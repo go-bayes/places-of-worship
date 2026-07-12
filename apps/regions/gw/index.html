@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Guinea-Bissau Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712b" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Guinea-Bissau's product is INE census religious affiliation by the eight
+    // administrative regions plus the Sector Autónomo de Bissau (nine units) for
+    // a single wave, 2009 (RGPH-2009). The source, Características socioculturais
+    // Quadro 4, publishes one-decimal column-percentage shares of each region's
+    // Guinean-nationality resident population (1,442,227 of 1,449,230 household
+    // residents) and prints no regional counts. population_total and every count
+    // field are null by design; no count is derived from a percentage. The six
+    // source categories (Animista, Muçulmana, Cristão, Outra Religião, Sem
+    // religião, ND) partition the denominator and sum to 100 within a derived
+    // rounding bound of 0.30 percentage points. Three columns print 99.9 or
+    // 100.1 as published (Oio 100.1, Biombo 99.9, Bolama/Bijagós 100.1) and are
+    // carried unaltered.
+    //
+    // Subnational religion is published for 2009 only; 1979 and 1991 have no
+    // published subnational religion table. No cross-wave change metric is
+    // offered. religious_affiliation_percent is the sum of the four affiliation
+    // shares (Animista, Muçulmana, Cristão, Outra Religião); no_religion_percent
+    // is the printed Sem religião share. ND (Não declarado, Not declared) is a
+    // large non-response category, 10.5-25.7% by region and 15.9% nationally;
+    // the report warns that the results should be used with some care. ND stays
+    // inside the denominator and outside both shipped shares.
+    //
+    // The affiliation and no-religion shares do not add to 100: the remainder is
+    // the Not-declared non-response share. Because that share varies widely and
+    // the no-religion share is small, the affiliation shading tracks the inverse
+    // of the Not-declared gradient more than a difference in religiosity. Gabú
+    // reads 89.4% affiliated (Muslim 86.5% in Quadro 4) against Bolama/Bijagós at
+    // 70.2%, but Not-declared runs 10.5% in Gabú against 25.7% in Bolama/Bijagós.
+    // The per-category composition (Muslim-majority east; animist and Christian
+    // west and islands) lives in Quadro 4 as source context; it is not a shipped
+    // map metric and is not in the popup.
+    //
+    // Licence needs_review (conductor build-then-ask posture, 2026-07-12): the
+    // INE Guiné-Bissau website carries an all-rights-reserved footer and no
+    // located open-data licence; reuse of the derived percentages is therefore
+    // under review pending a project-lead ruling. INE / RGPH-2009 attribution
+    // rides the map with the licence position stated as under review. Boundaries are
+    // geoBoundaries GNB ADM1 (ODbL 1.0), OpenStreetMap-derived, represented year
+    // 2017, with the Sector Autónomo de Bissau its own feature.
+    window.REGION_CONFIG = {
+      countryCode: "GW",
+      title: "Places of Worship | Guinea-Bissau Research Map",
+      // guinea-bissau spans lon -16.72..-13.64 by lat 10.89..12.69 across the
+      // nine units; centre on the frame and open at a zoom that fits the full
+      // extent beside the census panels
+      center: [-15.18, 11.79],
+      initialZoom: 7,
+      censusLevels: {
+        region: {
+          label: "Region",
+          boundaries: "data/gw_region_2009.geojson",
+          summary: "data/area_summary_region.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Instituto Nacional de Estatística (INE), Guiné-Bissau, RGPH-2009 (Características socioculturais, Quadro 4); licence under review (all-rights-reserved site footer, no located open-data licence) · Boundaries © geoBoundaries GNB ADM1 (ODbL 1.0), OpenStreetMap contributors"
+        }
+      },
+      defaultLevel: "region",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2009,
+      // the two census-question shares; place, density, and change metrics are
+      // omitted because no place layer is built and subnational religion is
+      // published for 2009 only
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share reporting a religious affiliation (Animista, Muçulmana, Cristão, or Outra Religião), summed from the published one-decimal shares in RGPH-2009 Quadro 4; the Not-declared non-response share is the gap to 100"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the source's Sem religião category, from the same Quadro 4 one-decimal shares; distinct from the Not-declared non-response category"
+        }
+      },
+      popupDenominatorNote: "Values are the source's published one-decimal column-percentage shares of each region's Guinean-nationality resident population in RGPH-2009 Quadro 4. The source publishes no counts; population and every count field are null, and no count is derived from a percentage. The six source categories (Animista, Muçulmana, Cristão, Outra Religião, Sem religião, ND) sum to 100 within a derived rounding bound of 0.30 percentage points; the Oio, Biombo, and Bolama/Bijagós columns print 100.1, 99.9, and 100.1 as published and are carried unaltered. The affiliation and no-religion shares do not add to 100: the remainder is the Não declarado (Not declared) non-response share, large here (10.5-25.7% by region), which stays inside the denominator and outside both shares. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+      cityPresets: [
+        { label: "Bissau", coords: [-15.5977, 11.8636], zoom: 11 },
+        { label: "Bafatá", coords: [-14.6615, 12.1667], zoom: 10 },
+        { label: "Gabú", coords: [-14.2216, 12.2800], zoom: 10 },
+        { label: "Cacheu", coords: [-16.1653, 12.2789], zoom: 10 },
+        { label: "Bolama", coords: [-15.4761, 11.5772], zoom: 10 },
+        { label: "Buba", coords: [-14.9964, 11.5892], zoom: 10 },
+        { label: "Catió", coords: [-15.2586, 11.2814], zoom: 10 },
+        { label: "Farim", coords: [-15.2211, 12.4817], zoom: 10 },
+        { label: "Quinhámel", coords: [-15.8500, 11.8833], zoom: 10 }
+      ],
+      geocode: { country: "gw", biasLngLat: [-15.18, 11.79] },
+      onboarding: {
+        title: "Guinea-Bissau research map",
+        intro: "Census religious affiliation across Guinea-Bissau's eight administrative regions plus the Sector Autónomo de Bissau, a single 2009 snapshot from the Instituto Nacional de Estatística (INE), RGPH-2009 Características socioculturais, Quadro 4. The source publishes one-decimal column-percentage shares only, with no counts and no change metric. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+        bullets: [
+          "The nine units are shaded by the share reporting a religious affiliation (Animista, Muçulmana, Cristão, or Outra Religião), or by the share in the source's <code>Sem religião</code> category, shown as No religion %.",
+          "This is one census wave, 2009, at region level, in percentages only. The source publishes no counts. Population and every count field are null, and no count is derived from a percentage. No change metric is offered.",
+          "A large <code>Não declarado</code> (Not declared) non-response category, 10.5-25.7% by region, sits inside the denominator and outside both shares. The report warns that the results should be used with some care. The affiliation and no-religion shares do not add to 100; the remainder is the Not-declared share.",
+          "Because the Not-declared share varies widely and the no-religion share is small, the affiliation shading follows the inverse of the Not-declared gradient more than a difference in religiosity. Gabú reads 89.4% affiliated against Bolama/Bijagós at 70.2%, but Not-declared runs 10.5% in Gabú against 25.7% in Bolama/Bijagós.",
+          "Percentages are the source's published one-decimal shares. The six categories sum to 100 within a derived rounding bound of 0.30 percentage points; the Oio, Biombo, and Bolama/Bijagós columns print 100.1, 99.9, and 100.1 as published and are carried unaltered.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion © <a href="https://www.stat-guinebissau.com/" target="_blank" rel="noopener">Instituto Nacional de Estatística (INE), Guiné-Bissau</a>, RGPH-2009 (Características socioculturais, Quadro 4). Licence under review: the INE website carries an all-rights-reserved footer and no located open-data licence; reuse of the derived percentages is therefore needs_review pending a project-lead ruling. Source: INE Guiné-Bissau, RGPH-2009. &middot; Boundaries © <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> GNB ADM1 (Open Data Commons Open Database License 1.0, ODbL 1.0), OpenStreetMap contributors',
+      censusFlagNote: "* Values are the source's published one-decimal column-percentage shares from RGPH-2009 Quadro 4; the source publishes no counts, and no count is derived from a percentage. The six source categories sum to 100 within a derived rounding bound of 0.30 percentage points; the Oio, Biombo, and Bolama/Bijagós columns print 100.1, 99.9, and 100.1 as published. A large Not-declared non-response share (10.5-25.7% by region) is the gap between the two shares and 100. Single wave (2009), region level, percentages only; no change metric. Census reuse is under review (all-rights-reserved site footer, no located open-data licence)."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712b"></script>
+</body>
+</html>

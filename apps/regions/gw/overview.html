@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Guinea-Bissau map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Guinea-Bissau research map; every string traces to
+    // research/countries/gw/route-probe.md, the manifest
+    // docs/manifests/gw-census-religion-2009.json, or the live REGION_CONFIG in
+    // apps/regions/gw/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "GW",
+      countryName: "Guinea-Bissau",
+      mapHref: "./",
+      intro: "Census religious affiliation across Guinea-Bissau's eight administrative regions plus the Sector Autónomo de Bissau, a single 2009 snapshot from the Instituto Nacional de Estatística (INE), RGPH-2009 Características socioculturais, Quadro 4. The source publishes one-decimal column-percentage shares of each region's Guinean-nationality resident population, with no counts and no change metric. The construct is census affiliation. It does not measure belief, practice, attendance, or registered membership.",
+      facts: {
+        waves: "One census: 2009",
+        geographies: "Region and Autonomous Sector (9 units)",
+        metrics: "Religious affiliation %, no religion %"
+      },
+      reading: [
+        "The nine units are shaded by the share reporting a religious affiliation (Animista, Muçulmana, Cristão, or Outra Religião), or by the share in the source's Sem religião category, shown as No religion %. The six source categories are mutually exclusive and partition each region's Guinean-nationality resident population.",
+        "Percentages are the source's published one-decimal column shares. The source publishes no counts. Population and every count field are null, and no count is derived from a percentage. National religion counts exist in the same report (Quadro 3 and Quadro 5, total 1,442,227) but are never multiplied into the shares; no derived-count layer is built.",
+        "A large Não declarado (Not declared) non-response category, 15.9% nationally and 10.5-25.7% across regions, sits inside the denominator and outside both shipped shares. The report warns that a relatively important percentage of respondents did not answer the religion question and that the results should be used with some care. The affiliation and no-religion shares do not add to 100; the Not-declared share is the remainder.",
+        "Because the Not-declared share varies widely and the Sem religião share is small, the affiliation shading follows the inverse of the Not-declared gradient more than a difference in religiosity. Gabú reads 89.4% affiliated and Bolama/Bijagós 70.2%, but Not-declared runs 10.5% in Gabú against 25.7% in Bolama/Bijagós. Read the affiliation map as substantially a non-response map.",
+        "The six categories sum to 100 within a derived rounding bound of 0.30 percentage points (0.05 percentage points per one-decimal cell across six categories). The Oio, Biombo, and Bolama/Bijagós columns print 100.1, 99.9, and 100.1; they are carried unaltered. Every other printed column sums to exactly 100.0.",
+        "The substantive contrast is religious composition, which the source records in Quadro 4 but the map does not shade: a Muslim-majority east (Gabú Muslim 86.5%, Bafatá 77.1%) against an animist and Christian west and islands (Biombo animist 40.1%, Bolama/Bijagós Christian 30.7%, Bissau Christian 40.2%). That per-category split is source context in Quadro 4; it is not a shipped map metric and is not in the popup.",
+        "The report's prose disagrees with Quadro 4 in two places, and the table is trusted in both. The prose gives Oio Muçulmana as 47.1% against the table's 42.1% (47.1 would sum the Oio column to 105.1), and it assigns the 77.1% and 86.5% Muslim shares to Gabú and Bafatá in the order the table reverses (only the table order sums both columns to 100). No shipped value is altered; both discrepancies are disclosed in the manifest.",
+        "Only the 2009 wave ships; no change metric is offered. Subnational religion is published for 2009 alone. Neither the 1979 first census nor the 1991 second census carries a subnational religion table, and no subnational religion for those waves was located; both are recorded as deferred non-routes. No published table gives religion counts by region for any wave.",
+        "The boundary frame is geoBoundaries GNB ADM1, nine units, represented year 2017, with the Sector Autónomo de Bissau its own feature. Seven units join the census by an accent-free key; two join by a documented identity concordance, census B. Bijagós (Região de Bolama/Bijagós) to geoBoundaries Bolama, and census SAB (Sector Autónomo de Bissau) to geoBoundaries Bissau. Both are documented identities, not merges.",
+        "No governed Guinea-Bissau place-of-worship snapshot ships with this product; place counts and density metrics are null."
+      ],
+      sources: [
+        {
+          name: "INE RGPH-2009, Características socioculturais, Quadro 4 (Distribuição percentual da população de nacionalidade guineense segundo região por religião)",
+          href: "https://www.stat-guinebissau.com/Menu_principal/IV_RGPH/rgph1/caracteristicas_socio_cultural.pdf",
+          construct: "Census religious affiliation by region and Autonomous Sector, one-decimal column-percentage shares, no counts",
+          years: "2009",
+          licence: "Licence under review (needs_review): the INE Guiné-Bissau website carries an all-rights-reserved footer and no located open-data licence; reuse of the derived percentages is pending a project-lead ruling under the build-then-ask posture. INE / RGPH-2009 attribution rides the map"
+        },
+        {
+          name: "geoBoundaries Guinea-Bissau ADM1 boundaries",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/GNB/ADM1/",
+          construct: "Boundary geometry (9 units, 8 regions plus the Sector Autónomo de Bissau), boundary ID GNB-ADM1-76643164, OpenStreetMap-derived",
+          years: "2017 (represented year)",
+          licence: "Open Data Commons Open Database License 1.0 (ODbL 1.0), per the release metadata"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Instituto Nacional de Estatística, <a href=\"https://www.stat-guinebissau.com/\" target=\"_blank\" rel=\"noopener\">INE Guiné-Bissau</a>: the RGPH-2009 Características socioculturais report, Quadro 4, religion by region and Autonomous Sector; boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/GNB/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries GNB ADM1</a>.",
+        tables: "Quadro 4 is the source of record for the shipped shares. It prints one-decimal column percentages for the six categories across the eight regions and the Sector Autónomo de Bissau, plus a national Guiné-Bissau column. The national counts in Quadro 3 and Quadro 5 sum exactly to 1,442,227 (Animista 215,130; Muçulmana 650,402; Cristão 318,021; Outra religião 414; Sem religião 29,542; ND 228,718), and each count as a share of that total reproduces the Quadro 4 Guiné-Bissau column within 0.1 percentage points. The area-summary religious_affiliation_percent field sums Animista, Muçulmana, Cristão, and Outra Religião; the no_religion_percent field carries the Sem religião share. No count is derived from any percentage.",
+        licence: "Census reuse is under review (needs_review). The INE Guiné-Bissau website carries an all-rights-reserved footer, “Instituto Nacional de Estatistica da Guiné-Bissau 1991-2020 © Todos os direitos reservados”, and no open-data licence was located on the site. Under the project's build-then-ask posture the derived product ships to staging with attribution while a reuse ask goes to the project lead; the recorded ask asks whether the transcribed one-decimal regional percentages may be published as a derived map product given the all-rights-reserved footer and the absence of a located open-data licence. The geoBoundaries GNB ADM1 boundary is ODbL 1.0 per the release metadata, OpenStreetMap-derived.",
+        script: "scripts/build_gw_area_summary.R",
+        manifests: [
+          { label: "gw-census-religion-2009", href: "docs/manifests/gw-census-religion-2009.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Guinea-Bissau map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>
