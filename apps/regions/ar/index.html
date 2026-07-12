@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Argentina Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712d" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Argentina's product is a SURVEY construct, not a census: the CEIL-CONICET
+    // national survey on religious beliefs and attitudes (Programa Sociedad,
+    // Cultura y Religión), religious affiliation by the six standard Argentine
+    // macro-regions for two waves, the Primera Encuesta (2008) and the Segunda
+    // Encuesta (2019). It ships as its own survey dataNoun and is never blended
+    // with census affiliation: Argentina's national census dropped religion
+    // after 1960, so there is no modern census-religion series to blend with.
+    // Both waves publish one-decimal percentages only, no counts. The national
+    // margin of error is +/- 2% at 95% confidence, scoped to the national total
+    // (Total País) alone; each per-region estimate rests on a subsample of
+    // roughly 400 cases and carries a larger, unpublished margin. Every string
+    // here traces to research/countries/ar/route-probe.md, the manifest
+    // docs/manifests/ar-survey-religion-2008-2019.json, or the shipped
+    // area_summary_region.json.
+    //
+    // Two-slot design. religious_affiliation_percent is the affiliation share;
+    // no_religion_percent is the no-religion share. For 2008 all five printed
+    // categories partition each region column, so affiliation (Católica +
+    // Evangélica + Testigos de Jehová/Mormones + Otras) and no religion
+    // (Indiferentes) sum close to 100. For 2019 the source chart prints only
+    // values above 2% ("Se consignan en el gráfico valores superiores al 2%"),
+    // so affiliation is a DISCLOSED LOWER BOUND of the printed above-2%
+    // categories: below-2% categories are omitted and no unprinted value is
+    // derived, so the 2019 shares need not sum to 100. No count is derived from
+    // any percentage.
+    //
+    // Two waves, no change metric. The 2008 and 2019 category frames differ
+    // (2008 "Indiferentes" against 2019 "Sin religión" plus a separate "No
+    // sabe"), and the 2019 affiliation is a printed-only lower bound, so no
+    // cross-wave change is comparable. Every row carries a change_withheld_*
+    // flag that trips the runtime's change guard, and the two per-year metrics
+    // are the only shaded layers.
+    //
+    // Licence. The map pages and derived summaries are the project's own work
+    // under CC BY-NC-SA 4.0 (DECISIONS.md D19). The 2019 wave's source reuse
+    // basis is CC BY-NC-SA 4.0 via the peer-reviewed article (Mallimaci,
+    // Esquivel & Giménez Béliveau 2020, Sociedad y Religión 30(55)); its
+    // non-commercial share-alike terms align with the project's own licence.
+    // The 2008 report carries no located open licence and ships with
+    // CEIL-CONICET attribution under the project's build-then-ask posture, with
+    // a reuse ask recorded. The macro-region boundary is a custom dissolve of
+    // the 526 COD-AB Argentina ADM2 units (UNHCR 2017, source Instituto
+    // Geográfico Nacional), CC BY-IGO; AMBA is CABA plus the 24 Gran Buenos
+    // Aires partidos and Centro takes the rest of Buenos Aires province.
+    window.REGION_CONFIG = {
+      countryCode: "AR",
+      title: "Places of Worship | Argentina Research Map",
+      dataNoun: "Survey",
+      // boundary bbox verified numerically from the six-feature layer:
+      // lon -73.57..-53.64, lat -55.06..-21.78; centre on [-63.6, -38.4].
+      // Argentina is tall and narrow (about 20 deg lon by 33 deg lat), so open
+      // at z3.7 to fit Tierra del Fuego to the Puna beside the panels
+      center: [-63.6, -38.4],
+      initialZoom: 3.7,
+      censusLevels: {
+        macro_region: {
+          label: "Macro-region (6, survey)",
+          boundaries: "data/ar_macroregion_2008_2019.geojson",
+          summary: "data/area_summary_region.json",
+          // the shipped boundary carries only a lowercase `region` join key
+          // (amba, centro, cuyo, nea, noa, patagonia) and no display-name
+          // property, so both the join code and the popup title read from it
+          codeProp: "region",
+          nameProp: "area_name",
+          credit: "Survey religion © CEIL-CONICET, Encuesta Nacional sobre Creencias y Actitudes Religiosas en Argentina — Primera Encuesta 2008 and Segunda Encuesta 2019 (Informe nº 25); 2019 reuse CC BY-NC-SA 4.0 via Mallimaci, Esquivel & Giménez Béliveau (2020), Sociedad y Religión 30(55); 2008 CEIL-CONICET attribution, reuse ask recorded · Boundaries © COD-AB Argentina ADM2 (UNHCR 2017, source Instituto Geográfico Nacional), CC BY-IGO, custom dissolve to six macro-regions · Project work CC BY-NC-SA 4.0"
+        }
+      },
+      defaultLevel: "macro_region",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2019,
+      // the two survey shares; place, density, and change metrics are omitted
+      // because no place layer is built and the two waves carry non-comparable
+      // frames (change is withheld on every row)
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation % (survey)",
+          note: "survey estimate of the share reporting a religious affiliation, from the CEIL-CONICET Encuesta Nacional sobre Creencias y Actitudes Religiosas. For 2008 it is the sum of the four printed affiliation categories (Católica, Evangélica, Testigos de Jehová/Mormones, Otras). For 2019 it is a disclosed lower bound: the source chart prints only values above 2%, so below-2% affiliation categories are omitted and the 2019 affiliation share understates the true share and need not sum with no religion to 100. These are survey percentages with sampling error, not census counts; the national margin is +/- 2% at 95% (Total País only) and each region rests on a subsample of roughly 400 carrying a larger, unpublished margin"
+        },
+        no_religion_percent: {
+          label: "No religion % (survey)",
+          note: "survey estimate of the no-religion share, from the same survey. For 2008 it is the Indiferentes category (agnostics, atheists and no-affiliation combined). For 2019 it is the printed Sin religión category. The two waves use different no-religion frames (2008 Indiferentes against 2019 Sin religión plus a separate No sabe), so they are shown as separate cross-sections and no cross-wave change is offered. These are survey percentages with sampling error, not census counts"
+        }
+      },
+      popupDenominatorNote: "Each share is a weighted survey percentage of the region's adult respondents, from subsamples of roughly 400 per macro-region; the denominator is the region's full subsample, with non-response inside it. The caveats above (*) govern every figure.",
+      cityPresets: [
+        { label: "Buenos Aires", coords: [-58.3816, -34.6037], zoom: 10 },
+        { label: "Córdoba", coords: [-64.1888, -31.4201], zoom: 10 },
+        { label: "Rosario", coords: [-60.6505, -32.9442], zoom: 10 },
+        { label: "Mendoza", coords: [-68.8272, -32.8895], zoom: 10 },
+        { label: "San Miguel de Tucumán", coords: [-65.2226, -26.8083], zoom: 10 },
+        { label: "Salta", coords: [-65.4117, -24.7859], zoom: 10 },
+        { label: "Resistencia", coords: [-58.9868, -27.4514], zoom: 10 },
+        { label: "Posadas", coords: [-55.8959, -27.3621], zoom: 10 },
+        { label: "Neuquén", coords: [-68.0591, -38.9516], zoom: 10 },
+        { label: "Ushuaia", coords: [-68.3030, -54.8019], zoom: 9 }
+      ],
+      geocode: { country: "ar", biasLngLat: [-63.6, -38.4] },
+      onboarding: {
+        title: "Argentina research map",
+        intro: "Survey religious affiliation across Argentina's six standard macro-regions, from the CEIL-CONICET Encuesta Nacional sobre Creencias y Actitudes Religiosas en Argentina, two waves — the Primera Encuesta (2008) and the Segunda Encuesta (2019, Informe nº 25). This is a sample survey, not a census: Argentina's national census dropped religion after 1960. Both waves publish one-decimal percentages only, with a national margin of +/- 2% at 95% (Total País); per-region estimates rest on subsamples of roughly 400 and carry a larger, unpublished margin.",
+        bullets: [
+          "The six macro-regions are shaded by the survey share reporting a religious affiliation, or by the share reporting no religion.",
+          "These are survey percentages with sampling error, not census counts. The +/- 2% margin at 95% is the national figure; each region rests on a subsample of roughly 400 and carries a larger, unpublished margin.",
+          "Two waves are shown, 2008 and 2019, each a separate cross-section. The frames differ (2008 Indiferentes against 2019 Sin religión plus No sabe) and the 2019 affiliation is a printed-only lower bound, so no cross-wave change metric is offered.",
+          "The 2019 affiliation share is a disclosed lower bound: the source chart prints only values above 2%, so below-2% categories are omitted and the two 2019 shares need not sum to 100. No count is derived from any percentage.",
+          "The macro-region boundary is a custom dissolve of the COD-AB Argentina departments: AMBA is the City of Buenos Aires plus the 24 Gran Buenos Aires partidos, and Centro takes the rest of Buenos Aires province.",
+          "Open <strong>Show Survey Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Survey religion &copy; <a href="https://www.ceil-conicet.gov.ar/2019/11/segunda-encuesta-nacional-sobre-creencias-y-actitudes-religiosas-en-la-argentina/" target="_blank" rel="noopener">CEIL-CONICET</a>, Encuesta Nacional sobre Creencias y Actitudes Religiosas en Argentina &mdash; Primera Encuesta 2008 and Segunda Encuesta 2019 (Informe n&ordm; 25). The 2019 regional table is reused under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0) via the peer-reviewed article <a href="https://www.redalyc.org/journal/3872/387266813004/" target="_blank" rel="noopener">Mallimaci, Esquivel &amp; Gim&eacute;nez B&eacute;liveau (2020)</a>, <em>Sociedad y Religi&oacute;n</em> 30(55), CONICET; the 2008 report ships with CEIL-CONICET attribution while a reuse ask is recorded. &middot; Boundaries &copy; <a href="https://data.humdata.org/dataset/cod-ab-arg" target="_blank" rel="noopener">COD-AB Argentina ADM2</a> (UNHCR 2017, source Instituto Geogr&aacute;fico Nacional), CC BY-IGO, custom dissolve to six macro-regions. &middot; Project work Creative Commons Attribution-NonCommercial-ShareAlike 4.0 (CC BY-NC-SA 4.0)',
+      censusFlagNote: "* These are CEIL-CONICET survey percentages with sampling error, not census counts. The national margin is +/- 2% at 95% (Total País only); each region rests on a subsample of roughly 400 and carries a larger, unpublished margin. Both waves publish one-decimal percentages only, no counts. For 2019 the affiliation share is a disclosed lower bound (the source chart prints only values above 2%), so the two 2019 shares need not sum to 100. Two waves (2008, 2019), each a separate cross-section; no change metric (the frames differ and the 2019 affiliation is a lower bound). The 2019 reuse is CC BY-NC-SA 4.0 via the peer-reviewed article, aligned with the project's own CC BY-NC-SA 4.0 licence; the 2008 report ships with CEIL-CONICET attribution and a recorded reuse ask. Boundaries are COD-AB Argentina ADM2 (UNHCR 2017), CC BY-IGO."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712d"></script>
+</body>
+</html>

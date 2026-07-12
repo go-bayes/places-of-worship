@@ -410,7 +410,7 @@
       "storage_provider": "git_repository",
       "format": "geojson",
       "bytes": 2907590,
-      "sha256": "6abd30c904529fadeb3b9e56b7f0a37305a11067859f31314c715cdeba11cf9b",
+      "sha256": "7cf6f674a9499362c34d8c9814227c437262e231f43fb8c6118b8a24ca0044f8",
       "content": "Argentina six macro-region boundary (COD-AB ADM2 dissolve)",
       "privacy": "public",
       "licence_status": "accepted",

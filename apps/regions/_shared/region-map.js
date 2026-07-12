@@ -346,7 +346,7 @@ const map = new maplibregl.Map({
 // the project-licence line rides every page; per-product source terms
 // recorded in the manifests prevail where they differ (LICENSE.md)
 map.addControl(new maplibregl.AttributionControl({
-  customAttribution: 'Project compilation <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>'
+  customAttribution: '<strong>Project compilation <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a></strong>'
 }), "bottom-right");
 
 // fall back to the free carto basemap when the keyed maptiler style or
