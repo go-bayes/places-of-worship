@@ -1,0 +1,1821 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:cv-census-religion:cv:2010-2021:ine-concelho",
+  "dataset_id": "cv-census-religion:cv:2010-2021:ine-concelho",
+  "dataset_version_id": "cv-census-religion:cv:2010-2021:ine-concelho:4af3d978e506",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "cv-census-religion",
+  "dataset_role": "staged_evidence",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "CV"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-07-12T00:00:00Z",
+  "created_by": "scripts/build_cv_area_summary.R",
+  "target_years": [
+    2010,
+    2021
+  ],
+  "pipeline": {
+    "script": "scripts/build_cv_area_summary.R",
+    "git_commit": "4fe78c37750a75525bbd0f851a37b7e41d339685",
+    "command": "Rscript scripts/build_cv_area_summary.R",
+    "parameters": {
+      "construct": "census religion or spirituality (voluntary question, residents aged 15+)",
+      "shipped_waves": [
+        2010,
+        2021
+      ],
+      "shipped_geography": "22 Cabo Verde concelhos (municipalities), stable across both waves",
+      "boundary_set": "cv-concelho-2017-geoboundaries-adm1",
+      "source_tables": {
+        "2010": "2010 Cabo Verde em Numeros national workbook, sheet Relig_3 (Tabela 12): religion by sex and concelho, aged 15+ (14 categories)",
+        "2021": "2021 Quadros por Concelho workbooks (22 files), sheet RELIGIAO_1 (Tabela 54): religion or spirituality by residence and sex, aged 15+ (15 categories)"
+      },
+      "universes": {
+        "2010": "resident population aged 15 and over (national 336,049); voluntary religion question",
+        "2021": "resident population aged 15 and over (national 352,494); voluntary religion or spirituality question"
+      },
+      "method_note": "Each concelho's religion counts are read verbatim from the INE workbooks and reconciled against the published national control totals: every concelho internal sum equals its printed 15+ Total, every category sums across the 22 concelhos to the national table total (Tabela 12 in 2010, Tabela 52 in 2021), and the grand totals are 336,049 (2010) and 352,494 (2021). No value is allocated, inferred, imputed, rounded, or tuned.",
+      "denominators": {
+        "2010": "printed concelho 15+ Total; affiliation = Total - Sem religiao - ND",
+        "2021": "printed concelho 15+ Total; affiliation = Total - Sem religiao - (Nao sabe / Nao respondeu)"
+      },
+      "slot_design": "Ordinary two-slot (BZ/SB/FM/KI precedent). religious_affiliation_percent is the share of the concelho population aged 15+ reporting a named religion or spirituality (Total minus Sem religiao minus the non-response line); no_religion_percent is the single Sem religiao line. The non-response line (2010 ND; 2021 Nao sabe / Nao respondeu) stays in the denominator and in neither slot, so the two shares need not sum to 100. Cabo Verde has a real, regionally-varying Sem religiao category (national 10.8% in 2010, 15.6% in 2021), so no minority-share (task-6) treatment applies.",
+      "category_frames": {
+        "2010": [
+          "Adventista",
+          "Assembleia de Deus",
+          "Católica",
+          "Deus é amor",
+          "Igreja do Nazareno",
+          "Islâmica",
+          "Judaica",
+          "Nova Apastólica",
+          "Racionalismo Cristão",
+          "Testemunho de Jeová",
+          "Universal do Reino de Deus",
+          "Outra",
+          "Sem religião",
+          "ND"
+        ],
+        "2021": [
+          "Adventista",
+          "Assembleia de Deus",
+          "Católica",
+          "Deus é Amor",
+          "Igreja do Nazareno / Protestante",
+          "Islâmica / Muçulmano",
+          "Judaica",
+          "Nova Apastólica",
+          "Racionalismo Critão",
+          "Testemunha de Jeová",
+          "Universal do Reino de Deus",
+          "Jesus Cristo dos Santos dos últimos dias / Mórmons",
+          "Outra",
+          "Sem religião",
+          "Não sabe / Não respondeu"
+        ],
+        "alignment_note": "The category frame changed across the 2010->2021 instrument break: 2021 splits 'Igreja do Nazareno / Protestante' (2010 'Igreja do Nazareno'), adds 'Jesus Cristo dos Santos dos ultimos dias / Mormons' as a separate line (folded into Outra in 2010), renames 'Islamica' -> 'Islamica / Muculmano', 'Testemunho de Jeova' -> 'Testemunha de Jeova', and 'ND' -> 'Nao sabe / Nao respondeu', and the construct is named 'religiao' in 2010 and 'religiao ou espiritualidade' in 2021. Fine-category change is not asserted across the break; the headline affiliation and no-religion shares are comparable. The 2021 per-concelho workbooks carry trivial spelling variants; the national Tabela 52 spelling is the canonical rendered frame."
+      },
+      "change_rule": "Two waves (2010, 2021) on the stable 22-concelho frame. Change is withheld on the fine categories across the instrument break; the headline affiliation and no-religion shares are comparable across waves.",
+      "no_religion_treatment": {
+        "2010": "single 'Sem religiao' line (national 36,272; 10.8%); separate 'ND' non-response line kept in denominator",
+        "2021": "single 'Sem religiao' line (national 54,814; 15.6%); separate 'Nao sabe / Nao respondeu' non-response line kept in denominator"
+      },
+      "voluntary_and_universe_note": "The religion/spirituality question is voluntary and asked of residents aged 15 and over. The universe on every surface is the published resident population aged 15+, not the whole population; the non-response line rides in the denominator and is disclosed, never repaired.",
+      "omitted_metrics": [
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 440361
+      },
+      "local_cache_hint": "All raw sources are cached under data/raw/cv_census/ and remain git-ignored.",
+      "retrieval_record": [
+        {
+          "uri": "data/raw/cv_census/cv_2010_national_cvnumeros.xls",
+          "url": "https://bdmi.ine.cv/site_deploy_api/Uploads/20251209_085254_1c628c72-ddfd-4301-8494-1c159b147216.xls",
+          "format": "xls",
+          "bytes": 935936,
+          "sha256": "97903fb3aa8e186c727bb4e003aaf6dfd3e7760355a94375a5adb111a702638f",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2010-cvnumeros-table-12-religion-by-concelho",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 Cabo Verde em Numeros national workbook; sheet Relig_3 (Tabela 12), religion by sex and concelho, aged 15+. Both margins close to 336,049.",
+          "local_cache_hint": "data/raw/cv_census/cv_2010_national_cvnumeros.xls (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_national_cvnumeros_corrigido.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/Uploads/20251126_152821_9cb2b311-0e9c-4d2a-9007-51557896ec8f.xlsx",
+          "format": "xlsx",
+          "bytes": 240399,
+          "sha256": "4d3c1758898f71ce9075b578bcacb7fe9884a267682ceda646b002c7cc31ba2e",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": false,
+          "periods": "2021",
+          "notes": "2021 Cabo Verde em Numeros - CORRIGIDO national workbook; sheet RELIGIAO_ESPIRITUALIDADE_1 (Tabela 52), national religion or spirituality, aged 15+. Source of the national control totals (national 352,494). Religion is not cross-tabbed by concelho in this national file; the concelho values come from the per-concelho Quadros workbooks.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_national_cvnumeros_corrigido.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_ine_politica_de_difusao.pdf",
+          "url": "https://bdmi.ine.cv/site_deploy_api/Uploads/20260226_155512_a23cdbcd-cdab-4a2a-b414-e1be3029b9c5.pdf",
+          "format": "pdf",
+          "bytes": 5739375,
+          "sha256": "02f92a16f7fb07894413fd9a46a7396eaa473fbdd492ece3010633f87cbc5d6f",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2010-cvnumeros-table-12-religion-by-concelho",
+          "used_in_public_product": false,
+          "periods": "2026",
+          "notes": "INE Politica de Difusao (Dissemination Policy) PDF; principle 10 states free and universal access to statistics at www.ine.cv. Licence evidence, not a data source.",
+          "local_cache_hint": "data/raw/cv_census/cv_ine_politica_de_difusao.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_ribeira_grande_de_santo_antao.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 202302,
+          "sha256": "9e94cd6eada8e91df46e201c1de2b1d7ce3174beed6726f81a6b0e26869df46e",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for Ribeira Grande; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_ribeira_grande_de_santo_antao.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_paul.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 199006,
+          "sha256": "544adbbec6beb72d9961e2d78f66463f389ed2fe57ae4d7642b1e6d5486d1b9d",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for Paul; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_paul.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_porto_novo.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 202979,
+          "sha256": "8223019a0959f1b87206806c542528da926c68b4cd00e2b2cd91f3b70ecb76cd",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for Porto Novo; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_porto_novo.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_sao_vicente.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 241243,
+          "sha256": "cab5bb7e359b3515a274358dbc2b143b230923285a858bba36d88f9485a97cd7",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for São Vicente; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_sao_vicente.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_ribeira_brava.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 202751,
+          "sha256": "75ad10f0179f15b1fe38663a4af1778ac37c9b8573a31a5b8db14b9604bf9de9",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for Ribeira Brava; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_ribeira_brava.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_tarrafal_de_s_nicolau.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 218694,
+          "sha256": "88d112fd5ca1eecc3ca340e3635d174bfcd066ccef4ecf690c64d48526376180",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for Tarrafal de São Nicolau; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_tarrafal_de_s_nicolau.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_sal.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 205491,
+          "sha256": "6db6f1d6a7d71931fa828f72e7e30b6a692ed2fcb60e57761f0daa3044337169",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for Sal; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_sal.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_boa_vista.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 198319,
+          "sha256": "cb4228247abf42c9538f6eb5987141ebcfd0981d79b3c7e50fc48b9cf806e39b",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for Boa Vista; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_boa_vista.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_maio.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 195256,
+          "sha256": "78179816a503b5f7903e783770d5bb7caa385bd9489b37ed210e2ca002faa6d2",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for Maio; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_maio.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_tarrafal_de_santiago.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 223238,
+          "sha256": "244da3659465c41a78fb5e5588cf2066069483398b4a2279f1b2ec01282bad40",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for Tarrafal; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_tarrafal_de_santiago.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_santa_catarina_de_santiago.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 206084,
+          "sha256": "f4a538d9383bc9cb5c97028658206fad6c843c161bd4c1b4750c936749cca4b3",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for Santa Catarina; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_santa_catarina_de_santiago.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_santa_cruz.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 225399,
+          "sha256": "9a45fa299f8070b2eeb23becca4b2303e78816a4b49c3104b330429e65e75cfe",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for Santa Cruz; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_santa_cruz.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_praia.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 217378,
+          "sha256": "2cb8cf3952104cc04e708ddcfbe5e68c860f705f27dccee7ba42395a83420fc8",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for Praia; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_praia.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_sao_domingos.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 220893,
+          "sha256": "c0a00e127437055e1d080d67989c821b769ab54696808c1fc8b568e1a3d2c6d0",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for São Domingos; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_sao_domingos.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_sao_miguel.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 223164,
+          "sha256": "f67f38c148b9d6c4889d72b8cee6bd8788e74ded4620d7a9a7f56abde843d35f",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for São Miguel; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_sao_miguel.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_sao_salvador_do_mundo.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 217514,
+          "sha256": "bb2418a4833929826f1241acce4309c769672c61b9f45e8f9885a0cdf6036023",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for São Salvador do Mundo; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_sao_salvador_do_mundo.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_sao_lourenco_dos_orgaos.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 221706,
+          "sha256": "565147b38729f5e75314c5da8a06ed33b144329c229b8613f059e08144f3e5bb",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for São Lourenço dos Órgãos; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_sao_lourenco_dos_orgaos.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_ribeira_grande_de_santiago.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 200411,
+          "sha256": "49fb16fa90cf9e842d76dac984a3872c1d170a97fea20d04823f305128860ab3",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for Ribeira Grande de Santiago; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_ribeira_grande_de_santiago.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_mosteiros.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 225889,
+          "sha256": "19d0ce3ee8dc55d05d18ecc07eeb35dece3c3ff6c8abd605a37c0817f8215bf1",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for Mosteiros; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_mosteiros.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_sao_filipe_fogo.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 227748,
+          "sha256": "b0566d48be8f12170e520e4f20022c303c3092943bdfc3a3093d75aaa87af366",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for São Filipe; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_sao_filipe_fogo.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_santa_catarina_do_fogo.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 194745,
+          "sha256": "26fcde4948f9c0e106a32f7149e83ce8919b21310ab8831045a697d8dc4c03a8",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for Santa Catarina do Fogo; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_santa_catarina_do_fogo.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/cv_2021_quadros_brava.xlsx",
+          "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+          "format": "xlsx",
+          "bytes": 192251,
+          "sha256": "6105335ce13b94fff125750ff13bdaedac4294c186fc6d447fe8e57fad69289e",
+          "row_count": null,
+          "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+          "used_in_public_product": true,
+          "periods": "2021",
+          "notes": "2021 Quadros por Concelho workbook for Brava; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+          "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_brava.xlsx (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/geoBoundaries-CPV-ADM1.geojson",
+          "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/CPV/ADM1/geoBoundaries-CPV-ADM1.geojson",
+          "format": "geojson",
+          "bytes": 614084,
+          "sha256": "1f5178861c917ff24e9e66301dc02c4285e7b4b4a952d2e82c1835ff86dd72ba",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-cpv-adm1-2017",
+          "used_in_public_product": true,
+          "periods": "2017",
+          "notes": "geoBoundaries CPV ADM1 GeoJSON; 22 concelhos, ODbL 1.0 (OpenStreetMap). Pinned commit 9469f09.",
+          "local_cache_hint": "data/raw/cv_census/geoBoundaries-CPV-ADM1.geojson (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/cv_census/gb_cpv_adm1_meta.json",
+          "url": "https://www.geoboundaries.org/api/current/gbOpen/CPV/ADM1/",
+          "format": "json",
+          "bytes": 1736,
+          "sha256": "5d7be88120588e3cb85d1ec9b9114f8c21bd5b4efec6e7691953eb0503f08ae2",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-cpv-adm1-2017",
+          "used_in_public_product": false,
+          "periods": "2017",
+          "notes": "geoBoundaries CPV ADM1 metadata; records ODbL 1.0, boundaryYearRepresented 2017, admUnitCount 22.",
+          "local_cache_hint": "data/raw/cv_census/gb_cpv_adm1_meta.json (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/cv_census/"
+          ]
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "readxl": "1.5.0",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "scripts/lib/simplify_boundary.R (npx mapshaper)"
+    }
+  },
+  "source": {
+    "provider": "Instituto Nacional de Estatistica (INE), Cabo Verde; geoBoundaries (William & Mary geoLab)",
+    "source_dataset_ids": [
+      "cv-census-2010-cvnumeros-table-12-religion-by-concelho",
+      "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "geoboundaries-cpv-adm1-2017"
+    ],
+    "source_urls": [
+      "https://bdmi.ine.cv/site_deploy_api/Uploads/20251209_085254_1c628c72-ddfd-4301-8494-1c159b147216.xls",
+      "https://bdmi.ine.cv/site_deploy_api/Uploads/20251126_152821_9cb2b311-0e9c-4d2a-9007-51557896ec8f.xlsx",
+      "https://bdmi.ine.cv/site_deploy_api/api/Census/content/paginated/3",
+      "https://bdmi.ine.cv/site_deploy_api/Uploads/20260226_155512_a23cdbcd-cdab-4a2a-b414-e1be3029b9c5.pdf",
+      "https://ine.cv/",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/CPV/ADM1/geoBoundaries-CPV-ADM1.geojson",
+      "https://www.geoboundaries.org/api/current/gbOpen/CPV/ADM1/"
+    ],
+    "retrieved_at": "2026-07-12T00:00:00Z",
+    "licence": "The National Statistics Institute of Cabo Verde (Instituto Nacional de Estatistica, INE; www.ine.cv) publishes no explicit open-data reuse licence and asserts no explicit all-rights-reserved copyright over its statistical tables. INE's Politica de Difusao (Dissemination Policy, PDF, principle 10, retrieved 2026-07-12) states: 'O acesso a informacao estatistica produzida pelo INE e tendencialmente gratuito e universal. Toda a informacao estatistica disponivel em www.ine.cv, pode ser acedida gratuitamente.' (Access to the statistical information produced by INE is generally free and universal; all statistical information available at www.ine.cv can be accessed free of charge.) Statistical confidentiality (segredo estatistico, Lei n. 48/IX/2019 do Sistema Estatistico Nacional, art. 10) protects only individual microdata, which this product never touches. Under the standing BUILD-THEN-ASK ruling the derived concelho summaries ship with attribution to INE (source line 'Fonte: INE, Censo 2010 / Censo 2021'); licence_status is needs_review and an INE reuse-confirmation ask is recorded for the PI. The boundary is Open Data Commons Open Database License 1.0 (OpenStreetMap).",
+    "citation": "INE Cabo Verde, Censo 2010 (Tabela 12) and Censo 2021 (Tabela 54, Quadros por Concelho); geoBoundaries CPV ADM1 (gbOpen).",
+    "raw_redistribution": "The census workbooks and the geoBoundaries source GeoJSON are not committed; they remain in data/raw/cv_census/.",
+    "local_cache_hint": "data/raw/cv_census/ (git-ignored by .gitignore data/ rule)",
+    "raw_cache_durable_uris": [
+      "gs://pow-research-data/raw_sources/cv_census/"
+    ]
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/cv_census/cv_2010_national_cvnumeros.xls",
+      "url": "https://bdmi.ine.cv/site_deploy_api/Uploads/20251209_085254_1c628c72-ddfd-4301-8494-1c159b147216.xls",
+      "format": "xls",
+      "bytes": 935936,
+      "sha256": "97903fb3aa8e186c727bb4e003aaf6dfd3e7760355a94375a5adb111a702638f",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2010-cvnumeros-table-12-religion-by-concelho",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Cabo Verde em Numeros national workbook; sheet Relig_3 (Tabela 12), religion by sex and concelho, aged 15+. Both margins close to 336,049.",
+      "local_cache_hint": "data/raw/cv_census/cv_2010_national_cvnumeros.xls (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_national_cvnumeros_corrigido.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/Uploads/20251126_152821_9cb2b311-0e9c-4d2a-9007-51557896ec8f.xlsx",
+      "format": "xlsx",
+      "bytes": 240399,
+      "sha256": "4d3c1758898f71ce9075b578bcacb7fe9884a267682ceda646b002c7cc31ba2e",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": false,
+      "periods": "2021",
+      "notes": "2021 Cabo Verde em Numeros - CORRIGIDO national workbook; sheet RELIGIAO_ESPIRITUALIDADE_1 (Tabela 52), national religion or spirituality, aged 15+. Source of the national control totals (national 352,494). Religion is not cross-tabbed by concelho in this national file; the concelho values come from the per-concelho Quadros workbooks.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_national_cvnumeros_corrigido.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_ine_politica_de_difusao.pdf",
+      "url": "https://bdmi.ine.cv/site_deploy_api/Uploads/20260226_155512_a23cdbcd-cdab-4a2a-b414-e1be3029b9c5.pdf",
+      "format": "pdf",
+      "bytes": 5739375,
+      "sha256": "02f92a16f7fb07894413fd9a46a7396eaa473fbdd492ece3010633f87cbc5d6f",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2010-cvnumeros-table-12-religion-by-concelho",
+      "used_in_public_product": false,
+      "periods": "2026",
+      "notes": "INE Politica de Difusao (Dissemination Policy) PDF; principle 10 states free and universal access to statistics at www.ine.cv. Licence evidence, not a data source.",
+      "local_cache_hint": "data/raw/cv_census/cv_ine_politica_de_difusao.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_ribeira_grande_de_santo_antao.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 202302,
+      "sha256": "9e94cd6eada8e91df46e201c1de2b1d7ce3174beed6726f81a6b0e26869df46e",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for Ribeira Grande; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_ribeira_grande_de_santo_antao.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_paul.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 199006,
+      "sha256": "544adbbec6beb72d9961e2d78f66463f389ed2fe57ae4d7642b1e6d5486d1b9d",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for Paul; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_paul.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_porto_novo.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 202979,
+      "sha256": "8223019a0959f1b87206806c542528da926c68b4cd00e2b2cd91f3b70ecb76cd",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for Porto Novo; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_porto_novo.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_sao_vicente.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 241243,
+      "sha256": "cab5bb7e359b3515a274358dbc2b143b230923285a858bba36d88f9485a97cd7",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for São Vicente; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_sao_vicente.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_ribeira_brava.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 202751,
+      "sha256": "75ad10f0179f15b1fe38663a4af1778ac37c9b8573a31a5b8db14b9604bf9de9",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for Ribeira Brava; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_ribeira_brava.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_tarrafal_de_s_nicolau.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 218694,
+      "sha256": "88d112fd5ca1eecc3ca340e3635d174bfcd066ccef4ecf690c64d48526376180",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for Tarrafal de São Nicolau; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_tarrafal_de_s_nicolau.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_sal.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 205491,
+      "sha256": "6db6f1d6a7d71931fa828f72e7e30b6a692ed2fcb60e57761f0daa3044337169",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for Sal; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_sal.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_boa_vista.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 198319,
+      "sha256": "cb4228247abf42c9538f6eb5987141ebcfd0981d79b3c7e50fc48b9cf806e39b",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for Boa Vista; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_boa_vista.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_maio.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 195256,
+      "sha256": "78179816a503b5f7903e783770d5bb7caa385bd9489b37ed210e2ca002faa6d2",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for Maio; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_maio.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_tarrafal_de_santiago.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 223238,
+      "sha256": "244da3659465c41a78fb5e5588cf2066069483398b4a2279f1b2ec01282bad40",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for Tarrafal; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_tarrafal_de_santiago.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_santa_catarina_de_santiago.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 206084,
+      "sha256": "f4a538d9383bc9cb5c97028658206fad6c843c161bd4c1b4750c936749cca4b3",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for Santa Catarina; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_santa_catarina_de_santiago.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_santa_cruz.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 225399,
+      "sha256": "9a45fa299f8070b2eeb23becca4b2303e78816a4b49c3104b330429e65e75cfe",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for Santa Cruz; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_santa_cruz.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_praia.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 217378,
+      "sha256": "2cb8cf3952104cc04e708ddcfbe5e68c860f705f27dccee7ba42395a83420fc8",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for Praia; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_praia.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_sao_domingos.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 220893,
+      "sha256": "c0a00e127437055e1d080d67989c821b769ab54696808c1fc8b568e1a3d2c6d0",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for São Domingos; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_sao_domingos.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_sao_miguel.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 223164,
+      "sha256": "f67f38c148b9d6c4889d72b8cee6bd8788e74ded4620d7a9a7f56abde843d35f",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for São Miguel; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_sao_miguel.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_sao_salvador_do_mundo.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 217514,
+      "sha256": "bb2418a4833929826f1241acce4309c769672c61b9f45e8f9885a0cdf6036023",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for São Salvador do Mundo; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_sao_salvador_do_mundo.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_sao_lourenco_dos_orgaos.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 221706,
+      "sha256": "565147b38729f5e75314c5da8a06ed33b144329c229b8613f059e08144f3e5bb",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for São Lourenço dos Órgãos; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_sao_lourenco_dos_orgaos.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_ribeira_grande_de_santiago.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 200411,
+      "sha256": "49fb16fa90cf9e842d76dac984a3872c1d170a97fea20d04823f305128860ab3",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for Ribeira Grande de Santiago; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_ribeira_grande_de_santiago.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_mosteiros.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 225889,
+      "sha256": "19d0ce3ee8dc55d05d18ecc07eeb35dece3c3ff6c8abd605a37c0817f8215bf1",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for Mosteiros; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_mosteiros.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_sao_filipe_fogo.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 227748,
+      "sha256": "b0566d48be8f12170e520e4f20022c303c3092943bdfc3a3093d75aaa87af366",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for São Filipe; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_sao_filipe_fogo.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_santa_catarina_do_fogo.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 194745,
+      "sha256": "26fcde4948f9c0e106a32f7149e83ce8919b21310ab8831045a697d8dc4c03a8",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for Santa Catarina do Fogo; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_santa_catarina_do_fogo.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/cv_2021_quadros_brava.xlsx",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/GenericFile/GetFile?publicationType=censo",
+      "format": "xlsx",
+      "bytes": 192251,
+      "sha256": "6105335ce13b94fff125750ff13bdaedac4294c186fc6d447fe8e57fad69289e",
+      "row_count": null,
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "used_in_public_product": true,
+      "periods": "2021",
+      "notes": "2021 Quadros por Concelho workbook for Brava; sheet RELIGIAO_1 (Tabela 54), religion or spirituality by residence and sex, aged 15+.",
+      "local_cache_hint": "data/raw/cv_census/cv_2021_quadros_brava.xlsx (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/geoBoundaries-CPV-ADM1.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/CPV/ADM1/geoBoundaries-CPV-ADM1.geojson",
+      "format": "geojson",
+      "bytes": 614084,
+      "sha256": "1f5178861c917ff24e9e66301dc02c4285e7b4b4a952d2e82c1835ff86dd72ba",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-cpv-adm1-2017",
+      "used_in_public_product": true,
+      "periods": "2017",
+      "notes": "geoBoundaries CPV ADM1 GeoJSON; 22 concelhos, ODbL 1.0 (OpenStreetMap). Pinned commit 9469f09.",
+      "local_cache_hint": "data/raw/cv_census/geoBoundaries-CPV-ADM1.geojson (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/cv_census/gb_cpv_adm1_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/CPV/ADM1/",
+      "format": "json",
+      "bytes": 1736,
+      "sha256": "5d7be88120588e3cb85d1ec9b9114f8c21bd5b4efec6e7691953eb0503f08ae2",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-cpv-adm1-2017",
+      "used_in_public_product": false,
+      "periods": "2017",
+      "notes": "geoBoundaries CPV ADM1 metadata; records ODbL 1.0, boundaryYearRepresented 2017, admUnitCount 22.",
+      "local_cache_hint": "data/raw/cv_census/gb_cpv_adm1_meta.json (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/cv_census/"
+      ]
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/cv/data/area_summary_concelho.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 113127,
+      "sha256": "4af3d978e5064309ed699ca3d86338e36de8384eea8cbf383a9cedc9629d3666",
+      "row_count": 44,
+      "feature_count": null,
+      "content": "Cabo Verde 22-concelho census religion/spirituality area summary for 2010 and 2021.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "ine_cv_attribution_build_then_ask"
+    },
+    {
+      "uri": "repo:apps/regions/cv/data/area_summary_concelho.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 73841,
+      "sha256": "57cffd0ef73b9b16630892ff35f21c38a84ffa511917b35fc08d1a553675553d",
+      "row_count": 44,
+      "feature_count": null,
+      "content": "Flattened Cabo Verde 22-concelho census religion rows for 2010 and 2021.",
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "licence_basis": "ine_cv_attribution_build_then_ask"
+    },
+    {
+      "uri": "repo:apps/regions/cv/data/cv_concelho_2017.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 440361,
+      "sha256": "a2146ec6c3b459de158bfed195aba242989d1ec685804cdf9df20d0cf64a72ee",
+      "row_count": null,
+      "feature_count": 22,
+      "content": "Simplified geoBoundaries CPV ADM1 22-concelho boundary GeoJSON.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_odbl_1_0"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/cv/data/area_summary_concelho.json",
+      "sha256": "4af3d978e5064309ed699ca3d86338e36de8384eea8cbf383a9cedc9629d3666",
+      "built_by": "scripts/build_cv_area_summary.R",
+      "notes": "22 concelhos x 2 waves = 44 rows; resident-population-15+ universe; no suppressed cells."
+    },
+    {
+      "uri": "repo:apps/regions/cv/data/cv_concelho_2017.geojson",
+      "sha256": "a2146ec6c3b459de158bfed195aba242989d1ec685804cdf9df20d0cf64a72ee",
+      "built_by": "scripts/build_cv_area_summary.R",
+      "notes": "22 concelho features from geoBoundaries CPV ADM1, simplified with mapshaper weighted keep-shapes."
+    }
+  ],
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_cv_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/cv/data/area_summary_concelho.json",
+      "bash scripts/validate_manifests.sh"
+    ],
+    "gate_2010": {
+      "status": "passed",
+      "both_margins_close_to": 336049,
+      "concelho_total_checks": 22,
+      "religion_category_checks": 14,
+      "records": [
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "ribeira_grande_santo_antao",
+          "computed": 13395,
+          "printed": 13395,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "paul",
+          "computed": 4995,
+          "printed": 4995,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "porto_novo",
+          "computed": 12409,
+          "printed": 12409,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "sao_vicente",
+          "computed": 55740,
+          "printed": 55740,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "ribeira_brava",
+          "computed": 5364,
+          "printed": 5364,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "tarrafal_sao_nicolau",
+          "computed": 3575,
+          "printed": 3575,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "sal",
+          "computed": 18371,
+          "printed": 18371,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "boa_vista",
+          "computed": 7088,
+          "printed": 7088,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "maio",
+          "computed": 4828,
+          "printed": 4828,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "tarrafal",
+          "computed": 11873,
+          "printed": 11873,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "santa_catarina",
+          "computed": 28312,
+          "printed": 28312,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "santa_cruz",
+          "computed": 16745,
+          "printed": 16745,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "praia",
+          "computed": 90377,
+          "printed": 90377,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "sao_domingos",
+          "computed": 8917,
+          "printed": 8917,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "sao_miguel",
+          "computed": 9920,
+          "printed": 9920,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "sao_salvador_do_mundo",
+          "computed": 5547,
+          "printed": 5547,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "sao_lourenco_dos_orgaos",
+          "computed": 4945,
+          "printed": 4945,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "ribeira_grande_de_santiago",
+          "computed": 5383,
+          "printed": 5383,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "mosteiros",
+          "computed": 6164,
+          "printed": 6164,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "sao_filipe",
+          "computed": 14749,
+          "printed": 14749,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "santa_catarina_do_fogo",
+          "computed": 3298,
+          "printed": 3298,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "concelho_total",
+          "key": "brava",
+          "computed": 4054,
+          "printed": 4054,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_category",
+          "key": "Adventista",
+          "computed": 5147,
+          "printed": 5147,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_category",
+          "key": "Assembleia de Deus",
+          "computed": 3101,
+          "printed": 3101,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_category",
+          "key": "Católica",
+          "computed": 259723,
+          "printed": 259723,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_category",
+          "key": "Deus é amor",
+          "computed": 382,
+          "printed": 382,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_category",
+          "key": "Igreja do Nazareno",
+          "computed": 5644,
+          "printed": 5644,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_category",
+          "key": "Islâmica",
+          "computed": 6008,
+          "printed": 6008,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_category",
+          "key": "Judaica",
+          "computed": 25,
+          "printed": 25,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_category",
+          "key": "Nova Apastólica",
+          "computed": 1773,
+          "printed": 1773,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_category",
+          "key": "Racionalismo Cristão",
+          "computed": 6263,
+          "printed": 6263,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_category",
+          "key": "Testemunho de Jeová",
+          "computed": 3498,
+          "printed": 3498,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_category",
+          "key": "Universal do Reino de Deus",
+          "computed": 1379,
+          "printed": 1379,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_category",
+          "key": "Outra",
+          "computed": 4264,
+          "printed": 4264,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_category",
+          "key": "Sem religião",
+          "computed": 36272,
+          "printed": 36272,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_category",
+          "key": "ND",
+          "computed": 2570,
+          "printed": 2570,
+          "difference": 0
+        }
+      ]
+    },
+    "gate_2021": {
+      "status": "passed",
+      "both_margins_close_to": 352494,
+      "concelho_total_checks": 22,
+      "religion_category_checks": 15,
+      "records": [
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "ribeira_grande_santo_antao",
+          "computed": 11554,
+          "printed": 11554,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "paul",
+          "computed": 4484,
+          "printed": 4484,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "porto_novo",
+          "computed": 11902,
+          "printed": 11902,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "sao_vicente",
+          "computed": 58126,
+          "printed": 58126,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "ribeira_brava",
+          "computed": 5369,
+          "printed": 5369,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "tarrafal_sao_nicolau",
+          "computed": 3947,
+          "printed": 3947,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "sal",
+          "computed": 23914,
+          "printed": 23914,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "boa_vista",
+          "computed": 8949,
+          "printed": 8949,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "maio",
+          "computed": 4616,
+          "printed": 4616,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "tarrafal",
+          "computed": 11829,
+          "printed": 11829,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "santa_catarina",
+          "computed": 26089,
+          "printed": 26089,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "santa_cruz",
+          "computed": 16774,
+          "printed": 16774,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "praia",
+          "computed": 103265,
+          "printed": 103265,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "sao_domingos",
+          "computed": 9739,
+          "printed": 9739,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "sao_miguel",
+          "computed": 9048,
+          "printed": 9048,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "sao_salvador_do_mundo",
+          "computed": 5301,
+          "printed": 5301,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "sao_lourenco_dos_orgaos",
+          "computed": 4513,
+          "printed": 4513,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "ribeira_grande_de_santiago",
+          "computed": 5471,
+          "printed": 5471,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "mosteiros",
+          "computed": 5566,
+          "printed": 5566,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "sao_filipe",
+          "computed": 14860,
+          "printed": 14860,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "santa_catarina_do_fogo",
+          "computed": 3204,
+          "printed": 3204,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "concelho_total",
+          "key": "brava",
+          "computed": 3974,
+          "printed": 3974,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "religion_category",
+          "key": "Adventista",
+          "computed": 6626,
+          "printed": 6626,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "religion_category",
+          "key": "Assembleia de Deus",
+          "computed": 730,
+          "printed": 730,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "religion_category",
+          "key": "Católica",
+          "computed": 255511,
+          "printed": 255511,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "religion_category",
+          "key": "Deus é Amor",
+          "computed": 300,
+          "printed": 300,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "religion_category",
+          "key": "Igreja do Nazareno / Protestante",
+          "computed": 6175,
+          "printed": 6175,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "religion_category",
+          "key": "Islâmica / Muçulmano",
+          "computed": 4616,
+          "printed": 4616,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "religion_category",
+          "key": "Judaica",
+          "computed": 23,
+          "printed": 23,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "religion_category",
+          "key": "Nova Apastólica",
+          "computed": 1719,
+          "printed": 1719,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "religion_category",
+          "key": "Racionalismo Critão",
+          "computed": 6129,
+          "printed": 6129,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "religion_category",
+          "key": "Testemunha de Jeová",
+          "computed": 4083,
+          "printed": 4083,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "religion_category",
+          "key": "Universal do Reino de Deus",
+          "computed": 2802,
+          "printed": 2802,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "religion_category",
+          "key": "Jesus Cristo dos Santos dos últimos dias / Mórmons",
+          "computed": 3565,
+          "printed": 3565,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "religion_category",
+          "key": "Outra",
+          "computed": 4090,
+          "printed": 4090,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "religion_category",
+          "key": "Sem religião",
+          "computed": 54814,
+          "printed": 54814,
+          "difference": 0
+        },
+        {
+          "year": 2021,
+          "margin": "religion_category",
+          "key": "Não sabe / Não respondeu",
+          "computed": 1311,
+          "printed": 1311,
+          "difference": 0
+        }
+      ]
+    },
+    "boundary_validation": {
+      "status": "passed",
+      "feature_count": 22,
+      "distinct_geometry_hashes": 22,
+      "geometry_hashes": [
+        "984b1232c7ac24596850ff7705d2a6792665bdcd71b3b2d726077a9c817aa878",
+        "5759e59f33766adc70ff5a169267602141a193a32ce28520e7904fb8a2759f8d",
+        "7bda50548d85eba96c6287f01aab8c3bca744591424ba3ac82bc3c895bcf4eff",
+        "90f162f739c0a846fed1ba29a757895c6cbb76bdc1432466dd5c883a03e497db",
+        "d3496e75875ec0a1a36ea063a2a6165e30d98c6e523e245bb37c20615c67068f",
+        "09050833c480a5f9b1cba190f4763bcd4230397286e309fa8f3ed09e38b2b376",
+        "3a5aa83d301fd801bf6dc69dff9fbb830742da6312c170c5e07eba3347211227",
+        "283c6d225e4ae32c91b96304eee0c54d99a1e0d3b79b81e4b7a6d43ad6cc8775",
+        "62ab764d7f5cd0e239023e2eac72f9694c29837446974e8c84f2b9e08ef1b9c1",
+        "1a7797c423d1477b3fb27479bb6530e2ce49a1b7a30d533edf589fde7d92aa28",
+        "eefa168e7ddfdba7974be8e74b99d03800f6bcbc3163fc6594fb4c201d7e54c6",
+        "81e4aa523aa68d89b2c25ed19f12911b59aaf4ee225376fcf43260d10598c52a",
+        "a7dd5ce22ad89335bbb5e34921c6f96828a2ba3896df29df352993d5561a37ee",
+        "c92e3bd293a476333f733fe9a43841298267f6d06ebe392f45471280c6b6772c",
+        "74ced432eb2a8b9eaabfd0fe05e1a9c8c211eaa4f7c3e6b1e41249b696bbf2d2",
+        "02647056da54c175fa34efb5f786fc90a99b03b742c3e786cd7087e981227978",
+        "59d88bcbd0e2f1d50053b1456725e2e3106465d520ffb3ab64e5c7fbbdca2b8b",
+        "c690c719c7add1ff451438f1a1728d6cafe6592243fdda8d2b1e2b1d24ff63ec",
+        "f3d9b6bc3b5a9b1c6a98bfffecc8d883b0c2d98077f492c9f5fdb89904c4729a",
+        "345cf55845686bbc037248c67660fb18062fc60718a343ca26a4567e0cc8b9d2",
+        "6625033af76b99fc68ab47667924796a5b7a3ff66a29d05db002e22b5b9c620b",
+        "1155fdcbf98cb2cd4bbc1d4976705230bdaa1501d0be4320e96ce295d29357bf"
+      ],
+      "bbox": {
+        "xmin": -25.3609478,
+        "ymin": 14.8031546,
+        "xmax": -22.6673416,
+        "ymax": 17.2047574
+      },
+      "dateline_note": "extent lon -25.4 to -22.7E, lat 14.8 to 17.2N; far from the antimeridian, no dateline handling needed",
+      "output_bytes": 440361,
+      "simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 440361
+      },
+      "licence": "Open Data Commons Open Database License 1.0",
+      "adm_unit_count": "22"
+    },
+    "join_coverage": {
+      "matched_concelhos": 22,
+      "expected_concelhos": 22,
+      "unmatched_concelhos": [],
+      "unused_boundary_features": []
+    },
+    "notes": "2010 (Tabela 12) closes integer-exact at both margins (national 336,049); 2021 (22 per-concelho Tabela 54 workbooks) closes integer-exact at both margins (national 352,494). Boundary joins 22/22 to geoBoundaries CPV ADM1 by shapeName with 22 distinct geometry hashes.",
+    "warnings": [
+      "STAGED product: no page, no hub link. The page decision is the conductor's.",
+      "Licence needs_review: INE publishes no explicit reuse licence; the Politica de Difusao (principle 10) states free and universal access to statistics at www.ine.cv, and segredo estatistico protects only individual microdata. Ships with attribution under BUILD-THEN-ASK; an INE reuse-confirmation ask is recorded for the PI.",
+      "The religion/spirituality question is voluntary and asked of residents aged 15+; the universe on every surface is the published resident population aged 15+, and the non-response line (2010 ND; 2021 Nao sabe / Nao respondeu) rides in the denominator, disclosed, never repaired.",
+      "The category frame changed across the 2010->2021 instrument break; fine-category change is not asserted, the headline affiliation and no-religion shares are comparable.",
+      "The two headline shares need not sum to 100 (the non-response line stays in the denominator and in neither slot)."
+    ]
+  },
+  "construct_notes": [
+    "The construct is census religion or spirituality: each resident's reported religion (2010) or religion/spirituality (2021), asked of the resident population aged 15 and over as a voluntary question, not practice, attendance, or membership.",
+    "The public product carries three headline fields per concelho-wave: population aged 15+, religious affiliation percent, and no-religion percent. Place-density metrics are null (no governed place-of-worship snapshot).",
+    "Two waves (2010, 2021) on the stable 22-concelho frame. The 2010 concelho counts come from the national workbook Tabela 12 (religion by sex and concelho); the 2021 concelho counts come from the 22 per-concelho Quadros workbooks Tabela 54 (the 2021 national workbook publishes religion only nationally).",
+    "The religion/spirituality question is voluntary and asked of residents aged 15+; the universe on every surface is the published resident population aged 15+ (336,049 in 2010, 352,494 in 2021), and the non-response line rides in the denominator, disclosed, never repaired.",
+    "Slot design (ordinary two-slot, BZ/SB/FM/KI precedent): religious_affiliation_percent is the share reporting a named religion or spirituality (Total minus Sem religiao minus the non-response line); no_religion_percent is the single Sem religiao line. Cabo Verde has a real, regionally-varying Sem religiao category, so no minority-share (task-6) treatment applies; the two shares need not sum to 100.",
+    "Licence needs_review under BUILD-THEN-ASK: INE's Politica de Difusao (principle 10) states free and universal access to published statistics at www.ine.cv, and segredo estatistico protects only individual microdata; no explicit reuse grant was found, so the derived concelho summaries ship with attribution to INE and an INE reuse-confirmation ask is recorded for the PI. The boundary is geoBoundaries CPV ADM1, 22 concelhos, Open Data Commons Open Database License 1.0 (OpenStreetMap), joined one-to-one by shapeName."
+  ],
+  "deferred_sources": [
+    {
+      "source_dataset_id": "cv-census-2021-religion-by-age-and-residence",
+      "status": "deferred",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/Census/content/paginated/3",
+      "local_path": "data/raw/cv_census",
+      "notes": "The 2021 per-concelho workbooks also carry Tabela 55 (religion by age group) and the residence (urbano/rural) and sex splits of Tabela 54; only the concelho totals are shipped. Documented, not used."
+    },
+    {
+      "source_dataset_id": "cv-census-2010-religion-by-age-and-residence",
+      "status": "deferred",
+      "url": "https://bdmi.ine.cv/site_deploy_api/Uploads/20251209_085254_1c628c72-ddfd-4301-8494-1c159b147216.xls",
+      "local_path": "data/raw/cv_census/cv_2010_national_cvnumeros.xls",
+      "notes": "The 2010 workbook carries religion by age group (Tabela 11) and by residence/sex (Tabela 10); only the concelho totals (Tabela 12) are shipped. Documented, not used."
+    },
+    {
+      "source_dataset_id": "ine-cv-reuse-confirmation",
+      "status": "not_pinned",
+      "url": "https://ine.cv/",
+      "local_path": null,
+      "notes": "An INE reuse-confirmation would move the licence from needs_review to accepted; recorded as a courtesy ask for the PI (do not send)."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "needs_review",
+  "licence_basis": "ine_cv_attribution_build_then_ask",
+  "downstream_status": "staged",
+  "source_datasets": [
+    {
+      "source_dataset_id": "cv-census-2010-cvnumeros-table-12-religion-by-concelho",
+      "name": "Cabo Verde 2010 Census (RGPH 2010), Cabo Verde em Numeros national workbook, Tabela 12: Populacao residente com 15 anos ou mais segundo a religiao por sexo e concelho",
+      "provider": "Instituto Nacional de Estatistica (INE), Cabo Verde",
+      "url": "https://bdmi.ine.cv/site_deploy_api/Uploads/20251209_085254_1c628c72-ddfd-4301-8494-1c159b147216.xls",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/cv_census/cv_2010_national_cvnumeros.xls",
+      "licence": {
+        "name": "The National Statistics Institute of Cabo Verde (Instituto Nacional de Estatistica, INE; www.ine.cv) publishes no explicit open-data reuse licence and asserts no explicit all-rights-reserved copyright over its statistical tables. INE's Politica de Difusao (Dissemination Policy, PDF, principle 10, retrieved 2026-07-12) states: 'O acesso a informacao estatistica produzida pelo INE e tendencialmente gratuito e universal. Toda a informacao estatistica disponivel em www.ine.cv, pode ser acedida gratuitamente.' (Access to the statistical information produced by INE is generally free and universal; all statistical information available at www.ine.cv can be accessed free of charge.) Statistical confidentiality (segredo estatistico, Lei n. 48/IX/2019 do Sistema Estatistico Nacional, art. 10) protects only individual microdata, which this product never touches. Under the standing BUILD-THEN-ASK ruling the derived concelho summaries ship with attribution to INE (source line 'Fonte: INE, Censo 2010 / Censo 2021'); licence_status is needs_review and an INE reuse-confirmation ask is recorded for the PI. The boundary is Open Data Commons Open Database License 1.0 (OpenStreetMap).",
+        "url": "https://ine.cv/",
+        "attribution": "Fonte: Instituto Nacional de Estatistica (INE), Cabo Verde, Censo 2010 e Censo 2021."
+      },
+      "citation": "INE Cabo Verde, IV Recenseamento Geral da Populacao e Habitacao (Censo 2010), Cabo Verde em Numeros, Tabela 12.",
+      "access_limits": null,
+      "redistribution_limits": "Derived concelho summaries ship with attribution to INE under BUILD-THEN-ASK (needs_review); the raw census workbook is not committed.",
+      "notes": "Integer counts; 14-category frame; universe is resident population aged 15+ (voluntary religion question). Both margins close exactly: every concelho internal sum equals its printed Total, every category sums across the 22 concelhos to the national Tabela 12 total, and the grand total is 336,049. No cell suppression."
+    },
+    {
+      "source_dataset_id": "cv-census-2021-quadros-concelho-religion-espiritualidade",
+      "name": "Cabo Verde 2021 Census (RGPH 2021), Quadros por Concelho workbooks, Tabela 54: Populacao residente no concelho com 15 anos ou mais segundo religiao ou espiritualidade",
+      "provider": "Instituto Nacional de Estatistica (INE), Cabo Verde",
+      "url": "https://bdmi.ine.cv/site_deploy_api/api/Census/content/paginated/3",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/cv_census",
+      "licence": {
+        "name": "The National Statistics Institute of Cabo Verde (Instituto Nacional de Estatistica, INE; www.ine.cv) publishes no explicit open-data reuse licence and asserts no explicit all-rights-reserved copyright over its statistical tables. INE's Politica de Difusao (Dissemination Policy, PDF, principle 10, retrieved 2026-07-12) states: 'O acesso a informacao estatistica produzida pelo INE e tendencialmente gratuito e universal. Toda a informacao estatistica disponivel em www.ine.cv, pode ser acedida gratuitamente.' (Access to the statistical information produced by INE is generally free and universal; all statistical information available at www.ine.cv can be accessed free of charge.) Statistical confidentiality (segredo estatistico, Lei n. 48/IX/2019 do Sistema Estatistico Nacional, art. 10) protects only individual microdata, which this product never touches. Under the standing BUILD-THEN-ASK ruling the derived concelho summaries ship with attribution to INE (source line 'Fonte: INE, Censo 2010 / Censo 2021'); licence_status is needs_review and an INE reuse-confirmation ask is recorded for the PI. The boundary is Open Data Commons Open Database License 1.0 (OpenStreetMap).",
+        "url": "https://ine.cv/",
+        "attribution": "Fonte: Instituto Nacional de Estatistica (INE), Cabo Verde, Censo 2010 e Censo 2021."
+      },
+      "citation": "INE Cabo Verde, V Recenseamento Geral da Populacao e Habitacao (Censo 2021), Quadros por Concelho, Tabela 54.",
+      "access_limits": null,
+      "redistribution_limits": "Derived concelho summaries ship with attribution to INE under BUILD-THEN-ASK (needs_review); the 22 raw per-concelho workbooks are not committed.",
+      "notes": "Integer counts; 15-category frame (religion or spirituality); universe is resident population aged 15+ (voluntary question). Both margins close exactly: every concelho internal sum equals its printed Total, every category sums across the 22 per-concelho workbooks to the national Tabela 52 total, and the grand total is 352,494. The per-concelho workbook spellings vary trivially; the national Tabela 52 spelling is the canonical frame."
+    },
+    {
+      "source_dataset_id": "geoboundaries-cpv-adm1-2017",
+      "name": "geoBoundaries CPV ADM1 (22 concelhos)",
+      "provider": "geoBoundaries (William & Mary geoLab); boundary source OpenStreetMap",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/CPV/ADM1/geoBoundaries-CPV-ADM1.geojson",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/cv_census/geoBoundaries-CPV-ADM1.geojson",
+      "licence": {
+        "name": "Open Data Commons Open Database License 1.0",
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/CPV/ADM1/",
+        "attribution": "geoBoundaries (gbOpen); boundary source (c) OpenStreetMap contributors, ODbL"
+      },
+      "citation": "geoBoundaries CPV ADM1 (gbOpen, pinned 9469f09), 22 concelho boundaries.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed under Open Data Commons Open Database License 1.0 (share-alike; attribution to OpenStreetMap contributors).",
+      "notes": "22 ADM1 concelhos, boundaryYearRepresented 2017, joined one-to-one to the census concelhos by shapeName. The extent spans lon -25.4 to -22.7E and lat 14.8 to 17.2N, far from the antimeridian; no dateline handling is needed."
+    }
+  ],
+  "notes": "STAGED product (no page, no hub link). The committed products are the derived 22-concelho area summary (44 rows: 22 concelhos x 2 waves) and the simplified geoBoundaries CPV ADM1 boundary. Licence needs_review (INE Politica de Difusao free-and-universal-access; ships with attribution under BUILD-THEN-ASK, INE reuse ask recorded for the PI); boundary ODbL 1.0 (OpenStreetMap). Two-wave concelho product on a stable frame; the page decision is the conductor's."
+}
