@@ -23,13 +23,14 @@ Rules for the executing agent:
   imperative lowercase subject ≤72 chars, no AI co-author trailer, push.
 - Mark the playbook's Status line DONE with the commit hash.
 
+The research playbooks (country survey, deep-history schema, external
+evidence gathering, US data map, US deep past, manifest-and-docs, VU
+spreadsheets) moved to the private research tier
+(`~/GIT/pow-research/docs/playbooks/`) for the work phase. The platform
+playbooks remain here:
+
 | Playbook | Task | Depends on |
 | --- | --- | --- |
-| `deep-history-schema.md` | #7 evidence contract for deep histories | none |
-| `country-survey.md` | #3 global survey + build cards | none (template exists) |
-| `free-contribution-portal.md` | #10 open RA intake design/build | deep-history-schema (types) |
+| `free-contribution-portal.md` | #10 open RA intake design/build | deep-history-schema (private tier, types) |
 | `fix-map-two-options.md` | #9 OSM + workbench routes on the maps | none |
-| `us-data-map.md` | first country extension (US counties, RCMS waves) | none |
-| `us-deep-past.md` | US 1850-1936 from NHGIS (licence check blocking) | us-data-map |
-| `manifest-and-docs.md` | #1 + #4 + #8 inventory and doc architecture | best done last |
-| `guy-vu-spreadsheets.md` | #11 historical VU census ingestion | blocked on data arrival |
+| `session-batch-review.md` | batch review workflow | none |

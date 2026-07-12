@@ -10,7 +10,7 @@ Under this licence you may share and adapt the project's work provided that you 
 
 ## What this licence does not cover
 
-The first thing this licence does not cover is source data. Each data product derives from a statistics office, register, or survey publication whose own terms are recorded in that product's manifest under `docs/manifests/`, and those source terms continue to govern the source data themselves. Nothing here restricts anyone's use of the original published tables obtained from their source of record.
+The first thing this licence does not cover is source data. Each data product derives from a statistics office, register, or survey publication whose own terms are recorded in that product's provenance manifest (held in the project's private research tier during the work phase; each map page states its source and licence position directly), and those source terms continue to govern the source data themselves. Nothing here restricts anyone's use of the original published tables obtained from their source of record.
 
 The second thing this licence does not cover is products whose source licence requires different terms. Where an upstream licence carries its own share-alike condition, that condition prevails over this licence for the affected product: the Chile commune product derives from INE tables under CC BY-SA 4.0 and remains available under CC BY-SA 4.0; boundary files derived from OpenStreetMap remain under the Open Database Licence (ODbL 1.0).
 

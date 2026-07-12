@@ -57,9 +57,10 @@ builders evolved, such as `kogl_type_1_attribution` — moves to the new
 decision value from the slug text; `accepted_by_jb_pending_ipums_confirmation`
 maps to `needs_review`, matching the standing IPUMS hold.
 
-The third part guards against recurrence. `bash scripts/validate_manifests.sh`
-validates every manifest and exits non-zero on any failure; review gates run
-it before any commit touching `docs/manifests/` or a manifest-writing
+The third part guards against recurrence. `bash pipeline/validate_manifests.sh`
+(in the private research tier, alongside the manifests and builders it
+validates) validates every manifest and exits non-zero on any failure; review
+gates run it before any commit touching the manifests or a manifest-writing
 builder. Builders were patched to emit the `licence_status`/`licence_basis`
 pair (21 scripts); the Tuvalu, Saint Lucia, and Bangladesh builders were
 re-run as round-trip proof. Residual: builders using the variable-threading

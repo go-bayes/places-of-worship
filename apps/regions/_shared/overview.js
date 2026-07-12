@@ -149,26 +149,18 @@
     if (a.sourceOfRecord) def("Source of record", html("span", null, a.sourceOfRecord));
     if (a.tables) def("Exact tables", html("span", null, a.tables));
     if (a.licence) def("Licence", html("span", null, a.licence));
-    // one repo path, or several (some countries build across two scripts)
+    // during the work phase the extraction pipeline and provenance manifests
+    // are held in the project's private research tier; name them without
+    // linking and say how to reach them
     var scripts = Array.isArray(a.script) ? a.script : (a.script ? [a.script] : []);
     if (scripts.length) {
-      var scriptSpan = el("span");
-      scripts.forEach(function (path, i) {
-        if (i) scriptSpan.appendChild(document.createTextNode(" · "));
-        var scriptHref = path.indexOf("http") === 0 ? path : GITHUB_BLOB + path;
-        scriptSpan.appendChild(link(path, scriptHref, true));
-      });
-      def(scripts.length > 1 ? "Extraction scripts" : "Extraction script", scriptSpan);
+      def(scripts.length > 1 ? "Extraction scripts" : "Extraction script", html("span", null, scripts.join(" · ")));
     }
     if (a.manifests && a.manifests.length) {
-      var span = el("span", "overview-manifests");
-      a.manifests.forEach(function (m, i) {
-        if (i) span.appendChild(document.createTextNode(" · "));
-        var href = m.href && m.href.indexOf("http") === 0 ? m.href : GITHUB_BLOB + (m.href || "");
-        span.appendChild(link(m.label, href, true));
-      });
-      def("Retrieval recipe and hashes", span);
+      var names = a.manifests.map(function (m) { return m.label; }).join(" · ");
+      def("Retrieval recipe and hashes", html("span", null, names));
     }
+    body.appendChild(html("p", "overview-access-note", "The extraction pipeline and the full provenance manifest are held in the project’s private research tier during the work phase and are available to collaborators on request."));
     if (a.note) body.appendChild(html("p", "overview-access-note", a.note));
     body.appendChild(dl);
     return renderSection("Get the data yourself", body);

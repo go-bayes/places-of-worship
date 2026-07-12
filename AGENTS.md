@@ -14,16 +14,26 @@
   `pow-next-arc-global-databases.md`. Sessions started from `~/GIT`
   load these automatically; sessions started elsewhere read them from
   the paths above.
+- PRIVATE RESEARCH TIER (work-phase split, 2026-07-13): the research
+  corpus lives in the private repo `go-bayes/pow-research`, cloned at
+  `~/GIT/pow-research` — `research/` (build queue, probes, surveys),
+  `manifests/`, `pipeline/` (area-summary builders, validators, lib),
+  research-method docs, research playbooks, and the governance records
+  (PLANNING, DECISIONS, JOURNAL, BRAINSTORMING, CRITIQUE). Research
+  lanes read and write THERE; this public repo carries the map, the
+  platform, and the RA-facing docs. Research-route detail never enters
+  public commit messages or the public CHANGELOG.
 - `ROADMAP.md`: high-level phases, non-goals, and long-horizon direction.
 - `docs/system-map.md`: compact module map. Use it to place work inside the
   right part of the system before changing planning or task lists.
-- `PLANNING.md`: active design, priorities, next steps, and open questions.
-- `BRAINSTORMING.md`: tool and architecture ideas still being considered.
-  Treat entries as options, not decisions, until they move into planning or the
-  journal.
-- `JOURNAL.md`: decisions and rationale that should be traceable later.
-  Treat it as public-facing project history: write for collaborators,
-  funders, and future readers, not as private agent instructions.
+- `~/GIT/pow-research/PLANNING.md`: active design, priorities, next steps,
+  and open questions (private tier).
+- `~/GIT/pow-research/BRAINSTORMING.md`: tool and architecture ideas still
+  being considered (private tier). Treat entries as options, not decisions,
+  until they move into planning or the journal.
+- `~/GIT/pow-research/JOURNAL.md`: decisions and rationale that should be
+  traceable later (private tier). Write for collaborators and future
+  readers, not as private agent instructions.
 - `LEXICON.md`: plain-language project terms. Use it when editing reports,
   RA-facing docs, README copy, diagrams, and planning summaries.
 - `CHANGELOG.md`: durable progress. Update it for user-visible docs, schemas,
@@ -39,10 +49,12 @@
   handoff artefacts.
 - `docs/ui-style-guide.md`: UI wording, status, colour, button, and form
   conventions for the map-first task interfaces.
-- `CRITIQUE.md`: review notes that motivated the revision-event pipeline.
-- `DECISIONS.md`: adjudicated standing rulings for the revisions pipeline,
-  with rationale, what each forecloses, and the cost to reverse. Check it
-  before reopening an identity, taxonomy, event-contract, or staging choice.
+- `~/GIT/pow-research/CRITIQUE.md`: review notes that motivated the
+  revision-event pipeline (private tier).
+- `~/GIT/pow-research/DECISIONS.md`: adjudicated standing rulings for the
+  revisions pipeline, with rationale, what each forecloses, and the cost to
+  reverse (private tier). Check it before reopening an identity, taxonomy,
+  event-contract, or staging choice.
 - `schemas/`: data contracts. Update schemas before changing dependent shapes.
 - `docs/ra-nz-pilot-task.md`: current RA-facing task instructions for the
   time-bounded New Zealand web/map-first pilot.
@@ -64,15 +76,15 @@
   removed) — see the dated `JOURNAL.md` entries. Do not rebuild inventory
   items from this guide without checking the journal first; its gotchas
   section remains useful.
-- `docs/development/adding-a-region.md`: how to add a country research
-  map now that the country pages share one runtime
+- `~/GIT/pow-research/docs/development/adding-a-region.md`: how to add a
+  country research map now that the country pages share one runtime
   (`apps/regions/_shared/region-map.js`) with thin per-country
-  `REGION_CONFIG` loaders. UI changes happen once in `_shared/`; never
-  add country-conditional logic to the module.
-- `docs/development/regional-map-consistency.md`: COMPLETED 2026-07-04
-  migration plan that unified the forked NZ/VU maps onto the shared
-  runtime, with the parity-verification record and the link to
-  `apps/regions/_shared/DRIFT-REPORT.md`.
+  `REGION_CONFIG` loaders (private tier). UI changes happen once in
+  `_shared/`; never add country-conditional logic to the module.
+- `~/GIT/pow-research/docs/development/regional-map-consistency.md`:
+  COMPLETED 2026-07-04 migration plan that unified the forked NZ/VU maps
+  onto the shared runtime (private tier), with the parity-verification
+  record and the link to `apps/regions/_shared/DRIFT-REPORT.md`.
 - `docs/templates/ra-historical-site-evidence/`: RA evidence-entry templates.
 - `docs/master-verification-workflow-plan.md`: master verification and review.
 - `docs/portal-data-entry-plan.md`: authenticated portal planning hub.
@@ -86,7 +98,9 @@
   boundaries.
 - `convex/`: provisional task-map backend scaffold. It owns shared task status
   only and must not write to the master database or public map exports.
-- `research/`: lightweight country-source feasibility notes only.
+- `~/GIT/pow-research/research/`: country-source feasibility notes, the
+  build queue, and probes (private tier; nothing research-shaped lands in
+  this public repo any more).
 - `grant/`: ignored local reporting reference; do not commit it.
 - The repository is not currently accepting external pull requests while the
   data contracts, RA validation workflow, and map products are still

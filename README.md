@@ -25,11 +25,9 @@ Building historical datasets fit for scientific inferences is remarkably difficu
 - [United States regional map](https://www.placesmap.org/apps/regions/us/)
 - [Vanuatu regional map](https://www.placesmap.org/apps/regions/vu/)
 - [Roadmap](ROADMAP.md)
-- [Country survey](research/country-survey.md)
 - [System map](docs/system-map.md)
 - [FAQ](FAQ.md)
 - [Lexicon](LEXICON.md)
-- [Using the census-religion data](docs/using-the-census-religion-data.md)
 
 
 ## Who reads what
@@ -62,7 +60,7 @@ OpenStreetMap-derived databases are distributed under the Open Database Licence
 
 ## Licence
 
-The project's original work — code, documentation, map pages, manifests, derived summaries, and figures — is licensed under [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/): attribution required, no commercial use, and derivative works must carry these same terms. Source data remain governed by their own licences, recorded per product in [docs/manifests/](docs/manifests/); where a source licence requires different terms (CC BY-SA, ODbL), the source terms prevail for that product. See [LICENSE.md](LICENSE.md).
+The project's original work — code, documentation, map pages, manifests, derived summaries, and figures — is licensed under [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/): attribution required, no commercial use, and derivative works must carry these same terms. Source data remain governed by their own licences, recorded per product in provenance manifests held in the project's private research tier during the work phase (each map page states its source, construct, and licence position directly, and manifest detail is available to collaborators on request); where a source licence requires different terms (CC BY-SA, ODbL), the source terms prevail for that product. See [LICENSE.md](LICENSE.md) and [docs/data-access-and-research-tiers.md](docs/data-access-and-research-tiers.md).
 
 ## Project Team
 
@@ -85,10 +83,11 @@ Public corrections to places of worship should generally be made through
 OpenStreetMap itself, following OpenStreetMap's own contribution rules and
 licence requirements.
 
-See [ROADMAP.md](ROADMAP.md) for planned phases, [PLANNING.md](PLANNING.md)
-for current implementation priorities, [FAQ.md](FAQ.md) for plain-language
-answers about site identity, task generation, and staged review, and
-[LEXICON.md](LEXICON.md) for preferred project terms. Maintainer references
+See [ROADMAP.md](ROADMAP.md) for planned phases, [FAQ.md](FAQ.md) for
+plain-language answers about site identity, task generation, and staged
+review, and [LEXICON.md](LEXICON.md) for preferred project terms. Planning
+and decision records live in the project's private research tier during
+the work phase. Maintainer references
 include the [documentation health check](docs/documentation-health-check.md),
 the [Convex function inventory](docs/api/convex-functions.md), the
 [workflow script catalogue](docs/api/workflow-scripts.md), and the [UI style
