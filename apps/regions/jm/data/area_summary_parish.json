@@ -1,0 +1,1616 @@
+{
+  "schema_version": "area-summary.v2",
+  "generated_at": "2026-07-12T11:29:43Z",
+  "generated_by": "scripts/build_jm_area_summary.R",
+  "country_code": "JM",
+  "data_status": "census_religion_live",
+  "data_status_note": "Census religious affiliation is live for the 14 parishes in 2011 from STATIN Vol 6 Table 5 (Total column), integer-exact to the 2,684,115 religion universe at every printed margin. Single wave: 2001 religion is national-only in the located sources and the 2022 census has no religion release yet, so no cross-wave parish change is possible. Vol 6 Table 5 prints a heterogeneous parish frame, and this product ships each parish's printed rows verbatim. Eleven parishes print 19 categories (the 16 denominational lines printed in every parish, plus one Other line, one no-religion line, and one non-response line), with the four small non-Christian groups (Bahai, Hinduism, Islam, Judaism) included in the parish Other line by source design. Three parishes additionally break out small non-Christian groups as printed: St Andrew prints all four (Bahai 109, Hinduism 967, Islam 483, Judaism 326; 23 categories), St James prints Hinduism (387; 20 categories), and St Catherine prints Islam (371; 20 categories). No category is merged, translated, or reconstructed. The parish Other lines therefore absorb the un-broken-out small-group residuals by source design (national count minus printed parish breakouts: Bahai 160, Hinduism 484, Islam 658, Judaism 180; 1,482 in all), and the sum of the parish Other lines (143,461) exceeds the national Other line (141,979) by exactly that 1,482. The parish-to-national non-additivity of the four small groups is a source-design fact stated in the table's own footnote, not an error.",
+  "boundary_set": {
+    "boundary_set_id": "jm-parish-2011-geoboundaries-adm1",
+    "country_code": "JM",
+    "level": "parish",
+    "vintage": "geoBoundaries JAM ADM1 (gbOpen); 14 units, OpenStreetMap-sourced, represented year 2011",
+    "source_dataset_id": "geoboundaries-jam-adm1"
+  },
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "no governed Jamaica place-of-worship snapshot is included in this census-religion release",
+    "notes": "The Jamaica lane ships census-religion count and share metrics only; place metrics are null."
+  },
+  "source_datasets": [
+    {
+      "source_dataset_id": "statin-jm-2011-vol6-table5-religion-parish",
+      "name": "STATIN 2011 Census Vol 6 Table 5: Population by Sex and Religious Affiliation/Denomination, by Parish",
+      "provider": "Statistical Institute of Jamaica (STATIN)",
+      "url": "https://census.statinja.gov.jm/wp-content/themes/futurio-child/Census2011Reports/Population and Housing Census 2011 Jamaica Ethnic Origin & Religious Affiliation Vol 6 .pdf",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/jm_census/vol6_religion.pdf",
+      "licence": {
+        "name": "STATIN Terms & Conditions of Data Use (open reuse grant with attribution, indication of changes, and a link to the original data)",
+        "url": "https://statinja.gov.jm/terms-of-use.aspx",
+        "attribution": "Adapted from data published by the Statistical Institute of Jamaica (STATIN): 2011 Population and Housing Census, Ethnic Origin & Religious Affiliation (Volume 6), Table 5. Changes were made (parish religion counts restated as counts and shares on the geoBoundaries parish frame). Original data: https://census.statinja.gov.jm/census-reports/ . STATIN does not endorse this use."
+      },
+      "citation": "Statistical Institute of Jamaica, 2011 Population and Housing Census, Ethnic Origin & Religious Affiliation (Volume 6), Table 5 'Population by Sex and Religious Affiliation/Denomination, by Parish'.",
+      "access_limits": "Public direct PDF download from census.statinja.gov.jm.",
+      "redistribution_limits": "Open reuse under the STATIN Terms & Conditions of Data Use with attribution. STATIN grants to the Data User a non-exclusive, royalty-free licence to copy, use and create derivative works from STATIN's Data for commercial and non-commercial purposes, released through its website, www.statinja.gov.jm , subject to the terms of this Licence.",
+      "notes": "Count-valued over a heterogeneous printed parish frame (19 to 23 categories), integer-exact to 2,684,115 at the Total column at every printed margin. The product ships the Total column only; the printed Male/Female columns carry small margin defects documented in the manifest. The 2011 national religion figures appear in two runs: this table's national block totals 2,684,115, while Vol 1 Table (xiii) totals 2,683,105 (the 2001-vs-2011 comparison run); this build takes Vol 6 Table 5 as the single source and does not mix the runs."
+    },
+    {
+      "source_dataset_id": "geoboundaries-jam-adm1",
+      "name": "geoBoundaries Jamaica ADM1 (14 parish units)",
+      "provider": "geoBoundaries (William & Mary geoLab); source OpenStreetMap, Wambacher",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/JAM/ADM1/geoBoundaries-JAM-ADM1.geojson",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/jm_census/geoBoundaries-JAM-ADM1.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution-ShareAlike 2.0 (CC BY-SA 2.0)",
+        "url": "https://creativecommons.org/licenses/by-sa/2.0/",
+        "attribution": "geoBoundaries (gbOpen) JAM ADM1; boundary source OpenStreetMap contributors; derived boundary shared under CC BY-SA."
+      },
+      "citation": "Runfola, D. et al. (2020) geoBoundaries: A global database of political administrative boundaries. gbOpen JAM ADM1 (pinned commit 9469f09).",
+      "access_limits": null,
+      "redistribution_limits": "CC BY-SA 2.0 permits redistribution and derivatives with attribution and share-alike.",
+      "notes": "14 ADM1 units; release metadata: boundaryType ADM1, CC BY-SA 2.0, source OpenStreetMap (Wambacher), admUnitCount 14, represented year 2011."
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_id": "religious_affiliation_percent",
+      "label": "Religious affiliation (%)",
+      "description": "Share of the parish's 2011 religion universe affiliated with any religion (every printed line except the parish's no-religion and non-response lines, including the Other line).",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "Parish denominator minus the parish's printed no-religion and non-response lines, over the parish's whole religion universe (all printed lines). Counts carried verbatim from the Total column of Vol 6 Table 5; no category merged, translated, or reconstructed.",
+      "temporal_coverage": "2011",
+      "spatial_coverage": "Fourteen parish units on the geoBoundaries JAM ADM1 layer, joined one-to-one by shapeISO (JM-01..JM-14); the boundary spells 'Saint' where the census prints 'St'.",
+      "quality_notes": "Vol 6 Table 5 prints a heterogeneous parish frame, and this product ships each parish's printed rows verbatim. Eleven parishes print 19 categories (the 16 denominational lines printed in every parish, plus one Other line, one no-religion line, and one non-response line), with the four small non-Christian groups (Bahai, Hinduism, Islam, Judaism) included in the parish Other line by source design. Three parishes additionally break out small non-Christian groups as printed: St Andrew prints all four (Bahai 109, Hinduism 967, Islam 483, Judaism 326; 23 categories), St James prints Hinduism (387; 20 categories), and St Catherine prints Islam (371; 20 categories). No category is merged, translated, or reconstructed. The parish Other lines therefore absorb the un-broken-out small-group residuals by source design (national count minus printed parish breakouts: Bahai 160, Hinduism 484, Islam 658, Judaism 180; 1,482 in all), and the sum of the parish Other lines (143,461) exceeds the national Other line (141,979) by exactly that 1,482. The parish-to-national non-additivity of the four small groups is a source-design fact stated in the table's own footnote, not an error."
+    },
+    {
+      "indicator_id": "no_religion_percent",
+      "label": "No religion (%)",
+      "description": "Share of the parish's 2011 religion universe reporting no religious affiliation (the parish's single affirmative no-religion line).",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "The parish's single printed affirmative no-religion line — spelled 'No Religious Affiliation/Denomination', 'No Religion/Denomination', or 'None' depending on the parish — over the parish's whole religion universe. Slot assignment is by role, not by string; the printed spelling is preserved in the per-row composition and named in the row's quality flags.",
+      "temporal_coverage": "2011",
+      "spatial_coverage": "Fourteen parish units on the geoBoundaries JAM ADM1 layer, joined one-to-one by shapeISO (JM-01..JM-14); the boundary spells 'Saint' where the census prints 'St'.",
+      "quality_notes": "The non-response line ('Not Reported'/'Not Stated') stays inside the denominator and outside both slots. National no-religion 571,982; national non-response 61,374; both reconcile parish-to-national exactly."
+    },
+    {
+      "indicator_id": "population_total",
+      "label": "Population (2011 census, religion universe)",
+      "description": "2011 de jure religion universe, the religion tabulation universe and the share denominator.",
+      "unit": "count",
+      "denominator_indicator_id": null,
+      "method": "Sum of the parish's printed category lines (Total column) from Vol 6 Table 5.",
+      "temporal_coverage": "2011",
+      "spatial_coverage": "Fourteen parish units on the geoBoundaries JAM ADM1 layer, joined one-to-one by shapeISO (JM-01..JM-14); the boundary spells 'Saint' where the census prints 'St'.",
+      "quality_notes": "Parishes sum to the national 2011 religion universe of 2,684,115 exactly; the religion universe sits slightly below the full census population (2,697,983)."
+    }
+  ],
+  "visual_layers": [
+    {
+      "visual_layer_id": "jm-parish-religious-affiliation-share",
+      "label": "Religious affiliation share",
+      "description": "Census religious affiliation share by parish, 2011.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "religious_affiliation_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "whole 2011 religion universe"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "published parish value on the geoBoundaries ADM1 layer",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": true,
+      "notes": "Seventh-Day Adventist and Pentecostal are the largest affiliations nationally."
+    },
+    {
+      "visual_layer_id": "jm-parish-no-religion-share",
+      "label": "No religion share",
+      "description": "Census no-religion share by parish, 2011.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "no_religion_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "whole 2011 religion universe"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "published parish value on the geoBoundaries ADM1 layer",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Single wave; no cross-wave change layer (2001 religion is national-only in the located sources; the 2022 census has no religion release yet)."
+    }
+  ],
+  "rows": [
+    {
+      "country_code": "JM",
+      "boundary_set_id": "jm-parish-2011-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "jm-parish-2011-geoboundaries-adm1:JM-01",
+      "area_code": "JM-01",
+      "area_name": "Kingston",
+      "year": 2011,
+      "population_total": 84606,
+      "population_total_basis": "2011 de jure religion universe from STATIN Vol 6 Table 5 ('Population by Sex and Religious Affiliation/Denomination, by Parish'), Total column. The parish denominator is the sum of all the parish's printed category lines, including the non-response line ('Not Reported'/'Not Stated'). The religion universe (2,684,115) sits slightly below the full 2011 de jure census population (2,697,983); the difference is a residual not carried in the religion tabulation.",
+      "religious_affiliation_count": 52864,
+      "religious_affiliation_percent": 62.4826,
+      "no_religion_count": 28794,
+      "no_religion_percent": 34.033,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 16.4935,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statin-jm-2011-vol6-table5-religion-parish",
+        "geoboundaries-jam-adm1"
+      ],
+      "quality_flag": "source_statin_2011_census_vol6_table5_religion_by_parish;universe_2011_religion_universe_de_jure_2684115;heterogeneous_printed_parish_frame_19_to_23_categories_shipped_verbatim;printed_frame_19_categories_small_non_christian_groups_in_other;parish_other_absorbs_unbroken_small_group_residuals_by_source_design;no_religion_slot_printed_line_no_religious_affiliation_denomination;non_response_printed_line_not_reported_inside_denominator_outside_slots;single_wave_2011;religious_change_withheld;boundary_geoboundaries_jam_adm1_ccbysa20",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 2535
+        },
+        {
+          "label_verbatim": "Baptist",
+          "count": 3635
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 1019
+        },
+        {
+          "label_verbatim": "Church of God in Jamaica",
+          "count": 5008
+        },
+        {
+          "label_verbatim": "Church of God of Prophecy",
+          "count": 2306
+        },
+        {
+          "label_verbatim": "New Testament Church of God",
+          "count": 3170
+        },
+        {
+          "label_verbatim": "Other Church of God",
+          "count": 4998
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 1086
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 1150
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 357
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 12654
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 1300
+        },
+        {
+          "label_verbatim": "Revivalist",
+          "count": 1256
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 3602
+        },
+        {
+          "label_verbatim": "Seventh-Day Adventist",
+          "count": 5445
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 1587
+        },
+        {
+          "label_verbatim": "Other Religious Affiliation/Denomination",
+          "count": 1756
+        },
+        {
+          "label_verbatim": "No Religious Affiliation/Denomination",
+          "count": 28794
+        },
+        {
+          "label_verbatim": "Not Reported",
+          "count": 2948
+        }
+      ]
+    },
+    {
+      "country_code": "JM",
+      "boundary_set_id": "jm-parish-2011-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "jm-parish-2011-geoboundaries-adm1:JM-02",
+      "area_code": "JM-02",
+      "area_name": "Saint Andrew",
+      "year": 2011,
+      "population_total": 571194,
+      "population_total_basis": "2011 de jure religion universe from STATIN Vol 6 Table 5 ('Population by Sex and Religious Affiliation/Denomination, by Parish'), Total column. The parish denominator is the sum of all the parish's printed category lines, including the non-response line ('Not Reported'/'Not Stated'). The religion universe (2,684,115) sits slightly below the full 2011 de jure census population (2,697,983); the difference is a residual not carried in the religion tabulation.",
+      "religious_affiliation_count": 405729,
+      "religious_affiliation_percent": 71.0317,
+      "no_religion_count": 148025,
+      "no_religion_percent": 25.915,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 446.7565,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statin-jm-2011-vol6-table5-religion-parish",
+        "geoboundaries-jam-adm1"
+      ],
+      "quality_flag": "source_statin_2011_census_vol6_table5_religion_by_parish;universe_2011_religion_universe_de_jure_2684115;heterogeneous_printed_parish_frame_19_to_23_categories_shipped_verbatim;printed_frame_23_categories_bahai_hinduism_islam_judaism_broken_out;parish_other_absorbs_unbroken_small_group_residuals_by_source_design;no_religion_slot_printed_line_no_religion_denomination;non_response_printed_line_not_reported_inside_denominator_outside_slots;single_wave_2011;religious_change_withheld;boundary_geoboundaries_jam_adm1_ccbysa20",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 21580
+        },
+        {
+          "label_verbatim": "Baptist",
+          "count": 32331
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 8162
+        },
+        {
+          "label_verbatim": "Church of God in Jamaica",
+          "count": 43309
+        },
+        {
+          "label_verbatim": "Church of God of Prophecy",
+          "count": 18116
+        },
+        {
+          "label_verbatim": "New Testament Church of God",
+          "count": 32639
+        },
+        {
+          "label_verbatim": "Other Church of God",
+          "count": 41655
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 7711
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 10562
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 2277
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 59147
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 7629
+        },
+        {
+          "label_verbatim": "Revivalist",
+          "count": 6861
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 28058
+        },
+        {
+          "label_verbatim": "Seventh-Day Adventist",
+          "count": 51140
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 11779
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 109
+        },
+        {
+          "label_verbatim": "Hinduism",
+          "count": 967
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 483
+        },
+        {
+          "label_verbatim": "Judaism",
+          "count": 326
+        },
+        {
+          "label_verbatim": "Other Religion/Denomination",
+          "count": 20888
+        },
+        {
+          "label_verbatim": "No Religion/Denomination",
+          "count": 148025
+        },
+        {
+          "label_verbatim": "Not Reported",
+          "count": 17440
+        }
+      ]
+    },
+    {
+      "country_code": "JM",
+      "boundary_set_id": "jm-parish-2011-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "jm-parish-2011-geoboundaries-adm1:JM-03",
+      "area_code": "JM-03",
+      "area_name": "Saint Thomas",
+      "year": 2011,
+      "population_total": 93742,
+      "population_total_basis": "2011 de jure religion universe from STATIN Vol 6 Table 5 ('Population by Sex and Religious Affiliation/Denomination, by Parish'), Total column. The parish denominator is the sum of all the parish's printed category lines, including the non-response line ('Not Reported'/'Not Stated'). The religion universe (2,684,115) sits slightly below the full 2011 de jure census population (2,697,983); the difference is a residual not carried in the religion tabulation.",
+      "religious_affiliation_count": 70092,
+      "religious_affiliation_percent": 74.7712,
+      "no_religion_count": 21155,
+      "no_religion_percent": 22.5673,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 733.4011,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statin-jm-2011-vol6-table5-religion-parish",
+        "geoboundaries-jam-adm1"
+      ],
+      "quality_flag": "source_statin_2011_census_vol6_table5_religion_by_parish;universe_2011_religion_universe_de_jure_2684115;heterogeneous_printed_parish_frame_19_to_23_categories_shipped_verbatim;printed_frame_19_categories_small_non_christian_groups_in_other;parish_other_absorbs_unbroken_small_group_residuals_by_source_design;no_religion_slot_printed_line_no_religion_denomination;non_response_printed_line_not_reported_inside_denominator_outside_slots;single_wave_2011;religious_change_withheld;boundary_geoboundaries_jam_adm1_ccbysa20",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 1624
+        },
+        {
+          "label_verbatim": "Baptist",
+          "count": 8048
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 424
+        },
+        {
+          "label_verbatim": "Church of God in Jamaica",
+          "count": 3174
+        },
+        {
+          "label_verbatim": "Church of God of Prophecy",
+          "count": 5860
+        },
+        {
+          "label_verbatim": "New Testament Church of God",
+          "count": 4565
+        },
+        {
+          "label_verbatim": "Other Church of God",
+          "count": 12720
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 1705
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 2709
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 37
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 9247
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 1365
+        },
+        {
+          "label_verbatim": "Revivalist",
+          "count": 3355
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 865
+        },
+        {
+          "label_verbatim": "Seventh-Day Adventist",
+          "count": 9614
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 454
+        },
+        {
+          "label_verbatim": "Other Religion/Denomination",
+          "count": 4326
+        },
+        {
+          "label_verbatim": "No Religion/Denomination",
+          "count": 21155
+        },
+        {
+          "label_verbatim": "Not Reported",
+          "count": 2495
+        }
+      ]
+    },
+    {
+      "country_code": "JM",
+      "boundary_set_id": "jm-parish-2011-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "jm-parish-2011-geoboundaries-adm1:JM-04",
+      "area_code": "JM-04",
+      "area_name": "Portland",
+      "year": 2011,
+      "population_total": 81566,
+      "population_total_basis": "2011 de jure religion universe from STATIN Vol 6 Table 5 ('Population by Sex and Religious Affiliation/Denomination, by Parish'), Total column. The parish denominator is the sum of all the parish's printed category lines, including the non-response line ('Not Reported'/'Not Stated'). The religion universe (2,684,115) sits slightly below the full 2011 de jure census population (2,697,983); the difference is a residual not carried in the religion tabulation.",
+      "religious_affiliation_count": 62321,
+      "religious_affiliation_percent": 76.4056,
+      "no_religion_count": 18248,
+      "no_religion_percent": 22.3721,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 839.3172,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statin-jm-2011-vol6-table5-religion-parish",
+        "geoboundaries-jam-adm1"
+      ],
+      "quality_flag": "source_statin_2011_census_vol6_table5_religion_by_parish;universe_2011_religion_universe_de_jure_2684115;heterogeneous_printed_parish_frame_19_to_23_categories_shipped_verbatim;printed_frame_19_categories_small_non_christian_groups_in_other;parish_other_absorbs_unbroken_small_group_residuals_by_source_design;no_religion_slot_printed_line_no_religious_affiliation_denomination;non_response_printed_line_not_reported_inside_denominator_outside_slots;single_wave_2011;religious_change_withheld;boundary_geoboundaries_jam_adm1_ccbysa20",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 2633
+        },
+        {
+          "label_verbatim": "Baptist",
+          "count": 5632
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 487
+        },
+        {
+          "label_verbatim": "Church of God in Jamaica",
+          "count": 2257
+        },
+        {
+          "label_verbatim": "Church of God of Prophecy",
+          "count": 3123
+        },
+        {
+          "label_verbatim": "New Testament Church of God",
+          "count": 5919
+        },
+        {
+          "label_verbatim": "Other Church of God",
+          "count": 6475
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 1808
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 1611
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 34
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 6899
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 1126
+        },
+        {
+          "label_verbatim": "Revivalist",
+          "count": 1976
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 707
+        },
+        {
+          "label_verbatim": "Seventh-Day Adventist",
+          "count": 14198
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 1611
+        },
+        {
+          "label_verbatim": "Other Religious Affiliation/Denomination",
+          "count": 5825
+        },
+        {
+          "label_verbatim": "No Religious Affiliation/Denomination",
+          "count": 18248
+        },
+        {
+          "label_verbatim": "Not Reported",
+          "count": 997
+        }
+      ]
+    },
+    {
+      "country_code": "JM",
+      "boundary_set_id": "jm-parish-2011-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "jm-parish-2011-geoboundaries-adm1:JM-05",
+      "area_code": "JM-05",
+      "area_name": "Saint Mary",
+      "year": 2011,
+      "population_total": 113172,
+      "population_total_basis": "2011 de jure religion universe from STATIN Vol 6 Table 5 ('Population by Sex and Religious Affiliation/Denomination, by Parish'), Total column. The parish denominator is the sum of all the parish's printed category lines, including the non-response line ('Not Reported'/'Not Stated'). The religion universe (2,684,115) sits slightly below the full 2011 de jure census population (2,697,983); the difference is a residual not carried in the religion tabulation.",
+      "religious_affiliation_count": 85005,
+      "religious_affiliation_percent": 75.1113,
+      "no_religion_count": 25872,
+      "no_religion_percent": 22.8608,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 623.5644,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statin-jm-2011-vol6-table5-religion-parish",
+        "geoboundaries-jam-adm1"
+      ],
+      "quality_flag": "source_statin_2011_census_vol6_table5_religion_by_parish;universe_2011_religion_universe_de_jure_2684115;heterogeneous_printed_parish_frame_19_to_23_categories_shipped_verbatim;printed_frame_19_categories_small_non_christian_groups_in_other;parish_other_absorbs_unbroken_small_group_residuals_by_source_design;no_religion_slot_printed_line_no_religious_affiliation_denomination;non_response_printed_line_not_reported_inside_denominator_outside_slots;single_wave_2011;religious_change_withheld;boundary_geoboundaries_jam_adm1_ccbysa20",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 2901
+        },
+        {
+          "label_verbatim": "Baptist",
+          "count": 7545
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 1404
+        },
+        {
+          "label_verbatim": "Church of God in Jamaica",
+          "count": 3557
+        },
+        {
+          "label_verbatim": "Church of God of Prophecy",
+          "count": 3749
+        },
+        {
+          "label_verbatim": "New Testament Church of God",
+          "count": 5425
+        },
+        {
+          "label_verbatim": "Other Church of God",
+          "count": 11721
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 2188
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 1710
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 49
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 11458
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 1317
+        },
+        {
+          "label_verbatim": "Revivalist",
+          "count": 1769
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 2388
+        },
+        {
+          "label_verbatim": "Seventh-Day Adventist",
+          "count": 16937
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 4880
+        },
+        {
+          "label_verbatim": "Other Religious Affiliation/Denomination",
+          "count": 6007
+        },
+        {
+          "label_verbatim": "No Religious Affiliation/Denomination",
+          "count": 25872
+        },
+        {
+          "label_verbatim": "Not Reported",
+          "count": 2295
+        }
+      ]
+    },
+    {
+      "country_code": "JM",
+      "boundary_set_id": "jm-parish-2011-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "jm-parish-2011-geoboundaries-adm1:JM-06",
+      "area_code": "JM-06",
+      "area_name": "Saint Ann",
+      "year": 2011,
+      "population_total": 171740,
+      "population_total_basis": "2011 de jure religion universe from STATIN Vol 6 Table 5 ('Population by Sex and Religious Affiliation/Denomination, by Parish'), Total column. The parish denominator is the sum of all the parish's printed category lines, including the non-response line ('Not Reported'/'Not Stated'). The religion universe (2,684,115) sits slightly below the full 2011 de jure census population (2,697,983); the difference is a residual not carried in the religion tabulation.",
+      "religious_affiliation_count": 143214,
+      "religious_affiliation_percent": 83.39,
+      "no_religion_count": 24506,
+      "no_religion_percent": 14.2692,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 1252.0109,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statin-jm-2011-vol6-table5-religion-parish",
+        "geoboundaries-jam-adm1"
+      ],
+      "quality_flag": "source_statin_2011_census_vol6_table5_religion_by_parish;universe_2011_religion_universe_de_jure_2684115;heterogeneous_printed_parish_frame_19_to_23_categories_shipped_verbatim;printed_frame_19_categories_small_non_christian_groups_in_other;parish_other_absorbs_unbroken_small_group_residuals_by_source_design;no_religion_slot_printed_line_no_religious_affiliation_denomination;non_response_printed_line_not_reported_inside_denominator_outside_slots;single_wave_2011;religious_change_withheld;boundary_geoboundaries_jam_adm1_ccbysa20",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 4093
+        },
+        {
+          "label_verbatim": "Baptist",
+          "count": 16115
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 753
+        },
+        {
+          "label_verbatim": "Church of God in Jamaica",
+          "count": 4694
+        },
+        {
+          "label_verbatim": "Church of God of Prophecy",
+          "count": 9740
+        },
+        {
+          "label_verbatim": "New Testament Church of God",
+          "count": 17051
+        },
+        {
+          "label_verbatim": "Other Church of God",
+          "count": 12656
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 4471
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 6521
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 242
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 31571
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 1580
+        },
+        {
+          "label_verbatim": "Revivalist",
+          "count": 1159
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 1927
+        },
+        {
+          "label_verbatim": "Seventh-Day Adventist",
+          "count": 16804
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 2379
+        },
+        {
+          "label_verbatim": "Other Religious Affiliation/Denomination",
+          "count": 11458
+        },
+        {
+          "label_verbatim": "No Religious Affiliation/Denomination",
+          "count": 24506
+        },
+        {
+          "label_verbatim": "Not Reported",
+          "count": 4020
+        }
+      ]
+    },
+    {
+      "country_code": "JM",
+      "boundary_set_id": "jm-parish-2011-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "jm-parish-2011-geoboundaries-adm1:JM-07",
+      "area_code": "JM-07",
+      "area_name": "Trelawny",
+      "year": 2011,
+      "population_total": 74991,
+      "population_total_basis": "2011 de jure religion universe from STATIN Vol 6 Table 5 ('Population by Sex and Religious Affiliation/Denomination, by Parish'), Total column. The parish denominator is the sum of all the parish's printed category lines, including the non-response line ('Not Reported'/'Not Stated'). The religion universe (2,684,115) sits slightly below the full 2011 de jure census population (2,697,983); the difference is a residual not carried in the religion tabulation.",
+      "religious_affiliation_count": 60412,
+      "religious_affiliation_percent": 80.559,
+      "no_religion_count": 12955,
+      "no_religion_percent": 17.2754,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 903.0021,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statin-jm-2011-vol6-table5-religion-parish",
+        "geoboundaries-jam-adm1"
+      ],
+      "quality_flag": "source_statin_2011_census_vol6_table5_religion_by_parish;universe_2011_religion_universe_de_jure_2684115;heterogeneous_printed_parish_frame_19_to_23_categories_shipped_verbatim;printed_frame_19_categories_small_non_christian_groups_in_other;parish_other_absorbs_unbroken_small_group_residuals_by_source_design;no_religion_slot_printed_line_no_religion_denomination;non_response_printed_line_not_reported_inside_denominator_outside_slots;single_wave_2011;religious_change_withheld;boundary_geoboundaries_jam_adm1_ccbysa20",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 3119
+        },
+        {
+          "label_verbatim": "Baptist",
+          "count": 9145
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 444
+        },
+        {
+          "label_verbatim": "Church of God in Jamaica",
+          "count": 830
+        },
+        {
+          "label_verbatim": "Church of God of Prophecy",
+          "count": 1655
+        },
+        {
+          "label_verbatim": "New Testament Church of God",
+          "count": 9489
+        },
+        {
+          "label_verbatim": "Other Church of God",
+          "count": 3640
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 1780
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 1630
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 31
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 11406
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 802
+        },
+        {
+          "label_verbatim": "Revivalist",
+          "count": 1166
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 470
+        },
+        {
+          "label_verbatim": "Seventh-Day Adventist",
+          "count": 9171
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 1983
+        },
+        {
+          "label_verbatim": "Other Religion/Denomination",
+          "count": 3651
+        },
+        {
+          "label_verbatim": "No Religion/Denomination",
+          "count": 12955
+        },
+        {
+          "label_verbatim": "Not Reported",
+          "count": 1624
+        }
+      ]
+    },
+    {
+      "country_code": "JM",
+      "boundary_set_id": "jm-parish-2011-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "jm-parish-2011-geoboundaries-adm1:JM-08",
+      "area_code": "JM-08",
+      "area_name": "Saint James",
+      "year": 2011,
+      "population_total": 182820,
+      "population_total_basis": "2011 de jure religion universe from STATIN Vol 6 Table 5 ('Population by Sex and Religious Affiliation/Denomination, by Parish'), Total column. The parish denominator is the sum of all the parish's printed category lines, including the non-response line ('Not Reported'/'Not Stated'). The religion universe (2,684,115) sits slightly below the full 2011 de jure census population (2,697,983); the difference is a residual not carried in the religion tabulation.",
+      "religious_affiliation_count": 140838,
+      "religious_affiliation_percent": 77.0364,
+      "no_religion_count": 37989,
+      "no_religion_percent": 20.7795,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 604.2922,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statin-jm-2011-vol6-table5-religion-parish",
+        "geoboundaries-jam-adm1"
+      ],
+      "quality_flag": "source_statin_2011_census_vol6_table5_religion_by_parish;universe_2011_religion_universe_de_jure_2684115;heterogeneous_printed_parish_frame_19_to_23_categories_shipped_verbatim;printed_frame_20_categories_hinduism_broken_out_remaining_small_groups_in_other;parish_other_absorbs_unbroken_small_group_residuals_by_source_design;no_religion_slot_printed_line_no_religious_affiliation_denomination;non_response_printed_line_not_reported_inside_denominator_outside_slots;single_wave_2011;religious_change_withheld;boundary_geoboundaries_jam_adm1_ccbysa20",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 3609
+        },
+        {
+          "label_verbatim": "Baptist",
+          "count": 16292
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 970
+        },
+        {
+          "label_verbatim": "Church of God in Jamaica",
+          "count": 3937
+        },
+        {
+          "label_verbatim": "Church of God of Prophecy",
+          "count": 3561
+        },
+        {
+          "label_verbatim": "New Testament Church of God",
+          "count": 11925
+        },
+        {
+          "label_verbatim": "Other Church of God",
+          "count": 11558
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 5766
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 1801
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 583
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 25406
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 1726
+        },
+        {
+          "label_verbatim": "Revivalist",
+          "count": 1708
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 2315
+        },
+        {
+          "label_verbatim": "Seventh-Day Adventist",
+          "count": 37255
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 2722
+        },
+        {
+          "label_verbatim": "Hinduism",
+          "count": 387
+        },
+        {
+          "label_verbatim": "Other Religious Affiliation/Denomination",
+          "count": 9317
+        },
+        {
+          "label_verbatim": "No Religious Affiliation/Denomination",
+          "count": 37989
+        },
+        {
+          "label_verbatim": "Not Reported",
+          "count": 3993
+        }
+      ]
+    },
+    {
+      "country_code": "JM",
+      "boundary_set_id": "jm-parish-2011-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "jm-parish-2011-geoboundaries-adm1:JM-09",
+      "area_code": "JM-09",
+      "area_name": "Hanover",
+      "year": 2011,
+      "population_total": 69398,
+      "population_total_basis": "2011 de jure religion universe from STATIN Vol 6 Table 5 ('Population by Sex and Religious Affiliation/Denomination, by Parish'), Total column. The parish denominator is the sum of all the parish's printed category lines, including the non-response line ('Not Reported'/'Not Stated'). The religion universe (2,684,115) sits slightly below the full 2011 de jure census population (2,697,983); the difference is a residual not carried in the religion tabulation.",
+      "religious_affiliation_count": 53136,
+      "religious_affiliation_percent": 76.567,
+      "no_religion_count": 14751,
+      "no_religion_percent": 21.2557,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 464.7748,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statin-jm-2011-vol6-table5-religion-parish",
+        "geoboundaries-jam-adm1"
+      ],
+      "quality_flag": "source_statin_2011_census_vol6_table5_religion_by_parish;universe_2011_religion_universe_de_jure_2684115;heterogeneous_printed_parish_frame_19_to_23_categories_shipped_verbatim;printed_frame_19_categories_small_non_christian_groups_in_other;parish_other_absorbs_unbroken_small_group_residuals_by_source_design;no_religion_slot_printed_line_no_religious_affiliation_denomination;non_response_printed_line_not_reported_inside_denominator_outside_slots;single_wave_2011;religious_change_withheld;boundary_geoboundaries_jam_adm1_ccbysa20",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 1184
+        },
+        {
+          "label_verbatim": "Baptist",
+          "count": 4495
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 41
+        },
+        {
+          "label_verbatim": "Church of God in Jamaica",
+          "count": 997
+        },
+        {
+          "label_verbatim": "Church of God of Prophecy",
+          "count": 1301
+        },
+        {
+          "label_verbatim": "New Testament Church of God",
+          "count": 7383
+        },
+        {
+          "label_verbatim": "Other Church of God",
+          "count": 3555
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 2195
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 1671
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 35
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 4649
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 864
+        },
+        {
+          "label_verbatim": "Revivalist",
+          "count": 681
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 540
+        },
+        {
+          "label_verbatim": "Seventh-Day Adventist",
+          "count": 14414
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 3387
+        },
+        {
+          "label_verbatim": "Other Religious Affiliation/Denomination",
+          "count": 5744
+        },
+        {
+          "label_verbatim": "No Religious Affiliation/Denomination",
+          "count": 14751
+        },
+        {
+          "label_verbatim": "Not Reported",
+          "count": 1511
+        }
+      ]
+    },
+    {
+      "country_code": "JM",
+      "boundary_set_id": "jm-parish-2011-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "jm-parish-2011-geoboundaries-adm1:JM-10",
+      "area_code": "JM-10",
+      "area_name": "Westmoreland",
+      "year": 2011,
+      "population_total": 143847,
+      "population_total_basis": "2011 de jure religion universe from STATIN Vol 6 Table 5 ('Population by Sex and Religious Affiliation/Denomination, by Parish'), Total column. The parish denominator is the sum of all the parish's printed category lines, including the non-response line ('Not Reported'/'Not Stated'). The religion universe (2,684,115) sits slightly below the full 2011 de jure census population (2,697,983); the difference is a residual not carried in the religion tabulation.",
+      "religious_affiliation_count": 111789,
+      "religious_affiliation_percent": 77.7138,
+      "no_religion_count": 29155,
+      "no_religion_percent": 20.2681,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 761.0339,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statin-jm-2011-vol6-table5-religion-parish",
+        "geoboundaries-jam-adm1"
+      ],
+      "quality_flag": "source_statin_2011_census_vol6_table5_religion_by_parish;universe_2011_religion_universe_de_jure_2684115;heterogeneous_printed_parish_frame_19_to_23_categories_shipped_verbatim;printed_frame_19_categories_small_non_christian_groups_in_other;parish_other_absorbs_unbroken_small_group_residuals_by_source_design;no_religion_slot_printed_line_no_religious_affiliation_denomination;non_response_printed_line_not_stated_inside_denominator_outside_slots;single_wave_2011;religious_change_withheld;boundary_geoboundaries_jam_adm1_ccbysa20",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 4370
+        },
+        {
+          "label_verbatim": "Baptist",
+          "count": 7292
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 255
+        },
+        {
+          "label_verbatim": "Church of God in Jamaica",
+          "count": 2684
+        },
+        {
+          "label_verbatim": "Church of God of Prophecy",
+          "count": 4687
+        },
+        {
+          "label_verbatim": "New Testament Church of God",
+          "count": 12255
+        },
+        {
+          "label_verbatim": "Other Church of God",
+          "count": 9663
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 2804
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 1600
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 1597
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 15776
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 1534
+        },
+        {
+          "label_verbatim": "Revivalist",
+          "count": 2326
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 2754
+        },
+        {
+          "label_verbatim": "Seventh-Day Adventist",
+          "count": 21440
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 3036
+        },
+        {
+          "label_verbatim": "Other Religious Affiliation/Denomination",
+          "count": 17716
+        },
+        {
+          "label_verbatim": "No Religious Affiliation/Denomination",
+          "count": 29155
+        },
+        {
+          "label_verbatim": "Not Stated",
+          "count": 2903
+        }
+      ]
+    },
+    {
+      "country_code": "JM",
+      "boundary_set_id": "jm-parish-2011-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "jm-parish-2011-geoboundaries-adm1:JM-11",
+      "area_code": "JM-11",
+      "area_name": "Saint Elizabeth",
+      "year": 2011,
+      "population_total": 150025,
+      "population_total_basis": "2011 de jure religion universe from STATIN Vol 6 Table 5 ('Population by Sex and Religious Affiliation/Denomination, by Parish'), Total column. The parish denominator is the sum of all the parish's printed category lines, including the non-response line ('Not Reported'/'Not Stated'). The religion universe (2,684,115) sits slightly below the full 2011 de jure census population (2,697,983); the difference is a residual not carried in the religion tabulation.",
+      "religious_affiliation_count": 116673,
+      "religious_affiliation_percent": 77.769,
+      "no_religion_count": 31359,
+      "no_religion_percent": 20.9025,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 1160.8801,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statin-jm-2011-vol6-table5-religion-parish",
+        "geoboundaries-jam-adm1"
+      ],
+      "quality_flag": "source_statin_2011_census_vol6_table5_religion_by_parish;universe_2011_religion_universe_de_jure_2684115;heterogeneous_printed_parish_frame_19_to_23_categories_shipped_verbatim;printed_frame_19_categories_small_non_christian_groups_in_other;parish_other_absorbs_unbroken_small_group_residuals_by_source_design;no_religion_slot_printed_line_no_religious_affiliation_denomination;non_response_printed_line_not_stated_inside_denominator_outside_slots;single_wave_2011;religious_change_withheld;boundary_geoboundaries_jam_adm1_ccbysa20",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 7227
+        },
+        {
+          "label_verbatim": "Baptist",
+          "count": 9787
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 3593
+        },
+        {
+          "label_verbatim": "Church of God in Jamaica",
+          "count": 5195
+        },
+        {
+          "label_verbatim": "Church of God of Prophecy",
+          "count": 5601
+        },
+        {
+          "label_verbatim": "New Testament Church of God",
+          "count": 8798
+        },
+        {
+          "label_verbatim": "Other Church of God",
+          "count": 11511
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 2575
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 2517
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 4700
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 20635
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 1223
+        },
+        {
+          "label_verbatim": "Revivalist",
+          "count": 2070
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 1283
+        },
+        {
+          "label_verbatim": "Seventh-Day Adventist",
+          "count": 20856
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 2067
+        },
+        {
+          "label_verbatim": "Other Religious Affiliation/Denomination",
+          "count": 7035
+        },
+        {
+          "label_verbatim": "No Religious Affiliation/Denomination",
+          "count": 31359
+        },
+        {
+          "label_verbatim": "Not Stated",
+          "count": 1993
+        }
+      ]
+    },
+    {
+      "country_code": "JM",
+      "boundary_set_id": "jm-parish-2011-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "jm-parish-2011-geoboundaries-adm1:JM-12",
+      "area_code": "JM-12",
+      "area_name": "Manchester",
+      "year": 2011,
+      "population_total": 188826,
+      "population_total_basis": "2011 de jure religion universe from STATIN Vol 6 Table 5 ('Population by Sex and Religious Affiliation/Denomination, by Parish'), Total column. The parish denominator is the sum of all the parish's printed category lines, including the non-response line ('Not Reported'/'Not Stated'). The religion universe (2,684,115) sits slightly below the full 2011 de jure census population (2,697,983); the difference is a residual not carried in the religion tabulation.",
+      "religious_affiliation_count": 163508,
+      "religious_affiliation_percent": 86.5919,
+      "no_religion_count": 22343,
+      "no_religion_percent": 11.8326,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 857.645,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statin-jm-2011-vol6-table5-religion-parish",
+        "geoboundaries-jam-adm1"
+      ],
+      "quality_flag": "source_statin_2011_census_vol6_table5_religion_by_parish;universe_2011_religion_universe_de_jure_2684115;heterogeneous_printed_parish_frame_19_to_23_categories_shipped_verbatim;printed_frame_19_categories_small_non_christian_groups_in_other;parish_other_absorbs_unbroken_small_group_residuals_by_source_design;no_religion_slot_printed_line_none;non_response_printed_line_not_stated_inside_denominator_outside_slots;single_wave_2011;religious_change_withheld;boundary_geoboundaries_jam_adm1_ccbysa20",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 6054
+        },
+        {
+          "label_verbatim": "Baptist",
+          "count": 8271
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 1815
+        },
+        {
+          "label_verbatim": "Church of God in Jamaica",
+          "count": 9075
+        },
+        {
+          "label_verbatim": "Church of God of Prophecy",
+          "count": 14058
+        },
+        {
+          "label_verbatim": "New Testament Church of God",
+          "count": 15292
+        },
+        {
+          "label_verbatim": "Other Church of God",
+          "count": 16869
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 3806
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 1516
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 6566
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 24734
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 1514
+        },
+        {
+          "label_verbatim": "Revivalist",
+          "count": 1881
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 2015
+        },
+        {
+          "label_verbatim": "Seventh-Day Adventist",
+          "count": 27762
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 8765
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 13515
+        },
+        {
+          "label_verbatim": "None",
+          "count": 22343
+        },
+        {
+          "label_verbatim": "Not Stated",
+          "count": 2975
+        }
+      ]
+    },
+    {
+      "country_code": "JM",
+      "boundary_set_id": "jm-parish-2011-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "jm-parish-2011-geoboundaries-adm1:JM-13",
+      "area_code": "JM-13",
+      "area_name": "Clarendon",
+      "year": 2011,
+      "population_total": 244655,
+      "population_total_basis": "2011 de jure religion universe from STATIN Vol 6 Table 5 ('Population by Sex and Religious Affiliation/Denomination, by Parish'), Total column. The parish denominator is the sum of all the parish's printed category lines, including the non-response line ('Not Reported'/'Not Stated'). The religion universe (2,684,115) sits slightly below the full 2011 de jure census population (2,697,983); the difference is a residual not carried in the religion tabulation.",
+      "religious_affiliation_count": 204189,
+      "religious_affiliation_percent": 83.46,
+      "no_religion_count": 36469,
+      "no_religion_percent": 14.9063,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 1135.3303,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statin-jm-2011-vol6-table5-religion-parish",
+        "geoboundaries-jam-adm1"
+      ],
+      "quality_flag": "source_statin_2011_census_vol6_table5_religion_by_parish;universe_2011_religion_universe_de_jure_2684115;heterogeneous_printed_parish_frame_19_to_23_categories_shipped_verbatim;printed_frame_19_categories_small_non_christian_groups_in_other;parish_other_absorbs_unbroken_small_group_residuals_by_source_design;no_religion_slot_printed_line_none;non_response_printed_line_not_stated_inside_denominator_outside_slots;single_wave_2011;religious_change_withheld;boundary_geoboundaries_jam_adm1_ccbysa20",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 4183
+        },
+        {
+          "label_verbatim": "Baptist",
+          "count": 19756
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 1694
+        },
+        {
+          "label_verbatim": "Church of God in Jamaica",
+          "count": 11883
+        },
+        {
+          "label_verbatim": "Church of God of Prophecy",
+          "count": 20040
+        },
+        {
+          "label_verbatim": "New Testament Church of God",
+          "count": 29510
+        },
+        {
+          "label_verbatim": "Other Church of God",
+          "count": 40653
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 3751
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 2666
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 631
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 22661
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 2496
+        },
+        {
+          "label_verbatim": "Revivalist",
+          "count": 4701
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 1519
+        },
+        {
+          "label_verbatim": "Seventh-Day Adventist",
+          "count": 20467
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 6007
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 11571
+        },
+        {
+          "label_verbatim": "None",
+          "count": 36469
+        },
+        {
+          "label_verbatim": "Not Stated",
+          "count": 3997
+        }
+      ]
+    },
+    {
+      "country_code": "JM",
+      "boundary_set_id": "jm-parish-2011-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "jm-parish-2011-geoboundaries-adm1:JM-14",
+      "area_code": "JM-14",
+      "area_name": "Saint Catherine",
+      "year": 2011,
+      "population_total": 513533,
+      "population_total_basis": "2011 de jure religion universe from STATIN Vol 6 Table 5 ('Population by Sex and Religious Affiliation/Denomination, by Parish'), Total column. The parish denominator is the sum of all the parish's printed category lines, including the non-response line ('Not Reported'/'Not Stated'). The religion universe (2,684,115) sits slightly below the full 2011 de jure census population (2,697,983); the difference is a residual not carried in the religion tabulation.",
+      "religious_affiliation_count": 380989,
+      "religious_affiliation_percent": 74.1898,
+      "no_religion_count": 120361,
+      "no_religion_percent": 23.4378,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 1206.3342,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statin-jm-2011-vol6-table5-religion-parish",
+        "geoboundaries-jam-adm1"
+      ],
+      "quality_flag": "source_statin_2011_census_vol6_table5_religion_by_parish;universe_2011_religion_universe_de_jure_2684115;heterogeneous_printed_parish_frame_19_to_23_categories_shipped_verbatim;printed_frame_20_categories_islam_broken_out_remaining_small_groups_in_other;parish_other_absorbs_unbroken_small_group_residuals_by_source_design;no_religion_slot_printed_line_none;non_response_printed_line_not_stated_inside_denominator_outside_slots;single_wave_2011;religious_change_withheld;boundary_geoboundaries_jam_adm1_ccbysa20",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 10031
+        },
+        {
+          "label_verbatim": "Baptist",
+          "count": 32368
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 3067
+        },
+        {
+          "label_verbatim": "Church of God in Jamaica",
+          "count": 32940
+        },
+        {
+          "label_verbatim": "Church of God of Prophecy",
+          "count": 27457
+        },
+        {
+          "label_verbatim": "New Testament Church of God",
+          "count": 28707
+        },
+        {
+          "label_verbatim": "Other Church of God",
+          "count": 59617
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 9208
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 5723
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 1219
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 63487
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 4564
+        },
+        {
+          "label_verbatim": "Revivalist",
+          "count": 5504
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 9639
+        },
+        {
+          "label_verbatim": "Seventh-Day Adventist",
+          "count": 56758
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 5677
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 371
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 24652
+        },
+        {
+          "label_verbatim": "None",
+          "count": 120361
+        },
+        {
+          "label_verbatim": "Not Stated",
+          "count": 12183
+        }
+      ]
+    }
+  ]
+}
