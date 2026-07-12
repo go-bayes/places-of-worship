@@ -255,6 +255,15 @@ basis_2024 <- paste(
   "at commune level. Denominator is the printed commune total_r. Affiliation =",
   "total_r - Ninguna - 'No declara religion'.")
 
+# the four 2004-parent communes: their 2002 record combines the later-created
+# child (Iquique+Alto Hospicio, Talcahuano+Hualpen, Santa Barbara+Alto Biobio,
+# Nueva Imperial+Cholchol), and the 2024 record excludes it. the change pair is
+# a different universe, and the record withholds change on those pairs; the
+# token carries the change_withheld substring so the runtime's blanket guard
+# nulls the change metric on the parents (and the null 2002 children null via
+# the finite-operand guard).
+parents_2004 <- c("1101", "8110", "8311", "9111")
+
 # build one schema-shaped row for a commune-wave, or a null-data row (2002 gaps).
 make_row <- function(cut, year, rec, region_name, land_area) {
   basis <- if (year == 2002L) basis_2002 else basis_2024
@@ -293,7 +302,11 @@ make_row <- function(cut, year, rec, region_name, land_area) {
     place_density_per_sq_km = NULL, land_area_sq_km = unname(round(land_area, 4)),
     site_snapshot_date = NULL, place_count_basis = NULL,
     source_dataset_ids = list(d_census, d_boundary),
-    quality_flag = paste0(flag_common, ";source_region=", region_name,
+    quality_flag = paste0(flag_common,
+                          if (cut %in% parents_2004)
+                            ";change_withheld_2004_reclassification_parent_2002_combines_later_child"
+                          else "",
+                          ";source_region=", region_name,
                           ";source_categories_verbatim=", breakdown))
 }
 

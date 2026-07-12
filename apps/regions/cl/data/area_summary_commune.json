@@ -154,7 +154,7 @@
         "cl-bcn-estadisticas-territoriales-101-religion-declarada-comuna",
         "ine-dpa-censal-comunas-simp16r"
       ],
-      "quality_flag": "census_affiliation;aged_15_plus_universe;single_select_reported_religion;bcn_harmonised_ten_category_frame;religious_affiliation_percent_is_total_minus_none_minus_no_declara;no_religion_percent_is_ninguna_line_only;no_declara_residual_in_denominator_neither_slot_2024_only;shares_over_total_r_ine_headline_uses_responder_base_no_declara_excluded;shares_need_not_sum_to_100;single_current_346_commune_frame_2002_recoded_by_cut_then_name;census_licence_cc_by_sa_4_0;source_region=REGIÓN DE TARAPACÁ;source_categories_verbatim=Católica=112855;Evangélica o Protestante=16693;Testigos de Jehová=2524;Judaica=76;Mormón=1997;Musulmana=205;Ortodoxa=44;Otro religión o credo=8550;Ninguna religión, ateo o agnóstico=13330;No declara religión=0"
+      "quality_flag": "census_affiliation;aged_15_plus_universe;single_select_reported_religion;bcn_harmonised_ten_category_frame;religious_affiliation_percent_is_total_minus_none_minus_no_declara;no_religion_percent_is_ninguna_line_only;no_declara_residual_in_denominator_neither_slot_2024_only;shares_over_total_r_ine_headline_uses_responder_base_no_declara_excluded;shares_need_not_sum_to_100;single_current_346_commune_frame_2002_recoded_by_cut_then_name;census_licence_cc_by_sa_4_0;change_withheld_2004_reclassification_parent_2002_combines_later_child;source_region=REGIÓN DE TARAPACÁ;source_categories_verbatim=Católica=112855;Evangélica o Protestante=16693;Testigos de Jehová=2524;Judaica=76;Mormón=1997;Musulmana=205;Ortodoxa=44;Otro religión o credo=8550;Ninguna religión, ateo o agnóstico=13330;No declara religión=0"
     },
     {
       "country_code": "CL",
@@ -180,7 +180,7 @@
         "cl-bcn-estadisticas-territoriales-101-religion-declarada-comuna",
         "ine-dpa-censal-comunas-simp16r"
       ],
-      "quality_flag": "census_affiliation;aged_15_plus_universe;single_select_reported_religion;bcn_harmonised_ten_category_frame;religious_affiliation_percent_is_total_minus_none_minus_no_declara;no_religion_percent_is_ninguna_line_only;no_declara_residual_in_denominator_neither_slot_2024_only;shares_over_total_r_ine_headline_uses_responder_base_no_declara_excluded;shares_need_not_sum_to_100;single_current_346_commune_frame_2002_recoded_by_cut_then_name;census_licence_cc_by_sa_4_0;source_region=REGIÓN DE TARAPACÁ;source_categories_verbatim=Católica=97841;Evangélica o Protestante=15635;Testigos de Jehová=1383;Judaica=213;Mormón=1174;Musulmana=753;Ortodoxa=0;Otro religión o credo=4597;Ninguna religión, ateo o agnóstico=38582;No declara religión=1664"
+      "quality_flag": "census_affiliation;aged_15_plus_universe;single_select_reported_religion;bcn_harmonised_ten_category_frame;religious_affiliation_percent_is_total_minus_none_minus_no_declara;no_religion_percent_is_ninguna_line_only;no_declara_residual_in_denominator_neither_slot_2024_only;shares_over_total_r_ine_headline_uses_responder_base_no_declara_excluded;shares_need_not_sum_to_100;single_current_346_commune_frame_2002_recoded_by_cut_then_name;census_licence_cc_by_sa_4_0;change_withheld_2004_reclassification_parent_2002_combines_later_child;source_region=REGIÓN DE TARAPACÁ;source_categories_verbatim=Católica=97841;Evangélica o Protestante=15635;Testigos de Jehová=1383;Judaica=213;Mormón=1174;Musulmana=753;Ortodoxa=0;Otro religión o credo=4597;Ninguna religión, ateo o agnóstico=38582;No declara religión=1664"
     },
     {
       "country_code": "CL",
@@ -7954,7 +7954,7 @@
         "cl-bcn-estadisticas-territoriales-101-religion-declarada-comuna",
         "ine-dpa-censal-comunas-simp16r"
       ],
-      "quality_flag": "census_affiliation;aged_15_plus_universe;single_select_reported_religion;bcn_harmonised_ten_category_frame;religious_affiliation_percent_is_total_minus_none_minus_no_declara;no_religion_percent_is_ninguna_line_only;no_declara_residual_in_denominator_neither_slot_2024_only;shares_over_total_r_ine_headline_uses_responder_base_no_declara_excluded;shares_need_not_sum_to_100;single_current_346_commune_frame_2002_recoded_by_cut_then_name;census_licence_cc_by_sa_4_0;source_region=REGIÓN DEL BIOBÍO;source_categories_verbatim=Católica=111379;Evangélica o Protestante=50308;Testigos de Jehová=1959;Judaica=58;Mormón=2728;Musulmana=16;Ortodoxa=31;Otro religión o credo=6248;Ninguna religión, ateo o agnóstico=15092;No declara religión=0"
+      "quality_flag": "census_affiliation;aged_15_plus_universe;single_select_reported_religion;bcn_harmonised_ten_category_frame;religious_affiliation_percent_is_total_minus_none_minus_no_declara;no_religion_percent_is_ninguna_line_only;no_declara_residual_in_denominator_neither_slot_2024_only;shares_over_total_r_ine_headline_uses_responder_base_no_declara_excluded;shares_need_not_sum_to_100;single_current_346_commune_frame_2002_recoded_by_cut_then_name;census_licence_cc_by_sa_4_0;change_withheld_2004_reclassification_parent_2002_combines_later_child;source_region=REGIÓN DEL BIOBÍO;source_categories_verbatim=Católica=111379;Evangélica o Protestante=50308;Testigos de Jehová=1959;Judaica=58;Mormón=2728;Musulmana=16;Ortodoxa=31;Otro religión o credo=6248;Ninguna religión, ateo o agnóstico=15092;No declara religión=0"
     },
     {
       "country_code": "CL",
@@ -7980,7 +7980,7 @@
         "cl-bcn-estadisticas-territoriales-101-religion-declarada-comuna",
         "ine-dpa-censal-comunas-simp16r"
       ],
-      "quality_flag": "census_affiliation;aged_15_plus_universe;single_select_reported_religion;bcn_harmonised_ten_category_frame;religious_affiliation_percent_is_total_minus_none_minus_no_declara;no_religion_percent_is_ninguna_line_only;no_declara_residual_in_denominator_neither_slot_2024_only;shares_over_total_r_ine_headline_uses_responder_base_no_declara_excluded;shares_need_not_sum_to_100;single_current_346_commune_frame_2002_recoded_by_cut_then_name;census_licence_cc_by_sa_4_0;source_region=REGIÓN DEL BIOBÍO;source_categories_verbatim=Católica=53103;Evangélica o Protestante=34726;Testigos de Jehová=888;Judaica=196;Mormón=1251;Musulmana=75;Ortodoxa=0;Otro religión o credo=1780;Ninguna religión, ateo o agnóstico=30766;No declara religión=259"
+      "quality_flag": "census_affiliation;aged_15_plus_universe;single_select_reported_religion;bcn_harmonised_ten_category_frame;religious_affiliation_percent_is_total_minus_none_minus_no_declara;no_religion_percent_is_ninguna_line_only;no_declara_residual_in_denominator_neither_slot_2024_only;shares_over_total_r_ine_headline_uses_responder_base_no_declara_excluded;shares_need_not_sum_to_100;single_current_346_commune_frame_2002_recoded_by_cut_then_name;census_licence_cc_by_sa_4_0;change_withheld_2004_reclassification_parent_2002_combines_later_child;source_region=REGIÓN DEL BIOBÍO;source_categories_verbatim=Católica=53103;Evangélica o Protestante=34726;Testigos de Jehová=888;Judaica=196;Mormón=1251;Musulmana=75;Ortodoxa=0;Otro religión o credo=1780;Ninguna religión, ateo o agnóstico=30766;No declara religión=259"
     },
     {
       "country_code": "CL",
@@ -8994,7 +8994,7 @@
         "cl-bcn-estadisticas-territoriales-101-religion-declarada-comuna",
         "ine-dpa-censal-comunas-simp16r"
       ],
-      "quality_flag": "census_affiliation;aged_15_plus_universe;single_select_reported_religion;bcn_harmonised_ten_category_frame;religious_affiliation_percent_is_total_minus_none_minus_no_declara;no_religion_percent_is_ninguna_line_only;no_declara_residual_in_denominator_neither_slot_2024_only;shares_over_total_r_ine_headline_uses_responder_base_no_declara_excluded;shares_need_not_sum_to_100;single_current_346_commune_frame_2002_recoded_by_cut_then_name;census_licence_cc_by_sa_4_0;source_region=REGIÓN DEL BIOBÍO;source_categories_verbatim=Católica=10819;Evangélica o Protestante=2259;Testigos de Jehová=70;Judaica=3;Mormón=87;Musulmana=6;Ortodoxa=0;Otro religión o credo=418;Ninguna religión, ateo o agnóstico=713;No declara religión=0"
+      "quality_flag": "census_affiliation;aged_15_plus_universe;single_select_reported_religion;bcn_harmonised_ten_category_frame;religious_affiliation_percent_is_total_minus_none_minus_no_declara;no_religion_percent_is_ninguna_line_only;no_declara_residual_in_denominator_neither_slot_2024_only;shares_over_total_r_ine_headline_uses_responder_base_no_declara_excluded;shares_need_not_sum_to_100;single_current_346_commune_frame_2002_recoded_by_cut_then_name;census_licence_cc_by_sa_4_0;change_withheld_2004_reclassification_parent_2002_combines_later_child;source_region=REGIÓN DEL BIOBÍO;source_categories_verbatim=Católica=10819;Evangélica o Protestante=2259;Testigos de Jehová=70;Judaica=3;Mormón=87;Musulmana=6;Ortodoxa=0;Otro religión o credo=418;Ninguna religión, ateo o agnóstico=713;No declara religión=0"
     },
     {
       "country_code": "CL",
@@ -9020,7 +9020,7 @@
         "cl-bcn-estadisticas-territoriales-101-religion-declarada-comuna",
         "ine-dpa-censal-comunas-simp16r"
       ],
-      "quality_flag": "census_affiliation;aged_15_plus_universe;single_select_reported_religion;bcn_harmonised_ten_category_frame;religious_affiliation_percent_is_total_minus_none_minus_no_declara;no_religion_percent_is_ninguna_line_only;no_declara_residual_in_denominator_neither_slot_2024_only;shares_over_total_r_ine_headline_uses_responder_base_no_declara_excluded;shares_need_not_sum_to_100;single_current_346_commune_frame_2002_recoded_by_cut_then_name;census_licence_cc_by_sa_4_0;source_region=REGIÓN DEL BIOBÍO;source_categories_verbatim=Católica=7543;Evangélica o Protestante=2172;Testigos de Jehová=74;Judaica=0;Mormón=91;Musulmana=0;Ortodoxa=0;Otro religión o credo=74;Ninguna religión, ateo o agnóstico=1590;No declara religión=22"
+      "quality_flag": "census_affiliation;aged_15_plus_universe;single_select_reported_religion;bcn_harmonised_ten_category_frame;religious_affiliation_percent_is_total_minus_none_minus_no_declara;no_religion_percent_is_ninguna_line_only;no_declara_residual_in_denominator_neither_slot_2024_only;shares_over_total_r_ine_headline_uses_responder_base_no_declara_excluded;shares_need_not_sum_to_100;single_current_346_commune_frame_2002_recoded_by_cut_then_name;census_licence_cc_by_sa_4_0;change_withheld_2004_reclassification_parent_2002_combines_later_child;source_region=REGIÓN DEL BIOBÍO;source_categories_verbatim=Católica=7543;Evangélica o Protestante=2172;Testigos de Jehová=74;Judaica=0;Mormón=91;Musulmana=0;Ortodoxa=0;Otro religión o credo=74;Ninguna religión, ateo o agnóstico=1590;No declara religión=22"
     },
     {
       "country_code": "CL",
@@ -9722,7 +9722,7 @@
         "cl-bcn-estadisticas-territoriales-101-religion-declarada-comuna",
         "ine-dpa-censal-comunas-simp16r"
       ],
-      "quality_flag": "census_affiliation;aged_15_plus_universe;single_select_reported_religion;bcn_harmonised_ten_category_frame;religious_affiliation_percent_is_total_minus_none_minus_no_declara;no_religion_percent_is_ninguna_line_only;no_declara_residual_in_denominator_neither_slot_2024_only;shares_over_total_r_ine_headline_uses_responder_base_no_declara_excluded;shares_need_not_sum_to_100;single_current_346_commune_frame_2002_recoded_by_cut_then_name;census_licence_cc_by_sa_4_0;source_region=REGIÓN DE LA ARAUCANÍA;source_categories_verbatim=Católica=17785;Evangélica o Protestante=8287;Testigos de Jehová=150;Judaica=17;Mormón=101;Musulmana=4;Ortodoxa=9;Otro religión o credo=1217;Ninguna religión, ateo o agnóstico=1402;No declara religión=0"
+      "quality_flag": "census_affiliation;aged_15_plus_universe;single_select_reported_religion;bcn_harmonised_ten_category_frame;religious_affiliation_percent_is_total_minus_none_minus_no_declara;no_religion_percent_is_ninguna_line_only;no_declara_residual_in_denominator_neither_slot_2024_only;shares_over_total_r_ine_headline_uses_responder_base_no_declara_excluded;shares_need_not_sum_to_100;single_current_346_commune_frame_2002_recoded_by_cut_then_name;census_licence_cc_by_sa_4_0;change_withheld_2004_reclassification_parent_2002_combines_later_child;source_region=REGIÓN DE LA ARAUCANÍA;source_categories_verbatim=Católica=17785;Evangélica o Protestante=8287;Testigos de Jehová=150;Judaica=17;Mormón=101;Musulmana=4;Ortodoxa=9;Otro religión o credo=1217;Ninguna religión, ateo o agnóstico=1402;No declara religión=0"
     },
     {
       "country_code": "CL",
@@ -9748,7 +9748,7 @@
         "cl-bcn-estadisticas-territoriales-101-religion-declarada-comuna",
         "ine-dpa-censal-comunas-simp16r"
       ],
-      "quality_flag": "census_affiliation;aged_15_plus_universe;single_select_reported_religion;bcn_harmonised_ten_category_frame;religious_affiliation_percent_is_total_minus_none_minus_no_declara;no_religion_percent_is_ninguna_line_only;no_declara_residual_in_denominator_neither_slot_2024_only;shares_over_total_r_ine_headline_uses_responder_base_no_declara_excluded;shares_need_not_sum_to_100;single_current_346_commune_frame_2002_recoded_by_cut_then_name;census_licence_cc_by_sa_4_0;source_region=REGIÓN DE LA ARAUCANÍA;source_categories_verbatim=Católica=12782;Evangélica o Protestante=8530;Testigos de Jehová=237;Judaica=0;Mormón=116;Musulmana=0;Ortodoxa=0;Otro religión o credo=313;Ninguna religión, ateo o agnóstico=5616;No declara religión=80"
+      "quality_flag": "census_affiliation;aged_15_plus_universe;single_select_reported_religion;bcn_harmonised_ten_category_frame;religious_affiliation_percent_is_total_minus_none_minus_no_declara;no_religion_percent_is_ninguna_line_only;no_declara_residual_in_denominator_neither_slot_2024_only;shares_over_total_r_ine_headline_uses_responder_base_no_declara_excluded;shares_need_not_sum_to_100;single_current_346_commune_frame_2002_recoded_by_cut_then_name;census_licence_cc_by_sa_4_0;change_withheld_2004_reclassification_parent_2002_combines_later_child;source_region=REGIÓN DE LA ARAUCANÍA;source_categories_verbatim=Católica=12782;Evangélica o Protestante=8530;Testigos de Jehová=237;Judaica=0;Mormón=116;Musulmana=0;Ortodoxa=0;Otro religión o credo=313;Ninguna religión, ateo o agnóstico=5616;No declara religión=80"
     },
     {
       "country_code": "CL",

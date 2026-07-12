@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Chile Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712b" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Chile's product is INE census religious affiliation by the 346 communes
+    // across two waves, 2002 and 2024, disseminated by the Biblioteca del
+    // Congreso Nacional (BCN Estadísticas Territoriales, theme 101 'Religión
+    // Declarada', sourced verbatim to the INE census). The universe is the
+    // population aged 15 and over in both waves; it rides on every surface.
+    // Religion was asked in the 2002 and 2024 censuses only: the 2012 census
+    // was annulled and the 2017 abbreviated census dropped the question, while
+    // 1992 (aged 5+) is a held universe break, not shipped.
+    //
+    // Chile has a real 'Ninguna religión, ateo o agnóstico' no-religion line,
+    // so the ordinary two-slot design applies: no_religion_percent is that line
+    // over the commune religion base (total_r); religious_affiliation_percent is
+    // (total_r minus Ninguna minus 'No declara religión') over total_r. The
+    // 2024-only 'No declara' non-response (national 87,515) stays in the
+    // denominator and in neither slot; the two shares therefore need not sum
+    // to 100.
+    // Defining affiliation as total minus none minus non-response folds in the
+    // INE-derived 'Otros cristianos' group (national residual 26,051 in 2024)
+    // the BCN ten-category commune frame does not column.
+    //
+    // Both waves ride the current 346-commune INE DPA frame. 2024 joins the
+    // boundary one-to-one by CUT. 2002 maps to the current frame by CUT (304
+    // communes) then by unique name (37 re-coded when Los Ríos, Arica y
+    // Parinacota, and Ñuble regions were created), leaving five communes null in
+    // 2002: four created in 2004 (Alto Hospicio, Hualpén, Alto Biobío, Cholchol),
+    // whose 2002 population sits inside their parent communes, and Puchuncaví,
+    // a genuine gap in the BCN 2002 series. Null 2002 cells render as no-data,
+    // never as zero, and no count is backcast or split.
+    //
+    // The change metric ships on the 341 comparable pairs. The four
+    // 2004-parent communes carry a combined 2002 count that includes their
+    // later-created children against a 2024 count that excludes them; the data
+    // product flags those rows change_withheld (conductor addition at the page
+    // gate), the runtime nulls their change, and the five 2002-null communes
+    // null via the finite-operand guard. The secularisation signal is the
+    // headline: national no religion rose from 8.3% in 2002 to 25.7% in 2024
+    // on the full religion base.
+    //
+    // Map-worthy pattern: no religion rises sharply and splits by region. The
+    // evangelical and secular south (Biobío, La Araucanía, Los Ríos, Ñuble)
+    // contrasts with strongly Catholic Coquimbo and the secular Metropolitana.
+    // The Roman Catholic share fell from 70.0% to 54.0% while Evangélica o
+    // Protestante rose from 15.1% to 16.3% across the pair.
+    //
+    // Licence accepted: INE CC BY-SA 4.0 (Reconocimiento-CompartirIgual 4.0).
+    // The share-alike notice is carried, and the page states that the mapped
+    // shares are the project's derivation, not INE's own analysis (Kosovo KAS
+    // precedent). Boundaries are the official INE DPA Censal commune layer
+    // (Comunas_Simp16R, 346 communes, CUT-coded), the same INE open-data
+    // licence. The Comuna Antártica polygon reaches -89 lat (the Chilean
+    // Antarctic claim, rendered as the official record); the continental camera
+    // below keeps it off the default frame (US Alaska precedent).
+    window.REGION_CONFIG = {
+      countryCode: "CL",
+      title: "Places of Worship | Chile Research Map",
+      // continental Chile is long and thin: mainland runs lat -17.5 (Arica) to
+      // about -56 (Cape Horn) across roughly lon -76..-66. The runtime uses this
+      // center/zoom directly and never auto-fits the boundary bbox; the far
+      // south Comuna Antártica (-89 lat) and Isla de Pascua (-109 lon) therefore
+      // sit off the default frame. z4 centred here fits the mainland north-south
+      // beside the census panels; reset returns here.
+      center: [-71.0, -38.0],
+      initialZoom: 4,
+      censusLevels: {
+        commune: {
+          label: "Commune (346 units)",
+          boundaries: "data/cl_commune_2002_2024.geojson",
+          summary: "data/area_summary_commune.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Instituto Nacional de Estadísticas (INE), Censo 2002 y Censo 2024, Religión Declarada por comuna (via BCN Estadísticas Territoriales, tema 101), population aged 15 and over; CC BY-SA 4.0 (share-alike), the mapped shares are the project's derivation, not INE's own analysis · Boundaries © INE, División Político Administrativa Censal (Comunas_Simp16R, 346 communes), CC BY-SA 4.0"
+        }
+      },
+      defaultLevel: "commune",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2024,
+      // the two census-question shares plus the cross-wave change the runtime
+      // derives from the pair; the four 2004-parent communes are flagged
+      // change_withheld in the data and null their change, and place and
+      // density metrics are omitted because no governed place-of-worship
+      // snapshot ships here
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the commune population aged 15 and over reporting a named religion, defined as the religion base minus the Ninguna (no religion) line minus the 2024 No declara (non-response) line, over each commune's printed census religion base. This definition folds in the INE-derived 'Otros cristianos' group the BCN ten-category commune frame does not column (national residual 26,051 in 2024). The product uses the full religion base as the denominator; INE's headline percentages use the responder base (that base minus No declara), a difference of about 0.58 percentage points in 2024 and zero in 2002."
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share of the commune population aged 15 and over in the census 'Ninguna religión, ateo o agnóstico' line, over each commune's printed religion base. The national share rose from 8.3% in 2002 to 25.7% on this denominator in 2024 (25.8% on INE's responder base). Affiliation % and no religion % need not sum to 100: the 2024 No declara non-response sits in the denominator and in neither share."
+        },
+        religious_change: {
+          label: "Religious affiliation change",
+          note: "percentage-point change in the affiliation share between the 2002 and 2024 censuses on the current 346-commune frame, a 22-year interval; a wave-to-wave difference is not an annual rate. The four 2004-parent communes (Iquique, Talcahuano, Santa Bárbara, Nueva Imperial) render no change: their 2002 counts combine the later-created children and the pairs are withheld. The five 2002-null communes likewise render no change."
+        }
+      },
+      popupDenominatorNote: "Percentages use each commune's printed census religion base (total_r, 'Población total en encuesta Religión') as the denominator, for the population aged 15 and over in both waves. Chile has a real Ninguna (no religion) line: no religion % is that line's share, and religious affiliation % is the religion base minus Ninguna minus the 2024 No declara (non-response) line. The two shares need not sum to 100 because the 2024 No declara sits in the denominator and in neither share. The 2024 affiliation share folds in the INE-derived 'Otros cristianos' group (national residual 26,051) the ten-category commune frame does not column. Five communes are null in 2002 (four created in 2004, whose parents carry the combined count; and Puchuncaví, a BCN 2002-series gap); null cells render as no-data, never as zero. The change metric differences the affiliation share across the pair; the four 2004-parent communes and the five 2002-null communes render no change. The construct is census affiliation; it does not measure belief, practice, attendance, or membership.",
+      cityPresets: [
+        { label: "Santiago", coords: [-70.6483, -33.4569], zoom: 9 },
+        { label: "Valparaíso", coords: [-71.6197, -33.0472], zoom: 10 },
+        { label: "Concepción", coords: [-73.0498, -36.8201], zoom: 10 },
+        { label: "Antofagasta", coords: [-70.3975, -23.6509], zoom: 10 },
+        { label: "Arica", coords: [-70.3126, -18.4783], zoom: 10 },
+        { label: "La Serena", coords: [-71.2500, -29.9027], zoom: 10 },
+        { label: "Temuco", coords: [-72.5904, -38.7359], zoom: 10 },
+        { label: "Puerto Montt", coords: [-72.9411, -41.4693], zoom: 10 },
+        { label: "Punta Arenas", coords: [-70.9171, -53.1638], zoom: 9 }
+      ],
+      geocode: { country: "cl", biasLngLat: [-71.0, -38.0] },
+      onboarding: {
+        title: "Chile research map",
+        intro: "Census religious affiliation across Chile's 346 communes over two waves, 2002 and 2024, from the Instituto Nacional de Estadísticas (INE), disseminated by the Biblioteca del Congreso Nacional (BCN Estadísticas Territoriales). Both waves count the population aged 15 and over on the current 346-commune frame. The construct is census affiliation; it does not measure belief, practice, attendance, or membership.",
+        bullets: [
+          "Communes are shaded by the share reporting a named religion, or by the share in the census <code>Ninguna religión, ateo o agnóstico</code> line, shown as No religion %. Affiliation is the religion base minus the Ninguna line minus the 2024 No declara (non-response) line; the two shares need not sum to 100.",
+          "Two census waves, 2002 and 2024, at commune level, both counting the population aged 15 and over. Religion was asked in 2002 and 2024 only: the 2012 census was annulled, the 2017 abbreviated census dropped the question, and 1992 (aged 5+) is a held universe break.",
+          "Both waves ride the current 346-commune frame. 2024 joins one-to-one by CUT; 2002 is re-coded by CUT then by unique name. Five communes are null in 2002 (four created in 2004, whose parents carry the combined count; and Puchuncaví, a BCN 2002-series gap); null cells render as no-data, never as zero, and no count is backcast.",
+          "No religion rises sharply between the waves: the national share climbs from 8.3% in 2002 to 25.7% in 2024 on the full religion base, and the Roman Catholic share falls from 70.0% to 54.0%. The evangelical and secular south (Biobío, La Araucanía, Los Ríos, Ñuble) contrasts with strongly Catholic Coquimbo and the secular Metropolitana.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://www.ine.gob.cl/" target="_blank" rel="noopener">Instituto Nacional de Estadísticas (INE)</a>, Censo 2002 y Censo 2024, Religión Declarada por comuna (via <a href="https://www.bcn.cl/siit/estadisticasterritoriales/tema?id=101" target="_blank" rel="noopener">BCN Estadísticas Territoriales</a>, tema 101), population aged 15 and over. Reused under Creative Commons Reconocimiento-CompartirIgual 4.0 Internacional (CC BY-SA 4.0): attribution and share-alike carried. The mapped shares are the project\'s derivation, not INE\'s own analysis. &middot; Boundaries &copy; INE, División Político Administrativa Censal (Comunas_Simp16R, 346 communes, CUT-coded), CC BY-SA 4.0',
+      censusFlagNote: "* Universe: population aged 15 and over in both waves. Percentages use each commune's printed census religion base (total_r). No religion % is the 'Ninguna religión, ateo o agnóstico' share; religious affiliation % is the religion base minus Ninguna minus the 2024 No declara (non-response) line, and the two need not sum to 100. The 2024 affiliation share folds in the INE-derived 'Otros cristianos' group (national residual 26,051). The product denominator is the full religion base; INE's headline percentages use the responder base (that base minus No declara), about 0.58 percentage points lower for no religion in 2024 and identical in 2002. Both waves ride the current 346-commune frame; five communes are null in 2002 (four created in 2004, whose parents carry the combined count; and Puchuncaví, a BCN 2002-series gap), rendered as no-data. The 2002 commune series reconciles exactly internally (national base 11,128,104) and runs about 0.87% below the INE regional base, a documented discrepancy never redistributed. Reused under CC BY-SA 4.0 (share-alike); the mapped shares are the project's derivation, not INE's own analysis."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712b"></script>
+</body>
+</html>

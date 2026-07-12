@@ -3,7 +3,7 @@
   "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:cl-census-religion:cl:2002-2024:ine-commune",
   "dataset_id": "cl-census-religion:cl:2002-2024:ine-commune",
-  "dataset_version_id": "cl-census-religion:cl:2002-2024:ine-commune:787baf9e2f09",
+  "dataset_version_id": "cl-census-religion:cl:2002-2024:ine-commune:a46ed864a268",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -26,7 +26,7 @@
   ],
   "pipeline": {
     "script": "scripts/build_cl_area_summary.R",
-    "git_commit": "555440b6a9cc3735cb76ed1493838fc1968ad606",
+    "git_commit": "93eef984a22ce4e82a71cdfb1ce8bdeeb5a495ed",
     "command": "Rscript scripts/build_cl_area_summary.R",
     "parameters": {
       "construct": "census affiliation",
@@ -324,8 +324,8 @@
       "uri": "repo:apps/regions/cl/data/area_summary_commune.json",
       "storage_provider": "git_repository",
       "format": "json",
-      "bytes": 1326185,
-      "sha256": "787baf9e2f09dd135bf34c59c00cf02c618b7970ff119c5c651229d093e0115e",
+      "bytes": 1326753,
+      "sha256": "a46ed864a268b40b669a8ad695543f220466e6660e62dea5702b5c5d0718db73",
       "row_count": 692,
       "feature_count": null,
       "content": "Chile commune census-affiliation area summary for 2002 and 2024 (346 communes).",
@@ -337,8 +337,8 @@
       "uri": "repo:apps/regions/cl/data/area_summary_commune.csv",
       "storage_provider": "git_repository",
       "format": "csv",
-      "bytes": 876878,
-      "sha256": "6505ea8c74f572b1e72326a29de04ed5ded1c77f1679c9d93c91fb509d63fa53",
+      "bytes": 877446,
+      "sha256": "a9062b8d04b433776755ea9248bc3037153c69d059abfd55dd8f81bced636fa7",
       "row_count": 692,
       "feature_count": null,
       "content": "Flattened Chile commune census-affiliation rows for 2002 and 2024.",
@@ -363,7 +363,7 @@
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/cl/data/area_summary_commune.json",
-      "sha256": "787baf9e2f09dd135bf34c59c00cf02c618b7970ff119c5c651229d093e0115e",
+      "sha256": "a46ed864a268b40b669a8ad695543f220466e6660e62dea5702b5c5d0718db73",
       "built_by": "scripts/build_cl_area_summary.R",
       "notes": "692 rows: 346 communes x 2 waves; 2002 null for five communes; aged-15+ universe both waves."
     },
