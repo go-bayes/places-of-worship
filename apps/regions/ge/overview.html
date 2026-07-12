@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Georgia map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Georgia research map; every string traces to
+    // research/countries/ge/route-probe.md, the manifest
+    // docs/manifests/ge-census-religion-2002-2024.json, or the live
+    // REGION_CONFIG in apps/regions/ge/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "GE",
+      countryName: "Georgia",
+      mapHref: "./",
+      intro: "Region census religion for Georgia's twelve regions across three censuses, 2002, 2014 and 2024, from the National Statistics Office of Georgia (Geostat). The construct is census affiliation: each resident's reported religion, asked of the whole enumerated population of all ages. It does not measure belief, practice, attendance, or membership. Every wave reconciles exactly at both margins, and the three waves ship as levels rather than as a change series.",
+      facts: {
+        waves: "Three censuses: 2002, 2014, 2024",
+        geographies: "Region (12 units; 11 in 2014 and 2024)",
+        metrics: "Religious affiliation %, no religion %"
+      },
+      reading: [
+        "Regions are shaded by the share reporting a named religious affiliation, or by the share in the census None category, shown as No religion %. Orthodox affiliation dominates every region; the sharpest published contrasts are Muslim concentration in Adjara, Kvemo Kartli and Kakheti, and Armenian Apostolic in Samtskhe-Javakheti.",
+        "The three waves do not share one category frame and are never merged. The 2002 table prints six named categories plus one 'other religion' residual; 2014 prints twelve categories, naming Yazidis and Protestant as separate lines; 2024 folds Yazidis and Protestant into Other, giving ten categories. No cross-wave category change is claimed, and the map offers no change metric; the comparable spine is the five great-tradition shares (Orthodox, Muslim, Armenian Apostolic/Gregorian, Catholic, Judaism), which the per-region breakdowns carry verbatim and unchanged.",
+        "For 2002 the affiliation share is a recorded lower bound: the summed share of the five named religions (Orthodox, Catholic, Armenian-Gregorian, Judaism, Muslim), divided by the region population. The 2002 'other religion' residual folds genuine other-religion affiliates and no-religion together inseparably and is excluded; the bound is tight, the five named religions being 98.6% of the national population. For the same reason 2002 no religion is null, and no split is invented at region level.",
+        "For 2014 and 2024 the affiliation share is population minus None, Refusal, and Not stated, divided by population, and the no-religion share is the single None line divided by population. Refusal and Not stated stay in the denominator and in neither share, and the affiliation and no-religion shares need not sum to 100. The 2014 wave carries verbatim …(≤10) suppression on a few small affiliation sub-categories (Judaism in Guria and Mtskheta-Mtianeti; Muslim, Armenian, Protestant and Other in Racha-Lechkhumi; Yazidis in Shida Kartli); those cells are carried unrepaired and the two headline shares stay exact, because None, Refusal, and Not stated are never suppressed.",
+        "Every wave counts the whole enumerated resident population of all ages; there is therefore no universe break, and the region shares are construct-comparable within each wave. The national religion-table totals equal the census populations exactly: 4,371,535 in 2002, 3,713,804 in 2014, and 3,929,581 in 2024. The population falls then rises across the series; each region's shares are read within its own wave denominator, and population change is never treated as a religion change.",
+        "Territorial scope, rendered as published (the map takes no position on the status of the territories): Geostat has not enumerated Abkhazia or the Tskhinvali Region / former South Ossetia Autonomous Oblast since the 1990s conflicts. The 2002 table prints an Abkhazia A.R. row of 1,956 persons, the fraction under Georgian control at the census date, mapped with a per-feature flag that it is not representative of Abkhazia; 2002 is the only wave with any Abkhazia figure. The 2014 and 2024 tables cover the eleven controlled regions and exclude the occupied territories (the 2024 source footnote reads 'Does not include occupied territories of Georgia'). Shida Kartli is enumerated in its Georgian-controlled part only in every wave; the boundary polygon spans the full administrative extent, including the non-enumerated Tskhinvali area, and this is disclosed on the Shida Kartli flag. No count is invented for any non-enumerated area.",
+        "The boundary frame is geoBoundaries GEO ADM1, twelve regions, represented year 2015. The census regions join one-to-one after normalising self-governing-city and autonomous-republic prefixes and the en-dash in Samtskhe–Javakheti; one boundary set serves all three waves, and the Abkhazia polygon carries the 2002 wave only. Region is the shipped level. The 2024 census additionally publishes religion by 64 self-governed units; that municipality product is deferred, because the available geoBoundaries GEO ADM2 layer is a 68-unit 2007 vintage that predates the self-governing-city reforms and mismatches the 2024 self-governed-unit frame, and no concordance is invented.",
+        "No governed Georgia place-of-worship snapshot ships with this product; place counts and density metrics are null."
+      ],
+      sources: [
+        {
+          name: "Geostat 2002 General Population Census, Volume I, Table #29 (population by religion by region)",
+          href: "https://geostat.ge/media/44559/I-tomi.pdf",
+          construct: "Census religion by region, 12 regions (incl. a 1,956-person Abkhazia fraction), six named categories plus an 'other religion' residual, integer counts",
+          years: "2002",
+          licence: "National Statistics Office of Georgia (Geostat) Terms of Use open reuse grant (free reuse for any purpose with source attribution)"
+        },
+        {
+          name: "Geostat 2014 General Population Census, Population by regions and religion",
+          href: "https://geostat.ge/media/44724/22_Population-by-regions-and-religion.xls",
+          construct: "Census religion by region, 11 regions, twelve categories incl. separate None, Refusal and Not stated, integer counts with …(≤10) suppression on small cells",
+          years: "2014",
+          licence: "National Statistics Office of Georgia (Geostat) Terms of Use open reuse grant (free reuse for any purpose with source attribution)"
+        },
+        {
+          name: "Geostat 2024 Population Census, Population by regions, self-governed units, sex and religion",
+          href: "https://geostat.ge/media/80625/6.-Population-by-regions%2C-self-governed-units%2C-sex-and-religion.xlsx",
+          construct: "Census religion by region (11 region rows shipped; 64 self-governed-unit rows deferred), ten categories, integer counts, no suppression; source footnote excludes the occupied territories",
+          years: "2024",
+          licence: "National Statistics Office of Georgia (Geostat) Terms of Use open reuse grant (free reuse for any purpose with source attribution)"
+        },
+        {
+          name: "geoBoundaries Georgia ADM1 boundaries",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/GEO/ADM1/",
+          construct: "Boundary geometry (12 regions), boundary source geoBoundaries, Wikimedia; Abkhazia used for the 2002 wave only",
+          years: "2015 (represented year)",
+          licence: "Creative Commons Attribution 3.0 License (CC BY 3.0), per the release metadata"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "National Statistics Office of Georgia, <a href=\"https://www.geostat.ge/\" target=\"_blank\" rel=\"noopener\">Geostat</a>: the 2002 census Volume I Table #29, the 2014 Population by regions and religion table, and the 2024 Population by regions, self-governed units, sex and religion table; boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/GEO/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries GEO ADM1</a>.",
+        tables: "The shipped region rows reconcile exactly at both margins in every wave. In 2002 the twelve region totals sum to 4,371,535 and every religion column closes to its printed national total; the affiliation share is the five named-religion sum (a recorded lower bound) and no religion is null. In 2014 the national row closes exactly over twelve categories to 3,713,804, the two headline shares are exact for every region, and the …(≤10) suppressed cells satisfy the recorded per-row bound. In 2024 the eleven region totals sum to 3,929,581 and every religion column closes to its printed national total, with no suppression. Boundaries join 12 of 12 regions.",
+        licence: "Census reuse is accepted under the National Statistics Office of Georgia (Geostat) Terms of Use open reuse grant, which grants the right to download, use, adapt, modify, create derivative works of, disseminate, copy, and share published statistical data for any purpose, commercial and non-commercial, without restriction, on the condition that users indicate Geostat as a source of information. No reuse ask is needed. The geoBoundaries GEO ADM1 boundary is Creative Commons Attribution 3.0 License (CC BY 3.0) per the release metadata, boundary source geoBoundaries, Wikimedia.",
+        script: "scripts/build_ge_area_summary.R",
+        manifests: [
+          { label: "ge-census-religion-2002-2024", href: "docs/manifests/ge-census-religion-2002-2024.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Georgia map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

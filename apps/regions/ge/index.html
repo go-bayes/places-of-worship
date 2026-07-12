@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Georgia Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712b" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Georgia's product is region census religion from the National Statistics
+    // Office of Georgia (Geostat) across three censuses (2002, 2014, 2024) as
+    // exact counts, joined to the geoBoundaries GEO ADM1 12-region frame. Every
+    // wave reconciles at both margins (national totals 4,371,535 / 3,713,804 /
+    // 3,929,581). The construct is census affiliation: each resident's reported
+    // religion, asked of the whole enumerated population of all ages. It does
+    // not measure belief, practice, attendance, or membership.
+    //
+    // Per-wave category frames differ and are never merged. The 2002 table
+    // prints six named categories plus one "other religion" residual; 2014
+    // prints twelve categories (Yazidis and Protestant as separate lines); 2024
+    // folds Yazidis and Protestant into Other (ten categories). No cross-wave
+    // category change is claimed; the comparable spine is the five great-
+    // tradition shares. The three waves ship as levels, and no change metric is
+    // offered. NOTE ON THE RUNTIME GUARD: the summary rows carry the withhold
+    // intent as the token category_frames_differ_per_wave_no_cross_wave_category
+    // _change, which the runtime's changeWithheld() guard (substring
+    // "change_withheld") does not match; religious_change is therefore withheld
+    // here by omission from metricsAvailable, not by the flag. This collision is
+    // reported to the conductor.
+    //
+    // Two derivation records ride every 2002 row. The 2002 affiliation slot is a
+    // recorded LOWER BOUND = (Orthodox + Catholic + Armenian-Gregorian + Judaism
+    // + Muslim) / population, because the "other religion" residual folds
+    // other-religion with no-religion inseparably and is excluded; the bound is
+    // tight (the five named religions are 98.6% of the national population). The
+    // 2002 no-religion slot is NULL for the same reason: the residual cannot be
+    // split at region level, and no split is invented. For 2014 and 2024,
+    // affiliation is (population - None - Refusal - Not stated) / population and
+    // no-religion is None / population; Refusal and Not stated stay in the
+    // denominator and in neither slot, and the two shares need not sum to 100.
+    // The 2014 wave carries verbatim "…"(<=10) suppression on small affiliation
+    // sub-categories; the two headline slots stay exact.
+    //
+    // TERRITORIAL SCOPE (render the record; take no position on status). Geostat
+    // does not enumerate Abkhazia or the Tskhinvali Region / former South
+    // Ossetia. The 2002 table prints a 1,956-person Abkhazia A.R. row, the
+    // fraction under Georgian control at the census date, mapped with a per-
+    // feature flag that it is not representative of Abkhazia; 2002 is the only
+    // wave with any Abkhazia figure. The 2014 and 2024 tables cover the eleven
+    // controlled regions and exclude the occupied territories (the 2024 source
+    // footnote reads "Does not include occupied territories of Georgia"). Shida
+    // Kartli is enumerated in its Georgian-controlled part only in every wave;
+    // the boundary polygon spans the full administrative extent (including the
+    // non-enumerated Tskhinvali area), disclosed on the Shida Kartli flag.
+    //
+    // Licence accepted (no ask): the census ships under the Geostat Terms of Use
+    // open reuse grant (free reuse for any purpose with source attribution).
+    // Boundaries are geoBoundaries GEO ADM1 (Creative Commons Attribution 3.0
+    // License), boundary source geoBoundaries, Wikimedia, represented year 2015.
+    // Municipality (2024 self-governed-unit) religion is a documented deeper
+    // product deferred on a boundary-vintage mismatch; region is the shipped
+    // level.
+    window.REGION_CONFIG = {
+      countryCode: "GE",
+      title: "Places of Worship | Georgia Research Map",
+      // boundary bbox verified numerically from the 12-feature layer:
+      // lon 40.007..46.736, lat 41.055..43.587; centre on [43.40, 42.15].
+      // the ~6.7 deg lon / ~2.5 deg lat extent fits all twelve regions at z7.
+      center: [43.40, 42.15],
+      initialZoom: 7,
+      censusLevels: {
+        region: {
+          label: "Region (12 units)",
+          boundaries: "data/ge_region.geojson",
+          summary: "data/area_summary_region.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © National Statistics Office of Georgia (Geostat), General Population Censuses 2002 and 2014 and 2024 Population Census, region religion tables (Geostat Terms of Use open reuse grant) · Boundaries © geoBoundaries GEO ADM1 (Creative Commons Attribution 3.0 License, CC BY 3.0), boundary source geoBoundaries, Wikimedia"
+        }
+      },
+      defaultLevel: "region",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2024,
+      // the two census-question shares; place and density metrics are omitted
+      // (no governed place layer), and religious_change is omitted because the
+      // three waves carry different category frames and ship as levels with no
+      // cross-wave change claimed.
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the region's census population reporting affiliation with a named religion. For 2014 and 2024 it is population minus None, Refusal, and Not stated, divided by population; Refusal and Not stated stay in the denominator and in neither share, and the affiliation and no-religion shares need not sum to 100. For 2002 it is the summed share of the five named religions (Orthodox, Catholic, Armenian-Gregorian, Judaism, Muslim), a recorded lower bound, because the 2002 'other religion' residual folds other-religion and no-religion together inseparably and is excluded. The three waves carry different category frames and ship as levels; no cross-wave change is offered, and the comparable spine is the five great-tradition shares."
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the census None line, for 2014 and 2024 only. For 2002 it is null: the 2002 'other religion' residual folds no-religion and other-religion together inseparably and cannot be split at region level, and no split is invented. Refusal and Not stated are disclosed denominator residuals and are never folded into this slot."
+        }
+      },
+      popupDenominatorNote: "Percentages use each region's printed census population total as the denominator. Religious affiliation % is the named-religion share: for 2014 and 2024 it is population minus None, Refusal, and Not stated; for 2002 it is the summed share of the five named religions (Orthodox, Catholic, Armenian-Gregorian, Judaism, Muslim), a recorded lower bound, because the 2002 'other religion' residual folds other-religion and no-religion together inseparably and is excluded. No religion % is the census None share, for 2014 and 2024 only; 2002 no-religion is null. In 2014 and 2024, Refusal and Not stated stay in the denominator and in neither share, and the two shares need not sum to 100. The three waves carry different category frames and ship as levels; no cross-wave change is offered. The construct is census affiliation; it does not measure belief, practice, attendance, or membership. Abkhazia and South Ossetia are not enumerated by Geostat: the 2002 Abkhazia figure is a 1,956-person enumerated fraction, not representative of Abkhazia, and Shida Kartli is enumerated in its Georgian-controlled part only against a polygon drawn to the full administrative extent.",
+      cityPresets: [
+        { label: "Tbilisi", coords: [44.7833, 41.7167], zoom: 10 },
+        { label: "Batumi", coords: [41.6367, 41.6417], zoom: 10 },
+        { label: "Kutaisi", coords: [42.7000, 42.2500], zoom: 10 },
+        { label: "Rustavi", coords: [44.9939, 41.5497], zoom: 10 },
+        { label: "Zugdidi", coords: [41.8709, 42.5088], zoom: 10 },
+        { label: "Gori", coords: [44.1114, 41.9847], zoom: 10 },
+        { label: "Poti", coords: [41.6720, 42.1508], zoom: 10 },
+        { label: "Telavi", coords: [45.4731, 41.9192], zoom: 10 }
+      ],
+      geocode: { country: "ge", biasLngLat: [43.40, 42.15] },
+      onboarding: {
+        title: "Georgia research map",
+        intro: "Region census religion for Georgia's twelve regions across three censuses, 2002, 2014 and 2024, from the National Statistics Office of Georgia (Geostat). The construct is census affiliation: each resident's reported religion, asked of the whole enumerated population of all ages. It does not measure belief, practice, attendance, or membership.",
+        bullets: [
+          "Regions are shaded by the share reporting a named religious affiliation, or by the share in the census <code>None</code> category, shown as No religion %. Orthodox affiliation dominates; the sharpest contrasts are Muslim concentration in Adjara, Kvemo Kartli and Kakheti and Armenian Apostolic in Samtskhe-Javakheti.",
+          "Three census waves ship at region level, 2002, 2014 and 2024, as exact counts. The category frames differ across waves and are never merged; no cross-wave change metric is offered, and the comparable spine is the five great-tradition shares (Orthodox, Muslim, Armenian Apostolic, Catholic, Judaism).",
+          "For 2002 the affiliation share is a recorded lower bound, the summed share of the five named religions (Orthodox, Catholic, Armenian-Gregorian, Judaism, Muslim); the 2002 'other religion' residual folds other-religion and no-religion together inseparably; 2002 no religion is therefore null, and no split is invented. For 2014 and 2024, Refusal and Not stated stay in the denominator and in neither share, and the two shares need not sum to 100. The 2014 wave carries verbatim …(≤10) suppression on small affiliation sub-categories; the two headline shares stay exact.",
+          "Territorial scope (render the record): Geostat does not enumerate Abkhazia or the Tskhinvali Region / former South Ossetia. The 2002 Abkhazia figure is a 1,956-person enumerated fraction, flagged as not representative of Abkhazia; 2014 and 2024 exclude the occupied territories. Shida Kartli is enumerated in its Georgian-controlled part only in every wave, against a polygon drawn to the full administrative extent.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://www.geostat.ge/" target="_blank" rel="noopener">National Statistics Office of Georgia (Geostat)</a>, General Population Censuses 2002 and 2014 and 2024 Population Census (region religion tables). Geostat Terms of Use open reuse grant; users should indicate Geostat as a source of information when using data of GEOSTAT. &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> GEO ADM1 (Creative Commons Attribution 3.0 License, CC BY 3.0), boundary source geoBoundaries, Wikimedia',
+      censusFlagNote: "* The construct is census affiliation (each resident's reported religion, whole enumerated population, all ages); it does not measure belief, practice, attendance, or membership. Category frames differ across the three waves and are never merged; no cross-wave category change is claimed, and the comparable spine is the five great-tradition shares. For 2002 the affiliation share is a recorded lower bound (the five named religions only, the 'other religion' residual excluded) and no religion is null (the residual folds no-religion and other-religion together inseparably). For 2014 and 2024, Refusal and Not stated stay in the denominator and in neither share, and the two shares need not sum to 100; the 2014 wave carries verbatim …(≤10) suppression on small affiliation sub-categories, and the two headline shares stay exact. Territorial scope: Geostat does not enumerate Abkhazia or the Tskhinvali Region / former South Ossetia; the 2002 Abkhazia figure is a 1,956-person enumerated fraction, not representative of Abkhazia, 2014 and 2024 exclude the occupied territories, and Shida Kartli is enumerated in its Georgian-controlled part only against a polygon drawn to the full administrative extent. Census reuse under the Geostat Terms of Use open reuse grant."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712b"></script>
+</body>
+</html>
