@@ -75,3 +75,15 @@ The extractor uses exact `quality_flag` tokens that declare small-cell suppressi
 ## Provenance
 
 The JSON output has a parallel `provenance` object keyed by manifest path. Every known field names its manifest path, manifest key path, area-summary key path, derivation from a named key, or exact quality-flag token. The build stops when any known value lacks provenance.
+
+## Vocabulary v2 candidates (PI direction, 2026-07-13)
+
+The project lead directed a maintenance dimension for v2: a parameter indicating whether the source's data collection is ONGOING and when the map can expect its next update. Proposed fields, pending PI sign-off on names and values:
+
+- `series_status`: `ongoing_annual` | `ongoing_periodic` | `dormant` | `closed` | `unknown` — whether the source still produces new waves.
+- `next_expected_wave`: a year or `unknown` — the next census round, register year, or survey wave the product would regenerate on (for example, Grenada regenerates on the final 2021 report; Malaysia's next census is planned for the 2030 round; the Church of Sweden series updates annually).
+- `update_posture`: `regenerates_on_release` | `awaiting_source_fix` | `complete_as_published` | `unknown` — what maintenance the corpus owes the product.
+
+Provenance discipline unchanged: these values must come from a declared manifest field (a `series_status` block written at build time from the source's own publication-calendar statements), never from world knowledge at extraction time. Existing manifests do not carry the field, so v2 needs a manifest-schema addition plus a backfill pass; until then the extractor would emit `unknown` throughout, which argues for landing the manifest field first and the vocabulary second.
+
+Also carried from the v1 build report as v2 candidates: `not_stated_handling` (79 of 99 unknown — the corpus declares it in prose, not tokens) and `small_cell_marks` (92 unknown — token absence is not evidence of absence; the field needs a declared positive/negative token pair, not inference from silence).
