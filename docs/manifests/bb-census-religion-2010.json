@@ -1,0 +1,817 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:bb-census-religion:bb:2010:bss-parish",
+  "dataset_id": "bb-census-religion:bb:2010:bss-parish",
+  "dataset_version_id": "bb-census-religion:bb:2010:bss-parish:7bdf778a9ac2",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "bb-census-religion",
+  "dataset_role": "staged_evidence",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "BB"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-07-12T00:00:00Z",
+  "created_by": "scripts/build_bb_area_summary.R",
+  "target_years": [
+    2010
+  ],
+  "pipeline": {
+    "script": "scripts/build_bb_area_summary.R",
+    "git_commit": "fa20975d5760a4803e553212415b541ea4c71bda",
+    "command": "Rscript scripts/build_bb_area_summary.R",
+    "parameters": {
+      "construct": "census affiliation",
+      "shipped_waves": [
+        2010
+      ],
+      "shipped_geography": "11 Barbados parishes (St. Michael, Christ Church, St. George, St. Philip, St. John, St. James, St. Thomas, St. Joseph, St. Andrew, St. Peter, St. Lucy)",
+      "boundary_set": "bb-parish-2005-geoboundaries-adm1",
+      "source_tables": {
+        "2010": "2010 Census Volume 1 Table 02.06 Total Population by Parish, Sex and Religion (integer full-count, 23 categories, Both Sexes)"
+      },
+      "universes": {
+        "2010": "Tabulable Population, all persons, all ages (226,193); the Estimated Resident Population (277,821) is a separate adjusted figure and is not the religion denominator"
+      },
+      "method_note": "The 2010 religion cross-tab (Table 02.06) is an integer full-count of the Tabulable Population (226,193). Every cell is transcribed verbatim from the Both Sexes rows; printed '-' is transcribed as 0. Both national margins close exactly. The Estimated Resident Population (277,821) is the census's separate adjusted total (the difference is the undercount) and is not used as the religion denominator.",
+      "denominators": {
+        "2010": "printed parish Total (Tabulable Population); affiliation = population - None - Not Stated"
+      },
+      "slot_design": "Ordinary two-slot (SB/FM/KI precedent). religious_affiliation_percent is the share of the parish population reporting a named religion/denomination (population minus None minus Not Stated); no_religion_percent is the single None line. The Not Stated line stays in the denominator and in neither slot, so the two shares need not sum to 100. Barbados has a real None category, so no minority-share (task-6) treatment applies.",
+      "category_frames": {
+        "2010": [
+          "Adventist",
+          "Anglican",
+          "Baptist",
+          "Brethren",
+          "Church of God",
+          "Jehovah Witness",
+          "Methodist",
+          "Moravian",
+          "Mormon",
+          "Nazarene",
+          "Pentecostal",
+          "Roman Catholic",
+          "Salvation Army",
+          "Wesleyan",
+          "Other Christian",
+          "Baha'i",
+          "Hindu",
+          "Jewish",
+          "Muslim",
+          "Rastafarian",
+          "Other Non-Christian",
+          "None",
+          "Not Stated"
+        ],
+        "alignment_note": "Single-wave product: religion is cross-tabulated by parish only in the 2010 census. 1990 and 2000 religion are published at national level only (2000 National Census Report Table 2.7, categories Adventist, Anglican, Baptist, Brethren, Church of God, Hindu, Jehovah's Witness, Methodist, Moravian, Muslim, Pentecostal, Rastafarian, Roman Catholic, Salvation Army, Other, None, Not Stated). The 2021 census collected religion (questionnaire P11) but published no religion table in any geography. No cross-wave parish change is assertable; the 2010 frame is preserved verbatim."
+      },
+      "change_rule": "Single wave (2010): no cross-wave parish change layer. National religion context exists for 1990, 2000, and 2010 (national totals), but the subnational (parish) product is 2010-only.",
+      "no_religion_treatment": {
+        "2010": "single None line (national 46,559; 20.6%); Not Stated is a separate non-response residual, excluded from this slot"
+      },
+      "held_and_deferred": "The 2021 parish religion wave does not exist as a published table (religion was collected via questionnaire P11 but not tabulated); it is a documented gap, not a held source. National 1990/2000 religion (2000 Report Table 2.7) is a deeper-history national series, not a parish product. 2000 Volume 2 detailed tables carry no religion cross-tab. A 2021 parish religion table would require a BSS data request (recorded as a courtesy ask).",
+      "territorial_note": "Barbados has no external territorial dispute affecting the parish frame.",
+      "omitted_metrics": [
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 25121
+      },
+      "local_cache_hint": "All raw sources are cached under data/raw/bb_census/ and remain git-ignored.",
+      "retrieval_record": [
+        {
+          "uri": "data/raw/bb_census/bb_2010_PHC_Vol1.pdf",
+          "url": "https://stats.gov.bb/wp-content/uploads/2020/03/2010-PHC-Report-Vol-1.pdf",
+          "format": "pdf",
+          "bytes": 9691556,
+          "sha256": "1cc968a8b382ff1af629f65028d844fa82d2e947201d950d70755a9f5ef15e57",
+          "row_count": null,
+          "source_dataset_id": "bb-census-2010-vol1-table-02-06-religion-by-parish",
+          "used_in_public_product": true,
+          "periods": "2010",
+          "notes": "2010 Census Volume 1; Table 02.06 Religion by parish (integer full-count, Both Sexes). Both margins close to 226,193.",
+          "local_cache_hint": "data/raw/bb_census/bb_2010_PHC_Vol1.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/bb_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/bb_census/bb_2000_Census_Report.pdf",
+          "url": "https://stats.gov.bb/wp-content/uploads/2020/05/Barbados-2000-Census-Report.pdf",
+          "format": "pdf",
+          "bytes": 1243911,
+          "sha256": "14789d61db8afb6c5090ab1a323340363bb61a4008c8b7825255ccfc8a947af9",
+          "row_count": null,
+          "source_dataset_id": "bb-census-2000-report-table-2-7-national-religion",
+          "used_in_public_product": false,
+          "periods": "1990;2000",
+          "notes": "2000 National Census Report (CARICOM Secretariat); Table 2.7 national religion for 1990 and 2000. National only, no parish religion cross-tab. Context, not a shipped subnational source.",
+          "local_cache_hint": "data/raw/bb_census/bb_2000_Census_Report.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/bb_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/bb_census/bb_2021_PHC.pdf",
+          "url": "https://stats.gov.bb/wp-content/uploads/2024/02/2021-Population-and-Housing-Census.pdf",
+          "format": "pdf",
+          "bytes": 2141565,
+          "sha256": "f4f6f5faa539c834635a1454c6733d34cd81754ea597976e2d3d863f52089bd5",
+          "row_count": null,
+          "source_dataset_id": "bb-census-2021-report",
+          "used_in_public_product": false,
+          "periods": "2021",
+          "notes": "2021 Population and Housing Census Report; religion collected (questionnaire P11) but no religion table published (national or parish). Documents the missing 2021 parish wave.",
+          "local_cache_hint": "data/raw/bb_census/bb_2021_PHC.pdf (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/bb_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/bb_census/bss_open_licence_agreement.html",
+          "url": "https://stats.gov.bb/open-licence-agreement/",
+          "format": "html",
+          "bytes": 144626,
+          "sha256": "d9741e1cf974885fab8ace12d9c45d14dfd6dc3dc9601335a2597e7a1c6e2902",
+          "row_count": null,
+          "source_dataset_id": "bb-census-2010-vol1-table-02-06-religion-by-parish",
+          "used_in_public_product": false,
+          "periods": "2026",
+          "notes": "BSS Open Licence Agreement (verbatim licence grant and acknowledgement-of-source notice).",
+          "local_cache_hint": "data/raw/bb_census/bss_open_licence_agreement.html (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/bb_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/bb_census/bss_terms.html",
+          "url": "https://stats.gov.bb/terms-and-conditions/",
+          "format": "html",
+          "bytes": 144148,
+          "sha256": "e8db1118387c1282cce2d66e3f1815beee24678fcc4aeb800f72596222619f15",
+          "row_count": null,
+          "source_dataset_id": "bb-census-2010-vol1-table-02-06-religion-by-parish",
+          "used_in_public_product": false,
+          "periods": "2026",
+          "notes": "BSS Terms and Conditions; 'Terms of Use of Data ... subject to the requirements set forth under the Open Licence Agreement'.",
+          "local_cache_hint": "data/raw/bb_census/bss_terms.html (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/bb_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/bb_census/geoBoundaries-BRB-ADM1.geojson",
+          "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BRB/ADM1/geoBoundaries-BRB-ADM1.geojson",
+          "format": "geojson",
+          "bytes": 47860,
+          "sha256": "b51cbd344b87ffa332e6ca2003ea9b77d5ff43d00d37eec951665f5c08b31b8f",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-brb-adm1-2005",
+          "used_in_public_product": true,
+          "periods": "2005",
+          "notes": "geoBoundaries BRB ADM1 GeoJSON; 11 parishes, CC BY 2.5 Generic. Pinned commit 9469f09.",
+          "local_cache_hint": "data/raw/bb_census/geoBoundaries-BRB-ADM1.geojson (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/bb_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/bb_census/gb_brb_adm1_meta.json",
+          "url": "https://www.geoboundaries.org/api/current/gbOpen/BRB/ADM1/",
+          "format": "json",
+          "bytes": 1708,
+          "sha256": "8065e71423d2c43b04a0a4ea5b2a13406d0b21f925a2a27ac4a69b7a27b91141",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-brb-adm1-2005",
+          "used_in_public_product": false,
+          "periods": "2005",
+          "notes": "geoBoundaries BRB ADM1 metadata; records CC BY 2.5 Generic, boundaryYearRepresented 2005, admUnitCount 11.",
+          "local_cache_hint": "data/raw/bb_census/gb_brb_adm1_meta.json (git-ignored by .gitignore data/ rule)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/bb_census/"
+          ]
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "digest": "0.6.39",
+      "mapshaper": "scripts/lib/simplify_boundary.R (npx mapshaper)"
+    }
+  },
+  "source": {
+    "provider": "Barbados Statistical Service (BSS); geoBoundaries (William & Mary geoLab)",
+    "source_dataset_ids": [
+      "bb-census-2010-vol1-table-02-06-religion-by-parish",
+      "geoboundaries-brb-adm1-2005"
+    ],
+    "source_urls": [
+      "https://stats.gov.bb/wp-content/uploads/2020/03/2010-PHC-Report-Vol-1.pdf",
+      "https://stats.gov.bb/wp-content/uploads/2020/05/Barbados-2000-Census-Report.pdf",
+      "https://stats.gov.bb/wp-content/uploads/2024/02/2021-Population-and-Housing-Census.pdf",
+      "https://stats.gov.bb/open-licence-agreement/",
+      "https://stats.gov.bb/terms-and-conditions/",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BRB/ADM1/geoBoundaries-BRB-ADM1.geojson",
+      "https://www.geoboundaries.org/api/current/gbOpen/BRB/ADM1/"
+    ],
+    "retrieved_at": "2026-07-12T00:00:00Z",
+    "licence": "The Barbados Statistical Service (BSS) publishes an Open Licence Agreement (stats.gov.bb/open-licence-agreement/) that governs use of BSS data. It grants 'a worldwide, royalty-free non-exclusive licence to freely use the data, copy, modify, translate, publish, adapt, distribute, create derivative works and value-added products for commercial and non-commercial purposes', conditioned on the acknowledgement-of-source notice. The required value-added-product notice is: 'This product was adapted from the Barbados Statistical Service's information, which is licensed under the Barbados Statistical Service's Open Licence Agreement.' The BSS Terms and Conditions confirm data use is subject to the Open Licence Agreement. Licence status: accepted. The boundary is Creative Commons Attribution 2.5 Generic.",
+    "citation": "BSS 2010 Population and Housing Census Volume 1 Table 02.06; geoBoundaries BRB ADM1 (gbOpen).",
+    "raw_redistribution": "The census PDFs and the geoBoundaries source GeoJSON are not committed; they remain in data/raw/bb_census/.",
+    "local_cache_hint": "data/raw/bb_census/ (git-ignored by .gitignore data/ rule)",
+    "raw_cache_durable_uris": [
+      "gs://pow-research-data/raw_sources/bb_census/"
+    ]
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/bb_census/bb_2010_PHC_Vol1.pdf",
+      "url": "https://stats.gov.bb/wp-content/uploads/2020/03/2010-PHC-Report-Vol-1.pdf",
+      "format": "pdf",
+      "bytes": 9691556,
+      "sha256": "1cc968a8b382ff1af629f65028d844fa82d2e947201d950d70755a9f5ef15e57",
+      "row_count": null,
+      "source_dataset_id": "bb-census-2010-vol1-table-02-06-religion-by-parish",
+      "used_in_public_product": true,
+      "periods": "2010",
+      "notes": "2010 Census Volume 1; Table 02.06 Religion by parish (integer full-count, Both Sexes). Both margins close to 226,193.",
+      "local_cache_hint": "data/raw/bb_census/bb_2010_PHC_Vol1.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/bb_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/bb_census/bb_2000_Census_Report.pdf",
+      "url": "https://stats.gov.bb/wp-content/uploads/2020/05/Barbados-2000-Census-Report.pdf",
+      "format": "pdf",
+      "bytes": 1243911,
+      "sha256": "14789d61db8afb6c5090ab1a323340363bb61a4008c8b7825255ccfc8a947af9",
+      "row_count": null,
+      "source_dataset_id": "bb-census-2000-report-table-2-7-national-religion",
+      "used_in_public_product": false,
+      "periods": "1990;2000",
+      "notes": "2000 National Census Report (CARICOM Secretariat); Table 2.7 national religion for 1990 and 2000. National only, no parish religion cross-tab. Context, not a shipped subnational source.",
+      "local_cache_hint": "data/raw/bb_census/bb_2000_Census_Report.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/bb_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/bb_census/bb_2021_PHC.pdf",
+      "url": "https://stats.gov.bb/wp-content/uploads/2024/02/2021-Population-and-Housing-Census.pdf",
+      "format": "pdf",
+      "bytes": 2141565,
+      "sha256": "f4f6f5faa539c834635a1454c6733d34cd81754ea597976e2d3d863f52089bd5",
+      "row_count": null,
+      "source_dataset_id": "bb-census-2021-report",
+      "used_in_public_product": false,
+      "periods": "2021",
+      "notes": "2021 Population and Housing Census Report; religion collected (questionnaire P11) but no religion table published (national or parish). Documents the missing 2021 parish wave.",
+      "local_cache_hint": "data/raw/bb_census/bb_2021_PHC.pdf (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/bb_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/bb_census/bss_open_licence_agreement.html",
+      "url": "https://stats.gov.bb/open-licence-agreement/",
+      "format": "html",
+      "bytes": 144626,
+      "sha256": "d9741e1cf974885fab8ace12d9c45d14dfd6dc3dc9601335a2597e7a1c6e2902",
+      "row_count": null,
+      "source_dataset_id": "bb-census-2010-vol1-table-02-06-religion-by-parish",
+      "used_in_public_product": false,
+      "periods": "2026",
+      "notes": "BSS Open Licence Agreement (verbatim licence grant and acknowledgement-of-source notice).",
+      "local_cache_hint": "data/raw/bb_census/bss_open_licence_agreement.html (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/bb_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/bb_census/bss_terms.html",
+      "url": "https://stats.gov.bb/terms-and-conditions/",
+      "format": "html",
+      "bytes": 144148,
+      "sha256": "e8db1118387c1282cce2d66e3f1815beee24678fcc4aeb800f72596222619f15",
+      "row_count": null,
+      "source_dataset_id": "bb-census-2010-vol1-table-02-06-religion-by-parish",
+      "used_in_public_product": false,
+      "periods": "2026",
+      "notes": "BSS Terms and Conditions; 'Terms of Use of Data ... subject to the requirements set forth under the Open Licence Agreement'.",
+      "local_cache_hint": "data/raw/bb_census/bss_terms.html (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/bb_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/bb_census/geoBoundaries-BRB-ADM1.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BRB/ADM1/geoBoundaries-BRB-ADM1.geojson",
+      "format": "geojson",
+      "bytes": 47860,
+      "sha256": "b51cbd344b87ffa332e6ca2003ea9b77d5ff43d00d37eec951665f5c08b31b8f",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-brb-adm1-2005",
+      "used_in_public_product": true,
+      "periods": "2005",
+      "notes": "geoBoundaries BRB ADM1 GeoJSON; 11 parishes, CC BY 2.5 Generic. Pinned commit 9469f09.",
+      "local_cache_hint": "data/raw/bb_census/geoBoundaries-BRB-ADM1.geojson (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/bb_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/bb_census/gb_brb_adm1_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/BRB/ADM1/",
+      "format": "json",
+      "bytes": 1708,
+      "sha256": "8065e71423d2c43b04a0a4ea5b2a13406d0b21f925a2a27ac4a69b7a27b91141",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-brb-adm1-2005",
+      "used_in_public_product": false,
+      "periods": "2005",
+      "notes": "geoBoundaries BRB ADM1 metadata; records CC BY 2.5 Generic, boundaryYearRepresented 2005, admUnitCount 11.",
+      "local_cache_hint": "data/raw/bb_census/gb_brb_adm1_meta.json (git-ignored by .gitignore data/ rule)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/bb_census/"
+      ]
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/bb/data/area_summary_parish.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 31177,
+      "sha256": "7bdf778a9ac207d6152a414870a55986341a4df23b4e46dfd4c7670b0f5fa619",
+      "row_count": 11,
+      "feature_count": null,
+      "content": "Barbados 11-parish census-affiliation area summary for 2010.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "bss_open_licence_agreement"
+    },
+    {
+      "uri": "repo:apps/regions/bb/data/area_summary_parish.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 16343,
+      "sha256": "b21b4bc3f9db0f9e6fc9d84e10a601f661ee59096a5f983b771ea844f84fd0de",
+      "row_count": 11,
+      "feature_count": null,
+      "content": "Flattened Barbados 11-parish census-affiliation rows for 2010.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "bss_open_licence_agreement"
+    },
+    {
+      "uri": "repo:apps/regions/bb/data/bb_parish_2005.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 25121,
+      "sha256": "302c1f13f84021dd13b52ba4a457c8fc578d22a3d2a81537e04a3d4b4ad48144",
+      "row_count": null,
+      "feature_count": 11,
+      "content": "Simplified geoBoundaries BRB ADM1 11-parish boundary GeoJSON.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_cc_by_2_5_generic"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/bb/data/area_summary_parish.json",
+      "sha256": "7bdf778a9ac207d6152a414870a55986341a4df23b4e46dfd4c7670b0f5fa619",
+      "built_by": "scripts/build_bb_area_summary.R",
+      "notes": "11 parishes x 1 wave = 11 rows; all-persons universe; no suppressed cells in the headline slots."
+    },
+    {
+      "uri": "repo:apps/regions/bb/data/bb_parish_2005.geojson",
+      "sha256": "302c1f13f84021dd13b52ba4a457c8fc578d22a3d2a81537e04a3d4b4ad48144",
+      "built_by": "scripts/build_bb_area_summary.R",
+      "notes": "11 parish features from geoBoundaries BRB ADM1, simplified with mapshaper weighted keep-shapes."
+    }
+  ],
+  "validation": {
+    "status": "passed_with_warnings",
+    "commands": [
+      "Rscript scripts/build_bb_area_summary.R",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/bb/data/area_summary_parish.json",
+      "bash scripts/validate_manifests.sh"
+    ],
+    "gate_2010": {
+      "status": "passed",
+      "both_margins_close_to": 226193,
+      "parish_column_checks": 11,
+      "religion_row_checks": 23,
+      "records": [
+        {
+          "year": 2010,
+          "margin": "parish_column",
+          "key": "St. Michael",
+          "computed": 69604,
+          "printed": 69604,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "parish_column",
+          "key": "Christ Church",
+          "computed": 43127,
+          "printed": 43127,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "parish_column",
+          "key": "St. George",
+          "computed": 18203,
+          "printed": 18203,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "parish_column",
+          "key": "St. Philip",
+          "computed": 23788,
+          "printed": 23788,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "parish_column",
+          "key": "St. John",
+          "computed": 8617,
+          "printed": 8617,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "parish_column",
+          "key": "St. James",
+          "computed": 21258,
+          "printed": 21258,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "parish_column",
+          "key": "St. Thomas",
+          "computed": 12035,
+          "printed": 12035,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "parish_column",
+          "key": "St. Joseph",
+          "computed": 5939,
+          "printed": 5939,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "parish_column",
+          "key": "St. Andrew",
+          "computed": 4631,
+          "printed": 4631,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "parish_column",
+          "key": "St. Peter",
+          "computed": 10382,
+          "printed": 10382,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "parish_column",
+          "key": "St. Lucy",
+          "computed": 8609,
+          "printed": 8609,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Adventist",
+          "computed": 13437,
+          "printed": 13437,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Anglican",
+          "computed": 53969,
+          "printed": 53969,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Baptist",
+          "computed": 4082,
+          "printed": 4082,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Brethren",
+          "computed": 1075,
+          "printed": 1075,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Church of God",
+          "computed": 5356,
+          "printed": 5356,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Jehovah Witness",
+          "computed": 4515,
+          "printed": 4515,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Methodist",
+          "computed": 9461,
+          "printed": 9461,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Moravian",
+          "computed": 2692,
+          "printed": 2692,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Mormon",
+          "computed": 235,
+          "printed": 235,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Nazarene",
+          "computed": 7300,
+          "printed": 7300,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Pentecostal",
+          "computed": 44093,
+          "printed": 44093,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Roman Catholic",
+          "computed": 8679,
+          "printed": 8679,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Salvation Army",
+          "computed": 879,
+          "printed": 879,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Wesleyan",
+          "computed": 7701,
+          "printed": 7701,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Other Christian",
+          "computed": 7567,
+          "printed": 7567,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Baha'i",
+          "computed": 98,
+          "printed": 98,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Hindu",
+          "computed": 1055,
+          "printed": 1055,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Jewish",
+          "computed": 103,
+          "printed": 103,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Muslim",
+          "computed": 1605,
+          "printed": 1605,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Rastafarian",
+          "computed": 2332,
+          "printed": 2332,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Other Non-Christian",
+          "computed": 624,
+          "printed": 624,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "None",
+          "computed": 46559,
+          "printed": 46559,
+          "difference": 0
+        },
+        {
+          "year": 2010,
+          "margin": "religion_row",
+          "key": "Not Stated",
+          "computed": 2776,
+          "printed": 2776,
+          "difference": 0
+        }
+      ]
+    },
+    "boundary_validation": {
+      "status": "passed",
+      "feature_count": 11,
+      "distinct_geometry_hashes": 11,
+      "geometry_hashes": [
+        "ff202333ec51b4d92da22c10ea350f77ddc6400d09c2c9ae573040fa0caaeb6e",
+        "fb033d4877d51d0f26b2820a222970efe7acdf9c1c7bba441072b1e26bd29ecb",
+        "3eb4673dc17d03476803e612261a31294d05356ad643c0366350cbe36d64d2cd",
+        "f51b31a14a7674225be35d16dda62646d93288a84696465ceb501ee1f7131063",
+        "678682c4259e169b4836cd2de11033777f1ae3e820faa8e14e2e655a63663da3",
+        "b1bfda4dcd13ca112901d181407bcc4adc85b861765c87ce23ca382a3280c38b",
+        "125dd875624a8b509768a332e3f597c8748a652cd46bfb7221aa478cda39fdef",
+        "6dfe2e742e2315431b53627ee4a2b3946c9067ab70a803883684e1e51f60fc92",
+        "2c72d708310377fb2a53658101a311f3df0bde025139573d16b3ce1cb8a93ad8",
+        "83774ffef354fa243cdabfbe86dc8ce5dd0d26b474a98096c0b6dfc1ac517e20",
+        "c6b95dff3cff0e86926da3efccd1b86227dc77453e026b86ab77ab5336beaee9"
+      ],
+      "bbox": {
+        "xmin": -59.6507074,
+        "ymin": 13.0450576,
+        "xmax": -59.4203442,
+        "ymax": 13.3346488
+      },
+      "dateline_note": "extent lon -59.65 to -59.42E, lat 13.04 to 13.34N; far from the antimeridian, no dateline handling needed",
+      "output_bytes": 25121,
+      "simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 100,
+        "bytes": 25121
+      },
+      "licence": "Creative Commons Attribution 2.5 Generic",
+      "adm_unit_count": "11"
+    },
+    "join_coverage": {
+      "matched_parishes": 11,
+      "expected_parishes": 11,
+      "unmatched_parishes": [],
+      "unused_boundary_features": []
+    },
+    "notes": "2010 Table 02.06 closes integer-exact at both margins (national total 226,193). Boundary joins 11/11 to geoBoundaries BRB ADM1 via a St.->Saint crosswalk with 11 distinct geometry hashes.",
+    "warnings": [
+      "STAGED product: no page, no hub link. The page and the single-wave-subnational display decision are the conductor's (parallel to the Antigua task-8 single-wave parish question).",
+      "Single-wave product: religion is cross-tabulated by parish only in 2010. 1990/2000 religion is national only (2000 Report Table 2.7); 2021 collected religion (P11) but published no religion table.",
+      "The religion denominator is the Tabulable Population (226,193), not the Estimated Resident Population (277,821); the difference is the census undercount.",
+      "Printed '-' in Table 02.06 is transcribed as 0 (structural zero cells for small denominations in small parishes)."
+    ]
+  },
+  "construct_notes": [
+    "The construct is census affiliation: each resident's reported religion/denomination (questionnaire item 'To which religion/denomination do you belong?'), asked of the whole resident population, not practice, attendance, or membership.",
+    "The public product carries three headline fields per parish-wave: population total, religious affiliation percent, and no-religion percent. Place-density metrics are null (no governed place-of-worship snapshot).",
+    "Single wave (2010): religion is cross-tabulated by parish only in the 2010 census (Table 02.06). 1990 and 2000 religion are national only (2000 National Census Report Table 2.7); the 2021 census collected religion (questionnaire P11) but published no religion table in any geography.",
+    "The 2010 table is an integer full-count of the Tabulable Population (226,193). The Estimated Resident Population (277,821) is the census's separate adjusted total; the difference is the undercount and is not part of the religion denominator.",
+    "Slot design (ordinary two-slot, SB/FM/KI precedent): religious_affiliation_percent is the share reporting a named religion/denomination (population minus None minus Not Stated); no_religion_percent is the single None line. Not Stated stays in the denominator and in neither slot, so the two shares need not sum to 100. Barbados has a real None category, so no minority-share (task-6) treatment applies.",
+    "Licence accepted: the BSS Open Licence Agreement grants free reuse (commercial and non-commercial) with the acknowledgement-of-source notice. The product ships with the required value-added-product attribution to the Barbados Statistical Service. The boundary is geoBoundaries BRB ADM1, 11 parishes, Creative Commons Attribution 2.5 Generic, joined one-to-one via a St.->Saint crosswalk."
+  ],
+  "deferred_sources": [
+    {
+      "source_dataset_id": "bb-census-2000-report-table-2-7-national-religion",
+      "status": "deferred",
+      "url": "https://stats.gov.bb/wp-content/uploads/2020/05/Barbados-2000-Census-Report.pdf",
+      "local_path": "data/raw/bb_census/bb_2000_Census_Report.pdf",
+      "notes": "2000 National Census Report Table 2.7: national religion for 1990 and 2000 (no parish breakdown). A deeper-history national series, not a parish product."
+    },
+    {
+      "source_dataset_id": "bb-census-2021-parish-religion",
+      "status": "not_published",
+      "url": "https://stats.gov.bb/wp-content/uploads/2024/02/2021-Population-and-Housing-Census.pdf",
+      "local_path": "data/raw/bb_census/bb_2021_PHC.pdf",
+      "notes": "The 2021 census collected religion (questionnaire P11 'Are you affiliated with any religious denomination?' / 'What is your religious affiliation/denomination?') but published no religion table in the 2021 report. A 2021 parish religion table is a BSS data request (courtesy ask)."
+    },
+    {
+      "source_dataset_id": "bss-data-request-2021-parish-religion",
+      "status": "not_pinned",
+      "url": "https://stats.gov.bb",
+      "local_path": null,
+      "notes": "A BSS data request for the 2021 parish religion cross-tab would extend the product to two waves; recorded as a courtesy ask for the PI."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "accepted",
+  "licence_basis": "bss_open_licence_agreement",
+  "downstream_status": "staged",
+  "source_datasets": [
+    {
+      "source_dataset_id": "bb-census-2010-vol1-table-02-06-religion-by-parish",
+      "name": "Barbados 2010 Population and Housing Census, Volume 1, Table 02.06: Total Population by Parish, Sex and Religion",
+      "provider": "Barbados Statistical Service (BSS)",
+      "url": "https://stats.gov.bb/wp-content/uploads/2020/03/2010-PHC-Report-Vol-1.pdf",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/bb_census/bb_2010_PHC_Vol1.pdf",
+      "licence": {
+        "name": "The Barbados Statistical Service (BSS) publishes an Open Licence Agreement (stats.gov.bb/open-licence-agreement/) that governs use of BSS data. It grants 'a worldwide, royalty-free non-exclusive licence to freely use the data, copy, modify, translate, publish, adapt, distribute, create derivative works and value-added products for commercial and non-commercial purposes', conditioned on the acknowledgement-of-source notice. The required value-added-product notice is: 'This product was adapted from the Barbados Statistical Service's information, which is licensed under the Barbados Statistical Service's Open Licence Agreement.' The BSS Terms and Conditions confirm data use is subject to the Open Licence Agreement. Licence status: accepted. The boundary is Creative Commons Attribution 2.5 Generic.",
+        "url": "https://stats.gov.bb/open-licence-agreement/",
+        "attribution": "This product was adapted from the Barbados Statistical Service's information, which is licensed under the Barbados Statistical Service's Open Licence Agreement."
+      },
+      "citation": "Barbados Statistical Service, 2010 Population and Housing Census, Volume 1, Table 02.06.",
+      "access_limits": null,
+      "redistribution_limits": "Derived parish summaries ship under the BSS Open Licence Agreement (free reuse with the acknowledgement-of-source notice). Raw census PDFs are not committed.",
+      "notes": "Integer full-count; 23-category frame; Both Sexes rows. Both margins close exactly: every parish column and every religion row sum to the printed national total of 226,193. No cell suppression. Printed '-' transcribed as 0. The denominator is the Tabulable Population (226,193); the Estimated Resident Population (277,821) is a separate adjusted figure and is not the religion denominator."
+    },
+    {
+      "source_dataset_id": "geoboundaries-brb-adm1-2005",
+      "name": "geoBoundaries BRB ADM1 (11 parishes)",
+      "provider": "geoBoundaries (William & Mary geoLab); boundary source Wikimedia Commons",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BRB/ADM1/geoBoundaries-BRB-ADM1.geojson",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/bb_census/geoBoundaries-BRB-ADM1.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution 2.5 Generic",
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/BRB/ADM1/",
+        "attribution": "geoBoundaries (gbOpen); boundary source Wikimedia Commons"
+      },
+      "citation": "geoBoundaries BRB ADM1 (gbOpen, pinned 9469f09), 11 parish boundaries.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed under Creative Commons Attribution 2.5 Generic (attribution to geoBoundaries / Wikimedia Commons).",
+      "notes": "11 ADM1 parishes, boundaryYearRepresented 2005, joined one-to-one to the census parishes via a St.->Saint name crosswalk. The extent spans lon -59.65 to -59.42E and lat 13.04 to 13.34N, far from the antimeridian; no dateline handling is needed."
+    }
+  ],
+  "notes": "STAGED product (no page, no hub link). The committed products are the derived 11-parish area summary (11 rows for 2010) and the simplified geoBoundaries BRB ADM1 boundary. Licence accepted (BSS Open Licence Agreement, free reuse with the acknowledgement-of-source notice); boundary CC BY 2.5 Generic. Single-wave parish product; the page decision is the conductor's, parallel to the Antigua task-8 single-wave-subnational question."
+}

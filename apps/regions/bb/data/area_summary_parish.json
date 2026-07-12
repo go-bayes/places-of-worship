@@ -1,0 +1,420 @@
+{
+  "schema_version": "area-summary.v1",
+  "generated_at": "2026-07-12T00:00:00Z",
+  "generated_by": "scripts/build_bb_area_summary.R",
+  "country_code": "BB",
+  "boundary_set": {
+    "boundary_set_id": "bb-parish-2005-geoboundaries-adm1",
+    "country_code": "BB",
+    "level": "parish",
+    "vintage": "2005",
+    "source_dataset_id": "geoboundaries-brb-adm1-2005"
+  },
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "No governed place-of-worship snapshot ships in the Barbados census product.",
+    "notes": "Place counts and density metrics remain null."
+  },
+  "source_datasets": [
+    {
+      "source_dataset_id": "bb-census-2010-vol1-table-02-06-religion-by-parish",
+      "name": "Barbados 2010 Population and Housing Census, Volume 1, Table 02.06: Total Population by Parish, Sex and Religion",
+      "provider": "Barbados Statistical Service (BSS)",
+      "url": "https://stats.gov.bb/wp-content/uploads/2020/03/2010-PHC-Report-Vol-1.pdf",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/bb_census/bb_2010_PHC_Vol1.pdf",
+      "licence": {
+        "name": "The Barbados Statistical Service (BSS) publishes an Open Licence Agreement (stats.gov.bb/open-licence-agreement/) that governs use of BSS data. It grants 'a worldwide, royalty-free non-exclusive licence to freely use the data, copy, modify, translate, publish, adapt, distribute, create derivative works and value-added products for commercial and non-commercial purposes', conditioned on the acknowledgement-of-source notice. The required value-added-product notice is: 'This product was adapted from the Barbados Statistical Service's information, which is licensed under the Barbados Statistical Service's Open Licence Agreement.' The BSS Terms and Conditions confirm data use is subject to the Open Licence Agreement. Licence status: accepted. The boundary is Creative Commons Attribution 2.5 Generic.",
+        "url": "https://stats.gov.bb/open-licence-agreement/",
+        "attribution": "This product was adapted from the Barbados Statistical Service's information, which is licensed under the Barbados Statistical Service's Open Licence Agreement."
+      },
+      "citation": "Barbados Statistical Service, 2010 Population and Housing Census, Volume 1, Table 02.06.",
+      "access_limits": null,
+      "redistribution_limits": "Derived parish summaries ship under the BSS Open Licence Agreement (free reuse with the acknowledgement-of-source notice). Raw census PDFs are not committed.",
+      "notes": "Integer full-count; 23-category frame; Both Sexes rows. Both margins close exactly: every parish column and every religion row sum to the printed national total of 226,193. No cell suppression. Printed '-' transcribed as 0. The denominator is the Tabulable Population (226,193); the Estimated Resident Population (277,821) is a separate adjusted figure and is not the religion denominator."
+    },
+    {
+      "source_dataset_id": "geoboundaries-brb-adm1-2005",
+      "name": "geoBoundaries BRB ADM1 (11 parishes)",
+      "provider": "geoBoundaries (William & Mary geoLab); boundary source Wikimedia Commons",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BRB/ADM1/geoBoundaries-BRB-ADM1.geojson",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/bb_census/geoBoundaries-BRB-ADM1.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution 2.5 Generic",
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/BRB/ADM1/",
+        "attribution": "geoBoundaries (gbOpen); boundary source Wikimedia Commons"
+      },
+      "citation": "geoBoundaries BRB ADM1 (gbOpen, pinned 9469f09), 11 parish boundaries.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed under Creative Commons Attribution 2.5 Generic (attribution to geoBoundaries / Wikimedia Commons).",
+      "notes": "11 ADM1 parishes, boundaryYearRepresented 2005, joined one-to-one to the census parishes via a St.->Saint name crosswalk. The extent spans lon -59.65 to -59.42E and lat 13.04 to 13.34N, far from the antimeridian; no dateline handling is needed."
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_id": "population_total",
+      "label": "Census population total",
+      "description": "Parish all-persons Tabulable Population represented in the 2010 religion table.",
+      "unit": "count",
+      "denominator_indicator_id": null,
+      "method": "Printed parish Total from 2010 Census Volume 1 Table 02.06 (Both Sexes).",
+      "temporal_coverage": "2010",
+      "spatial_coverage": "Barbados parishes (11)",
+      "quality_notes": "Religion is asked of the whole resident population (no age restriction). The denominator is the Tabulable Population (national 226,193), distinct from the Estimated Resident Population (277,821); the difference is the census undercount and is not part of the religion denominator."
+    },
+    {
+      "indicator_id": "religious_affiliation_percent",
+      "label": "Religious affiliation %",
+      "description": "Share of the parish population reporting affiliation with a named religion or denomination.",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "100 * (population - None - Not Stated) / population.",
+      "temporal_coverage": "2010",
+      "spatial_coverage": "Barbados parishes (11)",
+      "quality_notes": "Single wave (2010): religion is cross-tabulated by parish only in the 2010 census; 1990 and 2000 religion are published nationally only (2000 Report Table 2.7), and 2021 collected religion (questionnaire P11) but published no religion table. Percentages use each parish's Tabulable Population Total. The Not Stated line stays in the denominator and outside both headline numerators, so the two shares need not sum to 100%."
+    },
+    {
+      "indicator_id": "no_religion_percent",
+      "label": "No religious affiliation %",
+      "description": "Share of the parish population in the census None line.",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "100 * None / population. The Not Stated line is not part of this slot.",
+      "temporal_coverage": "2010",
+      "spatial_coverage": "Barbados parishes (11)",
+      "quality_notes": "The national no-religion share was 20.6% in 2010 (46,559 / 226,193); the construct is the share reporting None, read within each parish's own denominator. Percentages use each parish's Tabulable Population Total. The Not Stated line stays in the denominator and outside both headline numerators, so the two shares need not sum to 100%."
+    }
+  ],
+  "visual_layers": [
+    {
+      "visual_layer_id": "bb-parish-religious-affiliation",
+      "label": "Religious affiliation %",
+      "description": "Barbados census-affiliation share by parish (2010).",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "religious_affiliation_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "parish Tabulable Population, including a Not Stated residual"
+      },
+      "colour_scale": "sequential",
+      "time_control": "none",
+      "aggregation_rule": "reported parish value",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": true,
+      "notes": "Census affiliation, not practice, attendance, or membership. Single wave (2010)."
+    },
+    {
+      "visual_layer_id": "bb-parish-no-religion",
+      "label": "No religious affiliation %",
+      "description": "Barbados census no-religion share by parish (2010).",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "no_religion_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "parish Tabulable Population"
+      },
+      "colour_scale": "sequential",
+      "time_control": "none",
+      "aggregation_rule": "reported parish value",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "The source category is None. The Not Stated line is excluded from this slot."
+    }
+  ],
+  "rows": [
+    {
+      "country_code": "BB",
+      "boundary_set_id": "bb-parish-2005-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "bb-parish-2005-geoboundaries-adm1:st_michael",
+      "area_code": "st_michael",
+      "area_name": "St. Michael",
+      "year": 2010,
+      "population_total": 69604,
+      "population_total_basis": "2010 Population and Housing Census, Volume 1, Table 02.06 'Total Population by Parish, Sex and Religion' (Both Sexes), integer full-count. The denominator is the printed parish Total (Tabulable Population). Religious affiliation is the parish population minus the None and Not Stated lines.",
+      "religious_affiliation_count": 52341,
+      "religious_affiliation_percent": 75.1983,
+      "no_religion_count": 16421,
+      "no_religion_percent": 23.592,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 40.978,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "bb-census-2010-vol1-table-02-06-religion-by-parish",
+        "geoboundaries-brb-adm1-2005"
+      ],
+      "quality_flag": "frame_2010_twenty_three_category_integer_full_count;none_line=None;nonresponse_line=Not Stated;printed_dash_transcribed_as_zero;census_affiliation;all_persons_universe;single_select_reported_denomination;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;not_stated_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;single_wave_2010_parish_product;denominator_is_tabulable_population_226193_not_estimated_resident_277821;licence_accepted_bss_open_licence_agreement;boundary_cc_by_2_5_generic;source_categories_verbatim=Adventist=3947;Anglican=13783;Baptist=1435;Brethren=275;Church of God=1008;Jehovah Witness=1157;Methodist=3726;Moravian=745;Mormon=83;Nazarene=1940;Pentecostal=13170;Roman Catholic=3474;Salvation Army=183;Wesleyan=1987;Other Christian=2600;Baha'i=25;Hindu=404;Jewish=33;Muslim=1125;Rastafarian=965;Other Non-Christian=276;None=16421;Not Stated=842"
+    },
+    {
+      "country_code": "BB",
+      "boundary_set_id": "bb-parish-2005-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "bb-parish-2005-geoboundaries-adm1:christ_church",
+      "area_code": "christ_church",
+      "area_name": "Christ Church",
+      "year": 2010,
+      "population_total": 43127,
+      "population_total_basis": "2010 Population and Housing Census, Volume 1, Table 02.06 'Total Population by Parish, Sex and Religion' (Both Sexes), integer full-count. The denominator is the printed parish Total (Tabulable Population). Religious affiliation is the parish population minus the None and Not Stated lines.",
+      "religious_affiliation_count": 34741,
+      "religious_affiliation_percent": 80.5551,
+      "no_religion_count": 8002,
+      "no_religion_percent": 18.5545,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 60.6422,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "bb-census-2010-vol1-table-02-06-religion-by-parish",
+        "geoboundaries-brb-adm1-2005"
+      ],
+      "quality_flag": "frame_2010_twenty_three_category_integer_full_count;none_line=None;nonresponse_line=Not Stated;printed_dash_transcribed_as_zero;census_affiliation;all_persons_universe;single_select_reported_denomination;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;not_stated_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;single_wave_2010_parish_product;denominator_is_tabulable_population_226193_not_estimated_resident_277821;licence_accepted_bss_open_licence_agreement;boundary_cc_by_2_5_generic;source_categories_verbatim=Adventist=2053;Anglican=10606;Baptist=1021;Brethren=284;Church of God=702;Jehovah Witness=684;Methodist=2415;Moravian=300;Mormon=100;Nazarene=1109;Pentecostal=9160;Roman Catholic=2420;Salvation Army=113;Wesleyan=1244;Other Christian=1659;Baha'i=33;Hindu=221;Jewish=25;Muslim=168;Rastafarian=323;Other Non-Christian=101;None=8002;Not Stated=384"
+    },
+    {
+      "country_code": "BB",
+      "boundary_set_id": "bb-parish-2005-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "bb-parish-2005-geoboundaries-adm1:st_george",
+      "area_code": "st_george",
+      "area_name": "St. George",
+      "year": 2010,
+      "population_total": 18203,
+      "population_total_basis": "2010 Population and Housing Census, Volume 1, Table 02.06 'Total Population by Parish, Sex and Religion' (Both Sexes), integer full-count. The denominator is the printed parish Total (Tabulable Population). Religious affiliation is the parish population minus the None and Not Stated lines.",
+      "religious_affiliation_count": 14024,
+      "religious_affiliation_percent": 77.0422,
+      "no_religion_count": 4018,
+      "no_religion_percent": 22.0733,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 43.1125,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "bb-census-2010-vol1-table-02-06-religion-by-parish",
+        "geoboundaries-brb-adm1-2005"
+      ],
+      "quality_flag": "frame_2010_twenty_three_category_integer_full_count;none_line=None;nonresponse_line=Not Stated;printed_dash_transcribed_as_zero;census_affiliation;all_persons_universe;single_select_reported_denomination;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;not_stated_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;single_wave_2010_parish_product;denominator_is_tabulable_population_226193_not_estimated_resident_277821;licence_accepted_bss_open_licence_agreement;boundary_cc_by_2_5_generic;source_categories_verbatim=Adventist=1242;Anglican=5090;Baptist=153;Brethren=165;Church of God=477;Jehovah Witness=364;Methodist=403;Moravian=198;Mormon=8;Nazarene=926;Pentecostal=2914;Roman Catholic=504;Salvation Army=3;Wesleyan=729;Other Christian=476;Baha'i=4;Hindu=93;Jewish=6;Muslim=27;Rastafarian=205;Other Non-Christian=37;None=4018;Not Stated=161"
+    },
+    {
+      "country_code": "BB",
+      "boundary_set_id": "bb-parish-2005-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "bb-parish-2005-geoboundaries-adm1:st_philip",
+      "area_code": "st_philip",
+      "area_name": "St. Philip",
+      "year": 2010,
+      "population_total": 23788,
+      "population_total_basis": "2010 Population and Housing Census, Volume 1, Table 02.06 'Total Population by Parish, Sex and Religion' (Both Sexes), integer full-count. The denominator is the printed parish Total (Tabulable Population). Religious affiliation is the parish population minus the None and Not Stated lines.",
+      "religious_affiliation_count": 19495,
+      "religious_affiliation_percent": 81.9531,
+      "no_religion_count": 3878,
+      "no_religion_percent": 16.3023,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 62.3995,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "bb-census-2010-vol1-table-02-06-religion-by-parish",
+        "geoboundaries-brb-adm1-2005"
+      ],
+      "quality_flag": "frame_2010_twenty_three_category_integer_full_count;none_line=None;nonresponse_line=Not Stated;printed_dash_transcribed_as_zero;census_affiliation;all_persons_universe;single_select_reported_denomination;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;not_stated_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;single_wave_2010_parish_product;denominator_is_tabulable_population_226193_not_estimated_resident_277821;licence_accepted_bss_open_licence_agreement;boundary_cc_by_2_5_generic;source_categories_verbatim=Adventist=1218;Anglican=7107;Baptist=638;Brethren=37;Church of God=494;Jehovah Witness=762;Methodist=1158;Moravian=109;Mormon=24;Nazarene=1148;Pentecostal=4086;Roman Catholic=405;Salvation Army=148;Wesleyan=918;Other Christian=898;Baha'i=7;Hindu=91;Jewish=4;Muslim=33;Rastafarian=163;Other Non-Christian=47;None=3878;Not Stated=415"
+    },
+    {
+      "country_code": "BB",
+      "boundary_set_id": "bb-parish-2005-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "bb-parish-2005-geoboundaries-adm1:st_john",
+      "area_code": "st_john",
+      "area_name": "St. John",
+      "year": 2010,
+      "population_total": 8617,
+      "population_total_basis": "2010 Population and Housing Census, Volume 1, Table 02.06 'Total Population by Parish, Sex and Religion' (Both Sexes), integer full-count. The denominator is the printed parish Total (Tabulable Population). Religious affiliation is the parish population minus the None and Not Stated lines.",
+      "religious_affiliation_count": 6736,
+      "religious_affiliation_percent": 78.1711,
+      "no_religion_count": 1789,
+      "no_religion_percent": 20.7613,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 34.4416,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "bb-census-2010-vol1-table-02-06-religion-by-parish",
+        "geoboundaries-brb-adm1-2005"
+      ],
+      "quality_flag": "frame_2010_twenty_three_category_integer_full_count;none_line=None;nonresponse_line=Not Stated;printed_dash_transcribed_as_zero;census_affiliation;all_persons_universe;single_select_reported_denomination;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;not_stated_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;single_wave_2010_parish_product;denominator_is_tabulable_population_226193_not_estimated_resident_277821;licence_accepted_bss_open_licence_agreement;boundary_cc_by_2_5_generic;source_categories_verbatim=Adventist=431;Anglican=3232;Baptist=43;Brethren=23;Church of God=66;Jehovah Witness=155;Methodist=60;Moravian=374;Mormon=1;Nazarene=147;Pentecostal=1176;Roman Catholic=144;Salvation Army=3;Wesleyan=556;Other Christian=131;Baha'i=2;Hindu=29;Jewish=0;Muslim=14;Rastafarian=125;Other Non-Christian=24;None=1789;Not Stated=92"
+    },
+    {
+      "country_code": "BB",
+      "boundary_set_id": "bb-parish-2005-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "bb-parish-2005-geoboundaries-adm1:st_james",
+      "area_code": "st_james",
+      "area_name": "St. James",
+      "year": 2010,
+      "population_total": 21258,
+      "population_total_basis": "2010 Population and Housing Census, Volume 1, Table 02.06 'Total Population by Parish, Sex and Religion' (Both Sexes), integer full-count. The denominator is the printed parish Total (Tabulable Population). Religious affiliation is the parish population minus the None and Not Stated lines.",
+      "religious_affiliation_count": 17371,
+      "religious_affiliation_percent": 81.7151,
+      "no_religion_count": 3559,
+      "no_religion_percent": 16.7419,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 33.3445,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "bb-census-2010-vol1-table-02-06-religion-by-parish",
+        "geoboundaries-brb-adm1-2005"
+      ],
+      "quality_flag": "frame_2010_twenty_three_category_integer_full_count;none_line=None;nonresponse_line=Not Stated;printed_dash_transcribed_as_zero;census_affiliation;all_persons_universe;single_select_reported_denomination;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;not_stated_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;single_wave_2010_parish_product;denominator_is_tabulable_population_226193_not_estimated_resident_277821;licence_accepted_bss_open_licence_agreement;boundary_cc_by_2_5_generic;source_categories_verbatim=Adventist=1027;Anglican=5344;Baptist=203;Brethren=133;Church of God=893;Jehovah Witness=538;Methodist=1004;Moravian=175;Mormon=9;Nazarene=885;Pentecostal=4276;Roman Catholic=1067;Salvation Army=116;Wesleyan=434;Other Christian=700;Baha'i=16;Hindu=83;Jewish=20;Muslim=166;Rastafarian=207;Other Non-Christian=75;None=3559;Not Stated=328"
+    },
+    {
+      "country_code": "BB",
+      "boundary_set_id": "bb-parish-2005-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "bb-parish-2005-geoboundaries-adm1:st_thomas",
+      "area_code": "st_thomas",
+      "area_name": "St. Thomas",
+      "year": 2010,
+      "population_total": 12035,
+      "population_total_basis": "2010 Population and Housing Census, Volume 1, Table 02.06 'Total Population by Parish, Sex and Religion' (Both Sexes), integer full-count. The denominator is the printed parish Total (Tabulable Population). Religious affiliation is the parish population minus the None and Not Stated lines.",
+      "religious_affiliation_count": 9497,
+      "religious_affiliation_percent": 78.9115,
+      "no_religion_count": 2404,
+      "no_religion_percent": 19.9751,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 33.5011,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "bb-census-2010-vol1-table-02-06-religion-by-parish",
+        "geoboundaries-brb-adm1-2005"
+      ],
+      "quality_flag": "frame_2010_twenty_three_category_integer_full_count;none_line=None;nonresponse_line=Not Stated;printed_dash_transcribed_as_zero;census_affiliation;all_persons_universe;single_select_reported_denomination;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;not_stated_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;single_wave_2010_parish_product;denominator_is_tabulable_population_226193_not_estimated_resident_277821;licence_accepted_bss_open_licence_agreement;boundary_cc_by_2_5_generic;source_categories_verbatim=Adventist=695;Anglican=2212;Baptist=81;Brethren=75;Church of God=530;Jehovah Witness=347;Methodist=176;Moravian=685;Mormon=1;Nazarene=503;Pentecostal=2841;Roman Catholic=271;Salvation Army=8;Wesleyan=412;Other Christian=438;Baha'i=1;Hindu=65;Jewish=13;Muslim=31;Rastafarian=89;Other Non-Christian=23;None=2404;Not Stated=134"
+    },
+    {
+      "country_code": "BB",
+      "boundary_set_id": "bb-parish-2005-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "bb-parish-2005-geoboundaries-adm1:st_joseph",
+      "area_code": "st_joseph",
+      "area_name": "St. Joseph",
+      "year": 2010,
+      "population_total": 5939,
+      "population_total_basis": "2010 Population and Housing Census, Volume 1, Table 02.06 'Total Population by Parish, Sex and Religion' (Both Sexes), integer full-count. The denominator is the printed parish Total (Tabulable Population). Religious affiliation is the parish population minus the None and Not Stated lines.",
+      "religious_affiliation_count": 4371,
+      "religious_affiliation_percent": 73.5982,
+      "no_religion_count": 1529,
+      "no_religion_percent": 25.7451,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 23.1612,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "bb-census-2010-vol1-table-02-06-religion-by-parish",
+        "geoboundaries-brb-adm1-2005"
+      ],
+      "quality_flag": "frame_2010_twenty_three_category_integer_full_count;none_line=None;nonresponse_line=Not Stated;printed_dash_transcribed_as_zero;census_affiliation;all_persons_universe;single_select_reported_denomination;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;not_stated_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;single_wave_2010_parish_product;denominator_is_tabulable_population_226193_not_estimated_resident_277821;licence_accepted_bss_open_licence_agreement;boundary_cc_by_2_5_generic;source_categories_verbatim=Adventist=483;Anglican=1617;Baptist=91;Brethren=67;Church of God=72;Jehovah Witness=102;Methodist=33;Moravian=72;Mormon=1;Nazarene=109;Pentecostal=948;Roman Catholic=75;Salvation Army=0;Wesleyan=430;Other Christian=160;Baha'i=1;Hindu=20;Jewish=0;Muslim=4;Rastafarian=79;Other Non-Christian=7;None=1529;Not Stated=39"
+    },
+    {
+      "country_code": "BB",
+      "boundary_set_id": "bb-parish-2005-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "bb-parish-2005-geoboundaries-adm1:st_andrew",
+      "area_code": "st_andrew",
+      "area_name": "St. Andrew",
+      "year": 2010,
+      "population_total": 4631,
+      "population_total_basis": "2010 Population and Housing Census, Volume 1, Table 02.06 'Total Population by Parish, Sex and Religion' (Both Sexes), integer full-count. The denominator is the printed parish Total (Tabulable Population). Religious affiliation is the parish population minus the None and Not Stated lines.",
+      "religious_affiliation_count": 3561,
+      "religious_affiliation_percent": 76.8948,
+      "no_religion_count": 1013,
+      "no_religion_percent": 21.8743,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 33.5936,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "bb-census-2010-vol1-table-02-06-religion-by-parish",
+        "geoboundaries-brb-adm1-2005"
+      ],
+      "quality_flag": "frame_2010_twenty_three_category_integer_full_count;none_line=None;nonresponse_line=Not Stated;printed_dash_transcribed_as_zero;census_affiliation;all_persons_universe;single_select_reported_denomination;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;not_stated_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;single_wave_2010_parish_product;denominator_is_tabulable_population_226193_not_estimated_resident_277821;licence_accepted_bss_open_licence_agreement;boundary_cc_by_2_5_generic;source_categories_verbatim=Adventist=345;Anglican=706;Baptist=99;Brethren=4;Church of God=277;Jehovah Witness=55;Methodist=10;Moravian=7;Mormon=0;Nazarene=160;Pentecostal=1360;Roman Catholic=22;Salvation Army=12;Wesleyan=261;Other Christian=137;Baha'i=0;Hindu=1;Jewish=1;Muslim=5;Rastafarian=94;Other Non-Christian=5;None=1013;Not Stated=57"
+    },
+    {
+      "country_code": "BB",
+      "boundary_set_id": "bb-parish-2005-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "bb-parish-2005-geoboundaries-adm1:st_peter",
+      "area_code": "st_peter",
+      "area_name": "St. Peter",
+      "year": 2010,
+      "population_total": 10382,
+      "population_total_basis": "2010 Population and Housing Census, Volume 1, Table 02.06 'Total Population by Parish, Sex and Religion' (Both Sexes), integer full-count. The denominator is the printed parish Total (Tabulable Population). Religious affiliation is the parish population minus the None and Not Stated lines.",
+      "religious_affiliation_count": 8240,
+      "religious_affiliation_percent": 79.3681,
+      "no_religion_count": 2012,
+      "no_religion_percent": 19.3797,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 34.043,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "bb-census-2010-vol1-table-02-06-religion-by-parish",
+        "geoboundaries-brb-adm1-2005"
+      ],
+      "quality_flag": "frame_2010_twenty_three_category_integer_full_count;none_line=None;nonresponse_line=Not Stated;printed_dash_transcribed_as_zero;census_affiliation;all_persons_universe;single_select_reported_denomination;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;not_stated_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;single_wave_2010_parish_product;denominator_is_tabulable_population_226193_not_estimated_resident_277821;licence_accepted_bss_open_licence_agreement;boundary_cc_by_2_5_generic;source_categories_verbatim=Adventist=842;Anglican=2781;Baptist=236;Brethren=7;Church of God=584;Jehovah Witness=192;Methodist=273;Moravian=19;Mormon=5;Nazarene=215;Pentecostal=2299;Roman Catholic=226;Salvation Army=96;Wesleyan=191;Other Christian=161;Baha'i=5;Hindu=19;Jewish=1;Muslim=23;Rastafarian=42;Other Non-Christian=23;None=2012;Not Stated=130"
+    },
+    {
+      "country_code": "BB",
+      "boundary_set_id": "bb-parish-2005-geoboundaries-adm1",
+      "boundary_level": "parish",
+      "area_unit_id": "bb-parish-2005-geoboundaries-adm1:st_lucy",
+      "area_code": "st_lucy",
+      "area_name": "St. Lucy",
+      "year": 2010,
+      "population_total": 8609,
+      "population_total_basis": "2010 Population and Housing Census, Volume 1, Table 02.06 'Total Population by Parish, Sex and Religion' (Both Sexes), integer full-count. The denominator is the printed parish Total (Tabulable Population). Religious affiliation is the parish population minus the None and Not Stated lines.",
+      "religious_affiliation_count": 6481,
+      "religious_affiliation_percent": 75.2817,
+      "no_religion_count": 1934,
+      "no_religion_percent": 22.4649,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 33.3744,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "bb-census-2010-vol1-table-02-06-religion-by-parish",
+        "geoboundaries-brb-adm1-2005"
+      ],
+      "quality_flag": "frame_2010_twenty_three_category_integer_full_count;none_line=None;nonresponse_line=Not Stated;printed_dash_transcribed_as_zero;census_affiliation;all_persons_universe;single_select_reported_denomination;religious_affiliation_percent_is_named_religion_share;no_religion_percent_is_none_line_only;not_stated_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;single_wave_2010_parish_product;denominator_is_tabulable_population_226193_not_estimated_resident_277821;licence_accepted_bss_open_licence_agreement;boundary_cc_by_2_5_generic;source_categories_verbatim=Adventist=1154;Anglican=1491;Baptist=82;Brethren=5;Church of God=253;Jehovah Witness=159;Methodist=203;Moravian=8;Mormon=3;Nazarene=158;Pentecostal=1863;Roman Catholic=71;Salvation Army=197;Wesleyan=539;Other Christian=207;Baha'i=4;Hindu=29;Jewish=0;Muslim=9;Rastafarian=40;Other Non-Christian=6;None=1934;Not Stated=194"
+    }
+  ]
+}
