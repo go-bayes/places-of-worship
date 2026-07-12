@@ -1,0 +1,5017 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:my-census-religion-1991-2020-9b3f6e70f410",
+  "dataset_id": "my-census-religion-1991-2020",
+  "dataset_version_id": "my-census-religion-1991-2020:9b3f6e70f410",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "census_religion_area_summary",
+  "dataset_role": "staged_evidence",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "MY"
+    ],
+    "snapshot_date": "2020-07-07",
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-07-13T00:00:00Z",
+  "created_by": "scripts/build_my_area_summary.R",
+  "pipeline": {
+    "script": "scripts/build_my_area_summary.R",
+    "git_commit": null,
+    "command": "Rscript scripts/build_my_area_summary.R",
+    "parameters": {
+      "waves": [1991, 2000, 2010, 2020],
+      "boundary_simplification_tolerance": 0
+    },
+    "software_versions": {
+      "R": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "readxl": "1.5.0"
+    }
+  },
+  "source": {
+    "provider": "Department of Statistics Malaysia and OpenStreetMap contributors",
+    "source_dataset_ids": ["my-dosm-census-religion-1991-2020", "my-osm-administrative-relations-2026-07-13"],
+    "source_urls": ["https://www.dosm.gov.my/portal-main/release-content/key-findings-population-and-housing-census-of-malaysia-2020-administrative-district", "https://overpass-api.de/api/interpreter"],
+    "retrieved_at": "2026-07-13T00:00:00Z",
+    "licence": "DOSM Government Open Data Terms of Use 1.0 under the PI ruling; OSM-derived boundary under ODbL 1.0",
+    "citation": "Department of Statistics Malaysia; © OpenStreetMap contributors, ODbL 1.0",
+    "raw_redistribution": "Raw DOSM reports remain in the ignored cache. The staged derived outputs reproduce the ruled tables. The OSM-derived boundary ships share-alike.",
+    "local_cache_hint": "data/raw/my_census",
+    "raw_cache_durable_uris": [],
+    "licence_position": "The PI ruling recorded on 2026-07-11 authorises reproduction under DOSM general terms while PI follow-up proceeds in parallel.",
+    "licence_position_verbatim_from_playbook": null,
+    "licence_todo": "Continue the parallel PI follow-up concerning the publication-specific wording.",
+    "short_citation": "DOSM MyCensus 2020 district/state reports; © OpenStreetMap contributors, ODbL 1.0"
+  },
+  "durable_files": [
+    {
+      "uri": "apps/regions/my/data/area_summary_district.json",
+      "storage_provider": "git_repository",
+      "sha256": "9b3f6e70f41032b2e207348116749ed18b67c09b19eecfae320586e09b17fdc9",
+      "bytes": 920155,
+      "format": "json",
+      "row_count": 640,
+      "notes": "Staged area summary"
+    },
+    {
+      "uri": "apps/regions/my/data/area_summary_district.csv",
+      "storage_provider": "git_repository",
+      "sha256": "ac63e8ea23cc3d9f92d9bff339289da95aae307758bdae783a76e53abc1b0dfc",
+      "bytes": 260021,
+      "format": "csv",
+      "row_count": 640,
+      "notes": "Flat staged export with source-verbatim composition"
+    },
+    {
+      "uri": "apps/regions/my/data/my_district_2020.geojson",
+      "storage_provider": "git_repository",
+      "sha256": "4738fb56b67c8a634c68415442751a7682a8261a66478182b8cfe38a2915c237",
+      "bytes": 9953268,
+      "format": "geojson",
+      "feature_count": 160,
+      "notes": "Staged boundary with 160 valid, geometry-distinct features; no simplification",
+      "licence_status": "accepted",
+      "licence_basis": "odbl_1_0"
+    }
+  ],
+  "partitions": [
+    {
+      "partition_id": "my-district-1991",
+      "partition_type": "country",
+      "country_code": "MY",
+      "file_uri": "apps/regions/my/data/area_summary_district.json",
+      "sha256": "9b3f6e70f41032b2e207348116749ed18b67c09b19eecfae320586e09b17fdc9",
+      "snapshot_date": "1991-07-07",
+      "stage": "staged",
+      "row_count": 160
+    },
+    {
+      "partition_id": "my-district-2000",
+      "partition_type": "country",
+      "country_code": "MY",
+      "file_uri": "apps/regions/my/data/area_summary_district.json",
+      "sha256": "9b3f6e70f41032b2e207348116749ed18b67c09b19eecfae320586e09b17fdc9",
+      "snapshot_date": "2000-07-07",
+      "stage": "staged",
+      "row_count": 160
+    },
+    {
+      "partition_id": "my-district-2010",
+      "partition_type": "country",
+      "country_code": "MY",
+      "file_uri": "apps/regions/my/data/area_summary_district.json",
+      "sha256": "9b3f6e70f41032b2e207348116749ed18b67c09b19eecfae320586e09b17fdc9",
+      "snapshot_date": "2010-07-07",
+      "stage": "staged",
+      "row_count": 160
+    },
+    {
+      "partition_id": "my-district-2020",
+      "partition_type": "country",
+      "country_code": "MY",
+      "file_uri": "apps/regions/my/data/area_summary_district.json",
+      "sha256": "9b3f6e70f41032b2e207348116749ed18b67c09b19eecfae320586e09b17fdc9",
+      "snapshot_date": "2020-07-07",
+      "stage": "staged",
+      "row_count": 160
+    }
+  ],
+  "stats": {
+    "census_frame_districts": 160,
+    "output_boundary_features": 160,
+    "output_rows": 640,
+    "coverage_values_by_wave": {
+      "1991": 130,
+      "2000": 134,
+      "2010": 142,
+      "2020": 160
+    },
+    "nulls_as_printed_or_unpublished_by_wave": {
+      "1991": 30,
+      "2000": 26,
+      "2010": 18,
+      "2020": 0
+    },
+    "reconciliation_checks": 640,
+    "reconciliation_passed": 566,
+    "reconciliation_unavailable": 74,
+    "reconciliation_failures": [],
+    "geometry_valid_features": 160,
+    "geometry_distinct_hashes": 160,
+    "national_totals": [
+      {
+        "year": 1991,
+        "districts_with_values": 130,
+        "population_total": 17357931,
+        "printed_population_total": 17423342,
+        "religion_universe_minus_printed_total": -65411,
+        "religious_affiliation_count": 17080282,
+        "no_religion_count": 277649
+      },
+      {
+        "year": 2000,
+        "districts_with_values": 134,
+        "population_total": 22045194,
+        "printed_population_total": 22046190,
+        "religion_universe_minus_printed_total": -996,
+        "religious_affiliation_count": 21789199,
+        "no_religion_count": 255995
+      },
+      {
+        "year": 2010,
+        "districts_with_values": 142,
+        "population_total": 27321112,
+        "printed_population_total": 27320198,
+        "religion_universe_minus_printed_total": 914,
+        "religious_affiliation_count": 26857430,
+        "no_religion_count": 463682
+      },
+      {
+        "year": 2020,
+        "districts_with_values": 160,
+        "population_total": 32446979,
+        "printed_population_total": 32447385,
+        "religion_universe_minus_printed_total": -406,
+        "religious_affiliation_count": 31872517,
+        "no_religion_count": 574462
+      }
+    ]
+  },
+  "construct_notes": {
+    "universe": "population_total is the sum of the religion lines that DOSM prints for each district-wave. DOSM's printed religion percentages use this religion-block universe as their denominator.",
+    "printed_population_total": "The CSV records DOSM's Penduduk/ Population — Jumlah/ Total value as printed_population_total and the signed religion-universe-minus-printed-total difference as religion_universe_deviation. The area-summary.v2 JSON schema does not admit these named row properties. The JSON therefore carries the difference token, and the manifest carries the full row register.",
+    "population_total_deviation": {
+      "interpretation": "Negative values mean the printed religion lines sum below the printed district population total. Positive values mean they sum above it. The 1991 wave is systematically short. No value was repaired or rescaled.",
+      "summary_by_wave": [
+        {
+          "year": 1991,
+          "nonzero_count": 122,
+          "minimum": -14381,
+          "maximum": -1
+        },
+        {
+          "year": 2000,
+          "nonzero_count": 2,
+          "minimum": -1001,
+          "maximum": 5
+        },
+        {
+          "year": 2010,
+          "nonzero_count": 2,
+          "minimum": -192,
+          "maximum": 1106
+        },
+        {
+          "year": 2020,
+          "nonzero_count": 2,
+          "minimum": -407,
+          "maximum": 1
+        }
+      ],
+      "row_register": [
+        {
+          "area_name": "Alor Gajah",
+          "year": 1991,
+          "printed_population_total": 116653,
+          "religion_universe": 116103,
+          "religion_universe_deviation": -550
+        },
+        {
+          "area_name": "Alor Gajah",
+          "year": 2000,
+          "printed_population_total": 132317,
+          "religion_universe": 132317,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Alor Gajah",
+          "year": 2010,
+          "printed_population_total": 173712,
+          "religion_universe": 173712,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Alor Gajah",
+          "year": 2020,
+          "printed_population_total": 249356,
+          "religion_universe": 249356,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Asajaya",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Asajaya",
+          "year": 2000,
+          "printed_population_total": 28513,
+          "religion_universe": 28513,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Asajaya",
+          "year": 2010,
+          "printed_population_total": 31190,
+          "religion_universe": 31190,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Asajaya",
+          "year": 2020,
+          "printed_population_total": 33606,
+          "religion_universe": 33606,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bachok",
+          "year": 1991,
+          "printed_population_total": 98557,
+          "religion_universe": 98552,
+          "religion_universe_deviation": -5
+        },
+        {
+          "area_name": "Bachok",
+          "year": 2000,
+          "printed_population_total": 109384,
+          "religion_universe": 109384,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bachok",
+          "year": 2010,
+          "printed_population_total": 126350,
+          "religion_universe": 126350,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bachok",
+          "year": 2020,
+          "printed_population_total": 157288,
+          "religion_universe": 157288,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bagan Datuk",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Bagan Datuk",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Bagan Datuk",
+          "year": 2010,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Bagan Datuk",
+          "year": 2020,
+          "printed_population_total": 82785,
+          "religion_universe": 82785,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Baling",
+          "year": 1991,
+          "printed_population_total": 114485,
+          "religion_universe": 114418,
+          "religion_universe_deviation": -67
+        },
+        {
+          "area_name": "Baling",
+          "year": 2000,
+          "printed_population_total": 124830,
+          "religion_universe": 124830,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Baling",
+          "year": 2010,
+          "printed_population_total": 132304,
+          "religion_universe": 132304,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Baling",
+          "year": 2020,
+          "printed_population_total": 142643,
+          "religion_universe": 142643,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bandar Baharu",
+          "year": 1991,
+          "printed_population_total": 33006,
+          "religion_universe": 33006,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bandar Baharu",
+          "year": 2000,
+          "printed_population_total": 37963,
+          "religion_universe": 37963,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bandar Baharu",
+          "year": 2010,
+          "printed_population_total": 41352,
+          "religion_universe": 41352,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bandar Baharu",
+          "year": 2020,
+          "printed_population_total": 44412,
+          "religion_universe": 44412,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Barat Daya",
+          "year": 1991,
+          "printed_population_total": 122764,
+          "religion_universe": 122359,
+          "religion_universe_deviation": -405
+        },
+        {
+          "area_name": "Barat Daya",
+          "year": 2000,
+          "printed_population_total": 159129,
+          "religion_universe": 159129,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Barat Daya",
+          "year": 2010,
+          "printed_population_total": 197131,
+          "religion_universe": 197131,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Barat Daya",
+          "year": 2020,
+          "printed_population_total": 237738,
+          "religion_universe": 237738,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Batang Padang",
+          "year": 1991,
+          "printed_population_total": 154686,
+          "religion_universe": 152844,
+          "religion_universe_deviation": -1842
+        },
+        {
+          "area_name": "Batang Padang",
+          "year": 2000,
+          "printed_population_total": 152201,
+          "religion_universe": 152201,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Batang Padang",
+          "year": 2010,
+          "printed_population_total": 175318,
+          "religion_universe": 175318,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Batang Padang",
+          "year": 2020,
+          "printed_population_total": 124049,
+          "religion_universe": 124049,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Batu Pahat",
+          "year": 1991,
+          "printed_population_total": 294056,
+          "religion_universe": 293730,
+          "religion_universe_deviation": -326
+        },
+        {
+          "area_name": "Batu Pahat",
+          "year": 2000,
+          "printed_population_total": 336509,
+          "religion_universe": 336509,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Batu Pahat",
+          "year": 2010,
+          "printed_population_total": 401902,
+          "religion_universe": 401902,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Batu Pahat",
+          "year": 2020,
+          "printed_population_total": 495338,
+          "religion_universe": 495338,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bau",
+          "year": 1991,
+          "printed_population_total": 35958,
+          "religion_universe": 35958,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bau",
+          "year": 2000,
+          "printed_population_total": 41824,
+          "religion_universe": 41824,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bau",
+          "year": 2010,
+          "printed_population_total": 52760,
+          "religion_universe": 52760,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bau",
+          "year": 2020,
+          "printed_population_total": 52643,
+          "religion_universe": 52643,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Beaufort",
+          "year": 1991,
+          "printed_population_total": 48742,
+          "religion_universe": 48699,
+          "religion_universe_deviation": -43
+        },
+        {
+          "area_name": "Beaufort",
+          "year": 2000,
+          "printed_population_total": 62200,
+          "religion_universe": 62200,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Beaufort",
+          "year": 2010,
+          "printed_population_total": 64350,
+          "religion_universe": 64350,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Beaufort",
+          "year": 2020,
+          "printed_population_total": 75716,
+          "religion_universe": 75716,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Belaga",
+          "year": 1991,
+          "printed_population_total": 22284,
+          "religion_universe": 22230,
+          "religion_universe_deviation": -54
+        },
+        {
+          "area_name": "Belaga",
+          "year": 2000,
+          "printed_population_total": 22896,
+          "religion_universe": 22896,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Belaga",
+          "year": 2010,
+          "printed_population_total": 35247,
+          "religion_universe": 35247,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Belaga",
+          "year": 2020,
+          "printed_population_total": 22502,
+          "religion_universe": 22502,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Beluran",
+          "year": 1991,
+          "printed_population_total": 54539,
+          "religion_universe": 54495,
+          "religion_universe_deviation": -44
+        },
+        {
+          "area_name": "Beluran",
+          "year": 2000,
+          "printed_population_total": 75586,
+          "religion_universe": 75586,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Beluran",
+          "year": 2010,
+          "printed_population_total": 104484,
+          "religion_universe": 104484,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Beluran",
+          "year": 2020,
+          "printed_population_total": 77125,
+          "religion_universe": 77125,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Beluru",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Beluru",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Beluru",
+          "year": 2010,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Beluru",
+          "year": 2020,
+          "printed_population_total": 28695,
+          "religion_universe": 28695,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bentong",
+          "year": 1991,
+          "printed_population_total": 83965,
+          "religion_universe": 81258,
+          "religion_universe_deviation": -2707
+        },
+        {
+          "area_name": "Bentong",
+          "year": 2000,
+          "printed_population_total": 96689,
+          "religion_universe": 96689,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bentong",
+          "year": 2010,
+          "printed_population_total": 114397,
+          "religion_universe": 114397,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bentong",
+          "year": 2020,
+          "printed_population_total": 116799,
+          "religion_universe": 116799,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bera",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Bera",
+          "year": 2000,
+          "printed_population_total": 77685,
+          "religion_universe": 77685,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bera",
+          "year": 2010,
+          "printed_population_total": 94105,
+          "religion_universe": 94105,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bera",
+          "year": 2020,
+          "printed_population_total": 98137,
+          "religion_universe": 98137,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Besut",
+          "year": 1991,
+          "printed_population_total": 107900,
+          "religion_universe": 107689,
+          "religion_universe_deviation": -211
+        },
+        {
+          "area_name": "Besut",
+          "year": 2000,
+          "printed_population_total": 120199,
+          "religion_universe": 120199,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Besut",
+          "year": 2010,
+          "printed_population_total": 136563,
+          "religion_universe": 136563,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Besut",
+          "year": 2020,
+          "printed_population_total": 154168,
+          "religion_universe": 154168,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Betong",
+          "year": 1991,
+          "printed_population_total": 43993,
+          "religion_universe": 43961,
+          "religion_universe_deviation": -32
+        },
+        {
+          "area_name": "Betong",
+          "year": 2000,
+          "printed_population_total": 50392,
+          "religion_universe": 50392,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Betong",
+          "year": 2010,
+          "printed_population_total": 60728,
+          "religion_universe": 60728,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Betong",
+          "year": 2020,
+          "printed_population_total": 36303,
+          "religion_universe": 36303,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bintulu",
+          "year": 1991,
+          "printed_population_total": 86132,
+          "religion_universe": 85526,
+          "religion_universe_deviation": -606
+        },
+        {
+          "area_name": "Bintulu",
+          "year": 2000,
+          "printed_population_total": 139012,
+          "religion_universe": 139012,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bintulu",
+          "year": 2010,
+          "printed_population_total": 183402,
+          "religion_universe": 183402,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bintulu",
+          "year": 2020,
+          "printed_population_total": 178646,
+          "religion_universe": 178646,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Bukit Mabong",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Bukit Mabong",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Bukit Mabong",
+          "year": 2010,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Bukit Mabong",
+          "year": 2020,
+          "printed_population_total": 10155,
+          "religion_universe": 10155,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Cameron Highlands",
+          "year": 1991,
+          "printed_population_total": 25555,
+          "religion_universe": 25109,
+          "religion_universe_deviation": -446
+        },
+        {
+          "area_name": "Cameron Highlands",
+          "year": 2000,
+          "printed_population_total": 28077,
+          "religion_universe": 28077,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Cameron Highlands",
+          "year": 2010,
+          "printed_population_total": 36978,
+          "religion_universe": 36978,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Cameron Highlands",
+          "year": 2020,
+          "printed_population_total": 39004,
+          "religion_universe": 39004,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Dalat",
+          "year": 1991,
+          "printed_population_total": 24296,
+          "religion_universe": 24252,
+          "religion_universe_deviation": -44
+        },
+        {
+          "area_name": "Dalat",
+          "year": 2000,
+          "printed_population_total": 23462,
+          "religion_universe": 23462,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Dalat",
+          "year": 2010,
+          "printed_population_total": 18523,
+          "religion_universe": 18523,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Dalat",
+          "year": 2020,
+          "printed_population_total": 21147,
+          "religion_universe": 21147,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Daro",
+          "year": 1991,
+          "printed_population_total": 20059,
+          "religion_universe": 20026,
+          "religion_universe_deviation": -33
+        },
+        {
+          "area_name": "Daro",
+          "year": 2000,
+          "printed_population_total": 14851,
+          "religion_universe": 14851,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Daro",
+          "year": 2010,
+          "printed_population_total": 29975,
+          "religion_universe": 29975,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Daro",
+          "year": 2020,
+          "printed_population_total": 19477,
+          "religion_universe": 19477,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Dungun",
+          "year": 1991,
+          "printed_population_total": 102897,
+          "religion_universe": 102635,
+          "religion_universe_deviation": -262
+        },
+        {
+          "area_name": "Dungun",
+          "year": 2000,
+          "printed_population_total": 128709,
+          "religion_universe": 128709,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Dungun",
+          "year": 2010,
+          "printed_population_total": 149851,
+          "religion_universe": 149851,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Dungun",
+          "year": 2020,
+          "printed_population_total": 158130,
+          "religion_universe": 158130,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Gombak",
+          "year": 1991,
+          "printed_population_total": 352649,
+          "religion_universe": 352592,
+          "religion_universe_deviation": -57
+        },
+        {
+          "area_name": "Gombak",
+          "year": 2000,
+          "printed_population_total": 537525,
+          "religion_universe": 537525,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Gombak",
+          "year": 2010,
+          "printed_population_total": 668694,
+          "religion_universe": 668694,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Gombak",
+          "year": 2020,
+          "printed_population_total": 942400,
+          "religion_universe": 942400,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Gua Musang",
+          "year": 1991,
+          "printed_population_total": 63816,
+          "religion_universe": 63717,
+          "religion_universe_deviation": -99
+        },
+        {
+          "area_name": "Gua Musang",
+          "year": 2000,
+          "printed_population_total": 74988,
+          "religion_universe": 74988,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Gua Musang",
+          "year": 2010,
+          "printed_population_total": 86189,
+          "religion_universe": 86189,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Gua Musang",
+          "year": 2020,
+          "printed_population_total": 101886,
+          "religion_universe": 101886,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Hilir Perak",
+          "year": 1991,
+          "printed_population_total": 202059,
+          "religion_universe": 201742,
+          "religion_universe_deviation": -317
+        },
+        {
+          "area_name": "Hilir Perak",
+          "year": 2000,
+          "printed_population_total": 190868,
+          "religion_universe": 190868,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Hilir Perak",
+          "year": 2010,
+          "printed_population_total": 202593,
+          "religion_universe": 202593,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Hilir Perak",
+          "year": 2020,
+          "printed_population_total": 141959,
+          "religion_universe": 141959,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Hulu Perak",
+          "year": 1991,
+          "printed_population_total": 81636,
+          "religion_universe": 81534,
+          "religion_universe_deviation": -102
+        },
+        {
+          "area_name": "Hulu Perak",
+          "year": 2000,
+          "printed_population_total": 82551,
+          "religion_universe": 82551,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Hulu Perak",
+          "year": 2010,
+          "printed_population_total": 89926,
+          "religion_universe": 89926,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Hulu Perak",
+          "year": 2020,
+          "printed_population_total": 95076,
+          "religion_universe": 95076,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Jasin",
+          "year": 1991,
+          "printed_population_total": 92771,
+          "religion_universe": 92771,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Jasin",
+          "year": 2000,
+          "printed_population_total": 101659,
+          "religion_universe": 101659,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Jasin",
+          "year": 2010,
+          "printed_population_total": 131539,
+          "religion_universe": 131539,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Jasin",
+          "year": 2020,
+          "printed_population_total": 151937,
+          "religion_universe": 151937,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Jelebu",
+          "year": 1991,
+          "printed_population_total": 40012,
+          "religion_universe": 39973,
+          "religion_universe_deviation": -39
+        },
+        {
+          "area_name": "Jelebu",
+          "year": 2000,
+          "printed_population_total": 37194,
+          "religion_universe": 37194,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Jelebu",
+          "year": 2010,
+          "printed_population_total": 38299,
+          "religion_universe": 38299,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Jelebu",
+          "year": 2020,
+          "printed_population_total": 46053,
+          "religion_universe": 46053,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Jeli",
+          "year": 1991,
+          "printed_population_total": 32720,
+          "religion_universe": 32720,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Jeli",
+          "year": 2000,
+          "printed_population_total": 35988,
+          "religion_universe": 35988,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Jeli",
+          "year": 2010,
+          "printed_population_total": 39170,
+          "religion_universe": 39170,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Jeli",
+          "year": 2020,
+          "printed_population_total": 54656,
+          "religion_universe": 54656,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Jempol",
+          "year": 1991,
+          "printed_population_total": 122033,
+          "religion_universe": 121883,
+          "religion_universe_deviation": -150
+        },
+        {
+          "area_name": "Jempol",
+          "year": 2000,
+          "printed_population_total": 125010,
+          "religion_universe": 125010,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Jempol",
+          "year": 2010,
+          "printed_population_total": 112740,
+          "religion_universe": 112740,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Jempol",
+          "year": 2020,
+          "printed_population_total": 127199,
+          "religion_universe": 127199,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Jerantut",
+          "year": 1991,
+          "printed_population_total": 74547,
+          "religion_universe": 74383,
+          "religion_universe_deviation": -164
+        },
+        {
+          "area_name": "Jerantut",
+          "year": 2000,
+          "printed_population_total": 80685,
+          "religion_universe": 80685,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Jerantut",
+          "year": 2010,
+          "printed_population_total": 88035,
+          "religion_universe": 88035,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Jerantut",
+          "year": 2020,
+          "printed_population_total": 96006,
+          "religion_universe": 96006,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Johor Bahru",
+          "year": 1991,
+          "printed_population_total": 704471,
+          "religion_universe": 702683,
+          "religion_universe_deviation": -1788
+        },
+        {
+          "area_name": "Johor Bahru",
+          "year": 2000,
+          "printed_population_total": 1081978,
+          "religion_universe": 1081978,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Johor Bahru",
+          "year": 2010,
+          "printed_population_total": 1334188,
+          "religion_universe": 1334188,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Johor Bahru",
+          "year": 2020,
+          "printed_population_total": 1711191,
+          "religion_universe": 1711191,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Julau",
+          "year": 1991,
+          "printed_population_total": 28104,
+          "religion_universe": 28090,
+          "religion_universe_deviation": -14
+        },
+        {
+          "area_name": "Julau",
+          "year": 2000,
+          "printed_population_total": 31723,
+          "religion_universe": 31723,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Julau",
+          "year": 2010,
+          "printed_population_total": 15449,
+          "religion_universe": 15449,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Julau",
+          "year": 2020,
+          "printed_population_total": 15333,
+          "religion_universe": 15333,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kabong",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Kabong",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Kabong",
+          "year": 2010,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Kabong",
+          "year": 2020,
+          "printed_population_total": 18404,
+          "religion_universe": 18404,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kalabakan",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Kalabakan",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Kalabakan",
+          "year": 2010,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Kalabakan",
+          "year": 2020,
+          "printed_population_total": 48195,
+          "religion_universe": 48195,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kampar",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Kampar",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Kampar",
+          "year": 2010,
+          "printed_population_total": 96303,
+          "religion_universe": 96303,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kampar",
+          "year": 2020,
+          "printed_population_total": 98732,
+          "religion_universe": 98732,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kanowit",
+          "year": 1991,
+          "printed_population_total": 25380,
+          "religion_universe": 25301,
+          "religion_universe_deviation": -79
+        },
+        {
+          "area_name": "Kanowit",
+          "year": 2000,
+          "printed_population_total": 27143,
+          "religion_universe": 27143,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kanowit",
+          "year": 2010,
+          "printed_population_total": 28259,
+          "religion_universe": 28259,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kanowit",
+          "year": 2020,
+          "printed_population_total": 24700,
+          "religion_universe": 24700,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kapit",
+          "year": 1991,
+          "printed_population_total": 55608,
+          "religion_universe": 55171,
+          "religion_universe_deviation": -437
+        },
+        {
+          "area_name": "Kapit",
+          "year": 2000,
+          "printed_population_total": 56709,
+          "religion_universe": 56709,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kapit",
+          "year": 2010,
+          "printed_population_total": 55304,
+          "religion_universe": 55304,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kapit",
+          "year": 2020,
+          "printed_population_total": 36030,
+          "religion_universe": 36030,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kecil Lojing",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Kecil Lojing",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Kecil Lojing",
+          "year": 2010,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Kecil Lojing",
+          "year": 2020,
+          "printed_population_total": 10609,
+          "religion_universe": 10609,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kemaman",
+          "year": 1991,
+          "printed_population_total": 111901,
+          "religion_universe": 111540,
+          "religion_universe_deviation": -361
+        },
+        {
+          "area_name": "Kemaman",
+          "year": 2000,
+          "printed_population_total": 137070,
+          "religion_universe": 137070,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kemaman",
+          "year": 2010,
+          "printed_population_total": 166750,
+          "religion_universe": 166750,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kemaman",
+          "year": 2020,
+          "printed_population_total": 215582,
+          "religion_universe": 215582,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Keningau",
+          "year": 1991,
+          "printed_population_total": 88456,
+          "religion_universe": 88285,
+          "religion_universe_deviation": -171
+        },
+        {
+          "area_name": "Keningau",
+          "year": 2000,
+          "printed_population_total": 145984,
+          "religion_universe": 145984,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Keningau",
+          "year": 2010,
+          "printed_population_total": 173103,
+          "religion_universe": 173103,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Keningau",
+          "year": 2020,
+          "printed_population_total": 150927,
+          "religion_universe": 150927,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kerian",
+          "year": 1991,
+          "printed_population_total": 148720,
+          "religion_universe": 148688,
+          "religion_universe_deviation": -32
+        },
+        {
+          "area_name": "Kerian",
+          "year": 2000,
+          "printed_population_total": 152911,
+          "religion_universe": 152911,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kerian",
+          "year": 2010,
+          "printed_population_total": 176975,
+          "religion_universe": 176975,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kerian",
+          "year": 2020,
+          "printed_population_total": 166352,
+          "religion_universe": 166352,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kinabatangan",
+          "year": 1991,
+          "printed_population_total": 59072,
+          "religion_universe": 59072,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kinabatangan",
+          "year": 2000,
+          "printed_population_total": 88697,
+          "religion_universe": 88697,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kinabatangan",
+          "year": 2010,
+          "printed_population_total": 146987,
+          "religion_universe": 146987,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kinabatangan",
+          "year": 2020,
+          "printed_population_total": 143112,
+          "religion_universe": 143112,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kinta",
+          "year": 1991,
+          "printed_population_total": 627899,
+          "religion_universe": 624401,
+          "religion_universe_deviation": -3498
+        },
+        {
+          "area_name": "Kinta",
+          "year": 2000,
+          "printed_population_total": 703493,
+          "religion_universe": 703493,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kinta",
+          "year": 2010,
+          "printed_population_total": 749474,
+          "religion_universe": 749474,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kinta",
+          "year": 2020,
+          "printed_population_total": 888767,
+          "religion_universe": 888767,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Klang",
+          "year": 1991,
+          "printed_population_total": 406994,
+          "religion_universe": 406594,
+          "religion_universe_deviation": -400
+        },
+        {
+          "area_name": "Klang",
+          "year": 2000,
+          "printed_population_total": 643436,
+          "religion_universe": 643436,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Klang",
+          "year": 2010,
+          "printed_population_total": 842146,
+          "religion_universe": 842146,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Klang",
+          "year": 2020,
+          "printed_population_total": 1088942,
+          "religion_universe": 1088942,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kluang",
+          "year": 1991,
+          "printed_population_total": 224424,
+          "religion_universe": 224054,
+          "religion_universe_deviation": -370
+        },
+        {
+          "area_name": "Kluang",
+          "year": 2000,
+          "printed_population_total": 255601,
+          "religion_universe": 255601,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kluang",
+          "year": 2010,
+          "printed_population_total": 288364,
+          "religion_universe": 288364,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kluang",
+          "year": 2020,
+          "printed_population_total": 323762,
+          "religion_universe": 323762,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kota Belud",
+          "year": 1991,
+          "printed_population_total": 58259,
+          "religion_universe": 58257,
+          "religion_universe_deviation": -2
+        },
+        {
+          "area_name": "Kota Belud",
+          "year": 2000,
+          "printed_population_total": 72357,
+          "religion_universe": 72357,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kota Belud",
+          "year": 2010,
+          "printed_population_total": 91272,
+          "religion_universe": 91272,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kota Belud",
+          "year": 2020,
+          "printed_population_total": 107243,
+          "religion_universe": 107243,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kota Bharu",
+          "year": 1991,
+          "printed_population_total": 366770,
+          "religion_universe": 365828,
+          "religion_universe_deviation": -942
+        },
+        {
+          "area_name": "Kota Bharu",
+          "year": 2000,
+          "printed_population_total": 398835,
+          "religion_universe": 398835,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kota Bharu",
+          "year": 2010,
+          "printed_population_total": 468438,
+          "religion_universe": 468438,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kota Bharu",
+          "year": 2020,
+          "printed_population_total": 555757,
+          "religion_universe": 555757,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kota Kinabalu",
+          "year": 1991,
+          "printed_population_total": 209175,
+          "religion_universe": 207442,
+          "religion_universe_deviation": -1733
+        },
+        {
+          "area_name": "Kota Kinabalu",
+          "year": 2000,
+          "printed_population_total": 355435,
+          "religion_universe": 355435,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kota Kinabalu",
+          "year": 2010,
+          "printed_population_total": 452058,
+          "religion_universe": 452058,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kota Kinabalu",
+          "year": 2020,
+          "printed_population_total": 500421,
+          "religion_universe": 500421,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kota Marudu",
+          "year": 1991,
+          "printed_population_total": 42747,
+          "religion_universe": 42723,
+          "religion_universe_deviation": -24
+        },
+        {
+          "area_name": "Kota Marudu",
+          "year": 2000,
+          "printed_population_total": 58862,
+          "religion_universe": 58862,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kota Marudu",
+          "year": 2010,
+          "printed_population_total": 66374,
+          "religion_universe": 66374,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kota Marudu",
+          "year": 2020,
+          "printed_population_total": 69528,
+          "religion_universe": 69528,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kota Setar",
+          "year": 1991,
+          "printed_population_total": 322354,
+          "religion_universe": 321867,
+          "religion_universe_deviation": -487
+        },
+        {
+          "area_name": "Kota Setar",
+          "year": 2000,
+          "printed_population_total": 354513,
+          "religion_universe": 354513,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kota Setar",
+          "year": 2010,
+          "printed_population_total": 357176,
+          "religion_universe": 357176,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kota Setar",
+          "year": 2020,
+          "printed_population_total": 374051,
+          "religion_universe": 374051,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kota Tinggi",
+          "year": 1991,
+          "printed_population_total": 174425,
+          "religion_universe": 174061,
+          "religion_universe_deviation": -364
+        },
+        {
+          "area_name": "Kota Tinggi",
+          "year": 2000,
+          "printed_population_total": 192336,
+          "religion_universe": 192336,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kota Tinggi",
+          "year": 2010,
+          "printed_population_total": 187824,
+          "religion_universe": 187824,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kota Tinggi",
+          "year": 2020,
+          "printed_population_total": 222382,
+          "religion_universe": 222382,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Kangsar",
+          "year": 1991,
+          "printed_population_total": 146684,
+          "religion_universe": 146648,
+          "religion_universe_deviation": -36
+        },
+        {
+          "area_name": "Kuala Kangsar",
+          "year": 2000,
+          "printed_population_total": 144418,
+          "religion_universe": 144418,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Kangsar",
+          "year": 2010,
+          "printed_population_total": 155592,
+          "religion_universe": 155592,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Kangsar",
+          "year": 2020,
+          "printed_population_total": 176060,
+          "religion_universe": 176060,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Krai",
+          "year": 1991,
+          "printed_population_total": 90830,
+          "religion_universe": 90756,
+          "religion_universe_deviation": -74
+        },
+        {
+          "area_name": "Kuala Krai",
+          "year": 2000,
+          "printed_population_total": 91771,
+          "religion_universe": 91771,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Krai",
+          "year": 2010,
+          "printed_population_total": 104234,
+          "religion_universe": 104234,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Krai",
+          "year": 2020,
+          "printed_population_total": 105007,
+          "religion_universe": 105007,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Langat",
+          "year": 1991,
+          "printed_population_total": 130090,
+          "religion_universe": 130021,
+          "religion_universe_deviation": -69
+        },
+        {
+          "area_name": "Kuala Langat",
+          "year": 2000,
+          "printed_population_total": 192176,
+          "religion_universe": 192176,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Langat",
+          "year": 2010,
+          "printed_population_total": 220214,
+          "religion_universe": 220214,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Langat",
+          "year": 2020,
+          "printed_population_total": 307449,
+          "religion_universe": 307449,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Muda",
+          "year": 1991,
+          "printed_population_total": 254372,
+          "religion_universe": 254245,
+          "religion_universe_deviation": -127
+        },
+        {
+          "area_name": "Kuala Muda",
+          "year": 2000,
+          "printed_population_total": 339898,
+          "religion_universe": 339898,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Muda",
+          "year": 2010,
+          "printed_population_total": 443488,
+          "religion_universe": 443488,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Muda",
+          "year": 2020,
+          "printed_population_total": 544984,
+          "religion_universe": 544984,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Nerus",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Kuala Nerus",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Kuala Nerus",
+          "year": 2010,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Kuala Nerus",
+          "year": 2020,
+          "printed_population_total": 145642,
+          "religion_universe": 145642,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Penyu",
+          "year": 1991,
+          "printed_population_total": 14271,
+          "religion_universe": 14264,
+          "religion_universe_deviation": -7
+        },
+        {
+          "area_name": "Kuala Penyu",
+          "year": 2000,
+          "printed_population_total": 16558,
+          "religion_universe": 16558,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Penyu",
+          "year": 2010,
+          "printed_population_total": 18958,
+          "religion_universe": 18958,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Penyu",
+          "year": 2020,
+          "printed_population_total": 23710,
+          "religion_universe": 23710,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Pilah",
+          "year": 1991,
+          "printed_population_total": 68180,
+          "religion_universe": 68164,
+          "religion_universe_deviation": -16
+        },
+        {
+          "area_name": "Kuala Pilah",
+          "year": 2000,
+          "printed_population_total": 63541,
+          "religion_universe": 63541,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Pilah",
+          "year": 2010,
+          "printed_population_total": 63874,
+          "religion_universe": 63874,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Pilah",
+          "year": 2020,
+          "printed_population_total": 70331,
+          "religion_universe": 70331,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Selangor",
+          "year": 1991,
+          "printed_population_total": 123052,
+          "religion_universe": 122957,
+          "religion_universe_deviation": -95
+        },
+        {
+          "area_name": "Kuala Selangor",
+          "year": 2000,
+          "printed_population_total": 161168,
+          "religion_universe": 161168,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Selangor",
+          "year": 2010,
+          "printed_population_total": 205257,
+          "religion_universe": 205257,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Selangor",
+          "year": 2020,
+          "printed_population_total": 281711,
+          "religion_universe": 281711,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Terengganu",
+          "year": 1991,
+          "printed_population_total": 274489,
+          "religion_universe": 273698,
+          "religion_universe_deviation": -791
+        },
+        {
+          "area_name": "Kuala Terengganu",
+          "year": 2000,
+          "printed_population_total": 298304,
+          "religion_universe": 298304,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Terengganu",
+          "year": 2010,
+          "printed_population_total": 337553,
+          "religion_universe": 337553,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuala Terengganu",
+          "year": 2020,
+          "printed_population_total": 229781,
+          "religion_universe": 229781,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuantan",
+          "year": 1991,
+          "printed_population_total": 255974,
+          "religion_universe": 253978,
+          "religion_universe_deviation": -1996
+        },
+        {
+          "area_name": "Kuantan",
+          "year": 2000,
+          "printed_population_total": 344319,
+          "religion_universe": 344319,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuantan",
+          "year": 2010,
+          "printed_population_total": 443796,
+          "religion_universe": 443796,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuantan",
+          "year": 2020,
+          "printed_population_total": 548014,
+          "religion_universe": 548014,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kubang Pasu",
+          "year": 1991,
+          "printed_population_total": 157963,
+          "religion_universe": 157922,
+          "religion_universe_deviation": -41
+        },
+        {
+          "area_name": "Kubang Pasu",
+          "year": 2000,
+          "printed_population_total": 185856,
+          "religion_universe": 185856,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kubang Pasu",
+          "year": 2010,
+          "printed_population_total": 214479,
+          "religion_universe": 214479,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kubang Pasu",
+          "year": 2020,
+          "printed_population_total": 237759,
+          "religion_universe": 237759,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuching",
+          "year": 1991,
+          "printed_population_total": 369200,
+          "religion_universe": 367914,
+          "religion_universe_deviation": -1286
+        },
+        {
+          "area_name": "Kuching",
+          "year": 2000,
+          "printed_population_total": 494109,
+          "religion_universe": 494109,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuching",
+          "year": 2010,
+          "printed_population_total": 598617,
+          "religion_universe": 598617,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kuching",
+          "year": 2020,
+          "printed_population_total": 609205,
+          "religion_universe": 609205,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kudat",
+          "year": 1991,
+          "printed_population_total": 56047,
+          "religion_universe": 55957,
+          "religion_universe_deviation": -90
+        },
+        {
+          "area_name": "Kudat",
+          "year": 2000,
+          "printed_population_total": 70276,
+          "religion_universe": 70276,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kudat",
+          "year": 2010,
+          "printed_population_total": 83140,
+          "religion_universe": 83140,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kudat",
+          "year": 2020,
+          "printed_population_total": 86410,
+          "religion_universe": 86410,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kulai",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Kulai",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Kulai",
+          "year": 2010,
+          "printed_population_total": 245294,
+          "religion_universe": 245294,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kulai",
+          "year": 2020,
+          "printed_population_total": 329497,
+          "religion_universe": 329497,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kulim",
+          "year": 1991,
+          "printed_population_total": 128356,
+          "religion_universe": 128323,
+          "religion_universe_deviation": -33
+        },
+        {
+          "area_name": "Kulim",
+          "year": 2000,
+          "printed_population_total": 190952,
+          "religion_universe": 190952,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kulim",
+          "year": 2010,
+          "printed_population_total": 281260,
+          "religion_universe": 281260,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kulim",
+          "year": 2020,
+          "printed_population_total": 337699,
+          "religion_universe": 337699,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kunak",
+          "year": 1991,
+          "printed_population_total": 39873,
+          "religion_universe": 39873,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kunak",
+          "year": 2000,
+          "printed_population_total": 48591,
+          "religion_universe": 48591,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kunak",
+          "year": 2010,
+          "printed_population_total": 61094,
+          "religion_universe": 61094,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Kunak",
+          "year": 2020,
+          "printed_population_total": 68893,
+          "religion_universe": 68893,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Lahad Datu",
+          "year": 1991,
+          "printed_population_total": 118096,
+          "religion_universe": 117877,
+          "religion_universe_deviation": -219
+        },
+        {
+          "area_name": "Lahad Datu",
+          "year": 2000,
+          "printed_population_total": 156297,
+          "religion_universe": 156297,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Lahad Datu",
+          "year": 2010,
+          "printed_population_total": 199830,
+          "religion_universe": 199830,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Lahad Datu",
+          "year": 2020,
+          "printed_population_total": 229138,
+          "religion_universe": 229138,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Langkawi",
+          "year": 1991,
+          "printed_population_total": 42938,
+          "religion_universe": 42165,
+          "religion_universe_deviation": -773
+        },
+        {
+          "area_name": "Langkawi",
+          "year": 2000,
+          "printed_population_total": 69681,
+          "religion_universe": 69681,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Langkawi",
+          "year": 2010,
+          "printed_population_total": 92784,
+          "religion_universe": 92784,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Langkawi",
+          "year": 2020,
+          "printed_population_total": 94138,
+          "religion_universe": 94138,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Larut dan Matang",
+          "year": 1991,
+          "printed_population_total": 271882,
+          "religion_universe": 270386,
+          "religion_universe_deviation": -1496
+        },
+        {
+          "area_name": "Larut dan Matang",
+          "year": 2000,
+          "printed_population_total": 273641,
+          "religion_universe": 273641,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Larut dan Matang",
+          "year": 2010,
+          "printed_population_total": 326476,
+          "religion_universe": 326476,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Larut dan Matang",
+          "year": 2020,
+          "printed_population_total": 269584,
+          "religion_universe": 269584,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Lawas",
+          "year": 1991,
+          "printed_population_total": 29276,
+          "religion_universe": 29143,
+          "religion_universe_deviation": -133
+        },
+        {
+          "area_name": "Lawas",
+          "year": 2000,
+          "printed_population_total": 32726,
+          "religion_universe": 32726,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Lawas",
+          "year": 2010,
+          "printed_population_total": 37212,
+          "religion_universe": 37212,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Lawas",
+          "year": 2020,
+          "printed_population_total": 36604,
+          "religion_universe": 36604,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Limbang",
+          "year": 1991,
+          "printed_population_total": 33899,
+          "religion_universe": 33624,
+          "religion_universe_deviation": -275
+        },
+        {
+          "area_name": "Limbang",
+          "year": 2000,
+          "printed_population_total": 39817,
+          "religion_universe": 39817,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Limbang",
+          "year": 2010,
+          "printed_population_total": 46980,
+          "religion_universe": 46980,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Limbang",
+          "year": 2020,
+          "printed_population_total": 45061,
+          "religion_universe": 45061,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Lipis",
+          "year": 1991,
+          "printed_population_total": 68276,
+          "religion_universe": 68171,
+          "religion_universe_deviation": -105
+        },
+        {
+          "area_name": "Lipis",
+          "year": 2000,
+          "printed_population_total": 73557,
+          "religion_universe": 73557,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Lipis",
+          "year": 2010,
+          "printed_population_total": 86484,
+          "religion_universe": 86484,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Lipis",
+          "year": 2020,
+          "printed_population_total": 96620,
+          "religion_universe": 96620,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Lubok Antu",
+          "year": 1991,
+          "printed_population_total": 22234,
+          "religion_universe": 22205,
+          "religion_universe_deviation": -29
+        },
+        {
+          "area_name": "Lubok Antu",
+          "year": 2000,
+          "printed_population_total": 23255,
+          "religion_universe": 23255,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Lubok Antu",
+          "year": 2010,
+          "printed_population_total": 27363,
+          "religion_universe": 27363,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Lubok Antu",
+          "year": 2020,
+          "printed_population_total": 24573,
+          "religion_universe": 24573,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Lundu",
+          "year": 1991,
+          "printed_population_total": 24493,
+          "religion_universe": 24434,
+          "religion_universe_deviation": -59
+        },
+        {
+          "area_name": "Lundu",
+          "year": 2000,
+          "printed_population_total": 27345,
+          "religion_universe": 27345,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Lundu",
+          "year": 2010,
+          "printed_population_total": 32568,
+          "religion_universe": 32568,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Lundu",
+          "year": 2020,
+          "printed_population_total": 33479,
+          "religion_universe": 33479,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Machang",
+          "year": 1991,
+          "printed_population_total": 71584,
+          "religion_universe": 71584,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Machang",
+          "year": 2000,
+          "printed_population_total": 77762,
+          "religion_universe": 77762,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Machang",
+          "year": 2010,
+          "printed_population_total": 89118,
+          "religion_universe": 89118,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Machang",
+          "year": 2020,
+          "printed_population_total": 110008,
+          "religion_universe": 110008,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Manjung",
+          "year": 1991,
+          "printed_population_total": 168331,
+          "religion_universe": 167829,
+          "religion_universe_deviation": -502
+        },
+        {
+          "area_name": "Manjung",
+          "year": 2000,
+          "printed_population_total": 191132,
+          "religion_universe": 191132,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Manjung",
+          "year": 2010,
+          "printed_population_total": 227071,
+          "religion_universe": 227071,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Manjung",
+          "year": 2020,
+          "printed_population_total": 246977,
+          "religion_universe": 246977,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Maradong",
+          "year": 1991,
+          "printed_population_total": 26957,
+          "religion_universe": 26908,
+          "religion_universe_deviation": -49
+        },
+        {
+          "area_name": "Maradong",
+          "year": 2000,
+          "printed_population_total": 28942,
+          "religion_universe": 28942,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Maradong",
+          "year": 2010,
+          "printed_population_total": 28713,
+          "religion_universe": 28713,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Maradong",
+          "year": 2020,
+          "printed_population_total": 20299,
+          "religion_universe": 20299,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Maran",
+          "year": 1991,
+          "printed_population_total": 110264,
+          "religion_universe": 110240,
+          "religion_universe_deviation": -24
+        },
+        {
+          "area_name": "Maran",
+          "year": 2000,
+          "printed_population_total": 112606,
+          "religion_universe": 112606,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Maran",
+          "year": 2010,
+          "printed_population_total": 111056,
+          "religion_universe": 111056,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Maran",
+          "year": 2020,
+          "printed_population_total": 112330,
+          "religion_universe": 112330,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Marang",
+          "year": 1991,
+          "printed_population_total": 69637,
+          "religion_universe": 69433,
+          "religion_universe_deviation": -204
+        },
+        {
+          "area_name": "Marang",
+          "year": 2000,
+          "printed_population_total": 83284,
+          "religion_universe": 83284,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Marang",
+          "year": 2010,
+          "printed_population_total": 95283,
+          "religion_universe": 95283,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Marang",
+          "year": 2020,
+          "printed_population_total": 116605,
+          "religion_universe": 116605,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Marudi",
+          "year": 1991,
+          "printed_population_total": 71958,
+          "religion_universe": 71545,
+          "religion_universe_deviation": -413
+        },
+        {
+          "area_name": "Marudi",
+          "year": 2000,
+          "printed_population_total": 71713,
+          "religion_universe": 71713,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Marudi",
+          "year": 2010,
+          "printed_population_total": 62883,
+          "religion_universe": 62883,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Marudi",
+          "year": 2020,
+          "printed_population_total": 18838,
+          "religion_universe": 18838,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Matu",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Matu",
+          "year": 2000,
+          "printed_population_total": 11183,
+          "religion_universe": 11183,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Matu",
+          "year": 2010,
+          "printed_population_total": 16952,
+          "religion_universe": 16952,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Matu",
+          "year": 2020,
+          "printed_population_total": 16316,
+          "religion_universe": 16316,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Melaka Tengah",
+          "year": 1991,
+          "printed_population_total": 296897,
+          "religion_universe": 294850,
+          "religion_universe_deviation": -2047
+        },
+        {
+          "area_name": "Melaka Tengah",
+          "year": 2000,
+          "printed_population_total": 371263,
+          "religion_universe": 371263,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Melaka Tengah",
+          "year": 2010,
+          "printed_population_total": 484885,
+          "religion_universe": 484885,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Melaka Tengah",
+          "year": 2020,
+          "printed_population_total": 597135,
+          "religion_universe": 597135,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Mersing",
+          "year": 1991,
+          "printed_population_total": 63643,
+          "religion_universe": 63246,
+          "religion_universe_deviation": -397
+        },
+        {
+          "area_name": "Mersing",
+          "year": 2000,
+          "printed_population_total": 67605,
+          "religion_universe": 67605,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Mersing",
+          "year": 2010,
+          "printed_population_total": 69028,
+          "religion_universe": 69028,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Mersing",
+          "year": 2020,
+          "printed_population_total": 78195,
+          "religion_universe": 78195,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Miri",
+          "year": 1991,
+          "printed_population_total": 161373,
+          "religion_universe": 160133,
+          "religion_universe_deviation": -1240
+        },
+        {
+          "area_name": "Miri",
+          "year": 2000,
+          "printed_population_total": 221055,
+          "religion_universe": 221055,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Miri",
+          "year": 2010,
+          "printed_population_total": 290274,
+          "religion_universe": 290274,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Miri",
+          "year": 2020,
+          "printed_population_total": 248877,
+          "religion_universe": 248877,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Muallim",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Muallim",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Muallim",
+          "year": 2010,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Muallim",
+          "year": 2020,
+          "printed_population_total": 76688,
+          "religion_universe": 76688,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Muar",
+          "year": 1991,
+          "printed_population_total": 301804,
+          "religion_universe": 299741,
+          "religion_universe_deviation": -2063
+        },
+        {
+          "area_name": "Muar",
+          "year": 2000,
+          "printed_population_total": 330355,
+          "religion_universe": 330355,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Muar",
+          "year": 2010,
+          "printed_population_total": 239027,
+          "religion_universe": 239027,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Muar",
+          "year": 2020,
+          "printed_population_total": 314776,
+          "religion_universe": 314776,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Mukah",
+          "year": 1991,
+          "printed_population_total": 41831,
+          "religion_universe": 41743,
+          "religion_universe_deviation": -88
+        },
+        {
+          "area_name": "Mukah",
+          "year": 2000,
+          "printed_population_total": 44837,
+          "religion_universe": 44837,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Mukah",
+          "year": 2010,
+          "printed_population_total": 41481,
+          "religion_universe": 41481,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Mukah",
+          "year": 2020,
+          "printed_population_total": 42275,
+          "religion_universe": 42275,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Nabawan",
+          "year": 1991,
+          "printed_population_total": 19999,
+          "religion_universe": 19882,
+          "religion_universe_deviation": -117
+        },
+        {
+          "area_name": "Nabawan",
+          "year": 2000,
+          "printed_population_total": 23944,
+          "religion_universe": 22943,
+          "religion_universe_deviation": -1001
+        },
+        {
+          "area_name": "Nabawan",
+          "year": 2010,
+          "printed_population_total": 31807,
+          "religion_universe": 32913,
+          "religion_universe_deviation": 1106
+        },
+        {
+          "area_name": "Nabawan",
+          "year": 2020,
+          "printed_population_total": 28349,
+          "religion_universe": 28350,
+          "religion_universe_deviation": 1
+        },
+        {
+          "area_name": "Pakan",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Pakan",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Pakan",
+          "year": 2010,
+          "printed_population_total": 15139,
+          "religion_universe": 15139,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Pakan",
+          "year": 2020,
+          "printed_population_total": 15462,
+          "religion_universe": 15462,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Papar",
+          "year": 1991,
+          "printed_population_total": 59473,
+          "religion_universe": 59457,
+          "religion_universe_deviation": -16
+        },
+        {
+          "area_name": "Papar",
+          "year": 2000,
+          "printed_population_total": 88626,
+          "religion_universe": 88626,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Papar",
+          "year": 2010,
+          "printed_population_total": 124420,
+          "religion_universe": 124420,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Papar",
+          "year": 2020,
+          "printed_population_total": 150667,
+          "religion_universe": 150667,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Pasir Mas",
+          "year": 1991,
+          "printed_population_total": 150035,
+          "religion_universe": 150026,
+          "religion_universe_deviation": -9
+        },
+        {
+          "area_name": "Pasir Mas",
+          "year": 2000,
+          "printed_population_total": 162312,
+          "religion_universe": 162312,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Pasir Mas",
+          "year": 2010,
+          "printed_population_total": 180878,
+          "religion_universe": 180878,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Pasir Mas",
+          "year": 2020,
+          "printed_population_total": 230424,
+          "religion_universe": 230424,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Pasir Puteh",
+          "year": 1991,
+          "printed_population_total": 96348,
+          "religion_universe": 96327,
+          "religion_universe_deviation": -21
+        },
+        {
+          "area_name": "Pasir Puteh",
+          "year": 2000,
+          "printed_population_total": 104404,
+          "religion_universe": 104404,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Pasir Puteh",
+          "year": 2010,
+          "printed_population_total": 113191,
+          "religion_universe": 113191,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Pasir Puteh",
+          "year": 2020,
+          "printed_population_total": 136157,
+          "religion_universe": 136157,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Pekan",
+          "year": 1991,
+          "printed_population_total": 86179,
+          "religion_universe": 86109,
+          "religion_universe_deviation": -70
+        },
+        {
+          "area_name": "Pekan",
+          "year": 2000,
+          "printed_population_total": 97751,
+          "religion_universe": 97751,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Pekan",
+          "year": 2010,
+          "printed_population_total": 105587,
+          "religion_universe": 105587,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Pekan",
+          "year": 2020,
+          "printed_population_total": 121158,
+          "religion_universe": 121158,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Penampang",
+          "year": 1991,
+          "printed_population_total": 86941,
+          "religion_universe": 86897,
+          "religion_universe_deviation": -44
+        },
+        {
+          "area_name": "Penampang",
+          "year": 2000,
+          "printed_population_total": 131072,
+          "religion_universe": 131072,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Penampang",
+          "year": 2010,
+          "printed_population_total": 121934,
+          "religion_universe": 121934,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Penampang",
+          "year": 2020,
+          "printed_population_total": 162174,
+          "religion_universe": 162174,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Perak Tengah",
+          "year": 1991,
+          "printed_population_total": 75574,
+          "religion_universe": 75571,
+          "religion_universe_deviation": -3
+        },
+        {
+          "area_name": "Perak Tengah",
+          "year": 2000,
+          "printed_population_total": 82153,
+          "religion_universe": 82153,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Perak Tengah",
+          "year": 2010,
+          "printed_population_total": 99854,
+          "religion_universe": 99854,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Perak Tengah",
+          "year": 2020,
+          "printed_population_total": 94573,
+          "religion_universe": 94573,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Petaling",
+          "year": 1991,
+          "printed_population_total": 633165,
+          "religion_universe": 632330,
+          "religion_universe_deviation": -835
+        },
+        {
+          "area_name": "Petaling",
+          "year": 2000,
+          "printed_population_total": 1184180,
+          "religion_universe": 1184180,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Petaling",
+          "year": 2010,
+          "printed_population_total": 1765495,
+          "religion_universe": 1765495,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Petaling",
+          "year": 2020,
+          "printed_population_total": 2298130,
+          "religion_universe": 2298130,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Pitas",
+          "year": 1991,
+          "printed_population_total": 24240,
+          "religion_universe": 24229,
+          "religion_universe_deviation": -11
+        },
+        {
+          "area_name": "Pitas",
+          "year": 2000,
+          "printed_population_total": 32408,
+          "religion_universe": 32413,
+          "religion_universe_deviation": 5
+        },
+        {
+          "area_name": "Pitas",
+          "year": 2010,
+          "printed_population_total": 37808,
+          "religion_universe": 37808,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Pitas",
+          "year": 2020,
+          "printed_population_total": 36660,
+          "religion_universe": 36660,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Pokok Sena",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Pokok Sena",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Pokok Sena",
+          "year": 2010,
+          "printed_population_total": 48347,
+          "religion_universe": 48347,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Pokok Sena",
+          "year": 2020,
+          "printed_population_total": 49812,
+          "religion_universe": 49812,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Pontian",
+          "year": 1991,
+          "printed_population_total": 129356,
+          "religion_universe": 129266,
+          "religion_universe_deviation": -90
+        },
+        {
+          "area_name": "Pontian",
+          "year": 2000,
+          "printed_population_total": 142697,
+          "religion_universe": 142697,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Pontian",
+          "year": 2010,
+          "printed_population_total": 149938,
+          "religion_universe": 149938,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Pontian",
+          "year": 2020,
+          "printed_population_total": 173318,
+          "religion_universe": 173318,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Port Dickson",
+          "year": 1991,
+          "printed_population_total": 92171,
+          "religion_universe": 91659,
+          "religion_universe_deviation": -512
+        },
+        {
+          "area_name": "Port Dickson",
+          "year": 2000,
+          "printed_population_total": 106630,
+          "religion_universe": 106630,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Port Dickson",
+          "year": 2010,
+          "printed_population_total": 110991,
+          "religion_universe": 110991,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Port Dickson",
+          "year": 2020,
+          "printed_population_total": 128689,
+          "religion_universe": 128689,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Pusa",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Pusa",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Pusa",
+          "year": 2010,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Pusa",
+          "year": 2020,
+          "printed_population_total": 19557,
+          "religion_universe": 19557,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Putatan",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Putatan",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Putatan",
+          "year": 2010,
+          "printed_population_total": 54733,
+          "religion_universe": 54733,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Putatan",
+          "year": 2020,
+          "printed_population_total": 68811,
+          "religion_universe": 68811,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Ranau",
+          "year": 1991,
+          "printed_population_total": 49358,
+          "religion_universe": 49200,
+          "religion_universe_deviation": -158
+        },
+        {
+          "area_name": "Ranau",
+          "year": 2000,
+          "printed_population_total": 70685,
+          "religion_universe": 70685,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Ranau",
+          "year": 2010,
+          "printed_population_total": 94092,
+          "religion_universe": 94092,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Ranau",
+          "year": 2020,
+          "printed_population_total": 85077,
+          "religion_universe": 85077,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Raub",
+          "year": 1991,
+          "printed_population_total": 73085,
+          "religion_universe": 72750,
+          "religion_universe_deviation": -335
+        },
+        {
+          "area_name": "Raub",
+          "year": 2000,
+          "printed_population_total": 79488,
+          "religion_universe": 79488,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Raub",
+          "year": 2010,
+          "printed_population_total": 91731,
+          "religion_universe": 91731,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Raub",
+          "year": 2020,
+          "printed_population_total": 96139,
+          "religion_universe": 96139,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Rembau",
+          "year": 1991,
+          "printed_population_total": 34823,
+          "religion_universe": 34817,
+          "religion_universe_deviation": -6
+        },
+        {
+          "area_name": "Rembau",
+          "year": 2000,
+          "printed_population_total": 36848,
+          "religion_universe": 36848,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Rembau",
+          "year": 2010,
+          "printed_population_total": 41988,
+          "religion_universe": 41988,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Rembau",
+          "year": 2020,
+          "printed_population_total": 47296,
+          "religion_universe": 47296,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Rompin",
+          "year": 1991,
+          "printed_population_total": 80251,
+          "religion_universe": 80159,
+          "religion_universe_deviation": -92
+        },
+        {
+          "area_name": "Rompin",
+          "year": 2000,
+          "printed_population_total": 102033,
+          "religion_universe": 102033,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Rompin",
+          "year": 2010,
+          "printed_population_total": 109848,
+          "religion_universe": 109848,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Rompin",
+          "year": 2020,
+          "printed_population_total": 98065,
+          "religion_universe": 98065,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sabak Bernam",
+          "year": 1991,
+          "printed_population_total": 99824,
+          "religion_universe": 99739,
+          "religion_universe_deviation": -85
+        },
+        {
+          "area_name": "Sabak Bernam",
+          "year": 2000,
+          "printed_population_total": 113245,
+          "religion_universe": 113245,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sabak Bernam",
+          "year": 2010,
+          "printed_population_total": 103709,
+          "religion_universe": 103709,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sabak Bernam",
+          "year": 2020,
+          "printed_population_total": 107057,
+          "religion_universe": 107057,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Samarahan",
+          "year": 1991,
+          "printed_population_total": 46583,
+          "religion_universe": 46573,
+          "religion_universe_deviation": -10
+        },
+        {
+          "area_name": "Samarahan",
+          "year": 2000,
+          "printed_population_total": 46966,
+          "religion_universe": 46966,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Samarahan",
+          "year": 2010,
+          "printed_population_total": 85495,
+          "religion_universe": 85495,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Samarahan",
+          "year": 2020,
+          "printed_population_total": 128284,
+          "religion_universe": 128284,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sandakan",
+          "year": 1991,
+          "printed_population_total": 222817,
+          "religion_universe": 222402,
+          "religion_universe_deviation": -415
+        },
+        {
+          "area_name": "Sandakan",
+          "year": 2000,
+          "printed_population_total": 348930,
+          "religion_universe": 348930,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sandakan",
+          "year": 2010,
+          "printed_population_total": 396290,
+          "religion_universe": 396290,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sandakan",
+          "year": 2020,
+          "printed_population_total": 439050,
+          "religion_universe": 439050,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Saratok",
+          "year": 1991,
+          "printed_population_total": 37939,
+          "religion_universe": 37892,
+          "religion_universe_deviation": -47
+        },
+        {
+          "area_name": "Saratok",
+          "year": 2000,
+          "printed_population_total": 42035,
+          "religion_universe": 42035,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Saratok",
+          "year": 2010,
+          "printed_population_total": 45015,
+          "religion_universe": 45015,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Saratok",
+          "year": 2020,
+          "printed_population_total": 23105,
+          "religion_universe": 23105,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sarikei",
+          "year": 1991,
+          "printed_population_total": 49631,
+          "religion_universe": 49035,
+          "religion_universe_deviation": -596
+        },
+        {
+          "area_name": "Sarikei",
+          "year": 2000,
+          "printed_population_total": 57096,
+          "religion_universe": 57096,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sarikei",
+          "year": 2010,
+          "printed_population_total": 56228,
+          "religion_universe": 56228,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sarikei",
+          "year": 2020,
+          "printed_population_total": 44039,
+          "religion_universe": 44039,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sebauh",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Sebauh",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Sebauh",
+          "year": 2010,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Sebauh",
+          "year": 2020,
+          "printed_population_total": 29606,
+          "religion_universe": 29606,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Seberang Perai Selatan",
+          "year": 1991,
+          "printed_population_total": 84771,
+          "religion_universe": 84769,
+          "religion_universe_deviation": -2
+        },
+        {
+          "area_name": "Seberang Perai Selatan",
+          "year": 2000,
+          "printed_population_total": 117722,
+          "religion_universe": 117722,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Seberang Perai Selatan",
+          "year": 2010,
+          "printed_population_total": 166685,
+          "religion_universe": 166685,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Seberang Perai Selatan",
+          "year": 2020,
+          "printed_population_total": 184007,
+          "religion_universe": 184007,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Seberang Perai Tengah",
+          "year": 1991,
+          "printed_population_total": 236270,
+          "religion_universe": 236142,
+          "religion_universe_deviation": -128
+        },
+        {
+          "area_name": "Seberang Perai Tengah",
+          "year": 2000,
+          "printed_population_total": 294051,
+          "religion_universe": 294051,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Seberang Perai Tengah",
+          "year": 2010,
+          "printed_population_total": 362820,
+          "religion_universe": 362820,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Seberang Perai Tengah",
+          "year": 2020,
+          "printed_population_total": 422990,
+          "religion_universe": 422990,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Seberang Perai Utara",
+          "year": 1991,
+          "printed_population_total": 224647,
+          "religion_universe": 224070,
+          "religion_universe_deviation": -577
+        },
+        {
+          "area_name": "Seberang Perai Utara",
+          "year": 2000,
+          "printed_population_total": 243938,
+          "religion_universe": 243938,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Seberang Perai Utara",
+          "year": 2010,
+          "printed_population_total": 288692,
+          "religion_universe": 288692,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Seberang Perai Utara",
+          "year": 2020,
+          "printed_population_total": 339095,
+          "religion_universe": 339095,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Segamat",
+          "year": 1991,
+          "printed_population_total": 177561,
+          "religion_universe": 177219,
+          "religion_universe_deviation": -342
+        },
+        {
+          "area_name": "Segamat",
+          "year": 2000,
+          "printed_population_total": 177916,
+          "religion_universe": 177916,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Segamat",
+          "year": 2010,
+          "printed_population_total": 182985,
+          "religion_universe": 182985,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Segamat",
+          "year": 2020,
+          "printed_population_total": 197762,
+          "religion_universe": 197762,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Selama",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Selama",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Selama",
+          "year": 2010,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Selama",
+          "year": 2020,
+          "printed_population_total": 34439,
+          "religion_universe": 34439,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Selangau",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Selangau",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Selangau",
+          "year": 2010,
+          "printed_population_total": 22318,
+          "religion_universe": 22318,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Selangau",
+          "year": 2020,
+          "printed_population_total": 19844,
+          "religion_universe": 19844,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Semporna",
+          "year": 1991,
+          "printed_population_total": 91828,
+          "religion_universe": 91761,
+          "religion_universe_deviation": -67
+        },
+        {
+          "area_name": "Semporna",
+          "year": 2000,
+          "printed_population_total": 108526,
+          "religion_universe": 108526,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Semporna",
+          "year": 2010,
+          "printed_population_total": 133164,
+          "religion_universe": 133164,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Semporna",
+          "year": 2020,
+          "printed_population_total": 166587,
+          "religion_universe": 166587,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sepang",
+          "year": 1991,
+          "printed_population_total": 54671,
+          "religion_universe": 54617,
+          "religion_universe_deviation": -54
+        },
+        {
+          "area_name": "Sepang",
+          "year": 2000,
+          "printed_population_total": 108640,
+          "religion_universe": 108640,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sepang",
+          "year": 2010,
+          "printed_population_total": 207354,
+          "religion_universe": 207354,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sepang",
+          "year": 2020,
+          "printed_population_total": 325244,
+          "religion_universe": 325244,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Seremban",
+          "year": 1991,
+          "printed_population_total": 263383,
+          "religion_universe": 263174,
+          "religion_universe_deviation": -209
+        },
+        {
+          "area_name": "Seremban",
+          "year": 2000,
+          "printed_population_total": 383530,
+          "religion_universe": 383530,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Seremban",
+          "year": 2010,
+          "printed_population_total": 536147,
+          "religion_universe": 536147,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Seremban",
+          "year": 2020,
+          "printed_population_total": 692283,
+          "religion_universe": 692283,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Serian",
+          "year": 1991,
+          "printed_population_total": 71874,
+          "religion_universe": 71856,
+          "religion_universe_deviation": -18
+        },
+        {
+          "area_name": "Serian",
+          "year": 2000,
+          "printed_population_total": 79632,
+          "religion_universe": 79632,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Serian",
+          "year": 2010,
+          "printed_population_total": 89078,
+          "religion_universe": 89078,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Serian",
+          "year": 2020,
+          "printed_population_total": 85345,
+          "religion_universe": 85345,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Setiu",
+          "year": 1991,
+          "printed_population_total": 42434,
+          "religion_universe": 42420,
+          "religion_universe_deviation": -14
+        },
+        {
+          "area_name": "Setiu",
+          "year": 2000,
+          "printed_population_total": 50346,
+          "religion_universe": 50346,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Setiu",
+          "year": 2010,
+          "printed_population_total": 54563,
+          "religion_universe": 54563,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Setiu",
+          "year": 2020,
+          "printed_population_total": 59651,
+          "religion_universe": 59651,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sibu",
+          "year": 1991,
+          "printed_population_total": 170399,
+          "religion_universe": 169246,
+          "religion_universe_deviation": -1153
+        },
+        {
+          "area_name": "Sibu",
+          "year": 2000,
+          "printed_population_total": 210118,
+          "religion_universe": 210118,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sibu",
+          "year": 2010,
+          "printed_population_total": 240165,
+          "religion_universe": 240165,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sibu",
+          "year": 2020,
+          "printed_population_total": 248064,
+          "religion_universe": 248064,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sik",
+          "year": 1991,
+          "printed_population_total": 54466,
+          "religion_universe": 54443,
+          "religion_universe_deviation": -23
+        },
+        {
+          "area_name": "Sik",
+          "year": 2000,
+          "printed_population_total": 59556,
+          "religion_universe": 59556,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sik",
+          "year": 2010,
+          "printed_population_total": 66387,
+          "religion_universe": 66387,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sik",
+          "year": 2020,
+          "printed_population_total": 67925,
+          "religion_universe": 67925,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Simunjan",
+          "year": 1991,
+          "printed_population_total": 45971,
+          "religion_universe": 45929,
+          "religion_universe_deviation": -42
+        },
+        {
+          "area_name": "Simunjan",
+          "year": 2000,
+          "printed_population_total": 37287,
+          "religion_universe": 37287,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Simunjan",
+          "year": 2010,
+          "printed_population_total": 38324,
+          "religion_universe": 38324,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Simunjan",
+          "year": 2020,
+          "printed_population_total": 36211,
+          "religion_universe": 36211,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sipitang",
+          "year": 1991,
+          "printed_population_total": 24349,
+          "religion_universe": 24308,
+          "religion_universe_deviation": -41
+        },
+        {
+          "area_name": "Sipitang",
+          "year": 2000,
+          "printed_population_total": 29256,
+          "religion_universe": 29256,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sipitang",
+          "year": 2010,
+          "printed_population_total": 34862,
+          "religion_universe": 34862,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sipitang",
+          "year": 2020,
+          "printed_population_total": 37828,
+          "religion_universe": 37828,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Song",
+          "year": 1991,
+          "printed_population_total": 17576,
+          "religion_universe": 17488,
+          "religion_universe_deviation": -88
+        },
+        {
+          "area_name": "Song",
+          "year": 2000,
+          "printed_population_total": 19236,
+          "religion_universe": 19236,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Song",
+          "year": 2010,
+          "printed_population_total": 20105,
+          "religion_universe": 20105,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Song",
+          "year": 2020,
+          "printed_population_total": 9961,
+          "religion_universe": 9961,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sri Aman",
+          "year": 1991,
+          "printed_population_total": 58639,
+          "religion_universe": 58432,
+          "religion_universe_deviation": -207
+        },
+        {
+          "area_name": "Sri Aman",
+          "year": 2000,
+          "printed_population_total": 62775,
+          "religion_universe": 62775,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sri Aman",
+          "year": 2010,
+          "printed_population_total": 64500,
+          "religion_universe": 64500,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Sri Aman",
+          "year": 2020,
+          "printed_population_total": 61238,
+          "religion_universe": 61238,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Subis",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Subis",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Subis",
+          "year": 2010,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Subis",
+          "year": 2020,
+          "printed_population_total": 57289,
+          "religion_universe": 57289,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tambunan",
+          "year": 1991,
+          "printed_population_total": 19726,
+          "religion_universe": 19696,
+          "religion_universe_deviation": -30
+        },
+        {
+          "area_name": "Tambunan",
+          "year": 2000,
+          "printed_population_total": 27825,
+          "religion_universe": 27825,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tambunan",
+          "year": 2010,
+          "printed_population_total": 35667,
+          "religion_universe": 35667,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tambunan",
+          "year": 2020,
+          "printed_population_total": 31573,
+          "religion_universe": 31573,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tampin",
+          "year": 1991,
+          "printed_population_total": 72295,
+          "religion_universe": 72251,
+          "religion_universe_deviation": -44
+        },
+        {
+          "area_name": "Tampin",
+          "year": 2000,
+          "printed_population_total": 77021,
+          "religion_universe": 77021,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tampin",
+          "year": 2010,
+          "printed_population_total": 82165,
+          "religion_universe": 82165,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tampin",
+          "year": 2020,
+          "printed_population_total": 88123,
+          "religion_universe": 88123,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tanah Merah",
+          "year": 1991,
+          "printed_population_total": 94611,
+          "religion_universe": 94584,
+          "religion_universe_deviation": -27
+        },
+        {
+          "area_name": "Tanah Merah",
+          "year": 2000,
+          "printed_population_total": 101509,
+          "religion_universe": 101509,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tanah Merah",
+          "year": 2010,
+          "printed_population_total": 115949,
+          "religion_universe": 115949,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tanah Merah",
+          "year": 2020,
+          "printed_population_total": 150766,
+          "religion_universe": 150766,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tangkak",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Tangkak",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Tangkak",
+          "year": 2010,
+          "printed_population_total": 131890,
+          "religion_universe": 131890,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tangkak",
+          "year": 2020,
+          "printed_population_total": 163449,
+          "religion_universe": 163449,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tanjung Manis",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Tanjung Manis",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Tanjung Manis",
+          "year": 2010,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Tanjung Manis",
+          "year": 2020,
+          "printed_population_total": 7946,
+          "religion_universe": 7946,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tatau",
+          "year": 1991,
+          "printed_population_total": 21124,
+          "religion_universe": 21123,
+          "religion_universe_deviation": -1
+        },
+        {
+          "area_name": "Tatau",
+          "year": 2000,
+          "printed_population_total": 23241,
+          "religion_universe": 23241,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tatau",
+          "year": 2010,
+          "printed_population_total": 29592,
+          "religion_universe": 29592,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tatau",
+          "year": 2020,
+          "printed_population_total": 31920,
+          "religion_universe": 31920,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tawau",
+          "year": 1991,
+          "printed_population_total": 244728,
+          "religion_universe": 243332,
+          "religion_universe_deviation": -1396
+        },
+        {
+          "area_name": "Tawau",
+          "year": 2000,
+          "printed_population_total": 305080,
+          "religion_universe": 305080,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tawau",
+          "year": 2010,
+          "printed_population_total": 397673,
+          "religion_universe": 397673,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tawau",
+          "year": 2020,
+          "printed_population_total": 372615,
+          "religion_universe": 372615,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tebedu",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Tebedu",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Tebedu",
+          "year": 2010,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Tebedu",
+          "year": 2020,
+          "printed_population_total": 25232,
+          "religion_universe": 25232,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Telang Usan",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Telang Usan",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Telang Usan",
+          "year": 2010,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Telang Usan",
+          "year": 2020,
+          "printed_population_total": 17406,
+          "religion_universe": 17406,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Telupid",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Telupid",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Telupid",
+          "year": 2010,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Telupid",
+          "year": 2020,
+          "printed_population_total": 29241,
+          "religion_universe": 29241,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Temerloh",
+          "year": 1991,
+          "printed_population_total": 186907,
+          "religion_universe": 186432,
+          "religion_universe_deviation": -475
+        },
+        {
+          "area_name": "Temerloh",
+          "year": 2000,
+          "printed_population_total": 136214,
+          "religion_universe": 136214,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Temerloh",
+          "year": 2010,
+          "printed_population_total": 158724,
+          "religion_universe": 158724,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Temerloh",
+          "year": 2020,
+          "printed_population_total": 169023,
+          "religion_universe": 169023,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tenom",
+          "year": 1991,
+          "printed_population_total": 37954,
+          "religion_universe": 37893,
+          "religion_universe_deviation": -61
+        },
+        {
+          "area_name": "Tenom",
+          "year": 2000,
+          "printed_population_total": 46106,
+          "religion_universe": 46106,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tenom",
+          "year": 2010,
+          "printed_population_total": 55553,
+          "religion_universe": 55553,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tenom",
+          "year": 2020,
+          "printed_population_total": 51328,
+          "religion_universe": 51328,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Timur Laut",
+          "year": 1991,
+          "printed_population_total": 395714,
+          "religion_universe": 388365,
+          "religion_universe_deviation": -7349
+        },
+        {
+          "area_name": "Timur Laut",
+          "year": 2000,
+          "printed_population_total": 416369,
+          "religion_universe": 416369,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Timur Laut",
+          "year": 2010,
+          "printed_population_total": 510996,
+          "religion_universe": 510996,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Timur Laut",
+          "year": 2020,
+          "printed_population_total": 556575,
+          "religion_universe": 556575,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tongod",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Tongod",
+          "year": 2000,
+          "printed_population_total": 23730,
+          "religion_universe": 23730,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tongod",
+          "year": 2010,
+          "printed_population_total": 35341,
+          "religion_universe": 35341,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tongod",
+          "year": 2020,
+          "printed_population_total": 42742,
+          "religion_universe": 42742,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tuaran",
+          "year": 1991,
+          "printed_population_total": 63995,
+          "religion_universe": 63986,
+          "religion_universe_deviation": -9
+        },
+        {
+          "area_name": "Tuaran",
+          "year": 2000,
+          "printed_population_total": 81215,
+          "religion_universe": 81215,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tuaran",
+          "year": 2010,
+          "printed_population_total": 102411,
+          "religion_universe": 102411,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tuaran",
+          "year": 2020,
+          "printed_population_total": 135665,
+          "religion_universe": 135665,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tumpat",
+          "year": 1991,
+          "printed_population_total": 116044,
+          "religion_universe": 115910,
+          "religion_universe_deviation": -134
+        },
+        {
+          "area_name": "Tumpat",
+          "year": 2000,
+          "printed_population_total": 130414,
+          "religion_universe": 130414,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tumpat",
+          "year": 2010,
+          "printed_population_total": 147179,
+          "religion_universe": 147179,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Tumpat",
+          "year": 2020,
+          "printed_population_total": 179943,
+          "religion_universe": 179943,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Hulu Langat",
+          "year": 1991,
+          "printed_population_total": 413900,
+          "religion_universe": 413782,
+          "religion_universe_deviation": -118
+        },
+        {
+          "area_name": "Hulu Langat",
+          "year": 2000,
+          "printed_population_total": 864451,
+          "religion_universe": 864451,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Hulu Langat",
+          "year": 2010,
+          "printed_population_total": 1138198,
+          "religion_universe": 1138198,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Hulu Langat",
+          "year": 2020,
+          "printed_population_total": 1400461,
+          "religion_universe": 1400461,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Hulu Selangor",
+          "year": 1991,
+          "printed_population_total": 82814,
+          "religion_universe": 82740,
+          "religion_universe_deviation": -74
+        },
+        {
+          "area_name": "Hulu Selangor",
+          "year": 2000,
+          "printed_population_total": 147996,
+          "religion_universe": 147996,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Hulu Selangor",
+          "year": 2010,
+          "printed_population_total": 194387,
+          "religion_universe": 194387,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Hulu Selangor",
+          "year": 2020,
+          "printed_population_total": 243029,
+          "religion_universe": 243029,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Padang Terap",
+          "year": 1991,
+          "printed_population_total": 50726,
+          "religion_universe": 50726,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Padang Terap",
+          "year": 2000,
+          "printed_population_total": 55847,
+          "religion_universe": 55847,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Padang Terap",
+          "year": 2010,
+          "printed_population_total": 61970,
+          "religion_universe": 61970,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Padang Terap",
+          "year": 2020,
+          "printed_population_total": 65698,
+          "religion_universe": 65698,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Yan",
+          "year": 1991,
+          "printed_population_total": 60483,
+          "religion_universe": 60448,
+          "religion_universe_deviation": -35
+        },
+        {
+          "area_name": "Yan",
+          "year": 2000,
+          "printed_population_total": 62217,
+          "religion_universe": 62217,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Yan",
+          "year": 2010,
+          "printed_population_total": 66606,
+          "religion_universe": 66606,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Yan",
+          "year": 2020,
+          "printed_population_total": 73384,
+          "religion_universe": 73384,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Perlis",
+          "year": 1991,
+          "printed_population_total": 183824,
+          "religion_universe": 183635,
+          "religion_universe_deviation": -189
+        },
+        {
+          "area_name": "Perlis",
+          "year": 2000,
+          "printed_population_total": 198288,
+          "religion_universe": 198288,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Perlis",
+          "year": 2010,
+          "printed_population_total": 225630,
+          "religion_universe": 225630,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Perlis",
+          "year": 2020,
+          "printed_population_total": 284885,
+          "religion_universe": 284885,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "W.P. Kuala Lumpur",
+          "year": 1991,
+          "printed_population_total": 1145342,
+          "religion_universe": 1130961,
+          "religion_universe_deviation": -14381
+        },
+        {
+          "area_name": "W.P. Kuala Lumpur",
+          "year": 2000,
+          "printed_population_total": 1305792,
+          "religion_universe": 1305792,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "W.P. Kuala Lumpur",
+          "year": 2010,
+          "printed_population_total": 1588750,
+          "religion_universe": 1588750,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "W.P. Kuala Lumpur",
+          "year": 2020,
+          "printed_population_total": 1982112,
+          "religion_universe": 1982112,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "W.P. Labuan",
+          "year": 1991,
+          "printed_population_total": 54241,
+          "religion_universe": 53674,
+          "religion_universe_deviation": -567
+        },
+        {
+          "area_name": "W.P. Labuan",
+          "year": 2000,
+          "printed_population_total": 70871,
+          "religion_universe": 70871,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "W.P. Labuan",
+          "year": 2010,
+          "printed_population_total": 83920,
+          "religion_universe": 83920,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "W.P. Labuan",
+          "year": 2020,
+          "printed_population_total": 95120,
+          "religion_universe": 95120,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "W.P. Putrajaya",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "W.P. Putrajaya",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "W.P. Putrajaya",
+          "year": 2010,
+          "printed_population_total": 68361,
+          "religion_universe": 68169,
+          "religion_universe_deviation": -192
+        },
+        {
+          "area_name": "W.P. Putrajaya",
+          "year": 2020,
+          "printed_population_total": 109202,
+          "religion_universe": 108795,
+          "religion_universe_deviation": -407
+        },
+        {
+          "area_name": "Pendang",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Pendang",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Pendang",
+          "year": 2010,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Pendang",
+          "year": 2020,
+          "printed_population_total": 98922,
+          "religion_universe": 98922,
+          "religion_universe_deviation": 0
+        },
+        {
+          "area_name": "Hulu Terengganu",
+          "year": 1991,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Hulu Terengganu",
+          "year": 2000,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Hulu Terengganu",
+          "year": 2010,
+          "printed_population_total": null,
+          "religion_universe": null,
+          "religion_universe_deviation": null
+        },
+        {
+          "area_name": "Hulu Terengganu",
+          "year": 2020,
+          "printed_population_total": 69881,
+          "religion_universe": 69881,
+          "religion_universe_deviation": 0
+        }
+      ]
+    },
+    "partial_category_nulls": "Where DOSM prints a null category within an otherwise populated religion block, composition carries only the printed lines. population_total sums those printed lines, and quality_flag carries partial_category_null_as_printed.",
+    "waves": "The product ships 1991, 2000, 2010, and 2020. The four whole-unit state reports additionally print 1970 and 1980 context, which this product does not ship because the district series does not carry those waves.",
+    "categories": "The historical frame carries Islam; Christianity; Buddhism; Hinduism; Others; No Religion/Unknown verbatim. Pendang and Hulu Terengganu carry the seven Table 7 lines in 2020 because No Religion and Unknown are separately printed there.",
+    "no_religion_disclosure": "DOSM fuses No Religion and Unknown in the historical frame. Every row carries no_religion_line_fused_with_unknown_as_printed. For Pendang and Hulu Terengganu in 2020, the no_religion slot sums the separately printed No Religion and Unknown lines and carries no_religion_slot_documented_combine_of_separate_no_religion_and_unknown_lines.",
+    "missingness": "Printed '..' and '-' cells remain null. Pendang and Hulu Terengganu in 1991, 2000, and 2010 are null because those district-grain waves remain unpublished online; these six rows carry historical_wave_unpublished_at_district_grain.",
+    "licence_probe_paraphrase": "The route probe paraphrased a conflict between DOSM's general portal terms, which authorise reuse with attribution and conditions, and the narrower publication-specific statement. The PI ruling of 2026-07-11 post-dates that probe position and authorises reproduction under the general terms while follow-up proceeds in parallel. This paragraph attributes the probe's description as a paraphrase; it does not present it as verbatim source clauses.",
+    "boundary_derivation": {
+      "attribution": "© OpenStreetMap contributors, ODbL 1.0",
+      "retrieval_date": "2026-07-13",
+      "overpass_response_sha256": "7841281a645047f7dc97d9d4798013b5e9944d3aed312c718d258a914edfe1ee",
+      "query": "[out:json][timeout:240];area[\"ISO3166-1\"=\"MY\"][admin_level=2]->.country;(relation(area.country)[boundary=administrative][admin_level=6];relation(area.country)[boundary=administrative][admin_level=4][name~\"Perlis|Kuala Lumpur|Labuan|Putrajaya\",i];relation(area.country)[boundary=administrative][admin_level=7][name~\"Selama|Lojing\",i];);out geom;",
+      "processing": "Excluded the intersecting Thai Sadao relation. Used 158 Malaysia level-6 relations. Dissolved Gedong and Sebuyau into Simunjan, and Lingga and Pantu into Sri Aman. Replaced the four whole-unit districts with their level-4 extents. Used genuine level-7 Selama and Lojing relations and geometric differences from Larut dan Matang and Gua Musang. Applied no simplification.",
+      "sarawak_parent_evidence": ["Sarawak Samarahan Divisional Administration: Sebuyau and Gedong were under Simunjan administration in the 2020 frame (https://samarahan.sarawak.gov.my/web/subpage/webpage_view/153/simunjando).", "Sarawak Sri Aman Divisional Administration: Lingga and Pantu were sub-districts of Sri Aman before their December 2021 elevation (https://sriaman.sarawak.gov.my/web/subpage/webpage_view/142)."],
+      "contested_branches": ["Perlis, W.P. Kuala Lumpur, W.P. Labuan, and W.P. Putrajaya: level-4 extent-identity substitution.", "Gedong and Sebuyau: dissolved into Simunjan under the verified 2020 parent mapping.", "Lingga and Pantu: dissolved into Sri Aman under the verified pre-elevation parent mapping.", "Selama: genuine OSM level-7 relation 14009966; Larut dan Matang is the geometric difference.", "Kecil Lojing: genuine OSM level-7 relation 9404202; Gua Musang is the geometric difference."],
+      "name_normalisation": ["Central Malacca -> Melaka Tengah", "Kulaijaya/Kulai District -> Kulai", "Ulu Langat -> Hulu Langat", "Ulu Selangor -> Hulu Selangor", "Larut, Matang dan Selama -> Larut dan Matang", "Southwest Penang Island District -> Barat Daya", "Northeast Penang Island District -> Timur Laut", "Seberang Perai Northern/Central/Southern District -> Seberang Perai Utara/Tengah/Selatan", "Kuala Lumpur/Labuan/Putrajaya level-4 labels -> W.P. Kuala Lumpur/W.P. Labuan/W.P. Putrajaya"]
+    }
+  },
+  "validation": {
+    "status": "passed",
+    "checks": {
+      "source_sha256": {
+        "status": "passed",
+        "files": 160,
+        "values": {
+          "data/raw/my_census/district_reports/alor_gajah.pdf": "db18340e1ea9bb1055a41844b58240e6dd905b93a95e56470383ddd92bf5459b",
+          "data/raw/my_census/district_reports/asajaya.pdf": "7da9f12d2875f1f9d76ed4b6bc92b34fed28c421f43adf69de8a7b9592547b44",
+          "data/raw/my_census/district_reports/bachok.pdf": "4bd492ee445dc75dd785e94368139e47a786404ff103d0c864d3f3d35b1f3ec7",
+          "data/raw/my_census/district_reports/bagan_datuk.pdf": "b02a714682e639519e78c69920fd7092a0f05c48079436d27980f0220a86fb2c",
+          "data/raw/my_census/district_reports/baling.pdf": "06cc4e577b800f1385c23e13ddc7d38488766ad51645e4ebd32cf7fd57851caf",
+          "data/raw/my_census/district_reports/bandar_baharu.pdf": "bbd1b7929844f8ebb1a063e585993b660650078b8d4d736c0f1332e2b554128e",
+          "data/raw/my_census/district_reports/barat_daya.pdf": "7c399f3576efa9f31797a15a9f90a5bf306b7d195f9f2109020f6aaa2ff77699",
+          "data/raw/my_census/district_reports/batang_padang.pdf": "9d8537c60d61ef957ab4c15ec570c18b2d8105dc319a0187aaa61d3e7759beb5",
+          "data/raw/my_census/district_reports/batu_pahat.pdf": "dcada63025451f9035ab56054138936c7bfe9bbd42f50bf86d8e30b002c5b49c",
+          "data/raw/my_census/district_reports/bau.pdf": "aee436b4e08e50f627b75981e1f5239a04af1106727ec4e23bdeee7a11069043",
+          "data/raw/my_census/district_reports/beaufort.pdf": "25fe35a9631814a1f2d61372eb9512c5e9d2516b8d79e879215d2f615267b8fa",
+          "data/raw/my_census/district_reports/belaga.pdf": "956a703e87c1706162bcfd713f5b749867dbfef77d14a80a8b629eb506a99a50",
+          "data/raw/my_census/district_reports/beluran.pdf": "5641aaa658e06b6b9d40faccbdb13dd816a7e0e76055d693963ff679cef2137f",
+          "data/raw/my_census/district_reports/beluru.pdf": "73af6d4d06f8ea55be8835932cc18b1fc1075af5d50d1fa5dbb063d262b282c9",
+          "data/raw/my_census/district_reports/bentong.pdf": "e25cd34c962040d499463ca01a207037cc5834a993f53a491ada684486303f21",
+          "data/raw/my_census/district_reports/bera.pdf": "3f112d4f0aa56f40b3ee713b11fa296b17c83df045bf3aa01319a99b7b87acb6",
+          "data/raw/my_census/district_reports/besut.pdf": "6eb13e0fbd01388be1f9644b4cfda91d3edc84497dc48c96cadb22f7950b8d92",
+          "data/raw/my_census/district_reports/betong.pdf": "5c8ac8913edd4695123c7781255b3bc03e2c55c450c5cda548843f8062cc45b5",
+          "data/raw/my_census/district_reports/bintulu.pdf": "ffd882519f73f3febec6de3c60e091dcb4e89eb99f40483d21152b99288b963a",
+          "data/raw/my_census/district_reports/bukit_mabong.pdf": "59cd8c10c78b8cf6721740a733a4bfe19b5502481af81813d600bde208e2756b",
+          "data/raw/my_census/district_reports/cameron_highlands.pdf": "4a4b3fc30318fd1bfda91ed0cad5f7012ad0bb119d72b0bd2121120af47f1949",
+          "data/raw/my_census/district_reports/dalat.pdf": "300f626abfb661c2179b5b42d8227e35eb27159c992d7a30983a8000c9d2ef76",
+          "data/raw/my_census/district_reports/daro.pdf": "3b69eef693b9f8b7405eaf0411f5036c93a25a5477d1690c39d4eb2c6cbc294b",
+          "data/raw/my_census/district_reports/dungun.pdf": "a69402723fc69e88fe537f45006f73330654b50a374b371c1b2be4ff5c399d17",
+          "data/raw/my_census/district_reports/gombak.pdf": "099bc71ae096d3d5679187bd286689e049e35c9b6032b03a58485d3341b82661",
+          "data/raw/my_census/district_reports/gua_musang.pdf": "31eb097cb6a2efc3de3c4351236af0d9f39f69fe28c6b17ea58631cbe9bc3e28",
+          "data/raw/my_census/district_reports/hilir_perak.pdf": "572410f5b316800105b5c7e13a3e1515dc81b1b1fdf6beaca7fe8747deff9839",
+          "data/raw/my_census/district_reports/hulu_perak.pdf": "801c33450c94543937b80041094939ebf84d05f46ae8b1234c7cd831f0f78162",
+          "data/raw/my_census/district_reports/jasin.pdf": "4c804277eb8243f058cbd4d889ddbaaeedaf2c637781d8f70789bd70204bc8f8",
+          "data/raw/my_census/district_reports/jelebu.pdf": "531bc7fe3a25cde358337245d1b00b6436d2c239b1b72c8e086275e11fa38e55",
+          "data/raw/my_census/district_reports/jeli.pdf": "d9d1579d9c1bdbdfe6eaa662ba4e6294770e6413e8d30755ca325341be854a96",
+          "data/raw/my_census/district_reports/jempol.pdf": "e3298d72fa33f0e074c2643c328cfcff6be257596d163dec4f57635a7dff8560",
+          "data/raw/my_census/district_reports/jerantut.pdf": "00d683fe5d78d7b37e311bdfe1c9d2b206bc26c7bbb1734465e044688801bfa5",
+          "data/raw/my_census/district_reports/johor_bahru.pdf": "3150b9ac332179762225c39fbc864be30ad2067dd8013b9e509298be54d5d1d5",
+          "data/raw/my_census/district_reports/julau.pdf": "d5e964cc02a5a462396be06a02bd44ec70c2d2aff6b929dd55ed107102165645",
+          "data/raw/my_census/district_reports/kabong.pdf": "fdb3f162db003160243dd677eb59581c1576415eddbc8c1a732b7966896a4188",
+          "data/raw/my_census/district_reports/kalabakan.pdf": "697c1d56ee654991a20a30aef65cd403b79c5f2286aab261b1bbe6dae345de76",
+          "data/raw/my_census/district_reports/kampar.pdf": "1488231adf8b5185618a72b2238ae4f9896a124f0ae9cc02498d87e7cb114887",
+          "data/raw/my_census/district_reports/kanowit.pdf": "aa3616cbc075624a9bd8c93460e6060b23420f3a79d184e5630e3e01573fa471",
+          "data/raw/my_census/district_reports/kapit.pdf": "d257e701adef104aeaff89771f832f3e457e960ed2a8252168c21b95aaa9e220",
+          "data/raw/my_census/district_reports/kecil_lojing.pdf": "2b1c8f79c66f75b31b65a9db05de0a10752476fb44d41674256ce4c6b5707ac8",
+          "data/raw/my_census/district_reports/kemaman.pdf": "cbdff7d6fb0916a270baffe0e7ed634ec6823fe065a5d415f0aee483e2939884",
+          "data/raw/my_census/district_reports/keningau.pdf": "8fbebe8027f2303498c51f8a463abe181ef633147993c18d09d057b29c8b4df7",
+          "data/raw/my_census/district_reports/kerian.pdf": "014a5385397d4409db4df70b54fb0a3763e4f22f402ac32f736a1fda545c9e8d",
+          "data/raw/my_census/district_reports/kinabatangan.pdf": "86b9d1a77e5688a39a9d0877dc34e7ef2a409c1e08a8c238f51f34fdbd0dec3e",
+          "data/raw/my_census/district_reports/kinta.pdf": "f353807f5a5659c02949b4cf1a1d12be5116a9a6a16ab210387d3850dba10c0c",
+          "data/raw/my_census/district_reports/klang.pdf": "333b818df59d1575c0b5ad331e06a2b42b3dd6b2771c0753e9c4c53bd9433796",
+          "data/raw/my_census/district_reports/kluang.pdf": "23861034d6610f519ac68165968f182e46d4a85589cd1f766c1c745148d6c181",
+          "data/raw/my_census/district_reports/kota_belud.pdf": "6455469fe8bf441e89ed6729bbdb7a191dc3ae90f01dd5d425ea56de52f4edff",
+          "data/raw/my_census/district_reports/kota_bharu.pdf": "f68a995074d79da1d11b41620cefa2e43f4f2913ff2d03ca112272fc72269aee",
+          "data/raw/my_census/district_reports/kota_kinabalu.pdf": "8ea144edbfa1fc228a8bf3a1071859d870507ee72366c9a471c59703e7e901cf",
+          "data/raw/my_census/district_reports/kota_marudu.pdf": "c6240ffd19776c659037c006643aa1e6baf5a9e87a628038d85641d579ef9601",
+          "data/raw/my_census/district_reports/kota_setar.pdf": "3be3c08ca11d015956da10656737b4054e4f59aeafce7d3a4ab2db333f3d03aa",
+          "data/raw/my_census/district_reports/kota_tinggi.pdf": "80dcec83417fba7179c8966e991970ff5795e7a222b44de20055ab18facedc21",
+          "data/raw/my_census/district_reports/kuala_kangsar.pdf": "21e7dda60e6e93cd967e13a7d4a120a13f4666af07f07c8a986a43b9e65aa26c",
+          "data/raw/my_census/district_reports/kuala_krai.pdf": "5796cbe4e43c30bfb706247fd5d80eba0b68909d364ef6441541cb03157cd2e4",
+          "data/raw/my_census/district_reports/kuala_langat.pdf": "4561e13e77db69f8622d42dcadad70610a96e49f8cdc15da83b4e450705f0893",
+          "data/raw/my_census/district_reports/kuala_muda.pdf": "4663e02d3ac680bacf03632af034a894168d95d74178d77f6ec854803e7a1678",
+          "data/raw/my_census/district_reports/kuala_nerus.pdf": "f1359d40cc97bafb6ca76b63de1d0762f1ba65570a95c1ce4fc2e26393ad9888",
+          "data/raw/my_census/district_reports/kuala_penyu.pdf": "b57f8085cdbee8dda5e925d81a7ac987fdc451a3d6e4e64af4334f6a921f0570",
+          "data/raw/my_census/district_reports/kuala_pilah.pdf": "c9b787514322535b1c9f5381f432f4bd7221891f06e7096b227ef67c58064e31",
+          "data/raw/my_census/district_reports/kuala_selangor.pdf": "3dfa6cccca0de7d30d729b5194c3110f2a6887d242010b3b315b97ceb9d18a93",
+          "data/raw/my_census/district_reports/kuala_terengganu.pdf": "30896a6cadae8958eb710f71bd6a0b5c964277d8d10f6b0d6f0b76bb1351cf12",
+          "data/raw/my_census/district_reports/kuantan.pdf": "9f19947c22e60adc57ff4beaec95943d6ff441d2dc972eb89b9da2b7c8d8a50f",
+          "data/raw/my_census/district_reports/kubang_pasu.pdf": "ea02be95da7375cedd0a716e239077e20f5f4dc42cd768ec2988b92f65793991",
+          "data/raw/my_census/district_reports/kuching.pdf": "57761af02ac99ae2a50a3d2df489b383133608ab964cbb7d2ac072b042f3b620",
+          "data/raw/my_census/district_reports/kudat.pdf": "917190dd5b8bb26f2877f93d4692e5f8e8c46de5d4699345f01cb750dc2079bf",
+          "data/raw/my_census/district_reports/kulai.pdf": "a840db435e185763f916ca20f279d8b8564bf4153a146784f757d01571fd6dc5",
+          "data/raw/my_census/district_reports/kulim.pdf": "658b9f2746c0e6841c69d92cc1bc6efb6be81934e4ca64f649e691cd41df2753",
+          "data/raw/my_census/district_reports/kunak.pdf": "daa0961e04e4c0067471feeb49a2feaaa09f4d0b826097b3c7e06db3abf32d44",
+          "data/raw/my_census/district_reports/lahad_datu.pdf": "46776fcce65d24f182d2cdd3e56d84a8a3ba042b91c276030ee8b0587f1191a8",
+          "data/raw/my_census/district_reports/langkawi.pdf": "a70b64aebd26870f43f38a93ec5b23d561d7b3ac5e553d5d732673222620021a",
+          "data/raw/my_census/district_reports/larut_dan_matang.pdf": "43a8437ba987ed39788a332ec653c50a33bf29fe25443b8d743f68baa2b91340",
+          "data/raw/my_census/district_reports/lawas.pdf": "63956677a6e4ff2ccf43fb3d8d1b9d5b725763db6ce7f991cda59c29c58eb989",
+          "data/raw/my_census/district_reports/limbang.pdf": "6b833ea0c1cf17fffc5a8e106e496e6d6133d9a9c24096028cd9f120c61e653b",
+          "data/raw/my_census/district_reports/lipis.pdf": "8ec312b18c2ac1d4118f530c1309e6b088761b64145170fa2e604cecdfa97ef9",
+          "data/raw/my_census/district_reports/lubok_antu.pdf": "24699ee2881000ff9842355710af67b05d6daec50139db53abc867e820812c53",
+          "data/raw/my_census/district_reports/lundu.pdf": "42d097f7205f44d78cac051a7c748342aef730f9a09660ebc424467eddfe7ede",
+          "data/raw/my_census/district_reports/machang.pdf": "bcef683b7087c54f256de261f33d94844116872bbcef561f60f7c2bc524b702f",
+          "data/raw/my_census/district_reports/manjung.pdf": "23664a04a5db332a2b28419ec4401db2321a50dc5526147096495308b883d3c4",
+          "data/raw/my_census/district_reports/maradong.pdf": "5615b6b1a9345dd63384993cf279aac59432f9f11cae92325ba86ca132ee303f",
+          "data/raw/my_census/district_reports/maran.pdf": "9aabbe0d974b8b39535790ded420af3e36c1e8756a64d9f074b85cc964efd722",
+          "data/raw/my_census/district_reports/marang.pdf": "cc290b43cee6570b2d5fa7535b44a01d871e86a8c1cf78995730e6e57ef981f7",
+          "data/raw/my_census/district_reports/marudi.pdf": "d234ad4e8f18a64c8ca4b3a9fade17ac1ea88c34a174c1b2420bc3ca8c2c1906",
+          "data/raw/my_census/district_reports/matu.pdf": "71dae35755115c6748970685b30578e50ac80da51252b074658e276e2a4a04d9",
+          "data/raw/my_census/district_reports/melaka_tengah.pdf": "e69419ec26fb390f8e310ad795897aa9f06a7a7068c664a68cc125b360cce9d8",
+          "data/raw/my_census/district_reports/mersing.pdf": "9186bfafb36320b4bd915189a0cc2ed8e6545455117022ccdbdf3a1e7f8aac38",
+          "data/raw/my_census/district_reports/miri.pdf": "b064c1ffb301b9be28bf53cbbe812162a0767379a197b638e0f799fe00e2f3a7",
+          "data/raw/my_census/district_reports/muallim.pdf": "b372b634cd5378dc36758ddfa08e6b9ee56975f8ee9a464fadfff956d790b239",
+          "data/raw/my_census/district_reports/muar.pdf": "0e58e6ee32361b1e2b7a2fee0452632660060384fbe68abe44a4d483a5e93c59",
+          "data/raw/my_census/district_reports/mukah.pdf": "35085faa8d24653c8d895f5cedb25a4fb1c8a881ef7b339e72cbb08b2918717a",
+          "data/raw/my_census/district_reports/nabawan.pdf": "1ebb56594e979df82a23a0df7f2de331efbf510ba24bac387dc89d19f0f3cbd6",
+          "data/raw/my_census/district_reports/pakan.pdf": "af15a2c52f10178040a3145ed83a943a5793fc9d82e0934f47537410b0d69601",
+          "data/raw/my_census/district_reports/papar.pdf": "795f9aa6a7c84bf247078258178e980bd4beb8e5fff0c938732f414cd10d5673",
+          "data/raw/my_census/district_reports/pasir_mas.pdf": "3a60e4a8371f9298f24b562268881b0eefec153177f3ea2ff0f97fe86c513157",
+          "data/raw/my_census/district_reports/pasir_puteh.pdf": "fca5442fc5bd73bad7d4a62b12d27bd16163744fd6e40266d4bcc19e40b9c9ae",
+          "data/raw/my_census/district_reports/pekan.pdf": "70f86ae2776f12926d83474b777fa46b8c2999a499f1da3e1bfbe1f21ea43b6f",
+          "data/raw/my_census/district_reports/penampang.pdf": "6310e8c77ca3566c36b4effc12ab10b3b3d57027ccd28fda6a27e7daa384119e",
+          "data/raw/my_census/district_reports/perak_tengah.pdf": "94f5bcb87cd87c4af1b7124f5883fa419056ab6604ca65e12bdd376e4c427b20",
+          "data/raw/my_census/district_reports/petaling.pdf": "63a0826211691f7f1572f095fd2bd726add726fde80a2ea65f07168f2db678e8",
+          "data/raw/my_census/district_reports/pitas.pdf": "48f12ab822ab4a6f4870ad4d2305a1d608ffdfb182f3a1c86a36ecd5e84e8f1f",
+          "data/raw/my_census/district_reports/pokok_sena.pdf": "ee0edd83032e108cc336159da9803985203f0ce0bc91e4b8e8c1fa9ca8033946",
+          "data/raw/my_census/district_reports/pontian.pdf": "b934980fa700aba193ca0a0a43aa62dfe9e7f7342581f7a1a96ffdebb0361b6a",
+          "data/raw/my_census/district_reports/port_dickson.pdf": "193839e8e7d4b8170521af7e5882395f8fa84ad1c99c8d3e3c981eae13ef15f0",
+          "data/raw/my_census/district_reports/pusa.pdf": "283708bee202061054c624dc434507aded57424d24ed42dc3f00210cc2044e49",
+          "data/raw/my_census/district_reports/putatan.pdf": "ae8aa8e9f50d653ab6daaf04c70ee3e4a0dc0f5c8eaad9c2f25ca92db8ff6bfb",
+          "data/raw/my_census/district_reports/ranau.pdf": "40c7a7da76eb56eca3f6428058f4fbcff899cc13e6e5bd9ea815796907ed2db2",
+          "data/raw/my_census/district_reports/raub.pdf": "27b683bac8f3a2b23dad1434f4cba615a3c34fea29322d1db12f657c7253fbfa",
+          "data/raw/my_census/district_reports/rembau.pdf": "e82ab2fd8481df6d47626aceb408d88196aa835ac4eedc2cbc3f878fbdf1789e",
+          "data/raw/my_census/district_reports/rompin.pdf": "318270416aed30f31e2d26989ef2bb00f3c3298b3f253d28287e98cd0400a447",
+          "data/raw/my_census/district_reports/sabak_bernam.pdf": "aadb7fbf2599b38501b1782a29173909bf9ba585e52aece4eaf239b18864b100",
+          "data/raw/my_census/district_reports/samarahan.pdf": "31e183ae9ca3ed05c368230e51ff3c3d309fdc9a245b3ab0e34f4d7c9b0a7994",
+          "data/raw/my_census/district_reports/sandakan.pdf": "3a8a852f437a1897838eb925120dc27bec9f4f546e9612d0b817160ffb3307b3",
+          "data/raw/my_census/district_reports/saratok.pdf": "5ea940759fad063e6e9fe72db2d5e66e74047cc6f71ac8dab8a32e412759ba07",
+          "data/raw/my_census/district_reports/sarikei.pdf": "f5899a43c64c50de61d184b25f45c2445bf3ebc40f1bbfee08a751d6fd2a0cce",
+          "data/raw/my_census/district_reports/sebauh.pdf": "72231a69c777aea7967bc7263e8e7493f1d4f93879dae9de697c9d869a723ed8",
+          "data/raw/my_census/district_reports/seberang_perai_selatan.pdf": "9e7937e149626b729b97b9ec5408285556ab2f442bd011c504484a512f703f78",
+          "data/raw/my_census/district_reports/seberang_perai_tengah.pdf": "159a6b2ac819e75b217c77fff7f30030794e1d47d54033affae17afa5fed28c9",
+          "data/raw/my_census/district_reports/seberang_perai_utara.pdf": "053201862def628371b5650b60a7e8926af101ca83b6dd9a6782741816b55412",
+          "data/raw/my_census/district_reports/segamat.pdf": "73f91e374d09702f9b1848c8619d11433305ba5a7dbcdbe5f3e1ec8918f99b61",
+          "data/raw/my_census/district_reports/selama.pdf": "91eb7dd4b5a689599d72baa801748599fbef25dda19ed43b7d43889f586e8912",
+          "data/raw/my_census/district_reports/selangau.pdf": "b3c2c09f3225e54ad99985c524fac76c72ab39479bb1fbbba614aac20f6dcf1b",
+          "data/raw/my_census/district_reports/semporna.pdf": "c88e1874f07c1bfe82909c22e68b0b8af09ecd95124fcce8cf17c33576f706a9",
+          "data/raw/my_census/district_reports/sepang.pdf": "09765cc7f36001b7fa79556cf6d7315f4da16981fdb5bb503389e9374d80f08f",
+          "data/raw/my_census/district_reports/seremban.pdf": "bac63626d41fa29b61c7e85f0b2262706b9a421d2cb5a45cf9cfaea145dc131f",
+          "data/raw/my_census/district_reports/serian.pdf": "80d19f9847c0d30b17a90e2de5b090a5eaa0a1c330f29b36094495e11d1ab4f8",
+          "data/raw/my_census/district_reports/setiu.pdf": "056b51c57cda7a7fecacf657dfe4823195e670188addd014e56596d3ba723a33",
+          "data/raw/my_census/district_reports/sibu.pdf": "cc0dae0376a70423144fb16dce39912968d7aa89ffb4da8e383f3a79c350557e",
+          "data/raw/my_census/district_reports/sik.pdf": "55712436deb78df1549b97cb30fb183a145f8ec91dda82a05e5bff4aa226a96f",
+          "data/raw/my_census/district_reports/simunjan.pdf": "a60d003b9ce296b21ecd5a5ce5a2043d29a1e24314aecaffb0bd8a4df60706ee",
+          "data/raw/my_census/district_reports/sipitang.pdf": "fc3411955f53936e2c5b04b269ce6222c5a194aa05fa79c95931c0da76cf696e",
+          "data/raw/my_census/district_reports/song.pdf": "6b6ec9fae9fd55798f2d0218a5260001c4dc6ce0a9a6cab71597e88ecfc17677",
+          "data/raw/my_census/district_reports/sri_aman.pdf": "be51556edfa169783ccb18f76571528683d8f14a3101a65ebeaad1f09fa849b9",
+          "data/raw/my_census/district_reports/subis.pdf": "e1a19707cec23df26205034044c4ff29d3e8d5c66c27790299fc9d4e9d5e8ae5",
+          "data/raw/my_census/district_reports/tambunan.pdf": "9a307617c8408cf608c11967731c0f10fdd478f43a503a5f6e7da3c9d252d49e",
+          "data/raw/my_census/district_reports/tampin.pdf": "53a53ded7d4dc2da1f2ce93865575dc8e2298367a8ae7ecba8299efada5f2d7b",
+          "data/raw/my_census/district_reports/tanah_merah.pdf": "22db8689f83424b62a5d3a550a470b9dafc76a03567360f1e0d9a09fd2c589ee",
+          "data/raw/my_census/district_reports/tangkak.pdf": "4fd7cc0dc01702d87568d59fdbf273fe13ac89bf4a176d87d6d08882cb32ec61",
+          "data/raw/my_census/district_reports/tanjung_manis.pdf": "2c2c545a8068d4f0a7ea94b4d3e91b89faae8b72b466f54617df4fdf9f5e1dfe",
+          "data/raw/my_census/district_reports/tatau.pdf": "1a01e2e5c6138ca09d7afc193c3e13a0667c031d02b45733095dd1da710c4b99",
+          "data/raw/my_census/district_reports/tawau.pdf": "737895fc1f6a29a98dba3b531faaa38ac3e392232152f834729f4ef64c017832",
+          "data/raw/my_census/district_reports/tebedu.pdf": "9ab073ccab367a185bf535ebd02b603206e8e0f840ffeb9a7afa266741329c86",
+          "data/raw/my_census/district_reports/telang_usan.pdf": "ffbe61b8d134a13254e49093cffa40738e6a55cb19750f32729143eb83c382e8",
+          "data/raw/my_census/district_reports/telupid.pdf": "c3907e12fee3684853baa0a228539f4eab03ea51e72ac18c04ab917a186c6a8e",
+          "data/raw/my_census/district_reports/temerloh.pdf": "20740640859b989d44206b1a8cd6ee89ff7108df48131f43b8d9997c2a8acf06",
+          "data/raw/my_census/district_reports/tenom.pdf": "f305904024e9282e385c10e12b64f519b12e3cc171a6555a59c309f089fe4820",
+          "data/raw/my_census/district_reports/timur_laut.pdf": "14220ef10756be71b97368cfd0d5e35d2977ff1b85c8517a05fd8a265062b3b5",
+          "data/raw/my_census/district_reports/tongod.pdf": "63e3ae080b6e277abf084e33bd2a7ed7b59bab5877366ab800117243200f8b7e",
+          "data/raw/my_census/district_reports/tuaran.pdf": "21207a1f12b467f5d9c5a5fa1c888927ce70eb01cd9171e513d922ae04fc7e3b",
+          "data/raw/my_census/district_reports/tumpat.pdf": "b43d874aa8cb39638b115c9266fcf1a553bdba4f9d653efd3c2c7df5a6911ef4",
+          "data/raw/my_census/district_reports/ulu_langat.pdf": "012fdb59dec7c8c6a5e23a79ac2b6e4614518bb43b8ee890387989a89067f720",
+          "data/raw/my_census/district_reports/ulu_selangor.pdf": "1566be8df81f95f9bfde2cb36585fa3e720e8e12494301e1dab8ff6bfac54bf7",
+          "data/raw/my_census/district_reports/padang_terap_jadual.xlsx": "7449db32c7e799e55a0475ec37dd66c934d8c4bd4dac407f09acbb95bb0b7bd6",
+          "data/raw/my_census/district_reports/yan_jadual.xlsx": "c2df2e9d1ae4df8cf57127671be0424beb56032489f12447a26304d3952a443a",
+          "data/raw/my_census/state_reports/perlis.pdf": "b3b42d3d2d62e5eda43fade522de237dcc5bcac04bfda47c8051f70d4146b1eb",
+          "data/raw/my_census/state_reports/wp_kuala_lumpur.pdf": "12ffc12a8765dd4fc3850f219d47ebcfc1d56ee14ecd3312be29c9c7a521ee0a",
+          "data/raw/my_census/state_reports/wp_labuan.pdf": "efd5a08ce878fb92676c6ff53c2c21d0cceff797b7ece8058c9337752d8d6f57",
+          "data/raw/my_census/state_reports/wp_putrajaya.pdf": "80dcb749699dad9012889e300e97f3ef528c2eb011c6a116f7784623031d4179",
+          "data/raw/my_census/state_reports/kedah.pdf": "b9c0eb9c07db9742e52a13e47184b03be615dafcde338108bbfc56a9fbef03db",
+          "data/raw/my_census/state_reports/terengganu_jadual.xlsx": "083f5a3edc385a0d108873cf91d0e15038b55ccaec65d08949ddf247db064fdf"
+        }
+      },
+      "reconciliation": {
+        "status": "passed",
+        "checks": 640,
+        "failures": []
+      },
+      "printed_percentage_sample": {
+        "status": "passed",
+        "precision": "one decimal place",
+        "sample_size": 20,
+        "cells": [
+          {
+            "area_name": "Alor Gajah",
+            "year": 1991,
+            "status": "passed"
+          },
+          {
+            "area_name": "Bachok",
+            "year": 1991,
+            "status": "passed"
+          },
+          {
+            "area_name": "Bandar Baharu",
+            "year": 1991,
+            "status": "passed"
+          },
+          {
+            "area_name": "Barat Daya",
+            "year": 1991,
+            "status": "passed"
+          },
+          {
+            "area_name": "Batang Padang",
+            "year": 1991,
+            "status": "passed"
+          },
+          {
+            "area_name": "Alor Gajah",
+            "year": 2000,
+            "status": "passed"
+          },
+          {
+            "area_name": "Bachok",
+            "year": 2000,
+            "status": "passed"
+          },
+          {
+            "area_name": "Bandar Baharu",
+            "year": 2000,
+            "status": "passed"
+          },
+          {
+            "area_name": "Barat Daya",
+            "year": 2000,
+            "status": "passed"
+          },
+          {
+            "area_name": "Batang Padang",
+            "year": 2000,
+            "status": "passed"
+          },
+          {
+            "area_name": "Alor Gajah",
+            "year": 2010,
+            "status": "passed"
+          },
+          {
+            "area_name": "Bachok",
+            "year": 2010,
+            "status": "passed"
+          },
+          {
+            "area_name": "Bandar Baharu",
+            "year": 2010,
+            "status": "passed"
+          },
+          {
+            "area_name": "Barat Daya",
+            "year": 2010,
+            "status": "passed"
+          },
+          {
+            "area_name": "Batang Padang",
+            "year": 2010,
+            "status": "passed"
+          },
+          {
+            "area_name": "Alor Gajah",
+            "year": 2020,
+            "status": "passed"
+          },
+          {
+            "area_name": "Bachok",
+            "year": 2020,
+            "status": "passed"
+          },
+          {
+            "area_name": "Bandar Baharu",
+            "year": 2020,
+            "status": "passed"
+          },
+          {
+            "area_name": "Barat Daya",
+            "year": 2020,
+            "status": "passed"
+          },
+          {
+            "area_name": "Batang Padang",
+            "year": 2020,
+            "status": "passed"
+          }
+        ]
+      },
+      "boundary": {
+        "status": "passed",
+        "features": 160,
+        "census_rows_joined": 160,
+        "valid": 160,
+        "distinct_geometry_hashes": 160
+      },
+      "area_summary_schema": {
+        "status": "passed",
+        "command": "uvx check-jsonschema --base-uri file://$(pwd)/schemas/ --schemafile schemas/area-summary.v2.schema.json apps/regions/my/data/area_summary_district.json"
+      },
+      "manifest_schema": {
+        "status": "passed",
+        "command": "uvx check-jsonschema --base-uri file://$(pwd)/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/my-census-religion-1991-2020.json"
+      }
+    }
+  },
+  "licence_status": "accepted",
+  "downstream_status": "staged",
+  "notes": "Stage only. No page, hub, changelog, queue, shared-runtime, or git change is part of this build."
+}
