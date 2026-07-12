@@ -1,0 +1,4910 @@
+{
+  "schema_version": "area-summary.v2",
+  "generated_at": "2026-07-12T11:17:10Z",
+  "generated_by": "scripts/build_fi_area_summary.R",
+  "country_code": "FI",
+  "data_status": "register_membership_live",
+  "data_status_note": "Finland national administrative religious-community membership, StatFin 11rx, 1990-2025 (36 annual waves) on one geoBoundaries FIN ADM0 polygon. Register construct, not census affiliation or belief. Ships STAGED (no page, no hub).",
+  "boundary_set": {
+    "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+    "country_code": "FI",
+    "level": "adm0",
+    "vintage": "2017",
+    "source_dataset_id": "geoboundaries-gbopen-fin-adm0-9469f09"
+  },
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "no governed Finland place-of-worship snapshot is included in this membership release",
+    "notes": "The Finland lane ships administrative register-membership metrics only."
+  },
+  "source_datasets": [
+    {
+      "source_dataset_id": "statfin-px-11rx-religious-community-membership-1990-2025",
+      "name": "Population 31.12. (StatFin table 11rx, religious community by age and sex)",
+      "provider": "Statistics Finland (Tilastokeskus)",
+      "url": "https://pxdata.stat.fi/PxWeb/api/v1/en/StatFin/vaerak/11rx.px",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/fi_statfin/px_11rx_membership_national_1990_2025.json",
+      "licence": {
+        "name": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+        "url": "https://stat.fi/en/about-us/get-to-know-statistics-finland/legislation/terms-of-use",
+        "attribution": "Source: Statistics Finland, StatFin table 11rx (retrieved 2026-07-12), CC BY 4.0."
+      },
+      "citation": "Statistics Finland, StatFin table 11rx, Belonging to a religious community by age and sex, 1990-2025 (Population 31.12.); retrieved via the PxWeb API 2026-07-12. CC BY 4.0.",
+      "access_limits": "Open, unregistered PxWeb API; national geography only (no municipality or region religion table exists in StatFin).",
+      "redistribution_limits": "Statistics Finland permits reuse under CC BY 4.0 with the source and material-version date named and a hyperlink to the licence. Raw API responses remain in the git-ignored cache.",
+      "notes": "Register construct: membership in registered religious communities recorded in the Population Information System. 26 published categories in a shallow hierarchy (SSS Total; F00 Christianity and G00 Other religious groups are roll-up headings; the 23 leaves plus the not-a-member line reconcile to Total). This national slice fixes Sex=Total and Age=Total."
+    },
+    {
+      "source_dataset_id": "geoboundaries-gbopen-fin-adm0-9469f09",
+      "name": "geoBoundaries gbOpen Finland ADM0 (one national polygon)",
+      "provider": "geoBoundaries; source OpenStreetMap contributors",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/FIN/ADM0/geoBoundaries-FIN-ADM0.geojson",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/fi_statfin/geoboundaries_fin_adm0_raw.geojson",
+      "licence": {
+        "name": "Open Data Commons Open Database License 1.0",
+        "url": "https://www.openstreetmap.org/copyright",
+        "attribution": "geoBoundaries; © OpenStreetMap contributors, ODbL 1.0"
+      },
+      "citation": "geoBoundaries gbOpen FIN ADM0, boundary ID FIN-ADM0-59408979, release commit 9469f09, boundary year 2017; source OpenStreetMap contributors.",
+      "access_limits": null,
+      "redistribution_limits": "geoBoundaries records the FIN ADM0 boundary under the Open Data Commons Open Database License 1.0 (ODbL), NOT CC BY 4.0. ODbL permits redistribution of the simplified derivative with attribution to OpenStreetMap contributors and share-alike on the database. This diverges from the fleet's CC BY 4.0 boundaries; the National Land Survey / Statistics Finland CC BY 4.0 municipal vector is the clean-licence swap (deferred).",
+      "notes": "One native national polygon re-tagged area_code='FI' and simplified with scripts/lib/simplify_boundary.R."
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_id": "population_total",
+      "label": "Register population 31.12.",
+      "description": "Statistics Finland StatFin 11rx national population on 31 December (the register universe, the published TOTAL row).",
+      "unit": "count",
+      "denominator_indicator_id": null,
+      "method": "Published TOTAL (SSS) row for Sex=Total, Age=Total per year.",
+      "temporal_coverage": "1990-2025, annually",
+      "spatial_coverage": "Finland national total on a single geoBoundaries FIN ADM0 polygon.",
+      "quality_notes": "Register-based population 31.12.; the denominator for both membership shares."
+    },
+    {
+      "indicator_id": "religious_affiliation_count",
+      "label": "Registered religious-community membership (count)",
+      "description": "Administrative register membership in any registered religious community: TOTAL minus the not-a-member line (the sum of the 22 registered religious-community leaves).",
+      "unit": "count",
+      "denominator_indicator_id": "population_total",
+      "method": "TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY per year; corroborated as the sum of the 22 non-member leaves. No cell imputed.",
+      "temporal_coverage": "1990-2025, annually",
+      "spatial_coverage": "Finland national total on a single geoBoundaries FIN ADM0 polygon.",
+      "quality_notes": "Administrative religious-community membership from Finland's Population Information System, published by Statistics Finland. Never census affiliation, belief, or practice. Registered membership only; unaffiliated persons appear in the not-a-member line."
+    },
+    {
+      "indicator_id": "religious_affiliation_percent",
+      "label": "Registered religious-community membership (%)",
+      "description": "Registered religious-community membership as a share of the register universe (TOTAL).",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "100 times (TOTAL - not-a-member) divided by TOTAL.",
+      "temporal_coverage": "1990-2025, annually",
+      "spatial_coverage": "Finland national total on a single geoBoundaries FIN ADM0 polygon.",
+      "quality_notes": "Administrative religious-community membership from Finland's Population Information System, published by Statistics Finland. Never census affiliation, belief, or practice. Registered membership only; unaffiliated persons appear in the not-a-member line."
+    },
+    {
+      "indicator_id": "no_religion_count",
+      "label": "Persons not members of any religious community (count)",
+      "description": "Statistics Finland's PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY register line.",
+      "unit": "count",
+      "denominator_indicator_id": "population_total",
+      "method": "Published H00 row for Sex=Total, Age=Total per year.",
+      "temporal_coverage": "1990-2025, annually",
+      "spatial_coverage": "Finland national total on a single geoBoundaries FIN ADM0 polygon.",
+      "quality_notes": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY is the Statistics Finland register line for people not recorded as members of any registered religious community. The product does not interpret it as belief, irreligion, or attendance."
+    },
+    {
+      "indicator_id": "no_religion_percent",
+      "label": "Persons not members of any religious community (%)",
+      "description": "The not-a-member register line as a share of the register universe (TOTAL).",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "100 times the not-a-member line divided by TOTAL; complements the membership share (the two sum to 100).",
+      "temporal_coverage": "1990-2025, annually",
+      "spatial_coverage": "Finland national total on a single geoBoundaries FIN ADM0 polygon.",
+      "quality_notes": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY is the Statistics Finland register line for people not recorded as members of any registered religious community. The product does not interpret it as belief, irreligion, or attendance."
+    }
+  ],
+  "visual_layers": [
+    {
+      "visual_layer_id": "fi-adm0-register-membership-share",
+      "label": "Registered religious-community membership share",
+      "description": "National administrative-register membership in any registered religious community.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "religious_affiliation_percent"
+      ],
+      "geometry_unit_type": "country",
+      "legend": {
+        "unit": "percent",
+        "denominator": "register population 31.12. (TOTAL)"
+      },
+      "colour_scale": null,
+      "time_control": "year_selector",
+      "aggregation_rule": null,
+      "uncertainty_display": "quality_flag",
+      "default_visibility": true,
+      "notes": "A single national polygon is intentional: Statistics Finland publishes religion at the whole-country level only. The full 26-category StatFin frame rides the per-row composition."
+    },
+    {
+      "visual_layer_id": "fi-adm0-not-member-share",
+      "label": "Persons not members of any religious community share",
+      "description": "National share in Statistics Finland's PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY line.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "no_religion_percent"
+      ],
+      "geometry_unit_type": "country",
+      "legend": {
+        "unit": "percent",
+        "denominator": "register population 31.12. (TOTAL)"
+      },
+      "colour_scale": null,
+      "time_control": "year_selector",
+      "aggregation_rule": null,
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "The register non-membership line; not interpreted as belief or irreligion."
+    }
+  ],
+  "rows": [
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 1990,
+      "population_total": 4998478,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 1990 = 4998478. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4487962,
+      "religious_affiliation_percent": 89.7866,
+      "no_religion_count": 510516,
+      "no_religion_percent": 10.2134,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 4998478
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 9
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 810
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1006
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4470527
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 4805
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 94
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2565
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1079
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 15
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 4247
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1266
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 53427
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4390739
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 12266
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 24
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 15610
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 403
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 12157
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 2883
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 36
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 130
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 1
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 510516
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 1991,
+      "population_total": 5029002,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 1991 = 5029002. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4495513,
+      "religious_affiliation_percent": 89.3918,
+      "no_religion_count": 533489,
+      "no_religion_percent": 10.6082,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5029002
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 9
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 813
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1056
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4473150
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 4767
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 93
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2469
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1074
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 15
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 4525
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1259
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 53634
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4392900
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 12390
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 24
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 20485
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 403
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 17013
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 2905
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 35
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 128
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 1
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 533489
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 1992,
+      "population_total": 5054982,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 1992 = 5054982. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4489638,
+      "religious_affiliation_percent": 88.8161,
+      "no_religion_count": 565344,
+      "no_religion_percent": 11.1839,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5054982
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 19
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 911
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1100
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4466764
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 4783
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 93
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2465
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1063
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 19
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 4885
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1252
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 53786
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4385694
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 12699
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 25
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 20844
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 438
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 17301
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 2941
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 34
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 129
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 1
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 565344
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 1993,
+      "population_total": 5077912,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 1993 = 5077912. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4481374,
+      "religious_affiliation_percent": 88.2523,
+      "no_religion_count": 596538,
+      "no_religion_percent": 11.7477,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5077912
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 28
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 936
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1119
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4458309
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 4763
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 93
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2456
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1084
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 18
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 5300
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1270
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 53921
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4376477
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 12897
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 30
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 20982
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 445
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 17357
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3015
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 37
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 127
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 1
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 596538
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 1994,
+      "population_total": 5098754,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 1994 = 5098754. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4489196,
+      "religious_affiliation_percent": 88.045,
+      "no_religion_count": 609558,
+      "no_religion_percent": 11.955,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5098754
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 29
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 976
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1136
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4466002
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 4731
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 94
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2444
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1083
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 18
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 5599
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1257
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 54421
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4383259
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 13070
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 26
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 21053
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 434
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 17347
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3101
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 38
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 132
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 1
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 609558
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 1995,
+      "population_total": 5116826,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 1995 = 5116826. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4497200,
+      "religious_affiliation_percent": 87.8904,
+      "no_religion_count": 619626,
+      "no_religion_percent": 12.1096,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5116826
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 30
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 980
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1135
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4473926
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 4671
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 93
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2409
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1055
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 18
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 5916
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1259
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 54770
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4390550
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 13157
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 28
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 21129
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 437
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 17402
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3110
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 46
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 133
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 1
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 619626
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 1996,
+      "population_total": 5132320,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 1996 = 5132320. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4505365,
+      "religious_affiliation_percent": 87.7842,
+      "no_religion_count": 626955,
+      "no_religion_percent": 12.2158,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5132320
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 34
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 996
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1165
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4482010
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 4593
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 97
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2393
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1046
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 15
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 6232
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1261
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 54951
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4398158
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 13236
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 28
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 21160
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 443
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 17379
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3153
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 47
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 137
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 1
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 626955
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 1997,
+      "population_total": 5147349,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 1997 = 5147349. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4512912,
+      "religious_affiliation_percent": 87.6745,
+      "no_religion_count": 634437,
+      "no_religion_percent": 12.3255,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5147349
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 33
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 999
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1148
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4489558
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 4483
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 95
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2368
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1039
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 15
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 6533
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1265
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 55360
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4405073
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 13298
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 29
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 21174
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 468
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 17301
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3215
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 45
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 139
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 6
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 634437
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 1998,
+      "population_total": 5159646,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 1998 = 5159646. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4517959,
+      "religious_affiliation_percent": 87.5634,
+      "no_religion_count": 641687,
+      "no_religion_percent": 12.4366,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5159646
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 7
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 29
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 1057
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1157
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4493232
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 4423
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 94
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2333
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1048
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 18
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 6776
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1278
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 55850
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4408053
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 13331
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 28
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 22477
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 471
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 18562
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3235
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 64
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 140
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 5
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 641687
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 1999,
+      "population_total": 5171302,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 1999 = 5171302. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4518712,
+      "religious_affiliation_percent": 87.3805,
+      "no_religion_count": 652590,
+      "no_religion_percent": 12.6195,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5171302
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 22
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 37
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 1096
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1165
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4493824
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 4406
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 92
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2474
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1044
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 19
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 7043
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1278
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 56316
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4407725
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 13398
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 29
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 22568
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 475
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 18592
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3287
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 66
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 143
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 5
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 652590
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2000,
+      "population_total": 5181115,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2000 = 5181115. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4521136,
+      "religious_affiliation_percent": 87.2618,
+      "no_religion_count": 659979,
+      "no_religion_percent": 12.7382,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5181115
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 26
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 37
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 1199
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1157
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4496229
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 4316
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 95
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2437
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1033
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 20
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 7227
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1260
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 56807
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4409576
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 13431
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 27
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 22488
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 469
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 18492
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3307
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 71
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 144
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 5
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 659979
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2001,
+      "population_total": 5194901,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2001 = 5194901. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4523211,
+      "religious_affiliation_percent": 87.0702,
+      "no_religion_count": 671690,
+      "no_religion_percent": 12.9298,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5194901
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 38
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 44
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 2197
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1170
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4497370
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 4281
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 99
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2448
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1026
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 20
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 7413
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1249
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 57364
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4410043
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 13399
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 28
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 22392
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 466
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 18390
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3321
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 68
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 142
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 5
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 671690
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2002,
+      "population_total": 5206295,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2002 = 5206295. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4521901,
+      "religious_affiliation_percent": 86.8545,
+      "no_religion_count": 684394,
+      "no_religion_percent": 13.1455,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5206295
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 40
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 47
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 2442
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1171
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4495907
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 4191
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 97
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2474
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1012
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 23
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 7643
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1257
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 57973
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4407755
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 13453
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 29
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 22294
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 464
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 18280
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3331
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 73
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 139
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 7
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 684394
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2003,
+      "population_total": 5219732,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2003 = 5219732. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4512834,
+      "religious_affiliation_percent": 86.4572,
+      "no_religion_count": 706898,
+      "no_religion_percent": 13.5428,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5219732
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 39
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 64
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 2746
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1189
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4486548
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 4099
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 99
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2489
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1019
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 1000
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 7897
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1244
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 58453
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4396813
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 13402
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 33
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 22248
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 464
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 18245
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3317
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 75
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 140
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 7
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 706898
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2004,
+      "population_total": 5236611,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2004 = 5236611. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4503817,
+      "religious_affiliation_percent": 86.0063,
+      "no_religion_count": 732794,
+      "no_religion_percent": 13.9937,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5236611
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 40
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 64
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 2991
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1203
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4477249
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 4031
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 97
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2495
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1012
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 1294
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 8094
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1250
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 59078
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4386336
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 13519
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 43
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 22270
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 501
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 18239
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3315
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 76
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 132
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 7
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 732794
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2005,
+      "population_total": 5255580,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2005 = 5255580. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4494058,
+      "religious_affiliation_percent": 85.5102,
+      "no_religion_count": 761522,
+      "no_religion_percent": 14.4898,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5255580
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 68
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 66
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 4237
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1184
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4466128
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 4015
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 93
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2472
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1031
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 1992
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 8446
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1256
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 59558
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4373556
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 13663
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 46
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 22375
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 523
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 18329
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3301
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 78
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 137
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 7
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 761522
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2006,
+      "population_total": 5276955,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2006 = 5276955. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4478713,
+      "religious_affiliation_percent": 84.8731,
+      "no_religion_count": 798242,
+      "no_religion_percent": 15.1269,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5276955
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 75
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 89
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 4942
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1194
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4450077
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3986
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 88
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2481
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1032
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 2516
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 8783
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1281
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 60018
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4355949
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 13895
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 48
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 22336
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 528
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 18306
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3282
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 77
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 136
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 7
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 798242
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2007,
+      "population_total": 5300484,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2007 = 5300484. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4459761,
+      "religious_affiliation_percent": 84.1388,
+      "no_religion_count": 840723,
+      "no_religion_percent": 15.8612,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5300484
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 110
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 93
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 5687
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1181
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4430362
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3821
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 89
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2462
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1017
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 3486
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 9184
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1267
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 60382
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4334586
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 14022
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 46
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 22328
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 534
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 18177
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3264
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 209
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 137
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 7
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 840723
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2008,
+      "population_total": 5326314,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2008 = 5326314. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4427486,
+      "religious_affiliation_percent": 83.1248,
+      "no_religion_count": 898828,
+      "no_religion_percent": 16.8752,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5326314
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 103
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 98
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 6822
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1230
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4397008
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3751
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 88
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2442
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1008
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 4681
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 9672
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1279
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 60536
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4299186
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 14233
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 132
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 22225
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 554
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 18025
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3251
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 251
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 137
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 7
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 898828
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2009,
+      "population_total": 5351427,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2009 = 5351427. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4406097,
+      "religious_affiliation_percent": 82.335,
+      "no_religion_count": 945330,
+      "no_religion_percent": 17.665,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5351427
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 353
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 98
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 8230
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1236
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4372848
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3688
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 89
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2435
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 1006
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 5473
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 10090
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1301
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 60765
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4273425
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 14293
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 283
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 23332
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 547
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 19142
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3239
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 259
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 138
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 7
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 945330
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2010,
+      "population_total": 5375276,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2010 = 5375276. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4342847,
+      "religious_affiliation_percent": 80.793,
+      "no_religion_count": 1032429,
+      "no_religion_percent": 19.207,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5375276
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 509
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 91
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 9393
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1208
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4308342
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3648
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 88
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2419
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 994
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 6312
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 10640
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1301
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 60851
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4207192
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 14485
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 412
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 23304
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 568
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 19094
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3225
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 275
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 135
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 7
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 1032429
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2011,
+      "population_total": 5401267,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2011 = 5401267. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4313295,
+      "religious_affiliation_percent": 79.8571,
+      "no_religion_count": 1087972,
+      "no_religion_percent": 20.1429,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5401267
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 509
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 98
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 10088
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1198
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4278219
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3553
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 84
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2383
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 984
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 6909
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 11091
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1342
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 61183
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4175443
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 14789
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 458
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 23183
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 560
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 19001
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3208
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 275
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 132
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 7
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 1087972
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2012,
+      "population_total": 5426674,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2012 = 5426674. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4286944,
+      "religious_affiliation_percent": 78.9976,
+      "no_religion_count": 1139730,
+      "no_religion_percent": 21.0024,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5426674
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 538
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 96
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 10596
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1188
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4251545
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3474
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 91
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2395
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 980
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 7477
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 11530
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1352
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 61506
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4147371
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 14932
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 437
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 22981
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 557
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 18826
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3181
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 280
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 130
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 7
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 1139730
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2013,
+      "population_total": 5451270,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2013 = 5451270. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4247583,
+      "religious_affiliation_percent": 77.9191,
+      "no_religion_count": 1203687,
+      "no_religion_percent": 22.0809,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5451270
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 877
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 127
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 11125
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1170
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4211277
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3413
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 116
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2373
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 984
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 7855
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 11994
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1400
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 61608
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4106025
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 15064
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 445
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 23007
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 566
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 18697
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3282
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 283
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 135
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 44
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 1203687
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2014,
+      "population_total": 5471753,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2014 = 5471753. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4185295,
+      "religious_affiliation_percent": 76.4891,
+      "no_religion_count": 1286458,
+      "no_religion_percent": 23.5109,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5471753
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 29
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 887
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 300
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 12327
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1145
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4147658
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3429
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 138
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2585
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 987
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 8402
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 12554
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1413
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 61574
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4040787
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 15191
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 598
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 22949
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 666
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 18467
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3284
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 286
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 134
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 112
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 1286458
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2015,
+      "population_total": 5487308,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2015 = 5487308. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4151202,
+      "religious_affiliation_percent": 75.651,
+      "no_religion_count": 1336106,
+      "no_religion_percent": 24.349,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5487308
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 35
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 956
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 324
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 13289
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1133
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4112681
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3458
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 151
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2657
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 977
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 8762
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 13069
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1415
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 61690
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 4004369
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 15409
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 724
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 22784
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 670
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 18286
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3259
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 290
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 139
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 140
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 1336106
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2016,
+      "population_total": 5503297,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2016 = 5503297. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4108364,
+      "religious_affiliation_percent": 74.6528,
+      "no_religion_count": 1394933,
+      "no_religion_percent": 25.3472,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5503297
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 42
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 1036
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 345
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 14141
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1110
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4069236
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3414
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 171
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2540
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 945
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 9055
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 13528
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1424
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 61529
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 3960453
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 15376
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 801
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 22454
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 667
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 17979
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3235
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 283
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 138
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 152
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 1394933
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2017,
+      "population_total": 5513130,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2017 = 5513130. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4062392,
+      "religious_affiliation_percent": 73.6858,
+      "no_religion_count": 1450738,
+      "no_religion_percent": 26.3142,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5513130
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 52
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 1814
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 353
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 15359
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1093
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 4021460
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3362
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 173
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2505
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 927
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 9936
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 14034
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1434
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 61441
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 3911260
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 15397
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 991
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 22261
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 656
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 17685
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3314
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 290
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 135
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 181
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 1450738
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2018,
+      "population_total": 5517919,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2018 = 5517919. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 4006486,
+      "religious_affiliation_percent": 72.6086,
+      "no_religion_count": 1511433,
+      "no_religion_percent": 27.3914,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5517919
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 60
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 1777
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 358
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 16057
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1096
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 3965115
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3283
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 171
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2471
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 933
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 11791
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 14357
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1381
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 61112
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 3853106
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 15312
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 1198
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 22023
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 654
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 17303
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3275
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 290
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 132
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 369
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 1511433
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2019,
+      "population_total": 5525292,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2019 = 5525292. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 3950900,
+      "religious_affiliation_percent": 71.5057,
+      "no_religion_count": 1574392,
+      "no_religion_percent": 28.4943,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5525292
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 60
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 1792
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 367
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 16674
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1101
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 3909054
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3257
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 195
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2456
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 933
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 12501
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 14224
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1403
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 60567
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 3796918
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 15205
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 1395
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 21852
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 655
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 17083
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3269
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 291
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 125
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 429
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 1574392
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2020,
+      "population_total": 5533793,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2020 = 5533793. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 3906066,
+      "religious_affiliation_percent": 70.5857,
+      "no_religion_count": 1627727,
+      "no_religion_percent": 29.4143,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5533793
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 65
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 1826
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 368
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 19347
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1094
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 3861833
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3236
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 204
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2512
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 904
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 12784
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 14529
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1364
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 60086
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 3749713
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 15064
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 1437
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 21533
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 653
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 16787
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3230
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 286
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 125
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 452
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 1627727
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2021,
+      "population_total": 5548241,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2021 = 5548241. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 3851342,
+      "religious_affiliation_percent": 69.4155,
+      "no_religion_count": 1696899,
+      "no_religion_percent": 30.5845,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5548241
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 62
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 1834
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 371
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 20876
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1079
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 3805908
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3208
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 192
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2455
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 845
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 12944
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 14795
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1319
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 59508
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 3694315
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 14811
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 1516
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 21212
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 656
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 16495
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3187
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 286
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 119
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 469
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 1696899
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2022,
+      "population_total": 5563970,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2022 = 5563970. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 3782219,
+      "religious_affiliation_percent": 67.977,
+      "no_religion_count": 1781751,
+      "no_religion_percent": 32.023,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5563970
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 63
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 1854
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 379
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 22261
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1073
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 3735746
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3137
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 200
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2362
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 827
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 13242
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 15016
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1282
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 58472
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 3625007
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 14635
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 1566
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 20843
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 649
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 16193
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3125
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 282
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 117
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 477
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 1781751
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2023,
+      "population_total": 5603851,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2023 = 5603851. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 3721152,
+      "religious_affiliation_percent": 66.4035,
+      "no_religion_count": 1882699,
+      "no_religion_percent": 33.5965,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5603851
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 63
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 1865
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 375
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 24057
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1042
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 3673267
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3120
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 198
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2355
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 799
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 13389
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 15510
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1276
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 58163
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 3562283
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 14474
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 1700
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 20483
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 634
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 15846
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3083
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 273
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 112
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 535
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 1882699
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2024,
+      "population_total": 5635971,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2024 = 5635971. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 3670210,
+      "religious_affiliation_percent": 65.1212,
+      "no_religion_count": 1965761,
+      "no_religion_percent": 34.8788,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5635971
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 62
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 1856
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 378
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 26934
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1033
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 3619666
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3080
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 197
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2305
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 775
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 13816
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 15982
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1296
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 57888
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 3508082
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 14356
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 1889
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 20281
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 626
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 15677
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3056
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 266
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 110
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 546
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 1965761
+        }
+      ]
+    },
+    {
+      "country_code": "FI",
+      "boundary_set_id": "fi-adm0-2017-geoboundaries-9469f09",
+      "boundary_level": "adm0",
+      "area_unit_id": "fi-adm0-2017-geoboundaries-9469f09:FI",
+      "area_code": "FI",
+      "area_name": "Finland",
+      "year": 2025,
+      "population_total": 5652881,
+      "population_total_basis": "Statistics Finland StatFin table 11rx (Population 31.12.), register-based religious-community membership from the Population Information System; national total (Sex=Total, Age=Total), 2025 = 5652881. Membership is an administrative REGISTER construct, not census affiliation, belief, or practice. religious_affiliation = TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion = PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY; the two sum to the register universe (100% by construction).",
+      "religious_affiliation_count": 3622390,
+      "religious_affiliation_percent": 64.0804,
+      "no_religion_count": 2030491,
+      "no_religion_percent": 35.9196,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 335164.094,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "statfin-px-11rx-religious-community-membership-1990-2025",
+        "geoboundaries-gbopen-fin-adm0-9469f09"
+      ],
+      "quality_flag": "administrative_register_membership;national_only_adm0;register_construct_not_census_affiliation_not_belief_not_practice;religious_affiliation=total_minus_persons_not_members_of_any_religious_community;no_religion=persons_not_members_of_any_religious_community_register_line_not_irreligion_claim;affiliation_plus_not_member_equals_100_by_construction;verbatim_statfin_26_category_frame_preserved_no_merge_no_zeroing;23_leaves_reconcile_to_published_total;f00_christianity_g00_other_groups_are_roll_up_headings;no_suppressed_cells_in_national_total_slice;statfin_11rx_cc_by_4_0;boundary_geoboundaries_fin_adm0_odbl_1_0_osm_not_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "TOTAL",
+          "count": 5652881
+        },
+        {
+          "label_verbatim": "INDIGENEOUS RELIGIONS AND NEO-PAGANISM",
+          "count": 65
+        },
+        {
+          "label_verbatim": "BUDDHISM",
+          "count": 1845
+        },
+        {
+          "label_verbatim": "HINDUISM",
+          "count": 1072
+        },
+        {
+          "label_verbatim": "ISLAM",
+          "count": 28512
+        },
+        {
+          "label_verbatim": "JUDAISM",
+          "count": 1013
+        },
+        {
+          "label_verbatim": "CHRISTIANITY",
+          "count": 3569853
+        },
+        {
+          "label_verbatim": "Adventism",
+          "count": 3067
+        },
+        {
+          "label_verbatim": "Anglican churches",
+          "count": 208
+        },
+        {
+          "label_verbatim": "Baptism",
+          "count": 2266
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran free congregations",
+          "count": 759
+        },
+        {
+          "label_verbatim": "Pentecostalism",
+          "count": 14129
+        },
+        {
+          "label_verbatim": "Roman Catholic Church",
+          "count": 16783
+        },
+        {
+          "label_verbatim": "Methodism",
+          "count": 1226
+        },
+        {
+          "label_verbatim": "Greek Orthodox Church",
+          "count": 58073
+        },
+        {
+          "label_verbatim": "Evangelical Lutheran Church of Finland",
+          "count": 3457125
+        },
+        {
+          "label_verbatim": "Free churches",
+          "count": 14175
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 2042
+        },
+        {
+          "label_verbatim": "OTHER RELIGIOUS GROUPS",
+          "count": 20030
+        },
+        {
+          "label_verbatim": "Bahá'í communities",
+          "count": 620
+        },
+        {
+          "label_verbatim": "Jehovah's Witnesses",
+          "count": 15447
+        },
+        {
+          "label_verbatim": "Church of Jesus Christ of Latter-day Saints",
+          "count": 3034
+        },
+        {
+          "label_verbatim": "Christian Community of Finland",
+          "count": 260
+        },
+        {
+          "label_verbatim": "Liberal Catholic Church",
+          "count": 102
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 567
+        },
+        {
+          "label_verbatim": "PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY",
+          "count": 2030491
+        }
+      ]
+    }
+  ]
+}
