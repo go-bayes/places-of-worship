@@ -97,6 +97,12 @@ category_labels_verbatim <- list(
   `2008` = c(bud = "Buddhist", mus = "Muslims", chr = "Christians", oth = "Other"),
   `2019` = c(bud = "Buddhist", mus = "Muslims", chr = "Christian",  oth = "Other")
 )
+# denomination-taxonomy.json code for each source category, assigned only where the
+# mapping is unambiguous. "Other" is a residual mix (highland indigenous beliefs and
+# other religions), so it ships without a code; the area-summary.v2 composition field
+# carries a taxonomy_code only when present. keyed by the stable internal key, so it
+# holds across the wave label difference (Christians 2008 / Christian 2019).
+category_taxonomy <- c(bud = "buddhist", mus = "muslim", chr = "christian", oth = NA_character_)
 # the Table A4 count-anchor frame (five categories, distinct label set). recorded
 # as the count-anchor frame, never applied to the Table 2.5.1 source fields.
 a4_labels <- c("Buddhism", "Islam", "Christianity", "Other", "Not Stated")
@@ -482,6 +488,20 @@ build_row <- function(province, wave) {
   composition <- paste(
     sprintf("%s=%.1f", labels[category_keys], values), collapse = "|"
   )
+  # structured area-summary.v2 composition: one item per printed source category,
+  # carrying the source-verbatim per-wave label and the exact printed one-decimal
+  # percentage. Table 2.5.1 prints re-based percentages, not counts, so each item
+  # carries a percent and no count is derived. every cell is printed (0.0 is a
+  # genuine printed value, not a suppression), so all four categories emit for every
+  # row; the four partition the re-based frame and match the quality_flag composition
+  # token verbatim. taxonomy_code links to denomination-taxonomy.json where unambiguous.
+  composition_items <- lapply(seq_along(category_keys), function(i) {
+    key <- category_keys[[i]]
+    item <- list(label_verbatim = unname(labels[[key]]), percent = values[[i]])
+    tax <- category_taxonomy[[key]]
+    if (!is.na(tax)) item[["taxonomy_code"]] <- tax
+    item
+  })
   row_sum <- round(sum(values), 1)
   # two-slot minority-share re-emit. the reference share is the printed Buddhist
   # cell; the minority share is its exact one-decimal complement (100 minus the
@@ -532,7 +552,8 @@ build_row <- function(province, wave) {
     site_snapshot_date = NULL,
     place_count_basis = NULL,
     source_dataset_ids = list(dataset_id_census, dataset_id_anchor, dataset_id_boundary),
-    quality_flag = flags
+    quality_flag = flags,
+    composition = composition_items
   )
 }
 
@@ -763,7 +784,7 @@ visual_layers <- list(
 )
 
 area_summary <- list(
-  schema_version = "0.2.0",
+  schema_version = "area-summary.v2",
   generated_at = stamp,
   generated_by = script_id,
   country_code = country_code,
@@ -793,7 +814,7 @@ utils::write.csv(flatten_rows(all_rows), summary_csv_output, row.names = FALSE, 
 if (!jsonlite::validate(readChar(summary_output, file_bytes(summary_output), useBytes = TRUE))) {
   stop("area-summary output failed JSON syntax validation", call. = FALSE)
 }
-validate_json_schema("schemas/area-summary.schema.json", summary_output)
+validate_json_schema("schemas/area-summary.v2.schema.json", summary_output)
 
 # ---- manifest --------------------------------------------------------------
 
@@ -1086,7 +1107,7 @@ manifest <- list(
     status = "passed",
     commands = list(
       paste("Rscript", script_id),
-      paste("uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json", summary_output),
+      paste("uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.v2.schema.json", summary_output),
       paste("uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json", manifest_output),
       "bash scripts/validate_manifests.sh"
     ),

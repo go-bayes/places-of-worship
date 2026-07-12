@@ -1,5 +1,5 @@
 {
-  "schema_version": "area-summary.v1",
+  "schema_version": "area-summary.v2",
   "generated_at": "2026-07-11T00:00:00Z",
   "generated_by": "scripts/build_mh_area_summary.R",
   "country_code": "MH",
@@ -154,7 +154,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 728
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 88,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 98
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 1,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 33
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 13,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 37,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 38
+        },
+        {
+          "label_verbatim": "None",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 1,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 7
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 128
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -180,7 +252,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 168
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 1,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 66
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 0,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 0,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 0,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 0
+        },
+        {
+          "label_verbatim": "None",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -206,7 +350,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 445
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 26,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 342
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 2,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 2,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 3,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 81
+        },
+        {
+          "label_verbatim": "None",
+          "count": 11
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 148
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 71,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 9
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -232,7 +448,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 250
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 1,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 17
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 0,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 48
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 0,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 0,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 0
+        },
+        {
+          "label_verbatim": "None",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -258,7 +546,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0;zero_population_atoll;no_boundary_feature_map_join_excludes_bikini;shares_null_zero_denominator"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0;zero_population_atoll;no_boundary_feature_map_join_excludes_bikini;shares_null_zero_denominator",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 0,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 0,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 0,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 0,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 0
+        },
+        {
+          "label_verbatim": "None",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -284,7 +644,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 397
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 1,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 0,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 1,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 6,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 36
+        },
+        {
+          "label_verbatim": "None",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 15
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 12
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -310,7 +742,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 228
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 5,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 59
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 1,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 0,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 0,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 0
+        },
+        {
+          "label_verbatim": "None",
+          "count": 2
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 1,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -336,7 +840,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 75
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 0,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 0,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 0,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 0,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 0
+        },
+        {
+          "label_verbatim": "None",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -362,7 +938,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 691
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 125,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 2
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 0,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 88
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 2,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 8,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 5
+        },
+        {
+          "label_verbatim": "None",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 122,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 10
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 5,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -388,7 +1036,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 276
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 2,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 68
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 0,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 0,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 0,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 0
+        },
+        {
+          "label_verbatim": "None",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 68
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -414,7 +1134,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 4915
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 988,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 1094
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 117,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 258
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 789,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 127,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 352
+        },
+        {
+          "label_verbatim": "None",
+          "count": 26
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 458
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 148,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 94
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 39
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 295
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 39,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -440,7 +1232,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 77
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 0,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 0,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 19
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 37,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 0,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 0
+        },
+        {
+          "label_verbatim": "None",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -466,7 +1330,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 156
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 0,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 0,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 0,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 0,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 0
+        },
+        {
+          "label_verbatim": "None",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -492,7 +1428,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 37
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 162,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 25
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 0,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 0,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 0,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 0
+        },
+        {
+          "label_verbatim": "None",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 4
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -518,7 +1526,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 9341
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 2346,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 3507
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 415,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 482
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 1480,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 445,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 723
+        },
+        {
+          "label_verbatim": "None",
+          "count": 376
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 1349
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 612,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 969
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 310
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 152
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 117,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 249
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -544,7 +1624,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 350
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 1,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 44
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 0,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 0,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 0,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 0
+        },
+        {
+          "label_verbatim": "None",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -570,7 +1722,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 139
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 0,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 66
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 1,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 0,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 0,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 6
+        },
+        {
+          "label_verbatim": "None",
+          "count": 6
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 6
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 6
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -596,7 +1820,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 318
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 1,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 137
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 1,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 16,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 0,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 0
+        },
+        {
+          "label_verbatim": "None",
+          "count": 12
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 12
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -622,7 +1918,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 153
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 83,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 51
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 0,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 2
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 5,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 0,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 4
+        },
+        {
+          "label_verbatim": "None",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -648,7 +2016,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 409
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 0,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 31
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 0,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 0,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 83,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 0
+        },
+        {
+          "label_verbatim": "None",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -674,7 +2114,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0;zero_population_atoll;has_boundary_feature;shares_null_zero_denominator"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0;zero_population_atoll;has_boundary_feature;shares_null_zero_denominator",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 0,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 0,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 0,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 0,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 0
+        },
+        {
+          "label_verbatim": "None",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -700,7 +2212,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 248
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 0,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 58
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 0,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 4,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 0,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 0
+        },
+        {
+          "label_verbatim": "None",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -726,7 +2310,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 126
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 0,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 71
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 0,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 1,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 0,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 0
+        },
+        {
+          "label_verbatim": "None",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 59
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 2
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 5
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -752,7 +2408,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 80
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 1,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 7
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 0,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 0,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 0,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 0
+        },
+        {
+          "label_verbatim": "None",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "MH",
@@ -778,7 +2506,79 @@
         "mh-census-2021-vol1-table-9-religion",
         "geoboundaries-mhl-adm1-2017"
       ],
-      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0"
+      "quality_flag": "census_affiliation;all_persons_all_ages_universe;denominator_resident_population_atoll_total;affiliation=sum_of_fifteen_religious_categories;no_religion=none_line_only_no_separate_refused_or_notstated;single_wave_2021;source_frame_2021_sixteen_category;licence_needs_review_pending_pi_ruling_eppso_spc_partial_reproduction_clause;boundary_odbl_1_0",
+      "composition": [
+        {
+          "label_verbatim": "United Church of Christ",
+          "count": 313
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 32,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 121
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 0,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Reformed Congregational Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Mormon",
+          "count": 13,
+          "taxonomy_code": "christian.latter_day_saints"
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 11,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "Bukot Nan Jesus",
+          "count": 1
+        },
+        {
+          "label_verbatim": "None",
+          "count": 8
+        },
+        {
+          "label_verbatim": "Full Gospel",
+          "count": 68
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 0,
+          "taxonomy_code": "christian.salvation_army"
+        },
+        {
+          "label_verbatim": "Other (specify)",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Protestant Church",
+          "count": 93
+        },
+        {
+          "label_verbatim": "New Beginning Church",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Batkan Light House Church",
+          "count": 0
+        }
+      ]
     }
   ]
 }

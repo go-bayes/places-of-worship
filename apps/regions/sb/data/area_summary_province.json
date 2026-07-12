@@ -1,5 +1,5 @@
 {
-  "schema_version": "area-summary.v1",
+  "schema_version": "area-summary.v2",
   "generated_at": "2026-07-11T00:00:00Z",
   "generated_by": "scripts/build_sb_area_summary.R",
   "country_code": "SB",
@@ -171,7 +171,65 @@
         "sb-census-2009-basic-tables-p3-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=285;Roman Catholic=5995;South Sea Evangelical Church=321;Seventh Day Adventist=4401;United Church=14361;Christian Fellowship Church=283;Jehovah's Witness=12;Christian OutReach=4;Bahai=44;Custom Beliefs=1;No Religion=25;Refuse to Answer=4;Other=636"
+      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=285;Roman Catholic=5995;South Sea Evangelical Church=321;Seventh Day Adventist=4401;United Church=14361;Christian Fellowship Church=283;Jehovah's Witness=12;Christian OutReach=4;Bahai=44;Custom Beliefs=1;No Religion=25;Refuse to Answer=4;Other=636",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 285
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 5995,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 321
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 4401,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 14361
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 283
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 12,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Christian OutReach",
+          "count": 4
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 44,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Custom Beliefs",
+          "count": 1
+        },
+        {
+          "label_verbatim": "No Religion",
+          "count": 25
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 4
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 636
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -197,7 +255,65 @@
         "sb-census-2009-basic-tables-p3-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=2605;Roman Catholic=5176;South Sea Evangelical Church=2008;Seventh Day Adventist=21772;United Church=29984;Christian Fellowship Church=11568;Jehovah's Witness=168;Christian OutReach=649;Bahai=313;Custom Beliefs=13;No Religion=67;Refuse to Answer=36;Other=2290"
+      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=2605;Roman Catholic=5176;South Sea Evangelical Church=2008;Seventh Day Adventist=21772;United Church=29984;Christian Fellowship Church=11568;Jehovah's Witness=168;Christian OutReach=649;Bahai=313;Custom Beliefs=13;No Religion=67;Refuse to Answer=36;Other=2290",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 2605
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 5176,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 2008
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 21772,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 29984
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 11568
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 168,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Christian OutReach",
+          "count": 649
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 313,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Custom Beliefs",
+          "count": 13
+        },
+        {
+          "label_verbatim": "No Religion",
+          "count": 67
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 36
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 2290
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -223,7 +339,65 @@
         "sb-census-2009-basic-tables-p3-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=23183;Roman Catholic=834;South Sea Evangelical Church=115;Seventh Day Adventist=513;United Church=181;Christian Fellowship Church=29;Jehovah's Witness=11;Christian OutReach=8;Bahai=9;Custom Beliefs=6;No Religion=3;Refuse to Answer=0;Other=1266"
+      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=23183;Roman Catholic=834;South Sea Evangelical Church=115;Seventh Day Adventist=513;United Church=181;Christian Fellowship Church=29;Jehovah's Witness=11;Christian OutReach=8;Bahai=9;Custom Beliefs=6;No Religion=3;Refuse to Answer=0;Other=1266",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 23183
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 834,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 115
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 513,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 181
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 29
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 11,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Christian OutReach",
+          "count": 8
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 9,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Custom Beliefs",
+          "count": 6
+        },
+        {
+          "label_verbatim": "No Religion",
+          "count": 3
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 1266
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -249,7 +423,65 @@
         "sb-census-2009-basic-tables-p3-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=21747;Roman Catholic=2384;South Sea Evangelical Church=889;Seventh Day Adventist=753;United Church=128;Christian Fellowship Church=13;Jehovah's Witness=30;Christian OutReach=26;Bahai=21;Custom Beliefs=0;No Religion=8;Refuse to Answer=0;Other=52"
+      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=21747;Roman Catholic=2384;South Sea Evangelical Church=889;Seventh Day Adventist=753;United Church=128;Christian Fellowship Church=13;Jehovah's Witness=30;Christian OutReach=26;Bahai=21;Custom Beliefs=0;No Religion=8;Refuse to Answer=0;Other=52",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 21747
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 2384,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 889
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 753,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 128
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 13
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 30,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Christian OutReach",
+          "count": 26
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 21,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Custom Beliefs",
+          "count": 0
+        },
+        {
+          "label_verbatim": "No Religion",
+          "count": 8
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 52
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -275,7 +507,65 @@
         "sb-census-2009-basic-tables-p3-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=170;Roman Catholic=8;South Sea Evangelical Church=1192;Seventh Day Adventist=1512;United Church=2;Christian Fellowship Church=1;Jehovah's Witness=2;Christian OutReach=9;Bahai=0;Custom Beliefs=0;No Religion=0;Refuse to Answer=1;Other=144"
+      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=170;Roman Catholic=8;South Sea Evangelical Church=1192;Seventh Day Adventist=1512;United Church=2;Christian Fellowship Church=1;Jehovah's Witness=2;Christian OutReach=9;Bahai=0;Custom Beliefs=0;No Religion=0;Refuse to Answer=1;Other=144",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 170
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 8,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 1192
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 1512,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 2
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 2,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Christian OutReach",
+          "count": 9
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 0,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Custom Beliefs",
+          "count": 0
+        },
+        {
+          "label_verbatim": "No Religion",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 144
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -301,7 +591,65 @@
         "sb-census-2009-basic-tables-p3-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=22311;Roman Catholic=35275;South Sea Evangelical Church=16397;Seventh Day Adventist=11694;United Church=2733;Christian Fellowship Church=185;Jehovah's Witness=709;Christian OutReach=978;Bahai=93;Custom Beliefs=1650;No Religion=213;Refuse to Answer=16;Other=1359"
+      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=22311;Roman Catholic=35275;South Sea Evangelical Church=16397;Seventh Day Adventist=11694;United Church=2733;Christian Fellowship Church=185;Jehovah's Witness=709;Christian OutReach=978;Bahai=93;Custom Beliefs=1650;No Religion=213;Refuse to Answer=16;Other=1359",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 22311
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 35275,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 16397
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 11694,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 2733
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 185
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 709,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Christian OutReach",
+          "count": 978
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 93,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Custom Beliefs",
+          "count": 1650
+        },
+        {
+          "label_verbatim": "No Religion",
+          "count": 213
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 16
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 1359
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -327,7 +675,65 @@
         "sb-census-2009-basic-tables-p3-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=36241;Roman Catholic=32879;South Sea Evangelical Church=42813;Seventh Day Adventist=7966;United Church=254;Christian Fellowship Church=275;Jehovah's Witness=6714;Christian OutReach=1418;Bahai=1414;Custom Beliefs=2467;No Religion=149;Refuse to Answer=16;Other=4990"
+      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=36241;Roman Catholic=32879;South Sea Evangelical Church=42813;Seventh Day Adventist=7966;United Church=254;Christian Fellowship Church=275;Jehovah's Witness=6714;Christian OutReach=1418;Bahai=1414;Custom Beliefs=2467;No Religion=149;Refuse to Answer=16;Other=4990",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 36241
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 32879,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 42813
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 7966,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 254
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 275
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 6714,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Christian OutReach",
+          "count": 1418
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 1414,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Custom Beliefs",
+          "count": 2467
+        },
+        {
+          "label_verbatim": "No Religion",
+          "count": 149
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 16
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 4990
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -353,7 +759,65 @@
         "sb-census-2009-basic-tables-p3-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=18947;Roman Catholic=9004;South Sea Evangelical Church=9983;Seventh Day Adventist=1253;United Church=96;Christian Fellowship Church=49;Jehovah's Witness=125;Christian OutReach=355;Bahai=75;Custom Beliefs=5;No Religion=5;Refuse to Answer=0;Other=522"
+      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=18947;Roman Catholic=9004;South Sea Evangelical Church=9983;Seventh Day Adventist=1253;United Church=96;Christian Fellowship Church=49;Jehovah's Witness=125;Christian OutReach=355;Bahai=75;Custom Beliefs=5;No Religion=5;Refuse to Answer=0;Other=522",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 18947
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 9004,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 9983
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 1253,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 96
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 49
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 125,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Christian OutReach",
+          "count": 355
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 75,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Custom Beliefs",
+          "count": 5
+        },
+        {
+          "label_verbatim": "No Religion",
+          "count": 5
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 522
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -379,7 +843,65 @@
         "sb-census-2009-basic-tables-p3-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=18640;Roman Catholic=33;South Sea Evangelical Church=33;Seventh Day Adventist=458;United Church=14;Christian Fellowship Church=64;Jehovah's Witness=424;Christian OutReach=1316;Bahai=21;Custom Beliefs=1;No Religion=11;Refuse to Answer=4;Other=343"
+      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=18640;Roman Catholic=33;South Sea Evangelical Church=33;Seventh Day Adventist=458;United Church=14;Christian Fellowship Church=64;Jehovah's Witness=424;Christian OutReach=1316;Bahai=21;Custom Beliefs=1;No Religion=11;Refuse to Answer=4;Other=343",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 18640
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 33,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 33
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 458,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 14
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 64
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 424,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Christian OutReach",
+          "count": 1316
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 21,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Custom Beliefs",
+          "count": 1
+        },
+        {
+          "label_verbatim": "No Religion",
+          "count": 11
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 4
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 343
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -405,7 +927,65 @@
         "sb-census-2009-basic-tables-p3-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=20510;Roman Catholic=9411;South Sea Evangelical Church=14644;Seventh Day Adventist=10184;United Church=4166;Christian Fellowship Church=686;Jehovah's Witness=1249;Christian OutReach=540;Bahai=437;Custom Beliefs=48;No Religion=200;Refuse to Answer=60;Other=2474"
+      "quality_flag": "frame_2009_thirteen_category;no_religion_line=No Religion;refuse_line=Refuse to Answer;other_line_2009_not_comparable_to_2019_other_religions_split_out;source_province_spelling_guadalcanal_printed_guadacanal;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=20510;Roman Catholic=9411;South Sea Evangelical Church=14644;Seventh Day Adventist=10184;United Church=4166;Christian Fellowship Church=686;Jehovah's Witness=1249;Christian OutReach=540;Bahai=437;Custom Beliefs=48;No Religion=200;Refuse to Answer=60;Other=2474",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 20510
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 9411,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 14644
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 10184,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 4166
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 686
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 1249,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Christian OutReach",
+          "count": 540
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 437,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Custom Beliefs",
+          "count": 48
+        },
+        {
+          "label_verbatim": "No Religion",
+          "count": 200
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 60
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 2474
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -431,7 +1011,84 @@
         "sb-census-2019-basic-tables-p8-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=603;Roman Catholic=6954;South Sea Evangelical Church=441;Seventh Day Adventist=4892;United Church=16478;Christian Fellowship Church=363;Christian OutReach Church=24;Pentecostal=13;Jehovah's Witness=29;Bahai Faith=51;Assembly of God=6;Muslim=102;Baptist Church=1;Other religions=781;Custom Beliefs or Animism=5;No Religion or Faith/Atheism=26;Refuse to Answer=6"
+      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=603;Roman Catholic=6954;South Sea Evangelical Church=441;Seventh Day Adventist=4892;United Church=16478;Christian Fellowship Church=363;Christian OutReach Church=24;Pentecostal=13;Jehovah's Witness=29;Bahai Faith=51;Assembly of God=6;Muslim=102;Baptist Church=1;Other religions=781;Custom Beliefs or Animism=5;No Religion or Faith/Atheism=26;Refuse to Answer=6",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 603
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 6954,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 441
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 4892,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 16478
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 363
+        },
+        {
+          "label_verbatim": "Christian OutReach Church",
+          "count": 24
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 13,
+          "taxonomy_code": "christian.pentecostal"
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 29,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Bahai Faith",
+          "count": 51,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 6
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 102,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 1,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Other religions",
+          "count": 781
+        },
+        {
+          "label_verbatim": "Custom Beliefs or Animism",
+          "count": 5
+        },
+        {
+          "label_verbatim": "No Religion or Faith/Atheism",
+          "count": 26
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 6
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -457,7 +1114,84 @@
         "sb-census-2019-basic-tables-p8-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=4638;Roman Catholic=7031;South Sea Evangelical Church=2964;Seventh Day Adventist=24859;United Church=36472;Christian Fellowship Church=13629;Christian OutReach Church=787;Pentecostal=83;Jehovah's Witness=269;Bahai Faith=327;Assembly of God=408;Muslim=159;Baptist Church=80;Other religions=2160;Custom Beliefs or Animism=28;No Religion or Faith/Atheism=202;Refuse to Answer=10"
+      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=4638;Roman Catholic=7031;South Sea Evangelical Church=2964;Seventh Day Adventist=24859;United Church=36472;Christian Fellowship Church=13629;Christian OutReach Church=787;Pentecostal=83;Jehovah's Witness=269;Bahai Faith=327;Assembly of God=408;Muslim=159;Baptist Church=80;Other religions=2160;Custom Beliefs or Animism=28;No Religion or Faith/Atheism=202;Refuse to Answer=10",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 4638
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 7031,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 2964
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 24859,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 36472
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 13629
+        },
+        {
+          "label_verbatim": "Christian OutReach Church",
+          "count": 787
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 83,
+          "taxonomy_code": "christian.pentecostal"
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 269,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Bahai Faith",
+          "count": 327,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 408
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 159,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 80,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Other religions",
+          "count": 2160
+        },
+        {
+          "label_verbatim": "Custom Beliefs or Animism",
+          "count": 28
+        },
+        {
+          "label_verbatim": "No Religion or Faith/Atheism",
+          "count": 202
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 10
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -483,7 +1217,84 @@
         "sb-census-2019-basic-tables-p8-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=27991;Roman Catholic=475;South Sea Evangelical Church=138;Seventh Day Adventist=656;United Church=233;Christian Fellowship Church=37;Christian OutReach Church=11;Pentecostal=2;Jehovah's Witness=11;Bahai Faith=8;Assembly of God=102;Muslim=241;Baptist Church=0;Other religions=1484;Custom Beliefs or Animism=2;No Religion or Faith/Atheism=27;Refuse to Answer=2"
+      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=27991;Roman Catholic=475;South Sea Evangelical Church=138;Seventh Day Adventist=656;United Church=233;Christian Fellowship Church=37;Christian OutReach Church=11;Pentecostal=2;Jehovah's Witness=11;Bahai Faith=8;Assembly of God=102;Muslim=241;Baptist Church=0;Other religions=1484;Custom Beliefs or Animism=2;No Religion or Faith/Atheism=27;Refuse to Answer=2",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 27991
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 475,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 138
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 656,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 233
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 37
+        },
+        {
+          "label_verbatim": "Christian OutReach Church",
+          "count": 11
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 2,
+          "taxonomy_code": "christian.pentecostal"
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 11,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Bahai Faith",
+          "count": 8,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 102
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 241,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 0,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Other religions",
+          "count": 1484
+        },
+        {
+          "label_verbatim": "Custom Beliefs or Animism",
+          "count": 2
+        },
+        {
+          "label_verbatim": "No Religion or Faith/Atheism",
+          "count": 27
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 2
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -509,7 +1320,84 @@
         "sb-census-2019-basic-tables-p8-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=24959;Roman Catholic=2824;South Sea Evangelical Church=1082;Seventh Day Adventist=1117;United Church=122;Christian Fellowship Church=17;Christian OutReach Church=46;Pentecostal=15;Jehovah's Witness=66;Bahai Faith=11;Assembly of God=16;Muslim=16;Baptist Church=7;Other religions=17;Custom Beliefs or Animism=0;No Religion or Faith/Atheism=2;Refuse to Answer=1"
+      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=24959;Roman Catholic=2824;South Sea Evangelical Church=1082;Seventh Day Adventist=1117;United Church=122;Christian Fellowship Church=17;Christian OutReach Church=46;Pentecostal=15;Jehovah's Witness=66;Bahai Faith=11;Assembly of God=16;Muslim=16;Baptist Church=7;Other religions=17;Custom Beliefs or Animism=0;No Religion or Faith/Atheism=2;Refuse to Answer=1",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 24959
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 2824,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 1082
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 1117,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 122
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 17
+        },
+        {
+          "label_verbatim": "Christian OutReach Church",
+          "count": 46
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 15,
+          "taxonomy_code": "christian.pentecostal"
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 66,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Bahai Faith",
+          "count": 11,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 16
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 16,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 7,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Other religions",
+          "count": 17
+        },
+        {
+          "label_verbatim": "Custom Beliefs or Animism",
+          "count": 0
+        },
+        {
+          "label_verbatim": "No Religion or Faith/Atheism",
+          "count": 2
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 1
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -535,7 +1423,84 @@
         "sb-census-2019-basic-tables-p8-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=243;Roman Catholic=58;South Sea Evangelical Church=1530;Seventh Day Adventist=1958;United Church=20;Christian Fellowship Church=4;Christian OutReach Church=14;Pentecostal=0;Jehovah's Witness=5;Bahai Faith=3;Assembly of God=2;Muslim=97;Baptist Church=132;Other religions=31;Custom Beliefs or Animism=0;No Religion or Faith/Atheism=3;Refuse to Answer=0"
+      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=243;Roman Catholic=58;South Sea Evangelical Church=1530;Seventh Day Adventist=1958;United Church=20;Christian Fellowship Church=4;Christian OutReach Church=14;Pentecostal=0;Jehovah's Witness=5;Bahai Faith=3;Assembly of God=2;Muslim=97;Baptist Church=132;Other religions=31;Custom Beliefs or Animism=0;No Religion or Faith/Atheism=3;Refuse to Answer=0",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 243
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 58,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 1530
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 1958,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 20
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 4
+        },
+        {
+          "label_verbatim": "Christian OutReach Church",
+          "count": 14
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 0,
+          "taxonomy_code": "christian.pentecostal"
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 5,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Bahai Faith",
+          "count": 3,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 2
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 97,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 132,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Other religions",
+          "count": 31
+        },
+        {
+          "label_verbatim": "Custom Beliefs or Animism",
+          "count": 0
+        },
+        {
+          "label_verbatim": "No Religion or Faith/Atheism",
+          "count": 3
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -561,7 +1526,84 @@
         "sb-census-2019-basic-tables-p8-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=40817;Roman Catholic=55811;South Sea Evangelical Church=27241;Seventh Day Adventist=17652;United Church=4838;Christian Fellowship Church=415;Christian OutReach Church=1084;Pentecostal=238;Jehovah's Witness=1759;Bahai Faith=204;Assembly of God=501;Muslim=80;Baptist Church=310;Other religions=1703;Custom Beliefs or Animism=1176;No Religion or Faith/Atheism=180;Refuse to Answer=13"
+      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=40817;Roman Catholic=55811;South Sea Evangelical Church=27241;Seventh Day Adventist=17652;United Church=4838;Christian Fellowship Church=415;Christian OutReach Church=1084;Pentecostal=238;Jehovah's Witness=1759;Bahai Faith=204;Assembly of God=501;Muslim=80;Baptist Church=310;Other religions=1703;Custom Beliefs or Animism=1176;No Religion or Faith/Atheism=180;Refuse to Answer=13",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 40817
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 55811,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 27241
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 17652,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 4838
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 415
+        },
+        {
+          "label_verbatim": "Christian OutReach Church",
+          "count": 1084
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 238,
+          "taxonomy_code": "christian.pentecostal"
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 1759,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Bahai Faith",
+          "count": 204,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 501
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 80,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 310,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Other religions",
+          "count": 1703
+        },
+        {
+          "label_verbatim": "Custom Beliefs or Animism",
+          "count": 1176
+        },
+        {
+          "label_verbatim": "No Religion or Faith/Atheism",
+          "count": 180
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 13
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -587,7 +1629,84 @@
         "sb-census-2019-basic-tables-p8-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=49710;Roman Catholic=41390;South Sea Evangelical Church=48512;Seventh Day Adventist=9911;United Church=429;Christian Fellowship Church=377;Christian OutReach Church=1498;Pentecostal=1598;Jehovah's Witness=9078;Bahai Faith=1732;Assembly of God=1613;Muslim=116;Baptist Church=1137;Other religions=2482;Custom Beliefs or Animism=2807;No Religion or Faith/Atheism=329;Refuse to Answer=21"
+      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=49710;Roman Catholic=41390;South Sea Evangelical Church=48512;Seventh Day Adventist=9911;United Church=429;Christian Fellowship Church=377;Christian OutReach Church=1498;Pentecostal=1598;Jehovah's Witness=9078;Bahai Faith=1732;Assembly of God=1613;Muslim=116;Baptist Church=1137;Other religions=2482;Custom Beliefs or Animism=2807;No Religion or Faith/Atheism=329;Refuse to Answer=21",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 49710
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 41390,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 48512
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 9911,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 429
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 377
+        },
+        {
+          "label_verbatim": "Christian OutReach Church",
+          "count": 1498
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 1598,
+          "taxonomy_code": "christian.pentecostal"
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 9078,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Bahai Faith",
+          "count": 1732,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 1613
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 116,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 1137,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Other religions",
+          "count": 2482
+        },
+        {
+          "label_verbatim": "Custom Beliefs or Animism",
+          "count": 2807
+        },
+        {
+          "label_verbatim": "No Religion or Faith/Atheism",
+          "count": 329
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 21
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -613,7 +1732,84 @@
         "sb-census-2019-basic-tables-p8-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=23509;Roman Catholic=10904;South Sea Evangelical Church=12351;Seventh Day Adventist=1619;United Church=181;Christian Fellowship Church=58;Christian OutReach Church=273;Pentecostal=15;Jehovah's Witness=236;Bahai Faith=99;Assembly of God=1;Muslim=22;Baptist Church=4;Other religions=2298;Custom Beliefs or Animism=5;No Religion or Faith/Atheism=9;Refuse to Answer=3"
+      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=23509;Roman Catholic=10904;South Sea Evangelical Church=12351;Seventh Day Adventist=1619;United Church=181;Christian Fellowship Church=58;Christian OutReach Church=273;Pentecostal=15;Jehovah's Witness=236;Bahai Faith=99;Assembly of God=1;Muslim=22;Baptist Church=4;Other religions=2298;Custom Beliefs or Animism=5;No Religion or Faith/Atheism=9;Refuse to Answer=3",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 23509
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 10904,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 12351
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 1619,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 181
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 58
+        },
+        {
+          "label_verbatim": "Christian OutReach Church",
+          "count": 273
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 15,
+          "taxonomy_code": "christian.pentecostal"
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 236,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Bahai Faith",
+          "count": 99,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 22,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 4,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Other religions",
+          "count": 2298
+        },
+        {
+          "label_verbatim": "Custom Beliefs or Animism",
+          "count": 5
+        },
+        {
+          "label_verbatim": "No Religion or Faith/Atheism",
+          "count": 9
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 3
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -639,7 +1835,84 @@
         "sb-census-2019-basic-tables-p8-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=19003;Roman Catholic=74;South Sea Evangelical Church=99;Seventh Day Adventist=584;United Church=43;Christian Fellowship Church=66;Christian OutReach Church=1142;Pentecostal=38;Jehovah's Witness=459;Bahai Faith=6;Assembly of God=11;Muslim=16;Baptist Church=2;Other religions=743;Custom Beliefs or Animism=3;No Religion or Faith/Atheism=16;Refuse to Answer=14"
+      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=19003;Roman Catholic=74;South Sea Evangelical Church=99;Seventh Day Adventist=584;United Church=43;Christian Fellowship Church=66;Christian OutReach Church=1142;Pentecostal=38;Jehovah's Witness=459;Bahai Faith=6;Assembly of God=11;Muslim=16;Baptist Church=2;Other religions=743;Custom Beliefs or Animism=3;No Religion or Faith/Atheism=16;Refuse to Answer=14",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 19003
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 74,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 99
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 584,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 43
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 66
+        },
+        {
+          "label_verbatim": "Christian OutReach Church",
+          "count": 1142
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 38,
+          "taxonomy_code": "christian.pentecostal"
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 459,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Bahai Faith",
+          "count": 6,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 11
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 16,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 2,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Other religions",
+          "count": 743
+        },
+        {
+          "label_verbatim": "Custom Beliefs or Animism",
+          "count": 3
+        },
+        {
+          "label_verbatim": "No Religion or Faith/Atheism",
+          "count": 16
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 14
+        }
+      ]
     },
     {
       "country_code": "SB",
@@ -665,7 +1938,84 @@
         "sb-census-2019-basic-tables-p8-2-religion-by-province",
         "geoboundaries-slb-adm1-2021"
       ],
-      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=40568;Roman Catholic=18557;South Sea Evangelical Church=30148;Seventh Day Adventist=20204;United Church=8099;Christian Fellowship Church=1213;Christian OutReach Church=703;Pentecostal=1017;Jehovah's Witness=2712;Bahai Faith=663;Assembly of God=1096;Muslim=251;Baptist Church=499;Other religions=3254;Custom Beliefs or Animism=89;No Religion or Faith/Atheism=433;Refuse to Answer=63"
+      "quality_flag": "frame_2019_seventeen_category;no_religion_line=No Religion or Faith/Atheism;refuse_line=Refuse to Answer;pentecostal_assembly_of_god_muslim_baptist_split_out_of_2009_other;other_religions_line_2019_not_comparable_to_2009_other;census_affiliation;all_persons_all_ages_universe;no_universe_break_2009_to_2019;single_select_reported_religion;religious_affiliation_percent_is_summed_affiliation_share;custom_beliefs_counted_as_religious_affiliation;no_religion_percent_is_no_religion_line_only;refuse_to_answer_residual_in_denominator_neither_slot;shares_need_not_sum_to_100;broad_affiliation_comparable_2009_2019;licence_needs_review_pending_pi_ruling;boundary_public_domain;source_categories_verbatim=Church of Melanesia=40568;Roman Catholic=18557;South Sea Evangelical Church=30148;Seventh Day Adventist=20204;United Church=8099;Christian Fellowship Church=1213;Christian OutReach Church=703;Pentecostal=1017;Jehovah's Witness=2712;Bahai Faith=663;Assembly of God=1096;Muslim=251;Baptist Church=499;Other religions=3254;Custom Beliefs or Animism=89;No Religion or Faith/Atheism=433;Refuse to Answer=63",
+      "composition": [
+        {
+          "label_verbatim": "Church of Melanesia",
+          "count": 40568
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 18557,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "South Sea Evangelical Church",
+          "count": 30148
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 20204,
+          "taxonomy_code": "christian.seventh_day_adventist"
+        },
+        {
+          "label_verbatim": "United Church",
+          "count": 8099
+        },
+        {
+          "label_verbatim": "Christian Fellowship Church",
+          "count": 1213
+        },
+        {
+          "label_verbatim": "Christian OutReach Church",
+          "count": 703
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 1017,
+          "taxonomy_code": "christian.pentecostal"
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "count": 2712,
+          "taxonomy_code": "christian.jehovahs_witnesses"
+        },
+        {
+          "label_verbatim": "Bahai Faith",
+          "count": 663,
+          "taxonomy_code": "bahai"
+        },
+        {
+          "label_verbatim": "Assembly of God",
+          "count": 1096
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 251,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Baptist Church",
+          "count": 499,
+          "taxonomy_code": "christian.baptist"
+        },
+        {
+          "label_verbatim": "Other religions",
+          "count": 3254
+        },
+        {
+          "label_verbatim": "Custom Beliefs or Animism",
+          "count": 89
+        },
+        {
+          "label_verbatim": "No Religion or Faith/Atheism",
+          "count": 433
+        },
+        {
+          "label_verbatim": "Refuse to Answer",
+          "count": 63
+        }
+      ]
     }
   ]
 }

@@ -1,9 +1,9 @@
 {
   "$schema": "../../schemas/data-manifest.schema.json",
   "schema_version": "data-manifest.v2",
-  "manifest_id": "manifest:kh-census-religion:kh:2008-2019:deccdb6baf3f",
+  "manifest_id": "manifest:kh-census-religion:kh:2008-2019:4e1b4ea5eb0d",
   "dataset_id": "kh-census-religion:kh:2008-2019:nis-geoboundaries",
-  "dataset_version_id": "kh-census-religion:kh:2008-2019:nis-geoboundaries:deccdb6baf3f",
+  "dataset_version_id": "kh-census-religion:kh:2008-2019:nis-geoboundaries:4e1b4ea5eb0d",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -17,12 +17,12 @@
     "snapshot_date": null,
     "pipeline_stage": "staged"
   },
-  "created_at": "2026-07-11T04:26:49Z",
+  "created_at": "2026-07-12T10:47:22Z",
   "created_by": "scripts/build_kh_area_summary.R",
   "target_years": [2008, 2019],
   "pipeline": {
     "script": "scripts/build_kh_area_summary.R",
-    "git_commit": "41a15bd",
+    "git_commit": "88a2d02",
     "command": "Rscript scripts/build_kh_area_summary.R",
     "parameters": {
       "waves": [
@@ -438,8 +438,8 @@
       "uri": "repo:apps/regions/kh/data/area_summary_province.json",
       "storage_provider": "git_repository",
       "format": "json",
-      "bytes": 123985,
-      "sha256": "adcff844efecd48e97e99d2a08da027ed849a5bff2455e3aa8887d2d2ffbfb95",
+      "bytes": 148396,
+      "sha256": "4b94b4246994808fb871dabb1fdf4a221de40e40b8eb5ef0eda9d0cfbf6d2649",
       "content": "Cambodia two-wave province area-summary JSON (2008, 2019) with NIS census religion-distribution metrics under the two-slot minority-share design.",
       "privacy": "public",
       "licence_status": "accepted",
@@ -474,7 +474,7 @@
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/kh/data/area_summary_province.json",
-      "sha256": "adcff844efecd48e97e99d2a08da027ed849a5bff2455e3aa8887d2d2ffbfb95",
+      "sha256": "4b94b4246994808fb871dabb1fdf4a221de40e40b8eb5ef0eda9d0cfbf6d2649",
       "built_by": "scripts/build_kh_area_summary.R",
       "notes": "50 rows = 25 provinces x 2 waves (2008, 2019); percentages only, counts withheld."
     },
@@ -490,14 +490,14 @@
       "partition_id": "kh-province-2008",
       "partition_type": "area",
       "file_uri": "repo:apps/regions/kh/data/area_summary_province.json",
-      "sha256": "adcff844efecd48e97e99d2a08da027ed849a5bff2455e3aa8887d2d2ffbfb95",
+      "sha256": "4b94b4246994808fb871dabb1fdf4a221de40e40b8eb5ef0eda9d0cfbf6d2649",
       "country_code": "KH"
     },
     {
       "partition_id": "kh-province-2019",
       "partition_type": "area",
       "file_uri": "repo:apps/regions/kh/data/area_summary_province.json",
-      "sha256": "adcff844efecd48e97e99d2a08da027ed849a5bff2455e3aa8887d2d2ffbfb95",
+      "sha256": "4b94b4246994808fb871dabb1fdf4a221de40e40b8eb5ef0eda9d0cfbf6d2649",
       "country_code": "KH"
     }
   ],
@@ -516,7 +516,7 @@
     "status": "passed",
     "commands": [
       "Rscript scripts/build_kh_area_summary.R",
-      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/kh/data/area_summary_province.json",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.v2.schema.json apps/regions/kh/data/area_summary_province.json",
       "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/kh-census-religion-2008-2019.json",
       "bash scripts/validate_manifests.sh"
     ],

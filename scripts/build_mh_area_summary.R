@@ -83,6 +83,34 @@ categories <- c(
 # affiliation, not a no-religion slot. there is no separate refused/not-stated line.
 no_religion_category <- "None"
 
+# denomination-taxonomy.json code for each printed Table 9 category, assigned only
+# where the verbatim label maps to a single taxonomy denomination unambiguously. the
+# indigenous and locally-named bodies (Bukot Nan Jesus, New Beginning Church, Batkan
+# Light House Church), the generic "Protestant Church" and "Full Gospel" rollups, the
+# residual "Other (specify)", and the "None" no-religion line have no unambiguous code
+# and ship without one under area-summary.v2. "United Church of Christ" and "Reformed
+# Congregational Church" each sit between two plausible codes (church_of_christ /
+# congregational and reformed / congregational), so both are left unmapped rather than
+# guessed. "Mormon" is the census's own name for the Latter-day Saints body.
+category_taxonomy <- c(
+  "United Church of Christ"        = NA_character_,
+  "Roman Catholic"                 = "christian.catholic",
+  "Assembly of God"                = NA_character_,
+  "Jehovah's Witness"              = "christian.jehovahs_witnesses",
+  "Reformed Congregational Church" = NA_character_,
+  "Mormon"                         = "christian.latter_day_saints",
+  "Seventh Day Adventist"          = "christian.seventh_day_adventist",
+  "Bukot Nan Jesus"                = NA_character_,
+  "None"                           = NA_character_,
+  "Full Gospel"                    = NA_character_,
+  "Salvation Army"                 = "christian.salvation_army",
+  "Other (specify)"                = NA_character_,
+  "Protestant Church"              = NA_character_,
+  "New Beginning Church"           = NA_character_,
+  "Baptist Church"                 = "christian.baptist",
+  "Batkan Light House Church"      = NA_character_
+)
+
 # helper: build an atoll-named integer vector from a row of 16 category values given
 # in the category (column) order above.
 row16 <- function(...) {
@@ -344,6 +372,20 @@ make_row <- function(a) {
   has_pop <- pop > 0L
   has_geom <- a %in% boundary_atolls
   flag <- if (a == "Bikini") flag_bikini else if (a == "Rongelap") flag_rongelap else flag_base
+  # structured area-summary.v2 composition: one item per printed Table 9 category for
+  # this atoll, carrying the source-verbatim label and the exact published atoll count.
+  # the census prints counts, not percentages, so no percent is derived. every Table 9
+  # cell is a printed integer with no confidentiality suppression, so all sixteen
+  # categories emit, including printed zeros; the sixteen counts sum to the atoll total,
+  # the None cell equals no_religion_count, and the other fifteen sum to
+  # religious_affiliation_count. taxonomy_code links to denomination-taxonomy.json only
+  # where the mapping is unambiguous.
+  composition <- lapply(categories, function(cat) {
+    item <- list(label_verbatim = cat, count = as.integer(tab[[a]][[cat]]))
+    tax <- category_taxonomy[[cat]]
+    if (!is.na(tax)) item[["taxonomy_code"]] <- tax
+    item
+  })
   list(
     country_code = country_code,
     boundary_set_id = boundary_set_id,
@@ -365,7 +407,8 @@ make_row <- function(a) {
     site_snapshot_date = NULL,
     place_count_basis = NULL,
     source_dataset_ids = list(d2021, d_boundary),
-    quality_flag = flag
+    quality_flag = flag,
+    composition = composition
   )
 }
 
@@ -460,7 +503,7 @@ visual_layers <- function() {
 }
 
 summary_product <- list(
-  schema_version = "area-summary.v1", generated_at = stamp, generated_by = script_id,
+  schema_version = "area-summary.v2", generated_at = stamp, generated_by = script_id,
   country_code = country_code,
   boundary_set = list(boundary_set_id = boundary_set_id, country_code = country_code,
                       level = boundary_level, vintage = "2017", source_dataset_id = d_boundary),

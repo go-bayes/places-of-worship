@@ -170,6 +170,24 @@ national_2019 <- 720956L
 no_religion_label_2019 <- "No Religion or Faith/Atheism"
 refuse_label_2019 <- "Refuse to Answer"
 
+# denomination-taxonomy.json code for each printed source category, assigned only
+# where the printed label itself names a taxonomy tradition (the FJ/TK precedent
+# standard). Church of Melanesia, South Sea Evangelical Church, United Church,
+# Christian Fellowship Church, Christian OutReach(Church), Assembly of God, and
+# the residual, custom-belief, no-religion, and refuse lines print no taxonomy
+# tradition name, so they ship without a code under area-summary.v2. one map keyed
+# by verbatim label covers both waves (labels shared where identical).
+category_taxonomy <- c(
+  `Roman Catholic`               = "christian.catholic",
+  `Seventh Day Adventist`        = "christian.seventh_day_adventist",
+  `Jehovah's Witness`            = "christian.jehovahs_witnesses",
+  Bahai                          = "bahai",
+  `Bahai Faith`                  = "bahai",
+  Pentecostal                    = "christian.pentecostal",
+  Muslim                         = "muslim",
+  `Baptist Church`               = "christian.baptist"
+)
+
 # ---- reconciliation gates (fail-fast; stop, do not tune) ------------------------
 # every province column sums to its printed province total, every category row sums
 # to its printed national total, and both margins sum to the printed national grand
@@ -365,6 +383,18 @@ make_row <- function(s, year, mat, cats, province_total, no_rel_label, refuse_la
   breakdown <- paste(vapply(cats, function(c) paste0(c, "=", mat[[c]][[s]]), character(1)),
                      collapse = ";")
   full_flag <- paste0(flag, ";source_categories_verbatim=", breakdown)
+  # structured area-summary.v2 composition: one item per printed source category
+  # in this wave, carrying the source-verbatim label and the exact published
+  # province count. the census prints counts, not percentages, so no percent is
+  # derived. no cell is suppressed in either wave (dashes read as a genuine nil),
+  # so every category emits, including a printed zero. taxonomy_code links to
+  # denomination-taxonomy.json only where the printed label names a tradition.
+  composition <- lapply(cats, function(c) {
+    item <- list(label_verbatim = c, count = as.integer(mat[[c]][[s]]))
+    tax <- unname(category_taxonomy[c])
+    if (!is.na(tax)) item[["taxonomy_code"]] <- tax
+    item
+  })
   list(
     country_code = country_code,
     boundary_set_id = boundary_set_id,
@@ -386,7 +416,8 @@ make_row <- function(s, year, mat, cats, province_total, no_rel_label, refuse_la
     site_snapshot_date = NULL,
     place_count_basis = NULL,
     source_dataset_ids = list(dataset_id, d_boundary),
-    quality_flag = full_flag
+    quality_flag = full_flag,
+    composition = composition
   )
 }
 
@@ -515,7 +546,7 @@ visual_layers <- function() {
 }
 
 summary_product <- list(
-  schema_version = "area-summary.v1", generated_at = stamp, generated_by = script_id,
+  schema_version = "area-summary.v2", generated_at = stamp, generated_by = script_id,
   country_code = country_code,
   boundary_set = list(boundary_set_id = boundary_set_id, country_code = country_code,
                       level = boundary_level, vintage = boundary_vintage, source_dataset_id = d_boundary),

@@ -47,7 +47,14 @@ country_code <- "LK"
 years <- c(1981L, 2001L, 2012L, 2024L)
 script_id <- "scripts/build_lk_area_summary.R"
 stamp <- format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
-retrieval_date <- format(Sys.Date(), "%Y-%m-%d")
+# anchor the source retrieval date to the cached raw geometry meta so re-emission stays
+# reproducible regardless of run date; today's date is the fallback for a fresh fetch.
+adm3_meta_cache <- file.path(raw_dir, "geoboundaries_lka_adm3.geojson.meta.json")
+retrieval_date <- if (file.exists(adm3_meta_cache)) {
+  substr(fromJSON(adm3_meta_cache, simplifyVector = TRUE)[["retrieved_at"]], 1L, 10L)
+} else {
+  format(Sys.Date(), "%Y-%m-%d")
+}
 git_commit <- tryCatch(system("git rev-parse --short HEAD", intern = TRUE), error = function(e) NA_character_)
 if (length(git_commit) == 0L || is.na(git_commit[[1]])) git_commit <- NULL
 
@@ -192,6 +199,14 @@ labels_abstract <- c(buddhist = "Buddhist", hindu = "Hindus", islam = "Muslims",
                      roman_catholic = "Catholics", other_christian = "Christians", other = "Others")
 labels_census_table <- c(buddhist = "Buddhist", hindu = "Hindu", islam = "Islam",
                          roman_catholic = "Roman Catholic", other_christian = "Other Christian", other = "Other")
+
+# denomination-taxonomy.json code per stable category code, assigned only where the
+# mapping is unambiguous. "Other Christian" (a within-Christian residual excluding Roman
+# Catholic) and "Other" (a residual mix) have no unambiguous code, so both ship without one;
+# the area-summary.v2 composition item carries a taxonomy_code only when present.
+category_taxonomy <- c(buddhist = "buddhist", hindu = "hindu", islam = "muslim",
+                       roman_catholic = "christian.catholic",
+                       other_christian = NA_character_, other = NA_character_)
 
 # the label convention each wave's source table actually prints.
 wave_label_convention <- c(`1981` = "abstract", `2001` = "census_table",
@@ -558,9 +573,22 @@ build_row <- function(year, code, boundary) {
   # religious_affiliation_percent := reference-group (Buddhist) share; no_religion_percent := minority
   # share, the exact complement (the five non-reference categories summed). Both null on non-enumerated
   # rows. The verbatim six-category breakdown rides the quality flag for downstream composition metrics.
+  # structured area-summary.v2 composition: one item per printed category, carrying the
+  # wave's source-verbatim label and the exact published district count. the DCS tables print
+  # counts, not percentages, so no percent is derived. non-enumerated rows (the seven 2001
+  # districts and Kilinochchi 1981) publish no religion, so they carry no composition at all;
+  # the field is omitted (absent stays absent, never zeroed). taxonomy_code links to
+  # denomination-taxonomy.json where the mapping is unambiguous.
+  composition <- NULL
   if (enumerated) {
     counts <- mat[code, category_codes]
     total <- as.integer(mat[code, "total"])
+    composition <- lapply(category_codes, function(cc) {
+      item <- list(label_verbatim = labels[[cc]], count = as.integer(counts[[cc]]))
+      tax <- category_taxonomy[[cc]]
+      if (!is.na(tax)) item[["taxonomy_code"]] <- tax
+      item
+    })
     breakdown <- paste(vapply(category_codes, function(cc) {
       paste0(labels[[cc]], "=", counts[[cc]])
     }, character(1)), collapse = ";")
@@ -608,7 +636,7 @@ build_row <- function(year, code, boundary) {
     flag <- paste0(flag, ";jaffna_1981_row_covers_present_day_jaffna_plus_kilinochchi")
   }
 
-  list(
+  row <- list(
     country_code = country_code,
     boundary_set_id = boundary_set_id,
     boundary_level = boundary_level,
@@ -631,6 +659,9 @@ build_row <- function(year, code, boundary) {
     source_dataset_ids = as.list(c(census_dataset_id, boundary_dataset_id)),
     quality_flag = flag
   )
+  # append composition only for enumerated rows; omit it entirely where religion is absent.
+  if (!is.null(composition)) row[["composition"]] <- composition
+  row
 }
 
 # flatten row objects into the CSV companion shape.
@@ -844,8 +875,42 @@ validate_two_slot <- function(rows) {
 }
 two_slot_validation <- validate_two_slot(rows)
 
+# composition gate: every enumerated row carries a six-item composition whose counts sum to the
+# population total and reconcile with the two metric slots (the reference-group Buddhist count equals
+# the affiliation slot; the five non-reference counts sum to the minority slot); every non-enumerated
+# row omits composition entirely (absent stays absent, never zeroed). Stop, do not tune.
+validate_composition <- function(rows) {
+  with_comp <- 0L; without_comp <- 0L
+  for (r in rows) {
+    comp <- r[["composition"]]
+    tag <- paste(r[["area_code"]], r[["year"]])
+    if (is.null(comp)) {
+      if (!is.null(r[["religious_affiliation_count"]])) stop("enumerated row missing composition for ", tag, call. = FALSE)
+      without_comp <- without_comp + 1L
+      next
+    }
+    if (length(comp) != length(category_codes)) stop("composition is not the six-category partition for ", tag, call. = FALSE)
+    labels_expected <- labels_for_wave(r[["year"]])
+    total_from_comp <- sum(vapply(comp, function(it) as.integer(it[["count"]]), integer(1)))
+    if (total_from_comp != as.integer(r[["population_total"]])) stop("composition counts do not sum to population_total for ", tag, call. = FALSE)
+    ref_count <- comp[[which(category_codes == reference_group_code)]][["count"]]
+    if (as.integer(ref_count) != as.integer(r[["religious_affiliation_count"]])) stop("composition reference-group count != affiliation slot for ", tag, call. = FALSE)
+    if (total_from_comp - as.integer(ref_count) != as.integer(r[["no_religion_count"]])) stop("composition minority sum != minority slot for ", tag, call. = FALSE)
+    for (i in seq_along(category_codes)) {
+      if (!identical(comp[[i]][["label_verbatim"]], unname(labels_expected[[category_codes[i]]]))) {
+        stop("composition label is not the wave's source-verbatim label for ", tag, call. = FALSE)
+      }
+    }
+    with_comp <- with_comp + 1L
+  }
+  if (with_comp != 92L) stop("expected 92 rows with composition, got ", with_comp, call. = FALSE)
+  if (without_comp != 8L) stop("expected 8 rows without composition, got ", without_comp, call. = FALSE)
+  list(rows_with_composition = with_comp, rows_without_composition = without_comp)
+}
+composition_validation <- validate_composition(rows)
+
 area_summary <- list(
-  schema_version = "0.2.0",
+  schema_version = "area-summary.v2",
   generated_at = stamp,
   generated_by = script_id,
   country_code = country_code,
@@ -971,7 +1036,7 @@ manifest <- list(
     status = "passed_with_warnings",
     commands = list(
       "Rscript scripts/build_lk_area_summary.R",
-      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/lk/data/area_summary_district.json",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.v2.schema.json apps/regions/lk/data/area_summary_district.json",
       "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/lk-census-religion-1981-2024.json",
       "bash scripts/validate_manifests.sh"
     ),
@@ -1000,6 +1065,8 @@ manifest <- list(
       national_reference_share_2024 = reference_share_by_wave[["2024"]],
       enumerated_complement_rows = two_slot_validation[["enumerated_complement_rows"]],
       null_coverage_rows = two_slot_validation[["null_coverage_rows"]],
+      rows_with_composition = composition_validation[["rows_with_composition"]],
+      rows_without_composition = composition_validation[["rows_without_composition"]],
       boundary_features = 25L, boundary_valid_features = boundary_result[["valid_feature_count"]],
       distinct_geometry_hashes = length(unique(unlist(boundary_result[["geometry_hashes"]]))),
       adm3_divisional_secretariats = 330L,

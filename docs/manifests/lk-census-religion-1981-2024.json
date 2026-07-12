@@ -3,7 +3,7 @@
   "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:lk-census-religion:lk:1981-2024:dcs-district",
   "dataset_id": "lk-census-religion:lk:1981-2024:dcs-district",
-  "dataset_version_id": "lk-census-religion:lk:1981-2024:dcs-district:112c386c1b53",
+  "dataset_version_id": "lk-census-religion:lk:1981-2024:dcs-district:90f364b5d20c",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -18,11 +18,11 @@
     "snapshot_anchor": null,
     "pipeline_stage": "staged"
   },
-  "created_at": "2026-07-11T04:24:31Z",
+  "created_at": "2026-07-12T10:56:10Z",
   "created_by": "scripts/build_lk_area_summary.R",
   "pipeline": {
     "script": "scripts/build_lk_area_summary.R",
-    "git_commit": "2e710b7",
+    "git_commit": "88a2d02",
     "command": "Rscript scripts/build_lk_area_summary.R",
     "parameters": {
       "waves": [1981, 2001, 2012, 2024],
@@ -273,8 +273,8 @@
       "uri": "repo:apps/regions/lk/data/area_summary_district.json",
       "storage_provider": "git_repository",
       "format": "json",
-      "bytes": 243223,
-      "sha256": "112c386c1b53a1fa35d7740fabff4dd220c0e2382538cc1467fb31af28ea04df",
+      "bytes": 308218,
+      "sha256": "90f364b5d20c5d046e1a79a0dfa1f106aa99b9a8a78714bceac0c294665c405e",
       "row_count": 100,
       "content": "Sri Lanka district census-religion summary for 1981, 2001, 2012, and 2024 on the 25-district frame.",
       "privacy": "public",
@@ -415,7 +415,7 @@
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/lk/data/area_summary_district.json",
-      "sha256": "112c386c1b53a1fa35d7740fabff4dd220c0e2382538cc1467fb31af28ea04df",
+      "sha256": "90f364b5d20c5d046e1a79a0dfa1f106aa99b9a8a78714bceac0c294665c405e",
       "built_by": "scripts/build_lk_area_summary.R",
       "notes": "100 district-year rows (25 districts x 4 waves)."
     },
@@ -437,7 +437,7 @@
     "status": "passed_with_warnings",
     "commands": [
       "Rscript scripts/build_lk_area_summary.R",
-      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.schema.json apps/regions/lk/data/area_summary_district.json",
+      "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/area-summary.v2.schema.json apps/regions/lk/data/area_summary_district.json",
       "uvx check-jsonschema --base-uri file://$PWD/schemas/ --schemafile schemas/data-manifest.schema.json docs/manifests/lk-census-religion-1981-2024.json",
       "bash scripts/validate_manifests.sh"
     ],
@@ -476,12 +476,14 @@
       "national_reference_share_2024": 69.7789,
       "enumerated_complement_rows": 92,
       "null_coverage_rows": 8,
+      "rows_with_composition": 92,
+      "rows_without_composition": 8,
       "boundary_features": 25,
       "boundary_valid_features": 25,
       "distinct_geometry_hashes": 25,
       "adm3_divisional_secretariats": 330,
       "boundary_bytes": 1612039,
-      "summary_json_bytes": 243223,
+      "summary_json_bytes": 308218,
       "summary_csv_bytes": 159710
     },
     "reconciliation": {

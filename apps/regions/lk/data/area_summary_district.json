@@ -1,6 +1,6 @@
 {
-  "schema_version": "0.2.0",
-  "generated_at": "2026-07-11T04:24:31Z",
+  "schema_version": "area-summary.v2",
+  "generated_at": "2026-07-12T10:56:10Z",
   "generated_by": "scripts/build_lk_area_summary.R",
   "country_code": "LK",
   "boundary_set": {
@@ -154,7 +154,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1196964;Hindus=130215;Muslims=168863;Catholics=159947;Christians=40598;Others=2654;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1196964;Hindus=130215;Muslims=168863;Catholics=159947;Christians=40598;Others=2654;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1196964,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 130215,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 168863,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 159947,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 40598
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 2654
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -180,7 +210,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=989212;Hindus=26750;Muslims=48117;Catholics=313352;Christians=12563;Others=868;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=989212;Hindus=26750;Muslims=48117;Catholics=313352;Christians=12563;Others=868;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 989212,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 26750,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 48117,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 313352,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 12563
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 868
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -206,7 +266,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=699613;Hindus=37035;Muslims=62659;Catholics=27697;Christians=2424;Others=276;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=699613;Hindus=37035;Muslims=62659;Catholics=27697;Christians=2424;Others=276;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 699613,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 37035,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 62659,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 27697,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 2424
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 276
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -232,7 +322,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=771435;Hindus=132943;Muslims=115941;Catholics=20067;Christians=7498;Others=433;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=771435;Hindus=132943;Muslims=115941;Catholics=20067;Christians=7498;Others=433;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 771435,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 132943,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 115941,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 20067,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 7498
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 433
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -258,7 +378,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=281004;Hindus=41352;Muslims=26265;Catholics=7443;Christians=1202;Others=88;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=281004;Hindus=41352;Muslims=26265;Catholics=7443;Christians=1202;Others=88;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 281004,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 41352,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 26265,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 7443,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 1202
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 88
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -284,7 +434,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=251247;Hindus=303571;Muslims=14902;Catholics=28382;Christians=5312;Others=163;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=251247;Hindus=303571;Muslims=14902;Catholics=28382;Christians=5312;Others=163;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 251247,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 303571,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 14902,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 28382,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 5312
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 163
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -310,7 +490,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=767661;Hindus=15086;Muslims=26301;Catholics=3586;Christians=1452;Others=445;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=767661;Hindus=15086;Muslims=26301;Catholics=3586;Christians=1452;Others=445;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 767661,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 15086,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 26301,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 3586,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 1452
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 445
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -336,7 +546,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=608714;Hindus=15356;Muslims=16670;Catholics=2026;Christians=818;Others=202;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=608714;Hindus=15356;Muslims=16670;Catholics=2026;Christians=818;Others=202;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 608714,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 15356,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 16670,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 2026,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 818
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 202
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -362,7 +602,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=411919;Hindus=2174;Muslims=9408;Catholics=542;Christians=174;Others=127;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=411919;Hindus=2174;Muslims=9408;Catholics=542;Christians=174;Others=127;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 411919,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 2174,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 9408,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 542,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 174
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 127
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -388,7 +658,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=5104;Hindus=705705;Muslims=14844;Catholics=95613;Christians=9153;Others=133;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment;jaffna_1981_row_covers_present_day_jaffna_plus_kilinochchi"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=5104;Hindus=705705;Muslims=14844;Catholics=95613;Christians=9153;Others=133;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment;jaffna_1981_row_covers_present_day_jaffna_plus_kilinochchi",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 5104,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 705705,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 14844,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 95613,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 9153
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 133
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -414,7 +714,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=3363;Hindus=28885;Muslims=29161;Catholics=43633;Christians=1056;Others=137;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=3363;Hindus=28885;Muslims=29161;Catholics=43633;Christians=1056;Others=137;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 3363,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 28885,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 29161,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 43633,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 1056
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 137
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -440,7 +770,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=15754;Hindus=65574;Muslims=6740;Catholics=6493;Christians=845;Others=22;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=15754;Hindus=65574;Muslims=6740;Catholics=6493;Christians=845;Others=22;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 15754,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 65574,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 6740,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 6493,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 845
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 22
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -466,7 +826,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1060;Hindus=60117;Muslims=3789;Catholics=11735;Christians=476;Others=12;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1060;Hindus=60117;Muslims=3789;Catholics=11735;Christians=476;Others=12;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1060,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 60117,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 3789,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 11735,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 476
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 12
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -518,7 +908,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=9127;Hindus=218812;Muslims=78810;Catholics=19704;Christians=3795;Others=85;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=9127;Hindus=218812;Muslims=78810;Catholics=19704;Christians=3795;Others=85;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 9127,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 218812,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 78810,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 19704,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 3795
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 85
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -544,7 +964,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=145687;Hindus=72809;Muslims=162140;Catholics=5643;Christians=2387;Others=304;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=145687;Hindus=72809;Muslims=162140;Catholics=5643;Christians=2387;Others=304;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 145687,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 72809,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 162140,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 5643,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 2387
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 304
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -570,7 +1020,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=82602;Hindus=80843;Muslims=76404;Catholics=14303;Christians=1280;Others=516;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=82602;Hindus=80843;Muslims=76404;Catholics=14303;Christians=1280;Others=516;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 82602,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 80843,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 76404,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 14303,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 1280
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 516
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -596,7 +1076,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1092128;Hindus=15133;Muslims=64112;Catholics=36340;Christians=3641;Others=447;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1092128;Hindus=15133;Muslims=64112;Catholics=36340;Christians=3641;Others=447;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1092128,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 15133,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 64112,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 36340,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 3641
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 447
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -622,7 +1132,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=236241;Hindus=18997;Muslims=50351;Catholics=184555;Christians=2082;Others=307;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=236241;Hindus=18997;Muslims=50351;Catholics=184555;Christians=2082;Others=307;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 236241,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 18997,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 50351,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 184555,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 2082
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 307
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -648,7 +1188,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=530008;Hindus=6843;Muslims=42999;Catholics=6949;Christians=939;Others=191;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=530008;Hindus=6843;Muslims=42999;Catholics=6949;Christians=939;Others=191;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 530008,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 6843,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 42999,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 6949,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 939
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 191
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -674,7 +1244,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=235758;Hindus=4781;Muslims=17090;Catholics=3471;Christians=351;Others=112;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=235758;Hindus=4781;Muslims=17090;Catholics=3471;Christians=351;Others=112;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 235758,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 4781,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 17090,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 3471,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 351
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 112
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -700,7 +1300,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=440755;Hindus=156037;Muslims=29317;Catholics=11529;Christians=3081;Others=233;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=440755;Hindus=156037;Muslims=29317;Catholics=11529;Christians=3081;Others=233;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 440755,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 156037,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 29317,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 11529,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 3081
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 233
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -726,7 +1356,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=253576;Hindus=12778;Muslims=5584;Catholics=1224;Christians=314;Others=94;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=253576;Hindus=12778;Muslims=5584;Catholics=1224;Christians=314;Others=94;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 253576,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 12778,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 5584,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 1224,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 314
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 94
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -752,7 +1412,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=675785;Hindus=92156;Muslims=15576;Catholics=11107;Christians=2188;Others=275;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=675785;Hindus=92156;Muslims=15576;Catholics=11107;Christians=2188;Others=275;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 675785,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 92156,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 15576,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 11107,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 2188
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 275
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -778,7 +1468,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=583611;Hindus=53854;Muslims=35672;Catholics=8372;Christians=3225;Others=210;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=583611;Hindus=53854;Muslims=35672;Catholics=8372;Christians=3225;Others=210;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 583611,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 53854,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 35672,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 8372,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 3225
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 210
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -804,7 +1524,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1578246;Hindu=194743;Islam=241944;Roman Catholic=181920;Other Christian=51334;Other=3087;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1578246;Hindu=194743;Islam=241944;Roman Catholic=181920;Other Christian=51334;Other=3087;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1578246,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 194743,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 241944,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 181920,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 51334
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 3087
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -830,7 +1580,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1479955;Hindu=42356;Islam=93496;Roman Catholic=418286;Other Christian=28361;Other=1230;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1479955;Hindu=42356;Islam=93496;Roman Catholic=418286;Other Christian=28361;Other=1230;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1479955,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 42356,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 93496,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 418286,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 28361
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 1230
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -856,7 +1636,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=883968;Hindu=34678;Islam=105957;Roman Catholic=36176;Other Christian=5038;Other=422;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=883968;Hindu=34678;Islam=105957;Roman Catholic=36176;Other Christian=5038;Other=422;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 883968,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 34678,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 105957,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 36176,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 5038
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 422
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -882,7 +1692,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=937001;Hindu=134438;Islam=173590;Roman Catholic=23232;Other Christian=10330;Other=437;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=937001;Hindu=134438;Islam=173590;Roman Catholic=23232;Other Christian=10330;Other=437;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 937001,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 134438,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 173590,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 23232,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 10330
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 437
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -908,7 +1748,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=348762;Hindu=42433;Islam=39980;Roman Catholic=8400;Other Christian=1703;Other=50;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=348762;Hindu=42433;Islam=39980;Roman Catholic=8400;Other Christian=1703;Other=50;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 348762,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 42433,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 39980,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 8400,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 1703
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 50
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -934,7 +1804,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=279139;Hindu=359135;Islam=19099;Roman Catholic=35008;Other Christian=10741;Other=488;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=279139;Hindu=359135;Islam=19099;Roman Catholic=35008;Other Christian=10741;Other=488;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 279139,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 359135,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 19099,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 35008,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 10741
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 488
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -960,7 +1860,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=932331;Hindu=14934;Islam=35100;Roman Catholic=4568;Other Christian=3378;Other=176;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=932331;Hindu=14934;Islam=35100;Roman Catholic=4568;Other Christian=3378;Other=176;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 932331,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 14934,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 35100,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 4568,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 3378
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 176
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -986,7 +1916,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=716710;Hindu=17339;Islam=22481;Roman Catholic=2703;Other Christian=2001;Other=136;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=716710;Hindu=17339;Islam=22481;Roman Catholic=2703;Other Christian=2001;Other=136;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 716710,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 17339,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 22481,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 2703,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 2001
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 136
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1012,7 +1972,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=509987;Hindu=1369;Islam=13076;Roman Catholic=924;Other Christian=949;Other=109;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=509987;Hindu=1369;Islam=13076;Roman Catholic=924;Other Christian=949;Other=109;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 509987,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 1369,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 13076,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 924,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 949
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 109
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1194,7 +2184,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=235652;Hindu=100213;Islam=245179;Roman Catholic=7816;Other Christian=3969;Other=168;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=235652;Hindu=100213;Islam=245179;Roman Catholic=7816;Other Christian=3969;Other=168;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 235652,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 100213,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 245179,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 7816,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 3969
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 168
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1246,7 +2266,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1300539;Hindu=13303;Islam=98223;Roman Catholic=40680;Other Christian=6960;Other=510;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1300539;Hindu=13303;Islam=98223;Roman Catholic=40680;Other Christian=6960;Other=510;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1300539,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 13303,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 98223,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 40680,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 6960
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 510
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1272,7 +2322,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=308273;Hindu=29482;Islam=134643;Roman Catholic=229966;Other Christian=6830;Other=483;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=308273;Hindu=29482;Islam=134643;Roman Catholic=229966;Other Christian=6830;Other=483;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 308273,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 29482,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 134643,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 229966,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 6830
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 483
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1298,7 +2378,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=670963;Hindu=3459;Islam=62797;Roman Catholic=6266;Other Christian=2073;Other=135;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=670963;Hindu=3459;Islam=62797;Roman Catholic=6266;Other Christian=2073;Other=135;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 670963,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 3459,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 62797,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 6266,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 2073
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 135
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1324,7 +2434,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=320491;Hindu=6592;Islam=27225;Roman Catholic=3883;Other Christian=691;Other=102;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=320491;Hindu=6592;Islam=27225;Roman Catholic=3883;Other Christian=691;Other=102;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 320491,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 6592,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 27225,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 3883,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 691
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 102
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1350,7 +2490,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=561510;Hindu=158473;Islam=41347;Roman Catholic=13236;Other Christian=5242;Other=175;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=561510;Hindu=158473;Islam=41347;Roman Catholic=13236;Other Christian=5242;Other=175;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 561510,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 158473,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 41347,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 13236,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 5242
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 175
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1376,7 +2546,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=375252;Hindu=11623;Islam=8183;Roman Catholic=1583;Other Christian=681;Other=53;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=375252;Hindu=11623;Islam=8183;Roman Catholic=1583;Other Christian=681;Other=53;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 375252,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 11623,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 8183,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 1583,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 681
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 53
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1402,7 +2602,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=880151;Hindu=96738;Islam=21901;Roman Catholic=11728;Other Christian=4924;Other=365;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=880151;Hindu=96738;Islam=21901;Roman Catholic=11728;Other Christian=4924;Other=365;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 880151,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 96738,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 21901,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 11728,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 4924
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 365
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1428,7 +2658,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=667618;Hindu=51662;Islam=51675;Roman Catholic=9365;Other Christian=4977;Other=227;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=667618;Hindu=51662;Islam=51675;Roman Catholic=9365;Other Christian=4977;Other=227;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 667618,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 51662,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 51675,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 9365,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 4977
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 227
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1454,7 +2714,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1632225;Hindus=186454;Muslims=274087;Catholics=162314;Christians=66994;Others=2275;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1632225;Hindus=186454;Muslims=274087;Catholics=162314;Christians=66994;Others=2275;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1632225,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 186454,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 274087,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 162314,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 66994
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 2275
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1480,7 +2770,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1642767;Hindus=52973;Muslims=112746;Catholics=449398;Christians=46080;Others=869;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1642767;Hindus=52973;Muslims=112746;Catholics=449398;Christians=46080;Others=869;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1642767,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 52973,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 112746,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 449398,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 46080
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 869
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1506,7 +2826,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1018909;Hindus=39541;Muslims=114556;Catholics=39774;Christians=8956;Others=212;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1018909;Hindus=39541;Muslims=114556;Catholics=39774;Christians=8956;Others=212;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1018909,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 39541,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 114556,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 39774,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 8956
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 212
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1532,7 +2882,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1009220;Hindus=133744;Muslims=197076;Catholics=22379;Christians=12798;Others=165;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1009220;Hindus=133744;Muslims=197076;Catholics=22379;Christians=12798;Others=165;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1009220,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 133744,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 197076,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 22379,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 12798
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 165
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1558,7 +2938,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=385151;Hindus=43432;Muslims=45682;Catholics=7899;Christians=2342;Others=25;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=385151;Hindus=43432;Muslims=45682;Catholics=7899;Christians=2342;Others=25;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 385151,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 43432,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 45682,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 7899,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 2342
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 25
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1584,7 +2994,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=278254;Hindus=363163;Muslims=21116;Catholics=33476;Christians=15508;Others=127;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=278254;Hindus=363163;Muslims=21116;Catholics=33476;Christians=15508;Others=127;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 278254,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 363163,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 21116,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 33476,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 15508
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 127
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1610,7 +3050,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=998647;Hindus=15584;Muslims=39267;Catholics=4415;Christians=5315;Others=106;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=998647;Hindus=15584;Muslims=39267;Catholics=4415;Christians=5315;Others=106;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 998647,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 15584,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 39267,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 4415,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 5315
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 106
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1636,7 +3106,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=766323;Hindus=16421;Muslims=25614;Catholics=2432;Christians=3208;Others=50;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=766323;Hindus=16421;Muslims=25614;Catholics=2432;Christians=3208;Others=50;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 766323,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 16421,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 25614,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 2432,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 3208
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 50
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1662,7 +3162,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=580344;Hindus=1222;Muslims=15204;Catholics=1139;Christians=1692;Others=302;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=580344;Hindus=1222;Muslims=15204;Catholics=1139;Christians=1692;Others=302;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 580344,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 1222,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 15204,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 1139,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 1692
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 302
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1688,7 +3218,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=2168;Hindus=483255;Muslims=2363;Catholics=75474;Christians=20511;Others=111;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=2168;Hindus=483255;Muslims=2363;Catholics=75474;Christians=20511;Others=111;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 2168,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 483255,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 2363,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 75474,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 20511
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 111
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1714,7 +3274,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1809;Hindus=24027;Muslims=16512;Catholics=52415;Christians=4790;Others=17;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1809;Hindus=24027;Muslims=16512;Catholics=52415;Christians=4790;Others=17;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1809,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 24027,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 16512,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 52415,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 4790
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 17
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1740,7 +3330,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=16853;Hindus=119401;Muslims=11972;Catholics=15305;Christians=8498;Others=86;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=16853;Hindus=119401;Muslims=11972;Catholics=15305;Christians=8498;Others=86;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 16853,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 119401,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 11972,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 15305,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 8498
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 86
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1766,7 +3386,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=8185;Hindus=69377;Muslims=1880;Catholics=9063;Christians=3664;Others=69;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=8185;Hindus=69377;Muslims=1880;Catholics=9063;Christians=3664;Others=69;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 8185,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 69377,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 1880,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 9063,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 3664
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 69
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1792,7 +3442,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1275;Hindus=92986;Muslims=700;Catholics=12063;Christians=6436;Others=50;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1275;Hindus=92986;Muslims=700;Catholics=12063;Christians=6436;Others=50;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1275,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 92986,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 700,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 12063,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 6436
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 50
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1818,7 +3498,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=6281;Hindus=338882;Muslims=134065;Catholics=24454;Christians=22833;Others=52;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=6281;Hindus=338882;Muslims=134065;Catholics=24454;Christians=22833;Others=52;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 6281,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 338882,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 134065,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 24454,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 22833
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 52
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1844,7 +3554,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=251427;Hindus=102829;Muslims=281987;Catholics=7588;Christians=5541;Others=30;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=251427;Hindus=102829;Muslims=281987;Catholics=7588;Christians=5541;Others=30;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 251427,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 102829,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 281987,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 7588,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 5541
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 30
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1870,7 +3610,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=99344;Hindus=98442;Muslims=159418;Catholics=14493;Christians=7774;Others=70;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=99344;Hindus=98442;Muslims=159418;Catholics=14493;Christians=7774;Others=70;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 99344,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 98442,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 159418,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 14493,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 7774
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 70
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1896,7 +3666,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1431632;Hindus=14721;Muslims=118305;Catholics=43711;Christians=9926;Others=170;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=1431632;Hindus=14721;Muslims=118305;Catholics=43711;Christians=9926;Others=170;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1431632,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 14721,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 118305,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 43711,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 9926
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 170
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1922,7 +3722,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=329705;Hindus=28811;Muslims=150404;Catholics=240221;Christians=12093;Others=1162;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=329705;Hindus=28811;Muslims=150404;Catholics=240221;Christians=12093;Others=1162;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 329705,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 28811,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 150404,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 240221,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 12093
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 1162
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1948,7 +3778,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=775366;Hindus=3231;Muslims=71493;Catholics=6747;Christians=3660;Others=78;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=775366;Hindus=3231;Muslims=71493;Catholics=6747;Christians=3660;Others=78;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 775366,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 3231,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 71493,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 6747,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 3660
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 78
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -1974,7 +3834,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=364229;Hindus=6886;Muslims=30465;Catholics=3192;Christians=1276;Others=40;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=364229;Hindus=6886;Muslims=30465;Catholics=3192;Christians=1276;Others=40;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 364229,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 6886,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 30465,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 3192,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 1276
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 40
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2000,7 +3890,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=591799;Hindus=157608;Muslims=47192;Catholics=12020;Christians=6615;Others=171;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=591799;Hindus=157608;Muslims=47192;Catholics=12020;Christians=6615;Others=171;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 591799,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 157608,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 47192,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 12020,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 6615
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 171
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2026,7 +3946,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=426762;Hindus=11997;Muslims=9809;Catholics=1601;Christians=859;Others=30;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=426762;Hindus=11997;Muslims=9809;Catholics=1601;Christians=859;Others=30;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 426762,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 11997,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 9809,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 1601,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 859
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 30
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2052,7 +4002,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=943464;Hindus=101962;Muslims=24446;Catholics=10844;Christians=7212;Others=79;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=943464;Hindus=101962;Muslims=24446;Catholics=10844;Christians=7212;Others=79;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 943464,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 101962,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 24446,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 10844,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 7212
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 79
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2078,7 +4058,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=709917;Hindus=54350;Muslims=61164;Catholics=8777;Christians=6386;Others=54;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=abstract;source_categories_verbatim=Buddhist=709917;Hindus=54350;Muslims=61164;Catholics=8777;Christians=6386;Others=54;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 709917,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindus",
+          "count": 54350,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Muslims",
+          "count": 61164,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Catholics",
+          "count": 8777,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Christians",
+          "count": 6386
+        },
+        {
+          "label_verbatim": "Others",
+          "count": 54
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2104,7 +4114,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1682524;Hindu=197759;Islam=298422;Roman Catholic=139882;Other Christian=55624;Other=1204;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1682524;Hindu=197759;Islam=298422;Roman Catholic=139882;Other Christian=55624;Other=1204;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1682524,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 197759,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 298422,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 139882,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 55624
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 1204
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2130,7 +4170,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1744475;Hindu=69429;Islam=134422;Roman Catholic=442291;Other Christian=44540;Other=985;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1744475;Hindu=69429;Islam=134422;Roman Catholic=442291;Other Christian=44540;Other=985;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1744475,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 69429,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 134422,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 442291,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 44540
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 985
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2156,7 +4226,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1080638;Hindu=42528;Islam=138230;Roman Catholic=36510;Other Christian=7733;Other=145;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1080638;Hindu=42528;Islam=138230;Roman Catholic=36510;Other Christian=7733;Other=145;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1080638,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 42528,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 138230,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 36510,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 7733
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 145
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2182,7 +4282,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1063511;Hindu=144618;Islam=223997;Roman Catholic=18623;Other Christian=10919;Other=227;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1063511;Hindu=144618;Islam=223997;Roman Catholic=18623;Other Christian=10919;Other=227;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1063511,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 144618,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 223997,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 18623,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 10919
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 227
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2208,7 +4338,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=418608;Hindu=46181;Islam=52224;Roman Catholic=7797;Other Christian=2026;Other=34;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=418608;Hindu=46181;Islam=52224;Roman Catholic=7797;Other Christian=2026;Other=34;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 418608,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 46181,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 52224,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 7797,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 2026
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 34
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2234,7 +4394,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=278828;Hindu=377266;Islam=21929;Roman Catholic=31705;Other Christian=15474;Other=78;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=278828;Hindu=377266;Islam=21929;Roman Catholic=31705;Other Christian=15474;Other=78;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 278828,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 377266,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 21929,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 31705,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 15474
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 78
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2260,7 +4450,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1026031;Hindu=15600;Islam=46038;Roman Catholic=4207;Other Christian=5377;Other=119;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1026031;Hindu=15600;Islam=46038;Roman Catholic=4207;Other Christian=5377;Other=119;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1026031,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 15600,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 46038,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 4207,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 5377
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 119
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2286,7 +4506,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=787303;Hindu=14625;Islam=29858;Roman Catholic=2445;Other Christian=3619;Other=39;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=787303;Hindu=14625;Islam=29858;Roman Catholic=2445;Other Christian=3619;Other=39;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 787303,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 14625,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 29858,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 2445,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 3619
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 39
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2312,7 +4562,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=649736;Hindu=1401;Islam=17947;Roman Catholic=1017;Other Christian=1247;Other=70;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=649736;Hindu=1401;Islam=17947;Roman Catholic=1017;Other Christian=1247;Other=70;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 649736,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 1401,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 17947,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 1017,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 1247
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 70
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2338,7 +4618,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=2788;Hindu=489521;Islam=4352;Roman Catholic=77197;Other Christian=20857;Other=36;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=2788;Hindu=489521;Islam=4352;Roman Catholic=77197;Other Christian=20857;Other=36;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 2788,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 489521,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 4352,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 77197,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 20857
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 36
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2364,7 +4674,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=382;Hindu=26214;Islam=33883;Roman Catholic=57713;Other Christian=5560;Other=4;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=382;Hindu=26214;Islam=33883;Roman Catholic=57713;Other Christian=5560;Other=4;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 382,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 26214,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 33883,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 57713,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 5560
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 4
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2390,7 +4730,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=18292;Hindu=114504;Islam=17775;Roman Catholic=12785;Other Christian=8895;Other=61;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=18292;Hindu=114504;Islam=17775;Roman Catholic=12785;Other Christian=8895;Other=61;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 18292,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 114504,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 17775,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 12785,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 8895
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 61
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2416,7 +4786,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=10293;Hindu=88738;Islam=3279;Roman Catholic=13982;Other Christian=6315;Other=12;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=10293;Hindu=88738;Islam=3279;Roman Catholic=13982;Other Christian=6315;Other=12;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 10293,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 88738,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 3279,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 13982,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 6315
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 12
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2442,7 +4842,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1533;Hindu=110258;Islam=1394;Roman Catholic=14446;Other Christian=9074;Other=5;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1533;Hindu=110258;Islam=1394;Roman Catholic=14446;Other Christian=9074;Other=5;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1533,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 110258,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 1394,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 14446,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 9074
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 5
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2468,7 +4898,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=6024;Hindu=374836;Islam=161494;Roman Catholic=25803;Other Christian=27728;Other=33;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=6024;Hindu=374836;Islam=161494;Roman Catholic=25803;Other Christian=27728;Other=33;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 6024,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 374836,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 161494,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 25803,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 27728
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 33
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2494,7 +4954,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=276176;Hindu=114586;Islam=339896;Roman Catholic=7351;Other Christian=6486;Other=56;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=276176;Hindu=114586;Islam=339896;Roman Catholic=7351;Other Christian=6486;Other=56;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 276176,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 114586,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 339896,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 7351,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 6486
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 56
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2520,7 +5010,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=106919;Hindu=108050;Islam=205664;Roman Catholic=14353;Other Christian=7714;Other=45;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=106919;Hindu=108050;Islam=205664;Roman Catholic=14353;Other Christian=7714;Other=45;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 106919,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 108050,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 205664,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 14353,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 7714
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 45
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2546,7 +5066,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1557554;Hindu=17487;Islam=143299;Roman Catholic=40273;Other Christian=9413;Other=130;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=1557554;Hindu=17487;Islam=143299;Roman Catholic=40273;Other Christian=9413;Other=130;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 1557554,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 17487,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 143299,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 40273,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 9413
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 130
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2572,7 +5122,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=361148;Hindu=28832;Islam=176963;Roman Catholic=240975;Other Christian=10619;Other=279;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=361148;Hindu=28832;Islam=176963;Roman Catholic=240975;Other Christian=10619;Other=279;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 361148,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 28832,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 176963,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 240975,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 10619
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 279
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2598,7 +5178,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=862807;Hindu=3755;Islam=83979;Roman Catholic=5760;Other Christian=3656;Other=123;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=862807;Hindu=3755;Islam=83979;Roman Catholic=5760;Other Christian=3656;Other=123;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 862807,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 3755,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 83979,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 5760,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 3656
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 123
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2624,7 +5234,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=399488;Hindu=7215;Islam=37097;Roman Catholic=2560;Other Christian=1086;Other=84;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=399488;Hindu=7215;Islam=37097;Roman Catholic=2560;Other Christian=1086;Other=84;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 399488,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 7215,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 37097,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 2560,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 1086
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 84
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2650,7 +5290,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=636988;Hindu=166380;Islam=53563;Roman Catholic=9593;Other Christian=5729;Other=54;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=636988;Hindu=166380;Islam=53563;Roman Catholic=9593;Other Christian=5729;Other=54;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 636988,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 166380,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 53563,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 9593,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 5729
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 54
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2676,7 +5346,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=498436;Hindu=14974;Islam=12262;Roman Catholic=1181;Other Christian=713;Other=19;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=498436;Hindu=14974;Islam=12262;Roman Catholic=1181;Other Christian=713;Other=19;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 498436,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 14974,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 12262,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 1181,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 713
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 19
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2702,7 +5402,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=999682;Hindu=103883;Islam=26796;Roman Catholic=8607;Other Christian=6394;Other=61;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=999682;Hindu=103883;Islam=26796;Roman Catholic=8607;Other Christian=6394;Other=61;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 999682,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 103883,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 26796,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 8607,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 6394
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 61
+        }
+      ]
     },
     {
       "country_code": "LK",
@@ -2728,7 +5458,37 @@
         "dcs-census-religion-district-1981-2024",
         "geoboundaries-lka-adm3-dissolved-25"
       ],
-      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=728929;Hindu=56199;Islam=72616;Roman Catholic=7292;Other Christian=5387;Other=53;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment"
+      "quality_flag": "full_enumeration_census_religion;six_category_partition;no_no_religion_or_not_stated_category;minority_share_two_slot_design;reference_group=buddhist;religious_affiliation_percent=reference_group_buddhist_share;no_religion_percent=minority_share_exact_complement;minority_share=hindu+islam+roman_catholic+other_christian+other;label_convention=census_table;source_categories_verbatim=Buddhist=728929;Hindu=56199;Islam=72616;Roman Catholic=7292;Other Christian=5387;Other=53;exact_within_row_and_national_reconciliation;district_counts_rendered_as_published_no_small_cell_treatment",
+      "composition": [
+        {
+          "label_verbatim": "Buddhist",
+          "count": 728929,
+          "taxonomy_code": "buddhist"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 56199,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Islam",
+          "count": 72616,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 7292,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 5387
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 53
+        }
+      ]
     }
   ]
 }

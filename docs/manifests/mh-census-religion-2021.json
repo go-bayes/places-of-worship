@@ -3,7 +3,7 @@
   "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:mh-census-religion:mh:2021:eppso-spc-atoll",
   "dataset_id": "mh-census-religion:mh:2021:eppso-spc-atoll",
-  "dataset_version_id": "mh-census-religion:mh:2021:eppso-spc-atoll:3038cb06fcd9",
+  "dataset_version_id": "mh-census-religion:mh:2021:eppso-spc-atoll:6c67c4eefa8c",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -248,8 +248,8 @@
       "uri": "repo:apps/regions/mh/data/area_summary_atoll.json",
       "storage_provider": "git_repository",
       "format": "json",
-      "bytes": 47461,
-      "sha256": "3038cb06fcd9b799bc312a1c69ede267b0513a3d900127f64a14ccbe53d0aa49",
+      "bytes": 92796,
+      "sha256": "6c67c4eefa8c466e6f0154f31165cc396522a134f503357ce97d7c4059b38178",
       "row_count": 25,
       "feature_count": null,
       "content": "RMI 25-row atoll census-affiliation area summary for 2021 (24 mapped; Bikini unmapped).",
@@ -287,7 +287,7 @@
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/mh/data/area_summary_atoll.json",
-      "sha256": "3038cb06fcd9b799bc312a1c69ede267b0513a3d900127f64a14ccbe53d0aa49",
+      "sha256": "6c67c4eefa8c466e6f0154f31165cc396522a134f503357ce97d7c4059b38178",
       "built_by": "scripts/build_mh_area_summary.R",
       "notes": "25 atoll rows x 1 wave = 25 rows; all-persons universe; Bikini and Rongelap zero population with null shares."
     },

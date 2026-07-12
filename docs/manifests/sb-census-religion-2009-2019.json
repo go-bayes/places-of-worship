@@ -3,7 +3,7 @@
   "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:sb-census-religion:sb:2009-2019:sinso-province",
   "dataset_id": "sb-census-religion:sb:2009-2019:sinso-province",
-  "dataset_version_id": "sb-census-religion:sb:2009-2019:sinso-province:653dcce32dc0",
+  "dataset_version_id": "sb-census-religion:sb:2009-2019:sinso-province:d23dd5a62c70",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -26,7 +26,7 @@
   ],
   "pipeline": {
     "script": "scripts/build_sb_area_summary.R",
-    "git_commit": "a6c8015e0826c926b1e1271dcb856b1d1da09aaa",
+    "git_commit": "88a2d0288feea8ce44c496315c06ea62dcbcd673",
     "command": "Rscript scripts/build_sb_area_summary.R",
     "parameters": {
       "construct": "census affiliation",
@@ -307,8 +307,8 @@
       "uri": "repo:apps/regions/sb/data/area_summary_province.json",
       "storage_provider": "git_repository",
       "format": "json",
-      "bytes": 56319,
-      "sha256": "653dcce32dc03d2327ad8afca027c757632cf4bfaeb8dfb0523edf4589865d22",
+      "bytes": 90320,
+      "sha256": "d23dd5a62c70230e1299e8aa0897797b353b5729c849bbdf809778a3209e3993",
       "row_count": 20,
       "feature_count": null,
       "content": "Solomon Islands 10-province census-affiliation area summary for 2009 and 2019.",
@@ -346,7 +346,7 @@
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/sb/data/area_summary_province.json",
-      "sha256": "653dcce32dc03d2327ad8afca027c757632cf4bfaeb8dfb0523edf4589865d22",
+      "sha256": "d23dd5a62c70230e1299e8aa0897797b353b5729c849bbdf809778a3209e3993",
       "built_by": "scripts/build_sb_area_summary.R",
       "notes": "10 provinces x 2 waves = 20 rows; all-persons universe in every wave; no suppressed cells."
     },
