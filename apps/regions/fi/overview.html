@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Finland map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260712d" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Finland research map; every string traces to
+    // docs/manifests/fi-religious-community-membership-1990-2025.json
+    // (construct_notes and source), the product indicators block, or the live
+    // REGION_CONFIG in apps/regions/fi/index.html.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "FI",
+      countryName: "Finland",
+      mapHref: "./",
+      intro: "Administrative religious-community membership recorded in Finland's Population Information System and published by Statistics Finland (StatFin table 11rx), 36 annual waves 1990–2025. This register construct records neither census affiliation, belief, practice, nor attendance. Statistics Finland publishes religion at national level only; the map therefore shades a single national polygon.",
+      facts: {
+        waves: "36 annual register years, 1990–2025",
+        geographies: "National (one polygon; Statistics Finland publishes religion at the whole-country level only)",
+        metrics: "Registered religious-community membership %, persons not members of any religious community %, change since previous year"
+      },
+      reading: [
+        "The map shades a single national polygon by the share of the register population recorded as a member of a registered religious community. Statistics Finland publishes religion at national level only; no StatFin table crosses religion with municipality or region. The national-polygon shading is the whole of the published spatial detail, and sub-national membership is a recorded future deepening.",
+        "This is administrative membership recorded in the Population Information System. It is not a census affiliation, and it measures neither belief, religious practice, nor attendance.",
+        "The registered-membership share is the published register TOTAL minus the not-a-member line, corroborated as the sum of the 22 registered religious-community leaves. Every year the 23 mutually-exclusive leaves reconcile to the published TOTAL, and Christianity and Other religious groups are roll-up headings that equal the exact sum of their children. No cell is imputed.",
+        "Persons not members of any religious community is Statistics Finland's own register line for people not recorded as members of any registered religious community. The label keeps that name as register non-membership; the project does not frame it as irreligion, belief, or attendance.",
+        "The registered-membership share and the not-a-member share sum to 100 by construction: the two slots partition the register population exactly. In 1990 registered membership was 89.79% of 4,998,478; by 2025 it was 64.08% of 5,652,881, while membership of the Evangelical Lutheran Church of Finland fell from 4,390,739 to 3,457,125.",
+        "The change metric reports the percentage-point change in the membership share since the previous annual register year. The national total-sex, total-age slice carries no suppressed or confidential cell; published zero cells stay zero and no values are imputed.",
+        "Each area row carries the 23 mutually exclusive verbatim StatFin leaf categories in source order, with the published English labels and counts summing exactly to the register total. StatFin prints 26 lines in a shallow hierarchy; the TOTAL line and the two roll-up headings (CHRISTIANITY and OTHER RELIGIOUS GROUPS, each the exact sum of its children) stay out of the per-row composition to keep it a true partition, and the full 26-line published frame is recorded verbatim in the manifest. No category is merged, redistributed, renamed, or zeroed."
+      ],
+      sources: [
+        {
+          name: "Statistics Finland StatFin table 11rx, belonging to a religious community by age and sex",
+          href: "https://pxdata.stat.fi/PxWeb/api/v1/en/StatFin/vaerak/11rx.px",
+          construct: "Administrative religious-community membership from the Population Information System, national total (Sex=Total, Age=Total)",
+          years: "1990–2025 (annual)",
+          licence: "Statistics Finland open data, CC BY 4.0 with attribution and material-version date"
+        },
+        {
+          name: "geoBoundaries gbOpen Finland ADM0",
+          href: "https://www.geoboundaries.org/",
+          construct: "Boundary geometry (one national polygon)",
+          years: "2017 vintage",
+          licence: "Open Data Commons Open Database License 1.0 (ODbL), © OpenStreetMap contributors"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Statistics Finland, <a href=\"https://pxdata.stat.fi/PxWeb/api/v1/en/StatFin/vaerak/11rx.px\" target=\"_blank\" rel=\"noopener\">StatFin table 11rx</a>; boundaries from <a href=\"https://www.geoboundaries.org/\" target=\"_blank\" rel=\"noopener\">geoBoundaries</a> Finland ADM0 (2017).",
+        tables: "Statistics Finland StatFin 11rx, belonging to a religious community by age and sex, 1990–2025 (Population 31.12.). The area-summary religious_affiliation fields carry the register TOTAL minus the not-a-member line and the no_religion fields carry Statistics Finland's PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY line verbatim; both are administrative register memberships, never belief or practice. The register population on 31 December is the denominator.",
+        licence: "Statistics Finland data are CC BY 4.0 used with attribution and the material-version date; the geoBoundaries ADM0 boundary is ODbL 1.0 (OpenStreetMap source), a divergence from the fleet's CC BY 4.0 boundaries, with the National Land Survey / Statistics Finland CC BY 4.0 municipal vector recorded as the clean-licence swap (deferred).",
+        script: "scripts/build_fi_area_summary.R",
+        manifests: [
+          { label: "fi-religious-community-membership-1990-2025", href: "docs/manifests/fi-religious-community-membership-1990-2025.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Finland map is a register-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260712d"></script>
+</body>
+</html>

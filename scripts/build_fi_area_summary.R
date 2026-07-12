@@ -30,12 +30,16 @@
 #   100 every year. no_religion here is the register non-membership line, not a
 #   belief or irreligion claim.
 #
-# per-row composition. every row carries all 26 verbatim StatFin categories (the
-# published English labels) with count and share-of-TOTAL percent, in source
-# order. no cell is merged, redistributed, or zeroed; the national total-sex,
-# total-age slice carries no suppressed or confidential cells (verified: 0 nulls
-# across 26 categories x 36 years). the Finnish verbatim labels are recorded in
-# the manifest frame record alongside the English.
+# per-row composition. every row carries the 23 mutually exclusive verbatim
+# StatFin leaf categories (published English labels, counts) in source order,
+# summing exactly to population_total — the corpus composition invariant. the
+# TOTAL line and the F00/G00 roll-up headings stay out of composition (they
+# would double-count in any reader's sum) and are recorded verbatim in the
+# manifest category_frame. no cell is merged, redistributed, or zeroed; the
+# national total-sex, total-age slice carries no suppressed or confidential
+# cells (verified: 0 nulls across 26 categories x 36 years). the Finnish
+# verbatim labels are recorded in the manifest frame record alongside the
+# English.
 #
 # licence. Statistics Finland releases its statistical data under CC BY 4.0
 # (source and material-version date named, reference and hyperlink to the licence
@@ -424,15 +428,18 @@ quality_flag <- paste(
   sep = ";"
 )
 
-# one composition item per verbatim category. the register's published values are
-# integer counts, so composition carries the count verbatim (the CompositionItem
-# schema admits exactly one of count/percent; the share is count / population_total,
-# and population_total is on the row).
+# one composition item per mutually-exclusive leaf category, so the items
+# partition the register population and sum exactly to population_total (the
+# corpus composition invariant). the TOTAL line and the F00/G00 roll-up
+# headings stay out of composition — including them would double-count in any
+# reader's sum — and remain recorded verbatim in the manifest category_frame.
+# counts carry verbatim (the CompositionItem schema admits one of count/percent;
+# the share is count / population_total, and population_total is on the row).
 composition_for <- function(i) {
-  lapply(seq_len(n_rel), function(r) {
+  lapply(leaf_codes, function(code) {
     list(
-      label_verbatim = religion_labels_en[[r]],
-      count = as.integer(value_matrix[r, i])
+      label_verbatim = religion_labels_en[[match(code, religion_codes)]],
+      count = as.integer(value_matrix[code, i])
     )
   })
 }
@@ -646,7 +653,7 @@ visual_layers <- list(
     default_visibility = TRUE,
     notes = paste(
       "A single national polygon is intentional: Statistics Finland publishes religion at the",
-      "whole-country level only. The full 26-category StatFin frame rides the per-row composition."
+      "whole-country level only. The 23 mutually exclusive StatFin leaf categories ride the per-row composition; the TOTAL line and the two roll-up headings are recorded in the manifest category_frame."
     )
   ),
   list(
@@ -772,7 +779,7 @@ construct_notes <- list(
   "population_total is the published register population 31.12. (the StatFin TOTAL / SSS row). religious_affiliation is TOTAL minus PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY (the sum of the 22 registered religious-community leaves); no_religion is the PERSONS NOT MEMBERS OF ANY RELIGIOUS COMMUNITY line verbatim. The two sum to the register universe, so the two shares sum to 100 by construction.",
   "no_religion here is the register non-membership line, not a belief, irreligion, or attendance claim.",
   "The 26 published categories form a shallow hierarchy. SSS is the universe total. F00 CHRISTIANITY and G00 OTHER RELIGIOUS GROUPS are roll-up headings, the exact sums of their F01-F11 and G01-G06 children. The 23 mutually-exclusive leaves (A00,B00,C00,D00,E00; F01-F11; G01-G06; H00) reconcile to TOTAL every year. The build never sums a heading into the leaf frame.",
-  "Every row carries all 26 verbatim StatFin categories in the per-row composition (published English labels, count, and share-of-TOTAL percent), in source order. The Finnish and English verbatim labels are recorded together in pipeline.parameters.category_frame. No category is merged, redistributed, renamed, or zeroed.",
+  "Every row carries the 23 mutually exclusive verbatim StatFin leaf categories in the per-row composition (published English labels, counts summing exactly to population_total), in source order. The TOTAL line and the F00/G00 roll-up headings are excluded from composition to keep it a true partition and are recorded verbatim in pipeline.parameters.category_frame. The Finnish and English verbatim labels are recorded together in pipeline.parameters.category_frame. No category is merged, redistributed, renamed, or zeroed.",
   "The national total-sex, total-age slice carries no suppressed or confidential cell (0 nulls across 26 categories x 36 years); the suppressed/confidential rule (omit, never zero) is therefore satisfied vacuously in this slice.",
   "A single national polygon is intentional: Statistics Finland publishes religion at the whole-country level only; no current or archived StatFin table crosses religion with area.",
   "The 11rx data are CC BY 4.0 (Statistics Finland). The geoBoundaries FIN ADM0 boundary is ODbL 1.0 (OpenStreetMap source), NOT CC BY 4.0 - a divergence from the fleet's CC BY 4.0 boundaries, recorded verbatim and flagged; the National Land Survey / Statistics Finland CC BY 4.0 municipal vector is the clean-licence swap (deferred).",
@@ -833,7 +840,7 @@ manifest <- list(
         "SSS Total is the universe; F00 Christianity and G00 Other religious groups are roll-up",
         "headings (exact sums of F01-F11 and G01-G06); the 23 leaves reconcile to Total every year."
       ),
-      composition_note = "Every row carries all 26 verbatim categories (English label, count, share-of-Total percent) in source order; no merge, no zeroing.",
+      composition_note = "Every row carries the 23 mutually exclusive verbatim leaf categories (English label, count) in source order, summing exactly to population_total; the TOTAL and roll-up lines live in category_frame; no merge, no zeroing.",
       suppressed_cell_rule = "Suppressed/confidential cells are omitted, never zeroed; the national total-sex/total-age slice carries none (0 nulls, 26 x 36 cells).",
       statfin_licence_verbatim = statfin_licence_verbatim,
       boundary_licence_verbatim = boundary_licence_verbatim,
