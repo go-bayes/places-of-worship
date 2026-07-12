@@ -342,8 +342,12 @@ const map = new maplibregl.Map({
 });
 
 // responsive attribution: full text on wide maps, the standard
-// tap-to-expand disc on phones, where the corner shares the pill line
-map.addControl(new maplibregl.AttributionControl(), "bottom-right");
+// tap-to-expand disc on phones, where the corner shares the pill line.
+// the project-licence line rides every page; per-product source terms
+// recorded in the manifests prevail where they differ (LICENSE.md)
+map.addControl(new maplibregl.AttributionControl({
+  customAttribution: 'Project compilation <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>'
+}), "bottom-right");
 
 // fall back to the free carto basemap when the keyed maptiler style or
 // tiles stop loading: 401/403 key blocked or credit exhausted, 429

@@ -60,6 +60,10 @@ relevant data products.
 OpenStreetMap-derived databases are distributed under the Open Database Licence
 (ODbL 1.0), consistent with OSM licence terms.
 
+## Licence
+
+The project's original work — code, documentation, map pages, manifests, derived summaries, and figures — is licensed under [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/): attribution required, no commercial use, and derivative works must carry these same terms. Source data remain governed by their own licences, recorded per product in [docs/manifests/](docs/manifests/); where a source licence requires different terms (CC BY-SA, ODbL), the source terms prevail for that product. See [LICENSE.md](LICENSE.md).
+
 ## Project Team
 
 The main project is includes Professor Joseph Bulbulia (Victoria University of

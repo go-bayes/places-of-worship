@@ -196,6 +196,8 @@ body { line-height: 1.55; }
   text-decoration: none;
 }
 .overview-footer a:hover { color: #fff; text-decoration: underline; }
+.overview-licence-note { margin: 12px 0 0; color: #64748b; font-size: 12px; }
+.overview-licence-note a { color: #94a3b8; }
 
 @media (max-width: 520px) {
   .overview { padding: 28px 0 48px; }

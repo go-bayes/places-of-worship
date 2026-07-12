@@ -521,6 +521,20 @@ the governed boundary.
 **Status.** New — implemented in the change-event payloads and in the `pow`
 public-export validation mode.
 
+## D19. Project work is licensed CC BY-NC-SA 4.0, for now
+
+**Ruling (PI, 2026-07-12).** The project's original work — code, documentation, map pages, manifests, derived summaries, and figures — is licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International. Downstream users inherit every restriction the project carries: attribution, non-commercial use, and share-alike. The licence rides every map page (attribution line), every overview (footer), the hub, the README, and `LICENSE.md`.
+
+**Rationale.** The project sits in a competitive grant setting, and the PI directed protection against uncredited or commercial appropriation while the work is under active construction. Between the two candidate licences the PI named, BY-NC-SA satisfies the stated inheritance requirement (share-alike is the inheritance mechanism); BY-NC-ND would forbid derivatives entirely and shut out the researchers the tutorial invites.
+
+**Carve-outs.** Source data remain governed by their per-manifest source licences. Where a source licence requires different terms, the source terms prevail for that product: the Chile commune product remains CC BY-SA 4.0 (INE share-alike), OSM-derived boundaries remain ODbL 1.0. Third-party libraries and basemaps carry their own licences.
+
+**Forecloses.** Silent commercial reuse; permissively licensed forks of the compilation while this ruling stands; downstream relicensing that drops the restrictions.
+
+**Cost to reverse.** Low: the project holds the rights to its own work and can relicense to more permissive terms later; terms granted for already-released versions are not revoked.
+
+**Status.** New — implemented 2026-07-12 (`LICENSE.md`, README, hub, shared runtime attribution, overview footers; fleet tag 20260712d).
+
 ## Artefacts changed with this register
 
 - `schemas/change-event.schema.json` — `taxonomy_version` now required for

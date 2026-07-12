@@ -214,6 +214,10 @@
     var cardHref = f.card || (GITHUB_BLOB + "research/countries/" + cc + "/README.md");
     row.appendChild(link("Country card on GitHub", cardHref, true));
     footer.appendChild(row);
+    // project-licence line on every overview; source terms per product prevail
+    var lic = el("p", "overview-licence-note");
+    lic.innerHTML = 'Project compilation licensed <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>; source data carry the licences stated above.';
+    footer.appendChild(lic);
     return footer;
   }
 
