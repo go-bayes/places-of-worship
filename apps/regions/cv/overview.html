@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Cabo Verde map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260709f" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Cabo Verde research map; every string traces to
+    // research/countries/cv/route-probe.md, the manifest
+    // docs/manifests/cv-census-religion-2010-2021.json, the data product
+    // apps/regions/cv/data/area_summary_concelho.json, or the live
+    // REGION_CONFIG in apps/regions/cv/index.html. authors nothing.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "CV",
+      countryName: "Cabo Verde",
+      mapHref: "./",
+      intro: "Census religion and spirituality across Cabo Verde's 22 concelhos (municipalities) over two waves, 2010 and 2021, from the Instituto Nacional de Estatística (INE). Both waves count the resident population aged 15 and over and ask a voluntary religion or spirituality question. The construct is census affiliation. It does not measure belief, practice, attendance, or membership.",
+      facts: {
+        waves: "Two censuses: 2010 and 2021",
+        geographies: "Concelho (22 units) across ten inhabited islands",
+        metrics: "Religious affiliation %, no religion %"
+      },
+      reading: [
+        "The 22 concelhos are shaded by the share reporting a religion or spirituality (any named category), or by the share in the Sem religião (no religion) category, shown as No religion %. The religion or spirituality question is voluntary and asked of the resident population aged 15 and over; each concelho's printed 15+ Total is the denominator. The non-response line (2010 ND; 2021 Não sabe / Não respondeu) rides in the denominator and in neither share; the two shares therefore need not sum to 100.",
+        "The 2010 wave, from the Cabo Verde em Números national workbook, Tabela 12, carries integer counts across 14 categories. The 22 concelho Totals sum exactly to the national 336,049, and every category sums across the 22 concelhos to its printed national margin (Católica 259,723; Sem religião 36,272; ND 2,570). The national 2010 headline is affiliation 297,207 (88.4%), Sem religião 36,272 (10.8%), non-response 2,570 (0.8%).",
+        "The 2021 wave, from the 22 Quadros por Concelho workbooks, Tabela 54, carries integer counts across 15 categories. The 22 concelho Totals sum exactly to the national 352,494, and every category sums to the national Tabela 52 margin (Católica 255,511; Sem religião 54,814; Não sabe / Não respondeu 1,311). The national 2021 headline is affiliation 296,369 (84.1%), Sem religião 54,814 (15.6%), non-response 1,311 (0.4%). No value is allocated, inferred, imputed, rounded, or tuned.",
+        "The 2021 census renamed and split several fine categories: it split Igreja do Nazareno / Protestante (2010 named only Igreja do Nazareno), added Jesus Cristo dos Santos dos últimos dias / Mórmons as a separate line (folded into Outra in 2010), renamed Islâmica to Islâmica / Muçulmano and the non-response line to Não sabe / Não respondeu, and renamed the construct from religião to religião ou espiritualidade. Fine-category change is therefore withheld across that instrument break. The headline affiliation and no-religion shares stay comparable and are read on the year selector; the verbatim category composition rides on each area-summary row as source context and is not a shipped map metric.",
+        "The secularisation gradient is the reason to map Cabo Verde. National no religion rose from 10.8% in 2010 to 15.6% in 2021. Urban São Vicente (Mindelo) is the most secular concelho by a wide margin (30.9% no religion in 2010, 38.2% in 2021), against the rural Santiago interior near universal affiliation (São Domingos 0.4% no religion in 2010; São Salvador do Mundo 0.8% in 2021). Islam concentrates in the tourism islands (Sal, Boa Vista) and among the West African migrant population.",
+        "The boundary frame is geoBoundaries CPV ADM1, 22 concelhos, represented year 2017. The 22 concelhos join the census one-to-one on area_code; the concelho frame is stable across the two waves (Calheta de São Miguel was renamed São Miguel over the same territory); this is therefore a genuine two-wave series on identical geography and needs no concordance. The archipelago spans lon -25.4 to -22.7 and lat 14.8 to 17.2, far from the antimeridian, and needs no dateline handling.",
+        "No governed Cabo Verde place-of-worship snapshot ships with this product; place counts and density metrics are null. The 2000 census religion table and the age-group and urban/rural religion splits (2010 Tabela 11; 2021 Tabela 55) are documented deferred waves, not shipped."
+      ],
+      sources: [
+        {
+          name: "INE Cabo Verde, Censo 2010 (RGPH 2010), Cabo Verde em Números national workbook, Tabela 12: População residente com 15 anos ou mais segundo a religião por sexo e concelho",
+          href: "https://ine.cv/",
+          construct: "Census religion by concelho, resident population aged 15 and over, 14 categories; integer counts, national total 336,049",
+          years: "2010",
+          licence: "INE publishes no explicit open-data reuse licence and asserts no explicit all-rights-reserved copyright. Its Política de Difusão states free and universal access to published statistics at www.ine.cv, and statistical confidentiality protects only individual microdata. Derived concelho summaries ship with attribution to INE under a build-then-ask stance; licence status needs review, and an INE reuse-confirmation ask is recorded for the project lead"
+        },
+        {
+          name: "INE Cabo Verde, Censo 2021 (RGPH 2021), Quadros por Concelho workbooks (22 files), Tabela 54: População residente com 15 anos ou mais segundo religião ou espiritualidade pelo meio de residência e o sexo",
+          href: "https://ine.cv/",
+          construct: "Census religion or spirituality by concelho, resident population aged 15 and over, 15 categories; integer counts, national total 352,494 (national control totals from the Cabo Verde em Números 2021 workbook, Tabela 52)",
+          years: "2021",
+          licence: "INE publishes no explicit open-data reuse licence. Derived concelho summaries ship with attribution to INE under a build-then-ask stance; licence status needs review, and an INE reuse-confirmation ask is recorded for the project lead"
+        },
+        {
+          name: "geoBoundaries Cabo Verde ADM1 boundaries",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/CPV/ADM1/",
+          construct: "Boundary geometry (22 concelhos), source OpenStreetMap and Wambacher; joins the census one-to-one on area_code",
+          years: "2017 (represented year)",
+          licence: "Open Data Commons Open Database License 1.0 (ODbL 1.0), source OpenStreetMap contributors, per the geoBoundaries release metadata; the derived boundary ships share-alike under ODbL with attribution to OpenStreetMap contributors"
+        }
+      ],
+      accessData: {
+        note: "INE publishes no explicit reuse licence on its statistical tables; the product therefore ships STAGED with licence status needs_review under a build-then-ask stance, and an INE reuse-confirmation ask is recorded for the project lead. The committed products are the derived 22-concelho area summary (44 rows across 2010 and 2021) and the simplified geoBoundaries CPV ADM1 boundary; the raw census workbooks and the source GeoJSON are not committed.",
+        sourceOfRecord: "Instituto Nacional de Estatística, <a href=\"https://ine.cv/\" target=\"_blank\" rel=\"noopener\">INE</a>: the Censo 2010 Tabela 12 (Cabo Verde em Números national workbook) and the Censo 2021 Tabela 54 (22 Quadros por Concelho workbooks), religion or spirituality by concelho, resident population aged 15 and over; boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/CPV/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries CPV ADM1</a>.",
+        tables: "The concelho religion tables are the source of record: 22 concelhos by two waves. The area-summary religious_affiliation_percent field is each concelho's printed 15+ Total minus the Sem religião line and minus the non-response line; no_religion_percent carries the single Sem religião line; each row's quality_flag carries the verbatim per-category composition. Both waves reconcile integer-exact at every margin: the 2010 concelho Totals sum to 336,049 and every Tabela 12 category sums to its national total; the 2021 concelho Totals sum to 352,494 and every Tabela 54 category sums to its Tabela 52 national total. The non-response line rides in the denominator and in neither share, and fine-category change is withheld across the 2010-2021 instrument break.",
+        licence: "INE publishes the 2010 and 2021 census results openly on its portal (www.ine.cv) but states no explicit open-data reuse licence and asserts no explicit all-rights-reserved copyright. Its Política de Difusão (principle 10) states that access to published statistics is generally free and universal; statistical confidentiality (Lei n.º 48/IX/2019, art. 10) protects only individual microdata, which this aggregate product never touches. Under a build-then-ask stance the derived concelho summaries ship with attribution to INE (Fonte: INE, Censo 2010 / Censo 2021) and licence status needs_review; an INE reuse-confirmation ask is recorded for the project lead. The geoBoundaries CPV ADM1 boundary is Open Data Commons Open Database License 1.0 (OpenStreetMap contributors) and ships share-alike under ODbL.",
+        script: "scripts/build_cv_area_summary.R",
+        manifests: [
+          { label: "cv-census-religion-2010-2021", href: "docs/manifests/cv-census-religion-2010-2021.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Cabo Verde map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260709f"></script>
+</body>
+</html>

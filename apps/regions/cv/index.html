@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Cabo Verde Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712b" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Cabo Verde's product is INE census religion or spirituality by the 22
+    // concelhos (municipalities) across two waves, 2010 and 2021. The universe
+    // is the resident population aged 15 and over in both waves, and the
+    // religion or spirituality question is voluntary. The 2010 wave carries the
+    // 14-category Tabela 12 frame; the 2021 wave carries the 15-category Tabela
+    // 54 frame. Sem religiao is a real, regionally-varying no-religion line, so
+    // the ordinary two-slot design applies: religious_affiliation_percent is the
+    // printed 15+ Total minus the Sem religiao line and minus the non-response
+    // line (2010 ND; 2021 Nao sabe / Nao respondeu); no_religion_percent is the
+    // single Sem religiao line. The non-response line rides in the denominator
+    // and in neither slot; the two shares therefore need not sum to 100.
+    //
+    // Both waves reconcile integer-exact to the published national 15+ totals
+    // (336,049 in 2010; 352,494 in 2021). The 2021 census renamed and split
+    // several fine categories (split Igreja do Nazareno / Protestante, added a
+    // Mormon line, renamed Islamica / Muculmano and the non-response line) and
+    // renamed the construct from religiao to religiao ou espiritualidade;
+    // fine-category change is therefore withheld across that instrument break.
+    // The staged rows carry the token
+    // religious_change_withheld_across_2010_2021_instrument_break, which the
+    // runtime's changeWithheld() guard reads to null any cross-wave change
+    // metric. No religious_change metric ships; the trend is read on the year
+    // selector, and the headline affiliation and no-religion shares stay
+    // comparable across the two waves.
+    //
+    // Map-worthy pattern: the secularisation gradient is the signal and it is
+    // legible by concelho. National no religion rose from 10.8% (2010) to 15.6%
+    // (2021). Urban Sao Vicente (Mindelo) is the most secular concelho by a wide
+    // margin (30.9% no religion in 2010, 38.2% in 2021), against the rural
+    // Santiago interior near universal affiliation (Sao Domingos 0.4% no
+    // religion in 2010; Sao Salvador do Mundo 0.8% in 2021).
+    //
+    // Licence needs_review (build-then-ask): INE publishes no explicit reuse
+    // grant. Its Politica de Difusao states that published statistics are freely
+    // and universally accessible at www.ine.cv, and statistical confidentiality
+    // protects only individual microdata. The derived concelho summaries ship
+    // with attribution to INE under a build-then-ask stance; an INE
+    // reuse-confirmation ask is recorded for the project lead. Boundaries are
+    // geoBoundaries CPV ADM1 (Open Data Commons Open Database License 1.0,
+    // OpenStreetMap), 22 concelhos joining one-to-one by area_code.
+    window.REGION_CONFIG = {
+      countryCode: "CV",
+      title: "Places of Worship | Cabo Verde Research Map",
+      // boundary bbox verified numerically from the 22-feature layer:
+      // lon -25.36..-22.67, lat 14.80..17.21; geographic centroid -24.01, 16.00.
+      // The camera is biased north-west of the centroid so the ten-island
+      // archipelago opens centre-right, clear of the top-left census panel and
+      // key (Bahamas precedent); zoom 6.7 fits the full 2.7 deg lon by 2.4 deg
+      // lat extent beside the panels.
+      center: [-24.4, 16.2],
+      initialZoom: 6.7,
+      censusLevels: {
+        concelho: {
+          label: "Concelho (22 units)",
+          boundaries: "data/cv_concelho_2017.geojson",
+          summary: "data/area_summary_concelho.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Instituto Nacional de Estatística (INE), Cabo Verde, Censo 2010 (Tabela 12) and Censo 2021 (Tabela 54, Quadros por Concelho), resident population aged 15 and over, voluntary religion or spirituality question; derived concelho summaries reproduced with attribution while the reuse position is reviewed (Fonte: INE, Censo 2010 / Censo 2021) · Boundaries © geoBoundaries CPV ADM1 (Open Data Commons Open Database License 1.0, OpenStreetMap), 22 concelhos"
+        }
+      },
+      defaultLevel: "concelho",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      // the two census-question shares; place, density, and change metrics are
+      // omitted because no governed place-of-worship snapshot ships here and
+      // fine-category change is withheld across the 2010-2021 instrument break
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      // a lighter wash for the archipelago that keeps the small island
+      // features visible beneath the census choropleth (Bahamas precedent)
+      censusFillOpacity: 0.5,
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share of the concelho population aged 15 and over reporting a named religion or spirituality: the printed 15+ Total minus the Sem religião (no religion) line and minus the non-response line (2010 ND; 2021 Não sabe / Não respondeu). The religion or spirituality question is voluntary. The verbatim category composition rides on each row of the downloadable area summary and is not shown in this popup."
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share of the concelho population aged 15 and over in the single Sem religião (no religion) line. The non-response line stays in the denominator and in neither share; affiliation % and no religion % therefore need not sum to 100."
+        }
+      },
+      popupDenominatorNote: "Percentages use each concelho's printed census resident population aged 15 and over as the denominator. The religion or spirituality question is voluntary. Religious affiliation % is the printed 15+ Total minus the Sem religião (no religion) line and minus the non-response line (2010 ND; 2021 Não sabe / Não respondeu); no religion % is the single Sem religião line. The non-response line rides in the denominator and in neither share; the two shares therefore need not sum to 100. The 2010 and 2021 waves are read on the year selector: the 2021 census renamed and split several fine categories and renamed the construct from religião to religião ou espiritualidade; fine-category change is therefore withheld across the instrument break, while the headline affiliation and no-religion shares stay comparable across the two waves. The construct is census affiliation; it does not measure belief, practice, attendance, or membership.",
+      cityPresets: [
+        { label: "Praia", coords: [-23.5087, 14.9177], zoom: 11 },
+        { label: "Mindelo", shortLabel: "Mindelo", aliases: ["São Vicente"], coords: [-24.9956, 16.8901], zoom: 11 },
+        { label: "Espargos", shortLabel: "Sal", aliases: ["Sal"], coords: [-22.9445, 16.7565], zoom: 11 },
+        { label: "Sal Rei", shortLabel: "Boa Vista", aliases: ["Boa Vista"], coords: [-22.9159, 16.1802], zoom: 11 },
+        { label: "Assomada", shortLabel: "Santa Catarina", aliases: ["Santa Catarina"], coords: [-23.6667, 15.1000], zoom: 11 },
+        { label: "São Filipe", shortLabel: "Fogo", aliases: ["Fogo"], coords: [-24.4956, 14.8953], zoom: 11 },
+        { label: "Ribeira Grande", shortLabel: "Santo Antão", aliases: ["Santo Antão"], coords: [-25.0667, 17.1833], zoom: 11 },
+        { label: "Porto Novo", coords: [-25.0631, 17.0186], zoom: 11 }
+      ],
+      geocode: { country: "cv", biasLngLat: [-24.0, 16.0] },
+      onboarding: {
+        title: "Cabo Verde research map",
+        intro: "Census religion and spirituality across Cabo Verde's 22 concelhos (municipalities) over two waves, 2010 and 2021, from the Instituto Nacional de Estatística (INE). Both waves count the resident population aged 15 and over and ask a voluntary religion or spirituality question. The 2021 census renamed and split several fine categories; fine-category change is therefore withheld across that instrument break, while the headline affiliation and no-religion shares stay comparable and are read on the year selector. The construct is census affiliation; it does not measure belief, practice, attendance, or membership.",
+        bullets: [
+          "Concelhos are shaded by the share reporting a religion or spirituality (any named category), or by the share in the <code>Sem religião</code> (no religion) category, shown as No religion %. The question is voluntary and asked of residents aged 15 and over; the non-response line rides in the denominator and in neither share, and the two shares need not sum to 100.",
+          "Two census waves, 2010 and 2021, at concelho level. Both waves reconcile integer-exact to the published national totals for the resident population aged 15 and over (336,049 in 2010; 352,494 in 2021).",
+          "The 2021 census renamed and split several fine categories and renamed the construct from <code>religião</code> to <code>religião ou espiritualidade</code>; fine-category change is therefore withheld across that instrument break. The headline affiliation and no-religion shares stay comparable and are read on the year selector.",
+          "The secularisation gradient is the signal. National no religion rose from 10.8% in 2010 to 15.6% in 2021; urban São Vicente (Mindelo) is the most secular concelho by a wide margin (30.9% no religion in 2010, 38.2% in 2021), against the rural Santiago interior near universal affiliation (São Domingos 0.4% no religion in 2010; São Salvador do Mundo 0.8% in 2021).",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://ine.cv/" target="_blank" rel="noopener">Instituto Nacional de Estatística (INE), Cabo Verde</a>, Censo 2010 (Tabela 12) and Censo 2021 (Tabela 54, Quadros por Concelho), resident population aged 15 and over, voluntary religion or spirituality question. INE publishes no explicit open-data reuse licence; its Política de Difusão states that published statistics are freely and universally accessible at www.ine.cv, and statistical confidentiality protects only individual microdata. Under a build-then-ask stance the derived concelho summaries ship with attribution to INE, and the licence position remains under review. Fonte: INE, Censo 2010 / Censo 2021. &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> CPV ADM1 (Open Data Commons Open Database License 1.0, ODbL 1.0, &copy; OpenStreetMap contributors), 22 concelhos',
+      censusFlagNote: "* Universe: resident population aged 15 and over in both waves; the religion or spirituality question is voluntary. Religious affiliation % is each concelho's printed 15+ Total minus the Sem religião line and minus the non-response line; no religion % is the single Sem religião line. The non-response line (2010 ND; 2021 Não sabe / Não respondeu) rides in the denominator and in neither share; the two shares therefore need not sum to 100. Both waves reconcile integer-exact to the published national 15+ totals (336,049 in 2010; 352,494 in 2021). The 2010 and 2021 waves are read on the year selector; the 2021 census renamed and split several fine categories and renamed the construct from religião to religião ou espiritualidade; fine-category change is therefore withheld across the instrument break, while the headline affiliation and no-religion shares stay comparable. INE publishes no explicit reuse licence; the derived concelho summaries ship with attribution to INE under a build-then-ask stance while the licence position is reviewed. Boundaries are geoBoundaries CPV ADM1, Open Data Commons Open Database License 1.0 (OpenStreetMap contributors)."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712b"></script>
+</body>
+</html>
