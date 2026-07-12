@@ -75,6 +75,18 @@ province_aliases <- c("Nadroga/Navosa" = "Nadroga-Navosa")
 
 # the six mutually exclusive top-level religion categories printed by the source.
 top_categories <- c("Christian", "Hindu", "Sikh", "Moslem", "Other religion", "No religion")
+# denomination-taxonomy.json code for each printed top-level religion category,
+# assigned only where the mapping is unambiguous. "Other religion" is a residual
+# mix and "No religion" has no taxonomy code, so both ship without one; the
+# area-summary.v2 composition field carries a taxonomy_code only when present.
+top_category_taxonomy <- c(
+  "Christian" = "christian",
+  "Hindu" = "hindu",
+  "Sikh" = "sikh",
+  "Moslem" = "muslim",
+  "Other religion" = NA_character_,
+  "No religion" = NA_character_
+)
 # named religions counted as religious affiliation; "No religion" is the no-religion numerator.
 affiliation_categories <- c("Christian", "Hindu", "Sikh", "Moslem", "Other religion")
 # printed Christian sub-denomination labels (source-truncated spellings) for the internal gate.
@@ -421,6 +433,18 @@ build_area_row <- function(parsed, province_index, area) {
   total <- parsed[["total"]][[col]]
   affiliation <- sum(vapply(affiliation_categories, function(cat) parsed[["tops"]][[cat]][[col]], integer(1)))
   no_religion <- parsed[["tops"]][["No religion"]][[col]]
+  # structured area-summary.v2 composition: one item per printed top-level
+  # religion category, carrying the source-verbatim label and the exact published
+  # province count. the source prints counts, not percentages, so no percent is
+  # derived. the unprinted not-stated residual is not a source category and is
+  # omitted; the Christian sub-denominations are a within-Christian breakdown and
+  # are excluded to keep the composition one mutually-exclusive partition.
+  composition <- lapply(top_categories, function(cat) {
+    item <- list(label_verbatim = cat, count = as.integer(parsed[["tops"]][[cat]][[col]]))
+    tax <- top_category_taxonomy[[cat]]
+    if (!is.na(tax)) item[["taxonomy_code"]] <- tax
+    item
+  })
   list(
     country_code = country_code,
     boundary_set_id = boundary_set_id,
@@ -451,7 +475,8 @@ build_area_row <- function(parsed, province_index, area) {
       "unprinted_not_stated_residual_retained_in_denominator;",
       "2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0",
       sep = ""
-    )
+    ),
+    composition = composition
   )
 }
 
@@ -599,7 +624,7 @@ rows <- lapply(seq_along(province_order), function(index) {
 })
 
 summary_product <- list(
-  schema_version = "area-summary.v1", generated_at = stamp, generated_by = script_id,
+  schema_version = "area-summary.v2", generated_at = stamp, generated_by = script_id,
   country_code = country_code,
   boundary_set = list(
     boundary_set_id = boundary_set_id, country_code = country_code, level = boundary_level,

@@ -147,6 +147,21 @@ grand_2016 <- 1197L
 no_religion_label <- "No religion"
 not_stated_labels <- c("Not Stated", "Not stated")
 
+# denomination-taxonomy.json code for each printed source category, assigned only
+# where the mapping is unambiguous. "Other Christian", "Spiritualism and New Age
+# religions", "No religion", and the two "Not stated" spellings have no
+# unambiguous code, so they ship without one under area-summary.v2.
+category_taxonomy <- c(
+  "Congregational Christian"           = "christian.congregational",
+  "Presbyterian"                       = "christian.presbyterian",
+  "Roman Catholic"                     = "christian.catholic",
+  "Other Christian"                    = NA_character_,
+  "Spiritualism and New Age religions" = NA_character_,
+  "No religion"                        = NA_character_,
+  "Not Stated"                         = NA_character_,
+  "Not stated"                         = NA_character_
+)
+
 # ---- reconciliation gates (fail-fast; stop, do not tune) ------------------------
 
 # reconcile one wave at both margins against the printed controls; `~` counts as 0.
@@ -409,6 +424,22 @@ make_row <- function(a, wv) {
         "confidentiality_suppression_2006_presbyterian_and_not_stated_tilde_rendered_null_forced_zero_by_printed_margins")
     }
   }
+  # structured area-summary.v2 composition: one item per printed source category
+  # for this wave, carrying the source-verbatim label and the exact published
+  # atoll count. the census prints counts, not percentages, so no percent is
+  # derived. the 2006 Nukunonu Presbyterian and Not Stated cells print as `~`
+  # confidentiality suppressions with no published count, so they are omitted
+  # rather than emitted as a derived zero. taxonomy_code links to
+  # denomination-taxonomy.json where the mapping is unambiguous.
+  composition <- list()
+  for (cat in wv[["frame"]]) {
+    v <- wv[["mat"]][[cat]][[a]]
+    if (is.na(v)) next
+    item <- list(label_verbatim = cat, count = as.integer(v))
+    tax <- category_taxonomy[[cat]]
+    if (!is.na(tax)) item[["taxonomy_code"]] <- tax
+    composition[[length(composition) + 1L]] <- item
+  }
   list(
     country_code = country_code,
     boundary_set_id = boundary_set_id,
@@ -430,7 +461,8 @@ make_row <- function(a, wv) {
     site_snapshot_date = NULL,
     place_count_basis = NULL,
     source_dataset_ids = list(wv[["dataset"]], d_boundary),
-    quality_flag = paste(flag_parts, collapse = ";")
+    quality_flag = paste(flag_parts, collapse = ";"),
+    composition = composition
   )
 }
 
@@ -543,7 +575,7 @@ visual_layers <- function() {
 }
 
 summary_product <- list(
-  schema_version = "area-summary.v1", generated_at = stamp, generated_by = script_id,
+  schema_version = "area-summary.v2", generated_at = stamp, generated_by = script_id,
   country_code = country_code,
   boundary_set = list(boundary_set_id = boundary_set_id, country_code = country_code,
                       level = boundary_level, vintage = boundary_vintage, source_dataset_id = d_boundary),

@@ -1,5 +1,5 @@
 {
-  "schema_version": "area-summary.v1",
+  "schema_version": "area-summary.v2",
   "generated_at": "2026-07-11T00:00:00Z",
   "generated_by": "scripts/build_tk_area_summary.R",
   "country_code": "TK",
@@ -171,7 +171,32 @@
         "tnso-statsnz-census-2006-table-2-5-religion-by-atoll",
         "geoboundaries-tkl-adm0-2022-atoll-split"
       ],
-      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0;no_religion_absent_from_2006_frame_zero_by_source_narrative"
+      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0;no_religion_absent_from_2006_frame_zero_by_source_narrative",
+      "composition": [
+        {
+          "label_verbatim": "Congregational Christian",
+          "count": 397,
+          "taxonomy_code": "christian.congregational"
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "count": 1,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 1,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 17
+        },
+        {
+          "label_verbatim": "Not Stated",
+          "count": 1
+        }
+      ]
     },
     {
       "country_code": "TK",
@@ -197,7 +222,40 @@
         "tnso-statsnz-census-2016-table-5-8-religion-by-atoll-2011-2016",
         "geoboundaries-tkl-adm0-2022-atoll-split"
       ],
-      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Congregational Christian",
+          "count": 345,
+          "taxonomy_code": "christian.congregational"
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "count": 5,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 13,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 21
+        },
+        {
+          "label_verbatim": "Spiritualism and New Age religions",
+          "count": 0
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Not stated",
+          "count": 1
+        }
+      ]
     },
     {
       "country_code": "TK",
@@ -223,7 +281,40 @@
         "tnso-statsnz-census-2016-table-5-8-religion-by-atoll-2011-2016",
         "geoboundaries-tkl-adm0-2022-atoll-split"
       ],
-      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Congregational Christian",
+          "count": 318,
+          "taxonomy_code": "christian.congregational"
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "count": 54,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 18,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 15
+        },
+        {
+          "label_verbatim": "Spiritualism and New Age religions",
+          "count": 0
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Not stated",
+          "count": 7
+        }
+      ]
     },
     {
       "country_code": "TK",
@@ -249,7 +340,23 @@
         "tnso-statsnz-census-2006-table-2-5-religion-by-atoll",
         "geoboundaries-tkl-adm0-2022-atoll-split"
       ],
-      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0;no_religion_absent_from_2006_frame_zero_by_source_narrative;confidentiality_suppression_2006_presbyterian_and_not_stated_tilde_rendered_null_forced_zero_by_printed_margins"
+      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0;no_religion_absent_from_2006_frame_zero_by_source_narrative;confidentiality_suppression_2006_presbyterian_and_not_stated_tilde_rendered_null_forced_zero_by_printed_margins",
+      "composition": [
+        {
+          "label_verbatim": "Congregational Christian",
+          "count": 6,
+          "taxonomy_code": "christian.congregational"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 278,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 3
+        }
+      ]
     },
     {
       "country_code": "TK",
@@ -275,7 +382,40 @@
         "tnso-statsnz-census-2016-table-5-8-religion-by-atoll-2011-2016",
         "geoboundaries-tkl-adm0-2022-atoll-split"
       ],
-      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Congregational Christian",
+          "count": 14,
+          "taxonomy_code": "christian.congregational"
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "count": 5,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 290,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Spiritualism and New Age religions",
+          "count": 0
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Not stated",
+          "count": 0
+        }
+      ]
     },
     {
       "country_code": "TK",
@@ -301,7 +441,40 @@
         "tnso-statsnz-census-2016-table-5-8-religion-by-atoll-2011-2016",
         "geoboundaries-tkl-adm0-2022-atoll-split"
       ],
-      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Congregational Christian",
+          "count": 35,
+          "taxonomy_code": "christian.congregational"
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "count": 9,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 315,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 24
+        },
+        {
+          "label_verbatim": "Spiritualism and New Age religions",
+          "count": 0
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Not stated",
+          "count": 2
+        }
+      ]
     },
     {
       "country_code": "TK",
@@ -327,7 +500,32 @@
         "tnso-statsnz-census-2006-table-2-5-religion-by-atoll",
         "geoboundaries-tkl-adm0-2022-atoll-split"
       ],
-      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0;no_religion_absent_from_2006_frame_zero_by_source_narrative"
+      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0;no_religion_absent_from_2006_frame_zero_by_source_narrative",
+      "composition": [
+        {
+          "label_verbatim": "Congregational Christian",
+          "count": 261,
+          "taxonomy_code": "christian.congregational"
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "count": 10,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 82,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 16
+        },
+        {
+          "label_verbatim": "Not Stated",
+          "count": 1
+        }
+      ]
     },
     {
       "country_code": "TK",
@@ -353,7 +551,40 @@
         "tnso-statsnz-census-2016-table-5-8-religion-by-atoll-2011-2016",
         "geoboundaries-tkl-adm0-2022-atoll-split"
       ],
-      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Congregational Christian",
+          "count": 306,
+          "taxonomy_code": "christian.congregational"
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "count": 11,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 115,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 11
+        },
+        {
+          "label_verbatim": "Spiritualism and New Age religions",
+          "count": 1
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Not stated",
+          "count": 5
+        }
+      ]
     },
     {
       "country_code": "TK",
@@ -379,7 +610,40 @@
         "tnso-statsnz-census-2016-table-5-8-religion-by-atoll-2011-2016",
         "geoboundaries-tkl-adm0-2022-atoll-split"
       ],
-      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;present_usual_resident_universe;stable_frame_2006_2011_2016_source_categories_verbatim;statsnz_tnso_cc_by_4_0_adapted_content;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Congregational Christian",
+          "count": 250,
+          "taxonomy_code": "christian.congregational"
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "count": 8,
+          "taxonomy_code": "christian.presbyterian"
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 130,
+          "taxonomy_code": "christian.catholic"
+        },
+        {
+          "label_verbatim": "Other Christian",
+          "count": 11
+        },
+        {
+          "label_verbatim": "Spiritualism and New Age religions",
+          "count": 0
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Not stated",
+          "count": 0
+        }
+      ]
     }
   ]
 }

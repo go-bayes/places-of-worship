@@ -1,5 +1,5 @@
 {
-  "schema_version": "area-summary.v1",
+  "schema_version": "area-summary.v2",
   "generated_at": "2026-07-11T00:00:00Z",
   "generated_by": "scripts/build_fj_area_summary.R",
   "country_code": "FJ",
@@ -154,7 +154,37 @@
         "fbos-census-2007-table-p01-3-religion-province",
         "geoboundaries-fji-adm2-2020"
       ],
-      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Christian",
+          "count": 113765,
+          "taxonomy_code": "christian"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 92014,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Sikh",
+          "count": 1359,
+          "taxonomy_code": "sikh"
+        },
+        {
+          "label_verbatim": "Moslem",
+          "count": 23022,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Other religion",
+          "count": 240
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 1216
+        }
+      ]
     },
     {
       "country_code": "FJ",
@@ -180,7 +210,37 @@
         "fbos-census-2007-table-p01-3-religion-province",
         "geoboundaries-fji-adm2-2020"
       ],
-      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Christian",
+          "count": 11859,
+          "taxonomy_code": "christian"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 1847,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Sikh",
+          "count": 0,
+          "taxonomy_code": "sikh"
+        },
+        {
+          "label_verbatim": "Moslem",
+          "count": 415,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Other religion",
+          "count": 1
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 51
+        }
+      ]
     },
     {
       "country_code": "FJ",
@@ -206,7 +266,37 @@
         "fbos-census-2007-table-p01-3-religion-province",
         "geoboundaries-fji-adm2-2020"
       ],
-      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Christian",
+          "count": 42478,
+          "taxonomy_code": "christian"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 5172,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Sikh",
+          "count": 8,
+          "taxonomy_code": "sikh"
+        },
+        {
+          "label_verbatim": "Moslem",
+          "count": 1499,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Other religion",
+          "count": 12
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 136
+        }
+      ]
     },
     {
       "country_code": "FJ",
@@ -232,7 +322,37 @@
         "fbos-census-2007-table-p01-3-religion-province",
         "geoboundaries-fji-adm2-2020"
       ],
-      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Christian",
+          "count": 10132,
+          "taxonomy_code": "christian"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 20,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Sikh",
+          "count": 0,
+          "taxonomy_code": "sikh"
+        },
+        {
+          "label_verbatim": "Moslem",
+          "count": 5,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Other religion",
+          "count": 3
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 5
+        }
+      ]
     },
     {
       "country_code": "FJ",
@@ -258,7 +378,37 @@
         "fbos-census-2007-table-p01-3-religion-province",
         "geoboundaries-fji-adm2-2020"
       ],
-      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Christian",
+          "count": 10576,
+          "taxonomy_code": "christian"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 45,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Sikh",
+          "count": 0,
+          "taxonomy_code": "sikh"
+        },
+        {
+          "label_verbatim": "Moslem",
+          "count": 3,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Other religion",
+          "count": 1
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 3
+        }
+      ]
     },
     {
       "country_code": "FJ",
@@ -284,7 +434,37 @@
         "fbos-census-2007-table-p01-3-religion-province",
         "geoboundaries-fji-adm2-2020"
       ],
-      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Christian",
+          "count": 15864,
+          "taxonomy_code": "christian"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 259,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Sikh",
+          "count": 0,
+          "taxonomy_code": "sikh"
+        },
+        {
+          "label_verbatim": "Moslem",
+          "count": 51,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Other religion",
+          "count": 5
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 69
+        }
+      ]
     },
     {
       "country_code": "FJ",
@@ -310,7 +490,37 @@
         "fbos-census-2007-table-p01-3-religion-province",
         "geoboundaries-fji-adm2-2020"
       ],
-      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Christian",
+          "count": 32470,
+          "taxonomy_code": "christian"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 32061,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Sikh",
+          "count": 96,
+          "taxonomy_code": "sikh"
+        },
+        {
+          "label_verbatim": "Moslem",
+          "count": 7279,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Other religion",
+          "count": 195
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 265
+        }
+      ]
     },
     {
       "country_code": "FJ",
@@ -336,7 +546,37 @@
         "fbos-census-2007-table-p01-3-religion-province",
         "geoboundaries-fji-adm2-2020"
       ],
-      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Christian",
+          "count": 37491,
+          "taxonomy_code": "christian"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 16388,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Sikh",
+          "count": 164,
+          "taxonomy_code": "sikh"
+        },
+        {
+          "label_verbatim": "Moslem",
+          "count": 4106,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Other religion",
+          "count": 25
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 200
+        }
+      ]
     },
     {
       "country_code": "FJ",
@@ -362,7 +602,37 @@
         "fbos-census-2007-table-p01-3-religion-province",
         "geoboundaries-fji-adm2-2020"
       ],
-      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Christian",
+          "count": 106937,
+          "taxonomy_code": "christian"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 43009,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Sikh",
+          "count": 555,
+          "taxonomy_code": "sikh"
+        },
+        {
+          "label_verbatim": "Moslem",
+          "count": 9173,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Other religion",
+          "count": 228
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 695
+        }
+      ]
     },
     {
       "country_code": "FJ",
@@ -388,7 +658,37 @@
         "fbos-census-2007-table-p01-3-religion-province",
         "geoboundaries-fji-adm2-2020"
       ],
-      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Christian",
+          "count": 6430,
+          "taxonomy_code": "christian"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 316,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Sikh",
+          "count": 9,
+          "taxonomy_code": "sikh"
+        },
+        {
+          "label_verbatim": "Moslem",
+          "count": 120,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Other religion",
+          "count": 0
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 17
+        }
+      ]
     },
     {
       "country_code": "FJ",
@@ -414,7 +714,37 @@
         "fbos-census-2007-table-p01-3-religion-province",
         "geoboundaries-fji-adm2-2020"
       ],
-      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Christian",
+          "count": 20853,
+          "taxonomy_code": "christian"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 7667,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Sikh",
+          "count": 41,
+          "taxonomy_code": "sikh"
+        },
+        {
+          "label_verbatim": "Moslem",
+          "count": 854,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Other religion",
+          "count": 4
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 43
+        }
+      ]
     },
     {
       "country_code": "FJ",
@@ -440,7 +770,37 @@
         "fbos-census-2007-table-p01-3-religion-province",
         "geoboundaries-fji-adm2-2020"
       ],
-      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Christian",
+          "count": 78347,
+          "taxonomy_code": "christian"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 17199,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Sikh",
+          "count": 188,
+          "taxonomy_code": "sikh"
+        },
+        {
+          "label_verbatim": "Moslem",
+          "count": 3361,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Other religion",
+          "count": 512
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 1072
+        }
+      ]
     },
     {
       "country_code": "FJ",
@@ -466,7 +826,37 @@
         "fbos-census-2007-table-p01-3-religion-province",
         "geoboundaries-fji-adm2-2020"
       ],
-      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Christian",
+          "count": 12525,
+          "taxonomy_code": "christian"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 4901,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Sikh",
+          "count": 11,
+          "taxonomy_code": "sikh"
+        },
+        {
+          "label_verbatim": "Moslem",
+          "count": 524,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Other religion",
+          "count": 42
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 232
+        }
+      ]
     },
     {
       "country_code": "FJ",
@@ -492,7 +882,37 @@
         "fbos-census-2007-table-p01-3-religion-province",
         "geoboundaries-fji-adm2-2020"
       ],
-      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Christian",
+          "count": 41863,
+          "taxonomy_code": "christian"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 11205,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Sikh",
+          "count": 117,
+          "taxonomy_code": "sikh"
+        },
+        {
+          "label_verbatim": "Moslem",
+          "count": 2182,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Other religion",
+          "count": 26
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 241
+        }
+      ]
     },
     {
       "country_code": "FJ",
@@ -518,7 +938,37 @@
         "fbos-census-2007-table-p01-3-religion-province",
         "geoboundaries-fji-adm2-2020"
       ],
-      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0"
+      "quality_flag": "census_affiliation;religion_by_province_margin;ethnicity_dimension_out_of_scope;unprinted_not_stated_residual_retained_in_denominator;2007_only_change_withheld;fbos_all_rights_reserved_research_reuse_with_attribution;boundary_cc_by_4_0",
+      "composition": [
+        {
+          "label_verbatim": "Christian",
+          "count": 1998,
+          "taxonomy_code": "christian"
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 0,
+          "taxonomy_code": "hindu"
+        },
+        {
+          "label_verbatim": "Sikh",
+          "count": 0,
+          "taxonomy_code": "sikh"
+        },
+        {
+          "label_verbatim": "Moslem",
+          "count": 0,
+          "taxonomy_code": "muslim"
+        },
+        {
+          "label_verbatim": "Other religion",
+          "count": 0
+        },
+        {
+          "label_verbatim": "No religion",
+          "count": 4
+        }
+      ]
     }
   ]
 }

@@ -3,7 +3,7 @@
   "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:tk-census-religion:tk:2006-2016:tnso-atoll",
   "dataset_id": "tk-census-religion:tk:2006-2016:tnso-atoll",
-  "dataset_version_id": "tk-census-religion:tk:2006-2016:tnso-atoll:6b2d0f15d252",
+  "dataset_version_id": "tk-census-religion:tk:2006-2016:tnso-atoll:8249b23a6ddd",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -802,7 +802,7 @@
       "storage_provider": "git_repository",
       "format": "json",
       "bytes": 21252,
-      "sha256": "6b2d0f15d25244e8d20534715e8e6b7d127bce4aa068ce12910684d8d2337f7b",
+      "sha256": "8249b23a6dddb20d3340dce184f82807d671ba717abd77059ed8f661620e9ec2",
       "row_count": 9,
       "feature_count": null,
       "content": "Tokelau 3-atoll census-affiliation area summary for 2006, 2011, 2016.",
@@ -840,7 +840,7 @@
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/tk/data/area_summary_atoll.json",
-      "sha256": "6b2d0f15d25244e8d20534715e8e6b7d127bce4aa068ce12910684d8d2337f7b",
+      "sha256": "8249b23a6dddb20d3340dce184f82807d671ba717abd77059ed8f661620e9ec2",
       "built_by": "scripts/build_tk_area_summary.R",
       "notes": "3 atolls x 3 waves = 9 rows; present-usual-resident universe."
     },
