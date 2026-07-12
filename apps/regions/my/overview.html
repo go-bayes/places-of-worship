@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Malaysia map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260712d" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Malaysia research map; every statement follows
+    // the committed area summary, its manifest, or the source harvest.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "MY",
+      countryName: "Malaysia",
+      mapHref: "./",
+      intro: "Administrative-district census religious affiliation across Malaysia in 1991, 2000, 2010 and 2020. The Department of Statistics Malaysia (DOSM) district and state reports supply the printed religion counts on a stable 160-district frame.",
+      facts: {
+        waves: "Four censuses: 1991, 2000, 2010, 2020",
+        geographies: "Administrative district (160 units)",
+        metrics: "Religious affiliation %, No Religion/Unknown %, affiliation change"
+      },
+      reading: [
+        "The map carries 640 district-wave rows: 160 districts across four waves. Values are available for 130 districts in 1991, 134 in 2000, 142 in 2010 and all 160 in 2020. The remaining 74 district-waves are null as printed or unpublished.",
+        "The 2020 religion universe totals 32,446,979. Islam is the largest printed affiliation (20,610,060; 63.5%), followed by Buddhism (6,066,784; 18.7%) and Christianity (2,941,049; 9.1%). Hinduism accounts for 1,969,471 people (6.1%), while Others accounts for 285,153 (0.9%).",
+        "The national No Religion/Unknown share is 277,649 / 17,357,931 = 1.60% in 1991, 255,995 / 22,045,194 = 1.16% in 2000, 463,682 / 27,321,112 = 1.70% in 2010 and 574,462 / 32,446,979 = 1.77% in 2020. DOSM prints No Religion/Unknown as one fused line. The share therefore includes persons of unknown religion, and changes can partly reflect enumeration practice.",
+        "The 2020 district contrast is substantial despite the near-flat national affiliation share. Kecil Lojing reports 6,796 affiliated people out of a religion universe of 10,609 (64.1%), and its No Religion/Unknown line carries 3,813 people (35.9%). At the other extreme, Besut reports 154,152 affiliated people of 154,168 with a printed No Religion/Unknown line of 16. Some districts print no No Religion/Unknown line at all in a wave — W.P. Putrajaya's 2020 block is one — and their shares are not comparable to districts with the line printed.",
+        "Percentages use the religion-block universe: the sum of the religion lines printed for each district-wave. DOSM uses the same denominator for its printed religion percentages. The printed district population total can differ. In 1991, 17,357,931 - 17,423,342 = -65,411 nationally. The manifest records every district deviation, and the product does not repair or rescale any value.",
+        "Pendang and Hulu Terengganu carry 2020 data only because their earlier district values remain unpublished online. Their 2020 counts come from the state reports' seven-category Table 7. No Religion and Unknown are printed separately there. The metric sums the two lines as a documented combine, while each popup keeps both lines verbatim.",
+        "The change metric reports the percentage-point difference in religious affiliation from the previous census wave on the stable printed 160-district frame. The 1991 wave has no previous wave and therefore no change value. A comparison also remains null when either district-wave lacks a finite affiliation share. No-data is never treated as zero.",
+        "Baling's 2020 map values reproduce DOSM's printed counts. One category percentage printed by DOSM does not reproduce from those printed counts; the manifest records the discrepancy.",
+        "The OSM-derived boundary has 160 valid, geometry-distinct features and joins all 160 census districts. The extent runs from longitude 99.64050 to 119.26689 and latitude 0.85382 to 7.37938. The derivation uses level-4 substitutions for Perlis and the three federal territories, historical dissolves in Sarawak, and sub-relation differences for Selama and Kecil Lojing.",
+        "No governed Malaysia place-of-worship snapshot ships with this product. Place counts and density metrics are null."
+      ],
+      sources: [
+        {
+          name: "DOSM MyCensus 2020 administrative-district and state reports",
+          href: "https://www.dosm.gov.my/portal-main/release-content/key-findings-population-and-housing-census-of-malaysia-2020-administrative-district",
+          construct: "Printed district religion counts for 1991, 2000, 2010 and 2020; six-category historical frame, with seven-category Table 7 substitutions for Pendang and Hulu Terengganu in 2020",
+          years: "1991, 2000, 2010, 2020",
+          licence: "Attribution-based reuse under the DOSM Government Open Data Terms of Use 1.0. Source: Department of Statistics Malaysia."
+        },
+        {
+          name: "OpenStreetMap Malaysia administrative relations",
+          href: "https://www.openstreetmap.org/copyright",
+          construct: "Derived 2020 reporting boundary for 160 administrative districts, with documented level substitutions, historical dissolves and sub-relation differences",
+          years: "2020 reporting frame",
+          licence: "© OpenStreetMap contributors, Open Data Commons Open Database License 1.0 (ODbL 1.0); the derived boundary ships share-alike"
+        }
+      ],
+      accessData: {
+        note: "The committed products are the derived four-wave area summary and the OSM-derived district boundary. Raw DOSM reports remain outside Git.",
+        sourceOfRecord: "Department of Statistics Malaysia, <a href=\"https://www.dosm.gov.my/portal-main/release-content/key-findings-population-and-housing-census-of-malaysia-2020-administrative-district\" target=\"_blank\" rel=\"noopener\">MyCensus 2020 administrative-district and state reports</a>; boundaries from <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noopener\">OpenStreetMap contributors</a>.",
+        tables: "The district reports' Table 3 and equivalent state-report tables supply the four-wave historical religion block. Pendang and Hulu Terengganu use state-report Table 7 for 2020 because their district reports remain unpublished online. Table 7 prints No Religion and Unknown separately; the product sums those lines only for the fused metric and preserves both in composition. Printed '..' and '-' cells remain null. The religion-block universe supplies the denominator, matching DOSM's printed percentages. The separate printed district population total and every deviation remain recorded in the manifest.",
+        licence: "The census-derived product uses attribution-based reuse under DOSM's terms of use and names the Department of Statistics Malaysia as its source. The OpenStreetMap-derived boundary is ODbL 1.0. Its documented derivation uses level-4 substitutions for Perlis and W.P. Kuala Lumpur, W.P. Labuan and W.P. Putrajaya; historical dissolves for Simunjan and Sri Aman; and level-7 sub-relation differences for Selama and Kecil Lojing. The derived boundary ships share-alike.",
+        script: "scripts/build_my_area_summary.R",
+        manifests: [
+          { label: "my-census-religion-1991-2020", href: "docs/manifests/my-census-religion-1991-2020.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Malaysia map is a census-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260712d"></script>
+</body>
+</html>

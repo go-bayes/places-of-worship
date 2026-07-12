@@ -70,8 +70,8 @@
     {
       "uri": "apps/regions/my/data/my_district_2020.geojson",
       "storage_provider": "git_repository",
-      "sha256": "4738fb56b67c8a634c68415442751a7682a8261a66478182b8cfe38a2915c237",
-      "bytes": 9953268,
+      "sha256": "f9c262e6c984754b4c6694fd4d67d327a12070dfe402d7cffc7d3fd1906954ce",
+      "bytes": 9958569,
       "format": "geojson",
       "feature_count": 160,
       "notes": "Staged boundary with 160 valid, geometry-distinct features; no simplification",

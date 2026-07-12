@@ -578,6 +578,16 @@ rows <- lapply(rows, function(row) {
   row
 })
 
+# the shared runtime keys its census store by each row's area_code and paints
+# by matching the boundary codeProp against that key; the boundary therefore
+# carries area_code so the page wash can bind
+code_by_name <- setNames(
+  vapply(rows, `[[`, character(1), "area_code"),
+  vapply(rows, `[[`, character(1), "area_name")
+)
+boundary$area_code <- unname(code_by_name[boundary$area_name])
+assert(!any(is.na(boundary$area_code)), "boundary area_code carry-over incomplete")
+
 source_hashes <- setNames(
   vapply(unique(vapply(series, `[[`, character(1), "source")), sha256_file, character(1)),
   unique(vapply(series, `[[`, character(1), "source"))

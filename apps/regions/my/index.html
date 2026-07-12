@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Malaysia Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css?v=20260712d" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712d" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Malaysia's four census waves use the stable printed 160-district frame.
+    // The shared runtime derives change from consecutive finite affiliation
+    // shares. It leaves 1991 and every comparison with a null operand blank.
+    window.REGION_CONFIG = {
+      countryCode: "MY",
+      title: "Places of Worship | Malaysia Research Map",
+      // verified boundary bbox: lon 99.64050..119.26689,
+      // lat 0.85382..7.37938; the midpoint keeps both parts visible.
+      center: [109.45369, 4.11660],
+      initialZoom: 4.2,
+      censusLevels: {
+        district: {
+          label: "Administrative district (160 units)",
+          boundaries: "data/my_district_2020.geojson",
+          summary: "data/area_summary_district.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion &copy; Department of Statistics Malaysia (DOSM), MyCensus 2020 administrative-district and state reports; attribution-based reuse under DOSM terms of use &middot; Boundaries &copy; OpenStreetMap contributors, ODbL 1.0; derived 2020 district frame ships share-alike"
+        }
+      },
+      defaultLevel: "district",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2020,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share in the five printed affiliation lines: Islam, Christianity, Buddhism, Hinduism and Others. Percentages use the sum of the printed religion lines, matching DOSM's denominator. The printed district population total can differ, and no value has been repaired"
+        },
+        no_religion_percent: {
+          label: "No Religion/Unknown %",
+          note: "share in DOSM's fused No Religion/Unknown role. The source prints No Religion/Unknown as one line, which means the share includes persons of unknown religion and can partly change with enumeration practice. Pendang and Hulu Terengganu use the separately printed 2020 No Religion and Unknown lines from Table 7; the map sums them for this metric and keeps both lines in the popup composition"
+        },
+        religious_change: {
+          label: "Affiliation change",
+          note: "percentage-point change in religious affiliation since the previous census wave on the stable printed 160-district frame. The first wave, 1991, has no change. A district-wave with no data also has no change; no-data is never treated as zero"
+        }
+      },
+      popupDenominatorNote: "Percentages use the religion-block universe: the sum of the religion lines printed for each district-wave. DOSM uses this same denominator for its printed religion percentages. The printed district population total can differ; the 1991 religion universe is 65,411 people below the printed national total, and the manifest records every deviation without repair. DOSM prints No Religion/Unknown as a fused line, which means the no-religion share includes persons of unknown religion. Pendang and Hulu Terengganu use seven-category state-report Table 7 in 2020: No Religion and Unknown remain separate in the popup composition and are summed only for the fused metric. Printed or unpublished values remain null and display as no data.",
+      cityPresets: [
+        { label: "Kuala Lumpur", coords: [101.6869, 3.1390], zoom: 10 },
+        { label: "George Town", coords: [100.3327, 5.4141], zoom: 11 },
+        { label: "Johor Bahru", coords: [103.7618, 1.4927], zoom: 10 },
+        { label: "Kuching", coords: [110.3592, 1.5533], zoom: 10 },
+        { label: "Kota Kinabalu", coords: [116.0735, 5.9804], zoom: 10 }
+      ],
+      geocode: { country: "my", biasLngLat: [109.45369, 4.11660] },
+      onboarding: {
+        title: "Malaysia research map",
+        intro: "Census religious affiliation across Malaysia's stable printed frame of 160 administrative districts in 1991, 2000, 2010 and 2020. The map reproduces the Department of Statistics Malaysia (DOSM) district and state report counts.",
+        bullets: [
+          "Districts are shaded by religious affiliation, No Religion/Unknown, or the percentage-point change in affiliation since the previous wave. The 2020 religion universe contains 20,610,060 people reported as Islam, 6,066,784 as Buddhism and 2,941,049 as Christianity. Use the year control to move among the four waves.",
+          "DOSM prints <code>No Religion/Unknown</code> as one fused line. The mapped share therefore includes persons of unknown religion, and changes can partly reflect enumeration practice.",
+          "Percentages use the religion-block universe, the sum of the printed religion lines and the denominator DOSM uses for its own percentages. The printed district population total can differ. In 1991, the religion universe is 65,411 people below the printed national total. The manifest records every deviation; the product does not repair them.",
+          "Seventy-four district-waves are null as printed or unpublished. Pendang and Hulu Terengganu have 2020 values only because their earlier district values remain unpublished online. No-data displays as no data, never zero.",
+          "Pendang and Hulu Terengganu's 2020 values come from state-report Table 7. That table prints seven categories, with No Religion and Unknown separate. The metric sums those two lines as a documented combine, while the popup keeps both lines verbatim.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://www.dosm.gov.my/portal-main/release-content/key-findings-population-and-housing-census-of-malaysia-2020-administrative-district" target="_blank" rel="noopener">Department of Statistics Malaysia (DOSM)</a>, MyCensus 2020 administrative-district and state reports. Attribution-based reuse under <a href="https://www.dosm.gov.my/portal-main/article/term-of-use" target="_blank" rel="noopener">DOSM terms of use</a>. &middot; Boundaries &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors, ODbL 1.0</a>; the documented derived 2020 district boundary ships share-alike.',
+      censusFlagNote: "* DOSM prints No Religion/Unknown as a fused line. The metric therefore includes unknown religion. Pendang and Hulu Terengganu use separate No Religion and Unknown lines from state-report Table 7 in 2020; the metric sums them and the popup preserves both lines. Percentages use the printed religion-block universe. The printed district population total can differ, and the manifest records every deviation without repair. Printed or unpublished values remain null and display as no data."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712d"></script>
+</body>
+</html>
