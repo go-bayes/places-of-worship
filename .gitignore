@@ -121,9 +121,9 @@ data/
 # the workbench data layer is source code, not data: un-ignore it all
 !apps/workbench/src/data/
 !apps/workbench/src/data/**
-# the global map's derived declarations table is a citable product, not raw data
-!apps/global/data/
-!apps/global/data/**
+# apps/global/data/ stays ignored during the work phase; the measurement-regime
+# declarations table lives in the private research tier and returns here (or a
+# display-safe subset does) when the measurement-regime map view ships
 datasets/
 cache/
 raw_data/
