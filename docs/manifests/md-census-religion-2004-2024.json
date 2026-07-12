@@ -1,0 +1,1434 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:md-census-religion:md:2004-2024:bns-raion",
+  "dataset_id": "md-census-religion:md:2004-2024:bns-raion",
+  "dataset_version_id": "md-census-religion:md:2004-2024:bns-raion:8c6dbeb94c02",
+  "manifest_sha256": null,
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_family": "md-census-religion",
+  "dataset_role": "accepted_export",
+  "scope": {
+    "level": "country",
+    "country_codes": [
+      "MD"
+    ],
+    "snapshot_date": null,
+    "snapshot_anchor": null,
+    "pipeline_stage": "accepted"
+  },
+  "created_at": "2026-07-12T00:00:00Z",
+  "created_by": "scripts/build_md_area_summary.R",
+  "target_years": [
+    2004,
+    2014,
+    2024
+  ],
+  "pipeline": {
+    "script": "scripts/build_md_area_summary.R",
+    "git_commit": "a9da41ddfe5bcffcc7570ae3422127faa1835424",
+    "command": "Rscript scripts/build_md_area_summary.R",
+    "parameters": {
+      "construct": "census affiliation",
+      "shipped_waves": [
+        2004,
+        2014,
+        2024
+      ],
+      "shipped_geography": "35 right-bank raions and municipalities (Mun. Chişinău, Mun. Bălţi, 32 raions, U.T.A. Găgăuzia); Transnistria and Bender carried as no-data",
+      "boundary_set": "md-raion-geoboundaries-adm1",
+      "source_tables": {
+        "2004": "Vol I Table 5.2 (Populaţia după religie, în profil teritorial)",
+        "2014": "table 2.1 (Populaţia după religie, în profil teritorial)",
+        "2024": "ethnocultural annex table 5.29 counts (5.30 shares)"
+      },
+      "universes": {
+        "2004": "whole enumerated resident population, all ages (5 October 2004), right bank only",
+        "2014": "whole enumerated population, all ages, right bank only",
+        "2024": "usual-resident population, all ages, right bank only"
+      },
+      "slot_design": "Ordinary two-slot on each wave's own frame. religious_affiliation_percent: 2004 = (total - Atei - Fără religie - Nedeclarată)/total; 2014 = (12 named confessions)/total; 2024 = (10 named categories Ortodoxă ... Alte religii)/total. no_religion_percent: 2004 = (Atei + Fără religie)/total; 2014 = (Agnostic + Ateu)/total; 2024 = (Liber cugetător + Agnostic + Ateu + Fără religie)/total. The not-declared line (2004 Nedeclarată; 2014/2024 the separate not-declared column) stays in the denominator, outside both slots, so the two shares need not sum to 100.",
+      "category_frames": {
+        "2004": [
+          "Ortodoxă",
+          "Romano-catolică",
+          "Reformată",
+          "Evanghelică de confesiune augustană",
+          "Evanghelică sinodo-prezbiter.",
+          "Creştină de rit vechi",
+          "Baptistă",
+          "Penticostală",
+          "Adventistă de ziua a şaptea",
+          "Creştină după Evanghelie",
+          "Musulmană",
+          "Alte religii",
+          "Atei",
+          "Fără religie",
+          "Nedeclarată"
+        ],
+        "2014": [
+          "Ortodoxă",
+          "Creştină de rit vechi",
+          "Catolică",
+          "Evanghelică de Confesiune Augustană (Luterană)",
+          "Creştină Evanghelic Baptistă",
+          "Creştină după Evanghelie",
+          "Adventistă de Ziua a şaptea",
+          "Penticostală (Biserica lui Dumnezeu Apostolică)",
+          "Martorii lui Iehova",
+          "Iudaism",
+          "Islam",
+          "Alte grupări religioase",
+          "Agnostic",
+          "Ateu",
+          "Populaţia care nu a declarat religia"
+        ],
+        "2024": [
+          "Ortodoxă",
+          "Baptistă",
+          "Martorii lui Iehova",
+          "Penticostală",
+          "Adventistă",
+          "Creștină după Evanghelie",
+          "Staroveri (Ortodoxă Rusă de rit vechi)",
+          "Islam",
+          "Catolică",
+          "Alte religii",
+          "Liber cugetător",
+          "Agnostic",
+          "Ateu",
+          "Fără religie",
+          "Nu au declarat religia"
+        ],
+        "frame_break_note": "The three waves do not share one category frame. 2004 prints 15 columns incl. separate Atei, Fără religie and Nedeclarată. 2014 carries 14 declared-block columns (incl. Agnostic and Ateu, and Iudaism and Martorii lui Iehova as explicit lines) plus one not-declared column, with no separate 'fără religie' line at raion grain. 2024 adds Staroveri and splits the no-religion block into Liber cugetător, Agnostic, Ateu and Fără religie, folding several confessions into Alte religii. Each wave is transcribed in its own printed order and labelled by wave; a fine-category cross-wave change is withheld (change_withheld). The comparable spine is the Orthodox share and the aggregate declared-affiliation share."
+      },
+      "change_metric": "fine_category_cross_wave_change_withheld: headline two-slot levels ship per wave on each wave's own frame; a category-by-category cross-wave change is withheld across the frame breaks.",
+      "magnitude_zero": "2024 table 5.29 prints '-' for magnitude-zero cells; read as 0, never suppressed or differenced.",
+      "shares_sheet_quirk": "2024 table 5.30 (shares) prints the Liber cugetător and Agnostic columns at 100x their fraction (a source-internal formatting inconsistency); the product carries the exact 5.29 counts and does not use those printed shares. Recorded, not repaired.",
+      "territorial_scope": "The National Bureau of Statistics enumerates the right bank only in every post-Soviet census. 2004 states 'cu excepţia raioanelor de Est şi a municipiului Bender'; the 2024 annex footnote lists the non-enumerated left-bank localities verbatim: 'Datele se referă doar la UAT efectiv recenzate şi nu includ unităţile administrativ-teritoriale din stânga Nistrului, municipiului Bender (inclusiv satul Proteagailovca), comuna Chițcani (inclusiv satele Merenești și Zahorna), satele Cremenciug și Gîsca din raionul Căușeni, comuna Corjova (inclusiv satul Mahala) din raionul Dubăsari, precum și satul Roghi din cadrul comunei Molovata Nouă, raionul Dubăsari.' The two left-bank ADM1 polygons (Transnistria, Bender) carry no census religion in any wave and render as disclosed no-data (never zero). Căuşeni and Dubăsari are enumerated in their central-government-controlled parts only; their polygons span the full administrative extent, disclosed on the per-unit flag. No count is invented for any non-enumerated area.",
+      "universe_caveat_2014": "The 2014 enumerated-population base (2,804,801) differs from a later BNS usual-resident revision; each wave's shares are read within that wave's own published denominator and the bases are not reconciled.",
+      "boundary_derivation": "geoBoundaries MDA ADM1 (37 units, CC BY 3.0 IGO, 2020). The 35 census units join one-to-one after folding RO diacritics to the boundary ASCII form (ă->a, â/î->i, ş->s, ţ->t) and stripping the Mun./U.T.A. prefixes. Transnistria and Bender are the two non-census polygons. One boundary set serves all waves.",
+      "omitted_metrics": [
+        "places_per_10000_residents",
+        "place_density_per_sq_km"
+      ],
+      "boundary_simplification": {
+        "method": "mapshaper weighted keep-shapes",
+        "clean_option": "allow-overlaps",
+        "keep_percent": 60,
+        "bytes": 183904
+      },
+      "small_cell_rule": "docs/development/small-cell-rule.md. Denominator threshold (100) never triggered at raion grain (smallest unit total 14914). small_cell_under_10 marks rows carrying any published category numerator under 10; counts under 10 are rendered exactly as published, none suppressed. Smallest numerator observed: 0.",
+      "small_cell_counts": {
+        "2004": {
+          "rows_with_small_cell_under_10": 28,
+          "rows": 35
+        },
+        "2014": {
+          "rows_with_small_cell_under_10": 32,
+          "rows": 35
+        },
+        "2024": {
+          "rows_with_small_cell_under_10": 32,
+          "rows": 35
+        }
+      },
+      "local_cache_hint": "All raw sources are cached under data/raw/md_census/ and remain git-ignored.",
+      "retrieval_record": [
+        {
+          "uri": "data/raw/md_census/Recensamint_2004_vol.I.pdf",
+          "url": "https://statistica.gov.md/files/files/publicatii_electronice/Recensamint/recensamint_2004_vol.I.zip",
+          "format": "pdf",
+          "bytes": 5066790,
+          "sha256": "1aabbfbd8efa43f5313b0c9a60544042a2e3213962221aa04efe405dab8d1105",
+          "row_count": null,
+          "source_dataset_id": "md-census-2004-vol1-table5-2-religion-by-territory",
+          "used_in_public_product": true,
+          "periods": "2004",
+          "notes": "2004 census Vol I (text-extractable PDF from the published ZIP); Table 5.2 unit x religion. Both margins close to 3,383,332 (Orthodox 3,158,015).",
+          "local_cache_hint": "data/raw/md_census/Recensamint_2004_vol.I.pdf (git-ignored)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/md_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/md_census/Caracteristici_populatie_Comune_RPL_2014_rom_rus_eng.xls",
+          "url": "https://statistica.gov.md/public/files/Recensamint/Recensamint_pop_2014/Rezultate/Tabele/Caracteristici_populatie_Comune_RPL_2014_rom_rus_eng.xls",
+          "format": "xls",
+          "bytes": 191488,
+          "sha256": "c69138b33cd4f4a550e8f8c686c4c7e60d2560b62239518f9b17ef4ffa7cbd4b",
+          "row_count": null,
+          "source_dataset_id": "md-census-2014-population-by-religion-territorial",
+          "used_in_public_product": true,
+          "periods": "2014",
+          "notes": "2014 population-by-religion territorial table (sheet 2.1). National closes to 2,804,801 (Orthodox 2,528,152); Total=declared+not-declared per unit.",
+          "local_cache_hint": "data/raw/md_census/Caracteristici_populatie_Comune_RPL_2014_rom_rus_eng.xls (git-ignored)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/md_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/md_census/Anexa_Caracteristici_Etnoculturale_RPL2024.xlsx",
+          "url": "https://statistica.gov.md/files/files/ComPresa/Recensamant/2024/Ro/Anexa_Caracteristici_Etnoculturale_RPL2024.xlsx",
+          "format": "xlsx",
+          "bytes": 1310944,
+          "sha256": "a84bac831db56553107f4721b21e0085e7db81cc97757b364fd68857c8b28a4f",
+          "row_count": null,
+          "source_dataset_id": "md-census-2024-ethnocultural-annex-5-29-religion-by-raion",
+          "used_in_public_product": true,
+          "periods": "2024",
+          "notes": "2024 ethnocultural annex table 5.29 (counts). Region rows dropped by empty CUATM; 35 units close to 2,409,207 (Orthodox 2,271,105); '-'=magnitude zero.",
+          "local_cache_hint": "data/raw/md_census/Anexa_Caracteristici_Etnoculturale_RPL2024.xlsx (git-ignored)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/md_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/md_census/geoBoundaries-MDA-ADM1.geojson",
+          "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MDA/ADM1/geoBoundaries-MDA-ADM1.geojson",
+          "format": "geojson",
+          "bytes": 595126,
+          "sha256": "2358d3f23e7199eb8296d8859c09640c4db9f0a9cef31a429708015ee0aea9b6",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-mda-adm1-2020",
+          "used_in_public_product": true,
+          "periods": "2020",
+          "notes": "geoBoundaries MDA ADM1 GeoJSON; 37 units, CC BY 3.0 IGO. Pinned commit 9469f09. Transnistria and Bender are the two non-census polygons.",
+          "local_cache_hint": "data/raw/md_census/geoBoundaries-MDA-ADM1.geojson (git-ignored)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/md_census/"
+          ]
+        },
+        {
+          "uri": "data/raw/md_census/gb_mda_adm1_meta.json",
+          "url": "https://www.geoboundaries.org/api/current/gbOpen/MDA/ADM1/",
+          "format": "json",
+          "bytes": 1813,
+          "sha256": "58905a16af710469d0bdd9201bb91f28428d0b91798355079211bde6f433b75f",
+          "row_count": null,
+          "source_dataset_id": "geoboundaries-mda-adm1-2020",
+          "used_in_public_product": false,
+          "periods": "2020",
+          "notes": "geoBoundaries MDA ADM1 metadata; records CC BY 3.0 IGO, admUnitCount 37, boundaryYearRepresented 2020, source UNHCR/OCHA FISS.",
+          "local_cache_hint": "data/raw/md_census/gb_mda_adm1_meta.json (git-ignored)",
+          "raw_cache_durable_uris": [
+            "gs://pow-research-data/raw_sources/md_census/"
+          ]
+        }
+      ]
+    },
+    "software_versions": {
+      "r": "R version 4.6.1 (2026-06-24)",
+      "sf": "1.1.1",
+      "jsonlite": "2.0.0",
+      "readxl": "1.5.0",
+      "digest": "0.6.39",
+      "mapshaper": "scripts/lib/simplify_boundary.R (npx mapshaper)"
+    }
+  },
+  "source": {
+    "provider": "National Bureau of Statistics of the Republic of Moldova; geoBoundaries (William & Mary geoLab)",
+    "source_dataset_ids": [
+      "md-census-2004-vol1-table5-2-religion-by-territory",
+      "md-census-2014-population-by-religion-territorial",
+      "md-census-2024-ethnocultural-annex-5-29-religion-by-raion",
+      "geoboundaries-mda-adm1-2020"
+    ],
+    "source_urls": [
+      "https://statistica.gov.md/files/files/publicatii_electronice/Recensamint/recensamint_2004_vol.I.zip",
+      "https://statistica.gov.md/public/files/Recensamint/Recensamint_pop_2014/Rezultate/Tabele/Caracteristici_populatie_Comune_RPL_2014_rom_rus_eng.xls",
+      "https://statistica.gov.md/files/files/ComPresa/Recensamant/2024/Ro/Anexa_Caracteristici_Etnoculturale_RPL2024.xlsx",
+      "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MDA/ADM1/geoBoundaries-MDA-ADM1.geojson",
+      "https://www.geoboundaries.org/api/current/gbOpen/MDA/ADM1/",
+      "https://statistica.gov.md/en/terms-and-conditions-139_4417.html"
+    ],
+    "retrieved_at": "2026-07-12T00:00:00Z",
+    "licence": "National Bureau of Statistics of the Republic of Moldova (BNS) Terms of use of data, Creative Commons Attribution 4.0 International. The BNS Terms of use page (statistica.gov.md/en/terms-and-conditions-139_4417.html, retrieved 2026-07-12) place reuse of the website content and data under 'the license Creative Commons Attribution 4.0 International License', free to copy, redistribute, remix, transform and build upon the material for any purpose, on the conditions that the source is clearly indicated and any modification is noted. Attribution: 'National Bureau of Statistics of the Republic of Moldova'.",
+    "citation": "Moldova 2004 Census Vol I Table 5.2; 2014 population by religion (table 2.1); 2024 ethnocultural annex tables 5.29/5.30; geoBoundaries MDA ADM1 (CC BY 3.0 IGO).",
+    "raw_redistribution": "The census PDF/XLS/XLSX and the boundary source file are not committed; they remain in data/raw/md_census/.",
+    "local_cache_hint": "data/raw/md_census/ (git-ignored)",
+    "raw_cache_durable_uris": [
+      "gs://pow-research-data/raw_sources/md_census/"
+    ]
+  },
+  "input_manifests": [],
+  "raw_sources": [
+    {
+      "uri": "data/raw/md_census/Recensamint_2004_vol.I.pdf",
+      "url": "https://statistica.gov.md/files/files/publicatii_electronice/Recensamint/recensamint_2004_vol.I.zip",
+      "format": "pdf",
+      "bytes": 5066790,
+      "sha256": "1aabbfbd8efa43f5313b0c9a60544042a2e3213962221aa04efe405dab8d1105",
+      "row_count": null,
+      "source_dataset_id": "md-census-2004-vol1-table5-2-religion-by-territory",
+      "used_in_public_product": true,
+      "periods": "2004",
+      "notes": "2004 census Vol I (text-extractable PDF from the published ZIP); Table 5.2 unit x religion. Both margins close to 3,383,332 (Orthodox 3,158,015).",
+      "local_cache_hint": "data/raw/md_census/Recensamint_2004_vol.I.pdf (git-ignored)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/md_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/md_census/Caracteristici_populatie_Comune_RPL_2014_rom_rus_eng.xls",
+      "url": "https://statistica.gov.md/public/files/Recensamint/Recensamint_pop_2014/Rezultate/Tabele/Caracteristici_populatie_Comune_RPL_2014_rom_rus_eng.xls",
+      "format": "xls",
+      "bytes": 191488,
+      "sha256": "c69138b33cd4f4a550e8f8c686c4c7e60d2560b62239518f9b17ef4ffa7cbd4b",
+      "row_count": null,
+      "source_dataset_id": "md-census-2014-population-by-religion-territorial",
+      "used_in_public_product": true,
+      "periods": "2014",
+      "notes": "2014 population-by-religion territorial table (sheet 2.1). National closes to 2,804,801 (Orthodox 2,528,152); Total=declared+not-declared per unit.",
+      "local_cache_hint": "data/raw/md_census/Caracteristici_populatie_Comune_RPL_2014_rom_rus_eng.xls (git-ignored)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/md_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/md_census/Anexa_Caracteristici_Etnoculturale_RPL2024.xlsx",
+      "url": "https://statistica.gov.md/files/files/ComPresa/Recensamant/2024/Ro/Anexa_Caracteristici_Etnoculturale_RPL2024.xlsx",
+      "format": "xlsx",
+      "bytes": 1310944,
+      "sha256": "a84bac831db56553107f4721b21e0085e7db81cc97757b364fd68857c8b28a4f",
+      "row_count": null,
+      "source_dataset_id": "md-census-2024-ethnocultural-annex-5-29-religion-by-raion",
+      "used_in_public_product": true,
+      "periods": "2024",
+      "notes": "2024 ethnocultural annex table 5.29 (counts). Region rows dropped by empty CUATM; 35 units close to 2,409,207 (Orthodox 2,271,105); '-'=magnitude zero.",
+      "local_cache_hint": "data/raw/md_census/Anexa_Caracteristici_Etnoculturale_RPL2024.xlsx (git-ignored)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/md_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/md_census/geoBoundaries-MDA-ADM1.geojson",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MDA/ADM1/geoBoundaries-MDA-ADM1.geojson",
+      "format": "geojson",
+      "bytes": 595126,
+      "sha256": "2358d3f23e7199eb8296d8859c09640c4db9f0a9cef31a429708015ee0aea9b6",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-mda-adm1-2020",
+      "used_in_public_product": true,
+      "periods": "2020",
+      "notes": "geoBoundaries MDA ADM1 GeoJSON; 37 units, CC BY 3.0 IGO. Pinned commit 9469f09. Transnistria and Bender are the two non-census polygons.",
+      "local_cache_hint": "data/raw/md_census/geoBoundaries-MDA-ADM1.geojson (git-ignored)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/md_census/"
+      ]
+    },
+    {
+      "uri": "data/raw/md_census/gb_mda_adm1_meta.json",
+      "url": "https://www.geoboundaries.org/api/current/gbOpen/MDA/ADM1/",
+      "format": "json",
+      "bytes": 1813,
+      "sha256": "58905a16af710469d0bdd9201bb91f28428d0b91798355079211bde6f433b75f",
+      "row_count": null,
+      "source_dataset_id": "geoboundaries-mda-adm1-2020",
+      "used_in_public_product": false,
+      "periods": "2020",
+      "notes": "geoBoundaries MDA ADM1 metadata; records CC BY 3.0 IGO, admUnitCount 37, boundaryYearRepresented 2020, source UNHCR/OCHA FISS.",
+      "local_cache_hint": "data/raw/md_census/gb_mda_adm1_meta.json (git-ignored)",
+      "raw_cache_durable_uris": [
+        "gs://pow-research-data/raw_sources/md_census/"
+      ]
+    }
+  ],
+  "durable_files": [
+    {
+      "uri": "repo:apps/regions/md/data/area_summary_raion.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 412877,
+      "sha256": "8c6dbeb94c0236d13999513fb8bfa6e94ac9375dbc179933c5a3cbc5cfce65d3",
+      "row_count": 111,
+      "feature_count": null,
+      "content": "Moldova raion/municipality census-affiliation area summary for 2004, 2014, 2024.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "md_bns_cc_by_4_0_with_attribution"
+    },
+    {
+      "uri": "repo:apps/regions/md/data/area_summary_raion.csv",
+      "storage_provider": "git_repository",
+      "format": "csv",
+      "bytes": 126131,
+      "sha256": "422bcd5751c1f1e12311f7b52a48a76c106a7cdae32b17da212e3ad486f6c1f6",
+      "row_count": 111,
+      "feature_count": null,
+      "content": "Flattened Moldova raion/municipality census-affiliation rows for 2004, 2014, 2024.",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "md_bns_cc_by_4_0_with_attribution"
+    },
+    {
+      "uri": "repo:apps/regions/md/data/md_raion.geojson",
+      "storage_provider": "git_repository",
+      "format": "geojson",
+      "bytes": 183904,
+      "sha256": "a2f1f5cdf173e2adf286948072b14049694510080a8feeb0bc47b409624f50d3",
+      "row_count": null,
+      "feature_count": 37,
+      "content": "Simplified geoBoundaries MDA ADM1 37-unit boundary GeoJSON (35 census + Transnistria + Bender no-data).",
+      "privacy": "public",
+      "licence_status": "accepted",
+      "licence_basis": "geoboundaries_cc_by_3_0_igo"
+    }
+  ],
+  "derived_outputs": [
+    {
+      "uri": "repo:apps/regions/md/data/area_summary_raion.json",
+      "sha256": "8c6dbeb94c0236d13999513fb8bfa6e94ac9375dbc179933c5a3cbc5cfce65d3",
+      "built_by": "scripts/build_md_area_summary.R",
+      "notes": "111 rows: 35 units x 3 waves (105 census) + 2 left-bank polygons x 3 waves (6 no-data). Composition carries verbatim category counts per row."
+    },
+    {
+      "uri": "repo:apps/regions/md/data/md_raion.geojson",
+      "sha256": "a2f1f5cdf173e2adf286948072b14049694510080a8feeb0bc47b409624f50d3",
+      "built_by": "scripts/build_md_area_summary.R",
+      "notes": "37 features from geoBoundaries MDA ADM1, simplified with mapshaper; Transnistria and Bender carried as no-data."
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "Rscript scripts/build_md_area_summary.R",
+      "bash scripts/validate_area_summaries.sh",
+      "uvx check-jsonschema --schemafile schemas/data-manifest.schema.json docs/manifests/md-census-religion-2004-2024.json"
+    ],
+    "gate_2004": {
+      "status": "passed",
+      "both_margins_close_to": 3383332,
+      "orthodox_national": 3158015,
+      "unit_row_checks": 35,
+      "records": [
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "chisinau",
+          "computed": 712218,
+          "printed": 712218,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "balti",
+          "computed": 127561,
+          "printed": 127561,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "anenii_noi",
+          "computed": 81710,
+          "printed": 81710,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "basarabeasca",
+          "computed": 28978,
+          "printed": 28978,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "briceni",
+          "computed": 78027,
+          "printed": 78027,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "cahul",
+          "computed": 119231,
+          "printed": 119231,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "cantemir",
+          "computed": 60001,
+          "printed": 60001,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "calarasi",
+          "computed": 75075,
+          "printed": 75075,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "causeni",
+          "computed": 90612,
+          "printed": 90612,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "cimislia",
+          "computed": 60925,
+          "printed": 60925,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "criuleni",
+          "computed": 72254,
+          "printed": 72254,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "donduseni",
+          "computed": 46442,
+          "printed": 46442,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "drochia",
+          "computed": 87092,
+          "printed": 87092,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "dubasari",
+          "computed": 34015,
+          "printed": 34015,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "edinet",
+          "computed": 81390,
+          "printed": 81390,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "falesti",
+          "computed": 90320,
+          "printed": 90320,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "floresti",
+          "computed": 89389,
+          "printed": 89389,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "glodeni",
+          "computed": 60975,
+          "printed": 60975,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "hincesti",
+          "computed": 119762,
+          "printed": 119762,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "ialoveni",
+          "computed": 97704,
+          "printed": 97704,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "leova",
+          "computed": 51056,
+          "printed": 51056,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "nisporeni",
+          "computed": 64924,
+          "printed": 64924,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "ocnita",
+          "computed": 56510,
+          "printed": 56510,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "orhei",
+          "computed": 116271,
+          "printed": 116271,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "rezina",
+          "computed": 48105,
+          "printed": 48105,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "riscani",
+          "computed": 69454,
+          "printed": 69454,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "singerei",
+          "computed": 87153,
+          "printed": 87153,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "soroca",
+          "computed": 94986,
+          "printed": 94986,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "straseni",
+          "computed": 88900,
+          "printed": 88900,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "soldanesti",
+          "computed": 42227,
+          "printed": 42227,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "stefan_voda",
+          "computed": 70594,
+          "printed": 70594,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "taraclia",
+          "computed": 43154,
+          "printed": 43154,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "telenesti",
+          "computed": 70126,
+          "printed": 70126,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "ungheni",
+          "computed": 110545,
+          "printed": 110545,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "unit_row",
+          "key": "gagauzia",
+          "computed": 155646,
+          "printed": 155646,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "national_total",
+          "key": "Republica Moldova",
+          "computed": 3383332,
+          "printed": 3383332,
+          "difference": 0
+        },
+        {
+          "year": 2004,
+          "margin": "national_orthodox",
+          "key": "Ortodoxă",
+          "computed": 3158015,
+          "printed": 3158015,
+          "difference": 0
+        }
+      ]
+    },
+    "gate_2014": {
+      "status": "passed",
+      "national_total": 2804801,
+      "orthodox_national": 2528152,
+      "note": "per unit Total=declared+not-declared and declared=sum(14 categories); national exact",
+      "records": [
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "chisinau",
+          "computed": 469402,
+          "printed": 469402,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "balti",
+          "computed": 102457,
+          "printed": 102457,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "anenii_noi",
+          "computed": 78996,
+          "printed": 78996,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "basarabeasca",
+          "computed": 23012,
+          "printed": 23012,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "briceni",
+          "computed": 70029,
+          "printed": 70029,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "cahul",
+          "computed": 105324,
+          "printed": 105324,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "cantemir",
+          "computed": 52115,
+          "printed": 52115,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "calarasi",
+          "computed": 64401,
+          "printed": 64401,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "causeni",
+          "computed": 81185,
+          "printed": 81185,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "cimislia",
+          "computed": 49299,
+          "printed": 49299,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "criuleni",
+          "computed": 70648,
+          "printed": 70648,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "donduseni",
+          "computed": 37856,
+          "printed": 37856,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "drochia",
+          "computed": 74443,
+          "printed": 74443,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "dubasari",
+          "computed": 29271,
+          "printed": 29271,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "edinet",
+          "computed": 71849,
+          "printed": 71849,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "falesti",
+          "computed": 78258,
+          "printed": 78258,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "floresti",
+          "computed": 76457,
+          "printed": 76457,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "glodeni",
+          "computed": 51306,
+          "printed": 51306,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "hincesti",
+          "computed": 103784,
+          "printed": 103784,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "ialoveni",
+          "computed": 93154,
+          "printed": 93154,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "leova",
+          "computed": 44702,
+          "printed": 44702,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "nisporeni",
+          "computed": 53154,
+          "printed": 53154,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "ocnita",
+          "computed": 47425,
+          "printed": 47425,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "orhei",
+          "computed": 101502,
+          "printed": 101502,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "rezina",
+          "computed": 42486,
+          "printed": 42486,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "riscani",
+          "computed": 59226,
+          "printed": 59226,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "singerei",
+          "computed": 79814,
+          "printed": 79814,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "soroca",
+          "computed": 77656,
+          "printed": 77656,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "straseni",
+          "computed": 82675,
+          "printed": 82675,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "soldanesti",
+          "computed": 36743,
+          "printed": 36743,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "stefan_voda",
+          "computed": 62072,
+          "printed": 62072,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "taraclia",
+          "computed": 37357,
+          "printed": 37357,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "telenesti",
+          "computed": 61144,
+          "printed": 61144,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "ungheni",
+          "computed": 101064,
+          "printed": 101064,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "unit_declared_plus_notdeclared",
+          "key": "gagauzia",
+          "computed": 134535,
+          "printed": 134535,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "national_total",
+          "key": "Total populaţie",
+          "computed": 2804801,
+          "printed": 2804801,
+          "difference": 0
+        },
+        {
+          "year": 2014,
+          "margin": "national_orthodox",
+          "key": "Ortodoxă",
+          "computed": 2528152,
+          "printed": 2528152,
+          "difference": 0
+        }
+      ]
+    },
+    "gate_2024": {
+      "status": "passed",
+      "national_total": 2409207,
+      "orthodox_national": 2271105,
+      "note": "per unit Total=categories+not-declared; national exact",
+      "records": [
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "chisinau",
+          "computed": 720128,
+          "printed": 720128,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "balti",
+          "computed": 94546,
+          "printed": 94546,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "anenii_noi",
+          "computed": 57687,
+          "printed": 57687,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "basarabeasca",
+          "computed": 14914,
+          "printed": 14914,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "briceni",
+          "computed": 46894,
+          "printed": 46894,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "cahul",
+          "computed": 72775,
+          "printed": 72775,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "cantemir",
+          "computed": 33181,
+          "printed": 33181,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "calarasi",
+          "computed": 43864,
+          "printed": 43864,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "causeni",
+          "computed": 57261,
+          "printed": 57261,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "cimislia",
+          "computed": 30986,
+          "printed": 30986,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "criuleni",
+          "computed": 52926,
+          "printed": 52926,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "donduseni",
+          "computed": 28108,
+          "printed": 28108,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "drochia",
+          "computed": 53738,
+          "printed": 53738,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "dubasari",
+          "computed": 21781,
+          "printed": 21781,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "edinet",
+          "computed": 50429,
+          "printed": 50429,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "falesti",
+          "computed": 56039,
+          "printed": 56039,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "floresti",
+          "computed": 53264,
+          "printed": 53264,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "glodeni",
+          "computed": 35829,
+          "printed": 35829,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "hincesti",
+          "computed": 69462,
+          "printed": 69462,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "ialoveni",
+          "computed": 74458,
+          "printed": 74458,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "leova",
+          "computed": 28835,
+          "printed": 28835,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "nisporeni",
+          "computed": 36413,
+          "printed": 36413,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "ocnita",
+          "computed": 31610,
+          "printed": 31610,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "orhei",
+          "computed": 79242,
+          "printed": 79242,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "rezina",
+          "computed": 30243,
+          "printed": 30243,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "riscani",
+          "computed": 43652,
+          "printed": 43652,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "singerei",
+          "computed": 55933,
+          "printed": 55933,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "soroca",
+          "computed": 58609,
+          "printed": 58609,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "straseni",
+          "computed": 61362,
+          "printed": 61362,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "soldanesti",
+          "computed": 25394,
+          "printed": 25394,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "stefan_voda",
+          "computed": 42285,
+          "printed": 42285,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "taraclia",
+          "computed": 26435,
+          "printed": 26435,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "telenesti",
+          "computed": 41452,
+          "printed": 41452,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "ungheni",
+          "computed": 75804,
+          "printed": 75804,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "unit_categories_plus_notdeclared",
+          "key": "gagauzia",
+          "computed": 103668,
+          "printed": 103668,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "national_total",
+          "key": "Total",
+          "computed": 2409207,
+          "printed": 2409207,
+          "difference": 0
+        },
+        {
+          "year": 2024,
+          "margin": "national_orthodox",
+          "key": "Ortodoxă",
+          "computed": 2271105,
+          "printed": 2271105,
+          "difference": 0
+        }
+      ]
+    },
+    "boundary_validation": {
+      "status": "passed",
+      "feature_count": 37,
+      "distinct_geometry_hashes": 37,
+      "bbox": {
+        "xmin": 26.61635,
+        "ymin": 45.46728,
+        "xmax": 30.16314,
+        "ymax": 48.4915
+      },
+      "output_bytes": 183904,
+      "licence": "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)",
+      "adm_unit_count": "37"
+    },
+    "join_coverage": {
+      "matched_census_units": 35,
+      "expected_census_units": 35,
+      "no_data_polygons": 2,
+      "total_features": 37
+    },
+    "notes": "All three waves close exactly at both margins (2004: 3,383,332; 2014: 2,804,801; 2024: 2,409,207; Orthodox 3,158,015 / 2,528,152 / 2,271,105). Boundary joins 35/35 census units plus Transnistria and Bender as no-data; 37/37 features have distinct geometry hashes.",
+    "warnings": [
+      "Category frames differ per wave (2004: 15 columns; 2014: 14 declared + not-declared; 2024: 14 declared + not-declared) — a fine-category cross-wave change is withheld (change_withheld); the comparable spine is the Orthodox and aggregate declared-affiliation shares.",
+      "No-religion block is not cell-comparable across waves (2014 has no separate 'fără religie' line at raion grain); each wave renders its own atheist/no-religion block.",
+      "Territorial scope: Transnistria and Bender not enumerated in any wave (rendered as no-data, never zero); Căuşeni and Dubăsari enumerated in controlled parts only (flagged).",
+      "2014 enumerated base differs from a later usual-resident revision; each wave read in its own denominator.",
+      "2024 shares sheet 5.30 prints Liber cugetător and Agnostic at 100x their fraction (source-internal); exact 5.29 counts used instead.",
+      "small_cell_under_10 marks rows with any published category numerator under 10; counts rendered exactly, none suppressed."
+    ]
+  },
+  "construct_notes": [
+    "The construct is census affiliation: each enumerated resident's declared religion (asked of the whole enumerated population, all ages), not practice, attendance, or membership. Religion was tabulated at raion grain in the 2004, 2014 and 2024 censuses.",
+    "The public product carries three headline fields per unit-wave: population total, religious affiliation percent, and no-religion percent, plus a structured per-row composition of the wave's verbatim categories and counts. Place-density metrics are null (no governed place-of-worship snapshot).",
+    "Category frames differ per wave and are preserved verbatim per unit in the composition field and on the quality flag. A fine-category cross-wave change is withheld; the two-slot headline metrics ship as levels on each wave's own frame.",
+    "Slot design: religious_affiliation = the wave's declared-religion categories; no_religion = the wave's atheist/no-religion block (2004 Atei + Fără religie; 2014 Agnostic + Ateu; 2024 Liber cugetător + Agnostic + Ateu + Fără religie). The not-declared line stays in the denominator, outside both slots, so the two shares need not sum to 100.",
+    "Territorial scope (render the record): the National Bureau of Statistics enumerates the right bank only. Transnistria and Bender are carried as disclosed no-data polygons (never zero); Căuşeni and Dubăsari are enumerated in their central-government-controlled parts only, disclosed on the per-unit flag. No count is invented for any non-enumerated area.",
+    "Licence: the census data ship under the BNS Terms of use of data (Creative Commons Attribution 4.0 International with source attribution, quoted verbatim in source.licence). No reuse ask is needed; the product ships with attribution to the National Bureau of Statistics of the Republic of Moldova, and the boundary under CC BY 3.0 IGO to geoBoundaries / UNHCR / OCHA FISS."
+  ],
+  "deferred_sources": [
+    {
+      "source_dataset_id": "md-census-religion-age-sex-medium",
+      "status": "deferred",
+      "url": "https://statistica.gov.md/files/files/ComPresa/Recensamant/2024/Ro/Anexa_Caracteristici_Etnoculturale_RPL2024.xlsx",
+      "local_path": "data/raw/md_census/Anexa_Caracteristici_Etnoculturale_RPL2024.xlsx",
+      "notes": "The 2024 annex and the 2004 Vol I Table 5.1 split religion by age group, sex and urban/rural. Only the whole-population territorial block is shipped; the age/sex/medium cuts are a deeper future product."
+    }
+  ],
+  "privacy": "public",
+  "licence_status": "accepted",
+  "licence_basis": "md_bns_cc_by_4_0_with_attribution",
+  "downstream_status": "accepted",
+  "source_datasets": [
+    {
+      "source_dataset_id": "md-census-2004-vol1-table5-2-religion-by-territory",
+      "name": "Moldova 2004 Population Census, Volume I, Table 5.2: population by religion, in territorial aspect",
+      "provider": "National Bureau of Statistics of the Republic of Moldova",
+      "url": "https://statistica.gov.md/files/files/publicatii_electronice/Recensamint/recensamint_2004_vol.I.zip",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/md_census/Recensamint_2004_vol.I.pdf",
+      "licence": {
+        "name": "National Bureau of Statistics of the Republic of Moldova (BNS) Terms of use of data, Creative Commons Attribution 4.0 International. The BNS Terms of use page (statistica.gov.md/en/terms-and-conditions-139_4417.html, retrieved 2026-07-12) place reuse of the website content and data under 'the license Creative Commons Attribution 4.0 International License', free to copy, redistribute, remix, transform and build upon the material for any purpose, on the conditions that the source is clearly indicated and any modification is noted. Attribution: 'National Bureau of Statistics of the Republic of Moldova'.",
+        "url": "https://statistica.gov.md/en/terms-and-conditions-139_4417.html",
+        "attribution": "National Bureau of Statistics of the Republic of Moldova, 2004 Population Census"
+      },
+      "citation": "Moldova 2004 Population Census Results, Volume I, Table 5.2 (Populaţia după religie, în profil teritorial).",
+      "access_limits": null,
+      "redistribution_limits": "Open reuse with source attribution (CC BY 4.0); derived raion summaries ship with attribution to the National Bureau of Statistics of the Republic of Moldova.",
+      "notes": "Whole enumerated resident population, all ages, right bank only ('cu excepţia raioanelor de Est şi a municipiului Bender'). 35 units, 15 categories (12 named/other + Atei + Fără religie + Nedeclarată). Both margins close exactly to 3,383,332 (Orthodox 3,158,015). Text-extractable PDF (pdftotext -layout); the two-block spread transcribed verbatim and reconciled at build time."
+    },
+    {
+      "source_dataset_id": "md-census-2014-population-by-religion-territorial",
+      "name": "Moldova 2014 Population and Housing Census: population by religion, in territorial aspect (table 2.1)",
+      "provider": "National Bureau of Statistics of the Republic of Moldova",
+      "url": "https://statistica.gov.md/public/files/Recensamint/Recensamint_pop_2014/Rezultate/Tabele/Caracteristici_populatie_Comune_RPL_2014_rom_rus_eng.xls",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/md_census/Caracteristici_populatie_Comune_RPL_2014_rom_rus_eng.xls",
+      "licence": {
+        "name": "National Bureau of Statistics of the Republic of Moldova (BNS) Terms of use of data, Creative Commons Attribution 4.0 International. The BNS Terms of use page (statistica.gov.md/en/terms-and-conditions-139_4417.html, retrieved 2026-07-12) place reuse of the website content and data under 'the license Creative Commons Attribution 4.0 International License', free to copy, redistribute, remix, transform and build upon the material for any purpose, on the conditions that the source is clearly indicated and any modification is noted. Attribution: 'National Bureau of Statistics of the Republic of Moldova'.",
+        "url": "https://statistica.gov.md/en/terms-and-conditions-139_4417.html",
+        "attribution": "National Bureau of Statistics of the Republic of Moldova, 2014 Population and Housing Census"
+      },
+      "citation": "Moldova 2014 Population and Housing Census, Caracteristici - Populaţie 2, sheet 2.1 (Populaţia după religie, în profil teritorial).",
+      "access_limits": null,
+      "redistribution_limits": "Open reuse with source attribution (CC BY 4.0); derived raion summaries ship with attribution to the National Bureau of Statistics of the Republic of Moldova.",
+      "notes": "Whole enumerated population, all ages, right bank only. 35 units, 14 declared-block categories (incl. Agnostic and Ateu) plus a separate not-declared column. Total = declared + not-declared per unit; declared = sum of the 14 categories; national closes exactly to 2,804,801 (Orthodox 2,528,152). Enumerated base; BNS later published a lower usual-resident estimate, not reconciled here (each wave read in its own denominator)."
+    },
+    {
+      "source_dataset_id": "md-census-2024-ethnocultural-annex-5-29-religion-by-raion",
+      "name": "Moldova 2024 Population and Housing Census, ethnocultural annex table 5.29: population by religious affiliation by development region and raion/municipality (counts)",
+      "provider": "National Bureau of Statistics of the Republic of Moldova",
+      "url": "https://statistica.gov.md/files/files/ComPresa/Recensamant/2024/Ro/Anexa_Caracteristici_Etnoculturale_RPL2024.xlsx",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/md_census/Anexa_Caracteristici_Etnoculturale_RPL2024.xlsx",
+      "licence": {
+        "name": "National Bureau of Statistics of the Republic of Moldova (BNS) Terms of use of data, Creative Commons Attribution 4.0 International. The BNS Terms of use page (statistica.gov.md/en/terms-and-conditions-139_4417.html, retrieved 2026-07-12) place reuse of the website content and data under 'the license Creative Commons Attribution 4.0 International License', free to copy, redistribute, remix, transform and build upon the material for any purpose, on the conditions that the source is clearly indicated and any modification is noted. Attribution: 'National Bureau of Statistics of the Republic of Moldova'.",
+        "url": "https://statistica.gov.md/en/terms-and-conditions-139_4417.html",
+        "attribution": "National Bureau of Statistics of the Republic of Moldova, 2024 Population and Housing Census"
+      },
+      "citation": "Moldova 2024 Population and Housing Census, ethnocultural characteristics annex, table 5.29 (counts) / 5.30 (shares).",
+      "access_limits": null,
+      "redistribution_limits": "Open reuse with source attribution (CC BY 4.0); derived raion summaries ship with attribution to the National Bureau of Statistics of the Republic of Moldova.",
+      "notes": "Usual-resident population, all ages, right bank only. 35 units extracted from the region-and-raion table (the Nord/Centru/Sud development-region aggregate rows are dropped by their empty CUATM code). 14 declared-block categories (incl. Liber cugetător, Agnostic, Ateu, Fără religie) plus a separate not-declared column; Total = categories + not-declared per unit; national closes exactly to 2,409,207 (Orthodox 2,271,105). '-' = magnitudine zero. The published shares sheet 5.30 prints the Liber cugetător and Agnostic columns at 100x their fraction (a source-internal formatting inconsistency); the product carries the exact 5.29 counts and does not use those printed shares."
+    },
+    {
+      "source_dataset_id": "geoboundaries-mda-adm1-2020",
+      "name": "geoBoundaries MDA ADM1 (37 raion/municipality units, 2020 vintage)",
+      "provider": "geoBoundaries (William & Mary geoLab); boundary source UNHCR, OCHA FISS",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MDA/ADM1/geoBoundaries-MDA-ADM1.geojson",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/md_census/geoBoundaries-MDA-ADM1.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution 3.0 Intergovernmental Organisations (CC BY 3.0 IGO)",
+        "url": "https://www.geoboundaries.org/api/current/gbOpen/MDA/ADM1/",
+        "attribution": "geoBoundaries (gbOpen); boundary source UNHCR, OCHA FISS (CC BY 3.0 IGO)"
+      },
+      "citation": "geoBoundaries MDA ADM1 (gbOpen, pinned 9469f09), 37 raion/municipality boundaries.",
+      "access_limits": null,
+      "redistribution_limits": "The simplified derived boundary is committed under CC BY 3.0 IGO with attribution to geoBoundaries and UNHCR/OCHA FISS.",
+      "notes": "37 ADM1 units, boundaryYearRepresented 2020. The 35 census units join one-to-one; Transnistria and Bender are the two non-census polygons carried as disclosed no-data."
+    }
+  ],
+  "notes": "Accepted product (open BNS CC BY 4.0 reuse licence with attribution). The committed products are the derived raion area summary (111 rows across 2004, 2014, 2024) and one geoBoundaries MDA ADM1 37-unit boundary GeoJSON. On-page attribution, when a page is built, must cite the National Bureau of Statistics of the Republic of Moldova and geoBoundaries (CC BY 3.0 IGO)."
+}
