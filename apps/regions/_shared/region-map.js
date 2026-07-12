@@ -2942,11 +2942,14 @@ function requestCensusYear(year) {
   }
   setCensusYear(year);
 }
-// rr3 makes percentages on small denominators volatile, and suppressed
-// cells carry no value at all; both wash out instead of implying precision
+// rr3 makes percentages on small denominators volatile, suppressed cells
+// carry no value at all, and an unprotected denominator under 100 (the
+// ratified small-cell rule, docs/development/small-cell-rule.md) is too
+// fragile to colour a unit; all wash out instead of implying precision
 const WASH_FLAG_SUBSTRINGS = [
   "suppressed_denominator",
   "rr3_small_denominator",
+  "small_denominator",
   "boundary_change_crosswalked",
   "voluntary_survey"
 ];
@@ -2994,6 +2997,19 @@ function computeUniversalFlags(rows) {
 }
 function rowNoted(row, universalFlags) {
   return flagTokens(row).some((t) => !(universalFlags && universalFlags.has(t)));
+}
+// the ratified small-cell rule (docs/development/small-cell-rule.md §3-§4)
+// carries two numerator/denominator tokens the build scripts emit from the
+// published counts. small_denominator_under_100 washes the choropleth (it
+// is in WASH_FLAG_SUBSTRINGS above) and marks the popup share as resting on
+// a denominator under 100; small_cell_under_10 never washes — it only marks
+// a derived share in the popup as resting on fewer than ten people. neither
+// alters, redistributes, or hides a value: display emphasis only.
+function rowSmallDenominator(row) {
+  return flagTokens(row).some((t) => t.includes("small_denominator_under_100"));
+}
+function rowSmallCell(row) {
+  return flagTokens(row).some((t) => t.includes("small_cell_under_10"));
 }
 function metricUsesDenominator(metric) {
   // the count metrics carry no denominator, so denominator-quality washes
@@ -3443,7 +3459,24 @@ function openCensusPopup(feature, lngLat) {
     !fixedColumnMetrics.includes(censusState.metric);
   const activeMetric = censusState.metric;
   const fmtActive = (v) => (Number.isFinite(v) ? activeDef.format(v) : "–");
+  // the active-metric column is a derived share only when the metric is a
+  // *_percent field; the count metrics render as published and carry no
+  // small-cell marker (docs/development/small-cell-rule.md: the count itself
+  // renders as published; only derived shares are marked)
+  const activeIsShare = typeof activeMetric === "string" && activeMetric.endsWith("_percent");
   let anyFlagged = false;
+  let anySmallCell = false;
+  let anySmallDenom = false;
+  // the small-cell rule marks a derived share where the row's numerator falls
+  // under ten people (†) or its denominator under 100 (‡); the markers are
+  // byte-absent unless the row carries the token, so no existing product's
+  // popup changes and only the numerator/denominator-token rows gain a mark
+  const shareMark = (row) => {
+    let mark = "";
+    if (rowSmallCell(row)) { mark += "†"; anySmallCell = true; }
+    if (rowSmallDenominator(row)) { mark += "‡"; anySmallDenom = true; }
+    return mark;
+  };
   const rowsHtml = store.years.map((year) => {
     const row = store.byAreaYear.get(`${code}|${year}`);
     if (!row) return "";
@@ -3452,22 +3485,55 @@ function openCensusPopup(feature, lngLat) {
     const selected = year === censusState.year ? ' class="census-year-selected"' : "";
     return `<tr${selected}>
       <td>${year}${flagged ? "*" : ""}</td>
-      ${showActive ? `<td>${fmtActive(row[activeMetric])}</td>` : ""}
+      ${showActive ? `<td>${fmtActive(row[activeMetric])}${activeIsShare ? shareMark(row) : ""}</td>` : ""}
       ${hasCountMetric ? `<td>${Number.isFinite(row.religious_affiliation_count) ? countDef.format(row.religious_affiliation_count) : "–"}</td>` : ""}
-      ${hasAffiliationPercent ? `<td>${fmtPercent(row.religious_affiliation_percent)}</td>` : ""}
-      ${hasNoReligion ? `<td>${fmtPercent(row.no_religion_percent)}</td>` : ""}
+      ${hasAffiliationPercent ? `<td>${fmtPercent(row.religious_affiliation_percent)}${shareMark(row)}</td>` : ""}
+      ${hasNoReligion ? `<td>${fmtPercent(row.no_religion_percent)}${shareMark(row)}</td>` : ""}
       ${hasPlaces ? `<td>${fmtCount(row.place_count)}</td><td>${fmtRate(row.places_per_10000_residents)}</td>` : ""}
     </tr>`;
   }).join("");
   const flagNote = anyFlagged && RC.censusFlagNote
     ? `<div class="place-note">${RC.censusFlagNote}</div>`
     : "";
+  // small-cell footnotes: rendered only when a marked row is present, so the
+  // popup is byte-identical for every product that carries neither token
+  const smallCellNote = anySmallCell
+    ? `<div class="place-note">† share rests on fewer than ten people</div>`
+    : "";
+  const smallDenomNote = anySmallDenom
+    ? `<div class="place-note">‡ share rests on a denominator under 100</div>`
+    : "";
+  // the selected year's structured composition (area-summary.v2): source-
+  // verbatim category labels with the percent and/or count exactly as
+  // carried — never one derived from the other. absent on every product but
+  // vanuatu, so the block is byte-absent elsewhere and the popup is unchanged
+  const selectedRow = store.byAreaYear.get(`${code}|${censusState.year}`);
+  const composition = Array.isArray(selectedRow?.composition) ? selectedRow.composition : [];
+  const compositionHtml = composition.length
+    ? `<div class="place-note">Composition (${censusState.year})</div>` +
+      `<div class="place-attrs">` +
+      composition.map((entry) => {
+        const parts = [];
+        // render the percent exactly as carried (vu ships two decimals);
+        // re-rounding with toFixed would alter a published value
+        if (Number.isFinite(entry.percent)) parts.push(`${entry.percent}%`);
+        if (Number.isFinite(entry.count)) parts.push(String(entry.count));
+        return `<div class="place-attr">` +
+          `<span class="place-attr-key">${pulotuEscape(entry.label_verbatim)}</span>` +
+          `<span class="place-attr-val">${parts.join(" · ")}</span>` +
+          `</div>`;
+      }).join("") +
+      `</div>`
+    : "";
   const html =
     `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
     `<table class="census-table">` +
     `<thead><tr><th>${RC.dataNoun || "Census"}</th>${showActive ? `<th>${activeDef.label}</th>` : ""}${hasCountMetric ? `<th>${countLabel}</th>` : ""}${hasAffiliationPercent ? `<th>${affiliationLabel}</th>` : ""}${hasNoReligion ? `<th>${noReligionLabel}</th>` : ""}${hasPlaces ? "<th>Places</th><th>Per 10k</th>" : ""}</tr></thead>` +
     `<tbody>${rowsHtml}</tbody></table>` +
+    compositionHtml +
     flagNote +
+    smallCellNote +
+    smallDenomNote +
     `<div class="place-note">${RC.popupDenominatorNote || "Percentages use the stated religion-response denominator."}` +
     `${hasPlaces ? " Place counts are the current snapshot repeated across census years." : ""}</div>` +
     `<div class="place-note">${levelDef.credit}${hasPlaces ? " · places © OpenStreetMap (ODbL)" : ""}</div>`;
@@ -3712,9 +3778,29 @@ async function addPulotuLayer() {
   // (or right after a basemap switch); adding layers then throws, so
   // wait until the style reports loaded — styledata fires repeatedly
   // through a style load, so this resolves at the earliest safe moment
-  // rather than waiting for a full tile idle
-  while (!map.isStyleLoaded()) {
-    await new Promise((resolve) => map.once("styledata", resolve));
+  // rather than waiting for a full tile idle.
+  //
+  // the earlier `while (!isStyleLoaded) await once("styledata")` form lost
+  // the wakeup when the style finished in the gap between the check and the
+  // once-listener registering: an early flip during the INITIAL load then
+  // parked here forever, and setDataSource never reached its metric/level
+  // select swap, leaving the census selects stale until a second flip cycle
+  // (the tonga early-flip defect). registering the listener before the
+  // re-check, and polling as a backstop wake, closes the gap. the clean path
+  // is unchanged: an already-loaded style skips the wait entirely, exactly
+  // as before, so the post-initial-load flip on vu/sb is unaffected.
+  if (!map.isStyleLoaded()) {
+    await new Promise((resolve) => {
+      const settle = () => {
+        if (!map.isStyleLoaded()) return;
+        map.off("styledata", settle);
+        clearInterval(poll);
+        resolve();
+      };
+      const poll = setInterval(settle, 50);
+      map.on("styledata", settle);
+      settle();
+    });
   }
   if (map.getLayer(PULOTU.layer)) return;
   // a basemap switch drops the layer but can leave the source; reuse it
@@ -4073,7 +4159,7 @@ function updateCensusLegend() {
   // year-caveat line below instead); naming the wrong reason misleads
   const washTokenClause = (tokens) => {
     const clauses = [];
-    if (tokens.some((t) => t.includes("suppressed_denominator") || t.includes("rr3_small_denominator"))) {
+    if (tokens.some((t) => t.includes("suppressed_denominator") || t.includes("rr3_small_denominator") || t.includes("small_denominator"))) {
       clauses.push("small or suppressed denominators");
     }
     if (tokens.some((t) => t.includes("boundary_change_crosswalked"))) {
