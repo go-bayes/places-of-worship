@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Sweden map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260712d" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Sweden research map; every string traces to
+    // docs/manifests/se-church-membership-1972-2025.json, the committed area
+    // summary, the dated licence assessment, or the live REGION_CONFIG.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "SE",
+      countryName: "Sweden",
+      mapHref: "./",
+      intro: "Church of Sweden administrative membership, 54 annual register waves 1972–2025. This single-denomination register construct records neither census affiliation, belief, practice, nor attendance. A non-member supports no no-religion claim. The series is national only, and the map therefore shades a single national polygon.",
+      facts: {
+        waves: "54 annual register years, 1972–2025 (1981 has null metrics)",
+        geographies: "National (one polygon; the membership series is national only)",
+        metrics: "Church of Sweden administrative membership %"
+      },
+      reading: [
+        "The map shades a single national polygon by the share of the population recorded as Church of Sweden members. The published series contains national totals only. The national-polygon shading is the whole of the published spatial detail.",
+        "Church of Sweden membership is a single-denomination administrative register construct. It is not census affiliation and measures neither belief, religious practice, nor attendance. A non-member supports no no-religion claim, and the product carries no no-religion fields.",
+        "The source prints a member count and membership percentage, but it prints no population base. The product carries each printed percentage without recomputation or precision loss. The shared display normalises percentages to one decimal, including 94.0% for the source's printed 94 in 1977.",
+        "The source printed a blank row for 1981 because the Swedish National Tax Board prepared no person list and no population data could be obtained. The 1981 row therefore carries null metrics. The map shows no data and never substitutes zero or an interpolated value.",
+        "Church of Sweden membership fell from 95.2% in 1972 to 50.7% in 2025, a decline of 44.5 percentage points. The corresponding printed member counts fell from 7,754,784 to 5,365,542. Since 1996, children have not entered membership automatically at birth.",
+        "The MUCF/SST served-population series covers other faith communities under a different construct. It remains outside this map, which covers one denomination only."
+      ],
+      sources: [
+        {
+          name: "Church of Sweden, Medlemmar i Svenska kyrkan 1972-2025",
+          href: "https://www.svenskakyrkan.se/filer/1374643/Medlemmar%20i%20Svenska%20kyrkan%201972-2025.pdf?id=3016165",
+          construct: "Administrative Church of Sweden membership, national total",
+          years: "1972–2025 (annual; 1981 has null metrics)",
+          licence: "No reuse terms stated; used with attribution pending confirmation"
+        },
+        {
+          name: "geoBoundaries gbOpen Sweden ADM0",
+          href: "https://www.geoboundaries.org/",
+          construct: "Boundary geometry (one national polygon)",
+          years: "2019 vintage",
+          licence: "Open Government Licence v3.0"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Church of Sweden (Svenska kyrkan), <a href=\"https://www.svenskakyrkan.se/statistik\" target=\"_blank\" rel=\"noopener\">Medlemmar i Svenska kyrkan 1972-2025</a>, retrieved 13 July 2026; boundaries from <a href=\"https://www.geoboundaries.org/\" target=\"_blank\" rel=\"noopener\">geoBoundaries</a> Sweden ADM0 (2019).",
+        tables: "The Church of Sweden series prints annual national member counts, membership percentages, and year-on-year percentage changes for 1972–2025. The area-summary religious_affiliation fields carry the printed Church of Sweden membership values without recomputation or precision loss. The source prints no population base, no no-religion measure, and no metrics for 1981.",
+        licence: "The Church of Sweden series states no reuse terms and ships with attribution pending confirmation. The geoBoundaries Sweden ADM0 boundary uses the Open Government Licence v3.0.",
+        script: "scripts/build_se_area_summary.R",
+        manifests: [
+          { label: "se-church-membership-1972-2025", href: "docs/manifests/se-church-membership-1972-2025.json" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Sweden map is a register-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260712d"></script>
+</body>
+</html>

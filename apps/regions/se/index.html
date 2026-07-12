@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Sweden Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css?v=20260712d" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712d" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Sweden's product is Church of Sweden administrative membership, 54
+    // annual register waves 1972-2025. This single-denomination register
+    // construct records neither census affiliation, belief, practice, nor
+    // attendance. A non-member supports no no-religion claim, and the product
+    // therefore carries no no_religion metric. The source prints no population
+    // base, and 1981 is its sole blank row because no population data were
+    // available that year. The printed percentages are carried verbatim.
+    // bbox 11.11333-24.16701 E, 55.33916-69.06030 N; midpoint 17.64017, 62.19973.
+    window.REGION_CONFIG = {
+      countryCode: "SE",
+      title: "Places of Worship | Sweden Research Map",
+      dataNoun: "Register",
+      center: [17.64017, 62.19973],
+      initialZoom: 3.7,
+      censusLevels: {
+        national: {
+          label: "National",
+          boundaries: "data/se_national.geojson",
+          summary: "data/area_summary_national.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Church of Sweden administrative membership register, 1972–2025 · Boundaries from geoBoundaries Sweden ADM0 (2019), Open Government Licence v3.0"
+        }
+      },
+      defaultLevel: "national",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2025,
+      metricsAvailable: [
+        "religious_affiliation_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Church of Sweden membership (%)",
+          note: "administrative Church of Sweden membership as a share of the population, printed by the Church of Sweden and carried verbatim. This is a single-denomination register construct. It measures neither census affiliation, belief, practice, nor attendance, and non-membership supports no no-religion claim. The source prints no population base; 1981 has no membership metrics because no population data were available that year."
+        }
+      },
+      popupDenominatorNote: "The Church of Sweden source prints its administrative membership count and membership percentage of the population, but no population base. The map carries the printed percentage verbatim and never derives a denominator. This single-denomination register construct measures neither census affiliation, belief, practice, nor attendance. A non-member supports no no-religion claim. The source printed no membership metrics for 1981 because no population data were available that year; the map shows 1981 as no data.",
+      cityPresets: [
+        { label: "Stockholm", coords: [18.0686, 59.3293], zoom: 10 },
+        { label: "Gothenburg", coords: [11.9746, 57.7089], zoom: 10 },
+        { label: "Malmö", coords: [13.0038, 55.6050], zoom: 10 },
+        { label: "Uppsala", coords: [17.6389, 59.8586], zoom: 10 }
+      ],
+      geocode: { country: "se", biasLngLat: [17.64017, 62.19973] },
+      onboarding: {
+        title: "Sweden research map",
+        intro: "Church of Sweden administrative membership, 54 annual register waves 1972–2025. This single-denomination register construct records neither census affiliation, belief, practice, nor attendance. A non-member supports no no-religion claim.",
+        bullets: [
+          "The source publishes this series at national level. The map therefore shades a single national polygon by Church of Sweden membership.",
+          "The membership share fell from 95.2% in 1972 to 50.7% in 2025. The printed percentages are carried verbatim without recomputation or precision loss.",
+          "The source printed a blank row for 1981 because no population data were available that year. The map preserves 1981 as no data and never replaces it with zero or an interpolated value.",
+          "Since 1996, children have not entered Church of Sweden membership automatically at birth.",
+          "The separate MUCF/SST served-population series is outside this map. The mapped register covers one denomination only.",
+          "Open <strong>Show Register Data</strong> (top centre) for the metric and year controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Administrative Church of Sweden membership from <a href="https://www.svenskakyrkan.se/statistik" target="_blank" rel="noopener">Church of Sweden (Svenska kyrkan)</a>, <cite>Medlemmar i Svenska kyrkan 1972-2025</cite>, retrieved 13 July 2026. No reuse terms stated; used with attribution pending confirmation. This single-denomination register construct measures neither census affiliation, belief, practice, nor attendance, and a non-member supports no no-religion claim. Boundaries from <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> Sweden ADM0 (2019), Open Government Licence v3.0',
+      censusFlagNote: "* This is Church of Sweden administrative membership, a single-denomination register construct. It measures neither census affiliation, belief, practice, nor attendance, and a non-member supports no no-religion claim. The source prints no population base. It printed a blank row for 1981 because no population data were available that year; the map preserves 1981 as no data. The series is national only and the map shades one national polygon."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712d"></script>
+</body>
+</html>
