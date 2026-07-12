@@ -444,7 +444,7 @@ source_datasets <- function() {
       redistribution_limits = "Derived province summaries only; no open-data licence is stated on the census reports. Ships STAGED under BUILD-THEN-ASK with attribution.",
       notes = paste("77 provincial final reports cached (full-count enumeration); 76 ship on the 2010 frame (the BuengKan report is a deferred re-tabulation of eight old-Nong-Khai amphoes). One Table 4 per province,",
                     "nine verbatim categories (Buddhism, Islam, Christianity, Hindus, Confucious, Sikh, Others, No religion, Unknown).",
-                    "Category counts sum to the printed province Total exactly or within a +-1/+-2 person NSO independent-rounding residual,",
+                    "Category counts sum to the printed province Total exactly or within a +-1 to +-3 person NSO independent-rounding residual,",
                     "disclosed per province. WholeKingdom and the four regional reports carry the same Table 4 as cross-source controls.")),
     list(
       source_dataset_id = d_boundary,
@@ -466,7 +466,7 @@ indicators <- function() {
   denom_note <- paste(
     "Percentages use each province's printed census population Total row. The Unknown",
     "(non-response) line stays in the denominator and outside both headline numerators,",
-    "so the two shares need not sum to 100%.")
+    "and the two shares therefore need not sum to 100%.")
   list(
     list(indicator_id = "population_total", label = "Census population total",
          description = "Province all-persons population in the 2010 census religion table (Table 4 Total row).",
@@ -479,7 +479,7 @@ indicators <- function() {
          unit = "percent", denominator_indicator_id = "population_total",
          method = "100 * (population - No religion - Unknown) / population.",
          temporal_coverage = "2010", spatial_coverage = "Thailand provinces (76, 2010 census frame)",
-         quality_notes = paste("Single wave (2010); no cross-wave change is claimed. Category counts are carried verbatim; a +-1/+-2 person NSO independent-rounding residual between the nine category counts and the printed Total is disclosed per province.", denom_note)),
+         quality_notes = paste("Single wave (2010); no cross-wave change is claimed. Category counts are carried verbatim; a +-1 to +-3 person NSO independent-rounding residual between the nine category counts and the printed Total is disclosed per province.", denom_note)),
     list(indicator_id = "no_religion_percent", label = "No religious affiliation %",
          description = "Share of the province population in the census No religion line.",
          unit = "percent", denominator_indicator_id = "population_total",
@@ -634,7 +634,7 @@ manifest <- list(
         "shares need not sum to 100."),
       category_frame = list(english = as.list(cats_en), thai = as.list(cats_th)),
       reconciliation_rule = paste(
-        "Per province, the nine category counts must sum to the printed Total row within a +-2 person bound (the",
+        "Per province, the nine category counts must sum to the printed Total row within a +-3 person bound (the",
         "observed maximum NSO independent-rounding residual in these full-count tables). Every deviation is recorded;",
         "counts are carried verbatim, never repaired. The slots use the printed Total row as the denominator, so",
         "affiliation% + no-religion% + unknown% = 100% exactly."),
@@ -724,7 +724,7 @@ manifest <- list(
   construct_notes = list(
     "The construct is census affiliation: each resident's reported religion (2010 questionnaire 'What religion': Buddhism, Islam, Christianity, ...), asked of the whole resident population of all ages, not practice, attendance, or membership.",
     "The public product carries three headline fields per province: population total, religious affiliation percent, and no-religion percent. Place-density metrics are null (no governed place-of-worship snapshot).",
-    "Slot design (ordinary two-slot, BZ/SB precedent): religious_affiliation_percent is the share reporting a named religion (population minus No religion minus Unknown); no_religion_percent is the single No religion line. The Unknown non-response line stays in the denominator and in neither slot, so the two shares need not sum to 100.",
+    "Slot design (ordinary two-slot, BZ/SB precedent): religious_affiliation_percent is the share reporting a named religion (population minus No religion minus Unknown); no_religion_percent is the single No religion line. The Unknown non-response line stays in the denominator and in neither slot; the two shares therefore need not sum to 100.",
     "Single wave (2010). The 2000 census publishes province religion only as a two-category percentage summary (Buddhism %, Muslim %) with no counts and no no-religion line; the 2020 register-assisted census has no located province religion table. No cross-wave change is asserted.",
     "Boundary: geoBoundaries THA ADM1 rendered on the 2010 census frame -- 76 provinces, with Bueng Kan (created March 2011) unioned into Nong Khai, geometrically exact. Licence Open Data Commons Open Database License 1.0 (ODbL, share-alike). The 76 units join one-to-one to the NSO 2010 provincial reports by name after a three-name concordance. The NSO Bueng Kan re-tabulation is a deferred source; no unpublished cell is derived."
   ),

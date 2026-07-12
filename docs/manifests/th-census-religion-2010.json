@@ -3,7 +3,7 @@
   "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:th-census-religion:th:2010:nso-province",
   "dataset_id": "th-census-religion:th:2010:nso-province",
-  "dataset_version_id": "th-census-religion:th:2010:nso-province:5c496040b109",
+  "dataset_version_id": "th-census-religion:th:2010:nso-province:b13deeca61e8",
   "manifest_sha256": null,
   "supersedes_manifest_id": null,
   "superseded_by_manifest_id": null,
@@ -25,7 +25,7 @@
   ],
   "pipeline": {
     "script": "scripts/build_th_area_summary.R",
-    "git_commit": "9e84d1d3bea2c92faabff06b0f87cb3bcd562327",
+    "git_commit": "52bd0914abc7e4ca7157558f6280a94d76c4e6e0",
     "command": "Rscript scripts/build_th_area_summary.R",
     "parameters": {
       "construct": "census affiliation",
@@ -62,7 +62,7 @@
           "ไม่ทราบ"
         ]
       },
-      "reconciliation_rule": "Per province, the nine category counts must sum to the printed Total row within a +-2 person bound (the observed maximum NSO independent-rounding residual in these full-count tables). Every deviation is recorded; counts are carried verbatim, never repaired. The slots use the printed Total row as the denominator, so affiliation% + no-religion% + unknown% = 100% exactly.",
+      "reconciliation_rule": "Per province, the nine category counts must sum to the printed Total row within a +-3 person bound (the observed maximum NSO independent-rounding residual in these full-count tables). Every deviation is recorded; counts are carried verbatim, never repaired. The slots use the printed Total row as the denominator, so affiliation% + no-religion% + unknown% = 100% exactly.",
       "change_rule": "Single wave (2010); no cross-wave change is claimed. The 2000 province religion is percentage-only (two categories, no counts); not compared.",
       "bueng_kan_note": "The 2010 census enumeration (1 September 2010) predates Bueng Kan province (created March 2011 from eight Nong Khai amphoes). The NongKhai provincial report is the old frame -- its Table 1 lists all 17 amphoes including the eight later transferred -- and the separate BuengKan report re-tabulates those same eight amphoes, so summing all 77 reports double-counts Bueng Kan (+362,747 against the WholeKingdom Table 4 total; Bueng Kan's own total is 362,754). The product therefore ships the NSO-published 2010 frame: 76 provinces, with the Bueng Kan polygon unioned into Nong Khai (geometrically exact; Bueng Kan was carved wholly from Nong Khai). The BuengKan re-tabulation is recorded as a deferred source; no unpublished cell is derived by subtraction and no allocation is invented.",
       "territorial_note": "The deep-South provinces (Pattani, Yala, Narathiwat, Satun) are Muslim-majority and politically sensitive; the build renders the NSO record neutrally. Separate page annotation is a page-lane concern.",
@@ -2838,8 +2838,8 @@
       "uri": "repo:apps/regions/th/data/area_summary_province.json",
       "storage_provider": "git_repository",
       "format": "json",
-      "bytes": 166456,
-      "sha256": "5c496040b109d99fa3fe662a98341ecd179687f2383154464e1f2326c2a1f0d4",
+      "bytes": 166484,
+      "sha256": "b13deeca61e8ae1a9cec9357c31141c177f816a3507c2ff61030eb940421c89e",
       "row_count": 76,
       "feature_count": null,
       "content": "Thailand 76-province (2010 census frame) census-affiliation area summary.",
@@ -2877,7 +2877,7 @@
   "derived_outputs": [
     {
       "uri": "repo:apps/regions/th/data/area_summary_province.json",
-      "sha256": "5c496040b109d99fa3fe662a98341ecd179687f2383154464e1f2326c2a1f0d4",
+      "sha256": "b13deeca61e8ae1a9cec9357c31141c177f816a3507c2ff61030eb940421c89e",
       "built_by": "scripts/build_th_area_summary.R",
       "notes": "76 census-frame provinces x 1 wave = 76 rows; all-persons full-count universe; verbatim nine-category breakdown in quality_flag."
     },
@@ -3419,7 +3419,7 @@
   "construct_notes": [
     "The construct is census affiliation: each resident's reported religion (2010 questionnaire 'What religion': Buddhism, Islam, Christianity, ...), asked of the whole resident population of all ages, not practice, attendance, or membership.",
     "The public product carries three headline fields per province: population total, religious affiliation percent, and no-religion percent. Place-density metrics are null (no governed place-of-worship snapshot).",
-    "Slot design (ordinary two-slot, BZ/SB precedent): religious_affiliation_percent is the share reporting a named religion (population minus No religion minus Unknown); no_religion_percent is the single No religion line. The Unknown non-response line stays in the denominator and in neither slot, so the two shares need not sum to 100.",
+    "Slot design (ordinary two-slot, BZ/SB precedent): religious_affiliation_percent is the share reporting a named religion (population minus No religion minus Unknown); no_religion_percent is the single No religion line. The Unknown non-response line stays in the denominator and in neither slot; the two shares therefore need not sum to 100.",
     "Single wave (2010). The 2000 census publishes province religion only as a two-category percentage summary (Buddhism %, Muslim %) with no counts and no no-religion line; the 2020 register-assisted census has no located province religion table. No cross-wave change is asserted.",
     "Boundary: geoBoundaries THA ADM1 rendered on the 2010 census frame -- 76 provinces, with Bueng Kan (created March 2011) unioned into Nong Khai, geometrically exact. Licence Open Data Commons Open Database License 1.0 (ODbL, share-alike). The 76 units join one-to-one to the NSO 2010 provincial reports by name after a three-name concordance. The NSO Bueng Kan re-tabulation is a deferred source; no unpublished cell is derived."
   ],
@@ -3473,7 +3473,7 @@
       "citation": "National Statistical Office of Thailand, 2010 Population and Housing Census, Provincial Reports, Table 4 (Population by religion, sex and area).",
       "access_limits": "The live NSO hosts are WAF/Cloudflare-blocked to automation and the statbbi/nsoweb portals are decommissioned; the report PDFs were retrieved from Internet Archive replays of the NSO originals.",
       "redistribution_limits": "Derived province summaries only; no open-data licence is stated on the census reports. Ships STAGED under BUILD-THEN-ASK with attribution.",
-      "notes": "77 provincial final reports cached (full-count enumeration); 76 ship on the 2010 frame (the BuengKan report is a deferred re-tabulation of eight old-Nong-Khai amphoes). One Table 4 per province, nine verbatim categories (Buddhism, Islam, Christianity, Hindus, Confucious, Sikh, Others, No religion, Unknown). Category counts sum to the printed province Total exactly or within a +-1/+-2 person NSO independent-rounding residual, disclosed per province. WholeKingdom and the four regional reports carry the same Table 4 as cross-source controls."
+      "notes": "77 provincial final reports cached (full-count enumeration); 76 ship on the 2010 frame (the BuengKan report is a deferred re-tabulation of eight old-Nong-Khai amphoes). One Table 4 per province, nine verbatim categories (Buddhism, Islam, Christianity, Hindus, Confucious, Sikh, Others, No religion, Unknown). Category counts sum to the printed province Total exactly or within a +-1 to +-3 person NSO independent-rounding residual, disclosed per province. WholeKingdom and the four regional reports carry the same Table 4 as cross-source controls."
     },
     {
       "source_dataset_id": "geoboundaries-tha-adm1-2017",

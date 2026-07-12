@@ -32,7 +32,7 @@
       "citation": "National Statistical Office of Thailand, 2010 Population and Housing Census, Provincial Reports, Table 4 (Population by religion, sex and area).",
       "access_limits": "The live NSO hosts are WAF/Cloudflare-blocked to automation and the statbbi/nsoweb portals are decommissioned; the report PDFs were retrieved from Internet Archive replays of the NSO originals.",
       "redistribution_limits": "Derived province summaries only; no open-data licence is stated on the census reports. Ships STAGED under BUILD-THEN-ASK with attribution.",
-      "notes": "77 provincial final reports cached (full-count enumeration); 76 ship on the 2010 frame (the BuengKan report is a deferred re-tabulation of eight old-Nong-Khai amphoes). One Table 4 per province, nine verbatim categories (Buddhism, Islam, Christianity, Hindus, Confucious, Sikh, Others, No religion, Unknown). Category counts sum to the printed province Total exactly or within a +-1/+-2 person NSO independent-rounding residual, disclosed per province. WholeKingdom and the four regional reports carry the same Table 4 as cross-source controls."
+      "notes": "77 provincial final reports cached (full-count enumeration); 76 ship on the 2010 frame (the BuengKan report is a deferred re-tabulation of eight old-Nong-Khai amphoes). One Table 4 per province, nine verbatim categories (Buddhism, Islam, Christianity, Hindus, Confucious, Sikh, Others, No religion, Unknown). Category counts sum to the printed province Total exactly or within a +-1 to +-3 person NSO independent-rounding residual, disclosed per province. WholeKingdom and the four regional reports carry the same Table 4 as cross-source controls."
     },
     {
       "source_dataset_id": "geoboundaries-tha-adm1-2017",
@@ -73,7 +73,7 @@
       "method": "100 * (population - No religion - Unknown) / population.",
       "temporal_coverage": "2010",
       "spatial_coverage": "Thailand provinces (76, 2010 census frame)",
-      "quality_notes": "Single wave (2010); no cross-wave change is claimed. Category counts are carried verbatim; a +-1/+-2 person NSO independent-rounding residual between the nine category counts and the printed Total is disclosed per province. Percentages use each province's printed census population Total row. The Unknown (non-response) line stays in the denominator and outside both headline numerators, so the two shares need not sum to 100%."
+      "quality_notes": "Single wave (2010); no cross-wave change is claimed. Category counts are carried verbatim; a +-1 to +-3 person NSO independent-rounding residual between the nine category counts and the printed Total is disclosed per province. Percentages use each province's printed census population Total row. The Unknown (non-response) line stays in the denominator and outside both headline numerators, and the two shares therefore need not sum to 100%."
     },
     {
       "indicator_id": "no_religion_percent",
@@ -84,7 +84,7 @@
       "method": "100 * No religion / population. The Unknown line is not part of this slot.",
       "temporal_coverage": "2010",
       "spatial_coverage": "Thailand provinces (76, 2010 census frame)",
-      "quality_notes": "The source category is 'No religion' (ไม่มีศาสนา); very small in Thailand (national no-religion share well under 0.1%). Percentages use each province's printed census population Total row. The Unknown (non-response) line stays in the denominator and outside both headline numerators, so the two shares need not sum to 100%."
+      "quality_notes": "The source category is 'No religion' (ไม่มีศาสนา); very small in Thailand (national no-religion share well under 0.1%). Percentages use each province's printed census population Total row. The Unknown (non-response) line stays in the denominator and outside both headline numerators, and the two shares therefore need not sum to 100%."
     }
   ],
   "visual_layers": [

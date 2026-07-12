@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Thailand Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712b" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // Thailand's product is NSO 2010 census religious affiliation by the 76
+    // provinces (changwat) of the 2010 census frame, a single wave, 2010. The
+    // source is the 2010 Population and Housing Census provincial final reports,
+    // Table 4 "Population by religion, sex and area", a full-count integer table
+    // with nine verbatim categories (Buddhism, Islam, Christianity, Hindus,
+    // Confucious [sic], Sikh, Others, No religion, Unknown). The 76 province
+    // Totals sum to 65,981,653 against the WholeKingdom Table 4 total of
+    // 65,981,660 (-7 over 66 million), within the NSO's own disclosed
+    // independent-rounding residuals; every category reconciles within +-14.
+    // Counts are carried verbatim, never repaired.
+    //
+    // Frame finding: the 2010 enumeration (1 September 2010) predates Bueng Kan
+    // province, created in March 2011 from eight Nong Khai amphoes (districts).
+    // The Nong Khai provincial report is the old frame -- its Table 1 lists all
+    // 17 amphoes including the eight later transferred -- and the NSO's separate
+    // Bueng Kan report re-tabulates those same eight amphoes; summing all 77
+    // provincial reports therefore double-counts Bueng Kan (+362,747 against the
+    // WholeKingdom total; Bueng Kan's own total is 362,754). The product
+    // therefore ships the NSO-published 2010 frame of 76 provinces, with the
+    // Bueng Kan polygon unioned into Nong Khai (geometrically exact, because
+    // Bueng Kan was carved wholly from Nong Khai); the vintage is documented per
+    // feature (the merged unit carries ISO TH-43, spanning TH-43 + TH-38). No
+    // unpublished cell is derived by subtraction and no allocation is invented.
+    //
+    // Slot design (ordinary two-slot, BA/BZ/SB precedent):
+    // religious_affiliation_percent is the province population minus the No
+    // religion and Unknown lines, over the printed province Total;
+    // no_religion_percent is the single No religion line (No religion,
+    // ไม่มีศาสนา). The Unknown non-response line (Unknown, ไม่ทราบ) stays in the
+    // denominator and in neither slot; the two shares therefore need not sum to
+    // 100.
+    // The nine verbatim source categories are preserved per province in the
+    // published area summary; the map shades the two aggregate slots, not the
+    // nine lines. Nationally, no religion is 0.07% (46,119 of 65,981,653).
+    //
+    // Composition note (rendered per RENDER-THE-RECORD): the affiliation share
+    // is above 99% in nearly every province; it therefore carries little
+    // visible spatial contrast, and no religion is near zero everywhere. The
+    // Muslim-Buddhist composition that motivates the map lives inside the
+    // affiliation slot and in the verbatim category counts, not in either
+    // shaded metric. In the deep-South provinces of Pattani, Yala, Narathiwat,
+    // and Satun, Islam is the majority declared religion -- Pattani reports
+    // 513,841 Muslim residents of 609,015 (84.4%) -- while Buddhism is the
+    // majority across the rest of the kingdom. These provinces are politically
+    // sensitive; the build and the page render the NSO record verbatim and
+    // neutrally.
+    //
+    // Single wave. 2000 is HELD: province-level 2000 religion is
+    // percentage-only (Buddhism %, Muslim %), two categories, no counts and no
+    // no-religion line; the full 2000 nine-category count table is region-level
+    // only. 2020 is HELD: the register-assisted, COVID-affected 2020 census has
+    // no located province religion count table. No change metric is offered.
+    //
+    // Licence: no reuse licence is stated on the 2010 census report PDFs (NSO
+    // publisher front matter only). The NSO open-data catalogue labels its
+    // published datasets "Creative Commons Attributions", which governs the
+    // catalogue's survey datasets rather than these archived census reports. The
+    // derived province summaries ship with attribution to the National
+    // Statistical Office of Thailand under the standing BUILD-THEN-ASK ruling
+    // (licence_status needs_review); an NSO reuse-confirmation ask is with the
+    // project lead. Boundaries are geoBoundaries THA ADM1 (Open Data Commons
+    // Open Database License 1.0, ODbL; attribution and share-alike to
+    // OpenStreetMap contributors), boundaryYearRepresented 2017, rendered as the
+    // 76-unit 2010 frame.
+    window.REGION_CONFIG = {
+      countryCode: "TH",
+      title: "Places of Worship | Thailand Research Map",
+      // Thailand spans lon 97.34..105.64 by lat 5.61..20.46 across the 76
+      // provinces; centre on the country and open at a zoom that fits the full
+      // north-south extent beside the census panels
+      center: [100.99, 13.6],
+      initialZoom: 5,
+      censusLevels: {
+        province: {
+          label: "Province",
+          boundaries: "data/th_province_2010frame.geojson",
+          summary: "data/area_summary_province.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © National Statistical Office of Thailand (NSO), 2010 Population and Housing Census, provincial final reports Table 4 (attribution requested; no reuse licence stated on the reports, reuse confirmation pending) · Boundaries © geoBoundaries THA ADM1 (Open Data Commons Open Database License 1.0, ODbL), boundary source OpenStreetMap contributors"
+        }
+      },
+      defaultLevel: "province",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2010,
+      // the two census-question shares; place, density, and change metrics are
+      // omitted because no place layer is built and religion is a single 2010
+      // wave (2000 is percentage-only, 2020 has no located province table)
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share reporting a named religion, the province population minus the No religion and Unknown lines, over the printed province Total (NSO 2010 census Table 4, nine verbatim categories; the denominator includes the Unknown non-response line)"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the census No religion line (No religion, ไม่มีศาสนา); very small in Thailand (national share 0.07%). The Unknown non-response line stays in the denominator and in neither slot"
+        }
+      },
+      popupDenominatorNote: "Values are shares of each province's printed 2010 census population Total (NSO 2010 census provincial reports, Table 4, all persons of all ages; religion was asked of the whole resident population). Religious affiliation is the province population minus the No religion and Unknown lines; No religion is the single No religion line (ไม่มีศาสนา). The Unknown non-response line (ไม่ทราบ) stays in the denominator and in neither slot; the two shares therefore need not sum to 100%. The nine verbatim source categories are preserved in the published data. Category counts are carried verbatim; a ±1 to ±3 person NSO independent-rounding residual between the nine category counts and the printed Total is disclosed per province. The 2010 frame is 76 provinces: the enumeration (1 September 2010) predates Bueng Kan province; its polygon is therefore unioned into Nong Khai (geometrically exact). The affiliation share is above 99% in nearly every province; the Muslim–Buddhist composition sits within it and in the verbatim category counts, not in either shaded metric. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+      cityPresets: [
+        { label: "Bangkok", coords: [100.5018, 13.7563], zoom: 10 },
+        { label: "Chiang Mai", coords: [98.9853, 18.7883], zoom: 10 },
+        { label: "Nakhon Ratchasima", shortLabel: "Korat", coords: [102.0977, 14.9799], zoom: 10 },
+        { label: "Khon Kaen", coords: [102.8360, 16.4419], zoom: 10 },
+        { label: "Udon Thani", coords: [102.7859, 17.4138], zoom: 10 },
+        { label: "Songkhla", coords: [100.5951, 7.1988], zoom: 10 },
+        { label: "Pattani", coords: [101.2537, 6.8692], zoom: 10 },
+        { label: "Phuket", coords: [98.3923, 7.8804], zoom: 10 }
+      ],
+      geocode: { country: "th", biasLngLat: [100.99, 13.6] },
+      onboarding: {
+        title: "Thailand research map",
+        intro: "Census religious affiliation across Thailand's 76 provinces (changwat), a single 2010 snapshot from the National Statistical Office of Thailand (NSO), 2010 Population and Housing Census, provincial final reports, Table 4. The table is a full-count integer count of religion by province; religion was asked of every resident of all ages. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+        bullets: [
+          "Provinces are shaded by the share reporting a named religion (the province population minus the No religion and Unknown lines), or by the No religion % share (the single No religion line, <code>ไม่มีศาสนา</code>).",
+          "This is one census wave, 2010, on the 76-province 2010 census frame. Counts are full-count integers: the 76 province Totals sum to 65,981,653 against the WholeKingdom Table 4 total of 65,981,660 (&minus;7), within the NSO's disclosed independent-rounding residuals, and every category reconciles within &plusmn;14. Counts are carried verbatim, never repaired.",
+          "The 2010 enumeration (1 September 2010) predates Bueng Kan province, created in March 2011 from eight Nong Khai districts. The NSO's separate Bueng Kan report re-tabulates those districts; summing all 77 provincial reports would therefore double-count them. This product ships the 76-province 2010 frame with the Bueng Kan polygon unioned into Nong Khai (geometrically exact), the vintage documented per feature.",
+          "The Unknown non-response line (<code>ไม่ทราบ</code>) stays in the denominator and in neither slot; the affiliation and no-religion shares therefore need not sum to 100%. All nine verbatim source categories (Buddhism, Islam, Christianity, Hindus, Confucious, Sikh, Others, No religion, Unknown) are preserved in the published data.",
+          "In the deep-South provinces of Pattani, Yala, Narathiwat, and Satun, Islam is the majority declared religion &mdash; Pattani reports 513,841 Muslim residents of 609,015 (84.4%) &mdash; while Buddhism is the majority across the rest of the kingdom. This Muslim&ndash;Buddhist composition sits within the affiliation share, which is above 99% in nearly every province; it is preserved in the verbatim category counts rather than shaded directly.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion © <a href="https://www.nso.go.th" target="_blank" rel="noopener">National Statistical Office of Thailand (NSO)</a>, 2010 Population and Housing Census, provincial final reports, Table 4 (Population by religion, sex and area). No reuse licence is stated on the census report PDFs; the NSO open-data catalogue labels its published datasets "Creative Commons Attributions", which governs the catalogue\'s survey datasets rather than these archived census reports. These derived province summaries carry attribution to the National Statistical Office of Thailand under a build-then-ask posture while a reuse confirmation is pending; the licence is under review. &middot; Boundaries © <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> THA ADM1 (Open Data Commons Open Database License 1.0, ODbL; attribution and share-alike to OpenStreetMap contributors), boundary source OpenStreetMap',
+      censusFlagNote: "* Single wave (2010), province level, on the 76-unit 2010 census frame; the 76 province Totals sum to 65,981,653 against the WholeKingdom Table 4 total of 65,981,660 (&minus;7 over 66 million), within the NSO's disclosed independent-rounding residuals, and every category reconciles within &plusmn;14 &mdash; carried verbatim, never repaired. The 2010 enumeration predates Bueng Kan province (created March 2011 from eight Nong Khai districts); the NSO's separate Bueng Kan report re-tabulates those districts; summing all 77 provincial reports therefore double-counts them. The product ships the 76-province 2010 frame with the Bueng Kan polygon unioned into Nong Khai (geometrically exact), the vintage documented per feature. Religious affiliation is the province population minus the No religion and Unknown lines; No religion is the single No religion line; the Unknown non-response line stays in the denominator and in neither slot; the two shares therefore need not sum to 100%. The nine verbatim source categories are preserved in the published data. No reuse licence is stated on the census report PDFs; the summaries ship with attribution to the National Statistical Office of Thailand under a build-then-ask posture (reuse confirmation pending, licence under review). Boundaries: geoBoundaries THA ADM1 (ODbL 1.0), boundary source OpenStreetMap contributors."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260712b"></script>
+</body>
+</html>
