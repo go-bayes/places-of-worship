@@ -1,0 +1,1144 @@
+{
+  "schema_version": "area-summary.v2",
+  "generated_at": "2026-07-12T07:29:55Z",
+  "generated_by": "scripts/build_py_area_summary.R",
+  "country_code": "PY",
+  "data_status": "census_religion_live",
+  "data_status_note": "Census religious affiliation is live for the 18 first-level units (17 departments + Asunción) in 2002, from the CELADE INE REDATAM Webserver (base CPV2002) cross-tab of 'Religión que profesa' by Departamento, recoded to the published P16 seven-group frame. Single wave: the 2012 and 2022 censuses carry no religion variable, and 1992 is not in REDATAM, so no cross-wave change is possible.",
+  "boundary_set": {
+    "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+    "country_code": "PY",
+    "level": "department",
+    "vintage": "geoBoundaries PRY ADM1 (gbOpen); 18 units, DGEEC-sourced",
+    "source_dataset_id": "geoboundaries-pry-adm1"
+  },
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "no governed Paraguay place-of-worship snapshot is included in this census-religion release",
+    "notes": "The Paraguay lane ships census-religion count and share metrics only; place metrics are null."
+  },
+  "source_datasets": [
+    {
+      "source_dataset_id": "ine-cpv2002-redatam-religion-departamento",
+      "name": "INE Paraguay CPV2002 REDATAM cross-tabulation: Religión que profesa by Departamento",
+      "provider": "Instituto Nacional de Estadística (INE), Paraguay (DGEEC-era census); CELADE/CEPAL REDATAM Webserver",
+      "url": "https://prod.redatam.org/binpry/RpWebStats.exe/CrossTab?",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/py_census/redatam_religion_by_departamento_2002.html",
+      "licence": {
+        "name": "Paraguay open-data licence (Decreto 4064 / Ley 5282/2014); extracción and transformación authorised with attribution",
+        "url": "https://www.ine.gov.py/microdatos/license.php",
+        "attribution": "Fuente: INE Paraguay, Censo Nacional de Población y Viviendas 2002; contenido regido por la Licencia de Uso de la Información Pública (Decreto 4064 / Ley 5282/2014). No es un producto oficial ni patrocinado por el Estado Paraguayo."
+      },
+      "citation": "INE Paraguay, Censo Nacional de Población y Viviendas 2002; department-grain religion cross-tabulation via the CELADE-hosted REDATAM Webserver (base CPV2002, variable 'Religión que profesa', break Departamento). National frame: cuadro P16.",
+      "access_limits": "Public online processing (CELADE REDATAM Webserver); results generated on demand.",
+      "redistribution_limits": "Open reuse under the Paraguay open-data licence. Licencia de Uso de la Información y los Datos Abiertos Públicos propiedad del Estado Paraguayo (Decreto 4064 - Ley Nro. 5282/2014). Otorga la autorización gratuita, perpetua y no exclusiva de uso y/o transformación (copia, extracción, reproducción, distribución, comunicación pública, adaptación, transformación) con las condiciones: citar la fuente pública; citar la fecha de última actualización; no sugerir un uso oficial o patrocinado por el Estado Paraguayo.",
+      "notes": "Live cross-tab; the engine output is cached and sha-256-pinned, and the exact query parameters are recorded in the manifest (base CPV2002, ITEM CRUCPOB, ROW PERSONA.religion, COLUMN PERSONA.sexo, AREABREAK DEPTO, SELECTION ALL). The detailed denomination list is recoded to the P16 seven groups; all seven national group totals reconcile to P16 exactly (total 3,892,603)."
+    },
+    {
+      "source_dataset_id": "geoboundaries-pry-adm1",
+      "name": "geoBoundaries Paraguay ADM1 (18 units: 17 departments + Asunción)",
+      "provider": "geoBoundaries (William & Mary geoLab); sourced from DGEEC",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/PRY/ADM1/geoBoundaries-PRY-ADM1.geojson",
+      "retrieval_date": "2026-07-12",
+      "local_path": "data/raw/py_census/geoBoundaries-PRY-ADM1.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "geoBoundaries (gbOpen) PRY ADM1; boundary ID PRY-ADM1-63826900; source DGEEC"
+      },
+      "citation": "Runfola, D. et al. (2020) geoBoundaries: A global database of political administrative boundaries. gbOpen PRY ADM1 (pinned commit 9469f09).",
+      "access_limits": null,
+      "redistribution_limits": "CC BY 4.0 permits redistribution and derivatives with attribution.",
+      "notes": "18 ADM1 units; release metadata: boundaryID PRY-ADM1-63826900, CC BY 4.0, source DGEEC, admUnitCount 18, represented year 2012."
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_id": "religious_affiliation_percent",
+      "label": "Religious affiliation (%)",
+      "description": "Share of the population aged 10+ affiliated with any religion (P16 groups Católica, Evangélicas, Otras cristianas, Indígena, Otras religiones).",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "Sum of the five affiliated P16 group counts over the department's population aged 10+ (all responses, including the 'No informado' non-response group). Detailed REDATAM denominations recoded to the P16 seven-group frame; counts as extracted.",
+      "temporal_coverage": "2002",
+      "spatial_coverage": "17 departments plus the Asunción capital district (18 units) on the geoBoundaries PRY ADM1 layer; the census frame joins the boundary units one-to-one by department name.",
+      "quality_notes": "Universe: population aged 10+ (the religion question was asked only of persons 10+). The seven recoded national group totals equal the published P16 totals exactly. The Indígena group is a small cell (0-1 persons) in four central departments."
+    },
+    {
+      "indicator_id": "no_religion_percent",
+      "label": "No religion (%)",
+      "description": "Share of the population aged 10+ reporting no religion (P16 'No tiene'; REDATAM 'Sin religión').",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "The 'Sin religión' (P16 'No tiene') count over the department's population aged 10+.",
+      "temporal_coverage": "2002",
+      "spatial_coverage": "17 departments plus the Asunción capital district (18 units) on the geoBoundaries PRY ADM1 layer; the census frame joins the boundary units one-to-one by department name.",
+      "quality_notes": "No religion is a real non-affiliation category inside the denominator and outside the affiliation slot; distinct from the 'No informado' non-response group, which stays in the denominator and outside both slots."
+    },
+    {
+      "indicator_id": "population_total",
+      "label": "Population aged 10+ (religion universe)",
+      "description": "Population aged 10 and over enumerated in the 2002 census, the religion-question universe and the share denominator.",
+      "unit": "count",
+      "denominator_indicator_id": null,
+      "method": "Sum of the seven P16 group counts per department from the REDATAM cross-tabulation.",
+      "temporal_coverage": "2002",
+      "spatial_coverage": "17 departments plus the Asunción capital district (18 units) on the geoBoundaries PRY ADM1 layer; the census frame joins the boundary units one-to-one by department name.",
+      "quality_notes": "Departments sum to the national P16 total of 3,892,603 exactly."
+    }
+  ],
+  "visual_layers": [
+    {
+      "visual_layer_id": "py-department-religious-affiliation-share",
+      "label": "Religious affiliation share",
+      "description": "Census religious affiliation share by department, 2002.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "religious_affiliation_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "population aged 10+"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "published department value on the geoBoundaries ADM1 layer",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": true,
+      "notes": "Catholic-majority nationally (89.6%); the Boquerón and Presidente Hayes Chaco departments carry the largest Evangelical and Mennonite shares."
+    },
+    {
+      "visual_layer_id": "py-department-no-religion-share",
+      "label": "No religion share",
+      "description": "Census no-religion share by department, 2002.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "no_religion_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "population aged 10+"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "published department value on the geoBoundaries ADM1 layer",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Single wave; no cross-wave change layer (department religion is available for 2002 only)."
+    }
+  ],
+  "rows": [
+    {
+      "country_code": "PY",
+      "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+      "boundary_level": "department",
+      "area_unit_id": "py-department-2002-geoboundaries-adm1:00",
+      "area_code": "00",
+      "area_name": "Asunción",
+      "year": 2002,
+      "population_total": 420610,
+      "population_total_basis": "Population aged 10 and over enumerated in the 2002 census (the religion question, 'Religión que profesa', was asked only of persons 10+; national cuadro P16 universe 'Población de 10 años y más de edad'). Counts extracted from the CELADE INE REDATAM Webserver (base CPV2002) cross-tabulation of religion by department; the detailed denomination list is recoded to the published P16 seven-group frame. The denominator includes the non-response group 'No informado' (REDATAM 'No especificado').",
+      "religious_affiliation_count": 407277,
+      "religious_affiliation_percent": 96.8301,
+      "no_religion_count": 6606,
+      "no_religion_percent": 1.5706,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 128.6779,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-cpv2002-redatam-religion-departamento",
+        "geoboundaries-pry-adm1"
+      ],
+      "quality_flag": "census_affiliation_religion_que_profesa;universe_population_aged_10_plus;redatam_live_crosstab_recoded_to_p16_seven_groups;national_reconciliation_exact_per_group;single_wave_2002;religious_change_withheld;no_religion_group_sin_religion_p16_no_tiene;non_response_no_informado_no_especificado_inside_denominator_outside_slots;boundary_geoboundaries_adm1_ccby40",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "count": 375820
+        },
+        {
+          "label_verbatim": "Evangélicas",
+          "count": 24784
+        },
+        {
+          "label_verbatim": "Otras cristianas",
+          "count": 4069
+        },
+        {
+          "label_verbatim": "Indígena",
+          "count": 57
+        },
+        {
+          "label_verbatim": "Otras religiones",
+          "count": 2547
+        },
+        {
+          "label_verbatim": "No tiene",
+          "count": 6606
+        },
+        {
+          "label_verbatim": "No informado",
+          "count": 6727
+        }
+      ]
+    },
+    {
+      "country_code": "PY",
+      "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+      "boundary_level": "department",
+      "area_unit_id": "py-department-2002-geoboundaries-adm1:01",
+      "area_code": "01",
+      "area_name": "Concepción",
+      "year": 2002,
+      "population_total": 129520,
+      "population_total_basis": "Population aged 10 and over enumerated in the 2002 census (the religion question, 'Religión que profesa', was asked only of persons 10+; national cuadro P16 universe 'Población de 10 años y más de edad'). Counts extracted from the CELADE INE REDATAM Webserver (base CPV2002) cross-tabulation of religion by department; the detailed denomination list is recoded to the published P16 seven-group frame. The denominator includes the non-response group 'No informado' (REDATAM 'No especificado').",
+      "religious_affiliation_count": 127859,
+      "religious_affiliation_percent": 98.7176,
+      "no_religion_count": 804,
+      "no_religion_percent": 0.6208,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 18588.4707,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-cpv2002-redatam-religion-departamento",
+        "geoboundaries-pry-adm1"
+      ],
+      "quality_flag": "census_affiliation_religion_que_profesa;universe_population_aged_10_plus;redatam_live_crosstab_recoded_to_p16_seven_groups;national_reconciliation_exact_per_group;single_wave_2002;religious_change_withheld;no_religion_group_sin_religion_p16_no_tiene;non_response_no_informado_no_especificado_inside_denominator_outside_slots;boundary_geoboundaries_adm1_ccby40",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "count": 120824
+        },
+        {
+          "label_verbatim": "Evangélicas",
+          "count": 4577
+        },
+        {
+          "label_verbatim": "Otras cristianas",
+          "count": 865
+        },
+        {
+          "label_verbatim": "Indígena",
+          "count": 1318
+        },
+        {
+          "label_verbatim": "Otras religiones",
+          "count": 275
+        },
+        {
+          "label_verbatim": "No tiene",
+          "count": 804
+        },
+        {
+          "label_verbatim": "No informado",
+          "count": 857
+        }
+      ]
+    },
+    {
+      "country_code": "PY",
+      "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+      "boundary_level": "department",
+      "area_unit_id": "py-department-2002-geoboundaries-adm1:02",
+      "area_code": "02",
+      "area_name": "San Pedro",
+      "year": 2002,
+      "population_total": 229491,
+      "population_total_basis": "Population aged 10 and over enumerated in the 2002 census (the religion question, 'Religión que profesa', was asked only of persons 10+; national cuadro P16 universe 'Población de 10 años y más de edad'). Counts extracted from the CELADE INE REDATAM Webserver (base CPV2002) cross-tabulation of religion by department; the detailed denomination list is recoded to the published P16 seven-group frame. The denominator includes the non-response group 'No informado' (REDATAM 'No especificado').",
+      "religious_affiliation_count": 225443,
+      "religious_affiliation_percent": 98.2361,
+      "no_religion_count": 2525,
+      "no_religion_percent": 1.1003,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 20898.5732,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-cpv2002-redatam-religion-departamento",
+        "geoboundaries-pry-adm1"
+      ],
+      "quality_flag": "census_affiliation_religion_que_profesa;universe_population_aged_10_plus;redatam_live_crosstab_recoded_to_p16_seven_groups;national_reconciliation_exact_per_group;single_wave_2002;religious_change_withheld;no_religion_group_sin_religion_p16_no_tiene;non_response_no_informado_no_especificado_inside_denominator_outside_slots;boundary_geoboundaries_adm1_ccby40",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "count": 208314
+        },
+        {
+          "label_verbatim": "Evangélicas",
+          "count": 14310
+        },
+        {
+          "label_verbatim": "Otras cristianas",
+          "count": 1048
+        },
+        {
+          "label_verbatim": "Indígena",
+          "count": 1124
+        },
+        {
+          "label_verbatim": "Otras religiones",
+          "count": 647
+        },
+        {
+          "label_verbatim": "No tiene",
+          "count": 2525
+        },
+        {
+          "label_verbatim": "No informado",
+          "count": 1523
+        }
+      ]
+    },
+    {
+      "country_code": "PY",
+      "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+      "boundary_level": "department",
+      "area_unit_id": "py-department-2002-geoboundaries-adm1:03",
+      "area_code": "03",
+      "area_name": "Cordillera",
+      "year": 2002,
+      "population_total": 178205,
+      "population_total_basis": "Population aged 10 and over enumerated in the 2002 census (the religion question, 'Religión que profesa', was asked only of persons 10+; national cuadro P16 universe 'Población de 10 años y más de edad'). Counts extracted from the CELADE INE REDATAM Webserver (base CPV2002) cross-tabulation of religion by department; the detailed denomination list is recoded to the published P16 seven-group frame. The denominator includes the non-response group 'No informado' (REDATAM 'No especificado').",
+      "religious_affiliation_count": 175948,
+      "religious_affiliation_percent": 98.7335,
+      "no_religion_count": 812,
+      "no_religion_percent": 0.4557,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 4800.3287,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-cpv2002-redatam-religion-departamento",
+        "geoboundaries-pry-adm1"
+      ],
+      "quality_flag": "census_affiliation_religion_que_profesa;universe_population_aged_10_plus;redatam_live_crosstab_recoded_to_p16_seven_groups;national_reconciliation_exact_per_group;single_wave_2002;religious_change_withheld;no_religion_group_sin_religion_p16_no_tiene;non_response_no_informado_no_especificado_inside_denominator_outside_slots;boundary_geoboundaries_adm1_ccby40;small_cell_under_10",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "count": 170464
+        },
+        {
+          "label_verbatim": "Evangélicas",
+          "count": 4308
+        },
+        {
+          "label_verbatim": "Otras cristianas",
+          "count": 952
+        },
+        {
+          "label_verbatim": "Indígena",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Otras religiones",
+          "count": 223
+        },
+        {
+          "label_verbatim": "No tiene",
+          "count": 812
+        },
+        {
+          "label_verbatim": "No informado",
+          "count": 1445
+        }
+      ]
+    },
+    {
+      "country_code": "PY",
+      "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+      "boundary_level": "department",
+      "area_unit_id": "py-department-2002-geoboundaries-adm1:04",
+      "area_code": "04",
+      "area_name": "Guairá",
+      "year": 2002,
+      "population_total": 137202,
+      "population_total_basis": "Population aged 10 and over enumerated in the 2002 census (the religion question, 'Religión que profesa', was asked only of persons 10+; national cuadro P16 universe 'Población de 10 años y más de edad'). Counts extracted from the CELADE INE REDATAM Webserver (base CPV2002) cross-tabulation of religion by department; the detailed denomination list is recoded to the published P16 seven-group frame. The denominator includes the non-response group 'No informado' (REDATAM 'No especificado').",
+      "religious_affiliation_count": 135873,
+      "religious_affiliation_percent": 99.0314,
+      "no_religion_count": 488,
+      "no_religion_percent": 0.3557,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 3877.6593,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-cpv2002-redatam-religion-departamento",
+        "geoboundaries-pry-adm1"
+      ],
+      "quality_flag": "census_affiliation_religion_que_profesa;universe_population_aged_10_plus;redatam_live_crosstab_recoded_to_p16_seven_groups;national_reconciliation_exact_per_group;single_wave_2002;religious_change_withheld;no_religion_group_sin_religion_p16_no_tiene;non_response_no_informado_no_especificado_inside_denominator_outside_slots;boundary_geoboundaries_adm1_ccby40",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "count": 130402
+        },
+        {
+          "label_verbatim": "Evangélicas",
+          "count": 4006
+        },
+        {
+          "label_verbatim": "Otras cristianas",
+          "count": 712
+        },
+        {
+          "label_verbatim": "Indígena",
+          "count": 621
+        },
+        {
+          "label_verbatim": "Otras religiones",
+          "count": 132
+        },
+        {
+          "label_verbatim": "No tiene",
+          "count": 488
+        },
+        {
+          "label_verbatim": "No informado",
+          "count": 841
+        }
+      ]
+    },
+    {
+      "country_code": "PY",
+      "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+      "boundary_level": "department",
+      "area_unit_id": "py-department-2002-geoboundaries-adm1:05",
+      "area_code": "05",
+      "area_name": "Caaguazú",
+      "year": 2002,
+      "population_total": 316877,
+      "population_total_basis": "Population aged 10 and over enumerated in the 2002 census (the religion question, 'Religión que profesa', was asked only of persons 10+; national cuadro P16 universe 'Población de 10 años y más de edad'). Counts extracted from the CELADE INE REDATAM Webserver (base CPV2002) cross-tabulation of religion by department; the detailed denomination list is recoded to the published P16 seven-group frame. The denominator includes the non-response group 'No informado' (REDATAM 'No especificado').",
+      "religious_affiliation_count": 312654,
+      "religious_affiliation_percent": 98.6673,
+      "no_religion_count": 2789,
+      "no_religion_percent": 0.8802,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 12930.7874,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-cpv2002-redatam-religion-departamento",
+        "geoboundaries-pry-adm1"
+      ],
+      "quality_flag": "census_affiliation_religion_que_profesa;universe_population_aged_10_plus;redatam_live_crosstab_recoded_to_p16_seven_groups;national_reconciliation_exact_per_group;single_wave_2002;religious_change_withheld;no_religion_group_sin_religion_p16_no_tiene;non_response_no_informado_no_especificado_inside_denominator_outside_slots;boundary_geoboundaries_adm1_ccby40",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "count": 285803
+        },
+        {
+          "label_verbatim": "Evangélicas",
+          "count": 15425
+        },
+        {
+          "label_verbatim": "Otras cristianas",
+          "count": 7823
+        },
+        {
+          "label_verbatim": "Indígena",
+          "count": 3238
+        },
+        {
+          "label_verbatim": "Otras religiones",
+          "count": 365
+        },
+        {
+          "label_verbatim": "No tiene",
+          "count": 2789
+        },
+        {
+          "label_verbatim": "No informado",
+          "count": 1434
+        }
+      ]
+    },
+    {
+      "country_code": "PY",
+      "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+      "boundary_level": "department",
+      "area_unit_id": "py-department-2002-geoboundaries-adm1:06",
+      "area_code": "06",
+      "area_name": "Caazapá",
+      "year": 2002,
+      "population_total": 101850,
+      "population_total_basis": "Population aged 10 and over enumerated in the 2002 census (the religion question, 'Religión que profesa', was asked only of persons 10+; national cuadro P16 universe 'Población de 10 años y más de edad'). Counts extracted from the CELADE INE REDATAM Webserver (base CPV2002) cross-tabulation of religion by department; the detailed denomination list is recoded to the published P16 seven-group frame. The denominator includes the non-response group 'No informado' (REDATAM 'No especificado').",
+      "religious_affiliation_count": 100527,
+      "religious_affiliation_percent": 98.701,
+      "no_religion_count": 487,
+      "no_religion_percent": 0.4782,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 9567.5205,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-cpv2002-redatam-religion-departamento",
+        "geoboundaries-pry-adm1"
+      ],
+      "quality_flag": "census_affiliation_religion_que_profesa;universe_population_aged_10_plus;redatam_live_crosstab_recoded_to_p16_seven_groups;national_reconciliation_exact_per_group;single_wave_2002;religious_change_withheld;no_religion_group_sin_religion_p16_no_tiene;non_response_no_informado_no_especificado_inside_denominator_outside_slots;boundary_geoboundaries_adm1_ccby40",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "count": 95282
+        },
+        {
+          "label_verbatim": "Evangélicas",
+          "count": 3237
+        },
+        {
+          "label_verbatim": "Otras cristianas",
+          "count": 630
+        },
+        {
+          "label_verbatim": "Indígena",
+          "count": 1260
+        },
+        {
+          "label_verbatim": "Otras religiones",
+          "count": 118
+        },
+        {
+          "label_verbatim": "No tiene",
+          "count": 487
+        },
+        {
+          "label_verbatim": "No informado",
+          "count": 836
+        }
+      ]
+    },
+    {
+      "country_code": "PY",
+      "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+      "boundary_level": "department",
+      "area_unit_id": "py-department-2002-geoboundaries-adm1:07",
+      "area_code": "07",
+      "area_name": "Itapúa",
+      "year": 2002,
+      "population_total": 335846,
+      "population_total_basis": "Population aged 10 and over enumerated in the 2002 census (the religion question, 'Religión que profesa', was asked only of persons 10+; national cuadro P16 universe 'Población de 10 años y más de edad'). Counts extracted from the CELADE INE REDATAM Webserver (base CPV2002) cross-tabulation of religion by department; the detailed denomination list is recoded to the published P16 seven-group frame. The denominator includes the non-response group 'No informado' (REDATAM 'No especificado').",
+      "religious_affiliation_count": 330798,
+      "religious_affiliation_percent": 98.4969,
+      "no_religion_count": 3533,
+      "no_religion_percent": 1.052,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 15893.9963,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-cpv2002-redatam-religion-departamento",
+        "geoboundaries-pry-adm1"
+      ],
+      "quality_flag": "census_affiliation_religion_que_profesa;universe_population_aged_10_plus;redatam_live_crosstab_recoded_to_p16_seven_groups;national_reconciliation_exact_per_group;single_wave_2002;religious_change_withheld;no_religion_group_sin_religion_p16_no_tiene;non_response_no_informado_no_especificado_inside_denominator_outside_slots;boundary_geoboundaries_adm1_ccby40",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "count": 303137
+        },
+        {
+          "label_verbatim": "Evangélicas",
+          "count": 21506
+        },
+        {
+          "label_verbatim": "Otras cristianas",
+          "count": 4072
+        },
+        {
+          "label_verbatim": "Indígena",
+          "count": 1241
+        },
+        {
+          "label_verbatim": "Otras religiones",
+          "count": 842
+        },
+        {
+          "label_verbatim": "No tiene",
+          "count": 3533
+        },
+        {
+          "label_verbatim": "No informado",
+          "count": 1515
+        }
+      ]
+    },
+    {
+      "country_code": "PY",
+      "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+      "boundary_level": "department",
+      "area_unit_id": "py-department-2002-geoboundaries-adm1:08",
+      "area_code": "08",
+      "area_name": "Misiones",
+      "year": 2002,
+      "population_total": 78496,
+      "population_total_basis": "Population aged 10 and over enumerated in the 2002 census (the religion question, 'Religión que profesa', was asked only of persons 10+; national cuadro P16 universe 'Población de 10 años y más de edad'). Counts extracted from the CELADE INE REDATAM Webserver (base CPV2002) cross-tabulation of religion by department; the detailed denomination list is recoded to the published P16 seven-group frame. The denominator includes the non-response group 'No informado' (REDATAM 'No especificado').",
+      "religious_affiliation_count": 77120,
+      "religious_affiliation_percent": 98.247,
+      "no_religion_count": 547,
+      "no_religion_percent": 0.6969,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 8174.4225,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-cpv2002-redatam-religion-departamento",
+        "geoboundaries-pry-adm1"
+      ],
+      "quality_flag": "census_affiliation_religion_que_profesa;universe_population_aged_10_plus;redatam_live_crosstab_recoded_to_p16_seven_groups;national_reconciliation_exact_per_group;single_wave_2002;religious_change_withheld;no_religion_group_sin_religion_p16_no_tiene;non_response_no_informado_no_especificado_inside_denominator_outside_slots;boundary_geoboundaries_adm1_ccby40;small_cell_under_10",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "count": 74042
+        },
+        {
+          "label_verbatim": "Evangélicas",
+          "count": 2589
+        },
+        {
+          "label_verbatim": "Otras cristianas",
+          "count": 386
+        },
+        {
+          "label_verbatim": "Indígena",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Otras religiones",
+          "count": 103
+        },
+        {
+          "label_verbatim": "No tiene",
+          "count": 547
+        },
+        {
+          "label_verbatim": "No informado",
+          "count": 829
+        }
+      ]
+    },
+    {
+      "country_code": "PY",
+      "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+      "boundary_level": "department",
+      "area_unit_id": "py-department-2002-geoboundaries-adm1:09",
+      "area_code": "09",
+      "area_name": "Paraguarí",
+      "year": 2002,
+      "population_total": 171665,
+      "population_total_basis": "Population aged 10 and over enumerated in the 2002 census (the religion question, 'Religión que profesa', was asked only of persons 10+; national cuadro P16 universe 'Población de 10 años y más de edad'). Counts extracted from the CELADE INE REDATAM Webserver (base CPV2002) cross-tabulation of religion by department; the detailed denomination list is recoded to the published P16 seven-group frame. The denominator includes the non-response group 'No informado' (REDATAM 'No especificado').",
+      "religious_affiliation_count": 169899,
+      "religious_affiliation_percent": 98.9713,
+      "no_religion_count": 755,
+      "no_religion_percent": 0.4398,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 8618.9014,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-cpv2002-redatam-religion-departamento",
+        "geoboundaries-pry-adm1"
+      ],
+      "quality_flag": "census_affiliation_religion_que_profesa;universe_population_aged_10_plus;redatam_live_crosstab_recoded_to_p16_seven_groups;national_reconciliation_exact_per_group;single_wave_2002;religious_change_withheld;no_religion_group_sin_religion_p16_no_tiene;non_response_no_informado_no_especificado_inside_denominator_outside_slots;boundary_geoboundaries_adm1_ccby40;small_cell_under_10",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "count": 165048
+        },
+        {
+          "label_verbatim": "Evangélicas",
+          "count": 3992
+        },
+        {
+          "label_verbatim": "Otras cristianas",
+          "count": 576
+        },
+        {
+          "label_verbatim": "Indígena",
+          "count": 0
+        },
+        {
+          "label_verbatim": "Otras religiones",
+          "count": 283
+        },
+        {
+          "label_verbatim": "No tiene",
+          "count": 755
+        },
+        {
+          "label_verbatim": "No informado",
+          "count": 1011
+        }
+      ]
+    },
+    {
+      "country_code": "PY",
+      "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+      "boundary_level": "department",
+      "area_unit_id": "py-department-2002-geoboundaries-adm1:10",
+      "area_code": "10",
+      "area_name": "Alto Paraná",
+      "year": 2002,
+      "population_total": 410694,
+      "population_total_basis": "Population aged 10 and over enumerated in the 2002 census (the religion question, 'Religión que profesa', was asked only of persons 10+; national cuadro P16 universe 'Población de 10 años y más de edad'). Counts extracted from the CELADE INE REDATAM Webserver (base CPV2002) cross-tabulation of religion by department; the detailed denomination list is recoded to the published P16 seven-group frame. The denominator includes the non-response group 'No informado' (REDATAM 'No especificado').",
+      "religious_affiliation_count": 400563,
+      "religious_affiliation_percent": 97.5332,
+      "no_religion_count": 4766,
+      "no_religion_percent": 1.1605,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 14237.187,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-cpv2002-redatam-religion-departamento",
+        "geoboundaries-pry-adm1"
+      ],
+      "quality_flag": "census_affiliation_religion_que_profesa;universe_population_aged_10_plus;redatam_live_crosstab_recoded_to_p16_seven_groups;national_reconciliation_exact_per_group;single_wave_2002;religious_change_withheld;no_religion_group_sin_religion_p16_no_tiene;non_response_no_informado_no_especificado_inside_denominator_outside_slots;boundary_geoboundaries_adm1_ccby40",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "count": 357691
+        },
+        {
+          "label_verbatim": "Evangélicas",
+          "count": 31833
+        },
+        {
+          "label_verbatim": "Otras cristianas",
+          "count": 5612
+        },
+        {
+          "label_verbatim": "Indígena",
+          "count": 2577
+        },
+        {
+          "label_verbatim": "Otras religiones",
+          "count": 2850
+        },
+        {
+          "label_verbatim": "No tiene",
+          "count": 4766
+        },
+        {
+          "label_verbatim": "No informado",
+          "count": 5365
+        }
+      ]
+    },
+    {
+      "country_code": "PY",
+      "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+      "boundary_level": "department",
+      "area_unit_id": "py-department-2002-geoboundaries-adm1:11",
+      "area_code": "11",
+      "area_name": "Central",
+      "year": 2002,
+      "population_total": 1038934,
+      "population_total_basis": "Population aged 10 and over enumerated in the 2002 census (the religion question, 'Religión que profesa', was asked only of persons 10+; national cuadro P16 universe 'Población de 10 años y más de edad'). Counts extracted from the CELADE INE REDATAM Webserver (base CPV2002) cross-tabulation of religion by department; the detailed denomination list is recoded to the published P16 seven-group frame. The denominator includes the non-response group 'No informado' (REDATAM 'No especificado').",
+      "religious_affiliation_count": 1014914,
+      "religious_affiliation_percent": 97.688,
+      "no_religion_count": 11552,
+      "no_religion_percent": 1.1119,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 2417.9812,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-cpv2002-redatam-religion-departamento",
+        "geoboundaries-pry-adm1"
+      ],
+      "quality_flag": "census_affiliation_religion_que_profesa;universe_population_aged_10_plus;redatam_live_crosstab_recoded_to_p16_seven_groups;national_reconciliation_exact_per_group;single_wave_2002;religious_change_withheld;no_religion_group_sin_religion_p16_no_tiene;non_response_no_informado_no_especificado_inside_denominator_outside_slots;boundary_geoboundaries_adm1_ccby40",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "count": 935787
+        },
+        {
+          "label_verbatim": "Evangélicas",
+          "count": 62392
+        },
+        {
+          "label_verbatim": "Otras cristianas",
+          "count": 13401
+        },
+        {
+          "label_verbatim": "Indígena",
+          "count": 245
+        },
+        {
+          "label_verbatim": "Otras religiones",
+          "count": 3089
+        },
+        {
+          "label_verbatim": "No tiene",
+          "count": 11552
+        },
+        {
+          "label_verbatim": "No informado",
+          "count": 12468
+        }
+      ]
+    },
+    {
+      "country_code": "PY",
+      "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+      "boundary_level": "department",
+      "area_unit_id": "py-department-2002-geoboundaries-adm1:12",
+      "area_code": "12",
+      "area_name": "Ñeembucú",
+      "year": 2002,
+      "population_total": 61314,
+      "population_total_basis": "Population aged 10 and over enumerated in the 2002 census (the religion question, 'Religión que profesa', was asked only of persons 10+; national cuadro P16 universe 'Población de 10 años y más de edad'). Counts extracted from the CELADE INE REDATAM Webserver (base CPV2002) cross-tabulation of religion by department; the detailed denomination list is recoded to the published P16 seven-group frame. The denominator includes the non-response group 'No informado' (REDATAM 'No especificado').",
+      "religious_affiliation_count": 60563,
+      "religious_affiliation_percent": 98.7752,
+      "no_religion_count": 488,
+      "no_religion_percent": 0.7959,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 11695.6519,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-cpv2002-redatam-religion-departamento",
+        "geoboundaries-pry-adm1"
+      ],
+      "quality_flag": "census_affiliation_religion_que_profesa;universe_population_aged_10_plus;redatam_live_crosstab_recoded_to_p16_seven_groups;national_reconciliation_exact_per_group;single_wave_2002;religious_change_withheld;no_religion_group_sin_religion_p16_no_tiene;non_response_no_informado_no_especificado_inside_denominator_outside_slots;boundary_geoboundaries_adm1_ccby40;small_cell_under_10",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "count": 57922
+        },
+        {
+          "label_verbatim": "Evangélicas",
+          "count": 2183
+        },
+        {
+          "label_verbatim": "Otras cristianas",
+          "count": 397
+        },
+        {
+          "label_verbatim": "Indígena",
+          "count": 1
+        },
+        {
+          "label_verbatim": "Otras religiones",
+          "count": 60
+        },
+        {
+          "label_verbatim": "No tiene",
+          "count": 488
+        },
+        {
+          "label_verbatim": "No informado",
+          "count": 263
+        }
+      ]
+    },
+    {
+      "country_code": "PY",
+      "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+      "boundary_level": "department",
+      "area_unit_id": "py-department-2002-geoboundaries-adm1:13",
+      "area_code": "13",
+      "area_name": "Amambay",
+      "year": 2002,
+      "population_total": 84592,
+      "population_total_basis": "Population aged 10 and over enumerated in the 2002 census (the religion question, 'Religión que profesa', was asked only of persons 10+; national cuadro P16 universe 'Población de 10 años y más de edad'). Counts extracted from the CELADE INE REDATAM Webserver (base CPV2002) cross-tabulation of religion by department; the detailed denomination list is recoded to the published P16 seven-group frame. The denominator includes the non-response group 'No informado' (REDATAM 'No especificado').",
+      "religious_affiliation_count": 82669,
+      "religious_affiliation_percent": 97.7267,
+      "no_religion_count": 1115,
+      "no_religion_percent": 1.3181,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 12586.4703,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-cpv2002-redatam-religion-departamento",
+        "geoboundaries-pry-adm1"
+      ],
+      "quality_flag": "census_affiliation_religion_que_profesa;universe_population_aged_10_plus;redatam_live_crosstab_recoded_to_p16_seven_groups;national_reconciliation_exact_per_group;single_wave_2002;religious_change_withheld;no_religion_group_sin_religion_p16_no_tiene;non_response_no_informado_no_especificado_inside_denominator_outside_slots;boundary_geoboundaries_adm1_ccby40",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "count": 70761
+        },
+        {
+          "label_verbatim": "Evangélicas",
+          "count": 4367
+        },
+        {
+          "label_verbatim": "Otras cristianas",
+          "count": 978
+        },
+        {
+          "label_verbatim": "Indígena",
+          "count": 6167
+        },
+        {
+          "label_verbatim": "Otras religiones",
+          "count": 396
+        },
+        {
+          "label_verbatim": "No tiene",
+          "count": 1115
+        },
+        {
+          "label_verbatim": "No informado",
+          "count": 808
+        }
+      ]
+    },
+    {
+      "country_code": "PY",
+      "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+      "boundary_level": "department",
+      "area_unit_id": "py-department-2002-geoboundaries-adm1:14",
+      "area_code": "14",
+      "area_name": "Canindeyú",
+      "year": 2002,
+      "population_total": 97713,
+      "population_total_basis": "Population aged 10 and over enumerated in the 2002 census (the religion question, 'Religión que profesa', was asked only of persons 10+; national cuadro P16 universe 'Población de 10 años y más de edad'). Counts extracted from the CELADE INE REDATAM Webserver (base CPV2002) cross-tabulation of religion by department; the detailed denomination list is recoded to the published P16 seven-group frame. The denominator includes the non-response group 'No informado' (REDATAM 'No especificado').",
+      "religious_affiliation_count": 95445,
+      "religious_affiliation_percent": 97.6789,
+      "no_religion_count": 1651,
+      "no_religion_percent": 1.6896,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 15095.789,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-cpv2002-redatam-religion-departamento",
+        "geoboundaries-pry-adm1"
+      ],
+      "quality_flag": "census_affiliation_religion_que_profesa;universe_population_aged_10_plus;redatam_live_crosstab_recoded_to_p16_seven_groups;national_reconciliation_exact_per_group;single_wave_2002;religious_change_withheld;no_religion_group_sin_religion_p16_no_tiene;non_response_no_informado_no_especificado_inside_denominator_outside_slots;boundary_geoboundaries_adm1_ccby40",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "count": 79797
+        },
+        {
+          "label_verbatim": "Evangélicas",
+          "count": 8864
+        },
+        {
+          "label_verbatim": "Otras cristianas",
+          "count": 1730
+        },
+        {
+          "label_verbatim": "Indígena",
+          "count": 4678
+        },
+        {
+          "label_verbatim": "Otras religiones",
+          "count": 376
+        },
+        {
+          "label_verbatim": "No tiene",
+          "count": 1651
+        },
+        {
+          "label_verbatim": "No informado",
+          "count": 617
+        }
+      ]
+    },
+    {
+      "country_code": "PY",
+      "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+      "boundary_level": "department",
+      "area_unit_id": "py-department-2002-geoboundaries-adm1:15",
+      "area_code": "15",
+      "area_name": "Presidente Hayes",
+      "year": 2002,
+      "population_total": 60451,
+      "population_total_basis": "Population aged 10 and over enumerated in the 2002 census (the religion question, 'Religión que profesa', was asked only of persons 10+; national cuadro P16 universe 'Población de 10 años y más de edad'). Counts extracted from the CELADE INE REDATAM Webserver (base CPV2002) cross-tabulation of religion by department; the detailed denomination list is recoded to the published P16 seven-group frame. The denominator includes the non-response group 'No informado' (REDATAM 'No especificado').",
+      "religious_affiliation_count": 58067,
+      "religious_affiliation_percent": 96.0563,
+      "no_religion_count": 1943,
+      "no_religion_percent": 3.2142,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 73826.159,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-cpv2002-redatam-religion-departamento",
+        "geoboundaries-pry-adm1"
+      ],
+      "quality_flag": "census_affiliation_religion_que_profesa;universe_population_aged_10_plus;redatam_live_crosstab_recoded_to_p16_seven_groups;national_reconciliation_exact_per_group;single_wave_2002;religious_change_withheld;no_religion_group_sin_religion_p16_no_tiene;non_response_no_informado_no_especificado_inside_denominator_outside_slots;boundary_geoboundaries_adm1_ccby40",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "count": 41021
+        },
+        {
+          "label_verbatim": "Evangélicas",
+          "count": 14441
+        },
+        {
+          "label_verbatim": "Otras cristianas",
+          "count": 787
+        },
+        {
+          "label_verbatim": "Indígena",
+          "count": 1722
+        },
+        {
+          "label_verbatim": "Otras religiones",
+          "count": 96
+        },
+        {
+          "label_verbatim": "No tiene",
+          "count": 1943
+        },
+        {
+          "label_verbatim": "No informado",
+          "count": 441
+        }
+      ]
+    },
+    {
+      "country_code": "PY",
+      "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+      "boundary_level": "department",
+      "area_unit_id": "py-department-2002-geoboundaries-adm1:16",
+      "area_code": "16",
+      "area_name": "Boquerón",
+      "year": 2002,
+      "population_total": 30896,
+      "population_total_basis": "Population aged 10 and over enumerated in the 2002 census (the religion question, 'Religión que profesa', was asked only of persons 10+; national cuadro P16 universe 'Población de 10 años y más de edad'). Counts extracted from the CELADE INE REDATAM Webserver (base CPV2002) cross-tabulation of religion by department; the detailed denomination list is recoded to the published P16 seven-group frame. The denominator includes the non-response group 'No informado' (REDATAM 'No especificado').",
+      "religious_affiliation_count": 27531,
+      "religious_affiliation_percent": 89.1086,
+      "no_religion_count": 3194,
+      "no_religion_percent": 10.3379,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 88518.3302,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-cpv2002-redatam-religion-departamento",
+        "geoboundaries-pry-adm1"
+      ],
+      "quality_flag": "census_affiliation_religion_que_profesa;universe_population_aged_10_plus;redatam_live_crosstab_recoded_to_p16_seven_groups;national_reconciliation_exact_per_group;single_wave_2002;religious_change_withheld;no_religion_group_sin_religion_p16_no_tiene;non_response_no_informado_no_especificado_inside_denominator_outside_slots;boundary_geoboundaries_adm1_ccby40",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "count": 10583
+        },
+        {
+          "label_verbatim": "Evangélicas",
+          "count": 16046
+        },
+        {
+          "label_verbatim": "Otras cristianas",
+          "count": 221
+        },
+        {
+          "label_verbatim": "Indígena",
+          "count": 630
+        },
+        {
+          "label_verbatim": "Otras religiones",
+          "count": 51
+        },
+        {
+          "label_verbatim": "No tiene",
+          "count": 3194
+        },
+        {
+          "label_verbatim": "No informado",
+          "count": 171
+        }
+      ]
+    },
+    {
+      "country_code": "PY",
+      "boundary_set_id": "py-department-2002-geoboundaries-adm1",
+      "boundary_level": "department",
+      "area_unit_id": "py-department-2002-geoboundaries-adm1:17",
+      "area_code": "17",
+      "area_name": "Alto Paraguay",
+      "year": 2002,
+      "population_total": 8247,
+      "population_total_basis": "Population aged 10 and over enumerated in the 2002 census (the religion question, 'Religión que profesa', was asked only of persons 10+; national cuadro P16 universe 'Población de 10 años y más de edad'). Counts extracted from the CELADE INE REDATAM Webserver (base CPV2002) cross-tabulation of religion by department; the detailed denomination list is recoded to the published P16 seven-group frame. The denominator includes the non-response group 'No informado' (REDATAM 'No especificado').",
+      "religious_affiliation_count": 7913,
+      "religious_affiliation_percent": 95.95,
+      "no_religion_count": 279,
+      "no_religion_percent": 3.383,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 78756.4086,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "ine-cpv2002-redatam-religion-departamento",
+        "geoboundaries-pry-adm1"
+      ],
+      "quality_flag": "census_affiliation_religion_que_profesa;universe_population_aged_10_plus;redatam_live_crosstab_recoded_to_p16_seven_groups;national_reconciliation_exact_per_group;single_wave_2002;religious_change_withheld;no_religion_group_sin_religion_p16_no_tiene;non_response_no_informado_no_especificado_inside_denominator_outside_slots;boundary_geoboundaries_adm1_ccby40",
+      "composition": [
+        {
+          "label_verbatim": "Católica",
+          "count": 6833
+        },
+        {
+          "label_verbatim": "Evangélicas",
+          "count": 713
+        },
+        {
+          "label_verbatim": "Otras cristianas",
+          "count": 16
+        },
+        {
+          "label_verbatim": "Indígena",
+          "count": 339
+        },
+        {
+          "label_verbatim": "Otras religiones",
+          "count": 12
+        },
+        {
+          "label_verbatim": "No tiene",
+          "count": 279
+        },
+        {
+          "label_verbatim": "No informado",
+          "count": 55
+        }
+      ]
+    }
+  ]
+}
