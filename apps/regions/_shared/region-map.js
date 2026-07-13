@@ -4499,6 +4499,31 @@ function setCensusYear(year) {
   if (changed) applyCensusPaint();
 }
 
+// tick labels for the year strip: every year keeps its span so the flex
+// row spreads ticks across the slider's stops, but only a strip-width
+// budget of them carries text. an empty span shrinks to nothing while a
+// visibility-hidden one keeps its min-content width — which is what let
+// sweden's 54 register years push the tick row ~790px past the panel
+// edge. first and last years always label; the legend title carries the
+// active year, so a skipped label loses nothing.
+function censusTicksMarkup(tickYears, timeEl) {
+  // panel is open by default so the strip is usually measurable; the
+  // fallback approximates the census-long desktop strip
+  const stripWidth = (timeEl && timeEl.clientWidth) || 520;
+  // ~44px per label fits four digits with breathing room at 11px
+  const maxLabels = Math.max(4, Math.floor(stripWidth / 44));
+  const stride = Math.ceil(tickYears.length / maxLabels);
+  const last = tickYears.length - 1;
+  const spans = tickYears.map((y, i) => {
+    // the half-stride guard keeps a strided label from crowding the
+    // always-labelled final year
+    const labelled = stride === 1 || i === last ||
+      (i % stride === 0 && last - i >= stride / 2);
+    return `<span data-year="${y}">${labelled ? y : ""}</span>`;
+  });
+  return `<div class="census-ticks">${spans.join("")}</div>`;
+}
+
 // rebuild the slider structure for the timeline (or the active level's
 // year set when no timeline is configured)
 function syncCensusTimeSlider() {
@@ -4524,7 +4549,7 @@ function syncCensusTimeSlider() {
       : `${RC.dataNoun || "Census"} data for this level is pending — the year control activates when it arrives`;
     timeEl.hidden = false;
     timeEl.innerHTML =
-      (tickYears.length ? `<div class="census-ticks">${tickYears.map((y) => `<span data-year="${y}">${y}</span>`).join("")}</div>` : "") +
+      (tickYears.length ? censusTicksMarkup(tickYears, timeEl) : "") +
       `<div class="census-legend-note">${note}</div>`;
     markActiveTick();
     return;
@@ -4537,7 +4562,7 @@ function syncCensusTimeSlider() {
     `<div class="census-time-row">` +
       `<input id="census-slider" class="census-slider" type="range" min="0" max="${years.length - 1}" step="1" value="${idx}" aria-label="${RC.dataNoun || "Census"} year">` +
     `</div>` +
-    `<div class="census-ticks">${years.map((y) => `<span data-year="${y}">${y}</span>`).join("")}</div>`;
+    censusTicksMarkup(years, timeEl);
   attachCensusTimeListeners();
   markActiveTick();
 }
