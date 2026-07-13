@@ -1,0 +1,456 @@
+{
+  "schema_version": "area-summary.v2",
+  "generated_at": "2026-07-14T00:00:00Z",
+  "generated_by": "pipeline/build_kn_area_summary.R",
+  "country_code": "KN",
+  "data_status": "census_religion_live",
+  "data_status_note": "Three-wave national series; 1991 uses printed one-decimal percentages and 2001/2011 use printed counts.",
+  "boundary_set": {
+    "boundary_set_id": "kn-adm0-2021-geoboundaries-dissolved-adm1",
+    "country_code": "KN",
+    "level": "adm0",
+    "vintage": "2021",
+    "source_dataset_id": "geoboundaries-kna-adm1-9469f09"
+  },
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "No governed place-of-worship snapshot ships in this national census-religion product.",
+    "notes": "Place counts and density metrics remain null."
+  },
+  "source_datasets": [
+    {
+      "source_dataset_id": "dos-skn-census-religion-national-1991-2011",
+      "name": "Saint Kitts and Nevis national census religion, 1991, 2001, and 2011",
+      "provider": "Department of Statistics, St Kitts and Nevis; CARICOM",
+      "url": "https://www.stats.gov.kn/topics/demographic-social-statistics/population/population-by-religious-belief-2011/",
+      "retrieval_date": "2026-07-14",
+      "local_path": "data/raw/kn_census/religion_belief_2011.html",
+      "licence": {
+        "name": "Department of Statistics, St Kitts and Nevis Open Licence Agreement",
+        "url": "https://www.stats.gov.kn/terms-and-conditions/open-license-agreement/",
+        "attribution": "Source: Department of Statistics, St Kitts and Nevis. Contains information licenced under the Department of Statistics, St Kitts and Nevis's Open Licence Agreement."
+      },
+      "citation": "Department of Statistics, St Kitts and Nevis, Population by Religious Belief, 2011; National Census Report 2001, St. Kitts and Nevis, Table 2.3.",
+      "access_limits": null,
+      "redistribution_limits": "Free reuse under the Open Licence Agreement with acknowledgement. Source: Department of Statistics, St Kitts and Nevis. Contains information licenced under the Department of Statistics, St Kitts and Nevis's Open Licence Agreement.",
+      "notes": "Religion is published for the whole federation only. Table 2.3 supplies printed one-decimal percentages for 1991 and counts for 2001. The DOS-SKN HTML table supplies counts for 2011. Dynamic HTML byte drift from the 2026-07-12 probe was verified by the conductor."
+    },
+    {
+      "source_dataset_id": "geoboundaries-kna-adm1-9469f09",
+      "name": "geoBoundaries gbOpen KNA ADM1, dissolved to one national polygon",
+      "provider": "geoBoundaries; source OpenStreetMap",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/KNA/ADM1/geoBoundaries-KNA-ADM1.geojson",
+      "retrieval_date": "2026-07-14",
+      "local_path": "data/raw/kn_census/geoBoundaries-KNA-ADM1.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution-ShareAlike 2.0",
+        "url": "https://www.openstreetmap.org/copyright",
+        "attribution": "geoBoundaries; OpenStreetMap contributors"
+      },
+      "citation": "geoBoundaries gbOpen KNA ADM1, boundary ID KNA-ADM1-52472329, release commit 9469f09; source OpenStreetMap. Dissolved to the national outline.",
+      "access_limits": null,
+      "redistribution_limits": "The derived national boundary carries Creative Commons Attribution-ShareAlike 2.0.",
+      "notes": "The governed 14-parish ADM1 layer is dissolved to one national feature with area_code KN."
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_id": "population_total",
+      "label": "Religion-table population",
+      "description": "Printed national religion-table total where the source publishes counts.",
+      "unit": "count",
+      "denominator_indicator_id": null,
+      "method": "Use the printed total for 2001 and 2011; retain null for the percentage-only 1991 wave.",
+      "temporal_coverage": "2001 and 2011; null in 1991",
+      "spatial_coverage": "Saint Kitts and Nevis national total",
+      "quality_notes": "The 2011 religion table totals 47,195, compared with the 46,398 resident-population figure. The product records this universe difference without repair."
+    },
+    {
+      "indicator_id": "religious_affiliation_percent",
+      "label": "Religious affiliation %",
+      "description": "Share reporting a religious affiliation after excluding None and Not stated from the numerator.",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "Use 100 - None - Not Stated for 1991; use 100 * (total - None - Not stated) / total for 2001 and 2011.",
+      "temporal_coverage": "1991, 2001, 2011",
+      "spatial_coverage": "Saint Kitts and Nevis national",
+      "quality_notes": "Affiliation is 100 minus None minus Not stated. Not stated remains in the denominator and outside both headline numerators. The 1991 values are printed percentages; later values derive from counts. The 1991-to-2001 change combines a printed-percentage basis with a count-derived basis."
+    },
+    {
+      "indicator_id": "no_religion_percent",
+      "label": "No religion %",
+      "description": "Share in the source None category.",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "Use the printed None percentage for 1991; use 100 * None / total for 2001 and 2011.",
+      "temporal_coverage": "1991, 2001, 2011",
+      "spatial_coverage": "Saint Kitts and Nevis national",
+      "quality_notes": "Affiliation is 100 minus None minus Not stated. Not stated remains in the denominator and outside both headline numerators. The 1991 values are printed percentages; later values derive from counts."
+    }
+  ],
+  "visual_layers": [
+    {
+      "visual_layer_id": "kn-adm0-religious-affiliation",
+      "label": "Religious affiliation %",
+      "description": "National census religious-affiliation share for 1991, 2001, and 2011.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "religious_affiliation_percent"
+      ],
+      "geometry_unit_type": "country",
+      "legend": {
+        "unit": "percent",
+        "denominator": "printed wave basis"
+      },
+      "colour_scale": null,
+      "time_control": "year_selector",
+      "aggregation_rule": null,
+      "uncertainty_display": "quality_flag",
+      "default_visibility": true,
+      "notes": "One national polygon is intentional because no wave publishes religion by parish or island."
+    },
+    {
+      "visual_layer_id": "kn-adm0-no-religion",
+      "label": "No religion %",
+      "description": "National census None share for 1991, 2001, and 2011.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "no_religion_percent"
+      ],
+      "geometry_unit_type": "country",
+      "legend": {
+        "unit": "percent",
+        "denominator": "printed wave basis"
+      },
+      "colour_scale": null,
+      "time_control": "year_selector",
+      "aggregation_rule": null,
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "The None and Not stated lines remain separate in all three waves."
+    }
+  ],
+  "rows": [
+    {
+      "country_code": "KN",
+      "boundary_set_id": "kn-adm0-2021-geoboundaries-dissolved-adm1",
+      "boundary_level": "adm0",
+      "area_unit_id": "kn-adm0-2021-geoboundaries-dissolved-adm1:KN",
+      "area_code": "KN",
+      "area_name": "Saint Kitts and Nevis",
+      "year": 1991,
+      "population_total": null,
+      "population_total_basis": "Table 2.3 publishes a Total % column for 1991 and no 1991 population count. population_total is null. Headline shares use the printed one-decimal percentages exactly.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": 95.8,
+      "no_religion_count": null,
+      "no_religion_percent": 1.7,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 262.1319,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "dos-skn-census-religion-national-1991-2011",
+        "geoboundaries-kna-adm1-9469f09"
+      ],
+      "quality_flag": "census_affiliation;national_only_adm0;not_stated_in_denominator;source_frames_preserved_verbatim;dos_skn_open_licence_agreement;boundary_cc_by_sa_2_0;percentage_as_printed_one_decimal;printed_percent_rounding_bound_plus_or_minus_0.05;bahai_and_evangelical_grouped_into_other_by_source;mixed_basis_change_1991_percent_printed_to_2001_count_derived",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 27.5
+        },
+        {
+          "label_verbatim": "Baptist",
+          "percent": 3.9
+        },
+        {
+          "label_verbatim": "Bretheren",
+          "percent": 1.8
+        },
+        {
+          "label_verbatim": "Church of God",
+          "percent": 4.3
+        },
+        {
+          "label_verbatim": "Hindu",
+          "percent": 0.4
+        },
+        {
+          "label_verbatim": "Jehovah Witness",
+          "percent": 1.2
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 25.3
+        },
+        {
+          "label_verbatim": "Moravian",
+          "percent": 7.3
+        },
+        {
+          "label_verbatim": "Muslim",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 5.5
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "percent": 0.4
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "percent": 0.7
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 6.9
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 3.5
+        },
+        {
+          "label_verbatim": "None",
+          "percent": 1.7
+        },
+        {
+          "label_verbatim": "Not Stated",
+          "percent": 2.5
+        },
+        {
+          "label_verbatim": "Other",
+          "percent": 6.9
+        }
+      ]
+    },
+    {
+      "country_code": "KN",
+      "boundary_set_id": "kn-adm0-2021-geoboundaries-dissolved-adm1",
+      "boundary_level": "adm0",
+      "area_unit_id": "kn-adm0-2021-geoboundaries-dissolved-adm1:KN",
+      "area_code": "KN",
+      "area_name": "Saint Kitts and Nevis",
+      "year": 2001,
+      "population_total": 46325,
+      "population_total_basis": "Printed national religion-table total for the wave: 46,325 in Table 2.3 for 2001 and 47,195 in the DOS-SKN Population by Religious Belief table for 2011.",
+      "religious_affiliation_count": 42446,
+      "religious_affiliation_percent": 91.6266,
+      "no_religion_count": 2393,
+      "no_religion_percent": 5.1657,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 262.1319,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "dos-skn-census-religion-national-1991-2011",
+        "geoboundaries-kna-adm1-9469f09"
+      ],
+      "quality_flag": "census_affiliation;national_only_adm0;not_stated_in_denominator;source_frames_preserved_verbatim;dos_skn_open_licence_agreement;boundary_cc_by_sa_2_0;count_derived_share;other_count_3002;wesleyan_holiness_not_separate_in_source_frame;mixed_basis_change_from_1991",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 9545
+        },
+        {
+          "label_verbatim": "Baptist",
+          "count": 2221
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 18
+        },
+        {
+          "label_verbatim": "Bretheren",
+          "count": 829
+        },
+        {
+          "label_verbatim": "Church of God",
+          "count": 3162
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "count": 1201
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 371
+        },
+        {
+          "label_verbatim": "Jehovah Witness",
+          "count": 611
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 8846
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 2532
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 129
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 3791
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "count": 93
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 764
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 3105
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 61
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 2165
+        },
+        {
+          "label_verbatim": "None",
+          "count": 2393
+        },
+        {
+          "label_verbatim": "Not Stated",
+          "count": 1486
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 3002
+        }
+      ]
+    },
+    {
+      "country_code": "KN",
+      "boundary_set_id": "kn-adm0-2021-geoboundaries-dissolved-adm1",
+      "boundary_level": "adm0",
+      "area_unit_id": "kn-adm0-2021-geoboundaries-dissolved-adm1:KN",
+      "area_code": "KN",
+      "area_name": "Saint Kitts and Nevis",
+      "year": 2011,
+      "population_total": 47195,
+      "population_total_basis": "Printed national religion-table total for the wave: 46,325 in Table 2.3 for 2001 and 47,195 in the DOS-SKN Population by Religious Belief table for 2011.",
+      "religious_affiliation_count": 42998,
+      "religious_affiliation_percent": 91.1071,
+      "no_religion_count": 4141,
+      "no_religion_percent": 8.7742,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": 262.1319,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": [
+        "dos-skn-census-religion-national-1991-2011",
+        "geoboundaries-kna-adm1-9469f09"
+      ],
+      "quality_flag": "census_affiliation;national_only_adm0;not_stated_in_denominator;source_frames_preserved_verbatim;dos_skn_open_licence_agreement;boundary_cc_by_sa_2_0;count_derived_share;religion_table_total_47195_differs_from_resident_population_46398",
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "count": 7842
+        },
+        {
+          "label_verbatim": "Baptist",
+          "count": 2564
+        },
+        {
+          "label_verbatim": "Bahai",
+          "count": 33
+        },
+        {
+          "label_verbatim": "Brethren",
+          "count": 801
+        },
+        {
+          "label_verbatim": "Church of God",
+          "count": 3495
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "count": 975
+        },
+        {
+          "label_verbatim": "Hindu",
+          "count": 860
+        },
+        {
+          "label_verbatim": "Jehovah Witness",
+          "count": 661
+        },
+        {
+          "label_verbatim": "Methodist",
+          "count": 7447
+        },
+        {
+          "label_verbatim": "Moravian",
+          "count": 2265
+        },
+        {
+          "label_verbatim": "Muslim",
+          "count": 244
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "count": 5081
+        },
+        {
+          "label_verbatim": "Presbyterian",
+          "count": 159
+        },
+        {
+          "label_verbatim": "Rastafarian",
+          "count": 608
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "count": 2801
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "count": 55
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "count": 2554
+        },
+        {
+          "label_verbatim": "Wesleyan Holiness",
+          "count": 2506
+        },
+        {
+          "label_verbatim": "None",
+          "count": 4141
+        },
+        {
+          "label_verbatim": "Other",
+          "count": 2047
+        },
+        {
+          "label_verbatim": "Not stated",
+          "count": 56
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Saint Kitts and Nevis Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css?v=20260713g" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260713g" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // The national series combines the source's printed one-decimal percentages
+    // for 1991 with count-derived shares for 2001 and 2011. The Department of
+    // Statistics publishes religion for the whole federation only; no wave
+    // publishes religion by parish or island. The map shades one national polygon.
+    window.REGION_CONFIG = {
+      countryCode: "KN",
+      title: "Places of Worship | Saint Kitts and Nevis Research Map",
+      // the centre and zoom hold both islands within the initial view on desktop
+      // and mobile while leaving room for the top-centre census control
+      center: [-62.75, 17.31],
+      initialZoom: 9.3,
+      censusLevels: {
+        national: {
+          label: "National",
+          boundaries: "data/kn_adm0_2021.geojson",
+          summary: "data/area_summary_adm0.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Department of Statistics, St Kitts and Nevis, under its Open Licence Agreement · Boundaries © geoBoundaries KNA ADM1 / OpenStreetMap contributors (CC BY-SA 2.0), dissolved to one national polygon"
+        }
+      },
+      defaultLevel: "national",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2011,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share reporting any religious affiliation after excluding None and Not stated from the numerator. The 1991 value is 100 minus the source's printed one-decimal None and Not Stated percentages. The 2001 and 2011 values derive from category counts and each wave's printed religion-table total. Not stated remains in the denominator."
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the source None category. The map uses the printed 1991 percentage and count-derived shares for 2001 and 2011. None and Not stated are separate lines in every wave."
+        },
+        religious_change: {
+          label: "Religious affiliation change",
+          note: "percentage-point change in the religious-affiliation share since the previous census (1991 → 2001 → 2011). The 1991→2001 comparison has a mixed basis: printed one-decimal percentage to count-derived share. The 2001→2011 comparison uses count-derived shares in both waves."
+        }
+      },
+      popupDenominatorNote: "The 1991 source publishes one-decimal percentages only, with no population total in Table 2.3. The map carries those printed percentages exactly; each printed value is exact to ±0.05 percentage points. The 2001 and 2011 percentages use their printed religion-table totals of 46,325 and 47,195. Affiliation is the total less None and Not stated. Not stated stays in the denominator and outside both headline numerators. The 2011 religion-table total of 47,195 differs from the 46,398 resident-population figure; the map records this universe difference without repair. The Department publishes religion for the whole federation only. The Department publishes parish geography for every other census variable, but it publishes parish religion for no wave. The 2021–2022 census has released no religion table; thematic reports remain pending.",
+      cityPresets: [
+        { label: "Basseterre", coords: [-62.7241, 17.3026], zoom: 13 },
+        { label: "Charlestown", coords: [-62.6210, 17.1398], zoom: 13 }
+      ],
+      geocode: { country: "kn", biasLngLat: [-62.75, 17.31] },
+      onboarding: {
+        title: "Saint Kitts and Nevis research map",
+        intro: "Census religious affiliation for Saint Kitts and Nevis in 1991, 2001, and 2011. The Department publishes religion for the whole federation only; the map therefore shades one national polygon across the three waves.",
+        bullets: [
+          "The Department of Statistics publishes religion for the whole federation only. It publishes parish geography for every other census variable, but it publishes parish religion for no wave.",
+          "Open <strong>Show Census Data</strong> (top centre) to choose the metric and census year (1991, 2001, 2011).",
+          "The 1991 wave carries the source's printed one-decimal percentages exactly. The 2001 and 2011 shares derive from printed counts and religion-table totals.",
+          "Not stated remains in the denominator and outside both headline numerators. The 2011 religion-table total of 47,195 differs from the 46,398 resident-population figure.",
+          "The 2021–2022 census has released no religion table. Thematic reports remain pending."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      // the Open Licence Agreement requires the acknowledgement notice; the
+      // boundary attribution carries the geoBoundaries share-alike terms
+      censusSourceAttribution: 'Source: Department of Statistics, St Kitts and Nevis. Contains information licenced under the Department of Statistics, St Kitts and Nevis\'s Open Licence Agreement. Census religion © <a href="https://www.stats.gov.kn/" target="_blank" rel="noopener">Department of Statistics, St Kitts and Nevis</a> &middot; Boundaries © <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> KNA ADM1 / OpenStreetMap contributors (CC BY-SA 2.0), dissolved to one national polygon',
+      censusFlagNote: "* The Department of Statistics publishes religion for the whole federation only. It publishes parish geography for every other census variable, but it publishes parish religion for no wave. The 1991 wave carries printed one-decimal percentages; the 1991→2001 change therefore compares a printed-percentage basis with a count-derived basis. The 2001→2011 change uses count-derived shares. Not stated remains in the denominator and outside both headline numerators. The 2011 religion-table total is 47,195, compared with the 46,398 resident-population figure; the map records this universe difference without repair. The 2021–2022 census has released no religion table; thematic reports remain pending."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260713g"></script>
+</body>
+</html>
