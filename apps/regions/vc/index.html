@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | St Vincent Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css?v=20260713f" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260713f" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // the source prints christian-denomination percentages without counts or
+    // the remainder of the division population.
+    window.REGION_CONFIG = {
+      countryCode: "VC",
+      title: "Places of Worship | St Vincent Research Map",
+      dataNoun: "Census",
+      center: [-61.21, 13.16],
+      initialZoom: 8.1,
+      censusLevels: {
+        division: {
+          label: "Census division (13 units)",
+          boundaries: "data/vc_division.geojson",
+          summary: "data/area_summary_division.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census tables © Statistical Office, Government of Saint Vincent and the Grenadines, all rights reserved as posted; no reuse terms stated, used with attribution pending confirmation · Boundaries United States Census Bureau Demobase, US-government work"
+        }
+      },
+      defaultLevel: "division",
+      defaultMetric: "pentecostal_percent",
+      defaultYear: 2012,
+      metricsAvailable: [
+        "anglican_percent",
+        "baptist_spiritual_percent",
+        "evangelical_percent",
+        "jehovahs_witness_percent",
+        "methodist_percent",
+        "pentecostal_percent",
+        "presbyterian_congregational_percent",
+        "catholic_percent",
+        "salvation_army_percent",
+        "seventh_day_adventist_percent",
+        "other_christian_percent"
+      ],
+      metricLabels: {
+        anglican_percent: { note: "share of the division's total population; the printed tables cover Christian denominations only" },
+        baptist_spiritual_percent: { note: "share of the division's total population; the printed tables cover Christian denominations only" },
+        evangelical_percent: { note: "share of the division's total population; the printed tables cover Christian denominations only" },
+        jehovahs_witness_percent: { note: "share of the division's total population; the printed tables cover Christian denominations only" },
+        methodist_percent: { note: "share of the division's total population; the printed tables cover Christian denominations only" },
+        pentecostal_percent: { note: "share of the division's total population; the printed tables cover Christian denominations only" },
+        presbyterian_congregational_percent: { note: "share of the division's total population; the printed tables cover Christian denominations only" },
+        catholic_percent: { label: "Roman Catholic %", note: "share of the division's total population; the printed tables cover Christian denominations only" },
+        salvation_army_percent: { note: "share of the division's total population; the printed tables cover Christian denominations only" },
+        seventh_day_adventist_percent: { note: "share of the division's total population; the printed tables cover Christian denominations only" },
+        other_christian_percent: { note: "share of the division's total population; the printed tables cover Christian denominations only" }
+      },
+      popupDenominatorNote: "Every percentage is a share of the division's total population. The printed tables cover Christian denominations only. They omit the non-Christian, no-religion, and not-stated remainder at division grain. Rows therefore do not sum to 100 by source design. The source publishes no division counts in these tables. This map derives no counts.",
+      cityPresets: [
+        { label: "Kingstown", coords: [-61.2248, 13.16], zoom: 11 },
+        { label: "Georgetown", coords: [-61.1204, 13.2805], zoom: 11 },
+        { label: "Barrouallie", coords: [-61.2722, 13.2363], zoom: 11 }
+      ],
+      geocode: { country: "vc", biasLngLat: [-61.21, 13.16] },
+      onboarding: {
+        title: "St Vincent and the Grenadines research map",
+        intro: "Christian-denomination shares for the thirteen census divisions in 2001 and 2012. Every percentage uses the division's total population as its denominator. The printed tables omit the non-Christian, no-religion, and not-stated remainder at division grain. Rows therefore do not sum to 100 by source design.",
+        bullets: [
+          "The map hatches this layer and tags it <strong>Partial layer</strong> because the printed record is percentage-only and Christian-only at this grain. The source publishes no division counts in these tables. The map derives no counts.",
+          "Pentecostal was the largest printed national Christian-denomination share in both waves: 17.6% in 2001 and 27.6% in 2012.",
+          "Open <strong>Show Census Data</strong> (top centre) to choose among all eleven printed Christian-denomination shares and switch between 2001 and 2012.",
+          "Tap any dot for a place; tap a census division for its percentage detail."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Christian-denomination shares &copy; <a href="https://stats.gov.vc/wp-content/uploads/2018/11/Population-and-Housing-Census-Report-2012.pdf" target="_blank" rel="noopener">Statistical Office, Government of Saint Vincent and the Grenadines</a>, all rights reserved as posted; no reuse terms stated, used with attribution pending confirmation. &middot; Boundaries <a href="https://www.census.gov/library/visualizations/time-series/demo/demobase-stvincent-grenadines.html" target="_blank" rel="noopener">United States Census Bureau Demobase</a>, US-government work.',
+      censusFlagNote: "* The printed tables report percentages only and cover Christian denominations only. Their unprinted remainder comprises non-Christian affiliations, no religion, and not stated."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260713f"></script>
+</body>
+</html>

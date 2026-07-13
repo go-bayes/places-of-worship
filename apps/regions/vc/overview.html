@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | St Vincent map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260712d" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the saint vincent and the grenadines research map;
+    // every claim follows the committed area summary, private manifest, or
+    // source record.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "VC",
+      countryName: "St Vincent and the Grenadines",
+      mapHref: "./",
+      intro: "This map shows the eleven Christian-denomination shares printed for the thirteen census divisions in 2001 and 2012. Every percentage uses the division's total population as its denominator. The printed tables omit the non-Christian, no-religion, and not-stated remainder at division grain. Rows therefore do not sum to 100 by source design. The source publishes no division counts in these tables. This project derives no counts.",
+      facts: {
+        waves: "2 census waves, 2001 and 2012",
+        geographies: "Census division (13 units)",
+        metrics: "11 Christian-denomination shares",
+        placeDots: "OpenStreetMap supplies the separate place dots"
+      },
+      reading: [
+        "The map hatches the census layer and tags it Partial layer because the printed division record is percentage-only and Christian-only. Each wash shows one printed Christian-denomination share of the division's total population. No affiliation or no-religion metric exists at this grain.",
+        "Pentecostal was the largest printed national Christian-denomination share in both waves. The printed Total row reports 17.6% in 2001 and 27.6% in 2012, an increase of 10.0 percentage points.",
+        "The 2012 Pentecostal share ranges from 17.5% in North Grenadines to 35.9% in Kingstown Suburb. Georgetown records the largest division increase in this share. Its share rose from 4.9% in 2001 to 30.3% in 2012, an increase of 25.4 percentage points.",
+        "The printed tables cover Christian denominations only. They leave the non-Christian, no-religion, and not-stated remainder unprinted at division grain. Summing the eleven shares would therefore misuse the tables, and the map makes no claim about the omitted remainder.",
+        "The United States Census Bureau Demobase boundary contains the thirteen census divisions used by the 2012 census. United States Census Bureau staff digitised the subnational boundaries from publicly available sources. The boundary is a US-government work. The United States Census Bureau cannot guarantee the accuracy of boundary placements."
+      ],
+      sources: [
+        {
+          name: "Statistical Office, Population and Housing Census Report 2012, Tables 2.12 and 2.13",
+          href: "https://stats.gov.vc/wp-content/uploads/2018/11/Population-and-Housing-Census-Report-2012.pdf",
+          construct: "Christian-denomination shares of each census division's total population",
+          years: "2001 and 2012",
+          licence: "© Statistical Office, Government of Saint Vincent and the Grenadines. All rights reserved as posted. No reuse terms stated; used with attribution pending confirmation."
+        },
+        {
+          name: "United States Census Bureau Demobase VCT ADM1",
+          href: "https://www.census.gov/library/visualizations/time-series/demo/demobase-stvincent-grenadines.html",
+          construct: "Boundary geometry for 13 census divisions",
+          years: "2012 census geography",
+          licence: "US-government work. United States Census Bureau staff digitised the subnational boundaries from publicly available sources. The United States Census Bureau cannot guarantee the accuracy of boundary placements."
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Statistical Office, <a href=\"https://stats.gov.vc/wp-content/uploads/2018/11/Population-and-Housing-Census-Report-2012.pdf\" target=\"_blank\" rel=\"noopener\"><em>Population and Housing Census Report 2012</em>, Tables 2.12 and 2.13</a>. The tables print Christian-denomination percentages for 2012 and 2001. Boundaries come from <a href=\"https://www.census.gov/library/visualizations/time-series/demo/demobase-stvincent-grenadines.html\" target=\"_blank\" rel=\"noopener\">United States Census Bureau Demobase VCT ADM1</a>.",
+        tables: "Tables 2.12 and 2.13 print the percentage distribution of population by census division and Christian denomination. The source prints the tables as images. We transcribed every cell twice at different resolutions. We retained the sole comma-decimal cell as a provenance note.",
+        licence: "The census tables are © Statistical Office, Government of Saint Vincent and the Grenadines, with all rights reserved as posted. No reuse terms are stated; the derived summaries are used with attribution pending confirmation. The boundary is a United States Census Bureau Demobase US-government work. United States Census Bureau staff digitised it from publicly available sources. The United States Census Bureau cannot guarantee the accuracy of boundary placements. The project page and code are licensed under CC BY-NC-SA 4.0, subject to the source terms stated here.",
+        script: "pipeline/build_vc_area_summary.R",
+        manifests: [
+          { label: "vc-census-division-denominations-2001-2012.json" }
+        ],
+        note: "The manifest is named here for provenance and is not linked from this public page."
+      },
+      contribute: {
+        pendingNote: "The St Vincent and the Grenadines map has no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260713b"></script>
+</body>
+</html>

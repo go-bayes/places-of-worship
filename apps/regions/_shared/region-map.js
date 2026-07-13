@@ -3630,22 +3630,20 @@ function openCensusPopup(feature, lngLat) {
   // for example Italy, carry the latter with population_total null by
   // design), so show the area and its pending status rather than a table
   // of dashes
-  // a counts-only product (a page that opted into the count metric) has
-  // data when the count is populated, even though every percent and the
-  // population total are null by design — this branch is unreachable for
-  // pages that do not list religious_affiliation_count in metricsAvailable
   const hasCountMetric = "religious_affiliation_count" in CENSUS_METRICS;
-  // a place-register product (a page that opted into place_count) has data
-  // when the register count is populated, mirroring the counts-only rule
-  const hasPlaceCountMetric = "place_count" in CENSUS_METRICS;
+  // an area has data when any metric THIS PAGE carries holds a value on one
+  // of its rows (population_total counts too). generalises the earlier
+  // counts-only and place-register special cases to every opt-in product,
+  // including share-only pages (VC's denomination percentages). the two
+  // OSM-derived density metrics never count: pending-religion rows carry
+  // them by design, and they must keep reaching the pending popup below
+  const OSM_DERIVED_METRICS = new Set(["places_per_10000_residents", "place_density_per_sq_km"]);
+  const productMetrics = Object.keys(CENSUS_METRICS).filter((m) => !OSM_DERIVED_METRICS.has(m));
   const areaHasData = store.years.some((year) => {
     const row = store.byAreaYear.get(`${code}|${year}`);
     return row && (
       Number.isFinite(row.population_total) ||
-      Number.isFinite(row.religious_affiliation_percent) ||
-      Number.isFinite(row.no_religion_percent) ||
-      (hasCountMetric && Number.isFinite(row.religious_affiliation_count)) ||
-      (hasPlaceCountMetric && Number.isFinite(row.place_count))
+      productMetrics.some((metric) => Number.isFinite(row[metric]))
     );
   });
   if (!areaHasData) {
