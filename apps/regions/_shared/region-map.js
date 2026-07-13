@@ -104,6 +104,7 @@ document.title = RC.title;
       <button id="census-toggle" type="button" aria-controls="census-panel" aria-expanded="true">
         <span class="census-label-long">Show ${RC.dataNoun || "Census"} Data</span><span class="census-label-short">${RC.dataNoun || "Census"}</span><span class="census-caret" aria-hidden="true">▴</span>
       </button>
+      <span id="census-partial-tag" hidden>Partial layer</span>
       <select id="censusPoints" class="shell-pill-select" aria-label="Place dots"></select>
     </div>
     <div id="census-panel">
@@ -118,6 +119,7 @@ document.title = RC.title;
           <span>show later foundations</span>
         </label>
       </div>
+      <div id="census-partial-note" hidden></div>
       <div id="census-legend">
         <div id="census-legend-scale"></div>
         <div id="census-time" hidden></div>
@@ -2870,6 +2872,7 @@ function showTileStatus() {
 const CENSUS = {
   source: "nz-census",
   fill: "nz-census-fill",
+  hatch: "nz-census-hatch",
   line: "nz-census-line",
   hover: "nz-census-hover"
 };
@@ -3304,6 +3307,12 @@ async function loadCensusData(level) {
     const summary = await summaryRes.json();
     store.geojson = await boundariesRes.json();
     store.rows = summary.rows || [];
+    // partial-layer declaration (ruled 2026-07-13): a level whose record is
+    // partial — a unit or wave subset, a coarser or percentage-only grain, or
+    // a single-denomination register — carries differentiated styling (hatch)
+    // and a chrome tag. the level config wins over the summary file; either
+    // may carry a plain reason string or an object with a reason field.
+    store.partialLayer = normalisePartialLayer(def.partialLayer ?? summary.partial_layer);
     store.byAreaYear = new Map(store.rows.map((r) => [`${r.area_code}|${r.year}`, r]));
     store.years = [...new Set(store.rows.map((r) => r.year))].sort((a, b) => a - b);
     store.hasFlags = store.rows.some(rowFlagged);
@@ -3321,6 +3330,52 @@ async function loadCensusData(level) {
     store.loading = false;
   }
   return store.geojson;
+}
+
+// reduce a partial-layer declaration to its display reason, or null when
+// the layer is complete. accepts a bare string or {reason}/{note} objects.
+function normalisePartialLayer(value) {
+  if (!value) return null;
+  if (typeof value === "string") return value;
+  return value.reason || value.note || "Partial data layer";
+}
+
+// the diagonal hatch that marks a partial layer's wash. drawn once onto a
+// small canvas and registered as a tiling fill-pattern; the stub strokes at
+// the corners keep the 45-degree lines seamless across tile edges.
+function ensureHatchImage() {
+  if (map.hasImage("partial-hatch")) return;
+  const size = 10;
+  const canvas = document.createElement("canvas");
+  canvas.width = size * 2;
+  canvas.height = size * 2;
+  const g = canvas.getContext("2d");
+  g.strokeStyle = "rgba(15, 23, 42, 0.5)";
+  g.lineWidth = 2.4;
+  g.lineCap = "square";
+  const s = size * 2;
+  g.beginPath();
+  g.moveTo(0, s); g.lineTo(s, 0);
+  g.moveTo(-s / 2, s / 2); g.lineTo(s / 2, -s / 2);
+  g.moveTo(s / 2, s * 1.5); g.lineTo(s * 1.5, s / 2);
+  g.stroke();
+  map.addImage("partial-hatch", g.getImageData(0, 0, s, s), { pixelRatio: 2 });
+}
+
+// per-feature opacity for the hatch layer: hatch exactly the units the fill
+// paints with a value, so no-data washes never read as hatched data.
+function censusHatchOpacityExpression() {
+  const { metric, year } = censusState;
+  const store = censusActive();
+  const def = censusLevelDef();
+  const expr = ["match", ["get", def.codeProp]];
+  for (const feature of store.geojson.features) {
+    const code = feature.properties[def.codeProp];
+    const v = censusValue(code, year, metric);
+    expr.push(code, v === null || censusWashed(code, year, metric) ? 0 : 0.5);
+  }
+  expr.push(0);
+  return expr;
 }
 
 function censusFillExpression() {
@@ -3368,6 +3423,7 @@ function censusBeforeId() {
   const ours = new Set([
     ...Object.values(LAYERS),
     CENSUS.fill,
+    CENSUS.hatch,
     CENSUS.line,
     CENSUS.hover
   ]);
@@ -3423,6 +3479,18 @@ function addCensusLayers() {
     // stay visible beneath the choropleth (jb 2026-07-09, bahamas)
     paint: { "fill-color": censusFillExpression(), "fill-opacity": RC.censusFillOpacity ?? 0.55 }
   }, beforeId);
+  // partial layers carry the ruled diagonal hatch over the same ramp; the
+  // layer only exists when the active level declares partiality, so every
+  // complete layer's stack is unchanged
+  if (store.partialLayer) {
+    ensureHatchImage();
+    map.addLayer({
+      id: CENSUS.hatch,
+      type: "fill",
+      source: CENSUS.source,
+      paint: { "fill-pattern": "partial-hatch", "fill-opacity": censusHatchOpacityExpression() }
+    }, beforeId);
+  }
   map.addLayer({
     id: CENSUS.line,
     type: "line",
@@ -3443,7 +3511,7 @@ function addCensusLayers() {
 }
 
 function removeCensusLayers() {
-  [CENSUS.hover, CENSUS.line, CENSUS.fill].forEach((id) => {
+  [CENSUS.hover, CENSUS.line, CENSUS.hatch, CENSUS.fill].forEach((id) => {
     if (map.getLayer(id)) map.removeLayer(id);
   });
   if (map.getSource(CENSUS.source)) map.removeSource(CENSUS.source);
@@ -4248,11 +4316,30 @@ function applyCensusPaint() {
   if (map.getLayer(CENSUS.fill)) {
     map.setPaintProperty(CENSUS.fill, "fill-color", censusFillExpression());
   }
+  if (map.getLayer(CENSUS.hatch)) {
+    map.setPaintProperty(CENSUS.hatch, "fill-opacity", censusHatchOpacityExpression());
+  }
   syncPlaceDotEra();
   updateCensusLegend();
 }
 
+// the partial-layer chrome: the tag rides the data pill (it travels with a
+// dragged pill) and the panel note carries the declared reason. both bind to
+// the ACTIVE level's declaration, so switching to a complete level clears them.
+function updatePartialIndicator() {
+  const tag = document.getElementById("census-partial-tag");
+  const note = document.getElementById("census-partial-note");
+  const store = censusActive();
+  const reason = censusState.enabled && !pulotuState.active && store ? store.partialLayer : null;
+  if (tag) tag.hidden = !reason;
+  if (note) {
+    note.hidden = !reason;
+    note.textContent = reason || "";
+  }
+}
+
 function updateCensusLegend() {
+  updatePartialIndicator();
   if (!censusLegend) return;
   // the pulotu source carries its own categorical legend; the census
   // legend machinery below never speaks for it

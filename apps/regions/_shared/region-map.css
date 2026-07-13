@@ -39,6 +39,30 @@
 /* the points select moved up into the split data pill; this row now only
    carries the later-foundations checkbox, so it collapses when that is
    hidden rather than leaving an empty gap in the panel */
+/* partial-layer chrome (ruled 2026-07-13): the tag rides the data pill so a
+   screenshot of the map chrome carries the disclosure; the note under the
+   options states the declared reason. amber signals caution without alarm. */
+#census-partial-tag {
+  background: rgba(217, 119, 6, 0.28);
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  color: #fcd34d;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  align-self: center;
+}
+#census-partial-tag[hidden] { display: none; }
+#census-partial-note {
+  margin-bottom: 8px;
+  padding: 6px 8px;
+  border-left: 2px solid rgba(251, 191, 36, 0.55);
+  background: rgba(217, 119, 6, 0.12);
+  border-radius: 0 8px 8px 0;
+  color: #fcd34d;
+}
+#census-partial-note[hidden] { display: none; }
 #census-points-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 #census-points-row:not(:has(#census-points-future:not([hidden]))) { display: none; }
 #census-points-row select {
