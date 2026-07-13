@@ -2952,6 +2952,50 @@ const CENSUS_METRICS_BASE = {
     format: (v) => `${v.toFixed(1)}%`,
     note: "share affiliated with the Seventh-day Adventist Church"
   },
+  // Saint Vincent's division tables print eleven Christian-denomination
+  // share columns; the seven below join the opt-in family for them.
+  // Presbyterian/Congregational is the table's own combined category and
+  // stays distinct from the plain presbyterian_percent above
+  baptist_spiritual_percent: {
+    label: "Baptist (Spiritual) %", kind: "seq", optIn: true,
+    format: (v) => `${v.toFixed(1)}%`,
+    note: "share affiliated with the Baptist (Spiritual) denomination"
+  },
+  evangelical_percent: {
+    label: "Evangelical %", kind: "seq", optIn: true,
+    format: (v) => `${v.toFixed(1)}%`,
+    note: "share affiliated with Evangelical churches"
+  },
+  jehovahs_witness_percent: {
+    label: "Jehovah's Witness %", kind: "seq", optIn: true,
+    format: (v) => `${v.toFixed(1)}%`,
+    note: "share affiliated with Jehovah's Witnesses"
+  },
+  methodist_percent: {
+    label: "Methodist %", kind: "seq", optIn: true,
+    format: (v) => `${v.toFixed(1)}%`,
+    note: "share affiliated with the Methodist Church"
+  },
+  pentecostal_percent: {
+    label: "Pentecostal %", kind: "seq", optIn: true,
+    format: (v) => `${v.toFixed(1)}%`,
+    note: "share affiliated with Pentecostal churches"
+  },
+  presbyterian_congregational_percent: {
+    label: "Presbyterian/Congregational %", kind: "seq", optIn: true,
+    format: (v) => `${v.toFixed(1)}%`,
+    note: "share affiliated with Presbyterian or Congregational churches"
+  },
+  salvation_army_percent: {
+    label: "Salvation Army %", kind: "seq", optIn: true,
+    format: (v) => `${v.toFixed(1)}%`,
+    note: "share affiliated with the Salvation Army"
+  },
+  other_christian_percent: {
+    label: "Other Christian %", kind: "seq", optIn: true,
+    format: (v) => `${v.toFixed(1)}%`,
+    note: "share affiliated with other Christian denominations"
+  },
   // count metrics (opt-in): for products whose source publishes counts with
   // no area denominator, so no share metric would be honest. The count is
   // the row's religious_affiliation_count; the change is a difference of
