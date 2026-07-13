@@ -2850,6 +2850,15 @@ const CENSUS_METRICS_BASE = {
     label: "Membership change (count)", kind: "div", optIn: true,
     format: (v) => `${v > 0 ? "+" : ""}${Math.round(v).toLocaleString("en")}`,
     note: "change in the membership count since the previous year in the series"
+  },
+  // building-register count (opt-in): for products whose only indicator is a
+  // register of places (Bhutan's dzongkhag institutions), where mapping the
+  // count onto a membership field would misstate the construct. The value is
+  // the row's place_count as published; no denominator exists, so no share
+  place_count: {
+    label: "Places (count)", kind: "seq", optIn: true,
+    format: (v) => Math.round(v).toLocaleString("en"),
+    note: "register count of places; the source publishes no population denominator"
   }
 };
 // when a country sets metricsAvailable, its order also sets the dropdown
@@ -3020,7 +3029,8 @@ function metricUsesDenominator(metric) {
   // do not apply to them (only reachable when a page opts into the counts)
   return metric !== "place_density_per_sq_km" &&
     metric !== "religious_affiliation_count" &&
-    metric !== "religious_affiliation_count_change";
+    metric !== "religious_affiliation_count_change" &&
+    metric !== "place_count";
 }
 
 // three-stop ramps: sequential blues for levels, orange-to-blue
