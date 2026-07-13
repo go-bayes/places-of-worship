@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-07-14
+
+- Updated the licence notes on four research maps after the sources answered the project's reuse requests. Nepal: the National Statistics Office confirmed reuse of the published census table (citation and acknowledgment requested) — the staging language comes off the page. Kiribati: the National Statistics Office confirmed and encouraged the use — the courtesy-ask language comes off the page. Argentina: CEIL-CONICET's Programa Sociedad, Cultura y Religión confirmed reuse of both survey waves and requested a specific citation, now carried verbatim on the attribution surfaces. Fiji: the Bureau of Statistics routed the request through its Data Request Form; the page's use-for-now posture and needs-review licence status stand unchanged while that process completes. Pages: `apps/regions/np/`, `apps/regions/ki/`, `apps/regions/ar/`, `apps/regions/fj/overview.html`, and the hub cards in `apps/regions/index.html`.
+
 ### 2026-07-13
 
 - Launched the Saint Vincent and the Grenadines research map (hub to 98), the corpus's first percentage-only partial layer live: eleven Christian-denomination shares for thirteen census divisions in 2001 and 2012, rendered hatched and tagged "Partial layer" with the Christian-universe disclosure on every surface. Gate verified in browser: the hatch and tag bind from the product's partial_layer declaration, the eleven-metric select carries the printed column order with the Roman Catholic label override, the Chateaubelair popup reconciles exactly against the product on both waves (Pentecostal 15.5% to 23.0%) with the full eleven-line composition verbatim, the year control repaints 2001/2012, and the console is clean. The conductor's catch at the gate: the popup's has-data test knew the standard metrics, the membership count, and place_count, but not share-only rows, so every division fired the pending branch — generalised to any metric the page carries, with the two OSM-derived density metrics excluded so pending-religion areas on existing pages still read as pending. Pages: `apps/regions/vc/index.html`, `apps/regions/vc/overview.html`.
