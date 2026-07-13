@@ -38,6 +38,11 @@
       "type": "string",
       "description": "Optional builder-dialect free-form note accompanying data_status; legitimised by v2, per the data-manifest.v2 playbook."
     },
+    "partial_layer": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional partial-layer declaration under the 2026-07-13 partial-area-layers ruling: a one-sentence reason the layer is partial (a unit or wave subset, a coarser or percentage-only grain, or a single-denomination register). The shared runtime renders a declaring layer with the differentiated hatch and the Partial layer tag."
+    },
     "boundary_set": {
       "type": "object",
       "additionalProperties": false,

@@ -1,0 +1,2485 @@
+{
+  "schema_version": "area-summary.v2",
+  "generated_at": "2026-07-13T00:00:00Z",
+  "generated_by": "pipeline/build_vc_area_summary.R",
+  "country_code": "VC",
+  "data_status": "staged_percentage_only_partial_layer",
+  "data_status_note": "Staged for the conductor gate. The product contains two census waves and eleven opt-in Christian-denomination shares at census-division grain.",
+  "partial_layer": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain.",
+  "boundary_set": {
+    "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+    "country_code": "VC",
+    "level": "census_division",
+    "vintage": "USCB Demobase 2012 census-division ADM1, published 2021",
+    "source_dataset_id": "uscb-demobase-vct-adm1-2012"
+  },
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "No governed place-of-worship snapshot is included in this census-denomination release.",
+    "notes": "All place counts and derived place metrics are null."
+  },
+  "source_datasets": [
+    {
+      "source_dataset_id": "vc-census-division-denominations-2001-2012",
+      "name": "Population and Housing Census Report 2012, Tables 2.12 and 2.13",
+      "provider": "Statistical Office, Government of Saint Vincent and the Grenadines",
+      "url": "https://stats.gov.vc/wp-content/uploads/2018/11/Population-and-Housing-Census-Report-2012.pdf",
+      "retrieval_date": "2026-07-13",
+      "local_path": "research/countries/vc/division-tables-transcription-2026-07-13.md",
+      "licence": {
+        "name": "All rights reserved; needs review under build-then-ask posture",
+        "url": "https://stats.gov.vc/terms-and-conditions/",
+        "attribution": "Statistical Office, Government of Saint Vincent and the Grenadines"
+      },
+      "citation": "Statistical Office, Government of Saint Vincent and the Grenadines. Population and Housing Census Report 2012, Tables 2.12 and 2.13.",
+      "access_limits": "The source tables are image-only. The conductor transcription is the authoritative build input.",
+      "redistribution_limits": "Derived division summaries ship with attribution while the Statistical Office reuse-confirmation ask is recorded for the PI; the source site states all rights reserved.",
+      "notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "source_dataset_id": "uscb-demobase-vct-adm1-2012",
+      "name": "U.S. Census Bureau Demobase Saint Vincent and the Grenadines ADM1",
+      "provider": "U.S. Census Bureau",
+      "url": "https://www.census.gov/library/visualizations/time-series/demo/demobase-stvincent-grenadines.html",
+      "retrieval_date": "2026-07-13",
+      "local_path": "research/countries/vc/data/raw/geometry_recon/uscb-svg-2012-census-data.zip",
+      "licence": {
+        "name": "U.S. government work posture",
+        "url": "https://www2.census.gov/foia/ds_policies/ds027.pdf",
+        "attribution": "U.S. Census Bureau Demobase"
+      },
+      "citation": "U.S. Census Bureau Demobase Saint Vincent and the Grenadines, 2012 census-data File Geodatabase, ADM1 feature class.",
+      "access_limits": "Openly served cached ZIP; sha256 verified before extraction.",
+      "redistribution_limits": "Data/works created by Census Bureau employees generally are not subject to copyright protection within the United States. Census Bureau data or other works may be subject to copyright protection in foreign countries.",
+      "notes": "The U.S. Census Bureau cannot guarantee the accuracy of boundary placements."
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_id": "anglican_percent",
+      "label": "Anglican (%)",
+      "description": "Share of the division population in the printed Anglican Christian-denomination category.",
+      "unit": "percent",
+      "denominator_indicator_id": null,
+      "method": "Transcribed directly from the printed one-decimal percentage in census Tables 2.12 and 2.13; no counts or remainder shares were derived.",
+      "temporal_coverage": "2001 and 2012",
+      "spatial_coverage": "Thirteen Saint Vincent and the Grenadines census divisions.",
+      "quality_notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "indicator_id": "baptist_spiritual_percent",
+      "label": "Baptist (Spiritual) (%)",
+      "description": "Share of the division population in the printed Baptist (Spiritual) Christian-denomination category.",
+      "unit": "percent",
+      "denominator_indicator_id": null,
+      "method": "Transcribed directly from the printed one-decimal percentage in census Tables 2.12 and 2.13; no counts or remainder shares were derived.",
+      "temporal_coverage": "2001 and 2012",
+      "spatial_coverage": "Thirteen Saint Vincent and the Grenadines census divisions.",
+      "quality_notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "indicator_id": "evangelical_percent",
+      "label": "Evangelical (%)",
+      "description": "Share of the division population in the printed Evangelical Christian-denomination category.",
+      "unit": "percent",
+      "denominator_indicator_id": null,
+      "method": "Transcribed directly from the printed one-decimal percentage in census Tables 2.12 and 2.13; no counts or remainder shares were derived.",
+      "temporal_coverage": "2001 and 2012",
+      "spatial_coverage": "Thirteen Saint Vincent and the Grenadines census divisions.",
+      "quality_notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "indicator_id": "jehovahs_witness_percent",
+      "label": "Jehovah's Witness (%)",
+      "description": "Share of the division population in the printed Jehovah's Witness Christian-denomination category.",
+      "unit": "percent",
+      "denominator_indicator_id": null,
+      "method": "Transcribed directly from the printed one-decimal percentage in census Tables 2.12 and 2.13; no counts or remainder shares were derived.",
+      "temporal_coverage": "2001 and 2012",
+      "spatial_coverage": "Thirteen Saint Vincent and the Grenadines census divisions.",
+      "quality_notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "indicator_id": "methodist_percent",
+      "label": "Methodist (%)",
+      "description": "Share of the division population in the printed Methodist Christian-denomination category.",
+      "unit": "percent",
+      "denominator_indicator_id": null,
+      "method": "Transcribed directly from the printed one-decimal percentage in census Tables 2.12 and 2.13; no counts or remainder shares were derived.",
+      "temporal_coverage": "2001 and 2012",
+      "spatial_coverage": "Thirteen Saint Vincent and the Grenadines census divisions.",
+      "quality_notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "indicator_id": "pentecostal_percent",
+      "label": "Pentecostal (%)",
+      "description": "Share of the division population in the printed Pentecostal Christian-denomination category.",
+      "unit": "percent",
+      "denominator_indicator_id": null,
+      "method": "Transcribed directly from the printed one-decimal percentage in census Tables 2.12 and 2.13; no counts or remainder shares were derived.",
+      "temporal_coverage": "2001 and 2012",
+      "spatial_coverage": "Thirteen Saint Vincent and the Grenadines census divisions.",
+      "quality_notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "indicator_id": "presbyterian_congregational_percent",
+      "label": "Presbyterian/Congregational (%)",
+      "description": "Share of the division population in the printed Presbyterian/Congregational Christian-denomination category.",
+      "unit": "percent",
+      "denominator_indicator_id": null,
+      "method": "Transcribed directly from the printed one-decimal percentage in census Tables 2.12 and 2.13; no counts or remainder shares were derived.",
+      "temporal_coverage": "2001 and 2012",
+      "spatial_coverage": "Thirteen Saint Vincent and the Grenadines census divisions.",
+      "quality_notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "indicator_id": "catholic_percent",
+      "label": "Roman Catholic (%)",
+      "description": "Share of the division population in the printed Roman Catholic Christian-denomination category.",
+      "unit": "percent",
+      "denominator_indicator_id": null,
+      "method": "Transcribed directly from the printed one-decimal percentage in census Tables 2.12 and 2.13; no counts or remainder shares were derived.",
+      "temporal_coverage": "2001 and 2012",
+      "spatial_coverage": "Thirteen Saint Vincent and the Grenadines census divisions.",
+      "quality_notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "indicator_id": "salvation_army_percent",
+      "label": "Salvation Army (%)",
+      "description": "Share of the division population in the printed Salvation Army Christian-denomination category.",
+      "unit": "percent",
+      "denominator_indicator_id": null,
+      "method": "Transcribed directly from the printed one-decimal percentage in census Tables 2.12 and 2.13; no counts or remainder shares were derived.",
+      "temporal_coverage": "2001 and 2012",
+      "spatial_coverage": "Thirteen Saint Vincent and the Grenadines census divisions.",
+      "quality_notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "indicator_id": "seventh_day_adventist_percent",
+      "label": "Seventh Day Adventist (%)",
+      "description": "Share of the division population in the printed Seventh Day Adventist Christian-denomination category.",
+      "unit": "percent",
+      "denominator_indicator_id": null,
+      "method": "Transcribed directly from the printed one-decimal percentage in census Tables 2.12 and 2.13; no counts or remainder shares were derived.",
+      "temporal_coverage": "2001 and 2012",
+      "spatial_coverage": "Thirteen Saint Vincent and the Grenadines census divisions.",
+      "quality_notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "indicator_id": "other_christian_percent",
+      "label": "Other Christian Denomination (%)",
+      "description": "Share of the division population in the printed Other Christian Denomination Christian-denomination category.",
+      "unit": "percent",
+      "denominator_indicator_id": null,
+      "method": "Transcribed directly from the printed one-decimal percentage in census Tables 2.12 and 2.13; no counts or remainder shares were derived.",
+      "temporal_coverage": "2001 and 2012",
+      "spatial_coverage": "Thirteen Saint Vincent and the Grenadines census divisions.",
+      "quality_notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    }
+  ],
+  "visual_layers": [
+    {
+      "visual_layer_id": "vc_division_anglican",
+      "label": "Anglican share",
+      "description": "Printed Anglican share of division population.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "anglican_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "division population"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "Use the printed division-year percentage without aggregation.",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "visual_layer_id": "vc_division_baptist_spiritual",
+      "label": "Baptist (Spiritual) share",
+      "description": "Printed Baptist (Spiritual) share of division population.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "baptist_spiritual_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "division population"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "Use the printed division-year percentage without aggregation.",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "visual_layer_id": "vc_division_evangelical",
+      "label": "Evangelical share",
+      "description": "Printed Evangelical share of division population.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "evangelical_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "division population"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "Use the printed division-year percentage without aggregation.",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "visual_layer_id": "vc_division_jehovahs_witness",
+      "label": "Jehovah's Witness share",
+      "description": "Printed Jehovah's Witness share of division population.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "jehovahs_witness_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "division population"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "Use the printed division-year percentage without aggregation.",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "visual_layer_id": "vc_division_methodist",
+      "label": "Methodist share",
+      "description": "Printed Methodist share of division population.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "methodist_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "division population"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "Use the printed division-year percentage without aggregation.",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "visual_layer_id": "vc_division_pentecostal",
+      "label": "Pentecostal share",
+      "description": "Printed Pentecostal share of division population.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "pentecostal_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "division population"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "Use the printed division-year percentage without aggregation.",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "visual_layer_id": "vc_division_presbyterian_congregational",
+      "label": "Presbyterian/Congregational share",
+      "description": "Printed Presbyterian/Congregational share of division population.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "presbyterian_congregational_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "division population"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "Use the printed division-year percentage without aggregation.",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "visual_layer_id": "vc_division_catholic",
+      "label": "Roman Catholic share",
+      "description": "Printed Roman Catholic share of division population.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "catholic_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "division population"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "Use the printed division-year percentage without aggregation.",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "visual_layer_id": "vc_division_salvation_army",
+      "label": "Salvation Army share",
+      "description": "Printed Salvation Army share of division population.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "salvation_army_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "division population"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "Use the printed division-year percentage without aggregation.",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "visual_layer_id": "vc_division_seventh_day_adventist",
+      "label": "Seventh Day Adventist share",
+      "description": "Printed Seventh Day Adventist share of division population.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "seventh_day_adventist_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "division population"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "Use the printed division-year percentage without aggregation.",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    },
+    {
+      "visual_layer_id": "vc_division_other_christian",
+      "label": "Other Christian Denomination share",
+      "description": "Printed Other Christian Denomination share of division population.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "other_christian_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "division population"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "Use the printed division-year percentage without aggregation.",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Percentage-only census tables covering Christian denominations only; shares of division population, with the non-Christian, no-religion, and not-stated remainder unprinted at this grain."
+    }
+  ],
+  "rows": [
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_01",
+      "area_code": "VCT_01",
+      "area_name": "Kingstown",
+      "year": 2001,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 19.7,
+      "baptist_spiritual_percent": 7.2,
+      "evangelical_percent": 2.3,
+      "jehovahs_witness_percent": 0.9,
+      "methodist_percent": 18.3,
+      "pentecostal_percent": 20.2,
+      "presbyterian_congregational_percent": 0.1,
+      "catholic_percent": 11.6,
+      "salvation_army_percent": 0.4,
+      "seventh_day_adventist_percent": 3.8,
+      "other_christian_percent": 3.1,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 19.7
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 7.2
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 2.3
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.9
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 18.3
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 20.2
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 11.6
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0.4
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 3.8
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 3.1
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_01",
+      "area_code": "VCT_01",
+      "area_name": "Kingstown",
+      "year": 2012,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 15.4,
+      "baptist_spiritual_percent": 5.5,
+      "evangelical_percent": 3.4,
+      "jehovahs_witness_percent": 0.9,
+      "methodist_percent": 14.7,
+      "pentecostal_percent": 29.8,
+      "presbyterian_congregational_percent": 0.1,
+      "catholic_percent": 9.2,
+      "salvation_army_percent": 0.3,
+      "seventh_day_adventist_percent": 4.5,
+      "other_christian_percent": 0.7,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 15.4
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 5.5
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 3.4
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.9
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 14.7
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 29.8
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 9.2
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0.3
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 4.5
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 0.7
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_02",
+      "area_code": "VCT_02",
+      "area_name": "Kingstown Suburb",
+      "year": 2001,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 14.5,
+      "baptist_spiritual_percent": 8.9,
+      "evangelical_percent": 3.8,
+      "jehovahs_witness_percent": 0.5,
+      "methodist_percent": 11,
+      "pentecostal_percent": 25.6,
+      "presbyterian_congregational_percent": 0.1,
+      "catholic_percent": 5,
+      "salvation_army_percent": 0.2,
+      "seventh_day_adventist_percent": 7.7,
+      "other_christian_percent": 2.1,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 14.5
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 8.9
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 3.8
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.5
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 11
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 25.6
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 5
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0.2
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 7.7
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 2.1
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_02",
+      "area_code": "VCT_02",
+      "area_name": "Kingstown Suburb",
+      "year": 2012,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 10.2,
+      "baptist_spiritual_percent": 6.3,
+      "evangelical_percent": 4.3,
+      "jehovahs_witness_percent": 0.7,
+      "methodist_percent": 8.3,
+      "pentecostal_percent": 35.9,
+      "presbyterian_congregational_percent": 0.4,
+      "catholic_percent": 4.3,
+      "salvation_army_percent": 0.2,
+      "seventh_day_adventist_percent": 8.3,
+      "other_christian_percent": 0.5,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 10.2
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 6.3
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 4.3
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.7
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 8.3
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 35.9
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.4
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 4.3
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0.2
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 8.3
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 0.5
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_03",
+      "area_code": "VCT_03",
+      "area_name": "Calliaqua",
+      "year": 2001,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 18.9,
+      "baptist_spiritual_percent": 8.6,
+      "evangelical_percent": 1.8,
+      "jehovahs_witness_percent": 1,
+      "methodist_percent": 14.5,
+      "pentecostal_percent": 18.4,
+      "presbyterian_congregational_percent": 0.1,
+      "catholic_percent": 8.2,
+      "salvation_army_percent": 0.5,
+      "seventh_day_adventist_percent": 9.4,
+      "other_christian_percent": 4.4,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 18.9
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 8.6
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 1.8
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 1
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 14.5
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 18.4
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 8.2
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0.5
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 9.4
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 4.4
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_03",
+      "area_code": "VCT_03",
+      "area_name": "Calliaqua",
+      "year": 2012,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 15.7,
+      "baptist_spiritual_percent": 6.7,
+      "evangelical_percent": 3,
+      "jehovahs_witness_percent": 1.3,
+      "methodist_percent": 11.4,
+      "pentecostal_percent": 27,
+      "presbyterian_congregational_percent": 0.2,
+      "catholic_percent": 7.2,
+      "salvation_army_percent": 0.4,
+      "seventh_day_adventist_percent": 11.2,
+      "other_christian_percent": 0.3,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 15.7
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 6.7
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 3
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 1.3
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 11.4
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 27
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.2
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 7.2
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0.4
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 11.2
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 0.3
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_04",
+      "area_code": "VCT_04",
+      "area_name": "Marriaqua",
+      "year": 2001,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 8.7,
+      "baptist_spiritual_percent": 11.4,
+      "evangelical_percent": 0.9,
+      "jehovahs_witness_percent": 0.5,
+      "methodist_percent": 12.5,
+      "pentecostal_percent": 16.2,
+      "presbyterian_congregational_percent": 0.1,
+      "catholic_percent": 9.8,
+      "salvation_army_percent": 0.9,
+      "seventh_day_adventist_percent": 24.1,
+      "other_christian_percent": 4.8,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 8.7
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 11.4
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 0.9
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.5
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 12.5
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 16.2
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 9.8
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0.9
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 24.1
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 4.8
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_04",
+      "area_code": "VCT_04",
+      "area_name": "Marriaqua",
+      "year": 2012,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 7,
+      "baptist_spiritual_percent": 9.1,
+      "evangelical_percent": 0.6,
+      "jehovahs_witness_percent": 0.5,
+      "methodist_percent": 11.1,
+      "pentecostal_percent": 22.3,
+      "presbyterian_congregational_percent": 0.1,
+      "catholic_percent": 7.2,
+      "salvation_army_percent": 1.2,
+      "seventh_day_adventist_percent": 28.9,
+      "other_christian_percent": 0,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 7
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 9.1
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 0.6
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.5
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 11.1
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 22.3
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 7.2
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 1.2
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 28.9
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 0
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_05",
+      "area_code": "VCT_05",
+      "area_name": "Bridgetown",
+      "year": 2001,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 11.8,
+      "baptist_spiritual_percent": 17.7,
+      "evangelical_percent": 1.9,
+      "jehovahs_witness_percent": 0.6,
+      "methodist_percent": 5.1,
+      "pentecostal_percent": 10.2,
+      "presbyterian_congregational_percent": 0,
+      "catholic_percent": 3.3,
+      "salvation_army_percent": 0.1,
+      "seventh_day_adventist_percent": 20.6,
+      "other_christian_percent": 7.4,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 11.8
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 17.7
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 1.9
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.6
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 5.1
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 10.2
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 3.3
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 20.6
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 7.4
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_05",
+      "area_code": "VCT_05",
+      "area_name": "Bridgetown",
+      "year": 2012,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 8.4,
+      "baptist_spiritual_percent": 11.6,
+      "evangelical_percent": 2.5,
+      "jehovahs_witness_percent": 0.7,
+      "methodist_percent": 4.6,
+      "pentecostal_percent": 22.6,
+      "presbyterian_congregational_percent": 0.5,
+      "catholic_percent": 2,
+      "salvation_army_percent": 0.1,
+      "seventh_day_adventist_percent": 22.7,
+      "other_christian_percent": 0.1,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 8.4
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 11.6
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 2.5
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.7
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 4.6
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 22.6
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.5
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 2
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 22.7
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 0.1
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_06",
+      "area_code": "VCT_06",
+      "area_name": "Colonarie",
+      "year": 2001,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 11.1,
+      "baptist_spiritual_percent": 11,
+      "evangelical_percent": 2,
+      "jehovahs_witness_percent": 0.2,
+      "methodist_percent": 7.1,
+      "pentecostal_percent": 23.5,
+      "presbyterian_congregational_percent": 0.6,
+      "catholic_percent": 6.9,
+      "salvation_army_percent": 0,
+      "seventh_day_adventist_percent": 8.5,
+      "other_christian_percent": 3.9,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 11.1
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 11
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 2
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.2
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 7.1
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 23.5
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.6
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 6.9
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 8.5
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 3.9
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_06",
+      "area_code": "VCT_06",
+      "area_name": "Colonarie",
+      "year": 2012,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 8.3,
+      "baptist_spiritual_percent": 13.1,
+      "evangelical_percent": 3.9,
+      "jehovahs_witness_percent": 0.4,
+      "methodist_percent": 4.6,
+      "pentecostal_percent": 35.3,
+      "presbyterian_congregational_percent": 0.1,
+      "catholic_percent": 5.9,
+      "salvation_army_percent": 0,
+      "seventh_day_adventist_percent": 10.4,
+      "other_christian_percent": 0,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 8.3
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 13.1
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 3.9
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.4
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 4.6
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 35.3
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 5.9
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 10.4
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 0
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_07",
+      "area_code": "VCT_07",
+      "area_name": "Georgetown",
+      "year": 2001,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 20.9,
+      "baptist_spiritual_percent": 16.2,
+      "evangelical_percent": 2.4,
+      "jehovahs_witness_percent": 0.5,
+      "methodist_percent": 4.5,
+      "pentecostal_percent": 4.9,
+      "presbyterian_congregational_percent": 0,
+      "catholic_percent": 7.5,
+      "salvation_army_percent": 0,
+      "seventh_day_adventist_percent": 5.3,
+      "other_christian_percent": 4.1,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 20.9
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 16.2
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 2.4
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.5
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 4.5
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 4.9
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 7.5
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 5.3
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 4.1
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_07",
+      "area_code": "VCT_07",
+      "area_name": "Georgetown",
+      "year": 2012,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 16.3,
+      "baptist_spiritual_percent": 13,
+      "evangelical_percent": 4.9,
+      "jehovahs_witness_percent": 0.9,
+      "methodist_percent": 3.5,
+      "pentecostal_percent": 30.3,
+      "presbyterian_congregational_percent": 0.4,
+      "catholic_percent": 6.8,
+      "salvation_army_percent": 0.1,
+      "seventh_day_adventist_percent": 6.2,
+      "other_christian_percent": 0.3,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 16.3
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 13
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 4.9
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.9
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 3.5
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 30.3
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.4
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 6.8
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 6.2
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 0.3
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_08",
+      "area_code": "VCT_08",
+      "area_name": "Sandy Bay",
+      "year": 2001,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 32.8,
+      "baptist_spiritual_percent": 17.8,
+      "evangelical_percent": 0.9,
+      "jehovahs_witness_percent": 0,
+      "methodist_percent": 0.1,
+      "pentecostal_percent": 13.4,
+      "presbyterian_congregational_percent": 0,
+      "catholic_percent": 6.7,
+      "salvation_army_percent": 0,
+      "seventh_day_adventist_percent": 4.8,
+      "other_christian_percent": 2.3,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 32.8
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 17.8
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 0.9
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 13.4
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 6.7
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 4.8
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 2.3
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_08",
+      "area_code": "VCT_08",
+      "area_name": "Sandy Bay",
+      "year": 2012,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 23.4,
+      "baptist_spiritual_percent": 10,
+      "evangelical_percent": 0.5,
+      "jehovahs_witness_percent": 0.3,
+      "methodist_percent": 0.3,
+      "pentecostal_percent": 33.7,
+      "presbyterian_congregational_percent": 0.2,
+      "catholic_percent": 5.3,
+      "salvation_army_percent": 0,
+      "seventh_day_adventist_percent": 5.7,
+      "other_christian_percent": 0,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 23.4
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 10
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 0.5
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.3
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 0.3
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 33.7
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.2
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 5.3
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 5.7
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 0
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_09",
+      "area_code": "VCT_09",
+      "area_name": "Layou",
+      "year": 2001,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 11.7,
+      "baptist_spiritual_percent": 5.9,
+      "evangelical_percent": 2.1,
+      "jehovahs_witness_percent": 0.4,
+      "methodist_percent": 11.5,
+      "pentecostal_percent": 19.7,
+      "presbyterian_congregational_percent": 0,
+      "catholic_percent": 4.5,
+      "salvation_army_percent": 0.1,
+      "seventh_day_adventist_percent": 15.3,
+      "other_christian_percent": 4.4,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 11.7
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 5.9
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 2.1
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.4
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 11.5
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 19.7
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 4.5
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 15.3
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 4.4
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_09",
+      "area_code": "VCT_09",
+      "area_name": "Layou",
+      "year": 2012,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 11,
+      "baptist_spiritual_percent": 6.7,
+      "evangelical_percent": 2.8,
+      "jehovahs_witness_percent": 0.7,
+      "methodist_percent": 10.2,
+      "pentecostal_percent": 27,
+      "presbyterian_congregational_percent": 0.3,
+      "catholic_percent": 3.6,
+      "salvation_army_percent": 0.1,
+      "seventh_day_adventist_percent": 16.7,
+      "other_christian_percent": 0,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 11
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 6.7
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 2.8
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.7
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 10.2
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 27
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.3
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 3.6
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 16.7
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 0
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_10",
+      "area_code": "VCT_10",
+      "area_name": "Barrouallie",
+      "year": 2001,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 21.7,
+      "baptist_spiritual_percent": 7.6,
+      "evangelical_percent": 6.9,
+      "jehovahs_witness_percent": 0.2,
+      "methodist_percent": 7.6,
+      "pentecostal_percent": 20.7,
+      "presbyterian_congregational_percent": 0,
+      "catholic_percent": 1.2,
+      "salvation_army_percent": 0,
+      "seventh_day_adventist_percent": 10.4,
+      "other_christian_percent": 2.8,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 21.7
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 7.6
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 6.9
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.2
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 7.6
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 20.7
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 1.2
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 10.4
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 2.8
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_10",
+      "area_code": "VCT_10",
+      "area_name": "Barrouallie",
+      "year": 2012,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 16.3,
+      "baptist_spiritual_percent": 8,
+      "evangelical_percent": 7.7,
+      "jehovahs_witness_percent": 0.1,
+      "methodist_percent": 5.3,
+      "pentecostal_percent": 25,
+      "presbyterian_congregational_percent": 0.7,
+      "catholic_percent": 1.4,
+      "salvation_army_percent": 0.1,
+      "seventh_day_adventist_percent": 11,
+      "other_christian_percent": 0.1,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 16.3
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 8
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 7.7
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 5.3
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 25
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.7
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 1.4
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 11
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 0.1
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_11",
+      "area_code": "VCT_11",
+      "area_name": "Chateaubelair",
+      "year": 2001,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 18.4,
+      "baptist_spiritual_percent": 12.2,
+      "evangelical_percent": 4.6,
+      "jehovahs_witness_percent": 0.6,
+      "methodist_percent": 17.6,
+      "pentecostal_percent": 15.5,
+      "presbyterian_congregational_percent": 0.1,
+      "catholic_percent": 4.5,
+      "salvation_army_percent": 0,
+      "seventh_day_adventist_percent": 2.5,
+      "other_christian_percent": 2.8,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 18.4
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 12.2
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 4.6
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.6
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 17.6
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 15.5
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 4.5
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 2.5
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 2.8
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_11",
+      "area_code": "VCT_11",
+      "area_name": "Chateaubelair",
+      "year": 2012,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 13.7,
+      "baptist_spiritual_percent": 23.6,
+      "evangelical_percent": 5.6,
+      "jehovahs_witness_percent": 0.7,
+      "methodist_percent": 15.5,
+      "pentecostal_percent": 23,
+      "presbyterian_congregational_percent": 0.2,
+      "catholic_percent": 3.8,
+      "salvation_army_percent": 0,
+      "seventh_day_adventist_percent": 2.2,
+      "other_christian_percent": 0,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 13.7
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 23.6
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 5.6
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.7
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 15.5
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 23
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.2
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 3.8
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 2.2
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 0
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_12",
+      "area_code": "VCT_12",
+      "area_name": "North Grenadines",
+      "year": 2001,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 30.2,
+      "baptist_spiritual_percent": 6.9,
+      "evangelical_percent": 8.4,
+      "jehovahs_witness_percent": 1.1,
+      "methodist_percent": 1.4,
+      "pentecostal_percent": 11.4,
+      "presbyterian_congregational_percent": 0.1,
+      "catholic_percent": 7.8,
+      "salvation_army_percent": 0,
+      "seventh_day_adventist_percent": 13.6,
+      "other_christian_percent": 2.6,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 30.2
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 6.9
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 8.4
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 1.1
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 1.4
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 11.4
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 7.8
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 13.6
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 2.6
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_12",
+      "area_code": "VCT_12",
+      "area_name": "North Grenadines",
+      "year": 2012,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 22.6,
+      "baptist_spiritual_percent": 6.7,
+      "evangelical_percent": 9,
+      "jehovahs_witness_percent": 1.5,
+      "methodist_percent": 0.8,
+      "pentecostal_percent": 17.5,
+      "presbyterian_congregational_percent": 0.1,
+      "catholic_percent": 7,
+      "salvation_army_percent": 0,
+      "seventh_day_adventist_percent": 15.4,
+      "other_christian_percent": 0.3,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 22.6
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 6.7
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 9
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 1.5
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 0.8
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 17.5
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 7
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 15.4
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 0.3
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_13",
+      "area_code": "VCT_13",
+      "area_name": "South Grenadines",
+      "year": 2001,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 28.9,
+      "baptist_spiritual_percent": 5.7,
+      "evangelical_percent": 1.1,
+      "jehovahs_witness_percent": 0.4,
+      "methodist_percent": 2,
+      "pentecostal_percent": 11.8,
+      "presbyterian_congregational_percent": 0.1,
+      "catholic_percent": 21.4,
+      "salvation_army_percent": 0.1,
+      "seventh_day_adventist_percent": 12.8,
+      "other_christian_percent": 3.7,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 28.9
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 5.7
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 1.1
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.4
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 2
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 11.8
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 21.4
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 12.8
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 3.7
+        }
+      ]
+    },
+    {
+      "country_code": "VC",
+      "boundary_set_id": "vc-census-division-2012-uscb-demobase-adm1",
+      "boundary_level": "census_division",
+      "area_unit_id": "vc-census-division-2012-uscb-demobase-adm1:VCT_13",
+      "area_code": "VCT_13",
+      "area_name": "South Grenadines",
+      "year": 2012,
+      "population_total": null,
+      "population_total_basis": "The census-division tables publish Christian-denomination percentages only; no division population count is carried or derived.",
+      "religious_affiliation_count": null,
+      "religious_affiliation_percent": null,
+      "no_religion_count": null,
+      "no_religion_percent": null,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["vc-census-division-denominations-2001-2012", "uscb-demobase-vct-adm1-2012"],
+      "quality_flag": "percentage_only_grain;christian_denominations_only_universe;division_remainder_unprinted",
+      "anglican_percent": 21,
+      "baptist_spiritual_percent": 7.4,
+      "evangelical_percent": 1,
+      "jehovahs_witness_percent": 0.5,
+      "methodist_percent": 2.4,
+      "pentecostal_percent": 18.2,
+      "presbyterian_congregational_percent": 0.1,
+      "catholic_percent": 18.4,
+      "salvation_army_percent": 0.1,
+      "seventh_day_adventist_percent": 12.8,
+      "other_christian_percent": 0,
+      "composition": [
+        {
+          "label_verbatim": "Anglican",
+          "percent": 21
+        },
+        {
+          "label_verbatim": "Baptist (Spiritual)",
+          "percent": 7.4
+        },
+        {
+          "label_verbatim": "Evangelical",
+          "percent": 1
+        },
+        {
+          "label_verbatim": "Jehovah's Witness",
+          "percent": 0.5
+        },
+        {
+          "label_verbatim": "Methodist",
+          "percent": 2.4
+        },
+        {
+          "label_verbatim": "Pentecostal",
+          "percent": 18.2
+        },
+        {
+          "label_verbatim": "Presbyterian/Congregational",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Roman Catholic",
+          "percent": 18.4
+        },
+        {
+          "label_verbatim": "Salvation Army",
+          "percent": 0.1
+        },
+        {
+          "label_verbatim": "Seventh Day Adventist",
+          "percent": 12.8
+        },
+        {
+          "label_verbatim": "Other Christian Denomination",
+          "percent": 0
+        }
+      ]
+    }
+  ]
+}
