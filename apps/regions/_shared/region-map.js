@@ -919,10 +919,12 @@ function resolvePopupOffset(popup) {
   return { x: 0, y: 0 };
 }
 
-// popups drag like the pills (same 4px threshold, mouse/pen only, and
-// trailing-click suppression), but by adjusting the maplibre offset, so
-// the popup stays anchored to its feature: it pans and zooms with the
+// popups drag like the pills (same start threshold, all pointer types,
+// and trailing-click suppression), but by adjusting the maplibre offset,
+// so the popup stays anchored to its feature: it pans and zooms with the
 // map, displaced by the drag, and may leave the viewport — no clamping.
+// touch works because the popup content carries touch-action: none, so
+// the browser hands the gesture to us instead of claiming it for panning.
 // nothing persists: every popup opens fresh at its anchor. the anchor
 // is pinned when a real drag begins, leaving undragged popups on stock
 // auto-anchor behaviour.
@@ -943,6 +945,7 @@ function makePopupDraggable(popup) {
   let startX = 0, startY = 0, baseX = 0, baseY = 0;
   let pointerId = null, captureEl = null;
   let dragging = false, moved = false, suppressClick = false;
+  let dragThreshold = 4;
   // shared cleanup: end any gesture WITHOUT arming click suppression (a
   // cancelled pointer fires no trailing click, so arming would swallow
   // the next legitimate one) and always restore text selection
@@ -957,11 +960,13 @@ function makePopupDraggable(popup) {
   // gesture and restore the page then too
   popup.on("close", abortDrag);
   content.addEventListener("pointerdown", (e) => {
-    if (e.pointerType === "touch" || e.button !== 0) return;
+    if (e.button !== 0) return;
     const t = e.target;
     if (!(t instanceof Element)) return;
     // links, controls and the street view pane keep their own gestures
     if (t.closest("a, button, select, input, textarea, .streetview")) return;
+    // finger jitter overshoots the mouse threshold, so touch gets more slack
+    dragThreshold = e.pointerType === "touch" ? 10 : 4;
     startX = e.clientX; startY = e.clientY;
     dragging = true; moved = false; suppressClick = false;
     pointerId = e.pointerId;
@@ -974,7 +979,7 @@ function makePopupDraggable(popup) {
   content.addEventListener("pointermove", (e) => {
     if (!dragging || e.pointerId !== pointerId) return;
     const dx = e.clientX - startX, dy = e.clientY - startY;
-    if (!moved && Math.hypot(dx, dy) < 4) return; // under threshold: still a click
+    if (!moved && Math.hypot(dx, dy) < dragThreshold) return; // under threshold: still a click
     if (!moved) {
       moved = true;
       // pin the anchor, then resolve whatever offset the popup already
@@ -989,7 +994,13 @@ function makePopupDraggable(popup) {
   });
   content.addEventListener("pointerup", (e) => {
     if (!dragging || e.pointerId !== pointerId) return;
-    if (moved) suppressClick = true; // a real drag: swallow the click it fires
+    if (moved) {
+      suppressClick = true; // a real drag: swallow the click it fires
+      // a mouse drag fires its trailing click at once, but a touch or pen
+      // drag fires none at all — disarm shortly after, or the stale flag
+      // would swallow the next legitimate tap on the popup
+      setTimeout(() => { suppressClick = false; }, 150);
+    }
     abortDrag();
   });
   // a cancelled pointer produces no trailing click: end without arming
@@ -1801,18 +1812,43 @@ function resetSite() {
 }
 if (cornerRefresh) cornerRefresh.addEventListener("click", resetSite);
 
-// draggable floating pills: mouse/pen only (touch still pans the map). the
-// wrap carries the inline transform so its drop-down panel travels with it.
-// a 4px threshold keeps a tap a click; past it the gesture is a drag and its
-// trailing click is swallowed so the pill never toggles on release.
+// draggable floating pills: mouse, pen and touch (the pill chrome carries
+// touch-action: none, so a touch drag reaches us instead of being claimed by
+// the browser; the flanks around the pills still pan the map). the wrap
+// carries the inline transform so its drop-down panel travels with it. a
+// start threshold (4px mouse/pen, 10px touch) keeps a tap a click; past it
+// the gesture is a drag and its trailing click is swallowed so the pill
+// never toggles on release. a touch drop glides to the nearest screen edge
+// (free placement strands pills over the map centre on phones); mouse and
+// pen keep free placement. double-tapping a displaced pill sends just that
+// pill home without resetting the rest of the map.
 const DRAG_SELECTORS = ["#census-wrap", "#key-wrap", "#wordmark"];
+const DRAG_MARGIN = 8; // keep dragged boxes at least this far inside the viewport
 
 // snap every pill home by dropping its inline transform (reset + resize)
 function clearDragTransforms() {
   DRAG_SELECTORS.forEach((sel) => {
     const el = document.querySelector(sel);
-    if (el) el.style.transform = "";
+    if (el) { el.style.transition = ""; el.style.transform = ""; }
   });
+}
+
+// one teaching toast per session, shown on the first press-and-hold of a
+// pill; a completed drag also marks it seen — that user needs no teaching
+const PILL_HINT_KEY = "pow-pill-drag-hint";
+function pillHintPending() {
+  try { return !sessionStorage.getItem(PILL_HINT_KEY); } catch (_) { return false; }
+}
+function markPillHintSeen() {
+  try { sessionStorage.setItem(PILL_HINT_KEY, "1"); } catch (_) { /* private mode */ }
+}
+
+// ease an inline-transform change, then drop the transition so the next
+// live drag stays 1:1 (pointermove writes transforms directly)
+function glideTo(el, transform) {
+  el.style.transition = "transform 220ms ease";
+  el.style.transform = transform;
+  setTimeout(() => { el.style.transition = ""; }, 260);
 }
 
 // wire one wrap for pointer dragging; closes over its own gesture state
@@ -1822,6 +1858,10 @@ function makeDraggable(el) {
   let layoutLeft = 0, layoutTop = 0, boxW = 0, boxH = 0;
   let pointerId = null, captureEl = null;
   let dragging = false, moved = false, suppressClick = false;
+  let dragThreshold = 4;
+  let touchDrag = false;
+  let holdTimer = null;
+  let lastTapAt = 0, lastTapX = 0, lastTapY = 0;
 
   // read the offset already applied so a second drag continues from there
   const readOffset = () => {
@@ -1829,12 +1869,43 @@ function makeDraggable(el) {
     return m ? { x: parseFloat(m[1]), y: parseFloat(m[2]) } : { x: 0, y: 0 };
   };
 
+  const clearHoldTimer = () => {
+    if (holdTimer) clearTimeout(holdTimer);
+    holdTimer = null;
+  };
+
+  // after a touch drop, glide along one axis to the nearest screen edge;
+  // the layout values captured at pointerdown make this transform-agnostic
+  const snapToNearestEdge = () => {
+    const off = readOffset();
+    const left = layoutLeft + off.x, top = layoutTop + off.y;
+    const dLeft = left - DRAG_MARGIN;
+    const dRight = window.innerWidth - DRAG_MARGIN - boxW - left;
+    const dTop = top - DRAG_MARGIN;
+    const dBottom = window.innerHeight - DRAG_MARGIN - boxH - top;
+    let nx = off.x, ny = off.y;
+    const nearest = Math.min(dLeft, dRight, dTop, dBottom);
+    if (nearest === dLeft) nx = DRAG_MARGIN - layoutLeft;
+    else if (nearest === dRight) nx = window.innerWidth - DRAG_MARGIN - boxW - layoutLeft;
+    else if (nearest === dTop) ny = DRAG_MARGIN - layoutTop;
+    else ny = window.innerHeight - DRAG_MARGIN - boxH - layoutTop;
+    glideTo(el, `translate(${nx}px, ${ny}px)`);
+  };
+
   el.addEventListener("pointerdown", (e) => {
-    if (e.pointerType === "touch" || e.button !== 0) return;
+    if (e.button !== 0) return;
     const t = e.target;
     if (!(t instanceof Element)) return;
     // native selects/inputs open on mousedown, so never drag from them
     if (t.closest("select, input")) return;
+    // the key list scrolls on phones: a touch there scrolls, never drags
+    // (the key still moves by its pill; mouse drags keep working anywhere)
+    if (e.pointerType === "touch" && t.closest("#counts")) return;
+    // a drag must track the pointer 1:1, never ease after a snap
+    el.style.transition = "";
+    touchDrag = e.pointerType === "touch";
+    // finger jitter overshoots the mouse threshold, so touch gets more slack
+    dragThreshold = touchDrag ? 10 : 4;
     const off = readOffset();
     const rect = el.getBoundingClientRect();
     // layout position with zero transform, so clamping is transform-agnostic
@@ -1848,26 +1919,59 @@ function makeDraggable(el) {
     // capture on the hit element (it has pointer-events; the wrap may not)
     captureEl = t;
     try { t.setPointerCapture(e.pointerId); } catch (_) { /* capture unsupported */ }
+    if (pillHintPending()) {
+      clearHoldTimer();
+      holdTimer = setTimeout(() => {
+        holdTimer = null;
+        if (!dragging || moved) return;
+        markPillHintSeen();
+        showClickHint("Drag to move — double-tap sends it home", { durationMs: 2600 });
+      }, 450);
+    }
   });
 
   el.addEventListener("pointermove", (e) => {
     if (!dragging || e.pointerId !== pointerId) return;
     const dx = e.clientX - startX, dy = e.clientY - startY;
-    if (!moved && Math.hypot(dx, dy) < 4) return; // under threshold: still a click
-    moved = true;
-    const margin = 8; // keep the box at least this far inside the viewport
+    if (!moved && Math.hypot(dx, dy) < dragThreshold) return; // under threshold: still a click
+    if (!moved) {
+      moved = true;
+      clearHoldTimer();
+      markPillHintSeen();
+    }
     let nx = baseX + dx, ny = baseY + dy;
-    nx = Math.min(Math.max(nx, margin - layoutLeft), window.innerWidth - margin - boxW - layoutLeft);
-    ny = Math.min(Math.max(ny, margin - layoutTop), window.innerHeight - margin - boxH - layoutTop);
+    nx = Math.min(Math.max(nx, DRAG_MARGIN - layoutLeft), window.innerWidth - DRAG_MARGIN - boxW - layoutLeft);
+    ny = Math.min(Math.max(ny, DRAG_MARGIN - layoutTop), window.innerHeight - DRAG_MARGIN - boxH - layoutTop);
     el.style.transform = `translate(${nx}px, ${ny}px)`;
   });
 
   const endDrag = (e) => {
     if (!dragging || e.pointerId !== pointerId) return;
     dragging = false;
+    clearHoldTimer();
     if (captureEl) { try { captureEl.releasePointerCapture(pointerId); } catch (_) { /* already released */ } }
-    if (moved) suppressClick = true; // a real drag: swallow the click it fires
     captureEl = null;
+    if (moved) {
+      suppressClick = true; // a real drag: swallow the click it fires
+      // a mouse drag fires its trailing click at once, but a touch or pen
+      // drag fires none at all — disarm shortly after, or the stale flag
+      // would swallow the next legitimate tap on the pill
+      setTimeout(() => { suppressClick = false; }, 150);
+      // a cancelled pointer keeps the pill where the gesture left it
+      if (touchDrag && e.type === "pointerup") snapToNearestEdge();
+      return;
+    }
+    if (e.type !== "pointerup") return;
+    // double-tap on a displaced pill sends just that pill home; the taps
+    // still toggle the pill's panel twice, which nets to no change
+    const now = Date.now();
+    if (el.style.transform && now - lastTapAt < 350 &&
+        Math.hypot(e.clientX - lastTapX, e.clientY - lastTapY) < 30) {
+      glideTo(el, "");
+      lastTapAt = 0;
+    } else {
+      lastTapAt = now; lastTapX = e.clientX; lastTapY = e.clientY;
+    }
   };
   el.addEventListener("pointerup", endDrag);
   el.addEventListener("pointercancel", endDrag);
@@ -1882,8 +1986,16 @@ function makeDraggable(el) {
 }
 
 DRAG_SELECTORS.forEach((sel) => makeDraggable(document.querySelector(sel)));
-// a resize can strand a dragged pill off-screen, so snap them all home
-window.addEventListener("resize", clearDragTransforms);
+// a resize can strand a dragged pill off-screen, so snap them all home —
+// but only when the width changes (rotation, a real window resize): on
+// phones the on-screen keyboard fires a height-only resize, and opening
+// search must not discard the user's arrangement
+let lastViewportWidth = window.innerWidth;
+window.addEventListener("resize", () => {
+  if (window.innerWidth === lastViewportWidth) return;
+  lastViewportWidth = window.innerWidth;
+  clearDragTransforms();
+});
 
 let clickHintTimer = null;
 function showClickHint(message, options = {}) {

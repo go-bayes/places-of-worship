@@ -247,3 +247,19 @@
 .pulotu-legend-count { color: #94a3b8; font-size: 11px; }
 #census-panel.pulotu-mode .census-slider { accent-color: #6d28d9; }
 .pulotu-ticks span { letter-spacing: 0.01em; }
+
+/* touch drag (phone parity with desktop): the census control opts out of
+   browser pan/zoom so a touch drag reaches the module's pointer handlers
+   instead of being claimed for scrolling, and a stalled touch must not pop
+   text selection or the link callout. the shared surfaces (key bar,
+   wordmark, popups) carry the same rules in the global app sheet this page
+   forks; only the census control is this page's own. */
+#data-pill, #census-panel {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+/* native controls keep their own touch handling (select pickers, the time
+   slider, the later-foundations checkbox); drags never start from them */
+#census-panel select, #census-panel input, #data-pill select { touch-action: auto; }
