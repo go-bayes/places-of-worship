@@ -136,7 +136,10 @@
     var a = CONFIG.accessData;
     if (!a) return null;
     var body = el("div", "overview-access");
+    // a page whose product is not rate-shaped (a register-count map) can
+    // override the lede's noun so the boilerplate never misstates the product
     body.appendChild(el("p", "overview-access-lede",
+      a.redistributionNote ||
       "This project does not redistribute source data; the map shows derived rates with attribution. To obtain the data from the source of record:"));
     var dl = el("dl", "overview-defs");
     function def(term, valueNode) {

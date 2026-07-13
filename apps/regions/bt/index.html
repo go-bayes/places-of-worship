@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Bhutan Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css?v=20260712d" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260712d" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // bhutan's product is a locally defined administrative register of
+    // religious institutions; it measures buildings rather than people.
+    window.REGION_CONFIG = {
+      countryCode: "BT",
+      title: "Places of Worship | Bhutan Research Map",
+      dataNoun: "Register",
+      center: [90.43684, 27.50842],
+      initialZoom: 6.7,
+      censusLevels: {
+        dzongkhag: {
+          label: "Dzongkhag (20 units)",
+          boundaries: "data/bt_dzongkhag.geojson",
+          summary: "data/area_summary_dzongkhag.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Register counts © National Statistics Bureau of Bhutan; no reuse terms stated, used with attribution pending confirmation · Boundaries © geoBoundaries, CC BY 3.0"
+        }
+      },
+      defaultLevel: "dzongkhag",
+      defaultMetric: "place_count",
+      defaultYear: 2022,
+      metricsAvailable: ["place_count"],
+      metricLabels: {
+        place_count: {
+          label: "Religious institutions (count)",
+          note: "administrative register count of religious institutions compiled by each Dzongkhag Administration and published in the National Statistics Bureau's Dzongkhag at a Glance series. The count describes buildings, never people. Bhutan collects no census or survey data on personal religious affiliation; the 2017 Population and Housing Census publishes no religion table at any grain. Each office and edition defines religious institution locally. Counts are therefore not comparable across dzongkhags or necessarily across years. Darker shading means a higher level in that dzongkhag's own register. It does not mean more religious infrastructure or greater population religiosity."
+        }
+      },
+      popupDenominatorNote: "The National Statistics Bureau publishes these administrative register counts from each Dzongkhag Administration. They count religious-institution buildings, never people, and use no population denominator. Bhutan collects no census or survey data on personal religious affiliation; the 2017 Population and Housing Census publishes no religion table at any grain. Each dzongkhag office and edition defines religious institution locally. Counts are therefore not comparable across dzongkhags or necessarily across years, and the map makes no population-religiosity claim.",
+      pendingAreaNote: "No register observation is carried for this dzongkhag in any edition; the source publishes none. No data is never zero.",
+      cityPresets: [
+        { label: "Thimphu", coords: [89.6339, 27.4728], zoom: 10 },
+        { label: "Paro", coords: [89.4122, 27.4305], zoom: 10 },
+        { label: "Trashigang", coords: [91.5542, 27.3331], zoom: 9 }
+      ],
+      geocode: { country: "bt", biasLngLat: [90.43684, 27.50842] },
+      onboarding: {
+        title: "Bhutan research map",
+        intro: "Administrative register counts of religious institutions compiled by each Dzongkhag Administration and published in the National Statistics Bureau's Dzongkhag at a Glance series, for carried years from 2013 to 2023. The map counts buildings, never people. Bhutan collects no census or survey data on personal religious affiliation; the 2017 Population and Housing Census publishes no religion table at any grain. The map therefore makes no claim about population religiosity.",
+        bullets: [
+          "Each dzongkhag office and edition defines <em>religious institution</em> locally. Counts are not comparable across dzongkhags or necessarily across years. Darker shading shows a higher level in that dzongkhag's own register. It does not show more religious infrastructure or greater population religiosity than a lighter dzongkhag.",
+          "Register variance is large. Trashigang's carried series reaches 151 while Tsirang's reaches 1. Paro changes from 10 in 2019 to 183 in 2020 after a register redefinition. Thimphu changes from 92 to 20 between editions. These figures document local register practice rather than a shared national measurement scale.",
+          "Coverage varies by year. The 2023 product has observations for two dzongkhags, and Samdrup Jongkhar has no observation in any carried year. Missing dzongkhag-years display as no data, never zero.",
+          "Open <strong>Show Register Data</strong> (top centre) for the metric and index-based year control."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Religious-institution register counts &copy; <a href="https://web.archive.org/web/*/https://www.nsb.gov.bt/publications/insights/dzongkhag-at-a-glance/" target="_blank" rel="noopener">National Statistics Bureau of Bhutan</a>, <em>Dzongkhag at a Glance</em>, source: Dzongkhag Administrations. No reuse terms stated; used with attribution pending confirmation. &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/api/current/gbOpen/BTN/ADM1/" target="_blank" rel="noopener">geoBoundaries BTN ADM1</a>, CC BY 3.0.',
+      censusFlagNote: "* A starred register figure carries a source-history flag: figure revised in a later edition, the register's definition changed here, or both."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260713b"></script>
+</body>
+</html>

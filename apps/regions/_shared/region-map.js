@@ -3440,11 +3440,16 @@ function openCensusPopup(feature, lngLat) {
             : "") +
         `</div>`
       : "";
+    // a page whose product carries no OSM place layer overrides the pending
+    // wording (a register product's empty area is absent-in-source, not
+    // pending) and drops the OSM credit, which only backs placeInfo lines
+    const pendingNote = RC.pendingAreaNote ||
+      `Place density from OpenStreetMap. ${RC.dataNoun || "Census"} religious-affiliation data is pending for this area.`;
     const html =
       `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
       placeInfo +
-      `<div class="place-note">Place density from OpenStreetMap. ${RC.dataNoun || "Census"} religious-affiliation data is pending for this area.</div>` +
-      `<div class="place-note">${levelDef.credit} · places © OpenStreetMap (ODbL)</div>`;
+      `<div class="place-note">${pendingNote}</div>` +
+      `<div class="place-note">${levelDef.credit}${placeInfo ? " · places © OpenStreetMap (ODbL)" : ""}</div>`;
     trackPlacePopup(new maplibregl.Popup({ maxWidth: "320px" }).setLngLat(lngLat).setHTML(html).addTo(map));
     return;
   }

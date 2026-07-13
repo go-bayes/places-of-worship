@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Bhutan map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260712d" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the bhutan research map; every claim follows the
+    // committed area summary, its private manifest, or the source record.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "BT",
+      countryName: "Bhutan",
+      mapHref: "./",
+      intro: "This map shows administrative register counts of religious institutions compiled by each Dzongkhag Administration and published in the National Statistics Bureau's Dzongkhag at a Glance series. The counts describe buildings, never people. Bhutan collects no census or survey data on personal religious affiliation; the 2017 Population and Housing Census publishes no religion table at any grain. The map therefore makes no population-religiosity claim. Each dzongkhag office and edition defines religious institution locally, which means the counts are not comparable across dzongkhags or necessarily across years.",
+      facts: {
+        waves: "11 carried register years, 2013–2023",
+        geographies: "Dzongkhag (20 units)",
+        metrics: "Religious institutions (count)",
+        placeDots: "OpenStreetMap supplies the separate place dots"
+      },
+      reading: [
+        "Each dzongkhag's shading shows its own administrative register count for the selected year. The map uses no population denominator. Bhutan collects no census or survey data on personal religious affiliation, and the 2017 Population and Housing Census publishes no religion table at any grain. The shading therefore supports no claim about what people believe or how religious a population is.",
+        "Each dzongkhag office and edition defines religious institution locally. Counts are not comparable across dzongkhags or necessarily across years. Darker shading means a higher level in that dzongkhag's own register. Interpreting dark and light areas as differences in religious infrastructure or population religiosity would misuse the data.",
+        "The local definitions produce abrupt differences. Trashigang's carried register reaches 151 while Tsirang's reaches 1. Paro changes from 10 in 2019 to 183 in 2020 after a register redefinition. Thimphu changes from 92 to 20 between editions. The product flags revised figures and changed definitions in the popup series.",
+        "The product carries 175 dzongkhag-year observations from 2013 through 2023. Coverage varies by year and becomes thin near the end of the series. The 2023 product has observations for Sarpang and Thimphu only. Samdrup Jongkhar has no observation in any carried year. Missing dzongkhag-years display as no data, never zero.",
+        "The boundaries contain Bhutan's 20 dzongkhags on the geoBoundaries 2010 ADM1 frame. The area summary joins each observation to the boundary through its area code."
+      ],
+      sources: [
+        {
+          name: "National Statistics Bureau of Bhutan, Dzongkhag at a Glance",
+          href: "https://web.archive.org/web/*/https://www.nsb.gov.bt/publications/insights/dzongkhag-at-a-glance/",
+          construct: "Administrative register counts of religious institutions compiled by Dzongkhag Administrations",
+          years: "Editions 2016–2023; carried observations 2013–2023",
+          licence: "No reuse terms stated; used with attribution pending confirmation."
+        },
+        {
+          name: "geoBoundaries gbOpen BTN ADM1",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/BTN/ADM1/",
+          construct: "Boundary geometry for 20 dzongkhags",
+          years: "Boundary year 2010",
+          licence: "Creative Commons Attribution 3.0"
+        }
+      ],
+      accessData: {
+        redistributionNote: "This project does not redistribute source data; the map shows derived register counts with attribution. To obtain the data from the source of record:",
+        sourceOfRecord: "National Statistics Bureau of Bhutan, <a href=\"https://web.archive.org/web/*/https://www.nsb.gov.bt/publications/insights/dzongkhag-at-a-glance/\" target=\"_blank\" rel=\"noopener\"><em>Dzongkhag at a Glance</em> editions 2016–2023</a>, retrieved through the Internet Archive Wayback Machine because the live NSB host was unreachable. The captures are checksummed. Boundaries come from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/BTN/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries BTN ADM1</a>.",
+        tables: "The Religion & Culture block's Religious institutions row supplies the count. The source record has known defects: one catalogue entry serves the wrong dzongkhag's sheet, two captures are truncated in the archive, and several sheets print defective year headings. The pipeline keeps only ruled observations and records the defects and repair decisions.",
+        licence: "The NSB site states no reuse terms, and no reuse grant was located. The derived counts are used with attribution pending confirmation. The geoBoundaries BTN ADM1 boundary is Creative Commons Attribution 3.0. The project page and code are licensed under CC BY-NC-SA 4.0, subject to the source terms stated here.",
+        script: "pipeline/build_bt_area_summary.R",
+        manifests: [
+          { label: "bt-religious-institutions-2013-2023.json" }
+        ],
+        note: "The manifest is named here for provenance and is not linked from this public page."
+      },
+      contribute: {
+        pendingNote: "The Bhutan map is a register-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260713b"></script>
+</body>
+</html>
