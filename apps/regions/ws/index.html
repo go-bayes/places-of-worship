@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Samoa Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css?v=20260713g" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260713g" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // the four-region layer is an exact roll-up of the constituency product.
+    window.REGION_CONFIG = {
+      countryCode: "WS",
+      title: "Samoa",
+      dataNoun: "Census",
+      center: [-172.35, -13.75],
+      initialZoom: 7.0,
+      censusLevels: {
+        region: {
+          label: "Statistical region (2021, partial layer)",
+          boundaries: "data/ws_region_2011.geojson",
+          summary: "data/area_summary_region.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Samoa Bureau of Statistics, 2021 Census tables workbook Table 2; derived summaries used with attribution under the project-lead use-for-now ruling while an SBS reuse ask is outgoing · Boundaries Pacific Community (SPC) Statistics for Development Division, Pacific Data Hub, 2011 PHC region boundaries, Creative Commons Attribution"
+        }
+      },
+      defaultLevel: "region",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2021,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: { note: "share of the statistical region's total resident population reporting any of the 25 religious-affiliation categories" },
+        no_religion_percent: { note: "share of the statistical region's total resident population recorded as NO RELIGION" }
+      },
+      popupDenominatorNote: "The 2021 table has no separate not-stated category. Its 26 printed religion categories sum exactly to the enumerated resident population. Religious affiliation is TOTAL minus NO RELIGION; no religion is the NO RELIGION count. Both percentages use the statistical region's total resident population as their denominator.",
+      cityPresets: [
+        { label: "Apia", coords: [-171.7514, -13.8333], zoom: 11 },
+        { label: "Salelologa", coords: [-172.1739, -13.7333], zoom: 11 }
+      ],
+      geocode: { country: "ws", biasLngLat: [-172.35, -13.75] },
+      onboarding: {
+        title: "Samoa research map",
+        intro: "Religious-affiliation and no-religion shares for Samoa's four statistical regions in 2021. The census publishes a finer table for 51 electoral constituencies, but no licensed constituency boundary layer exists.",
+        bullets: [
+          "The map hatches this layer and tags it <strong>Partial layer</strong> because it renders the census workbook's four-region roll-up. The full 51-constituency table remains in the committed data product.",
+          "The 26 printed categories sum exactly to the enumerated resident population. The NO RELIGION category contains 132 people nationally.",
+          "Open <strong>Show Census Data</strong> (top centre) to switch between religious affiliation and no religion.",
+          "Tap any dot for a place; tap a statistical region for its 2021 census detail."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "datamaps-link", label: "Data maps", href: "../", title: "All country data maps" },
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion &copy; <a href="https://www.sbs.gov.ws/wp-content/uploads/2022/12/CensusTablesEXCELFiles.xlsx" target="_blank" rel="noopener">Samoa Bureau of Statistics, 2021 Census tables workbook Table 2</a>; derived summaries used with attribution under the project-lead use-for-now ruling while an SBS reuse ask is outgoing. The page reverts in a single commit if SBS objects. &middot; Boundaries <a href="https://pacificdata.org/data/dataset/2011_wsm_phc_admin_boundaries" target="_blank" rel="noopener">Pacific Community (SPC) Statistics for Development Division, Pacific Data Hub, 2011 PHC region boundaries</a>, Creative Commons Attribution. &middot; Project page and code <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>, subject to the source terms stated here.',
+      censusFlagNote: "* Religion is published and staged for 51 electoral constituencies, but no licensed constituency boundary layer exists. The map renders the census's four statistical regions, the workbook's own roll-up, until the Samoa Bureau of Statistics supplies a constituency vector; the full constituency table ships in the committed data product. The 2021 table has no separate not-stated category: all 26 printed categories sum exactly to the enumerated resident population. Religious affiliation is TOTAL minus NO RELIGION, no religion is NO RELIGION, and both percentages use total resident population as their denominator. The boundary layer is the 2011 Population and Housing Census dissemination geography; its four statistical regions are the same frame used by the 2021 workbook roll-up. This release has one subnational census wave, 2021, and therefore reports no change metric."
+    };
+  </script>
+  <script src="../_shared/region-map.js?v=20260713g"></script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Samoa map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260712d" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the samoa research map; every claim follows the
+    // committed summaries, private manifests, or source records.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "WS",
+      countryName: "Samoa",
+      mapHref: "./",
+      intro: "This map shows religious-affiliation and no-religion shares for Samoa's four statistical regions in 2021. The region rows sum the committed 51-constituency counts through the census workbook's own hierarchy. No value is allocated or inferred. The region layer is partial because no licensed boundary represents the 51 electoral constituencies.",
+      facts: {
+        waves: "1 census wave, 2021",
+        geographies: "Statistical region (4 units, partial layer)",
+        metrics: "Religious affiliation and no religion",
+        placeDots: "OpenStreetMap supplies the separate place dots"
+      },
+      reading: [
+        "The map hatches the census layer and tags it Partial layer because it shows the four statistical regions rather than the 51 electoral constituencies. The full constituency table remains in the committed data product and will supersede this region wash when the Samoa Bureau of Statistics supplies a licensed constituency vector.",
+        "The 2021 census frame contains 26 printed categories, including NO RELIGION. The 26 categories sum exactly to the enumerated resident population. Religious affiliation is the sum of the other 25 categories, and both displayed percentages use total resident population as their denominator.",
+        "The four region rows close exactly to the 51 constituency rows. Apia Urban Area contains 35,974 residents, North West Upolu 75,307, Rest of Upolu 49,101, and Savaii 45,175. The four counts sum to the national total of 205,557.",
+        "The boundary layer uses the 2011 Population and Housing Census dissemination geography. Its four statistical regions are the same frame used by the 2021 workbook roll-up. The source notes that upper-level administrative units may differ slightly from official boundaries.",
+        "The map contains one subnational census wave, 2021. A single wave supports a cross-sectional description and no change metric."
+      ],
+      sources: [
+        {
+          name: "Samoa Bureau of Statistics, 2021 Census tables workbook, Table 2",
+          href: "https://www.sbs.gov.ws/wp-content/uploads/2022/12/CensusTablesEXCELFiles.xlsx",
+          construct: "Total resident population by stated church or religion and place of residence",
+          years: "2021",
+          licence: "Copyright © Samoa Bureau of Statistics. Derived summaries are used with attribution under the project-lead use-for-now ruling while an SBS reuse ask is outgoing. The page reverts in a single commit if SBS objects."
+        },
+        {
+          name: "Pacific Community Statistics for Development Division, Pacific Data Hub, Samoa 2011 PHC region boundaries",
+          href: "https://pacificdata.org/data/dataset/2011_wsm_phc_admin_boundaries",
+          construct: "Boundary geometry for four census statistical regions",
+          years: "2011 PHC dissemination geography",
+          licence: "Creative Commons Attribution. Upper level administrative units may slightly differ from the official boundaries. The boundaries, codes and names shown in the datasets do not imply official endorsement or acceptance by SPC."
+        },
+        {
+          name: "Committed Samoa constituency census-religion product",
+          href: "data/area_summary_constituency.json",
+          construct: "Finer table of 51 electoral constituencies used as the governed aggregation input",
+          years: "2021",
+          licence: "Derived SBS summary used with attribution under the project-lead use-for-now ruling; licence status needs review."
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "The census source of record is the Samoa Bureau of Statistics <a href=\"https://www.sbs.gov.ws/wp-content/uploads/2022/12/CensusTablesEXCELFiles.xlsx\" target=\"_blank\" rel=\"noopener\">2021 Census tables workbook, Table 2</a>. The governed aggregation input is the committed <a href=\"data/area_summary_constituency.json\">51-constituency summary</a>. Boundaries come from the <a href=\"https://pacificdata.org/data/dataset/2011_wsm_phc_admin_boundaries\" target=\"_blank\" rel=\"noopener\">Pacific Data Hub 2011 PHC region layer</a>.",
+        tables: "The builder sums every committed constituency count by the aua, nwu, rou, and sav area-code prefixes. The prefix map is the census workbook's own four-region hierarchy. Percentages are derived only after the counts are summed.",
+        licence: "The census summaries are used with SBS attribution under the project-lead use-for-now ruling while a reuse ask is outgoing. The page reverts in a single commit if SBS objects. The boundary licence is Creative Commons Attribution, with attribution to Pacific Community (SPC) Statistics for Development Division, Pacific Data Hub. The project page and code are licensed under CC BY-NC-SA 4.0, subject to the source terms stated here.",
+        script: "pipeline/build_ws_region_summary.R",
+        manifests: [
+          { label: "ws-census-religion-2021.json" },
+          { label: "ws-census-religion-2021-region.json" }
+        ],
+        note: "The manifests are named here for provenance and are not linked from this public page. They remain in the project's private research tier."
+      },
+      contribute: {
+        pendingNote: "The Samoa map has no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260713b"></script>
+</body>
+</html>

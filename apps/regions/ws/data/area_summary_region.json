@@ -1,0 +1,653 @@
+{
+  "schema_version": "area-summary.v2",
+  "generated_at": "2026-07-14T00:00:00Z",
+  "generated_by": "pipeline/build_ws_region_summary.R",
+  "country_code": "WS",
+  "data_status": "staged_coarser_grain_partial_layer",
+  "data_status_note": "The four-region layer is an exact roll-up of the committed 51-constituency product.",
+  "partial_layer": "Religion is published and staged for 51 electoral constituencies, but no licensed constituency boundary layer exists. The map renders the census's four statistical regions, the workbook's own roll-up, until the Samoa Bureau of Statistics supplies a constituency vector; the full constituency table ships in the committed data product.",
+  "boundary_set": {
+    "boundary_set_id": "ws-statistical-region-2011-spc-pdh",
+    "country_code": "WS",
+    "level": "statistical_region",
+    "vintage": "2011 PHC dissemination geography used for the 2021 workbook's four-region roll-up",
+    "source_dataset_id": "spc-pdh-wsm-2011-phc-regions"
+  },
+  "site_snapshot": {
+    "source_dataset_id": null,
+    "snapshot_date": null,
+    "basis": "No governed Samoa place-of-worship snapshot is included in this census-religion release.",
+    "notes": "All place counts and derived place metrics are null."
+  },
+  "source_datasets": [
+    {
+      "source_dataset_id": "sbs-census-2021-table2-religion-constituency",
+      "name": "SBS Census of Samoa 2021, Table 2: Total population by sex, religion and place of residence (census tables workbook)",
+      "provider": "Samoa Bureau of Statistics (SBS)",
+      "url": "https://www.sbs.gov.ws/wp-content/uploads/2022/12/CensusTablesEXCELFiles.xlsx",
+      "retrieval_date": "2026-07-11",
+      "local_path": "/Users/joseph/GIT/places-of-worship/apps/regions/ws/data/area_summary_constituency.json",
+      "licence": {
+        "name": "SBS asserts a bare copyright with no explicit reuse grant (verbatim: \"Copyright ©  Samoa Bureau of Statistics (SBS), Apia, Samoa, 2022.\"). No SBS terms-of-use or open-data licence page was located. This build ships derived aggregate rates with SBS attribution under the project lead's use-for-now ruling (2026-07-11). Written SBS confirmation of reuse terms remains pending. The licence position is needs_review.",
+        "url": "https://www.sbs.gov.ws/",
+        "attribution": "Source: Samoa Bureau of Statistics (SBS), Census of Samoa 2021, Table 2"
+      },
+      "citation": "Samoa Bureau of Statistics, Population and Housing Census 2021, Table 2: Total population by sex, religion and place of residence.",
+      "access_limits": "Public download from the SBS website; the workbook sha256 is a build gate.",
+      "redistribution_limits": "SBS grants no explicit reproduction permission; the 2021 report prints only a bare copyright. This build publishes DERIVED aggregate rates with SBS attribution and holds raw inputs git-ignored; the project lead approved the use-for-now position on 2026-07-11 (PI task 3), and written SBS confirmation of reuse terms is the clean path and remains pending (licence_status needs_review).",
+      "notes": "The region product reads the committed 51-constituency summary as its governed census input and sums every published count by the area_code prefix. The four-region result is exact arithmetic on the census workbook's own hierarchy; no value is allocated or inferred."
+    },
+    {
+      "source_dataset_id": "spc-pdh-wsm-2011-phc-regions",
+      "name": "Samoa 2011 Population and Housing Census region boundaries",
+      "provider": "Pacific Community (SPC) Statistics for Development Division, Pacific Data Hub",
+      "url": "https://pacificdata.org/data/dataset/2011_wsm_phc_admin_boundaries",
+      "retrieval_date": "2026-07-14",
+      "local_path": "data/raw/ws_geometry_recon/pdh_2011_wsm_region.geojson",
+      "licence": {
+        "name": "Creative Commons Attribution",
+        "url": "https://pacificdata.org/data/dataset/2011_wsm_phc_admin_boundaries",
+        "attribution": "Pacific Community (SPC) Statistics for Development Division, Pacific Data Hub, 2011 PHC region boundaries"
+      },
+      "citation": "Pacific Community (SPC) Statistics for Development Division, Pacific Data Hub, 2011 PHC region boundaries",
+      "access_limits": "The cached GeoJSON matched the reconnaissance checksum before use.",
+      "redistribution_limits": "Redistributed with attribution under the source's Creative Commons Attribution licence.",
+      "notes": "The 2011 PHC dissemination layer contains the four statistical regions used by the 2021 census workbook roll-up. Upper level administrative units may slightly differ from the official boundaries. The boundaries, codes and names shown in the datasets do not imply official endorsement or acceptance by SPC."
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_id": "population_total",
+      "label": "Census resident population",
+      "description": "Samoa's 2021 census resident population, summed exactly from the committed constituency rows to four statistical regions.",
+      "unit": "count",
+      "denominator_indicator_id": null,
+      "method": "Sum the committed constituency population_total values by the aua, nwu, rou, and sav area_code prefixes.",
+      "temporal_coverage": "2021 Census of Samoa, Table 2.",
+      "spatial_coverage": "Four census statistical regions.",
+      "quality_notes": "Religion is published and staged for 51 electoral constituencies, but no licensed constituency boundary layer exists. The map renders the census's four statistical regions, the workbook's own roll-up, until the Samoa Bureau of Statistics supplies a constituency vector; the full constituency table ships in the committed data product."
+    },
+    {
+      "indicator_id": "religious_affiliation_percent",
+      "label": "Religious affiliation (%)",
+      "description": "Share of the region's enumerated resident population reporting any of the 25 religious-affiliation categories in the 2021 frame.",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "100 times the summed constituency religious_affiliation_count divided by the summed constituency population_total.",
+      "temporal_coverage": "2021 Census of Samoa, Table 2.",
+      "spatial_coverage": "Four census statistical regions.",
+      "quality_notes": "Religion is published and staged for 51 electoral constituencies, but no licensed constituency boundary layer exists. The map renders the census's four statistical regions, the workbook's own roll-up, until the Samoa Bureau of Statistics supplies a constituency vector; the full constituency table ships in the committed data product."
+    },
+    {
+      "indicator_id": "no_religion_percent",
+      "label": "No religion (%)",
+      "description": "Share of the region's enumerated resident population recorded in the NO RELIGION category.",
+      "unit": "percent",
+      "denominator_indicator_id": "population_total",
+      "method": "100 times the summed constituency NO RELIGION count divided by the summed constituency population_total.",
+      "temporal_coverage": "2021 Census of Samoa, Table 2.",
+      "spatial_coverage": "Four census statistical regions.",
+      "quality_notes": "Religion is published and staged for 51 electoral constituencies, but no licensed constituency boundary layer exists. The map renders the census's four statistical regions, the workbook's own roll-up, until the Samoa Bureau of Statistics supplies a constituency vector; the full constituency table ships in the committed data product."
+    }
+  ],
+  "visual_layers": [
+    {
+      "visual_layer_id": "ws-region-affiliation-share",
+      "label": "Religious affiliation (%)",
+      "description": "Share of the statistical-region population reporting any religious affiliation, 2021.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "religious_affiliation_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "statistical-region total resident population"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "Exact sum of committed constituency counts by census-region area_code prefix.",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": true,
+      "notes": "Religion is published and staged for 51 electoral constituencies, but no licensed constituency boundary layer exists. The map renders the census's four statistical regions, the workbook's own roll-up, until the Samoa Bureau of Statistics supplies a constituency vector; the full constituency table ships in the committed data product."
+    },
+    {
+      "visual_layer_id": "ws-region-no-religion-share",
+      "label": "No religion (%)",
+      "description": "Share of the statistical-region population recorded as NO RELIGION, 2021.",
+      "layer_type": "choropleth",
+      "indicator_ids": [
+        "no_religion_percent"
+      ],
+      "geometry_unit_type": "area_unit",
+      "legend": {
+        "unit": "percent",
+        "denominator": "statistical-region total resident population"
+      },
+      "colour_scale": "sequential",
+      "time_control": "year_selector",
+      "aggregation_rule": "Exact sum of committed constituency counts by census-region area_code prefix.",
+      "uncertainty_display": "quality_flag",
+      "default_visibility": false,
+      "notes": "Religion is published and staged for 51 electoral constituencies, but no licensed constituency boundary layer exists. The map renders the census's four statistical regions, the workbook's own roll-up, until the Samoa Bureau of Statistics supplies a constituency vector; the full constituency table ships in the committed data product."
+    }
+  ],
+  "rows": [
+    {
+      "country_code": "WS",
+      "boundary_set_id": "ws-statistical-region-2011-spc-pdh",
+      "boundary_level": "statistical_region",
+      "area_unit_id": "ws-statistical-region-2011-spc-pdh:aua",
+      "area_code": "aua",
+      "area_name": "Apia Urban Area",
+      "year": 2021,
+      "population_total": 35974,
+      "population_total_basis": "Exact sum of the committed 2021 constituency-summary population counts for the census statistical region; the area_code prefix supplies the workbook's own roll-up.",
+      "religious_affiliation_count": 35931,
+      "religious_affiliation_percent": 99.8805,
+      "no_religion_count": 43,
+      "no_religion_percent": 0.1195,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["sbs-census-2021-table2-religion-constituency", "spc-pdh-wsm-2011-phc-regions"],
+      "quality_flag": "census_religion_2021_verbatim_frame;26_category_partition;real_no_religion_category;ordinary_two_slot_semantics;exact_constituency_rollup;no_allocation_no_inference;partial_layer=coarser-grain;primary_level=statistical_region;constituency_prefix=aua;categories_verbatim[CONGREGATIONAL CHRISTIAN CHURCH OF SAMOA=10232;METHODIST=2861;ROMAN CATHOLIC=9098;LATTER  DAY SAINTS=4904;ASSEMBLY OF GOD=2073;SEVENTH DAYS ADVENTIST=1213;ASO FITU  (SISDAC)=273;JEHOVAHS WITNESS=396;CONGREGATIONAL CHRISTIAN CHURCH OF JESUS IN SAMOA  (EFIS)=236;AMAZING LOVE CHRISTIAN CHURCH=143;BAHAI=132;VOICE OF CHRIST=368;WORSHIP CENTRE=1471;NAZARENE=163;BIBLE STUDY=58;FIRST FULL GOSPEL PENTECOSTAL CHURCH IN SAMOA=335;PABTISM=120;PEACE CHAPEL=418;SAMOA EVANGELISM=63;POROTESANO=146;ANGLICAN CHURCH=63;ELIM CHURCH=35;CHRISTIAN FELLOWSHIP=201;MUSLIM=14;OTHER CHURCHES=915;NO RELIGION=43]",
+      "composition": [
+        {
+          "label_verbatim": "CONGREGATIONAL CHRISTIAN CHURCH OF SAMOA",
+          "count": 10232
+        },
+        {
+          "label_verbatim": "METHODIST",
+          "count": 2861
+        },
+        {
+          "label_verbatim": "ROMAN CATHOLIC",
+          "count": 9098
+        },
+        {
+          "label_verbatim": "LATTER  DAY SAINTS",
+          "count": 4904
+        },
+        {
+          "label_verbatim": "ASSEMBLY OF GOD",
+          "count": 2073
+        },
+        {
+          "label_verbatim": "SEVENTH DAYS ADVENTIST",
+          "count": 1213
+        },
+        {
+          "label_verbatim": "ASO FITU  (SISDAC)",
+          "count": 273
+        },
+        {
+          "label_verbatim": "JEHOVAHS WITNESS",
+          "count": 396
+        },
+        {
+          "label_verbatim": "CONGREGATIONAL CHRISTIAN CHURCH OF JESUS IN SAMOA  (EFIS)",
+          "count": 236
+        },
+        {
+          "label_verbatim": "AMAZING LOVE CHRISTIAN CHURCH",
+          "count": 143
+        },
+        {
+          "label_verbatim": "BAHAI",
+          "count": 132
+        },
+        {
+          "label_verbatim": "VOICE OF CHRIST",
+          "count": 368
+        },
+        {
+          "label_verbatim": "WORSHIP CENTRE",
+          "count": 1471
+        },
+        {
+          "label_verbatim": "NAZARENE",
+          "count": 163
+        },
+        {
+          "label_verbatim": "BIBLE STUDY",
+          "count": 58
+        },
+        {
+          "label_verbatim": "FIRST FULL GOSPEL PENTECOSTAL CHURCH IN SAMOA",
+          "count": 335
+        },
+        {
+          "label_verbatim": "PABTISM",
+          "count": 120
+        },
+        {
+          "label_verbatim": "PEACE CHAPEL",
+          "count": 418
+        },
+        {
+          "label_verbatim": "SAMOA EVANGELISM",
+          "count": 63
+        },
+        {
+          "label_verbatim": "POROTESANO",
+          "count": 146
+        },
+        {
+          "label_verbatim": "ANGLICAN CHURCH",
+          "count": 63
+        },
+        {
+          "label_verbatim": "ELIM CHURCH",
+          "count": 35
+        },
+        {
+          "label_verbatim": "CHRISTIAN FELLOWSHIP",
+          "count": 201
+        },
+        {
+          "label_verbatim": "MUSLIM",
+          "count": 14
+        },
+        {
+          "label_verbatim": "OTHER CHURCHES",
+          "count": 915
+        },
+        {
+          "label_verbatim": "NO RELIGION",
+          "count": 43
+        }
+      ]
+    },
+    {
+      "country_code": "WS",
+      "boundary_set_id": "ws-statistical-region-2011-spc-pdh",
+      "boundary_level": "statistical_region",
+      "area_unit_id": "ws-statistical-region-2011-spc-pdh:nwu",
+      "area_code": "nwu",
+      "area_name": "North West Upolu",
+      "year": 2021,
+      "population_total": 75307,
+      "population_total_basis": "Exact sum of the committed 2021 constituency-summary population counts for the census statistical region; the area_code prefix supplies the workbook's own roll-up.",
+      "religious_affiliation_count": 75229,
+      "religious_affiliation_percent": 99.8964,
+      "no_religion_count": 78,
+      "no_religion_percent": 0.1036,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["sbs-census-2021-table2-religion-constituency", "spc-pdh-wsm-2011-phc-regions"],
+      "quality_flag": "census_religion_2021_verbatim_frame;26_category_partition;real_no_religion_category;ordinary_two_slot_semantics;exact_constituency_rollup;no_allocation_no_inference;partial_layer=coarser-grain;primary_level=statistical_region;constituency_prefix=nwu;categories_verbatim[CONGREGATIONAL CHRISTIAN CHURCH OF SAMOA=17228;METHODIST=7293;ROMAN CATHOLIC=14145;LATTER  DAY SAINTS=11666;ASSEMBLY OF GOD=10021;SEVENTH DAYS ADVENTIST=3769;ASO FITU  (SISDAC)=887;JEHOVAHS WITNESS=793;CONGREGATIONAL CHRISTIAN CHURCH OF JESUS IN SAMOA  (EFIS)=88;AMAZING LOVE CHRISTIAN CHURCH=133;BAHAI=325;VOICE OF CHRIST=636;WORSHIP CENTRE=3420;NAZARENE=546;BIBLE STUDY=93;FIRST FULL GOSPEL PENTECOSTAL CHURCH IN SAMOA=760;PABTISM=294;PEACE CHAPEL=422;SAMOA EVANGELISM=128;POROTESANO=66;ANGLICAN CHURCH=79;ELIM CHURCH=9;CHRISTIAN FELLOWSHIP=330;MUSLIM=37;OTHER CHURCHES=2061;NO RELIGION=78]",
+      "composition": [
+        {
+          "label_verbatim": "CONGREGATIONAL CHRISTIAN CHURCH OF SAMOA",
+          "count": 17228
+        },
+        {
+          "label_verbatim": "METHODIST",
+          "count": 7293
+        },
+        {
+          "label_verbatim": "ROMAN CATHOLIC",
+          "count": 14145
+        },
+        {
+          "label_verbatim": "LATTER  DAY SAINTS",
+          "count": 11666
+        },
+        {
+          "label_verbatim": "ASSEMBLY OF GOD",
+          "count": 10021
+        },
+        {
+          "label_verbatim": "SEVENTH DAYS ADVENTIST",
+          "count": 3769
+        },
+        {
+          "label_verbatim": "ASO FITU  (SISDAC)",
+          "count": 887
+        },
+        {
+          "label_verbatim": "JEHOVAHS WITNESS",
+          "count": 793
+        },
+        {
+          "label_verbatim": "CONGREGATIONAL CHRISTIAN CHURCH OF JESUS IN SAMOA  (EFIS)",
+          "count": 88
+        },
+        {
+          "label_verbatim": "AMAZING LOVE CHRISTIAN CHURCH",
+          "count": 133
+        },
+        {
+          "label_verbatim": "BAHAI",
+          "count": 325
+        },
+        {
+          "label_verbatim": "VOICE OF CHRIST",
+          "count": 636
+        },
+        {
+          "label_verbatim": "WORSHIP CENTRE",
+          "count": 3420
+        },
+        {
+          "label_verbatim": "NAZARENE",
+          "count": 546
+        },
+        {
+          "label_verbatim": "BIBLE STUDY",
+          "count": 93
+        },
+        {
+          "label_verbatim": "FIRST FULL GOSPEL PENTECOSTAL CHURCH IN SAMOA",
+          "count": 760
+        },
+        {
+          "label_verbatim": "PABTISM",
+          "count": 294
+        },
+        {
+          "label_verbatim": "PEACE CHAPEL",
+          "count": 422
+        },
+        {
+          "label_verbatim": "SAMOA EVANGELISM",
+          "count": 128
+        },
+        {
+          "label_verbatim": "POROTESANO",
+          "count": 66
+        },
+        {
+          "label_verbatim": "ANGLICAN CHURCH",
+          "count": 79
+        },
+        {
+          "label_verbatim": "ELIM CHURCH",
+          "count": 9
+        },
+        {
+          "label_verbatim": "CHRISTIAN FELLOWSHIP",
+          "count": 330
+        },
+        {
+          "label_verbatim": "MUSLIM",
+          "count": 37
+        },
+        {
+          "label_verbatim": "OTHER CHURCHES",
+          "count": 2061
+        },
+        {
+          "label_verbatim": "NO RELIGION",
+          "count": 78
+        }
+      ]
+    },
+    {
+      "country_code": "WS",
+      "boundary_set_id": "ws-statistical-region-2011-spc-pdh",
+      "boundary_level": "statistical_region",
+      "area_unit_id": "ws-statistical-region-2011-spc-pdh:rou",
+      "area_code": "rou",
+      "area_name": "Rest of Upolu",
+      "year": 2021,
+      "population_total": 49101,
+      "population_total_basis": "Exact sum of the committed 2021 constituency-summary population counts for the census statistical region; the area_code prefix supplies the workbook's own roll-up.",
+      "religious_affiliation_count": 49092,
+      "religious_affiliation_percent": 99.9817,
+      "no_religion_count": 9,
+      "no_religion_percent": 0.0183,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["sbs-census-2021-table2-religion-constituency", "spc-pdh-wsm-2011-phc-regions"],
+      "quality_flag": "census_religion_2021_verbatim_frame;26_category_partition;real_no_religion_category;ordinary_two_slot_semantics;exact_constituency_rollup;no_allocation_no_inference;partial_layer=coarser-grain;primary_level=statistical_region;constituency_prefix=rou;categories_verbatim[CONGREGATIONAL CHRISTIAN CHURCH OF SAMOA=16201;METHODIST=4903;ROMAN CATHOLIC=8414;LATTER  DAY SAINTS=9926;ASSEMBLY OF GOD=4358;SEVENTH DAYS ADVENTIST=1414;ASO FITU  (SISDAC)=403;JEHOVAHS WITNESS=268;CONGREGATIONAL CHRISTIAN CHURCH OF JESUS IN SAMOA  (EFIS)=50;AMAZING LOVE CHRISTIAN CHURCH=388;BAHAI=158;VOICE OF CHRIST=461;WORSHIP CENTRE=484;NAZARENE=415;BIBLE STUDY=1;FIRST FULL GOSPEL PENTECOSTAL CHURCH IN SAMOA=334;PABTISM=41;PEACE CHAPEL=5;SAMOA EVANGELISM=32;POROTESANO=9;ANGLICAN CHURCH=1;ELIM CHURCH=187;CHRISTIAN FELLOWSHIP=16;MUSLIM=1;OTHER CHURCHES=622;NO RELIGION=9]",
+      "composition": [
+        {
+          "label_verbatim": "CONGREGATIONAL CHRISTIAN CHURCH OF SAMOA",
+          "count": 16201
+        },
+        {
+          "label_verbatim": "METHODIST",
+          "count": 4903
+        },
+        {
+          "label_verbatim": "ROMAN CATHOLIC",
+          "count": 8414
+        },
+        {
+          "label_verbatim": "LATTER  DAY SAINTS",
+          "count": 9926
+        },
+        {
+          "label_verbatim": "ASSEMBLY OF GOD",
+          "count": 4358
+        },
+        {
+          "label_verbatim": "SEVENTH DAYS ADVENTIST",
+          "count": 1414
+        },
+        {
+          "label_verbatim": "ASO FITU  (SISDAC)",
+          "count": 403
+        },
+        {
+          "label_verbatim": "JEHOVAHS WITNESS",
+          "count": 268
+        },
+        {
+          "label_verbatim": "CONGREGATIONAL CHRISTIAN CHURCH OF JESUS IN SAMOA  (EFIS)",
+          "count": 50
+        },
+        {
+          "label_verbatim": "AMAZING LOVE CHRISTIAN CHURCH",
+          "count": 388
+        },
+        {
+          "label_verbatim": "BAHAI",
+          "count": 158
+        },
+        {
+          "label_verbatim": "VOICE OF CHRIST",
+          "count": 461
+        },
+        {
+          "label_verbatim": "WORSHIP CENTRE",
+          "count": 484
+        },
+        {
+          "label_verbatim": "NAZARENE",
+          "count": 415
+        },
+        {
+          "label_verbatim": "BIBLE STUDY",
+          "count": 1
+        },
+        {
+          "label_verbatim": "FIRST FULL GOSPEL PENTECOSTAL CHURCH IN SAMOA",
+          "count": 334
+        },
+        {
+          "label_verbatim": "PABTISM",
+          "count": 41
+        },
+        {
+          "label_verbatim": "PEACE CHAPEL",
+          "count": 5
+        },
+        {
+          "label_verbatim": "SAMOA EVANGELISM",
+          "count": 32
+        },
+        {
+          "label_verbatim": "POROTESANO",
+          "count": 9
+        },
+        {
+          "label_verbatim": "ANGLICAN CHURCH",
+          "count": 1
+        },
+        {
+          "label_verbatim": "ELIM CHURCH",
+          "count": 187
+        },
+        {
+          "label_verbatim": "CHRISTIAN FELLOWSHIP",
+          "count": 16
+        },
+        {
+          "label_verbatim": "MUSLIM",
+          "count": 1
+        },
+        {
+          "label_verbatim": "OTHER CHURCHES",
+          "count": 622
+        },
+        {
+          "label_verbatim": "NO RELIGION",
+          "count": 9
+        }
+      ]
+    },
+    {
+      "country_code": "WS",
+      "boundary_set_id": "ws-statistical-region-2011-spc-pdh",
+      "boundary_level": "statistical_region",
+      "area_unit_id": "ws-statistical-region-2011-spc-pdh:sav",
+      "area_code": "sav",
+      "area_name": "Savaii",
+      "year": 2021,
+      "population_total": 45175,
+      "population_total_basis": "Exact sum of the committed 2021 constituency-summary population counts for the census statistical region; the area_code prefix supplies the workbook's own roll-up.",
+      "religious_affiliation_count": 45173,
+      "religious_affiliation_percent": 99.9956,
+      "no_religion_count": 2,
+      "no_religion_percent": 0.0044,
+      "place_count": null,
+      "places_per_10000_residents": null,
+      "place_density_per_sq_km": null,
+      "land_area_sq_km": null,
+      "site_snapshot_date": null,
+      "place_count_basis": null,
+      "source_dataset_ids": ["sbs-census-2021-table2-religion-constituency", "spc-pdh-wsm-2011-phc-regions"],
+      "quality_flag": "census_religion_2021_verbatim_frame;26_category_partition;real_no_religion_category;ordinary_two_slot_semantics;exact_constituency_rollup;no_allocation_no_inference;partial_layer=coarser-grain;primary_level=statistical_region;constituency_prefix=sav;categories_verbatim[CONGREGATIONAL CHRISTIAN CHURCH OF SAMOA=11750;METHODIST=9261;ROMAN CATHOLIC=5249;LATTER  DAY SAINTS=9663;ASSEMBLY OF GOD=4281;SEVENTH DAYS ADVENTIST=1674;ASO FITU  (SISDAC)=399;JEHOVAHS WITNESS=262;CONGREGATIONAL CHRISTIAN CHURCH OF JESUS IN SAMOA  (EFIS)=108;AMAZING LOVE CHRISTIAN CHURCH=20;BAHAI=175;VOICE OF CHRIST=276;WORSHIP CENTRE=756;NAZARENE=164;BIBLE STUDY=324;FIRST FULL GOSPEL PENTECOSTAL CHURCH IN SAMOA=277;PABTISM=203;PEACE CHAPEL=5;SAMOA EVANGELISM=0;POROTESANO=7;ANGLICAN CHURCH=10;ELIM CHURCH=0;CHRISTIAN FELLOWSHIP=18;MUSLIM=0;OTHER CHURCHES=291;NO RELIGION=2]",
+      "composition": [
+        {
+          "label_verbatim": "CONGREGATIONAL CHRISTIAN CHURCH OF SAMOA",
+          "count": 11750
+        },
+        {
+          "label_verbatim": "METHODIST",
+          "count": 9261
+        },
+        {
+          "label_verbatim": "ROMAN CATHOLIC",
+          "count": 5249
+        },
+        {
+          "label_verbatim": "LATTER  DAY SAINTS",
+          "count": 9663
+        },
+        {
+          "label_verbatim": "ASSEMBLY OF GOD",
+          "count": 4281
+        },
+        {
+          "label_verbatim": "SEVENTH DAYS ADVENTIST",
+          "count": 1674
+        },
+        {
+          "label_verbatim": "ASO FITU  (SISDAC)",
+          "count": 399
+        },
+        {
+          "label_verbatim": "JEHOVAHS WITNESS",
+          "count": 262
+        },
+        {
+          "label_verbatim": "CONGREGATIONAL CHRISTIAN CHURCH OF JESUS IN SAMOA  (EFIS)",
+          "count": 108
+        },
+        {
+          "label_verbatim": "AMAZING LOVE CHRISTIAN CHURCH",
+          "count": 20
+        },
+        {
+          "label_verbatim": "BAHAI",
+          "count": 175
+        },
+        {
+          "label_verbatim": "VOICE OF CHRIST",
+          "count": 276
+        },
+        {
+          "label_verbatim": "WORSHIP CENTRE",
+          "count": 756
+        },
+        {
+          "label_verbatim": "NAZARENE",
+          "count": 164
+        },
+        {
+          "label_verbatim": "BIBLE STUDY",
+          "count": 324
+        },
+        {
+          "label_verbatim": "FIRST FULL GOSPEL PENTECOSTAL CHURCH IN SAMOA",
+          "count": 277
+        },
+        {
+          "label_verbatim": "PABTISM",
+          "count": 203
+        },
+        {
+          "label_verbatim": "PEACE CHAPEL",
+          "count": 5
+        },
+        {
+          "label_verbatim": "SAMOA EVANGELISM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "POROTESANO",
+          "count": 7
+        },
+        {
+          "label_verbatim": "ANGLICAN CHURCH",
+          "count": 10
+        },
+        {
+          "label_verbatim": "ELIM CHURCH",
+          "count": 0
+        },
+        {
+          "label_verbatim": "CHRISTIAN FELLOWSHIP",
+          "count": 18
+        },
+        {
+          "label_verbatim": "MUSLIM",
+          "count": 0
+        },
+        {
+          "label_verbatim": "OTHER CHURCHES",
+          "count": 291
+        },
+        {
+          "label_verbatim": "NO RELIGION",
+          "count": 2
+        }
+      ]
+    }
+  ]
+}
