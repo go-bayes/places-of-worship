@@ -99,7 +99,11 @@
 #census-time { margin-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 8px; }
 .census-time-row { display: flex; align-items: center; gap: 8px; }
 .census-slider { flex: 1; min-width: 0; accent-color: #3b82f6; cursor: pointer; }
-.census-ticks { display: flex; margin-top: 2px; color: #94a3b8; font-size: 11px; }
+/* overflow backstop: label density comes from the module (it labels only
+   as many years as the strip holds; unlabelled spans are empty and shrink
+   to nothing), so any residue clips at the panel edge instead of riding
+   over the map */
+.census-ticks { display: flex; margin-top: 2px; color: #94a3b8; font-size: 11px; overflow: hidden; }
 .census-ticks span { flex: 1; text-align: center; }
 .census-ticks span:first-child { text-align: left; }
 .census-ticks span:last-child { text-align: right; }
@@ -216,10 +220,10 @@
   #census-panel { width: min(300px, 76vw); }
 }
 
-/* long census series: with six or more year ticks the labels sit flush
-   on phones, so thin the middle ones; first and last always visible */
-.census-ticks:has(span:nth-child(6)) span:nth-child(even) { visibility: hidden; }
-.census-ticks:has(span:nth-child(6)) span:last-child { visibility: visible; }
+/* long census series: the module thins tick labels to a strip-width
+   budget by leaving spans empty (see censusTicksMarkup). the old
+   visibility-hidden thinning here kept each hidden span's min-content
+   width, so a 54-year series still overflowed the panel by ~790px */
 
 /* long timelines (six or more year stops) earn a wider panel so the
    slider has room to be dragged precisely; the module adds the class */
