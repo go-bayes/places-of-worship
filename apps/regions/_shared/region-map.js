@@ -3411,13 +3411,17 @@ function openCensusPopup(feature, lngLat) {
   // population total are null by design — this branch is unreachable for
   // pages that do not list religious_affiliation_count in metricsAvailable
   const hasCountMetric = "religious_affiliation_count" in CENSUS_METRICS;
+  // a place-register product (a page that opted into place_count) has data
+  // when the register count is populated, mirroring the counts-only rule
+  const hasPlaceCountMetric = "place_count" in CENSUS_METRICS;
   const areaHasData = store.years.some((year) => {
     const row = store.byAreaYear.get(`${code}|${year}`);
     return row && (
       Number.isFinite(row.population_total) ||
       Number.isFinite(row.religious_affiliation_percent) ||
       Number.isFinite(row.no_religion_percent) ||
-      (hasCountMetric && Number.isFinite(row.religious_affiliation_count))
+      (hasCountMetric && Number.isFinite(row.religious_affiliation_count)) ||
+      (hasPlaceCountMetric && Number.isFinite(row.place_count))
     );
   });
   if (!areaHasData) {
@@ -3426,8 +3430,14 @@ function openCensusPopup(feature, lngLat) {
     const placeInfo = row && Number.isFinite(row.place_count)
       ? `<div class="place-attrs">` +
           `<div class="place-attr"><span class="place-attr-key">Places of worship</span><span class="place-attr-val">${row.place_count}</span></div>` +
-          `<div class="place-attr"><span class="place-attr-key">Land area</span><span class="place-attr-val">${row.land_area_sq_km.toFixed(0)} km²</span></div>` +
-          `<div class="place-attr"><span class="place-attr-key">Density</span><span class="place-attr-val">${row.place_density_per_sq_km.toFixed(3)} / km²</span></div>` +
+          // guard the derived lines: a register product carries the count
+          // with no land area, and null.toFixed would throw mid-popup
+          (Number.isFinite(row.land_area_sq_km)
+            ? `<div class="place-attr"><span class="place-attr-key">Land area</span><span class="place-attr-val">${row.land_area_sq_km.toFixed(0)} km²</span></div>`
+            : "") +
+          (Number.isFinite(row.place_density_per_sq_km)
+            ? `<div class="place-attr"><span class="place-attr-key">Density</span><span class="place-attr-val">${row.place_density_per_sq_km.toFixed(3)} / km²</span></div>`
+            : "") +
         `</div>`
       : "";
     const html =
