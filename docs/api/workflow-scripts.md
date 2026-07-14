@@ -71,6 +71,7 @@ from the live RA/review loop.
 | `scripts/clean_global_places.R` | `main()` | Clean global country partitions with deterministic filtering rules. | Source for global cleaning reference behaviour. |
 | `scripts/deduplicate_global_places.R` | `main()` | Deduplicate cleaned global country partitions. | Use after cleaning and before review-queue generation. |
 | `scripts/build_global_review_queue.R` | `main()` | Build country-level review queues from cleaned global outputs. | Use to triage weak tags, low-confidence candidates, and ambiguous country records. |
+| `scripts/build_region_bboxes.py` | `main()` | Build the border-handoff extent manifest (clustered bounding boxes plus a dissolved, simplified outline per country) from the shipped country boundary files. | Writes `apps/regions/_shared/data/region-bboxes.json`, read by the shared data-map runtime's border-handoff pill. Rerun after launching a country map; the script fails loudly when a page directory and the hub disagree. |
 
 ## Update Rules
 

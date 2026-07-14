@@ -80,6 +80,7 @@ document.title = RC.title;
     <button id="filters-clear" class="shell-pill" type="button" hidden aria-label="Clear filters"></button>
     <button id="near-me" class="shell-pill" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
   </div>
+  <button id="border-handoff" class="shell-pill" type="button" hidden aria-live="polite"></button>
   <!-- top-left: the denomination key for the place dots -->
   <div id="top-left-controls">
   <div id="key-wrap">
@@ -4738,3 +4739,177 @@ map.on("zoomend", () => {
   ensureCustomLayers();
 });
 map.on("styledata", showTileStatus);
+
+// ---- border handoff ------------------------------------------------------
+// moving from one country's data map to a neighbour's should not need the
+// hub (JW request, 2026-07-14). when the map centre leaves this country's
+// data extent, a pill offers the country now under the centre — or the way
+// home when the centre is over open water — and a handoff carries the
+// camera hash so the next page opens on the same view. country extents
+// come from a committed manifest generated off the shipped boundary files
+// (scripts/build_region_bboxes.py; rerun it when a country launches);
+// boxes are [west, south, east, north], west > east wrapping the
+// antimeridian. no manifest, no feature: the page behaves as before.
+const handoffPill = document.getElementById("border-handoff");
+const HANDOFF_HOME = RC.countryCode.toLowerCase();
+// offers need a country-scale view; below this zoom the centre names
+// nothing in particular
+const HANDOFF_MIN_ZOOM = 3;
+// degrees of offshore grace around the home extent before the pill offers
+// the way home; context panning just off the coast stays quiet
+const HANDOFF_HOME_MARGIN = 2.5;
+let handoffRegions = null;
+let handoffTarget = null; // manifest entry, "home", or null when hidden
+const handoffPrefetched = new Set();
+
+function normaliseLng(lng) {
+  // maplibre reports unwrapped longitudes after a long pan
+  return ((lng + 180) % 360 + 360) % 360 - 180;
+}
+
+function boxContains(box, lng, lat, margin) {
+  // containment on a circular longitude axis, so west > east boxes wrap
+  // the antimeridian and a margin can push any edge across it safely
+  const m = margin || 0;
+  if (lat < box[1] - m || lat > box[3] + m) return false;
+  const width = ((box[2] - box[0]) % 360 + 360) % 360 + 2 * m;
+  const rel = ((lng - (box[0] - m)) % 360 + 360) % 360;
+  return rel <= width;
+}
+
+function boxArea(box) {
+  const width = (box[2] - box[0] + 360) % 360 || 360;
+  return width * (box[3] - box[1]);
+}
+
+function pointInRings(rings, lng, lat) {
+  // even-odd ray cast over every outline ring (exteriors and holes
+  // together). rings crossing the antimeridian store longitudes past
+  // 180, so the query point probes all three 360-degree frames; it can
+  // only fall inside in one of them
+  for (const probe of [lng - 360, lng, lng + 360]) {
+    let inside = false;
+    for (const ring of rings) {
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const xi = ring[i][0], yi = ring[i][1];
+        const xj = ring[j][0], yj = ring[j][1];
+        if ((yi > lat) !== (yj > lat) &&
+            probe < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) {
+          inside = !inside;
+        }
+      }
+    }
+    if (inside) return true;
+  }
+  return false;
+}
+
+function regionHasPoint(region, lng, lat) {
+  return Array.isArray(region.rings) && pointInRings(region.rings, lng, lat);
+}
+
+function hideHandoff() {
+  if (!handoffPill) return;
+  handoffPill.hidden = true;
+  handoffTarget = null;
+}
+
+function showHandoff(target, label) {
+  handoffTarget = target;
+  handoffPill.textContent = label;
+  handoffPill.hidden = false;
+}
+
+function prefetchHandoffPage(code) {
+  // warm the neighbour's page while the user reads the offer
+  if (handoffPrefetched.has(code)) return;
+  handoffPrefetched.add(code);
+  const link = document.createElement("link");
+  link.rel = "prefetch";
+  link.href = `../${code}/`;
+  document.head.appendChild(link);
+}
+
+function updateBorderHandoff() {
+  if (!handoffRegions) return;
+  if (map.getZoom() < HANDOFF_MIN_ZOOM) { hideHandoff(); return; }
+  const centre = map.getCenter();
+  const lng = normaliseLng(centre.lng);
+  const lat = centre.lat;
+  const home = handoffRegions.find((r) => r.code === HANDOFF_HOME);
+  if (!home) { hideHandoff(); return; }
+  // the outline settles the question wherever it can; a rectangle alone
+  // wrongly keeps munich "inside" l-shaped austria. boxes remain the
+  // prefilter and the fallback for entries without rings
+  if (regionHasPoint(home, lng, lat)) { hideHandoff(); return; }
+  const containing = handoffRegions.filter((r) => r.code !== HANDOFF_HOME &&
+    r.boxes.some((b) => boxContains(b, lng, lat, 0)));
+  // smallest containing box wins, so a continental neighbour's wide box
+  // never shadows an island country inside it
+  const smallest = (list) => {
+    let pick = null;
+    let pickArea = Infinity;
+    for (const region of list) {
+      for (const box of region.boxes) {
+        if (boxContains(box, lng, lat, 0) && boxArea(box) < pickArea) {
+          pickArea = boxArea(box);
+          pick = region;
+        }
+      }
+    }
+    return pick;
+  };
+  const onLand = containing.filter((r) => regionHasPoint(r, lng, lat));
+  if (onLand.length) {
+    const pick = smallest(onLand);
+    showHandoff(pick, `Continue into ${pick.name} →`);
+    prefetchHandoffPage(pick.code);
+    return;
+  }
+  // over water but still inside the home rectangle: context panning
+  if (home.boxes.some((b) => boxContains(b, lng, lat, 0))) { hideHandoff(); return; }
+  // rectangle-only fallback for manifest entries that carry no outline
+  const boxOnly = containing.filter((r) => !Array.isArray(r.rings));
+  if (boxOnly.length) {
+    const pick = smallest(boxOnly);
+    showHandoff(pick, `Continue into ${pick.name} →`);
+    prefetchHandoffPage(pick.code);
+    return;
+  }
+  // open water: stay quiet within the offshore grace band, then offer home
+  if (home.boxes.some((b) => boxContains(b, lng, lat, HANDOFF_HOME_MARGIN))) {
+    hideHandoff();
+    return;
+  }
+  showHandoff("home", `Back to ${home.name}`);
+}
+
+if (handoffPill && !RC.disableBorderHandoff) {
+  // no-cache revalidates the manifest against the host's etag, so a new
+  // country launch reaches every page without a cache-pin ceremony
+  fetch("../_shared/data/region-bboxes.json", { cache: "no-cache" })
+    .then((res) => (res.ok ? res.json() : null))
+    .then((doc) => {
+      if (!doc || !Array.isArray(doc.regions)) return;
+      handoffRegions = doc.regions;
+      // an offer computed for the last resting centre goes stale the
+      // moment the camera moves again; maplibre fires movestart/moveend
+      // for zooms too, so this pair covers every gesture
+      map.on("movestart", hideHandoff);
+      map.on("moveend", updateBorderHandoff);
+      updateBorderHandoff();
+    })
+    .catch(() => {});
+  handoffPill.addEventListener("click", () => {
+    if (!handoffTarget) return;
+    if (handoffTarget === "home") {
+      map.flyTo({ center: CONFIG.center, zoom: CONFIG.initialZoom, bearing: 0, pitch: 0, speed: 1.6 });
+      hideHandoff();
+      return;
+    }
+    const centre = map.getCenter();
+    const zoom = map.getZoom().toFixed(2);
+    window.location.href =
+      `../${handoffTarget.code}/#map=${zoom}/${centre.lat.toFixed(5)}/${normaliseLng(centre.lng).toFixed(5)}`;
+  });
+}

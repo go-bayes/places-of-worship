@@ -291,3 +291,25 @@
 /* native controls keep their own touch handling (select pickers, the time
    slider, the later-foundations checkbox); drags never start from them */
 #census-panel select, #census-panel input, #data-pill select { touch-action: auto; }
+
+/* border handoff: the one-tap offer to continue onto the neighbouring
+   country's data map (or back home from open water). it sits above the
+   bottom action row and appears only when the map centre has left the
+   country's data extent, so it never competes with the resting layout */
+#border-handoff {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--safe-bottom) + 56px);
+  z-index: 13;
+  padding: 10px 16px;
+  font: inherit;
+  font-size: 14px;
+  color: #e2e8f0;
+  cursor: pointer;
+  white-space: nowrap;
+  max-width: 92vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#border-handoff:hover { --pill-opacity: 1; }
