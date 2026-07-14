@@ -55,12 +55,26 @@
     .map-card-note { color: #94a3b8; font-size: 13px; margin-top: 2px; }
     .back { display: inline-block; margin-top: 18px; color: #cbd5f5; font-size: 13px; text-decoration: none; }
     .back:hover { color: #fff; text-decoration: underline; }
+    /* the quick filter is script-injected (it is useless without js) */
+    #hub-filter {
+      width: 100%;
+      margin: 0 0 14px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      font: inherit;
+      font-size: 14px;
+    }
+    #hub-filter::placeholder { color: #94a3b8; }
+    #hub-filter:focus { outline: none; border-color: rgba(148, 163, 184, 0.6); }
   </style>
 </head>
 <body>
   <main>
     <h1>Data maps</h1>
-    <p class="lede">Places of worship with census and religion-data overlays, by country. <span id="country-count" class="country-count">97 countries mapped.</span></p>
+    <p class="lede">Places of worship with census and religion-data overlays, by country. <span id="country-count" class="country-count" role="status">100 countries mapped.</span></p>
     <nav class="map-list">
       <a class="map-card" href="al/">
         <div class="map-card-title">Albania <span class="wave-badge w2">2 waves · 2011–2023</span></div>
@@ -469,8 +483,39 @@
   <script>
     // the count derives from the cards so a new launch never leaves it stale;
     // the static text above is the no-script fallback
-    document.getElementById("country-count").textContent =
-      document.querySelectorAll(".map-card").length + " countries mapped.";
+    const cards = Array.from(document.querySelectorAll(".map-card"));
+    const countEl = document.getElementById("country-count");
+    countEl.textContent = cards.length + " countries mapped.";
+
+    // quick filter over the country names; injected here so the page
+    // carries no dead control without javascript
+    const fold = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    const names = cards.map((card) => {
+      const title = card.querySelector(".map-card-title");
+      return fold(Array.from(title.childNodes)
+        .filter((n) => n.nodeType === Node.TEXT_NODE)
+        .map((n) => n.textContent)
+        .join(""));
+    });
+    const filter = document.createElement("input");
+    filter.id = "hub-filter";
+    filter.type = "search";
+    filter.placeholder = "Filter countries…";
+    filter.setAttribute("aria-label", "Filter countries");
+    filter.autocomplete = "off";
+    document.querySelector(".map-list").before(filter);
+    filter.addEventListener("input", () => {
+      const q = fold(filter.value).trim();
+      let shown = 0;
+      cards.forEach((card, i) => {
+        const hit = !q || names[i].includes(q);
+        card.hidden = !hit;
+        if (hit) shown += 1;
+      });
+      countEl.textContent = q
+        ? shown + " of " + cards.length + " countries shown."
+        : cards.length + " countries mapped.";
+    });
   </script>
 </body>
 </html>
