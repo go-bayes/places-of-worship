@@ -12,8 +12,8 @@
   <script>
     // public record for the United States research map; every string traces to
     // research/countries/us/README.md, the manifests, or the live REGION_CONFIG.
-    // the licence position stays pending in the card's words: the project's
-    // IPUMS/NHGIS reply has not arrived, so the page says pending, not resolved.
+    // licence position resolved: IPUMS NHGIS confirmed conformance 2026-07-14
+    // and asked for a reuse note beside the citation; the page carries both.
     window.OVERVIEW_CONFIG = {
       countryCode: "US",
       countryName: "United States",
@@ -38,14 +38,14 @@
           href: "https://www.nhgis.org/",
           construct: "Churches or church edifices, seating, and church property value by denomination",
           years: "1850, 1860, 1870, 1890",
-          licence: "Raw redistribution requires permission; The project publishes attributed derived rates/counts for the research map, pending IPUMS/NHGIS confirmation"
+          licence: "Raw redistribution requires permission; the project publishes attributed derived rates/counts for the research map — IPUMS NHGIS confirmed on 14 July 2026 that this use conforms with its licence"
         },
         {
           name: "IPUMS NHGIS, Census of Religious Bodies",
           href: "https://www.nhgis.org/",
           construct: "Members reported by religious bodies",
           years: "1906, 1916, 1926, 1936",
-          licence: "Same NHGIS terms and project licence position (pending IPUMS/NHGIS confirmation)"
+          licence: "Same NHGIS terms and project licence position (IPUMS NHGIS confirmed conformance, 14 July 2026)"
         },
         {
           name: "Churches and Church Membership / U.S. Religion Census (RCMS), ARDA",
@@ -64,9 +64,10 @@
       ],
       accessData: {
         sourceOfRecord: "IPUMS NHGIS, University of Minnesota, <a href=\"https://www.nhgis.org/\" target=\"_blank\" rel=\"noopener\">nhgis.org</a>; Association of Religion Data Archives (ARDA), <a href=\"https://www.thearda.com/\" target=\"_blank\" rel=\"noopener\">thearda.com</a>.",
+        citation: "Jonathan Schroeder, David Van Riper, Steven Manson, Grace Cooper, Zachary Krause, Tracy Kugler, Tsu Zhu, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 21.0 [dataset]. Minneapolis, MN: IPUMS. 2026. <a href=\"http://doi.org/10.18128/D050.V21.0\" target=\"_blank\" rel=\"noopener\">doi.org/10.18128/D050.V21.0</a>.",
         tables: "NHGIS datasets <code>1850_cPAX</code>/<code>ds10</code>, <code>1860_cPAX</code>/<code>ds14</code>, <code>1870_cPAX</code>/<code>ds17</code>, <code>1890_cRelig</code>/<code>ds28</code>, <code>1906_cRelig</code>/<code>ds33</code>, <code>1916_cRelig</code>/<code>ds41</code>, <code>1926_cRelig</code>/<code>ds51</code>, and <code>1936_cRelig</code>/<code>ds74</code>; RCMS/ARDA county files <code>CMS52CNT</code>, <code>CMS71CNT</code>, <code>CMS80CNT</code>, <code>CMS90CNT</code>, <code>RCMSCY</code>, <code>RCMSCY10</code>, and <code>RCMSCY20</code>.",
-        licence: "NHGIS: derived rates are published with citation and a pointer to the original NHGIS data, under the project's recorded licence position; IPUMS's licensing reply is pending. RCMS: ARDA click-through research-use terms for source workbooks; U.S. Census Bureau boundary files public domain. Derived products attribute ARDA, the original studies, and the U.S. Census Bureau.",
-        note: "Pending: the project has asked IPUMS/NHGIS whether attributed derived county rates on a research map are within their licence or require permission; the answer will be recorded when it arrives. Raw NHGIS files are not redistributed; the retrieval recipe below lets you obtain them from NHGIS directly.",
+        licence: "NHGIS: derived rates are published with citation and a pointer to the original NHGIS data; IPUMS NHGIS confirmed on 14 July 2026 that this use conforms with its licence. RCMS: ARDA click-through research-use terms for source workbooks; U.S. Census Bureau boundary files public domain. Derived products attribute ARDA, the original studies, and the U.S. Census Bureau.",
+        note: "Any other re-use of our data should also cite IPUMS NHGIS, and the data should not be further redistributed without permission from IPUMS NHGIS (nhgis@umn.edu). Please see the <a href=\"https://www.ipums.org/about/terms\" target=\"_blank\" rel=\"noopener\">IPUMS NHGIS Terms of Use</a>. Raw NHGIS files are not redistributed; the retrieval recipe below lets you obtain them from NHGIS directly.",
         script: ["scripts/build_us_nhgis_deep_past.R", "scripts/build_us_area_summary.R"],
         manifests: [
           { label: "us-nhgis-county-1850-1936", href: "docs/manifests/us-nhgis-county-1850-1936.json" },

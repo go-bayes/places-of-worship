@@ -150,6 +150,8 @@
       dl.appendChild(dd);
     }
     if (a.sourceOfRecord) def("Source of record", html("span", null, a.sourceOfRecord));
+    // full dataset citation where a provider requests one verbatim; author-controlled
+    if (a.citation) def("Citation", html("span", null, a.citation));
     if (a.tables) def("Exact tables", html("span", null, a.tables));
     if (a.licence) def("Licence", html("span", null, a.licence));
     // during the work phase the extraction pipeline and provenance manifests

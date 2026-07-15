@@ -20,7 +20,9 @@
     "provider": "IPUMS NHGIS, University of Minnesota",
     "citation": "Jonathan Schroeder, David Van Riper, Steven Manson, Grace Cooper, Zachary Krause, Tracy Kugler, Tsu Zhu, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 21.0 [dataset]. Minneapolis, MN: IPUMS. 2026. http://doi.org/10.18128/D050.V21.0",
     "short_citation": "IPUMS NHGIS, University of Minnesota, www.nhgis.org.",
-    "licence_position": "publish the derived rates with citation and a pointer to the original NHGIS data, now; he judges the risk acceptable for a research website and takes responsibility for it."
+    "reuse_note": "Any other re-use of our data should also cite IPUMS NHGIS, and the data should not be further redistributed without permission from IPUMS NHGIS (nhgis@umn.edu). Please see the IPUMS NHGIS Terms of Use: https://www.ipums.org/about/terms.",
+    "licence_position": "publish the derived rates with citation and a pointer to the original NHGIS data, now; he judges the risk acceptable for a research website and takes responsibility for it.",
+    "licence_confirmation": "IPUMS NHGIS confirmed on 2026-07-14 that publishing these derived county rates conforms with the NHGIS licence (NHGIS user support reply, recorded in research/correspondence/reuse-reply-us-nhgis-2026-07-15.md); the reply asked that the reuse note ship alongside the citation."
   },
   "indicators": [
     "population_total",
