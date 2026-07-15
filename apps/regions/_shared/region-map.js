@@ -4752,6 +4752,7 @@ map.on("styledata", showTileStatus);
 // antimeridian. no manifest, no feature: the page behaves as before.
 const handoffPill = document.getElementById("border-handoff");
 const HANDOFF_HOME = RC.countryCode.toLowerCase();
+const HANDOFF_ORIGIN_PARAM = "handoff-from";
 // offers need a country-scale view; below this zoom the centre names
 // nothing in particular
 const HANDOFF_MIN_ZOOM = 3;
@@ -4760,6 +4761,7 @@ const HANDOFF_MIN_ZOOM = 3;
 const HANDOFF_HOME_MARGIN = 2.5;
 let handoffRegions = null;
 let handoffTarget = null; // manifest entry, "home", or null when hidden
+let handoffOrigin = null; // arrival-only route back to the country just left
 const handoffPrefetched = new Set();
 
 function normaliseLng(lng) {
@@ -4838,6 +4840,15 @@ function updateBorderHandoff() {
   const lat = centre.lat;
   const home = handoffRegions.find((r) => r.code === HANDOFF_HOME);
   if (!home) { hideHandoff(); return; }
+  // a handoff preserves the border camera, which puts the arrival inside
+  // the new home and suppresses the reverse border offer. keep one explicit
+  // return offer until the user starts moving the destination map.
+  if (handoffOrigin && regionHasPoint(home, lng, lat)) {
+    showHandoff(handoffOrigin, `Back to ${handoffOrigin.name} →`);
+    prefetchHandoffPage(handoffOrigin.code);
+    return;
+  }
+  handoffOrigin = null;
   // the outline settles the question wherever it can; a rectangle alone
   // wrongly keeps munich "inside" l-shaped austria. boxes remain the
   // prefilter and the fallback for entries without rings
@@ -4892,10 +4903,18 @@ if (handoffPill && !RC.disableBorderHandoff) {
     .then((doc) => {
       if (!doc || !Array.isArray(doc.regions)) return;
       handoffRegions = doc.regions;
+      const originCode = readHashParam(HANDOFF_ORIGIN_PARAM);
+      handoffOrigin = doc.regions.find((r) => r.code === originCode && r.code !== HANDOFF_HOME) || null;
+      // consume the arrival marker once; reloading the destination should
+      // behave like an ordinary map load rather than replaying the offer
+      writeHashParam(HANDOFF_ORIGIN_PARAM, null);
       // an offer computed for the last resting centre goes stale the
       // moment the camera moves again; maplibre fires movestart/moveend
       // for zooms too, so this pair covers every gesture
-      map.on("movestart", hideHandoff);
+      map.on("movestart", () => {
+        handoffOrigin = null;
+        hideHandoff();
+      });
       map.on("moveend", updateBorderHandoff);
       updateBorderHandoff();
     })
@@ -4910,6 +4929,7 @@ if (handoffPill && !RC.disableBorderHandoff) {
     const centre = map.getCenter();
     const zoom = map.getZoom().toFixed(2);
     window.location.href =
-      `../${handoffTarget.code}/#map=${zoom}/${centre.lat.toFixed(5)}/${normaliseLng(centre.lng).toFixed(5)}`;
+      `../${handoffTarget.code}/#map=${zoom}/${centre.lat.toFixed(5)}/${normaliseLng(centre.lng).toFixed(5)}` +
+      `&${HANDOFF_ORIGIN_PARAM}=${HANDOFF_HOME}`;
   });
 }
