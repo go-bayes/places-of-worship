@@ -3075,6 +3075,28 @@ const censusState = {
   levels: {}
 };
 
+// ---- census view in the url ----------------------------------------
+// the fragment carries the census view (#d=metric:year) beside the
+// camera and the filters, so a border handoff — and any shared link —
+// lands on the construct and wave the traveller was reading (roam v1,
+// design record: docs/development/datamaps-pill-review-2026-07.md).
+// an unknown metric falls back to this country's default; a year the
+// arrival level lacks clamps to the nearest available wave on load.
+// geography level never carries: levels do not correspond across
+// countries, so the arrival keeps its own default.
+(function applyCarriedCensusView() {
+  const carried = readHashParam("d");
+  if (!carried) return;
+  const [metric, year] = carried.split(":");
+  if (metric && CENSUS_METRICS[metric]) censusState.metric = metric;
+  const y = Number(year);
+  if (Number.isInteger(y) && y >= 1000 && y <= 9999) censusState.year = y;
+})();
+function writeCensusHash() {
+  const carriable = censusState.enabled && !pulotuState.active;
+  writeHashParam("d", carriable ? `${censusState.metric}:${censusState.year}` : null);
+}
+
 const censusToggle = document.getElementById("census-toggle");
 const censusPanel = document.getElementById("census-panel");
 const censusLevelSelect = document.getElementById("censusLevel");
@@ -4307,6 +4329,9 @@ async function setDataSource(src) {
     applyPulotuPaint();
     syncPulotuTimeStrip();
     updateCensusLegend();
+    // pulotu metrics name another dataset's constructs; the carried
+    // census view would mislead a handoff, so the fragment drops it
+    writeCensusHash();
   } else {
     syncCensusTimeSlider();
     if (censusState.enabled && censusActive()) applyCensusPaint();
@@ -4391,6 +4416,9 @@ function applyCensusPaint() {
   }
   syncPlaceDotEra();
   updateCensusLegend();
+  // every metric or wave change funnels through here, so the url's
+  // census view stays current for handoffs and shared links
+  writeCensusHash();
 }
 
 // the partial-layer chrome: the tag rides the data pill (it travels with a
@@ -4741,6 +4769,18 @@ async function setCensusEnabled(on) {
       updateCensusLegend();
       return;
     }
+    // a carried census view (#d=metric:year) can name a wave this
+    // country never surveyed; the same nearest-year clamp that guards a
+    // level switch guards the first load (earlier wins a tie)
+    const store = censusActive();
+    if (store && store.years.length && !store.years.includes(censusState.year)) {
+      const current = censusState.year;
+      censusState.year = store.years.reduce((best, y) => {
+        const dy = Math.abs(y - current);
+        const db = Math.abs(best - current);
+        return dy < db || (dy === db && y < best) ? y : best;
+      });
+    }
     syncCensusYearSelect();
     syncCensusTimeSlider();
     addCensusLayers();
@@ -4749,6 +4789,7 @@ async function setCensusEnabled(on) {
     removeCensusLayers();
     syncPlaceDotEra();
     updateCensusLegend();
+    writeCensusHash();
   }
 }
 
@@ -5101,8 +5142,14 @@ if (handoffPill && !RC.disableBorderHandoff) {
     }
     const centre = map.getCenter();
     const zoom = map.getZoom().toFixed(2);
+    // the handoff carries the census view (roam v1): the neighbour opens
+    // on the same metric and the nearest wave it holds, so crossing a
+    // border keeps the traveller's question in front of them
+    const carried = censusState.enabled && !pulotuState.active
+      ? `&d=${censusState.metric}:${censusState.year}`
+      : "";
     window.location.href =
       `../${handoffTarget.code}/#map=${zoom}/${centre.lat.toFixed(5)}/${normaliseLng(centre.lng).toFixed(5)}` +
-      `&${HANDOFF_ORIGIN_PARAM}=${HANDOFF_HOME}`;
+      `&${HANDOFF_ORIGIN_PARAM}=${HANDOFF_HOME}${carried}`;
   });
 }
