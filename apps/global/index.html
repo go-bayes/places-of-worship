@@ -6,7 +6,7 @@
   <title>Places of Worship | MapLibre Flat Prototype</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
   <link href="../shared/map-shell.css" rel="stylesheet">
-  <link href="styles/maplibre-flat.css?v=20260716g" rel="stylesheet">
+  <link href="styles/maplibre-flat.css?v=20260716h" rel="stylesheet">
 </head>
 <body>
   <div id="map"></div>
@@ -2802,13 +2802,13 @@
     // ---- the data maps pill's offer states ----------------------------
     // the split pill's main zone follows the camera on the global map:
     // over a country with a data map it offers "<Country> Data →" in
-    // emerald — a first tap arms it and paints the territory (never
-    // uninvited — jb 2026-07-16), a second tap opens that country's map
-    // with the camera carried. far out over a data country it hints
-    // "Zoom for <Country> data", and clicking delivers the zoom. resting
-    // (over open ocean or non-data land) it is the plain "Data Maps"
-    // trigger for the switcher panel, whose listener it defers to; the
-    // caret zone opens that panel in every state (design record:
+    // emerald and one tap opens that country's map with the camera
+    // carried (jb 2026-07-16: no territory layer, no arming step). far
+    // out over a data country it hints "Zoom for <Country> data", and
+    // clicking delivers the zoom. resting (over open ocean or non-data
+    // land) it is the plain "Data Maps" trigger for the switcher panel,
+    // whose listener it defers to; the caret zone opens that panel in
+    // every state (design record:
     // docs/development/country-broadcast-review-2026-07.md). geometry
     // comes from the shared resolver over the border-handoff manifest.
     (function dataMapsOffer() {
@@ -2817,57 +2817,10 @@
       const resolve = window.RegionResolve;
       if (!go || !shell || !resolve) return;
       const OFFER_MIN_ZOOM = 3;
-      const SRC = "handoff-territory";
-      const FILL = "handoff-territory-fill";
-      const LINE = "handoff-territory-line";
       let regions = null;
-      let mode = "resting"; // resting | hint | offer | armed
+      let mode = "resting"; // resting | hint | offer
       let region = null;
       let savedLabel = null;
-
-      function anchorId() {
-        // beneath the place dots so the highlight never obscures the data
-        return [LAYERS.overview, LAYERS.places].find((id) => id && map.getLayer(id));
-      }
-
-      function showLayer(target) {
-        try {
-          const src = map.getSource(SRC);
-          const data = { type: "FeatureCollection", features: [resolve.regionFeature(target)] };
-          if (src) src.setData(data);
-          else map.addSource(SRC, { type: "geojson", data });
-          // the wash is safe here: the global map has no choropleth to tint
-          if (!map.getLayer(FILL)) {
-            map.addLayer({
-              id: FILL,
-              type: "fill",
-              source: SRC,
-              paint: { "fill-color": "#34d399", "fill-opacity": 0.14 }
-            }, anchorId());
-          }
-          if (!map.getLayer(LINE)) {
-            map.addLayer({
-              id: LINE,
-              type: "line",
-              source: SRC,
-              paint: { "line-color": "#34d399", "line-width": 2, "line-opacity": 0.85 }
-            }, anchorId());
-          }
-          for (const id of [FILL, LINE]) map.setLayoutProperty(id, "visibility", "visible");
-        } catch (err) {
-          // a theme switch or a still-loading style must not throw;
-          // styledata fires as it settles — try again then
-          map.once("styledata", () => {
-            if (mode === "armed" && region === target) showLayer(target);
-          });
-        }
-      }
-
-      function hideLayer() {
-        for (const id of [FILL, LINE]) {
-          if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", "none");
-        }
-      }
 
       function targetHref(target) {
         const centre = map.getCenter();
@@ -2876,36 +2829,26 @@
       }
 
       function setOffer(nextMode, nextRegion) {
-        if (mode === nextMode && (nextRegion ? region && region.code === nextRegion.code : !region)) {
-          if (mode === "armed") showLayer(nextRegion); // re-assert after theme switches
-          return;
-        }
+        if (mode === nextMode && (nextRegion ? region && region.code === nextRegion.code : !region)) return;
         mode = nextMode;
         region = nextRegion || null;
-        shell.classList.toggle("offering", mode === "offer" || mode === "armed");
-        shell.classList.toggle("armed", mode === "armed");
+        shell.classList.toggle("offering", mode === "offer");
         shell.classList.toggle("hinting", mode === "hint");
         if (mode === "resting") {
           if (savedLabel !== null) { go.innerHTML = savedLabel; savedLabel = null; }
           go.setAttribute("href", "../regions/");
           go.removeAttribute("aria-label");
-          hideLayer();
           return;
         }
         if (savedLabel === null) savedLabel = go.innerHTML;
-        if (mode === "offer" || mode === "armed") {
+        if (mode === "offer") {
           go.textContent = `${region.name} Data →`;
           go.setAttribute("href", targetHref(region));
-          go.setAttribute("aria-label", mode === "offer"
-            ? `Preview the ${region.name} data map`
-            : `Open the ${region.name} data map`);
-          if (mode === "armed") showLayer(region);
-          else hideLayer();
+          go.setAttribute("aria-label", `Open the ${region.name} data map`);
         } else {
           go.textContent = `Zoom for ${region.name} data`;
           go.setAttribute("href", "../regions/");
           go.setAttribute("aria-label", `Zoom in for ${region.name} data`);
-          hideLayer();
         }
       }
 
@@ -2913,15 +2856,9 @@
         if (!regions) return;
         const centre = map.getCenter();
         const found = resolve.resolveAt(regions, resolve.normaliseLng(centre.lng), centre.lat);
-        if (found && map.getZoom() >= OFFER_MIN_ZOOM) {
-          // an armed offer for the same country stays armed across pans
-          // only if the user has not gestured (movestart disarms below)
-          setOffer(mode === "armed" && region && region.code === found.code ? "armed" : "offer", found);
-        } else if (found) {
-          setOffer("hint", found);
-        } else {
-          setOffer("resting", null);
-        }
+        if (found && map.getZoom() >= OFFER_MIN_ZOOM) setOffer("offer", found);
+        else if (found) setOffer("hint", found);
+        else setOffer("resting", null);
       }
 
       // the offer engine claims the main zone's clicks in every
@@ -2940,25 +2877,7 @@
           map.jumpTo({ zoom: OFFER_MIN_ZOOM + 0.4 });
           return;
         }
-        if (mode === "offer") {
-          // first tap arms: the emerald territory confirms what a second
-          // tap will open, so the choice needs no reading
-          setOffer("armed", region);
-          return;
-        }
-        if (mode === "armed") window.location.href = targetHref(region);
-      });
-
-      // a user gesture disarms (the territory is never uninvited);
-      // programmatic camera moves keep an armed offer alive
-      map.on("movestart", (e) => {
-        if (e && e.originalEvent && mode === "armed") {
-          setOffer("offer", region);
-        }
-      });
-
-      map.on("styledata", () => {
-        if (mode === "armed" && region && !map.getLayer(FILL)) showLayer(region);
+        window.location.href = targetHref(region);
       });
 
       // the manifest is the border handoff's, shared with the country

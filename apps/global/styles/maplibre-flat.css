@@ -368,8 +368,7 @@
     /* offering: the main zone names the country under the map centre and
        the pill wears the chrome's "go" colour: emerald glass, distinct
        from amber (caution) and the blue data ramp, and separable from
-       both without colour vision. armed (first tap taken, territory lit)
-       brightens the glass so the second tap reads as "go" */
+       both without colour vision */
     #datamaps-pill.offering {
       --pill-opacity: 1;
       background: rgba(6, 78, 59, 0.78);
@@ -377,8 +376,25 @@
       color: #a7f3d0;
     }
     #datamaps-pill.offering:hover { background: rgba(6, 95, 70, 0.88); color: #d1fae5; }
-    #datamaps-pill.armed { background: rgba(6, 95, 70, 0.92); color: #d1fae5; }
     #datamaps-pill.offering #datamaps-caret { border-left-color: rgba(52, 211, 153, 0.45); }
+    /* the census toggle dot (country pages, over home): filled blue —
+       the data ramp's colour — while the choropleth is on, hollow when
+       off; mirrors the near-me pill's dot idiom */
+    .dm-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      border: 2px solid #94a3b8;
+      background: transparent;
+      box-sizing: border-box;
+      flex: none;
+      margin-right: 8px;
+    }
+    .dm-dot.on {
+      border-color: #3b82f6;
+      background: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+    }
     /* hint state (global map, far out over a data country): an
        instruction to zoom, not yet an offer, so the label dims */
     #datamaps-pill.hinting #datamaps-go { color: #94a3b8; }
