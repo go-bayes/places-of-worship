@@ -1,32 +1,34 @@
 /* datamaps-switcher.js — one-tap country switcher for the map surfaces.
-   enhances the bottom-bar "Switch Country" pill (present on every country
-   page and the global map) into a searchable dropdown listing every
-   country data map, so moving between maps never needs the two-hop trip
-   through the hub. the top-right wordmark "Data maps" entry stays a plain
-   hub link — one control owns the panel (design record:
-   docs/development/datamaps-pill-review-2026-07.md). a generated
+   wires the bottom-bar Data Maps split pill's search affordances: the
+   caret zone always opens a searchable dropdown listing every country
+   data map, and the main zone opens it too while resting (the offer
+   engine in each surface's runtime claims the main zone's clicks when
+   it is tracking a country; design record:
+   docs/development/country-broadcast-review-2026-07.md). a generated
    catalogue supplies navigation and conservative prefetch estimates; the
    hub parser remains the fallback when that catalogue is absent or
    malformed. progressive enhancement: without javascript, or if both
-   fetches fail, the pill keeps navigating to the hub as before. */
+   fetches fail, the main zone keeps navigating to the hub as before. */
 (function () {
   "use strict";
 
   function init() {
-    const trigger = document.getElementById("datamaps-pill");
-    if (!trigger) return;
-    const hubUrl = new URL(trigger.getAttribute("href"), window.location.href);
+    const shell = document.getElementById("datamaps-pill");
+    const goTrigger = document.getElementById("datamaps-go");
+    const caretTrigger = document.getElementById("datamaps-caret");
+    const triggers = [goTrigger, caretTrigger].filter(Boolean);
+    if (!shell || !triggers.length || !goTrigger) return;
+    const hubUrl = new URL(goTrigger.getAttribute("href"), window.location.href);
     const catalogUrl = new URL("../shared/data/region-catalog.json", hubUrl);
 
-    // signal the menu behaviour on the existing link; the panel opens
-    // above the bottom pill, so the caret points up
-    trigger.setAttribute("aria-haspopup", "dialog");
-    trigger.setAttribute("aria-expanded", "false");
-    const caret = document.createElement("span");
-    caret.className = "dm-caret";
-    caret.setAttribute("aria-hidden", "true");
-    caret.textContent = " ▴";
-    trigger.appendChild(caret);
+    // menu semantics live on the caret zone, the panel's dedicated
+    // trigger; the go zone's role changes with the offer engine's state,
+    // so it carries no popup claim
+    let activeTrigger = triggers[0];
+    if (caretTrigger) {
+      caretTrigger.setAttribute("aria-haspopup", "dialog");
+      caretTrigger.setAttribute("aria-expanded", "false");
+    }
 
     // panel styles ride the module so no shared stylesheet needs a
     // cache bump; colours and radii follow the shell popup idiom
@@ -388,10 +390,10 @@
       setActive(-1);
     }
 
-    // the pill anchors the panel; the rect is measured at each open
-    // rather than fixed at load
+    // the whole split pill anchors the panel; the rect is measured at
+    // each open rather than fixed at load
     function placePanel() {
-      const rect = trigger.getBoundingClientRect();
+      const rect = shell.getBoundingClientRect();
       const width = Math.min(340, window.innerWidth - 24);
       // centre on the pill, clamped inside the viewport margins
       let left = rect.left + rect.width / 2 - width / 2;
@@ -416,7 +418,7 @@
 
     function openPanel() {
       panel.hidden = false;
-      trigger.setAttribute("aria-expanded", "true");
+      if (caretTrigger) caretTrigger.setAttribute("aria-expanded", "true");
       placePanel();
       filterEl.value = "";
       renderList("");
@@ -431,7 +433,7 @@
     function closePanel() {
       if (!panel || panel.hidden) return;
       panel.hidden = true;
-      trigger.setAttribute("aria-expanded", "false");
+      if (caretTrigger) caretTrigger.setAttribute("aria-expanded", "false");
       document.removeEventListener("pointerdown", onOutside, true);
       document.removeEventListener("keydown", onEscape, true);
       window.removeEventListener("resize", onResize);
@@ -449,26 +451,27 @@
     }
 
     function onOutside(e) {
-      if (panel.contains(e.target) || trigger.contains(e.target)) return;
+      if (panel.contains(e.target) || shell.contains(e.target)) return;
       closePanel();
     }
 
     function onEscape(e) {
       if (e.key !== "Escape") return;
       closePanel();
-      trigger.focus();
+      activeTrigger.focus();
     }
 
     // the hub escape below opens only after a real wait, so an ordinary
     // double-click cannot yank the user away mid-fetch
     let loadingSince = 0;
 
-    trigger.addEventListener("click", async (e) => {
+    triggers.forEach((trigger) => trigger.addEventListener("click", async (e) => {
       // modified activations keep their native new-tab/window behaviour
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
       e.preventDefault();
       // keyboard activations report detail 0; remembered for the autofocus
       wasKeyboard = e.detail === 0;
+      activeTrigger = trigger;
       if (panel && !panel.hidden) { closePanel(); return; }
       if (!countries) {
         // a stalled fetch must not trap the user: a repeat activation
@@ -491,10 +494,10 @@
           trigger.removeAttribute("aria-busy");
         }
         buildPanel();
-        trigger.setAttribute("aria-controls", "dm-panel");
+        if (caretTrigger) caretTrigger.setAttribute("aria-controls", "dm-panel");
       }
       openPanel();
-    });
+    }));
   }
 
   if (document.readyState === "loading") {

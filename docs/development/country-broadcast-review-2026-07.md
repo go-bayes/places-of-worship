@@ -56,3 +56,12 @@ The travel-pill shape shipped with the tribunal's fixes:
 - Cache pins bumped to `?v=20260716f` (C's stale-CSS finding).
 
 Deferred, recorded as open work: the manifest split (boxes-only ~3 KB for arming, rings on demand — B/D; the global fetch meanwhile uses default HTTP caching instead of `no-cache`), generator-side ring nesting, and D's suggestion of a "countries in view" affordance inside the switcher panel at low zoom.
+
+## Field-test revision (JB, same day)
+
+Joseph tested the travel-pill shape and rejected it: the separate travel pill did not register as "the tab", the uninvited emerald territory confused rather than helped, and "Switch Country" carried no intuitive meaning — data controls must say "data", and searching 100 countries is friction where the pill could follow the user's movement. The revision lands A's split pill after all, amended by two of Joseph's rules:
+
+1. **One split pill, main zone tracking.** The bottom-bar pill's main zone follows the map — resting "Data Maps" (opens the search panel, as does the always-available caret zone), over a neighbour "<Country> Data →" in emerald, after a handoff "Back to <Origin> →", from open water "Back to <Home>". The separate travel pill is gone; the global map gets the same pill with a "Zoom for <Country> data" hint (click delivers the zoom) far out over data countries.
+2. **The territory highlight is gesture-gated.** Panning only relabels the pill. The emerald outline (wash + outline on the global map) appears on the FIRST tap — of the pill's main zone or of the country's land — which arms the offer; the second tap navigates, census view carried. A user gesture disarms; programmatic camera nudges do not.
+
+Every tribunal fix carries over: the shared resolver, nested-hole topology, honest `href` per state, `aria-live` on the shell with per-state `aria-label`, ellipsised long names, styledata re-assertion, and the switcher-fallthrough ordering (the offer engine claims main-zone clicks only in non-resting states). Verdicts that conflict with the owner's field testing yield to the field test; recorded also in assistant memory as a standing preference.

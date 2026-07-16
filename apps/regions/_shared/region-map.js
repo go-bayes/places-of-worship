@@ -79,9 +79,11 @@ document.title = RC.title;
     <button id="dock-toggle" class="shell-pill" type="button">Search &amp; Filters</button>
     <button id="filters-clear" class="shell-pill" type="button" hidden aria-label="Clear filters"></button>
     <button id="near-me" class="shell-pill" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
-    <a id="datamaps-pill" class="shell-pill" href="../" title="Switch to another country's data map"><span class="dm-label-long">Switch Country</span><span class="dm-label-short">Countries</span></a>
+    <div id="datamaps-pill" class="shell-pill" aria-live="polite">
+      <a id="datamaps-go" href="../" title="Country data maps"><span class="dm-label-long">Data Maps</span><span class="dm-label-short">Data</span></a>
+      <button id="datamaps-caret" type="button" aria-label="Search all country data maps">▴</button>
+    </div>
   </div>
-  <a id="border-handoff" class="shell-pill" hidden aria-live="polite"></a>
   <!-- top-left: the denomination key for the place dots -->
   <div id="top-left-controls">
   <div id="key-wrap">
@@ -4929,7 +4931,11 @@ map.on("styledata", showTileStatus);
 // (scripts/build_region_bboxes.py; rerun it when a country launches);
 // boxes are [west, south, east, north], west > east wrapping the
 // antimeridian. no manifest, no feature: the page behaves as before.
-const handoffPill = document.getElementById("border-handoff");
+const offerGo = document.getElementById("datamaps-go");
+const offerShell = document.getElementById("datamaps-pill");
+let offerMode = "resting"; // resting | offer | armed | back | home
+let offerRegion = null;    // the manifest entry the mode points at
+let offerSavedLabel = null;
 const HANDOFF_HOME = RC.countryCode.toLowerCase();
 const HANDOFF_ORIGIN_PARAM = "handoff-from";
 // offers need a country-scale view; below this zoom the centre names
@@ -4939,8 +4945,7 @@ const HANDOFF_MIN_ZOOM = 3;
 // the way home; context panning just off the coast stays quiet
 const HANDOFF_HOME_MARGIN = 2.5;
 let handoffRegions = null;
-let handoffTarget = null; // manifest entry, "home", or null when hidden
-let handoffTapTarget = null; // a tap-made offer outlives programmatic moveends
+let handoffTapTarget = null; // a tap-armed offer outlives programmatic moveends
 let handoffOrigin = null; // arrival-only route back to the country just left
 const handoffPrefetched = new Set();
 
@@ -4997,20 +5002,13 @@ function showTerritoryLayer(region) {
     // the style may still be loading on arrival; styledata fires as it
     // settles — try again then
     map.once("styledata", () => {
-      if (handoffTarget && handoffTarget.code === region.code) showTerritoryLayer(region);
+      if (offerMode === "armed" && offerRegion && offerRegion.code === region.code) showTerritoryLayer(region);
     });
   }
 }
 
 function hideTerritoryLayer() {
   if (map.getLayer(TERRITORY.layer)) map.setLayoutProperty(TERRITORY.layer, "visibility", "none");
-}
-
-function hideHandoff() {
-  if (!handoffPill) return;
-  handoffPill.hidden = true;
-  handoffTarget = null;
-  hideTerritoryLayer();
 }
 
 // the census view a departure carries (roam v1): metric and year are
@@ -5027,21 +5025,61 @@ function handoffHref(target) {
     `&${HANDOFF_ORIGIN_PARAM}=${HANDOFF_HOME}${handoffCarrySegment()}`;
 }
 
-function showHandoff(target, label) {
-  handoffTarget = target;
-  handoffPill.textContent = label;
-  // a real href keeps modified clicks, middle clicks, and copied links
-  // honest about the destination; the home offer flies rather than
-  // navigates, so it carries no destination
-  if (target === "home") {
-    handoffPill.removeAttribute("href");
-    handoffPill.setAttribute("role", "button");
-  } else {
-    handoffPill.setAttribute("href", handoffHref(target));
-    handoffPill.removeAttribute("role");
-    showTerritoryLayer(target);
+// ---- the data maps pill's offer states --------------------------------
+// the split pill's main zone follows the map: over a neighbour it offers
+// "<Country> Data →" in emerald; a first tap arms the offer and paints
+// the territory outline (never uninvited — jb 2026-07-16), a second tap
+// goes there with the census view carried. after a handoff it offers the
+// way back; from open water, the way home. resting, it is the plain
+// "Data Maps" trigger for the switcher panel (whose listener it defers
+// to; the caret zone opens that panel in every state).
+function setOffer(mode, region) {
+  if (!offerGo) return;
+  if (mode === offerMode && region && offerRegion && region.code === offerRegion.code) {
+    // a basemap switch drops custom layers; re-assert an armed outline
+    if (mode === "armed") showTerritoryLayer(region);
+    return;
   }
-  handoffPill.hidden = false;
+  offerMode = mode;
+  offerRegion = region || null;
+  offerShell.classList.toggle("offering", mode !== "resting");
+  offerShell.classList.toggle("armed", mode === "armed");
+  if (mode === "resting") {
+    if (offerSavedLabel !== null) {
+      offerGo.innerHTML = offerSavedLabel;
+      offerSavedLabel = null;
+    }
+    offerGo.setAttribute("href", "../");
+    offerGo.removeAttribute("role");
+    offerGo.removeAttribute("aria-label");
+    hideTerritoryLayer();
+    return;
+  }
+  if (offerSavedLabel === null) offerSavedLabel = offerGo.innerHTML;
+  if (mode === "offer" || mode === "armed") {
+    offerGo.textContent = `${region.name} Data →`;
+    offerGo.setAttribute("href", handoffHref(region));
+    offerGo.removeAttribute("role");
+    offerGo.setAttribute("aria-label", mode === "offer"
+      ? `Preview the ${region.name} data map`
+      : `Open the ${region.name} data map`);
+    if (mode === "armed") showTerritoryLayer(region);
+    else hideTerritoryLayer();
+    prefetchHandoffPage(region.code);
+  } else if (mode === "back") {
+    offerGo.textContent = `Back to ${region.name} →`;
+    offerGo.setAttribute("href", handoffHref(region));
+    offerGo.removeAttribute("role");
+    offerGo.setAttribute("aria-label", `Back to the ${region.name} data map`);
+    hideTerritoryLayer();
+    prefetchHandoffPage(region.code);
+  } else if (mode === "home") {
+    offerGo.textContent = `Back to ${region.name}`;
+    offerGo.removeAttribute("href");
+    offerGo.setAttribute("role", "button");
+    offerGo.setAttribute("aria-label", `Back to ${region.name}`);
+    hideTerritoryLayer();
+  }
 }
 
 function prefetchHandoffPage(code) {
@@ -5064,45 +5102,43 @@ function updateBorderHandoff() {
   // would otherwise re-derive from a centre still over home); only a real
   // user gesture — which clears the tap target on movestart — dismisses it
   if (handoffTapTarget) {
-    showHandoff(handoffTapTarget, `Continue into ${handoffTapTarget.name} →`);
+    setOffer("armed", handoffTapTarget);
     return;
   }
-  if (map.getZoom() < HANDOFF_MIN_ZOOM) { hideHandoff(); return; }
+  if (map.getZoom() < HANDOFF_MIN_ZOOM) { setOffer("resting"); return; }
   const centre = map.getCenter();
   const lng = normaliseLng(centre.lng);
   const lat = centre.lat;
   const home = handoffRegions.find((r) => r.code === HANDOFF_HOME);
-  if (!home) { hideHandoff(); return; }
+  if (!home) { setOffer("resting"); return; }
   // a handoff preserves the border camera, which puts the arrival inside
   // the new home and suppresses the reverse border offer. keep one explicit
   // return offer until the user starts moving the destination map.
   if (handoffOrigin && regionHasPoint(home, lng, lat)) {
-    showHandoff(handoffOrigin, `Back to ${handoffOrigin.name} →`);
-    prefetchHandoffPage(handoffOrigin.code);
+    setOffer("back", handoffOrigin);
     return;
   }
   handoffOrigin = null;
   // the outline settles the question wherever it can; a rectangle alone
   // wrongly keeps munich "inside" l-shaped austria. boxes remain the
   // prefilter and the fallback for entries without rings
-  if (regionHasPoint(home, lng, lat)) { hideHandoff(); return; }
+  if (regionHasPoint(home, lng, lat)) { setOffer("resting"); return; }
   const pick = handoffNeighbourAt(lng, lat);
   if (pick) {
-    showHandoff(pick, `Continue into ${pick.name} →`);
-    prefetchHandoffPage(pick.code);
+    setOffer("offer", pick);
     return;
   }
   // over water but still inside the home rectangle: context panning
-  if (home.boxes.some((b) => boxContains(b, lng, lat, 0))) { hideHandoff(); return; }
+  if (home.boxes.some((b) => boxContains(b, lng, lat, 0))) { setOffer("resting"); return; }
   // open water: stay quiet within the offshore grace band, then offer home
   if (home.boxes.some((b) => boxContains(b, lng, lat, HANDOFF_HOME_MARGIN))) {
-    hideHandoff();
+    setOffer("resting");
     return;
   }
-  showHandoff("home", `Back to ${home.name}`);
+  setOffer("home", home);
 }
 
-if (handoffPill && !RC.disableBorderHandoff) {
+if (offerGo && !RC.disableBorderHandoff) {
   // no-cache revalidates the manifest against the host's etag, so a new
   // country launch reaches every page without a cache-pin ceremony
   fetch("../_shared/data/region-bboxes.json", { cache: "no-cache" })
@@ -5115,34 +5151,37 @@ if (handoffPill && !RC.disableBorderHandoff) {
       // consume the arrival marker once; reloading the destination should
       // behave like an ordinary map load rather than replaying the offer
       writeHashParam(HANDOFF_ORIGIN_PARAM, null);
-      // an offer computed for the last resting centre goes stale the
-      // moment the camera moves again; maplibre fires movestart/moveend
-      // for zooms too, so this pair covers every gesture. only a USER
-      // gesture consumes the arrival-return offer: the runtime's own
-      // camera nudges (nudgeMap's paired jumpTo calls after layer
-      // refreshes) are programmatic movestarts with no originalEvent,
-      // and they must not eat the "Back to ..." pill before it is seen
+      // the pill is persistent chrome, so it keeps its state during a
+      // gesture and moveend re-derives it. only a USER gesture disarms:
+      // the runtime's own camera nudges (nudgeMap's paired jumpTo calls
+      // after layer refreshes) are programmatic movestarts with no
+      // originalEvent, and they must not eat an armed offer or the
+      // arrival-return offer before it is seen
       map.on("movestart", (e) => {
         if (e && e.originalEvent) {
           handoffOrigin = null;
           handoffTapTarget = null;
+          if (offerMode === "armed") {
+            offerMode = "offer";
+            offerShell.classList.remove("armed");
+            hideTerritoryLayer();
+          }
         }
-        hideHandoff();
       });
       map.on("moveend", updateBorderHandoff);
       // a basemap switch drops the territory outline with every other
       // custom layer; re-add it when the new style settles
       map.on("styledata", () => {
-        if (handoffTarget && handoffTarget !== "home" && !map.getLayer(TERRITORY.layer)) {
-          showTerritoryLayer(handoffTarget);
+        if (offerMode === "armed" && offerRegion && !map.getLayer(TERRITORY.layer)) {
+          showTerritoryLayer(offerRegion);
         }
       });
       // touching a neighbouring country's territory is a stronger signal
-      // than drifting the centre across a border: surface the same offer
-      // on tap. the tap only OFFERS — navigation still takes a second tap
-      // on the pill, so a stray touch never yanks the user off their map.
-      // runs only when the tap hit none of the page's interactive layers,
-      // so place dots, census areas, and pulotu points keep every popup
+      // than drifting the centre across a border: the tap ARMS the offer
+      // (pill plus emerald outline) — navigation still takes a tap on the
+      // pill, so a stray touch never yanks the user off their map. runs
+      // only when the tap hit none of the page's interactive layers, so
+      // place dots, census areas, and pulotu points keep every popup
       map.on("click", (e) => {
         if (map.getZoom() < HANDOFF_MIN_ZOOM) return;
         const target = e.originalEvent && e.originalEvent.target;
@@ -5155,31 +5194,44 @@ if (handoffPill && !RC.disableBorderHandoff) {
         const pick = handoffNeighbourAt(normaliseLng(e.lngLat.lng), e.lngLat.lat);
         if (!pick) {
           // tapping home or water dismisses what tapping a neighbour armed
-          if (handoffTapTarget) { handoffTapTarget = null; hideHandoff(); }
+          if (handoffTapTarget) {
+            handoffTapTarget = null;
+            updateBorderHandoff();
+          }
           return;
         }
         handoffTapTarget = pick;
-        showHandoff(pick, `Continue into ${pick.name} →`);
-        prefetchHandoffPage(pick.code);
+        setOffer("armed", pick);
       });
       updateBorderHandoff();
     })
     .catch(() => {});
-  handoffPill.addEventListener("click", (e) => {
-    if (!handoffTarget) return;
+  // the offer engine claims the main zone's clicks in every non-resting
+  // state; this listener registers before the switcher's (script order),
+  // so resting clicks fall through to the panel as usual
+  offerGo.addEventListener("click", (e) => {
+    if (offerMode === "resting") return;
     // modified activations keep their native new-tab/window behaviour on
-    // the href set at show time
+    // the href set with the offer
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
     e.preventDefault();
-    if (handoffTarget === "home") {
-      map.flyTo({ center: CONFIG.center, zoom: CONFIG.initialZoom, bearing: 0, pitch: 0, speed: 1.6 });
-      hideHandoff();
+    e.stopImmediatePropagation();
+    if (offerMode === "offer") {
+      // first tap arms: the emerald outline confirms what a second tap
+      // will open, so the choice needs no reading
+      handoffTapTarget = offerRegion;
+      setOffer("armed", offerRegion);
       return;
     }
-    // the handoff carries the census view (roam v1): the neighbour opens
-    // on the same metric and the nearest wave it holds, so crossing a
-    // border keeps the traveller's question in front of them; the href
-    // rebuilds at click time so the camera is exact
-    window.location.href = handoffHref(handoffTarget);
+    if (offerMode === "armed" || offerMode === "back") {
+      // the census view rides along (roam v1); the href rebuilds at
+      // click time so the camera is exact
+      window.location.href = handoffHref(offerRegion);
+      return;
+    }
+    if (offerMode === "home") {
+      map.flyTo({ center: CONFIG.center, zoom: CONFIG.initialZoom, bearing: 0, pitch: 0, speed: 1.6 });
+      setOffer("resting");
+    }
   });
 }
