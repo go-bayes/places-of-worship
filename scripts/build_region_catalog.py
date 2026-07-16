@@ -13,6 +13,7 @@ import json
 import math
 import re
 import sys
+import zlib
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -155,12 +156,16 @@ def summary_waves(path):
 
 
 def payload_record(path, page_dir):
-    # raw bytes are a conservative transfer-budget estimate and hash input
+    # raw bytes bound parse and memory spend and feed the hash; the
+    # zlib-6 length approximates the host's gzip transfer size, which
+    # the switcher's prefetch budget spends (raw-byte budgeting barred
+    # a third of the fleet's pairs from warming)
     data = path.read_bytes()
     return [
         path.relative_to(page_dir).as_posix(),
         len(data),
         hashlib.sha256(data).hexdigest(),
+        len(zlib.compress(data, 6)),
     ]
 
 
@@ -264,7 +269,7 @@ def main():
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(
         json.dumps(
-            {"payload_fields": ["path", "bytes", "sha256"], "regions": catalogue},
+            {"payload_fields": ["path", "bytes", "sha256", "gzip_bytes"], "regions": catalogue},
             ensure_ascii=False,
             separators=(",", ":"),
         ) + "\n",

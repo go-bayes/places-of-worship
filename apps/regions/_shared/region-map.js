@@ -2404,6 +2404,10 @@ const countsHint = document.getElementById("countsHint");
 const countsList = document.getElementById("countsList");
 const countsTotal = document.getElementById("countsTotal");
 const countsToggle = document.getElementById("counts-toggle");
+const keyWrap = document.getElementById("key-wrap");
+// set by syncKeyToDots when "Points: off" leaves the key describing
+// nothing; updateCounts folds it into the toggle's disabled state
+let keyDotsOff = false;
 const countsHintDefault = countsHint ? countsHint.textContent : "";
 const countLabels = [
   { key: "christian", label: "Christian", color: "#e11d48" },
@@ -2827,9 +2831,10 @@ function updateCounts() {
     const eligibleZoom = zoom >= 4;
     if (countsToggle) {
       countsToggle.style.display = "inline-flex";
-      const disableToggle = !eligibleZoom && !IS_MOBILE;
+      const disableToggle = (!eligibleZoom || keyDotsOff) && !IS_MOBILE;
       countsToggle.disabled = disableToggle;
       countsToggle.setAttribute("aria-disabled", disableToggle ? "true" : "false");
+      countsToggle.title = keyDotsOff ? "Place dots are off" : "";
       if (!eligibleZoom && disableToggle) {
         syncCountsToggleLabel();
         countsToggle.setAttribute("aria-expanded", "false");
@@ -4420,6 +4425,26 @@ function syncPlaceDotEra() {
         : ["interpolate", ["linear"], ["zoom"], 6, 0.2, 9, 0.85, 12, 0.75, 18, 0.7]);
   }
   syncPointsControl(mode);
+  syncKeyToDots(mode);
+}
+
+// the key describes the place dots; "Points: off" leaves it describing
+// nothing, so phones drop the pill entirely (phone chrome earns its
+// place) while desktop keeps the affordance visible but disabled with
+// the reason — hidden affordances are not rediscovered (tribunal
+// consensus, docs/development/datamaps-tribunal-2026-07-17.md). any
+// mode with dots restores the key at once through the same paint path.
+function syncKeyToDots(mode) {
+  if (!keyWrap || !countsToggle) return;
+  const dotsOff = mode === "off";
+  if (dotsOff === keyDotsOff) return;
+  keyDotsOff = dotsOff;
+  if (dotsOff && countsUserEnabled) {
+    countsUserEnabled = false;
+    syncCountsToggleLabel();
+  }
+  keyWrap.hidden = IS_MOBILE && dotsOff;
+  updateCounts();
 }
 
 // keep the points control in step with the effective mode: the select

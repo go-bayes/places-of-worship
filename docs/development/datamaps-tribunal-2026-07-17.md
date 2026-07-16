@@ -10,11 +10,11 @@ Two-seat tribunal (Fable 5, GPT 5.6 high) convened at JB's request over four que
 
 ## Ratified backlog (consensus, not yet built)
 
-1. Prefetch accounting: add estimated-gzip bytes to `region-catalog.json` (`scripts/build_region_catalog.py`) and budget the switcher's 1 MiB warming limit on compressed bytes — 97/100 boundary+summary pairs fit compressed against 67/100 raw. Warm the boundary as well as the summary on list hover/touch and border-handoff offers; today those paths leave the boundary on the next page's critical path.
+1. SHIPPED same day. Prefetch accounting: add estimated-gzip bytes to `region-catalog.json` (`scripts/build_region_catalog.py`) and budget the switcher's 1 MiB warming limit on compressed bytes — 97/100 boundary+summary pairs fit compressed against 67/100 raw (both figures re-measured against the regenerated catalogue). Warm the boundary as well as the summary on list hover/touch and border-handoff offers; those paths used to leave the boundary on the next page's critical path.
 2. Boundary outliers: run Malaysia's district file (~10 MB raw, 7 dp, never simplified) through the standard mapshaper keep-shapes + 5 dp pipeline, and add a generic build gate (raw ≤ 3 MB, est. gzip ≤ 1 MB, unchanged feature count and join keys, manifest waiver for true exceptions).
 3. Summary compaction: drop pretty-printing in the summary generators (one flag; US 20.6 → 16.6 MB raw) and, for the US/Brazil-class outliers only, hoist the constant per-row fields or emit a compact render payload at the planned compiled-map seam. Parse cost measured small (~20 ms desktop, both seats replicated), so this is hygiene behind items 1–2, not the headline.
 4. Census panel on phones: session-remembered dismissal — open on the first teaching visit; once dismissed via × or toggle, later country pages in the session open with the choropleth on and the panel collapsed. Gesture-triggered collapse was considered and rejected (the panel is a working legend; collapsing on first pan removes the key when it becomes useful).
-5. Denomination key follows the dots: hide the key pill on phones while "Points: off" is selected (restore on any mode with dots), disable-with-reason on desktop; wire in the existing points-sync path. Fold in the 44 px touch floor for the top pills (`#data-pill`, `#counts-toggle`) while touching that chrome.
+5. SHIPPED same day (key half). Denomination key follows the dots: hide the key pill on phones while "Points: off" is selected (restore on any mode with dots), disable-with-reason on desktop; wired in `syncPlaceDotEra`. The 44 px touch floor for the top pills (`#data-pill`, `#counts-toggle`) remains open.
 
 ## Ratified do-not-do
 

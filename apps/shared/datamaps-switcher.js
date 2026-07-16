@@ -171,7 +171,10 @@
     }
 
     function queuePrefetch(url, estimatedBytes) {
-      // raw catalogue sizes conservatively bound compressed transfer spend
+      // the budget spends estimated transfer bytes: zlib-6 estimates for
+      // the data payloads (the catalogue carries them), raw bytes for the
+      // small page shells. budgeting on raw sizes barred 33 of 100
+      // countries' pairs from warming that compressed comfortably fit
       if (!connectionAllowsPrefetch() || !Number.isFinite(estimatedBytes) || estimatedBytes <= 0) return;
       const href = url.href;
       if (prefetched.has(href) || prefetchBytes + estimatedBytes > PREFETCH_LIMIT_BYTES) return;
@@ -187,9 +190,10 @@
     }
 
     function validPayload(payload) {
-      return Array.isArray(payload) && payload.length === 3 &&
+      return Array.isArray(payload) && payload.length === 4 &&
         typeof payload[0] === "string" && Number.isFinite(payload[1]) && payload[1] > 0 &&
-        typeof payload[2] === "string" && /^[a-f0-9]{64}$/.test(payload[2]);
+        typeof payload[2] === "string" && /^[a-f0-9]{64}$/.test(payload[2]) &&
+        Number.isFinite(payload[3]) && payload[3] > 0 && payload[3] <= payload[1];
     }
 
     async function loadCatalogue() {
@@ -198,7 +202,7 @@
         const res = await fetch(catalogUrl.href, { credentials: "same-origin", cache: "no-cache" });
         if (!res.ok) throw new Error("catalogue fetch " + res.status);
         const doc = await res.json();
-        if (!doc || JSON.stringify(doc.payload_fields) !== '["path","bytes","sha256"]' ||
+        if (!doc || JSON.stringify(doc.payload_fields) !== '["path","bytes","sha256","gzip_bytes"]' ||
             !Array.isArray(doc.regions) || !doc.regions.length) throw new Error("catalogue shape");
         const codes = new Set();
         for (const region of doc.regions) {
@@ -243,8 +247,8 @@
         if (!region) return;
         const pageUrl = new URL(region.url.replace(/^apps\/regions\//, ""), hubUrl);
         queuePrefetch(pageUrl, region.html_bytes);
-        if (includeSummary) queuePrefetch(new URL(region.summary[0], pageUrl), region.summary[1]);
-        if (includeBoundary) queuePrefetch(new URL(region.boundary[0], pageUrl), region.boundary[1]);
+        if (includeSummary) queuePrefetch(new URL(region.summary[0], pageUrl), region.summary[3]);
+        if (includeBoundary) queuePrefetch(new URL(region.boundary[0], pageUrl), region.boundary[3]);
       } catch (err) {
         // speculative failures never alter navigation
       }
@@ -336,8 +340,10 @@
     document.addEventListener("datamap:first-idle", markPrefetchReady, { once: true });
     if (!currentCode && !prefetchReady) window.addEventListener("load", markPrefetchReady, { once: true });
     if (prefetchReady) { warmHome(); void warmNeighbours(); }
-    // border handoff uses the same network guard, idle gate, and page budget
-    window.datamapsPrefetchCountry = (code) => { void prefetchCountry(code, false); };
+    // border handoff uses the same network guard, idle gate, and page
+    // budget; an offer on screen is strong intent, so the summary and
+    // boundary warm alongside the page shell (budget-capped as ever)
+    window.datamapsPrefetchCountry = (code) => { void prefetchCountry(code, true, true); };
 
     async function loadHubCountries() {
       const res = await fetch(hubUrl.href, { credentials: "same-origin" });
@@ -470,7 +476,7 @@
         name.className = "dm-name";
         name.textContent = `← Back to ${previousRegion.name}`;
         back.appendChild(name);
-        const warm = () => { void prefetchCountry(previousRegion.code, true); };
+        const warm = () => { void prefetchCountry(previousRegion.code, true, true); };
         back.addEventListener("pointerenter", warm, { once: true });
         back.addEventListener("focus", warm, { once: true });
         back.addEventListener("touchstart", warm, { once: true, passive: true });
@@ -505,7 +511,9 @@
           a.appendChild(meta);
         }
         if (c.code) {
-          const warm = () => { void prefetchCountry(c.code, true); };
+          // hover, focus or touch is strong intent: warm the whole pair
+          // so the destination's census layer opens from cache too
+          const warm = () => { void prefetchCountry(c.code, true, true); };
           a.addEventListener("pointerenter", warm, { once: true });
           a.addEventListener("focus", warm, { once: true });
           a.addEventListener("touchstart", warm, { once: true, passive: true });
