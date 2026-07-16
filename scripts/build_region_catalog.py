@@ -19,6 +19,18 @@ REPO = Path(__file__).resolve().parent.parent
 REGIONS = REPO / "apps" / "regions"
 BBOXES = REGIONS / "_shared" / "data" / "region-bboxes.json"
 OUT = REPO / "apps" / "shared" / "data" / "region-catalog.json"
+TZ_OUT = REPO / "apps" / "shared" / "data" / "tz-index.json"
+# system tz tables, best first: zone1970.tab leads each zone's codes
+# column with its primary country; the deprecated zone.tab (all macOS
+# ships) lists one country per row, which serves the same lookup
+TZ_TABS = [
+    Path("/usr/share/zoneinfo/zone1970.tab"),
+    Path("/usr/share/zoneinfo/zone.tab"),
+    Path("/var/db/timezone/zoneinfo/zone1970.tab"),
+    Path("/var/db/timezone/zoneinfo/zone.tab"),
+]
+# hub codes are catalogue identities, not pure ISO 3166
+ISO_TO_CATALOGUE = {"gb": "uk"}
 NEIGHBOUR_GAP_DEG = 3.0
 # symmetric adjacency overrides for isolated countries the degree rule
 # misses: the tasman is wider than any gap threshold worth having, yet
@@ -191,6 +203,30 @@ def neighbours_for(code, boxes_by_code):
     return neighbours
 
 
+def tz_index(codes):
+    # IANA zone name -> catalogue code, only for countries with data
+    # maps; the switcher's home warm reads this to guess the visitor's
+    # country from the device timezone without any permission prompt
+    for tab in TZ_TABS:
+        if not tab.is_file():
+            continue
+        index = {}
+        for line in tab.read_text(encoding="utf-8").splitlines():
+            if not line or line.startswith("#"):
+                continue
+            fields = line.split("\t")
+            if len(fields) < 3:
+                continue
+            primary = fields[0].split(",")[0].strip().lower()
+            code = ISO_TO_CATALOGUE.get(primary, primary)
+            if code in codes:
+                index.setdefault(fields[2].strip(), code)
+        if index.get("Pacific/Auckland") == "nz":
+            return index
+        sys.exit(f"{tab} parsed but lacks Pacific/Auckland -> nz; refusing a broken index")
+    sys.exit("no system zone tab found; cannot build the timezone index")
+
+
 def main():
     names = hub_names()
     try:
@@ -238,6 +274,16 @@ def main():
     if size >= 40 * 1024:
         sys.exit(f"catalogue is {size} bytes; compact it below 40 KB")
     print(f"wrote {OUT.relative_to(REPO)}: {len(catalogue)} countries, {size} bytes")
+
+    zones = tz_index({entry["code"] for entry in catalogue})
+    TZ_OUT.write_text(
+        json.dumps(zones, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+    tz_size = TZ_OUT.stat().st_size
+    if tz_size >= 16 * 1024:
+        sys.exit(f"timezone index is {tz_size} bytes; keep it below 16 KB")
+    print(f"wrote {TZ_OUT.relative_to(REPO)}: {len(zones)} zones, {tz_size} bytes")
 
 
 if __name__ == "__main__":

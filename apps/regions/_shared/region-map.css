@@ -21,6 +21,46 @@
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24);
 }
 #census-panel[hidden] { display: none; }
+/* phone-only dismiss chip: hangs off the panel's top-right corner so it
+   overlaps no content; a 44px hit box (style-guide touch floor) around a
+   28px visual disc in the dock-close idiom. desktop keeps the settled
+   chrome — the census button's caret is enough beside a pointer */
+#census-close {
+  display: none;
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+#census-close > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #cbd5e1;
+  font-size: 16px;
+  line-height: 1;
+}
+@media (max-width: 640px) {
+  #census-close { display: flex; }
+  /* phones drop the panel's reference prose — the colour sentence and
+     the construct note — to give the map back its screen; the wash and
+     caveat disclosures stay, they change what the paint means. both
+     sentences remain on desktop and in each country's overview page */
+  .census-colour-note,
+  .census-construct-note { display: none; }
+}
 /* dataset passport: the panel names its contents — source · construct on
    the first line, geography · wave on the second; generated from product
    metadata (design record: docs/development/sidebar-design-space-2026-07.md) */

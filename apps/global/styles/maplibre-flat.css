@@ -471,13 +471,21 @@
        must not pop text selection or the link callout. the onboarding card
        is absent from this set on purpose: it scrolls, and it is not
        draggable anywhere. */
-    #counts-bar, #wordmark {
+    #counts-bar, #wordmark, #dock {
       touch-action: none;
       -webkit-user-select: none;
       user-select: none;
       -webkit-touch-callout: none;
     }
     #wordmark select { touch-action: auto; }
+    /* the dock's own controls keep native touch and text behaviour: the
+       search input must take a caret and a selection, and drags never
+       start from inputs or selects anyway */
+    #dock input, #dock select {
+      touch-action: auto;
+      -webkit-user-select: text;
+      user-select: text;
+    }
     /* the denomination key list scrolls on phones: touches there scroll it */
     #counts { touch-action: pan-y; }
     #counts-bar {
@@ -594,8 +602,11 @@
         transform: translateX(-50%);
         width: 86dvw;
         max-width: 86dvw;
-        /* sit above the pill row so the open panel hides no controls */
-        bottom: calc(var(--safe-bottom) + 64px);
+        /* sit above the pill row so the open panel hides no controls;
+           the band wraps to two pill rows on phones since the data maps
+           pill joined it, so the old 64px offset overlapped by 20px
+           (measured at 430px, jb report 2026-07-17) */
+        bottom: calc(var(--safe-bottom) + 92px);
       }
       #corner-refresh {
         width: 44px;
@@ -688,9 +699,8 @@
   color: #fff;
   text-decoration: underline;
 }
-/* phones: the pill itself stays — the shared sheet (map-shell.css) hides its
-   non-navigation members (fix-map link, theme select, repo link), leaving
-   "Data maps" (and "Global map" on country pages) reachable on mobile */
+/* phones: the shared sheet (map-shell.css) hides the whole wordmark pill
+   below 640px — phones are exploration surfaces (jb ruling 2026-07-16) */
 
 /* lazy street view: the popup shows a button until someone asks */
 .streetview .sv-show {

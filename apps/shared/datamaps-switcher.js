@@ -20,6 +20,7 @@
     if (!shell || !triggers.length || !goTrigger) return;
     const hubUrl = new URL(goTrigger.getAttribute("href"), window.location.href);
     const catalogUrl = new URL("../shared/data/region-catalog.json", hubUrl);
+    const tzIndexUrl = new URL("../shared/data/tz-index.json", hubUrl);
 
     // menu semantics live on the caret zone, the panel's dedicated
     // trigger; the go zone's role changes with the offer engine's state,
@@ -224,7 +225,7 @@
       });
     }
 
-    async function prefetchCountry(code, includeSummary) {
+    async function prefetchCountry(code, includeSummary, includeBoundary) {
       if (!connectionAllowsPrefetch() || code === currentCode) return;
       try {
         const regions = await loadCatalogue();
@@ -233,9 +234,73 @@
         const pageUrl = new URL(region.url.replace(/^apps\/regions\//, ""), hubUrl);
         queuePrefetch(pageUrl, region.html_bytes);
         if (includeSummary) queuePrefetch(new URL(region.summary[0], pageUrl), region.summary[1]);
+        if (includeBoundary) queuePrefetch(new URL(region.boundary[0], pageUrl), region.boundary[1]);
       } catch (err) {
         // speculative failures never alter navigation
       }
+    }
+
+    // the global map warms one country data map — page, summary and
+    // boundary — so the likeliest handoff opens from cache. the target
+    // is the visitor's own country when a permissionless signal names
+    // one with a data map: the device timezone first (it says where the
+    // device is right now), then an explicit locale region subtag
+    // (ranked second because browsers often report en-US regardless of
+    // place). whatever the budget cannot seat is skipped by the
+    // queuePrefetch gate, so the warm degrades to partial on the big
+    // countries — a us visitor warms the us page shell, never its
+    // 20 MB county summary. new zealand is the fallback and, when the
+    // guess lands elsewhere, the top-up: the flagship census map stays
+    // warm for every visitor with whatever budget the guess leaves.
+    // country pages skip all of this; their neighbours matter more.
+    const HOME_DEFAULT = "nz";
+    let homeWarmed = false;
+
+    async function guessHomeCode(regions) {
+      const has = (code) => regions.some((region) => region.code === code);
+      try {
+        // qa override, the dm-previous storage idiom
+        const forced = window.sessionStorage.getItem("dm-home");
+        if (forced && has(forced)) return forced;
+      } catch (err) {}
+      try {
+        const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (zone) {
+          const res = await fetch(tzIndexUrl.href, { credentials: "same-origin" });
+          if (res.ok) {
+            const index = await res.json();
+            const code = index && typeof index === "object" ? index[zone] : null;
+            if (typeof code === "string" && has(code)) return code;
+          }
+        }
+      } catch (err) {}
+      for (const tag of navigator.languages || []) {
+        try {
+          // explicit region only — maximize() would invent en -> US
+          const region = new Intl.Locale(tag).region;
+          if (region && region.length === 2) {
+            const iso = region.toLowerCase();
+            const code = iso === "gb" ? "uk" : iso;
+            if (has(code)) return code;
+          }
+        } catch (err) {}
+      }
+      return HOME_DEFAULT;
+    }
+
+    function warmHome() {
+      if (currentCode || homeWarmed || !connectionAllowsPrefetch()) return;
+      homeWarmed = true;
+      void (async () => {
+        try {
+          const regions = await loadCatalogue();
+          const code = await guessHomeCode(regions);
+          await prefetchCountry(code, true, true);
+          if (code !== HOME_DEFAULT) await prefetchCountry(HOME_DEFAULT, true, true);
+        } catch (err) {
+          // a failed guess or catalogue costs only the warm
+        }
+      })();
     }
 
     async function warmNeighbours() {
@@ -254,12 +319,13 @@
     function markPrefetchReady() {
       prefetchReady = true;
       flushPrefetchQueue();
+      warmHome();
       void warmNeighbours();
     }
 
     document.addEventListener("datamap:first-idle", markPrefetchReady, { once: true });
     if (!currentCode && !prefetchReady) window.addEventListener("load", markPrefetchReady, { once: true });
-    if (prefetchReady) void warmNeighbours();
+    if (prefetchReady) { warmHome(); void warmNeighbours(); }
     // border handoff uses the same network guard, idle gate, and page budget
     window.datamapsPrefetchCountry = (code) => { void prefetchCountry(code, false); };
 

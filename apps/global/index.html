@@ -6,7 +6,7 @@
   <title>Places of Worship | MapLibre Flat Prototype</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
   <link href="../shared/map-shell.css" rel="stylesheet">
-  <link href="styles/maplibre-flat.css?v=20260716i" rel="stylesheet">
+  <link href="styles/maplibre-flat.css?v=20260716j" rel="stylesheet">
 </head>
 <body>
   <div id="map"></div>
@@ -1751,7 +1751,10 @@
     // pen keep free placement. double-tapping a displaced pill sends just that
     // pill home without resetting the rest of the map. ported from the region
     // pages' shared module (apps/regions/_shared/region-map.js) for parity.
-    const DRAG_SELECTORS = ["#key-wrap", "#wordmark"];
+    // the search dock joins the drag roster (jb 2026-07-17): its input and
+    // selects never start drags, and the width-only resize guard keeps the
+    // phone keyboard from snapping a moved dock home
+    const DRAG_SELECTORS = ["#key-wrap", "#wordmark", "#dock"];
     const DRAG_MARGIN = 8; // keep dragged boxes at least this far inside the viewport
 
     // snap every pill home by dropping its inline transform (reset + resize)
@@ -2905,6 +2908,6 @@
     })();
 
   </script>
-  <script src="../shared/datamaps-switcher.js?v=20260716i"></script>
+  <script src="../shared/datamaps-switcher.js?v=20260716j"></script>
 </body>
 </html>

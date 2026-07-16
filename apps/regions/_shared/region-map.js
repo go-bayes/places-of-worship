@@ -112,6 +112,11 @@ document.title = RC.title;
       <select id="censusPoints" class="shell-pill-select" aria-label="Place dots"></select>
     </div>
     <div id="census-panel">
+      <!-- phone-only dismiss: the panel covers half a phone screen, and
+           field-testing (jb 2026-07-16) showed the census button's caret
+           is not discovered as the way to clear it; the X collapses via
+           the same state as the button, which stays the reopen path -->
+      <button id="census-close" type="button" aria-label="Hide the data panel"><span aria-hidden="true">×</span></button>
       <!-- dataset passport: the panel names its own contents — who measured,
            what construct, which geography and wave — with the evidence one
            tap away (design record: docs/development/sidebar-design-space-2026-07.md) -->
@@ -133,7 +138,7 @@ document.title = RC.title;
         <div id="census-time" hidden></div>
       </div>
       <details id="census-evidence" hidden>
-        <summary>About this data</summary>
+        <summary>About these data</summary>
         <div id="census-evidence-body"></div>
       </details>
     </div>
@@ -1849,7 +1854,10 @@ if (cornerRefresh) cornerRefresh.addEventListener("click", resetSite);
 // (free placement strands pills over the map centre on phones); mouse and
 // pen keep free placement. double-tapping a displaced pill sends just that
 // pill home without resetting the rest of the map.
-const DRAG_SELECTORS = ["#census-wrap", "#key-wrap", "#wordmark"];
+// the search dock joins the drag roster (jb 2026-07-17): its input and
+// selects never start drags, and the width-only resize guard keeps the
+// phone keyboard from snapping a moved dock home
+const DRAG_SELECTORS = ["#census-wrap", "#key-wrap", "#wordmark", "#dock"];
 const DRAG_MARGIN = 8; // keep dragged boxes at least this far inside the viewport
 
 // snap every pill home by dropping its inline transform (reset + resize)
@@ -3734,7 +3742,7 @@ function openCensusPopup(feature, lngLat) {
     // wording (a register product's empty area is absent-in-source, not
     // pending) and drops the OSM credit, which only backs placeInfo lines
     const pendingNote = RC.pendingAreaNote ||
-      `Place density from OpenStreetMap. ${RC.dataNoun || "Census"} religious-affiliation data is pending for this area.`;
+      `Place density from OpenStreetMap. ${RC.dataNoun || "Census"} religious-affiliation data are pending for this area.`;
     const html =
       `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
       placeInfo +
@@ -4587,7 +4595,7 @@ function updateCensusLegend() {
     censusLegend.hidden = false;
     scale.innerHTML =
       `<div class="census-legend-title">${censusLevelDef().label} boundaries</div>` +
-      `<div class="census-legend-note">${RC.dataNoun || "Census"} religious-affiliation data is pending. ` +
+      `<div class="census-legend-note">${RC.dataNoun || "Census"} religious-affiliation data are pending. ` +
       `The areas are ready to receive it.</div>`;
     return;
   }
@@ -4665,7 +4673,7 @@ function updateCensusLegend() {
     `<div class="census-legend-bar" style="background:${rampGradient(stops)}"></div>` +
     `<div class="census-legend-range"><span>${loLabel}</span><span>${hiLabel}</span></div>` +
     colourNote +
-    `<div class="census-legend-note">${def.note}</div>` +
+    `<div class="census-legend-note census-construct-note">${def.note}</div>` +
     washNote +
     yearCaveatNote +
     dotEraNote;
@@ -4855,6 +4863,15 @@ if (censusToggle) {
   syncCensusPanel();
   censusToggle.addEventListener("click", () => {
     censusPanelOpen = !censusPanelOpen;
+    syncCensusPanel();
+  });
+}
+// the phone X closes through the same state, so the census button's
+// aria-expanded and caret stay truthful and remain the reopen path
+const censusClose = document.getElementById("census-close");
+if (censusClose) {
+  censusClose.addEventListener("click", () => {
+    censusPanelOpen = false;
     syncCensusPanel();
   });
 }

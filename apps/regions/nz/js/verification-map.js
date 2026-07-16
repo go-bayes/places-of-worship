@@ -883,7 +883,7 @@ const LIFECYCLE_FIELD_BY_EVENT = {
 
 function dataUrl(path) {
     if (!COUNTRY_CONFIG.dataPath) {
-        throw new Error(`${COUNTRY_CONFIG.countryName} task data is not configured yet.`);
+        throw new Error(`${COUNTRY_CONFIG.countryName} task data are not configured yet.`);
     }
     const prefix = window.location.pathname.includes("/places-of-worship/") ? "/places-of-worship/" : "/";
     return new URL(`${prefix}${COUNTRY_CONFIG.dataPath}${path}`, window.location.origin).toString();
