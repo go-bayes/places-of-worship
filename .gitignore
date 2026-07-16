@@ -142,6 +142,9 @@ research_data/
 !apps/regions/**/data/
 !apps/regions/**/data/**
 !apps/regions/**/data/*.geojson
+# the generated navigation catalogue is a small deployed app asset
+!apps/shared/data/
+!apps/shared/data/region-catalog.json
 
 # Geographic and spatial data files
 *.geojson

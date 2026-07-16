@@ -6,7 +6,7 @@ helper function in `scripts/`. The aim is to make the data path readable:
 source extraction, task generation, Convex seeding, review export, and handoff
 to `pow`.
 
-Last reviewed: 2026-07-06.
+Last reviewed: 2026-07-16.
 
 ## Boundary Rule
 
@@ -72,6 +72,7 @@ from the live RA/review loop.
 | `scripts/deduplicate_global_places.R` | `main()` | Deduplicate cleaned global country partitions. | Use after cleaning and before review-queue generation. |
 | `scripts/build_global_review_queue.R` | `main()` | Build country-level review queues from cleaned global outputs. | Use to triage weak tags, low-confidence candidates, and ambiguous country records. |
 | `scripts/build_region_bboxes.py` | `main()` | Build the border-handoff extent manifest (clustered bounding boxes plus a dissolved, simplified outline per country) from the shipped country boundary files. | Writes `apps/regions/_shared/data/region-bboxes.json`, read by the shared data-map runtime's border-handoff pill. Rerun after launching a country map; the script fails loudly when a page directory and the hub disagree. |
+| `scripts/build_region_catalog.py` | `main()` | Build the compact country data-map catalogue from each page's default configuration, shipped payloads, and generated bounding boxes. | Writes `apps/shared/data/region-catalog.json`, including payload hashes, conservative byte estimates, census waves, and three-degree neighbours. Rerun after launching a country map or changing its default payloads. |
 
 ## Update Rules
 

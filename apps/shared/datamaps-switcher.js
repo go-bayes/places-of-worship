@@ -2,11 +2,11 @@
    enhances the wordmark "Data maps" link (present on every country page
    and the global map) into a searchable dropdown listing every country
    data map, so moving between maps never needs the two-hop trip through
-   the hub. the hub page (apps/regions/index.html) stays the single
-   source of truth: the panel fetches and parses its map cards at first
-   open, so a newly launched country appears here with no extra step.
-   progressive enhancement: without javascript, or if the fetch fails,
-   the link keeps navigating to the hub as before. */
+   the hub. a generated catalogue supplies navigation and conservative
+   prefetch estimates; the hub parser remains the fallback when that
+   catalogue is absent or malformed. progressive enhancement: without
+   javascript, or if both fetches fail, the link keeps navigating to the
+   hub as before. */
 (function () {
   "use strict";
 
@@ -14,6 +14,7 @@
     const trigger = document.getElementById("datamaps-link");
     if (!trigger) return;
     const hubUrl = new URL(trigger.getAttribute("href"), window.location.href);
+    const catalogUrl = new URL("../shared/data/region-catalog.json", hubUrl);
 
     // signal the menu behaviour on the existing link
     trigger.setAttribute("aria-haspopup", "dialog");
@@ -86,8 +87,9 @@
     `;
     document.head.appendChild(style);
 
-    // state: countries load once from the hub html on first open
+    // navigation and prefetch state persist for this page load only
     let countries = null;
+    let catalogPromise = null;
     let panel = null;
     let listEl = null;
     let filterEl = null;
@@ -95,6 +97,11 @@
     let activeIndex = -1;
     let loading = false;
     let wasKeyboard = false;
+    let neighboursWarmed = false;
+    const prefetched = new Set();
+    const prefetchQueue = [];
+    const PREFETCH_LIMIT_BYTES = 1024 * 1024;
+    let prefetchBytes = 0;
 
     // fold case and accents so "cote" finds Côte d'Ivoire
     const fold = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -102,8 +109,138 @@
     // a page path counts as "here" when it names the same directory
     const normDir = (path) => path.replace(/index\.html$/, "").replace(/\/+$/, "/");
     const herePath = normDir(window.location.pathname);
+    const codeMatch = herePath.match(/\/apps\/regions\/([a-z]{2})\/$/);
+    const currentCode = codeMatch ? codeMatch[1] : null;
+    let prefetchReady = currentCode
+      ? window.__DATAMAP_FIRST_IDLE__ === true
+      : document.readyState === "complete";
 
-    async function loadCountries() {
+    function connectionAllowsPrefetch() {
+      // explicit data-saving and very slow connections disable all warming
+      const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (!connection) return true;
+      return !connection.saveData && connection.effectiveType !== "2g" && connection.effectiveType !== "slow-2g";
+    }
+
+    function runWhenIdle(callback) {
+      // data-map work wins every race; speculative requests start only later
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(callback, { timeout: 2000 });
+      } else {
+        window.setTimeout(callback, 0);
+      }
+    }
+
+    function flushPrefetchQueue() {
+      if (!prefetchReady) return;
+      while (prefetchQueue.length) runWhenIdle(prefetchQueue.shift());
+    }
+
+    function queuePrefetch(url, estimatedBytes) {
+      // raw catalogue sizes conservatively bound compressed transfer spend
+      if (!connectionAllowsPrefetch() || !Number.isFinite(estimatedBytes) || estimatedBytes <= 0) return;
+      const href = url.href;
+      if (prefetched.has(href) || prefetchBytes + estimatedBytes > PREFETCH_LIMIT_BYTES) return;
+      prefetched.add(href);
+      prefetchBytes += estimatedBytes;
+      prefetchQueue.push(() => {
+        const link = document.createElement("link");
+        link.rel = "prefetch";
+        link.href = href;
+        document.head.appendChild(link);
+      });
+      flushPrefetchQueue();
+    }
+
+    function validPayload(payload) {
+      return Array.isArray(payload) && payload.length === 3 &&
+        typeof payload[0] === "string" && Number.isFinite(payload[1]) && payload[1] > 0 &&
+        typeof payload[2] === "string" && /^[a-f0-9]{64}$/.test(payload[2]);
+    }
+
+    async function loadCatalogue() {
+      if (catalogPromise) return catalogPromise;
+      catalogPromise = (async () => {
+        const res = await fetch(catalogUrl.href, { credentials: "same-origin", cache: "no-cache" });
+        if (!res.ok) throw new Error("catalogue fetch " + res.status);
+        const doc = await res.json();
+        if (!doc || JSON.stringify(doc.payload_fields) !== '["path","bytes","sha256"]' ||
+            !Array.isArray(doc.regions) || !doc.regions.length) throw new Error("catalogue shape");
+        const codes = new Set();
+        for (const region of doc.regions) {
+          if (!region || !/^[a-z]{2}$/.test(region.code) || codes.has(region.code) ||
+              typeof region.name !== "string" || !region.name ||
+              region.url !== `apps/regions/${region.code}/` ||
+              !Number.isFinite(region.html_bytes) || region.html_bytes <= 0 ||
+              !validPayload(region.boundary) || !validPayload(region.summary) ||
+              !Array.isArray(region.waves) || !region.waves.length || !region.waves.every(Number.isInteger) ||
+              !Array.isArray(region.neighbours) || !region.neighbours.every((code) => /^[a-z]{2}$/.test(code))) {
+            throw new Error("catalogue region shape");
+          }
+          codes.add(region.code);
+        }
+        if (doc.regions.some((region) => region.neighbours.some((code) => !codes.has(code)))) {
+          throw new Error("catalogue neighbour shape");
+        }
+        return doc.regions;
+      })();
+      return catalogPromise;
+    }
+
+    function catalogueCountries(regions) {
+      return regions.map((region) => {
+        const href = new URL(region.url.replace(/^apps\/regions\//, ""), hubUrl);
+        return {
+          code: region.code,
+          name: region.name,
+          meta: region.waves.join(" · "),
+          href: href.href,
+          dir: normDir(href.pathname),
+          catalog: region
+        };
+      });
+    }
+
+    async function prefetchCountry(code, includeSummary) {
+      if (!connectionAllowsPrefetch() || code === currentCode) return;
+      try {
+        const regions = await loadCatalogue();
+        const region = regions.find((item) => item.code === code);
+        if (!region) return;
+        const pageUrl = new URL(region.url.replace(/^apps\/regions\//, ""), hubUrl);
+        queuePrefetch(pageUrl, region.html_bytes);
+        if (includeSummary) queuePrefetch(new URL(region.summary[0], pageUrl), region.summary[1]);
+      } catch (err) {
+        // speculative failures never alter navigation
+      }
+    }
+
+    async function warmNeighbours() {
+      if (!currentCode || neighboursWarmed || !connectionAllowsPrefetch()) return;
+      neighboursWarmed = true;
+      try {
+        const regions = await loadCatalogue();
+        const current = regions.find((region) => region.code === currentCode);
+        if (!current) return;
+        current.neighbours.forEach((code) => { void prefetchCountry(code, false); });
+      } catch (err) {
+        // no catalogue, no neighbour warming
+      }
+    }
+
+    function markPrefetchReady() {
+      prefetchReady = true;
+      flushPrefetchQueue();
+      void warmNeighbours();
+    }
+
+    document.addEventListener("datamap:first-idle", markPrefetchReady, { once: true });
+    if (!currentCode && !prefetchReady) window.addEventListener("load", markPrefetchReady, { once: true });
+    if (prefetchReady) void warmNeighbours();
+    // border handoff uses the same network guard, idle gate, and page budget
+    window.datamapsPrefetchCountry = (code) => { void prefetchCountry(code, false); };
+
+    async function loadHubCountries() {
       const res = await fetch(hubUrl.href, { credentials: "same-origin" });
       if (!res.ok) throw new Error("hub fetch " + res.status);
       const doc = new DOMParser().parseFromString(await res.text(), "text/html");
@@ -124,12 +261,22 @@
           .map((b) => b.textContent.trim())
           .join(" · ");
         const href = new URL(card.getAttribute("href"), hubUrl.href);
-        out.push({ name: name, meta: meta, href: href.href, dir: normDir(href.pathname) });
+        const match = normDir(href.pathname).match(/\/([a-z]{2})\/$/);
+        out.push({ code: match ? match[1] : null, name: name, meta: meta, href: href.href, dir: normDir(href.pathname) });
       });
       // a partial parse means the hub markup drifted; fall back to the hub
       // rather than silently dropping countries from every switcher
       if (!out.length || out.length !== cards.length) throw new Error("hub parse mismatch");
       return out;
+    }
+
+    async function loadCountries() {
+      // catalogue-first navigation; the live hub parser is the compatibility path
+      try {
+        return catalogueCountries(await loadCatalogue());
+      } catch (err) {
+        return loadHubCountries();
+      }
     }
 
     function buildPanel() {
@@ -223,6 +370,12 @@
           meta.className = "dm-meta";
           meta.textContent = c.meta;
           a.appendChild(meta);
+        }
+        if (c.code) {
+          const warm = () => { void prefetchCountry(c.code, true); };
+          a.addEventListener("pointerenter", warm, { once: true });
+          a.addEventListener("focus", warm, { once: true });
+          a.addEventListener("touchstart", warm, { once: true, passive: true });
         }
         listEl.appendChild(a);
       });
