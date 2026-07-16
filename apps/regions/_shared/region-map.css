@@ -330,35 +330,6 @@
    slider, the later-foundations checkbox); drags never start from them */
 #census-panel select, #census-panel input, #data-pill select { touch-action: auto; }
 
-/* border handoff: the one-tap offer to continue onto the neighbouring
-   country's data map (or back home from open water). it sits above the
-   bottom action row and appears only when the map centre has left the
-   country's data extent, so it never competes with the resting layout */
-#border-handoff {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: calc(var(--safe-bottom) + 56px);
-  z-index: 13;
-  padding: 10px 16px;
-  font: inherit;
-  font-size: 14px;
-  cursor: pointer;
-  white-space: nowrap;
-  max-width: 92vw;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  /* the handoff pill is an offer to go somewhere, so it wears the chrome's
-     "go" colour: emerald glass, distinct from amber (caution) and the blue
-     data ramp, and separable from both without colour vision */
-  background: rgba(6, 78, 59, 0.78);
-  border: 1px solid rgba(52, 211, 153, 0.55);
-  color: #a7f3d0;
-}
-#border-handoff:hover { --pill-opacity: 1; background: rgba(6, 95, 70, 0.88); color: #d1fae5; }
-/* phones: the refresh button rises into the handoff band (see
-   maplibre-flat.css), so the centred offer narrows to keep the corner
-   clear; the ellipsis absorbs long country names */
-@media (max-width: 640px) {
-  #border-handoff { max-width: 60vw; }
-}
+/* border handoff (the travel pill): styled in the shared sheet
+   (../../global/styles/maplibre-flat.css) since the global map seats the
+   same control */

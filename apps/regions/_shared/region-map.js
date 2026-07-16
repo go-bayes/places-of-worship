@@ -81,7 +81,7 @@ document.title = RC.title;
     <button id="near-me" class="shell-pill" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
     <a id="datamaps-pill" class="shell-pill" href="../" title="Switch to another country's data map"><span class="dm-label-long">Switch Country</span><span class="dm-label-short">Countries</span></a>
   </div>
-  <button id="border-handoff" class="shell-pill" type="button" hidden aria-live="polite"></button>
+  <a id="border-handoff" class="shell-pill" hidden aria-live="polite"></a>
   <!-- top-left: the denomination key for the place dots -->
   <div id="top-left-controls">
   <div id="key-wrap">
@@ -4940,70 +4940,17 @@ const HANDOFF_MIN_ZOOM = 3;
 const HANDOFF_HOME_MARGIN = 2.5;
 let handoffRegions = null;
 let handoffTarget = null; // manifest entry, "home", or null when hidden
+let handoffTapTarget = null; // a tap-made offer outlives programmatic moveends
 let handoffOrigin = null; // arrival-only route back to the country just left
 const handoffPrefetched = new Set();
 
-function normaliseLng(lng) {
-  // maplibre reports unwrapped longitudes after a long pan
-  return ((lng + 180) % 360 + 360) % 360 - 180;
-}
-
-function boxContains(box, lng, lat, margin) {
-  // containment on a circular longitude axis, so west > east boxes wrap
-  // the antimeridian and a margin can push any edge across it safely
-  const m = margin || 0;
-  if (lat < box[1] - m || lat > box[3] + m) return false;
-  const width = ((box[2] - box[0]) % 360 + 360) % 360 + 2 * m;
-  const rel = ((lng - (box[0] - m)) % 360 + 360) % 360;
-  return rel <= width;
-}
-
-function boxArea(box) {
-  const width = (box[2] - box[0] + 360) % 360 || 360;
-  return width * (box[3] - box[1]);
-}
-
-function pointInRings(rings, lng, lat) {
-  // even-odd ray cast over every outline ring (exteriors and holes
-  // together). rings crossing the antimeridian store longitudes past
-  // 180, so the query point probes all three 360-degree frames; it can
-  // only fall inside in one of them
-  for (const probe of [lng - 360, lng, lng + 360]) {
-    let inside = false;
-    for (const ring of rings) {
-      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-        const xi = ring[i][0], yi = ring[i][1];
-        const xj = ring[j][0], yj = ring[j][1];
-        if ((yi > lat) !== (yj > lat) &&
-            probe < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) {
-          inside = !inside;
-        }
-      }
-    }
-    if (inside) return true;
-  }
-  return false;
-}
-
-function regionHasPoint(region, lng, lat) {
-  return Array.isArray(region.rings) && pointInRings(region.rings, lng, lat);
-}
-
-// smallest containing box wins, so a continental neighbour's wide box
-// never shadows an island country inside it
-function smallestRegionAt(list, lng, lat) {
-  let pick = null;
-  let pickArea = Infinity;
-  for (const region of list) {
-    for (const box of region.boxes) {
-      if (boxContains(box, lng, lat, 0) && boxArea(box) < pickArea) {
-        pickArea = boxArea(box);
-        pick = region;
-      }
-    }
-  }
-  return pick;
-}
+// geometry lives in the shared resolver (apps/shared/region-resolve.js),
+// one implementation for every surface after tribunal review caught the
+// global map's duplicate diverging (design record:
+// docs/development/country-broadcast-review-2026-07.md)
+const normaliseLng = window.RegionResolve.normaliseLng;
+const boxContains = window.RegionResolve.boxContains;
+const regionHasPoint = window.RegionResolve.regionHasPoint;
 
 // the foreign country under a point, land-verified with the rectangle-only
 // fallback for entries without outlines; null over home, over open water,
@@ -5011,26 +4958,89 @@ function smallestRegionAt(list, lng, lat) {
 // detection and the tap-on-a-neighbour offer, so both name the same country
 function handoffNeighbourAt(lng, lat) {
   if (!handoffRegions) return null;
-  const home = handoffRegions.find((r) => r.code === HANDOFF_HOME);
-  if (!home || regionHasPoint(home, lng, lat)) return null;
-  const containing = handoffRegions.filter((r) => r.code !== HANDOFF_HOME &&
-    r.boxes.some((b) => boxContains(b, lng, lat, 0)));
-  const onLand = containing.filter((r) => regionHasPoint(r, lng, lat));
-  if (onLand.length) return smallestRegionAt(onLand, lng, lat);
-  if (home.boxes.some((b) => boxContains(b, lng, lat, 0))) return null;
-  const boxOnly = containing.filter((r) => !Array.isArray(r.rings));
-  return boxOnly.length ? smallestRegionAt(boxOnly, lng, lat) : null;
+  return window.RegionResolve.resolveAt(handoffRegions, lng, lat, { homeCode: HANDOFF_HOME });
+}
+
+// ---- territory highlight ---------------------------------------------
+// the offered country also glows on the map — an emerald outline beneath
+// the place dots, so the offer can be taken without reading. outline
+// only on these pages: a fill would sit over the census choropleth and
+// tint the values it encodes (tribunal decision, design record:
+// docs/development/country-broadcast-review-2026-07.md)
+const TERRITORY = { source: "handoff-territory", layer: "handoff-territory-line" };
+
+function territoryAnchorId() {
+  // beneath the place dots so the offer never obscures the data
+  return [LAYERS.overview, LAYERS.places].find((id) => id && map.getLayer(id));
+}
+
+function showTerritoryLayer(region) {
+  try {
+    const src = map.getSource(TERRITORY.source);
+    const data = { type: "FeatureCollection", features: [window.RegionResolve.regionFeature(region)] };
+    if (src) src.setData(data);
+    else map.addSource(TERRITORY.source, { type: "geojson", data });
+    if (!map.getLayer(TERRITORY.layer)) {
+      map.addLayer({
+        id: TERRITORY.layer,
+        type: "line",
+        source: TERRITORY.source,
+        paint: {
+          "line-color": "#34d399",
+          "line-width": 2,
+          "line-opacity": 0.85
+        }
+      }, territoryAnchorId());
+    }
+    map.setLayoutProperty(TERRITORY.layer, "visibility", "visible");
+  } catch (err) {
+    // the style may still be loading on arrival; styledata fires as it
+    // settles — try again then
+    map.once("styledata", () => {
+      if (handoffTarget && handoffTarget.code === region.code) showTerritoryLayer(region);
+    });
+  }
+}
+
+function hideTerritoryLayer() {
+  if (map.getLayer(TERRITORY.layer)) map.setLayoutProperty(TERRITORY.layer, "visibility", "none");
 }
 
 function hideHandoff() {
   if (!handoffPill) return;
   handoffPill.hidden = true;
   handoffTarget = null;
+  hideTerritoryLayer();
+}
+
+// the census view a departure carries (roam v1): metric and year are
+// valid even before the layer's first load completes (they hold the
+// defaults); only the pulotu source withholds them
+function handoffCarrySegment() {
+  return !pulotuState.active ? `&d=${censusState.metric}:${censusState.year}` : "";
+}
+
+function handoffHref(target) {
+  const centre = map.getCenter();
+  const zoom = map.getZoom().toFixed(2);
+  return `../${target.code}/#map=${zoom}/${centre.lat.toFixed(5)}/${normaliseLng(centre.lng).toFixed(5)}` +
+    `&${HANDOFF_ORIGIN_PARAM}=${HANDOFF_HOME}${handoffCarrySegment()}`;
 }
 
 function showHandoff(target, label) {
   handoffTarget = target;
   handoffPill.textContent = label;
+  // a real href keeps modified clicks, middle clicks, and copied links
+  // honest about the destination; the home offer flies rather than
+  // navigates, so it carries no destination
+  if (target === "home") {
+    handoffPill.removeAttribute("href");
+    handoffPill.setAttribute("role", "button");
+  } else {
+    handoffPill.setAttribute("href", handoffHref(target));
+    handoffPill.removeAttribute("role");
+    showTerritoryLayer(target);
+  }
   handoffPill.hidden = false;
 }
 
@@ -5050,6 +5060,13 @@ function prefetchHandoffPage(code) {
 
 function updateBorderHandoff() {
   if (!handoffRegions) return;
+  // a tap-armed offer survives programmatic camera nudges (whose moveends
+  // would otherwise re-derive from a centre still over home); only a real
+  // user gesture — which clears the tap target on movestart — dismisses it
+  if (handoffTapTarget) {
+    showHandoff(handoffTapTarget, `Continue into ${handoffTapTarget.name} →`);
+    return;
+  }
   if (map.getZoom() < HANDOFF_MIN_ZOOM) { hideHandoff(); return; }
   const centre = map.getCenter();
   const lng = normaliseLng(centre.lng);
@@ -5106,10 +5123,20 @@ if (handoffPill && !RC.disableBorderHandoff) {
       // refreshes) are programmatic movestarts with no originalEvent,
       // and they must not eat the "Back to ..." pill before it is seen
       map.on("movestart", (e) => {
-        if (e && e.originalEvent) handoffOrigin = null;
+        if (e && e.originalEvent) {
+          handoffOrigin = null;
+          handoffTapTarget = null;
+        }
         hideHandoff();
       });
       map.on("moveend", updateBorderHandoff);
+      // a basemap switch drops the territory outline with every other
+      // custom layer; re-add it when the new style settles
+      map.on("styledata", () => {
+        if (handoffTarget && handoffTarget !== "home" && !map.getLayer(TERRITORY.layer)) {
+          showTerritoryLayer(handoffTarget);
+        }
+      });
       // touching a neighbouring country's territory is a stronger signal
       // than drifting the centre across a border: surface the same offer
       // on tap. the tap only OFFERS — navigation still takes a second tap
@@ -5126,30 +5153,33 @@ if (handoffPill && !RC.disableBorderHandoff) {
           .filter((id) => id && map.getLayer(id));
         if (interactive.length && map.queryRenderedFeatures(e.point, { layers: interactive }).length) return;
         const pick = handoffNeighbourAt(normaliseLng(e.lngLat.lng), e.lngLat.lat);
-        if (!pick) return;
+        if (!pick) {
+          // tapping home or water dismisses what tapping a neighbour armed
+          if (handoffTapTarget) { handoffTapTarget = null; hideHandoff(); }
+          return;
+        }
+        handoffTapTarget = pick;
         showHandoff(pick, `Continue into ${pick.name} →`);
         prefetchHandoffPage(pick.code);
       });
       updateBorderHandoff();
     })
     .catch(() => {});
-  handoffPill.addEventListener("click", () => {
+  handoffPill.addEventListener("click", (e) => {
     if (!handoffTarget) return;
+    // modified activations keep their native new-tab/window behaviour on
+    // the href set at show time
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
     if (handoffTarget === "home") {
       map.flyTo({ center: CONFIG.center, zoom: CONFIG.initialZoom, bearing: 0, pitch: 0, speed: 1.6 });
       hideHandoff();
       return;
     }
-    const centre = map.getCenter();
-    const zoom = map.getZoom().toFixed(2);
     // the handoff carries the census view (roam v1): the neighbour opens
     // on the same metric and the nearest wave it holds, so crossing a
-    // border keeps the traveller's question in front of them
-    const carried = censusState.enabled && !pulotuState.active
-      ? `&d=${censusState.metric}:${censusState.year}`
-      : "";
-    window.location.href =
-      `../${handoffTarget.code}/#map=${zoom}/${centre.lat.toFixed(5)}/${normaliseLng(centre.lng).toFixed(5)}` +
-      `&${HANDOFF_ORIGIN_PARAM}=${HANDOFF_HOME}${carried}`;
+    // border keeps the traveller's question in front of them; the href
+    // rebuilds at click time so the camera is exact
+    window.location.href = handoffHref(handoffTarget);
   });
 }

@@ -6,7 +6,7 @@
   <title>Places of Worship | MapLibre Flat Prototype</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
   <link href="../shared/map-shell.css" rel="stylesheet">
-  <link href="styles/maplibre-flat.css?v=20260716e" rel="stylesheet">
+  <link href="styles/maplibre-flat.css?v=20260716f" rel="stylesheet">
 </head>
 <body>
   <div id="map"></div>
@@ -49,6 +49,7 @@
     <button id="near-me" class="shell-pill" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
     <a id="datamaps-pill" class="shell-pill" href="../regions/" title="Switch to a country data map"><span class="dm-label-long">Switch Country</span><span class="dm-label-short">Countries</span></a>
   </div>
+  <a id="border-handoff" class="shell-pill" hidden aria-live="polite"></a>
   <div id="counts-wrap" class="shell-top-centre">
   <!-- the drag wrap: the key bar and its panel move as one (matches the
        region pages' key-wrap idiom) -->
@@ -87,6 +88,7 @@
   <script src="config.public.js"></script>
   <script src="config.js"></script>
   <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script src="../shared/region-resolve.js?v=20260716f"></script>
   <script>
     if (!window.maplibregl) {
       throw new Error("MapLibre missing");
@@ -2795,7 +2797,153 @@
     });
     map.on("styledata", showTileStatus);
 
+    // ---- the travel pill (country broadcast) --------------------------
+    // the emerald travel pill tracks the camera on the global map, as it
+    // does on every country page: resting over a country with a data map
+    // it offers "Continue into <Country> →" and outlines and washes the
+    // territory emerald, so entering needs no reading; far out over a
+    // data country it hints "Zoom for <Country> data"; over open ocean it
+    // stays hidden. the switch-country pill below it never changes
+    // identity (tribunal decision, design record:
+    // docs/development/country-broadcast-review-2026-07.md). geometry
+    // comes from the shared resolver over the border-handoff manifest.
+    (function travelPill() {
+      const pill = document.getElementById("border-handoff");
+      const resolve = window.RegionResolve;
+      if (!pill || !resolve) return;
+      const OFFER_MIN_ZOOM = 3;
+      const SRC = "handoff-territory";
+      const FILL = "handoff-territory-fill";
+      const LINE = "handoff-territory-line";
+      let regions = null;
+      let state = { mode: "idle", code: null, region: null };
 
+      function anchorId() {
+        // beneath the place dots so the offer never obscures the data
+        return [LAYERS.overview, LAYERS.places].find((id) => id && map.getLayer(id));
+      }
+
+      function showLayer(region) {
+        try {
+          const src = map.getSource(SRC);
+          const data = { type: "FeatureCollection", features: [resolve.regionFeature(region)] };
+          if (src) src.setData(data);
+          else map.addSource(SRC, { type: "geojson", data });
+          // the fill is safe here: the global map has no choropleth to
+          // tint, so the wash plus outline reads at a glance
+          if (!map.getLayer(FILL)) {
+            map.addLayer({
+              id: FILL,
+              type: "fill",
+              source: SRC,
+              paint: { "fill-color": "#34d399", "fill-opacity": 0.14 }
+            }, anchorId());
+          }
+          if (!map.getLayer(LINE)) {
+            map.addLayer({
+              id: LINE,
+              type: "line",
+              source: SRC,
+              paint: { "line-color": "#34d399", "line-width": 2, "line-opacity": 0.85 }
+            }, anchorId());
+          }
+          for (const id of [FILL, LINE]) map.setLayoutProperty(id, "visibility", "visible");
+        } catch (err) {
+          // a theme switch or a still-loading style must not throw;
+          // styledata fires as it settles — try again then
+          map.once("styledata", () => {
+            if (state.mode === "broadcast" && state.region === region) showLayer(region);
+          });
+        }
+      }
+
+      function hideLayer() {
+        for (const id of [FILL, LINE]) {
+          if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", "none");
+        }
+      }
+
+      function targetHref(region) {
+        const centre = map.getCenter();
+        const zoom = map.getZoom().toFixed(2);
+        return `../regions/${region.code}/#map=${zoom}/${centre.lat.toFixed(5)}/${resolve.normaliseLng(centre.lng).toFixed(5)}`;
+      }
+
+      function setPill(mode, region) {
+        if (state.mode === mode && state.code === (region && region.code)) {
+          if (mode === "broadcast") showLayer(region); // re-assert after theme switches
+          return;
+        }
+        state = { mode, code: region ? region.code : null, region };
+        pill.classList.remove("hinting");
+        if (mode === "broadcast") {
+          pill.textContent = `Continue into ${region.name} →`;
+          pill.setAttribute("href", targetHref(region));
+          pill.setAttribute("aria-label", `Continue into ${region.name}`);
+          pill.hidden = false;
+          showLayer(region);
+        } else if (mode === "hint") {
+          pill.classList.add("hinting");
+          pill.textContent = `Zoom for ${region.name} data`;
+          pill.removeAttribute("href");
+          pill.setAttribute("aria-label", `Zoom in for ${region.name} data`);
+          pill.hidden = false;
+          hideLayer();
+        } else {
+          pill.hidden = true;
+          pill.removeAttribute("href");
+          hideLayer();
+        }
+      }
+
+      function update() {
+        if (!regions) return;
+        const centre = map.getCenter();
+        const region = resolve.resolveAt(regions, resolve.normaliseLng(centre.lng), centre.lat);
+        if (region && map.getZoom() >= OFFER_MIN_ZOOM) setPill("broadcast", region);
+        else if (region) setPill("hint", region);
+        else setPill("idle", null);
+      }
+
+      pill.addEventListener("click", (e) => {
+        // modified activations keep their native new-tab behaviour on the href
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+        if (state.mode === "hint") {
+          // the hint promises data on zoom; deliver the zoom. jumpTo,
+          // because this surface's animated camera transitions are inert
+          // (an existing page quirk — flyTo and zoomTo no-op here)
+          e.preventDefault();
+          map.jumpTo({ zoom: OFFER_MIN_ZOOM + 0.4 });
+          return;
+        }
+        if (state.mode === "broadcast") {
+          e.preventDefault();
+          window.location.href = targetHref(state.region);
+        }
+      });
+
+      map.on("styledata", () => {
+        if (state.mode === "broadcast" && state.region && !map.getLayer(FILL)) showLayer(state.region);
+      });
+
+      // the manifest is the border handoff's, shared with the country
+      // pages' cache; default caching (the etag does the revalidation)
+      // and a window-load gate keep it off the critical path
+      function armTravelPill() {
+        fetch("../regions/_shared/data/region-bboxes.json")
+          .then((res) => (res.ok ? res.json() : null))
+          .then((doc) => {
+            if (!doc || !Array.isArray(doc.regions)) return;
+            regions = doc.regions;
+            map.on("moveend", update);
+            map.on("zoomend", update);
+            update();
+          })
+          .catch(() => {});
+      }
+      if (document.readyState === "complete") armTravelPill();
+      else window.addEventListener("load", armTravelPill, { once: true });
+    })();
 
   </script>
   <script src="../shared/datamaps-switcher.js?v=20260716e"></script>
