@@ -6,7 +6,7 @@
   <title>Places of Worship | MapLibre Flat Prototype</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
   <link href="../shared/map-shell.css" rel="stylesheet">
-  <link href="styles/maplibre-flat.css?v=20260713d" rel="stylesheet">
+  <link href="styles/maplibre-flat.css?v=20260716e" rel="stylesheet">
 </head>
 <body>
   <div id="map"></div>
@@ -47,6 +47,7 @@
     <button id="dock-toggle" class="shell-pill" type="button">Search World</button>
     <button id="filters-clear" class="shell-pill" type="button" hidden aria-label="Clear filters"></button>
     <button id="near-me" class="shell-pill" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
+    <a id="datamaps-pill" class="shell-pill" href="../regions/" title="Switch to a country data map"><span class="dm-label-long">Switch Country</span><span class="dm-label-short">Countries</span></a>
   </div>
   <div id="counts-wrap" class="shell-top-centre">
   <!-- the drag wrap: the key bar and its panel move as one (matches the
@@ -2797,6 +2798,6 @@
 
 
   </script>
-  <script src="../shared/datamaps-switcher.js?v=20260716b"></script>
+  <script src="../shared/datamaps-switcher.js?v=20260716e"></script>
 </body>
 </html>

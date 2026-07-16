@@ -318,7 +318,8 @@
       align-items: center;
     }
     #dock-toggle,
-    #near-me {
+    #near-me,
+    #datamaps-pill {
       padding: 12px 22px;
       font-size: 18px;
       cursor: pointer;
@@ -326,6 +327,29 @@
       align-items: center;
       gap: 8px;
       white-space: nowrap;
+    }
+    /* the pill is an anchor so no-javascript visits still reach the hub */
+    #datamaps-pill { text-decoration: none; }
+    /* the pill names its action in full on desktop and by its object on
+       phones, mirroring the census pill's long/short label swap */
+    #datamaps-pill .dm-label-short { display: none; }
+    /* phones: every resting pill shrinks as one (the filter chip too),
+       and an overfull row wraps upward instead of running off-screen */
+    @media (max-width: 640px) {
+      #bottom-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 96vw;
+      }
+      #dock-toggle,
+      #near-me,
+      #datamaps-pill,
+      #filters-clear {
+        padding: 10px 13px;
+        font-size: 14px;
+      }
+      #datamaps-pill .dm-label-long { display: none; }
+      #datamaps-pill .dm-label-short { display: inline; }
     }
     #near-me .nm-dot {
       width: 11px;
@@ -494,6 +518,9 @@
       #corner-refresh {
         width: 44px;
         height: 44px;
+        /* the three-pill action row needs the whole bottom band on a
+           phone, so the refresh button steps up out of its way */
+        bottom: calc(var(--safe-bottom) + 60px);
       }
       #corner-refresh svg { width: 22px; height: 22px; }
       #onboard {

@@ -1,28 +1,31 @@
 /* datamaps-switcher.js — one-tap country switcher for the map surfaces.
-   enhances the wordmark "Data maps" link (present on every country page
-   and the global map) into a searchable dropdown listing every country
-   data map, so moving between maps never needs the two-hop trip through
-   the hub. a generated catalogue supplies navigation and conservative
-   prefetch estimates; the hub parser remains the fallback when that
-   catalogue is absent or malformed. progressive enhancement: without
-   javascript, or if both fetches fail, the link keeps navigating to the
-   hub as before. */
+   enhances the bottom-bar "Switch Country" pill (present on every country
+   page and the global map) into a searchable dropdown listing every
+   country data map, so moving between maps never needs the two-hop trip
+   through the hub. the top-right wordmark "Data maps" entry stays a plain
+   hub link — one control owns the panel (design record:
+   docs/development/datamaps-pill-review-2026-07.md). a generated
+   catalogue supplies navigation and conservative prefetch estimates; the
+   hub parser remains the fallback when that catalogue is absent or
+   malformed. progressive enhancement: without javascript, or if both
+   fetches fail, the pill keeps navigating to the hub as before. */
 (function () {
   "use strict";
 
   function init() {
-    const trigger = document.getElementById("datamaps-link");
+    const trigger = document.getElementById("datamaps-pill");
     if (!trigger) return;
     const hubUrl = new URL(trigger.getAttribute("href"), window.location.href);
     const catalogUrl = new URL("../shared/data/region-catalog.json", hubUrl);
 
-    // signal the menu behaviour on the existing link
+    // signal the menu behaviour on the existing link; the panel opens
+    // above the bottom pill, so the caret points up
     trigger.setAttribute("aria-haspopup", "dialog");
     trigger.setAttribute("aria-expanded", "false");
     const caret = document.createElement("span");
     caret.className = "dm-caret";
     caret.setAttribute("aria-hidden", "true");
-    caret.textContent = " ▾";
+    caret.textContent = " ▴";
     trigger.appendChild(caret);
 
     // panel styles ride the module so no shared stylesheet needs a
@@ -332,7 +335,10 @@
       else if (e.key === "Enter") {
         const items = visibleItems();
         const target = items[activeIndex >= 0 ? activeIndex : 0];
-        if (target) window.location.href = target.href;
+        if (!target) return;
+        // cmd/ctrl+enter keeps its open-in-new-tab meaning
+        if (e.metaKey || e.ctrlKey) window.open(target.href, "_blank", "noopener");
+        else window.location.href = target.href;
       }
     }
 
@@ -382,18 +388,21 @@
       setActive(-1);
     }
 
-    // the wordmark pill is draggable on both surfaces, so the anchor
-    // rect is measured at each open rather than fixed at load
+    // the pill anchors the panel; the rect is measured at each open
+    // rather than fixed at load
     function placePanel() {
-      const anchor = document.getElementById("wordmark") || trigger;
-      const rect = anchor.getBoundingClientRect();
+      const rect = trigger.getBoundingClientRect();
       const width = Math.min(340, window.innerWidth - 24);
-      let right = Math.max(12, window.innerWidth - rect.right);
-      if (right + width > window.innerWidth - 12) right = 12;
-      panel.style.right = right + "px";
-      // a dragged pill can sit anywhere; open on whichever side has room
-      const below = window.innerHeight - rect.bottom - 24;
-      const above = rect.top - 24;
+      // centre on the pill, clamped inside the viewport margins
+      let left = rect.left + rect.width / 2 - width / 2;
+      left = Math.max(12, Math.min(left, window.innerWidth - width - 12));
+      panel.style.left = left + "px";
+      panel.style.right = "auto";
+      // open on whichever side has room, capped at 60vh so the list
+      // reads as a menu, not a sheet, and stays clear of the top chrome
+      const cap = Math.round(window.innerHeight * 0.6);
+      const below = Math.min(window.innerHeight - rect.bottom - 24, cap);
+      const above = Math.min(rect.top - 24, cap);
       if (below >= 220 || below >= above) {
         panel.style.top = rect.bottom + 8 + "px";
         panel.style.bottom = "auto";
@@ -403,13 +412,6 @@
         panel.style.bottom = window.innerHeight - rect.top + 8 + "px";
         panel.style.maxHeight = Math.max(120, above) + "px";
       }
-    }
-
-    // the wordmark pill is draggable; a drag with the panel open would
-    // strand the panel at its old anchor, so any buttons-down move closes
-    // it (a jiggly plain click nets out: the trailing click reopens)
-    function onAnchorDragMove(e) {
-      if (e.buttons) closePanel();
     }
 
     function openPanel() {
@@ -423,9 +425,7 @@
       if (wasKeyboard || window.matchMedia("(pointer: fine)").matches) filterEl.focus();
       document.addEventListener("pointerdown", onOutside, true);
       document.addEventListener("keydown", onEscape, true);
-      window.addEventListener("resize", closePanel);
-      const anchor = document.getElementById("wordmark");
-      if (anchor) anchor.addEventListener("pointermove", onAnchorDragMove);
+      window.addEventListener("resize", onResize);
     }
 
     function closePanel() {
@@ -434,9 +434,18 @@
       trigger.setAttribute("aria-expanded", "false");
       document.removeEventListener("pointerdown", onOutside, true);
       document.removeEventListener("keydown", onEscape, true);
-      window.removeEventListener("resize", closePanel);
-      const anchor = document.getElementById("wordmark");
-      if (anchor) anchor.removeEventListener("pointermove", onAnchorDragMove);
+      window.removeEventListener("resize", onResize);
+    }
+
+    // a soft keyboard opening under the filter fires a window resize;
+    // closing then would destroy the panel as typing starts, so a
+    // focused filter re-places the panel instead
+    function onResize() {
+      if (filterEl && document.activeElement === filterEl) {
+        placePanel();
+        return;
+      }
+      closePanel();
     }
 
     function onOutside(e) {
@@ -450,6 +459,10 @@
       trigger.focus();
     }
 
+    // the hub escape below opens only after a real wait, so an ordinary
+    // double-click cannot yank the user away mid-fetch
+    let loadingSince = 0;
+
     trigger.addEventListener("click", async (e) => {
       // modified activations keep their native new-tab/window behaviour
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
@@ -458,10 +471,15 @@
       wasKeyboard = e.detail === 0;
       if (panel && !panel.hidden) { closePanel(); return; }
       if (!countries) {
-        // a stalled fetch must not trap the user: the second activation
-        // takes the plain hub navigation instead of waiting
-        if (loading) { window.location.href = hubUrl.href; return; }
+        // a stalled fetch must not trap the user: a repeat activation
+        // after a one-second wait takes the plain hub navigation instead
+        if (loading) {
+          if (Date.now() - loadingSince > 1000) window.location.href = hubUrl.href;
+          return;
+        }
         loading = true;
+        loadingSince = Date.now();
+        trigger.setAttribute("aria-busy", "true");
         try {
           countries = await loadCountries();
         } catch (err) {
@@ -470,8 +488,10 @@
           return;
         } finally {
           loading = false;
+          trigger.removeAttribute("aria-busy");
         }
         buildPanel();
+        trigger.setAttribute("aria-controls", "dm-panel");
       }
       openPanel();
     });

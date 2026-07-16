@@ -49,7 +49,10 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
 /* corner grammar: where chrome may sit. top-left carries transient
    state only, top-centre the key, top-right identity, bottom-left the
    refresh button, bottom-centre the action row, bottom-right stays with
-   the stock map controls. */
+   the stock map controls. amendment (2026-07-16): the action row also
+   seats the switch-country pill — cross-map navigation, not a map
+   action — a deliberate breach recorded in
+   docs/development/datamaps-pill-review-2026-07.md. */
 .shell-top-left { position: fixed; left: var(--safe-left); top: var(--safe-top); z-index: 13; }
 .shell-top-right { position: fixed; right: var(--safe-right); top: var(--safe-top); z-index: 12; }
 /* full-width so its content centres, but the empty flanks must let clicks

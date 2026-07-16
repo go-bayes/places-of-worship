@@ -79,6 +79,7 @@ document.title = RC.title;
     <button id="dock-toggle" class="shell-pill" type="button">Search &amp; Filters</button>
     <button id="filters-clear" class="shell-pill" type="button" hidden aria-label="Clear filters"></button>
     <button id="near-me" class="shell-pill" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
+    <a id="datamaps-pill" class="shell-pill" href="../" title="Switch to another country's data map"><span class="dm-label-long">Switch Country</span><span class="dm-label-short">Countries</span></a>
   </div>
   <button id="border-handoff" class="shell-pill" type="button" hidden aria-live="polite"></button>
   <!-- top-left: the denomination key for the place dots -->

@@ -356,3 +356,9 @@
   color: #a7f3d0;
 }
 #border-handoff:hover { --pill-opacity: 1; background: rgba(6, 95, 70, 0.88); color: #d1fae5; }
+/* phones: the refresh button rises into the handoff band (see
+   maplibre-flat.css), so the centred offer narrows to keep the corner
+   clear; the ellipsis absorbs long country names */
+@media (max-width: 640px) {
+  #border-handoff { max-width: 60vw; }
+}
