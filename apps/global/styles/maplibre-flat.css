@@ -213,6 +213,10 @@
       padding: 0;
       text-decoration: none;
       cursor: pointer;
+      /* the set-north badge seats on the right (jb 2026-07-17): below the
+         top-right wordmark on desktop; phones hide the wordmark, so the
+         badge takes the corner itself (media rule below) */
+      top: calc(var(--safe-top) + 34px);
       /* compass on demand: hidden until the map is rotated off north */
       display: none;
       align-items: center;
@@ -660,6 +664,8 @@
       #corner-reset {
         width: 54px;
         height: 54px;
+        /* the wordmark hides on phones; the badge takes the corner */
+        top: var(--safe-top);
       }
       #corner-reset svg {
         width: 44px;

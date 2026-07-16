@@ -531,18 +531,31 @@
       // touch screens pin the panel to the top of the viewport: the soft
       // keyboard owns the bottom, and a pill-anchored panel shrinks down
       // into it as the filtered list gets shorter, hiding the search row
-      // at exactly the moment the filter is doing its job. the visual
-      // viewport bounds the height so the list ends above the keyboard
+      // at exactly the moment the filter is doing its job. all coordinates
+      // come from the visual viewport (jb 2026-07-17): fixed positioning
+      // anchors to the layout viewport, so under page pinch-zoom a plain
+      // top:12px can sit entirely outside the visible area — the offsets
+      // translate the panel into whatever part of the page is on screen,
+      // and the height bound keeps the list above the soft keyboard
       if (window.matchMedia("(pointer: coarse)").matches) {
-        panel.style.left = Math.max(12, (window.innerWidth - width) / 2) + "px";
+        const vv = window.visualViewport;
+        const vx = vv ? vv.offsetLeft : 0;
+        const vy = vv ? vv.offsetTop : 0;
+        const vw = vv ? vv.width : window.innerWidth;
+        const vh = vv ? vv.height : window.innerHeight;
+        const fit = Math.min(340, vw - 24);
+        panel.style.width = fit + "px";
+        panel.style.left = (vx + Math.max(12, (vw - fit) / 2)) + "px";
         panel.style.right = "auto";
-        panel.style.top = "12px";
+        panel.style.top = (vy + 12) + "px";
         panel.style.bottom = "auto";
-        const avail = (window.visualViewport ? window.visualViewport.height : window.innerHeight) - 24;
-        panel.style.maxHeight = Math.max(160, Math.min(avail, Math.round(window.innerHeight * 0.72))) + "px";
+        panel.style.maxHeight = Math.max(160, Math.min(vh - 24, Math.round(vh * 0.72))) + "px";
         return;
       }
-      // centre on the pill, clamped inside the viewport margins
+      // centre on the pill, clamped inside the viewport margins (width set
+      // inline on both branches so a pointer-mode change never inherits a
+      // stale coarse-branch width)
+      panel.style.width = width + "px";
       let left = rect.left + rect.width / 2 - width / 2;
       left = Math.max(12, Math.min(left, window.innerWidth - width - 12));
       panel.style.left = left + "px";
@@ -576,8 +589,13 @@
       document.addEventListener("keydown", onEscape, true);
       window.addEventListener("resize", onResize);
       // ios keyboards resize only the visual viewport, never the window,
-      // so the height cap re-measures on that channel too
-      if (window.visualViewport) window.visualViewport.addEventListener("resize", onViewportResize);
+      // so the height cap re-measures on that channel too; pinch-zoom
+      // panning moves the visual viewport without resizing it, which is
+      // the scroll channel
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", onViewportResize);
+        window.visualViewport.addEventListener("scroll", onViewportResize);
+      }
     }
 
     function closePanel() {
@@ -587,7 +605,10 @@
       document.removeEventListener("pointerdown", onOutside, true);
       document.removeEventListener("keydown", onEscape, true);
       window.removeEventListener("resize", onResize);
-      if (window.visualViewport) window.visualViewport.removeEventListener("resize", onViewportResize);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener("resize", onViewportResize);
+        window.visualViewport.removeEventListener("scroll", onViewportResize);
+      }
     }
 
     // a visual-viewport change never closes the panel; it only re-fits it

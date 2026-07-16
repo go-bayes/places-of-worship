@@ -52,7 +52,11 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
    the stock map controls. amendment (2026-07-16): the action row also
    seats the switch-country pill — cross-map navigation, not a map
    action — a deliberate breach recorded in
-   docs/development/datamaps-pill-review-2026-07.md. */
+   docs/development/datamaps-pill-review-2026-07.md.
+   amendment (2026-07-17, jb): the transient set-north badge rides the
+   right edge — below the wordmark on desktop, the corner itself on
+   phones where the wordmark hides — so the left edge stays clear for
+   the key. */
 .shell-top-left { position: fixed; left: var(--safe-left); top: var(--safe-top); z-index: 13; }
 .shell-top-right { position: fixed; right: var(--safe-right); top: var(--safe-top); z-index: 12; }
 /* full-width so its content centres, but the empty flanks must let clicks

@@ -62,7 +62,7 @@ document.title = RC.title;
     <a id="fixmap-link" href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener" title="Improve this map area on OpenStreetMap">fix OSM map</a>
     <select id="basemapSelect" class="shell-pill-select" aria-label="Theme"></select>
   </div>
-  <button id="corner-reset" class="shell-pill shell-top-left" type="button" aria-label="Set North">
+  <button id="corner-reset" class="shell-pill shell-top-right" type="button" aria-label="Set North">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path d="M12 3L17 12L7 12L12 3Z" fill="#ef4444"/>
       <path d="M7 12L17 12L12 21L7 12Z" fill="currentColor" opacity="0.45"/>
@@ -1840,9 +1840,47 @@ function resetSite() {
   // resurface the onboarding card (jb 2026-07-09): reset is how a visitor
   // recovers the how-to and the about-this-map link after dismissing it
   showOnboard();
+  resetPageZoom();
   showClickHint("Map reset");
 }
 if (cornerRefresh) cornerRefresh.addEventListener("click", resetSite);
+
+// page pinch-zoom is distinct from the map's own zoom: it scales the
+// layout viewport, stranding the fixed chrome outside the visible area
+// with no obvious way back (jb 2026-07-17). two recoveries: the reset
+// button follows the visible corner while the page is zoomed, and reset
+// itself re-clamps the page scale to 1 by briefly pinning the viewport
+// meta — then restores it, so pinch zoom (an accessibility affordance)
+// stays available.
+function resetPageZoom() {
+  const vv = window.visualViewport;
+  if (!vv || vv.scale <= 1.02) return;
+  const meta = document.querySelector('meta[name="viewport"]');
+  if (!meta) return;
+  const original = meta.getAttribute("content");
+  meta.setAttribute("content", "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no");
+  window.setTimeout(() => meta.setAttribute("content", original), 250);
+  window.scrollTo(0, 0);
+}
+if (window.visualViewport && cornerRefresh) {
+  const vv = window.visualViewport;
+  let followRaf = 0;
+  const followViewport = () => {
+    followRaf = 0;
+    if (vv.scale > 1.02) {
+      cornerRefresh.style.left = (vv.offsetLeft + 10) + "px";
+      cornerRefresh.style.top = (vv.offsetTop + vv.height - cornerRefresh.offsetHeight - 10) + "px";
+      cornerRefresh.style.bottom = "auto";
+    } else {
+      cornerRefresh.style.left = "";
+      cornerRefresh.style.top = "";
+      cornerRefresh.style.bottom = "";
+    }
+  };
+  const queueFollow = () => { if (!followRaf) followRaf = requestAnimationFrame(followViewport); };
+  vv.addEventListener("resize", queueFollow);
+  vv.addEventListener("scroll", queueFollow);
+}
 
 // draggable floating pills: mouse, pen and touch (the pill chrome carries
 // touch-action: none, so a touch drag reaches us instead of being claimed by
