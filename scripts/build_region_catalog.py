@@ -20,6 +20,12 @@ REGIONS = REPO / "apps" / "regions"
 BBOXES = REGIONS / "_shared" / "data" / "region-bboxes.json"
 OUT = REPO / "apps" / "shared" / "data" / "region-catalog.json"
 NEIGHBOUR_GAP_DEG = 3.0
+# symmetric adjacency overrides for isolated countries the degree rule
+# misses: the tasman is wider than any gap threshold worth having, yet
+# nz<->au is the hop those pages' users actually make
+NEIGHBOUR_OVERRIDES = [
+    ("nz", "au"),
+]
 
 
 def hub_names():
@@ -170,12 +176,17 @@ def box_gap(first, second):
 
 
 def neighbours_for(code, boxes_by_code):
-    # any pair of clustered country boxes within three degrees is adjacent
+    # any pair of clustered country boxes within three degrees is adjacent,
+    # plus the declared overrides (applied in both directions)
+    overridden = {b for a, b in NEIGHBOUR_OVERRIDES if a == code}
+    overridden |= {a for a, b in NEIGHBOUR_OVERRIDES if b == code}
     neighbours = []
     for other, other_boxes in sorted(boxes_by_code.items()):
         if other == code:
             continue
-        if any(box_gap(first, second) <= NEIGHBOUR_GAP_DEG for first in boxes_by_code[code] for second in other_boxes):
+        if other in overridden or any(
+            box_gap(first, second) <= NEIGHBOUR_GAP_DEG for first in boxes_by_code[code] for second in other_boxes
+        ):
             neighbours.append(other)
     return neighbours
 
