@@ -61,6 +61,12 @@
       }
       #dm-filter::placeholder { color: #94a3b8; }
       #dm-filter:focus { outline: none; border-color: rgba(148, 163, 184, 0.6); }
+      /* ios auto-zooms the page when a focused input's type is under
+         16px, throwing the panel off its top pin (jb 2026-07-17); full
+         16px type on touch screens stops that zoom at the source */
+      @media (pointer: coarse) {
+        #dm-filter { font-size: 16px; }
+      }
       #dm-list { overflow-y: auto; overscroll-behavior: contain; flex: 1 1 auto; padding: 6px; }
       #dm-list .dm-empty { padding: 12px; color: #94a3b8; font-size: 13px; }
       a.dm-item {
