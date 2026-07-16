@@ -5051,9 +5051,13 @@ if (handoffPill && !RC.disableBorderHandoff) {
       writeHashParam(HANDOFF_ORIGIN_PARAM, null);
       // an offer computed for the last resting centre goes stale the
       // moment the camera moves again; maplibre fires movestart/moveend
-      // for zooms too, so this pair covers every gesture
-      map.on("movestart", () => {
-        handoffOrigin = null;
+      // for zooms too, so this pair covers every gesture. only a USER
+      // gesture consumes the arrival-return offer: the runtime's own
+      // camera nudges (nudgeMap's paired jumpTo calls after layer
+      // refreshes) are programmatic movestarts with no originalEvent,
+      // and they must not eat the "Back to ..." pill before it is seen
+      map.on("movestart", (e) => {
+        if (e && e.originalEvent) handoffOrigin = null;
         hideHandoff();
       });
       map.on("moveend", updateBorderHandoff);
