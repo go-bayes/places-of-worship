@@ -1827,9 +1827,10 @@ function resetSite() {
   clearDragTransforms(); // reset also snaps any dragged pills back home
   // reset restores the whole initial state (jb 2026-07-16): any travel
   // offer drops at once (not at the flight's end) and the census layer
-  // returns if it was toggled off
+  // returns if it was toggled off. the toggle renders only where the
+  // offer engine is armed — an unarmed pill stays the panel trigger
   handoffTapTarget = null;
-  setOffer("toggle");
+  if (handoffRegions) setOffer("toggle");
   if (!censusState.enabled) void setCensusEnabled(true);
   // resurface the onboarding card (jb 2026-07-09): reset is how a visitor
   // recovers the how-to and the about-this-map link after dismissing it
@@ -5024,7 +5025,12 @@ function setOffer(mode, region) {
   if (!offerGo) return;
   if (mode === offerMode) {
     if (mode === "toggle") renderOfferToggle();
-    if (region && offerRegion && region.code === offerRegion.code) return;
+    if (region && offerRegion && region.code === offerRegion.code) {
+      // same offer, new camera: keep modified clicks and copied links
+      // honest about where they lead
+      if (mode === "offer") offerGo.setAttribute("href", handoffHref(region));
+      return;
+    }
     if (!region && !offerRegion) return;
   }
   offerMode = mode;

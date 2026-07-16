@@ -366,20 +366,28 @@
       const q = fold(query || "").trim();
       const shown = countries.filter((c) => !q || fold(c.name).includes(q));
       listEl.innerHTML = "";
+      if (!shown.length) {
+        listEl.innerHTML = '<div class="dm-empty">No country matches.</div>';
+      }
       // an unfiltered list leads with the way back to the country last
-      // departed, one tap from anywhere
+      // departed, one tap from anywhere; a proper option so the listbox
+      // keyboard walk and announcements include it
       if (!q && previousRegion) {
         const back = document.createElement("a");
         back.className = "dm-item dm-previous";
+        back.id = "dm-opt-prev";
+        back.setAttribute("role", "option");
+        back.setAttribute("aria-selected", "false");
         back.href = new URL(`${previousRegion.code}/`, hubUrl).href;
         const name = document.createElement("div");
         name.className = "dm-name";
         name.textContent = `← Back to ${previousRegion.name}`;
         back.appendChild(name);
+        const warm = () => { void prefetchCountry(previousRegion.code, true); };
+        back.addEventListener("pointerenter", warm, { once: true });
+        back.addEventListener("focus", warm, { once: true });
+        back.addEventListener("touchstart", warm, { once: true, passive: true });
         listEl.appendChild(back);
-      }
-      if (!shown.length) {
-        listEl.innerHTML = '<div class="dm-empty">No country matches.</div>';
       }
       statusEl.textContent = shown.length
         ? shown.length + " of " + countries.length + " countries listed"

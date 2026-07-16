@@ -6,7 +6,7 @@
   <title>Places of Worship | MapLibre Flat Prototype</title>
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
   <link href="../shared/map-shell.css" rel="stylesheet">
-  <link href="styles/maplibre-flat.css?v=20260716h" rel="stylesheet">
+  <link href="styles/maplibre-flat.css?v=20260716i" rel="stylesheet">
 </head>
 <body>
   <div id="map"></div>
@@ -2829,7 +2829,11 @@
       }
 
       function setOffer(nextMode, nextRegion) {
-        if (mode === nextMode && (nextRegion ? region && region.code === nextRegion.code : !region)) return;
+        if (mode === nextMode && (nextRegion ? region && region.code === nextRegion.code : !region)) {
+          // same offer, new camera: keep modified clicks honest
+          if (mode === "offer") go.setAttribute("href", targetHref(nextRegion));
+          return;
+        }
         mode = nextMode;
         region = nextRegion || null;
         shell.classList.toggle("offering", mode === "offer");
@@ -2902,6 +2906,6 @@
     })();
 
   </script>
-  <script src="../shared/datamaps-switcher.js?v=20260716h"></script>
+  <script src="../shared/datamaps-switcher.js?v=20260716i"></script>
 </body>
 </html>
