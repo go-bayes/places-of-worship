@@ -109,6 +109,10 @@ document.title = RC.title;
       <select id="censusPoints" class="shell-pill-select" aria-label="Place dots"></select>
     </div>
     <div id="census-panel">
+      <!-- dataset passport: the panel names its own contents — who measured,
+           what construct, which geography and wave — with the evidence one
+           tap away (design record: docs/development/sidebar-design-space-2026-07.md) -->
+      <div id="census-passport" hidden></div>
       <div id="census-options">
         <select id="censusSource" aria-label="Data source" hidden></select>
         <select id="censusMetric" aria-label="${RC.dataNoun || "Census"} metric"></select>
@@ -125,6 +129,10 @@ document.title = RC.title;
         <div id="census-legend-scale"></div>
         <div id="census-time" hidden></div>
       </div>
+      <details id="census-evidence" hidden>
+        <summary>About this data</summary>
+        <div id="census-evidence-body"></div>
+      </details>
     </div>
   </div>
   </div>
@@ -1580,7 +1588,13 @@ map.on("load", () => {
   // census is on by default so the map opens already oriented in NZ; this
   // idle fires after the point layers exist, so the choropleth inserts
   // beneath them rather than over the dots
-  map.once("idle", () => { void setCensusEnabled(true); });
+  map.once("idle", async () => {
+    await setCensusEnabled(true);
+    // navigation prefetch starts only after the default boundary and summary
+    // have completed, so speculative requests never contend with map data
+    window.__DATAMAP_FIRST_IDLE__ = true;
+    document.dispatchEvent(new CustomEvent("datamap:first-idle"));
+  });
 });
 
 map.on("error", (e) => {
@@ -3358,6 +3372,18 @@ async function loadCensusData(level) {
     // and a chrome tag. the level config wins over the summary file; either
     // may carry a plain reason string or an object with a reason field.
     store.partialLayer = normalisePartialLayer(def.partialLayer ?? summary.partial_layer);
+    // passport metadata rides the product itself, so the panel can name its
+    // contents without hand-written per-page prose (which drifts at 100 pages)
+    store.meta = {
+      sourceDatasets: Array.isArray(summary.source_datasets) ? summary.source_datasets
+        : summary.source ? [summary.source] : [],
+      construct: summary.construct || null,
+      boundarySet: summary.boundary_set || null,
+      // the boundary and place-snapshot datasets are excluded from the
+      // passport identity line by their own declared ids
+      boundaryId: summary.boundary_set?.source_dataset_id || null,
+      snapshotId: summary.site_snapshot?.source_dataset_id || null
+    };
     store.byAreaYear = new Map(store.rows.map((r) => [`${r.area_code}|${r.year}`, r]));
     store.years = [...new Set(store.rows.map((r) => r.year))].sort((a, b) => a - b);
     store.hasFlags = store.rows.some(rowFlagged);
@@ -4381,8 +4407,113 @@ function updatePartialIndicator() {
   }
 }
 
+// ---- dataset passport ---------------------------------------------------
+// escape product-json strings before they enter panel markup; RC config
+// strings stay author-controlled html as elsewhere in this file
+function escText(value) {
+  return String(value).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+// distinct statistics providers behind the active product; boundary and
+// place-snapshot datasets stay in the drawer, off the identity line. two
+// providers fit on a line; more would push the frame line off a phone
+function passportProviders(meta) {
+  const all = (meta.sourceDatasets || []).filter(Boolean);
+  const roleTagged = all.some((s) => s.role);
+  let candidates = roleTagged
+    ? all.filter((s) => s.role === "map_source")
+    : all.filter((s) => !meta.snapshotId || s.source_dataset_id !== meta.snapshotId);
+  if (!roleTagged && meta.boundaryId) {
+    // a boundary that rides the statistics dataset itself (one id for both)
+    // must not empty the line; exclude only when other sources remain
+    const nonBoundary = candidates.filter((s) => s.source_dataset_id !== meta.boundaryId);
+    if (nonBoundary.length) candidates = nonBoundary;
+  }
+  if (!candidates.length) candidates = all;
+  const names = [...new Set(candidates.map((s) => s.provider).filter(Boolean))];
+  if (!names.length) return null;
+  return names.length <= 2 ? names.join(" · ") : `${names[0]} + ${names.length - 1} more`;
+}
+
+// the passport answers "what exactly am I looking at?" with zero
+// interaction: source · construct on one line, geography · wave on the
+// next. it renders only what the product metadata states — a page whose
+// product carries no construct shows none rather than a guessed one.
+function updateDataPassport() {
+  const passport = document.getElementById("census-passport");
+  const evidence = document.getElementById("census-evidence");
+  const hideAll = () => {
+    if (passport) passport.hidden = true;
+    if (evidence) evidence.hidden = true;
+  };
+  if (!passport) return;
+  if (!censusState.enabled) { hideAll(); return; }
+  if (pulotuState.active) {
+    passport.hidden = false;
+    passport.innerHTML =
+      `<div class="passport-line passport-source">Pulotu database of Pacific cultures</div>` +
+      `<div class="passport-line passport-frame">curated culture records · Traditional / Post-contact / Current</div>`;
+    if (evidence) evidence.hidden = true;
+    return;
+  }
+  const store = censusActive();
+  const meta = store && store.meta;
+  if (!store || !store.geojson || !meta) { hideAll(); return; }
+  const providers = passportProviders(meta) || RC.dataNoun || "Census";
+  const level = censusLevelDef();
+  const years = store.years || [];
+  const waveText = years.length > 1
+    ? `${years[0]}–${years[years.length - 1]} · showing ${censusState.year}`
+    : `${censusState.year}`;
+  passport.hidden = false;
+  passport.innerHTML =
+    `<div class="passport-line passport-source">${escText(providers)}${meta.construct ? ` · ${escText(meta.construct)}` : ""}</div>` +
+    `<div class="passport-line passport-frame">${escText(level.label)} · ${escText(waveText)}</div>`;
+  renderEvidenceDrawer(meta);
+}
+
+// the collapsed evidence drawer: sources with licences, the boundary
+// lineage, provider-mandated reuse text, and the page's full dossier
+function renderEvidenceDrawer(meta) {
+  const evidence = document.getElementById("census-evidence");
+  const body = document.getElementById("census-evidence-body");
+  if (!evidence || !body) return;
+  const rows = [];
+  for (const s of (meta.sourceDatasets || []).slice(0, 6)) {
+    if (!s) continue;
+    const name = s.name || s.provider || s.source_dataset_id;
+    if (!name) continue;
+    const link = s.url
+      ? `<a href="${escText(s.url)}" target="_blank" rel="noopener">${escText(name)}</a>`
+      : escText(name);
+    const licence = s.licence && (s.licence.name || (typeof s.licence === "string" ? s.licence : null));
+    const licenceHtml = licence
+      ? (s.licence.url
+        ? ` — <a href="${escText(s.licence.url)}" target="_blank" rel="noopener">${escText(licence)}</a>`
+        : ` — ${escText(licence)}`)
+      : "";
+    rows.push(`<li>${link}${licenceHtml}</li>`);
+    if (s.reuse_note) rows.push(`<li class="evidence-reuse">${escText(s.reuse_note)}</li>`);
+  }
+  const b = meta.boundarySet;
+  const boundaryNote = b && (b.source_dataset_id || b.boundary_set_id)
+    ? `<p class="evidence-note">Boundaries: ${escText(b.source_dataset_id || b.boundary_set_id)}${b.vintage ? ` (${escText(b.vintage)} vintage)` : ""}</p>`
+    : "";
+  const flagNote = RC.censusFlagNote ? `<p class="evidence-note">${escText(RC.censusFlagNote)}</p>` : "";
+  // attribution is author-controlled html, same trust as the map credit line
+  const attribution = RC.censusSourceAttribution
+    ? `<p class="evidence-note">${RC.censusSourceAttribution}</p>`
+    : "";
+  evidence.hidden = false;
+  body.innerHTML =
+    (rows.length ? `<ul class="evidence-sources">${rows.join("")}</ul>` : "") +
+    boundaryNote + flagNote + attribution +
+    `<p class="evidence-note"><a href="overview.html">Full data record →</a></p>`;
+}
+
 function updateCensusLegend() {
   updatePartialIndicator();
+  updateDataPassport();
   if (!censusLegend) return;
   // the pulotu source carries its own categorical legend; the census
   // legend machinery below never speaks for it
@@ -4477,10 +4608,16 @@ function updateCensusLegend() {
   const hiLabel = (isClamped ? "≥ " : "") + def.format(domain[1]);
   censusLegend.hidden = false;
   // only the scale child is rewritten; the time slider below it persists
+  // the colour sentence states direction and scale behaviour plainly; the
+  // ramp alone tells a first-time reader neither
+  const colourNote = def.kind === "div"
+    ? `<div class="census-legend-note census-colour-note">orange marks decline, blue marks growth${isClamped ? "; ≤ and ≥ mark the clamped 2nd–98th percentile ends" : ""}</div>`
+    : `<div class="census-legend-note census-colour-note">darker blue means a higher value; one colour scale spans every wave${isClamped ? ", clamped at the 2nd–98th percentiles" : ""}</div>`;
   scale.innerHTML =
     `<div class="census-legend-title">${censusLevelDef().label}: ${def.label} (${censusState.year})</div>` +
     `<div class="census-legend-bar" style="background:${rampGradient(stops)}"></div>` +
     `<div class="census-legend-range"><span>${loLabel}</span><span>${hiLabel}</span></div>` +
+    colourNote +
     `<div class="census-legend-note">${def.note}</div>` +
     washNote +
     yearCaveatNote +
@@ -4826,6 +4963,10 @@ function prefetchHandoffPage(code) {
   // warm the neighbour's page while the user reads the offer
   if (handoffPrefetched.has(code)) return;
   handoffPrefetched.add(code);
+  if (typeof window.datamapsPrefetchCountry === "function") {
+    window.datamapsPrefetchCountry(code);
+    return;
+  }
   const link = document.createElement("link");
   link.rel = "prefetch";
   link.href = `../${code}/`;
