@@ -2842,7 +2842,9 @@
         }
         if (savedLabel === null) savedLabel = go.innerHTML;
         if (mode === "offer") {
-          go.textContent = `${region.name} Data →`;
+          // the arrow sits outside the ellipsised name (see the shared css)
+          go.innerHTML = `<span class="dm-offer-name"></span><span class="dm-offer-arrow" aria-hidden="true">→</span>`;
+          go.querySelector(".dm-offer-name").textContent = `${region.name} Data`;
           go.setAttribute("href", targetHref(region));
           go.setAttribute("aria-label", `Open the ${region.name} data map`);
         } else {
@@ -2900,6 +2902,6 @@
     })();
 
   </script>
-  <script src="../shared/datamaps-switcher.js?v=20260716g"></script>
+  <script src="../shared/datamaps-switcher.js?v=20260716h"></script>
 </body>
 </html>

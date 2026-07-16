@@ -1826,8 +1826,10 @@ function resetSite() {
   map.flyTo({ center: CONFIG.center, zoom: CONFIG.initialZoom, bearing: 0, pitch: 0, speed: 1.6 });
   clearDragTransforms(); // reset also snaps any dragged pills back home
   // reset restores the whole initial state (jb 2026-07-16): any travel
-  // offer drops and the census layer returns if it was toggled off
+  // offer drops at once (not at the flight's end) and the census layer
+  // returns if it was toggled off
   handoffTapTarget = null;
+  setOffer("toggle");
   if (!censusState.enabled) void setCensusEnabled(true);
   // resurface the onboarding card (jb 2026-07-09): reset is how a visitor
   // recovers the how-to and the about-this-map link after dismissing it
@@ -3381,10 +3383,19 @@ function syncCensusYearSelect() {
 
 async function loadCensusData(level) {
   const existing = censusState.levels[level];
-  if (existing && (existing.geojson || existing.loading)) return existing.geojson;
+  if (existing && existing.geojson) return existing.geojson;
+  // callers arriving mid-load share the one in-flight promise instead of
+  // reading null and treating "still loading" as failure (a rapid census
+  // toggle used to lose its on-intent this way)
+  if (existing && existing.loading && existing.promise) return existing.promise;
   const def = CENSUS_LEVELS[level];
   const store = { geojson: null, rows: [], byAreaYear: new Map(), years: [], domains: {}, hasFlags: false, loading: true };
   censusState.levels[level] = store;
+  store.promise = loadCensusDataInto(store, def);
+  return store.promise;
+}
+
+async function loadCensusDataInto(store, def) {
   showClickHint(`Loading ${(RC.dataNoun || "Census").toLowerCase()} boundaries…`);
   try {
     const [boundariesRes, summaryRes] = await Promise.all([
@@ -4770,6 +4781,9 @@ async function setCensusEnabled(on) {
   censusState.enabled = on;
   if (on) {
     const data = await loadCensusData(censusState.level);
+    // a second toggle can land while the load is in flight; the later
+    // intent wins, so a stale load must not add layers over it
+    if (censusState.enabled !== on) return;
     if (!data) {
       censusState.enabled = false;
       updateCensusLegend();
@@ -4958,8 +4972,6 @@ const handoffPrefetched = new Set();
 // global map's duplicate diverging (design record:
 // docs/development/country-broadcast-review-2026-07.md)
 const normaliseLng = window.RegionResolve.normaliseLng;
-const boxContains = window.RegionResolve.boxContains;
-const regionHasPoint = window.RegionResolve.regionHasPoint;
 
 // the foreign country under a point, land-verified with the rectangle-only
 // fallback for entries without outlines; null over home, over open water,
@@ -4998,9 +5010,14 @@ function handoffHref(target) {
 // that panel in every state.
 function renderOfferToggle() {
   const on = censusState.enabled;
+  // re-rendering an unchanged toggle would spam the pill's polite live
+  // region on every moveend; only a real state change speaks
+  const want = on ? "true" : "false";
+  if (offerGo.getAttribute("aria-pressed") === want && offerGo.querySelector(".dm-dot")) return;
+  const noun = (RC.dataNoun || "census").toLowerCase();
   offerGo.innerHTML = `<span class="dm-dot${on ? " on" : ""}" aria-hidden="true"></span><span>${RC.countryCode.toUpperCase()} Data</span>`;
-  offerGo.setAttribute("aria-pressed", on ? "true" : "false");
-  offerGo.setAttribute("aria-label", `${on ? "Hide" : "Show"} the ${RC.countryCode.toUpperCase()} census data layer`);
+  offerGo.setAttribute("aria-pressed", want);
+  offerGo.setAttribute("aria-label", `${on ? "Hide" : "Show"} the ${RC.countryCode.toUpperCase()} ${noun} data layer`);
 }
 
 function setOffer(mode, region) {
@@ -5020,19 +5037,27 @@ function setOffer(mode, region) {
     }
     offerGo.setAttribute("href", "../");
     offerGo.removeAttribute("role");
+    offerGo.removeAttribute("tabindex");
     offerGo.removeAttribute("aria-label");
     offerGo.removeAttribute("aria-pressed");
     return;
   }
   if (offerSavedLabel === null) offerSavedLabel = offerGo.innerHTML;
   offerGo.removeAttribute("aria-pressed");
+  if (mode !== "toggle") offerGo.removeAttribute("tabindex");
   if (mode === "toggle") {
-    // the toggle acts in place, so it carries no destination
+    // the toggle acts in place, so it carries no destination; an anchor
+    // without href leaves the tab order, so tabindex keeps it reachable
+    // (enter and space handled below)
     offerGo.removeAttribute("href");
     offerGo.setAttribute("role", "button");
+    offerGo.setAttribute("tabindex", "0");
     renderOfferToggle();
   } else if (mode === "offer") {
-    offerGo.textContent = `${region.name} Data →`;
+    // the arrow sits outside the ellipsised name, so a long country
+    // never truncates the navigation affordance itself
+    offerGo.innerHTML = `<span class="dm-offer-name"></span><span class="dm-offer-arrow" aria-hidden="true">→</span>`;
+    offerGo.querySelector(".dm-offer-name").textContent = `${region.name} Data`;
     offerGo.setAttribute("href", handoffHref(region));
     offerGo.removeAttribute("role");
     offerGo.setAttribute("aria-label", `Open the ${region.name} data map`);
@@ -5124,6 +5149,14 @@ if (offerGo && !RC.disableBorderHandoff) {
   // the offer engine claims the main zone's clicks in every non-resting
   // state; this listener registers before the switcher's (script order),
   // so resting clicks fall through to the panel as usual
+  // the toggle is an anchor without href, so enter and space activate it
+  // by hand (role=button promises both keys)
+  offerGo.addEventListener("keydown", (e) => {
+    if (offerMode !== "toggle") return;
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    offerGo.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }));
+  });
   offerGo.addEventListener("click", (e) => {
     if (offerMode === "resting") return;
     // modified activations keep their native new-tab/window behaviour on
@@ -5142,6 +5175,17 @@ if (offerGo && !RC.disableBorderHandoff) {
       return;
     }
     if (offerMode === "offer") {
+      // remember the country being left, so the switcher panel can pin a
+      // one-tap return row (the pill itself keeps no sticky back state)
+      try {
+        const homeEntry = handoffRegions && handoffRegions.find((r) => r.code === HANDOFF_HOME);
+        window.sessionStorage.setItem("dm-previous", JSON.stringify({
+          code: HANDOFF_HOME,
+          name: homeEntry ? homeEntry.name : RC.countryCode.toUpperCase()
+        }));
+      } catch (err) {
+        // private-mode storage failures cost only the return row
+      }
       // one tap goes there, census view riding along (roam v1); the
       // href rebuilds at click time so the camera is exact
       window.location.href = handoffHref(offerRegion);

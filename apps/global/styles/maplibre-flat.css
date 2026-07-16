@@ -352,6 +352,15 @@
       /* long country names ellipsise instead of breaking the row */
       max-width: min(52vw, 340px);
     }
+    /* offers ellipsise the name, never the arrow: the shrinkable span
+       carries the text and the arrow sits outside it */
+    #datamaps-go .dm-offer-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #datamaps-go .dm-offer-arrow { flex: none; margin-left: 6px; }
     #datamaps-caret {
       display: inline-flex;
       align-items: center;

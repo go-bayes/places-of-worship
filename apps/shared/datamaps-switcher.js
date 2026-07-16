@@ -73,6 +73,8 @@
       a.dm-item .dm-name { font-size: 13.5px; font-weight: 600; }
       a.dm-item .dm-meta { font-size: 11.5px; color: #94a3b8; margin-top: 1px; }
       a.dm-item[aria-current="page"] { border: 1px solid rgba(148, 163, 184, 0.45); }
+      a.dm-item.dm-previous { border-bottom: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px 10px 0 0; margin-bottom: 4px; }
+      a.dm-item.dm-previous .dm-name { color: #6ee7b7; }
       a.dm-item .dm-here { color: #94a3b8; font-weight: 500; font-size: 11.5px; }
       #dm-foot { padding: 8px 12px; border-top: 1px solid rgba(255, 255, 255, 0.08); }
       #dm-foot a { color: #cbd5f5; font-size: 12.5px; text-decoration: none; }
@@ -116,6 +118,22 @@
     const herePath = normDir(window.location.pathname);
     const codeMatch = herePath.match(/\/apps\/regions\/([a-z]{2})\/$/);
     const currentCode = codeMatch ? codeMatch[1] : null;
+
+    // the last country departed by a travel offer (recorded by the offer
+    // engine at navigation); surfaced as a pinned return row so the pill
+    // needs no sticky back state
+    let previousRegion = null;
+    try {
+      const raw = window.sessionStorage.getItem("dm-previous");
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (parsed && /^[a-z]{2}$/.test(parsed.code) &&
+          typeof parsed.name === "string" && parsed.name &&
+          parsed.code !== currentCode) {
+        previousRegion = parsed;
+      }
+    } catch (err) {
+      // private-mode storage failures cost only the return row
+    }
     let prefetchReady = currentCode
       ? window.__DATAMAP_FIRST_IDLE__ === true
       : document.readyState === "complete";
@@ -348,6 +366,18 @@
       const q = fold(query || "").trim();
       const shown = countries.filter((c) => !q || fold(c.name).includes(q));
       listEl.innerHTML = "";
+      // an unfiltered list leads with the way back to the country last
+      // departed, one tap from anywhere
+      if (!q && previousRegion) {
+        const back = document.createElement("a");
+        back.className = "dm-item dm-previous";
+        back.href = new URL(`${previousRegion.code}/`, hubUrl).href;
+        const name = document.createElement("div");
+        name.className = "dm-name";
+        name.textContent = `← Back to ${previousRegion.name}`;
+        back.appendChild(name);
+        listEl.appendChild(back);
+      }
       if (!shown.length) {
         listEl.innerHTML = '<div class="dm-empty">No country matches.</div>';
       }
