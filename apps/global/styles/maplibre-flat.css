@@ -374,6 +374,13 @@
       font-size: 14px;
       cursor: pointer;
     }
+    /* the caret zone names its object: the visible word says a menu of
+       all countries lives here (field lesson: bare glyphs go
+       undiscovered), and the glyph turns while the panel is open —
+       state carried by the aria-expanded the switcher already sets */
+    #datamaps-caret .dm-caret-word { margin-right: 5px; }
+    #datamaps-caret .dm-caret-glyph { display: inline-block; transition: transform 120ms ease; }
+    #datamaps-caret[aria-expanded="true"] .dm-caret-glyph { transform: rotate(180deg); }
     /* offering: the main zone names the country under the map centre and
        the pill wears the chrome's "go" colour: emerald glass, distinct
        from amber (caution) and the blue data ramp, and separable from

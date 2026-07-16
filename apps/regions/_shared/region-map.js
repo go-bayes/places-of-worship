@@ -81,7 +81,7 @@ document.title = RC.title;
     <button id="near-me" class="shell-pill" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
     <div id="datamaps-pill" class="shell-pill" aria-live="polite">
       <a id="datamaps-go" href="../" title="Country data maps"><span class="dm-label-long">Data Maps</span><span class="dm-label-short">Data</span></a>
-      <button id="datamaps-caret" type="button" aria-label="Search all country data maps">▴</button>
+      <button id="datamaps-caret" type="button" aria-label="Search all country data maps"><span class="dm-caret-word">Countries</span><span class="dm-caret-glyph" aria-hidden="true">▴</span></button>
     </div>
   </div>
   <!-- top-left: the denomination key for the place dots -->

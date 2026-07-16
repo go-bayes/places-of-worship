@@ -114,6 +114,16 @@
     // fold case and accents so "cote" finds Côte d'Ivoire
     const fold = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
+    // rank a match so typed letters read as an alphabet jump: names that
+    // start with the query lead, then names with a later word starting
+    // with it ("zea" finds New Zealand), then mere substrings; -1 is no
+    // match. ties fall back to the list's alphabetical order
+    function matchRank(foldedName, q) {
+      if (foldedName.startsWith(q)) return 0;
+      if (!foldedName.includes(q)) return -1;
+      return foldedName.split(/[^\p{L}\p{N}]+/u).some((w) => w.startsWith(q)) ? 1 : 2;
+    }
+
     // a page path counts as "here" when it names the same directory
     const normDir = (path) => path.replace(/index\.html$/, "").replace(/\/+$/, "/");
     const herePath = normDir(window.location.pathname);
@@ -361,11 +371,16 @@
 
     async function loadCountries() {
       // catalogue-first navigation; the live hub parser is the compatibility path
+      let list;
       try {
-        return catalogueCountries(await loadCatalogue());
+        list = catalogueCountries(await loadCatalogue());
       } catch (err) {
-        return loadHubCountries();
+        list = await loadHubCountries();
       }
+      // the catalogue arrives in code order (Austria before Australia);
+      // the panel reads as an alphabet, so names sort by folded form once
+      // here and the stable filter sort inherits the order within ranks
+      return list.sort((a, b) => fold(a.name).localeCompare(fold(b.name)));
     }
 
     function buildPanel() {
@@ -430,7 +445,13 @@
 
     function renderList(query) {
       const q = fold(query || "").trim();
-      const shown = countries.filter((c) => !q || fold(c.name).includes(q));
+      const shown = q
+        ? countries
+            .map((c) => ({ c, rank: matchRank(fold(c.name), q) }))
+            .filter((entry) => entry.rank >= 0)
+            .sort((a, b) => a.rank - b.rank)
+            .map((entry) => entry.c)
+        : countries;
       listEl.innerHTML = "";
       if (!shown.length) {
         listEl.innerHTML = '<div class="dm-empty">No country matches.</div>';
@@ -499,6 +520,20 @@
     function placePanel() {
       const rect = shell.getBoundingClientRect();
       const width = Math.min(340, window.innerWidth - 24);
+      // touch screens pin the panel to the top of the viewport: the soft
+      // keyboard owns the bottom, and a pill-anchored panel shrinks down
+      // into it as the filtered list gets shorter, hiding the search row
+      // at exactly the moment the filter is doing its job. the visual
+      // viewport bounds the height so the list ends above the keyboard
+      if (window.matchMedia("(pointer: coarse)").matches) {
+        panel.style.left = Math.max(12, (window.innerWidth - width) / 2) + "px";
+        panel.style.right = "auto";
+        panel.style.top = "12px";
+        panel.style.bottom = "auto";
+        const avail = (window.visualViewport ? window.visualViewport.height : window.innerHeight) - 24;
+        panel.style.maxHeight = Math.max(160, Math.min(avail, Math.round(window.innerHeight * 0.72))) + "px";
+        return;
+      }
       // centre on the pill, clamped inside the viewport margins
       let left = rect.left + rect.width / 2 - width / 2;
       left = Math.max(12, Math.min(left, window.innerWidth - width - 12));
@@ -532,6 +567,9 @@
       document.addEventListener("pointerdown", onOutside, true);
       document.addEventListener("keydown", onEscape, true);
       window.addEventListener("resize", onResize);
+      // ios keyboards resize only the visual viewport, never the window,
+      // so the height cap re-measures on that channel too
+      if (window.visualViewport) window.visualViewport.addEventListener("resize", onViewportResize);
     }
 
     function closePanel() {
@@ -541,6 +579,12 @@
       document.removeEventListener("pointerdown", onOutside, true);
       document.removeEventListener("keydown", onEscape, true);
       window.removeEventListener("resize", onResize);
+      if (window.visualViewport) window.visualViewport.removeEventListener("resize", onViewportResize);
+    }
+
+    // a visual-viewport change never closes the panel; it only re-fits it
+    function onViewportResize() {
+      if (panel && !panel.hidden) placePanel();
     }
 
     // a soft keyboard opening under the filter fires a window resize;
