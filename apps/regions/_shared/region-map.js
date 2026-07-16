@@ -4947,6 +4947,39 @@ function regionHasPoint(region, lng, lat) {
   return Array.isArray(region.rings) && pointInRings(region.rings, lng, lat);
 }
 
+// smallest containing box wins, so a continental neighbour's wide box
+// never shadows an island country inside it
+function smallestRegionAt(list, lng, lat) {
+  let pick = null;
+  let pickArea = Infinity;
+  for (const region of list) {
+    for (const box of region.boxes) {
+      if (boxContains(box, lng, lat, 0) && boxArea(box) < pickArea) {
+        pickArea = boxArea(box);
+        pick = region;
+      }
+    }
+  }
+  return pick;
+}
+
+// the foreign country under a point, land-verified with the rectangle-only
+// fallback for entries without outlines; null over home, over open water,
+// and over water inside the home rectangle. shared by the centre-crossing
+// detection and the tap-on-a-neighbour offer, so both name the same country
+function handoffNeighbourAt(lng, lat) {
+  if (!handoffRegions) return null;
+  const home = handoffRegions.find((r) => r.code === HANDOFF_HOME);
+  if (!home || regionHasPoint(home, lng, lat)) return null;
+  const containing = handoffRegions.filter((r) => r.code !== HANDOFF_HOME &&
+    r.boxes.some((b) => boxContains(b, lng, lat, 0)));
+  const onLand = containing.filter((r) => regionHasPoint(r, lng, lat));
+  if (onLand.length) return smallestRegionAt(onLand, lng, lat);
+  if (home.boxes.some((b) => boxContains(b, lng, lat, 0))) return null;
+  const boxOnly = containing.filter((r) => !Array.isArray(r.rings));
+  return boxOnly.length ? smallestRegionAt(boxOnly, lng, lat) : null;
+}
+
 function hideHandoff() {
   if (!handoffPill) return;
   handoffPill.hidden = true;
@@ -4994,40 +5027,14 @@ function updateBorderHandoff() {
   // wrongly keeps munich "inside" l-shaped austria. boxes remain the
   // prefilter and the fallback for entries without rings
   if (regionHasPoint(home, lng, lat)) { hideHandoff(); return; }
-  const containing = handoffRegions.filter((r) => r.code !== HANDOFF_HOME &&
-    r.boxes.some((b) => boxContains(b, lng, lat, 0)));
-  // smallest containing box wins, so a continental neighbour's wide box
-  // never shadows an island country inside it
-  const smallest = (list) => {
-    let pick = null;
-    let pickArea = Infinity;
-    for (const region of list) {
-      for (const box of region.boxes) {
-        if (boxContains(box, lng, lat, 0) && boxArea(box) < pickArea) {
-          pickArea = boxArea(box);
-          pick = region;
-        }
-      }
-    }
-    return pick;
-  };
-  const onLand = containing.filter((r) => regionHasPoint(r, lng, lat));
-  if (onLand.length) {
-    const pick = smallest(onLand);
+  const pick = handoffNeighbourAt(lng, lat);
+  if (pick) {
     showHandoff(pick, `Continue into ${pick.name} →`);
     prefetchHandoffPage(pick.code);
     return;
   }
   // over water but still inside the home rectangle: context panning
   if (home.boxes.some((b) => boxContains(b, lng, lat, 0))) { hideHandoff(); return; }
-  // rectangle-only fallback for manifest entries that carry no outline
-  const boxOnly = containing.filter((r) => !Array.isArray(r.rings));
-  if (boxOnly.length) {
-    const pick = smallest(boxOnly);
-    showHandoff(pick, `Continue into ${pick.name} →`);
-    prefetchHandoffPage(pick.code);
-    return;
-  }
   // open water: stay quiet within the offshore grace band, then offer home
   if (home.boxes.some((b) => boxContains(b, lng, lat, HANDOFF_HOME_MARGIN))) {
     hideHandoff();
@@ -5061,6 +5068,26 @@ if (handoffPill && !RC.disableBorderHandoff) {
         hideHandoff();
       });
       map.on("moveend", updateBorderHandoff);
+      // touching a neighbouring country's territory is a stronger signal
+      // than drifting the centre across a border: surface the same offer
+      // on tap. the tap only OFFERS — navigation still takes a second tap
+      // on the pill, so a stray touch never yanks the user off their map.
+      // runs only when the tap hit none of the page's interactive layers,
+      // so place dots, census areas, and pulotu points keep every popup
+      map.on("click", (e) => {
+        if (map.getZoom() < HANDOFF_MIN_ZOOM) return;
+        const target = e.originalEvent && e.originalEvent.target;
+        if (target instanceof Element && target.closest(
+          "button, a, input, select, textarea, label, #dock, #key-wrap, #census-wrap, #wordmark, #corner-refresh, .maplibregl-ctrl"
+        )) return;
+        const interactive = [LAYERS.places, LAYERS.overview, CENSUS.fill, PULOTU.layer]
+          .filter((id) => id && map.getLayer(id));
+        if (interactive.length && map.queryRenderedFeatures(e.point, { layers: interactive }).length) return;
+        const pick = handoffNeighbourAt(normaliseLng(e.lngLat.lng), e.lngLat.lat);
+        if (!pick) return;
+        showHandoff(pick, `Continue into ${pick.name} →`);
+        prefetchHandoffPage(pick.code);
+      });
       updateBorderHandoff();
     })
     .catch(() => {});
