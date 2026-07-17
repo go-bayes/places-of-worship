@@ -245,6 +245,12 @@
             "type": "string"
           }
         },
+        "licence_confirmation": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "licence_position": {
           "type": [
             "string",
@@ -258,6 +264,12 @@
           ]
         },
         "licence_todo": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reuse_note": {
           "type": [
             "string",
             "null"
