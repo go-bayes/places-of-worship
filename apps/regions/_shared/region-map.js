@@ -122,6 +122,9 @@ document.title = RC.title;
            tap away (design record: docs/development/sidebar-design-space-2026-07.md) -->
       <div id="census-passport" hidden></div>
       <div id="census-options">
+        <!-- domain select: hidden until a page declares two or more
+             overlay domains (multi-domain-overlay-design.md §3) -->
+        <select id="censusDomain" aria-label="Data domain" hidden></select>
         <select id="censusSource" aria-label="Data source" hidden></select>
         <select id="censusMetric" aria-label="${RC.dataNoun || "Census"} metric"></select>
         <select id="censusLevel" aria-label="${RC.dataNoun || "Census"} geography"></select>
@@ -2952,9 +2955,47 @@ const CENSUS = {
   line: "nz-census-line",
   hover: "nz-census-hover"
 };
+// ---- overlay domains -------------------------------------------------
+// the overlay registry (design: docs/development/multi-domain-overlay-
+// design.md; build record: overlay-registry-phase1-2026-07-17.md).
+// RC.overlays maps domain id -> block; when absent, the PERMANENT legacy
+// shim builds a single religion domain from the top-level keys, so all
+// existing pages derive byte-identical values and never migrate.
+function normaliseOverlayDomains(rc) {
+  if (rc.overlays && typeof rc.overlays === "object" && Object.keys(rc.overlays).length) {
+    const out = {};
+    for (const [id, block] of Object.entries(rc.overlays)) {
+      if (!block || typeof block !== "object" || !block.levels) continue;
+      out[id] = block;
+    }
+    if (Object.keys(out).length) return out;
+  }
+  return {
+    religion: {
+      label: "Religion",
+      levels: rc.censusLevels,
+      defaultLevel: rc.defaultLevel,
+      defaultMetric: rc.defaultMetric,
+      defaultYear: rc.defaultYear,
+      timeline: rc.timeline,
+      metricLabels: rc.metricLabels,
+      metricsAvailable: rc.metricsAvailable
+    }
+  };
+}
+const OVERLAY_DOMAINS = normaliseOverlayDomains(RC);
+// religion leads when present (it carries the place dots); otherwise the
+// config's first declared domain opens
+let activeDomainId = OVERLAY_DOMAINS.religion ? "religion" : Object.keys(OVERLAY_DOMAINS)[0];
+function activeDomain() {
+  return OVERLAY_DOMAINS[activeDomainId];
+}
+
 // each level is a governed area-summary product plus its boundary file;
-// join key and display name are properties of that boundary set
-const CENSUS_LEVELS = RC.censusLevels;
+// join key and display name are properties of that boundary set.
+// domain-scoped: rebound by setOverlayDomain when a page declares more
+// than one domain; under the legacy shim these never rebind
+let CENSUS_LEVELS = activeDomain().levels;
 // base metric definitions are shared across every country; a country whose
 // construct differs (for example, adherents reported by religious bodies
 // rather than a census self-identification question) overrides label/note
@@ -3100,8 +3141,9 @@ const CENSUS_METRICS_BASE = {
 // order (so a country can lead with its most informative metric); otherwise
 // the base order stands and opt-in metrics stay hidden
 function buildCensusMetrics() {
-  const allow = Array.isArray(RC.metricsAvailable) ? RC.metricsAvailable : null;
-  const overrides = RC.metricLabels || {};
+  const domain = activeDomain();
+  const allow = Array.isArray(domain.metricsAvailable) ? domain.metricsAvailable : null;
+  const overrides = domain.metricLabels || {};
   const withOverride = (id) => {
     const def = CENSUS_METRICS_BASE[id];
     if (!def) return null;
@@ -3123,14 +3165,16 @@ function buildCensusMetrics() {
   }
   return out;
 }
-const CENSUS_METRICS = buildCensusMetrics();
+let CENSUS_METRICS = buildCensusMetrics();
 const censusState = {
   enabled: false,
+  // the active overlay domain; single-domain pages never change it
+  domain: activeDomainId,
   // the level, metric and year the overlay opens on (config): a country
   // opens on whichever metric carries data today
-  level: RC.defaultLevel,
-  metric: RC.defaultMetric,
-  year: RC.defaultYear,
+  level: activeDomain().defaultLevel,
+  metric: activeDomain().defaultMetric,
+  year: activeDomain().defaultYear,
   // per-level stores: { geojson, rows, byAreaYear, years, domains, hasFlags, loading }
   levels: {}
 };
@@ -3189,8 +3233,8 @@ function censusLevelDef() {
 // and switches geography level automatically as the year crosses an
 // era boundary. without the config the slider spans the active level's
 // years, as before.
-const CENSUS_TIMELINE = Array.isArray(RC.timeline)
-  ? RC.timeline.slice().sort((a, b) => a.year - b.year)
+let CENSUS_TIMELINE = Array.isArray(activeDomain().timeline)
+  ? activeDomain().timeline.slice().sort((a, b) => a.year - b.year)
   : null;
 function censusSliderYears() {
   if (CENSUS_TIMELINE) return CENSUS_TIMELINE.map((t) => t.year);
@@ -3456,6 +3500,14 @@ async function loadCensusDataInto(store, def) {
     ]);
     if (!boundariesRes.ok || !summaryRes.ok) throw new Error("census fetch failed");
     const summary = await summaryRes.json();
+    // design §2: a product whose declared domain disagrees with the
+    // config slot that loads it fails loudly rather than painting the
+    // wrong construct; products without the field default to religion
+    const productDomain = summary.domain || "religion";
+    if (productDomain !== censusState.domain) {
+      console.error(`area summary declares domain "${productDomain}" but the active overlay domain is "${censusState.domain}"`);
+      throw new Error("overlay domain mismatch");
+    }
     store.geojson = await boundariesRes.json();
     store.rows = summary.rows || [];
     // partial-layer declaration (ruled 2026-07-13): a level whose record is
@@ -4430,7 +4482,11 @@ function syncPulotuCultures() {
 
 function syncPlaceDotEra() {
   const stale = placeSnapshotStale();
-  const mode = censusState.enabled ? effectivePointsMode() : "all";
+  // dots are religion-domain furniture (design §4): under any other
+  // overlay domain the place layers hide and the points row drops; the
+  // user's chosen mode survives in placesDotState for religion's return
+  const dotsBelong = activeDomainId === "religion";
+  const mode = !dotsBelong ? "off" : censusState.enabled ? effectivePointsMode() : "all";
   // period mode shows only the dated tier; all mode keeps the pre-modes
   // behaviour where the dated tier joins the faded snapshot on
   // historical years; off shows no dots at all
@@ -4492,6 +4548,9 @@ function syncPointsControl(mode) {
   const select = document.getElementById("censusPoints");
   const futureRow = document.getElementById("census-points-future");
   if (!select) return;
+  // the points control speaks only for religion's place dots; other
+  // overlay domains drop the row entirely (design §4)
+  select.hidden = activeDomainId !== "religion";
   if (select.value !== mode) select.value = mode;
   if (futureRow) futureRow.hidden = mode !== "period" || !RC.datedPlaces;
 }
@@ -4922,6 +4981,66 @@ async function setCensusLevel(level) {
   applyCensusPaint();
 }
 
+// ---- overlay domain switching (design §3, §5) -------------------------
+// single-domain pages — every page under the legacy shim — never call
+// this; the select that drives it renders only when RC.overlays declares
+// two or more domains. switching rebinds the domain-scoped constants,
+// clears the level cache (level ids may repeat across domains), snaps to
+// the target domain's defaults with the year carrying over when the
+// target has it, and repaints.
+async function setOverlayDomain(domainId) {
+  if (!OVERLAY_DOMAINS[domainId] || domainId === activeDomainId) return;
+  activeDomainId = domainId;
+  censusState.domain = domainId;
+  const domain = activeDomain();
+  CENSUS_LEVELS = domain.levels;
+  CENSUS_METRICS = buildCensusMetrics();
+  CENSUS_TIMELINE = Array.isArray(domain.timeline)
+    ? domain.timeline.slice().sort((a, b) => a.year - b.year)
+    : null;
+  removeCensusLayers();
+  censusState.levels = {};
+  censusState.level = domain.defaultLevel;
+  censusState.metric = domain.defaultMetric;
+  const carriedYear = censusState.year;
+  censusState.year = domain.defaultYear;
+  if (censusLevelSelect) {
+    censusLevelSelect.innerHTML = "";
+    for (const [id, def] of Object.entries(CENSUS_LEVELS)) {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent = def.label;
+      censusLevelSelect.appendChild(option);
+    }
+    censusLevelSelect.value = censusState.level;
+  }
+  populateMetricOptions();
+  // dots are religion furniture: leaving religion hides them, returning
+  // restores the remembered points mode through the same paint path
+  syncPlaceDotEra();
+  if (!censusState.enabled) return;
+  const data = await loadCensusData(censusState.level);
+  if (!data) {
+    updateCensusLegend();
+    return;
+  }
+  // the year carries over when the loaded store has it (design §5);
+  // otherwise the nearest available year wins, earlier on a tie
+  const store = censusActive();
+  if (store && store.years.length) {
+    const wanted = store.years.includes(carriedYear) ? carriedYear : censusState.year;
+    censusState.year = store.years.includes(wanted) ? wanted : store.years.reduce((best, y) => {
+      const dy = Math.abs(y - wanted);
+      const db = Math.abs(best - wanted);
+      return dy < db || (dy === db && y < best) ? y : best;
+    });
+  }
+  syncCensusYearSelect();
+  syncCensusTimeSlider();
+  addCensusLayers();
+  applyCensusPaint();
+}
+
 if (censusToggle) {
   syncCensusPanel();
   censusToggle.addEventListener("click", () => {
@@ -4961,6 +5080,23 @@ if (censusMetricSelect) {
     }
     censusState.metric = censusMetricSelect.value;
     applyCensusPaint();
+  });
+}
+// the domain select renders only when the page declares two or more
+// overlay domains (design §3); every single-domain page — all pages
+// under the legacy shim — keeps no control and no change
+const censusDomainSelect = document.getElementById("censusDomain");
+if (censusDomainSelect && Object.keys(OVERLAY_DOMAINS).length > 1) {
+  for (const [id, block] of Object.entries(OVERLAY_DOMAINS)) {
+    const option = document.createElement("option");
+    option.value = id;
+    option.textContent = block.label || id;
+    censusDomainSelect.appendChild(option);
+  }
+  censusDomainSelect.value = activeDomainId;
+  censusDomainSelect.hidden = false;
+  censusDomainSelect.addEventListener("change", () => {
+    void setOverlayDomain(censusDomainSelect.value);
   });
 }
 // the data-source select exists only where a page opts into the pulotu
