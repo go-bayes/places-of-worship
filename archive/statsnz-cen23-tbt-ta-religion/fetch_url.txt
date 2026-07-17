@@ -1,0 +1,2 @@
+https://explore.data.stats.govt.nz/vis?df[id]=CEN23_TBT_008&df[ag]=STATSNZ
+dq: variables raTotal+ra00+ra01+ra02+ra03+ra04+ra05+ra06+ra07+ra08+ra80+raTS+ra99; areas = 67 shipped TA codes + 999 + 999999; years 2013+2018+2023

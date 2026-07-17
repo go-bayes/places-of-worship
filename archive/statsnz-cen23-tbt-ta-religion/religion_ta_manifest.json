@@ -1,0 +1,22 @@
+{
+  "source_dataset_id": "statsnz-cen23-tbt-008-religion-ta-2013-2023",
+  "name": "Totals by topic for individuals, territorial authorities and local boards, 2013, 2018, and 2023 Censuses",
+  "provider": "Stats NZ Tatauranga Aotearoa",
+  "dataflow_id": "STATSNZ:CEN23_TBT_008(1.0)",
+  "explorer_url": "https://explore.data.stats.govt.nz/vis?df[id]=CEN23_TBT_008&df[ag]=STATSNZ",
+  "dq_selection": "Variables raTotal+ra00+ra01+ra02+ra03+ra04+ra05+ra06+ra07+ra08+ra80+raTS+ra99; areas = the 67 shipped territorial-authority codes + 999 + 999999; years 2013+2018+2023.",
+  "retrieval_date": "2026-07-17T22:06:15Z",
+  "licence": {
+    "name": "CC BY 4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "attribution": "Stats NZ"
+  },
+  "sha256": "211ff9a7a029122378296441a97bd64e40fc7cc405c9212b84c973c51ecf692d",
+  "row_count": 2691,
+  "area_count": 69,
+  "product_area_count": 67,
+  "years": [2013, 2018, 2023],
+  "variable_count": 13,
+  "confidentiality": "Counts are subject to Stats NZ confidentiality rules and random rounding to base 3 (RR3).",
+  "notes": "The subject population is the census usually resident population. Religious affiliation is a total-responses variable: each person is counted once in every level-1 group they stated. The product excludes 999 (Area Outside Territorial Authority) and 999999 (New Zealand total by territorial authority/local board)."
+}

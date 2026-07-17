@@ -25,8 +25,8 @@ Python environment:
 
 Current NZ cleanup utilities:
 
-- `scripts/fetch_ta_religion_data.R`: fetch Stats NZ/Figure.NZ territorial-authority religion data for 2013, 2018, and 2023, align it to official TA codes, and write `apps/regions/nz/data/ta_aggregated_data.json`.
-- `scripts/build_nz_area_summary.R`: build the first territorial-authority `area_summary` product from current NZ places, TA boundaries, and 2013/2018/2023 religion data.
+- `~/GIT/pow-research/pipeline/build_ta_aggregated_from_cen23_tbt.R`: validate the archived official Stats NZ CEN23_TBT_008 extract for 2013, 2018, and 2023, align it to the 67 shipped TA codes, and write `apps/regions/nz/data/ta_aggregated_data.json`. The former Figure.NZ fetcher now lives at `~/GIT/pow-research/pipeline/fetch_ta_religion_data.R` and its CSV is a superseded fallback.
+- `~/GIT/pow-research/pipeline/build_nz_area_summary.R`: build the territorial-authority `area_summary` product from current NZ places, TA boundaries, and official 2013/2018/2023 religion data.
 - `scripts/clean_nz_places.py`: remove obvious non-worship records from the committed NZ places datasets.
 - `scripts/build_nz_review_queue.py`: build `docs/nz-manual-review-queue.md` and `docs/nz-manual-review-queue.csv` for manual review.
 - `scripts/build_ra_working_sheet.py`: build the project-owned RA Google Sheets import workbook from `docs/templates/ra-historical-site-evidence/`; the generated `.xlsx` goes under gitignored `exports/` and should be imported into Google Drive as a native Sheet. The workbook includes frozen headers, filters, and dropdown validation for the main controlled fields.
