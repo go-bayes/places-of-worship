@@ -5319,6 +5319,32 @@ function updateBorderHandoff() {
   else setOffer("toggle");
 }
 
+// near me can land the camera outside this country entirely (the phone
+// is in another country); the choropleth has nothing to paint there, so
+// the data layer reads off while its panels keep talking about a census
+// the viewport no longer shows. make the state honest: turn the census
+// off and fold its panel. only the crossing itself acts — a user who
+// re-enables the layer while abroad (to browse this map's data from
+// afar) is not fought on every subsequent watch fix.
+let lastFixWasAbroad = false;
+geolocate.on("geolocate", (event) => {
+  if (!handoffRegions || !event || !event.coords) return;
+  const lng = normaliseLng(event.coords.longitude);
+  const lat = event.coords.latitude;
+  const home = handoffRegions.find((r) => r.code === HANDOFF_HOME);
+  // home means on home land or over water inside the home rectangle —
+  // the same nulls the handoff resolver treats as "not a neighbour"
+  const abroad = Boolean(home) &&
+    !window.RegionResolve.regionHasPoint(home, lng, lat) &&
+    !home.boxes.some((b) => window.RegionResolve.boxContains(b, lng, lat, 0));
+  if (abroad && !lastFixWasAbroad && censusState.enabled) {
+    void setCensusEnabled(false);
+    censusPanelOpen = false;
+    syncCensusPanel();
+  }
+  lastFixWasAbroad = abroad;
+});
+
 if (offerGo && !RC.disableBorderHandoff) {
   // no-cache revalidates the manifest against the host's etag, so a new
   // country launch reaches every page without a cache-pin ceremony
