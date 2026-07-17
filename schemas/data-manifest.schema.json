@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://go-bayes.github.io/places-of-worship/schemas/data-manifest.schema.json",
   "title": "Data Manifest",
-  "description": "Recoverable, checksummed manifest for raw, intermediate, staged, accepted, or public data artefacts. v2 (2026-07-11) legitimises the enriched builder dialect: optional provenance containers (construct_notes, deferred_sources, derived_outputs, raw_sources, source_datasets, target_years), the git_repository storage provider, nullable pipeline.git_commit, source.raw_redistribution, durable-file notes and licence_basis, open validation evidence keys, and partition snapshot_date/stage. licence_status stays the strict shipping-decision enum; the terms identifier lives in licence_basis.",
+  "description": "Recoverable, checksummed manifest for raw, intermediate, staged, accepted, or public data artefacts. v2 (2026-07-11) legitimises the enriched builder dialect: optional provenance containers (construct_notes, deferred_sources, derived_outputs, raw_sources, source_datasets, target_years), the git_repository storage provider, nullable pipeline.git_commit, source.raw_redistribution, durable-file notes and licence_basis, open validation evidence keys, and partition snapshot_date/stage. licence_status stays the strict shipping-decision enum; the terms identifier lives in licence_basis. The 2026-07-17 boundary-gate extension adds optional size-waiver and join-key baseline fields to durable files.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -522,6 +522,24 @@
             "null"
           ],
           "minimum": 0
+        },
+        "size_gate_waiver": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "join_key_property": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "join_key_sha256": {
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "content": {
           "type": "string"
