@@ -10,6 +10,8 @@
   "compatibility_date": "2026-07-01",
   "routes": [
     { "pattern": "powmap.org", "custom_domain": true },
-    { "pattern": "www.powmap.org", "custom_domain": true }
+    { "pattern": "www.powmap.org", "custom_domain": true },
+    { "pattern": "placesmap.org", "custom_domain": true },
+    { "pattern": "www.placesmap.org", "custom_domain": true }
   ]
 }
