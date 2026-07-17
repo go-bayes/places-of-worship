@@ -288,6 +288,15 @@
   font: inherit;
 }
 .census-caret { color: #94a3b8; font-size: 12px; }
+/* style-guide touch floor (tribunal 2026-07-17 item 5 tail): the two top
+   pills reach 44px on touch screens, and the data pill's interactive
+   children stretch so the whole height answers the finger, not just the
+   text line. display-only children keep their centred line */
+@media (pointer: coarse) {
+  #data-pill, #counts-toggle { min-height: 44px; }
+  #data-pill .shell-pill-select,
+  #data-pill #census-toggle { align-self: stretch; }
+}
 .census-label-short { display: none; }
 @media (max-width: 640px) {
   /* the top row is tight on phones: the key shrinks to its colour dots and

@@ -3210,8 +3210,31 @@ const censusYearSelect = document.getElementById("censusYear");
 const censusLegend = document.getElementById("census-legend");
 
 // census is on by default; the centre Census button opens and closes its
-// data panel (options, colour key, slider) rather than toggling the layer
-let censusPanelOpen = true;
+// data panel (options, colour key, slider) rather than toggling the layer.
+// phones remember a dismissal for the session (tribunal 2026-07-17 item 4):
+// the panel teaches on the first visit; once closed via the x or the census
+// button, later country pages open with the choropleth on and the panel
+// folded. an explicit reopen clears the memory — the state follows the last
+// gesture. desktop keeps the always-open default.
+const CENSUS_PANEL_DISMISSED_KEY = "pow-census-panel-dismissed";
+function censusPanelDismissalRemembered() {
+  if (!IS_MOBILE) return false;
+  try {
+    return window.sessionStorage.getItem(CENSUS_PANEL_DISMISSED_KEY) === "1";
+  } catch (err) {
+    return false;
+  }
+}
+function rememberCensusPanelDismissal(dismissed) {
+  if (!IS_MOBILE) return;
+  try {
+    if (dismissed) window.sessionStorage.setItem(CENSUS_PANEL_DISMISSED_KEY, "1");
+    else window.sessionStorage.removeItem(CENSUS_PANEL_DISMISSED_KEY);
+  } catch (err) {
+    // private-mode storage failures cost only the memory
+  }
+}
+let censusPanelOpen = !censusPanelDismissalRemembered();
 function syncCensusPanel() {
   if (censusPanel) censusPanel.hidden = !censusPanelOpen;
   if (censusToggle) {
@@ -5045,6 +5068,7 @@ if (censusToggle) {
   syncCensusPanel();
   censusToggle.addEventListener("click", () => {
     censusPanelOpen = !censusPanelOpen;
+    rememberCensusPanelDismissal(!censusPanelOpen);
     syncCensusPanel();
   });
 }
@@ -5054,6 +5078,7 @@ const censusClose = document.getElementById("census-close");
 if (censusClose) {
   censusClose.addEventListener("click", () => {
     censusPanelOpen = false;
+    rememberCensusPanelDismissal(true);
     syncCensusPanel();
   });
 }
