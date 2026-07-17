@@ -42,6 +42,28 @@ Email attachments to JB; he drops them into the pipeline. Every
 delivery is hashed, validated against published totals, archived, and
 credited to you in the data manifests and changelog.
 
+## Current tasks (updated 2026-07-17)
+
+Both your July deliveries — the 2020 religion-by-island table and the
+1979 island/sub-island draft — are received, hashed, and archived, with
+findings and questions coming back to you by email. The running list:
+
+1. **1979**: one row to recheck against the book — Tanna North/Nord,
+   where the printed total (2230) sits 8 under your summed row (2238);
+   every other row in the sheet checks exactly. Whichever way it falls,
+   we record it; printed errors are documented, never repaired.
+2. **1989**: your Area Council → Enumeration Area → named-place lookup
+   from the census map volumes is the priority — it closes the one gap
+   in the island series. Individual-level data never travels by email;
+   aggregated island-unit tables are the deliverable.
+3. **1999**: yes please to coding the island rows from your scan.
+4. **2009**: skip — our extraction already carries island grain
+   (64 islands) from Basic Tables T3.5.
+
+This page is the durable copy of your instructions (the note you could
+not reach moved into the project's private research tier during a
+repository split — nothing is closed, and this page always works).
+
 ## Where your harmonised AC series fits
 
 Your planned first-census-to-present AC spreadsheet (religion,
