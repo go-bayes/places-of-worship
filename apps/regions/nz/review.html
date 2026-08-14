@@ -328,6 +328,18 @@
             overflow: auto;
         }
 
+        /* keep the decision controls in view while the evidence panels
+           scroll under them; capped height so the pane never fills the
+           viewport on laptops */
+        .decision-panel {
+            position: sticky;
+            bottom: 12px;
+            z-index: 5;
+            max-height: 60vh;
+            overflow: auto;
+            box-shadow: 0 -6px 18px rgba(23, 32, 42, 0.14);
+        }
+
         .decision-form {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -362,6 +374,15 @@
 
             .decision-form .wide {
                 grid-column: auto;
+            }
+
+            /* normal flow on phones so the sticky pane cannot cover
+               the single-column evidence */
+            .decision-panel {
+                position: static;
+                max-height: none;
+                overflow: visible;
+                box-shadow: none;
             }
         }
     </style>
@@ -422,6 +443,6 @@
     <script src="js/convex-config.js?v=20260523-vanuatu"></script>
     <script src="js/convex-task-client.js?v=20260523-vanuatu"></script>
     <script src="js/claude-review-panel.js?v=20260707-claude-review"></script>
-    <script src="js/review-portal.js?v=20260709p"></script>
+    <script src="js/review-portal.js?v=20260814b"></script>
 </body>
 </html>

@@ -174,6 +174,7 @@ export function EvidenceForm(props: {
   country: CountryConfig;
   provider: WorkbenchProvider;
   onChanged: () => Promise<void>;
+  onDirtyChange?: (dirty: boolean) => void;
 }) {
   const { task, country, provider } = props;
   const [draft, setDraft] = useState<EvidenceDraft>(() => emptyDraft(task));
@@ -196,6 +197,7 @@ export function EvidenceForm(props: {
       provider={provider}
       draft={draft}
       onDraftChange={setDraft}
+      onDirtyChange={props.onDirtyChange}
       onChanged={props.onChanged}
       allowSkip
       showTaskHeader
@@ -209,6 +211,9 @@ export function DraftEvidenceEditor(props: {
   provider: WorkbenchProvider;
   draft: EvidenceDraft;
   onDraftChange: (draft: EvidenceDraft) => void;
+  // dirty draft guard: set on any unsaved edit, cleared once the draft is
+  // persisted, so the app shell can confirm before unmounting the editor
+  onDirtyChange?: (dirty: boolean) => void;
   onChanged: () => Promise<void>;
   allowSkip?: boolean;
   lockSources?: boolean;
@@ -235,6 +240,7 @@ export function DraftEvidenceEditor(props: {
     // keep field provenance current on every path that edits an
     // agent-assisted draft; markHumanEdits is a no-op for other lanes
     props.onDraftChange(markHumanEdits(props.draft, { ...props.draft, ...patch }));
+    props.onDirtyChange?.(true);
   }
 
   function normalisedForSave(): EvidenceDraft {
@@ -314,6 +320,7 @@ export function DraftEvidenceEditor(props: {
     const candidate = normalisedForSave();
     await provider.saveDraft(candidate);
     props.onDraftChange(candidate);
+    props.onDirtyChange?.(false);
     setMessage("Draft saved. You can keep editing and submit when it is ready.");
     setProblems([]);
     await props.onChanged();
@@ -330,6 +337,7 @@ export function DraftEvidenceEditor(props: {
       await provider.saveDraft(candidate);
       await provider.submitForReview(candidate.draftId);
       props.onDraftChange({ ...candidate, state: "submitted", updatedAt: new Date().toISOString() });
+      props.onDirtyChange?.(false);
       setMessage("Submitted for review. A reviewer will look at this; you can track it under My work.");
       setProblems([]);
       await props.onChanged();
@@ -340,6 +348,9 @@ export function DraftEvidenceEditor(props: {
 
   async function handleSkip(): Promise<void> {
     await provider.skipTask(task.taskId);
+    // a skip abandons any unsaved edits deliberately; clear the flag so the
+    // editor's unmount on refresh cannot leave it stale
+    props.onDirtyChange?.(false);
     setMessage("Task skipped.");
     await props.onChanged();
   }
@@ -355,6 +366,7 @@ export function DraftEvidenceEditor(props: {
       fieldProvenance: candidate.claimProvenance?.fieldProvenance,
     });
     props.onDraftChange(confirmed);
+    props.onDirtyChange?.(false);
     setMessage("Claim confirmed as your own work. You can now submit it for review.");
     await props.onChanged();
   }
@@ -449,7 +461,12 @@ export function DraftEvidenceEditor(props: {
         country={country}
         readOnly={readOnly}
         worshipChoice={worshipChoice}
-        setWorshipChoice={setWorshipChoice}
+        setWorshipChoice={(choice) => {
+          // the worship choice only reaches the draft at save time, so an
+          // unsaved change here is also a discardable edit
+          setWorshipChoice(choice);
+          props.onDirtyChange?.(true);
+        }}
         update={update}
       />
       <LocationFields draft={props.draft} readOnly={readOnly} update={update} />
@@ -513,6 +530,7 @@ export function DraftEvidenceEditor(props: {
         provider={provider}
         readOnly={readOnly}
         onDraftChange={props.onDraftChange}
+        onDirtyChange={props.onDirtyChange}
         onChanged={props.onChanged}
       />
     </div>
@@ -1165,6 +1183,7 @@ function UnresolvedNote(props: {
   provider: WorkbenchProvider;
   readOnly: boolean;
   onDraftChange: (draft: EvidenceDraft) => void;
+  onDirtyChange?: (dirty: boolean) => void;
   onChanged: () => Promise<void>;
 }) {
   const [note, setNote] = useState(props.draft.unresolvedNote ?? "");
@@ -1196,6 +1215,8 @@ function UnresolvedNote(props: {
               unresolvedNote: note.trim(),
               updatedAt: new Date().toISOString(),
             });
+            // the note submission persisted the draft, so nothing is unsaved
+            props.onDirtyChange?.(false);
             setSent(true);
             await props.onChanged();
           })()

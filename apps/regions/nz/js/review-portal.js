@@ -453,7 +453,7 @@
 
             ${window.PowClaudeReviewPanel ? window.PowClaudeReviewPanel.panelHtml(agentReview) : ""}
 
-            <section class="panel">
+            <section class="panel decision-panel">
                 <h3>Review decision</h3>
                 ${decisionForm(task, draft)}
             </section>
@@ -529,6 +529,14 @@
 
     function wireDecisionForm(form) {
         form.decisionStatus?.addEventListener("change", () => updateDecisionHelp(form));
+        // cmd/ctrl+enter from the note records the decision without a mouse
+        // trip; submitDecision keeps the busy guard and validation messages
+        form.decisionNote?.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+                event.preventDefault();
+                form.requestSubmit();
+            }
+        });
         document.getElementById("markSystemTest")?.addEventListener("click", () => {
             setDecisionFormValues(form, {
                 decisionStatus: "rejected",
@@ -607,6 +615,48 @@
         `;
     }
 
+    // next task id after the decided row, walking the pre-reload queue order
+    // and keeping only rows still present after the reload; wraps to the top
+    function nextQueueTaskId(previousIds, decidedTaskId) {
+        if (state.queue.length === 0) return null;
+        const remaining = new Set(state.queue.map((entry) => entry.task.task_id));
+        const start = previousIds.indexOf(decidedTaskId);
+        for (let offset = 1; offset <= previousIds.length; offset += 1) {
+            const candidate = previousIds[(start + offset) % previousIds.length];
+            if (candidate !== decidedTaskId && remaining.has(candidate)) return candidate;
+        }
+        return state.queue[0].task.task_id;
+    }
+
+    // post-decision pane mirroring the RA portal's "Open next task" idiom:
+    // advancing stays the reviewer's click, never an auto-select
+    function renderDecisionRecorded(taskStatus, previousIds, decidedTaskId) {
+        const queueEmpty = state.queue.length === 0;
+        els.detailPanel.innerHTML = `
+            <div class="panel">
+                <h2>Decision recorded</h2>
+                <div class="status ok">Task status is now ${escapeHtml(taskStatus)}.</div>
+                <div class="review-actions">
+                    <button id="openNextInQueue" type="button" ${queueEmpty ? "disabled" : ""}>Open next in queue</button>
+                </div>
+                <div id="nextInQueueStatus" class="muted" aria-live="polite">
+                    ${queueEmpty
+                        ? "The queue for this status is empty. Change the queue status or refresh to load more work."
+                        : "Or select another submitted task from the list."}
+                </div>
+            </div>
+        `;
+        document.getElementById("openNextInQueue")?.addEventListener("click", () => {
+            const nextId = nextQueueTaskId(previousIds, decidedTaskId);
+            if (!nextId) {
+                document.getElementById("nextInQueueStatus").textContent =
+                    "The queue for this status is empty. Change the queue status or refresh to load more work.";
+                return;
+            }
+            selectTask(nextId);
+        });
+    }
+
     async function submitDecision(event) {
         event.preventDefault();
         if (!state.selected || state.busy) return;
@@ -666,9 +716,12 @@
             });
             statusText.textContent = `Recorded. Task status is now ${result.task_status}.`;
             statusText.className = "status ok";
+            // keep the pre-reload order so "next" follows the reviewed row
+            const decidedTaskId = state.selected.task.task_id;
+            const previousIds = state.queue.map((entry) => entry.task.task_id);
             state.selected = null;
             await loadQueue();
-            renderEmptyDetail("Decision recorded. Select another submitted task.");
+            renderDecisionRecorded(result.task_status, previousIds, decidedTaskId);
         } catch (error) {
             statusText.textContent = error.message || "Could not record the review decision.";
             statusText.className = "status error";
