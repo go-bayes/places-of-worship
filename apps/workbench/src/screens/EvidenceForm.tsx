@@ -1201,7 +1201,15 @@ function UnresolvedNote(props: {
         Useful but incomplete evidence: park it here for a reviewer instead of
         forcing a submission.
       </div>
-      <textarea disabled={props.readOnly} value={note} onChange={(event) => setNote(event.target.value)} />
+      <textarea
+        disabled={props.readOnly}
+        value={note}
+        onChange={(event) => {
+          // an unsent note is unsaved work; the submit handler clears the flag
+          setNote(event.target.value);
+          props.onDirtyChange?.(true);
+        }}
+      />
       <button
         className="secondary"
         disabled={props.readOnly || !note.trim() || sent}

@@ -1818,6 +1818,10 @@ class NzVerificationMap {
         this.latestDraftsByTaskId.clear();
         this.myWorkItems = [];
         this.revisionDraftIdsByTaskId.clear();
+        // sign-out discards the form with the panel; a lingering dirty flag
+        // would fire beforeunload against a page showing no form at all
+        this.clearFormDirty();
+        this.formSnapshotsByTaskId.clear();
         this.backendLastError = "Signed out here. On a shared computer, also sign out of Google in the browser.";
         if (ASSIGNMENT_MODE) {
             this.tasks = [];
@@ -3408,9 +3412,12 @@ class NzVerificationMap {
     handleGlobalKeydown(event) {
         if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
             const withinForm = event.target?.closest?.(".review-form");
+            if (!withinForm) return;
+            // the shortcut always means submit, never newline: prevent the
+            // textarea default even while the in-flight save has it locked
+            event.preventDefault();
             const submitButton = document.getElementById("submitReviewButton");
-            if (withinForm && submitButton && !submitButton.disabled) {
-                event.preventDefault();
+            if (submitButton && !submitButton.disabled) {
                 submitButton.click();
             }
             return;

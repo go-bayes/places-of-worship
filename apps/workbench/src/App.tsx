@@ -268,6 +268,8 @@ export function App() {
                 drafts={myWork}
                 openDraftId={openRecord?.draft.draftId ?? null}
                 onNominate={() => {
+                  // nominate unmounts whichever editor is open, like its siblings
+                  if (!confirmDiscard()) return;
                   setView("nominate");
                   setOpenRecord(null);
                 }}

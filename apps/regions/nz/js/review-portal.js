@@ -529,9 +529,10 @@
 
     function wireDecisionForm(form) {
         form.decisionStatus?.addEventListener("change", () => updateDecisionHelp(form));
-        // cmd/ctrl+enter from the note records the decision without a mouse
-        // trip; submitDecision keeps the busy guard and validation messages
-        form.decisionNote?.addEventListener("keydown", (event) => {
+        // cmd/ctrl+enter from anywhere in the decision form records the
+        // decision without a mouse trip, matching the ra portal's scope;
+        // submitDecision keeps the busy guard and validation messages
+        form.addEventListener("keydown", (event) => {
             if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
                 event.preventDefault();
                 form.requestSubmit();
