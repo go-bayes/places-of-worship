@@ -1,0 +1,40 @@
+# minimal ci: typecheck the convex backend and workbench, run the portal
+# unit test, run the pow-cli rust tests, and validate shipped area summaries.
+# pages deployment is branch-based and unaffected by this workflow.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: typecheck convex
+        run: |
+          npm install --no-audit --no-fund
+          npx tsc --noEmit
+      - name: typecheck workbench
+        working-directory: apps/workbench
+        run: |
+          npm install --no-audit --no-fund
+          npm run typecheck
+      - name: portal unit test
+        run: node apps/regions/nz/js/claude-review-panel.test.cjs
+      - uses: astral-sh/setup-uv@v5
+      - name: validate area summaries
+        run: bash scripts/validate_area_summaries.sh
+
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: cargo test
+        run: cargo test --workspace
