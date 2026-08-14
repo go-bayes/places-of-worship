@@ -1,3 +1,6 @@
+// one-off fixture (2026-08-14 stocktake ruling): seeds the VU training
+// workpack. keep only for reseeding a fresh deployment; retire once the
+// training lane closes. internal: admin-key/CLI only.
 import { v } from "convex/values";
 import { internalMutation } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";

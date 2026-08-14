@@ -9,8 +9,15 @@ The purpose of this inventory is the same as a package function reference: a
 future maintainer should be able to see what exists, who may call it, and where
 it sits in the workflow without reading every source file first.
 
-Last reviewed: 2026-05-14, against the exported Convex functions in
-`users.ts`, `tasks.ts`, `evidence.ts`, `reviews.ts`, and `exports.ts`.
+The inventory also lists internal functions (kind `internal query`,
+`internal mutation`, or `internal action`) where they matter operationally.
+Internal functions are not part of the public API: they are callable only with
+the deployment admin key, from the CLI, dashboard, or a scheduled job.
+
+Last reviewed: 2026-08-14, against the exported Convex functions in
+`users.ts`, `tasks.ts`, `evidence.ts`, `batchImport.ts`, `reviews.ts`,
+`claudeReviews.ts`, `exports.ts`, `devSeed.ts`, `revisionSeed.ts`, and
+`trainingSeed.ts`.
 Exports from `model.ts` and `convex/lib/` are internal validators and helpers,
 not public workflow functions.
 
@@ -22,6 +29,8 @@ not public workflow functions.
 - `admin`: can manage users and perform all pilot operations.
 - `service`: trusted service role for imports or automated maintenance.
 - `setup token`: protected bootstrap path using `POW_CONVEX_SETUP_TOKEN`.
+- `admin key`: deployment admin key (CLI, dashboard, or scheduled job); marks
+  internal functions that are never callable from the public API.
 
 ## Boundary Rule
 
@@ -53,6 +62,7 @@ and export bundles. Accepted changes become research data only after export,
 | `inviteUser` | mutation | `admin` | Create or update a pending invitation and assigned roles. | `users` |
 | `claimInvite` | mutation | invited authenticated user | Bind a pending email invitation to the Google-authenticated subject. | `users` |
 | `listUsers` | query | `admin` | List project users, optionally filtered by status. | None |
+| `adminUpsertUser` | internal mutation | `admin key` | Repair a user record: patch roles on an existing user while preserving status (unlike `inviteUser`, which resets active users to pending), or insert a pending invite when no row matches the email. | `users` |
 
 ## `tasks.ts`
 
@@ -62,13 +72,16 @@ and export bundles. Accepted changes become research data only after export,
 | `listMyTasks` | query | `ra`, `reviewer`, `curator`, `admin` | List tasks assigned to the current user, with latest draft and review summary for RA history panels. | None |
 | `getTask` | query | `ra`, `reviewer`, `curator`, `admin`, `service` | Return one task and its latest visible evidence draft. RAs see their own latest draft; reviewers and maintainers can see the project-level latest draft. | None |
 | `getTaskEvents` | query | `ra`, `reviewer`, `curator`, `admin`, `service` | Return append-only history for a task. RAs are limited to their own assigned task history; reviewers and maintainers can inspect full task history. | None |
+| `getTaskHistory` | query | `ra`, `reviewer`, `curator`, `admin`, `service` | Return a capped event history for any task plus draft count and latest review summary. All roles see workflow state; actor identity and reasons are visible only to reviewers and maintainers, or on the caller's own events. | None |
 | `upsertTasksFromStaticMap` | mutation | `admin`, `service` | Import or refresh a task batch from static map or workpack seed data. | `task_batches`, `tasks`, `task_events` |
 | `claimTask` | mutation | `ra`, `reviewer`, `curator`, `admin` | Assign a task to the caller and mark open/reopened tasks as in progress. | `tasks`, `task_events` |
 | `releaseTask` | mutation | `ra`, `reviewer`, `curator`, `admin` | Return a claimed task to open status. | `tasks`, `task_events` |
 | `skipTask` | mutation | `ra`, `reviewer`, `curator`, `admin` | Mark a task skipped with an optional reason. | `tasks`, `task_events` |
+| `unskipTask` | mutation | `ra`, `reviewer`, `curator`, `admin` | Return a skipped task to in progress, recorded as a reopened event with an optional reason. | `tasks`, `task_events` |
 | `markProvisionallyClosed` | mutation | `ra`, `reviewer`, `curator`, `admin` | Mark a task provisionally closed after evidence is recorded. | `tasks`, `task_events` |
 | `reopenTask` | mutation | `reviewer`, `curator`, `admin` | Reopen a task after review or correction. | `tasks`, `task_events` |
 | `addTaskNote` | mutation | `ra`, `reviewer`, `curator`, `admin` | Add a size-limited note to the task history without changing the data contract. | `task_events` |
+| `createIssueTask` | mutation | `ra`, `reviewer`, `curator`, `admin` | Create an issue-report task (possible duplicate, verify existing site, geometry check, OSM identity link, or other) from RA map inspection, in the per-country `ra-issues-<cc>` batch. An open issue task for the same matched site or OSM id is deduplicated: the note is appended to it instead. | `task_batches`, `tasks`, `task_events` |
 | `createManualCandidateTask` | mutation | `ra`, `reviewer`, `curator`, `admin` | Create a provisional candidate task for a nominated missing place of worship. | `tasks`, `task_events` |
 
 Target-year defaults: when a caller omits `targetYears`,
@@ -92,16 +105,54 @@ change.
 | `submitUnresolvedNote` | mutation | draft owner, `reviewer`, `curator`, `admin` | Submit useful but incomplete evidence for reviewer triage and mark the task unresolved-note. | `evidence_drafts`, `tasks`, `task_events` |
 | `reviseEvidenceDraft` | mutation | draft owner, `reviewer`, `curator`, `admin` | Start a revision from a task's active submission (submitted draft or unresolved note): clone it into a new editable version, or reuse the author's existing editable draft, and record a task event. Per-status transitions: changes-requested moves to in-progress; needs-review and unresolved-note keep their queue status while the revision rides alongside. The submitted version stays immutable. | `evidence_drafts`, `tasks`, `task_events` |
 
+## `batchImport.ts`
+
+Convex mirror of the curator batch import
+(`docs/portal-batch-import-and-corrections.md`). Rows are parsed client-side
+and re-validated server-side with the same rules as
+`apps/workbench/src/data/batchImport.ts`; rule changes must land in both
+places. Imported rows arrive as drafts, never auto-submitted, so the review
+gates are untouched.
+
+| Function | Kind | Roles | Purpose | Writes |
+| --- | --- | --- | --- | --- |
+| `importNominationBatch` | mutation | `curator`, `admin` | Import up to 200 validated nomination rows from one source file as draft-saved tasks with draft evidence. Idempotent per source: a row whose (source, locator) key or claim hash matches an earlier import is skipped; invalid rows are rejected with per-row reports; VU rows without a kastom answer are parked for individual handling. | `task_batches`, `tasks`, `evidence_drafts`, `task_events` |
+
 ## `reviews.ts`
 
 | Function | Kind | Roles | Purpose | Writes |
 | --- | --- | --- | --- | --- |
-| `listReviewQueue` | query | `reviewer`, `curator`, `admin` | List review-relevant tasks by status with latest draft evidence and latest review decision. | None |
+| `listReviewQueue` | query | `reviewer`, `curator`, `admin` | List review-relevant tasks by status with latest draft evidence, latest review decision, and the newest Claude batch-review artifact (`latestAgentReview`, advisory context only). | None |
 | `feedbackLoopMetrics` | query | `reviewer`, `curator`, `admin` | Report, per task, the time from a changes-requested event to the revision that answered it. | None |
 | `recordReviewDecision` | mutation | `reviewer`, `curator`, `admin` | Record accept, reject, needs-more-evidence, duplicate, or defer decisions and update task state. Decisions require a short size-limited note; accepted-for-export decisions require an evidence draft from the same task. | `review_decisions`, `tasks`, `evidence_drafts`, `task_events` |
 
 The review decision is not a master write. It becomes eligible for export only
 through the export batch workflow.
+
+## `claudeReviews.ts`
+
+Claude batch-review lane (`docs/portal-claude-batch-review.md`). Humans
+decide; Claude recommends. Nothing in this module changes a task status, an
+evidence draft, or a review decision: it appends advisory artifacts, batch
+manifests, and audit events. The runner is an internal action, so
+unauthenticated callers cannot trigger model spend.
+
+| Function | Kind | Roles | Purpose | Writes |
+| --- | --- | --- | --- | --- |
+| `listAgentReviewsForTask` | query | `reviewer`, `curator`, `admin` | List a task's Claude batch-review artifacts, newest first. | None |
+| `ensureServiceUser` | internal mutation | `admin key` | Find or create the `claude-batch-reviewer` service user that artifacts and audit events are attributed to. | `users` |
+| `pendingForBatch` | internal query | `admin key` | List needs-review tasks with their latest reviewable draft and whether that draft already carries an artifact at the current prompt version. | None |
+| `openBatch` | internal mutation | `admin key` | Insert a running batch manifest recording trigger, models, and item cap. | `agent_review_batches` |
+| `closeBatch` | internal mutation | `admin key` | Mark a batch manifest completed or failed with final counts and error notes. | `agent_review_batches` |
+| `recordArtifact` | internal mutation | `admin key` | Append a versioned agent-review artifact and an audit note event; the task status is deliberately untouched. | `agent_reviews`, `task_events` |
+| `runBatch` | internal action | `admin key` | Run one batch: select pending items, check sources, call the model, and record artifacts through the mutations above. Requires `ANTHROPIC_API_KEY`; item cap and deadline bound each run, and idempotent re-runs continue the remaining queue. | None directly; writes via the mutations above |
+
+Two schema tables back this lane. The `agent_reviews` table holds append-only
+advisory artifacts, one row per (claim version, prompt version); re-reviews
+append with a higher version, never overwrite. The `agent_review_batches`
+table is the run manifest per batch invocation: trigger, models, caps, and
+counts made inspectable. No function that writes to either table may change
+tasks, drafts, or review decisions.
 
 ## `exports.ts`
 
@@ -128,6 +179,35 @@ through the export batch workflow.
 
 The local script `scripts/materialise_convex_export.py` writes this bundle to
 ignored local files, adds SHA-256 hashes, and prepares the handoff for `pow`.
+
+## `devSeed.ts`
+
+Dev-only seeding for local and dev deployments; never intended for the
+production project.
+
+| Function | Kind | Roles | Purpose | Writes |
+| --- | --- | --- | --- | --- |
+| `seedReviewQueueFixture` | internal mutation | `admin key` | Seed one reviewable task with a submitted draft so the batch-review dry run has a queue to triage. Idempotent per task id. | `users`, `task_batches`, `tasks`, `evidence_drafts` |
+
+## `revisionSeed.ts`
+
+Phase R1 seeding for per-country revision batches
+(`docs/development/revision-pipeline-all-countries.md`). Seeded batches start
+as drafts, invisible to RA queues, until a curator promotes them.
+
+| Function | Kind | Roles | Purpose | Writes |
+| --- | --- | --- | --- | --- |
+| `seedRevisionBatch` | internal mutation | `admin key` | Create or extend a draft revision batch (`revise-<cc>-<nnn>`) with one open task per shipped map site. Target years must match the Convex wave mirror; sites are deduplicated on `matched_current_site_id`, so a re-seed appends only new sites. | `task_batches`, `tasks`, `task_events` |
+| `promoteRevisionBatch` | internal mutation | `admin key` | Promote a draft revision batch to active so its tasks appear in RA queues — the R1 throttling gate, run from the CLI as a curator decision. | `task_batches` |
+
+## `trainingSeed.ts`
+
+One-off fixture kept for reseeding a fresh deployment; retire once the
+training lane closes.
+
+| Function | Kind | Roles | Purpose | Writes |
+| --- | --- | --- | --- | --- |
+| `seedGuyTrainingWorkpack` | internal mutation | `admin key` | Seed the fixed VU training batch `guy-vu-training-001` with its training-case tasks, all excluded from exports. Idempotent: skips entirely when the batch already exists. | `task_batches`, `tasks`, `task_events` |
 
 ## Update Rules
 

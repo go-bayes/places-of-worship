@@ -1,3 +1,6 @@
+// seeding fixture (2026-08-14 stocktake ruling): seeds and promotes revision
+// batches. STILL LIVE — revise-nz-001/revise-vu-001 await promotion; retire
+// only after both batches are promoted. internal: admin-key/CLI only.
 import { v } from "convex/values";
 import { internalMutation } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";

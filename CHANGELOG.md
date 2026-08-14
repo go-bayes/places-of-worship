@@ -2,7 +2,12 @@
 
 ## Unreleased
 
-### 2026-07-18
+### 2026-08-14
+
+- Repo stocktake executed (report: `docs/development/repo-stocktake-2026-08-14.md`). Removed the dead FastAPI prototype (`api/`, with its `pyproject.toml` extras), the seven-month-old `frontend/` and `src/` redirect shims, the empty `research/` husk, the three transitional global-pipeline Python scripts, the unused `indicator-observation` schema, and the dormant Git LFS configuration. Moved five orphaned scripts (`clean_nz_places.py`, `build_nz_review_queue.py`, `build_osm_dated_places_products.R`, `optimize_places_data.py`, `update_counts.R`) to the private research tier. Archived superseded docs (`architecture`, `runbook`, `deployment-strategy`, `api-specification`, `schema-integration`, completed one-shot audits) under `docs/archive/`.
+- Domain sweep: every remaining `placesmap.org` link in README, RA/reviewer docs, the NZ portal Guide buttons, and the workbench now points at `religionmap.org` (`verification-map.js` cache pin `?v=20260814a`).
+- Added minimal CI (`.github/workflows/ci.yml`): Convex and workbench typechecks, the review-panel unit test, `cargo test`, and the area-summary validator.
+- Refreshed `docs/api/workflow-scripts.md` and `docs/api/convex-functions.md` to match the post-split codebase; annotated the Convex seed modules as fixtures.
 
 - Rebased the New Zealand territorial-authority religion product on the official Stats NZ CEN23_TBT_008 source. The 67-area app contract and headline category values remain unchanged; official level-1 counts replace the inflated Māori-religions, Spiritualism, and composed Other-religion lines from the superseded Figure.NZ bridge. Regenerated both territorial-authority area-summary renderings and added hash-backed provenance records for the source, boundary, census products, and current OpenStreetMap places file. Files: `apps/regions/nz/data/ta_aggregated_data.json`, `apps/regions/nz/data/area_summary_ta.json`, `apps/regions/nz/data/area_summary_ta.csv`, `archive/statsnz-cen23-tbt-ta-religion/`.
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # validate every area-summary product against the schema version it declares;
-# exit non-zero on any gated failure. twin of scripts/validate_manifests.sh,
+# exit non-zero on any gated failure. twin of the private tier's
+# ~/GIT/pow-research/pipeline/validate_manifests.sh,
 # declared-version-resolving: each product declares schema_version and the
 # validator resolves that to the matching schema. area-summary.v2 products are
 # gated against schemas/area-summary.v2.schema.json. legacy generations
