@@ -111,8 +111,15 @@ export function FreeContributionPortal(props: {
   /** map-route context: prefills the place-first identity fields and
       skips the mode chooser, since the contributor arrived from a dot */
   initialMapContext?: { lat?: number; lng?: number; name?: string };
+  /** dirty draft guard: forwarded to every editor the portal mounts, so
+      the app shell can confirm before unmounting one from outside */
+  onDirtyChange?: (dirty: boolean) => void;
+  /** ask before a portal navigation that discards a dirty editor;
+      defaults to always-allow so the portal stays usable standalone */
+  confirmDiscard?: () => boolean;
 }) {
   const [mode, setMode] = useState<PortalMode>(props.initialMapContext ? "place_first" : "chooser");
+  const confirmDiscard = props.confirmDiscard ?? (() => true);
 
   return (
     <div>
@@ -123,14 +130,35 @@ export function FreeContributionPortal(props: {
       </p>
       {mode === "chooser" && (
         <div className="mode-grid">
-          <button onClick={() => setMode("place_first")}>Place-first</button>
-          <button className="secondary" onClick={() => setMode("source_first")}>
+          {/* a mode change swaps which flow (and editor) is mounted */}
+          <button
+            onClick={() => {
+              if (!confirmDiscard()) return;
+              setMode("place_first");
+            }}
+          >
+            Place-first
+          </button>
+          <button
+            className="secondary"
+            onClick={() => {
+              if (!confirmDiscard()) return;
+              setMode("source_first");
+            }}
+          >
             Source-first
           </button>
         </div>
       )}
       {mode !== "chooser" && (
-        <button className="tertiary" onClick={() => setMode("chooser")}>
+        <button
+          className="tertiary"
+          onClick={() => {
+            // leaving a flow unmounts any editor it holds
+            if (!confirmDiscard()) return;
+            setMode("chooser");
+          }}
+        >
           Change mode
         </button>
       )}
@@ -140,10 +168,17 @@ export function FreeContributionPortal(props: {
           provider={props.provider}
           onChanged={props.onChanged}
           initialMapContext={props.initialMapContext}
+          onDirtyChange={props.onDirtyChange}
         />
       )}
       {mode === "source_first" && (
-        <SourceFirstFlow country={props.country} provider={props.provider} onChanged={props.onChanged} />
+        <SourceFirstFlow
+          country={props.country}
+          provider={props.provider}
+          onChanged={props.onChanged}
+          onDirtyChange={props.onDirtyChange}
+          confirmDiscard={confirmDiscard}
+        />
       )}
     </div>
   );
@@ -154,6 +189,7 @@ function PlaceFirstFlow(props: {
   provider: WorkbenchProvider;
   onChanged: () => Promise<void>;
   initialMapContext?: { lat?: number; lng?: number; name?: string };
+  onDirtyChange?: (dirty: boolean) => void;
 }) {
   const [identity, setIdentity] = useState<IdentityFields>(() =>
     identityWithContext(props.initialMapContext),
@@ -249,6 +285,7 @@ function PlaceFirstFlow(props: {
           provider={props.provider}
           draft={draft}
           onDraftChange={setDraft}
+          onDirtyChange={props.onDirtyChange}
           onChanged={props.onChanged}
           allowSkip={false}
           showTaskHeader={false}
@@ -487,6 +524,8 @@ function SourceFirstFlow(props: {
   country: CountryConfig;
   provider: WorkbenchProvider;
   onChanged: () => Promise<void>;
+  onDirtyChange?: (dirty: boolean) => void;
+  confirmDiscard: () => boolean;
 }) {
   const [source, setSource] = useState<SourceRecordInput>(() => sourceInput(props.country.countryCode));
   const [sourceRecord, setSourceRecord] = useState<SourceRecord | null>(null);
@@ -693,8 +732,15 @@ function SourceFirstFlow(props: {
           <SourcePanel source={sourceRecord} />
           <ClaimList
             claims={claims}
-            onCreateClaim={() => void createClaim()}
+            onCreateClaim={() => {
+              // a new claim replaces the active editor's draft, if one is open
+              if (activeDraft && !props.confirmDiscard()) return;
+              void createClaim();
+            }}
             onSelect={(selected) => {
+              // reselecting the open claim keeps the editor's draft; no prompt
+              if (selected.draftId === activeDraft?.draftId) return;
+              if (!props.confirmDiscard()) return;
               setActiveDraft(selected);
               setActiveTask({
                 taskId: selected.taskId,
@@ -720,6 +766,7 @@ function SourceFirstFlow(props: {
                 setActiveDraft(draft);
                 setClaims((current) => mergeDraft(current, draft));
               }}
+              onDirtyChange={props.onDirtyChange}
               onChanged={async () => {
                 await refreshClaims(sourceRecord);
               }}
@@ -730,7 +777,13 @@ function SourceFirstFlow(props: {
         </>
       )}
 
-      <AgentExtractionWorkspace country={props.country} provider={props.provider} onChanged={props.onChanged} />
+      <AgentExtractionWorkspace
+        country={props.country}
+        provider={props.provider}
+        onChanged={props.onChanged}
+        onDirtyChange={props.onDirtyChange}
+        confirmDiscard={props.confirmDiscard}
+      />
     </div>
   );
 }
@@ -797,6 +850,8 @@ function AgentExtractionWorkspace(props: {
   country: CountryConfig;
   provider: WorkbenchProvider;
   onChanged: () => Promise<void>;
+  onDirtyChange?: (dirty: boolean) => void;
+  confirmDiscard: () => boolean;
 }) {
   const [drafts, setDrafts] = useState<EvidenceDraft[]>([]);
   const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
@@ -903,7 +958,16 @@ function AgentExtractionWorkspace(props: {
                       <FieldProvenanceBadge state={draft.claimProvenance?.fieldProvenance?.["location.containingArea"]} />
                     </td>
                     <td>
-                      <button className="tertiary" onClick={() => setActiveDraftId(draft.draftId)}>
+                      <button
+                        className="tertiary"
+                        onClick={() => {
+                          // reviewing the open claim keeps its editor; a
+                          // different claim swaps the editor's draft
+                          if (draft.draftId === activeDraft?.draftId) return;
+                          if (!props.confirmDiscard()) return;
+                          setActiveDraftId(draft.draftId);
+                        }}
+                      >
                         Review
                       </button>
                       <button
@@ -954,6 +1018,7 @@ function AgentExtractionWorkspace(props: {
                   setDrafts((current) => mergeDraft(current, next));
                   setActiveDraftId(next.draftId);
                 }}
+                onDirtyChange={props.onDirtyChange}
                 onChanged={async () => {
                   await refresh();
                   await props.onChanged();
