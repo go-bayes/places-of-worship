@@ -129,9 +129,14 @@ reach them.
    `classList.toggle("hinting", false)` is a no-op on country pages, and
    the `.hinting` rule already ships in `maplibre-flat.css` (420), which
    both surfaces load. The hint click does
-   `map.jumpTo({ zoom: HANDOFF_MIN_ZOOM + 0.4 })` — **jumpTo is
-   load-bearing**: global's own comment records that flyTo/zoomTo no-op on
-   this surface.
+   `map.jumpTo({ zoom: HANDOFF_MIN_ZOOM + 0.4 })`. Correction
+   (2026-08-14): the old page's comment claimed flyTo/zoomTo no-op on
+   this surface, and this report originally called jumpTo load-bearing
+   on that basis; a hand check on the converged page disproved the
+   claim — reset's flyTo flies the camera home, and the city chips
+   fly. jumpTo stays as a design choice (the hint promises data on
+   zoom; the instant jump delivers it without an animation), not as a
+   workaround.
 2. **`zoomend` offer refresh** (global 2939). Registered only when
    `!HANDOFF_HOME`. The hint↔offer transition is purely zoom-driven, so
    dropping it would freeze the hint until a pan; adding it on country

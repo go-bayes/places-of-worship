@@ -5532,9 +5532,11 @@ if (offerGo && !RC.disableBorderHandoff) {
       return;
     }
     if (offerMode === "hint") {
-      // the hint promises data on zoom; deliver the zoom. jumpTo, because
-      // the global surface's animated camera transitions are inert (an
-      // existing page quirk — flyTo and zoomTo no-op there)
+      // the hint promises data on zoom; deliver the zoom. jumpTo by
+      // choice, not necessity: the old page's claim that flyTo/zoomTo
+      // no-op on the global surface was disproved by hand (reset's
+      // flyTo moves the camera; jb 2026-08-14) — the instant jump is
+      // simply the promise kept without an animation to wait through
       map.jumpTo({ zoom: HANDOFF_MIN_ZOOM + 0.4 });
       return;
     }
