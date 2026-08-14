@@ -8,10 +8,6 @@
 // (see docs/development/regional-map-consistency.md and ./DRIFT-REPORT.md).
 // loads as a classic script from the page's own directory, so relative
 // fetches (data/…, ../../../schemas/…) resolve against the page location.
-if (!window.maplibregl) {
-  throw new Error("MapLibre missing");
-}
-
 // the whole country-specific surface: copy, camera, census levels, geocode
 // bias, cross-links. everything below reads this and the data products.
 const RC = window.REGION_CONFIG;
@@ -186,6 +182,13 @@ ${censusChrome}
   </div>
 `;
 })();
+
+// guard after the chrome injection, so a blocked or failed maplibre CDN
+// load still leaves the wordmark, onboarding, and navigation on screen
+// instead of a blank page (the map itself cannot boot either way)
+if (!window.maplibregl) {
+  throw new Error("MapLibre missing");
+}
 
 const showStatus = () => {};
 
@@ -1858,7 +1861,7 @@ function resetSite() {
   // returns if it was toggled off. the toggle renders only where the
   // offer engine is armed — an unarmed pill stays the panel trigger
   handoffTapTarget = null;
-  if (handoffRegions) setOffer(HANDOFF_HOME ? "toggle" : "resting", null);
+  if (handoffRegions) setOffer(HANDOFF_HOME && HAS_CENSUS ? "toggle" : "resting", null);
   if (!censusState.enabled) void setCensusEnabled(true);
   // resurface the onboarding card (jb 2026-07-09): reset is how a visitor
   // recovers the how-to and the about-this-map link after dismissing it
@@ -5381,9 +5384,12 @@ function updateBorderHandoff() {
     setOffer("offer", handoffTapTarget);
     return;
   }
-  if (HANDOFF_HOME) {
+  if (HANDOFF_HOME && HAS_CENSUS) {
     // country semantics: below the offer zoom the pill is the census
-    // toggle, before any resolve; a neighbour under the centre offers
+    // toggle, before any resolve; a neighbour under the centre offers.
+    // toggle mode needs census data behind it — a dots-only home page
+    // (countryCode set, census pending) falls through to the global
+    // semantics below so the pill never renders a dead toggle
     if (map.getZoom() < HANDOFF_MIN_ZOOM) { setOffer("toggle"); return; }
     const centre = map.getCenter();
     const lng = normaliseLng(centre.lng);
