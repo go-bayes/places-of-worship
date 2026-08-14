@@ -9,21 +9,21 @@ Building historical datasets fit for scientific inferences is remarkably difficu
 
 ## Links
 
-- [Global map](https://www.placesmap.org/)
-- [Australia regional map](https://www.placesmap.org/apps/regions/au/)
-- [India regional map](https://www.placesmap.org/apps/regions/in/)
-- [Ireland regional map](https://www.placesmap.org/apps/regions/ie/)
-- [New Zealand regional map](https://www.placesmap.org/apps/regions/nz/)
-- [Brazil regional map](https://www.placesmap.org/apps/regions/br/)
-- [Canada regional map](https://www.placesmap.org/apps/regions/ca/)
-- [Mexico regional map](https://www.placesmap.org/apps/regions/mx/)
-- [Portugal regional map](https://www.placesmap.org/apps/regions/pt/)
-- [Romania regional map](https://www.placesmap.org/apps/regions/ro/)
-- [Slovakia regional map](https://www.placesmap.org/apps/regions/sk/)
-- [South Korea regional map](https://www.placesmap.org/apps/regions/kr/)
-- [United Kingdom regional map](https://www.placesmap.org/apps/regions/uk/)
-- [United States regional map](https://www.placesmap.org/apps/regions/us/)
-- [Vanuatu regional map](https://www.placesmap.org/apps/regions/vu/)
+- [Global map](https://religionmap.org/)
+- [Australia regional map](https://religionmap.org/apps/regions/au/)
+- [India regional map](https://religionmap.org/apps/regions/in/)
+- [Ireland regional map](https://religionmap.org/apps/regions/ie/)
+- [New Zealand regional map](https://religionmap.org/apps/regions/nz/)
+- [Brazil regional map](https://religionmap.org/apps/regions/br/)
+- [Canada regional map](https://religionmap.org/apps/regions/ca/)
+- [Mexico regional map](https://religionmap.org/apps/regions/mx/)
+- [Portugal regional map](https://religionmap.org/apps/regions/pt/)
+- [Romania regional map](https://religionmap.org/apps/regions/ro/)
+- [Slovakia regional map](https://religionmap.org/apps/regions/sk/)
+- [South Korea regional map](https://religionmap.org/apps/regions/kr/)
+- [United Kingdom regional map](https://religionmap.org/apps/regions/uk/)
+- [United States regional map](https://religionmap.org/apps/regions/us/)
+- [Vanuatu regional map](https://religionmap.org/apps/regions/vu/)
 - [Roadmap](ROADMAP.md)
 - [System map](docs/system-map.md)
 - [FAQ](FAQ.md)
@@ -38,11 +38,11 @@ Instructions are audience-addressed under [docs/people/](docs/people/):
 
 ## Ongoing Work
 
-- **[RA assignment: New Zealand 50-case workpack](https://www.placesmap.org/apps/regions/nz/verification.html)**
-- **[Reviewer portal: New Zealand submitted evidence](https://www.placesmap.org/apps/regions/nz/review.html)**,
+- **[RA assignment: New Zealand 50-case workpack](https://religionmap.org/apps/regions/nz/verification.html)**
+- **[Reviewer portal: New Zealand submitted evidence](https://religionmap.org/apps/regions/nz/review.html)**,
   currently authorised for JB and JW only.
-- **[Vanuatu source-first test portal](https://www.placesmap.org/apps/regions/vu/verification.html)**
-- **[Reviewer portal: Vanuatu submitted evidence](https://www.placesmap.org/apps/regions/vu/review.html)**,
+- **[Vanuatu source-first test portal](https://religionmap.org/apps/regions/vu/verification.html)**
+- **[Reviewer portal: Vanuatu submitted evidence](https://religionmap.org/apps/regions/vu/review.html)**,
   currently a test surface over the shared review layer.
 
 

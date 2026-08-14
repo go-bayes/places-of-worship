@@ -142,7 +142,7 @@ export function App() {
     <>
       <header className="masthead">
         <span className="wordmark">
-          <a href="https://www.placesmap.org/">Places of Worship</a>
+          <a href="https://religionmap.org/">Places of Worship</a>
         </span>
         <span className="context">Research Workbench</span>
         <span className="spacer" />

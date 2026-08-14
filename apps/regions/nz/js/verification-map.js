@@ -2425,7 +2425,7 @@ class NzVerificationMap {
             // wants them, and the dismiss/localStorage plumbing is unchanged
             quickstart.innerHTML = `
                 <details class="quickstart" role="note">
-                    <summary><strong>New here? Follow the step-by-step <a href="https://www.placesmap.org/apps/guides/ra.html" target="_blank" rel="noopener">Guide</a>.</strong></summary>
+                    <summary><strong>New here? Follow the step-by-step <a href="https://religionmap.org/apps/guides/ra.html" target="_blank" rel="noopener">Guide</a>.</strong></summary>
                     ${ASSIGNMENT_MODE ? `
                         ${assignmentQuickstartHtml()}
                     ` : `

@@ -41,7 +41,7 @@ verify actual behaviour before deciding).
   link waits for the authenticated portal. Ask; do not assume.
 - `verification.html`/`review.html` are untouched; this is not a
   replacement for their entry points.
-- The workbench is a Vite app: publishing it on placesmap.org requires
+- The workbench is a Vite app: publishing it on religionmap.org requires
   committing `dist/` or a CI build (see `apps/workbench/README.md`) —
   that publish decision is JB's and is a precondition of this playbook.
 

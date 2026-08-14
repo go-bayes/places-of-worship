@@ -6,7 +6,7 @@ demo-mode and unpublished.
 
 This note prepares the two deliberate steps recorded in
 `apps/workbench/README.md`: publishing the built workbench on
-placesmap.org, and binding it to the shared Convex backend with Google
+religionmap.org, and binding it to the shared Convex backend with Google
 sign-in. It exists so each step is a small, reviewable action rather
 than a discovery exercise.
 
@@ -20,14 +20,14 @@ than a discovery exercise.
   `docs/playbooks/free-contribution-portal.md`, verification notes).
   The only persistence is localStorage; the app makes no network calls.
 - The site deploys as static files from `main` via GitHub Pages
-  (`CNAME` → `www.placesmap.org`). There is no CI build.
+  (`CNAME` → `religionmap.org`). There is no CI build.
 - The root `.gitignore` ignores `dist/` globally, which is why the
-  workbench cannot drift onto placesmap.org by accident.
+  workbench cannot drift onto religionmap.org by accident.
 - Google auth already works on the NZ/VU verification pages against the
   hosted Convex deployment (`https://pastel-goshawk-398.convex.cloud`)
   with the public Google client id committed in
   `convex/auth.config.ts`. The OAuth client therefore already
-  authorises the `www.placesmap.org` origin; a published workbench on
+  authorises the `religionmap.org` origin; a published workbench on
   the same origin needs no new OAuth configuration.
 
 ## Step 1 — Publish The Built Workbench (JB decision)
@@ -39,7 +39,7 @@ deploys-static-from-main model intact.
    `dist/` rule.
 2. `npm --prefix apps/workbench run build`, commit `dist/`.
 3. The workbench serves at
-   `https://www.placesmap.org/apps/workbench/dist/` once the branch
+   `https://religionmap.org/apps/workbench/dist/` once the branch
    merges to `main`.
 
 Each workbench change then requires a rebuild-and-commit, which is

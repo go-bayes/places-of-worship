@@ -11,7 +11,7 @@ you sign in with Google, and save your drafts or submissions to the project
 task queue.
 
 Current assigned workpack link:
-<https://www.placesmap.org/apps/regions/nz/verification.html?batch=nz-temporal-ra-workpack-001>
+<https://religionmap.org/apps/regions/nz/verification.html?batch=nz-temporal-ra-workpack-001>
 
 When the page shows the shared task backend at the top, sign in with Google and
 use `Save draft`, `Submit unresolved note`, or `Submit for review`. That is
@@ -68,7 +68,7 @@ enabled or JB explicitly asks you to use the spreadsheet fallback.
 Use this only if JB asks you to sample the open task map rather than work from
 the assigned web workpack.
 
-Open <https://www.placesmap.org/apps/regions/nz/verification.html?full=1>,
+Open <https://religionmap.org/apps/regions/nz/verification.html?full=1>,
 sample 5 to 10 varied cases, and save or submit each useful case. The `?full=1`
 parameter overrides the default workpack and shows the full NZ task map. Aim
 for variety:
@@ -239,13 +239,13 @@ repository templates.
 ## Links
 
 - NZ verification task map (lands on the assigned workpack by default):
-  <https://www.placesmap.org/apps/regions/nz/verification.html>
+  <https://religionmap.org/apps/regions/nz/verification.html>
 - NZ Temporal RA Workpack 001 (explicit workpack link):
-  <https://www.placesmap.org/apps/regions/nz/verification.html?batch=nz-temporal-ra-workpack-001>
+  <https://religionmap.org/apps/regions/nz/verification.html?batch=nz-temporal-ra-workpack-001>
 - Open NZ task map (full, for free sampling outside the workpack):
-  <https://www.placesmap.org/apps/regions/nz/verification.html?full=1>
+  <https://religionmap.org/apps/regions/nz/verification.html?full=1>
 - Read-only feedback view (no action builder):
-  <https://www.placesmap.org/apps/regions/nz/verification.html?demo=0>
+  <https://religionmap.org/apps/regions/nz/verification.html?demo=0>
 - Detailed case guide:
   `docs/ra-map-triage-guide.md`
 
@@ -253,7 +253,7 @@ repository templates.
 
 Unless JB assigns a specific set of sites, sample tasks directly from the full
 task map by opening
-<https://www.placesmap.org/apps/regions/nz/verification.html?full=1>. The bare
+<https://religionmap.org/apps/regions/nz/verification.html?full=1>. The bare
 URL without `?full=1` lands on the assigned workpack and hides the rest of the
 map. Prioritise variety over volume. A useful session might include:
 

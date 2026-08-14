@@ -239,7 +239,7 @@ The first hosted assignment has been seeded as `nz-temporal-ra-workpack-001`.
 Send the RA the assignment link:
 
 ```text
-https://www.placesmap.org/apps/regions/nz/verification.html?batch=nz-temporal-ra-workpack-001
+https://religionmap.org/apps/regions/nz/verification.html?batch=nz-temporal-ra-workpack-001
 ```
 
 The assignment page loads only that batch from Convex. It should not ask the RA
@@ -251,8 +251,8 @@ explicitly chosen the fallback path.
 The temporary Vanuatu entry points are:
 
 ```text
-https://www.placesmap.org/apps/regions/vu/verification.html
-https://www.placesmap.org/apps/regions/vu/review.html
+https://religionmap.org/apps/regions/vu/verification.html
+https://religionmap.org/apps/regions/vu/review.html
 ```
 
 They route into the shared static task and reviewer pages with `country=vu`.

@@ -101,7 +101,7 @@ That JSON contains exactly the `batch` and `tasks` arguments for
 After the seed is imported into Convex and the static map client is enabled,
 the RA assignment link is:
 
-<https://www.placesmap.org/apps/regions/nz/verification.html?batch=nz-temporal-ra-workpack-001>
+<https://religionmap.org/apps/regions/nz/verification.html?batch=nz-temporal-ra-workpack-001>
 
 ## How André Should Use It
 

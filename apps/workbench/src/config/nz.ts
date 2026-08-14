@@ -9,7 +9,7 @@ export const nz: CountryConfig = {
   lifecycleFloorYear: 1800,
   mapCenter: [174.0, -41.0],
   mapZoom: 5.2,
-  researchMapHref: "https://www.placesmap.org/apps/regions/nz/",
+  researchMapHref: "https://religionmap.org/apps/regions/nz/",
   raGuidance: [
     "Record what the source states, not what you infer. Leave unknown dates blank and explain uncertainty in the evidence note.",
     "For historic sites, record the address as the source gives it and choose the geocoding basis that matches how you placed it on the modern map.",

@@ -10,7 +10,7 @@ export const vu: CountryConfig = {
   lifecycleFloorYear: 1600,
   mapCenter: [167.2, -16.0],
   mapZoom: 6.0,
-  researchMapHref: "https://www.placesmap.org/apps/regions/vu/",
+  researchMapHref: "https://religionmap.org/apps/regions/vu/",
   raGuidance: [
     "Source-first: start from the document, then place the site. A record without modern coordinates is still valuable — choose the geocoding basis honestly.",
     "Mission-era sources use older place names; record the name as written and add the modern locality where known.",

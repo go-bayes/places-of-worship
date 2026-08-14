@@ -2,8 +2,8 @@
 
 Entry points (authorised for JB and JW):
 
-- **[NZ review portal](https://www.placesmap.org/apps/regions/nz/review.html)**
-- **[Vanuatu review portal](https://www.placesmap.org/apps/regions/vu/review.html)**
+- **[NZ review portal](https://religionmap.org/apps/regions/nz/review.html)**
+- **[Vanuatu review portal](https://religionmap.org/apps/regions/vu/review.html)**
 
 ## What a decision means
 
