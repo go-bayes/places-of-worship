@@ -32,7 +32,15 @@ export function TaskList(props: {
         <div
           key={task.taskId}
           className={`task-item${task.taskId === props.selectedTaskId ? " selected" : ""}`}
+          role="button"
+          tabIndex={0}
           onClick={() => props.onSelect(task.taskId)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              props.onSelect(task.taskId);
+            }
+          }}
         >
           <div className="task-name">{task.siteName ?? task.taskId}</div>
           <div className="task-meta">

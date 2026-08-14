@@ -59,6 +59,38 @@ export function App() {
 
   const country = useMemo(() => getCountry(countryCode), [countryCode]);
 
+  // dirty draft guard (finding 6): the editors are keyed, so task and view
+  // switches unmount them and discard in-memory edits. a ref rather than
+  // state lets navigation handlers consult the current value without
+  // re-rendering on every keystroke
+  const dirtyRef = useRef(false);
+  const setDirty = useCallback((dirty: boolean) => {
+    dirtyRef.current = dirty;
+  }, []);
+
+  // ask before any navigation that would unmount an editor with unsaved
+  // edits; a confirmed leave clears the flag so it cannot linger
+  const confirmDiscard = useCallback(() => {
+    if (!dirtyRef.current) return true;
+    const leave = window.confirm(
+      "You have unsaved edits. Leave without saving? Your changes will be discarded.",
+    );
+    if (leave) dirtyRef.current = false;
+    return leave;
+  }, []);
+
+  // warn on tab close or reload while an editor holds unsaved edits
+  useEffect(() => {
+    const handler = (event: BeforeUnloadEvent) => {
+      if (!dirtyRef.current) return;
+      event.preventDefault();
+      // legacy path for browsers that ignore preventDefault
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, []);
+
   const refresh = useCallback(async () => {
     setTasks(await provider.listTasks(countryCode));
     const work = await provider.listMyWork(countryCode);
@@ -149,7 +181,11 @@ export function App() {
         <select
           aria-label="Country"
           value={countryCode}
-          onChange={(e) => setCountryCode(e.target.value)}
+          onChange={(e) => {
+            // a country change resets selection and unmounts any open editor
+            if (!confirmDiscard()) return;
+            setCountryCode(e.target.value);
+          }}
         >
           {Object.values(countries).map((c) => (
             <option key={c.countryCode} value={c.countryCode}>
@@ -168,6 +204,7 @@ export function App() {
             className={view === "nominate" ? undefined : "secondary"}
             style={{ width: "100%", marginBottom: 10 }}
             onClick={() => {
+              if (!confirmDiscard()) return;
               setView("nominate");
               setSelectedTaskId(null);
               setOpenRecord(null);
@@ -179,6 +216,9 @@ export function App() {
             <button
               className={view === "tasks" ? undefined : "secondary"}
               onClick={() => {
+                // only an open My-work record unmounts here; a selected
+                // task's editor survives the view switch
+                if (openRecord && !confirmDiscard()) return;
                 setView("tasks");
                 setOpenRecord(null);
               }}
@@ -188,6 +228,7 @@ export function App() {
             <button
               className={view === "my_work" ? undefined : "secondary"}
               onClick={() => {
+                if (openRecord && !confirmDiscard()) return;
                 setView("my_work");
                 setOpenRecord(null);
               }}
@@ -199,6 +240,7 @@ export function App() {
             className={view === "import" ? undefined : "secondary"}
             style={{ width: "100%", marginBottom: 10 }}
             onClick={() => {
+              if (!confirmDiscard()) return;
               setView("import");
               setSelectedTaskId(null);
               setOpenRecord(null);
@@ -211,6 +253,10 @@ export function App() {
               tasks={activeTasks}
               selectedTaskId={selectedTaskId}
               onSelect={(taskId) => {
+                // reselecting the open task keeps the editor mounted, so it
+                // needs no guard
+                if (taskId === selectedTaskId) return;
+                if (!confirmDiscard()) return;
                 setSelectedTaskId(taskId);
                 setOpenRecord(null);
               }}
@@ -222,10 +268,17 @@ export function App() {
                 drafts={myWork}
                 openDraftId={openRecord?.draft.draftId ?? null}
                 onNominate={() => {
+                  // nominate unmounts whichever editor is open, like its siblings
+                  if (!confirmDiscard()) return;
                   setView("nominate");
                   setOpenRecord(null);
                 }}
-                onOpen={(draft) => void openMyWorkRecord(draft)}
+                onOpen={(draft) => {
+                  // reopening the open record keeps the editor mounted
+                  if (draft.draftId === openRecord?.draft.draftId) return;
+                  if (!confirmDiscard()) return;
+                  void openMyWorkRecord(draft);
+                }}
               />
             </>
           )}
@@ -236,7 +289,10 @@ export function App() {
               <button
                 className="tertiary"
                 style={{ marginBottom: 10 }}
-                onClick={() => setOpenRecord(null)}
+                onClick={() => {
+                  if (!confirmDiscard()) return;
+                  setOpenRecord(null);
+                }}
               >
                 Back to My work
               </button>
@@ -252,6 +308,7 @@ export function App() {
                 provider={provider}
                 draft={openRecord.draft}
                 onDraftChange={(draft) => setOpenRecord({ task: openRecord.task, draft })}
+                onDirtyChange={setDirty}
                 onChanged={refresh}
                 allowSkip={false}
                 showTaskHeader={false}
@@ -272,6 +329,7 @@ export function App() {
               task={selectedTask}
               country={country}
               provider={provider}
+              onDirtyChange={setDirty}
               onChanged={refresh}
             />
           ) : (

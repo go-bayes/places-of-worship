@@ -1535,6 +1535,15 @@ class NzVerificationMap {
         this.myWorkItems = [];
         this.revisionDraftIdsByTaskId = new Map();
         this.backendLastError = "";
+        // unsaved-entry protection: dirty flag for the evidence form plus
+        // per-task snapshots reapplied after programmatic rebuilds
+        this.formDirty = false;
+        this.formDirtyTaskId = null;
+        this.formSnapshotsByTaskId = new Map();
+        // my work list: show every item or just the recent slice
+        this.myWorkShowAll = false;
+        // transient signed-in card status, e.g. refresh feedback
+        this.backendTransientStatus = "";
         // which task's issue form should render expanded (survives re-renders)
         this.issueFormOpenTaskId = null;
         // pin-drop nomination state: mode flag, live marker, confirmed
@@ -1738,7 +1747,8 @@ class NzVerificationMap {
                     this.renderBackendPanel();
                     this.applyFilters();
                     if (this.selectedTask) {
-                        this.renderDetail(this.selectedTask);
+                        // sign-in after an expired save must not wipe typed values
+                        this.renderDetailPreservingForm(this.selectedTask);
                     }
                 },
                 onError: error => {
@@ -1761,20 +1771,44 @@ class NzVerificationMap {
                 <strong>${ASSIGNMENT_MODE ? "Signed in. Choose a task below." : "Shared task backend"}</strong>
                 ${assignmentLabel}
                 <span>Signed in as ${escapeHtml(label)}. ${escapeHtml(assignmentStatusText)}</span>
+                <span id="backendRefreshStatus" class="copy-status" aria-live="polite">${escapeHtml(this.backendTransientStatus || "")}</span>
                 <div class="backend-actions">
                     <button type="button" class="secondary" id="refreshBackendTasksButton">Refresh task list</button>
                     <button type="button" class="tertiary" id="signOutButton">Sign out</button>
                 </div>
             </div>
         `;
-        document.getElementById("refreshBackendTasksButton")?.addEventListener("click", async () => {
+        document.getElementById("refreshBackendTasksButton")?.addEventListener("click", async event => {
+            // lock the button for the flight; the refresh re-renders this
+            // card, so the outcome reports through the fresh copy
+            const button = event.currentTarget;
+            button.disabled = true;
             await this.refreshBackendTasks();
+            // if the refresh bailed early without re-rendering, unlock
+            if (button.isConnected) button.disabled = false;
             this.applyFilters();
             if (this.selectedTask) {
-                this.renderDetail(this.selectedTask);
+                this.renderDetailPreservingForm(this.selectedTask);
             }
+            this.setBackendTransientStatus(this.backendLastError
+                ? this.backendLastError
+                : `Task list refreshed — ${this.tasks.length} available, ${this.myWorkItems.length} in My work.`);
         });
         document.getElementById("signOutButton")?.addEventListener("click", () => this.signOutBackend());
+    }
+
+    // transient status line on the signed-in card; clears itself so stale
+    // refresh feedback never lingers
+    setBackendTransientStatus(text) {
+        this.backendTransientStatus = text;
+        const statusEl = document.getElementById("backendRefreshStatus");
+        if (statusEl) statusEl.textContent = text;
+        clearTimeout(this._backendStatusTimer);
+        this._backendStatusTimer = setTimeout(() => {
+            this.backendTransientStatus = "";
+            const current = document.getElementById("backendRefreshStatus");
+            if (current) current.textContent = "";
+        }, 6000);
     }
 
     signOutBackend() {
@@ -1784,6 +1818,10 @@ class NzVerificationMap {
         this.latestDraftsByTaskId.clear();
         this.myWorkItems = [];
         this.revisionDraftIdsByTaskId.clear();
+        // sign-out discards the form with the panel; a lingering dirty flag
+        // would fire beforeunload against a page showing no form at all
+        this.clearFormDirty();
+        this.formSnapshotsByTaskId.clear();
         this.backendLastError = "Signed out here. On a shared computer, also sign out of Google in the browser.";
         if (ASSIGNMENT_MODE) {
             this.tasks = [];
@@ -1804,6 +1842,14 @@ class NzVerificationMap {
         this.setupMap();
         this.setupPageMode();
         this.setupFilters();
+        // browser-level guard while typed evidence is unsaved
+        window.addEventListener("beforeunload", event => {
+            if (!this.formDirty) return;
+            event.preventDefault();
+            event.returnValue = "";
+        });
+        // keyboard starts: cmd/ctrl+enter submits, plain "n" opens the next task
+        document.addEventListener("keydown", event => this.handleGlobalKeydown(event));
         this.renderBackendPanel();
         await this.loadTasks();
         await this.refreshBackendTasks();
@@ -1895,12 +1941,19 @@ class NzVerificationMap {
                     <div class="session-empty">No saved, submitted, skipped, or reviewed tasks yet.</div>
                 ` : `
                     <div class="session-entries" role="list">
-                        ${items.slice(0, SESSION_RECENT_LIMIT).map(item => this.myWorkEntryHtml(item)).join("")}
+                        ${(this.myWorkShowAll ? items : items.slice(0, SESSION_RECENT_LIMIT)).map(item => this.myWorkEntryHtml(item)).join("")}
                     </div>
+                    ${total > SESSION_RECENT_LIMIT ? `
+                        <button type="button" class="secondary" id="myWorkShowAllButton">${this.myWorkShowAll ? `Show recent ${SESSION_RECENT_LIMIT} only` : `Show all ${total}`}</button>
+                    ` : ""}
                     <div class="session-empty">Submitted and reviewed work stays here so you do not repeat it. Revise only when you have new evidence or need to correct a mistake.</div>
                 `}
             </details>
         `;
+        document.getElementById("myWorkShowAllButton")?.addEventListener("click", () => {
+            this.myWorkShowAll = !this.myWorkShowAll;
+            this.renderMyWorkPanel(panel);
+        });
         panel.querySelectorAll(".my-work-open").forEach(btn => {
             btn.addEventListener("click", () => this.selectTaskById(btn.dataset.taskId, { focusDetail: true }));
         });
@@ -2491,7 +2544,8 @@ class NzVerificationMap {
                 // the note copy carries the year, so refresh it too
                 this.updatePointsNote();
                 if (this.selectedTask) {
-                    this.renderDetail(this.selectedTask);
+                    // same-task rebuild: carry typed values across the re-render
+                    this.renderDetailPreservingForm(this.selectedTask);
                 }
             });
         }
@@ -2865,6 +2919,15 @@ class NzVerificationMap {
     }
 
     selectTask(feature, fromMarker, options = {}) {
+        // switching tasks rebuilds the form; confirm before typed work is lost
+        const nextTaskId = feature?.properties?.task_id || "";
+        if (this.formDirty && this.formDirtyTaskId && this.formDirtyTaskId !== nextTaskId) {
+            if (!window.confirm("You have unsaved evidence on the current task. Discard it and open the other task?")) {
+                return;
+            }
+            this.formSnapshotsByTaskId.delete(this.formDirtyTaskId);
+            this.clearFormDirty();
+        }
         this.selectedTask = feature;
         const props = feature.properties || {};
         const coordinates = feature.geometry?.coordinates || [];
@@ -2879,11 +2942,12 @@ class NzVerificationMap {
         }
 
         this.renderTaskList();
-        this.renderDetail(feature);
+        this.renderDetailPreservingForm(feature);
         if (this.backend?.signedIn && props.task_id && !this.latestDraftsByTaskId.has(props.task_id)) {
             this.loadLatestDraftForTask(props.task_id).then(() => {
                 if (this.selectedTask?.properties?.task_id === props.task_id) {
-                    this.renderDetail(this.selectedTask);
+                    // async draft load re-renders; keep anything typed meanwhile
+                    this.renderDetailPreservingForm(this.selectedTask);
                     if (options.focusDetail) {
                         this.focusDetailPanel();
                     }
@@ -3291,6 +3355,84 @@ class NzVerificationMap {
         `;
     }
 
+    // mark the evidence form as carrying unsaved typed work for a task
+    markFormDirty(taskId) {
+        this.formDirty = true;
+        this.formDirtyTaskId = taskId || this.selectedTask?.properties?.task_id || null;
+    }
+
+    clearFormDirty() {
+        this.formDirty = false;
+        this.formDirtyTaskId = null;
+    }
+
+    // snapshot the typed form as a draft-shaped object so applyDraftToForm
+    // can reapply it after a programmatic rebuild
+    snapshotFormForTask(taskId) {
+        if (!taskId || !document.getElementById("raActionSelect")) return;
+        const values = this.currentFormValues();
+        this.formSnapshotsByTaskId.set(taskId, {
+            action: values.action,
+            target_year_statuses: values.targetYearStatuses,
+            source_type: values.sourceType,
+            existence_status: values.existenceStatus,
+            worship_use_status: values.rawWorshipUseStatus,
+            assessment_confidence: values.assessmentConfidence,
+            match_confidence: values.matchConfidence,
+            geocoding_confidence: values.geocodingConfidence,
+            provider: values.sourceProvider,
+            source_title: values.sourceTitle,
+            source_date_or_capture_date: values.sourceDate,
+            address_raw: values.addressRaw,
+            locality_raw: values.localityRaw,
+            address_change_note: values.addressNote,
+            lifecycle_event: values.lifecycleEvent,
+            lifecycle_date: values.lifecycleDate,
+            lifecycle_date_precision: values.lifecycleDatePrecision,
+            lifecycle_note: values.lifecycleNote,
+            change_class: values.changeClass,
+            source_url_or_file: values.sourceUrl,
+            related_ids_or_note: values.relatedIds,
+            evidence_note: values.note,
+        });
+    }
+
+    // re-render the detail panel without losing typed-but-unsaved values;
+    // use for same-task programmatic rebuilds (year change, refresh, sign-in)
+    renderDetailPreservingForm(feature) {
+        const taskId = feature?.properties?.task_id;
+        if (taskId && this.formDirty && this.formDirtyTaskId === taskId) {
+            this.snapshotFormForTask(taskId);
+        }
+        this.renderDetail(feature);
+    }
+
+    // cmd/ctrl+enter submits the open evidence form; plain "n" on the
+    // confirmation pane opens the next task when no field has focus
+    handleGlobalKeydown(event) {
+        if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+            const withinForm = event.target?.closest?.(".review-form");
+            if (!withinForm) return;
+            // the shortcut always means submit, never newline: prevent the
+            // textarea default even while the in-flight save has it locked
+            event.preventDefault();
+            const submitButton = document.getElementById("submitReviewButton");
+            if (submitButton && !submitButton.disabled) {
+                submitButton.click();
+            }
+            return;
+        }
+        if (event.key === "n" && !event.metaKey && !event.ctrlKey && !event.altKey) {
+            const tag = (document.activeElement?.tagName || "").toLowerCase();
+            if (tag === "input" || tag === "select" || tag === "textarea") return;
+            const nextButton = document.getElementById("openNextTaskButton");
+            if (nextButton) {
+                event.preventDefault();
+                nextButton.click();
+            }
+        }
+    }
+
     renderDetail(feature) {
         const props = { ...(feature.properties || {}) };
         const coordinates = feature.geometry?.coordinates || [];
@@ -3586,7 +3728,13 @@ class NzVerificationMap {
             "denomination_or_shared_use",
             COUNTRY_CONFIG.temporalLossAction.value,
         ]);
-        hint.hidden = !closureActions.has(action);
+        const implied = closureActions.has(action);
+        hint.hidden = !implied;
+        // a closure-implying action should surface the collapsed lifecycle block
+        if (implied) {
+            const block = document.getElementById("lifecycleBlockDetails");
+            if (block) block.open = true;
+        }
     }
 
     // returns " If your filters hide the next task, clear them above the list."
@@ -3714,6 +3862,12 @@ class NzVerificationMap {
         const skipControl = ASSIGNMENT_MODE
             ? (assignmentTaskAvailable && !readOnly && !revisionMode ? this.skipFormHtml() : "")
             : this.skipFormHtml();
+        // collapsed optional blocks open when the saved draft or a pending
+        // unsaved snapshot already carries values for them
+        const prefill = this.formSnapshotsByTaskId.get(taskId) || this.latestDraftForTask(taskId) || {};
+        const addressOpen = Boolean(prefill.address_raw || prefill.locality_raw || prefill.address_change_note);
+        const lifecycleOpen = Boolean(prefill.lifecycle_event || prefill.lifecycle_date || prefill.lifecycle_note);
+        const relatedOpen = Boolean(prefill.related_ids_or_note);
         return `
             <h3>2. Choose what your evidence shows</h3>
             <div class="review-form">
@@ -3783,53 +3937,57 @@ class NzVerificationMap {
                     Source date or imagery capture date
                     <input id="sourceDateInput" type="text" placeholder="e.g. 2018-09, 2023, or 2026-05-03 for a field visit">
                 </label>
-                <h3>Address or locality</h3>
-                <div class="copy-help">
-                    Use these fields when the task says the street address is missing or a source gives a better address than the map record. Leave them blank if your evidence is about worship use only.
-                </div>
-                <div class="field-grid">
+                <details class="skip-form optional-block" id="addressBlockDetails"${addressOpen ? " open" : ""}>
+                    <summary>Address or locality (optional)</summary>
+                    <div class="copy-help">
+                        Use these fields when the task says the street address is missing or a source gives a better address than the map record. Leave them blank if your evidence is about worship use only.
+                    </div>
+                    <div class="field-grid">
+                        <label>
+                            Street address found
+                            <input id="addressRawInput" type="text" placeholder="${escapeHtml(props.address || "e.g. 12 Example Street")}">
+                        </label>
+                        <label>
+                            Locality found
+                            <input id="localityRawInput" type="text" placeholder="${escapeHtml(props.locality || "suburb, town, or city")}">
+                        </label>
+                    </div>
                     <label>
-                        Street address found
-                        <input id="addressRawInput" type="text" placeholder="${escapeHtml(props.address || "e.g. 12 Example Street")}">
+                        Address note
+                        <input id="addressNoteInput" type="text" placeholder="e.g. source gives street address; map point remains approximate">
                     </label>
-                    <label>
-                        Locality found
-                        <input id="localityRawInput" type="text" placeholder="${escapeHtml(props.locality || "suburb, town, or city")}">
-                    </label>
-                </div>
-                <label>
-                    Address note
-                    <input id="addressNoteInput" type="text" placeholder="e.g. source gives street address; map point remains approximate">
-                </label>
-                <h3>Optional opening, closure, or later change</h3>
-                <div class="copy-help">
-                    Use this when the source gives a dated opening, closure, first/last seen, relocation, demolition, or later worship-function change. For example, use <em>Use changed / shared use began</em> for evidence that a site became multi-denominational in 2024.
-                </div>
-                <div class="copy-help action-closure-hint" id="closureLifecycleHint" hidden>
-                    <strong>Lifecycle date helps:</strong> for this action, please record an opening, closure, or changed-use date if the source gives one. If the date is bracketed, use <em>not earlier than</em> or <em>not later than</em> in the event note. If only a year is supported, set the precision to <em>Year</em> or <em>Bounded / inferred</em>.
-                </div>
-                <div class="field-grid">
-                    <label>
-                        Event type
-                        <select id="lifecycleEventSelect">
-                            ${selectOptionsHtml(LIFECYCLE_EVENT_OPTIONS, "")}
-                        </select>
-                    </label>
-                    <label>
-                        Event date
-                        <input id="lifecycleDateInput" type="text" placeholder="YYYY, YYYY-MM, or YYYY-MM-DD">
-                    </label>
-                    <label>
-                        Date precision
-                        <select id="lifecycleDatePrecisionSelect">
-                            ${selectOptionsHtml(DATE_PRECISION_OPTIONS, "year")}
-                        </select>
-                    </label>
-                    <label>
-                        Opening/closure/change note
-                        <input id="lifecycleNoteInput" type="text" placeholder="e.g. source says shared Anglican/Methodist use began in 2024">
-                    </label>
-                </div>
+                </details>
+                <details class="skip-form optional-block" id="lifecycleBlockDetails"${lifecycleOpen ? " open" : ""}>
+                    <summary>Optional opening, closure, or later change</summary>
+                    <div class="copy-help">
+                        Use this when the source gives a dated opening, closure, first/last seen, relocation, demolition, or later worship-function change. For example, use <em>Use changed / shared use began</em> for evidence that a site became multi-denominational in 2024.
+                    </div>
+                    <div class="copy-help action-closure-hint" id="closureLifecycleHint" hidden>
+                        <strong>Lifecycle date helps:</strong> for this action, please record an opening, closure, or changed-use date if the source gives one. If the date is bracketed, use <em>not earlier than</em> or <em>not later than</em> in the event note. If only a year is supported, set the precision to <em>Year</em> or <em>Bounded / inferred</em>.
+                    </div>
+                    <div class="field-grid">
+                        <label>
+                            Event type
+                            <select id="lifecycleEventSelect">
+                                ${selectOptionsHtml(LIFECYCLE_EVENT_OPTIONS, "")}
+                            </select>
+                        </label>
+                        <label>
+                            Event date
+                            <input id="lifecycleDateInput" type="text" placeholder="YYYY, YYYY-MM, or YYYY-MM-DD">
+                        </label>
+                        <label>
+                            Date precision
+                            <select id="lifecycleDatePrecisionSelect">
+                                ${selectOptionsHtml(DATE_PRECISION_OPTIONS, "year")}
+                            </select>
+                        </label>
+                        <label>
+                            Opening/closure/change note
+                            <input id="lifecycleNoteInput" type="text" placeholder="e.g. source says shared Anglican/Methodist use began in 2024">
+                        </label>
+                    </div>
+                </details>
                 <label>
                     What kind of claim is this?
                     <select id="changeClassSelect">
@@ -3849,10 +4007,13 @@ class NzVerificationMap {
                         <button id="useOsmUrlButton" type="button" class="tertiary" title="Fill the URL field with the OSM record link if your evidence is the OSM record itself">Use OSM URL</button>
                     </div>
                 </div>
-                <label>
-                    Related ids or duplicate note
-                    <input id="relatedIdsInput" type="text" placeholder="Other master/OSM ids, if relevant">
-                </label>
+                <details class="skip-form optional-block" id="relatedIdsBlockDetails"${relatedOpen ? " open" : ""}>
+                    <summary>Related ids or duplicate note (optional)</summary>
+                    <label>
+                        Related ids or duplicate note
+                        <input id="relatedIdsInput" type="text" placeholder="Other master/OSM ids, if relevant">
+                    </label>
+                </details>
                 <label>
                     Evidence note
                     <textarea id="decisionNote" rows="3" placeholder="One or two sentences explaining what the source says about this site at the target year."></textarea>
@@ -3922,11 +4083,24 @@ class NzVerificationMap {
             this.updateClosureLifecycleHint();
             this.updateWorkflowSteps();
         };
-        actionSelect?.addEventListener("change", applyDefaults);
+        // any user edit marks the form dirty so rebuilds and unloads guard it
+        const markDirty = () => this.markFormDirty(props.task_id);
+        actionSelect?.addEventListener("change", () => {
+            markDirty();
+            applyDefaults();
+        });
         applyDefaults();
         const latestDraft = this.latestDraftForTask(props.task_id);
         if (latestDraft) {
             this.applyDraftToForm(latestDraft);
+        }
+        // typed-but-unsaved values snapshotted before a programmatic rebuild
+        // win over the saved draft and stay marked unsaved
+        const snapshot = this.formSnapshotsByTaskId.get(props.task_id);
+        if (snapshot) {
+            this.formSnapshotsByTaskId.delete(props.task_id);
+            this.applyDraftToForm(snapshot);
+            this.markFormDirty(props.task_id);
         }
         this.updateClosureLifecycleHint();
 
@@ -3987,6 +4161,7 @@ class NzVerificationMap {
         if (note) {
             note.addEventListener("input", () => {
                 note.dataset.touched = "1";
+                markDirty();
                 this.updateWorkflowSteps();
             });
         }
@@ -4011,11 +4186,15 @@ class NzVerificationMap {
             "matchConfidenceSelect",
             "geocodingConfidenceSelect",
         ].forEach(id => {
-            document.getElementById(id)?.addEventListener("input", () => this.updateWorkflowSteps());
+            document.getElementById(id)?.addEventListener("input", () => {
+                markDirty();
+                this.updateWorkflowSteps();
+            });
             document.getElementById(id)?.addEventListener("change", event => {
                 if (id.endsWith("Select") && !id.startsWith("source")) {
                     event.target.dataset.touched = "1";
                 }
+                markDirty();
                 this.updateWorkflowSteps();
             });
         });
@@ -4031,6 +4210,7 @@ class NzVerificationMap {
         });
         TARGET_YEARS.forEach(year => {
             document.getElementById(`status${year}`)?.addEventListener("change", () => {
+                markDirty();
                 this.applyControlledAssessmentDefaults();
                 this.updateWorkflowSteps();
             });
@@ -4109,6 +4289,9 @@ class NzVerificationMap {
         setValue("sourceUrlInput", draft.source_url_or_file, false);
         setValue("relatedIdsInput", draft.related_ids_or_note, false);
         setValue("decisionNote", draft.evidence_note, true);
+        // the form now mirrors a known baseline; snapshot reapply re-marks
+        // it dirty afterwards because those values are still unsaved
+        this.clearFormDirty();
         this.updateWorkflowSteps();
     }
 
@@ -4465,6 +4648,11 @@ class NzVerificationMap {
         const latestKnownDraft = this.latestDraftsByTaskId.get(props.task_id);
         const revisionDraftId = this.revisionDraftIdsByTaskId.get(props.task_id)
             || (latestKnownDraft?.draft_status === "draft" ? latestKnownDraft.evidence_draft_id : undefined);
+        // lock the write buttons for the flight so a slow save cannot double-fire
+        const writeButtons = ["saveDraftButton", "submitUnresolvedButton", "submitReviewButton"]
+            .map(id => document.getElementById(id))
+            .filter(Boolean);
+        writeButtons.forEach(button => { button.disabled = true; });
         try {
             if (status) {
                 status.textContent = unresolved
@@ -4502,6 +4690,9 @@ class NzVerificationMap {
                 evidence_draft_id: saved.evidence_draft_id,
                 draft_status: unresolved ? "unresolved_note" : submit ? "submitted" : "draft",
             });
+            // the typed values are persisted; drop the dirty guard and snapshot
+            this.clearFormDirty();
+            this.formSnapshotsByTaskId.delete(props.task_id);
             if ((unresolved || submit) && revisionDraftId) {
                 this.revisionDraftIdsByTaskId.delete(props.task_id);
             }
@@ -4541,6 +4732,8 @@ class NzVerificationMap {
                 this.renderBackendPanel();
             }
             if (status) status.textContent = `${error.message || "Backend save failed."} Nothing was saved.`;
+        } finally {
+            writeButtons.forEach(button => { button.disabled = false; });
         }
     }
 
@@ -5073,6 +5266,9 @@ class NzVerificationMap {
                     reason: reason || undefined,
                 });
                 this.taskHistoryByTaskId.delete(props.task_id);
+                // the skip intentionally discards any typed values for this task
+                this.clearFormDirty();
+                this.formSnapshotsByTaskId.delete(props.task_id);
                 await this.refreshBackendTasks();
                 // a recorded skip closes the task for this ra too: same
                 // return-to-list as submit, with skip wording
