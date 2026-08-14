@@ -20,6 +20,12 @@ if (!RC) {
 }
 document.title = RC.title;
 
+// depth-sensitive bases: country pages sit one level deeper than the
+// global map, so every hub/handoff/manifest path rides regionsBase and
+// the taxonomy rides schemaBase — no runtime path counting
+const REGIONS_BASE = RC.regionsBase || "../";
+const SCHEMA_BASE = RC.schemaBase || "../../../schemas/";
+
 // ── page chrome ─────────────────────────────────────────────────────
 // injected rather than authored per country so the structure cannot
 // drift between forks; only the copy (onboarding, wordmark links) comes
@@ -40,65 +46,20 @@ document.title = RC.title;
     .join("\n      ");
   // wordmark: config links lead; the fix-map link and theme select are shared
   const wordmarkLinks = (RC.wordmarkLinks || [])
-    .map((link) => `<a id="${link.id}" href="${link.href}" title="${link.title}">${link.label}</a>`)
+    .map((link) => `<a id="${link.id}" href="${link.href}" ${link.external ? 'target="_blank" rel="noopener" ' : ""}title="${link.title}">${link.label}</a>`)
     .join("\n    ");
-  root.innerHTML = `
-  <div id="map"></div>
-  <div id="tile-status">Loading tiles…</div>
-  <div id="click-hint" class="shell-toast" role="status" aria-live="polite"></div>
-  <div id="onboard" role="dialog" aria-label="About this map">
-    <h3>${RC.onboarding.title}</h3>
-    <p>${RC.onboarding.intro}</p>
-    <ul>
-      ${onboardBullets}
-    </ul>
-    <div class="onboard-actions">
-      ${onboardLinks}
-      <button type="button" id="onboard-dismiss">Got it</button>
-    </div>
-  </div>
-  <div id="wordmark" class="shell-pill shell-top-right shell-divided">
-    ${wordmarkLinks}
-    <a id="fixmap-link" href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener" title="Improve this map area on OpenStreetMap">fix OSM map</a>
-    <select id="basemapSelect" class="shell-pill-select" aria-label="Theme"></select>
-  </div>
-  <button id="corner-reset" class="shell-pill shell-top-right" type="button" aria-label="Set North">
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M12 3L17 12L7 12L12 3Z" fill="#ef4444"/>
-      <path d="M7 12L17 12L12 21L7 12Z" fill="currentColor" opacity="0.45"/>
-      <text x="12" y="15" text-anchor="middle" font-size="8.5" font-weight="800" fill="#f8fafc" font-family="system-ui, sans-serif">N</text>
-    </svg>
-  </button>
-  <button id="corner-refresh" class="shell-pill shell-bottom-left" type="button" aria-label="Reset map" title="Reset map">
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 12a9 9 0 1 1-2.64-6.36"/>
-      <polyline points="21 3 21 9 15 9"/>
-    </svg>
-  </button>
-  <div id="bottom-actions" class="shell-bottom-centre">
-    <button id="dock-toggle" class="shell-pill" type="button">Search &amp; Filters</button>
-    <button id="filters-clear" class="shell-pill" type="button" hidden aria-label="Clear filters"></button>
-    <button id="near-me" class="shell-pill" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
-    <div id="datamaps-pill" class="shell-pill" aria-live="polite">
-      <a id="datamaps-go" href="../" title="Country data maps"><span class="dm-label-long">Data Maps</span><span class="dm-label-short">Data</span></a>
-      <button id="datamaps-caret" type="button" aria-label="Search all country data maps"><span class="dm-caret-word">Countries</span><span class="dm-caret-glyph" aria-hidden="true">▴</span></button>
-    </div>
-  </div>
-  <!-- top-left: the denomination key for the place dots -->
-  <div id="top-left-controls">
-  <div id="key-wrap">
-    <div id="counts-bar">
-      <button id="counts-toggle" class="shell-pill" type="button" aria-controls="counts" aria-expanded="false">Show Denomination Key</button>
-    </div>
-    <div id="counts">
-      <h3>Visible Places</h3>
-      <div id="countsHint">Zoom in for key</div>
-      <ul id="countsList"></ul>
-      <div class="count-total" id="countsTotal">Total: 0</div>
-    </div>
-  </div>
-  </div>
-  <!-- census data control: options, colour key and time slider; front and
+  // key wrapper: the global map keeps its top-centre #counts-wrap (styled
+  // by maplibre-flat.css, which every surface loads); country pages keep
+  // #top-left-controls verbatim (styled by region-map.css)
+  const keyWrapOpen = RC.keyPlacement === "top-centre"
+    ? `<div id="counts-wrap" class="shell-top-centre">`
+    : `<div id="top-left-controls">`;
+  // census chrome renders only where a page declares census or overlay
+  // data; tested on RC directly because the chrome renders before
+  // CENSUS_LEVELS binds. a censusless page (the global map) gets no
+  // census element at all, which is what keeps the census machinery inert
+  const hasCensusConfig = Boolean(RC.censusLevels || RC.overlays);
+  const censusChrome = hasCensusConfig ? `  <!-- census data control: options, colour key and time slider; front and
        centre (jb 2026-07-09) now the top strip has room. the pill is split:
        the census-data half toggles the panel, the points half is the place-
        dot mode select promoted out of the panel so it cannot be missed -->
@@ -146,7 +107,64 @@ document.title = RC.title;
       </details>
     </div>
   </div>
+  </div>` : "";
+  root.innerHTML = `
+  <div id="map"></div>
+  <div id="tile-status">Loading tiles…</div>
+  <div id="click-hint" class="shell-toast" role="status" aria-live="polite"></div>
+  <div id="onboard" role="dialog" aria-label="${RC.onboarding.ariaLabel || "About this map"}">
+    <h3>${RC.onboarding.title}</h3>
+    <p>${RC.onboarding.intro}</p>
+    <ul>
+      ${onboardBullets}
+    </ul>
+    <div class="onboard-actions">
+      ${onboardLinks}
+      <button type="button" id="onboard-dismiss">Got it</button>
+    </div>
   </div>
+  <div id="wordmark" class="shell-pill shell-top-right shell-divided">
+    ${wordmarkLinks}
+    <a id="fixmap-link" href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener" title="Improve this map area on OpenStreetMap">fix OSM map</a>
+    <select id="basemapSelect" class="shell-pill-select" aria-label="Theme"></select>
+  </div>
+  <button id="corner-reset" class="shell-pill shell-top-right" type="button" aria-label="Set North">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 3L17 12L7 12L12 3Z" fill="#ef4444"/>
+      <path d="M7 12L17 12L12 21L7 12Z" fill="currentColor" opacity="0.45"/>
+      <text x="12" y="15" text-anchor="middle" font-size="8.5" font-weight="800" fill="#f8fafc" font-family="system-ui, sans-serif">N</text>
+    </svg>
+  </button>
+  <button id="corner-refresh" class="shell-pill shell-bottom-left" type="button" aria-label="Reset map" title="Reset map">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 12a9 9 0 1 1-2.64-6.36"/>
+      <polyline points="21 3 21 9 15 9"/>
+    </svg>
+  </button>
+  <div id="bottom-actions" class="shell-bottom-centre">
+    <button id="dock-toggle" class="shell-pill" type="button">Search &amp; Filters</button>
+    <button id="filters-clear" class="shell-pill" type="button" hidden aria-label="Clear filters"></button>
+    <button id="near-me" class="shell-pill" type="button" aria-pressed="false"><span class="nm-dot"></span><span>Near Me</span></button>
+    <div id="datamaps-pill" class="shell-pill" aria-live="polite">
+      <a id="datamaps-go" href="${REGIONS_BASE}" title="Country data maps"><span class="dm-label-long">Data Maps</span><span class="dm-label-short">Data</span></a>
+      <button id="datamaps-caret" type="button" aria-label="Search all country data maps"><span class="dm-caret-word">Countries</span><span class="dm-caret-glyph" aria-hidden="true">▴</span></button>
+    </div>
+  </div>
+  <!-- top-left: the denomination key for the place dots -->
+  ${keyWrapOpen}
+  <div id="key-wrap">
+    <div id="counts-bar">
+      <button id="counts-toggle" class="shell-pill" type="button" aria-controls="counts" aria-expanded="false">Show Denomination Key</button>
+    </div>
+    <div id="counts">
+      <h3>Visible Places</h3>
+      <div id="countsHint">Zoom in for key</div>
+      <ul id="countsList"></ul>
+      <div class="count-total" id="countsTotal">Total: 0</div>
+    </div>
+  </div>
+  </div>
+${censusChrome}
   <div id="dock">
     <div class="dock-panel">
       <div class="dock-row">
@@ -1600,7 +1618,7 @@ map.on("load", () => {
   // idle fires after the point layers exist, so the choropleth inserts
   // beneath them rather than over the dots
   map.once("idle", async () => {
-    await setCensusEnabled(true);
+    if (HAS_CENSUS) await setCensusEnabled(true);
     // navigation prefetch starts only after the default boundary and summary
     // have completed, so speculative requests never contend with map data
     window.__DATAMAP_FIRST_IDLE__ = true;
@@ -1647,7 +1665,7 @@ if (!IS_MOBILE) {
     const target = e.originalEvent && e.originalEvent.target;
     if (target instanceof Element) {
       const isUiClick = target.closest(
-        "button, a, input, select, textarea, label, #dock, #key-wrap, #census-wrap, #wordmark, #corner-refresh, .maplibregl-ctrl"
+        "button, a, input, select, textarea, label, #dock, #counts-wrap, #key-wrap, #census-wrap, #wordmark, #corner-refresh, .maplibregl-ctrl"
       );
       if (isUiClick) return;
     }
@@ -1691,8 +1709,10 @@ const onboard = document.getElementById("onboard");
 const onboardDismiss = document.getElementById("onboard-dismiss");
 const onboardToggle = document.getElementById("onboard-toggle");
 // per-country dismissal key, so one country's "got it" does not
-// silence the card everywhere
-const ONBOARD_STORAGE_KEY = `pow-${RC.countryCode.toLowerCase()}-onboard-dismissed`;
+// silence the card everywhere; the global map overrides via config to
+// keep its pre-convergence dismissals (short-circuit leaves countryCode
+// unread on a homeless config)
+const ONBOARD_STORAGE_KEY = RC.onboardStorageKey || `pow-${RC.countryCode.toLowerCase()}-onboard-dismissed`;
 // quick-jump chips in the search dock (config)
 const cityPresets = RC.cityPresets;
 
@@ -1838,7 +1858,7 @@ function resetSite() {
   // returns if it was toggled off. the toggle renders only where the
   // offer engine is armed — an unarmed pill stays the panel trigger
   handoffTapTarget = null;
-  if (handoffRegions) setOffer("toggle");
+  if (handoffRegions) setOffer(HANDOFF_HOME ? "toggle" : "resting", null);
   if (!censusState.enabled) void setCensusEnabled(true);
   // resurface the onboarding card (jb 2026-07-09): reset is how a visitor
   // recovers the how-to and the about-this-map link after dismissing it
@@ -2242,8 +2262,10 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 4500) {
 
 async function geocodeNominatim(query) {
   const emailParam = NOMINATIM_EMAIL ? `&email=${encodeURIComponent(NOMINATIM_EMAIL)}` : "";
-  // country-first: this is the country's research surface
-  const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&addressdetails=0&countrycodes=${RC.geocode.country}&q=${encodeURIComponent(query)}${emailParam}`;
+  // country-first where a page declares a geocode bias; the global map
+  // declares none, so world search stays unbiased
+  const nominatimCountry = RC.geocode && RC.geocode.country ? `&countrycodes=${RC.geocode.country}` : "";
+  const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&addressdetails=0${nominatimCountry}&q=${encodeURIComponent(query)}${emailParam}`;
   let response;
   try {
     response = await fetchWithTimeout(url, { headers: { "Accept": "application/json" } });
@@ -2267,7 +2289,8 @@ async function geocodeNominatim(query) {
 
 async function geocodeMaptiler(query) {
   if (!hasMaptilerKey || !window.USE_MAPTILER_GEOCODE) return null;
-  const url = `https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${encodeURIComponent(MAPTILER_API_KEY)}&limit=1&country=${RC.geocode.country}`;
+  const maptilerCountry = RC.geocode && RC.geocode.country ? `&country=${RC.geocode.country}` : "";
+  const url = `https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${encodeURIComponent(MAPTILER_API_KEY)}&limit=1${maptilerCountry}`;
   let response;
   try {
     response = await fetchWithTimeout(url, { headers: { "Accept": "application/json" } });
@@ -2288,8 +2311,10 @@ async function geocodeMaptiler(query) {
 }
 
 async function geocodePhoton(query) {
-  // bias results toward the country; photon has no hard country filter
-  const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=1&lat=${RC.geocode.biasLngLat[1]}&lon=${RC.geocode.biasLngLat[0]}`;
+  // bias results toward the country; photon has no hard country filter,
+  // and a page without a declared bias (the global map) sends none
+  const photonBias = RC.geocode && RC.geocode.biasLngLat ? `&lat=${RC.geocode.biasLngLat[1]}&lon=${RC.geocode.biasLngLat[0]}` : "";
+  const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=1${photonBias}`;
   let response;
   try {
     response = await fetchWithTimeout(url, { headers: { "Accept": "application/json" } });
@@ -2494,9 +2519,9 @@ let christianBuckets = null; // [{ code, label, aliases }] from the taxonomy
 
 async function loadDenominationBuckets() {
   try {
-    // this page sits one level deeper than the global map
-    // (apps/regions/nz/ vs apps/global/), so the taxonomy is three up
-    const res = await fetch("../../../schemas/denomination-taxonomy.json");
+    // the schema base absorbs the page-depth difference: country pages
+    // sit three up from schemas/, the global map two up (config)
+    const res = await fetch(SCHEMA_BASE + "denomination-taxonomy.json");
     if (!res.ok) throw new Error(`taxonomy fetch ${res.status}`);
     const tax = await res.json();
     christianBuckets = CHRISTIAN_BUCKET_CODES.map((code) => {
@@ -2996,6 +3021,11 @@ function activeDomain() {
 // domain-scoped: rebound by setOverlayDomain when a page declares more
 // than one domain; under the legacy shim these never rebind
 let CENSUS_LEVELS = activeDomain().levels;
+// the census absence key: a page with no censusLevels and no overlays (the
+// global map) forecloses every census entry point through this one
+// predicate; every live country page declares non-empty levels, so the
+// guards keyed on it are unreachable there
+const HAS_CENSUS = Boolean(CENSUS_LEVELS && Object.keys(CENSUS_LEVELS).length);
 // base metric definitions are shared across every country; a country whose
 // construct differs (for example, adherents reported by religious bodies
 // rather than a census self-identification question) overrides label/note
@@ -4932,6 +4962,9 @@ function attachCensusTimeListeners() {
 }
 
 async function setCensusEnabled(on) {
+  // a censusless page has nothing to enable; returning before the state
+  // write means the flag can never be left true with no store
+  if (!HAS_CENSUS) return;
   censusState.enabled = on;
   if (on) {
     const data = await loadCensusData(censusState.level);
@@ -5082,7 +5115,7 @@ if (censusClose) {
     syncCensusPanel();
   });
 }
-if (censusLevelSelect) {
+if (censusLevelSelect && HAS_CENSUS) {
   for (const [id, def] of Object.entries(CENSUS_LEVELS)) {
     const option = document.createElement("option");
     option.value = id;
@@ -5196,10 +5229,13 @@ map.on("styledata", showTileStatus);
 // antimeridian. no manifest, no feature: the page behaves as before.
 const offerGo = document.getElementById("datamaps-go");
 const offerShell = document.getElementById("datamaps-pill");
-let offerMode = "resting"; // resting | toggle | offer
+let offerMode = "resting"; // resting | toggle | hint | offer
 let offerRegion = null;    // the manifest entry the mode points at
 let offerSavedLabel = null;
-const HANDOFF_HOME = RC.countryCode.toLowerCase();
+// the handoff home key: a country page's own code, or null on the global
+// map, which has no home — null switches the engine to global semantics
+// (hint state, zoom-driven refresh, deferred manifest fetch)
+const HANDOFF_HOME = RC.countryCode ? RC.countryCode.toLowerCase() : null;
 // legacy arrival marker from older handoff links; consumed and ignored
 const HANDOFF_ORIGIN_PARAM = "handoff-from";
 // offers need a country-scale view; below this zoom the centre names
@@ -5221,20 +5257,21 @@ const normaliseLng = window.RegionResolve.normaliseLng;
 // detection and the tap-on-a-neighbour offer, so both name the same country
 function handoffNeighbourAt(lng, lat) {
   if (!handoffRegions) return null;
-  return window.RegionResolve.resolveAt(handoffRegions, lng, lat, { homeCode: HANDOFF_HOME });
+  // no homeCode on the global map: every data country resolves, none is home
+  return window.RegionResolve.resolveAt(handoffRegions, lng, lat, HANDOFF_HOME ? { homeCode: HANDOFF_HOME } : undefined);
 }
 
 // the census view a departure carries (roam v1): metric and year are
 // valid even before the layer's first load completes (they hold the
 // defaults); only the pulotu source withholds them
 function handoffCarrySegment() {
-  return !pulotuState.active ? `&d=${censusState.metric}:${censusState.year}` : "";
+  return HAS_CENSUS && !pulotuState.active ? `&d=${censusState.metric}:${censusState.year}` : "";
 }
 
 function handoffHref(target) {
   const centre = map.getCenter();
   const zoom = map.getZoom().toFixed(2);
-  return `../${target.code}/#map=${zoom}/${centre.lat.toFixed(5)}/${normaliseLng(centre.lng).toFixed(5)}` +
+  return `${REGIONS_BASE}${target.code}/#map=${zoom}/${centre.lat.toFixed(5)}/${normaliseLng(centre.lng).toFixed(5)}` +
     handoffCarrySegment();
 }
 
@@ -5277,12 +5314,13 @@ function setOffer(mode, region) {
   offerMode = mode;
   offerRegion = region || null;
   offerShell.classList.toggle("offering", mode === "offer");
+  offerShell.classList.toggle("hinting", mode === "hint");
   if (mode === "resting") {
     if (offerSavedLabel !== null) {
       offerGo.innerHTML = offerSavedLabel;
       offerSavedLabel = null;
     }
-    offerGo.setAttribute("href", "../");
+    offerGo.setAttribute("href", REGIONS_BASE);
     offerGo.removeAttribute("role");
     offerGo.removeAttribute("tabindex");
     offerGo.removeAttribute("aria-label");
@@ -5309,6 +5347,14 @@ function setOffer(mode, region) {
     offerGo.removeAttribute("role");
     offerGo.setAttribute("aria-label", `Open the ${region.name} data map`);
     prefetchHandoffPage(region.code);
+  } else if (mode === "hint") {
+    // global-only state: a data country sits under the centre but the
+    // view is too far out for a direct offer; the hint promises data on
+    // zoom and the click handler delivers the zoom
+    offerGo.textContent = `Zoom for ${region.name} data`;
+    offerGo.setAttribute("href", REGIONS_BASE);
+    offerGo.removeAttribute("role");
+    offerGo.setAttribute("aria-label", `Zoom in for ${region.name} data`);
   }
 }
 
@@ -5322,7 +5368,7 @@ function prefetchHandoffPage(code) {
   }
   const link = document.createElement("link");
   link.rel = "prefetch";
-  link.href = `../${code}/`;
+  link.href = `${REGIONS_BASE}${code}/`;
   document.head.appendChild(link);
 }
 
@@ -5335,13 +5381,28 @@ function updateBorderHandoff() {
     setOffer("offer", handoffTapTarget);
     return;
   }
-  if (map.getZoom() < HANDOFF_MIN_ZOOM) { setOffer("toggle"); return; }
+  if (HANDOFF_HOME) {
+    // country semantics: below the offer zoom the pill is the census
+    // toggle, before any resolve; a neighbour under the centre offers
+    if (map.getZoom() < HANDOFF_MIN_ZOOM) { setOffer("toggle"); return; }
+    const centre = map.getCenter();
+    const lng = normaliseLng(centre.lng);
+    const lat = centre.lat;
+    const pick = handoffNeighbourAt(lng, lat);
+    if (pick) setOffer("offer", pick);
+    else setOffer("toggle");
+    return;
+  }
+  // global semantics: no census toggle to fall back to — a data country
+  // under the centre offers at offer zoom, hints below it, and open
+  // water rests the pill
   const centre = map.getCenter();
   const lng = normaliseLng(centre.lng);
   const lat = centre.lat;
   const pick = handoffNeighbourAt(lng, lat);
-  if (pick) setOffer("offer", pick);
-  else setOffer("toggle");
+  if (pick && map.getZoom() >= HANDOFF_MIN_ZOOM) setOffer("offer", pick);
+  else if (pick) setOffer("hint", pick);
+  else setOffer("resting", null);
 }
 
 // near me can land the camera outside this country entirely (the phone
@@ -5371,54 +5432,71 @@ geolocate.on("geolocate", (event) => {
 });
 
 if (offerGo && !RC.disableBorderHandoff) {
-  // no-cache revalidates the manifest against the host's etag, so a new
-  // country launch reaches every page without a cache-pin ceremony
-  fetch("../_shared/data/region-bboxes.json", { cache: "no-cache" })
-    .then((res) => (res.ok ? res.json() : null))
-    .then((doc) => {
-      if (!doc || !Array.isArray(doc.regions)) return;
-      handoffRegions = doc.regions;
-      // consume the legacy arrival marker so older links stay clean
-      writeHashParam(HANDOFF_ORIGIN_PARAM, null);
-      // the pill is persistent chrome, so it keeps its state during a
-      // gesture and moveend re-derives it. only a USER gesture drops a
-      // tap-made offer: the runtime's own camera nudges (nudgeMap's
-      // paired jumpTo calls after layer refreshes) are programmatic
-      // movestarts with no originalEvent, and they must not eat it
-      map.on("movestart", (e) => {
-        if (e && e.originalEvent) handoffTapTarget = null;
-      });
-      map.on("moveend", updateBorderHandoff);
-      // touching a neighbouring country's territory is a stronger signal
-      // than drifting the centre across a border: the tap surfaces the
-      // offer on the pill — navigation still takes a tap on the pill, so
-      // a stray touch never yanks the user off their map. runs only when
-      // the tap hit none of the page's interactive layers, so place
-      // dots, census areas, and pulotu points keep every popup
-      map.on("click", (e) => {
-        if (map.getZoom() < HANDOFF_MIN_ZOOM) return;
-        const target = e.originalEvent && e.originalEvent.target;
-        if (target instanceof Element && target.closest(
-          "button, a, input, select, textarea, label, #dock, #key-wrap, #census-wrap, #wordmark, #corner-refresh, .maplibregl-ctrl"
-        )) return;
-        const interactive = [LAYERS.places, LAYERS.overview, CENSUS.fill, PULOTU.layer]
-          .filter((id) => id && map.getLayer(id));
-        if (interactive.length && map.queryRenderedFeatures(e.point, { layers: interactive }).length) return;
-        const pick = handoffNeighbourAt(normaliseLng(e.lngLat.lng), e.lngLat.lat);
-        if (!pick) {
-          // tapping home or water dismisses what tapping a neighbour offered
-          if (handoffTapTarget) {
-            handoffTapTarget = null;
-            updateBorderHandoff();
-          }
-          return;
+  // country pages revalidate the manifest against the host's etag
+  // (no-cache), so a new country launch reaches every page without a
+  // cache-pin ceremony; the global map keeps default caching — the etag
+  // still revalidates — and defers the fetch past window load so the
+  // manifest stays off the critical path
+  const armOffers = () => {
+    fetch(`${REGIONS_BASE}_shared/data/region-bboxes.json`, HANDOFF_HOME ? { cache: "no-cache" } : undefined)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((doc) => {
+        if (!doc || !Array.isArray(doc.regions)) return;
+        handoffRegions = doc.regions;
+        // consume the legacy arrival marker so older links stay clean
+        writeHashParam(HANDOFF_ORIGIN_PARAM, null);
+        if (HANDOFF_HOME) {
+          // the pill is persistent chrome, so it keeps its state during a
+          // gesture and moveend re-derives it. only a USER gesture drops a
+          // tap-made offer: the runtime's own camera nudges (nudgeMap's
+          // paired jumpTo calls after layer refreshes) are programmatic
+          // movestarts with no originalEvent, and they must not eat it
+          map.on("movestart", (e) => {
+            if (e && e.originalEvent) handoffTapTarget = null;
+          });
         }
-        handoffTapTarget = pick;
-        setOffer("offer", pick);
-      });
-      updateBorderHandoff();
-    })
-    .catch(() => {});
+        map.on("moveend", updateBorderHandoff);
+        if (HANDOFF_HOME) {
+          // touching a neighbouring country's territory is a stronger signal
+          // than drifting the centre across a border: the tap surfaces the
+          // offer on the pill — navigation still takes a tap on the pill, so
+          // a stray touch never yanks the user off their map. runs only when
+          // the tap hit none of the page's interactive layers, so place
+          // dots, census areas, and pulotu points keep every popup
+          map.on("click", (e) => {
+            if (map.getZoom() < HANDOFF_MIN_ZOOM) return;
+            const target = e.originalEvent && e.originalEvent.target;
+            if (target instanceof Element && target.closest(
+              "button, a, input, select, textarea, label, #dock, #counts-wrap, #key-wrap, #census-wrap, #wordmark, #corner-refresh, .maplibregl-ctrl"
+            )) return;
+            const interactive = [LAYERS.places, LAYERS.overview, CENSUS.fill, PULOTU.layer]
+              .filter((id) => id && map.getLayer(id));
+            if (interactive.length && map.queryRenderedFeatures(e.point, { layers: interactive }).length) return;
+            const pick = handoffNeighbourAt(normaliseLng(e.lngLat.lng), e.lngLat.lat);
+            if (!pick) {
+              // tapping home or water dismisses what tapping a neighbour offered
+              if (handoffTapTarget) {
+                handoffTapTarget = null;
+                updateBorderHandoff();
+              }
+              return;
+            }
+            handoffTapTarget = pick;
+            setOffer("offer", pick);
+          });
+        } else {
+          // the global hint↔offer transition is purely zoom-driven, so
+          // moveend alone would freeze a hint until the next pan; on
+          // country pages this would double-call per zoom, so global-only
+          map.on("zoomend", updateBorderHandoff);
+        }
+        updateBorderHandoff();
+      })
+      .catch(() => {});
+  };
+  if (HANDOFF_HOME) armOffers();
+  else if (document.readyState === "complete") armOffers();
+  else window.addEventListener("load", armOffers, { once: true });
   // the offer engine claims the main zone's clicks in every non-resting
   // state; this listener registers before the switcher's (script order),
   // so resting clicks fall through to the panel as usual
@@ -5447,17 +5525,27 @@ if (offerGo && !RC.disableBorderHandoff) {
         });
       return;
     }
+    if (offerMode === "hint") {
+      // the hint promises data on zoom; deliver the zoom. jumpTo, because
+      // the global surface's animated camera transitions are inert (an
+      // existing page quirk — flyTo and zoomTo no-op there)
+      map.jumpTo({ zoom: HANDOFF_MIN_ZOOM + 0.4 });
+      return;
+    }
     if (offerMode === "offer") {
-      // remember the country being left, so the switcher panel can pin a
-      // one-tap return row (the pill itself keeps no sticky back state)
-      try {
-        const homeEntry = handoffRegions && handoffRegions.find((r) => r.code === HANDOFF_HOME);
-        window.sessionStorage.setItem("dm-previous", JSON.stringify({
-          code: HANDOFF_HOME,
-          name: homeEntry ? homeEntry.name : RC.countryCode.toUpperCase()
-        }));
-      } catch (err) {
-        // private-mode storage failures cost only the return row
+      if (HANDOFF_HOME) {
+        // remember the country being left, so the switcher panel can pin a
+        // one-tap return row (the pill itself keeps no sticky back state);
+        // the global map has no home to name, so it writes nothing
+        try {
+          const homeEntry = handoffRegions && handoffRegions.find((r) => r.code === HANDOFF_HOME);
+          window.sessionStorage.setItem("dm-previous", JSON.stringify({
+            code: HANDOFF_HOME,
+            name: homeEntry ? homeEntry.name : RC.countryCode.toUpperCase()
+          }));
+        } catch (err) {
+          // private-mode storage failures cost only the return row
+        }
       }
       // one tap goes there, census view riding along (roam v1); the
       // href rebuilds at click time so the camera is exact
