@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import { projectRole } from "./model";
 import { normaliseEmail, requireUser } from "./lib/auth";
 
@@ -171,6 +171,55 @@ export const inviteUser = mutation({
       created_at: now,
       updated_at: now,
     });
+  },
+});
+
+// admin-key-only user repair: patch roles on an existing user (preserving
+// status, unlike inviteUser which resets active users to pending), or insert
+// a pending invite when no row matches the email. run via CLI/dashboard.
+export const adminUpsertUser = internalMutation({
+  args: {
+    email: v.string(),
+    roles: v.array(projectRole),
+    displayName: v.optional(v.string()),
+    initials: v.optional(v.string()),
+  },
+  returns: v.object({ user_id: v.id("users"), created: v.boolean(), status: v.string() }),
+  handler: async (ctx, args) => {
+    const email = normaliseEmail(args.email);
+    if (email === undefined) {
+      throw new Error("Email is required.");
+    }
+    if (args.roles.length === 0) {
+      throw new Error("At least one role is required.");
+    }
+
+    const now = Date.now();
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .unique();
+
+    if (existing !== null) {
+      await ctx.db.patch(existing._id, {
+        roles: args.roles,
+        display_name: args.displayName ?? existing.display_name,
+        initials: args.initials?.trim().slice(0, 12) || existing.initials,
+        updated_at: now,
+      });
+      return { user_id: existing._id, created: false, status: existing.status };
+    }
+
+    const userId = await ctx.db.insert("users", {
+      email,
+      display_name: args.displayName,
+      initials: args.initials?.trim().slice(0, 12) || email.slice(0, 2).toUpperCase(),
+      roles: args.roles,
+      status: "pending",
+      created_at: now,
+      updated_at: now,
+    });
+    return { user_id: userId, created: true, status: "pending" };
   },
 });
 
