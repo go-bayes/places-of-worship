@@ -210,7 +210,6 @@
 
 - Rust checks: `cargo fmt --all`, `cargo test`, `cargo clippy --all-targets -- -D warnings`.
 - Python setup: `uv sync`; run scripts with `uv run <script>`.
-- API prototype: `uv run uvicorn api.main:app --reload`.
 - Convex task-map backend: `npm install`, `npm run convex:dev`, and
   `uv run scripts/build_convex_task_seed.py --limit 100 --output exports/convex-task-seed/nz-sample.json`.
 - R scripts: run from the repo root unless the script documents another working

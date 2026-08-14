@@ -6,18 +6,6 @@ requires-python = ">=3.14"
 dependencies = []
 
 [project.optional-dependencies]
-api = [
-  "fastapi==0.136.1",
-  "geopandas==1.1.2",
-  "pandas==2.3.1",
-  "polars>=1.33.1,<2",
-  "shapely==2.1.1",
-  "starlette==1.3.1",
-  "uvicorn==0.35.0",
-]
-fast-parquet = [
-  "pyarrow>=23.0.1,<24",
-]
 legacy = [
   "osm2geojson",
   "pysimdjson",
