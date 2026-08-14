@@ -1,0 +1,8 @@
+{
+  "name": "pow-tiles-worker",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "pmtiles": "^4.3.0"
+  }
+}

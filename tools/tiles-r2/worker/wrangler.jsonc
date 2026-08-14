@@ -1,0 +1,13 @@
+{
+  "name": "pow-tiles",
+  "main": "src/index.js",
+  "compatibility_date": "2026-07-01",
+  "account_id": "4799a35f17f38fd6509d945820cc7075",
+  "r2_buckets": [
+    { "binding": "BUCKET", "bucket_name": "pow-tiles" }
+  ],
+  "routes": [
+    { "pattern": "tiles.placemap.org", "custom_domain": true }
+  ],
+  "observability": { "enabled": true }
+}
