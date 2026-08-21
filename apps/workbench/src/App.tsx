@@ -204,6 +204,9 @@ export function App() {
             className={view === "nominate" ? undefined : "secondary"}
             style={{ width: "100%", marginBottom: 10 }}
             onClick={() => {
+              // reclicking while the portal is open keeps its editors
+              // mounted, so a prompt here would falsely clear the flag
+              if (view === "nominate") return;
               if (!confirmDiscard()) return;
               setView("nominate");
               setSelectedTaskId(null);
@@ -216,9 +219,9 @@ export function App() {
             <button
               className={view === "tasks" ? undefined : "secondary"}
               onClick={() => {
-                // only an open My-work record unmounts here; a selected
-                // task's editor survives the view switch
-                if (openRecord && !confirmDiscard()) return;
+                // an open My-work record or the nominate portal unmounts
+                // here; a selected task's editor survives the view switch
+                if ((openRecord || view === "nominate") && !confirmDiscard()) return;
                 setView("tasks");
                 setOpenRecord(null);
               }}
@@ -228,7 +231,7 @@ export function App() {
             <button
               className={view === "my_work" ? undefined : "secondary"}
               onClick={() => {
-                if (openRecord && !confirmDiscard()) return;
+                if ((openRecord || view === "nominate") && !confirmDiscard()) return;
                 setView("my_work");
                 setOpenRecord(null);
               }}
@@ -268,7 +271,9 @@ export function App() {
                 drafts={myWork}
                 openDraftId={openRecord?.draft.draftId ?? null}
                 onNominate={() => {
-                  // nominate unmounts whichever editor is open, like its siblings
+                  // nominate unmounts whichever editor is open, like its
+                  // siblings; reclicking from the portal keeps it mounted
+                  if (view === "nominate") return;
                   if (!confirmDiscard()) return;
                   setView("nominate");
                   setOpenRecord(null);
@@ -320,6 +325,8 @@ export function App() {
               provider={provider}
               onChanged={refresh}
               initialMapContext={mapContext ?? undefined}
+              onDirtyChange={setDirty}
+              confirmDiscard={confirmDiscard}
             />
           ) : view === "import" ? (
             <BatchImport country={country} provider={provider} onChanged={refresh} />
