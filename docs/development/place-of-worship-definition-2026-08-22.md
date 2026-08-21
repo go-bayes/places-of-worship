@@ -1,6 +1,6 @@
 # Defining a place of worship: decision note and discussion topic
 
-Date: 2026-08-22. Status: discussion draft; the rulings marked **RULING** include pre-filled recommendations that become the decision unless overruled, and section 6 lists the questions the team is still working through. Origin: a team question about what the project counts as a place of worship, raised while the taxonomy of standard and edge cases is being built. Scope: the definition itself, the threshold that makes it operational, a site-category attribute that lets several classes of site co-exist in the master record, and the rulings on the edge categories that have come up so far.
+Version: 0.0.1. Date: 2026-08-22. Status: discussion draft; the rulings marked **RULING** include pre-filled recommendations that become the decision unless overruled, and section 6 lists the questions the team is still working through. Origin: a team question about what the project counts as a place of worship, raised while the taxonomy of standard and edge cases is being built. Scope: the definition itself, the threshold that makes it operational, a site-category attribute that lets several classes of site co-exist in the master record, and the rulings on the edge categories that have come up so far.
 
 ## 1. What the project says now
 
