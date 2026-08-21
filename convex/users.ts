@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
-import { projectRole } from "./model";
+import { projectRole, userStatus } from "./model";
 import { normaliseEmail, requireUser } from "./lib/auth";
 
 declare const process: {
@@ -183,6 +183,9 @@ export const adminUpsertUser = internalMutation({
     roles: v.array(projectRole),
     displayName: v.optional(v.string()),
     initials: v.optional(v.string()),
+    // optional status override, e.g. to create an active service account
+    // that never signs in; omitted = preserve existing, pending on insert
+    status: v.optional(userStatus),
   },
   returns: v.object({ user_id: v.id("users"), created: v.boolean(), status: v.string() }),
   handler: async (ctx, args) => {
@@ -205,9 +208,10 @@ export const adminUpsertUser = internalMutation({
         roles: args.roles,
         display_name: args.displayName ?? existing.display_name,
         initials: args.initials?.trim().slice(0, 12) || existing.initials,
+        status: args.status ?? existing.status,
         updated_at: now,
       });
-      return { user_id: existing._id, created: false, status: existing.status };
+      return { user_id: existing._id, created: false, status: args.status ?? existing.status };
     }
 
     const userId = await ctx.db.insert("users", {
@@ -215,11 +219,11 @@ export const adminUpsertUser = internalMutation({
       display_name: args.displayName,
       initials: args.initials?.trim().slice(0, 12) || email.slice(0, 2).toUpperCase(),
       roles: args.roles,
-      status: "pending",
+      status: args.status ?? "pending",
       created_at: now,
       updated_at: now,
     });
-    return { user_id: userId, created: true, status: "pending" };
+    return { user_id: userId, created: true, status: args.status ?? "pending" };
   },
 });
 

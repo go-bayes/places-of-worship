@@ -222,16 +222,27 @@ def build() -> dict:
     return {"batch": batch, "tasks": tasks}
 
 
+SERVICE_ACTOR_EMAIL = "service+claude@religionmap.org"
+RUN_PATH = OUT_PATH.with_suffix(".run.json")
+
+
 def main() -> None:
     payload = build()
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    # compact args for the admin-key path, acting as the seeding service user:
+    #   npx convex run tasks:adminUpsertTasksFromStaticMap "$(cat <RUN_PATH>)"
+    RUN_PATH.write_text(
+        json.dumps({"actor_email": SERVICE_ACTOR_EMAIL, **payload}, ensure_ascii=False, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
     tasks = payload["tasks"]
     by_priority = {}
     for t in tasks:
         by_priority[t["priority"]] = by_priority.get(t["priority"], 0) + 1
     with_nearby = sum(1 for t in tasks if t["nearby_site_refs"])
     print(f"wrote {len(tasks)} tasks for batch {BATCH_ID} to {OUT_PATH.relative_to(REPO)}")
+    print(f"wrote run args (actor {SERVICE_ACTOR_EMAIL}) to {RUN_PATH.relative_to(REPO)}")
     print(f"priority: {by_priority}; tasks with an OSM place of worship within {NEARBY_RADIUS_M} m: {with_nearby}")
 
 

@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import {
@@ -389,18 +389,23 @@ export const getTaskHistory = query({
   },
 });
 
-export const upsertTasksFromStaticMap = mutation({
-  args: {
-    batch: taskBatchInput,
-    tasks: v.array(taskInput),
-  },
-  returns: v.object({
-    batch_id: v.string(),
-    inserted: v.number(),
-    updated: v.number(),
-  }),
-  handler: async (ctx, args) => {
-    const user = await requireUser(ctx, ["admin", "service"]);
+const upsertTasksArgs = {
+  batch: taskBatchInput,
+  tasks: v.array(taskInput),
+};
+const upsertTasksReturns = v.object({
+  batch_id: v.string(),
+  inserted: v.number(),
+  updated: v.number(),
+});
+
+// shared seeding core: idempotent on batch_id and task_id; the caller has
+// already resolved and authorised the acting user
+async function upsertTaskBatch(
+  ctx: MutationCtx,
+  user: Doc<"users">,
+  args: { batch: typeof taskBatchInput.type; tasks: (typeof taskInput.type)[] },
+): Promise<{ batch_id: string; inserted: number; updated: number }> {
     const actorRole = chooseActorRole(user, ["service", "admin"]);
     const now = Date.now();
     assertMaxString("batch id", args.batch.batch_id, MEDIUM_TEXT_MAX);
@@ -476,6 +481,40 @@ export const upsertTasksFromStaticMap = mutation({
     }
 
     return { batch_id: args.batch.batch_id, inserted, updated };
+}
+
+export const upsertTasksFromStaticMap = mutation({
+  args: upsertTasksArgs,
+  returns: upsertTasksReturns,
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["admin", "service"]);
+    return upsertTaskBatch(ctx, user, args);
+  },
+});
+
+// admin-key-only seeding path (dashboard function runner, `convex run`, or
+// the Convex connector): acts as a named active service/admin user so task
+// events carry an honest actor. internal functions cannot be called by any
+// client, so the deployment admin key is the only gate.
+export const adminUpsertTasksFromStaticMap = internalMutation({
+  args: {
+    actor_email: v.string(),
+    ...upsertTasksArgs,
+  },
+  returns: upsertTasksReturns,
+  handler: async (ctx, args) => {
+    const email = args.actor_email.trim().toLowerCase();
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .unique();
+    if (user === null || user.status !== "active") {
+      throw new Error("Acting user is not an active project user.");
+    }
+    if (!user.roles.includes("service") && !user.roles.includes("admin")) {
+      throw new Error("Acting user must hold the service or admin role.");
+    }
+    return upsertTaskBatch(ctx, user, { batch: args.batch, tasks: args.tasks });
   },
 });
 
