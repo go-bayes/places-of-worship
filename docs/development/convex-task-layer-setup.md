@@ -388,3 +388,24 @@ If Convex is unavailable during the pilot, fall back to the current map plus
 shared Sheet workflow. The Sheet remains a compatible evidence export path until
 Convex exports have been validated by `pow`, but the RA default should be
 backend save/submit once the hosted deployment is configured.
+
+## Admin-Key Seeding As A Service Actor
+
+Since 2026-08-22 a task batch can be seeded without the dashboard. The internal
+mutation `tasks:adminUpsertTasksFromStaticMap` takes `actor_email` plus the same
+`batch` and `tasks` payload as `tasks:upsertTasksFromStaticMap`, resolves the
+actor by email, requires that user to be active with the `service` or `admin`
+role, and runs the shared seeding core. Internal functions cannot be called by
+any client, so the deployment admin key is the only gate; task events record
+the named actor. The seeding service account is
+`service+claude@religionmap.org` (role `service`, never signs in; created with
+`users:adminUpsertUser`, which now accepts an optional `status`).
+
+```sh
+python3 scripts/build_vu_survey_tasks.py   # writes <batch>.json and <batch>.run.json
+npx convex run tasks:adminUpsertTasksFromStaticMap "$(cat exports/convex-task-seed/<batch>.run.json)"
+```
+
+The `.run.json` file is the payload with `actor_email` prepended. The mutation
+is idempotent on `batch_id` and `task_id`, so a corrected payload can be re-run.
+First use: `vu-port-vila-survey-2010-001` (93 tasks from Eriksen & Andrew 2010).
