@@ -8,7 +8,8 @@ membership itself is JB's grant.
 
 ## What you get
 
-- **`pow-research` (GitHub, private)**: R analysis workflows,
+- **`pow-research` (GitHub, private)**: session handover notes under
+  `handover/` (read the newest dated file first), R analysis workflows,
   harmonised-dataset builders, small derived tables, and manifest
   pointers to bucket objects.
 - **`gs://pow-research-data/` (GCS, private)**: the data itself, under
