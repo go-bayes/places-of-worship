@@ -1,22 +1,10 @@
-# Playbook: session-run batch review (subscription lane)
+# Playbook: session-run batch review (authorised account lane)
 
-Status: READY 2026-07-07. JB decision: at pilot scale, batch reviews run
-inside JB-authorised assistant sittings (Claude Code under the Max
-subscription, or codex/GPT-5.5 under JB's OpenAI tokens) instead of the
-API runner, so no per-call Anthropic credits are spent. The Convex
-action (`claudeReviews:runBatch`) remains the later automation path;
-both lanes implement the SAME contract
-(`docs/portal-claude-batch-review.md`), and `prompt_version`
-(`claude-batch-review-v1`) names that contract — the executor's true
-identity goes in `agent_name` / `model_provider` / `model_name`, which
-`recordArtifact` accepts as overrides.
+Status: READY 2026-07-07; staged development pilot approved by JB on 2026-08-26. The first capped run is scheduled for 2026-08-27 and follows the evaluation sequence in `docs/portal-claude-batch-review.md`. At pilot scale, batch reviews run inside JB-authorised assistant sittings under the individual or organisational AI account that authorises the session. The Convex action (`claudeReviews:runBatch`) remains the later Anthropic automation path. Both lanes implement the same contract (`docs/portal-claude-batch-review.md`), and `prompt_version` (`claude-batch-review-v1`) names that contract. The executor's true identity belongs in `agent_name` / `model_provider` / `model_name`, which `recordArtifact` accepts as overrides. Never infer the model from the interface label, account type, or prompt contract.
 
 ## Boundary (unchanged, non-negotiable)
 
-Humans decide; the session recommends. The session writes ONLY through
-`claudeReviews:recordArtifact` (artifacts + audit events); it never
-touches task statuses, drafts, or review decisions — the mutations
-enforce this, and the brief must state it anyway.
+Humans decide; the agent recommends. The session writes ONLY through `claudeReviews:recordArtifact` (artifacts + audit events); it never touches task statuses, drafts, or review decisions — the mutations enforce this, and the brief must state it anyway.
 
 ## Steps (all via `npx convex run` against the target deployment)
 
@@ -42,17 +30,10 @@ enforce this, and the brief must state it anyway.
    only (unsupported or wrong-site → reject; plausible but incomplete
    or unverifiable → revise), with reasoning under 300 words citing
    the checks.
-6. `claudeReviews:recordArtifact` with taskId, evidenceDraftId, a fresh
-   batchId (`agent-review-batch:session:<date>`), recommendation,
-   reasoning, sourcesChecked, culturalSensitivity, serviceUserId, and
-   TRUE provenance — e.g. codex: `agentName: "codex-batch-reviewer"`,
-   `modelProvider: "openai"`, `modelName: "gpt-5.5"`.
+6. `claudeReviews:recordArtifact` with taskId, evidenceDraftId, a fresh batchId (`agent-review-batch:session:<date>`), recommendation, reasoning, sourcesChecked, culturalSensitivity, serviceUserId, and true execution details — for example, a Codex run may use `agentName: "codex-batch-reviewer"` and `modelProvider: "openai"`, but `modelName` must contain the runtime model identifier actually reported for that run.
 7. Report per-item outcomes to the coordinating session, which spot-
    checks artifacts (`npx convex data agent_reviews`) before ending.
 
 ## Routing note
 
-Per the model policy: codex handles the fetch-and-check grunt work and
-may synthesise (advisory, human-gated); escalate to a Claude model when
-an item needs cultural, historical, or ambiguous-identity judgement —
-and `defer_cultural` items need no model at all.
+Use an authorised model for bounded source verification. Escalate ambiguous historical or identity questions for stronger review, and send culturally sensitive judgements to a qualified human reviewer. A `defer_cultural` item receives source verification, while a qualified human decides the cultural claim.

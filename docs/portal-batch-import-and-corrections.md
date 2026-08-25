@@ -115,18 +115,7 @@ queue.
 
 ### What imported rows become
 
-Each imported row becomes a source-first claim in the provisional
-queue: a task (type `missing_from_project_map`, batch-linked) plus an
-evidence draft in state `draft` owned by the importing curator, carrying
-the shared source record, its row locator, and lane/origin marking the
-batch import. Imported drafts are NOT auto-submitted: the curator
-reviews the import report, then submits rows for review in bulk or
-individually — submission stays a deliberate human act, and everything
-downstream is unchanged: the same reviewer queue, the same
-`human_confirmed`/review gates, and the Claude batch-review lane
-triaging the result (a 200-row import is exactly the queue shape the
-batch reviewer exists for). Batch acceptance keeps its ratified shape:
-sampled review with row-level exceptions; nothing here weakens it.
+Each imported row becomes a source-first claim in the provisional queue: a task (type `missing_from_project_map`, batch-linked) plus an evidence draft in state `draft` owned by the importing curator, carrying the shared source record, its row locator, and lane/origin marking the batch import. Imported drafts are NOT auto-submitted: the curator reviews the import report, then submits rows for review in bulk or individually — submission stays a deliberate human act, and everything downstream is unchanged: the same reviewer queue, the same `human_confirmed`/review gates, and the AI batch-review lane triaging the result (a 200-row import is exactly the queue shape the batch reviewer exists for). Batch acceptance keeps its ratified shape: sampled review with row-level exceptions; nothing here weakens it.
 
 ### Sequencing
 

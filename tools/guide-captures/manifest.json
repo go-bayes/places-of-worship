@@ -200,12 +200,12 @@
   },
   {
     "flow_id": "ai-review-panel",
-    "title": "Read the Claude review panel before deciding",
+    "title": "Read the AI review panel before deciding",
     "audience": "pi",
     "steps": [
       {
         "file": "ai-review-panel/ai-review-panel-01.png",
-        "caption": "The Claude recommendation panel is labelled AI-generated and never decides for you."
+        "caption": "The AI recommendation is labelled AI-generated, identifies its agent, provider, and model, and never decides for you."
       },
       {
         "file": "ai-review-panel/ai-review-panel-02.png",

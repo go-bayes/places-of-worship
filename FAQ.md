@@ -353,6 +353,10 @@ parts of it could be rebuilt in a more Rust-centred stack. That is an
 aspiration for settled, load-bearing parts, not a reason to slow the current RA
 pilot.
 
+## Does the AI recommendation label identify the model that performed the review?
+
+No. “AI recommendation” names the advisory role, not a provider or model. Each append-only review artifact records the actual agent name, model provider, model name, prompt version, and creation time. The reviewer portal displays the recorded agent, provider, and model beside the recommendation. Existing artifacts retain their original execution details when the project changes accounts, providers, or model routes.
+
 ## Where are the function and script references?
 
 The public Convex function inventory is

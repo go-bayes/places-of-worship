@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path").join(__dirname, "claude-review-panel.js");
 global.window = {};
 eval(fs.readFileSync(path, "utf8"));
-const panel = global.window.PowClaudeReviewPanel;
+const panel = global.window.PowAgentReviewPanel;
 
 let failures = 0;
 function check(name, condition) {
@@ -39,6 +39,7 @@ check("no artifact renders no pill", panel.queuePillHtml(null) === "");
 // rendering: panel content and escaping
 const artifact = {
   agent_review_id: "task-9:agent-review:1751800000000:2",
+  agent_name: "codex-batch-reviewer",
   recommendation: "revise",
   reasoning: "The source supports existence but the <b>date</b> is unclear & unverified.",
   sources_checked: [
@@ -46,7 +47,8 @@ const artifact = {
     { check: "date_support", method: "http_fetch", outcome: "unclear", note: "No 1885 mention." },
   ],
   cultural_sensitivity: { flagged: false },
-  model_name: "claude-sonnet-5",
+  model_provider: "openai",
+  model_name: "gpt-5.5",
   prompt_version: "claude-batch-review-v1",
   version: 2,
   created_at: 1751800000000,
@@ -54,6 +56,7 @@ const artifact = {
 const html = panel.panelHtml(artifact);
 check("panel renders recommendation label", html.includes(">revise<"));
 check("panel renders AI-generated pill", html.includes("AI-generated"));
+check("panel shows recorded agent, provider, and model", html.includes("agent codex-batch-reviewer · OpenAI · gpt-5.5"));
 check("panel escapes reasoning html", html.includes("&lt;b&gt;date&lt;/b&gt;") && html.includes("&amp; unverified"));
 check("panel shows version line for re-reviews", html.includes("review 2 of this task"));
 check("panel lists both source checks", html.includes("date support") && html.includes("existence"));
@@ -63,7 +66,7 @@ check("panel always offers Decide differently", html.includes("disagreeAgentReco
 const deferHtml = panel.panelHtml({ ...artifact, recommendation: "defer_cultural", cultural_sensitivity: { flagged: true, basis: "Vanuatu country default." } });
 check("defer panel hides prefill button", !deferHtml.includes("useAgentRecommendation"));
 check("defer panel keeps disagree affordance", deferHtml.includes("disagreeAgentRecommendation"));
-check("defer panel states source-check-only boundary", deferHtml.includes("no judgement on the cultural claim"));
+check("defer panel states source-check-only boundary", deferHtml.includes("The AI review checked sources only") && deferHtml.includes("no judgement on the cultural claim"));
 
 check("absent artifact renders empty panel", panel.panelHtml(null) === "");
 

@@ -227,6 +227,7 @@ Evidence And Governance:
 - `[~]` Convex task-map spike for shared assignments, provisional closures,
   evidence drafts, reviewer comments, review decisions, and project-review
   queues.
+- `[~]` Provider-neutral AI-assisted review pilot: append-only recommendations, recorded execution details, per-source checks, sensitivity gates, and the human decision gate are built. The first JB-authorised development run is scheduled for 2026-08-27 on three to five non-sensitive claims; routine use waits for comparison with independent human decisions, and automatic scheduling remains disabled.
 - `[~]` First assigned web batch:
   `nz-temporal-ra-workpack-001` exposes 50 curated New Zealand temporal cases
   through the verification map once the hosted backend is seeded.
@@ -322,7 +323,8 @@ Evidence And Governance:
   taxonomies.
 - `[~]` Community and partner contribution paths, starting with a spreadsheet
   export adapter into the shared review portal.
-- `[ ]` Bounded AI-assisted entry and review after a non-AI baseline: deterministic checks first, then provisional text extraction, taxonomy candidates with abstention, and focused follow-up questions under human confirmation, sensitivity gates, model and prompt versioning, audit, and a kill switch.
+- `[ ]` Extend the evaluated AI-assisted review contract beyond the development pilot without weakening the human decision gate, sensitivity exclusions, execution records, or pause controls.
+- `[ ]` Bounded AI-assisted entry after a non-AI baseline: deterministic checks first, then provisional text extraction, taxonomy candidates with abstention, and focused follow-up questions under human confirmation, sensitivity gates, model and prompt versioning, audit, and a kill switch.
 - `[ ]` Provider migration options, including SQLite-compatible, PostGIS, and
   object-storage backends.
 - `[~]` Convex-to-`pow` export contract for task state, evidence drafts, and
