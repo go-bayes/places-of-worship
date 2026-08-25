@@ -213,8 +213,10 @@ artifact per task:
 
 Dev deployment first; production only after the dev run is inspected.
 
-1. `npx convex dev` (login) in the repo, then `npx convex deploy` of
-   the schema and functions to the **dev** deployment.
+1. `npx convex dev --once` in the repo pushes the schema and functions to
+   the **dev** deployment (`pastel-goshawk-398`, the one the portals use).
+   `npx convex deploy` goes to the empty prod deployment instead; see
+   `docs/development/convex-task-layer-setup.md`.
 2. Set the key on dev: `npx convex env set ANTHROPIC_API_KEY <key>`.
 3. Optional: pre-seed the service user with
    `npx convex run claudeReviews:ensureServiceUser '{}'` (idempotent;

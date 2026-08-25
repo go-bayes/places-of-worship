@@ -137,8 +137,12 @@ operator visibility and older branches, but the current `auth.config.ts` does
 not read it at codegen time because local anonymous Convex deployments reject a
 missing deployment environment variable before hosted settings are available.
 
-Run `npm run convex:dev` or `npx convex deploy` after changing the provider
-configuration.
+Run `npx convex dev --once` after changing the provider configuration. That
+pushes to the deployment named in `.env.local` (`dev:pastel-goshawk-398`),
+which is the deployment the live portals use. `npx convex deploy` targets the
+separate prod deployment (`valiant-octopus-914`), which is empty by design
+pending the dev-to-prod cutover ruling; pushing there changes nothing the
+portals see.
 
 `docs/development/convex-auth-google.config.example.ts` is kept only as a small
 reference copy of the same configuration.
@@ -147,7 +151,8 @@ The deploy key and any OAuth client secret are not public. Configure secrets in
 the Convex dashboard, GitHub secrets, or a local shell environment. Do not paste
 them into chat or commit them.
 
-If using a Convex deploy key, set it locally only for the command that needs it:
+If using a Convex deploy key (only needed for the prod deployment or CI), set
+it locally only for the command that needs it:
 
 ```sh
 CONVEX_DEPLOY_KEY='...' npx convex deploy
