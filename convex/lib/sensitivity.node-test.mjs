@@ -8,10 +8,24 @@ test("Vanuatu evidence remains behind the country sensitivity gate", () => {
   assert.match(result.basis, /Vanuatu country default/);
 });
 
-test("guided observation evidence remains outside the existing external AI lane", () => {
+test("guided denomination claims remain outside the existing external AI lane", () => {
   assert.equal(isExternalAiReviewEligible({
     observation_contract_version: "guided_observation_v1",
+    action: "denomination_or_shared_use",
   }), false);
+  assert.equal(isExternalAiReviewEligible({
+    observation_contract_version: "guided_observation_v1",
+    action: "confirm_current_record",
+    denomination_or_tradition_raw: "Example Fellowship",
+  }), false);
+});
+
+test("ordinary guided evidence and legacy evidence still receive source checks", () => {
+  assert.equal(isExternalAiReviewEligible({
+    observation_contract_version: "guided_observation_v1",
+    action: "confirm_current_record",
+    denomination_or_tradition_raw: "",
+  }), true);
   assert.equal(isExternalAiReviewEligible({}), true);
 });
 

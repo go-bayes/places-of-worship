@@ -80,7 +80,7 @@ Before exposing a real intake endpoint beyond the core team, implement:
 - audit logs for original-media and restricted-metadata access
 - malware scanning where feasible
 - privacy, cultural-sensitivity, and licence review before routine internal media access
-- exclusion of media, exact location, contributor identity, private media references, and guided observation text from external AI or other outbound services until separately approved
+- exclusion of media, exact location, contributor identity, private media references, and guided denomination claims (raw labels, label basis, relation) from external AI or other outbound services until separately approved
 - append-only audit logs
 - dry-run diffs before master ingestion
 - no direct master writes from public, RA, script, or AI submission paths

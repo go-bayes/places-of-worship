@@ -1,8 +1,15 @@
 export type EvidenceSensitivity = { flagged: boolean; basis?: string };
 
-// keep newly guided evidence outside the existing external AI review lane
-export function isExternalAiReviewEligible(draft: { observation_contract_version?: string }): boolean {
-  return draft.observation_contract_version !== "guided_observation_v1";
+// keep guided denomination claims outside the existing external AI review lane;
+// ordinary guided evidence (existence, dates, location) still receives source checks
+export function isExternalAiReviewEligible(draft: {
+  observation_contract_version?: string;
+  action?: string;
+  denomination_or_tradition_raw?: string;
+}): boolean {
+  if (draft.observation_contract_version !== "guided_observation_v1") return true;
+  if (draft.action === "denomination_or_shared_use") return false;
+  return !draft.denomination_or_tradition_raw?.trim();
 }
 
 // classify whether a draft may enter external source-check or model services

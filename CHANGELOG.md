@@ -4,6 +4,7 @@
 
 ### 2026-08-25
 
+- Narrowed the external-AI exclusion added with the guided evidence intake: only guided drafts that carry a denomination claim (the denomination action, or a raw label) stay outside the Claude batch-review lane. Ordinary guided evidence about existence, dates, and location continues to receive bounded source checks; Vanuatu and privacy-flagged evidence remain excluded by the sensitivity gate. Files: `convex/lib/sensitivity.ts`, `convex/claudeReviews.ts`.
 - Added an internal field-observation packet specification requiring images to remain outside Convex and public outputs, original time and location evidence to be retained under restricted access, device dictation to produce confirmed text without retained audio, and later AI assistance to remain advisory and human-confirmed. Media capture, storage, and dictation are not implemented by this change.
 - Added live portal raw-label evidence fields for denomination or tradition wording, label basis, and a provisional relation to the project record, together with versioned direct-observation, interpretation, uncertainty, and sensitivity fields. The change includes Vanuatu survey-context adaptation, server-assigned submission contracts, AI exclusion for culturally or privacy-flagged evidence, reviewer display, and JSONL-only export for present-day field observations that assess no project target year. It does not enable accepted denomination events or allow provisional denomination relations to alter site type.
 

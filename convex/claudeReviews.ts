@@ -464,7 +464,7 @@ const CHECK_NAMES: SourceCheckName[] = ["existence", "date_support", "location_p
 
 function claimSummary(task: Doc<"tasks">, draft: Doc<"evidence_drafts">): string {
   if (!isExternalAiReviewEligible(draft)) {
-    throw new Error("Guided observation evidence is outside the current external AI review contract.");
+    throw new Error("Guided denomination evidence is outside the current external AI review contract.");
   }
   return JSON.stringify(
     {
@@ -765,7 +765,7 @@ export const runBatch = internalAction({
     let failed = 0;
     let attempted = 0;
     const errorNotes: string[] = policyExcluded > 0
-      ? [`policy exclusion: ${policyExcluded} guided observation draft(s) remained outside the external AI review lane.`]
+      ? [`policy exclusion: ${policyExcluded} guided denomination draft(s) remained outside the external AI review lane.`]
       : [];
     const runStartedAt = Date.now();
 
