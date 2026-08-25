@@ -1,6 +1,6 @@
 # Playbook: session-run batch review (authorised account lane)
 
-Status: READY 2026-07-07. JB decision: at pilot scale, batch reviews run inside JB-authorised assistant sittings under the individual or organisational AI account that authorises the session. The Convex action (`claudeReviews:runBatch`) remains the later Anthropic automation path. Both lanes implement the same contract (`docs/portal-claude-batch-review.md`), and `prompt_version` (`claude-batch-review-v1`) names that contract. The executor's true identity belongs in `agent_name` / `model_provider` / `model_name`, which `recordArtifact` accepts as overrides. Never infer the model from the interface label, account type, or prompt contract.
+Status: READY 2026-07-07; staged development pilot approved by JB on 2026-08-26. The first capped run is scheduled for 2026-08-27 and follows the evaluation sequence in `docs/portal-claude-batch-review.md`. At pilot scale, batch reviews run inside JB-authorised assistant sittings under the individual or organisational AI account that authorises the session. The Convex action (`claudeReviews:runBatch`) remains the later Anthropic automation path. Both lanes implement the same contract (`docs/portal-claude-batch-review.md`), and `prompt_version` (`claude-batch-review-v1`) names that contract. The executor's true identity belongs in `agent_name` / `model_provider` / `model_name`, which `recordArtifact` accepts as overrides. Never infer the model from the interface label, account type, or prompt contract.
 
 ## Boundary (unchanged, non-negotiable)
 

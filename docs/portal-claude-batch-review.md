@@ -1,10 +1,6 @@
 # Claude Batch Review Lane
 
-Status: DESIGNED AND BUILT 2026-07-07 (dev-deployment code only; every
-activation step is a JB decision). Commissioned by JB, 2026-07-07:
-before JW and JB open the review queue, Claude reviews each pending
-submission in batch and attaches a recommendation, so the human queue
-arrives already triaged.
+Status: DESIGNED AND BUILT 2026-07-07. JB approved the staged provider-neutral development pilot on 2026-08-26; the first capped run is scheduled for 2026-08-27. The code remains development-deployment code only, and every production or scheduling step remains a separate JB decision. Commissioned by JB, 2026-07-07: before JW and JB open the review queue, Claude reviews each pending submission in batch and attaches a recommendation, so the human queue arrives already triaged.
 
 Boundary, stated first: **humans decide; AI recommends.** The ratified `human_confirmed` gate and the reviewer decision path are untouched. No function in this lane changes a task status, an evidence draft, or a review decision. The lane only appends review artifacts and audit events. A recommendation can never accept a claim.
 
@@ -19,6 +15,14 @@ Related references:
 | `schemas/change-event.schema.json` | Source-reference discipline the evidence contract mirrors. |
 | `docs/development/workbench-publication-plan.md` | The JB-gated publication and binding steps this plan slots behind. |
 | `apps/regions/nz/review.html` | The reviewer queue where recommendations surface. |
+
+## Approved Pilot Sequence
+
+1. Merge the provider-neutral reviewer-interface and documentation update in PR #31.
+2. On 2026-08-27, deploy the merged functions to the development deployment, select three to five non-sensitive claims, run one capped JB-authorised session, and inspect every recommendation, source-check record, audit event, and reviewer control.
+3. If the development run preserves the contract, evaluate 10–20 ordinary non-sensitive submissions over the next three to five working days. Compare the recommendations with independent human decisions and record overconfident errors, missing evidence, and workflow burden.
+4. Permit routine human-triggered pre-triage only if the evaluation is satisfactory. Keep the run cap, manual trigger, and pause control; leave automatic scheduling disabled during this pilot.
+5. Treat AI-mediated data-entry questions as a separate text-only prototype. Do not send images, exact capture locations, exact capture times, culturally sensitive material, privacy-flagged material, or guided denomination claims to an external model in this review pilot.
 
 ## Where This Sits In The Agent-Lane Design
 

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-08-26
+
+- Approved a staged provider-neutral AI-assisted review pilot. The first capped development run is scheduled for 2026-08-27 on three to five non-sensitive claims, followed by comparison with independent human decisions before any routine use. Recommendations remain append-only and advisory; the human decision gate, sensitivity exclusions, manual trigger, run cap, and pause control remain in force, and automatic scheduling remains disabled. Files: `ROADMAP.md`, `docs/portal-claude-batch-review.md`, `docs/playbooks/session-batch-review.md`.
+
 ### 2026-08-25
 
 - Made the reviewer-facing AI lane provider-neutral: the portal now says “AI recommendation” and displays the agent, provider, and model recorded on each append-only artifact. Existing OpenAI and Anthropic execution details remain unchanged; the Anthropic automation runner retains its implementation-specific name. The session-run playbook now requires the runtime model identifier actually reported for each run and permits accounts authorised for individual or organisational use without assuming a provider. Files: `apps/regions/nz/js/claude-review-panel.js`, `apps/regions/nz/js/review-portal.js`, `apps/regions/nz/review.html`, reviewer guides and API documentation.
