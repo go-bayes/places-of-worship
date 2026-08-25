@@ -251,3 +251,6 @@ tools/guide-captures/_run-report.json
 
 # wrangler cli cache from r2 uploads
 .wrangler/
+
+# local scratch folder (manuscript drafts, private notes)
+local/
