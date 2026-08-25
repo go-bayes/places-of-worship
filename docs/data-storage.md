@@ -14,12 +14,13 @@ generation.
 - Basemap tiles and styles: MapTiler Cloud (subscription), consumed by
   MapLibre in the browser.
 - Street View: Google Maps JS API (key in `apps/global/config.public.js`).
-- Custom tiles hosting: Martin on a GCP VM (`tiles.placemap.org`).
-  - Tile source files live on the VM at `/srv/tiles`.
-  - Tiles are uploaded to GCS and manually synced to the VM.
-  - Current tile artifacts in GCS include `places.mbtiles`,
-    `places-overview.mbtiles`, `buildings.mbtiles`, and `nz-polygons.pmtiles`
-    (bucket details are kept private).
+- Custom tiles hosting: a Cloudflare Worker (`tools/tiles-r2/`) serving
+  `z/x/y` vector tiles from PMTiles archives in a Cloudflare R2 bucket at
+  `tiles.religionmap.org` (cutover 2026-07-22; the earlier Martin-on-GCP VM
+  was deleted at the same time).
+  - Tilesets: `places`, `places-overview`, `buildings`, `nz-polygons`.
+  - Local copies of the archives are kept outside the repo; the worker
+    README records the upload and rebuild procedure.
 
 ### Repository (tracked)
 - Regional app data (served directly by GitHub Pages):

@@ -74,6 +74,7 @@ and export bundles. Accepted changes become research data only after export,
 | `getTaskEvents` | query | `ra`, `reviewer`, `curator`, `admin`, `service` | Return append-only history for a task. RAs are limited to their own assigned task history; reviewers and maintainers can inspect full task history. | None |
 | `getTaskHistory` | query | `ra`, `reviewer`, `curator`, `admin`, `service` | Return a capped event history for any task plus draft count and latest review summary. All roles see workflow state; actor identity and reasons are visible only to reviewers and maintainers, or on the caller's own events. | None |
 | `upsertTasksFromStaticMap` | mutation | `admin`, `service` | Import or refresh a task batch from static map or workpack seed data. | `task_batches`, `tasks`, `task_events` |
+| `adminUpsertTasksFromStaticMap` | internalMutation | deployment admin key only | Same import as `upsertTasksFromStaticMap`, run from a script with the admin key and an `actor_email` naming an active service user so task events carry an honest actor. Not callable from any client. | `task_batches`, `tasks`, `task_events` |
 | `claimTask` | mutation | `ra`, `reviewer`, `curator`, `admin` | Assign a task to the caller and mark open/reopened tasks as in progress. | `tasks`, `task_events` |
 | `releaseTask` | mutation | `ra`, `reviewer`, `curator`, `admin` | Return a claimed task to open status. | `tasks`, `task_events` |
 | `skipTask` | mutation | `ra`, `reviewer`, `curator`, `admin` | Mark a task skipped with an optional reason. | `tasks`, `task_events` |

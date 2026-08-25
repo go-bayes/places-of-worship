@@ -7,6 +7,8 @@ const TILESETS = new Set(["places", "places-overview", "buildings", "nz-polygons
 const ALLOWED_ORIGINS = new Set([
   "https://religionmap.org",
   "https://www.religionmap.org",
+  // retired domains: they 301 to religionmap.org, but a cached page may still
+  // request tiles from them during the redirect window, so keep them allowed
   "https://placesmap.org",
   "https://powmap.org",
   "https://go-bayes.github.io",

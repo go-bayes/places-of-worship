@@ -245,7 +245,6 @@ const religionColors = [
 
 const basemapSelect = document.getElementById("basemapSelect");
 const hasMaptilerKey = Boolean(MAPTILER_API_KEY && !MAPTILER_API_KEY.includes("REPLACE_WITH_MAPTILER_KEY"));
-const isPlacesmapHost = ["placesmap.org", "www.placesmap.org"].includes(window.location.hostname);
 const cartoStyle = {
   id: "carto-light",
   label: "CARTO",
