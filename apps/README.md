@@ -9,4 +9,4 @@ Structure:
 - workbench/ : TypeScript RA ingestion app (not deployed)
 - guides/ : static RA and PI guides
 
-The legacy `frontend/` and `src/` redirect shims were removed on 2026-08-14 after a seven-month grace period; the root `index.html` and `enhanced-places.html` redirects remain.
+The legacy `frontend/` and `src/` redirect shims were removed on 2026-08-14 after a seven-month grace period; the root `enhanced-places.html` shim followed on 2026-08-25; only the root `index.html` redirect to `apps/global/` remains.

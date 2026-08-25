@@ -12,19 +12,25 @@ JSON Schemas that define the core data structures used across the project.
 - data-manifest.schema.json: checksummed data artefact manifest for local cache,
   durable storage, global partitions, and supersession tracking.
 - denomination-taxonomy.schema.json: contract for the versioned religion and
-  denomination vocabulary.
+  denomination vocabulary (aspirational: no validator consumes it yet; the
+  instance below is read directly by builders).
 - denomination-taxonomy.json: the versioned vocabulary instance itself (not a
   schema). Change events pin its `taxonomy_version`; update it by publishing a
   new version with supersession links, never by editing codes in place.
 - geometry-history.schema.json: time-bounded site or structure geometry state.
-- indicator.schema.json: reusable indicator definitions.
+- indicator.schema.json: reusable indicator definitions (aspirational: no
+  consumer yet).
 - site.schema.json: place-of-worship site record.
-- source-dataset.schema.json: provenance for source datasets.
+- source-dataset.schema.json: provenance for source datasets (aspirational:
+  no consumer yet; manifests carry provenance under data-manifest.v2).
 - structure.schema.json: physical structure details.
-- visual-layer.schema.json: map and portal layer metadata.
+- visual-layer.schema.json: map and portal layer metadata (aspirational: no
+  consumer yet).
 
 Keep these schemas versioned and update them before changing any dataset shape
-that depends on them.
+that depends on them. Schemas marked aspirational (audit of 2026-08-25) have no
+validator or builder reading them; either wire a consumer or retire them when
+the relevant lane next opens.
 
 ## data-manifest.v2 (2026-07-11)
 

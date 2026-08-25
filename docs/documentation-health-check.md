@@ -122,3 +122,19 @@ the summary and the others point to it.
 6. What phrase would confuse JB, JW, a funder, or a future maintainer?
 7. Which open question should now be a decision?
 8. Which decision should now be a FAQ entry?
+
+## Run Record
+
+- 2026-08-25 (audit sitting, read-only pass then fixes): fast-pass items 6, 8,
+  and 9 checked. Corrected the retired GCP tile-hosting description in
+  `docs/data-storage.md`; added `adminUpsertTasksFromStaticMap` to
+  `docs/api/convex-functions.md`; removed the root `enhanced-places.html` shim
+  and `ideas/`; marked four consumer-less schemas aspirational; split
+  `archive/` into provenance and legacy with a README. Left as deliberate
+  design references: the Google Cloud/PostGIS "durable staging" statements
+  in the portal storage, data-entry, ingestion, and pipeline plans (no such
+  deployment exists today; the plans still name it as the reference).
+  Left with their dated status lines: the 2026-07 DRAFT/PROPOSED markers on
+  `portal-ra-feedback-and-training.md`, `multi-domain-overlay-design.md`,
+  `revision-pipeline-all-countries.md`, and the pending invite note in
+  `workbench-publication-plan.md`. Items 1-5, 7, and 10 were not re-read.
