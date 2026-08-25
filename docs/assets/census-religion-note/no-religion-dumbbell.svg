@@ -249,7 +249,7 @@
 <text x='122.68' y='14.79' style='font-size: 13.00px; font-weight: bold;fill: #0B0B0B; font-family: "Arial";' textLength='359.09px' lengthAdjust='spacingAndGlyphs'>No-religion share, first versus latest shipped census wave</text>
 <text x='122.68' y='623.56' style='font-size: 8.00px;fill: #898781; font-family: "Arial";' textLength='269.14px' lengthAdjust='spacingAndGlyphs'>Each row spans the wave years shown in its label; constructs and universes</text>
 <text x='122.68' y='632.20' style='font-size: 8.00px;fill: #898781; font-family: "Arial";' textLength='273.23px' lengthAdjust='spacingAndGlyphs'>are per product as published. Source: shipped area-summary products under</text>
-<text x='122.68' y='640.84' style='font-size: 8.00px;fill: #898781; font-family: "Arial";' textLength='250.05px' lengthAdjust='spacingAndGlyphs'>apps/regions/&lt;iso2&gt;/data/; per-product provenance in docs/manifests/.</text>
+<text x='122.68' y='640.84' style='font-size: 8.00px;fill: #898781; font-family: "Arial";' textLength='292.78px' lengthAdjust='spacingAndGlyphs'>apps/regions/&lt;iso2&gt;/data/; per-product provenance in the project manifest register.</text>
 </g>
 </g>
 </svg>

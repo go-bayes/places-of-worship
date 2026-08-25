@@ -10,7 +10,7 @@ The first piece is the area summary itself: `apps/regions/<iso2>/data/area_summa
 
 The second piece is the boundary file: a GeoJSON in the same directory, keyed to the rows by `area_unit_id`. Boundary vintages are recorded per product; some countries ship one boundary frame per wave.
 
-The third piece is the manifest: `docs/manifests/<iso2>-census-religion-<years>.json`. The manifest carries the source tables, retrieval dates, licence position, universes, denominators, reconciliation results, and method notes. The manifest is the provenance contract; cite it, and read it before comparing anything across waves.
+The third piece is the manifest, `<iso2>-census-religion-<years>.json`, held in the project's manifest register (the private research tier during the work phase; published with each data release). The manifest carries the source tables, retrieval dates, licence position, universes, denominators, reconciliation results, and method notes. The manifest is the provenance contract; cite it, and read it before comparing anything across waves.
 
 The data contracts are `schemas/area-summary.schema.json` and `schemas/area-summary.v2.schema.json`.
 

@@ -61,7 +61,7 @@
 <text x='17.49' y='30.17' style='font-size: 10.00px;fill: #52514E; font-family: "Arial";' textLength='402.31px' lengthAdjust='spacingAndGlyphs'>Density of commune-level shares; census affiliation, population aged 15 and over (percent)</text>
 <text x='17.49' y='14.79' style='font-size: 13.00px; font-weight: bold;fill: #0B0B0B; font-family: "Arial";' textLength='396.00px' lengthAdjust='spacingAndGlyphs'>No-religion share across 346 Chilean communes, 2002 and 2024</text>
 <text x='17.49' y='272.20' style='font-size: 8.00px;fill: #898781; font-family: "Arial";' textLength='275.00px' lengthAdjust='spacingAndGlyphs'>Source: shipped product apps/regions/cl/data/area_summary_commune.json;</text>
-<text x='17.49' y='280.84' style='font-size: 8.00px;fill: #898781; font-family: "Arial";' textLength='230.52px' lengthAdjust='spacingAndGlyphs'>provenance in docs/manifests/cl-census-religion-2002-2024.json.</text>
+<text x='17.49' y='280.84' style='font-size: 8.00px;fill: #898781; font-family: "Arial";' textLength='249.66px' lengthAdjust='spacingAndGlyphs'>provenance in the product manifest cl-census-religion-2002-2024.json.</text>
 </g>
 </g>
 </svg>

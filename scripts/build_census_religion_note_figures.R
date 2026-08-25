@@ -85,7 +85,7 @@ fig1 <- ggplot(bz_rows, aes(year, no_religion, group = district)) +
     title = "No-religion share by Belize district, 2000–2022",
     subtitle = "Census affiliation; district population reporting the None line (percent)",
     x = NULL, y = "no religion (%)",
-    caption = "Source: Statistical Institute of Belize census tables, rendered from the shipped product\napps/regions/bz/data/area_summary_district.json; provenance in docs/manifests/bz-census-religion-2000-2022.json."
+    caption = "Source: Statistical Institute of Belize census tables, rendered from the shipped product\napps/regions/bz/data/area_summary_district.json; provenance in the product manifest bz-census-religion-2000-2022.json."
   ) +
   theme_note
 
@@ -174,7 +174,7 @@ fig2 <- ggplot(dumbbell, aes(y = axis_label)) +
     title = "No-religion share, first versus latest shipped census wave",
     subtitle = "Population-weighted national share from each country's\ncensus-affiliation product (percent)",
     x = "no religion (%)", y = NULL,
-    caption = "Each row spans the wave years shown in its label; constructs and universes\nare per product as published. Source: shipped area-summary products under\napps/regions/<iso2>/data/; per-product provenance in docs/manifests/."
+    caption = "Each row spans the wave years shown in its label; constructs and universes\nare per product as published. Source: shipped area-summary products under\napps/regions/<iso2>/data/; per-product provenance in the project manifest register."
   ) +
   theme_note +
   theme(legend.position = "top", axis.text.y = element_text(colour = col_ink_2, size = 8.5))
@@ -201,7 +201,7 @@ fig3 <- ggplot(cl_rows, aes(no_religion, fill = wave)) +
     title = "No-religion share across 346 Chilean communes, 2002 and 2024",
     subtitle = "Density of commune-level shares; census affiliation, population aged 15 and over (percent)",
     x = "no religion (%)", y = "density of communes",
-    caption = "Source: shipped product apps/regions/cl/data/area_summary_commune.json;\nprovenance in docs/manifests/cl-census-religion-2002-2024.json."
+    caption = "Source: shipped product apps/regions/cl/data/area_summary_commune.json;\nprovenance in the product manifest cl-census-religion-2002-2024.json."
   ) +
   theme_note +
   theme(legend.position = "top", axis.text.y = element_blank(), panel.grid.major.y = element_blank())

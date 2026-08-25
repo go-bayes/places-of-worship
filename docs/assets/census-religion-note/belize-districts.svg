@@ -88,7 +88,7 @@
 <text x='32.20' y='30.17' style='font-size: 10.00px;fill: #52514E; font-family: "Arial";' textLength='306.12px' lengthAdjust='spacingAndGlyphs'>Census affiliation; district population reporting the None line (percent)</text>
 <text x='32.20' y='14.79' style='font-size: 13.00px; font-weight: bold;fill: #0B0B0B; font-family: "Arial";' textLength='286.16px' lengthAdjust='spacingAndGlyphs'>No-religion share by Belize district, 2000–2022</text>
 <text x='32.20' y='308.20' style='font-size: 8.00px;fill: #898781; font-family: "Arial";' textLength='305.64px' lengthAdjust='spacingAndGlyphs'>Source: Statistical Institute of Belize census tables, rendered from the shipped product</text>
-<text x='32.20' y='316.84' style='font-size: 8.00px;fill: #898781; font-family: "Arial";' textLength='412.05px' lengthAdjust='spacingAndGlyphs'>apps/regions/bz/data/area_summary_district.json; provenance in docs/manifests/bz-census-religion-2000-2022.json.</text>
+<text x='32.20' y='316.84' style='font-size: 8.00px;fill: #898781; font-family: "Arial";' textLength='431.19px' lengthAdjust='spacingAndGlyphs'>apps/regions/bz/data/area_summary_district.json; provenance in the product manifest bz-census-religion-2000-2022.json.</text>
 </g>
 </g>
 </svg>
