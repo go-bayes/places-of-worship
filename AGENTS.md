@@ -7,13 +7,14 @@
 
 ## Where To Look
 
-- CONDUCTOR HANDOVER (read first when conducting a work sitting):
-  `~/.claude/projects/-Users-joseph-GIT/memory/pow-conductor-handover.md`
-  carries the routing rulings, the project lead's blocking list, the
-  next-work order, and the trap list; the war log sits beside it as
-  `pow-next-arc-global-databases.md`. Sessions started from `~/GIT`
-  load these automatically; sessions started elsewhere read them from
-  the paths above.
+- HANDOVER (read first when conducting a work sitting):
+  `~/GIT/pow-research/handover/` in the private tier. Start with the
+  newest dated file (currently `handover-2026-08-22.md`); the earlier
+  `pow-conductor-handover.md` carries the routing rulings, the project
+  lead's blocking list, and the trap list, and the war log sits beside
+  it as `pow-next-arc-global-databases.md`. These files travel with the
+  private repo, so every machine with a `pow-research` clone has them;
+  Claude memory directories are per-machine and no longer canonical.
 - PRIVATE RESEARCH TIER (work-phase split, 2026-07-13): the research
   corpus lives in the private repo `go-bayes/pow-research`, cloned at
   `~/GIT/pow-research` — `research/` (build queue, probes, surveys),
