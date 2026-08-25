@@ -27,8 +27,7 @@ governance.
   provenance (`task_events`).
 - The six-state validation vocabulary is defined and maps 1:1 onto
   existing task/export states — a derived rendering, not stored columns.
-- The Claude batch-review lane (`claudeReviews.ts`) is built, advisory
-  only, and deliberately inactive pending a PI decision.
+- The AI batch-review lane (`claudeReviews.ts`) is built, advisory only, and deliberately inactive pending a PI decision.
 - The revision loop (`needs_more_evidence` → `changes_requested` →
   `reviseEvidenceDraft` → resubmit, with immutable draft versions and
   `feedbackLoopMetrics`) is live.
@@ -74,7 +73,7 @@ first frozen export exists (R4). Acceptance: an RA can see at a glance
 which points in the viewport carry open work, and the ring never competes
 with the religion colour encoding.
 
-## Phase R3 — Claude batch-review activation (PI-gated)
+## Phase R3 — AI batch-review activation (PI-gated)
 
 With a small human pool, the advisory lane is the throughput multiplier.
 Proposed activation sequence, each step a separate PI go/no-go:

@@ -114,8 +114,8 @@
             `<span class="pill">${escapeHtml(task.task_type)}</span>`,
             `<span class="pill amber">${escapeHtml(task.priority)}</span>`,
         ];
-        if (agentReview && window.PowClaudeReviewPanel) {
-            pills.push(window.PowClaudeReviewPanel.queuePillHtml(agentReview));
+        if (agentReview && window.PowAgentReviewPanel) {
+            pills.push(window.PowAgentReviewPanel.queuePillHtml(agentReview));
         }
         if (draft?.draft_status) {
             pills.push(`<span class="pill green">${escapeHtml(draft.draft_status)}</span>`);
@@ -459,7 +459,7 @@
                 ${draft ? targetYearTable(draft.target_year_statuses, draft.target_year_evidence) : `<p class="muted">No target-year statuses recorded.</p>`}
             </section>
 
-            ${window.PowClaudeReviewPanel ? window.PowClaudeReviewPanel.panelHtml(agentReview) : ""}
+            ${window.PowAgentReviewPanel ? window.PowAgentReviewPanel.panelHtml(agentReview) : ""}
 
             <section class="panel decision-panel">
                 <h3>Review decision</h3>
@@ -498,10 +498,10 @@
     // or record disagreement. Neither submits; the decision note and the
     // Record button remain the human act.
     function wireAgentReviewPanel(form, agentReview) {
-        if (!form || !agentReview || !window.PowClaudeReviewPanel) return;
+        if (!form || !agentReview || !window.PowAgentReviewPanel) return;
         const statusLine = document.getElementById("agentAgreementStatus");
         document.getElementById("useAgentRecommendation")?.addEventListener("click", () => {
-            const mapped = window.PowClaudeReviewPanel.decisionForRecommendation(agentReview.recommendation);
+            const mapped = window.PowAgentReviewPanel.decisionForRecommendation(agentReview.recommendation);
             if (mapped) {
                 setDecisionFormValues(form, { decisionStatus: mapped });
             }
@@ -704,9 +704,9 @@
         // human followed it — explicit button choice wins, otherwise derived
         // from the decision so the record never overstates agreement
         const agentReview = state.selected.latestAgentReview;
-        if (agentReview && window.PowClaudeReviewPanel) {
+        if (agentReview && window.PowAgentReviewPanel) {
             decision.agent_review_id = agentReview.agent_review_id;
-            decision.agent_review_agreement = window.PowClaudeReviewPanel.deriveAgreement(
+            decision.agent_review_agreement = window.PowAgentReviewPanel.deriveAgreement(
                 agentReview,
                 decisionStatus,
                 state.agentAgreementChoice || undefined,

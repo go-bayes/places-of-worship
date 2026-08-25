@@ -1,8 +1,9 @@
-// Claude batch-review panel: renders AI review artifacts in the reviewer
+// AI batch-review panel: renders provider-neutral review artifacts in the reviewer
 // portal and carries the agreement semantics for the disagree affordance.
 // Advisory display only — every function here is pure rendering or pure
 // mapping; nothing submits, and the human decision form stays the only
-// write path (docs/portal-claude-batch-review.md).
+// write path. The legacy filename reflects the first automated runner;
+// each artifact supplies its actual agent, provider, and model.
 (function () {
     function escapeHtml(value) {
         return String(value ?? "")
@@ -65,6 +66,30 @@
         return String(outcome ?? "").replaceAll("_", " ");
     }
 
+    function providerLabel(provider) {
+        if (provider === "openai") return "OpenAI";
+        if (provider === "anthropic") return "Anthropic";
+        return String(provider ?? "");
+    }
+
+    function provenanceHtml(artifact) {
+        const executor = [
+            artifact.agent_name ? `agent ${artifact.agent_name}` : "",
+            providerLabel(artifact.model_provider),
+            artifact.model_name,
+        ]
+            .filter(Boolean)
+            .join(" · ");
+        return [
+            executor,
+            formatDateTime(artifact.created_at),
+            artifact.prompt_version ? `prompt ${artifact.prompt_version}` : "",
+        ]
+            .filter(Boolean)
+            .map(escapeHtml)
+            .join(" · ");
+    }
+
     function sourceChecksHtml(checks) {
         if (!Array.isArray(checks) || checks.length === 0) {
             return `<p class="muted">No source checks were possible for this claim.</p>`;
@@ -95,19 +120,18 @@
         const label = recommendationLabel(artifact.recommendation);
         const mapped = decisionForRecommendation(artifact.recommendation);
         const cultural = artifact.cultural_sensitivity?.flagged
-            ? `<div class="review-warning">Flagged culturally sensitive: ${escapeHtml(artifact.cultural_sensitivity.basis || "requires human cultural judgement")} Claude checked sources only and made no judgement on the cultural claim.</div>`
+            ? `<div class="review-warning">Flagged culturally sensitive: ${escapeHtml(artifact.cultural_sensitivity.basis || "requires human cultural judgement")} The AI review checked sources only and made no judgement on the cultural claim.</div>`
             : "";
         return `
-            <section class="panel" id="claudeReviewPanel">
-                <h3>Claude recommendation</h3>
+            <section class="panel" id="agentReviewPanel">
+                <h3>AI recommendation</h3>
                 <div class="pill-row">
                     <span class="pill ${pillClass(artifact.recommendation)}">${escapeHtml(label)}</span>
                     <span class="pill">AI-generated</span>
                     ${artifact.version > 1 ? `<span class="pill">review ${escapeHtml(String(artifact.version))} of this task</span>` : ""}
                 </div>
                 <p class="muted">
-                    ${escapeHtml(artifact.model_name || "")} · ${escapeHtml(formatDateTime(artifact.created_at))}
-                    · prompt ${escapeHtml(artifact.prompt_version || "")}
+                    ${provenanceHtml(artifact)}
                 </p>
                 ${cultural}
                 <details>
@@ -131,11 +155,12 @@
         `;
     }
 
-    window.PowClaudeReviewPanel = {
+    window.PowAgentReviewPanel = {
         recommendationLabel,
         pillClass,
         decisionForRecommendation,
         deriveAgreement,
+        providerLabel,
         queuePillHtml,
         panelHtml,
     };

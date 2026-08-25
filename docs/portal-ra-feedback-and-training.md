@@ -8,10 +8,7 @@ practice.
 
 ## 1. Guy's training workpack (build first)
 
-Purpose: a labelled series of test cases Guy works through in the
-portal, exercising every flow he will be paid to do, with expected
-outcomes recorded so JB can assess quality quickly (and the Claude
-batch reviewer pre-triages his submissions like any others).
+Purpose: a labelled series of training cases Guy works through in the portal, exercising every flow he will be paid to do, with expected outcomes recorded so JB can assess quality quickly (and the AI batch reviewer pre-triages his submissions like any others).
 
 Prerequisite (JB action): Guy's invite — `users:inviteUser` with his
 email (held privately, never in the repo), roles `ra` only for
@@ -38,12 +35,7 @@ each, with the skill it tests:
 | 9 | Revision exercise: JB requests changes on case 1 | the feedback loop below, revise-and-resubmit |
 | 10 | Unresolved note (useful but incomplete lead) | parking evidence without forcing submission |
 
-Per case, record in the seeding file: the expected outcome and the 2-3
-things a reviewer checks. Assessment loop: Guy submits → Claude batch
-reviewer triages → JB reviews with the AI panel → case 9 deliberately
-exercises changes_requested. VU sensitivity: cases run under the VU
-config, so the kastom gate and defer_cultural behaviour are exercised
-end to end — that is deliberate.
+Per case, record in the seeding file: the expected outcome and the 2-3 things a reviewer verifies. Assessment loop: Guy submits → AI batch reviewer triages → JB reviews with the AI panel → case 9 deliberately exercises changes_requested. VU sensitivity: cases run under the VU config. The kastom gate and defer_cultural behaviour are exercised end to end — that is deliberate.
 
 ## 2. RA feedback loop (tight loops)
 

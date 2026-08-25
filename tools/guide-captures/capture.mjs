@@ -416,6 +416,7 @@ const demoQueueRows = [
 ];
 const demoAgentReview = {
   agent_review_id: "task_demo_003:agent-review:1751900000000:1",
+  agent_name: "codex-batch-reviewer",
   recommendation: "revise",
   reasoning: "Demo reasoning: the directory supports existence, but no source yet ties the 2013 status to this address.",
   sources_checked: [
@@ -424,7 +425,8 @@ const demoAgentReview = {
     { check: "address_match", method: "not_attempted", outcome: "not_checked", note: "Demo: source has no street address to check." },
   ],
   cultural_sensitivity: { flagged: false },
-  model_name: "claude-demo-model",
+  model_provider: "openai",
+  model_name: "demo-model",
   prompt_version: "claude-batch-review-v1",
   version: 1,
   created_at: 1751900000000,
@@ -485,20 +487,20 @@ flows.push(
     },
   },
   {
-    id: "ai-review-panel", title: "Read the Claude review panel before deciding", audience: "pi",
+    id: "ai-review-panel", title: "Read the AI review panel before deciding", audience: "pi",
     run: async (page, step) => {
       const rows = JSON.parse(JSON.stringify(demoQueueRows));
       rows[0].latestAgentReview = demoAgentReview;
       await openReviewPage(page, rows);
       await page.click('.task-button[data-task-id="task_demo_003"]');
       await page.waitForTimeout(700);
-      await page.locator("#claudeReviewPanel").scrollIntoViewIfNeeded();
-      await step("The Claude recommendation panel is labelled AI-generated and never decides for you.");
-      await page.locator("#claudeReviewPanel details").first().locator("summary").click();
+      await page.locator("#agentReviewPanel").scrollIntoViewIfNeeded();
+      await step("The AI recommendation is labelled AI-generated, identifies its agent, provider, and model, and never decides for you.");
+      await page.locator("#agentReviewPanel details").first().locator("summary").click();
       await page.waitForTimeout(400);
       await step("Reasoning explains the recommendation in plain language.");
-      await page.locator("#claudeReviewPanel details").nth(1).locator("summary").click();
-      await page.locator("#claudeReviewPanel details").nth(1).scrollIntoViewIfNeeded();
+      await page.locator("#agentReviewPanel details").nth(1).locator("summary").click();
+      await page.locator("#agentReviewPanel details").nth(1).scrollIntoViewIfNeeded();
       await page.waitForTimeout(400);
       await step("Source checks record every outcome, including what could not be checked.");
       await page.click("#useAgentRecommendation");

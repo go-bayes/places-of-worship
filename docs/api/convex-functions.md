@@ -123,7 +123,7 @@ gates are untouched.
 
 | Function | Kind | Roles | Purpose | Writes |
 | --- | --- | --- | --- | --- |
-| `listReviewQueue` | query | `reviewer`, `curator`, `admin` | List review-relevant tasks by status with latest draft evidence, latest review decision, and the newest Claude batch-review artifact (`latestAgentReview`, advisory context only). | None |
+| `listReviewQueue` | query | `reviewer`, `curator`, `admin` | List review-relevant tasks by status with latest draft evidence, latest review decision, and the newest AI review artifact (`latestAgentReview`, advisory context only). | None |
 | `feedbackLoopMetrics` | query | `reviewer`, `curator`, `admin` | Report, per task, the time from a changes-requested event to the revision that answered it. | None |
 | `recordReviewDecision` | mutation | `reviewer`, `curator`, `admin` | Record accept, reject, needs-more-evidence, duplicate, or defer decisions and update task state. Decisions require a short size-limited note; accepted-for-export decisions require an evidence draft from the same task. | `review_decisions`, `tasks`, `evidence_drafts`, `task_events` |
 
@@ -132,15 +132,11 @@ through the export batch workflow.
 
 ## `claudeReviews.ts`
 
-Claude batch-review lane (`docs/portal-claude-batch-review.md`). Humans
-decide; Claude recommends. Nothing in this module changes a task status, an
-evidence draft, or a review decision: it appends advisory artifacts, batch
-manifests, and audit events. The runner is an internal action, so
-unauthenticated callers cannot trigger model spend.
+`claudeReviews.ts` contains the built Anthropic automation runner described in `docs/portal-claude-batch-review.md` and the provider-neutral artifact mutations used by authorised session runs. Humans decide; AI recommends. Nothing in this module changes a task status, an evidence draft, or a review decision: it appends advisory artifacts, batch manifests, and audit events. The automated runner is an internal action, so unauthenticated callers cannot trigger model spend.
 
 | Function | Kind | Roles | Purpose | Writes |
 | --- | --- | --- | --- | --- |
-| `listAgentReviewsForTask` | query | `reviewer`, `curator`, `admin` | List a task's Claude batch-review artifacts, newest first. | None |
+| `listAgentReviewsForTask` | query | `reviewer`, `curator`, `admin` | List a task's AI review artifacts, newest first. | None |
 | `ensureServiceUser` | internal mutation | `admin key` | Find or create the `claude-batch-reviewer` service user that artifacts and audit events are attributed to. | `users` |
 | `pendingForBatch` | internal query | `admin key` | List needs-review tasks with their latest reviewable draft and whether that draft already carries an artifact at the current prompt version. | None |
 | `openBatch` | internal mutation | `admin key` | Insert a running batch manifest recording trigger, models, and item cap. | `agent_review_batches` |
