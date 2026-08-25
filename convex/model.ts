@@ -143,6 +143,25 @@ export const changeClass = v.union(
   v.literal("uncertain"),
 );
 
+export const denominationLabelBasis = v.union(
+  v.literal("named_documentary_source"),
+  v.literal("displayed_sign_or_notice"),
+  v.literal("current_self_description"),
+  v.literal("local_investigator_account"),
+  v.literal("unknown"),
+);
+
+// describe the claim's relation to the project record separately from who supplied the label
+export const denominationRelation = v.union(
+  v.literal("label_only"),
+  v.literal("record_correction"),
+  v.literal("historical_change"),
+  v.literal("shared_or_concurrent_use"),
+  v.literal("uncertain"),
+);
+
+export const observationContractVersion = v.literal("guided_observation_v1");
+
 export const identityDecision = v.union(
   v.literal("same_site"),
   v.literal("new_candidate"),
@@ -252,6 +271,7 @@ export const taskInput = v.object({
 });
 
 export const evidenceDraftInput = v.object({
+  observation_contract_version: v.optional(observationContractVersion),
   source_type: v.optional(sourceType),
   provider: v.optional(v.string()),
   source_title: v.optional(v.string()),
@@ -275,7 +295,12 @@ export const evidenceDraftInput = v.object({
   lifecycle_date_precision: v.optional(v.string()),
   lifecycle_note: v.optional(v.string()),
   related_ids_or_note: v.optional(v.string()),
+  denomination_or_tradition_raw: v.optional(v.string()),
+  denomination_label_basis: v.optional(denominationLabelBasis),
+  denomination_relation: v.optional(denominationRelation),
   evidence_note: v.optional(v.string()),
+  interpretation_note: v.optional(v.string()),
+  uncertainty_note: v.optional(v.string()),
   generated_wide_row: v.optional(v.any()),
   privacy_flag: v.optional(privacyFlag),
   licence_flag: v.optional(licenceFlag),

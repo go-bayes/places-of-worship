@@ -1,6 +1,6 @@
 # Portal Submission Review Plan
 
-Planning source of truth: `PLANNING.md`.
+Public direction: `ROADMAP.md`. Detailed active planning and governance records are maintained in the private research tier.
 
 Portal hub: `docs/portal-data-entry-plan.md`.
 
@@ -32,6 +32,10 @@ rather than forced into a complete evidence claim. This follows the lesson of
 OpenStreetMap note workflows: keep a source-backed lead visible, preserve the
 conversation and history, and let a reviewer accept, reject, defer, or ask for
 more evidence once the uncertainty is clear.
+
+Evidence intake should distinguish direct observation, interpretation, and uncertainty or follow-up. Denomination evidence should show starting source wording and any starting project taxonomy code beside the contributor's exact observed label, label basis, and provisional relation to the record. A reviewer may assess the raw-label evidence without treating it as an accepted taxonomy value, correction, historical event, or master change.
+
+The media pilot should show an internal field-observation packet only to authorised roles. Reviewers should see time and location provenance, discrepancy, sensitivity state, the confirmed observer account, and provisional claims; they should not receive durable object URLs or accept a packet as an indivisible substitute for claim-level judgement.
 
 ```mermaid
 flowchart LR

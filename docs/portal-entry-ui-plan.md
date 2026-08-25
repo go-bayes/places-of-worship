@@ -1,6 +1,6 @@
 # Portal Entry UI Plan
 
-Planning source of truth: `PLANNING.md`.
+Public direction: `ROADMAP.md`. Detailed active planning and governance records are maintained in the private research tier.
 
 Portal hub: `docs/portal-data-entry-plan.md`.
 
@@ -37,7 +37,7 @@ For the first pilot:
    a source only supports approximate placement.
 6. Review the selected geometry and source context.
 7. Fill a short staged-submission form.
-8. Attach an optional image for quarantine, if the pilot enables upload.
+8. Attach an optional internal field-observation packet only after the separate media pilot is enabled.
 9. Submit and receive a tracking id.
 
 The building selection should draw a visible outline around the selected
@@ -50,18 +50,24 @@ The first form should be short enough for field use:
 
 - proposed action: add, modify, close, reopen, split, merge, flag, or review
 - site name and alternative names
-- denomination or tradition where known
+- the exact denomination or tradition label where observed, kept separate from the starting project label and any later taxonomy mapping
+- who supplied the label: named documentary source, displayed sign or public notice, named public community self-description, local investigator account, or unknown
+- the provisional relation to the project record: label only, possible record correction, possible historical change, possible shared or concurrent use, or uncertainty
 - current or historical status
 - target years affected, especially 2013, 2018, and 2023 for New Zealand
 - selected geometry and geometry basis
-- source URL, file reference, or evidence note
+- source title and URL or agreed file reference
 - date evidence, including exact and bounded dates
-- optional image upload
-- contributor note for reviewers
+- direct observation, interpretation, and uncertainty or follow-up as separate guided fields
+- optional internal image capture only after the media and sensitivity gates are met
 
 The form should preserve uncertainty. It should allow "known by this date",
 "not earlier than", "not later than", approximate locality, and unknown values
 without forcing false precision.
+
+The first live repair collects raw-label evidence only. Possible correction, historical-change, or shared-use selections route follow-up; they do not represent a complete denomination revision or event, because those objects require a separate contract for prior and later labels, concurrent groups, and effective dates or bounds. Taxonomy mapping is a versioned reviewer operation, and enabling intake does not enable accepted denomination events in the master.
+
+Device dictation may fill one guided text field at a time, but the contributor must confirm the resulting text before submission. The first pilot retains no audio.
 
 ## Review-Oriented UI Rules
 

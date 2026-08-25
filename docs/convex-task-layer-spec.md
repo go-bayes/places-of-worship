@@ -1,6 +1,6 @@
 # Convex Task-Map Backend Specification
 
-Planning source of truth: `PLANNING.md`.
+Public direction: `ROADMAP.md`. Detailed active planning and governance records are maintained in the private research tier.
 
 Portal hub: `docs/portal-data-entry-plan.md`.
 
@@ -430,11 +430,13 @@ Fields:
 - `assessment_confidence`.
 - `match_confidence`.
 - `geocoding_confidence`.
-
-Submitted evidence and unresolved notes are read-only for RAs. If an RA needs
-to correct or extend either, the UI starts a revision with a new
-`evidence_draft_id`. The earlier submitted draft remains part of the audit
-trail and is marked `superseded` only after the revision is submitted.
+- `denomination_or_tradition_raw`: exact source, sign, or community wording preserved as evidence.
+- `denomination_label_basis`: `named_documentary_source`, `displayed_sign_or_notice`, `current_self_description`, `local_investigator_account`, or `unknown`. A self-description must come from a named public source or display unless a separately approved oral-evidence protocol applies.
+- `denomination_relation`: `label_only`, `record_correction`, `historical_change`, `shared_or_concurrent_use`, or `uncertain`; non-label-only values are follow-up signals rather than complete accepted event objects.
+- `observation_contract_version`: identifies the prompt contract; `guided_observation_v1` distinguishes new direct observations from unversioned legacy evidence notes.
+- `evidence_note`: direct observation only when `observation_contract_version = guided_observation_v1`; older unversioned values remain generic evidence notes.
+- `interpretation_note`: optional claim the observation might support.
+- `uncertainty_note`: optional limit or follow-up need.
 - `lifecycle_event`: optional.
 - `lifecycle_date`: optional partial date string. Country protocols may allow
   early historical dates; the Vanuatu protocol accepts valid dates from 1600
@@ -442,12 +444,15 @@ trail and is marked `superseded` only after the revision is submitted.
 - `lifecycle_date_precision`: optional.
 - `lifecycle_note`: optional.
 - `related_ids_or_note`.
-- `evidence_note`.
 - `generated_wide_row`: optional TSV or object form matching
   `site_evidence_wide`.
 - `privacy_flag`: `clear`, `needs_review`, or `restricted`.
 - `licence_flag`: `clear`, `needs_review`, or `restricted`.
 - `validation_summary`: optional latest validation result.
+
+Submitted evidence and unresolved notes are read-only for RAs. If an RA needs to correct or extend either, the UI starts a revision with a new `evidence_draft_id`. The earlier submitted draft remains part of the audit trail and is marked `superseded` only after the revision is submitted.
+
+An accepted draft with no assessed project target year remains in `evidence_drafts.jsonl` and the review trail. The exporter omits it from `site_evidence_wide.csv`, because a `pow` event-candidate row requires at least one assessed target year. A present-day field observation whose capture year is not a project target year and a raw-label denomination record both default every target year to `not_assessed`; either can enter the wide handoff only when separate evidence supports a target-year state. A provisional denomination relation must not change `site_type`.
 
 Indexes:
 
@@ -683,10 +688,7 @@ Minimum controls before real RA use:
 - no direct master writes,
 - public map products consume reviewed exports only.
 
-Do not use Convex file storage for public media in the first task-layer spike.
-If media upload becomes necessary, use the quarantine plan in
-`docs/portal-media-and-provider-evaluation-plan.md` and keep media private until
-licence, privacy, and review checks pass.
+Do not use Convex file storage for field-observation media. Images are internal evidence by design and belong in restricted project-controlled object storage under `docs/field-observation-packet-spec.md`; Convex may hold only opaque references, guided text, workflow state, and review events.
 
 Rate limiting:
 For the first invite-only pilot, rely on authentication, role checks, short

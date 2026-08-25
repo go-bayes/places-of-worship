@@ -1,6 +1,6 @@
 # Portal Data Entry Plan
 
-Planning source of truth: `PLANNING.md`.
+Public direction: `ROADMAP.md`. Detailed active planning and governance records are maintained in the private research tier.
 
 Related designs:
 
@@ -12,6 +12,7 @@ Related designs:
 - `docs/portal-submission-review-plan.md`
 - `docs/portal-auth-security-plan.md`
 - `docs/portal-media-and-provider-evaluation-plan.md`
+- `docs/field-observation-packet-spec.md`
 
 This document is the hub for the future contribution portal. It covers the
 authenticated website path that will eventually replace the current "fix errors
@@ -77,9 +78,11 @@ Authenticated edit map
 Staged submission form
   - proposed action
   - site identity and status evidence
+  - exact denomination or tradition label, label basis, and provisional relation to the project record
+  - direct observation, interpretation, and uncertainty
   - source references
   - geometry source
-  - optional quarantined image
+  - optional internal field-observation packet when separately enabled
 
         |
         v
@@ -126,6 +129,8 @@ and launch gates.
 the pilot and records why Convex is now the near-term task-map spike while
 Google Cloud/PostGIS remains the durable storage reference. SpacetimeDB is
 deferred, and Cloudflare is not in the active plan.
+
+`docs/field-observation-packet-spec.md` defines the measurement object for internal images and guided dictation: capture evidence remains distinct from an observer account, provisional claims, review decisions, and accepted events.
 
 ## Scope Boundaries
 

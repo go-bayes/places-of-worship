@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### 2026-08-25
+
+- Added an internal field-observation packet specification requiring images to remain outside Convex and public outputs, original time and location evidence to be retained under restricted access, device dictation to produce confirmed text without retained audio, and later AI assistance to remain advisory and human-confirmed. Media capture, storage, and dictation are not implemented by this change.
+- Added live portal raw-label evidence fields for denomination or tradition wording, label basis, and a provisional relation to the project record, together with versioned direct-observation, interpretation, uncertainty, and sensitivity fields. The change includes Vanuatu survey-context adaptation, server-assigned submission contracts, AI exclusion for culturally or privacy-flagged evidence, reviewer display, and JSONL-only export for present-day field observations that assess no project target year. It does not enable accepted denomination events or allow provisional denomination relations to alter site type.
+
 ### 2026-08-14
 
 - C2 cutover pre-work opens (decision document: `docs/development/c2-vocabulary-reconciliation-2026-08-14.md`, three JB rulings pending). The document reconciles the portal and workbench vocabularies before the workbench writes to the shared Convex tables — lifecycle event types (portal's 13 wide-schema events canonical), assessment confidence, source types (union of both lists minus the workbench duplicate), skip semantics (portal's reason-chips-plus-undo pattern ports to the workbench), and the geocoding basis-versus-confidence distinction — and closes with the cutover checklist, including schema validators for the fields Convex currently stores as bare strings. The dirty-edit guard from the ergonomics round also extends into the workbench's nominate flow: all three of its evidence editors report dirtiness, mode and claim switches confirm before discarding, and the shell's view switches now guard the portal's unmount, which previously prompted for nothing. Files: `apps/workbench/src/App.tsx`, `apps/workbench/src/screens/FreeContributionPortal.tsx`, the decision document.

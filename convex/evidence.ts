@@ -9,6 +9,7 @@ import {
   TASK_BRIEF_MAX,
   assertClientContextLimit,
   assertEvidenceDraftLimits,
+  assertEvidenceDraftSubmission,
   assertMaxString,
   assertTaskReasonLimit,
 } from "./lib/limits";
@@ -216,6 +217,7 @@ async function importSubmittedSpreadsheetDraft(
   assertMaxString("submitter name", item.submitter_name, MEDIUM_TEXT_MAX);
   assertTaskReasonLimit("submission note", item.submit_note);
   assertEvidenceDraftLimits(item.draft);
+  assertEvidenceDraftSubmission(item.draft, false);
 
   const draftId = item.evidence_draft_id ?? `${item.task_id}:spreadsheet:${now}`;
   const task = await getTaskOrThrow(ctx, item.task_id);
@@ -309,6 +311,7 @@ export const saveEvidenceDraft = mutation({
         privacy_flag: args.draft.privacy_flag ?? "clear",
         licence_flag: args.draft.licence_flag ?? "needs_review",
         ...args.draft,
+        observation_contract_version: args.draft.observation_contract_version ?? "guided_observation_v1",
       });
     } else {
       if (existing.created_by !== user._id && !canReviewEvidence(user)) {
@@ -323,6 +326,7 @@ export const saveEvidenceDraft = mutation({
       }
       await ctx.db.patch(existing._id, {
         ...args.draft,
+        observation_contract_version: args.draft.observation_contract_version ?? existing.observation_contract_version,
         privacy_flag: args.draft.privacy_flag ?? existing.privacy_flag,
         licence_flag: args.draft.licence_flag ?? existing.licence_flag,
         draft_status: existing.draft_status === "submitted" ? "submitted" : "draft",
@@ -550,6 +554,7 @@ export const submitEvidenceDraft = mutation({
     if (draft.created_by !== user._id && !canReview(user.roles)) {
       throw new Error("Evidence draft belongs to another user.");
     }
+    assertEvidenceDraftSubmission(draft, false);
     const task = await getTaskOrThrow(ctx, draft.task_id);
     const now = Date.now();
 
@@ -597,6 +602,7 @@ export const submitUnresolvedNote = mutation({
     ) {
       throw new Error("Evidence draft belongs to another user.");
     }
+    assertEvidenceDraftSubmission(draft, true);
     const task = await getTaskOrThrow(ctx, draft.task_id);
     const now = Date.now();
 
