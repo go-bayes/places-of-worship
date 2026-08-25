@@ -1,6 +1,6 @@
 # Portal Database And Storage Plan
 
-Planning source of truth: `PLANNING.md`.
+Public direction: `ROADMAP.md`. Detailed active planning and governance records are maintained in the private research tier.
 
 Portal hub: `docs/portal-data-entry-plan.md`.
 
@@ -46,8 +46,7 @@ heavy geospatial checks, export verification, or master-rebuild integration need
 HTTP endpoints. Cloud SQL/PostGIS should hold durable staged submissions,
 geometry references, and audit records only when Convex is not sufficient for
 those responsibilities. Cloud Storage should hold immutable raw submission
-payloads, source exports, quarantined images, and reviewed public derivatives
-where publication is permitted.
+payloads, source exports, quarantined image originals, restricted metadata manifests, and internal review derivatives. The field-observation pilot has no public media derivative or publication state.
 
 ## Data Boundary
 

@@ -34,14 +34,11 @@ In practical terms:
 7. Decide what kind of case it is: confirmed site, missing from the project
    map, duplicate, closed or changed use, no building present, shared use, or
    uncertain.
-8. Fill in source title, URL or agreed file reference, status/confidence
-   dropdowns, any source-backed street address or locality correction, any
-   useful lifecycle date, and a short evidence note.
+8. Fill in source title, URL or agreed file reference, status/confidence dropdowns, any source-backed street address or locality correction, any useful lifecycle date, and the guided observation fields. If denomination or shared use is relevant, copy the exact denomination or tradition label, record who supplied it, and choose its provisional relation to the project record.
 9. Click `Save draft` if the row is not ready. A draft can be incomplete, so
    use it whenever you have started useful work. Click `Submit unresolved note`
    when you have checked something useful but cannot yet resolve the case.
-   Click `Submit for review` only when the source title, source link or file
-   reference, and evidence note are ready for JB or a reviewer to inspect.
+   Click `Submit for review` only when the source title, source link or file reference, and direct observation are ready for a reviewer to inspect.
 10. If JB explicitly asks you to use spreadsheet fallback, click `Copy
    spreadsheet row`, paste under the unchanged header in the shared Sheet, and
    review the pasted row.
@@ -105,8 +102,7 @@ use `Revise submission`; the map will create a new evidence version rather
 than rewriting the earlier submission.
 
 Use date formats exactly: `YYYY`, `YYYY-MM`, or `YYYY-MM-DD`. For example,
-`2018`, `2018-09`, or `2018-09-01`. If a date is unknown, leave the date cell
-blank and explain the uncertainty in the evidence note.
+`2018`, `2018-09`, or `2018-09-01`. If a date is unknown, leave the date cell blank and explain it under uncertainty or follow-up.
 
 ## Assigned Temporal Workpacks
 
@@ -225,7 +221,7 @@ A useful pilot row has:
 
 - a clear map task or candidate place,
 - a source title and source link or agreed file reference,
-- a short evidence note,
+- a direct observation, with interpretation and uncertainty recorded separately where relevant,
 - target-year status for any year the source supports,
 - uncertainty marked clearly where the source does not settle the issue,
 - no private contact details or restricted source material.
@@ -285,11 +281,7 @@ Submit an unresolved note, explain the uncertainty, and move on.
    denomination or tradition, lifecycle tags, automated checks, and links.
 7. Open source links in new tabs and search for evidence.
 8. Decide which action best fits the evidence.
-9. Use the dropdown fields to record status and confidence, then click
-   `Save draft`, `Submit unresolved note`, or `Submit for review` if the
-   shared backend is enabled. If using spreadsheet fallback, click
-   `Copy spreadsheet row`, click column A in the next empty row under the
-   unchanged spreadsheet header, paste, and review the pasted row.
+9. Use the dropdown fields to record status and confidence, add any exact denomination or tradition label, and use the separate direct-observation, interpretation, and uncertainty fields. Then click `Save draft`, `Submit unresolved note`, or `Submit for review` if the shared backend is enabled. If using spreadsheet fallback and at least one target year has been assessed, click `Copy spreadsheet row`, click column A in the next empty row under the unchanged spreadsheet header, paste, and review the pasted row. If every target year remains `not_assessed`, use `Copy review JSON` instead so the evidence remains available for reviewer follow-up without creating an invalid wide row.
 10. For a missing place that belongs to the assigned task, use the closest
     available action and explain the candidate in the evidence note. For an
     unrelated missing place you happen to notice, write down its name, source,
@@ -326,6 +318,8 @@ Use `Submit unresolved note` freely. The pilot is designed to find difficult
 cases, not to force final decisions. This is similar to a map-note workflow:
 record the lead, say what remains unclear, and let JB or a reviewer decide the
 next step.
+
+For denomination or tradition evidence, copy the wording exactly. Record who supplied the label separately from whether it merely records wording or may indicate a correction, historical change, shared or concurrent use, or uncertainty. A correction, historical change, shared or concurrent use, or uncertainty creates follow-up work; these choices do not constitute complete denomination revisions or events. Do not overwrite the starting wording or project code, and do not invent a taxonomy code.
 
 For now, `Missing current site` should be used only when the missing-place
 finding is part of the assigned task you are already checking. The live
@@ -394,9 +388,7 @@ Use public or project-approved sources:
 - archived web pages,
 - local histories or directories where licence and access are acceptable.
 
-For each source, record enough information for someone else to find it again:
-source type, source title, URL or agreed file reference, retrieval date, and a
-short evidence note.
+For each source, record enough information for someone else to find it again: source type, source title, URL or agreed file reference, retrieval date, and what you directly observed at the site or read in the source. Record interpretation and uncertainty separately where relevant. Do not record private conversations.
 
 For street-level imagery, record the provider, URL, displayed capture date, and
 what was visible. Use `YYYY`, `YYYY-MM`, or `YYYY-MM-DD` for capture and visit

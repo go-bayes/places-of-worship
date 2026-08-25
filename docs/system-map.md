@@ -5,9 +5,7 @@ A deep module has a simple outside interface and hides messy internal details.
 The aim is to make the system easy to hold in mind, easy to develop, and easy
 to assign work within.
 
-The map is not a replacement for `ROADMAP.md`, `PLANNING.md`, or `JOURNAL.md`.
-It is the architectural index: what the major parts are, what each part owns,
-and what each part gives to the next.
+The map is not a replacement for `ROADMAP.md` or the detailed planning and governance records in the private research tier. It is the architectural index: what the major parts are, what each part owns, and what each part gives to the next.
 
 ## Whole-System View
 
@@ -51,19 +49,20 @@ flowchart LR
 
 ## Current Tactical Focus
 
-The immediate New Zealand pilot sits across four modules:
+The immediate New Zealand pilot has five stages spanning six modules:
 
 1. **Temporal Leads**: generate the first 50-record RA workpack from OSM date
    tags and year-difference leads.
 2. **Shared Task List**: assign that work through Convex, with the Sheet path
    retained only as fallback/debug export.
-3. **Evidence Intake**: have André record source-backed target-year evidence,
-   uncertainty, and useful lifecycle dates.
+3. **Evidence Intake**: record source-backed target-year evidence, useful lifecycle dates, exact denomination or tradition labels, and guided direct observation, interpretation, and uncertainty.
 4. **Authenticated Review Portal**: let JB/JW inspect submitted evidence and
    record decisions that update the task list.
 5. **Reviewed Export Bundle** and **Validation And Diff**: freeze accepted
    decisions, validate, stage, propose, diff, and review the returned evidence
    before anything can affect the master.
+
+The planned field-observation packet extends Evidence Intake without changing this authority chain. Restricted object storage holds image artefacts and exact capture metadata; Convex holds guided text, opaque references, and workflow state; reviewers adjudicate provisional claims; and only governed `pow` exports can become accepted events.
 
 ## Development Rule
 

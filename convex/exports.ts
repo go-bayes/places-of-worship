@@ -4,6 +4,7 @@ import type { Doc } from "./_generated/dataModel";
 import { exportFormat, exportBatchStatus } from "./model";
 import { chooseActorRole, requireUser } from "./lib/auth";
 import { appendTaskEvent } from "./lib/taskEvents";
+import { isWideEvidenceExportEligible } from "./lib/exportEligibility";
 import {
   evidenceDraftDoc,
   exportBatchDoc,
@@ -60,6 +61,9 @@ function siteEvidenceWideCsv(
 
   for (const draft of evidenceDrafts) {
     if (!acceptedDraftIds.has(draft.evidence_draft_id)) {
+      continue;
+    }
+    if (!isWideEvidenceExportEligible(draft)) {
       continue;
     }
     const generated = draft.generated_wide_row as

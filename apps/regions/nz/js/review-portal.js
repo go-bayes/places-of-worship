@@ -424,12 +424,20 @@
                     <h3>Evidence summary</h3>
                     ${draft ? renderFieldGrid([
                         ["Action", draft.action],
+                        ["Starting source wording", task.source_context?.survey?.religion_as_given || task.source_context?.denomination],
+                        ["Starting project taxonomy code", task.source_context?.denomination_code || task.source_context?.survey?.denomination_code],
+                        ["Exact observed or reported label", draft.denomination_or_tradition_raw],
+                        ["Label supplied by", draft.denomination_label_basis],
+                        ["Relation to project record", draft.denomination_relation],
                         ["Existence status", draft.existence_status],
                         ["Worship-use status", draft.worship_use_status],
                         ["Assessment confidence", draft.assessment_confidence],
                         ["Match confidence", draft.match_confidence],
                         ["Geocoding confidence", draft.geocoding_confidence],
-                        ["Evidence note", draft.evidence_note],
+                        [draft.observation_contract_version === "guided_observation_v1" ? "Direct observation" : "Legacy evidence note", draft.evidence_note],
+                        ["Interpretation", draft.interpretation_note],
+                        ["Uncertainty or follow-up", draft.uncertainty_note],
+                        ["Observation contract", draft.observation_contract_version],
                         ["Source notes", draft.source_notes],
                     ]) : `<p class="muted">No evidence draft is attached.</p>`}
                 </section>

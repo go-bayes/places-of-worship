@@ -331,11 +331,13 @@ Street View, Apple Look Around, Mapillary, KartaView, Bing Streetside, or
 similar services. Use `source_type = field_observation` for approved RA or
 project-team site visits.
 
-Record the provider, link or agreed reference, capture or visit date, and a
-short site-level visual claim. Do not store screenshots, photos, videos,
-private conversations, or personal contact details in Git or public outputs
-unless a later approved media workflow covers consent, licensing, quarantine,
-and review.
+Record the provider, link or agreed reference, capture or visit date, and a short site-level visual claim. Do not store screenshots, photos, videos, private conversations, or personal contact details in Git or public outputs.
+
+The planned field-observation pilot keeps project-captured images internal by design. Restricted object storage will retain the original timestamp and location evidence; Convex will hold only guided text, workflow state, and opaque references. The pilot will have no public media derivative or public image endpoint. See `docs/field-observation-packet-spec.md`.
+
+## How should I record a denomination or tradition?
+
+Preserve the exact wording and record who supplied it: a named documentary source, a displayed sign or public notice, a named public community self-description, a local investigator account, or an unknown source. A self-description must come from a named public source or display unless a separately approved oral-evidence protocol applies; do not record private conversations. Separately state whether the evidence merely records a label or may indicate a correction, historical change, shared or concurrent use, or uncertainty. These relations create follow-up work rather than complete denomination events. Do not replace the starting source wording or project code, and do not invent a taxonomy code. Raw labels are evidence; versioned taxonomy mapping and acceptance remain reviewer and `pow` operations.
 
 ## Why use Convex and TypeScript if the governed stack is Rust?
 

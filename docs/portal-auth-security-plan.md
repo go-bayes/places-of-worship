@@ -1,6 +1,6 @@
 # Portal Auth And Security Plan
 
-Planning source of truth: `PLANNING.md`.
+Public direction: `ROADMAP.md`. Detailed active planning and governance records are maintained in the private research tier.
 
 Portal hub: `docs/portal-data-entry-plan.md`.
 
@@ -49,7 +49,7 @@ Assets:
 - raw submissions and source snapshots
 - contributor identities and role grants
 - private or restricted source files
-- quarantined images
+- quarantined images and exact capture metadata
 - public map exports and downloads
 - API credentials and service accounts
 
@@ -75,16 +75,18 @@ Before exposing a real intake endpoint beyond the core team, implement:
 - structured schema validation
 - geometry bounds and plausibility checks
 - upload file-type and size limits
-- media quarantine and private default access
+- media quarantine with no public endpoint or public derivative
+- least-privilege, role-checked, short-lived access to originals and exact capture metadata
+- audit logs for original-media and restricted-metadata access
 - malware scanning where feasible
-- privacy and licence checks before public display
+- privacy, cultural-sensitivity, and licence review before routine internal media access
+- exclusion of media, exact location, contributor identity, private media references, and guided observation text from external AI or other outbound services until separately approved
 - append-only audit logs
 - dry-run diffs before master ingestion
 - no direct master writes from public, RA, script, or AI submission paths
 
 ## Launch Gates
 
-The pilot should not leave demo status until unauthorised users cannot submit,
-invited submitters cannot review, reviewers cannot mutate the master directly,
-uploads remain private by default, and every accepted decision has a traceable
-raw submission, validation result, reviewer identity, and proposed master diff.
+The task and review pilot should not leave demo status until unauthorised users cannot submit, invited submitters cannot review, reviewers cannot mutate the master directly, and every accepted decision has a traceable raw submission, validation result, reviewer identity, and proposed master diff.
+
+Media upload has a separate launch gate. Before uploads are enabled, the project must ratify retention periods, contributor withdrawal and authorised deletion procedures, backup deletion limits, access-review intervals, breach and cultural-harm response, and the authority to suspend or destroy restricted media. Uploads must remain disabled while any of these rules is unresolved.

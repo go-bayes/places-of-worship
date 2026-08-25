@@ -251,7 +251,9 @@ Evidence And Governance:
 - `[ ]` Staged submissions in Cloud SQL/PostgreSQL/PostGIS or a compatible
   provider-neutral schema if Convex is not sufficient for canonical staging.
 - `[ ]` Raw submissions and media in quarantined object storage before any
-  public display.
+  internal review; field-observation media remain absent from public products.
+- `[~]` Guided observation intake that keeps direct observation, interpretation, uncertainty, and exact denomination or tradition labels distinct before review.
+- `[ ]` Internal image-plus-device-dictation pilot using independently recorded capture time and one-time location, no retained audio, and no public media path.
 - `[ ]` Map-first edit UI with clear staged/rejected/demo-only states.
 - `[ ]` Reviewer map with validation warnings, evidence trail, existing and
   proposed values, linked geometry, and duplicate risk.
@@ -320,8 +322,7 @@ Evidence And Governance:
   taxonomies.
 - `[~]` Community and partner contribution paths, starting with a spreadsheet
   export adapter into the shared review portal.
-- `[ ]` AI-assisted proposal generation and AI-assisted review under scoped
-  credentials and audit may be possible.
+- `[ ]` Bounded AI-assisted entry and review after a non-AI baseline: deterministic checks first, then provisional text extraction, taxonomy candidates with abstention, and focused follow-up questions under human confirmation, sensitivity gates, model and prompt versioning, audit, and a kill switch.
 - `[ ]` Provider migration options, including SQLite-compatible, PostGIS, and
   object-storage backends.
 - `[~]` Convex-to-`pow` export contract for task state, evidence drafts, and

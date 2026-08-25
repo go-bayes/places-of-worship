@@ -1,25 +1,23 @@
 # Portal Media And Provider Evaluation Plan
 
-Planning source of truth: `PLANNING.md`.
+Public direction: `ROADMAP.md`. Detailed active planning and governance records are maintained in the private research tier.
 
 Portal hub: `docs/portal-data-entry-plan.md`.
 
 ## Media Policy
 
-The first portal pilot should allow image uploads only for invited users, and
-only into private quarantine. Video should be deferred.
+The first portal media pilot should allow internal image evidence only for invited users and only through private quarantine. Video should be deferred.
 
-Images can substantially improve the qualitative public experience later, but
-they also introduce security, privacy, moderation, licence, and storage risks.
-The pilot should prove that the project can receive and review images safely
-before any media faces the public.
+Images are internal evidence by design, not prospective public content. The pilot should prove that an image plus a guided, observer-confirmed account improves verification without weakening privacy, cultural governance, licensing, or measurement accuracy. It must not create a public media bucket, anonymous media endpoint, public derivative, public URL, or media field in public exports.
 
 Minimum image metadata:
 
 - submission id
 - contributor id
-- upload timestamp
-- original filename, stored separately from public display name
+- device or image capture time and timezone provenance
+- portal capture time, server receipt time, and observer-confirmed time
+- image metadata coordinates, one-time browser location and accuracy, expected task coordinates, discrepancy, provenance, and confidence
+- original filename, restricted from routine display
 - content type
 - file size
 - checksum
@@ -28,10 +26,17 @@ Minimum image metadata:
 - licence status
 - privacy status
 - review status
-- public derivative path or file ID, if approved
+- restricted original path or file ID
+- internal review derivative path or file ID
+- sensitivity and access state
 
-Public display should use reviewed derivatives, not original uploads. Strip
-metadata such as EXIF where feasible before publication.
+The immutable original should retain its checksum and acquisition metadata in restricted storage. An internal review derivative may correct orientation and reduce size, but it should omit unnecessary embedded device metadata and expose relevant time and location through the controlled reviewer interface. Retention does not imply broad access; exact time or location may require restriction.
+
+Convex may hold an opaque observation or media identifier, workflow state, guided text, and review events. It must not hold image bytes, thumbnails, original filenames, full EXIF payloads, durable signed URLs, exact restricted coordinates, or audio.
+
+The first dictation pilot should use device dictation into separately prompted text fields. The contributor must review and correct the transcript before submission, and the project should not claim on-device-only processing without verifying the actual devices and settings.
+
+The complete evidence-object and pilot contract is in `docs/field-observation-packet-spec.md`.
 
 ## Google Cloud Durable Staging Baseline
 

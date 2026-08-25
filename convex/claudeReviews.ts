@@ -11,6 +11,7 @@ import {
   assertMaxString,
 } from "./lib/limits";
 import { appendTaskEvent } from "./lib/taskEvents";
+import { evidenceSensitivityFor, isExternalAiReviewEligible } from "./lib/sensitivity";
 
 // Claude batch-review lane (docs/portal-claude-batch-review.md).
 // Boundary: humans decide; Claude recommends. Nothing in this module
@@ -325,28 +326,8 @@ export const listAgentReviewsForTask = query({
 // ---------------------------------------------------------------------------
 // kastom / cultural-sensitivity gate
 
-// flagged items get source checks only; the recommendation is forced to
-// defer_cultural and the synthesis model never judges the cultural claim
-function culturalSensitivityFor(
-  task: { country_code: string },
-  draft: { privacy_flag: string; generated_wide_row?: unknown },
-): { flagged: boolean; basis?: string } {
-  if (draft.privacy_flag !== "clear") {
-    return { flagged: true, basis: `Evidence privacy flag is ${draft.privacy_flag}.` };
-  }
-  const wideRow = draft.generated_wide_row as Record<string, unknown> | undefined;
-  if (wideRow && (wideRow["culturally_sensitive"] === true || wideRow["culturallySensitive"] === true)) {
-    return { flagged: true, basis: "Evidence carries an explicit cultural-sensitivity flag." };
-  }
-  if (task.country_code === "VU") {
-    return {
-      flagged: true,
-      basis:
-        "Vanuatu country default: kastom-flagged items defer to human cultural judgement until the per-record sensitivity flag is bound.",
-    };
-  }
-  return { flagged: false };
-}
+// flagged items receive a not-checked artifact; the recommendation is forced
+// to defer_cultural and neither source fetching nor model synthesis runs
 
 // ---------------------------------------------------------------------------
 // source fetching and model calls
@@ -482,6 +463,9 @@ async function callClaude(args: {
 const CHECK_NAMES: SourceCheckName[] = ["existence", "date_support", "location_plausibility"];
 
 function claimSummary(task: Doc<"tasks">, draft: Doc<"evidence_drafts">): string {
+  if (!isExternalAiReviewEligible(draft)) {
+    throw new Error("Guided observation evidence is outside the current external AI review contract.");
+  }
   return JSON.stringify(
     {
       site_name: task.name,
@@ -519,6 +503,7 @@ async function checkSources(
   apiKey: string,
   task: Doc<"tasks">,
   draft: Doc<"evidence_drafts">,
+  sensitivity: { flagged: boolean; basis?: string },
 ): Promise<SourceCheckResult[]> {
   // fetch uses the full url; the stored check records carry clamped
   // copies so three records stay well under the artifact's JSON limit
@@ -526,9 +511,9 @@ async function checkSources(
   const title = clampField(draft.source_title, CHECK_TITLE_MAX);
   const urlOrFile = clampField(rawUrl, CHECK_URL_MAX);
 
-  // privacy-flagged evidence never leaves the deployment: no fetch, no
-  // model call — the artifact records that the check was withheld
-  if (draft.privacy_flag !== "clear") {
+  // sensitive evidence never leaves the deployment: no fetch or model call;
+  // the artifact records that the check was withheld
+  if (sensitivity.flagged) {
     return [
       {
         source_title: title,
@@ -536,7 +521,7 @@ async function checkSources(
         check: "existence",
         method: "not_checked",
         outcome: "requires_human_access",
-        note: `Evidence carries privacy flag ${draft.privacy_flag}; its content is not sent to external services. Verify sources manually.`,
+        note: `${sensitivity.basis ?? "Evidence requires human sensitivity review"} Its content is not sent to external services. Verify sources manually.`,
       },
     ];
   }
@@ -759,8 +744,10 @@ export const runBatch = internalAction({
       });
     // queue-wide at scan time, not per-run: "how many of the current
     // queue already carry an artifact at this prompt version"
-    const skippedExisting = args.forceRerun === true ? 0 : rows.filter((row) => row.alreadyReviewed).length;
-    const pending = (args.forceRerun === true ? rows : rows.filter((row) => !row.alreadyReviewed)).slice(
+    const eligibleRows = rows.filter((row) => isExternalAiReviewEligible(row.draft));
+    const policyExcluded = rows.length - eligibleRows.length;
+    const skippedExisting = args.forceRerun === true ? 0 : eligibleRows.filter((row) => row.alreadyReviewed).length;
+    const pending = (args.forceRerun === true ? eligibleRows : eligibleRows.filter((row) => !row.alreadyReviewed)).slice(
       0,
       maxItems,
     );
@@ -777,7 +764,9 @@ export const runBatch = internalAction({
     let deferredCultural = 0;
     let failed = 0;
     let attempted = 0;
-    const errorNotes: string[] = [];
+    const errorNotes: string[] = policyExcluded > 0
+      ? [`policy exclusion: ${policyExcluded} guided observation draft(s) remained outside the external AI review lane.`]
+      : [];
     const runStartedAt = Date.now();
 
     for (const { task, draft } of pending) {
@@ -794,8 +783,8 @@ export const runBatch = internalAction({
       }
       attempted += 1;
       try {
-        const sensitivity = culturalSensitivityFor(task, draft);
-        const checks = await checkSources(apiKey, task, draft);
+        const sensitivity = evidenceSensitivityFor(task, draft);
+        const checks = await checkSources(apiKey, task, draft, sensitivity);
 
         let recommendation: Recommendation;
         let reasoning: string;

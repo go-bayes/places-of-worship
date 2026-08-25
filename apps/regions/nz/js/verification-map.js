@@ -846,6 +846,25 @@ const CHANGE_CLASS_OPTIONS = [
     ["genuine_change", "Genuine change — this place actually opened, closed, or changed use around a date"],
     ["map_correction", "Map correction — the map record was wrong or incomplete; the world did not change"],
 ];
+const DENOMINATION_LABEL_BASIS_OPTIONS = [
+    ["unknown", "Unknown or unclear"],
+    ["named_documentary_source", "Named documentary or web source"],
+    ["displayed_sign_or_notice", "Displayed sign or public notice"],
+    ["current_self_description", "Named public community self-description"],
+    ["local_investigator_account", "Local investigator account"],
+];
+const DENOMINATION_RELATION_OPTIONS = [
+    ["uncertain", "Uncertain — the relation to the project record is not yet clear"],
+    ["label_only", "Record the label only; no correction or change claim"],
+    ["record_correction", "Correction to the project record"],
+    ["historical_change", "Possible historical change; further event evidence required"],
+    ["shared_or_concurrent_use", "Possible shared or concurrent use; record each group separately later"],
+];
+const PRIVACY_FLAG_OPTIONS = [
+    ["clear", "Clear — no sensitive or private details known"],
+    ["needs_review", "Needs sensitivity or privacy review"],
+    ["restricted", "Restricted — authorised reviewers only"],
+];
 const LIFECYCLE_EVENT_OPTIONS = [
     ["", "No extra opening/closure/change date"],
     ["organisation_founded", "Organisation/congregation founded"],
@@ -1153,8 +1172,10 @@ function statusDefaultsForAction(action, targetYear, props) {
     const latestYear = TARGET_YEARS[TARGET_YEARS.length - 1];
     const lossAction = COUNTRY_CONFIG.temporalLossAction;
 
-    if (action === "confirm_current_record" || action === "denomination_or_shared_use") {
+    if (action === "confirm_current_record") {
         statuses[targetYear] = "present";
+    } else if (action === "denomination_or_shared_use") {
+        // raw-label evidence does not set a worship-state target year
     } else if (action === "missing_current_site") {
         statuses[latestYear] = "present";
     } else if (action === lossAction.value) {
@@ -1220,7 +1241,7 @@ function reviewNoteForAction(action) {
     if (action === COUNTRY_CONFIG.temporalLossAction.value) return COUNTRY_CONFIG.temporalLossAction.note;
     if (action === "closed_or_changed_use") return "Evidence suggests worship use closed or changed; reviewer to distinguish building existence from worship function.";
     if (action === "no_building_present") return "Evidence suggests no building is present at the mapped location; reviewer to distinguish demolition, relocation, bad geometry, and worship-use closure.";
-    if (action === "denomination_or_shared_use") return "Evidence suggests denomination change, shared use, or multi-use building; reviewer to preserve concurrent uses if present.";
+    if (action === "denomination_or_shared_use") return "Evidence concerns a denomination or shared-use question. Treat the exact label and relation as provisional evidence for reviewer follow-up.";
     return "Needs reviewer decision.";
 }
 
@@ -1417,6 +1438,7 @@ function osmPointUrl(lat, lng) {
 
 function featureFromBackendTask(task) {
     const context = task.source_context || {};
+    const survey = context.survey || {};
     const coordinates = task.geometry?.coordinates || [];
     const osmUrl = context.osm_object_url || osmObjectUrl(task.osm_object_type, task.matched_osm_id);
     const osmHistoryUrl = task.osm_object_type && task.matched_osm_id ? `${osmUrl}/history` : "";
@@ -1433,8 +1455,10 @@ function featureFromBackendTask(task) {
         name: task.name || context.latest_name || context.matched_current_name || "Unnamed place of worship",
         address: task.address || "",
         locality: task.locality || "",
-        religion: context.religion || "",
-        denomination: context.denomination || "",
+        religion: context.religion || survey.religion_as_given || "",
+        denomination: context.denomination || survey.denomination_or_tradition_raw || "",
+        source_denomination_label: survey.religion_as_given || context.denomination || "",
+        denomination_code: context.denomination_code || survey.denomination_code || "",
         verification_priority: task.priority || "medium",
         automated_suggested_action: backendTaskAction(task, context),
         automated_check_count: (task.automated_checks || []).length,
@@ -3372,6 +3396,7 @@ class NzVerificationMap {
         if (!taskId || !document.getElementById("raActionSelect")) return;
         const values = this.currentFormValues();
         this.formSnapshotsByTaskId.set(taskId, {
+            observation_contract_version: this.observationContractVersionFor(values),
             action: values.action,
             target_year_statuses: values.targetYearStatuses,
             source_type: values.sourceType,
@@ -3393,7 +3418,13 @@ class NzVerificationMap {
             change_class: values.changeClass,
             source_url_or_file: values.sourceUrl,
             related_ids_or_note: values.relatedIds,
+            denomination_or_tradition_raw: values.denominationRaw,
+            denomination_label_basis: values.denominationLabelBasis,
+            denomination_relation: values.denominationRelation,
+            privacy_flag: values.privacyFlag,
             evidence_note: values.note,
+            interpretation_note: values.interpretationNote,
+            uncertainty_note: values.uncertaintyNote,
         });
     }
 
@@ -3725,7 +3756,6 @@ class NzVerificationMap {
         const closureActions = new Set([
             "closed_or_changed_use",
             "no_building_present",
-            "denomination_or_shared_use",
             COUNTRY_CONFIG.temporalLossAction.value,
         ]);
         const implied = closureActions.has(action);
@@ -4014,10 +4044,52 @@ class NzVerificationMap {
                         <input id="relatedIdsInput" type="text" placeholder="Other master/OSM ids, if relevant">
                     </label>
                 </details>
+                <fieldset>
+                    <legend>Denomination or tradition evidence</legend>
+                    <div class="copy-help">
+                        Starting source wording: <strong>${escapeHtml(props.source_denomination_label || props.denomination || "none recorded")}</strong>. Starting project taxonomy code: <strong>${escapeHtml(props.denomination_code || "none recorded")}</strong>. Preserve the exact wording you found; this proposal will not silently replace either starting value or enter the master database.
+                    </div>
+                    <label>
+                        Exact label observed or reported (optional)
+                        <input id="denominationRawInput" type="text" placeholder="Copy the wording exactly, including local language">
+                    </label>
+                    <label>
+                        Who supplied this label?
+                        <select id="denominationLabelBasisSelect">
+                            ${selectOptionsHtml(DENOMINATION_LABEL_BASIS_OPTIONS, "unknown")}
+                        </select>
+                    </label>
+                    <label>
+                        How does it relate to the project record?
+                        <select id="denominationRelationSelect">
+                            ${selectOptionsHtml(DENOMINATION_RELATION_OPTIONS, "uncertain")}
+                        </select>
+                    </label>
+                </fieldset>
                 <label>
-                    Evidence note
-                    <textarea id="decisionNote" rows="3" placeholder="One or two sentences explaining what the source says about this site at the target year."></textarea>
+                    What did you directly observe or read in the source?
+                    <textarea id="decisionNote" data-question-id="direct_observation_v1" rows="3" maxlength="2000" placeholder="Record the direct observation. Copy names, denomination wording, dates, or notices exactly where relevant."></textarea>
                 </label>
+                <div class="copy-help" id="legacyNoteUpgradeHelp" hidden>
+                    This draft contains an older generic evidence note. It remains a legacy note unless you review and rewrite this field as a direct observation; adding the new guided fields also requires that review.
+                </div>
+                <label>
+                    What might this observation support? (optional)
+                    <textarea id="interpretationNote" data-question-id="interpretation_v1" rows="2" maxlength="1000" placeholder="Keep your interpretation separate from what you directly observed."></textarea>
+                </label>
+                <label>
+                    What remains uncertain or needs follow-up? (optional)
+                    <textarea id="uncertaintyNote" data-question-id="uncertainty_v1" rows="2" maxlength="2000" placeholder="Record what this evidence cannot establish or what another source should check."></textarea>
+                </label>
+                <label>
+                    Sensitivity and privacy
+                    <select id="privacyFlagSelect">
+                        ${selectOptionsHtml(PRIVACY_FLAG_OPTIONS, COUNTRY_CONFIG.countryCode === "VU" ? "needs_review" : "clear")}
+                    </select>
+                </label>
+                <div class="copy-help">
+                    Choose review or restricted when the account may identify people, expose a culturally restricted place, or require local judgement. Evidence marked needs review or restricted is withheld from external AI services.
+                </div>
                 <h3>4. Save or submit</h3>
                 ${this.backend?.configured && this.backendUser ? `
                     <div class="copy-help">
@@ -4179,6 +4251,12 @@ class NzVerificationMap {
             "lifecycleDatePrecisionSelect",
             "lifecycleNoteInput",
             "relatedIdsInput",
+            "denominationRawInput",
+            "denominationLabelBasisSelect",
+            "denominationRelationSelect",
+            "interpretationNote",
+            "uncertaintyNote",
+            "privacyFlagSelect",
             "sourceTypeSelect",
             "existenceStatusSelect",
             "worshipUseStatusSelect",
@@ -4288,7 +4366,20 @@ class NzVerificationMap {
         setValue("changeClassSelect", draft.change_class);
         setValue("sourceUrlInput", draft.source_url_or_file, false);
         setValue("relatedIdsInput", draft.related_ids_or_note, false);
+        setValue("denominationRawInput", draft.denomination_or_tradition_raw, false);
+        setValue("denominationLabelBasisSelect", draft.denomination_label_basis);
+        setValue("denominationRelationSelect", draft.denomination_relation);
         setValue("decisionNote", draft.evidence_note, true);
+        const note = document.getElementById("decisionNote");
+        if (note) {
+            note.dataset.loadedObservationContract = draft.observation_contract_version || (draft.evidence_note ? "legacy" : "guided_observation_v1");
+            note.dataset.loadedEvidenceNote = draft.evidence_note || "";
+        }
+        const legacyHelp = document.getElementById("legacyNoteUpgradeHelp");
+        if (legacyHelp) legacyHelp.hidden = note?.dataset.loadedObservationContract !== "legacy";
+        setValue("interpretationNote", draft.interpretation_note, false);
+        setValue("uncertaintyNote", draft.uncertainty_note, false);
+        setValue("privacyFlagSelect", draft.privacy_flag);
         // the form now mirrors a known baseline; snapshot reapply re-marks
         // it dirty afterwards because those values are still unsaved
         this.clearFormDirty();
@@ -4366,7 +4457,13 @@ class NzVerificationMap {
             changeClass: document.getElementById("changeClassSelect")?.value || "uncertain",
             sourceUrl: document.getElementById("sourceUrlInput")?.value || "",
             relatedIds: document.getElementById("relatedIdsInput")?.value || "",
+            denominationRaw: document.getElementById("denominationRawInput")?.value || "",
+            denominationLabelBasis: document.getElementById("denominationLabelBasisSelect")?.value || "unknown",
+            denominationRelation: document.getElementById("denominationRelationSelect")?.value || "uncertain",
             note: document.getElementById("decisionNote")?.value || "",
+            interpretationNote: document.getElementById("interpretationNote")?.value || "",
+            uncertaintyNote: document.getElementById("uncertaintyNote")?.value || "",
+            privacyFlag: document.getElementById("privacyFlagSelect")?.value || (COUNTRY_CONFIG.countryCode === "VU" ? "needs_review" : "clear"),
         };
     }
 
@@ -4374,11 +4471,19 @@ class NzVerificationMap {
         const unresolved = Boolean(options.unresolved);
         const submit = !unresolved && options.submit !== false;
         if (!submit && !unresolved) return "";
+        const hasNewGuidedContent = values.denominationRaw.trim()
+            || values.denominationLabelBasis !== "unknown"
+            || values.denominationRelation !== "uncertain"
+            || values.interpretationNote.trim()
+            || values.uncertaintyNote.trim();
+        if (!this.observationContractVersionFor(values) && hasNewGuidedContent) {
+            return "Review and rewrite the legacy evidence note as a direct observation before adding the new guided fields.";
+        }
         if (unresolved) {
             if (values.sourceTitle.trim() && isPlaceholderText(values.sourceTitle)) {
                 return "Do not use NA or N/A as a source title. Add the actual source title, or leave it blank and explain what you checked.";
             }
-            if (values.note.trim().length < 12) {
+            if (`${values.note} ${values.uncertaintyNote}`.trim().length < 12) {
                 return "Add a short unresolved-note explanation: what you checked, what remains unclear, or why the case needs review.";
             }
             if (values.sourceDate.trim() && !isValidPartialDateText(values.sourceDate)) {
@@ -4397,6 +4502,16 @@ class NzVerificationMap {
             if (values.sourceType === "field_observation" && !values.sourceDate.trim()) {
                 return "Add the field observation date.";
             }
+            if (values.sourceType === "field_observation") {
+                const observationYear = values.sourceDate.slice(0, 4);
+                const unsupportedYears = Object.entries(values.targetYearStatuses)
+                    .filter(([, status]) => status !== "not_assessed")
+                    .map(([year]) => year)
+                    .filter(year => year !== observationYear);
+                if (unsupportedYears.length) {
+                    return `A field observation supports its observation year only. Mark ${unsupportedYears.join(", ")} not assessed, or add a separate historical source.`;
+                }
+            }
             return "";
         }
         if (!values.sourceTitle.trim()) return "Add a source title.";
@@ -4404,6 +4519,28 @@ class NzVerificationMap {
             return "Do not use NA or N/A as a source title. Add the actual source title, or save a draft until you have it.";
         }
         if (values.note.trim().length < 5) return "Add a short evidence note.";
+        if (values.denominationLabelBasis !== "unknown" && !values.denominationRaw.trim()) {
+            return "Copy the exact denomination or tradition label, or choose unknown when the wording is not available.";
+        }
+        if (values.denominationRelation !== "uncertain" && !values.denominationRaw.trim()) {
+            return "Copy the exact denomination or tradition label before describing how it relates to the project record.";
+        }
+        if (values.action === "denomination_or_shared_use" && !values.denominationRaw.trim() && !values.uncertaintyNote.trim()) {
+            return "Add the exact denomination or tradition label, or explain what remains uncertain.";
+        }
+        if (values.denominationRelation === "record_correction" && values.changeClass === "genuine_change") {
+            return "Choose map correction or can't tell yet: a denomination record correction is not a genuine change.";
+        }
+        if (values.denominationRelation === "historical_change" && values.changeClass === "map_correction") {
+            return "Choose genuine change or can't tell yet: a possible historical denomination change is not a map correction.";
+        }
+        if (
+            hasNewGuidedContent
+            && ["label_only", "shared_or_concurrent_use", "uncertain"].includes(values.denominationRelation)
+            && values.changeClass !== "uncertain"
+        ) {
+            return "Choose can't tell yet for change class: this denomination relation is provisional rather than a classified change.";
+        }
         if (values.sourceDate.trim() && !isValidPartialDateText(values.sourceDate)) {
             return "Use YYYY, YYYY-MM, or YYYY-MM-DD for source and capture dates. If the date is unknown, leave it blank and explain in the note.";
         }
@@ -4419,6 +4556,16 @@ class NzVerificationMap {
         }
         if (values.sourceType === "field_observation" && !values.sourceDate.trim()) {
             return "Add the field observation date.";
+        }
+        if (values.sourceType === "field_observation") {
+            const observationYear = values.sourceDate.slice(0, 4);
+            const unsupportedYears = Object.entries(values.targetYearStatuses)
+                .filter(([, status]) => status !== "not_assessed")
+                .map(([year]) => year)
+                .filter(year => year !== observationYear);
+            if (unsupportedYears.length) {
+                return `A field observation supports its observation year only. Mark ${unsupportedYears.join(", ")} not assessed, or add a separate historical source.`;
+            }
         }
         if (values.sourceType !== "field_observation" && !values.sourceUrl.trim()) {
             return "Add a source URL or agreed file reference. Use the OSM button only when OSM itself is the evidence.";
@@ -4452,7 +4599,6 @@ class NzVerificationMap {
         const targetEvidence = values.note || deriveTargetYearStatus(props, this.targetYear).note;
         const isMissing = values.action === "missing_current_site";
         const isDuplicate = values.action === "possible_duplicate";
-        const isShared = values.action === "denomination_or_shared_use";
         const addressRaw = values.addressRaw.trim() || props.address || "";
         const localityRaw = values.localityRaw.trim() || props.locality || "";
 
@@ -4473,8 +4619,8 @@ class NzVerificationMap {
         row.source_notes = `Generated from the ${ASSIGNMENT_MODE ? "assigned web workpack" : "static RA workbench"}${raInitials ? ` by ${raInitials}` : ""}. Action: ${actionLabelForRa(values.action)}.${values.sourceDate ? ` Source/capture date: ${values.sourceDate}.` : ""}`;
         row.name_raw = props.name || "";
         row.name_standardised = props.name || "";
-        row.denomination_or_tradition_raw = props.denomination || "";
-        row.site_type = isShared ? "multi_use" : normaliseSiteType(props.site_type || props.name || "");
+        row.denomination_or_tradition_raw = values.denominationRaw.trim();
+        row.site_type = normaliseSiteType(props.site_type || props.name || "");
         row.address_raw = addressRaw;
         row.modern_address_candidate = addressRaw;
         row.address_standardised = addressRaw;
@@ -4552,18 +4698,32 @@ class NzVerificationMap {
                 ? "directory_confirmed"
                 : "needs_review";
         row.review_status = values.action === "confirm_current_record" ? "unreviewed" : "needs_review";
-        row.privacy_flag = "clear";
+        row.privacy_flag = values.privacyFlag;
         row.licence_flag = "needs_review";
         row.retrieved_by = raInitials || "ra";
         row.extracted_by = raInitials || "ra";
         row.extracted_at = nowIso();
-        row.review_note = `${reviewNoteForAction(values.action)} ${values.relatedIds ? `Related ids: ${values.relatedIds}.` : ""}`.trim();
+        row.review_note = [
+            reviewNoteForAction(values.action),
+            values.denominationRaw ? `Denomination label (${values.denominationLabelBasis}; ${values.denominationRelation}): ${values.denominationRaw}.` : "",
+            values.interpretationNote ? `Interpretation: ${values.interpretationNote}` : "",
+            values.uncertaintyNote ? `Uncertainty or follow-up: ${values.uncertaintyNote}` : "",
+            values.relatedIds ? `Related ids: ${values.relatedIds}.` : "",
+        ].filter(Boolean).join(" ").trim();
 
         return row;
     }
 
+    observationContractVersionFor(values) {
+        const note = document.getElementById("decisionNote");
+        const loadedLegacy = note?.dataset.loadedObservationContract === "legacy";
+        const legacyNoteUnchanged = loadedLegacy && values.note === (note?.dataset.loadedEvidenceNote || "");
+        return legacyNoteUnchanged ? undefined : "guided_observation_v1";
+    }
+
     buildEvidenceDraft(props, row, options = {}) {
         const values = this.currentFormValues();
+        const observationContractVersion = this.observationContractVersionFor(values);
         const targetEvidence = values.note || deriveTargetYearStatus(props, this.targetYear).note;
         const targetYearEvidence = Object.fromEntries(TARGET_YEARS.map(year => [
             year,
@@ -4581,6 +4741,7 @@ class NzVerificationMap {
             validationMessages.push(submitError);
         }
         return {
+            observation_contract_version: observationContractVersion,
             source_type: values.sourceType,
             provider: values.sourceProvider || undefined,
             source_title: values.sourceTitle,
@@ -4604,13 +4765,26 @@ class NzVerificationMap {
             lifecycle_note: values.lifecycleNote || undefined,
             change_class: values.changeClass || "uncertain",
             related_ids_or_note: values.relatedIds || undefined,
+            denomination_or_tradition_raw: values.denominationRaw,
+            denomination_label_basis: values.denominationLabelBasis,
+            denomination_relation: values.denominationRelation,
             evidence_note: values.note,
+            interpretation_note: values.interpretationNote,
+            uncertainty_note: values.uncertaintyNote,
             generated_wide_row: {
                 fields: WIDE_EVIDENCE_FIELDS,
                 row,
                 tsv: tsvRowFromObject(row),
+                guided_evidence: observationContractVersion ? {
+                    direct_observation: values.note,
+                    interpretation: values.interpretationNote,
+                    uncertainty_or_follow_up: values.uncertaintyNote,
+                    denomination_or_tradition_raw: values.denominationRaw,
+                    denomination_label_basis: values.denominationLabelBasis,
+                    denomination_relation: values.denominationRelation,
+                } : undefined,
             },
-            privacy_flag: "clear",
+            privacy_flag: values.privacyFlag,
             licence_flag: "needs_review",
             validation_summary: {
                 status: unresolved ? "unresolved_note" : submitError ? "draft_needs_more_detail" : "client_checked",
@@ -4741,6 +4915,7 @@ class NzVerificationMap {
         const values = this.currentFormValues();
         return {
             task_id: props.task_id,
+            observation_contract_version: this.observationContractVersionFor(values),
             master_snapshot_id: props.master_snapshot_id,
             master_site_id: props.master_site_id,
             osm_id: props.osm_id,
@@ -4767,7 +4942,13 @@ class NzVerificationMap {
             address_change_note: values.addressNote,
             source_url_or_file: values.sourceUrl,
             related_ids_or_note: values.relatedIds,
+            denomination_or_tradition_raw: values.denominationRaw,
+            denomination_label_basis: values.denominationLabelBasis,
+            denomination_relation: values.denominationRelation,
             evidence_note: values.note,
+            interpretation_note: values.interpretationNote,
+            uncertainty_note: values.uncertaintyNote,
+            privacy_flag: values.privacyFlag,
             source: COUNTRY_CONFIG.mapSource,
             saved_or_submitted: false,
         };
@@ -5204,6 +5385,13 @@ class NzVerificationMap {
         if (inputError) {
             if (status) {
                 status.textContent = `${inputError} Nothing was copied.`;
+            }
+            return;
+        }
+        const hasAssessedTargetYear = Object.values(values.targetYearStatuses).some((value) => value !== "not_assessed");
+        if (!hasAssessedTargetYear) {
+            if (status) {
+                status.textContent = "No target year has been assessed. Use Copy review JSON instead; nothing was copied.";
             }
             return;
         }

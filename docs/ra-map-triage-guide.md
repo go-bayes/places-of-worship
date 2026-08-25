@@ -76,20 +76,11 @@ Use this section only if JB asks you to use demo or spreadsheet-fallback mode.
 4. In "What did you find?", choose the closest action.
 5. Check or adjust the 2013, 2018, and 2023 statuses.
 6. Check or adjust the controlled status and confidence dropdowns.
-7. Add a short source title, source URL or agreed file reference, any
-   source-backed street address or locality found for missing-address tasks,
-   related ids if relevant, and a source-backed evidence note.
-8. Click `Copy spreadsheet row` if you were asked to paste a draft row into the
-   wide evidence sheet.
-9. Click `Copy review JSON` if JB asks for a compact feedback
-   payload.
+7. Add a short source title, source URL or agreed file reference, any source-backed street address or locality found for missing-address tasks, related ids if relevant, and the guided direct-observation, interpretation, and uncertainty fields. If denomination or shared use is relevant, preserve the exact label, record who supplied it, and choose its provisional relation to the project record.
+8. Click `Copy spreadsheet row` if you were asked to paste a draft row into the wide evidence sheet and at least one target year has been assessed.
+9. Click `Copy review JSON` if JB asks for a compact feedback payload, or when the evidence preserves a raw denomination label without assessing a target year.
 
-The copied spreadsheet row is a single tab-separated row matching the wide
-evidence sheet columns. Paste it into the sheet under the existing header row.
-Review it before sending it back. The map marks copied tasks as tentatively
-closed only in this browser; choose the next task from the map or list. Do not
-enter private contact details, restricted source material, or raw uploaded files
-into the map.
+The copied spreadsheet row is a single tab-separated row matching the wide evidence sheet columns. Paste it into the sheet under the existing header row. Review it before sending it back. A record with every target year left as `not_assessed` cannot form a wide spreadsheet or `pow` row; preserve it as review JSON for reviewer follow-up instead. The map marks copied tasks as tentatively closed only in this browser; choose the next task from the map or list. Do not enter private contact details, restricted source material, or raw uploaded files into the map.
 
 The target-year fields are for 2013, 2018, and 2023. Use the optional opening,
 closure, and change-date fields for dates outside those waves, such as site
@@ -328,7 +319,7 @@ Use this when the building remains but the worship function is complicated.
 
 1. Record each source separately if it supports a different organisation,
    denomination, or time period.
-2. Preserve `denomination_or_tradition_raw` exactly as the source gives it.
+2. Preserve `denomination_or_tradition_raw` exactly as the source, sign, or community gives it. In the live portal, enter this under `Exact label observed or reported` and keep it separate from the starting project label.
 3. Use `site_type` as `multi_use` if worship is one use among several.
 4. Use `review_note` to explain whether the case is:
    - denomination switch,
@@ -342,6 +333,8 @@ Use this when the building remains but the worship function is complicated.
 Current limitation: coded denomination taxonomy and multi-organisation event
 translation are still being developed. Preserve the evidence; do not force a
 single final denomination if the source shows concurrent use.
+
+Record who supplied the label separately from its possible relation to the record. Correction, historical-change, and shared-use choices create follow-up signals only; they are not complete change events. Taxonomy mapping and acceptance remain reviewer and `pow` operations.
 
 ## How To Work Through The NZ Website Priority List
 

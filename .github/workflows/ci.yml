@@ -20,6 +20,8 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           npx tsc --noEmit
+      - name: test evidence submission contract
+        run: node --test convex/lib/*.node-test.mjs
       - name: typecheck workbench
         working-directory: apps/workbench
         run: |
