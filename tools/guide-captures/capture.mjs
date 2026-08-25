@@ -429,7 +429,7 @@ const demoAgentReview = {
   model_name: "demo-model",
   prompt_version: "claude-batch-review-v1",
   version: 1,
-  created_at: 1751900000000,
+  created_at: 1787610600000,
 };
 const demoEvents = [
   { event_type: "submitted_for_review", occurred_at: Date.now() - 864e5, actor_role: "ra", new_status: "needs_review" },
@@ -492,6 +492,12 @@ flows.push(
       const rows = JSON.parse(JSON.stringify(demoQueueRows));
       rows[0].latestAgentReview = demoAgentReview;
       await openReviewPage(page, rows);
+      // The live decision panel is sticky for reviewer ergonomics. Keep it in
+      // normal flow for guide captures so it cannot obscure the AI execution
+      // details or source checks that the screenshots are meant to explain.
+      await page.addStyleTag({
+        content: ".decision-panel { position: static !important; max-height: none !important; overflow: visible !important; }",
+      });
       await page.click('.task-button[data-task-id="task_demo_003"]');
       await page.waitForTimeout(700);
       await page.locator("#agentReviewPanel").scrollIntoViewIfNeeded();
@@ -521,6 +527,8 @@ async function runFlow(browser, flow) {
   const context = await browser.newContext({
     viewport: { width: 1280, height: 800 },
     deviceScaleFactor: 2,
+    locale: "en-NZ",
+    timezoneId: "Pacific/Auckland",
   });
   const page = await context.newPage();
   const errors = [];
