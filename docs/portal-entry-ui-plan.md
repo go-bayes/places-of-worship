@@ -69,6 +69,16 @@ The first live repair collects raw-label evidence only. Possible correction, his
 
 Device dictation may fill one guided text field at a time, but the contributor must confirm the resulting text before submission. The first pilot retains no audio.
 
+## Vanuatu Rapid Current Entry
+
+The Vanuatu field-entry path should minimise taps without collapsing physical existence into worship use. Its required first question has four answers at an exact observation date: used for worship; place exists but worship use is uncertain; place exists but is not used for worship; or status could not be determined. “Current” is indexed to that observation date, not treated as a timeless property. The server derives provisional existence, worship-use, action, and review fields from that answer; the browser does not supply those derived classifications.
+
+A rapid submission records an exact observation date, an evidence basis, a sensitivity flag, and optional exact denomination wording, direct observation, and uncertainty. A new place also requires a building-accurate point after a nearby-place check. All Vanuatu historical target years remain `not_assessed`; rapid entry must not turn a present observation into evidence for 1989, 1999, 2009, or 2020.
+
+One authenticated mutation should create the candidate task when needed, save the submitted evidence, append audit events, and move the task to human review atomically. Client-generated UUIDs make retries idempotent. Server-side role checks, Vanuatu coordinate bounds, field limits, controlled validators, and per-user and global rate limits apply before a write. The response should immediately re-arm the map for the next place. Detailed historical or complicated cases remain available through the full form.
+
+Images, audio, and public media delivery are outside this path. The later media pilot must keep originals and exact capture metadata in restricted object storage, use Convex only for workflow state and opaque references, and meet the separate media launch gate before upload controls appear.
+
 ## Review-Oriented UI Rules
 
 The edit map should remain map-first. Avoid large explanatory panels on the

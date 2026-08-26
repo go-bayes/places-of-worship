@@ -43,6 +43,8 @@ type EvidenceDraftLimitInput = {
   evidence_note?: string;
   interpretation_note?: string;
   uncertainty_note?: string;
+  current_observation_status?: string;
+  current_observation_basis?: string;
   generated_wide_row?: unknown;
   validation_summary?: unknown;
 };
@@ -104,15 +106,75 @@ export function assertEvidenceDraftLimits(draft: EvidenceDraftLimitInput): void 
   assertMaxString("evidence note", draft.evidence_note, LONG_TEXT_MAX);
   assertMaxString("interpretation note", draft.interpretation_note, LONG_TEXT_MAX);
   assertMaxString("uncertainty note", draft.uncertainty_note, LONG_TEXT_MAX);
+  assertMaxString("current observation status", draft.current_observation_status, SHORT_TEXT_MAX);
+  assertMaxString("current observation basis", draft.current_observation_basis, SHORT_TEXT_MAX);
   assertMaxJson("target-year statuses", draft.target_year_statuses, VALIDATION_SUMMARY_MAX);
   assertMaxJson("target-year evidence", draft.target_year_evidence, VALIDATION_SUMMARY_MAX);
   assertMaxJson("generated wide row", draft.generated_wide_row, GENERATED_ROW_MAX);
   assertMaxJson("validation summary", draft.validation_summary, VALIDATION_SUMMARY_MAX);
 }
 
+export function isValidPartialDate(value: string): boolean {
+  if (/^(?:1\d{3}|20\d{2}|2100)$/.test(value)) return true;
+  if (/^(?:1\d{3}|20\d{2}|2100)-(?:0[1-9]|1[0-2])$/.test(value)) return true;
+  const parts = value.match(/^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/);
+  if (!parts) return false;
+  const parsed = new Date(`${value}T00:00:00Z`);
+  return parsed.getUTCFullYear() === Number(parts[1])
+    && parsed.getUTCMonth() + 1 === Number(parts[2])
+    && parsed.getUTCDate() === Number(parts[3]);
+}
+
+export function assertRapidCurrentObservation(draft: EvidenceDraftLimitInput): void {
+  const status = draft.current_observation_status;
+  const basis = draft.current_observation_basis;
+  const observedOn = draft.source_date_or_capture_date?.trim() ?? "";
+  const directObservation = draft.evidence_note?.trim() ?? "";
+  const uncertainty = draft.uncertainty_note?.trim() ?? "";
+
+  if (!status || !basis) {
+    throw new Error("Choose what you can confirm and how you know it.");
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(observedOn) || !isValidPartialDate(observedOn)) {
+    throw new Error("A rapid current observation requires a valid YYYY-MM-DD observation date.");
+  }
+  if (Date.parse(`${observedOn}T00:00:00Z`) > Date.now() + 36 * 60 * 60 * 1_000) {
+    throw new Error("A rapid current observation cannot use a future observation date.");
+  }
+  if (basis === "named_public_source" && !draft.source_title?.trim()) {
+    throw new Error("A named public source requires its title.");
+  }
+  if (basis === "named_public_source" && !draft.source_url_or_file?.trim()) {
+    throw new Error("A named public source requires its URL or agreed file reference.");
+  }
+  if (basis === "local_investigator_account" && directObservation.length < 5) {
+    throw new Error("A local investigator account requires a short direct observation.");
+  }
+  if (
+    draft.denomination_or_tradition_raw?.trim()
+    && (!draft.denomination_label_basis || draft.denomination_label_basis === "unknown")
+  ) {
+    throw new Error("Choose where the denomination or tradition wording came from.");
+  }
+  if (status === "could_not_determine" && uncertainty.length < 12) {
+    throw new Error("Explain what remains uncertain before submitting this observation.");
+  }
+  const assessedHistoricalYears = Object.entries(
+    (draft.target_year_statuses as Record<string, unknown> | undefined) ?? {},
+  )
+    .filter(([, value]) => value !== "not_assessed")
+    .map(([year]) => year);
+  if (assessedHistoricalYears.length > 0) {
+    throw new Error("Rapid current observations cannot assess historical target years.");
+  }
+}
+
 // validate a persisted draft against the versioned scientific submission contract
 export function assertEvidenceDraftSubmission(draft: EvidenceDraftLimitInput, unresolved: boolean): void {
-  if (draft.observation_contract_version !== undefined && draft.observation_contract_version !== "guided_observation_v1") {
+  if (
+    draft.observation_contract_version !== undefined
+    && !["guided_observation_v1", "rapid_current_v1"].includes(draft.observation_contract_version)
+  ) {
     throw new Error("The observation contract version is not supported.");
   }
   const hasGuidedFields = Boolean(draft.denomination_or_tradition_raw?.trim())
@@ -120,7 +182,12 @@ export function assertEvidenceDraftSubmission(draft: EvidenceDraftLimitInput, un
     || (draft.denomination_relation !== undefined && draft.denomination_relation !== "uncertain")
     || Boolean(draft.interpretation_note?.trim())
     || Boolean(draft.uncertainty_note?.trim());
-  if (hasGuidedFields && draft.observation_contract_version !== "guided_observation_v1") {
+  const isRapidCurrent = draft.observation_contract_version === "rapid_current_v1";
+  const hasRapidCurrentFields = Boolean(draft.current_observation_status || draft.current_observation_basis);
+  if (hasRapidCurrentFields && !isRapidCurrent) {
+    throw new Error("Rapid current fields require the rapid current observation contract.");
+  }
+  if (hasGuidedFields && draft.observation_contract_version !== "guided_observation_v1" && !isRapidCurrent) {
     throw new Error("Guided evidence fields require the guided observation contract.");
   }
   const isGuidedObservation = draft.observation_contract_version === "guided_observation_v1";
@@ -133,16 +200,9 @@ export function assertEvidenceDraftSubmission(draft: EvidenceDraftLimitInput, un
   const lifecycleDate = draft.lifecycle_date?.trim() ?? "";
   const lifecyclePrecision = draft.lifecycle_date_precision?.trim() ?? "";
 
-  const isValidPartialDate = (value: string): boolean => {
-    if (/^(?:1\d{3}|20\d{2}|2100)$/.test(value)) return true;
-    if (/^(?:1\d{3}|20\d{2}|2100)-(?:0[1-9]|1[0-2])$/.test(value)) return true;
-    const parts = value.match(/^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/);
-    if (!parts) return false;
-    const parsed = new Date(`${value}T00:00:00Z`);
-    return parsed.getUTCFullYear() === Number(parts[1])
-      && parsed.getUTCMonth() + 1 === Number(parts[2])
-      && parsed.getUTCDate() === Number(parts[3]);
-  };
+  if (isRapidCurrent) {
+    assertRapidCurrentObservation(draft);
+  }
 
   if (isGuidedObservation && !unresolved && !sourceTitle) {
     throw new Error("Add a source title before submitting for review.");
@@ -153,7 +213,7 @@ export function assertEvidenceDraftSubmission(draft: EvidenceDraftLimitInput, un
   if (isGuidedObservation && !unresolved && directObservation.length < 5) {
     throw new Error("Add a direct observation before submitting for review.");
   }
-  if (isGuidedObservation) {
+  if (isGuidedObservation || isRapidCurrent) {
     assertMaxString("direct observation", draft.evidence_note, GUIDED_DIRECT_OBSERVATION_MAX);
     assertMaxString("interpretation", draft.interpretation_note, GUIDED_INTERPRETATION_MAX);
     assertMaxString("uncertainty or follow-up", draft.uncertainty_note, GUIDED_UNCERTAINTY_MAX);

@@ -27,8 +27,10 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           npm run typecheck
-      - name: portal unit test
-        run: node apps/regions/nz/js/claude-review-panel.test.cjs
+      - name: portal unit tests
+        run: |
+          node apps/regions/nz/js/claude-review-panel.test.cjs
+          node apps/regions/nz/js/rapid-entry-contract.test.cjs
       - uses: astral-sh/setup-uv@v5
       - name: validate area summaries
         run: bash scripts/validate_area_summaries.sh

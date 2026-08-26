@@ -327,6 +327,7 @@ Fields:
 - `nearby_site_refs`: optional compact references for duplicate checks.
 - `automated_checks`: array of check summaries.
 - `task_brief`: concise RA-facing task text.
+- `intake_submission_key`: optional user-scoped idempotency key for atomic intake.
 - `created_at`, `updated_at`.
 - `last_event_at`.
 
@@ -343,10 +344,7 @@ Indexes:
 
 ### Reusable candidate intake
 
-The next build step is a reusable `Nominate missing PoW` flow on top of the
-existing task and evidence-draft model. It should work for the New Zealand
-assignment page first, then be reused for Vanuatu and later public-country
-maps.
+The reusable `Nominate missing PoW` flow sits on top of the existing task and evidence-draft model. The Vanuatu rapid-current variant records a new candidate and its first submitted observation atomically; the detailed generic path may still create a candidate task and reopen the standard evidence form.
 
 Use this wording consistently in the interface and documentation. Do not label
 the action `Add to map`: the user is proposing a candidate for review, not
@@ -361,10 +359,8 @@ The flow should:
    evidence note, and target-year status where known,
 4. show nearby existing sites before submission so the user can flag a possible
    match, duplicate, shared building, successor site, or unrelated candidate,
-5. call `tasks:createManualCandidateTask` to create a provisional
-   `candidate_site_id` and ordinary review task,
-6. reopen the standard evidence form for that new task, so save/submit,
-   validation, review, and export use the same path as seeded tasks, and
+5. call `rapidEntry:submitVanuatuCurrentObservation` for the Vanuatu rapid path, or `tasks:createManualCandidateTask` for the detailed generic path, to create a provisional `candidate_site_id` and ordinary review task,
+6. create submitted evidence in the same Vanuatu rapid-entry transaction, or reopen the standard evidence form for a detailed candidate, so validation, review, and export use the same shared tables, and
 7. keep all country-specific target years, date bounds, map defaults, and
    nomination options in `country_configs` rather than hard-coding New Zealand
    assumptions into the component.
@@ -433,8 +429,10 @@ Fields:
 - `denomination_or_tradition_raw`: exact source, sign, or community wording preserved as evidence.
 - `denomination_label_basis`: `named_documentary_source`, `displayed_sign_or_notice`, `current_self_description`, `local_investigator_account`, or `unknown`. A self-description must come from a named public source or display unless a separately approved oral-evidence protocol applies.
 - `denomination_relation`: `label_only`, `record_correction`, `historical_change`, `shared_or_concurrent_use`, or `uncertain`; non-label-only values are follow-up signals rather than complete accepted event objects.
-- `observation_contract_version`: identifies the prompt contract; `guided_observation_v1` distinguishes new direct observations from unversioned legacy evidence notes.
-- `evidence_note`: direct observation only when `observation_contract_version = guided_observation_v1`; older unversioned values remain generic evidence notes.
+- `observation_contract_version`: identifies the prompt contract; `guided_observation_v1` distinguishes the detailed guided form and `rapid_current_v1` identifies the Vanuatu current-observation form, while unversioned values remain legacy evidence.
+- `current_observation_status`: for `rapid_current_v1`, the observer's explicit distinction among current worship, physical existence with uncertain worship, physical existence without current worship, and undetermined current status.
+- `current_observation_basis`: for `rapid_current_v1`, the controlled evidence basis for that present observation.
+- `evidence_note`: direct observation when `observation_contract_version` is `guided_observation_v1` or `rapid_current_v1`; older unversioned values remain generic evidence notes.
 - `interpretation_note`: optional claim the observation might support.
 - `uncertainty_note`: optional limit or follow-up need.
 - `lifecycle_event`: optional.
@@ -449,15 +447,17 @@ Fields:
 - `privacy_flag`: `clear`, `needs_review`, or `restricted`.
 - `licence_flag`: `clear`, `needs_review`, or `restricted`.
 - `validation_summary`: optional latest validation result.
+- `intake_submission_key`: optional user-scoped idempotency key for atomic intake.
 
 Submitted evidence and unresolved notes are read-only for RAs. If an RA needs to correct or extend either, the UI starts a revision with a new `evidence_draft_id`. The earlier submitted draft remains part of the audit trail and is marked `superseded` only after the revision is submitted.
 
-An accepted draft with no assessed project target year remains in `evidence_drafts.jsonl` and the review trail. The exporter omits it from `site_evidence_wide.csv`, because a `pow` event-candidate row requires at least one assessed target year. A present-day field observation whose capture year is not a project target year and a raw-label denomination record both default every target year to `not_assessed`; either can enter the wide handoff only when separate evidence supports a target-year state. A provisional denomination relation must not change `site_type`.
+An accepted draft with no assessed project target year remains in `evidence_drafts.jsonl` and the review trail. The exporter omits it from `site_evidence_wide.csv`, because a `pow` event-candidate row requires at least one assessed target year. Every Vanuatu `rapid_current_v1` submission deliberately leaves 1989, 1999, 2009, and 2020 unassessed; it therefore remains JSONL-only until separately reviewed evidence supports a target-year state or a later governed current-observation import contract is added. The same rule applies to another present-day field observation whose capture year is not a project target year and to raw-label denomination evidence. A provisional denomination relation must not change `site_type`.
 
 Indexes:
 
 - `by_task_status`
 - `by_creator_time`
+- `by_task_creator_status`
 - `by_source_url`
 
 ### `review_decisions`

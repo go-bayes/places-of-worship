@@ -41,6 +41,10 @@ they exceed the pilot's field-size limits. These limits reduce the damage from
 accidental paste errors and basic oversized-submission attacks; they do not
 replace rate limits, upload controls, or source review.
 
+Current Vanuatu rapid-entry rule: the authenticated backend accepts only invited active `ra`, `reviewer`, `curator`, or `admin` accounts; enforces task ownership or reviewer authority; validates the four controlled current-status choices, exact observation date, source requirements, privacy flag, text limits, and Vanuatu coordinate bounds; and applies transactional per-user and global rate limits. A user-scoped UUID makes a retry idempotent. Candidate creation, submitted evidence, task-state transition, and append-only events occur in one mutation, so a partial browser failure cannot leave a candidate without its evidence. Historical target years are set to `not_assessed` by the server.
+
+The rapid-entry endpoint is fail-closed. The client cannot select derived existence, worship-use, action, target-year, task-type, or task-status values, and it cannot write to the master or public map. Images and audio are not accepted by the endpoint.
+
 ## Assets And Threats
 
 Assets:

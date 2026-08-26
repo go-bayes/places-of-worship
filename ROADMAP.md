@@ -237,9 +237,7 @@ Evidence And Governance:
 - `[~]` Shared task-list model: treat prototype assignments as filtered batches
   over one task store, so later New Zealand batches, Vanuatu tasks, and
   missing-site nominations can merge without reconciling separate worksheets.
-- `[ ]` Reusable `Nominate missing PoW` flow: create provisional candidate
-  tasks in Convex, then reuse the same evidence, review, and export path for
-  New Zealand, Vanuatu, later country maps, and the larger public site.
+- `[~]` Reusable `Nominate missing PoW` flow: the Vanuatu rapid-current path now creates a provisional candidate and its first submitted observation atomically in Convex, with detailed New Zealand and later public-country reuse still to complete.
 - `[~]` Implement the task/event/evidence/review/export contract in
   `docs/convex-task-layer-spec.md`.
 - `[ ]` Weekly or reviewer-triggered export from Convex task status into `pow`
@@ -254,8 +252,9 @@ Evidence And Governance:
 - `[ ]` Raw submissions and media in quarantined object storage before any
   internal review; field-observation media remain absent from public products.
 - `[~]` Guided observation intake that keeps direct observation, interpretation, uncertainty, and exact denomination or tradition labels distinct before review.
+- `[~]` Security-first Vanuatu rapid-current entry that distinguishes physical existence from worship use at an exact observation date, leaves historical target years unassessed, and applies authenticated roles, server-derived classifications, idempotency, country bounds, field limits, transactional rate limits, append-only events, and human review.
 - `[ ]` Internal image-plus-device-dictation pilot using independently recorded capture time and one-time location, no retained audio, and no public media path.
-- `[ ]` Map-first edit UI with clear staged/rejected/demo-only states.
+- `[~]` Map-first edit UI with clear staged/rejected/demo-only states; the Vanuatu rapid-current path is implemented and the reusable multi-country surface remains in progress.
 - `[ ]` Reviewer map with validation warnings, evidence trail, existing and
   proposed values, linked geometry, and duplicate risk.
 

@@ -202,3 +202,79 @@ test("guided text caps match the focused browser fields", () => {
     /uncertainty or follow-up is too long/,
   );
 });
+
+const rapidCurrentDraft = {
+  observation_contract_version: "rapid_current_v1",
+  source_type: "field_observation",
+  source_title: "RA field observation",
+  source_date_or_capture_date: "2026-08-26",
+  action: "confirm_current_record",
+  change_class: "uncertain",
+  target_year_statuses: {
+    "1989": "not_assessed",
+    "1999": "not_assessed",
+    "2009": "not_assessed",
+    "2020": "not_assessed",
+  },
+  existence_status: "present",
+  worship_use_status: "confirmed_worship",
+  current_observation_status: "currently_used_for_worship",
+  current_observation_basis: "direct_field_observation",
+};
+
+test("rapid current observations leave Vanuatu historical target years unassessed", () => {
+  assert.doesNotThrow(() => assertEvidenceDraftSubmission(rapidCurrentDraft, false));
+  assert.throws(
+    () => assertEvidenceDraftSubmission({
+      ...rapidCurrentDraft,
+      target_year_statuses: { ...rapidCurrentDraft.target_year_statuses, "2020": "present" },
+    }, false),
+    /cannot assess historical target years/,
+  );
+});
+
+test("rapid current observations require an exact valid observation date", () => {
+  assert.throws(
+    () => assertEvidenceDraftSubmission({ ...rapidCurrentDraft, source_date_or_capture_date: "2026-02-30" }, false),
+    /valid YYYY-MM-DD observation date/,
+  );
+  assert.throws(
+    () => assertEvidenceDraftSubmission({ ...rapidCurrentDraft, source_date_or_capture_date: "2100-01-01" }, false),
+    /cannot use a future observation date/,
+  );
+});
+
+test("an uncertain rapid observation requires an uncertainty account", () => {
+  assert.throws(
+    () => assertEvidenceDraftSubmission({
+      ...rapidCurrentDraft,
+      current_observation_status: "could_not_determine",
+      existence_status: "uncertain",
+      worship_use_status: "uncertain",
+    }, false),
+    /Explain what remains uncertain/,
+  );
+});
+
+test("named-source rapid observations require title and reference", () => {
+  assert.throws(
+    () => assertEvidenceDraftSubmission({
+      ...rapidCurrentDraft,
+      source_type: "other",
+      source_title: "",
+      current_observation_basis: "named_public_source",
+    }, false),
+    /requires its title/,
+  );
+});
+
+test("rapid denomination wording requires a known evidence basis", () => {
+  assert.throws(
+    () => assertEvidenceDraftSubmission({
+      ...rapidCurrentDraft,
+      denomination_or_tradition_raw: "Example Fellowship",
+      denomination_label_basis: "unknown",
+    }, false),
+    /Choose where the denomination or tradition wording came from/,
+  );
+});

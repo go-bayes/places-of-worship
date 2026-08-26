@@ -336,6 +336,10 @@
             return await this.request("mutation", "tasks:createManualCandidateTask", args);
         }
 
+        async submitVanuatuCurrentObservation(args) {
+            return await this.request("mutation", "rapidEntry:submitVanuatuCurrentObservation", args);
+        }
+
         async recordReviewDecision(args) {
             return await this.request("mutation", "reviews:recordReviewDecision", args);
         }
