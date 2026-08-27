@@ -2,6 +2,10 @@
 
 This research project maps places of worship and studies religious and cultural variation across space and time.
 
+## Operational definition
+
+[**At a specified time, a place of worship is a mappable site with evidence of recurring communal religious worship.**](docs/operational-definition.md)
+
 Our long-term aim is to build a research portal for places of worship (PoWs) that can track opening, closure, persistence, relocation, shared use, and repurposing at the level of the place itself. These site histories can be linked to other historical data when evaluating theories about the social consequences of religion. The public map is an active prototype under development. The lowest-level analytical unit is a mappable place of worship with a time-indexed worship-function state. Buildings, organisations, and congregations are distinct objects linked to that site.
 
 Building historical datasets fit for scientific inference is remarkably difficult because the records are diffuse and incomplete. Somewhat inconveniently, our ancestors documented only a fraction of what we would now like to know. Having built a prototype global location map, we are focusing on New Zealand and Vanuatu, two very different island settings, to establish the feasibility of scientific work on religion that uses PoWs as the smallest units of analysis.
@@ -24,7 +28,6 @@ Building historical datasets fit for scientific inference is remarkably difficul
 - [United States regional map](https://religionmap.org/apps/regions/us/)
 - [Vanuatu regional map](https://religionmap.org/apps/regions/vu/)
 - [Roadmap](ROADMAP.md)
-- [Operational definition of a place of worship](docs/operational-definition.md)
 - [System map](docs/system-map.md)
 - [FAQ](FAQ.md)
 - [Lexicon](LEXICON.md)

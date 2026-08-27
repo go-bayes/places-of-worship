@@ -29,9 +29,9 @@ The scientific object is the worship-function state at a mappable site at a spec
 
 ## What counts as a place of worship?
 
-At a specified time, a place of worship is a reproducibly mappable site for which source evidence supports recurring religious worship by or for a community. Shared, adapted, institutional, temporary, multi-purpose, and natural settings can qualify when they meet that functional threshold. Religious architecture, affiliation, sacred significance, an organisation's address, private devotion, or a one-off event does not alone establish a place-of-worship state.
+At a specified time, a place of worship is a reproducibly mappable site for which source evidence supports recurring religious worship by or for a community. Shared, adapted, institutional, temporary, multi-purpose, and natural settings can qualify when they meet that functional threshold. Treat religious architecture, affiliation, sacred significance, an organisation's address, private devotion, and one-off events as candidate evidence, then apply all three criteria before accepting a place-of-worship state.
 
-Candidate collection is broader than accepted classification. An OSM tag, directory entry, public nomination, or field observation may create a provisional claim for review. The claim becomes an accepted site-time state only when the evidence supports the working definition. Boundary and culturally restricted cases retain their source wording, uncertainty, and access conditions rather than being forced into a classification. See the [current operational definition](docs/operational-definition.md) for the full rule, its relationship to JW's M1 concept, and the questions that remain open.
+Candidate collection is broader than accepted classification. An OSM tag, directory entry, public nomination, or field observation may create a provisional claim for review. The claim becomes an accepted site-time state when the evidence supports the working definition. Boundary and culturally restricted cases retain their source wording, uncertainty, and access conditions. See the [current operational definition](docs/operational-definition.md) for the full rule and its application to measurement over time.
 
 ## What do opening, closure, and change dates mean here?
 
