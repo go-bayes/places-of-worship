@@ -1,3 +1,4 @@
+import { assertRapidDerivedConsistency } from "./rapidEntry.ts";
 export const SHORT_TEXT_MAX = 256;
 export const MEDIUM_TEXT_MAX = 2_048;
 export const LONG_TEXT_MAX = 8_000;
@@ -126,6 +127,7 @@ export function isValidPartialDate(value: string): boolean {
 }
 
 export function assertRapidCurrentObservation(draft: EvidenceDraftLimitInput): void {
+  assertRapidDerivedConsistency(draft);
   const status = draft.current_observation_status;
   const basis = draft.current_observation_basis;
   const observedOn = draft.source_date_or_capture_date?.trim() ?? "";

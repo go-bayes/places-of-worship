@@ -13,6 +13,7 @@ import {
   assertMaxString,
   assertTaskReasonLimit,
 } from "./lib/limits";
+import { assertNotRapidContract, isRapidCurrentDraft } from "./lib/rapidEntry";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { evidenceDraftDoc } from "./lib/validators";
 
@@ -216,6 +217,7 @@ async function importSubmittedSpreadsheetDraft(
   assertMaxString("submitter email", item.submitter_email, MEDIUM_TEXT_MAX);
   assertMaxString("submitter name", item.submitter_name, MEDIUM_TEXT_MAX);
   assertTaskReasonLimit("submission note", item.submit_note);
+  assertNotRapidContract(item.draft, "spreadsheet import");
   assertEvidenceDraftLimits(item.draft);
   assertEvidenceDraftSubmission(item.draft, false);
 
@@ -230,6 +232,7 @@ async function importSubmittedSpreadsheetDraft(
   if (existing !== null && finalDraftStatuses.has(existing.draft_status)) {
     return "skipped_final";
   }
+  assertNotRapidContract(existing, "spreadsheet import");
 
   const draftRecord = {
     evidence_draft_id: draftId,
@@ -290,6 +293,7 @@ export const saveEvidenceDraft = mutation({
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
     assertOwnsOrCanReview(user._id, user.roles, task.assigned_to);
+    assertNotRapidContract(args.draft, "the general draft route");
     assertEvidenceDraftLimits(args.draft);
     assertClientContextLimit(args.clientContext);
 
@@ -314,6 +318,7 @@ export const saveEvidenceDraft = mutation({
         observation_contract_version: args.draft.observation_contract_version ?? "guided_observation_v1",
       });
     } else {
+      assertNotRapidContract(existing, "the general draft route");
       if (existing.created_by !== user._id && !canReviewEvidence(user)) {
         throw new Error("Evidence draft belongs to another user.");
       }
@@ -457,6 +462,14 @@ export const reviseEvidenceDraft = mutation({
     if (sourceDraft.created_by !== user._id && !canReview(user.roles)) {
       throw new Error("Evidence draft belongs to another user.");
     }
+    // a rapid observation is never cloned into a generic draft: the
+    // original stays on record and its author corrects it by submitting a
+    // new current observation through rapidEntry:submitVanuatuCurrentObservation
+    if (isRapidCurrentDraft(sourceDraft)) {
+      throw new Error(
+        "This task holds a rapid current observation. Submit a corrected observation instead of revising; the original stays on record.",
+      );
+    }
 
     const now = Date.now();
     // reuse the author's newest editable draft instead of minting a second
@@ -554,6 +567,7 @@ export const submitEvidenceDraft = mutation({
     if (draft.created_by !== user._id && !canReview(user.roles)) {
       throw new Error("Evidence draft belongs to another user.");
     }
+    assertNotRapidContract(draft, "the general submission route");
     assertEvidenceDraftSubmission(draft, false);
     const task = await getTaskOrThrow(ctx, draft.task_id);
     const now = Date.now();
@@ -602,6 +616,7 @@ export const submitUnresolvedNote = mutation({
     ) {
       throw new Error("Evidence draft belongs to another user.");
     }
+    assertNotRapidContract(draft, "the unresolved-note route");
     assertEvidenceDraftSubmission(draft, true);
     const task = await getTaskOrThrow(ctx, draft.task_id);
     const now = Date.now();

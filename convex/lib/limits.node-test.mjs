@@ -249,6 +249,7 @@ test("an uncertain rapid observation requires an uncertainty account", () => {
     () => assertEvidenceDraftSubmission({
       ...rapidCurrentDraft,
       current_observation_status: "could_not_determine",
+      action: "needs_review",
       existence_status: "uncertain",
       worship_use_status: "uncertain",
     }, false),
@@ -276,5 +277,40 @@ test("rapid denomination wording requires a known evidence basis", () => {
       denomination_label_basis: "unknown",
     }, false),
     /Choose where the denomination or tradition wording came from/,
+  );
+});
+
+const validRapidDraft = {
+  observation_contract_version: "rapid_current_v1",
+  current_observation_status: "place_exists_worship_uncertain",
+  current_observation_basis: "direct_field_observation",
+  source_type: "field_observation",
+  source_title: "RA field observation",
+  source_date_or_capture_date: "2026-08-20",
+  action: "needs_review",
+  existence_status: "present",
+  worship_use_status: "uncertain",
+  target_year_statuses: { "1989": "not_assessed", "2020": "not_assessed" },
+};
+
+test("a consistent rapid draft passes submission validation", () => {
+  assert.doesNotThrow(() => assertEvidenceDraftSubmission(validRapidDraft, false));
+});
+
+test("a rapid draft whose derived fields contradict its status is rejected", () => {
+  assert.throws(
+    () => assertEvidenceDraftSubmission({ ...validRapidDraft, worship_use_status: "confirmed_worship" }, false),
+    /does not follow from status/,
+  );
+  assert.throws(
+    () => assertEvidenceDraftSubmission({ ...validRapidDraft, action: "confirm_current_record" }, false),
+    /does not follow from status/,
+  );
+});
+
+test("a rapid draft cannot assess historical target years", () => {
+  assert.throws(
+    () => assertEvidenceDraftSubmission({ ...validRapidDraft, target_year_statuses: { "2020": "present" } }, false),
+    /cannot assess historical target years/,
   );
 });

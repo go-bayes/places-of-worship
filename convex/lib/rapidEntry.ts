@@ -122,3 +122,59 @@ export function assertRapidCandidateContext(context: RapidCandidateContext | und
     throw new Error("Check nearby places before submitting a new candidate.");
   }
 }
+
+export const RAPID_CURRENT_CONTRACT = "rapid_current_v1";
+
+export type RapidDraftShape = {
+  observation_contract_version?: string;
+  current_observation_status?: string;
+  current_observation_basis?: string;
+  action?: string;
+  existence_status?: string;
+  worship_use_status?: string;
+};
+
+const CURRENT_OBSERVATION_STATUSES: readonly CurrentObservationStatus[] = [
+  "currently_used_for_worship",
+  "place_exists_worship_uncertain",
+  "place_exists_not_used_for_worship",
+  "could_not_determine",
+];
+
+export function isRapidCurrentDraft(draft: RapidDraftShape | null | undefined): boolean {
+  return draft?.observation_contract_version === RAPID_CURRENT_CONTRACT;
+}
+
+// a rapid draft persists only the server-derived provisional fields; any
+// stored triple that the observer's answer could not have produced is a
+// tampered or misrouted record and must not reach review or export
+export function assertRapidDerivedConsistency(draft: RapidDraftShape): void {
+  const status = draft.current_observation_status as CurrentObservationStatus | undefined;
+  if (status === undefined || !CURRENT_OBSERVATION_STATUSES.includes(status)) {
+    throw new Error("A rapid current observation requires a controlled current-status answer.");
+  }
+  const forExisting = deriveCurrentObservation(status, false);
+  const forCandidate = deriveCurrentObservation(status, true);
+  const allowedActions = new Set([forExisting.action, forCandidate.action]);
+  if (draft.action === undefined || !allowedActions.has(draft.action as DerivedCurrentObservation["action"])) {
+    throw new Error(`Rapid observation action "${draft.action ?? "missing"}" does not follow from status "${status}".`);
+  }
+  if (draft.existence_status !== forExisting.existence_status) {
+    throw new Error(`Rapid observation existence status "${draft.existence_status ?? "missing"}" does not follow from status "${status}".`);
+  }
+  if (draft.worship_use_status !== forExisting.worship_use_status) {
+    throw new Error(`Rapid observation worship-use status "${draft.worship_use_status ?? "missing"}" does not follow from status "${status}".`);
+  }
+}
+
+// only rapidEntry:submitVanuatuCurrentObservation may create or replace a
+// rapid observation; every other write route rejects the contract and its
+// fields so a client cannot reach the rapid record through a generic door
+export function assertNotRapidContract(draft: RapidDraftShape | null | undefined, route: string): void {
+  if (draft === null || draft === undefined) return;
+  if (isRapidCurrentDraft(draft) || draft.current_observation_status || draft.current_observation_basis) {
+    throw new Error(
+      `Rapid current observations cannot be written through ${route}. Use the Vanuatu rapid-entry submission, which keeps the original observation on record.`,
+    );
+  }
+}

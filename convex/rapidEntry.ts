@@ -19,6 +19,7 @@ import {
   assertRapidSubmissionId,
   assertVanuatuPoint,
   deriveCurrentObservation,
+  isRapidCurrentDraft,
   sourceFieldsForObservationBasis,
 } from "./lib/rapidEntry";
 import { appendTaskEvent } from "./lib/taskEvents";
@@ -30,8 +31,15 @@ const ACTIVE_INTAKE_STATUSES = new Set([
   "open",
   "in_progress",
   "draft_saved",
-  "changes_requested",
   "reopened",
+]);
+// a task already holding a submitted rapid observation accepts a correction
+// only from that observation's author; the earlier record is superseded,
+// never rewritten, and reviewers act through review decisions instead
+const CORRECTION_STATUSES = new Set([
+  "needs_review",
+  "unresolved_note",
+  "changes_requested",
 ]);
 
 const candidateInput = v.object({
@@ -74,6 +82,23 @@ function assertClientContext(context: typeof rapidClientContext.type | undefined
   assertMaxString("portal version", context?.portal_version, SHORT_TEXT_MAX);
 }
 
+// the author's active rapid observation on a task, if any
+async function activeRapidObservationBy(
+  ctx: MutationCtx,
+  taskId: string,
+  actorId: Doc<"users">["_id"],
+): Promise<Doc<"evidence_drafts"> | null> {
+  for (const status of ["submitted", "unresolved_note"] as const) {
+    const draft = await ctx.db
+      .query("evidence_drafts")
+      .withIndex("by_task_creator_status", (q) => q.eq("task_id", taskId).eq("created_by", actorId).eq("draft_status", status))
+      .order("desc")
+      .first();
+    if (draft !== null) return draft;
+  }
+  return null;
+}
+
 async function supersedeEarlierSubmissions(
   ctx: MutationCtx,
   taskId: string,
@@ -111,6 +136,8 @@ export const submitVanuatuCurrentObservation = mutation({
     candidate_site_id: v.optional(v.string()),
     task_status: taskStatus,
     deduped: v.boolean(),
+    corrected: v.boolean(),
+    superseded_evidence_draft_id: v.optional(v.string()),
   }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
@@ -138,6 +165,7 @@ export const submitVanuatuCurrentObservation = mutation({
           : {}),
         task_status: existingTask.status,
         deduped: true,
+        corrected: false,
       };
     }
 
@@ -164,15 +192,25 @@ export const submitVanuatuCurrentObservation = mutation({
     const actorRole = chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]);
 
     let authorisedExistingTask: Doc<"tasks"> | undefined;
+    let correctedDraft: Doc<"evidence_drafts"> | null = null;
     if (args.taskId !== undefined) {
       assertMaxString("task id", args.taskId, MEDIUM_TEXT_MAX);
       authorisedExistingTask = await getTaskOrThrow(ctx, args.taskId);
       if (authorisedExistingTask.country_code !== RAPID_ENTRY_COUNTRY) {
         throw new Error("Rapid current entry is enabled only for Vanuatu tasks.");
       }
-      assertOwnsOrCanReview(user._id, user.roles, authorisedExistingTask.assigned_to);
-      if (!ACTIVE_INTAKE_STATUSES.has(authorisedExistingTask.status)) {
-        throw new Error("This task is already under review or closed. Start a revision instead.");
+      if (ACTIVE_INTAKE_STATUSES.has(authorisedExistingTask.status)) {
+        assertOwnsOrCanReview(user._id, user.roles, authorisedExistingTask.assigned_to);
+      } else if (CORRECTION_STATUSES.has(authorisedExistingTask.status)) {
+        correctedDraft = await activeRapidObservationBy(ctx, authorisedExistingTask.task_id, user._id);
+        if (correctedDraft === null) {
+          throw new Error("Only the observer who recorded this observation can correct it while it awaits review.");
+        }
+        if (!isRapidCurrentDraft(correctedDraft)) {
+          throw new Error("This task holds detailed evidence. Revise it through the detailed form instead of the rapid path.");
+        }
+      } else {
+        throw new Error("This task has been reviewed or closed. Ask JB to reopen it before recording a new observation.");
       }
     } else {
       const candidate = args.candidate!;
@@ -334,8 +372,13 @@ export const submitVanuatuCurrentObservation = mutation({
       previousStatus: task.status,
       newStatus: "needs_review",
       evidenceDraftId: draftId,
-      reason: "Vanuatu current observation submitted for review.",
-      clientContext: args.clientContext,
+      reason: correctedDraft !== null
+        ? `Corrected Vanuatu current observation submitted for review; supersedes ${correctedDraft.evidence_draft_id}.`
+        : "Vanuatu current observation submitted for review.",
+      clientContext: {
+        ...(args.clientContext ?? {}),
+        ...(correctedDraft !== null ? { corrects_evidence_draft_id: correctedDraft.evidence_draft_id } : {}),
+      },
     });
 
     return {
@@ -344,6 +387,8 @@ export const submitVanuatuCurrentObservation = mutation({
       ...(task.candidate_site_id !== undefined ? { candidate_site_id: task.candidate_site_id } : {}),
       task_status: "needs_review" as const,
       deduped: false,
+      corrected: correctedDraft !== null,
+      ...(correctedDraft !== null ? { superseded_evidence_draft_id: correctedDraft.evidence_draft_id } : {}),
     };
   },
 });
