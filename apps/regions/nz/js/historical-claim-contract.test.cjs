@@ -33,6 +33,8 @@ check("bounded structure claim validates", history.validateHistoricalClaim(valid
 check("partial year and month dates validate", history.isValidPartialDate("1880") && history.isValidPartialDate("1945-08"));
 check("invalid calendar dates fail", !history.isValidPartialDate("1945-02-30"));
 check("reversed bounds fail", /earliest supported date/.test(history.validateHistoricalClaim({ ...valid, earliestSupportedDate: "1900", latestSupportedDate: "1890" }, "2026-08-28")));
+check("a partial reference year includes its supported months", history.validateHistoricalClaim({ ...valid, earliestSupportedDate: "2023-12", latestSupportedDate: "" }, "2023") === "");
+check("a bound after the reference year fails", /evidence reference date/.test(history.validateHistoricalClaim({ ...valid, earliestSupportedDate: "2024", latestSupportedDate: "" }, "2023")));
 check("open event fails", /Only a historical state/.test(history.validateHistoricalClaim({ ...valid, continuesThroughObservation: true, latestSupportedDate: "" }, "2026-08-28")));
 check("open state validates", history.validateHistoricalClaim({ ...valid, claimTiming: "state", continuesThroughObservation: true, latestSupportedDate: "" }, "2026-08-28") === "");
 check("unresolved war wording needs an uncertainty note", /dates remain unresolved/.test(history.validateHistoricalClaim({ ...valid, earliestSupportedDate: "", latestSupportedDate: "", uncertaintyNote: "" }, "2026-08-28")));

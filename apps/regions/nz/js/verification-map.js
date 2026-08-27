@@ -613,6 +613,7 @@ const RAPID_CURRENT_ENTRY = Boolean(
     && ASSIGNMENT_MODE
     && SEARCH_PARAMS.get("detailed") !== "1"
 );
+const HISTORICAL_CLAIM_ENTRY = ASSIGNMENT_MODE;
 // optional personalised hint: invitation links may include ?email=ra@example.com
 // so the sign-in card can name the specific invited account
 const INVITED_EMAIL_HINT = (SEARCH_PARAMS.get("email") || "").trim();
@@ -3403,6 +3404,35 @@ class NzVerificationMap {
         );
     }
 
+    // historical claims may follow either supported evidence contract, but
+    // only while the parent submission remains active and only for its author.
+    taskCanAddHistory(taskId) {
+        const backendTask = this.backendTasksById.get(taskId);
+        const draft = this.latestDraftForTask(taskId);
+        const supportedParent = draft?.observation_contract_version === "rapid_current_v1"
+            || draft?.observation_contract_version === "guided_observation_v1";
+        return Boolean(
+            HISTORICAL_CLAIM_ENTRY
+            && backendTask
+            && REVISION_ELIGIBLE_STATUSES.has(backendTask.status)
+            && supportedParent
+            && ["submitted", "unresolved_note"].includes(draft?.draft_status)
+            && draft.created_by === this.backendUser?._id
+        );
+    }
+
+    historicalClaimContext(props, draft, nomination = false) {
+        const parentDate = (draft?.source_date_or_capture_date || "").trim();
+        return {
+            taskId: props.task_id,
+            parentEvidenceDraftId: draft.evidence_draft_id,
+            taskName: props.name || "Unnamed site",
+            referenceDate: parentDate || window.PowRapidEntry.localIsoDate(),
+            referenceDateFromParent: Boolean(parentDate),
+            nomination,
+        };
+    }
+
     startRapidCorrection(props) {
         const taskId = props?.task_id || "";
         if (!taskId || !this.taskCanCorrectRapid(taskId)) return;
@@ -4124,11 +4154,7 @@ class NzVerificationMap {
         const backendTask = this.backendTaskForProps(props);
         const status = backendTask?.status || "";
         const canCorrect = this.taskCanCorrectRapid(taskId);
-        const canAddHistory = Boolean(
-            draft
-            && draft.observation_contract_version === "rapid_current_v1"
-            && ["needs_review", "unresolved_note", "changes_requested"].includes(status)
-        );
+        const canAddHistory = this.taskCanAddHistory(taskId);
         const statusNote = status === "changes_requested"
             ? "A reviewer asked for more evidence. Submit a corrected observation to respond."
             : status === "needs_review" || status === "unresolved_note"
@@ -4257,7 +4283,8 @@ class NzVerificationMap {
                         taskId: result.task_id,
                         parentEvidenceDraftId: result.evidence_draft_id,
                         taskName: options.props.name || "Unnamed site",
-                        observationDate: values.observedOn,
+                        referenceDate: values.observedOn,
+                        referenceDateFromParent: true,
                         nomination: false,
                     },
                 });
@@ -4276,7 +4303,8 @@ class NzVerificationMap {
                     taskId: result.task_id,
                     parentEvidenceDraftId: result.evidence_draft_id,
                     taskName: submittedProps.name,
-                    observationDate: values.observedOn,
+                    referenceDate: values.observedOn,
+                    referenceDateFromParent: true,
                     nomination: true,
                 },
             });
@@ -4292,9 +4320,12 @@ class NzVerificationMap {
         }
     }
 
-    // renders one repeatable claim form linked to the submitted current observation.
+    // renders one repeatable claim form linked to submitted rapid or guided evidence.
     historicalClaimFormHtml(context, { recordedCount = 0, statusMessage = "" } = {}) {
         const submissionId = window.PowRapidEntry.secureSubmissionId();
+        const referenceDateLabel = context.referenceDateFromParent
+            ? context.referenceDate
+            : `the claim-recording date (${context.referenceDate})`;
         return `
             <h2>${recordedCount ? "Historical claim recorded" : "Add known history"}</h2>
             <div class="pilot-note">
@@ -4338,7 +4369,7 @@ class NzVerificationMap {
                     </div>
                     <label class="historical-open-state">
                         <input id="historicalContinues" type="checkbox">
-                        <span>This state remains open through the current observation date (${escapeHtml(context.observationDate)}).</span>
+                        <span>This state remains open through ${escapeHtml(referenceDateLabel)}.</span>
                     </label>
                 </fieldset>
                 <div class="field-grid">
@@ -4467,7 +4498,7 @@ class NzVerificationMap {
             return;
         }
         const values = this.historicalClaimValues();
-        const inputError = window.PowHistoricalClaim.validateHistoricalClaim(values, context.observationDate);
+        const inputError = window.PowHistoricalClaim.validateHistoricalClaim(values, context.referenceDate);
         if (inputError) {
             if (status) status.textContent = inputError;
             return;
@@ -4480,7 +4511,9 @@ class NzVerificationMap {
                 taskId: context.taskId,
                 parentEvidenceDraftId: context.parentEvidenceDraftId,
                 claim: window.PowHistoricalClaim.historicalClaimPayload(values),
-                clientContext: { portal_version: "vanuatu-historical-claim-v1" },
+                clientContext: {
+                    portal_version: "historical-claim-v1",
+                },
             });
             this.clearFormDirty();
             this.taskHistoryByTaskId.delete(context.taskId);
@@ -4526,6 +4559,7 @@ class NzVerificationMap {
         const readOnly = taskId ? this.taskIsReadOnly(taskId) : false;
         const revisionMode = taskId ? this.taskIsRevisionMode(taskId) : false;
         const canRevise = taskId ? this.taskCanRevise(taskId) : false;
+        const canAddHistory = taskId ? this.taskCanAddHistory(taskId) : false;
         if (RAPID_CURRENT_ENTRY && !readOnly) {
             return this.rapidCurrentReviewFormHtml(props);
         }
@@ -4752,7 +4786,8 @@ class NzVerificationMap {
                     ${readOnly ? `
                         ${canRevise ? `
                             <div class="button-row">
-                                <button id="reviseSubmissionButton" type="button">Revise submission</button>
+                                ${canAddHistory ? `<button id="addKnownHistoryFromRecordedButton" type="button">Add known history</button>` : ""}
+                                <button id="reviseSubmissionButton"${canAddHistory ? ` class="secondary"` : ""} type="button">Revise submission</button>
                             </div>
                         ` : `
                             <div class="disabled-panel">
@@ -4794,13 +4829,7 @@ class NzVerificationMap {
         document.getElementById("addKnownHistoryFromRecordedButton")?.addEventListener("click", () => {
             const draft = this.latestDraftForTask(props.task_id);
             if (!draft) return;
-            this.renderHistoricalClaimEntry({
-                taskId: props.task_id,
-                parentEvidenceDraftId: draft.evidence_draft_id,
-                taskName: props.name || "Unnamed site",
-                observationDate: draft.source_date_or_capture_date,
-                nomination: false,
-            });
+            this.renderHistoricalClaimEntry(this.historicalClaimContext(props, draft));
         });
         if (document.getElementById("taskRapidCurrentForm")) {
             this.bindRapidObservationForm("task", { props });
@@ -5548,7 +5577,17 @@ class NzVerificationMap {
                 // can keep editing.
                 this.selectedTask = null;
                 this.applyFilters();
-                this.renderSubmissionRecordedDetail(props, { unresolved });
+                this.renderSubmissionRecordedDetail(props, {
+                    unresolved,
+                    knownHistory: HISTORICAL_CLAIM_ENTRY ? {
+                        taskId: props.task_id,
+                        parentEvidenceDraftId: saved.evidence_draft_id,
+                        taskName: props.name || "Unnamed site",
+                        referenceDate: values.sourceDate || window.PowRapidEntry.localIsoDate(),
+                        referenceDateFromParent: Boolean(values.sourceDate),
+                        nomination: false,
+                    } : null,
+                });
                 this.focusDetailPanel();
                 return;
             }

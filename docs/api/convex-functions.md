@@ -50,7 +50,7 @@ and export bundles. Accepted changes become research data only after export,
   client context have server-side size limits before writes reach the shared
   backend.
 - Vanuatu rapid entry is role-checked, rate-limited, idempotent per user submission, restricted to Vanuatu coordinates, and atomic across candidate creation, evidence submission, audit events, and the task transition to human review. The client cannot submit historical target-year states or other derived review fields through this endpoint.
-- Vanuatu historical-claim entry is a separate, author-bound `historical_claim_v1` route. It validates one source-backed event or state against the parent rapid observation date, preserves unresolved bounds and retained source wording, and cannot alter the current observation or create a target-year state.
+- Historical-claim entry is a separate, author-bound `historical_claim_v1` route for every country task. It validates one source-backed event or state against a submitted rapid or guided evidence record, preserves unresolved bounds and retained source wording, and cannot alter the parent evidence or create a target-year state.
 - `accepted_for_export` is a review state, not a master write. It only makes a
   decision eligible for export to the governed `pow` path.
 
@@ -107,7 +107,7 @@ change.
 | Function | Kind | Roles | Purpose | Writes |
 | --- | --- | --- | --- | --- |
 | `listTaskHistoricalClaims` | query | claim author, `reviewer`, `curator`, `admin` | Return a bounded newest-first list of historical claims for one task. RAs see only claims they authored; reviewers and maintainers can inspect all claims. | None |
-| `submitHistoricalClaim` | mutation | author of the parent rapid observation with an active `ra`, `reviewer`, `curator`, or `admin` role | Record one `historical_claim_v1` event or state linked to a submitted Vanuatu rapid observation. The mutation validates partial or unresolved date bounds, open-state logic, confidence, source provenance, retained wording, privacy, idempotency, and rate limits. It appends a task-history note but does not change task status, the current observation, target-year states, or the master. | `historical_claims`, `task_events`, rate-limit component state |
+| `submitHistoricalClaim` | mutation | author of the parent evidence with an active `ra`, `reviewer`, `curator`, or `admin` role | Record one `historical_claim_v1` event or state linked to submitted rapid or guided evidence from any country task. The mutation derives an evidence reference date, validates partial or unresolved date bounds, open-state logic, confidence, source details, retained wording, privacy, idempotency, and rate limits. It appends a task-history note but does not change task status, parent evidence, target-year states, or the master. | `historical_claims`, `task_events`, rate-limit component state |
 
 ## `evidence.ts`
 

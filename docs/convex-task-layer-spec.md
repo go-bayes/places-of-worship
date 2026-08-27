@@ -463,7 +463,7 @@ Indexes:
 
 ### `historical_claims`
 
-Repeatable provisional history attached to a submitted Vanuatu rapid current observation. Each row records one scientific claim so structure history, worship function, denomination or affiliation, leadership, and shared or concurrent use are not collapsed into one lifecycle note.
+Repeatable provisional history attached to submitted rapid or guided evidence from any country task. Each row records one scientific claim so structure history, worship function, denomination or affiliation, leadership, and shared or concurrent use are not collapsed into one lifecycle note.
 
 Fields:
 
@@ -474,6 +474,7 @@ Fields:
 - `claim_kind`: `structure`, `worship_function`, `denomination_or_affiliation`, `leadership`, `shared_use`, or `other`.
 - `claim_timing`: `event` or `state`.
 - `claim_text`: the event or state the source supports.
+- `reference_date` and `reference_date_basis`: the parent evidence date when one is available, otherwise the claim-recording date.
 - `earliest_supported_date` and `latest_supported_date`: optional `YYYY`, `YYYY-MM`, or `YYYY-MM-DD` bounds from 1600 onward.
 - `continues_through_observation`: permitted only for a state with no latest supported date.
 - `confidence` and `confidence_basis`.
@@ -481,7 +482,7 @@ Fields:
 - `uncertainty_note`: required when both date bounds are blank.
 - `privacy_flag` and user-scoped `intake_submission_key`.
 
-The dedicated mutation validates the claim against the parent observation date and writes an append-only task note event. It does not infer a date, derive a target-year state, alter the parent current observation, or create an accepted change event. Claims remain separate reviewer evidence and are exported as `historical_claims.jsonl` for governed follow-up.
+The dedicated mutation validates the claim against the evidence reference date and writes an append-only task note event. It does not infer a historical date, derive a target-year state, alter the parent evidence, or create an accepted change event. Claims remain distinct reviewer evidence and are exported as `historical_claims.jsonl` for governed follow-up.
 
 Indexes:
 

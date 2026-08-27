@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { assertHistoricalClaim } from "./historicalClaims.ts";
+import {
+  assertHistoricalClaim,
+  historicalClaimReferenceDate,
+  isHistoricalClaimParentContract,
+} from "./historicalClaims.ts";
 
 const validClaim = {
   claim_kind: "structure",
@@ -64,7 +68,7 @@ test("vague war-period wording stays unresolved when no dates are supported", ()
   }, "2026-08-28"), /date bounds or explain/);
 });
 
-test("date bounds cannot reverse or extend beyond the observation", () => {
+test("date bounds cannot reverse or extend beyond the evidence reference date", () => {
   assert.throws(() => assertHistoricalClaim({
     ...validClaim,
     earliest_supported_date: "1900",
@@ -74,7 +78,12 @@ test("date bounds cannot reverse or extend beyond the observation", () => {
     ...validClaim,
     earliest_supported_date: "2027",
     latest_supported_date: undefined,
-  }, "2026-08-28"), /after the current observation date/);
+  }, "2026-08-28"), /after the evidence reference date/);
+  assert.doesNotThrow(() => assertHistoricalClaim({
+    ...validClaim,
+    earliest_supported_date: "2023-12",
+    latest_supported_date: undefined,
+  }, "2023"));
 });
 
 test("named public sources require a concrete reference", () => {
@@ -93,4 +102,21 @@ test("source wording and confidence basis are required", () => {
     ...validClaim,
     confidence_basis: "",
   }, "2026-08-28"), /explain the confidence/);
+});
+
+test("rapid and guided evidence can anchor historical claims", () => {
+  assert.equal(isHistoricalClaimParentContract("rapid_current_v1"), true);
+  assert.equal(isHistoricalClaimParentContract("guided_observation_v1"), true);
+  assert.equal(isHistoricalClaimParentContract(undefined), false);
+});
+
+test("the reference date preserves a parent evidence date or uses the claim date", () => {
+  assert.deepEqual(historicalClaimReferenceDate("2023-08", "2026-08-28"), {
+    referenceDate: "2023-08",
+    referenceDateBasis: "parent_evidence_date",
+  });
+  assert.deepEqual(historicalClaimReferenceDate(undefined, "2026-08-28"), {
+    referenceDate: "2026-08-28",
+    referenceDateBasis: "claim_recorded_date",
+  });
 });

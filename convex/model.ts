@@ -210,6 +210,11 @@ export const historicalClaimSourceBasis = v.union(
   v.literal("other"),
 );
 
+export const historicalClaimReferenceDateBasis = v.union(
+  v.literal("parent_evidence_date"),
+  v.literal("claim_recorded_date"),
+);
+
 export const observationContractVersion = v.union(
   v.literal("guided_observation_v1"),
   v.literal("rapid_current_v1"),

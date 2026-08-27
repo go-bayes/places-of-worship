@@ -23,6 +23,34 @@ export type HistoricalClaimShape = {
   privacy_flag: "clear" | "needs_review" | "restricted";
 };
 
+export type HistoricalClaimReference = {
+  referenceDate: string;
+  referenceDateBasis: "parent_evidence_date" | "claim_recorded_date";
+};
+
+// accepts the two versioned evidence contracts that can anchor known history.
+export function isHistoricalClaimParentContract(value: string | undefined): boolean {
+  return value === "rapid_current_v1" || value === "guided_observation_v1";
+}
+
+// uses the parent evidence date when available and otherwise records the claim date.
+export function historicalClaimReferenceDate(
+  parentEvidenceDate: string | undefined,
+  claimRecordedDate: string,
+): HistoricalClaimReference {
+  const parentDate = parentEvidenceDate?.trim() ?? "";
+  if (parentDate && isValidPartialDate(parentDate)) {
+    return {
+      referenceDate: parentDate,
+      referenceDateBasis: "parent_evidence_date",
+    };
+  }
+  return {
+    referenceDate: claimRecordedDate,
+    referenceDateBasis: "claim_recorded_date",
+  };
+}
+
 // converts a supported partial date to its earliest possible calendar date.
 function partialDateLower(value: string): string {
   if (/^\d{4}$/.test(value)) return `${value}-01-01`;
@@ -44,7 +72,7 @@ function partialDateUpper(value: string): string {
 // validates one provisional claim without deriving dates or scientific states.
 export function assertHistoricalClaim(
   claim: HistoricalClaimShape,
-  observationDate: string,
+  referenceDate: string,
 ): void {
   const claimText = claim.claim_text.trim();
   const confidenceBasis = claim.confidence_basis.trim();
@@ -78,10 +106,10 @@ export function assertHistoricalClaim(
     throw new Error("A named public source requires a URL, archive reference, or agreed file reference.");
   }
   if (claim.continues_through_observation && claim.claim_timing !== "state") {
-    throw new Error("Only a historical state can remain open through the observation date.");
+    throw new Error("Only a historical state can remain open through the evidence reference date.");
   }
   if (claim.continues_through_observation && latest) {
-    throw new Error("Leave the latest supported date blank when the state remains open through the observation date.");
+    throw new Error("Leave the latest supported date blank when the state remains open through the evidence reference date.");
   }
   if (!earliest && !latest && uncertainty.length < 12) {
     throw new Error("Add supported date bounds or explain why the dates remain unresolved.");
@@ -92,8 +120,8 @@ export function assertHistoricalClaim(
     if (!isValidPartialDate(value) || Number(value.slice(0, 4)) < 1600) {
       throw new Error(`Use YYYY, YYYY-MM, or YYYY-MM-DD from 1600 onward for the ${label} supported date.`);
     }
-    if (partialDateLower(value) > observationDate) {
-      throw new Error(`The ${label} supported date cannot be after the current observation date.`);
+    if (partialDateLower(value) > partialDateUpper(referenceDate)) {
+      throw new Error(`The ${label} supported date cannot be after the evidence reference date.`);
     }
   }
   if (earliest && latest && partialDateLower(earliest) > partialDateUpper(latest)) {

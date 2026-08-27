@@ -27,7 +27,7 @@
         return value;
     }
 
-    function validateHistoricalClaim(values, observationDate) {
+    function validateHistoricalClaim(values, referenceDate) {
         const earliest = values.earliestSupportedDate?.trim() || "";
         const latest = values.latestSupportedDate?.trim() || "";
         if (!values.claimKind) return "Choose what the historical claim concerns.";
@@ -38,11 +38,11 @@
         }
         if (earliest && !isValidPartialDate(earliest)) return "Use YYYY, YYYY-MM, or YYYY-MM-DD from 1600 onward for the earliest supported date.";
         if (latest && !isValidPartialDate(latest)) return "Use YYYY, YYYY-MM, or YYYY-MM-DD from 1600 onward for the latest supported date.";
-        if (earliest && partialDateLower(earliest) > observationDate) return "The earliest supported date cannot be after the current observation date.";
-        if (latest && partialDateLower(latest) > observationDate) return "The latest supported date cannot be after the current observation date.";
+        if (earliest && partialDateLower(earliest) > partialDateUpper(referenceDate)) return "The earliest supported date cannot be after the evidence reference date.";
+        if (latest && partialDateLower(latest) > partialDateUpper(referenceDate)) return "The latest supported date cannot be after the evidence reference date.";
         if (earliest && latest && partialDateLower(earliest) > partialDateUpper(latest)) return "The earliest supported date cannot be after the latest supported date.";
-        if (values.continuesThroughObservation && values.claimTiming !== "state") return "Only a historical state can remain open through the observation date.";
-        if (values.continuesThroughObservation && latest) return "Leave the latest supported date blank when the state remains open through the observation date.";
+        if (values.continuesThroughObservation && values.claimTiming !== "state") return "Only a historical state can remain open through the evidence reference date.";
+        if (values.continuesThroughObservation && latest) return "Leave the latest supported date blank when the state remains open through the evidence reference date.";
         if (!values.confidence) return "Choose a confidence category.";
         if ((values.confidenceBasis?.trim().length || 0) < 5) return "Briefly explain the confidence category.";
         if (!values.sourceBasis) return "Choose the source or informant basis.";

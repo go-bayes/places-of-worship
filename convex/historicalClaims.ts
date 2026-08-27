@@ -2,11 +2,20 @@ import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
-import { assertHistoricalClaim } from "./lib/historicalClaims";
+import {
+  assertHistoricalClaim,
+  historicalClaimReferenceDate,
+  isHistoricalClaimParentContract,
+} from "./lib/historicalClaims";
 import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser } from "./lib/auth";
-import { assertClientContextLimit, assertMaxString, MEDIUM_TEXT_MAX, SHORT_TEXT_MAX } from "./lib/limits";
+import {
+  assertClientContextLimit,
+  assertMaxString,
+  MEDIUM_TEXT_MAX,
+  SHORT_TEXT_MAX,
+} from "./lib/limits";
 import { intakeRateLimiter } from "./lib/rateLimits";
-import { assertRapidSubmissionId, isRapidCurrentDraft } from "./lib/rapidEntry";
+import { assertRapidSubmissionId } from "./lib/rapidEntry";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { historicalClaimInput, historicalClaimStatus } from "./model";
 import { historicalClaimDoc } from "./lib/validators";
@@ -29,8 +38,8 @@ async function getTaskOrThrow(ctx: QueryCtx | MutationCtx, taskId: string): Prom
   return task;
 }
 
-// loads the submitted rapid observation that anchors the historical claims.
-async function getParentObservationOrThrow(
+// loads the submitted evidence record that anchors the historical claims.
+async function getParentEvidenceOrThrow(
   ctx: QueryCtx | MutationCtx,
   evidenceDraftId: string,
 ): Promise<Doc<"evidence_drafts">> {
@@ -110,24 +119,25 @@ export const submitHistoricalClaim = mutation({
     }
 
     const task = await getTaskOrThrow(ctx, args.taskId);
-    const parent = await getParentObservationOrThrow(ctx, args.parentEvidenceDraftId);
-    if (task.country_code !== "VU") {
-      throw new Error("Rapid historical-claim entry is enabled only for Vanuatu tasks.");
-    }
+    const parent = await getParentEvidenceOrThrow(ctx, args.parentEvidenceDraftId);
     if (!ACTIVE_HISTORY_STATUSES.has(task.status)) {
       throw new Error("This task is closed for historical entry. Ask JB to reopen it before adding history.");
     }
-    if (parent.task_id !== task.task_id || !isRapidCurrentDraft(parent)) {
-      throw new Error("Historical claims must attach to the submitted rapid current observation for this task.");
+    const supportedParent = isHistoricalClaimParentContract(parent.observation_contract_version);
+    if (parent.task_id !== task.task_id || !supportedParent) {
+      throw new Error("Historical claims must attach to submitted rapid or guided evidence for this task.");
     }
     if (parent.created_by !== user._id) {
-      throw new Error("Only the observer who recorded the current observation can add its known history.");
+      throw new Error("Only the investigator who submitted the parent evidence can add its known history.");
     }
     if (parent.draft_status !== "submitted" && parent.draft_status !== "unresolved_note") {
-      throw new Error("Add history to the latest submitted current observation, not to an earlier version.");
+      throw new Error("Add history to the latest submitted evidence record, not to an earlier version.");
     }
-    const observationDate = parent.source_date_or_capture_date ?? "";
-    assertHistoricalClaim(args.claim, observationDate);
+    const { referenceDate, referenceDateBasis } = historicalClaimReferenceDate(
+      parent.source_date_or_capture_date,
+      new Date().toISOString().slice(0, 10),
+    );
+    assertHistoricalClaim(args.claim, referenceDate);
 
     await intakeRateLimiter.limit(ctx, "historicalClaimPerUser", { key: user._id, throws: true });
     await intakeRateLimiter.limit(ctx, "historicalClaimGlobal", { throws: true });
@@ -146,6 +156,8 @@ export const submitHistoricalClaim = mutation({
       claim_kind: args.claim.claim_kind,
       claim_timing: args.claim.claim_timing,
       claim_text: args.claim.claim_text.trim(),
+      reference_date: referenceDate,
+      reference_date_basis: referenceDateBasis,
       ...(args.claim.earliest_supported_date?.trim()
         ? { earliest_supported_date: args.claim.earliest_supported_date.trim() }
         : {}),
@@ -178,6 +190,7 @@ export const submitHistoricalClaim = mutation({
       reason: `Historical ${args.claim.claim_timing} claim submitted for review.`,
       clientContext: {
         ...(args.clientContext ?? {}),
+        country_code: task.country_code,
         historical_claim_id: historicalClaimId,
         contract_version: "historical_claim_v1",
       },
