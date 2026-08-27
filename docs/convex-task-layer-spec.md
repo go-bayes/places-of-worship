@@ -6,6 +6,7 @@ Portal hub: `docs/portal-data-entry-plan.md`.
 
 Related designs:
 
+- `docs/development/content-addressed-review.md`
 - `docs/portal-database-storage-plan.md`
 - `docs/portal-submission-review-plan.md`
 - `docs/portal-auth-security-plan.md`

@@ -18,6 +18,7 @@ not as the default RA task guide.
 
 Current development references:
 
+- `content-addressed-review.md`: proposed immutable version, hash, decision, frozen-export, and replay contract shared by dashboard, command-line, and later agent clients.
 - `nz-osm-temporal-cleaning.md`: how the annual OSM places-to-check files are
   generated.
 - `nz-temporal-ra-workpack.md`: how the first curated 50-record New Zealand RA

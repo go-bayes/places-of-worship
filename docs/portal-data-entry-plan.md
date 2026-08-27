@@ -4,6 +4,7 @@ Public direction: `ROADMAP.md`. Detailed active planning and governance records 
 
 Related designs:
 
+- `docs/development/content-addressed-review.md`
 - `docs/community-ingestion-api-plan.md`
 - `docs/convex-task-layer-spec.md`
 - `docs/master-verification-workflow-plan.md`
