@@ -30,6 +30,8 @@ flowchart LR
   J -.-> H
 ```
 
+The proposed [content-addressed review contract](development/content-addressed-review.md) defines a frozen export as stored bytes with verified file and manifest hashes. The current Convex prototype precedes that contract.
+
 ## Module Table
 
 | Module | Owns | Does not own | Main interface |

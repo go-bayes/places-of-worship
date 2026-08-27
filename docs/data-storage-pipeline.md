@@ -61,6 +61,8 @@ flowchart TD
   Pow --> Outputs["Reviewed map and research outputs"]
 ```
 
+The proposed [content-addressed review contract](development/content-addressed-review.md) defines the byte-level meaning of a frozen reviewed export. The current Convex prototype remains an earlier implementation stage.
+
 ### Current Data Inventory
 
 | Data source                                                                             | Script or path that created it                                                                                                               | Where it is now                                                                                                                                         | Current status                                                                                                                                                                                                                                                                                                     | Next action                                                                                                                                                                   |
