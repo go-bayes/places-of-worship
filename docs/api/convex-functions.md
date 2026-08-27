@@ -14,9 +14,9 @@ The inventory also lists internal functions (kind `internal query`,
 Internal functions are not part of the public API: they are callable only with
 the deployment admin key, from the CLI, dashboard, or a scheduled job.
 
-Last reviewed: 2026-08-26, against the exported Convex functions in
+Last reviewed: 2026-08-28, against the exported Convex functions in
 `users.ts`, `tasks.ts`, `evidence.ts`, `batchImport.ts`, `reviews.ts`,
-`rapidEntry.ts`, `claudeReviews.ts`, `exports.ts`, `devSeed.ts`, `revisionSeed.ts`, and
+`rapidEntry.ts`, `historicalClaims.ts`, `claudeReviews.ts`, `exports.ts`, `devSeed.ts`, `revisionSeed.ts`, and
 `trainingSeed.ts`.
 Exports from `model.ts` and `convex/lib/` are internal validators and helpers,
 not public workflow functions.
@@ -50,6 +50,7 @@ and export bundles. Accepted changes become research data only after export,
   client context have server-side size limits before writes reach the shared
   backend.
 - Vanuatu rapid entry is role-checked, rate-limited, idempotent per user submission, restricted to Vanuatu coordinates, and atomic across candidate creation, evidence submission, audit events, and the task transition to human review. The client cannot submit historical target-year states or other derived review fields through this endpoint.
+- Vanuatu historical-claim entry is a separate, author-bound `historical_claim_v1` route. It validates one source-backed event or state against the parent rapid observation date, preserves unresolved bounds and retained source wording, and cannot alter the current observation or create a target-year state.
 - `accepted_for_export` is a review state, not a master write. It only makes a
   decision eligible for export to the governed `pow` path.
 
@@ -100,6 +101,13 @@ change.
 | Function | Kind | Roles | Purpose | Writes |
 | --- | --- | --- | --- | --- |
 | `submitVanuatuCurrentObservation` | mutation | `ra`, `reviewer`, `curator`, `admin` | Atomically record one Vanuatu current observation against an authorised existing task or a newly pinned provisional candidate. The server validates controlled current-status and evidence fields, applies Vanuatu bounds and transactional rate limits, derives provisional workflow classifications, leaves all historical target years unassessed, appends audit events, and moves the task to human review. A user-scoped UUID makes safe retries idempotent. While a task holding a rapid observation awaits review (`needs_review`, `unresolved_note`, `changes_requested`), only that observation's author may submit a corrected observation; the earlier record is marked `superseded`, never rewritten. This is the only route that can create or replace a `rapid_current_v1` draft. | `task_batches` when absent, `tasks`, `evidence_drafts`, `task_events`, rate-limit component state |
+
+## `historicalClaims.ts`
+
+| Function | Kind | Roles | Purpose | Writes |
+| --- | --- | --- | --- | --- |
+| `listTaskHistoricalClaims` | query | claim author, `reviewer`, `curator`, `admin` | Return a bounded newest-first list of historical claims for one task. RAs see only claims they authored; reviewers and maintainers can inspect all claims. | None |
+| `submitHistoricalClaim` | mutation | author of the parent rapid observation with an active `ra`, `reviewer`, `curator`, or `admin` role | Record one `historical_claim_v1` event or state linked to a submitted Vanuatu rapid observation. The mutation validates partial or unresolved date bounds, open-state logic, confidence, source provenance, retained wording, privacy, idempotency, and rate limits. It appends a task-history note but does not change task status, the current observation, target-year states, or the master. | `historical_claims`, `task_events`, rate-limit component state |
 
 ## `evidence.ts`
 
@@ -173,11 +181,13 @@ tasks, drafts, or review decisions.
 - `tasks`,
 - `task_events`,
 - `evidence_drafts`,
+- `historical_claims`,
 - `review_decisions`,
 - `files.export_manifest_json`,
 - `files.tasks_jsonl`,
 - `files.task_events_jsonl`,
 - `files.evidence_drafts_jsonl`,
+- `files.historical_claims_jsonl`,
 - `files.review_decisions_jsonl`,
 - `files.site_evidence_wide_csv`.
 

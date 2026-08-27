@@ -24,6 +24,12 @@ export const evidenceDraftDoc = v.object({
   ...schema.tables.evidence_drafts.validator.fields,
 });
 
+export const historicalClaimDoc = v.object({
+  _id: v.id("historical_claims"),
+  _creationTime: v.number(),
+  ...schema.tables.historical_claims.validator.fields,
+});
+
 export const reviewDecisionDoc = v.object({
   _id: v.id("review_decisions"),
   _creationTime: v.number(),

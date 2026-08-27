@@ -8,6 +8,7 @@ import { isWideEvidenceExportEligible } from "./lib/exportEligibility";
 import {
   evidenceDraftDoc,
   exportBatchDoc,
+  historicalClaimDoc,
   reviewDecisionDoc,
   taskDoc,
   taskEventDoc,
@@ -98,6 +99,7 @@ function exportFiles(
   tasks: Doc<"tasks">[],
   taskEvents: Doc<"task_events">[],
   evidenceDrafts: Doc<"evidence_drafts">[],
+  historicalClaims: Doc<"historical_claims">[],
   reviewDecisions: Doc<"review_decisions">[],
 ) {
   const wide = siteEvidenceWideCsv(evidenceDrafts, reviewDecisions);
@@ -108,6 +110,7 @@ function exportFiles(
       { filename: "tasks.jsonl", content_type: "application/x-ndjson", record_count: tasks.length },
       { filename: "task_events.jsonl", content_type: "application/x-ndjson", record_count: taskEvents.length },
       { filename: "evidence_drafts.jsonl", content_type: "application/x-ndjson", record_count: evidenceDrafts.length },
+      { filename: "historical_claims.jsonl", content_type: "application/x-ndjson", record_count: historicalClaims.length },
       { filename: "review_decisions.jsonl", content_type: "application/x-ndjson", record_count: reviewDecisions.length },
       {
         filename: "site_evidence_wide.csv",
@@ -123,6 +126,7 @@ function exportFiles(
     tasks_jsonl: jsonl(tasks),
     task_events_jsonl: jsonl(taskEvents),
     evidence_drafts_jsonl: jsonl(evidenceDrafts),
+    historical_claims_jsonl: jsonl(historicalClaims),
     review_decisions_jsonl: jsonl(reviewDecisions),
     site_evidence_wide_csv: wide.csv,
   };
@@ -206,7 +210,7 @@ export const createExportBatch = mutation({
       created_at: now,
       included_task_ids: taskIds,
       included_review_decision_ids: reviewDecisionIds,
-      schema_version: "convex-task-layer.v0",
+      schema_version: "convex-task-layer.v0.1",
       export_format: args.exportFormat ?? "bundle",
       pow_validation_status: "not_run",
       notes: args.notes,
@@ -286,6 +290,7 @@ export const getExportBundle = query({
       export_format: exportFormat,
       included_task_count: v.number(),
       included_evidence_count: v.number(),
+      included_historical_claim_count: v.number(),
       included_review_decision_count: v.number(),
       pow_validation_status: v.optional(
         v.union(v.literal("not_run"), v.literal("passed"), v.literal("failed")),
@@ -294,12 +299,14 @@ export const getExportBundle = query({
     tasks: v.array(taskDoc),
     task_events: v.array(taskEventDoc),
     evidence_drafts: v.array(evidenceDraftDoc),
+    historical_claims: v.array(historicalClaimDoc),
     review_decisions: v.array(reviewDecisionDoc),
     files: v.object({
       export_manifest_json: v.string(),
       tasks_jsonl: v.string(),
       task_events_jsonl: v.string(),
       evidence_drafts_jsonl: v.string(),
+      historical_claims_jsonl: v.string(),
       review_decisions_jsonl: v.string(),
       site_evidence_wide_csv: v.string(),
     }),
@@ -317,6 +324,7 @@ export const getExportBundle = query({
     const tasks = [];
     const taskEvents = [];
     const evidenceDrafts = [];
+    const historicalClaims = [];
     for (const taskId of batch.included_task_ids) {
       const task = await taskByTaskId(ctx, taskId);
       if (task !== null) {
@@ -334,6 +342,14 @@ export const getExportBundle = query({
           .withIndex("by_task_status", (q) => q.eq("task_id", taskId))
           .collect()),
       );
+      const taskHistoricalClaims = await ctx.db
+        .query("historical_claims")
+        .withIndex("by_task_and_created_at", (q) => q.eq("task_id", taskId))
+        .take(501);
+      if (taskHistoricalClaims.length > 500) {
+        throw new Error(`Task ${taskId} has more than 500 historical claims; split or review it before export.`);
+      }
+      historicalClaims.push(...taskHistoricalClaims);
     }
 
     const reviewDecisions = [];
@@ -356,6 +372,7 @@ export const getExportBundle = query({
       export_format: batch.export_format,
       included_task_count: tasks.length,
       included_evidence_count: evidenceDrafts.length,
+      included_historical_claim_count: historicalClaims.length,
       included_review_decision_count: reviewDecisions.length,
       pow_validation_status: batch.pow_validation_status,
     };
@@ -365,8 +382,9 @@ export const getExportBundle = query({
       tasks,
       task_events: taskEvents,
       evidence_drafts: evidenceDrafts,
+      historical_claims: historicalClaims,
       review_decisions: reviewDecisions,
-      files: exportFiles(exportManifest, tasks, taskEvents, evidenceDrafts, reviewDecisions),
+      files: exportFiles(exportManifest, tasks, taskEvents, evidenceDrafts, historicalClaims, reviewDecisions),
     };
   },
 });

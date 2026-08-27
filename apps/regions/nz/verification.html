@@ -1463,6 +1463,42 @@
             font-weight: 700;
         }
 
+        .history-count {
+            margin: 10px 0;
+            color: #145a32;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .historical-date-block {
+            display: grid;
+            gap: 8px;
+            margin: 0;
+            padding: 10px;
+            border: 1px solid #b6c2cf;
+            border-radius: 6px;
+        }
+
+        .historical-date-block legend {
+            padding: 0 4px;
+            color: #243447;
+            font-weight: 700;
+        }
+
+        .historical-open-state {
+            display: grid;
+            grid-template-columns: 22px minmax(0, 1fr);
+            align-items: start;
+            gap: 8px;
+            min-height: 44px;
+        }
+
+        .historical-open-state input {
+            width: 20px;
+            height: 20px;
+            margin: 1px 0 0;
+        }
+
         /* Two-pane desktop lock (>900px, above the mobile stack breakpoint).
            The app shell is already height:100vh, but its single grid row was
            auto-sized, so a long sidebar grew the row past the viewport and the
@@ -1681,8 +1717,9 @@
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
     <script src="js/convex-config.js?v=20260707-changes-requested"></script>
-    <script src="js/convex-task-client.js?v=20260826a"></script>
+    <script src="js/convex-task-client.js?v=20260828a"></script>
     <script src="js/rapid-entry-contract.js?v=20260826a"></script>
-  <script src="js/verification-map.js?v=20260827c"></script>
+    <script src="js/historical-claim-contract.js?v=20260828a"></script>
+  <script src="js/verification-map.js?v=20260828a"></script>
 </body>
 </html>

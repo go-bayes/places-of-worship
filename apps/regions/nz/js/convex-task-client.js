@@ -276,6 +276,10 @@
             return await this.request("query", "evidence:listTaskEvidence", args);
         }
 
+        async listTaskHistoricalClaims(args) {
+            return await this.request("query", "historicalClaims:listTaskHistoricalClaims", args);
+        }
+
         async getTaskEvents(args) {
             return await this.request("query", "tasks:getTaskEvents", args);
         }
@@ -338,6 +342,10 @@
 
         async submitVanuatuCurrentObservation(args) {
             return await this.request("mutation", "rapidEntry:submitVanuatuCurrentObservation", args);
+        }
+
+        async submitHistoricalClaim(args) {
+            return await this.request("mutation", "historicalClaims:submitHistoricalClaim", args);
         }
 
         async recordReviewDecision(args) {

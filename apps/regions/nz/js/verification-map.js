@@ -659,6 +659,30 @@ const RAPID_BASIS_LABELS = {
     named_public_source: "I checked a named public source",
     other: "Other evidence",
 };
+const HISTORICAL_CLAIM_KIND_LABELS = {
+    structure: "Structure or building",
+    worship_function: "Worship function",
+    denomination_or_affiliation: "Denomination or affiliation",
+    leadership: "Leadership",
+    shared_use: "Shared or concurrent worship use",
+    other: "Other history",
+};
+const HISTORICAL_CLAIM_TIMING_LABELS = {
+    event: "Event",
+    state: "State over an interval",
+};
+const HISTORICAL_CONFIDENCE_LABELS = {
+    high: "High",
+    moderate: "Moderate",
+    low: "Low",
+    uncertain: "Uncertain",
+};
+const HISTORICAL_SOURCE_BASIS_LABELS = {
+    inscription_or_document_observed: "Inscription or document I observed",
+    local_investigator_account: "Local investigator account",
+    named_public_source: "Named public source",
+    other: "Other source or informant basis",
+};
 const READ_ONLY_ASSIGNMENT_STATUSES = new Set([
     "needs_review",
     "unresolved_note",
@@ -3108,7 +3132,14 @@ class NzVerificationMap {
     // portal's "decision recorded" return-to-list. the finished task rightly
     // leaves the available list in assignment mode, so the prompt points at
     // the next task rather than the one just closed.
-    renderSubmissionRecordedDetail(props, { unresolved = false, skipped = false, corrected = false, deduped = false } = {}) {
+    renderSubmissionRecordedDetail(props, {
+        unresolved = false,
+        skipped = false,
+        corrected = false,
+        deduped = false,
+        knownHistory = null,
+        nomination = false,
+    } = {}) {
         const panel = document.getElementById("detailPanel");
         if (!panel) return;
         panel.innerHTML = `
@@ -3126,7 +3157,10 @@ class NzVerificationMap {
                                 : "saved to the shared backend and submitted for review."}
             </div>
             <div class="button-row">
-                <button id="openNextTaskButton" type="button">Open next task</button>
+                ${knownHistory ? `<button id="addKnownHistoryButton" type="button">Add known history</button>` : ""}
+                ${nomination
+                    ? `<button id="nominateAnotherButton"${knownHistory ? ` class="secondary"` : ""} type="button">Nominate another PoW</button>`
+                    : `<button id="openNextTaskButton"${knownHistory ? ` class="secondary"` : ""} type="button">Open next task</button>`}
                 ${skipped ? `<button id="undoSkipButton" class="secondary" type="button">Undo skip</button>` : ""}
             </div>
             <div id="confirmPaneStatus" class="copy-status" aria-live="polite"></div>
@@ -3135,6 +3169,8 @@ class NzVerificationMap {
             </div>
         `;
         document.getElementById("openNextTaskButton")?.addEventListener("click", () => this.openNextAvailableTask());
+        document.getElementById("nominateAnotherButton")?.addEventListener("click", () => this.enterPinMode());
+        document.getElementById("addKnownHistoryButton")?.addEventListener("click", () => this.renderHistoricalClaimEntry(knownHistory));
         document.getElementById("undoSkipButton")?.addEventListener("click", () => this.undoSkip(props.task_id));
     }
 
@@ -4088,6 +4124,11 @@ class NzVerificationMap {
         const backendTask = this.backendTaskForProps(props);
         const status = backendTask?.status || "";
         const canCorrect = this.taskCanCorrectRapid(taskId);
+        const canAddHistory = Boolean(
+            draft
+            && draft.observation_contract_version === "rapid_current_v1"
+            && ["needs_review", "unresolved_note", "changes_requested"].includes(status)
+        );
         const statusNote = status === "changes_requested"
             ? "A reviewer asked for more evidence. Submit a corrected observation to respond."
             : status === "needs_review" || status === "unresolved_note"
@@ -4115,11 +4156,12 @@ class NzVerificationMap {
             <h3>Recorded observation</h3>
             <div class="pilot-note">${escapeHtml(statusNote)}</div>
             ${summary}
-            ${canCorrect ? `
+            ${canCorrect || canAddHistory ? `
                 <div class="button-row">
-                    <button id="correctObservationButton" type="button">Correct this observation</button>
+                    ${canAddHistory ? `<button id="addKnownHistoryFromRecordedButton" type="button">Add known history</button>` : ""}
+                    ${canCorrect ? `<button id="correctObservationButton"${canAddHistory ? ` class="secondary"` : ""} type="button">Correct this observation</button>` : ""}
                 </div>
-                <div class="copy-help">Use this only for a mistake or new information. Your earlier observation stays on record and is marked superseded.</div>
+                ${canCorrect ? `<div class="copy-help">Correct the current observation only for a mistake or new information. Your earlier observation stays on record and is marked superseded.</div>` : ""}
             ` : ""}
             <div id="copyStatus" class="copy-status" aria-live="polite"></div>
         `;
@@ -4208,15 +4250,37 @@ class NzVerificationMap {
                 await this.refreshBackendTasks();
                 this.selectedTask = null;
                 this.applyFilters();
-                this.renderSubmissionRecordedDetail(options.props, { corrected: Boolean(result.corrected), deduped: Boolean(result.deduped) });
+                this.renderSubmissionRecordedDetail(options.props, {
+                    corrected: Boolean(result.corrected),
+                    deduped: Boolean(result.deduped),
+                    knownHistory: {
+                        taskId: result.task_id,
+                        parentEvidenceDraftId: result.evidence_draft_id,
+                        taskName: options.props.name || "Unnamed site",
+                        observationDate: values.observedOn,
+                        nomination: false,
+                    },
+                });
                 this.focusDetailPanel();
                 return;
             }
-            this.setBackendTransientStatus(result.deduped
-                ? "That observation was already recorded. The form is ready for another place."
-                : "Observation recorded for review. The form is ready for another place.");
             this.exitPinMode();
-            this.enterPinMode();
+            const submittedProps = {
+                task_id: result.task_id,
+                name: candidate.name || "Unknown place of worship",
+            };
+            this.renderSubmissionRecordedDetail(submittedProps, {
+                deduped: Boolean(result.deduped),
+                nomination: true,
+                knownHistory: {
+                    taskId: result.task_id,
+                    parentEvidenceDraftId: result.evidence_draft_id,
+                    taskName: submittedProps.name,
+                    observationDate: values.observedOn,
+                    nomination: true,
+                },
+            });
+            this.focusDetailPanel();
         } catch (error) {
             if (error.authExpired) {
                 this.backendUser = null;
@@ -4225,6 +4289,215 @@ class NzVerificationMap {
             }
             submitButton.disabled = false;
             if (status) status.textContent = `${error.message || "Could not submit the observation."} Your entries remain here; try again.`;
+        }
+    }
+
+    // renders one repeatable claim form linked to the submitted current observation.
+    historicalClaimFormHtml(context, { recordedCount = 0, statusMessage = "" } = {}) {
+        const submissionId = window.PowRapidEntry.secureSubmissionId();
+        return `
+            <h2>${recordedCount ? "Historical claim recorded" : "Add known history"}</h2>
+            <div class="pilot-note">
+                Record one historical event or state at a time. Structure history, worship function, affiliation, leadership, and shared use remain separate claims. This evidence enters review and does not fill a target-year state automatically.
+            </div>
+            ${statusMessage ? `<div class="copy-status" role="status">${escapeHtml(statusMessage)}</div>` : ""}
+            ${recordedCount ? `<div class="history-count">${recordedCount} historical claim${recordedCount === 1 ? "" : "s"} recorded in this entry sequence.</div>` : ""}
+            <form id="historicalClaimForm" class="rapid-current-form historical-claim-form" data-submission-id="${escapeHtml(submissionId)}">
+                <div class="field-grid">
+                    <label>
+                        What does this claim concern?
+                        <select id="historicalClaimKind">
+                            <option value="">Choose one...</option>
+                            ${Object.entries(HISTORICAL_CLAIM_KIND_LABELS).map(([value, label]) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`).join("")}
+                        </select>
+                    </label>
+                    <label>
+                        Is this an event or a state?
+                        <select id="historicalClaimTiming">
+                            <option value="">Choose one...</option>
+                            ${Object.entries(HISTORICAL_CLAIM_TIMING_LABELS).map(([value, label]) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`).join("")}
+                        </select>
+                    </label>
+                </div>
+                <label>
+                    What event or state does the source support?
+                    <input id="historicalClaimText" type="text" maxlength="2048" placeholder="e.g. Anglican leadership or shared Methodist services">
+                </label>
+                <fieldset class="historical-date-block">
+                    <legend>Supported date bounds</legend>
+                    <div class="copy-help">Use YYYY, YYYY-MM, or YYYY-MM-DD. Leave a bound blank when the source does not support one.</div>
+                    <div class="field-grid">
+                        <label>
+                            Earliest supported date (optional)
+                            <input id="historicalEarliestDate" type="text" inputmode="numeric" placeholder="1880" maxlength="10">
+                        </label>
+                        <label>
+                            Latest supported date (optional)
+                            <input id="historicalLatestDate" type="text" inputmode="numeric" placeholder="1890" maxlength="10">
+                        </label>
+                    </div>
+                    <label class="historical-open-state">
+                        <input id="historicalContinues" type="checkbox">
+                        <span>This state remains open through the current observation date (${escapeHtml(context.observationDate)}).</span>
+                    </label>
+                </fieldset>
+                <div class="field-grid">
+                    <label>
+                        Confidence
+                        <select id="historicalConfidence">
+                            <option value="">Choose one...</option>
+                            ${Object.entries(HISTORICAL_CONFIDENCE_LABELS).map(([value, label]) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`).join("")}
+                        </select>
+                    </label>
+                    <label>
+                        Why this confidence?
+                        <input id="historicalConfidenceBasis" type="text" maxlength="2048">
+                    </label>
+                </div>
+                <div class="field-grid">
+                    <label>
+                        Source or informant basis
+                        <select id="historicalSourceBasis">
+                            <option value="">Choose one...</option>
+                            ${Object.entries(HISTORICAL_SOURCE_BASIS_LABELS).map(([value, label]) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`).join("")}
+                        </select>
+                    </label>
+                    <label>
+                        Source title or brief description
+                        <input id="historicalSourceTitle" type="text" maxlength="2048" placeholder="e.g. foundation plaque at west entrance">
+                    </label>
+                </div>
+                <label>
+                    Source URL, archive reference, or agreed file reference (required for a named public source)
+                    <input id="historicalSourceReference" type="text" maxlength="4096">
+                </label>
+                <label>
+                    Source wording or short dictated account
+                    <textarea id="historicalSourceAccount" rows="4" maxlength="8000" placeholder="Retain what the source says. Do not translate phrases such as ‘during the war’ into calendar years unless the source supports them."></textarea>
+                </label>
+                <div class="copy-help">You may use your device’s dictation. Check the resulting text before submitting. The portal stores the confirmed text, not audio.</div>
+                <label>
+                    What remains uncertain about the dates or claim? (required when both date bounds are blank)
+                    <textarea id="historicalUncertainty" rows="3" maxlength="8000"></textarea>
+                </label>
+                <label>
+                    Sensitivity and privacy
+                    <select id="historicalPrivacyFlag">
+                        ${selectOptionsHtml(PRIVACY_FLAG_OPTIONS, "needs_review")}
+                    </select>
+                </label>
+                <div class="copy-help">Do not enter personal contact details or private conversations. Choose restricted when the claim could expose a culturally restricted place or identifiable person.</div>
+                <div class="button-row">
+                    <button id="submitHistoricalClaimButton" type="submit">Record this claim for review</button>
+                    <button id="finishHistoricalClaimsButton" class="secondary" type="button">${context.nomination ? "Done — nominate another PoW" : "Done — open next task"}</button>
+                </div>
+                <div id="historicalClaimStatus" class="copy-status" aria-live="polite"></div>
+            </form>
+        `;
+    }
+
+    // reads the compact historical form without deriving scientific values.
+    historicalClaimValues() {
+        return {
+            claimKind: document.getElementById("historicalClaimKind")?.value || "",
+            claimTiming: document.getElementById("historicalClaimTiming")?.value || "",
+            claimText: document.getElementById("historicalClaimText")?.value || "",
+            earliestSupportedDate: document.getElementById("historicalEarliestDate")?.value || "",
+            latestSupportedDate: document.getElementById("historicalLatestDate")?.value || "",
+            continuesThroughObservation: Boolean(document.getElementById("historicalContinues")?.checked),
+            confidence: document.getElementById("historicalConfidence")?.value || "",
+            confidenceBasis: document.getElementById("historicalConfidenceBasis")?.value || "",
+            sourceBasis: document.getElementById("historicalSourceBasis")?.value || "",
+            sourceTitle: document.getElementById("historicalSourceTitle")?.value || "",
+            sourceReference: document.getElementById("historicalSourceReference")?.value || "",
+            sourceAccount: document.getElementById("historicalSourceAccount")?.value || "",
+            uncertaintyNote: document.getElementById("historicalUncertainty")?.value || "",
+            privacyFlag: document.getElementById("historicalPrivacyFlag")?.value || "",
+        };
+    }
+
+    // keeps open-state controls consistent with the selected temporal object.
+    updateHistoricalTimingControls() {
+        const timing = document.getElementById("historicalClaimTiming")?.value || "";
+        const continues = document.getElementById("historicalContinues");
+        const latest = document.getElementById("historicalLatestDate");
+        if (continues) {
+            continues.disabled = timing !== "state";
+            if (timing !== "state") continues.checked = false;
+        }
+        if (latest) latest.disabled = Boolean(continues?.checked);
+    }
+
+    // mounts and wires a fresh repeatable historical-claim form.
+    renderHistoricalClaimEntry(context, options = {}) {
+        const panel = document.getElementById("detailPanel");
+        if (!panel || !context || !window.PowHistoricalClaim) return;
+        panel.innerHTML = this.historicalClaimFormHtml(context, options);
+        const form = document.getElementById("historicalClaimForm");
+        const markDirty = () => this.markFormDirty(`history-${context.taskId}`);
+        form?.addEventListener("input", markDirty);
+        form?.addEventListener("change", markDirty);
+        document.getElementById("historicalClaimTiming")?.addEventListener("change", () => this.updateHistoricalTimingControls());
+        document.getElementById("historicalContinues")?.addEventListener("change", () => this.updateHistoricalTimingControls());
+        this.updateHistoricalTimingControls();
+        form?.addEventListener("submit", event => {
+            event.preventDefault();
+            this.submitHistoricalClaim(context, options.recordedCount || 0);
+        });
+        document.getElementById("finishHistoricalClaimsButton")?.addEventListener("click", () => {
+            if (this.formDirty && !window.confirm("Discard this unfinished historical claim?")) return;
+            this.clearFormDirty();
+            if (context.nomination) {
+                this.enterPinMode();
+            } else {
+                this.openNextAvailableTask();
+            }
+        });
+        this.focusDetailPanel();
+    }
+
+    // submits one claim and returns a clean form for another distinct claim.
+    async submitHistoricalClaim(context, recordedCount) {
+        const form = document.getElementById("historicalClaimForm");
+        const status = document.getElementById("historicalClaimStatus");
+        const submitButton = document.getElementById("submitHistoricalClaimButton");
+        if (!form || !window.PowHistoricalClaim) return;
+        if (!this.backend?.configured || !this.backend.signedIn) {
+            if (status) status.textContent = "Sign in before recording known history.";
+            return;
+        }
+        const values = this.historicalClaimValues();
+        const inputError = window.PowHistoricalClaim.validateHistoricalClaim(values, context.observationDate);
+        if (inputError) {
+            if (status) status.textContent = inputError;
+            return;
+        }
+        submitButton.disabled = true;
+        if (status) status.textContent = "Recording this historical claim for review...";
+        try {
+            const result = await this.backend.submitHistoricalClaim({
+                clientSubmissionId: form.dataset.submissionId,
+                taskId: context.taskId,
+                parentEvidenceDraftId: context.parentEvidenceDraftId,
+                claim: window.PowHistoricalClaim.historicalClaimPayload(values),
+                clientContext: { portal_version: "vanuatu-historical-claim-v1" },
+            });
+            this.clearFormDirty();
+            this.taskHistoryByTaskId.delete(context.taskId);
+            this.renderHistoricalClaimEntry(context, {
+                recordedCount: recordedCount + 1,
+                statusMessage: result.deduped
+                    ? "That historical claim was already recorded; nothing was duplicated."
+                    : "Historical claim recorded for human review. Add another claim only when it concerns a distinct event or state.",
+            });
+        } catch (error) {
+            if (error.authExpired) {
+                this.backendUser = null;
+                this.backendLastError = error.message;
+                this.renderBackendPanel();
+            }
+            submitButton.disabled = false;
+            if (status) status.textContent = `${error.message || "Could not record the historical claim."} Your entries remain here; try again.`;
         }
     }
 
@@ -4518,6 +4791,17 @@ class NzVerificationMap {
 
     bindRaActionForm(props) {
         document.getElementById("correctObservationButton")?.addEventListener("click", () => this.startRapidCorrection(props));
+        document.getElementById("addKnownHistoryFromRecordedButton")?.addEventListener("click", () => {
+            const draft = this.latestDraftForTask(props.task_id);
+            if (!draft) return;
+            this.renderHistoricalClaimEntry({
+                taskId: props.task_id,
+                parentEvidenceDraftId: draft.evidence_draft_id,
+                taskName: props.name || "Unnamed site",
+                observationDate: draft.source_date_or_capture_date,
+                nomination: false,
+            });
+        });
         if (document.getElementById("taskRapidCurrentForm")) {
             this.bindRapidObservationForm("task", { props });
             document.getElementById("taskFormCancelButton")?.addEventListener("click", () => this.cancelRapidCorrection(props));

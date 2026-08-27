@@ -174,6 +174,42 @@ export const currentObservationBasis = v.union(
   v.literal("other"),
 );
 
+export const historicalClaimContractVersion = v.literal("historical_claim_v1");
+
+export const historicalClaimStatus = v.union(
+  v.literal("submitted"),
+  v.literal("superseded"),
+  v.literal("withdrawn"),
+);
+
+export const historicalClaimKind = v.union(
+  v.literal("structure"),
+  v.literal("worship_function"),
+  v.literal("denomination_or_affiliation"),
+  v.literal("leadership"),
+  v.literal("shared_use"),
+  v.literal("other"),
+);
+
+export const historicalClaimTiming = v.union(
+  v.literal("event"),
+  v.literal("state"),
+);
+
+export const historicalClaimConfidence = v.union(
+  v.literal("high"),
+  v.literal("moderate"),
+  v.literal("low"),
+  v.literal("uncertain"),
+);
+
+export const historicalClaimSourceBasis = v.union(
+  v.literal("inscription_or_document_observed"),
+  v.literal("local_investigator_account"),
+  v.literal("named_public_source"),
+  v.literal("other"),
+);
+
 export const observationContractVersion = v.union(
   v.literal("guided_observation_v1"),
   v.literal("rapid_current_v1"),
@@ -335,6 +371,23 @@ export const rapidCurrentObservationInput = v.object({
   denomination_or_tradition_raw: v.optional(v.string()),
   denomination_label_basis: v.optional(denominationLabelBasis),
   direct_observation: v.optional(v.string()),
+  uncertainty_note: v.optional(v.string()),
+  privacy_flag: privacyFlag,
+});
+
+export const historicalClaimInput = v.object({
+  claim_kind: historicalClaimKind,
+  claim_timing: historicalClaimTiming,
+  claim_text: v.string(),
+  earliest_supported_date: v.optional(v.string()),
+  latest_supported_date: v.optional(v.string()),
+  continues_through_observation: v.boolean(),
+  confidence: historicalClaimConfidence,
+  confidence_basis: v.string(),
+  source_basis: historicalClaimSourceBasis,
+  source_title: v.string(),
+  source_reference: v.optional(v.string()),
+  source_account: v.string(),
   uncertainty_note: v.optional(v.string()),
   privacy_flag: privacyFlag,
 });

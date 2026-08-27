@@ -51,7 +51,7 @@ flowchart LR
 
 | Script | Main entry point | Purpose | Inputs | Outputs | When to run |
 | --- | --- | --- | --- | --- | --- |
-| `scripts/materialise_convex_export.py` | `main()` | Materialise a JSON bundle returned by `exports:getExportBundle` into local files for `pow`. | JSON copied from the Convex `getExportBundle` query. | Ignored export directory under `exports/convex-roundtrip/<export_batch_id>/`, including `tasks.jsonl`, `task_events.jsonl`, `evidence_drafts.jsonl`, `review_decisions.jsonl`, `site_evidence_wide.csv`, `export_manifest.json`, and `SHA256SUMS`. | After a curator creates and freezes a Convex export batch for a reviewed set of tasks. |
+| `scripts/materialise_convex_export.py` | `main()` | Materialise a JSON bundle returned by `exports:getExportBundle` into local files for `pow`. | JSON copied from the Convex `getExportBundle` query. | Ignored export directory under `exports/convex-roundtrip/<export_batch_id>/`, including `tasks.jsonl`, `task_events.jsonl`, `evidence_drafts.jsonl`, `historical_claims.jsonl`, `review_decisions.jsonl`, `site_evidence_wide.csv`, `export_manifest.json`, and `SHA256SUMS`. | After a curator creates and freezes a Convex export batch for a reviewed set of tasks. |
 
 Manifest tooling (`generate_manifest.py`, `validate_manifests.sh`) lives in the private research tier at `~/GIT/pow-research/pipeline/`.
 

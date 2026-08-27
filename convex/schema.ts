@@ -14,6 +14,12 @@ import {
   evidenceDraftStatus,
   exportBatchStatus,
   exportFormat,
+  historicalClaimConfidence,
+  historicalClaimContractVersion,
+  historicalClaimKind,
+  historicalClaimSourceBasis,
+  historicalClaimStatus,
+  historicalClaimTiming,
   identityDecision,
   licenceFlag,
   observationContractVersion,
@@ -180,6 +186,37 @@ export default defineSchema({
     .index("by_source_url", ["source_url_or_file"])
     .index("by_source_claim_key", ["source_claim_key"])
     .index("by_claim_hash", ["claim_hash"])
+    .index("by_intake_submission_key", ["intake_submission_key"]),
+
+  historical_claims: defineTable({
+    historical_claim_id: v.string(),
+    task_id: v.string(),
+    parent_evidence_draft_id: v.string(),
+    claim_status: historicalClaimStatus,
+    contract_version: historicalClaimContractVersion,
+    created_by: v.id("users"),
+    created_at: v.number(),
+    updated_at: v.number(),
+    claim_kind: historicalClaimKind,
+    claim_timing: historicalClaimTiming,
+    claim_text: v.string(),
+    earliest_supported_date: v.optional(v.string()),
+    latest_supported_date: v.optional(v.string()),
+    continues_through_observation: v.boolean(),
+    confidence: historicalClaimConfidence,
+    confidence_basis: v.string(),
+    source_basis: historicalClaimSourceBasis,
+    source_title: v.string(),
+    source_reference: v.optional(v.string()),
+    source_account: v.string(),
+    uncertainty_note: v.optional(v.string()),
+    privacy_flag: privacyFlag,
+    intake_submission_key: v.string(),
+  })
+    .index("by_historical_claim_id", ["historical_claim_id"])
+    .index("by_parent_evidence_draft_id", ["parent_evidence_draft_id"])
+    .index("by_task_and_created_at", ["task_id", "created_at"])
+    .index("by_task_creator_and_created_at", ["task_id", "created_by", "created_at"])
     .index("by_intake_submission_key", ["intake_submission_key"]),
 
   review_decisions: defineTable({
