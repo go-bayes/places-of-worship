@@ -1,6 +1,6 @@
 # Operational definition of a place of worship
 
-Current version: 0.1.0. Adopted: 2026-08-27. Status: adopted working operational definition. This undated page is the canonical entry point for the current definition. Each adopted revision must update this page and add an immutable dated snapshot under `docs/development/` so that studies can identify the exact rule they used.
+Current version: 0.1.0. Adopted: 2026-08-27. Status: adopted working operational definition. This undated page is the canonical entry point for the current definition. Each adopted revision must update this page and add an immutable dated snapshot under `docs/development/` so that studies can identify the exact rule they used. Dated definitions and discussion drafts remain complete after supersession.
 
 This version governs current measurement design, accepted site records, and longitudinal derivations until a later versioned decision changes it. It does not settle the site-category taxonomy, the target population for every study, or culturally specific access and publication decisions.
 

@@ -35,9 +35,7 @@ Building historical datasets fit for scientific inferences is remarkably difficu
 
 ## Who reads what
 
-Instructions are audience-addressed under [docs/people/](docs/people/):
-[research assistants](docs/people/ra/), [JW](docs/people/jw/), and
-[Guy](docs/people/guy/). The public/private rule lives there too.
+Instructions are audience-addressed under [docs/people/](docs/people/): [JB](docs/people/jb/), [research assistants](docs/people/ra/), [JW](docs/people/jw/), and [Guy](docs/people/guy/). The public/private rule lives there too.
 
 ## Ongoing Work
 
