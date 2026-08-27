@@ -4,7 +4,7 @@
 
 ### 2026-08-27
 
-- Adopted and synchronised a dated working operational definition of a place of worship: the time-indexed worship-function state at a reproducibly mappable site for which source evidence supports recurring religious worship by or for a community. The decision note records its conceptual lineage, the distinction between candidate evidence and accepted states, its consequences for OSM change measurement, and the boundary questions that remain open. The 2026-08-22 discussion draft now points readers to the adopted version. Files: `docs/development/place-of-worship-definition-2026-08-27.md`, `docs/development/place-of-worship-definition-2026-08-22.md`, `LEXICON.md`, `FAQ.md`, and `schemas/site.schema.json`.
+- Adopted and synchronised a working operational definition of a place of worship: the time-indexed worship-function state at a reproducibly mappable site for which source evidence supports recurring religious worship by or for a community. The stable `docs/operational-definition.md` entry point now presents the current rule, while dated snapshots preserve the exact definition used by earlier studies. The decision note records its conceptual lineage, the distinction between candidate evidence and accepted states, its consequences for OSM change measurement, and the boundary questions that remain open. The 2026-08-22 discussion draft now points readers to the adopted version. Files: `README.md`, `docs/operational-definition.md`, `docs/development/place-of-worship-definition-2026-08-27.md`, `docs/development/place-of-worship-definition-2026-08-22.md`, `LEXICON.md`, `FAQ.md`, `schemas/site.schema.json`, and `AGENTS.md`.
 
 ### 2026-08-26
 
