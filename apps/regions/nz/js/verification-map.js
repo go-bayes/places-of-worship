@@ -801,10 +801,38 @@ const SKIP_REASON_CHIPS = [
     { reason: "Looks like a duplicate", issueHint: true },
     { reason: "Data error on the map", issueHint: true },
 ];
-// pin-drop nominations: placements must be building-accurate, so the
-// confirm step gates on zoom, and nearby existing tasks are offered first
+// pin-drop nominations: rapid-current Vanuatu entry remains building-level;
+// ordinary nominations may instead preserve an explicitly approximate area
 const PIN_MIN_PLACEMENT_ZOOM = 15;
+const PIN_MIN_APPROXIMATE_ZOOM = 8;
 const PIN_PROXIMITY_METRES = 150;
+const LOCATION_MODE_OPTIONS = [
+    ["building_identified", "I identified the building"],
+    ["approximate_area", "I only know the approximate area"],
+];
+const LOCATION_RADIUS_OPTIONS = [
+    ["100", "Within about 100 m"],
+    ["250", "Within about 250 m"],
+    ["500", "Within about 500 m"],
+    ["1000", "Within about 1 km"],
+    ["2000", "Within about 2 km"],
+    ["5000", "Within about 5 km"],
+    ["10000", "Within about 10 km"],
+    ["25000", "Within about 25 km"],
+];
+const LOCATION_BASIS_OPTIONS = [
+    ["map_placement", "I identified it on the map"],
+    ["address_or_locality", "Address or named locality"],
+    ["named_source_description", "Named source description"],
+    ["local_investigator_account", "Local investigator account"],
+    ["other", "Other location evidence"],
+];
+const LOCATION_CONFIDENCE_OPTIONS = [
+    ["high", "High"],
+    ["moderate", "Moderate"],
+    ["low", "Low"],
+    ["uncertain", "Uncertain"],
+];
 // six-state validation ring for task markers and list rows, per
 // docs/portal-ra-issues-and-pin-drops.md. Status rides as a RING around the
 // religion-coloured (or context-grey) fill, so it never competes with the
@@ -1529,6 +1557,7 @@ function featureFromBackendTask(task) {
         osm_end_date: closureRaw,
         osm_lifecycle_date_notes: context.osm_date_tags_by_year || "",
         source_context: context,
+        initial_location_assertion: task.initial_location_assertion,
         ...backendTargetYearFields(context),
     };
     return {
@@ -1624,6 +1653,7 @@ class NzVerificationMap {
         // refresh cannot see the manual batch, so we re-merge these)
         this.pinMode = false;
         this.pinMarker = null;
+        this.pinUncertaintyCircle = null;
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
         this.pinSubmissionId = null;
@@ -2775,6 +2805,23 @@ class NzVerificationMap {
             props.street_view_url = streetViewUrlForCoordinates(coordinates) || props.street_view_url || "";
             const temporal = deriveTargetYearStatus(props, this.targetYear);
             const verifState = validationState(this.backendTasksById.get(props.task_id)?.status, temporal.status);
+            const locationAssertion = props.initial_location_assertion
+                || this.backendTasksById.get(props.task_id)?.initial_location_assertion;
+            if (
+                locationAssertion?.mode === "approximate_area"
+                && Number.isFinite(locationAssertion.uncertainty_radius_m)
+            ) {
+                const area = L.circle([lat, lng], {
+                    radius: locationAssertion.uncertainty_radius_m,
+                    color: "#a15c07",
+                    weight: 2,
+                    opacity: 0.85,
+                    fillColor: "#f4c46b",
+                    fillOpacity: 0.14,
+                    interactive: false,
+                });
+                this.markerLayer.addLayer(area);
+            }
             const marker = L.marker([lat, lng], {
                 icon: this.createIcon(props.verification_priority, temporal.status, verifState),
             });
@@ -3009,10 +3056,20 @@ class NzVerificationMap {
         this.selectedTask = feature;
         const props = feature.properties || {};
         const coordinates = feature.geometry?.coordinates || [];
+        const locationAssertion = props.initial_location_assertion
+            || this.backendTasksById.get(props.task_id)?.initial_location_assertion;
         const [lng, lat] = coordinates;
 
         if (!fromMarker && coordinates.length >= 2) {
-            this.map.setView([lat, lng], Math.max(this.map.getZoom(), 16));
+            if (
+                locationAssertion?.mode === "approximate_area"
+                && Number.isFinite(locationAssertion.uncertainty_radius_m)
+            ) {
+                const bounds = L.circle([lat, lng], { radius: locationAssertion.uncertainty_radius_m }).getBounds();
+                this.map.fitBounds(bounds, { padding: [30, 30], maxZoom: 14 });
+            } else {
+                this.map.setView([lat, lng], Math.max(this.map.getZoom(), 16));
+            }
             const marker = this.markersByTaskId.get(props.task_id);
             if (marker) {
                 marker.openPopup();
@@ -3613,6 +3670,9 @@ class NzVerificationMap {
     renderDetail(feature) {
         const props = { ...(feature.properties || {}) };
         const coordinates = feature.geometry?.coordinates || [];
+        const locationAssertion = props.initial_location_assertion
+            || this.backendTasksById.get(props.task_id)?.initial_location_assertion;
+        const locationIsApproximate = locationAssertion?.mode === "approximate_area";
         props.google_maps_url = mapUrlForCoordinates(coordinates) || props.google_maps_url || "";
         props.street_view_url = streetViewUrlForCoordinates(coordinates) || props.street_view_url || "";
         const checks = props.automated_checks || [];
@@ -3638,6 +3698,21 @@ class NzVerificationMap {
                 ${this.siteTaskBriefHtml(props)}
             </div>
 
+            ${locationAssertion ? `
+                <div class="detail-section">
+                    <h3>Location evidence</h3>
+                    <dl class="recorded-observation-grid">
+                        <dt>Representation</dt><dd>${escapeHtml(locationIsApproximate ? "Approximate area" : "Identified building")}</dd>
+                        ${locationIsApproximate ? `<dt>Uncertainty radius</dt><dd>${escapeHtml(`${locationAssertion.uncertainty_radius_m} m`)}</dd>` : ""}
+                        <dt>Basis</dt><dd>${escapeHtml(cap(String(locationAssertion.basis || "").replaceAll("_", " ")))}</dd>
+                        <dt>Confidence</dt><dd>${escapeHtml(cap(locationAssertion.confidence || ""))}</dd>
+                        ${locationAssertion.source_wording ? `<dt>Source wording</dt><dd>${escapeHtml(locationAssertion.source_wording)}</dd>` : ""}
+                        <dt>Human confirmation</dt><dd>${locationAssertion.contributor_confirmed ? "Confirmed by contributor" : "Not recorded"}</dd>
+                    </dl>
+                    ${locationIsApproximate ? `<div class="pilot-note">The marker is the centre of a supported area, not an accepted site point. The shaded radius and retained wording remain evidence for human review.</div>` : ""}
+                </div>
+            ` : ""}
+
             <div class="detail-section">
                 <h3>1. Open source links</h3>
                 <div class="copy-help">
@@ -3645,10 +3720,10 @@ class NzVerificationMap {
                 </div>
                 <div class="link-grid">
                     ${this.linkHtml("Street View", props.street_view_url, "source-link-primary")}
-                    ${this.linkHtml("Google Maps", props.google_maps_url, "source-link-primary")}
+                    ${this.linkHtml(locationIsApproximate ? "Approximate centre in Google Maps" : "Google Maps", props.google_maps_url, "source-link-primary")}
                     ${Number.isFinite(issueContext.latitude) && Number.isFinite(issueContext.longitude) ? `
                     ${this.linkHtml("Open OSM", osmPointUrl(issueContext.latitude, issueContext.longitude))}
-                    <button class="coord-copy" type="button" data-copy="${escapeHtml(`${issueContext.latitude.toFixed(5)},${issueContext.longitude.toFixed(5)}`)}">Copy coords</button>` : ""}
+                    <button class="coord-copy" type="button" data-copy="${escapeHtml(`${issueContext.latitude.toFixed(5)},${issueContext.longitude.toFixed(5)}`)}">${locationIsApproximate ? "Copy area centre" : "Copy coords"}</button>` : ""}
                     ${this.linkHtml("OSM object", props.osm_object_url)}
                     ${this.linkHtml("OSM history", props.osm_history_url)}
                     ${this.linkHtml("OSM map", props.osm_map_url)}
@@ -5661,8 +5736,9 @@ class NzVerificationMap {
     }
 
     // pin-drop nomination: the assignment-mode refit of the nomination
-    // panel. drop a draggable pin, confirm at building-accurate zoom, offer
-    // any existing task within 150 m first, then create the candidate task
+    // panel. ordinary nominations preserve either a confirmed building point
+    // or an approximate area; rapid Vanuatu nominations retain their stricter
+    // building-level contract
     // through tasks:createManualCandidateTask and land in its detail panel
     // assignment-mode nomination panel: a single one-line helper. the
     // actionable entry point is the header "Add a place" button; the
@@ -5677,7 +5753,7 @@ class NzVerificationMap {
         }
         return `
             <div class="copy-help">
-                Know a place of worship that is not on the map? Use <strong>Add a place that's missing</strong> at the top of this panel, drop a pin on the building, then describe how you know it. Local knowledge counts as evidence.
+                Know a place of worship that is not on the map? Use <strong>Add a place that's missing</strong>, then identify either the building or the approximate area supported by your evidence. Local knowledge counts as evidence.
             </div>
         `;
     }
@@ -5693,6 +5769,31 @@ class NzVerificationMap {
                 showCancel: true,
             })
             : `
+                <fieldset>
+                    <legend>Location evidence</legend>
+                    <label>
+                        How was the location established?
+                        <select id="pinLocationBasis">
+                            ${selectOptionsHtml(LOCATION_BASIS_OPTIONS, "map_placement")}
+                        </select>
+                    </label>
+                    <label>
+                        Location confidence
+                        <select id="pinLocationConfidence">
+                            ${selectOptionsHtml(LOCATION_CONFIDENCE_OPTIONS, "moderate")}
+                        </select>
+                    </label>
+                    <label id="pinLocationWordingField">
+                        What does the source or informant establish about the location? (optional for an identified building; required for an approximate area)
+                        <textarea id="pinLocationWording" rows="2" maxlength="2000" placeholder="Preserve the wording, for example: somewhere in the northern part of the settlement."></textarea>
+                    </label>
+                    <div class="copy-help">If the evidence gives only a distance from an anchor, such as “roughly two kilometres from the town centre”, without enough direction to locate an area, do not invent a centre. Retain it as unresolved location evidence until the relative-location contract is available.</div>
+                    <label class="checkbox-label">
+                        <input id="pinLocationConfirmed" type="checkbox">
+                        I confirm that this location description matches my evidence.
+                    </label>
+                    <div class="copy-help">This confirmation creates a provisional location claim for human review. It does not add a site to the public map.</div>
+                </fieldset>
                 <label>
                     Observed or source date (optional)
                     <input id="pinObservedDateInput" type="text" placeholder="e.g. 2026-07 or 'seen last month'">
@@ -5719,6 +5820,20 @@ class NzVerificationMap {
             <h2 class="pin-host-title">${RAPID_CURRENT_ENTRY ? "Nominate missing PoW" : "Add a place that's missing"}</h2>
             <div id="pinConfirmCard" class="pin-card" hidden>
                 <div class="pin-coords">Pin: <span id="pinLat"></span>, <span id="pinLng"></span></div>
+                ${RAPID_CURRENT_ENTRY ? "" : `
+                    <label>
+                        What does this pin represent?
+                        <select id="pinLocationMode">
+                            ${selectOptionsHtml(LOCATION_MODE_OPTIONS, "building_identified")}
+                        </select>
+                    </label>
+                    <label id="pinLocationRadiusField" hidden>
+                        Approximate area
+                        <select id="pinLocationRadius">
+                            ${selectOptionsHtml(LOCATION_RADIUS_OPTIONS, "500")}
+                        </select>
+                    </label>
+                `}
                 <div id="pinZoomGate" class="pin-zoom-gate">
                     Zoom in further to place the pin precisely — the recorded location must be building-accurate.
                 </div>
@@ -5758,6 +5873,8 @@ class NzVerificationMap {
         document.getElementById("pinCancelButton")?.addEventListener("click", () => this.exitPinMode());
         document.getElementById("pinFormCancelButton")?.addEventListener("click", () => this.exitPinMode());
         document.getElementById("pinSubmitButton")?.addEventListener("click", () => this.submitPinNomination());
+        document.getElementById("pinLocationMode")?.addEventListener("change", () => this.updatePinConfirmCard());
+        document.getElementById("pinLocationRadius")?.addEventListener("change", () => this.updatePinConfirmCard());
         if (RAPID_CURRENT_ENTRY) {
             ["pinNameInput", "pinAddressInput", "pinLocalityInput"].forEach(id => {
                 document.getElementById(id)?.addEventListener("input", () => this.markFormDirty("rapid-pin"));
@@ -5773,6 +5890,22 @@ class NzVerificationMap {
                         longitude: this.pinConfirmed.longitude,
                     };
                 },
+            });
+        } else {
+            [
+                "pinNameInput",
+                "pinAddressInput",
+                "pinLocalityInput",
+                "pinLocationBasis",
+                "pinLocationConfidence",
+                "pinLocationWording",
+                "pinLocationConfirmed",
+                "pinObservedDateInput",
+                "pinSourceNoteInput",
+                "pinChangeClassSelect",
+            ].forEach(id => {
+                document.getElementById(id)?.addEventListener("input", () => this.markFormDirty("location-pin"));
+                document.getElementById(id)?.addEventListener("change", () => this.markFormDirty("location-pin"));
             });
         }
         this.revealPinHost();
@@ -5822,9 +5955,40 @@ class NzVerificationMap {
         const card = document.getElementById("pinConfirmCard");
         if (card) card.hidden = false;
         const status = document.getElementById("pinStatus");
-        if (status) status.textContent = "Drag the pin onto the building, zoom in, then confirm the location.";
+        if (status) status.textContent = RAPID_CURRENT_ENTRY
+            ? "Drag the pin onto the building, zoom in, then confirm the location."
+            : "Choose what the pin represents, place it on the building or at the centre of the supported area, then confirm.";
         this.updatePinConfirmCard();
         this.revealPinHost();
+    }
+
+    pinLocationMode() {
+        return RAPID_CURRENT_ENTRY
+            ? "building_identified"
+            : (document.getElementById("pinLocationMode")?.value || "building_identified");
+    }
+
+    pinLocationRadius() {
+        if (this.pinLocationMode() !== "approximate_area") return undefined;
+        return Number(document.getElementById("pinLocationRadius")?.value || 500);
+    }
+
+    updatePinUncertaintyCircle(position) {
+        if (this.pinUncertaintyCircle) {
+            this.map.removeLayer(this.pinUncertaintyCircle);
+            this.pinUncertaintyCircle = null;
+        }
+        const radius = this.pinLocationRadius();
+        if (!position || !Number.isFinite(radius)) return;
+        this.pinUncertaintyCircle = L.circle(position, {
+            radius,
+            color: "#a15c07",
+            weight: 2,
+            opacity: 0.9,
+            fillColor: "#f4c46b",
+            fillOpacity: 0.18,
+            interactive: false,
+        }).addTo(this.map);
     }
 
     updatePinConfirmCard() {
@@ -5834,20 +5998,41 @@ class NzVerificationMap {
         const lngEl = document.getElementById("pinLng");
         if (latEl) latEl.textContent = position.lat.toFixed(5);
         if (lngEl) lngEl.textContent = position.lng.toFixed(5);
-        const zoomOk = this.map.getZoom() >= PIN_MIN_PLACEMENT_ZOOM;
+        const mode = this.pinLocationMode();
+        const requiredZoom = mode === "approximate_area" ? PIN_MIN_APPROXIMATE_ZOOM : PIN_MIN_PLACEMENT_ZOOM;
+        const zoomOk = this.map.getZoom() >= requiredZoom;
         const confirmButton = document.getElementById("pinConfirmButton");
         if (confirmButton) confirmButton.disabled = !zoomOk;
+        if (confirmButton) confirmButton.textContent = mode === "approximate_area"
+            ? "Confirm approximate area"
+            : "Confirm building location";
         const gate = document.getElementById("pinZoomGate");
-        if (gate) gate.hidden = zoomOk;
+        if (gate) {
+            gate.hidden = false;
+            gate.textContent = zoomOk
+                ? (mode === "approximate_area"
+                    ? "The shaded circle is an uncertainty area, not an accepted site boundary."
+                    : "The pin will be recorded as the building location you identified.")
+                : (mode === "approximate_area"
+                    ? "Zoom in far enough to place the centre of the supported area."
+                    : "Zoom in further — a building-level point requires building-level placement.");
+        }
+        const radiusField = document.getElementById("pinLocationRadiusField");
+        if (radiusField) radiusField.hidden = mode !== "approximate_area";
+        this.updatePinUncertaintyCircle(position);
     }
 
     confirmPinLocation() {
-        if (!this.pinMarker || this.map.getZoom() < PIN_MIN_PLACEMENT_ZOOM) return;
+        const mode = this.pinLocationMode();
+        const requiredZoom = mode === "approximate_area" ? PIN_MIN_APPROXIMATE_ZOOM : PIN_MIN_PLACEMENT_ZOOM;
+        if (!this.pinMarker || this.map.getZoom() < requiredZoom) return;
         const position = this.pinMarker.getLatLng();
         this.pinConfirmed = {
             latitude: position.lat,
             longitude: position.lng,
             zoom: this.map.getZoom(),
+            locationMode: mode,
+            uncertaintyRadiusM: this.pinLocationRadius(),
         };
         // the confirmed position is what gets recorded; freeze the pin
         this.pinMarker.dragging.disable();
@@ -5857,7 +6042,7 @@ class NzVerificationMap {
         }
         const confirmCard = document.getElementById("pinConfirmCard");
         if (confirmCard) confirmCard.hidden = true;
-        const nearby = this.nearbyTaskRows(position);
+        const nearby = this.nearbyTaskRows(position, this.pinConfirmed.uncertaintyRadiusM);
         this.pinNearbyCount = nearby.length;
         if (nearby.length) {
             this.showPinProximity(nearby);
@@ -5867,14 +6052,15 @@ class NzVerificationMap {
     }
 
     // existing task markers within the proximity radius, nearest first
-    nearbyTaskRows(position) {
+    nearbyTaskRows(position, uncertaintyRadiusM) {
         const pin = L.latLng(position.lat, position.lng);
+        const proximityMetres = Math.max(PIN_PROXIMITY_METRES, Number(uncertaintyRadiusM) || 0);
         return this.tasks
             .map(feature => {
                 const coords = feature.geometry?.coordinates || [];
                 if (coords.length < 2) return null;
                 const distance = pin.distanceTo(L.latLng(coords[1], coords[0]));
-                if (distance > PIN_PROXIMITY_METRES) return null;
+                if (distance > proximityMetres) return null;
                 const props = feature.properties || {};
                 const backendStatus = this.backendTasksById.get(props.task_id)?.status || "not started";
                 return {
@@ -5891,12 +6077,14 @@ class NzVerificationMap {
     showPinProximity(rows) {
         const card = document.getElementById("pinProximityCard");
         if (!card) return;
+        const shownRows = rows.slice(0, 20);
         card.hidden = false;
         card.innerHTML = `
             <div class="copy-help">
-                Existing tasks near your pin — is one of these the same place?
+                Existing tasks in or near the supported location — is one of these the same place?
             </div>
-            ${rows.map(row => `
+            ${rows.length > shownRows.length ? `<div class="pilot-note">Showing the nearest ${shownRows.length} of ${rows.length} tasks in this broad area. A reviewer must still assess duplicate risk.</div>` : ""}
+            ${shownRows.map(row => `
                 <div class="pin-nearby-row">
                     <span>${escapeHtml(row.name)} — ${row.distance} m, ${escapeHtml(row.status)}</span>
                     <button type="button" class="tertiary pin-nearby-open" data-task-id="${escapeHtml(row.taskId)}">This is it — open that task instead</button>
@@ -5929,6 +6117,19 @@ class NzVerificationMap {
         document.getElementById("pinNameInput")?.focus({ preventScroll: true });
     }
 
+    locationAssertionValues() {
+        return {
+            mode: this.pinConfirmed?.locationMode || "building_identified",
+            basis: document.getElementById("pinLocationBasis")?.value || "map_placement",
+            latitude: this.pinConfirmed?.latitude,
+            longitude: this.pinConfirmed?.longitude,
+            uncertaintyRadiusM: this.pinConfirmed?.uncertaintyRadiusM,
+            sourceWording: document.getElementById("pinLocationWording")?.value || "",
+            confidence: document.getElementById("pinLocationConfidence")?.value || "moderate",
+            contributorConfirmed: document.getElementById("pinLocationConfirmed")?.checked === true,
+        };
+    }
+
     async submitPinNomination() {
         const status = document.getElementById("pinStatus");
         if (!this.pinConfirmed) {
@@ -5939,6 +6140,17 @@ class NzVerificationMap {
             if (status) status.textContent = "Sign in to the shared backend before nominating a place.";
             return;
         }
+        if (!window.PowLocationAssertion) {
+            if (status) status.textContent = "The location contract did not load. Reload the portal before submitting.";
+            return;
+        }
+        const locationValues = this.locationAssertionValues();
+        const locationError = window.PowLocationAssertion.validate(locationValues);
+        if (locationError) {
+            if (status) status.textContent = locationError;
+            return;
+        }
+        const locationAssertion = window.PowLocationAssertion.payload(locationValues);
         const name = (document.getElementById("pinNameInput")?.value || "").trim() || "Unknown place of worship";
         const address = (document.getElementById("pinAddressInput")?.value || "").trim();
         const locality = (document.getElementById("pinLocalityInput")?.value || "").trim();
@@ -5962,6 +6174,7 @@ class NzVerificationMap {
                 longitude: this.pinConfirmed.longitude,
                 targetYears: COUNTRY_CONFIG.targetYears.map(Number),
                 sourceNote,
+                locationAssertion,
                 clientContext: {
                     source: "portal_pin_drop",
                     country_code: COUNTRY_CONFIG.countryCode,
@@ -5969,6 +6182,8 @@ class NzVerificationMap {
                     placement_zoom: this.pinConfirmed.zoom,
                     proximity_checked: true,
                     nearby_count: this.pinNearbyCount,
+                    location_assertion_contract: "location_assertion_v1",
+                    location_mode: locationAssertion.mode,
                 },
             });
             // synthesise the backend-task shape locally so the detail panel
@@ -5989,6 +6204,7 @@ class NzVerificationMap {
                     type: "Point",
                     coordinates: [this.pinConfirmed.longitude, this.pinConfirmed.latitude],
                 },
+                initial_location_assertion: locationAssertion,
                 automated_checks: [{
                     check_id: "user_nomination",
                     severity: "info",
@@ -6026,7 +6242,7 @@ class NzVerificationMap {
     }
 
     exitPinMode() {
-        if (this.formDirtyTaskId === "rapid-pin") {
+        if (this.formDirtyTaskId === "rapid-pin" || this.formDirtyTaskId === "location-pin") {
             this.clearFormDirty();
         }
         this.pinMode = false;
@@ -6048,6 +6264,10 @@ class NzVerificationMap {
         if (this.pinMarker) {
             this.map.removeLayer(this.pinMarker);
             this.pinMarker = null;
+        }
+        if (this.pinUncertaintyCircle) {
+            this.map.removeLayer(this.pinUncertaintyCircle);
+            this.pinUncertaintyCircle = null;
         }
         this.map?.getContainer().classList.remove("pin-placement");
         // tear down the transient cards entirely so the host leaves no

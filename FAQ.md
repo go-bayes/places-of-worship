@@ -77,6 +77,10 @@ status where known, any relevant OSM object ids, and review notes.
 
 The Vanuatu rapid-entry path implements this nomination as an atomic review submission: it creates the provisional candidate and submitted evidence together, then places the task in the human review queue. It requires a building-accurate point, a nearby-place check, an exact observation date, an evidence basis, one of four explicit current-status claims, and a sensitivity setting. It does not create an accepted site or change the public map.
 
+The ordinary country nomination path may instead preserve an approximate area when the contributor cannot identify a building. The contributor places the centre of the supported area, records an uncertainty radius, retains what the source or informant says about the location, states the basis and confidence, and confirms that this description matches the evidence. The centre is not treated as an accepted site point. Review must establish or retain the appropriate location representation before export can affect accepted data.
+
+A statement such as “roughly two kilometres from the town centre” supports a relative distance but, without a direction, does not support a single approximate-area centre. The contributor should retain that wording as unresolved location evidence rather than invent a point. A later relative-location contract will represent distance bounds, the named anchor, and direction when supported; the roadmap keeps that increment explicit.
+
 A reviewer can then reject it, link it to an existing site, request more
 evidence, or accept it as a new project site. Acceptance mints or assigns a
 durable internal `site_id`; it does not write directly from the suggestion into
@@ -338,6 +342,10 @@ project-team site visits.
 Record the provider, link or agreed reference, capture or visit date, and a short site-level visual claim. Do not store screenshots, photos, videos, private conversations, or personal contact details in Git or public outputs.
 
 The planned field-observation pilot keeps project-captured images internal by design. Restricted object storage will retain the original timestamp and location evidence; Convex will hold only guided text, workflow state, and opaque references. The pilot will have no public media derivative or public image endpoint. See `docs/field-observation-packet-spec.md`.
+
+## If the portal accepts a PNG, PDF, spreadsheet, or another file, can that file become public?
+
+No. Every permitted upload type must enter private project-controlled quarantine and remain private. This rule applies to images, HEIC or JPEG originals, PNG files, PDFs, spreadsheets, CSV or GeoJSON files, and any later allowlisted format. Convex may retain only an opaque reference and workflow state. The file bytes, original filename, full metadata, restricted coordinates, and durable access URLs remain outside Convex and public exports. A future decision to publish a derivative would require separate approval, rights and privacy review, a defined public product, and a new export contract. Routine visibility settings cannot authorise publication.
 
 ## How should I record a denomination or tradition?
 

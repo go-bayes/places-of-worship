@@ -238,6 +238,7 @@ Evidence And Governance:
   over one task store, so later New Zealand batches, Vanuatu tasks, and
   missing-site nominations can merge without reconciling separate worksheets.
 - `[~]` Reusable `Nominate missing PoW` flow: the Vanuatu rapid-current path now creates a provisional candidate and its first submitted observation atomically in Convex, with detailed New Zealand and later public-country reuse still to complete.
+- `[~]` Contributor-confirmed location assertions for ordinary nominations: the shared country portal now distinguishes an identified building point from an approximate-area centre with a retained uncertainty radius, source wording, basis, and confidence. Relative-distance and locality-only representations remain later contract increments; the Vanuatu rapid-current path retains its building-level requirement.
 - `[~]` Implement the task/event/evidence/review/export contract in
   `docs/convex-task-layer-spec.md`.
 - `[ ]` Weekly or reviewer-triggered export from Convex task status into `pow`
@@ -249,8 +250,7 @@ Evidence And Governance:
   heavy geospatial checks, or durable staging need a separate service.
 - `[ ]` Staged submissions in Cloud SQL/PostgreSQL/PostGIS or a compatible
   provider-neutral schema if Convex is not sufficient for canonical staging.
-- `[ ]` Raw submissions and media in quarantined object storage before any
-  internal review; field-observation media remain absent from public products.
+- `[ ]` Raw submissions and every permitted upload type in private project-controlled quarantine before any internal review. Images, HEIC or JPEG originals, PNG files, PDFs, spreadsheets, CSV or GeoJSON files, and later allowlisted formats remain private; file bytes and durable access URLs stay outside Convex and public products.
 - `[~]` Guided observation intake that keeps direct observation, interpretation, uncertainty, and exact denomination or tradition labels distinct before review.
 - `[~]` Security-first Vanuatu rapid-current entry that distinguishes physical existence from worship use at an exact observation date, leaves historical target years unassessed, and applies authenticated roles, server-derived classifications, idempotency, country bounds, field limits, transactional rate limits, append-only events, and human review.
 - `[ ]` Count rapid corrections in `reviews:feedbackLoopMetrics`: a corrected Vanuatu rapid observation moves `changes_requested → needs_review` directly and records `corrects_evidence_draft_id` on its `submitted_for_review` event, but the metric keys only on the `changes_requested → in_progress` `draft_saved` event, so rapid corrections are audited yet uncounted.

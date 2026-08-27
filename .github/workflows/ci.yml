@@ -31,6 +31,7 @@ jobs:
         run: |
           node apps/regions/nz/js/claude-review-panel.test.cjs
           node apps/regions/nz/js/historical-claim-contract.test.cjs
+          node apps/regions/nz/js/location-assertion-contract.test.cjs
           node apps/regions/nz/js/rapid-entry-contract.test.cjs
       - uses: astral-sh/setup-uv@v5
       - name: validate area summaries

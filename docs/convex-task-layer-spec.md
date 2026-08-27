@@ -359,7 +359,7 @@ The flow should:
    evidence note, and target-year status where known,
 4. show nearby existing sites before submission so the user can flag a possible
    match, duplicate, shared building, successor site, or unrelated candidate,
-5. call `rapidEntry:submitVanuatuCurrentObservation` for the Vanuatu rapid path, or `tasks:createManualCandidateTask` for the detailed generic path, to create a provisional `candidate_site_id` and ordinary review task,
+5. call `rapidEntry:submitVanuatuCurrentObservation` for the Vanuatu rapid path, or `tasks:createManualCandidateTask` for the detailed generic path, to create a provisional `candidate_site_id` and ordinary review task; the generic path may include a contributor-confirmed `location_assertion_v1` that distinguishes an identified building point from the centre of an approximate area and retains the radius, location basis, confidence, and source wording,
 6. create submitted evidence in the same Vanuatu rapid-entry transaction, or reopen the standard evidence form for a detailed candidate, so validation, review, and export use the same shared tables, and
 7. keep all country-specific target years, date bounds, map defaults, and
    nomination options in `country_configs` rather than hard-coding New Zealand
@@ -724,7 +724,7 @@ Minimum controls before real RA use:
 - no direct master writes,
 - public map products consume reviewed exports only.
 
-Do not use Convex file storage for field-observation media. Images are internal evidence by design and belong in restricted project-controlled object storage under `docs/field-observation-packet-spec.md`; Convex may hold only opaque references, guided text, workflow state, and review events.
+Do not use Convex file storage for portal uploads. Every permitted image, PDF, spreadsheet, CSV, GeoJSON, or later allowlisted file is private evidence or a private source object and belongs in restricted project-controlled quarantine under `docs/field-observation-packet-spec.md` and `docs/portal-media-and-provider-evaluation-plan.md`; Convex may hold only opaque references, guided text, workflow state, and review events. Permitting a file type never authorises a public bucket, public derivative, durable public URL, or public export field.
 
 Rate limiting:
 For the first invite-only pilot, rely on authentication, role checks, short

@@ -85,7 +85,7 @@ and export bundles. Accepted changes become research data only after export,
 | `reopenTask` | mutation | `reviewer`, `curator`, `admin` | Reopen a task after review or correction. | `tasks`, `task_events` |
 | `addTaskNote` | mutation | `ra`, `reviewer`, `curator`, `admin` | Add a size-limited note to the task history without changing the data contract. | `task_events` |
 | `createIssueTask` | mutation | `ra`, `reviewer`, `curator`, `admin` | Create an issue-report task (possible duplicate, verify existing site, geometry check, OSM identity link, or other) from RA map inspection, in the per-country `ra-issues-<cc>` batch. An open issue task for the same matched site or OSM id is deduplicated: the note is appended to it instead. | `task_batches`, `tasks`, `task_events` |
-| `createManualCandidateTask` | mutation | `ra`, `reviewer`, `curator`, `admin` | Create a provisional candidate task for a nominated missing place of worship. | `tasks`, `task_events` |
+| `createManualCandidateTask` | mutation | `ra`, `reviewer`, `curator`, `admin` | Create a provisional candidate task for a nominated missing place of worship. An optional `location_assertion_v1` records a contributor-confirmed building point or approximate-area centre, including the uncertainty radius, basis, confidence, and retained location wording. | `tasks`, `task_events` |
 
 Target-year defaults: when a caller omits `targetYears`,
 `createManualCandidateTask` resolves the country's shipped census waves

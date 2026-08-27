@@ -370,6 +370,7 @@
         const draft = currentDraft();
         const review = currentReview();
         const agentReview = row.latestAgentReview || null;
+        const locationAssertion = task.initial_location_assertion || null;
         const coordinates = Array.isArray(task.geometry?.coordinates)
             ? `${task.geometry.coordinates[1]}, ${task.geometry.coordinates[0]}`
             : "";
@@ -402,7 +403,14 @@
                         ["OSM object type", task.osm_object_type],
                         ["Address", task.address],
                         ["Locality", task.locality],
-                        ["Coordinates", coordinates],
+                        [locationAssertion?.mode === "approximate_area" ? "Approximate-area centre" : "Coordinates", coordinates],
+                        ["Location contract", locationAssertion?.contract_version],
+                        ["Location representation", locationAssertion ? human(locationAssertion.mode) : undefined],
+                        ["Location basis", locationAssertion ? human(locationAssertion.basis) : undefined],
+                        ["Uncertainty radius", locationAssertion?.uncertainty_radius_m !== undefined ? `${locationAssertion.uncertainty_radius_m} m` : undefined],
+                        ["Location confidence", locationAssertion?.confidence],
+                        ["Contributor confirmed", locationAssertion?.contributor_confirmed ? "yes" : undefined],
+                        ["Retained location wording", locationAssertion?.source_wording],
                     ])}
                 </section>
 
