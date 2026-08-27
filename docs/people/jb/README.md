@@ -1,6 +1,6 @@
 # Instructions for JB — project lead and reviewer
 
-This page records JB's public project role and stable entry points. Current assignments and individual progress belong in the private `pow-research` task index rather than this public repository.
+This page records JB's public project role and stable entry points. The private `pow-research` task index holds current assignments and individual progress.
 
 ## Start here
 
@@ -20,4 +20,4 @@ This page records JB's public project role and stable entry points. Current assi
 
 ## Current assignments
 
-JB's current task list is maintained in the private research tier because person-specific assignment status is not public project documentation. Decisions that change public methods, schemas, interfaces, or release behaviour remain recorded in this repository.
+The private research tier maintains JB's current task list and person-specific assignment status. This public repository records decisions that change public methods, schemas, interfaces, or release behaviour.
