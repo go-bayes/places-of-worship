@@ -19,6 +19,7 @@ import type * as lib_countryYears from "../lib/countryYears.js";
 import type * as lib_exportEligibility from "../lib/exportEligibility.js";
 import type * as lib_historicalClaims from "../lib/historicalClaims.js";
 import type * as lib_limits from "../lib/limits.js";
+import type * as lib_locationAssertions from "../lib/locationAssertions.js";
 import type * as lib_rapidEntry from "../lib/rapidEntry.js";
 import type * as lib_rateLimits from "../lib/rateLimits.js";
 import type * as lib_sensitivity from "../lib/sensitivity.js";
@@ -51,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   "lib/exportEligibility": typeof lib_exportEligibility;
   "lib/historicalClaims": typeof lib_historicalClaims;
   "lib/limits": typeof lib_limits;
+  "lib/locationAssertions": typeof lib_locationAssertions;
   "lib/rapidEntry": typeof lib_rapidEntry;
   "lib/rateLimits": typeof lib_rateLimits;
   "lib/sensitivity": typeof lib_sensitivity;
