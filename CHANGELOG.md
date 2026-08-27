@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-08-27
+
+- Adopted and synchronised a working operational definition of a place of worship: the time-indexed worship-function state at a reproducibly mappable site for which source evidence supports recurring religious worship by or for a community. The stable `docs/operational-definition.md` entry point now presents the current rule, while dated snapshots preserve the exact definition used by earlier studies. The decision note records its conceptual lineage, the distinction between candidate evidence and accepted states, its consequences for OSM change measurement, and the boundary questions that remain open. The 2026-08-22 discussion draft now points readers to the adopted version. Files: `README.md`, `docs/operational-definition.md`, `docs/development/place-of-worship-definition-2026-08-27.md`, `docs/development/place-of-worship-definition-2026-08-22.md`, `LEXICON.md`, `FAQ.md`, `schemas/site.schema.json`, and `AGENTS.md`.
+
 ### 2026-08-26
 
 - Approved a staged provider-neutral AI-assisted review pilot. The first capped development run is scheduled for 2026-08-27 on three to five non-sensitive claims, followed by comparison with independent human decisions before any routine use. Recommendations remain append-only and advisory; the human decision gate, sensitivity exclusions, manual trigger, run cap, and pause control remain in force, and automatic scheduling remains disabled. Files: `ROADMAP.md`, `docs/portal-claude-batch-review.md`, `docs/playbooks/session-batch-review.md`.

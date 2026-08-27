@@ -25,6 +25,7 @@ Building historical datasets fit for scientific inferences is remarkably difficu
 - [United States regional map](https://religionmap.org/apps/regions/us/)
 - [Vanuatu regional map](https://religionmap.org/apps/regions/vu/)
 - [Roadmap](ROADMAP.md)
+- [Operational definition of a place of worship](docs/operational-definition.md)
 - [System map](docs/system-map.md)
 - [FAQ](FAQ.md)
 - [Lexicon](LEXICON.md)
