@@ -3044,7 +3044,10 @@ class NzVerificationMap {
         if (!panel) return;
         panel.scrollTop = 0;
         panel.focus({ preventScroll: true });
-        panel.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        // "start" rather than "nearest": when the sidebar is the scroll
+        // container (desktop, and phone assignment mode) "nearest" leaves the
+        // panel bottom-aligned with only its heading visible
+        panel.scrollIntoView({ block: "start", behavior: "smooth" });
     }
 
     renderInitialDetail() {

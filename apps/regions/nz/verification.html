@@ -1539,9 +1539,18 @@
             }
 
             body.assignment-mode .sidebar {
+                /* block flow, as on desktop: the whole sidebar scrolls and the
+                   detail panel is not squeezed into a 28px internal scroller
+                   beneath the task list */
                 grid-row: 1;
+                display: block;
                 min-height: 0;
                 overflow-y: auto;
+            }
+
+            body.assignment-mode .detail-panel {
+                flex: none;
+                overflow: visible;
             }
 
             body.assignment-mode #map {
@@ -1674,6 +1683,6 @@
     <script src="js/convex-config.js?v=20260707-changes-requested"></script>
     <script src="js/convex-task-client.js?v=20260826a"></script>
     <script src="js/rapid-entry-contract.js?v=20260826a"></script>
-  <script src="js/verification-map.js?v=20260827b"></script>
+  <script src="js/verification-map.js?v=20260827c"></script>
 </body>
 </html>
