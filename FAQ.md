@@ -24,6 +24,14 @@ Vanuatu is the next country case. Its rapid-entry path lets an invited RA pin a 
 
 No. Physical existence and worship function are separate observations. The rapid Vanuatu form therefore asks the RA to choose among four claims at an exact observation date: the site is used for worship; the place exists but worship use is uncertain; the place exists but is not used for worship; or its status could not be determined. Here, “current” means at that recorded date, not a timeless property. The server preserves the explicit answer and derives provisional review fields from it. It does not infer worship from a building, nor use a present observation to fill a historical target year.
 
+## How should an RA record known history?
+
+Submit the rapid observation or guided evidence first, then choose `Add known history`. All configured country verification portals offer the same action through the shared New Zealand portal. Record one historical event or state at a time. Keep structure history, worship-function history, denomination or affiliation, leadership, and shared or concurrent use as separate claims because evidence for one does not establish the others.
+
+For each claim, retain the source wording or a short confirmed dictated account. Enter the earliest and latest dates only when the source supports those bounds, using `YYYY`, `YYYY-MM`, or `YYYY-MM-DD`. If a source says only “during the war”, retain those words and explain that the war or calendar bounds remain unresolved. Do not translate the phrase into years without additional evidence. An ongoing state may be marked open through the parent evidence date, or through the claim-recording date when the parent evidence has no date. An event cannot remain open.
+
+Each historical claim enters human review as provisional evidence. It does not change the current observation, fill a target-year state, become an accepted event, or update the master or public map. The first version stores confirmed text only: an RA may use device dictation, but the portal retains no audio and performs no AI extraction.
+
 ## What is the unit of analysis?
 
 The scientific object is the worship-function state at a mappable site at a specified time. The `site_id` identifies the physical place; buildings, organisations, congregations, source records, and observations are distinct objects linked to it.

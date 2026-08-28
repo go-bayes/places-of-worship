@@ -17,6 +17,7 @@ FILE_KEYS = {
     "tasks_jsonl": "tasks.jsonl",
     "task_events_jsonl": "task_events.jsonl",
     "evidence_drafts_jsonl": "evidence_drafts.jsonl",
+    "historical_claims_jsonl": "historical_claims.jsonl",
     "review_decisions_jsonl": "review_decisions.jsonl",
     "site_evidence_wide_csv": "site_evidence_wide.csv",
 }

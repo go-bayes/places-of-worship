@@ -13,4 +13,14 @@ export const intakeRateLimiter = new RateLimiter(components.rateLimiter, {
     rate: 500,
     period: HOUR,
   },
+  historicalClaimPerUser: {
+    kind: "fixed window",
+    rate: 240,
+    period: HOUR,
+  },
+  historicalClaimGlobal: {
+    kind: "fixed window",
+    rate: 1_000,
+    period: HOUR,
+  },
 });

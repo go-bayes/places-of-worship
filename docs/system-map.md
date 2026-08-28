@@ -15,9 +15,9 @@ flowchart LR
   B --> C["Temporal Leads<br/>date tags, year differences,<br/>curated places to check"]
   C --> D["Shared Task List<br/>Convex assignments, status,<br/>workpacks and nominations"]
   U["Nominate Missing PoW<br/>provisional candidate task<br/>not an add-to-map action"] --> D
-  D --> E["Evidence Intake<br/>drafts, source notes,<br/>target-year and lifecycle claims"]
+  D --> E["Evidence Intake<br/>drafts, source notes,<br/>target-year and historical claims"]
   E --> R["Authenticated Review Portal<br/>inspect evidence, decide,<br/>return status to task list"]
-  R --> X["Reviewed Export Bundle<br/>tasks, events, evidence drafts,<br/>review decisions, CSV/JSONL"]
+  R --> X["Reviewed Export Bundle<br/>tasks, events, evidence drafts,<br/>historical claims and decisions"]
   X --> F["Validation And Diff<br/>pow validate/stage/propose/diff"]
   F --> G["Master Reconstruction<br/>accepted events, replay,<br/>site states by date"]
   G --> H["Research Outputs<br/>maps, downloads, density tables,<br/>R workflows"]
@@ -38,7 +38,7 @@ flowchart LR
 | Extraction And Cleaning | Deterministic R scripts, current/global extraction rules, obvious false-positive removal, cleaned intermediate outputs. | RA assignments or final historical truth. | Cleaned datasets and generated places-to-check files. |
 | Temporal Leads | OSM date-tag leads, OSM year-difference leads, candidate gain/loss windows, small RA workpacks. | Acceptance decisions or public map layers. | Curated workpack CSV/Sheet rows with one narrow evidence question per row. |
 | Shared Task List | Who is working on what, task status, provisional closure, assignments, nominations, spreadsheet-submitted leads, and shared task history. | Accepted research data or master writes. | Convex task state; Sheets only as fallback/debug export or import adapter. |
-| Evidence Intake | RA evidence drafts, source notes, target-year statuses, uncertainty, lifecycle claims, candidate identifiers. | Final acceptance decisions. | Evidence drafts and exported CSV/JSONL that can be validated and staged. |
+| Evidence Intake | RA evidence drafts, source notes, target-year statuses, uncertainty, separate historical claims, and candidate identifiers. | Final acceptance decisions. | Evidence drafts and exported CSV/JSONL that can be validated and staged. |
 | Authenticated Review Portal | Reviewer queues, evidence inspection, accept/reject/defer/revise decisions, and RA-visible next actions. | Master writes or public map updates. | Review decisions and task-state updates in Convex. |
 | Reviewed Export Bundle | Frozen task, event, evidence, and decision files for governed handoff. | Research estimates or public map layers. | Manifested CSV/JSONL bundle for `pow`. |
 | Validation And Diff | `pow` validation, staging, proposal generation, reviewer diff reports, and replay checks. | Public research products or live task assignment. | Accepted, rejected, deferred, or revised events with rationale and hashes. |
@@ -55,7 +55,7 @@ The immediate New Zealand pilot has five stages spanning six modules:
    tags and year-difference leads.
 2. **Shared Task List**: assign that work through Convex, with the Sheet path
    retained only as fallback/debug export.
-3. **Evidence Intake**: record source-backed target-year evidence, useful lifecycle dates, exact denomination or tradition labels, and guided direct observation, interpretation, and uncertainty.
+3. **Evidence Intake**: record source-backed target-year evidence, separate historical events or states, exact denomination or tradition labels, and guided direct observation, interpretation, and uncertainty.
 4. **Authenticated Review Portal**: let JB/JW inspect submitted evidence and
    record decisions that update the task list.
 5. **Reviewed Export Bundle** and **Validation And Diff**: freeze accepted

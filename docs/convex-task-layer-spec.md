@@ -461,6 +461,37 @@ Indexes:
 - `by_task_creator_status`
 - `by_source_url`
 
+### `historical_claims`
+
+Repeatable provisional history attached to submitted rapid or guided evidence from any country task. Each row records one scientific claim so structure history, worship function, denomination or affiliation, leadership, and shared or concurrent use are not collapsed into one lifecycle note.
+
+Fields:
+
+- `historical_claim_id`, `task_id`, and `parent_evidence_draft_id`.
+- `claim_status`: `submitted`, `superseded`, or `withdrawn`.
+- `contract_version`: `historical_claim_v1`.
+- `created_by`, `created_at`, and `updated_at`.
+- `claim_kind`: `structure`, `worship_function`, `denomination_or_affiliation`, `leadership`, `shared_use`, or `other`.
+- `claim_timing`: `event` or `state`.
+- `claim_text`: the event or state the source supports.
+- `reference_date` and `reference_date_basis`: the parent evidence date when one is available, otherwise the claim-recording date.
+- `earliest_supported_date` and `latest_supported_date`: optional `YYYY`, `YYYY-MM`, or `YYYY-MM-DD` bounds from 1600 onward.
+- `continues_through_observation`: permitted only for a state with no latest supported date.
+- `confidence` and `confidence_basis`.
+- `source_basis`, `source_title`, optional `source_reference`, and `source_account`; `source_account` retains the source wording or the RA's confirmed dictated text.
+- `uncertainty_note`: required when both date bounds are blank.
+- `privacy_flag` and user-scoped `intake_submission_key`.
+
+The dedicated mutation validates the claim against the evidence reference date and writes an append-only task note event. It does not infer a historical date, derive a target-year state, alter the parent evidence, or create an accepted change event. Claims remain distinct reviewer evidence and are exported as `historical_claims.jsonl` for governed follow-up.
+
+Indexes:
+
+- `by_historical_claim_id`
+- `by_parent_evidence_draft_id`
+- `by_task_and_created_at`
+- `by_task_creator_and_created_at`
+- `by_intake_submission_key`
+
 ### `review_decisions`
 
 Reviewer outcome for a submitted evidence draft or task.
@@ -526,6 +557,7 @@ external side effects such as exports or calls to validation services.
   draft and review information.
 - `listReviewQueue(filters)`: reviewer work queue.
 - `getEvidenceDraft(draftId)`: one evidence draft.
+- `listTaskHistoricalClaims(taskId)`: bounded historical claims available to the author or a reviewer.
 - `listExportBatches(filters)`: reviewer download history.
 
 ### Mutations
@@ -534,6 +566,7 @@ external side effects such as exports or calls to validation services.
 - `releaseTask(taskId)`.
 - `saveEvidenceDraft(taskId, draft)`.
 - `submitEvidenceDraft(draftId)`.
+- `submitHistoricalClaim(taskId, parentEvidenceDraftId, claim)`.
 - `skipTask(taskId, reason)`.
 - `markProvisionallyClosed(taskId, evidenceDraftId)`.
 - `addTaskNote(taskId, note)`.
@@ -634,6 +667,7 @@ The first export file set should include:
 - `tasks.jsonl`,
 - `task_events.jsonl`,
 - `evidence_drafts.jsonl`,
+- `historical_claims.jsonl`,
 - `review_decisions.jsonl`,
 - `site_evidence_wide.csv` where possible.
 
@@ -647,6 +681,7 @@ The manifest should include:
 - `schema_version`,
 - `included_task_count`,
 - `included_evidence_count`,
+- `included_historical_claim_count`,
 - `included_review_decision_count`,
 - output filenames,
 - SHA-256 hashes,
@@ -737,8 +772,7 @@ Phase 3: Review and export
 
 - Reviewers make decisions in the task workbench.
 - A person with export permission freezes the reviewed file set.
-- Convex returns a file bundle with tasks, task events, evidence drafts, review
-  decisions, and `site_evidence_wide.csv`.
+- Convex returns a file bundle with tasks, task events, evidence drafts, historical claims, review decisions, and `site_evidence_wide.csv`.
 - A local materialiser writes the bundle to ignored export files, adds
   SHA-256 hashes, and produces a manifest for `pow`.
 - The exported file set is validated by `pow`.
@@ -754,14 +788,14 @@ Phase 4: Remove Sheet as default
 
 The first implementation scaffold lives in `convex/`:
 
-- `schema.ts`: users, task batches, tasks, task events, evidence drafts, review
-  decisions, and export batches.
+- `schema.ts`: users, task batches, tasks, task events, evidence drafts, historical claims, review decisions, and export batches.
 - `users.ts`: first-admin bootstrap, invite creation, invite claiming, and
   user lookup.
 - `tasks.ts`: static task import, task claiming, skipping, provisional closure,
   reopening, notes, and manual candidate task creation for places not on OSM or
   not on the project map.
 - `evidence.ts`: evidence draft save and submit mutations.
+- `historicalClaims.ts`: repeatable provisional history linked to a rapid current observation.
 - `reviews.ts`: reviewer queue and review-decision mutations.
 - `exports.ts`: reviewer export batch creation, freezing, and file-set retrieval.
 
@@ -783,13 +817,7 @@ disabled for the RA. The bridge is disabled by default until the hosted
 deployment URL and Google client id are configured. The scaffold still has no
 master-write path.
 
-The first export bundle path is now available through
-`exports:getExportBundle`. It returns raw task/review documents plus a file
-block for `export_manifest.json`, JSONL artefacts, and
-`site_evidence_wide.csv`. The local materialiser
-`scripts/materialise_convex_export.py` writes those files and hash manifests so
-the curator can run the first Convex-to-`pow` round trip without treating
-Convex as the master.
+The first export bundle path is now available through `exports:getExportBundle`. It returns raw task/review documents plus a file block for `export_manifest.json`, JSONL artefacts including `historical_claims.jsonl`, and `site_evidence_wide.csv`. The local materialiser `scripts/materialise_convex_export.py` writes those files and hash manifests so the curator can run the first Convex-to-`pow` round trip without treating Convex as the master.
 
 ## Definition Of Done For The First Spike
 

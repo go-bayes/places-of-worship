@@ -37,6 +37,7 @@
         queue: [],
         selected: null,
         drafts: [],
+        historicalClaims: [],
         events: [],
         busy: false,
         // explicit reviewer stance on the AI recommendation, set by the
@@ -326,16 +327,19 @@
         if (!row) return;
         state.selected = row;
         state.drafts = [];
+        state.historicalClaims = [];
         state.events = [];
         state.agentAgreementChoice = null;
         renderQueue();
         renderDetail(true);
         try {
-            const [drafts, events] = await Promise.all([
+            const [drafts, historicalClaims, events] = await Promise.all([
                 client.listTaskEvidence({ taskId, limit: 20 }),
+                client.listTaskHistoricalClaims({ taskId, limit: 100 }),
                 client.getTaskEvents({ taskId, limit: 50 }),
             ]);
             state.drafts = drafts || [];
+            state.historicalClaims = historicalClaims || [];
             state.events = events || [];
             renderDetail(false);
         } catch (error) {
@@ -459,6 +463,36 @@
             <section class="panel">
                 <h3>Target-year statuses</h3>
                 ${draft ? targetYearTable(draft.target_year_statuses, draft.target_year_evidence) : `<p class="muted">No target-year statuses recorded.</p>`}
+            </section>
+
+            <section class="panel">
+                <h3>Known history claims</h3>
+                ${state.historicalClaims.length === 0
+                    ? `<p class="muted">No separate historical claims recorded.</p>`
+                    : state.historicalClaims.map((claim, index) => `
+                        <details${index === 0 ? " open" : ""}>
+                            <summary>${escapeHtml(human(claim.claim_kind))} — ${escapeHtml(claim.claim_text)}</summary>
+                            ${renderFieldGrid([
+                                ["Claim status", claim.claim_status],
+                                ["Contract", claim.contract_version],
+                                ["Temporal form", claim.claim_timing],
+                                ["Evidence reference date", claim.reference_date],
+                                ["Reference-date basis", claim.reference_date_basis],
+                                ["Earliest supported date", claim.earliest_supported_date],
+                                ["Latest supported date", claim.latest_supported_date],
+                                ["Open through reference date", claim.continues_through_observation ? "yes" : "no"],
+                                ["Confidence", claim.confidence],
+                                ["Confidence basis", claim.confidence_basis],
+                                ["Source or informant basis", claim.source_basis],
+                                ["Source title or description", claim.source_title],
+                                ["Source reference", claim.source_reference],
+                                ["Retained source wording or account", claim.source_account],
+                                ["Uncertainty", claim.uncertainty_note],
+                                ["Privacy flag", claim.privacy_flag],
+                            ])}
+                        </details>
+                    `).join("")}
+                <p class="muted">These provisional claims remain distinct evidence for review. They do not fill target-year states or become accepted events automatically.</p>
             </section>
 
             ${window.PowAgentReviewPanel ? window.PowAgentReviewPanel.panelHtml(agentReview) : ""}
