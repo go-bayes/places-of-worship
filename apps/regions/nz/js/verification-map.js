@@ -2246,8 +2246,10 @@ class NzVerificationMap {
 
     setupMap() {
         this.map = L.map("map", { preferCanvas: true }).setView(COUNTRY_CONFIG.mapCentre, COUNTRY_CONFIG.mapZoom);
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        // openstreetmap standard tiles: no key to ship, and building
+        // footprints render unwatermarked at the zooms pin placement needs
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             maxZoom: 19,
             // keep the zoom-out floor at 5 for compact countries, but let
             // continental configs (au/br/ca/mx/us open below 5) take effect

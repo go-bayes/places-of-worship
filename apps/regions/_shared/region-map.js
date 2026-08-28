@@ -245,23 +245,24 @@ const religionColors = [
 
 const basemapSelect = document.getElementById("basemapSelect");
 const hasMaptilerKey = Boolean(MAPTILER_API_KEY && !MAPTILER_API_KEY.includes("REPLACE_WITH_MAPTILER_KEY"));
+// keyless fallback basemap: openstreetmap standard tiles replaced the
+// carto endpoint, which now watermarks every tile with "API KEY REQUIRED";
+// the internal id stays "carto-light" so saved basemap preferences and the
+// maptiler-failure fallback keep working
 const cartoStyle = {
   id: "carto-light",
-  label: "CARTO",
+  label: "OpenStreetMap",
   style: {
     version: 8,
-    name: "CARTO",
+    name: "OpenStreetMap",
     sources: {
       "carto-light": {
         type: "raster",
         tiles: [
-          "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-          "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-          "https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-          "https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
+          "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
         ],
         tileSize: 256,
-        attribution: "© OpenStreetMap contributors, © CARTO"
+        attribution: "© OpenStreetMap contributors"
       }
     },
     layers: [{ id: "carto-light", type: "raster", source: "carto-light" }]
