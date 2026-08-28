@@ -6,6 +6,12 @@ Portal hub: `docs/portal-data-entry-plan.md`.
 
 ## Media Policy
 
+### Private upload invariant
+
+Every file type later permitted by a portal must enter private project-controlled quarantine and remain private. The invariant applies to field images, HEIC or JPEG originals, PNG files, PDFs, spreadsheets, CSV or GeoJSON files, and any later allowlisted format. Allowing a type means that the private intake service can validate, scan, retain, restrict, review, and delete that type; it never means that the file may be stored in Git, Convex, a public bucket, a public derivative path, or a public export. Any future public derivative requires a new explicit publication decision, rights and privacy review, and its own export contract.
+
+The portal must not expose a file input until authenticated private upload, quarantine, type and size validation, safe processing, audit events, restricted review access, retention, and deletion are operational for every advertised type. A configured MIME type, extension, or client-side metadata result is never sufficient validation. Bulk selection may improve contributor ergonomics, but each object remains independently identified, checksummed, validated, and reviewable; the first image pilot should accept multiple individual files rather than an unrestricted archive.
+
 The first portal media pilot should allow internal image evidence only for invited users and only through private quarantine. Video should be deferred.
 
 Images are internal evidence by design, not prospective public content. The pilot should prove that an image plus a guided, observer-confirmed account improves verification without weakening privacy, cultural governance, licensing, or measurement accuracy. It must not create a public media bucket, anonymous media endpoint, public derivative, public URL, or media field in public exports.
@@ -32,7 +38,7 @@ Minimum image metadata:
 
 The immutable original should retain its checksum and acquisition metadata in restricted storage. An internal review derivative may correct orientation and reduce size, but it should omit unnecessary embedded device metadata and expose relevant time and location through the controlled reviewer interface. Retention does not imply broad access; exact time or location may require restriction.
 
-Convex may hold an opaque observation or media identifier, workflow state, guided text, and review events. It must not hold image bytes, thumbnails, original filenames, full EXIF payloads, durable signed URLs, exact restricted coordinates, or audio.
+Convex may hold an opaque observation or media identifier, workflow state, guided text, and review events. It must not hold uploaded file bytes, image thumbnails, document derivatives, original filenames, full EXIF or document metadata payloads, durable signed URLs, exact restricted coordinates, or audio.
 
 The first dictation pilot should use device dictation into separately prompted text fields. The contributor must review and correct the transcript before submission, and the project should not claim on-device-only processing without verifying the actual devices and settings.
 

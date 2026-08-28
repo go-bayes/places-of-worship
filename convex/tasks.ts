@@ -3,6 +3,7 @@ import { internalMutation, mutation, query } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import {
+  locationAssertionInput,
   projectRole,
   reviewDecisionStatus,
   taskBatchInput,
@@ -15,6 +16,7 @@ import {
 } from "./model";
 import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser } from "./lib/auth";
 import { defaultTargetYears } from "./lib/countryYears";
+import { assertAssertionMatchesTaskPoint } from "./lib/locationAssertions";
 import {
   MEDIUM_TEXT_MAX,
   SHORT_TEXT_MAX,
@@ -950,6 +952,7 @@ export const createManualCandidateTask = mutation({
     targetYears: v.optional(v.array(v.number())),
     taskBrief: v.optional(v.string()),
     sourceNote: v.optional(v.string()),
+    locationAssertion: v.optional(locationAssertionInput),
     clientContext: v.optional(v.any()),
   },
   returns: v.object({
@@ -966,6 +969,16 @@ export const createManualCandidateTask = mutation({
     assertMaxString("nomination task brief", args.taskBrief, TASK_BRIEF_MAX);
     assertMaxString("nomination source note", args.sourceNote, TASK_REASON_MAX);
     assertClientContextLimit(args.clientContext);
+    const locationAssertion = args.locationAssertion ?? {
+      contract_version: "location_assertion_v1" as const,
+      mode: "building_identified" as const,
+      basis: "map_placement" as const,
+      latitude: args.latitude,
+      longitude: args.longitude,
+      confidence: "high" as const,
+      contributor_confirmed: true as const,
+    };
+    assertAssertionMatchesTaskPoint(locationAssertion, args.latitude, args.longitude);
     const now = Date.now();
     const taskId = manualTaskId(args.countryCode, args.name, now);
     const candidateSiteId = `candidate:${taskId}`;
@@ -992,6 +1005,7 @@ export const createManualCandidateTask = mutation({
         type: "Point",
         coordinates: [args.longitude, args.latitude],
       },
+      initial_location_assertion: locationAssertion,
       nearby_site_refs: [],
       automated_checks: [
         {

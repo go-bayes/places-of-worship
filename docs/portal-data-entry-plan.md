@@ -125,10 +125,7 @@ behaviour, audit decisions, undo semantics, and the optional GitHub audit mirror
 permission scopes, rate limits, validation, upload controls, quarantine, logs,
 and launch gates.
 
-`docs/portal-media-and-provider-evaluation-plan.md` defines image quarantine for
-the pilot and records why Convex is now the near-term task-map spike while
-Google Cloud/PostGIS remains the durable storage reference. SpacetimeDB is
-deferred, and Cloudflare is not in the active plan.
+`docs/portal-media-and-provider-evaluation-plan.md` defines the private-upload invariant and image quarantine for the pilot. Every later permitted image, PDF, spreadsheet, CSV, GeoJSON, or other file enters private project-controlled quarantine and remains private. File input remains disabled until the advertised types have authenticated upload, validation, safe processing, restricted review, retention, and deletion. The plan also records why Convex is the near-term task-map spike while Google Cloud/PostGIS remains the durable storage reference. SpacetimeDB is deferred, and Cloudflare is not in the active plan.
 
 `docs/field-observation-packet-spec.md` defines the measurement object for internal images and guided dictation: capture evidence remains distinct from an observer account, provisional claims, review decisions, and accepted events.
 

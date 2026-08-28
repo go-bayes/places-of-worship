@@ -38,6 +38,8 @@ Capture time is an observation time, not automatically the effective time of a h
 
 Images are internal evidence by design. The pilot must have no public media bucket, anonymous media endpoint, public image derivative, public image URL, or media field in public exports. A future proposal to publish images would require a new governance decision rather than changing a routine visibility flag.
 
+The same private-only rule governs any other file type later permitted by the portal. PNG files, PDFs, spreadsheets, CSV or GeoJSON files, and later allowlisted formats must enter private project-controlled quarantine and remain private. The interface must not advertise a type until the intake service can validate, scan, restrict, review, retain, and delete that type safely.
+
 Convex may store an opaque observation or media identifier, workflow status, guided text, and review events. It must not store image bytes, thumbnails, original filenames, full metadata payloads, durable signed URLs, exact restricted coordinates, or audio. An approved project-controlled object store should hold immutable originals, restricted metadata manifests, and internal review derivatives behind role-checked, short-lived access.
 
 The original should retain its checksum and acquisition metadata. An internal review derivative may correct orientation and reduce size, but it should omit unnecessary embedded device metadata and present relevant time and location through the controlled reviewer interface.

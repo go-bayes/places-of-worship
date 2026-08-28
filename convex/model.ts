@@ -174,6 +174,40 @@ export const currentObservationBasis = v.union(
   v.literal("other"),
 );
 
+export const locationAssertionContractVersion = v.literal("location_assertion_v1");
+
+export const locationAssertionMode = v.union(
+  v.literal("building_identified"),
+  v.literal("approximate_area"),
+);
+
+export const locationAssertionBasis = v.union(
+  v.literal("map_placement"),
+  v.literal("address_or_locality"),
+  v.literal("named_source_description"),
+  v.literal("local_investigator_account"),
+  v.literal("other"),
+);
+
+export const locationAssertionConfidence = v.union(
+  v.literal("high"),
+  v.literal("moderate"),
+  v.literal("low"),
+  v.literal("uncertain"),
+);
+
+export const locationAssertionInput = v.object({
+  contract_version: locationAssertionContractVersion,
+  mode: locationAssertionMode,
+  basis: locationAssertionBasis,
+  latitude: v.number(),
+  longitude: v.number(),
+  uncertainty_radius_m: v.optional(v.number()),
+  source_wording: v.optional(v.string()),
+  confidence: locationAssertionConfidence,
+  contributor_confirmed: v.literal(true),
+});
+
 export const historicalClaimContractVersion = v.literal("historical_claim_v1");
 
 export const historicalClaimStatus = v.union(

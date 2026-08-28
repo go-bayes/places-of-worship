@@ -701,6 +701,35 @@
             font: inherit;
         }
 
+        .pin-card fieldset {
+            display: grid;
+            gap: 8px;
+            margin: 0;
+            padding: 10px;
+            border: 1px solid #b6c2cf;
+            border-radius: 5px;
+        }
+
+        .pin-card fieldset legend {
+            padding: 0 4px;
+            color: #34495e;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .pin-card .checkbox-label {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            align-items: start;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .pin-card .checkbox-label input {
+            width: auto;
+            margin-top: 3px;
+        }
+
         .copy-status {
             min-height: 22px;
             font-size: 14px;
@@ -1720,6 +1749,7 @@
     <script src="js/convex-task-client.js?v=20260828a"></script>
     <script src="js/rapid-entry-contract.js?v=20260826a"></script>
     <script src="js/historical-claim-contract.js?v=20260828a"></script>
-    <script src="js/verification-map.js?v=20260828b"></script>
+    <script src="js/location-assertion-contract.js?v=20260828a"></script>
+    <script src="js/verification-map.js?v=20260828d"></script>
 </body>
 </html>
