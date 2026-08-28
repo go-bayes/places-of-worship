@@ -108,6 +108,8 @@ geocoding_basis,manual_match,Location was inferred by manual matching
 geocoding_basis,existing_osm_site,Location was inferred from an existing OpenStreetMap site
 geocoding_basis,gazetteer_or_road_rename,Location was inferred from a gazetteer or road-renaming source
 geocoding_basis,property_record,Location was inferred from a property or parcel record
+geocoding_basis,described_locality,Coordinates are the centre of a described locality with a recorded uncertainty radius
+geocoding_basis,regional_only,Coordinates are the centre of a broad approximate area with a recorded uncertainty radius
 geocoding_basis,unknown,Geocoding basis is unknown
 geocoding_confidence,high,Strong evidence for coordinates or modern address
 geocoding_confidence,medium,Plausible geocoding requiring normal review

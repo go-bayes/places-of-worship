@@ -4593,7 +4593,12 @@ class NzVerificationMap {
             continues.disabled = timing !== "state";
             if (timing !== "state") continues.checked = false;
         }
-        if (latest) latest.disabled = Boolean(continues?.checked);
+        if (latest) {
+            latest.disabled = Boolean(continues?.checked);
+            // a disabled field must not hold a value the validator will
+            // reject and the ra can no longer edit
+            if (latest.disabled) latest.value = "";
+        }
     }
 
     // mounts and wires a fresh repeatable historical-claim form.
@@ -5460,12 +5465,23 @@ class NzVerificationMap {
         row.locality_raw = localityRaw;
         row.address_change_note = values.addressNote
             || (values.addressRaw.trim() || values.localityRaw.trim() ? "RA supplied source-backed address or locality." : "");
+        // an approximate-area nomination must not export as an exact,
+        // manually matched point: carry the honest basis and radius
+        const wideAssertion = props.initial_location_assertion
+            || this.backendTasksById.get(props.task_id)?.initial_location_assertion;
+        const wideApproximate = wideAssertion?.mode === "approximate_area"
+            && Number.isFinite(wideAssertion.uncertainty_radius_m);
         row.geocoding_basis = isMissing
-            ? "manual_match"
+            ? (wideApproximate
+                ? (wideAssertion.uncertainty_radius_m > 2000 ? "regional_only" : "described_locality")
+                : "manual_match")
             : values.addressRaw.trim() || values.localityRaw.trim()
                 ? "source_address"
                 : "existing_osm_site";
         row.geocoding_confidence = values.geocodingConfidence;
+        if (wideApproximate) {
+            row.source_notes += ` Location is an approximate-area centre with an uncertainty radius of ${wideAssertion.uncertainty_radius_m} m${wideAssertion.source_wording ? `; source wording: ${wideAssertion.source_wording}` : ""}.`;
+        }
         row.latitude = lat ?? "";
         row.longitude = lng ?? "";
         row.matched_osm_id = props.osm_id || "";
