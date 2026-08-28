@@ -160,7 +160,24 @@ export const denominationRelation = v.union(
   v.literal("uncertain"),
 );
 
-export const observationContractVersion = v.literal("guided_observation_v1");
+export const currentObservationStatus = v.union(
+  v.literal("currently_used_for_worship"),
+  v.literal("place_exists_worship_uncertain"),
+  v.literal("place_exists_not_used_for_worship"),
+  v.literal("could_not_determine"),
+);
+
+export const currentObservationBasis = v.union(
+  v.literal("direct_field_observation"),
+  v.literal("local_investigator_account"),
+  v.literal("named_public_source"),
+  v.literal("other"),
+);
+
+export const observationContractVersion = v.union(
+  v.literal("guided_observation_v1"),
+  v.literal("rapid_current_v1"),
+);
 
 export const identityDecision = v.union(
   v.literal("same_site"),
@@ -301,10 +318,25 @@ export const evidenceDraftInput = v.object({
   evidence_note: v.optional(v.string()),
   interpretation_note: v.optional(v.string()),
   uncertainty_note: v.optional(v.string()),
+  current_observation_status: v.optional(currentObservationStatus),
+  current_observation_basis: v.optional(currentObservationBasis),
   generated_wide_row: v.optional(v.any()),
   privacy_flag: v.optional(privacyFlag),
   licence_flag: v.optional(licenceFlag),
   validation_summary: v.optional(v.any()),
+});
+
+export const rapidCurrentObservationInput = v.object({
+  current_status: currentObservationStatus,
+  observation_basis: currentObservationBasis,
+  observed_on: v.string(),
+  source_title: v.optional(v.string()),
+  source_reference: v.optional(v.string()),
+  denomination_or_tradition_raw: v.optional(v.string()),
+  denomination_label_basis: v.optional(denominationLabelBasis),
+  direct_observation: v.optional(v.string()),
+  uncertainty_note: v.optional(v.string()),
+  privacy_flag: privacyFlag,
 });
 
 // batch-review lane (docs/portal-claude-batch-review.md): AI review

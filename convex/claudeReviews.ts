@@ -464,7 +464,7 @@ const CHECK_NAMES: SourceCheckName[] = ["existence", "date_support", "location_p
 
 function claimSummary(task: Doc<"tasks">, draft: Doc<"evidence_drafts">): string {
   if (!isExternalAiReviewEligible(draft)) {
-    throw new Error("Guided denomination evidence is outside the current external AI review contract.");
+    throw new Error("This evidence is outside the external AI review contract (rapid current observations and guided denomination claims stay with human review).");
   }
   return JSON.stringify(
     {

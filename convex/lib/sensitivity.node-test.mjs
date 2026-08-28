@@ -43,3 +43,15 @@ test("either supported cultural-sensitivity field prevents external processing",
 test("clear non-Vanuatu evidence may enter bounded external checks", () => {
   assert.deepEqual(evidenceSensitivityFor({ country_code: "NZ" }, { privacy_flag: "clear" }), { flagged: false });
 });
+
+test("rapid current observations are ineligible for external AI review by contract", () => {
+  assert.equal(isExternalAiReviewEligible({
+    observation_contract_version: "rapid_current_v1",
+    action: "confirm_current_record",
+  }), false);
+  assert.equal(isExternalAiReviewEligible({
+    observation_contract_version: "rapid_current_v1",
+    action: "needs_review",
+    denomination_or_tradition_raw: "",
+  }), false);
+});

@@ -45,6 +45,7 @@ const COUNTRY_CONFIGS = {
         nominationSource: "vu_verification_static_map_nomination",
         defaultAssignmentBatchId: "vu-source-first-test-001",
         assignmentHeading: "Vanuatu source-first test",
+        rapidCurrentEntry: true,
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -607,6 +608,11 @@ const ASSIGNMENT_BATCH_ID = FULL_MAP_MODE
     ? ""
     : (REQUESTED_ASSIGNMENT_BATCH_ID || (BACKEND_CONFIGURED ? DEFAULT_ASSIGNMENT_BATCH_ID : ""));
 const ASSIGNMENT_MODE = ASSIGNMENT_BATCH_ID.length > 0;
+const RAPID_CURRENT_ENTRY = Boolean(
+    COUNTRY_CONFIG.rapidCurrentEntry
+    && ASSIGNMENT_MODE
+    && SEARCH_PARAMS.get("detailed") !== "1"
+);
 // optional personalised hint: invitation links may include ?email=ra@example.com
 // so the sign-in card can name the specific invited account
 const INVITED_EMAIL_HINT = (SEARCH_PARAMS.get("email") || "").trim();
@@ -639,6 +645,20 @@ const REVISION_ELIGIBLE_STATUSES = new Set(["needs_review", "unresolved_note", "
 // revision must start through the server so the transition to in_progress
 // and the task event are recorded (reviews:feedbackLoopMetrics keys on them)
 const REVISION_AUTO_ATTACH_STATUSES = new Set(["needs_review", "unresolved_note"]);
+// human labels for the rapid current-observation vocabulary; the values
+// are the server contract in convex/model.ts
+const RAPID_STATUS_LABELS = {
+    currently_used_for_worship: "Used for worship",
+    place_exists_worship_uncertain: "Exists; worship use uncertain",
+    place_exists_not_used_for_worship: "Exists; not used for worship",
+    could_not_determine: "Could not determine",
+};
+const RAPID_BASIS_LABELS = {
+    direct_field_observation: "I observed it in person",
+    local_investigator_account: "I know it through local fieldwork",
+    named_public_source: "I checked a named public source",
+    other: "Other evidence",
+};
 const READ_ONLY_ASSIGNMENT_STATUSES = new Set([
     "needs_review",
     "unresolved_note",
@@ -1558,6 +1578,10 @@ class NzVerificationMap {
         this.latestDraftsByTaskId = new Map();
         this.myWorkItems = [];
         this.revisionDraftIdsByTaskId = new Map();
+        // rapid tasks awaiting review that the observer has chosen to correct;
+        // a correction is a new observation, so no server draft exists until
+        // it is submitted and the set is cleared
+        this.rapidCorrectionTaskIds = new Set();
         this.backendLastError = "";
         // unsaved-entry protection: dirty flag for the evidence form plus
         // per-task snapshots reapplied after programmatic rebuilds
@@ -1577,6 +1601,7 @@ class NzVerificationMap {
         this.pinMarker = null;
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
+        this.pinSubmissionId = null;
         this.manualTasksById = new Map();
         // context dots: lazily fetched dated places, keyed off the target
         // year in period mode; task history responses cached per task
@@ -2539,7 +2564,11 @@ class NzVerificationMap {
             if (ASSIGNMENT_MODE) {
                 // the single pin-drop entry point lives in the header now;
                 // the transient cards render into #pinCardHost on demand
-                document.getElementById("addPlaceButton")?.addEventListener("click", () => this.enterPinMode());
+                const addPlaceButton = document.getElementById("addPlaceButton");
+                if (addPlaceButton && RAPID_CURRENT_ENTRY) {
+                    addPlaceButton.textContent = "＋ Nominate missing PoW";
+                }
+                addPlaceButton?.addEventListener("click", () => this.enterPinMode());
             }
         }
 
@@ -2624,26 +2653,56 @@ class NzVerificationMap {
             }
             const tasks = await this.backend.listTasks(query);
             const allTasks = tasks || [];
+            // nominated candidates live in the manual batch, which the
+            // assignment-scoped query cannot return; fetch it as well so
+            // nominations stay reachable and visible to the duplicate
+            // check after a reload, not only in this page's memory
+            let manualBatchTasks = [];
+            if (ASSIGNMENT_MODE) {
+                const manualBatchId = `manual-${COUNTRY_CONFIG.countryCode.toLowerCase()}`;
+                manualBatchTasks = (await this.backend.listTasks({
+                    countryCode: COUNTRY_CONFIG.countryCode,
+                    batchId: manualBatchId,
+                    limit: 1000,
+                })) || [];
+            }
             this.backendTasksById = new Map(allTasks.map(task => [task.task_id, task]));
-            // pin-drop tasks live in the manual batch, which the
-            // assignment-scoped query cannot return; re-merge the local
-            // copies so the ra stays landed in a freshly created task
+            for (const task of manualBatchTasks) {
+                this.backendTasksById.set(task.task_id, task);
+            }
+            // re-merge local copies so the ra stays landed in a task
+            // created moments ago that the queries have not indexed yet
             for (const [taskId, manualTask] of this.manualTasksById) {
                 if (!this.backendTasksById.has(taskId)) {
                     this.backendTasksById.set(taskId, manualTask);
                 }
             }
+            // no batch scope: my work covers the assignment batch and the
+            // ra's own nominated candidates in the manual batch
             this.myWorkItems = ASSIGNMENT_MODE
-                ? await this.backend.listMyTasks({
+                ? ((await this.backend.listMyTasks({
                     countryCode: COUNTRY_CONFIG.countryCode,
-                    batchId: ASSIGNMENT_BATCH_ID,
                     statuses: MY_WORK_STATUSES,
                     limit: 200,
+                })) || []).filter(item => {
+                    const batchId = item?.task?.batch_id || "";
+                    return batchId === ASSIGNMENT_BATCH_ID
+                        || batchId === `manual-${COUNTRY_CONFIG.countryCode.toLowerCase()}`;
                 })
                 : [];
             if (ASSIGNMENT_MODE) {
+                // nominated candidates join the map and list whatever their
+                // status: their author needs a route back to them, and the
+                // pin-drop proximity check needs to see them
+                const nominatedTasks = [...manualBatchTasks];
+                for (const [taskId, manualTask] of this.manualTasksById) {
+                    if (!nominatedTasks.some(task => task.task_id === taskId)) {
+                        nominatedTasks.push(manualTask);
+                    }
+                }
                 this.tasks = allTasks
                     .filter(task => this.assignmentTaskIsAvailable(task))
+                    .concat(nominatedTasks)
                     .map(featureFromBackendTask);
                 const snapshotEl = document.getElementById("snapshotId");
                 if (snapshotEl) {
@@ -3015,7 +3074,10 @@ class NzVerificationMap {
         if (!panel) return;
         panel.scrollTop = 0;
         panel.focus({ preventScroll: true });
-        panel.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        // "start" rather than "nearest": when the sidebar is the scroll
+        // container (desktop, and phone assignment mode) "nearest" leaves the
+        // panel bottom-aligned with only its heading visible
+        panel.scrollIntoView({ block: "start", behavior: "smooth" });
     }
 
     renderInitialDetail() {
@@ -3026,13 +3088,17 @@ class NzVerificationMap {
                 <h2>Assigned web workpack</h2>
                 <div class="${this.backend?.configured ? "pilot-note" : "demo-warning"}" role="${this.backend?.configured ? "note" : "alert"}">
                     ${this.backend?.configured
-                        ? `Sign in with Google at the top of this panel, then work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when useful evidence remains incomplete, and <em>Submit for review</em> when a case is ready for JB.`
+                        ? RAPID_CURRENT_ENTRY
+                            ? `Sign in with Google at the top of this panel, then work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. For each place, choose one current-status answer, record how you know it, and use <em>Submit for review</em>.`
+                            : `Sign in with Google at the top of this panel, then work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when useful evidence remains incomplete, and <em>Submit for review</em> when a case is ready for JB.`
                         : `This link points to <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>, but this deployment does not yet have the shared backend enabled.`}
                 </div>
                 <div class="detail-section">
                     <h3>What to check</h3>
                     <div class="disabled-panel">
-                        For each assigned case, answer the task question, seek non-OSM evidence where possible, record 2013, 2018, and 2023 status, preserve any useful opening or closure dates, and submit unresolved notes for cases that should stay visible but cannot yet be resolved.
+                        ${RAPID_CURRENT_ENTRY
+                            ? `For each assigned place, record what you can confirm at the observation date: whether the place exists and whether it is used for worship. Do not infer worship use from the building alone. Historical target years (${escapeHtml(COUNTRY_CONFIG.targetYears.join(", "))}) stay unassessed here; use the detailed form for historical or complicated cases.`
+                            : `For each assigned case, answer the task question, seek non-OSM evidence where possible, record ${escapeHtml(COUNTRY_CONFIG.targetYears.join(", "))} status, preserve any useful opening or closure dates, and submit unresolved notes for cases that should stay visible but cannot yet be resolved.`}
                     </div>
                 </div>
             `;
@@ -3072,18 +3138,22 @@ class NzVerificationMap {
     // portal's "decision recorded" return-to-list. the finished task rightly
     // leaves the available list in assignment mode, so the prompt points at
     // the next task rather than the one just closed.
-    renderSubmissionRecordedDetail(props, { unresolved = false, skipped = false } = {}) {
+    renderSubmissionRecordedDetail(props, { unresolved = false, skipped = false, corrected = false, deduped = false } = {}) {
         const panel = document.getElementById("detailPanel");
         if (!panel) return;
         panel.innerHTML = `
-            <h2>${skipped ? "Task skipped" : unresolved ? "Unresolved note submitted" : "Submitted for review"}</h2>
+            <h2>${skipped ? "Task skipped" : unresolved ? "Unresolved note submitted" : corrected ? "Correction submitted" : "Submitted for review"}</h2>
             <div class="copy-status" role="status">
                 ${escapeHtml(props.name || "Unnamed site")} ${props.task_id ? `(${escapeHtml(props.task_id)})` : ""} —
                 ${skipped
                     ? "skipped in the shared backend."
                     : unresolved
                         ? "saved as an unresolved note for review."
-                        : "saved to the shared backend and submitted for review."}
+                        : deduped
+                            ? "this observation was already recorded; nothing was duplicated."
+                            : corrected
+                                ? "corrected observation submitted for review; the earlier record is kept as superseded."
+                                : "saved to the shared backend and submitted for review."}
             </div>
             <div class="button-row">
                 <button id="openNextTaskButton" type="button">Open next task</button>
@@ -3308,7 +3378,38 @@ class NzVerificationMap {
     taskIsReadOnly(taskId) {
         const backendTask = this.backendTasksById.get(taskId);
         if (!ASSIGNMENT_MODE || !backendTask) return false;
+        if (RAPID_CURRENT_ENTRY && this.rapidCorrectionTaskIds.has(taskId)) return false;
         return READ_ONLY_ASSIGNMENT_STATUSES.has(backendTask.status) && !this.taskIsRevisionMode(taskId);
+    }
+
+    // a task whose latest evidence is a rapid observation by the signed-in
+    // observer: the server accepts a correction only from that author while
+    // the task awaits review (needs_review, unresolved_note, changes_requested)
+    taskCanCorrectRapid(taskId) {
+        const backendTask = this.backendTasksById.get(taskId);
+        const draft = this.latestDraftForTask(taskId);
+        return Boolean(
+            RAPID_CURRENT_ENTRY
+            && backendTask
+            && REVISION_ELIGIBLE_STATUSES.has(backendTask.status)
+            && draft?.observation_contract_version === "rapid_current_v1"
+            && draft.created_by === this.backendUser?._id
+        );
+    }
+
+    startRapidCorrection(props) {
+        const taskId = props?.task_id || "";
+        if (!taskId || !this.taskCanCorrectRapid(taskId)) return;
+        this.rapidCorrectionTaskIds.add(taskId);
+        this.renderDetail(this.featureForTaskId(taskId) || this.selectedTask);
+        this.focusDetailPanel();
+    }
+
+    cancelRapidCorrection(props) {
+        const taskId = props?.task_id || "";
+        this.rapidCorrectionTaskIds.delete(taskId);
+        this.clearFormDirty();
+        this.renderDetail(this.featureForTaskId(taskId) || this.selectedTask);
     }
 
     // starts a revision for the selected task through the same server
@@ -3432,6 +3533,15 @@ class NzVerificationMap {
     // use for same-task programmatic rebuilds (year change, refresh, sign-in)
     renderDetailPreservingForm(feature) {
         const taskId = feature?.properties?.task_id;
+        if (
+            RAPID_CURRENT_ENTRY
+            && taskId
+            && this.formDirty
+            && this.formDirtyTaskId === taskId
+            && document.getElementById("taskRapidCurrentForm")
+        ) {
+            return;
+        }
         if (taskId && this.formDirty && this.formDirtyTaskId === taskId) {
             this.snapshotFormForTask(taskId);
         }
@@ -3638,6 +3748,14 @@ class NzVerificationMap {
     }
 
     siteTaskBriefHtml(props) {
+        if (RAPID_CURRENT_ENTRY && !this.taskIsReadOnly(props.task_id)) {
+            return `
+                <h3>Record current information</h3>
+                <div class="copy-help">
+                    Record what you can confirm now. This observation will not fill Vanuatu's historical target years or change the public map before review.
+                </div>
+            `;
+        }
         const checks = props.automated_checks || [];
         const focus = taskFocusForAction(props.automated_suggested_action, props.verification_priority);
         const temporal = deriveTargetYearStatus(props, this.targetYear);
@@ -3785,6 +3903,13 @@ class NzVerificationMap {
         const readOnly = props?.task_id ? this.taskIsReadOnly(props.task_id) : false;
         const revisionMode = props?.task_id ? this.taskIsRevisionMode(props.task_id) : false;
         if (this.backend?.configured && this.backendUser) {
+            if (RAPID_CURRENT_ENTRY && !readOnly) {
+                return `
+                    <div class="pilot-note">
+                        Record only what you can confirm now. The server keeps every historical target year unassessed, derives the provisional review fields, and sends the observation to human review without changing the public map.
+                    </div>
+                `;
+            }
             if (revisionMode) {
                 return `
                     <div class="pilot-note">
@@ -3864,6 +3989,307 @@ class NzVerificationMap {
         `;
     }
 
+    detailedEntryUrl() {
+        const url = new URL(window.location.href);
+        url.searchParams.set("detailed", "1");
+        return url.toString();
+    }
+
+    rapidObservationFieldsHtml(prefix, options = {}) {
+        const submitLabel = options.submitLabel || "Submit for review";
+        const submissionId = options.submissionId || window.PowRapidEntry.secureSubmissionId();
+        const pre = options.prefill || {};
+        const checked = value => pre.current_observation_status === value ? " checked" : "";
+        const preBasis = pre.current_observation_basis || "direct_field_observation";
+        const preNamed = preBasis === "named_public_source" || preBasis === "other";
+        const optionalOpen = Boolean(pre.denomination_or_tradition_raw || pre.evidence_note || pre.uncertainty_note);
+        return `
+            <form id="${prefix}RapidCurrentForm" class="rapid-current-form" data-submission-id="${escapeHtml(submissionId)}">
+                <fieldset class="rapid-choice-group">
+                    <legend>What can you confirm at the observation date?</legend>
+                    <label class="rapid-choice">
+                        <input type="radio" name="${prefix}CurrentStatus" value="currently_used_for_worship"${checked("currently_used_for_worship")}>
+                        <span><strong>This site is used for worship</strong><small>At the observation date, the place exists and worship use is confirmed.</small></span>
+                    </label>
+                    <label class="rapid-choice">
+                        <input type="radio" name="${prefix}CurrentStatus" value="place_exists_worship_uncertain"${checked("place_exists_worship_uncertain")}>
+                        <span><strong>The place exists, but worship use is uncertain</strong><small>At the observation date, do not infer worship use from the building alone.</small></span>
+                    </label>
+                    <label class="rapid-choice">
+                        <input type="radio" name="${prefix}CurrentStatus" value="place_exists_not_used_for_worship"${checked("place_exists_not_used_for_worship")}>
+                        <span><strong>The place exists but is not used for worship</strong><small>This records non-use at the observation date; a reviewer will assess any past use, closure, relocation, or changed use.</small></span>
+                    </label>
+                    <label class="rapid-choice">
+                        <input type="radio" name="${prefix}CurrentStatus" value="could_not_determine"${checked("could_not_determine")}>
+                        <span><strong>I could not determine its status</strong><small>Record what remained uncertain at the observation date.</small></span>
+                    </label>
+                </fieldset>
+                <div class="field-grid">
+                    <label>
+                        Observation date
+                        <input id="${prefix}ObservedOn" type="date" max="${escapeHtml(window.PowRapidEntry.localIsoDate())}" value="${escapeHtml(pre.source_date_or_capture_date || window.PowRapidEntry.localIsoDate())}">
+                    </label>
+                    <label>
+                        How do you know this?
+                        <select id="${prefix}ObservationBasis">
+                            ${Object.entries(RAPID_BASIS_LABELS).map(([value, label]) => `<option value="${escapeHtml(value)}"${value === preBasis ? " selected" : ""}>${escapeHtml(label)}</option>`).join("")}
+                        </select>
+                    </label>
+                </div>
+                <div id="${prefix}NamedSourceFields" class="rapid-conditional"${preNamed ? "" : " hidden"}>
+                    <label>
+                        Source title or brief description
+                        <input id="${prefix}SourceTitle" type="text" maxlength="2048" value="${escapeHtml(preNamed ? pre.source_title || "" : "")}">
+                    </label>
+                    <label>
+                        Source URL or agreed file reference (if one exists)
+                        <input id="${prefix}SourceReference" type="text" maxlength="4096" value="${escapeHtml(preNamed ? pre.source_url_or_file || "" : "")}">
+                    </label>
+                </div>
+                <details class="optional-block"${optionalOpen ? " open" : ""}>
+                    <summary>Denomination or notes</summary>
+                    <div class="rapid-optional-fields">
+                        <label>
+                            Exact denomination or tradition wording (optional)
+                            <input id="${prefix}DenominationRaw" type="text" maxlength="2048" placeholder="Copy the wording exactly" value="${escapeHtml(pre.denomination_or_tradition_raw || "")}">
+                        </label>
+                        <label>
+                            Where did that wording come from?
+                            <select id="${prefix}DenominationBasis">
+                                ${selectOptionsHtml(DENOMINATION_LABEL_BASIS_OPTIONS, pre.denomination_label_basis || "unknown")}
+                            </select>
+                        </label>
+                        <label>
+                            What did you directly observe? (optional for an in-person observation)
+                            <textarea id="${prefix}DirectObservation" rows="2" maxlength="2000">${escapeHtml(pre.evidence_note || "")}</textarea>
+                        </label>
+                        <label>
+                            What remains uncertain? (optional unless you could not determine the status)
+                            <textarea id="${prefix}UncertaintyNote" rows="2" maxlength="2000">${escapeHtml(pre.uncertainty_note || "")}</textarea>
+                        </label>
+                    </div>
+                </details>
+                <label>
+                    Sensitivity and privacy
+                    <select id="${prefix}PrivacyFlag">
+                        ${selectOptionsHtml(PRIVACY_FLAG_OPTIONS, pre.privacy_flag || "needs_review")}
+                    </select>
+                </label>
+                <div class="copy-help">
+                    Do not enter personal contact details or private conversations. Choose restricted when the observation could expose a culturally restricted place or identifiable person. Every submission enters human review and does not update the public map directly.
+                </div>
+                <div class="button-row">
+                    <button id="${prefix}RapidSubmit" type="submit">${escapeHtml(submitLabel)}</button>
+                    ${options.showCancel ? `<button id="${prefix}FormCancelButton" type="button" class="secondary">Cancel</button>` : ""}
+                </div>
+                <div id="${prefix}RapidStatus" class="copy-status" aria-live="polite"></div>
+            </form>
+        `;
+    }
+
+    rapidCurrentReviewFormHtml(props) {
+        const taskId = props?.task_id || "";
+        const correcting = Boolean(taskId && this.rapidCorrectionTaskIds.has(taskId));
+        const previous = correcting ? this.latestDraftForTask(taskId) : null;
+        return `
+            <h3>${correcting ? "Correct your observation" : "Current observation"}</h3>
+            ${correcting ? `
+                <div class="pilot-note">
+                    Submitting records a new observation and marks your earlier one as superseded. The earlier record stays on file for reviewers; it is not rewritten.
+                </div>
+            ` : this.formModeNoticeHtml(props)}
+            ${this.rapidObservationFieldsHtml("task", {
+                submitLabel: correcting ? "Submit correction for review" : "Submit for review",
+                showCancel: correcting,
+                prefill: previous,
+            })}
+            ${correcting ? "" : `
+                <div class="rapid-detailed-link">
+                    <a href="${escapeHtml(this.detailedEntryUrl())}">Use the detailed historical or complicated-case form</a>
+                </div>
+            `}
+        `;
+    }
+
+    // read-only view of a submitted rapid observation with the single
+    // correction action the server supports for its author
+    rapidReadOnlyHtml(props, draft, draftLoaded) {
+        const taskId = props?.task_id || "";
+        const backendTask = this.backendTaskForProps(props);
+        const status = backendTask?.status || "";
+        const canCorrect = this.taskCanCorrectRapid(taskId);
+        const statusNote = status === "changes_requested"
+            ? "A reviewer asked for more evidence. Submit a corrected observation to respond."
+            : status === "needs_review" || status === "unresolved_note"
+                ? "This observation is waiting for review."
+                : "This task is closed for now. Ask JB to reopen it if new evidence changes the answer.";
+        const statusLabelText = RAPID_STATUS_LABELS[draft?.current_observation_status] || draft?.current_observation_status || "";
+        const basisLabelText = RAPID_BASIS_LABELS[draft?.current_observation_basis] || draft?.current_observation_basis || "";
+        const summary = !draftLoaded
+            ? `<div class="copy-status">Loading the recorded observation...</div>`
+            : draft
+                ? `
+                    <dl class="meta-grid rapid-summary">
+                        <dt>Confirmed</dt><dd>${escapeHtml(statusLabelText)}</dd>
+                        <dt>Observed on</dt><dd>${escapeHtml(draft.source_date_or_capture_date || "")}</dd>
+                        <dt>Basis</dt><dd>${escapeHtml(basisLabelText)}</dd>
+                        ${draft.source_title && draft.current_observation_basis !== "direct_field_observation" && draft.current_observation_basis !== "local_investigator_account" ? `<dt>Source</dt><dd>${escapeHtml(draft.source_title)}${draft.source_url_or_file ? ` — ${escapeHtml(draft.source_url_or_file)}` : ""}</dd>` : ""}
+                        ${draft.denomination_or_tradition_raw ? `<dt>Denomination</dt><dd>${escapeHtml(draft.denomination_or_tradition_raw)}</dd>` : ""}
+                        ${draft.evidence_note ? `<dt>Observed</dt><dd>${escapeHtml(draft.evidence_note)}</dd>` : ""}
+                        ${draft.uncertainty_note ? `<dt>Uncertain</dt><dd>${escapeHtml(draft.uncertainty_note)}</dd>` : ""}
+                        <dt>Privacy</dt><dd>${escapeHtml(String(draft.privacy_flag || "").replaceAll("_", " "))}</dd>
+                    </dl>
+                `
+                : `<div class="copy-status">No observation is attached to this task yet.</div>`;
+        return `
+            <h3>Recorded observation</h3>
+            <div class="pilot-note">${escapeHtml(statusNote)}</div>
+            ${summary}
+            ${canCorrect ? `
+                <div class="button-row">
+                    <button id="correctObservationButton" type="button">Correct this observation</button>
+                </div>
+                <div class="copy-help">Use this only for a mistake or new information. Your earlier observation stays on record and is marked superseded.</div>
+            ` : ""}
+            <div id="copyStatus" class="copy-status" aria-live="polite"></div>
+        `;
+    }
+
+    rapidObservationValues(prefix) {
+        return {
+            currentStatus: document.querySelector(`input[name="${prefix}CurrentStatus"]:checked`)?.value || "",
+            observationBasis: document.getElementById(`${prefix}ObservationBasis`)?.value || "",
+            observedOn: document.getElementById(`${prefix}ObservedOn`)?.value || "",
+            sourceTitle: document.getElementById(`${prefix}SourceTitle`)?.value || "",
+            sourceReference: document.getElementById(`${prefix}SourceReference`)?.value || "",
+            denominationRaw: document.getElementById(`${prefix}DenominationRaw`)?.value || "",
+            denominationLabelBasis: document.getElementById(`${prefix}DenominationBasis`)?.value || "unknown",
+            directObservation: document.getElementById(`${prefix}DirectObservation`)?.value || "",
+            uncertaintyNote: document.getElementById(`${prefix}UncertaintyNote`)?.value || "",
+            privacyFlag: document.getElementById(`${prefix}PrivacyFlag`)?.value || "",
+        };
+    }
+
+    updateRapidSourceFields(prefix) {
+        const basis = document.getElementById(`${prefix}ObservationBasis`)?.value || "";
+        const fields = document.getElementById(`${prefix}NamedSourceFields`);
+        if (fields) fields.hidden = basis !== "named_public_source" && basis !== "other";
+    }
+
+    bindRapidObservationForm(prefix, options = {}) {
+        const form = document.getElementById(`${prefix}RapidCurrentForm`);
+        if (!form || !window.PowRapidEntry) return;
+        const markDirty = () => this.markFormDirty(options.props?.task_id || `rapid-${prefix}`);
+        form.addEventListener("input", markDirty);
+        form.addEventListener("change", markDirty);
+        document.getElementById(`${prefix}ObservationBasis`)?.addEventListener("change", () => {
+            this.updateRapidSourceFields(prefix);
+        });
+        this.updateRapidSourceFields(prefix);
+        form.addEventListener("submit", event => {
+            event.preventDefault();
+            this.submitRapidObservation(prefix, options);
+        });
+    }
+
+    async submitRapidObservation(prefix, options = {}) {
+        const form = document.getElementById(`${prefix}RapidCurrentForm`);
+        const status = document.getElementById(`${prefix}RapidStatus`);
+        const submitButton = document.getElementById(`${prefix}RapidSubmit`);
+        if (!form || !window.PowRapidEntry) return;
+        if (!this.backend?.configured || !this.backend.signedIn) {
+            if (status) status.textContent = "Sign in before recording this observation.";
+            return;
+        }
+        const values = this.rapidObservationValues(prefix);
+        const inputError = window.PowRapidEntry.validateObservation(values);
+        if (inputError) {
+            if (status) status.textContent = inputError;
+            return;
+        }
+        const candidate = options.getCandidate?.();
+        if (options.getCandidate && !candidate) {
+            if (status) status.textContent = "Confirm the map location before recording this observation.";
+            return;
+        }
+        submitButton.disabled = true;
+        if (status) status.textContent = "Submitting securely for review...";
+        try {
+            const result = await this.backend.submitVanuatuCurrentObservation({
+                clientSubmissionId: form.dataset.submissionId,
+                ...(options.props?.task_id ? { taskId: options.props.task_id } : { candidate }),
+                observation: window.PowRapidEntry.observationPayload(values),
+                clientContext: {
+                    ...(this.pinConfirmed?.zoom !== undefined ? { placement_zoom: this.pinConfirmed.zoom } : {}),
+                    ...(options.getCandidate ? {
+                        proximity_checked: true,
+                        nearby_count: this.pinNearbyCount,
+                    } : {}),
+                    portal_version: "vanuatu-rapid-current-v1",
+                },
+            });
+            this.clearFormDirty();
+            if (options.props?.task_id) {
+                const taskId = options.props.task_id;
+                this.rapidCorrectionTaskIds.delete(taskId);
+                this.formSnapshotsByTaskId.delete(taskId);
+                this.latestDraftsByTaskId.delete(taskId);
+                this.taskHistoryByTaskId.delete(taskId);
+                await this.refreshBackendTasks();
+                this.selectedTask = null;
+                this.applyFilters();
+                this.renderSubmissionRecordedDetail(options.props, { corrected: Boolean(result.corrected), deduped: Boolean(result.deduped) });
+                this.focusDetailPanel();
+                return;
+            }
+            // synthesise the backend-task shape locally so the nomination
+            // stays on the map, in the list, in my work, and visible to
+            // the proximity check before the batch queries catch up
+            const manualTask = {
+                task_id: result.task_id,
+                batch_id: `manual-${COUNTRY_CONFIG.countryCode.toLowerCase()}`,
+                country_code: COUNTRY_CONFIG.countryCode,
+                task_type: "missing_from_project_map",
+                priority: "high",
+                status: result.task_status,
+                assigned_to: this.backendUser?._id,
+                target_years: COUNTRY_CONFIG.targetYears.map(Number),
+                candidate_site_id: result.candidate_site_id,
+                name: candidate.name,
+                address: candidate.address,
+                locality: candidate.locality,
+                geometry: {
+                    type: "Point",
+                    coordinates: [candidate.longitude, candidate.latitude],
+                },
+                automated_checks: [{
+                    check_id: "rapid_current_nomination",
+                    severity: "info",
+                    message: "An invited RA submitted a current-place observation through the Vanuatu rapid-entry path.",
+                    suggested_action: "review_identity_and_current_use",
+                }],
+                task_brief: "Review this Vanuatu current-place observation. Confirm site identity, present worship use, sensitivity, and whether an existing project or OSM record already represents the place before export.",
+            };
+            this.manualTasksById.set(result.task_id, manualTask);
+            this.backendTasksById.set(result.task_id, manualTask);
+            await this.refreshBackendTasks();
+            this.applyFilters();
+            this.setBackendTransientStatus(result.deduped
+                ? "That observation was already recorded. The form is ready for another place."
+                : "Observation recorded for review. The form is ready for another place.");
+            this.exitPinMode();
+            this.enterPinMode();
+        } catch (error) {
+            if (error.authExpired) {
+                this.backendUser = null;
+                this.backendLastError = error.message;
+                this.renderBackendPanel();
+            }
+            submitButton.disabled = false;
+            if (status) status.textContent = `${error.message || "Could not submit the observation."} Your entries remain here; try again.`;
+        }
+    }
+
     reviewFormHtml(props) {
         const taskId = props?.task_id || "";
         if (ASSIGNMENT_MODE && !this.backendUser) {
@@ -3889,6 +4315,19 @@ class NzVerificationMap {
         const readOnly = taskId ? this.taskIsReadOnly(taskId) : false;
         const revisionMode = taskId ? this.taskIsRevisionMode(taskId) : false;
         const canRevise = taskId ? this.taskCanRevise(taskId) : false;
+        if (RAPID_CURRENT_ENTRY && !readOnly) {
+            return this.rapidCurrentReviewFormHtml(props);
+        }
+        if (RAPID_CURRENT_ENTRY && readOnly) {
+            const latest = this.latestDraftForTask(taskId);
+            const draftLoaded = this.latestDraftsByTaskId.has(taskId);
+            // a guided (detailed) submission keeps its own revision route; the
+            // generic form below handles it, but a rapid record never enters
+            // the generic revise path because the server refuses to clone it
+            if (!draftLoaded || !latest || latest.observation_contract_version === "rapid_current_v1") {
+                return this.rapidReadOnlyHtml(props, latest, draftLoaded);
+            }
+        }
         const skipControl = ASSIGNMENT_MODE
             ? (assignmentTaskAvailable && !readOnly && !revisionMode ? this.skipFormHtml() : "")
             : this.skipFormHtml();
@@ -4140,6 +4579,12 @@ class NzVerificationMap {
     }
 
     bindRaActionForm(props) {
+        document.getElementById("correctObservationButton")?.addEventListener("click", () => this.startRapidCorrection(props));
+        if (document.getElementById("taskRapidCurrentForm")) {
+            this.bindRapidObservationForm("task", { props });
+            document.getElementById("taskFormCancelButton")?.addEventListener("click", () => this.cancelRapidCorrection(props));
+            return;
+        }
         const actionSelect = document.getElementById("raActionSelect");
         const sourceUrl = document.getElementById("sourceUrlInput");
         const sourceTitle = document.getElementById("sourceTitleInput");
@@ -4962,6 +5407,13 @@ class NzVerificationMap {
     // actionable entry point is the header "Add a place" button; the
     // transient cards render into #pinCardHost when pin mode is armed
     pinNominationHtml() {
+        if (RAPID_CURRENT_ENTRY) {
+            return `
+                <div class="copy-help">
+                    Record a place by confirming its building location and what you can establish about its current worship use. Each observation is time-stamped and sent to human review; it does not update the public map directly.
+                </div>
+            `;
+        }
         return `
             <div class="copy-help">
                 Know a place of worship that is not on the map? Use <strong>Add a place that's missing</strong> at the top of this panel, drop a pin on the building, then describe how you know it. Local knowledge counts as evidence.
@@ -4973,8 +5425,37 @@ class NzVerificationMap {
     // mode is active (kept here, near the map, rather than buried in the
     // nomination panel). ids are unchanged so all pin logic still binds
     pinCardsHtml() {
+        const formFields = RAPID_CURRENT_ENTRY
+            ? this.rapidObservationFieldsHtml("pin", {
+                submitLabel: "Save and add another",
+                submissionId: this.pinSubmissionId,
+                showCancel: true,
+            })
+            : `
+                <label>
+                    Observed or source date (optional)
+                    <input id="pinObservedDateInput" type="text" placeholder="e.g. 2026-07 or 'seen last month'">
+                </label>
+                <label>
+                    How do you know this place? (source note)
+                    <textarea id="pinSourceNoteInput" rows="3" placeholder="e.g. I attend services here; no URL exists."></textarea>
+                </label>
+                <label>
+                    What kind of claim is this?
+                    <select id="pinChangeClassSelect">
+                        ${selectOptionsHtml(CHANGE_CLASS_OPTIONS, "uncertain")}
+                    </select>
+                </label>
+                <div class="copy-help">
+                    This distinction drives the annual census: real change is counted, map corrections rewrite history.
+                </div>
+                <div class="button-row">
+                    <button id="pinSubmitButton" type="button">Create candidate task</button>
+                    <button id="pinFormCancelButton" type="button" class="secondary">Cancel</button>
+                </div>
+            `;
         return `
-            <h2 class="pin-host-title">Add a place that's missing</h2>
+            <h2 class="pin-host-title">${RAPID_CURRENT_ENTRY ? "Nominate missing PoW" : "Add a place that's missing"}</h2>
             <div id="pinConfirmCard" class="pin-card" hidden>
                 <div class="pin-coords">Pin: <span id="pinLat"></span>, <span id="pinLng"></span></div>
                 <div id="pinZoomGate" class="pin-zoom-gate">
@@ -4999,27 +5480,7 @@ class NzVerificationMap {
                     Locality (optional)
                     <input id="pinLocalityInput" type="text">
                 </label>
-                <label>
-                    Observed or source date (optional)
-                    <input id="pinObservedDateInput" type="text" placeholder="e.g. 2026-07 or 'seen last month'">
-                </label>
-                <label>
-                    How do you know this place? (source note)
-                    <textarea id="pinSourceNoteInput" rows="3" placeholder="e.g. I attend services here; no URL exists."></textarea>
-                </label>
-                <label>
-                    What kind of claim is this?
-                    <select id="pinChangeClassSelect">
-                        ${selectOptionsHtml(CHANGE_CLASS_OPTIONS, "uncertain")}
-                    </select>
-                </label>
-                <div class="copy-help">
-                    This distinction drives the annual census: real change is counted, map corrections rewrite history.
-                </div>
-                <div class="button-row">
-                    <button id="pinSubmitButton" type="button">Create candidate task</button>
-                    <button id="pinFormCancelButton" type="button" class="secondary">Cancel</button>
-                </div>
+                ${formFields}
             </div>
             <div id="pinStatus" class="copy-status" aria-live="polite"></div>
         `;
@@ -5036,6 +5497,23 @@ class NzVerificationMap {
         document.getElementById("pinCancelButton")?.addEventListener("click", () => this.exitPinMode());
         document.getElementById("pinFormCancelButton")?.addEventListener("click", () => this.exitPinMode());
         document.getElementById("pinSubmitButton")?.addEventListener("click", () => this.submitPinNomination());
+        if (RAPID_CURRENT_ENTRY) {
+            ["pinNameInput", "pinAddressInput", "pinLocalityInput"].forEach(id => {
+                document.getElementById(id)?.addEventListener("input", () => this.markFormDirty("rapid-pin"));
+            });
+            this.bindRapidObservationForm("pin", {
+                getCandidate: () => {
+                    if (!this.pinConfirmed) return null;
+                    return {
+                        name: (document.getElementById("pinNameInput")?.value || "").trim() || "Unknown place of worship",
+                        address: (document.getElementById("pinAddressInput")?.value || "").trim() || undefined,
+                        locality: (document.getElementById("pinLocalityInput")?.value || "").trim() || undefined,
+                        latitude: this.pinConfirmed.latitude,
+                        longitude: this.pinConfirmed.longitude,
+                    };
+                },
+            });
+        }
         this.revealPinHost();
     }
 
@@ -5051,6 +5529,7 @@ class NzVerificationMap {
         this.pinMode = true;
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
+        this.pinSubmissionId = RAPID_CURRENT_ENTRY ? window.PowRapidEntry.secureSubmissionId() : null;
         this.mountPinCards();
         this.map.getContainer().classList.add("pin-placement");
         document.getElementById("addPlaceButton")?.setAttribute("disabled", "true");
@@ -5286,9 +5765,13 @@ class NzVerificationMap {
     }
 
     exitPinMode() {
+        if (this.formDirtyTaskId === "rapid-pin") {
+            this.clearFormDirty();
+        }
         this.pinMode = false;
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
+        this.pinSubmissionId = null;
         if (this._pinClickHandler) {
             this.map.off("click", this._pinClickHandler);
             this._pinClickHandler = null;

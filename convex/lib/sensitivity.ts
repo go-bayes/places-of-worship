@@ -7,6 +7,10 @@ export function isExternalAiReviewEligible(draft: {
   action?: string;
   denomination_or_tradition_raw?: string;
 }): boolean {
+  // rapid current observations are human-review only by contract: they are
+  // first-hand RA field evidence, largely from Vanuatu, and carry no source
+  // an external checker could verify without exporting the observation
+  if (draft.observation_contract_version === "rapid_current_v1") return false;
   if (draft.observation_contract_version !== "guided_observation_v1") return true;
   if (draft.action === "denomination_or_shared_use") return false;
   return !draft.denomination_or_tradition_raw?.trim();

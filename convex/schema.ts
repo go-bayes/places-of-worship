@@ -7,6 +7,8 @@ import {
   agentSourceCheck,
   automatedCheck,
   changeClass,
+  currentObservationBasis,
+  currentObservationStatus,
   denominationLabelBasis,
   denominationRelation,
   evidenceDraftStatus,
@@ -86,6 +88,7 @@ export default defineSchema({
     automated_checks: v.optional(v.array(automatedCheck)),
     task_brief: v.string(),
     source_context: v.optional(v.any()),
+    intake_submission_key: v.optional(v.string()),
     created_at: v.number(),
     updated_at: v.number(),
     last_event_at: v.optional(v.number()),
@@ -156,6 +159,9 @@ export default defineSchema({
     evidence_note: v.optional(v.string()),
     interpretation_note: v.optional(v.string()),
     uncertainty_note: v.optional(v.string()),
+    current_observation_status: v.optional(currentObservationStatus),
+    current_observation_basis: v.optional(currentObservationBasis),
+    intake_submission_key: v.optional(v.string()),
     generated_wide_row: v.optional(v.any()),
     privacy_flag: privacyFlag,
     licence_flag: licenceFlag,
@@ -169,10 +175,12 @@ export default defineSchema({
   })
     .index("by_evidence_draft_id", ["evidence_draft_id"])
     .index("by_task_status", ["task_id", "draft_status"])
+    .index("by_task_creator_status", ["task_id", "created_by", "draft_status"])
     .index("by_creator_time", ["created_by", "updated_at"])
     .index("by_source_url", ["source_url_or_file"])
     .index("by_source_claim_key", ["source_claim_key"])
-    .index("by_claim_hash", ["claim_hash"]),
+    .index("by_claim_hash", ["claim_hash"])
+    .index("by_intake_submission_key", ["intake_submission_key"]),
 
   review_decisions: defineTable({
     review_decision_id: v.string(),

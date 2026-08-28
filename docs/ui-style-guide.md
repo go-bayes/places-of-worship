@@ -2,7 +2,7 @@
 
 This guide records the visible language of the current task-map interface. It
 is not a complete design system. Its purpose is to keep the New Zealand pilot,
-future Vanuatu workbench, and later public task surfaces from drifting into
+current Vanuatu workbench, and later public task surfaces from drifting into
 different visual or wording conventions.
 
 The live reference today is `apps/regions/nz/verification.html` and
@@ -104,6 +104,8 @@ Use dropdowns for controlled vocabulary:
 - lifecycle event type,
 - review status,
 - action type.
+
+For rapid current observation, use one explicit four-choice control indexed to an exact observation date: worship use confirmed; place exists but worship use uncertain; place exists but worship use not present; or status undetermined. Never let the interface or server infer worship use from physical existence alone.
 
 Use open text only for evidence notes, source titles, addresses, and other
 source-specific details. Do not ask RAs to type controlled values such as

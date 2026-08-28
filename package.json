@@ -10,5 +10,8 @@
   "devDependencies": {
     "convex": "^1.45.0",
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@convex-dev/rate-limiter": "^0.3.2"
   }
 }

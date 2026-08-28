@@ -25,8 +25,7 @@ From the repository root:
 npm install
 ```
 
-This installs the Convex CLI and TypeScript. Commit the generated lockfile once
-dependencies are installed for the first time.
+This installs the Convex CLI, TypeScript, and the Convex rate-limiter component used by authenticated rapid entry. Commit the generated lockfile once dependencies are installed for the first time.
 
 ## Start A Development Deployment
 

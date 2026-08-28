@@ -14,9 +14,9 @@ The inventory also lists internal functions (kind `internal query`,
 Internal functions are not part of the public API: they are callable only with
 the deployment admin key, from the CLI, dashboard, or a scheduled job.
 
-Last reviewed: 2026-08-14, against the exported Convex functions in
+Last reviewed: 2026-08-26, against the exported Convex functions in
 `users.ts`, `tasks.ts`, `evidence.ts`, `batchImport.ts`, `reviews.ts`,
-`claudeReviews.ts`, `exports.ts`, `devSeed.ts`, `revisionSeed.ts`, and
+`rapidEntry.ts`, `claudeReviews.ts`, `exports.ts`, `devSeed.ts`, `revisionSeed.ts`, and
 `trainingSeed.ts`.
 Exports from `model.ts` and `convex/lib/` are internal validators and helpers,
 not public workflow functions.
@@ -49,6 +49,7 @@ and export bundles. Accepted changes become research data only after export,
 - Evidence notes, source fields, generated rows, review notes, task notes, and
   client context have server-side size limits before writes reach the shared
   backend.
+- Vanuatu rapid entry is role-checked, rate-limited, idempotent per user submission, restricted to Vanuatu coordinates, and atomic across candidate creation, evidence submission, audit events, and the task transition to human review. The client cannot submit historical target-year states or other derived review fields through this endpoint.
 - `accepted_for_export` is a review state, not a master write. It only makes a
   decision eligible for export to the governed `pow` path.
 
@@ -94,17 +95,23 @@ does. `countryYears.ts` mirrors the portal's `COUNTRY_CONFIGS`
 `targetYears` — update both in the same commit when a country's waves
 change.
 
+## `rapidEntry.ts`
+
+| Function | Kind | Roles | Purpose | Writes |
+| --- | --- | --- | --- | --- |
+| `submitVanuatuCurrentObservation` | mutation | `ra`, `reviewer`, `curator`, `admin` | Atomically record one Vanuatu current observation against an authorised existing task or a newly pinned provisional candidate. The server validates controlled current-status and evidence fields, applies Vanuatu bounds and transactional rate limits, derives provisional workflow classifications, leaves all historical target years unassessed, appends audit events, and moves the task to human review. A user-scoped UUID makes safe retries idempotent. While a task holding a rapid observation awaits review (`needs_review`, `unresolved_note`, `changes_requested`), only that observation's author may submit a corrected observation; the earlier record is marked `superseded`, never rewritten. This is the only route that can create or replace a `rapid_current_v1` draft. | `task_batches` when absent, `tasks`, `evidence_drafts`, `task_events`, rate-limit component state |
+
 ## `evidence.ts`
 
 | Function | Kind | Roles | Purpose | Writes |
 | --- | --- | --- | --- | --- |
 | `getEvidenceDraft` | query | draft owner, `reviewer`, `curator`, `admin` | Return one evidence draft if the caller owns it or can review it. | None |
 | `listTaskEvidence` | query | `ra`, `reviewer`, `curator`, `admin` | List evidence drafts for a task. RAs see only their own drafts; reviewers and maintainers can see all task evidence. | None |
-| `saveEvidenceDraft` | mutation | `ra`, `reviewer`, `curator`, `admin` | Create or update a size-limited user evidence draft and mark the task draft-saved. | `evidence_drafts`, `tasks`, `task_events` |
-| `importSubmittedEvidenceDrafts` | mutation | `admin`, `service` | Import spreadsheet-submitted rows as provisional tasks and submitted evidence drafts so they enter the reviewer queue. | `task_batches`, `tasks`, `evidence_drafts`, `task_events` |
-| `submitEvidenceDraft` | mutation | draft owner, `reviewer`, `curator`, `admin` | Submit a draft for reviewer attention and mark the task needs-review. | `evidence_drafts`, `tasks`, `task_events` |
-| `submitUnresolvedNote` | mutation | draft owner, `reviewer`, `curator`, `admin` | Submit useful but incomplete evidence for reviewer triage and mark the task unresolved-note. | `evidence_drafts`, `tasks`, `task_events` |
-| `reviseEvidenceDraft` | mutation | draft owner, `reviewer`, `curator`, `admin` | Start a revision from a task's active submission (submitted draft or unresolved note): clone it into a new editable version, or reuse the author's existing editable draft, and record a task event. Per-status transitions: changes-requested moves to in-progress; needs-review and unresolved-note keep their queue status while the revision rides alongside. The submitted version stays immutable. | `evidence_drafts`, `tasks`, `task_events` |
+| `saveEvidenceDraft` | mutation | `ra`, `reviewer`, `curator`, `admin` | Create or update a size-limited user evidence draft and mark the task draft-saved. Rejects the `rapid_current_v1` contract and rapid fields, and refuses to patch an existing rapid draft. | `evidence_drafts`, `tasks`, `task_events` |
+| `importSubmittedEvidenceDrafts` | mutation | `admin`, `service` | Import spreadsheet-submitted rows as provisional tasks and submitted evidence drafts so they enter the reviewer queue. Rejects `rapid_current_v1` rows and never overwrites an existing rapid draft. | `task_batches`, `tasks`, `evidence_drafts`, `task_events` |
+| `submitEvidenceDraft` | mutation | draft owner, `reviewer`, `curator`, `admin` | Submit a draft for reviewer attention and mark the task needs-review. Rejects rapid drafts. | `evidence_drafts`, `tasks`, `task_events` |
+| `submitUnresolvedNote` | mutation | draft owner, `reviewer`, `curator`, `admin` | Submit useful but incomplete evidence for reviewer triage and mark the task unresolved-note. Rejects rapid drafts. | `evidence_drafts`, `tasks`, `task_events` |
+| `reviseEvidenceDraft` | mutation | draft owner, `reviewer`, `curator`, `admin` | Start a revision from a task's active submission (submitted draft or unresolved note): clone it into a new editable version, or reuse the author's existing editable draft, and record a task event. Per-status transitions: changes-requested moves to in-progress; needs-review and unresolved-note keep their queue status while the revision rides alongside. The submitted version stays immutable. A rapid observation is never cloned: the call fails and the author corrects through `rapidEntry:submitVanuatuCurrentObservation`. | `evidence_drafts`, `tasks`, `task_events` |
 
 ## `batchImport.ts`
 

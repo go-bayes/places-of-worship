@@ -18,10 +18,11 @@ master database or public map. Reviewed evidence must still be exported,
 validated by `pow`, staged, diffed, and replayed before it becomes research or
 public-map data.
 
-Vanuatu is the next country case, but it starts source-first. Guy should first
-collect and assess source leads for 1989, 1999, 2009, and 2020, while
-preserving older lifecycle evidence back to 1600. The temporary Vanuatu portal
-is a test surface over the shared Convex review layer, not a final country map.
+Vanuatu is the next country case. Its rapid-entry path lets an invited RA pin a provisional missing place and record a dated observation about its current physical existence and worship use in one submission. The same portal retains a detailed form for source leads concerning 1989, 1999, 2009, and 2020 and for older lifecycle evidence back to 1600. The temporary Vanuatu portal is a test surface over the shared Convex review layer, not a final country map.
+
+## Does “the place currently exists” mean that worship currently occurs there?
+
+No. Physical existence and worship function are separate observations. The rapid Vanuatu form therefore asks the RA to choose among four claims at an exact observation date: the site is used for worship; the place exists but worship use is uncertain; the place exists but is not used for worship; or its status could not be determined. Here, “current” means at that recorded date, not a timeless property. The server preserves the explicit answer and derives provisional review fields from it. It does not infer worship from a building, nor use a present observation to fill a historical target year.
 
 ## What is the unit of analysis?
 
@@ -69,12 +70,7 @@ source or matching evidence rather than treated as the project identity.
 The candidate should include source evidence, location evidence, target-year
 status where known, any relevant OSM object ids, and review notes.
 
-For the first New Zealand RA assignment, the live page can save evidence
-against assigned tasks but does not yet let an RA create an unrelated new
-candidate. If an assistant finds a missing place while checking an assigned
-task, they should record it in that task. If they notice a separate missing
-place, they should send the name, source, location, and any OSM id to JB until
-the reusable `Nominate missing PoW` flow is built.
+The Vanuatu rapid-entry path implements this nomination as an atomic review submission: it creates the provisional candidate and submitted evidence together, then places the task in the human review queue. It requires a building-accurate point, a nearby-place check, an exact observation date, an evidence basis, one of four explicit current-status claims, and a sensitivity setting. It does not create an accepted site or change the public map.
 
 A reviewer can then reject it, link it to an existing site, request more
 evidence, or accept it as a new project site. Acceptance mints or assigns a
