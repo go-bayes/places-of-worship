@@ -104,6 +104,13 @@ async function supersedeOtherActiveDrafts(
       .collect();
     for (const otherDraft of others) {
       if (otherDraft._id !== draft._id && otherDraft.created_by === draft.created_by) {
+        // a generic submission must never displace an active rapid
+        // observation; only rapidEntry's correction path may supersede it
+        if (isRapidCurrentDraft(otherDraft)) {
+          throw new Error(
+            "This task holds a rapid current observation awaiting review. Correct that observation through the rapid entry path instead of submitting separate evidence.",
+          );
+        }
         await ctx.db.patch(otherDraft._id, {
           draft_status: "superseded",
           updated_at: now,
