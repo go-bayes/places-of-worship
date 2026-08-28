@@ -37,6 +37,7 @@
   readers, not as private agent instructions.
 - `LEXICON.md`: plain-language project terms. Use it when editing reports,
   RA-facing docs, README copy, diagrams, and planning summaries.
+- `docs/operational-definition.md`: stable public entry point for the current operational definition. Update this canonical page whenever the project adopts a revised definition, and preserve each adopted version as a dated snapshot under `docs/development/`. Link current instructions to the canonical page; link a dated snapshot only when a study or decision needs the historical rule. Keep every dated definition or discussion draft complete. Add supersession notices while retaining the original text.
 - `CHANGELOG.md`: durable progress. Update it for user-visible docs, schemas,
   scripts, data products, or deployment behaviour. Add dated entries under
   `## Unreleased`, using ISO dates such as `### 2026-05-03`.

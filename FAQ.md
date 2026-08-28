@@ -34,10 +34,13 @@ Each historical claim enters human review as provisional evidence. It does not c
 
 ## What is the unit of analysis?
 
-The primary unit is a mappable place of worship: a building, parcel, compound,
-or otherwise locatable site where worship use occurs or occurred. It is not
-simply a building record and it is not always the same as a congregation or
-organisation.
+The scientific object is the worship-function state at a mappable site at a specified time. The `site_id` identifies the physical place; buildings, organisations, congregations, source records, and observations are distinct objects linked to it.
+
+## What counts as a place of worship?
+
+At a specified time, a place of worship is a reproducibly mappable site for which source evidence supports recurring religious worship by or for a community. Shared, adapted, institutional, temporary, multi-purpose, and natural settings can qualify when they meet that functional threshold. Treat religious architecture, affiliation, sacred significance, an organisation's address, private devotion, and one-off events as candidate evidence, then apply all three criteria before accepting a place-of-worship state.
+
+Candidate collection is broader than accepted classification. An OSM tag, directory entry, public nomination, or field observation may create a provisional claim for review. The claim becomes an accepted site-time state when the evidence supports the working definition. Boundary and culturally restricted cases retain their source wording, uncertainty, and access conditions. See the [current operational definition](docs/operational-definition.md) for the full rule and its application to measurement over time.
 
 ## What do opening, closure, and change dates mean here?
 
