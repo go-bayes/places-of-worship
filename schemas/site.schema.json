@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://go-bayes.github.io/places-of-worship/schemas/site.schema.json",
   "title": "Place of Worship — Site",
-  "description": "Persistent location (parcel/compound) where religious activity occurs. Distinct from structures and organisations.",
+  "description": "Persistent, reproducibly mappable site with source evidence of recurring religious worship by or for a community at one or more specified times. Distinct from structures and organisations.",
   "type": "object",
   "additionalProperties": false,
   "required": ["site_id", "geometry", "country_code", "status", "valid_from", "sources"],
