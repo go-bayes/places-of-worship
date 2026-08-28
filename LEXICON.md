@@ -40,14 +40,11 @@ reviewer" or "person with export permission".
 
 ### Place Of Worship
 
-A site where worship use occurs or occurred. It may be a church, mosque,
-temple, synagogue, meeting house, prayer room, shared building, or other
-locatable place used for worship.
+At a specified time, a place of worship is a reproducibly mappable site for which source evidence supports recurring religious worship by or for a community. Accepted records may preserve earlier worship use after it ends, with the worship-function state and its time bounds held in distinct fields.
 
 ### Mappable Site
 
-The physical place we can put on a map: a building, parcel, compound, point, or
-locality. This is the lowest-level unit of analysis.
+The physical place that preserved location evidence allows independent project workers to identify at the spatial precision required by the study. It may be a building, parcel, compound, room, shared or temporary venue, or natural place. This is the lowest-level unit of analysis; the `site_id` identifies this unit.
 
 ### `site_id`
 
@@ -62,9 +59,7 @@ site, or be rejected.
 
 ### Worship Use
 
-Whether the place is being used for worship. A building can exist without
-current worship use, and worship use can occur in a shared or multi-purpose
-building.
+Whether source evidence supports recurring religious worship by or for a community at the site at a specified time. A building can exist without current worship use, and worship use can occur in a shared, adapted, temporary, multi-purpose, or natural setting.
 
 ### Target Year
 

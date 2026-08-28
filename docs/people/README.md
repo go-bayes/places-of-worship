@@ -23,6 +23,7 @@ facts set the policy:
 
 ## Audience directories
 
+- `docs/people/jb/` — JB, project lead, maintainer, and reviewer.
 - `docs/people/ra/` — research assistants (public; RAs work from these
   pages directly).
 - `docs/people/jw/` — JW, co-investigator and reviewer.
