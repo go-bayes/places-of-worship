@@ -2678,26 +2678,56 @@ class NzVerificationMap {
             }
             const tasks = await this.backend.listTasks(query);
             const allTasks = tasks || [];
+            // nominated candidates live in the manual batch, which the
+            // assignment-scoped query cannot return; fetch it as well so
+            // nominations stay reachable and visible to the duplicate
+            // check after a reload, not only in this page's memory
+            let manualBatchTasks = [];
+            if (ASSIGNMENT_MODE) {
+                const manualBatchId = `manual-${COUNTRY_CONFIG.countryCode.toLowerCase()}`;
+                manualBatchTasks = (await this.backend.listTasks({
+                    countryCode: COUNTRY_CONFIG.countryCode,
+                    batchId: manualBatchId,
+                    limit: 1000,
+                })) || [];
+            }
             this.backendTasksById = new Map(allTasks.map(task => [task.task_id, task]));
-            // pin-drop tasks live in the manual batch, which the
-            // assignment-scoped query cannot return; re-merge the local
-            // copies so the ra stays landed in a freshly created task
+            for (const task of manualBatchTasks) {
+                this.backendTasksById.set(task.task_id, task);
+            }
+            // re-merge local copies so the ra stays landed in a task
+            // created moments ago that the queries have not indexed yet
             for (const [taskId, manualTask] of this.manualTasksById) {
                 if (!this.backendTasksById.has(taskId)) {
                     this.backendTasksById.set(taskId, manualTask);
                 }
             }
+            // no batch scope: my work covers the assignment batch and the
+            // ra's own nominated candidates in the manual batch
             this.myWorkItems = ASSIGNMENT_MODE
-                ? await this.backend.listMyTasks({
+                ? ((await this.backend.listMyTasks({
                     countryCode: COUNTRY_CONFIG.countryCode,
-                    batchId: ASSIGNMENT_BATCH_ID,
                     statuses: MY_WORK_STATUSES,
                     limit: 200,
+                })) || []).filter(item => {
+                    const batchId = item?.task?.batch_id || "";
+                    return batchId === ASSIGNMENT_BATCH_ID
+                        || batchId === `manual-${COUNTRY_CONFIG.countryCode.toLowerCase()}`;
                 })
                 : [];
             if (ASSIGNMENT_MODE) {
+                // nominated candidates join the map and list whatever their
+                // status: their author needs a route back to them, and the
+                // pin-drop proximity check needs to see them
+                const nominatedTasks = [...manualBatchTasks];
+                for (const [taskId, manualTask] of this.manualTasksById) {
+                    if (!nominatedTasks.some(task => task.task_id === taskId)) {
+                        nominatedTasks.push(manualTask);
+                    }
+                }
                 this.tasks = allTasks
                     .filter(task => this.assignmentTaskIsAvailable(task))
+                    .concat(nominatedTasks)
                     .map(featureFromBackendTask);
                 const snapshotEl = document.getElementById("snapshotId");
                 if (snapshotEl) {
@@ -4291,6 +4321,38 @@ class NzVerificationMap {
                 this.focusDetailPanel();
                 return;
             }
+            // synthesise the backend-task shape locally so the nomination
+            // stays on the map, in the list, in my work, and visible to
+            // the proximity check before the batch queries catch up
+            const manualTask = {
+                task_id: result.task_id,
+                batch_id: `manual-${COUNTRY_CONFIG.countryCode.toLowerCase()}`,
+                country_code: COUNTRY_CONFIG.countryCode,
+                task_type: "missing_from_project_map",
+                priority: "high",
+                status: result.task_status,
+                assigned_to: this.backendUser?._id,
+                target_years: COUNTRY_CONFIG.targetYears.map(Number),
+                candidate_site_id: result.candidate_site_id,
+                name: candidate.name,
+                address: candidate.address,
+                locality: candidate.locality,
+                geometry: {
+                    type: "Point",
+                    coordinates: [candidate.longitude, candidate.latitude],
+                },
+                automated_checks: [{
+                    check_id: "rapid_current_nomination",
+                    severity: "info",
+                    message: "An invited RA submitted a current-place observation through the Vanuatu rapid-entry path.",
+                    suggested_action: "review_identity_and_current_use",
+                }],
+                task_brief: "Review this Vanuatu current-place observation. Confirm site identity, present worship use, sensitivity, and whether an existing project or OSM record already represents the place before export.",
+            };
+            this.manualTasksById.set(result.task_id, manualTask);
+            this.backendTasksById.set(result.task_id, manualTask);
+            await this.refreshBackendTasks();
+            this.applyFilters();
             this.exitPinMode();
             const submittedProps = {
                 task_id: result.task_id,
