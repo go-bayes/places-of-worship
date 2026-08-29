@@ -90,7 +90,7 @@
         },
         "person_names_public": {
           "type": "boolean",
-          "description": "Whether tenure person names may enter the DOM. The flag guards living people, not presentation taste: set it true only when the dataset's persons are established as historical, and treat a recorded death date as the only positive evidence of decease. Absence of recent activity is not such evidence — the Anglican incumbent series, for example, names 1844 people of whom 583 have activity in 2000 or later and 258 hold open-ended tenures. A collection that cannot establish decease declares false and ships person_ref only."
+          "description": "Whether tenure person names may be published. The flag governs publication, not retention. False means names must not be rendered on any public surface: a conforming product may still carry name in a private or access-controlled feed for audit, provided that feed is not published, and the consuming page drops the names at load so no render path can reach one. This schema permits name regardless of the flag, which is what lets such an audit feed validate. Do not strip names from a private feed to satisfy the flag: that destroys the audit trail without protecting anyone, since the protection comes from not rendering them. The flag guards living people, not presentation taste: set it true only when the dataset's persons are established as historical, and treat a recorded death date as the only positive evidence of decease. Absence of recent activity is not such evidence — the Anglican incumbent series, for example, names 1844 people of whom 583 have activity in 2000 or later and 258 hold open-ended tenures."
         },
         "source_datasets": {
           "type": "array",
@@ -342,7 +342,7 @@
         },
         "tenures": {
           "type": "array",
-          "description": "People attached to the unit, never units themselves. Names ship only when meta.person_names_public is true; person_ref stays stable either way.",
+          "description": "People attached to the unit, never units themselves. Names are published only when meta.person_names_public is true; person_ref stays stable either way, and a private audit feed may carry name under a false flag.",
           "items": {
             "type": "object",
             "additionalProperties": false,
@@ -354,7 +354,11 @@
               "start_year": { "type": ["integer", "null"] },
               "end_year": { "type": ["integer", "null"] },
               "date_precision": { "type": "string", "enum": ["year", "circa", "decade", "unknown"] },
-              "source": { "type": "string" }
+              "source": { "type": "string" },
+              "extensions": {
+                "type": "object",
+                "description": "Renderer-specific extras for this tenure; never read by the engine. Present because its absence forced the Anglican migration to fold a starred marker into the source string."
+              }
             }
           }
         },

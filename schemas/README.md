@@ -30,6 +30,22 @@ JSON Schemas that define the core data structures used across the project.
   unit. The closed enum is the ruled position (2026-08-29), so
   indicator.schema.json should give way when that aspirational schema next
   gains a consumer.
+  person_names_public governs publication, not retention: false means names
+  must not be rendered on any public surface, while a private or
+  access-controlled feed may still carry name for audit. The schema permits
+  name under either setting deliberately. Stripping names from a private
+  feed protects nobody — the protection comes from not rendering them — and
+  destroys the audit trail.
+  Known gap list for a future collection.v2, banked from the Anglican
+  migration (pow-research 5f101a9, 941 features validating with no errors):
+  the migration had to carry diocese, lifecycle events (kind, verbatim
+  source_text, date_precision, source page), wave presence, aliases, matched
+  place name, and collection-level counts in extensions, because the
+  standalone renderer reads them and no typed field exists. They stay in
+  extensions while the series engine mode is deferred; type them in v2 if
+  that mode lands. The tenure item gained its own extensions object in v1
+  because its absence forced a real data compromise — a starred marker had
+  to be folded into the source string.
 - change-event.schema.json: append-only staged or accepted revision event,
   including worship-function state changes needed for `pow diff`.
 - data-manifest.schema.json: checksummed data artefact manifest for local cache,
