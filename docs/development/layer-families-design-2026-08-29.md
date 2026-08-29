@@ -72,7 +72,63 @@ Protestant station locations from atlases; Catholic mission stations (Jan
   + licence line; measurement-diversity principle (kinds displayed side by
   side, never blended); build-then-ask licence posture.
 
-## Architecture: three families, each with one contract
+## The unit of analysis (JB, 2026-08-29, governing)
+
+The place of worship is the unit of analysis, and this governs everything
+below. A PoW unit is mappable in time and attaches to a community. It has
+properties in space and time: a location (approximate where it cannot be
+pinned, with the basis declared), a denomination, perhaps a congregation
+size, and whatever else we learn to record. Nearly every measure in
+Derbyshire's thesis and in the Anglican Church's published series — acts of
+communion, offerings, average attendance — is an attribute of such a unit at
+a time, with place typically, though not necessarily always, fixed. Measures
+we publish on areas are **derived from these units**: the share of places of
+worship in a region at a given time is a statistic computed over units, not
+an independent quantity.
+
+Three consequences follow, and they revise the family scheme drafted earlier
+in this document.
+
+**1. The attribute set is a square structure with extensible columns.**
+Unit × time × attribute. The research tier already carries this shape:
+`site`, `site_snapshot`, `indicator`, and `indicator_observation` — the last
+attaching a value to a site, a snapshot, an area unit, a country, or a grid
+cell for a period (`pow-research/PLANNING.md`, "Country backend scheme").
+Learning something new about places of worship therefore adds a **declared
+indicator**, never a schema change. The schema is fixed; the vocabulary
+grows. This is the same principle already ruled for area domains, applied one
+level down.
+
+**2. A source of PoW units is not a separate ontology.** The Anglican parish
+series and Woodberry's mission stations describe places of worship. Their
+units are sites, and their metrics are indicator observations on those sites.
+They belong to the places-of-worship family and feed the master; the
+`collection.v1` product is a governed *view* of those observations carrying
+its own provenance, licence, credit, and time model — not a parallel kind of
+thing. Only a collection whose units are genuinely not places of worship
+(Pulotu cultures, which are cultures) stands outside the family, and the
+never-merge rule is what keeps it outside. `unit_kind` in the contract must
+therefore declare whether a collection's units are sites, and a collection of
+sites must be able to carry `pow_site_ref`.
+
+**3. Area domains divide by derivation, and must say which they are.**
+Place counts, places per 10,000 residents, density, and denominational shares
+of places of worship are **derived** from the unit table, and inherit its
+coverage limits exactly. Census religion, language, and economic indicators
+are **independently enumerated** and inherit the enumeration's limits
+instead. Both render as choropleths; a product must declare which it is, so
+that a reader is never invited to read a coverage artefact as a finding.
+
+**The invariant: always locatable on a map in time.** Every PoW unit carries
+a location — exact, or approximate with its basis and precision declared —
+and a time extent. It follows that an unplaced unit is a work queue item, not
+a display state: the Anglican prototype's 344 unplaced parishes are a
+matching queue that should feed the portal's task list, not a permanent tray
+beside the map. Where a unit's location changes, the location is an attribute
+of the unit at a time like any other, which is what the fixed-place
+qualification above reserves.
+
+## Architecture: the families as revised by the ruling above
 
 ### Family 0 — PoW (the default, always)
 
