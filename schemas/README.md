@@ -18,6 +18,18 @@ JSON Schemas that define the core data structures used across the project.
   pending (the VU Woodberry mission collection; the Pulotu product converts
   behind a shim when the collections runtime lands). Fixture and Pulotu
   mapping note under fixtures/; gated by scripts/validate_collections.sh.
+  Under the unit-of-analysis ruling (2026-08-29), a collection declaring
+  units_are_places_of_worship true is a governed view of site-level
+  indicator observations inside the places-of-worship family, and carries a
+  pow_site_ref slot on every unit; false marks units that are genuinely
+  something else (Pulotu cultures). Attributes extend by declared metric,
+  never by schema change. One known drift against indicator.schema.json:
+  collection.v1 closes the unit enum (count, percent, rate, currency, code,
+  year) where indicator.schema.json leaves unit an open string whose
+  examples (places_per_10000_residents) name a whole indicator rather than a
+  unit. The closed enum is the ruled position (2026-08-29), so
+  indicator.schema.json should give way when that aspirational schema next
+  gains a consumer.
 - change-event.schema.json: append-only staged or accepted revision event,
   including worship-function state changes needed for `pow diff`.
 - data-manifest.schema.json: checksummed data artefact manifest for local cache,
