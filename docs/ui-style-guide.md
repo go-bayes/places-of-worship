@@ -10,8 +10,13 @@ The live reference today is `apps/regions/nz/verification.html` and
 
 ## Product Wording
 
-- Use `Nominate missing PoW`, not `Add to map`, for user-created candidate
-  intake.
+- Use `＋ Add a missing place`, not `Add to map`, for user-created candidate
+  intake (ruled 2026-08-29). One label serves every country, rapid entry
+  included. Pair it with the helper line "Your nomination goes to human
+  review — it does not change the public map.", which carries the nomination
+  semantics the older `Nominate missing PoW` label expressed. Treat
+  `Nominate missing PoW` as a legacy technical label where it survives in
+  code or older documents.
 - Use `Save draft` when the RA is still gathering evidence.
 - Use `Submit for review` when the RA wants JB or a reviewer to inspect the
   evidence.
@@ -34,6 +39,21 @@ The map interface has two primary regions:
 - `.sidebar`: instructions, sign-in, filters, task list, session or assignment
   state, and task detail.
 - `#map`: the map and spatial task markers.
+
+The contributor portal (assignment mode) gates its sidebar behind sign-in
+(ruled 2026-08-29). Signed out, the sidebar shows only the header and the
+sign-in card; the map stays visible for read-only browsing. After sign-in a
+chooser offers two activities — `Assigned tasks` and `Add places` — and the
+sidebar then shows only the chosen activity's sections. A `← Change activity`
+link returns to the chooser; the choice persists for the tab
+(`sessionStorage`), so a reload lands where the contributor was.
+
+The map offers `Streets` (OSM standard tiles) and `Satellite` (MapTiler
+imagery) basemaps through a small pill control. Add-places mode prefers
+satellite once buildings are resolvable and switches to it when pin placement
+starts, so contributors can guide the pin onto the actual building; a manual
+toggle choice wins for the rest of the session. The satellite option hides
+itself when no MapTiler key is configured.
 
 Keep the sidebar dense but readable. This is a workbench, not a landing page.
 Avoid hero copy, decorative cards, and explanatory blocks that push the task
