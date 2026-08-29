@@ -7,6 +7,15 @@ JSON Schemas that define the core data structures used across the project.
   generations validate against this base schema).
 - area-summary.v2.schema.json: the area-summary.v2 contract — structured
   per-row composition and optional service_url, declared-version validated.
+- collection.v1.schema.json: the collection.v1 contract — a dated map
+  collection (mission stations, cultural reconstructions, parish series):
+  units with nullable point locations, dated presence with the
+  site_lifespan_v1 basis vocabulary, metric series or coded state values,
+  person tenures, and a collection passport (construct, credit,
+  temporal_model, metric registry). Defined 2026-08-29; first consumer
+  pending (the VU Woodberry mission collection; the Pulotu product converts
+  behind a shim when the collections runtime lands). Fixture and Pulotu
+  mapping note under fixtures/; gated by scripts/validate_collections.sh.
 - change-event.schema.json: append-only staged or accepted revision event,
   including worship-function state changes needed for `pow diff`.
 - data-manifest.schema.json: checksummed data artefact manifest for local cache,
