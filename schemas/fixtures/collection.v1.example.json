@@ -4,8 +4,11 @@
   "meta": {
     "collection_id": "vu-example-missions",
     "label": "Example mission stations",
-    "country_codes": ["VU"],
+    "country_codes": [
+      "VU"
+    ],
     "unit_kind": "mission_station",
+    "units_are_places_of_worship": true,
     "construct": "documented mission stations georeferenced from historical atlases; records of documentation, never counts",
     "credit": "Example data compiled by A. Contributor; atlas sources as cited per station.",
     "person_names_public": true,
@@ -24,7 +27,13 @@
     "temporal_model": {
       "kind": "interval",
       "axis": "calendar_year",
-      "stops": [1850, 1875, 1900, 1925, 1950]
+      "stops": [
+        1850,
+        1875,
+        1900,
+        1925,
+        1950
+      ]
     },
     "metrics": [
       {
@@ -33,8 +42,16 @@
         "unit": "code",
         "kind": "cat",
         "codes": [
-          { "code": "protestant", "label": "Protestant", "colour": "#7b5aa6" },
-          { "code": "catholic", "label": "Catholic", "colour": "#3f8fb5" }
+          {
+            "code": "protestant",
+            "label": "Protestant",
+            "colour": "#7b5aa6"
+          },
+          {
+            "code": "catholic",
+            "label": "Catholic",
+            "colour": "#3f8fb5"
+          }
         ]
       }
     ]
@@ -42,7 +59,13 @@
   "features": [
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [168.32, -17.74] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          168.32,
+          -17.74
+        ]
+      },
       "properties": {
         "unit_id": "vu-example-missions:station-001",
         "name": "Example Bay Mission",
@@ -52,7 +75,12 @@
         "start_basis": "founding_stated",
         "end_basis": "last_seen_only",
         "values": {
-          "tradition": { "code": "protestant", "sources": ["example-atlas-1900 p. 12"] }
+          "tradition": {
+            "code": "protestant",
+            "sources": [
+              "example-atlas-1900 p. 12"
+            ]
+          }
         },
         "tenures": [
           {
@@ -67,7 +95,9 @@
         ],
         "location_basis": "atlas_georeference",
         "location_confidence": "medium",
-        "sources": ["example-atlas-1900 p. 12"],
+        "sources": [
+          "example-atlas-1900 p. 12"
+        ],
         "taxonomy_code": null,
         "pow_site_ref": null
       }
@@ -84,12 +114,23 @@
         "start_basis": "first_seen_only",
         "end_basis": "unknown",
         "values": {
-          "tradition": { "code": "catholic", "sources": ["example-atlas-1900 p. 31"] }
+          "tradition": {
+            "code": "catholic",
+            "sources": [
+              "example-atlas-1900 p. 31"
+            ]
+          }
         },
         "location_basis": "described_locality",
         "location_confidence": "low",
-        "representative_area": { "level": "province", "code": "VU-MAP" },
-        "sources": ["example-atlas-1900 p. 31"]
+        "representative_area": {
+          "level": "province",
+          "code": "VU-MAP"
+        },
+        "sources": [
+          "example-atlas-1900 p. 31"
+        ],
+        "pow_site_ref": null
       }
     }
   ]
