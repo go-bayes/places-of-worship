@@ -231,6 +231,24 @@ socio-economic domains per country as route probes deliver products.
   recorded activity, and the coverage of any death-date field — must be run
   on Bob's two missionary workbooks before names ship. Only a recorded death
   date is positive evidence of decease.
+
+  **Result of that check on Bob's workbooks (2026-08-29): his data are not
+  wholly historical either.** About 110 named persons may be living. Catholic
+  missionaries: 15 of 198 have a birth year within 95 years and no recorded
+  death (born 1937-1954), on a file with 94.9% birth-year and 85.9% death-year
+  coverage, so these 15 are a specific checkable list. Protestant missionaries:
+  95 of 686 have no recorded death and a last record in 2015 or later, on a
+  file with no birth years at all and 28.3% death coverage, so absence of a
+  death record carries almost no information. Several of the possibly-living
+  carry ni-Vanuatu names and the `From Vanuatu` flag, and so are likely
+  resident and locally known. The Southern Cross Log sheet is wholly historical
+  (nothing past 1972).
+
+  The ruling that names may ship because these are historical deceased persons
+  therefore rests on a false premise and is suspended pending JB's decision.
+  Interim rule in force: **a name ships only where a death is recorded**;
+  otherwise initials or counts. This is a privacy question for JB and for Bob,
+  not one the build resolves.
 - Stations: display collection now; **and immediately** seed Bob's sites
   as tasks in Guy's Vanuatu task list (the `adminUpsertTasksFromStaticMap`
   route used for the Port Vila 2010 survey batch), with Street View links
