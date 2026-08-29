@@ -215,12 +215,22 @@ socio-economic domains per country as route probes deliver products.
 
 - Woodberry collection pilot first; VU language domain second; socio-
   economic domains after both.
-- Missionaries render as tenures on stations **with names**. Bob's
-  records are historical references to deceased persons, not subject to
-  the living-clergy quarantine applied in the Anglican prototype; names
-  appear in the station popup's tenure disclosure with their source, and
-  Bob reviews the material before it ships. (Supersedes the sitting's first
+- Missionaries render as tenures on stations **with names**, subject to the
+  living-person check below. Bob's records are historical references; names
+  appear in the station popup's tenure disclosure with their source, and Bob
+  reviews the material before it ships. (Supersedes the sitting's first
   draft, which had applied the Anglican clergy rule by analogy.)
+
+  **Verified 2026-08-29, and it corrects a premise: the Anglican persons are
+  not all deceased.** The Derbyshire incumbents feed carries 3,637 tenure
+  rows over 1,844 distinct named clergy; 583 have activity in 2000 or later,
+  230 in 2010 or later, and 258 tenures are open-ended at the thesis's 2012
+  horizon. A dataset's historical framing does not establish that its persons
+  are dead. The Anglican no-names-in-DOM rule therefore stands on its own
+  footing, and the same check — the distribution of each person's last
+  recorded activity, and the coverage of any death-date field — must be run
+  on Bob's two missionary workbooks before names ship. Only a recorded death
+  date is positive evidence of decease.
 - Stations: display collection now; **and immediately** seed Bob's sites
   as tasks in Guy's Vanuatu task list (the `adminUpsertTasksFromStaticMap`
   route used for the Port Vila 2010 survey batch), with Street View links
