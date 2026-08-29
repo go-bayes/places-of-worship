@@ -267,6 +267,41 @@ Pilot 2 — VU language domain (proves Family 1 beyond religion):
 Then: Anglican feed → collection.v1 (rename, standalone stays);
 socio-economic domains per country as route probes deliver products.
 
+## Standing policy: personal details (JB, 2026-08-29)
+
+**We do not publish personal details without permission, even where those
+details are already in the public domain.** Public availability is not consent,
+and it is not a licence. This governs every surface the project publishes —
+maps, collections, exports, downloads, and figures — and it binds regardless of
+how a record reached us or how freely it circulates elsewhere.
+
+The rule follows two findings from this sitting, both of which refuted an
+assumption that had been travelling unchecked. The Derbyshire parish series
+carries 1,844 named clergy, of whom 583 have activity in 2000 or later and 258
+hold tenures still open at the thesis's 2012 horizon. Woodberry's missionary
+workbooks carry about 110 persons who may be living, several with ni-Vanuatu
+names and his `From Vanuatu` flag, and so likely resident and locally known.
+A dataset's historical framing establishes nothing about whether its persons
+are alive; **only a recorded death date is positive evidence of decease.**
+
+In force:
+
+- A name reaches a public surface only where a death is recorded, or where the
+  person has given permission. Otherwise initials, a role, or a count.
+- `person_names_public` in `collection.v1` governs **publication, not
+  retention**. Names stay in private, access-controlled feeds for audit; the
+  consuming page drops them at load, so no render path can reach one. Stripping
+  a private audit trail protects nobody, since the protection comes from not
+  rendering.
+- The same test applies to any personal detail, not only names: addresses,
+  photographs, roles held at datable times, and anything that identifies a
+  living person.
+- Where a source's own terms and this rule disagree, this rule governs, and the
+  question returns to JB.
+
+This policy belongs in the project's governance documents as well as here;
+recording it in the design note is an interim measure.
+
 ## Rulings (JB, 2026-08-29)
 
 - Woodberry collection pilot first; VU language domain second; socio-
