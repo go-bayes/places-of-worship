@@ -806,6 +806,21 @@ const SKIP_REASON_CHIPS = [
 const PIN_MIN_PLACEMENT_ZOOM = 15;
 const PIN_MIN_APPROXIMATE_ZOOM = 8;
 const PIN_PROXIMITY_METRES = 150;
+// satellite basemap: maptiler's paid plan (ruled 2026-08-29) so contributors
+// can steer the pin onto the actual building; absent key hides the option
+const MAPTILER_API_KEY = String(window.MAPTILER_API_KEY || "").trim();
+const SATELLITE_TILE_URL = MAPTILER_API_KEY
+    ? `https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+    : "";
+// add mode prefers imagery once streets stop showing individual buildings
+const PORTAL_AUTO_SATELLITE_ZOOM = 15;
+// signed-in portal activity, kept per country and batch for the tab's life
+const PORTAL_MODES = new Set(["assigned", "add"]);
+const PORTAL_MODE_KEY = `pow_portal_mode_v1:${COUNTRY_CONFIG.countryCode.toLowerCase()}${ASSIGNMENT_SESSION_SEGMENT}`;
+// place-name search: one nominatim request per submit, spaced out, so the
+// portal stays well inside the osmf usage policy
+const NOMINATIM_SEARCH_URL = "https://nominatim.openstreetmap.org/search";
+const NOMINATIM_MIN_INTERVAL_MS = 1500;
 const LOCATION_MODE_OPTIONS = [
     ["building_identified", "I identified the building"],
     ["approximate_area", "I only know the approximate area"],
@@ -1658,6 +1673,16 @@ class NzVerificationMap {
         this.pinNearbyCount = 0;
         this.pinSubmissionId = null;
         this.manualTasksById = new Map();
+        // signed-in portal activity: null while signed out or choosing,
+        // otherwise "assigned" or "add" (see setPortalMode)
+        this.portalMode = null;
+        // basemap: streets by default; auto switches (add mode, pin
+        // placement) yield to a manual choice for the rest of the session
+        this.basemap = "streets";
+        this.basemapUserChosen = false;
+        this.streetsLayer = null;
+        this.satelliteLayer = null;
+        this.lastNominatimRequestAt = 0;
         // context dots: lazily fetched dated places, keyed off the target
         // year in period mode; task history responses cached per task
         this.pointsMode = "off";
@@ -1825,6 +1850,7 @@ class NzVerificationMap {
                         : "Not configured on this deployment. The page is using the local demo and spreadsheet fallback."}</span>
                 </div>
             `;
+            this.syncPortalChrome();
             return;
         }
 
@@ -1836,7 +1862,7 @@ class NzVerificationMap {
                     <span>${ASSIGNMENT_MODE
                         ? `${INVITED_EMAIL_HINT
                             ? `Use ${escapeHtml(INVITED_EMAIL_HINT)}, the Google account JB invited.`
-                            : "Use the Google account JB invited (check the invitation email if you're not sure which one)."} Your assigned tasks load after sign-in, and saved work goes straight to the shared review queue.`
+                            : "Use the Google account JB invited (check the invitation email if you're not sure which one)."} After sign-in, choose between your assigned tasks and adding missing places; saved work goes straight to the shared review queue.`
                         : "Sign in with Google to load assigned tasks and save evidence directly for review."}</span>
                     <div id="googleSignInButton" class="google-sign-in-host"></div>
                     <span class="backend-help">The Google button shows accounts already signed into this browser. If the wrong name appears, choose another Google account or use a browser profile signed into the invited account.</span>
@@ -1848,6 +1874,9 @@ class NzVerificationMap {
                 onSignedIn: async user => {
                     this.backendUser = user;
                     await this.refreshBackendTasks();
+                    // a reload or an expired session lands back in the
+                    // activity the contributor had chosen, else the chooser
+                    this.restorePortalMode();
                     this.renderBackendPanel();
                     this.applyFilters();
                     if (this.selectedTask) {
@@ -1863,6 +1892,7 @@ class NzVerificationMap {
                 this.backendLastError = error.message || "Could not initialise sign-in.";
                 this.renderBackendPanel();
             });
+            this.syncPortalChrome();
             return;
         }
 
@@ -1870,9 +1900,16 @@ class NzVerificationMap {
         const assignmentStatusText = ASSIGNMENT_MODE
             ? `${this.tasks.length} available task${this.tasks.length === 1 ? "" : "s"}; ${this.myWorkItems.length} item${this.myWorkItems.length === 1 ? "" : "s"} in My work.`
             : "Saves and submissions go to Convex for reviewer follow-up.";
+        const signedInHeading = !ASSIGNMENT_MODE
+            ? "Shared task backend"
+            : this.portalMode === "assigned"
+                ? "Signed in. Choose a task below."
+                : this.portalMode === "add"
+                    ? "Signed in. Add missing places."
+                    : "Signed in. Choose an activity below.";
         panel.innerHTML = `
             <div class="backend-card signed-in">
-                <strong>${ASSIGNMENT_MODE ? "Signed in. Choose a task below." : "Shared task backend"}</strong>
+                <strong>${signedInHeading}</strong>
                 ${assignmentLabel}
                 <span>Signed in as ${escapeHtml(label)}. ${escapeHtml(assignmentStatusText)}</span>
                 <span id="backendRefreshStatus" class="copy-status" aria-live="polite">${escapeHtml(this.backendTransientStatus || "")}</span>
@@ -1882,6 +1919,7 @@ class NzVerificationMap {
                 </div>
             </div>
         `;
+        this.syncPortalChrome();
         document.getElementById("refreshBackendTasksButton")?.addEventListener("click", async event => {
             // lock the button for the flight; the refresh re-renders this
             // card, so the outcome reports through the fresh copy
@@ -1918,6 +1956,15 @@ class NzVerificationMap {
     signOutBackend() {
         this.backend?.signOut();
         this.backendUser = null;
+        // a deliberate sign-out forgets the chosen activity; an expired
+        // session (backendUser cleared elsewhere) keeps it for the return
+        if (this.pinMode) this.exitPinMode();
+        this.portalMode = null;
+        try {
+            sessionStorage.removeItem(PORTAL_MODE_KEY);
+        } catch (error) {
+            // storage unavailable: nothing to forget
+        }
         this.backendTasksById.clear();
         this.latestDraftsByTaskId.clear();
         this.myWorkItems = [];
@@ -2248,13 +2295,30 @@ class NzVerificationMap {
         this.map = L.map("map", { preferCanvas: true }).setView(COUNTRY_CONFIG.mapCentre, COUNTRY_CONFIG.mapZoom);
         // openstreetmap standard tiles: no key to ship, and building
         // footprints render unwatermarked at the zooms pin placement needs
-        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        // keep the zoom-out floor at 5 for compact countries, but let
+        // continental configs (au/br/ca/mx/us open below 5) take effect
+        const minZoom = Math.min(5, Math.floor(COUNTRY_CONFIG.mapZoom));
+        this.streetsLayer = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             maxZoom: 19,
-            // keep the zoom-out floor at 5 for compact countries, but let
-            // continental configs (au/br/ca/mx/us open below 5) take effect
-            minZoom: Math.min(5, Math.floor(COUNTRY_CONFIG.mapZoom)),
+            minZoom,
         }).addTo(this.map);
+        if (SATELLITE_TILE_URL) {
+            // imagery so the pin can be steered onto the real building;
+            // maptiler serves z20 (upsampled where no aerial exists)
+            this.satelliteLayer = L.tileLayer(SATELLITE_TILE_URL, {
+                attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 20,
+                minZoom,
+            });
+            this.addBasemapControl();
+            // add mode: imagery takes over once buildings are resolvable,
+            // unless the contributor has picked a basemap by hand
+            this.map.on("zoomend", () => {
+                if (this.portalMode !== "add" || this.basemapUserChosen) return;
+                if (this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM) this.setBasemap("satellite");
+            });
+        }
 
         // context dots ride the canvas (preferCanvas), so they always paint
         // beneath the dom-based task markers
@@ -2559,20 +2623,7 @@ class NzVerificationMap {
                 : `${COUNTRY_CONFIG.countryName} OSM Verification`;
         }
 
-        const notice = document.getElementById("modeNotice");
-        if (notice) {
-            notice.classList.toggle("demo-warning", DEMO_MODE);
-            notice.innerHTML = DEMO_MODE
-                ? (ASSIGNMENT_MODE
-                    ? (this.backend?.configured
-                        ? `Assigned web workpack: <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Sign in to load tasks and save evidence. Do not enter private or sensitive data.`
-                        : `Assigned web workpack: <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. The shared backend is not configured here, so the assignment cannot be used on this deployment yet.`)
-                    : this.backend?.configured
-                    ? "Draft controls enabled. Sign in through the shared backend panel to save or submit evidence. Do not enter private or sensitive data."
-                    : "Draft controls enabled. The shared backend is not configured here, so nothing is uploaded or saved until you use the spreadsheet fallback. Do not enter private or sensitive data.")
-                : `Inspection only: form controls live in <a href="${escapeHtml(demoUrl())}">demo mode</a>. Nothing is uploaded either way.`;
-            notice.setAttribute("role", DEMO_MODE ? "alert" : "note");
-        }
+        this.renderModeNotice();
 
         const quickstart = document.getElementById("quickstartBanner");
         const quickstartKey = ASSIGNMENT_MODE
@@ -2619,17 +2670,186 @@ class NzVerificationMap {
                 </div>
             `;
             if (ASSIGNMENT_MODE) {
-                // the single pin-drop entry point lives in the header now;
+                // one label serves every country (rapid entry included);
                 // the transient cards render into #pinCardHost on demand
-                const addPlaceButton = document.getElementById("addPlaceButton");
-                if (addPlaceButton && RAPID_CURRENT_ENTRY) {
-                    addPlaceButton.textContent = "＋ Nominate missing PoW";
-                }
-                addPlaceButton?.addEventListener("click", () => this.enterPinMode());
+                document.getElementById("addPlaceButton")?.addEventListener("click", () => this.enterPinMode());
             }
         }
 
+        this.renderPortalChooser();
+        this.renderPortalModeBar();
+        this.syncPortalChrome();
         this.renderInitialDetail();
+    }
+
+    // header notice; re-rendered when sign-in state changes so a signed-in
+    // sidebar never keeps a stale "sign in to load tasks" instruction
+    renderModeNotice() {
+        const notice = document.getElementById("modeNotice");
+        if (!notice) return;
+        notice.classList.toggle("demo-warning", DEMO_MODE);
+        notice.innerHTML = DEMO_MODE
+            ? (ASSIGNMENT_MODE
+                ? (this.backend?.configured
+                    ? (this.backendUser
+                        ? `Assigned web workpack: <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Saved work goes to the shared review queue. Do not enter private or sensitive data.`
+                        : `Assigned web workpack: <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Sign in to load tasks and save evidence. Do not enter private or sensitive data.`)
+                    : `Assigned web workpack: <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. The shared backend is not configured here, so the assignment cannot be used on this deployment yet.`)
+                : this.backend?.configured
+                ? "Draft controls enabled. Sign in through the shared backend panel to save or submit evidence. Do not enter private or sensitive data."
+                : "Draft controls enabled. The shared backend is not configured here, so nothing is uploaded or saved until you use the spreadsheet fallback. Do not enter private or sensitive data.")
+            : `Inspection only: form controls live in <a href="${escapeHtml(demoUrl())}">demo mode</a>. Nothing is uploaded either way.`;
+        notice.setAttribute("role", DEMO_MODE ? "alert" : "note");
+    }
+
+    // --- signed-in portal activity: chooser, assigned sheet, add flow ---
+
+    // body classes drive which sidebar sections show (see the css gating
+    // block); derived from the user and the chosen activity, never set by
+    // hand elsewhere
+    syncPortalChrome() {
+        if (!ASSIGNMENT_MODE) {
+            document.body.classList.remove("portal-signed-out", "portal-chooser", "portal-assigned", "portal-add");
+            return;
+        }
+        const signedOut = !this.backendUser;
+        const mode = signedOut ? null : (PORTAL_MODES.has(this.portalMode) ? this.portalMode : "chooser");
+        this.renderModeNotice();
+        document.body.classList.toggle("portal-signed-out", signedOut);
+        document.body.classList.toggle("portal-chooser", mode === "chooser");
+        document.body.classList.toggle("portal-assigned", mode === "assigned");
+        document.body.classList.toggle("portal-add", mode === "add");
+        const chooser = document.getElementById("portalChooser");
+        if (chooser) chooser.hidden = mode !== "chooser";
+        const bar = document.getElementById("portalModeBar");
+        if (bar) bar.hidden = !(mode === "assigned" || mode === "add");
+        if (mode === "chooser") this.renderPortalChooser();
+        if (mode === "assigned" || mode === "add") this.renderPortalModeBar();
+    }
+
+    renderPortalChooser() {
+        const chooser = document.getElementById("portalChooser");
+        if (!chooser || !ASSIGNMENT_MODE) return;
+        const available = this.tasks.filter(feature => (feature.properties?.batch_id || ASSIGNMENT_BATCH_ID) === ASSIGNMENT_BATCH_ID).length;
+        const assignedSummary = available
+            ? `${available} task${available === 1 ? "" : "s"} available in ${ASSIGNMENT_BATCH_ID}${this.myWorkItems.length ? `; ${this.myWorkItems.length} in My work` : ""}.`
+            : `No tasks are assigned to you in ${ASSIGNMENT_BATCH_ID} right now. You can still add places.`;
+        chooser.innerHTML = `
+            <h2>What would you like to do?</h2>
+            <button type="button" class="chooser-option" id="chooseAssignedButton">
+                <strong>Assigned tasks</strong>
+                <span>${escapeHtml(assignedSummary)}</span>
+            </button>
+            <button type="button" class="chooser-option" id="chooseAddButton">
+                <strong>Add places</strong>
+                <span>Nominate places of worship missing from the map. Your nomination goes to human review — it does not change the public map.</span>
+            </button>
+        `;
+        document.getElementById("chooseAssignedButton")?.addEventListener("click", () => this.setPortalMode("assigned"));
+        document.getElementById("chooseAddButton")?.addEventListener("click", () => this.setPortalMode("add"));
+    }
+
+    renderPortalModeBar() {
+        const bar = document.getElementById("portalModeBar");
+        if (!bar || !ASSIGNMENT_MODE) return;
+        const label = this.portalMode === "add" ? "Add places" : "Assigned tasks";
+        bar.innerHTML = `
+            <span>${label}</span>
+            <button type="button" class="link-button" id="changeActivityButton">← Change activity</button>
+        `;
+        document.getElementById("changeActivityButton")?.addEventListener("click", () => this.setPortalMode(null));
+    }
+
+    // switches activity in place (no reload); null returns to the chooser.
+    // the choice persists for the tab so a reload lands where the
+    // contributor was
+    setPortalMode(mode) {
+        if (!ASSIGNMENT_MODE || !this.backendUser) return;
+        const next = PORTAL_MODES.has(mode) ? mode : null;
+        if (next === this.portalMode) return;
+        if (this.formDirty && !window.confirm("You have unsaved entries. Change activity and discard them?")) return;
+        if (this.pinMode) this.exitPinMode();
+        this.clearFormDirty();
+        this.portalMode = next;
+        try {
+            if (next) {
+                sessionStorage.setItem(PORTAL_MODE_KEY, next);
+            } else {
+                sessionStorage.removeItem(PORTAL_MODE_KEY);
+            }
+        } catch (error) {
+            // storage unavailable: the choice lives in memory only
+        }
+        if (next === "add") {
+            // imagery is the working surface for placing a pin, once close
+            // enough for buildings to show
+            if (this.map && this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM && !this.basemapUserChosen) {
+                this.setBasemap("satellite");
+            }
+        } else if (this.basemap === "satellite" && !this.basemapUserChosen) {
+            this.setBasemap("streets");
+        }
+        this.selectedTask = null;
+        this.renderInitialDetail();
+        this.renderBackendPanel();
+        document.querySelector(".sidebar")?.scrollTo({ top: 0 });
+    }
+
+    restorePortalMode() {
+        if (!ASSIGNMENT_MODE) return;
+        if (PORTAL_MODES.has(this.portalMode)) return;
+        let stored = "";
+        try {
+            stored = sessionStorage.getItem(PORTAL_MODE_KEY) || "";
+        } catch (error) {
+            stored = "";
+        }
+        this.portalMode = PORTAL_MODES.has(stored) ? stored : null;
+        if (this.portalMode === "add" && this.map && this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM) {
+            this.setBasemap("satellite");
+        }
+    }
+
+    // --- basemap: streets (osm) or satellite (maptiler) ---
+
+    addBasemapControl() {
+        const control = L.control({ position: "topright" });
+        control.onAdd = () => {
+            const div = L.DomUtil.create("div", "basemap-toggle");
+            div.setAttribute("role", "group");
+            div.setAttribute("aria-label", "Basemap");
+            div.innerHTML = `
+                <button type="button" data-basemap="streets" aria-pressed="true">Streets</button>
+                <button type="button" data-basemap="satellite" aria-pressed="false">Satellite</button>
+            `;
+            L.DomEvent.disableClickPropagation(div);
+            L.DomEvent.disableScrollPropagation(div);
+            div.querySelectorAll("button").forEach(button => {
+                button.addEventListener("click", () => {
+                    this.basemapUserChosen = true;
+                    this.setBasemap(button.dataset.basemap);
+                });
+            });
+            return div;
+        };
+        control.addTo(this.map);
+    }
+
+    setBasemap(name) {
+        if (!this.map || !this.streetsLayer) return;
+        const next = name === "satellite" && this.satelliteLayer ? "satellite" : "streets";
+        if (next !== this.basemap) {
+            const incoming = next === "satellite" ? this.satelliteLayer : this.streetsLayer;
+            const outgoing = next === "satellite" ? this.streetsLayer : this.satelliteLayer;
+            if (outgoing && this.map.hasLayer(outgoing)) this.map.removeLayer(outgoing);
+            if (!this.map.hasLayer(incoming)) incoming.addTo(this.map);
+            // tiles sit beneath the canvas dots and dom markers
+            incoming.bringToBack();
+            this.basemap = next;
+        }
+        document.querySelectorAll(".basemap-toggle button").forEach(button => {
+            button.setAttribute("aria-pressed", button.dataset.basemap === this.basemap ? "true" : "false");
+        });
     }
 
     setupFilters() {
@@ -3169,18 +3389,22 @@ class NzVerificationMap {
         if (!panel) return;
         if (ASSIGNMENT_MODE) {
             panel.innerHTML = `
-                <h2>Assigned web workpack</h2>
+                <h2>${this.portalMode === "add" ? "Add places" : "Assigned web workpack"}</h2>
                 <div class="${this.backend?.configured ? "pilot-note" : "demo-warning"}" role="${this.backend?.configured ? "note" : "alert"}">
                     ${this.backend?.configured
-                        ? RAPID_CURRENT_ENTRY
-                            ? `Sign in with Google at the top of this panel, then work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. For each place, choose one current-status answer, record how you know it, and use <em>Submit for review</em>.`
-                            : `Sign in with Google at the top of this panel, then work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when useful evidence remains incomplete, and <em>Submit for review</em> when a case is ready for JB.`
+                        ? this.portalMode === "add"
+                            ? `Use <strong>＋ Add a missing place</strong> above, then find the building by searching a name or address, typing coordinates, or clicking the map. Drag the pin onto the building before confirming.`
+                            : RAPID_CURRENT_ENTRY
+                                ? `Work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. For each place, choose one current-status answer, record how you know it, and use <em>Submit for review</em>.`
+                                : `Work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when useful evidence remains incomplete, and <em>Submit for review</em> when a case is ready for JB.`
                         : `This link points to <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>, but this deployment does not yet have the shared backend enabled.`}
                 </div>
                 <div class="detail-section">
                     <h3>What to check</h3>
                     <div class="disabled-panel">
-                        ${RAPID_CURRENT_ENTRY
+                        ${this.portalMode === "add"
+                            ? `Before nominating, check whether the place is already on the map. Nearby existing records are listed automatically after you confirm a pin location.`
+                            : RAPID_CURRENT_ENTRY
                             ? `For each assigned place, record what you can confirm at the observation date: whether the place exists and whether it is used for worship. Do not infer worship use from the building alone. Historical target years (${escapeHtml(COUNTRY_CONFIG.targetYears.join(", "))}) stay unassessed here; use the detailed form for historical or complicated cases.`
                             : `For each assigned case, answer the task question, seek non-OSM evidence where possible, record ${escapeHtml(COUNTRY_CONFIG.targetYears.join(", "))} status, preserve any useful opening or closure dates, and submit unresolved notes for cases that should stay visible but cannot yet be resolved.`}
                     </div>
@@ -3249,7 +3473,7 @@ class NzVerificationMap {
             <div class="button-row">
                 ${knownHistory ? `<button id="addKnownHistoryButton" type="button">Add known history</button>` : ""}
                 ${nomination
-                    ? `<button id="nominateAnotherButton"${knownHistory ? ` class="secondary"` : ""} type="button">Nominate another PoW</button>`
+                    ? `<button id="nominateAnotherButton"${knownHistory ? ` class="secondary"` : ""} type="button">Add another place</button>`
                     : `<button id="openNextTaskButton"${knownHistory ? ` class="secondary"` : ""} type="button">Open next task</button>`}
                 ${skipped ? `<button id="undoSkipButton" class="secondary" type="button">Undo skip</button>` : ""}
             </div>
@@ -5833,7 +6057,7 @@ class NzVerificationMap {
         }
         return `
             <div class="copy-help">
-                Know a place of worship that is not on the map? Use <strong>Add a place that's missing</strong>, then identify either the building or the approximate area supported by your evidence. Local knowledge counts as evidence.
+                Know a place of worship that is not on the map? Use <strong>＋ Add a missing place</strong>, then identify either the building or the approximate area supported by your evidence. Local knowledge counts as evidence.
             </div>
         `;
     }
@@ -5897,7 +6121,33 @@ class NzVerificationMap {
                 </div>
             `;
         return `
-            <h2 class="pin-host-title">${RAPID_CURRENT_ENTRY ? "Nominate missing PoW" : "Add a place that's missing"}</h2>
+            <h2 class="pin-host-title">Add a missing place</h2>
+            <div id="pinLocateCard" class="pin-card">
+                <div class="copy-help">
+                    Find the place by searching a name or address, typing coordinates, or clicking the building on the map. Every route moves the same pin, and it stays draggable until you confirm it.
+                </div>
+                <div class="pin-locate-row">
+                    <label>
+                        Address or place name
+                        <input id="pinSearchInput" type="search" placeholder="e.g. Sacred Heart Cathedral, Port Vila" autocomplete="off">
+                    </label>
+                    <button id="pinSearchButton" type="button" class="secondary">Search</button>
+                </div>
+                <ul id="pinSearchResults" class="pin-search-results" hidden></ul>
+                <div id="pinSearchStatus" class="copy-status" aria-live="polite"></div>
+                <div class="pin-coord-row">
+                    <label>
+                        Latitude
+                        <input id="pinLatInput" type="text" inputmode="decimal" placeholder="-17.74043" autocomplete="off">
+                    </label>
+                    <label>
+                        Longitude
+                        <input id="pinLngInput" type="text" inputmode="decimal" placeholder="168.32100" autocomplete="off">
+                    </label>
+                    <button id="pinCoordButton" type="button" class="secondary">Move pin</button>
+                </div>
+                <div class="copy-help">Search results by Nominatim &copy; OpenStreetMap contributors.</div>
+            </div>
             <div id="pinConfirmCard" class="pin-card" hidden>
                 <div class="pin-coords">Pin: <span id="pinLat"></span>, <span id="pinLng"></span></div>
                 ${RAPID_CURRENT_ENTRY ? "" : `
@@ -5955,6 +6205,23 @@ class NzVerificationMap {
         document.getElementById("pinSubmitButton")?.addEventListener("click", () => this.submitPinNomination());
         document.getElementById("pinLocationMode")?.addEventListener("change", () => this.updatePinConfirmCard());
         document.getElementById("pinLocationRadius")?.addEventListener("change", () => this.updatePinConfirmCard());
+        // locate card: search and typed coordinates feed the same pending pin
+        document.getElementById("pinSearchButton")?.addEventListener("click", () => this.submitPinSearch());
+        document.getElementById("pinSearchInput")?.addEventListener("keydown", event => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                this.submitPinSearch();
+            }
+        });
+        document.getElementById("pinCoordButton")?.addEventListener("click", () => this.applyTypedCoordinates());
+        ["pinLatInput", "pinLngInput"].forEach(id => {
+            document.getElementById(id)?.addEventListener("keydown", event => {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    this.applyTypedCoordinates();
+                }
+            });
+        });
         if (RAPID_CURRENT_ENTRY) {
             ["pinNameInput", "pinAddressInput", "pinLocalityInput"].forEach(id => {
                 document.getElementById(id)?.addEventListener("input", () => this.markFormDirty("rapid-pin"));
@@ -5988,7 +6255,8 @@ class NzVerificationMap {
                 document.getElementById(id)?.addEventListener("change", () => this.markFormDirty("location-pin"));
             });
         }
-        this.revealPinHost();
+        // no scroll on entry: the armed button carries the instruction, and
+        // the transient cards already sit at the top of the working column
     }
 
     // pull the pin-card host to the top of the sidebar scroll so the armed
@@ -6006,9 +6274,18 @@ class NzVerificationMap {
         this.pinSubmissionId = RAPID_CURRENT_ENTRY ? window.PowRapidEntry.secureSubmissionId() : null;
         this.mountPinCards();
         this.map.getContainer().classList.add("pin-placement");
-        document.getElementById("addPlaceButton")?.setAttribute("disabled", "true");
+        // the button itself carries the in-progress instruction, so the
+        // click never reads as a dead control
+        const addPlaceButton = document.getElementById("addPlaceButton");
+        if (addPlaceButton) {
+            addPlaceButton.setAttribute("disabled", "true");
+            addPlaceButton.classList.add("placing");
+            addPlaceButton.textContent = "Placing pin — click the building on the map · Esc cancels";
+        }
+        // structures must be visible so the pin lands on the actual building
+        this.setBasemap("satellite");
         const status = document.getElementById("pinStatus");
-        if (status) status.textContent = "Click the building on the map to drop the pin. Press Escape to cancel.";
+        if (status) status.textContent = "Click the building on the map to drop the pin, or use search or coordinates above. Press Escape to cancel.";
         this._pinClickHandler = (event) => this.placePin(event.latlng);
         this.map.once("click", this._pinClickHandler);
         this._pinKeyHandler = (event) => {
@@ -6040,6 +6317,97 @@ class NzVerificationMap {
             : "Choose what the pin represents, place it on the building or at the centre of the supported area, then confirm.";
         this.updatePinConfirmCard();
         this.revealPinHost();
+    }
+
+    // search, typed coordinates, and the map click all land here: one
+    // pending location, one draggable pin
+    setPendingPin(lat, lng, { zoom = 18 } = {}) {
+        if (!this.pinMode || this.pinConfirmed || !this.map) return;
+        const latlng = L.latLng(lat, lng);
+        const maxZoom = this.basemap === "satellite" && this.satelliteLayer ? 20 : 19;
+        this.map.setView(latlng, Math.min(Math.max(this.map.getZoom(), zoom), maxZoom));
+        if (this.pinMarker) {
+            this.pinMarker.setLatLng(latlng);
+            this.updatePinConfirmCard();
+        } else {
+            this.placePin(latlng);
+        }
+        const status = document.getElementById("pinStatus");
+        if (status) status.textContent = "Drag the pin onto the building before confirming — searches and typed coordinates are rarely building-exact.";
+    }
+
+    // one nominatim request per explicit submit, spaced out and biased to
+    // this portal's country, per the osmf usage policy
+    async submitPinSearch() {
+        const status = document.getElementById("pinSearchStatus");
+        const resultsEl = document.getElementById("pinSearchResults");
+        const button = document.getElementById("pinSearchButton");
+        const query = (document.getElementById("pinSearchInput")?.value || "").trim();
+        if (!query) {
+            if (status) status.textContent = "Type an address or place name first.";
+            return;
+        }
+        if (Date.now() - this.lastNominatimRequestAt < NOMINATIM_MIN_INTERVAL_MS) {
+            if (status) status.textContent = "One search at a time — try again in a moment.";
+            return;
+        }
+        this.lastNominatimRequestAt = Date.now();
+        if (button) button.disabled = true;
+        if (status) status.textContent = "Searching…";
+        if (resultsEl) {
+            resultsEl.hidden = true;
+            resultsEl.innerHTML = "";
+        }
+        try {
+            const params = new URLSearchParams({
+                format: "jsonv2",
+                q: query,
+                limit: "5",
+                countrycodes: COUNTRY_CONFIG.countryCode.toLowerCase(),
+            });
+            const response = await fetch(`${NOMINATIM_SEARCH_URL}?${params.toString()}`, {
+                headers: { Accept: "application/json" },
+            });
+            if (!response.ok) throw new Error(`Search failed (${response.status}). Try again shortly or click the map instead.`);
+            const rows = await response.json();
+            if (!Array.isArray(rows) || rows.length === 0) {
+                if (status) status.textContent = "No match found. Add the town or island to the search, or click the map instead.";
+                return;
+            }
+            if (status) status.textContent = "";
+            if (resultsEl) {
+                resultsEl.hidden = false;
+                resultsEl.innerHTML = rows.map((row, index) => `
+                    <li><button type="button" data-result-index="${index}">${escapeHtml(row.display_name || "Unnamed result")}</button></li>
+                `).join("");
+                resultsEl.querySelectorAll("button").forEach(resultButton => {
+                    resultButton.addEventListener("click", () => {
+                        const row = rows[Number(resultButton.dataset.resultIndex)];
+                        const lat = Number(row?.lat);
+                        const lng = Number(row?.lon);
+                        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+                        resultsEl.hidden = true;
+                        this.setPendingPin(lat, lng);
+                    });
+                });
+            }
+        } catch (error) {
+            if (status) status.textContent = error.message || "Search failed — check the connection or click the map instead.";
+        } finally {
+            if (button) button.disabled = false;
+        }
+    }
+
+    applyTypedCoordinates() {
+        const status = document.getElementById("pinSearchStatus");
+        const lat = Number.parseFloat(document.getElementById("pinLatInput")?.value || "");
+        const lng = Number.parseFloat(document.getElementById("pinLngInput")?.value || "");
+        if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+            if (status) status.textContent = "Enter decimal degrees: latitude between -90 and 90, longitude between -180 and 180.";
+            return;
+        }
+        if (status) status.textContent = "";
+        this.setPendingPin(lat, lng);
     }
 
     pinLocationMode() {
@@ -6078,6 +6446,11 @@ class NzVerificationMap {
         const lngEl = document.getElementById("pinLng");
         if (latEl) latEl.textContent = position.lat.toFixed(5);
         if (lngEl) lngEl.textContent = position.lng.toFixed(5);
+        // the typed-coordinate fields track the pin, unless being edited
+        [["pinLatInput", position.lat], ["pinLngInput", position.lng]].forEach(([id, value]) => {
+            const field = document.getElementById(id);
+            if (field && document.activeElement !== field) field.value = value.toFixed(5);
+        });
         const mode = this.pinLocationMode();
         const requiredZoom = mode === "approximate_area" ? PIN_MIN_APPROXIMATE_ZOOM : PIN_MIN_PLACEMENT_ZOOM;
         const zoomOk = this.map.getZoom() >= requiredZoom;
@@ -6122,6 +6495,9 @@ class NzVerificationMap {
         }
         const confirmCard = document.getElementById("pinConfirmCard");
         if (confirmCard) confirmCard.hidden = true;
+        // the location is settled; the locate tools would now be misleading
+        const locateCard = document.getElementById("pinLocateCard");
+        if (locateCard) locateCard.hidden = true;
         const nearby = this.nearbyTaskRows(position, this.pinConfirmed.uncertaintyRadiusM);
         this.pinNearbyCount = nearby.length;
         if (nearby.length) {
@@ -6357,7 +6733,12 @@ class NzVerificationMap {
             host.innerHTML = "";
             host.hidden = true;
         }
-        document.getElementById("addPlaceButton")?.removeAttribute("disabled");
+        const addPlaceButton = document.getElementById("addPlaceButton");
+        if (addPlaceButton) {
+            addPlaceButton.removeAttribute("disabled");
+            addPlaceButton.classList.remove("placing");
+            addPlaceButton.textContent = "＋ Add a missing place";
+        }
     }
 
     nominationFormHtml() {
