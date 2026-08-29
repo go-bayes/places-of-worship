@@ -12,7 +12,9 @@ JSON Schemas that define the core data structures used across the project.
   units with nullable point locations, dated presence with the
   site_lifespan_v1 basis vocabulary, metric series or coded state values,
   person tenures, and a collection passport (construct, credit,
-  temporal_model, metric registry). Defined 2026-08-29; first consumer
+  temporal_model, metric registry). Supersedes the prototype contract
+  pow.unit-time-series.v1, whose consumer (the NZ Anglican parish feed) is
+  being migrated to emit collection.v1. Defined 2026-08-29; first consumer
   pending (the VU Woodberry mission collection; the Pulotu product converts
   behind a shim when the collections runtime lands). Fixture and Pulotu
   mapping note under fixtures/; gated by scripts/validate_collections.sh.

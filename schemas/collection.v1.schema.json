@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://go-bayes.github.io/places-of-worship/schemas/collection.v1.schema.json",
   "title": "Collection v1",
-  "description": "A dated map collection: units with nullable point locations, dated presence, optional metric series or coded state values, optional person tenures, per-unit provenance, and a collection passport. One contract, two engine renderers (interval and stages); the series renderer remains standalone (Anglican prototype) until ruled. Collections are their own data source on a page: never merged with census products or with each other.",
+  "description": "A dated map collection: units with nullable point locations, dated presence, optional metric series or coded state values, optional person tenures, per-unit provenance, and a collection passport. Supersedes the prototype contract pow.unit-time-series.v1, whose consumer (the NZ Anglican parish feed) is being migrated to emit this schema. Two engine renderers exist (interval and stages); the series renderer is deferred, so a series collection stays on its own page until ruled. Collections are their own data source on a page: never merged with census products or with each other.",
   "type": "object",
   "additionalProperties": false,
   "required": ["type", "schema_version", "meta", "features"],
@@ -61,7 +61,7 @@
         },
         "person_names_public": {
           "type": "boolean",
-          "description": "Whether tenure person names may enter the DOM. Historical deceased persons may be named per JB ruling 2026-08-29; a consent-gated collection declares false and ships person_ref only."
+          "description": "Whether tenure person names may enter the DOM. The flag guards living people, not presentation taste: set it true only when the dataset's persons are established as historical, and treat a recorded death date as the only positive evidence of decease. Absence of recent activity is not such evidence — the Anglican incumbent series, for example, names 1844 people of whom 583 have activity in 2000 or later and 258 hold open-ended tenures. A collection that cannot establish decease declares false and ships person_ref only."
         },
         "source_datasets": {
           "type": "array",
@@ -216,6 +216,11 @@
         "unit_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]*$" },
         "unit_kind": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
         "name": { "type": "string" },
+        "country_iso2": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Z]{2}$",
+          "description": "The modern country the unit falls in, as a derived tag. Required where known (null only when the record cannot be placed in a country); country pages filter a multi-country collection on this field."
+        },
         "start_year": { "type": ["integer", "null"] },
         "end_year": {
           "type": ["integer", "null"],

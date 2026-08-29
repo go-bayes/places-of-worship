@@ -13,6 +13,7 @@ Exercise only: the live product `apps/regions/_shared/data/pulotu_cultures.geojs
 | `values.dominant_world_religion.denomination_taxonomy_code` | `properties.values.<metric_id>.taxonomy_code` |
 | `time_focus.traditional_state.year` / `.contemporary.year` | `properties.anchors.{traditional, current}` |
 | `record_url` | `properties.record_url` |
+| `country_iso2` (derived modern-country tag) | `properties.country_iso2` |
 | three time layers (Traditional / Post-contact / Current) | `meta.temporal_model {kind: stages, axis: ordinal, stops: [{id, label} × 3]}` |
 | curated variables | `meta.metrics[]` with `kind: cat`, `codes[]`, and `stage_id` binding each metric to its stop |
 | CC BY 4.0 credit (hardcoded in region-map.js L4684-4692 today) | `meta.credit` |
@@ -22,7 +23,7 @@ Exercise only: the live product `apps/regions/_shared/data/pulotu_cultures.geojs
 1. **`values{}` beside `series{}`.** Pulotu units carry one coded state per variable with per-value sourcing, not year series. The first contract draft had only `series`; the mapping forced a `values` property (metric-id keyed `{code, label, sources, taxonomy_code}`). Stages renderers read `values`; interval renderers may too (Woodberry `tradition`).
 2. **`anchors{}`.** Each culture declares its own calendar dates for the ordinal stops (traditional focus 1521–1983, contemporary mostly 2014–2020). Unit-level `anchors` carries them; the legend states that anchors are per-unit.
 3. **`stage_id` on metrics.** The Pulotu metric select repopulates per active time point; the contract needed a metric→stop binding.
-4. **`country_iso2` per feature** has no dedicated field: `meta.country_codes` lists the covered countries, and the runtime's country filtering would read a per-unit extension. If per-unit country filtering survives the generalisation, promote it from `extensions` to a typed field — one-line schema change, noted for the collections build (step 4).
+4. **`country_iso2` as a typed unit field.** Pulotu already computes a derived modern-country tag per culture, and country pages filter a global product on it; JB ruled on 2026-08-29 that the field be typed now rather than carried in `extensions`.
 
 ## What the product lacks that the contract requires
 

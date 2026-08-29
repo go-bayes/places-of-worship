@@ -46,6 +46,7 @@
       "properties": {
         "unit_id": "vu-example-missions:station-001",
         "name": "Example Bay Mission",
+        "country_iso2": "VU",
         "start_year": 1852,
         "end_year": 1910,
         "start_basis": "founding_stated",
@@ -77,6 +78,7 @@
       "properties": {
         "unit_id": "vu-example-missions:station-002",
         "name": "Unlocated Inland Station",
+        "country_iso2": "VU",
         "start_year": 1888,
         "end_year": null,
         "start_basis": "first_seen_only",
