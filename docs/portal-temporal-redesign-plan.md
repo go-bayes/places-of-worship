@@ -356,10 +356,14 @@ plus nominations. **D12** yes — already effected on dev (Bob invited
   declared) when the slider-domain work lands; a bare widening without a
   declared floor would readmit the typo class the guard exists to catch.
 - **F2 — design review method robust to remote terminals.** JB could not
-  view the visual design over ssh. Standing method: every design doc
-  carries (a) the canonical markdown spec in the repo, readable in any
-  terminal, and (b) a committed static render (PNG or PDF) under
-  `docs/development/assets/`, fetchable with scp or viewable on any
-  machine, alongside any artifact link. Artifact links remain useful from
-  any browser (they are not tied to a machine) but must never be the only
-  form of a design put to JB for ruling.
+  view the visual design over ssh. Standing method (amended 2026-08-31 to
+  avoid bloating the repository): every design doc carries the canonical
+  markdown spec in the repo, readable in any terminal, and a static render
+  (PNG, HTML, or PDF) saved to the git-ignored `local/review/` folder —
+  the established home for review screenshots — named and referenced from
+  the design doc so the reviewed version is identifiable. Renders are
+  never committed. A render that must survive the machine or cross
+  machines is banked to the project GCS bucket via the pow-research
+  push/pull scripts, on the same rule as other large files. Artifact links
+  remain useful from any browser (they are not tied to a machine) but must
+  never be the only form of a design put to JB for ruling.
