@@ -1,9 +1,10 @@
 # Portal Temporal And Sidebar Redesign Plan
 
-Status: design awaiting JB rulings (section 6). Produced 2026-08-28 from two
-independent model designs (Fable 5 with full session context; Opus 5
-independently on the temporal model), reconciled by the session conductor.
-No code in this plan has been implemented.
+Status: RULED (JB, 2026-08-31) — all twelve section-6 decisions ruled;
+section 7 records the rulings, three amendments, and two follow-up items.
+Produced 2026-08-28 from two independent model designs (Fable 5 with full
+session context; Opus 5 independently on the temporal model), reconciled by
+the session conductor. No code in this plan has been implemented.
 
 Portal hub: `docs/portal-data-entry-plan.md`. Related contracts:
 `docs/convex-task-layer-spec.md`, `docs/field-observation-packet-spec.md`.
@@ -280,3 +281,85 @@ Product:
 - **D11 Browse-mode scope.** Static verification dataset + nominations
   (recommended), or also the public master layer?
 - **D12 Bob's roles** `ra` + `reviewer` from day one. Recommended yes.
+
+## 7. JB Rulings — 2026-08-31
+
+Recorded from JB's review of this document (terminal read of the branch
+file; the visual design was not viewable in that session — see follow-up
+F2).
+
+### Section rulings
+
+- **Section 2.1 — ruled with an amendment.** Inferred (derived) dates are
+  permitted as first-class working values; the standing no-inferred-dates
+  rule is relaxed to: *derived dates are permitted, provided each derived
+  value receives quick reviewer confirmation in the review portal before it
+  enters the observed vocabulary.* The architecture stands unchanged —
+  derived states live in `derived_target_year_states` and reach
+  `target_year_statuses` only on confirmation — but the confirmation UX
+  must be fast (the drawn-interval, per-year confirm bar of §2.5, with
+  "Confirm all" where rules 1/2/4 fired). Confirmation is a lightweight
+  gate, not a re-adjudication.
+- **Section 2.2 — ruled.** The basis asymmetry is affirmed; the
+  distinctions (`founding_stated` vs `first_seen_only`;
+  `closure_stated` vs `last_seen_only`; `building_dedication` /
+  `organisation_founded` dating a different object) **must be enforced**,
+  not merely recorded.
+- **Sections 2.3, 2.4, 2.5 — ruled as designed.**
+- **Section 3 — ruled with an amendment.** Integrate the public map's
+  existing slider machinery (this also settles D9: public map first). On
+  the domain: the 1600 floor is queried. It is only a typo-guard constant
+  in `convex/lib/historicalClaims.ts` (line 120), not a scientific
+  commitment. JB's direction: deep history must remain reachable —
+  eventually back to the early Holocene for archaeological layers — so the
+  slider domain must not hard-bake 1600. Design toward a country-specific
+  (or collection-declared) domain and/or a relative slider; see follow-up
+  F1 for the validation-floor change this implies.
+- **Section 4 — ruled with an amendment.** Author-cannot-accept-own is
+  affirmed. The governing requirement, on the model of GitHub pull-request
+  review: **review provenance must be an ongoing, inspectable record** —
+  who confirmed, overrode, or rejected each derived value, when, and with
+  what note, as an append-only history rather than a mutable state field.
+  `derived_target_year_states.review state` therefore needs a companion
+  event log (or equivalent immutable trail) in PR-B. On the import cap:
+  see D7. Batch entry must be easy for RAs, not only for the admin lane.
+- **Section 5 — ruled.** Build order PR-A → PR-B0 → PR-B → PR-C → PR-D
+  approved.
+
+### Decision rulings (all twelve)
+
+Scientific: **D2** whole-census-year convention, as recommended. **D3**
+`founding_stated` licenses `absent` for earlier census years, as
+recommended. **D4** range-as-affordance ratified against the template
+README's do-not-collapse rule (storage stays typed and uncollapsed).
+**D5** reviewer-confirmed derived states enter the wide CSV with mandatory
+basis columns, as recommended. **D6** `absent` is acceptable for a
+not-yet-founded year, with the distinction carried in derivation metadata
+and rendering. **D10** relocation enters census change statistics as
+neither closure nor founding; relocation is its own linked event class.
+
+Product: **D1** "＋ Add a missing place" wording and helper line, as
+recommended. **D7** chunked admin-path ingest accepted, and JB
+additionally permits raising `IMPORT_MAX_ROWS` for batching; the specific
+ruling governs — make batch entry easy, for RAs as well as the admin lane.
+**D8** 15-year staleness horizon. **D9** public map first (see section 3
+ruling). **D11** browse mode scopes to the static verification dataset
+plus nominations. **D12** yes — already effected on dev (Bob invited
+`ra` + `reviewer`, pending).
+
+### Follow-ups opened by these rulings
+
+- **F1 — date-validation floor.** The 1600 floor in
+  `convex/lib/historicalClaims.ts` conflicts with the deep-history
+  direction. Replace the constant with a per-country or per-collection
+  declared floor (defaulting to the current 1600 where nothing is
+  declared) when the slider-domain work lands; a bare widening without a
+  declared floor would readmit the typo class the guard exists to catch.
+- **F2 — design review method robust to remote terminals.** JB could not
+  view the visual design over ssh. Standing method: every design doc
+  carries (a) the canonical markdown spec in the repo, readable in any
+  terminal, and (b) a committed static render (PNG or PDF) under
+  `docs/development/assets/`, fetchable with scp or viewable on any
+  machine, alongside any artifact link. Artifact links remain useful from
+  any browser (they are not tied to a machine) but must never be the only
+  form of a design put to JB for ruling.
