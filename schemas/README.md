@@ -23,13 +23,20 @@ JSON Schemas that define the core data structures used across the project.
   indicator observations inside the places-of-worship family, and carries a
   pow_site_ref slot on every unit; false marks units that are genuinely
   something else (Pulotu cultures). Attributes extend by declared metric,
-  never by schema change. One known drift against indicator.schema.json:
-  collection.v1 closes the unit enum (count, percent, rate, currency, code,
-  year) where indicator.schema.json leaves unit an open string whose
-  examples (places_per_10000_residents) name a whole indicator rather than a
-  unit. The closed enum is the ruled position (2026-08-29), so
-  indicator.schema.json should give way when that aspirational schema next
-  gains a consumer.
+  never by schema change. The unit drift against indicator.schema.json is
+  RULED (JB, 2026-08-31): the closed enum wins. Here unit names a
+  measurement unit — how a value is scaled (count, percent, rate, currency,
+  code, year) — and is distinct from the unit of analysis, which the
+  2026-08-29 ruling establishes as the place of worship.
+  indicator.schema.json leaves unit an open string whose examples
+  (places_per_10000_residents) name a whole indicator rather than a unit;
+  the correct decomposition uses the unit rate and declares the denominator
+  through denominator_indicator_id. Correct that schema to the closed enum
+  and this decomposition when it next gains a consumer (it is aspirational;
+  none exists yet). The enum grows only by versioned vocabulary change,
+  under the same discipline as denomination-taxonomy.json — publish a new
+  version with supersession links; never reopen the string, and never edit
+  values in place.
   person_names_public governs publication, not retention: false means names
   must not be rendered on any public surface, while a private or
   access-controlled feed may still carry name for audit. The schema permits
