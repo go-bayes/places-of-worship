@@ -471,7 +471,7 @@ export const reviseEvidenceDraft = mutation({
     }
     // a rapid observation is never cloned into a generic draft: the
     // original stays on record and its author corrects it by submitting a
-    // new current observation through rapidEntry:submitVanuatuCurrentObservation
+    // new current observation through rapidEntry:submitCurrentObservation
     if (isRapidCurrentDraft(sourceDraft)) {
       throw new Error(
         "This task holds a rapid current observation. Submit a corrected observation instead of revising; the original stays on record.",

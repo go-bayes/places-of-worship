@@ -15,9 +15,10 @@ import {
 } from "./lib/limits";
 import { intakeRateLimiter } from "./lib/rateLimits";
 import {
+  assertCountryIntakePoint,
   assertRapidCandidateContext,
   assertRapidSubmissionId,
-  assertVanuatuPoint,
+  countryIntakeBounds,
   deriveCurrentObservation,
   isRapidCurrentDraft,
   sourceFieldsForObservationBasis,
@@ -25,8 +26,9 @@ import {
 import { appendTaskEvent } from "./lib/taskEvents";
 import { privacyFlag, rapidCurrentObservationInput, taskStatus } from "./model";
 
-const RAPID_ENTRY_COUNTRY = "VU";
-const RAPID_ENTRY_BATCH = "manual-vu";
+// the first release was vanuatu-only; an omitted country keeps the deployed
+// portal's behaviour exactly while newer clients name their country
+const DEFAULT_RAPID_ENTRY_COUNTRY = "VU";
 const ACTIVE_INTAKE_STATUSES = new Set([
   "open",
   "in_progress",
@@ -122,9 +124,10 @@ async function supersedeEarlierSubmissions(
   }
 }
 
-export const submitVanuatuCurrentObservation = mutation({
+export const submitCurrentObservation = mutation({
   args: {
     clientSubmissionId: v.string(),
+    countryCode: v.optional(v.string()),
     taskId: v.optional(v.string()),
     candidate: v.optional(candidateInput),
     observation: rapidCurrentObservationInput,
@@ -186,18 +189,27 @@ export const submitVanuatuCurrentObservation = mutation({
       args.observation.source_title,
       args.observation.source_reference,
     );
-    const targetYears = defaultTargetYears(RAPID_ENTRY_COUNTRY);
-    const targetYearStatuses = Object.fromEntries(targetYears.map((year) => [String(year), "not_assessed" as const]));
     const now = Date.now();
     const actorRole = chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]);
 
+    // an omitted country preserves the vanuatu-era client exactly; the
+    // registry inside countryIntakeBounds is the closed enabling gate
+    const requestedCountry = args.countryCode?.trim().toUpperCase();
+    if (requestedCountry !== undefined) {
+      assertMaxString("country code", requestedCountry, SHORT_TEXT_MAX);
+    }
+    let intakeCountry: string;
     let authorisedExistingTask: Doc<"tasks"> | undefined;
     let correctedDraft: Doc<"evidence_drafts"> | null = null;
     if (args.taskId !== undefined) {
       assertMaxString("task id", args.taskId, MEDIUM_TEXT_MAX);
       authorisedExistingTask = await getTaskOrThrow(ctx, args.taskId);
-      if (authorisedExistingTask.country_code !== RAPID_ENTRY_COUNTRY) {
-        throw new Error("Rapid current entry is enabled only for Vanuatu tasks.");
+      // an existing task carries its own country; the registry refuses
+      // countries without a declared intake ruling
+      intakeCountry = authorisedExistingTask.country_code.toUpperCase();
+      countryIntakeBounds(intakeCountry);
+      if (requestedCountry !== undefined && requestedCountry !== intakeCountry) {
+        throw new Error("The submitted country does not match the selected task.");
       }
       if (ACTIVE_INTAKE_STATUSES.has(authorisedExistingTask.status)) {
         assertOwnsOrCanReview(user._id, user.roles, authorisedExistingTask.assigned_to);
@@ -214,11 +226,16 @@ export const submitVanuatuCurrentObservation = mutation({
       }
     } else {
       const candidate = args.candidate!;
+      intakeCountry = requestedCountry ?? DEFAULT_RAPID_ENTRY_COUNTRY;
       assertMaxString("candidate name", candidate.name, TASK_NAME_MAX);
       assertMaxString("candidate address", candidate.address, MEDIUM_TEXT_MAX);
       assertMaxString("candidate locality", candidate.locality, MEDIUM_TEXT_MAX);
-      assertVanuatuPoint(candidate.latitude, candidate.longitude);
+      assertCountryIntakePoint(intakeCountry, candidate.latitude, candidate.longitude);
     }
+    const intake = countryIntakeBounds(intakeCountry);
+    const rapidEntryBatch = `manual-${intakeCountry.toLowerCase()}`;
+    const targetYears = defaultTargetYears(intakeCountry);
+    const targetYearStatuses = Object.fromEntries(targetYears.map((year) => [String(year), "not_assessed" as const]));
 
     // Consume capacity only after malformed and unauthorised requests fail.
     await intakeRateLimiter.limit(ctx, "rapidEntryPerUser", { key: user._id, throws: true });
@@ -231,25 +248,25 @@ export const submitVanuatuCurrentObservation = mutation({
       const candidate = args.candidate!;
       const batch = await ctx.db
         .query("task_batches")
-        .withIndex("by_batch_id", (q) => q.eq("batch_id", RAPID_ENTRY_BATCH))
+        .withIndex("by_batch_id", (q) => q.eq("batch_id", rapidEntryBatch))
         .unique();
       if (batch === null) {
         await ctx.db.insert("task_batches", {
-          batch_id: RAPID_ENTRY_BATCH,
-          country_code: RAPID_ENTRY_COUNTRY,
+          batch_id: rapidEntryBatch,
+          country_code: intakeCountry,
           source_kind: "ra_nomination",
           target_years: targetYears,
           status: "active",
           created_by: user._id,
           created_at: now,
           updated_at: now,
-          notes: "Vanuatu rapid current-place observations",
+          notes: `${intake.name} rapid current-place observations`,
         });
       } else if (batch.status !== "active") {
-        throw new Error("Vanuatu rapid entry is paused. Ask JB before continuing.");
+        throw new Error(`${intake.name} rapid entry is paused. Ask JB before continuing.`);
       }
 
-      const taskId = `vu-candidate-${args.clientSubmissionId}`;
+      const taskId = `${intakeCountry.toLowerCase()}-candidate-${args.clientSubmissionId}`;
       const candidateSiteId = `candidate:${taskId}`;
       const taskIdCollision = await ctx.db
         .query("tasks")
@@ -260,8 +277,8 @@ export const submitVanuatuCurrentObservation = mutation({
       }
       const taskRecord = {
         task_id: taskId,
-        batch_id: RAPID_ENTRY_BATCH,
-        country_code: RAPID_ENTRY_COUNTRY,
+        batch_id: rapidEntryBatch,
+        country_code: intakeCountry,
         task_type: "missing_from_project_map" as const,
         priority: "high" as const,
         status: "in_progress" as const,
@@ -281,10 +298,10 @@ export const submitVanuatuCurrentObservation = mutation({
         automated_checks: [{
           check_id: "rapid_current_nomination",
           severity: "info",
-          message: "An invited RA submitted a current-place observation through the Vanuatu rapid-entry path.",
+          message: `An invited RA submitted a current-place observation through the ${intake.name} rapid-entry path.`,
           suggested_action: "review_identity_and_current_use",
         }],
-        task_brief: "Review this Vanuatu current-place observation. Confirm site identity, present worship use, sensitivity, and whether an existing project or OSM record already represents the place before export.",
+        task_brief: `Review this ${intake.name} current-place observation. Confirm site identity, present worship use, sensitivity, and whether an existing project or OSM record already represents the place before export.`,
         source_context: {
           intake_mode: "rapid_current_v1",
           proximity_checked: args.clientContext?.proximity_checked ?? false,
@@ -307,7 +324,7 @@ export const submitVanuatuCurrentObservation = mutation({
         actorUserId: user._id,
         actorRole,
         newStatus: "in_progress",
-        reason: "Vanuatu current-place observation started.",
+        reason: `${intake.name} current-place observation started.`,
         clientContext: args.clientContext,
       });
     }
@@ -373,8 +390,8 @@ export const submitVanuatuCurrentObservation = mutation({
       newStatus: "needs_review",
       evidenceDraftId: draftId,
       reason: correctedDraft !== null
-        ? `Corrected Vanuatu current observation submitted for review; supersedes ${correctedDraft.evidence_draft_id}.`
-        : "Vanuatu current observation submitted for review.",
+        ? `Corrected ${intake.name} current observation submitted for review; supersedes ${correctedDraft.evidence_draft_id}.`
+        : `${intake.name} current observation submitted for review.`,
       clientContext: {
         ...(args.clientContext ?? {}),
         ...(correctedDraft !== null ? { corrects_evidence_draft_id: correctedDraft.evidence_draft_id } : {}),
@@ -392,3 +409,8 @@ export const submitVanuatuCurrentObservation = mutation({
     };
   },
 });
+
+// the deployed vanuatu portal still calls the release-one name; both
+// exports register the same mutation, so the old route keeps its exact
+// contract until the client workstream moves to submitCurrentObservation
+export const submitVanuatuCurrentObservation = submitCurrentObservation;
