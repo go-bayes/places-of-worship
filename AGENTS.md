@@ -194,6 +194,12 @@
   summaries before replacing existing artefacts.
 - For frontend changes, test the affected map page in a browser and check tiles,
   controls, legends, popups, and overlays.
+- Any change to contributor-portal UI (`apps/regions/*/verification.html`,
+  `apps/regions/nz/js/verification-map.js`, portal styles, or the rapid-entry
+  contract's RA-facing surface) must update the RA guide
+  (`apps/guides/ra.html`) in the same change, or state in the PR why the guide
+  is unaffected. The guide is the RA's contract with the UI; drift between
+  them wastes RA time and corrupts training (JB ruling, 2026-08-31).
 
 ## Agent And PR Coordination
 
