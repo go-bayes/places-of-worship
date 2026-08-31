@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as attachments from "../attachments.js";
 import type * as batchImport from "../batchImport.js";
 import type * as claudeReviews from "../claudeReviews.js";
 import type * as devSeed from "../devSeed.js";
@@ -20,6 +21,7 @@ import type * as lib_exportEligibility from "../lib/exportEligibility.js";
 import type * as lib_historicalClaims from "../lib/historicalClaims.js";
 import type * as lib_limits from "../lib/limits.js";
 import type * as lib_locationAssertions from "../lib/locationAssertions.js";
+import type * as lib_r2Presign from "../lib/r2Presign.js";
 import type * as lib_rapidEntry from "../lib/rapidEntry.js";
 import type * as lib_rateLimits from "../lib/rateLimits.js";
 import type * as lib_sensitivity from "../lib/sensitivity.js";
@@ -41,6 +43,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  attachments: typeof attachments;
   batchImport: typeof batchImport;
   claudeReviews: typeof claudeReviews;
   devSeed: typeof devSeed;
@@ -53,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   "lib/historicalClaims": typeof lib_historicalClaims;
   "lib/limits": typeof lib_limits;
   "lib/locationAssertions": typeof lib_locationAssertions;
+  "lib/r2Presign": typeof lib_r2Presign;
   "lib/rapidEntry": typeof lib_rapidEntry;
   "lib/rateLimits": typeof lib_rateLimits;
   "lib/sensitivity": typeof lib_sensitivity;

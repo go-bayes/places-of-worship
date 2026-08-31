@@ -329,18 +329,22 @@
         state.drafts = [];
         state.historicalClaims = [];
         state.events = [];
+        state.attachments = [];
         state.agentAgreementChoice = null;
         renderQueue();
         renderDetail(true);
         try {
-            const [drafts, historicalClaims, events] = await Promise.all([
+            const [drafts, historicalClaims, events, attachments] = await Promise.all([
                 client.listTaskEvidence({ taskId, limit: 20 }),
                 client.listTaskHistoricalClaims({ taskId, limit: 100 }),
                 client.getTaskEvents({ taskId, limit: 50 }),
+                // deployments without a bucket simply show no files section
+                client.listTaskAttachments({ taskId }).catch(() => []),
             ]);
             state.drafts = drafts || [];
             state.historicalClaims = historicalClaims || [];
             state.events = events || [];
+            state.attachments = attachments || [];
             renderDetail(false);
         } catch (error) {
             renderDetail(false, error.message || "Could not load task details.");
@@ -503,6 +507,20 @@
                 <p class="muted">These provisional claims remain distinct evidence for review. They do not fill target-year states or become accepted events automatically.</p>
             </section>
 
+            <section class="panel">
+                <h3>Evidence files</h3>
+                ${state.attachments.length === 0
+                    ? `<p class="muted">No photos or documents were added for this task.</p>`
+                    : state.attachments.map((file) => `
+                        <p>
+                            ${escapeHtml(file.content_type === "application/pdf" ? "PDF" : "Photo")}
+                            · ${Math.max(1, Math.round(file.byte_size / 1024))} KB
+                            ${file.caption ? `— ${escapeHtml(file.caption)}` : ""}
+                            <button type="button" class="attachment-open" data-attachment-id="${escapeHtml(file.attachment_id)}">Open</button>
+                        </p>
+                    `).join("")}
+            </section>
+
             ${window.PowAgentReviewPanel ? window.PowAgentReviewPanel.panelHtml(agentReview) : ""}
 
             <section class="panel decision-panel">
@@ -536,6 +554,21 @@
             form.addEventListener("submit", submitDecision);
         }
         wireAgentReviewPanel(form, agentReview);
+        // evidence files open through a fresh short-lived url per click —
+        // nothing in the page holds a durable link to the private bucket
+        els.detailPanel.querySelectorAll(".attachment-open").forEach((button) => {
+            button.addEventListener("click", async () => {
+                button.disabled = true;
+                try {
+                    const grant = await client.requestAttachmentView({ attachmentId: button.dataset.attachmentId });
+                    window.open(grant.view_url, "_blank", "noopener");
+                } catch (error) {
+                    button.textContent = "Could not open";
+                } finally {
+                    button.disabled = false;
+                }
+            });
+        });
     }
 
     // the explicit affordances on the AI recommendation: prefill-and-agree

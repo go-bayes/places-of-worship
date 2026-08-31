@@ -973,6 +973,48 @@
             margin-top: -4px;
         }
 
+        .attachments-block {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border: 1px solid #d5dde5;
+            border-radius: 6px;
+            padding: 10px;
+        }
+
+        .attachments-block input[type="file"] {
+            font-size: 13px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .attachments-block input[type="text"] {
+            font-size: 13px;
+            padding: 6px 8px;
+            border: 1px solid #b6c2cf;
+            border-radius: 5px;
+        }
+
+        .attachment-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            padding: 4px 0;
+            border-bottom: 1px solid #eef2f6;
+        }
+
+        .attachment-row span {
+            flex: 1;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .attachment-row button {
+            font-size: 12px;
+            padding: 3px 8px;
+        }
+
         .copy-help kbd {
             background: #ffffff;
             border: 1px solid #b6c2cf;
@@ -1985,10 +2027,10 @@
          hides itself when the key is absent -->
     <script src="../../global/config.public.js"></script>
     <script src="js/convex-config.js?v=20260707-changes-requested"></script>
-    <script src="js/convex-task-client.js?v=20260828a"></script>
+    <script src="js/convex-task-client.js?v=20260831a"></script>
     <script src="js/rapid-entry-contract.js?v=20260826a"></script>
     <script src="js/historical-claim-contract.js?v=20260828a"></script>
     <script src="js/location-assertion-contract.js?v=20260828a"></script>
-    <script src="js/verification-map.js?v=20260831b"></script>
+    <script src="js/verification-map.js?v=20260831c"></script>
 </body>
 </html>

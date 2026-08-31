@@ -4531,6 +4531,7 @@ class NzVerificationMap {
                     Submitting records a new observation and marks your earlier one as superseded. The earlier record stays on file for reviewers; it is not rewritten.
                 </div>
             ` : this.formModeNoticeHtml(props)}
+            <div id="attachmentsBlock" class="attachments-block" hidden></div>
             ${this.rapidObservationFieldsHtml("task", {
                 submitLabel: correcting ? "Submit correction for review" : "Submit for review",
                 showCancel: correcting,
@@ -5217,6 +5218,7 @@ class NzVerificationMap {
                                 ? "Save a revision draft while working. Submit the revision when the corrected or extended evidence is ready for review."
                                 : "Save drafts while working. Use Submit unresolved note when you have checked sources but cannot resolve the case. Use Submit for review when the evidence is ready for a decision."}
                     </div>
+                    <div id="attachmentsBlock" class="attachments-block" hidden></div>
                     ${readOnly ? `
                         ${canRevise ? `
                             <div class="button-row">
@@ -5426,6 +5428,7 @@ class NzVerificationMap {
 
         document.getElementById("copyEvidenceRowButton")?.addEventListener("click", () => this.copyEvidenceRow(props));
         document.getElementById("copyDecisionButton")?.addEventListener("click", () => this.copyDecision(props));
+        this.initAttachmentsBlock(props);
         document.getElementById("saveDraftButton")?.addEventListener("click", () => this.saveEvidenceToBackend(props, { submit: false }));
         document.getElementById("submitUnresolvedButton")?.addEventListener("click", () => this.saveEvidenceToBackend(props, { unresolved: true }));
         document.getElementById("submitReviewButton")?.addEventListener("click", () => this.saveEvidenceToBackend(props, { submit: true }));
@@ -5933,6 +5936,119 @@ class NzVerificationMap {
                 messages: validationMessages,
             },
         };
+    }
+
+    // --- evidence attachments: photo/document citations on the task.
+    // review-tier by ruling (2026-08-31): visible only through the signed-in
+    // portal; every view uses a fresh short-lived url minted by the backend
+
+    async initAttachmentsBlock(props) {
+        const block = document.getElementById("attachmentsBlock");
+        if (!block || !this.backend?.configured || !this.backendUser) return;
+        if (this.attachmentsEnabledCache === undefined) {
+            try {
+                this.attachmentsEnabledCache = await this.backend.attachmentsEnabled();
+            } catch (error) {
+                this.attachmentsEnabledCache = false;
+            }
+        }
+        if (!this.attachmentsEnabledCache) return;
+        block.hidden = false;
+        block.innerHTML = `
+            <strong>Photos &amp; documents (optional)</strong>
+            <div class="copy-help">Add a photo of the building or sign, or a source document (JPEG, PNG, WebP, PDF, under 10&nbsp;MB). Files are citations for review only — they never appear on the public map.</div>
+            <div class="button-row">
+                <input id="attachmentFileInput" type="file" accept="image/jpeg,image/png,image/webp,application/pdf">
+                <button id="attachmentUploadButton" class="secondary" type="button">Add file</button>
+            </div>
+            <input id="attachmentCaptionInput" type="text" maxlength="500" placeholder="Caption — what does this show? (optional)">
+            <div id="attachmentStatus" class="copy-status"></div>
+            <div id="attachmentList"></div>
+        `;
+        document.getElementById("attachmentUploadButton")?.addEventListener("click", () => this.uploadAttachment(props.task_id));
+        this.refreshAttachmentList(props.task_id);
+    }
+
+    async refreshAttachmentList(taskId) {
+        const list = document.getElementById("attachmentList");
+        if (!list) return;
+        let rows = [];
+        try {
+            rows = await this.backend.listTaskAttachments({ taskId });
+        } catch (error) {
+            list.textContent = "";
+            return;
+        }
+        if (!rows.length) {
+            list.textContent = "";
+            return;
+        }
+        list.innerHTML = rows.map(row => {
+            const sizeKb = Math.max(1, Math.round(row.byte_size / 1024));
+            const kind = row.content_type === "application/pdf" ? "PDF" : "Photo";
+            return `
+                <div class="attachment-row" data-attachment-id="${escapeHtml(row.attachment_id)}">
+                    <span>${kind} · ${sizeKb} KB${row.caption ? ` — ${escapeHtml(row.caption)}` : ""}</span>
+                    <button type="button" class="secondary attachment-view">View</button>
+                    ${row.author_is_me ? `<button type="button" class="secondary attachment-remove">Remove</button>` : ""}
+                </div>
+            `;
+        }).join("");
+        list.querySelectorAll(".attachment-row").forEach(rowEl => {
+            const attachmentId = rowEl.dataset.attachmentId;
+            rowEl.querySelector(".attachment-view")?.addEventListener("click", async () => {
+                try {
+                    const grant = await this.backend.requestAttachmentView({ attachmentId });
+                    window.open(grant.view_url, "_blank", "noopener");
+                } catch (error) {
+                    const status = document.getElementById("attachmentStatus");
+                    if (status) status.textContent = error.message || "Could not open the file.";
+                }
+            });
+            rowEl.querySelector(".attachment-remove")?.addEventListener("click", async () => {
+                try {
+                    await this.backend.removeAttachment({ attachmentId });
+                    this.refreshAttachmentList(taskId);
+                } catch (error) {
+                    const status = document.getElementById("attachmentStatus");
+                    if (status) status.textContent = error.message || "Could not remove the file.";
+                }
+            });
+        });
+    }
+
+    async uploadAttachment(taskId) {
+        const input = document.getElementById("attachmentFileInput");
+        const status = document.getElementById("attachmentStatus");
+        const button = document.getElementById("attachmentUploadButton");
+        const file = input?.files?.[0];
+        if (!file) {
+            if (status) status.textContent = "Choose a file first.";
+            return;
+        }
+        const caption = (document.getElementById("attachmentCaptionInput")?.value || "").trim();
+        if (button) button.disabled = true;
+        if (status) status.textContent = "Uploading...";
+        try {
+            const grant = await this.backend.requestAttachmentUpload({
+                taskId,
+                contentType: file.type,
+                byteSize: file.size,
+                caption: caption || undefined,
+            });
+            const put = await fetch(grant.upload_url, { method: "PUT", body: file });
+            if (!put.ok) throw new Error(`Upload failed (${put.status}). Try again.`);
+            await this.backend.confirmAttachmentUpload({ attachmentId: grant.attachment_id });
+            if (status) status.textContent = "File added.";
+            if (input) input.value = "";
+            const captionInput = document.getElementById("attachmentCaptionInput");
+            if (captionInput) captionInput.value = "";
+            this.refreshAttachmentList(taskId);
+        } catch (error) {
+            if (status) status.textContent = error.message || "Upload failed.";
+        } finally {
+            if (button) button.disabled = false;
+        }
     }
 
     async saveEvidenceToBackend(props, options = {}) {
