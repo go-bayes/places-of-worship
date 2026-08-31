@@ -812,6 +812,11 @@ const MAPTILER_API_KEY = String(window.MAPTILER_API_KEY || "").trim();
 const SATELLITE_TILE_URL = MAPTILER_API_KEY
     ? `https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=${encodeURIComponent(MAPTILER_API_KEY)}`
     : "";
+// hybrid = the same imagery with street and place labels drawn over it, so
+// the contributor keeps orientation while steering the pin (JB 2026-08-31)
+const HYBRID_TILE_URL = MAPTILER_API_KEY
+    ? `https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+    : "";
 // add mode prefers imagery once streets stop showing individual buildings
 const PORTAL_AUTO_SATELLITE_ZOOM = 15;
 // signed-in portal activity, kept per country and batch for the tab's life
@@ -1682,6 +1687,8 @@ class NzVerificationMap {
         this.basemapUserChosen = false;
         this.streetsLayer = null;
         this.satelliteLayer = null;
+        this.hybridLayer = null;
+        this.imageryBroken = false;
         this.lastNominatimRequestAt = 0;
         // context dots: lazily fetched dated places, keyed off the target
         // year in period mode; task history responses cached per task
@@ -2306,17 +2313,25 @@ class NzVerificationMap {
         if (SATELLITE_TILE_URL) {
             // imagery so the pin can be steered onto the real building;
             // maptiler serves z20 (upsampled where no aerial exists)
+            const imageryAttribution = '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
             this.satelliteLayer = L.tileLayer(SATELLITE_TILE_URL, {
-                attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                attribution: imageryAttribution,
                 maxZoom: 20,
                 minZoom,
             });
+            this.hybridLayer = L.tileLayer(HYBRID_TILE_URL, {
+                attribution: imageryAttribution,
+                maxZoom: 20,
+                minZoom,
+            });
+            this.watchImageryLayer(this.satelliteLayer);
+            this.watchImageryLayer(this.hybridLayer);
             this.addBasemapControl();
             // add mode: imagery takes over once buildings are resolvable,
             // unless the contributor has picked a basemap by hand
             this.map.on("zoomend", () => {
                 if (this.portalMode !== "add" || this.basemapUserChosen) return;
-                if (this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM) this.setBasemap("satellite");
+                if (this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM) this.setBasemap("hybrid");
             });
         }
 
@@ -2340,14 +2355,15 @@ class NzVerificationMap {
             // uniform option order across surfaces (per the historical-points
             // standard): period first where a dated product is wired, then all,
             // then off; all/off only where no dated product exists
-            const modes = COUNTRY_CONFIG.datedPlaces
-                ? [["period", "Points: period"], ["all", "Points: all"], ["off", "Points: off"]]
-                : [["all", "Points: all"], ["off", "Points: off"]];
+            // without a dated context layer the select would load nothing,
+            // so it does not render: an inert control reads as broken
+            const modes = [["period", "Points: period"], ["all", "Points: all"], ["off", "Points: off"]];
             div.innerHTML = `
+                ${COUNTRY_CONFIG.datedPlaces ? `
                 <select id="portalPointsSelect" aria-label="Context dots">
                     ${modes.map(([value, label]) => `<option value="${value}"${value === this.pointsMode ? " selected" : ""}>${label}</option>`).join("")}
                 </select>
-                <div id="portalPointsNote" class="points-mode-note" hidden></div>
+                <div id="portalPointsNote" class="points-mode-note" hidden></div>` : ""}
                 <div class="map-legend">
                     <span class="legend-caption">Validation ring</span>
                     <span class="legend-row"><span class="legend-dot vm-validated-present-swatch"></span>validated present</span>
@@ -2361,7 +2377,7 @@ class NzVerificationMap {
             // keep map gestures away from the control
             L.DomEvent.disableClickPropagation(div);
             L.DomEvent.disableScrollPropagation(div);
-            div.querySelector("#portalPointsSelect").addEventListener("change", (event) => {
+            div.querySelector("#portalPointsSelect")?.addEventListener("change", (event) => {
                 this.setPointsMode(event.target.value);
             });
             return div;
@@ -2784,9 +2800,9 @@ class NzVerificationMap {
             // imagery is the working surface for placing a pin, once close
             // enough for buildings to show
             if (this.map && this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM && !this.basemapUserChosen) {
-                this.setBasemap("satellite");
+                this.setBasemap("hybrid");
             }
-        } else if (this.basemap === "satellite" && !this.basemapUserChosen) {
+        } else if (this.basemap !== "streets" && !this.basemapUserChosen) {
             this.setBasemap("streets");
         }
         this.selectedTask = null;
@@ -2806,7 +2822,7 @@ class NzVerificationMap {
         }
         this.portalMode = PORTAL_MODES.has(stored) ? stored : null;
         if (this.portalMode === "add" && this.map && this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM) {
-            this.setBasemap("satellite");
+            this.setBasemap("hybrid");
         }
     }
 
@@ -2820,6 +2836,7 @@ class NzVerificationMap {
             div.setAttribute("aria-label", "Basemap");
             div.innerHTML = `
                 <button type="button" data-basemap="streets" aria-pressed="true">Streets</button>
+                <button type="button" data-basemap="hybrid" aria-pressed="false">Hybrid</button>
                 <button type="button" data-basemap="satellite" aria-pressed="false">Satellite</button>
             `;
             L.DomEvent.disableClickPropagation(div);
@@ -2835,13 +2852,56 @@ class NzVerificationMap {
         control.addTo(this.map);
     }
 
+    // a referrer-blocked or exhausted key must not leave the contributor on
+    // a blank map: repeated tile errors with no successful load drop the map
+    // to streets and retire the imagery options for the session
+    watchImageryLayer(layer) {
+        let errors = 0;
+        let loaded = false;
+        layer.on("tileload", () => { loaded = true; });
+        layer.on("tileerror", () => {
+            errors += 1;
+            if (loaded || errors < 3) return;
+            this.markImageryBroken();
+        });
+    }
+
+    // img tiles render even on http 403 — maptiler ships a blocked-notice
+    // image — so tileerror alone cannot detect a refused key. one fetch
+    // probe per session sees the real status the first time imagery is used
+    probeImagery() {
+        if (this._imageryProbe) return this._imageryProbe;
+        const url = (HYBRID_TILE_URL || SATELLITE_TILE_URL).replace("{z}/{x}/{y}", "1/1/1");
+        this._imageryProbe = fetch(url)
+            .then(response => {
+                if (!response.ok) this.markImageryBroken();
+            })
+            .catch(() => this.markImageryBroken());
+        return this._imageryProbe;
+    }
+
+    markImageryBroken() {
+        if (this.imageryBroken) return;
+        this.imageryBroken = true;
+        this.setBasemap("streets");
+        document.querySelectorAll(".basemap-toggle button").forEach(button => {
+            if (button.dataset.basemap !== "streets") {
+                button.setAttribute("disabled", "true");
+                button.title = "Imagery is unavailable right now";
+            }
+        });
+    }
+
     setBasemap(name) {
         if (!this.map || !this.streetsLayer) return;
-        const next = name === "satellite" && this.satelliteLayer ? "satellite" : "streets";
+        const layers = { streets: this.streetsLayer, hybrid: this.hybridLayer, satellite: this.satelliteLayer };
+        const next = layers[name] && !(this.imageryBroken && name !== "streets") ? name : "streets";
+        if (next !== "streets") this.probeImagery();
         if (next !== this.basemap) {
-            const incoming = next === "satellite" ? this.satelliteLayer : this.streetsLayer;
-            const outgoing = next === "satellite" ? this.streetsLayer : this.satelliteLayer;
-            if (outgoing && this.map.hasLayer(outgoing)) this.map.removeLayer(outgoing);
+            const incoming = layers[next];
+            Object.entries(layers).forEach(([key, layer]) => {
+                if (layer && key !== next && this.map.hasLayer(layer)) this.map.removeLayer(layer);
+            });
             if (!this.map.hasLayer(incoming)) incoming.addTo(this.map);
             // tiles sit beneath the canvas dots and dom markers
             incoming.bringToBack();
@@ -2977,14 +3037,19 @@ class NzVerificationMap {
                         nominatedTasks.push(manualTask);
                     }
                 }
-                this.tasks = allTasks
-                    .filter(task => this.assignmentTaskIsAvailable(task))
+                const availableTasks = allTasks.filter(task => this.assignmentTaskIsAvailable(task));
+                this.tasks = availableTasks
                     .concat(nominatedTasks)
                     .map(featureFromBackendTask);
                 const snapshotEl = document.getElementById("snapshotId");
                 if (snapshotEl) {
+                    // nominations are not part of the batch, so they count
+                    // separately rather than inflating "available of"
                     const total = allTasks.length;
-                    snapshotEl.textContent = `${ASSIGNMENT_BATCH_ID} | ${this.tasks.length} available of ${total}`;
+                    const nominatedSuffix = nominatedTasks.length
+                        ? ` + ${nominatedTasks.length} nominated`
+                        : "";
+                    snapshotEl.textContent = `${ASSIGNMENT_BATCH_ID} | ${availableTasks.length} available of ${total}${nominatedSuffix}`;
                 }
                 const selectedId = this.selectedTask?.properties?.task_id;
                 if (selectedId && !this.backendTasksById.has(selectedId)) {
@@ -6124,12 +6189,12 @@ class NzVerificationMap {
             <h2 class="pin-host-title">Add a missing place</h2>
             <div id="pinLocateCard" class="pin-card">
                 <div class="copy-help">
-                    Find the place by searching a name or address, typing coordinates, or clicking the building on the map. Every route moves the same pin, and it stays draggable until you confirm it.
+                    Find the place by searching a name or address, typing coordinates, or clicking the building on the map. Every route moves the same pin, and it stays draggable until you confirm it. Church names rarely resolve in the gazetteer — search the town or village, then steer the pin onto the building.
                 </div>
                 <div class="pin-locate-row">
                     <label>
                         Address or place name
-                        <input id="pinSearchInput" type="search" placeholder="e.g. Sacred Heart Cathedral, Port Vila" autocomplete="off">
+                        <input id="pinSearchInput" type="search" placeholder="e.g. Mele, Efate" autocomplete="off">
                     </label>
                     <button id="pinSearchButton" type="button" class="secondary">Search</button>
                 </div>
@@ -6283,11 +6348,21 @@ class NzVerificationMap {
             addPlaceButton.textContent = "Placing pin — click the building on the map · Esc cancels";
         }
         // structures must be visible so the pin lands on the actual building
-        this.setBasemap("satellite");
+        this.setBasemap("hybrid");
         const status = document.getElementById("pinStatus");
         if (status) status.textContent = "Click the building on the map to drop the pin, or use search or coordinates above. Press Escape to cancel.";
-        this._pinClickHandler = (event) => this.placePin(event.latlng);
-        this.map.once("click", this._pinClickHandler);
+        // every map click while armed lands the same pending pin: the first
+        // click places it and later clicks move it, exactly as the sidebar
+        // promises; the handler stays bound until exitPinMode
+        this._pinClickHandler = (event) => {
+            if (this.pinConfirmed) return;
+            if (this.pinMarker) {
+                this.setPendingPin(event.latlng.lat, event.latlng.lng, { zoom: this.map.getZoom() });
+            } else {
+                this.placePin(event.latlng);
+            }
+        };
+        this.map.on("click", this._pinClickHandler);
         this._pinKeyHandler = (event) => {
             if (event.key === "Escape") this.exitPinMode();
         };
@@ -6324,7 +6399,7 @@ class NzVerificationMap {
     setPendingPin(lat, lng, { zoom = 18 } = {}) {
         if (!this.pinMode || this.pinConfirmed || !this.map) return;
         const latlng = L.latLng(lat, lng);
-        const maxZoom = this.basemap === "satellite" && this.satelliteLayer ? 20 : 19;
+        const maxZoom = this.basemap !== "streets" ? 20 : 19;
         this.map.setView(latlng, Math.min(Math.max(this.map.getZoom(), zoom), maxZoom));
         if (this.pinMarker) {
             this.pinMarker.setLatLng(latlng);
@@ -6454,21 +6529,26 @@ class NzVerificationMap {
         const mode = this.pinLocationMode();
         const requiredZoom = mode === "approximate_area" ? PIN_MIN_APPROXIMATE_ZOOM : PIN_MIN_PLACEMENT_ZOOM;
         const zoomOk = this.map.getZoom() >= requiredZoom;
+        // a pin the contributor cannot see must not be confirmable: a stray
+        // early click can leave it far off-screen (even at sea)
+        const inView = this.map.getBounds().contains(position);
         const confirmButton = document.getElementById("pinConfirmButton");
-        if (confirmButton) confirmButton.disabled = !zoomOk;
+        if (confirmButton) confirmButton.disabled = !zoomOk || !inView;
         if (confirmButton) confirmButton.textContent = mode === "approximate_area"
             ? "Confirm approximate area"
             : "Confirm building location";
         const gate = document.getElementById("pinZoomGate");
         if (gate) {
             gate.hidden = false;
-            gate.textContent = zoomOk
-                ? (mode === "approximate_area"
-                    ? "The shaded circle is an uncertainty area, not an accepted site boundary."
-                    : "The pin will be recorded as the building location you identified.")
-                : (mode === "approximate_area"
-                    ? "Zoom in far enough to place the centre of the supported area."
-                    : "Zoom in further — a building-level point requires building-level placement.");
+            gate.textContent = !inView
+                ? "The pin is off screen — pan back to it, or click the map here to move it, before confirming."
+                : zoomOk
+                    ? (mode === "approximate_area"
+                        ? "The shaded circle is an uncertainty area, not an accepted site boundary."
+                        : "The pin will be recorded as the building location you identified.")
+                    : (mode === "approximate_area"
+                        ? "Zoom in far enough to place the centre of the supported area."
+                        : "Zoom in further — a building-level point requires building-level placement.");
         }
         const radiusField = document.getElementById("pinLocationRadiusField");
         if (radiusField) radiusField.hidden = mode !== "approximate_area";
@@ -6479,6 +6559,7 @@ class NzVerificationMap {
         const mode = this.pinLocationMode();
         const requiredZoom = mode === "approximate_area" ? PIN_MIN_APPROXIMATE_ZOOM : PIN_MIN_PLACEMENT_ZOOM;
         if (!this.pinMarker || this.map.getZoom() < requiredZoom) return;
+        if (!this.map.getBounds().contains(this.pinMarker.getLatLng())) return;
         const position = this.pinMarker.getLatLng();
         this.pinConfirmed = {
             latitude: position.lat,
