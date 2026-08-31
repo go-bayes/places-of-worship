@@ -1677,6 +1677,7 @@ class NzVerificationMap {
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
         this.pinSubmissionId = null;
+        this.pinHistory = [];
         this.manualTasksById = new Map();
         // signed-in portal activity: null while signed out or choosing,
         // otherwise "assigned" or "add" (see setPortalMode)
@@ -6364,7 +6365,18 @@ class NzVerificationMap {
         };
         this.map.on("click", this._pinClickHandler);
         this._pinKeyHandler = (event) => {
-            if (event.key === "Escape") this.exitPinMode();
+            if (event.key === "Escape") {
+                this.exitPinMode();
+                return;
+            }
+            // cmd/ctrl+z steps the pin back through its placements; text
+            // fields keep their own undo
+            const undoCombo = (event.metaKey || event.ctrlKey) && !event.shiftKey && event.key.toLowerCase() === "z";
+            if (!undoCombo) return;
+            const target = event.target;
+            if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+            event.preventDefault();
+            this.undoPinMove();
         };
         document.addEventListener("keydown", this._pinKeyHandler);
     }
@@ -6381,7 +6393,9 @@ class NzVerificationMap {
                 iconAnchor: [9, 9],
             }),
         }).addTo(this.map);
+        this.pinHistory = [L.latLng(latlng)];
         this.pinMarker.on("drag", () => this.updatePinConfirmCard());
+        this.pinMarker.on("dragend", () => this.recordPinPosition());
         this._pinZoomHandler = () => this.updatePinConfirmCard();
         this.map.on("zoomend", this._pinZoomHandler);
         const card = document.getElementById("pinConfirmCard");
@@ -6394,6 +6408,43 @@ class NzVerificationMap {
         this.revealPinHost();
     }
 
+    // undo history for the pending pin: every placement, click-move, typed
+    // move, and drag lands here so cmd/ctrl+z can step back through them
+    recordPinPosition() {
+        if (!this.pinMarker) return;
+        const position = this.pinMarker.getLatLng();
+        const last = this.pinHistory[this.pinHistory.length - 1];
+        if (last && last.equals(position)) return;
+        this.pinHistory.push(L.latLng(position.lat, position.lng));
+    }
+
+    undoPinMove() {
+        if (!this.pinMode || this.pinConfirmed || !this.pinMarker) return;
+        this.pinHistory.pop();
+        const previous = this.pinHistory[this.pinHistory.length - 1];
+        if (previous) {
+            this.pinMarker.setLatLng(previous);
+            if (!this.map.getBounds().contains(previous)) this.map.panTo(previous);
+            this.updatePinConfirmCard();
+            return;
+        }
+        // undoing the first drop removes the pin; placement stays armed
+        this.map.removeLayer(this.pinMarker);
+        this.pinMarker = null;
+        if (this.pinUncertaintyCircle) {
+            this.map.removeLayer(this.pinUncertaintyCircle);
+            this.pinUncertaintyCircle = null;
+        }
+        if (this._pinZoomHandler) {
+            this.map.off("zoomend", this._pinZoomHandler);
+            this._pinZoomHandler = null;
+        }
+        const card = document.getElementById("pinConfirmCard");
+        if (card) card.hidden = true;
+        const status = document.getElementById("pinStatus");
+        if (status) status.textContent = "Pin removed. Click the building on the map to drop it again.";
+    }
+
     // search, typed coordinates, and the map click all land here: one
     // pending location, one draggable pin
     setPendingPin(lat, lng, { zoom = 18 } = {}) {
@@ -6403,6 +6454,7 @@ class NzVerificationMap {
         this.map.setView(latlng, Math.min(Math.max(this.map.getZoom(), zoom), maxZoom));
         if (this.pinMarker) {
             this.pinMarker.setLatLng(latlng);
+            this.recordPinPosition();
             this.updatePinConfirmCard();
         } else {
             this.placePin(latlng);
@@ -6786,6 +6838,7 @@ class NzVerificationMap {
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
         this.pinSubmissionId = null;
+        this.pinHistory = [];
         if (this._pinClickHandler) {
             this.map.off("click", this._pinClickHandler);
             this._pinClickHandler = null;
