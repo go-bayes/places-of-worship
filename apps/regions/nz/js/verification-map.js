@@ -1623,7 +1623,6 @@ function assignmentQuickstartHtml() {
                 <li>Work from source-backed leads. OSM is sparse in Vanuatu, so treat any OSM record as context rather than the main evidence.</li>
                 <li>Record 1989, 1999, 2009, and 2020 status only where a source supports a target-year judgement.</li>
                 <li>Use lifecycle fields for older historical evidence, including mission, church, building, relocation, closure, or changed-use dates back to 1600.</li>
-                <li>Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when useful evidence remains unclear, and <em>Submit for review</em> when the evidence is ready for JB or JW.</li>
             </ol>
         `;
     }
@@ -1634,7 +1633,6 @@ function assignmentQuickstartHtml() {
                 <li>Work down the assigned ${COUNTRY_CONFIG.countryName} task list in order. Stop at a natural stopping point and tell JB where you stopped.</li>
                 <li>Open Street View or Google Maps to look around the site, and use the OSM object only as context. Record the imagery capture date if Street View is your evidence.</li>
                 <li>Record ${targetYearAndListText()} status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
-                <li>Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when the case remains unclear after useful checking, and <em>Submit for review</em> when the evidence is ready for JB.</li>
             </ol>
         `;
     }
@@ -1642,10 +1640,8 @@ function assignmentQuickstartHtml() {
         <ol>
             <li>Sign in with Google at the top of this panel.</li>
             <li>Work down the assigned task list in order. Stop at a natural stopping point and tell JB where you stopped.</li>
-            <li>How the list was made: <a href="https://github.com/go-bayes/places-of-worship/blob/main/scripts/build_nz_temporal_ra_workpack.R" target="_blank" rel="noopener">this R script</a> first selects every date-tag row whose <code>candidate_date_tag_windows</code> contains <code>candidate_gain</code>; then, after excluding used <code>osm_key</code>s, adds five OSM-present-then-absent rows with a nearby replacement object, five rows with parser warnings, uncertain target-year status, or <code>candidate_status_change</code>, and five present-present-present controls with no candidate window or parser warning. Treat OSM as the prompt to check, not as final evidence.</li>
             <li>Open Street View or Google Maps to look around the site, and use the OSM object only as context. Record the imagery capture date if Street View is your evidence.</li>
             <li>Record 2013, 2018, and 2023 status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
-            <li>Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when the case remains unclear after useful checking, and <em>Submit for review</em> when the evidence is ready for JB.</li>
         </ol>
     `;
 }
@@ -1895,7 +1891,7 @@ class NzVerificationMap {
                             : "Use the Google account JB invited (check the invitation email if you're not sure which one)."} After sign-in, choose between your assigned tasks and adding missing places; saved work goes straight to the shared review queue.`
                         : "Sign in with Google to load assigned tasks and save evidence directly for review."}</span>
                     <div id="googleSignInButton" class="google-sign-in-host"></div>
-                    <span class="backend-help">The Google button shows accounts already signed into this browser. If the wrong name appears, choose another Google account or use a browser profile signed into the invited account.</span>
+                    <details class="backend-help"><summary>Wrong account showing?</summary>The Google button shows accounts already signed into this browser. If the wrong name appears, choose another Google account or use a browser profile signed into the invited account.</details>
                     ${this.backendLastError ? `<span class="copy-status">${escapeHtml(this.backendLastError)}</span>` : ""}
                 </div>
             `;
@@ -2118,7 +2114,7 @@ class NzVerificationMap {
             ${this.changesRequestedPanelHtml(changesRequested)}
             <details ${total > 0 ? "open" : ""}>
                 <summary>My work
-                    <span class="ra-initials">${escapeHtml(`${total} item${total === 1 ? "" : "s"}: ${drafts} draft, ${submitted} submitted, ${unresolved} unresolved, ${needsMore} needs more evidence, ${skipped} skipped, ${reviewed} reviewed`)}</span>
+                    <span class="ra-initials">${escapeHtml(`${total} item${total === 1 ? "" : "s"} · ${needsMore + unresolved} need${needsMore + unresolved === 1 ? "s" : ""} attention`)}</span>
                 </summary>
                 ${total === 0 ? `
                     <div class="session-empty">No saved, submitted, skipped, or reviewed tasks yet.</div>
@@ -2129,7 +2125,6 @@ class NzVerificationMap {
                     ${total > SESSION_RECENT_LIMIT ? `
                         <button type="button" class="secondary" id="myWorkShowAllButton">${this.myWorkShowAll ? `Show recent ${SESSION_RECENT_LIMIT} only` : `Show all ${total}`}</button>
                     ` : ""}
-                    <div class="session-empty">Submitted and reviewed work stays here so you do not repeat it. Revise only when you have new evidence or need to correct a mistake.</div>
                 `}
             </details>
         `;
@@ -2687,7 +2682,7 @@ class NzVerificationMap {
                             <li>Open the source links in step 1 of the task panel.</li>
                             <li>In step 2, choose what your evidence shows and confirm year statuses.</li>
                             <li>In step 3, paste a short evidence note and the source URL or file reference.</li>
-                            <li>In step 4, use <em>Save draft</em>, <em>Submit unresolved note</em>, or <em>Submit for review</em> when the shared backend is enabled. Use <em>Copy spreadsheet row</em> only as the fallback.</li>
+                            <li>In step 4, save or submit; use <em>Copy spreadsheet row</em> only as the fallback.</li>
                         </ol>
                     `}
                     <button type="button" class="quickstart-dismiss" id="quickstartDismiss">Hide this guide for this workpack</button>
@@ -2733,13 +2728,11 @@ class NzVerificationMap {
         notice.innerHTML = DEMO_MODE
             ? (ASSIGNMENT_MODE
                 ? (this.backend?.configured
-                    ? (this.backendUser
-                        ? `Assigned web workpack: <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Saved work goes to the shared review queue. Do not enter private or sensitive data.`
-                        : `Assigned web workpack: <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Sign in to load tasks and save evidence. Do not enter private or sensitive data.`)
+                    ? ""
                     : `Assigned web workpack: <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. The shared backend is not configured here, so the assignment cannot be used on this deployment yet.`)
                 : this.backend?.configured
-                ? "Draft controls enabled. Sign in through the shared backend panel to save or submit evidence. Do not enter private or sensitive data."
-                : "Draft controls enabled. The shared backend is not configured here, so nothing is uploaded or saved until you use the spreadsheet fallback. Do not enter private or sensitive data.")
+                ? "Draft controls enabled. Sign in through the shared backend panel to save or submit evidence."
+                : "Draft controls enabled. The shared backend is not configured here, so nothing is uploaded or saved until you use the spreadsheet fallback.")
             : `Inspection only: form controls live in <a href="${escapeHtml(demoUrl())}">demo mode</a>. Nothing is uploaded either way.`;
         notice.setAttribute("role", DEMO_MODE ? "alert" : "note");
     }
@@ -2784,7 +2777,7 @@ class NzVerificationMap {
             </button>
             <button type="button" class="chooser-option" id="chooseAddButton">
                 <strong>Add places</strong>
-                <span>Nominate missing places of worship — nominations go to human review.${this.nominationFeatures.length ? ` You have ${this.nominationFeatures.length} under review.` : ""}</span>
+                <span>Nominate a place that is missing.${this.nominationFeatures.length ? ` You have ${this.nominationFeatures.length} under review.` : ""}</span>
             </button>
         `;
         document.getElementById("chooseAssignedButton")?.addEventListener("click", () => this.setPortalMode("assigned"));
@@ -3561,9 +3554,6 @@ class NzVerificationMap {
             </div>
             <div class="detail-section">
                 <h3>New or missing sites</h3>
-                <div class="disabled-panel">
-                    Use the draft nomination form in the sidebar to inspect fields for a site missing from the project map, a lost site, or a shared or changed site. OSM may already have a candidate object; record that id as evidence rather than as the project site id.
-                </div>
                 <button type="button" class="secondary" id="openNominationPanelButton">Open draft nomination form</button>
             </div>
         ` : `
@@ -3963,14 +3953,7 @@ class NzVerificationMap {
                 </div>
             `;
         }
-        const revisionText = this.taskIsRevisionMode(props.task_id)
-            ? " Revision mode is active; saving creates a new evidence version."
-            : "";
-        return `
-            <div class="pilot-note">
-                Shared backend status: <strong>${escapeHtml(backendTask.status.replaceAll("_", " "))}</strong>.${escapeHtml(revisionText)}
-            </div>
-        `;
+        return "";
     }
 
     // mark the evidence form as carrying unsaved typed work for a task
@@ -4262,9 +4245,6 @@ class NzVerificationMap {
         if (this.taskUsesRapidForm(props) && !this.taskIsReadOnly(props.task_id)) {
             return `
                 <h3>Record current information</h3>
-                <div class="copy-help">
-                    Record what you can confirm now. This observation will not fill Vanuatu's historical target years or change the public map before review.
-                </div>
             `;
         }
         const checks = props.automated_checks || [];
@@ -4431,21 +4411,21 @@ class NzVerificationMap {
             if (readOnly && status === "needs_review") {
                 return `
                     <div class="pilot-note">
-                        This submission is waiting for review. View it here, or use <strong>Revise submission</strong> if you have new evidence or need to correct a mistake.
+                        Waiting for review — use <strong>Revise submission</strong> if you have new evidence.
                     </div>
                 `;
             }
             if (readOnly && status === "unresolved_note") {
                 return `
                     <div class="pilot-note">
-                        This unresolved note is waiting for review. View it here, or use <strong>Revise submission</strong> if you find better evidence.
+                        Unresolved note waiting for review — use <strong>Revise submission</strong> if you have new evidence.
                     </div>
                 `;
             }
             if (readOnly && status === "changes_requested") {
                 return `
                     <div class="pilot-note">
-                        A reviewer asked for more evidence. Use <strong>Revise submission</strong> to respond with a new evidence version.
+                        Changes requested — use <strong>Revise submission</strong> to respond.
                     </div>
                 `;
             }
@@ -4587,7 +4567,7 @@ class NzVerificationMap {
                     </select>
                 </label>
                 <div class="copy-help">
-                    Do not enter personal contact details or private conversations. Choose restricted when the observation could expose a culturally restricted place or identifiable person. Every submission enters human review and does not update the public map directly.
+                    No contact details or private conversations. Choose restricted for culturally restricted places or identifiable people.
                 </div>
                 <div class="button-row">
                     <button id="${prefix}RapidSubmit" type="submit">${escapeHtml(submitLabel)}</button>
@@ -4606,7 +4586,7 @@ class NzVerificationMap {
             <h3>${correcting ? "Correct your observation" : "Current observation"}</h3>
             ${correcting ? `
                 <div class="pilot-note">
-                    Submitting records a new observation and marks your earlier one as superseded. The earlier record stays on file for reviewers; it is not rewritten.
+                    Your earlier observation stays on record, marked superseded.
                 </div>
             ` : this.formModeNoticeHtml(props)}
             <div id="attachmentsBlock" class="attachments-block" hidden></div>
@@ -4663,7 +4643,7 @@ class NzVerificationMap {
                     ${canAddHistory ? `<button id="addKnownHistoryFromRecordedButton" type="button">Add known history</button>` : ""}
                     ${canCorrect ? `<button id="correctObservationButton"${canAddHistory ? ` class="secondary"` : ""} type="button">Correct this observation</button>` : ""}
                 </div>
-                ${canCorrect ? `<div class="copy-help">Correct the current observation only for a mistake or new information. Your earlier observation stays on record and is marked superseded.</div>` : ""}
+                ${canCorrect ? `<div class="copy-help">Only for a mistake or new information.</div>` : ""}
             ` : ""}
             <div id="copyStatus" class="copy-status" aria-live="polite"></div>
         `;
@@ -4865,7 +4845,6 @@ class NzVerificationMap {
                 </label>
                 <fieldset class="historical-date-block">
                     <legend>Supported date bounds</legend>
-                    <div class="copy-help">Use YYYY, YYYY-MM, or YYYY-MM-DD. Leave a bound blank when the source does not support one.</div>
                     <div class="field-grid">
                         <label>
                             Earliest supported date (optional)
@@ -5286,17 +5265,15 @@ class NzVerificationMap {
                     </select>
                 </label>
                 <div class="copy-help">
-                    Choose review or restricted when the account may identify people, expose a culturally restricted place, or require local judgement. Evidence marked needs review or restricted is withheld from external AI services.
+                    Mark review or restricted if the account could identify a person or a restricted place; such evidence is withheld from external AI services.
                 </div>
                 <h3>4. Save or submit</h3>
                 ${this.backend?.configured && this.backendUser ? `
-                    <div class="copy-help">
-                        ${readOnly
-                            ? "This saved work is visible for reference. Revisions create a new evidence version; they do not rewrite the submitted record."
-                            : revisionMode
-                                ? "Save a revision draft while working. Submit the revision when the corrected or extended evidence is ready for review."
-                                : "Save drafts while working. Use Submit unresolved note when you have checked sources but cannot resolve the case. Use Submit for review when the evidence is ready for a decision."}
-                    </div>
+                    ${readOnly
+                        ? `<div class="copy-help">This saved work is visible for reference. Revisions create a new evidence version; they do not rewrite the submitted record.</div>`
+                        : revisionMode
+                            ? `<div class="copy-help">Save a revision draft while working. Submit the revision when the corrected or extended evidence is ready for review.</div>`
+                            : ""}
                     <div id="attachmentsBlock" class="attachments-block" hidden></div>
                     ${readOnly ? `
                         ${canRevise ? `
@@ -5322,7 +5299,8 @@ class NzVerificationMap {
                     </div>
                 ` : `
                     <div class="copy-help">
-                        <strong>Fallback:</strong> Copies one tab-separated row to your clipboard. Switch to the working evidence spreadsheet, click column A in the next empty row under the unchanged header, and paste with <kbd>Cmd</kbd>+<kbd>V</kbd> (Mac) or <kbd>Ctrl</kbd>+<kbd>V</kbd> (Windows). Nothing is uploaded.
+                        <strong>Fallback:</strong> Copies one tab-separated row to your clipboard. Nothing is uploaded.
+                        <details><summary>How to paste</summary>Switch to the working evidence spreadsheet, click column A in the next empty row under the unchanged header, and paste with <kbd>Cmd</kbd>+<kbd>V</kbd> (Mac) or <kbd>Ctrl</kbd>+<kbd>V</kbd> (Windows).</details>
                     </div>
                 `}
                 ${ASSIGNMENT_MODE ? "" : `
@@ -6035,7 +6013,7 @@ class NzVerificationMap {
         block.hidden = false;
         block.innerHTML = `
             <strong>Photos &amp; documents (optional)</strong>
-            <div class="copy-help">Add a photo of the building or sign, or a source document (JPEG, PNG, WebP, PDF, under 10&nbsp;MB). Files are citations for review only — they never appear on the public map.</div>
+            <div class="copy-help">JPEG, PNG, WebP or PDF, under 10&nbsp;MB. Review-only — never public.</div>
             <div class="button-row">
                 <input id="attachmentFileInput" type="file" accept="image/jpeg,image/png,image/webp,application/pdf">
                 <button id="attachmentUploadButton" class="secondary" type="button">Add file</button>
@@ -6316,11 +6294,7 @@ class NzVerificationMap {
                 </div>
             `;
         }
-        return `
-            <div class="copy-help">
-                Know a place of worship that is not on the map? Use <strong>＋ Add a missing place</strong>, then identify either the building or the approximate area supported by your evidence. Local knowledge counts as evidence.
-            </div>
-        `;
+        return "";
     }
 
     // the transient pin-drop cards, rendered into #pinCardHost while pin
@@ -6369,13 +6343,10 @@ class NzVerificationMap {
                 </label>
                 <label>
                     What kind of claim is this?
-                    <select id="pinChangeClassSelect">
+                    <select id="pinChangeClassSelect" title="This distinction drives the annual census: real change is counted, map corrections rewrite history.">
                         ${selectOptionsHtml(CHANGE_CLASS_OPTIONS, "uncertain")}
                     </select>
                 </label>
-                <div class="copy-help">
-                    This distinction drives the annual census: real change is counted, map corrections rewrite history.
-                </div>
                 <div class="button-row">
                     <button id="pinSubmitButton" type="button">Create candidate task</button>
                     <button id="pinFormCancelButton" type="button" class="secondary">Cancel</button>
@@ -6385,7 +6356,7 @@ class NzVerificationMap {
             <h2 class="pin-host-title">Add a missing place</h2>
             <div id="pinLocateCard" class="pin-card">
                 <div class="copy-help">
-                    Find the place by searching a name or address, typing coordinates, or clicking the building on the map. Every route moves the same pin, and it stays draggable until you confirm it. Church names rarely resolve in the gazetteer — search the town or village, then steer the pin onto the building.
+                    Search, type coordinates, or click the map. Drag the pin onto the building.
                 </div>
                 <div class="pin-locate-row">
                     <label>
