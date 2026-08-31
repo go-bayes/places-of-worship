@@ -48,12 +48,22 @@ sidebar then shows only the chosen activity's sections. A `← Change activity`
 link returns to the chooser; the choice persists for the tab
 (`sessionStorage`), so a reload lands where the contributor was.
 
-The map offers `Streets` (OSM standard tiles) and `Satellite` (MapTiler
-imagery) basemaps through a small pill control. Add-places mode prefers
-satellite once buildings are resolvable and switches to it when pin placement
-starts, so contributors can guide the pin onto the actual building; a manual
-toggle choice wins for the rest of the session. The satellite option hides
-itself when no MapTiler key is configured.
+The map offers `Streets` (OSM standard tiles), `Hybrid` (MapTiler imagery
+with street and place labels), and `Satellite` (bare MapTiler imagery)
+basemaps through a small pill control. Add-places mode prefers hybrid once
+buildings are resolvable and switches to it when pin placement starts, so
+contributors can guide the pin onto the actual building without losing
+street-name orientation; a manual toggle choice wins for the rest of the
+session. The imagery options hide when no MapTiler key is configured, and
+the portal falls back to streets (disabling the imagery buttons) when the
+key is refused or exhausted.
+
+Assigned-task work and pure entry are separate activities (ruled
+2026-08-31): the assignment sheet lists only the batch's tasks, while the
+contributor's own nominations live in a teal `My nominations` panel in Add
+places. Nominations always stay on the map — as dashed teal rings while
+healthy, keeping their validation-state ring once disputed or validated —
+so the duplicate check and the route back to them survive the separation.
 
 Keep the sidebar dense but readable. This is a workbench, not a landing page.
 Avoid hero copy, decorative cards, and explanatory blocks that push the task
@@ -76,7 +86,7 @@ Do not reuse these colours for unrelated meanings.
 | Not assessed | `.status-not-assessed` | pale blue, currently around `#e8f1fb`, `#1f4e79` |
 | Warning or demo-only message | `.demo-warning` | amber warning |
 | Disabled or unavailable state | `.disabled-panel`, `.backend-card.disabled` | light grey |
-| Pure data entry (nominations, walk-up records) — containers only, never the action button | `.portal-mode-bar.mode-add`, `.nominations-panel`, `.entry-badge`, `.task-row.entry-card`, `.pin-card-host`, `.verification-marker.vm-nomination` | teal, `--entry` `#0f766e`, `--entry-ink` `#115e59`, `--entry-bg` `#e6f4f1` (JB separation ruling, 2026-08-31) |
+| Pure data entry (nominations, walk-up records) — containers only, never the action button | `.portal-mode-bar.mode-add`, `.nominations-panel`, `.entry-badge`, `.task-row.entry-card`, `.pin-card-host`, `.verification-marker.vm-nomination`, `.legend-dot.vm-nomination-swatch`, `.chooser-option#chooseAddButton strong` | teal, `--entry` `#0f766e`, `--entry-ink` `#115e59`, `--entry-bg` `#e6f4f1` (JB separation ruling, 2026-08-31) |
 
 If these colours change, update both the CSS and this table. On
 `verification.html` these meanings now live as CSS custom properties in the

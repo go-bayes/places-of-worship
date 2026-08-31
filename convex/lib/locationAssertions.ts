@@ -22,10 +22,12 @@ export type LocationAssertionInput = {
 };
 
 // the single per-country location-mode rule, mirroring the portal's
-// nomination forms: a rapid-current country records only identified
-// buildings, so an approximate_area assertion for it can only come from a
-// crafted call, never the portal (follow-up recorded 2026-08-28; server
-// gate ruled with the generalisation, jb 2026-08-31)
+// nomination forms: a building-level-only country records only identified
+// buildings, and its portal (rapid and detailed forms alike) offers no
+// approximate-area option, so such an assertion can only come from a
+// crafted call (follow-up recorded 2026-08-28; server gate ruled with the
+// generalisation, jb 2026-08-31). the client mirror is buildingLevelOnly
+// in the portal's country config.
 const BUILDING_LEVEL_ONLY_COUNTRIES: ReadonlySet<string> = new Set(["VU"]);
 
 // enforces the per-country rule server-side; countries outside the set

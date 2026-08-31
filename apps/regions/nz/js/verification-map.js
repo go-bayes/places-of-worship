@@ -49,6 +49,7 @@ const COUNTRY_CONFIGS = {
         assignmentHeading: "Vanuatu source-first test",
         rapidCurrentEntry: true,
         rapidNominationEntry: true,
+        buildingLevelOnly: true,
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -840,10 +841,17 @@ const PORTAL_MODE_KEY = `pow_portal_mode_v1:${COUNTRY_CONFIG.countryCode.toLower
 // portal stays well inside the osmf usage policy
 const NOMINATIM_SEARCH_URL = "https://nominatim.openstreetmap.org/search";
 const NOMINATIM_MIN_INTERVAL_MS = 1500;
-const LOCATION_MODE_OPTIONS = [
-    ["building_identified", "I identified the building"],
-    ["approximate_area", "I only know the approximate area"],
-];
+// vu is building-level only (kastom-sensitive intake; the server enforces
+// the same rule in convex/lib/locationAssertions.ts), so its detailed form
+// must not offer the approximate-area mode the server will refuse
+const LOCATION_MODE_OPTIONS = COUNTRY_CONFIG.buildingLevelOnly
+    ? [["building_identified", "I identified the building"]]
+    : [
+        ["building_identified", "I identified the building"],
+        // approximate area: use when local knowledge places the site in a
+        // vicinity but not at a building; the radius states the uncertainty
+        ["approximate_area", "I only know the approximate area"],
+    ];
 const LOCATION_RADIUS_OPTIONS = [
     ["100", "Within about 100 m"],
     ["250", "Within about 250 m"],
@@ -1961,7 +1969,7 @@ class NzVerificationMap {
             }
             this.setBackendTransientStatus(this.backendLastError
                 ? this.backendLastError
-                : `Task list refreshed — ${this.tasks.length} available, ${this.myWorkItems.length} in My work.`);
+                : `Task list refreshed — ${this.tasks.filter(feature => !isNominationProps(feature.properties)).length} available, ${this.myWorkItems.length} in My work.`);
         });
         document.getElementById("signOutButton")?.addEventListener("click", () => this.signOutBackend());
     }
@@ -2097,6 +2105,11 @@ class NzVerificationMap {
         }
         const items = this.myWorkItems || [];
         const total = items.length;
+        // a bounced nomination must reach the ra with the reviewer's note
+        // wherever they are working, so the alert panel and badge cover
+        // nominations too even though the my-work list itself is batch-only
+        const nominationChangesRequested = (this.myNominationItems || [])
+            .filter(item => item.task?.status === "changes_requested");
         // a task awaiting review with an editable draft alongside is a
         // revision in progress; count it as a draft, not as submitted work
         const isRevisionItem = item =>
@@ -2106,7 +2119,9 @@ class NzVerificationMap {
         const submitted = items.filter(item => item.task?.status === "needs_review" && !isRevisionItem(item)).length;
         const unresolved = items.filter(item => item.task?.status === "unresolved_note" && !isRevisionItem(item)).length;
         const drafts = items.filter(item => item.task?.status === "draft_saved").length + revisionDrafts;
-        const changesRequested = items.filter(item => item.task?.status === "changes_requested");
+        const changesRequested = items
+            .filter(item => item.task?.status === "changes_requested")
+            .concat(nominationChangesRequested);
         const needsMore = changesRequested.length;
         const skipped = items.filter(item => item.task?.status === "skipped").length;
         const reviewed = items.filter(item => item.task?.status === "reviewed" || item.task?.status === "exported").length;
@@ -2728,7 +2743,9 @@ class NzVerificationMap {
         notice.innerHTML = DEMO_MODE
             ? (ASSIGNMENT_MODE
                 ? (this.backend?.configured
-                    ? ""
+                    // one line, load-bearing: the blanket rule must appear on
+                    // the live signed-in flow, not only inside the forms
+                    ? "Do not enter private or sensitive data."
                     : `Assigned web workpack: <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. The shared backend is not configured here, so the assignment cannot be used on this deployment yet.`)
                 : this.backend?.configured
                 ? "Draft controls enabled. Sign in through the shared backend panel to save or submit evidence."
@@ -2777,7 +2794,7 @@ class NzVerificationMap {
             </button>
             <button type="button" class="chooser-option" id="chooseAddButton">
                 <strong>Add places</strong>
-                <span>Nominate a place that is missing.${this.nominationFeatures.length ? ` You have ${this.nominationFeatures.length} under review.` : ""}</span>
+                <span>Nominate a place that is missing.${(this.myNominationItems || []).length ? ` You have ${this.myNominationItems.length} under review.` : ""}</span>
             </button>
         `;
         document.getElementById("chooseAssignedButton")?.addEventListener("click", () => this.setPortalMode("assigned"));
@@ -3052,6 +3069,9 @@ class NzVerificationMap {
             // live in their own panel in add mode
             this.myWorkItems = myItems.filter(item => !isNominationProps(item?.task));
             this.myNominationItems = myItems.filter(item => isNominationProps(item?.task));
+            // the nominations panel depends on this list and the selection
+            // only, so it renders here and on selectTask, not per keystroke
+            this.renderNominationList();
             if (ASSIGNMENT_MODE) {
                 // nominated candidates join the map and list whatever their
                 // status: their author needs a route back to them, and the
@@ -3124,15 +3144,21 @@ class NzVerificationMap {
             if (status !== "all" && temporal.status !== status) return false;
             return true;
         };
-        // nominations stay off the assignment sheet and its filters; they
-        // keep their own list (and always stay on the map for the
-        // duplicate check and the route back to them)
-        this.nominationFeatures = this.tasks.filter(feature => isNominationProps(feature.properties));
-        this.filteredTasks = this.tasks.filter(feature => !isNominationProps(feature.properties) && matchesFilters(feature));
+        // one partition pass: nominations stay off the assignment sheet and
+        // its filters, but always stay on the map for the duplicate check
+        // and the route back to them
+        this.nominationFeatures = [];
+        this.filteredTasks = [];
+        for (const feature of this.tasks) {
+            if (isNominationProps(feature.properties)) {
+                this.nominationFeatures.push(feature);
+            } else if (matchesFilters(feature)) {
+                this.filteredTasks.push(feature);
+            }
+        }
 
         this.renderMarkers();
         this.renderTaskList();
-        this.renderNominationList();
         this.updateStats();
     }
 
@@ -3141,18 +3167,20 @@ class NzVerificationMap {
     renderNominationList() {
         const panel = document.getElementById("nominationsPanel");
         if (!panel) return;
-        const rows = this.nominationFeatures || [];
+        // author-scoped: listMyTasks returns only the signed-in ra's work,
+        // so this list never presents another contributor's nominations as
+        // "my nominations" (the country-wide manual batch stays map-only)
+        const rows = this.myNominationItems || [];
         panel.innerHTML = `
             <h2>My nominations${rows.length ? ` (${rows.length})` : ""}</h2>
-            ${rows.length ? rows.map(feature => {
-                const props = feature.properties || {};
-                const backendTask = this.backendTasksById.get(props.task_id);
-                const statusText = (backendTask?.status || "in review").replaceAll("_", " ");
-                const activeClass = this.selectedTask?.properties?.task_id === props.task_id ? " active" : "";
+            ${rows.length ? rows.map(item => {
+                const task = item.task || {};
+                const statusText = (task.status || "in review").replaceAll("_", " ");
+                const activeClass = this.selectedTask?.properties?.task_id === task.task_id ? " active" : "";
                 return `
-                    <button class="task-row entry-card${activeClass}" type="button" data-task-id="${escapeHtml(props.task_id)}">
-                        <span class="task-row-title">${escapeHtml(props.name || "Unnamed place")}<span class="entry-badge">${escapeHtml(statusText)}</span></span>
-                        <span class="task-row-meta">${escapeHtml(props.locality || props.address || "")}</span>
+                    <button class="task-row entry-card${activeClass}" type="button" data-task-id="${escapeHtml(task.task_id || "")}">
+                        <span class="task-row-title">${escapeHtml(task.name || "Unnamed place")}<span class="entry-badge">${escapeHtml(statusText)}</span></span>
+                        <span class="task-row-meta">${escapeHtml(task.locality || task.address || "")}</span>
                     </button>
                 `;
             }).join("") : `<div class="task-row-meta">None yet.</div>`}
@@ -3225,8 +3253,10 @@ class NzVerificationMap {
         const color = statusColor(status);
         // a nomination is pure-entry work, worn as a dashed teal ring on a
         // hollow marker (state = ring, never fill), apart from every
-        // validation-state ring hue
-        if (isNomination) {
+        // validation-state ring hue. only the healthy states take the teal:
+        // disputed and validated nominations keep their state ring so a
+        // stalled nomination stays visible on the map
+        if (isNomination && (verifState === "unvalidated" || verifState === "in_review")) {
             return L.divIcon({
                 className: "",
                 html: `<div class="verification-marker vm-nomination" style="width:${size}px;height:${size}px;"></div>`,
@@ -3458,6 +3488,7 @@ class NzVerificationMap {
         }
 
         this.renderTaskList();
+        this.renderNominationList();
         this.renderDetailPreservingForm(feature);
         if (this.backend?.signedIn && props.task_id && !this.latestDraftsByTaskId.has(props.task_id)) {
             this.loadLatestDraftForTask(props.task_id).then(() => {
@@ -3826,7 +3857,14 @@ class NzVerificationMap {
     // server's intake registry allows it (jb 2026-08-31)
     taskUsesRapidForm(props) {
         if (RAPID_ASSIGNED_ENTRY) return true;
-        return RAPID_NOMINATION_ENTRY && isNominationProps(props);
+        if (!(RAPID_NOMINATION_ENTRY && isNominationProps(props))) return false;
+        // a nomination already holding guided evidence stays on the guided
+        // form: the rapid form must never hide or overwrite a guided draft
+        // (mirrors the read-only branch's contract check)
+        const taskId = props?.task_id;
+        const latest = taskId ? this.latestDraftForTask(taskId) : null;
+        const draftLoaded = taskId ? this.latestDraftsByTaskId.has(taskId) : false;
+        return !draftLoaded || !latest || latest.observation_contract_version === "rapid_current_v1";
     }
 
     taskIsReadOnly(taskId) {
@@ -4771,10 +4809,10 @@ class NzVerificationMap {
                 automated_checks: [{
                     check_id: "rapid_current_nomination",
                     severity: "info",
-                    message: "An invited RA submitted a current-place observation through the Vanuatu rapid-entry path.",
+                    message: "An invited RA submitted a current-place observation through the rapid-entry path.",
                     suggested_action: "review_identity_and_current_use",
                 }],
-                task_brief: "Review this Vanuatu current-place observation. Confirm site identity, present worship use, sensitivity, and whether an existing project or OSM record already represents the place before export.",
+                task_brief: "Review this current-place observation. Confirm site identity, present worship use, sensitivity, and whether an existing project or OSM record already represents the place before export.",
             };
             this.manualTasksById.set(result.task_id, manualTask);
             this.backendTasksById.set(result.task_id, manualTask);

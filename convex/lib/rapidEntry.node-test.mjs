@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  COUNTRY_INTAKE_BOUNDS,
   assertCountryIntakePoint,
+  manualBatchId,
   assertNotRapidContract,
   assertRapidCandidateContext,
   assertRapidDerivedConsistency,
@@ -197,4 +199,19 @@ test("general write routes reject the rapid contract and its fields", () => {
     () => assertNotRapidContract({ current_observation_basis: "other" }, "the general submission route"),
     /general submission route/,
   );
+});
+
+test("out-of-range longitudes normalise before the bounds test", () => {
+  // leaflet's continuous world: a chatham islands pin reached by panning
+  // east across the antimeridian arrives as about +183.4
+  assert.doesNotThrow(() => assertCountryIntakePoint("NZ", -43.95, 183.44));
+  assert.doesNotThrow(() => assertCountryIntakePoint("NZ", -43.95, -176.56));
+  assert.throws(() => assertCountryIntakePoint("NZ", -43.95, 190.1), /outside the New Zealand intake area/);
+});
+
+test("the nomination-batch contract and assigned-rapid flag are declared once", () => {
+  assert.equal(manualBatchId("VU"), "manual-vu");
+  assert.equal(manualBatchId("nz"), "manual-nz");
+  assert.equal(COUNTRY_INTAKE_BOUNDS.VU.assignedRapid, true);
+  assert.equal(COUNTRY_INTAKE_BOUNDS.NZ.assignedRapid, undefined);
 });

@@ -21,6 +21,7 @@ import {
   countryIntakeBounds,
   deriveCurrentObservation,
   isRapidCurrentDraft,
+  manualBatchId,
   sourceFieldsForObservationBasis,
 } from "./lib/rapidEntry";
 import { appendTaskEvent } from "./lib/taskEvents";
@@ -207,7 +208,14 @@ export const submitCurrentObservation = mutation({
       // an existing task carries its own country; the registry refuses
       // countries without a declared intake ruling
       intakeCountry = authorisedExistingTask.country_code.toUpperCase();
-      countryIntakeBounds(intakeCountry);
+      const taskIntake = countryIntakeBounds(intakeCountry);
+      // rapid observations land only on rapid-designed tasks: the
+      // country's nomination batch, or any batch where the country's
+      // assigned work itself is rapid (vu). a crafted call must not put a
+      // rapid draft on a guided-design assigned task (separation ruling)
+      if (!taskIntake.assignedRapid && authorisedExistingTask.batch_id !== manualBatchId(intakeCountry)) {
+        throw new Error("This task uses the detailed evidence form. Record it through the portal's guided workflow.");
+      }
       if (requestedCountry !== undefined && requestedCountry !== intakeCountry) {
         throw new Error("The submitted country does not match the selected task.");
       }
@@ -233,7 +241,7 @@ export const submitCurrentObservation = mutation({
       assertCountryIntakePoint(intakeCountry, candidate.latitude, candidate.longitude);
     }
     const intake = countryIntakeBounds(intakeCountry);
-    const rapidEntryBatch = `manual-${intakeCountry.toLowerCase()}`;
+    const rapidEntryBatch = manualBatchId(intakeCountry);
     const targetYears = defaultTargetYears(intakeCountry);
     const targetYearStatuses = Object.fromEntries(targetYears.map((year) => [String(year), "not_assessed" as const]));
 

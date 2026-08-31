@@ -22,6 +22,9 @@ export type CountryIntakeBounds = {
   south: number;
   east: number;
   north: number;
+  // true only where the country's assigned batch itself uses the rapid
+  // design; nominations are rapid-eligible in every registry country
+  assignedRapid?: boolean;
 };
 
 // closed per-country registry of rapid-intake bounding boxes, keyed by
@@ -30,12 +33,22 @@ export type CountryIntakeBounds = {
 // (jb, 2026-08-31). an east edge greater than 180 marks a box that crosses
 // the antimeridian and is read as east - 360 on the wrapped side.
 export const COUNTRY_INTAKE_BOUNDS: Record<string, CountryIntakeBounds> = {
-  VU: { name: "Vanuatu", west: 166.491, south: -20.303, east: 170.289, north: -13.022 },
+  // assignedRapid: the country's ASSIGNED batch is designed source-first,
+  // so rapid observations are accepted on its existing batch tasks; for
+  // every other country the rapid task path is restricted to the
+  // country's manual nomination batch (jb separation ruling 2026-08-31)
+  VU: { name: "Vanuatu", west: 166.491, south: -20.303, east: 170.289, north: -13.022, assignedRapid: true },
   // nz includes the chatham islands near 176.5°W, so the box crosses the
   // antimeridian: a longitude is inside when it falls in [165.5, 180] or
   // in the wrapped run [-180, -176] (east 184 - 360)
   NZ: { name: "New Zealand", west: 165.5, south: -47.5, east: 184.0, north: -34.0 },
 };
+
+// one home for the nomination-batch naming contract shared by the rapid
+// candidate path, createManualCandidateTask, and the portal
+export function manualBatchId(countryCode: string): string {
+  return `manual-${countryCode.toLowerCase()}`;
+}
 
 export type RapidCandidateContext = {
   placement_zoom?: number;
@@ -123,6 +136,10 @@ export function countryIntakeBounds(countryCode: string): CountryIntakeBounds {
 }
 
 function longitudeWithinBounds(bounds: CountryIntakeBounds, longitude: number): boolean {
+  // leaflet's world is continuous, so a pin dropped after panning across
+  // the antimeridian arrives as e.g. +183.4; normalise to [-180, 180)
+  // before testing so a point inside the box is never refused
+  longitude = ((longitude + 180) % 360 + 360) % 360 - 180;
   if (bounds.east <= 180) {
     return longitude >= bounds.west && longitude <= bounds.east;
   }
