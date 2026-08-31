@@ -372,8 +372,10 @@
             return await this.request("action", "attachments:requestAttachmentView", args);
         }
 
-        async submitVanuatuCurrentObservation(args) {
-            return await this.request("mutation", "rapidEntry:submitVanuatuCurrentObservation", args);
+        async submitCurrentObservation(args) {
+            // canonical multi-country route; the old vanuatu-named alias
+            // stays registered server-side for previously cached clients
+            return await this.request("mutation", "rapidEntry:submitCurrentObservation", args);
         }
 
         async submitHistoricalClaim(args) {

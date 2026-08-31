@@ -20,6 +20,8 @@ const COUNTRY_CONFIGS = {
         defaultAssignmentBatchId: "nz-temporal-ra-workpack-001",
         datedPlaces: "../nz/data/dated_places.geojson",
         assignmentHeading: "New Zealand source-first test",
+        // pure entry only: nz assigned tasks keep the guided form
+        rapidNominationEntry: true,
         temporalLossAction: {
             value: "present_2013_absent_2018",
             label: "Present in 2013, absent in 2018",
@@ -46,6 +48,7 @@ const COUNTRY_CONFIGS = {
         defaultAssignmentBatchId: "vu-source-first-test-001",
         assignmentHeading: "Vanuatu source-first test",
         rapidCurrentEntry: true,
+        rapidNominationEntry: true,
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -608,11 +611,22 @@ const ASSIGNMENT_BATCH_ID = FULL_MAP_MODE
     ? ""
     : (REQUESTED_ASSIGNMENT_BATCH_ID || (BACKEND_CONFIGURED ? DEFAULT_ASSIGNMENT_BATCH_ID : ""));
 const ASSIGNMENT_MODE = ASSIGNMENT_BATCH_ID.length > 0;
-const RAPID_CURRENT_ENTRY = Boolean(
+// two gates where one used to conflate assigned work with pure entry
+// (jb 2026-08-31): rapidCurrentEntry keeps a country's ASSIGNED batch on
+// the rapid form (vu's source-first design); rapidNominationEntry puts
+// PURE ENTRY (add places) on the same rapid form wherever the server's
+// country intake registry has bounds (vu and nz today)
+const RAPID_ASSIGNED_ENTRY = Boolean(
     COUNTRY_CONFIG.rapidCurrentEntry
     && ASSIGNMENT_MODE
     && SEARCH_PARAMS.get("detailed") !== "1"
 );
+const RAPID_NOMINATION_ENTRY = Boolean(
+    COUNTRY_CONFIG.rapidNominationEntry
+    && ASSIGNMENT_MODE
+    && SEARCH_PARAMS.get("detailed") !== "1"
+);
+const RAPID_ANY_ENTRY = RAPID_ASSIGNED_ENTRY || RAPID_NOMINATION_ENTRY;
 const HISTORICAL_CLAIM_ENTRY = ASSIGNMENT_MODE;
 // optional personalised hint: invitation links may include ?email=ra@example.com
 // so the sign-in card can name the specific invited account
@@ -1529,6 +1543,12 @@ function osmPointUrl(lat, lng) {
     return `https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}`;
 }
 
+// a nomination lives in the country's manual batch: it is the ra's own
+// pure-entry work, ruled separate from the assignment sheet (jb 2026-08-31)
+function isNominationProps(props) {
+    return (props?.batch_id || "").startsWith("manual-");
+}
+
 function featureFromBackendTask(task) {
     const context = task.source_context || {};
     const survey = context.survey || {};
@@ -1651,6 +1671,8 @@ class NzVerificationMap {
         this.backendTasksById = new Map();
         this.latestDraftsByTaskId = new Map();
         this.myWorkItems = [];
+        this.myNominationItems = [];
+        this.nominationFeatures = [];
         this.revisionDraftIdsByTaskId = new Map();
         // rapid tasks awaiting review that the observer has chosen to correct;
         // a correction is a new observation, so no server draft exists until
@@ -1905,8 +1927,9 @@ class NzVerificationMap {
         }
 
         const label = this.backendUser.initials || this.backendUser.email || "signed in";
+        const assignedAvailable = this.tasks.filter(feature => !isNominationProps(feature.properties)).length;
         const assignmentStatusText = ASSIGNMENT_MODE
-            ? `${this.tasks.length} available task${this.tasks.length === 1 ? "" : "s"}; ${this.myWorkItems.length} item${this.myWorkItems.length === 1 ? "" : "s"} in My work.`
+            ? `${assignedAvailable} available task${assignedAvailable === 1 ? "" : "s"}; ${this.myWorkItems.length} item${this.myWorkItems.length === 1 ? "" : "s"} in My work.`
             : "Saves and submissions go to Convex for reviewer follow-up.";
         const signedInHeading = !ASSIGNMENT_MODE
             ? "Shared task backend"
@@ -1976,6 +1999,7 @@ class NzVerificationMap {
         this.backendTasksById.clear();
         this.latestDraftsByTaskId.clear();
         this.myWorkItems = [];
+        this.myNominationItems = [];
         this.revisionDraftIdsByTaskId.clear();
         // sign-out discards the form with the panel; a lingering dirty flag
         // would fire beforeunload against a page showing no form at all
@@ -2372,6 +2396,7 @@ class NzVerificationMap {
                     <span class="legend-row"><span class="legend-dot vm-in-review-swatch"></span>in review</span>
                     <span class="legend-row"><span class="legend-dot vm-disputed-swatch"></span>disputed</span>
                     <span class="legend-row"><span class="legend-dot vm-default-swatch"></span>unvalidated</span>
+                    <span class="legend-row"><span class="legend-dot vm-nomination-swatch"></span>nomination</span>
                     ${COUNTRY_CONFIG.datedPlaces ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>context dots</span>` : ""}
                 </div>
             `;
@@ -2759,7 +2784,7 @@ class NzVerificationMap {
             </button>
             <button type="button" class="chooser-option" id="chooseAddButton">
                 <strong>Add places</strong>
-                <span>Nominate places of worship missing from the map. Your nomination goes to human review — it does not change the public map.</span>
+                <span>Nominate missing places of worship — nominations go to human review.${this.nominationFeatures.length ? ` You have ${this.nominationFeatures.length} under review.` : ""}</span>
             </button>
         `;
         document.getElementById("chooseAssignedButton")?.addEventListener("click", () => this.setPortalMode("assigned"));
@@ -2770,6 +2795,7 @@ class NzVerificationMap {
         const bar = document.getElementById("portalModeBar");
         if (!bar || !ASSIGNMENT_MODE) return;
         const label = this.portalMode === "add" ? "Add places" : "Assigned tasks";
+        bar.classList.toggle("mode-add", this.portalMode === "add");
         bar.innerHTML = `
             <span>${label}</span>
             <button type="button" class="link-button" id="changeActivityButton">← Change activity</button>
@@ -3017,7 +3043,7 @@ class NzVerificationMap {
             }
             // no batch scope: my work covers the assignment batch and the
             // ra's own nominated candidates in the manual batch
-            this.myWorkItems = ASSIGNMENT_MODE
+            const myItems = ASSIGNMENT_MODE
                 ? ((await this.backend.listMyTasks({
                     countryCode: COUNTRY_CONFIG.countryCode,
                     statuses: MY_WORK_STATUSES,
@@ -3028,6 +3054,11 @@ class NzVerificationMap {
                         || batchId === `manual-${COUNTRY_CONFIG.countryCode.toLowerCase()}`;
                 })
                 : [];
+            // assignment work and the ra's own nominations are separate
+            // lists (jb 2026-08-31): my work covers the batch; nominations
+            // live in their own panel in add mode
+            this.myWorkItems = myItems.filter(item => !isNominationProps(item?.task));
+            this.myNominationItems = myItems.filter(item => isNominationProps(item?.task));
             if (ASSIGNMENT_MODE) {
                 // nominated candidates join the map and list whatever their
                 // status: their author needs a route back to them, and the
@@ -3044,13 +3075,9 @@ class NzVerificationMap {
                     .map(featureFromBackendTask);
                 const snapshotEl = document.getElementById("snapshotId");
                 if (snapshotEl) {
-                    // nominations are not part of the batch, so they count
-                    // separately rather than inflating "available of"
-                    const total = allTasks.length;
-                    const nominatedSuffix = nominatedTasks.length
-                        ? ` + ${nominatedTasks.length} nominated`
-                        : "";
-                    snapshotEl.textContent = `${ASSIGNMENT_BATCH_ID} | ${availableTasks.length} available of ${total}${nominatedSuffix}`;
+                    // batch numbers only: nominations are separate work and
+                    // count in their own panel, not the assignment header
+                    snapshotEl.textContent = `${ASSIGNMENT_BATCH_ID} | ${availableTasks.length} available of ${allTasks.length}`;
                 }
                 const selectedId = this.selectedTask?.properties?.task_id;
                 if (selectedId && !this.backendTasksById.has(selectedId)) {
@@ -3083,7 +3110,7 @@ class NzVerificationMap {
         const action = document.getElementById("actionFilter")?.value || "all";
         const status = document.getElementById("statusFilter")?.value || "all";
 
-        this.filteredTasks = this.tasks.filter(feature => {
+        const matchesFilters = feature => {
             const props = feature.properties || {};
             const temporal = deriveTargetYearStatus(props, this.targetYear);
             const searchText = [
@@ -3103,18 +3130,50 @@ class NzVerificationMap {
             if (action !== "all" && props.automated_suggested_action !== action) return false;
             if (status !== "all" && temporal.status !== status) return false;
             return true;
-        });
+        };
+        // nominations stay off the assignment sheet and its filters; they
+        // keep their own list (and always stay on the map for the
+        // duplicate check and the route back to them)
+        this.nominationFeatures = this.tasks.filter(feature => isNominationProps(feature.properties));
+        this.filteredTasks = this.tasks.filter(feature => !isNominationProps(feature.properties) && matchesFilters(feature));
 
         this.renderMarkers();
         this.renderTaskList();
+        this.renderNominationList();
         this.updateStats();
+    }
+
+    // the ra's own nominations, listed apart from the assignment sheet in
+    // add mode: name, status, and the route back — nothing else
+    renderNominationList() {
+        const panel = document.getElementById("nominationsPanel");
+        if (!panel) return;
+        const rows = this.nominationFeatures || [];
+        panel.innerHTML = `
+            <h2>My nominations${rows.length ? ` (${rows.length})` : ""}</h2>
+            ${rows.length ? rows.map(feature => {
+                const props = feature.properties || {};
+                const backendTask = this.backendTasksById.get(props.task_id);
+                const statusText = (backendTask?.status || "in review").replaceAll("_", " ");
+                const activeClass = this.selectedTask?.properties?.task_id === props.task_id ? " active" : "";
+                return `
+                    <button class="task-row entry-card${activeClass}" type="button" data-task-id="${escapeHtml(props.task_id)}">
+                        <span class="task-row-title">${escapeHtml(props.name || "Unnamed place")}<span class="entry-badge">${escapeHtml(statusText)}</span></span>
+                        <span class="task-row-meta">${escapeHtml(props.locality || props.address || "")}</span>
+                    </button>
+                `;
+            }).join("") : `<div class="task-row-meta">None yet.</div>`}
+        `;
+        panel.querySelectorAll(".task-row").forEach(row => {
+            row.addEventListener("click", () => this.selectTaskById(row.dataset.taskId));
+        });
     }
 
     renderMarkers() {
         this.markerLayer.clearLayers();
         this.markersByTaskId.clear();
 
-        this.filteredTasks.forEach(feature => {
+        this.filteredTasks.concat(this.nominationFeatures || []).forEach(feature => {
             const coordinates = feature.geometry?.coordinates || [];
             if (coordinates.length < 2) return;
             const [lng, lat] = coordinates;
@@ -3141,7 +3200,7 @@ class NzVerificationMap {
                 this.markerLayer.addLayer(area);
             }
             const marker = L.marker([lat, lng], {
-                icon: this.createIcon(props.verification_priority, temporal.status, verifState),
+                icon: this.createIcon(props.verification_priority, temporal.status, verifState, isNominationProps(props)),
             });
 
             marker.on("click", () => this.selectTask(feature, true));
@@ -3168,9 +3227,20 @@ class NzVerificationMap {
         ].filter(Boolean).join(" · ");
     }
 
-    createIcon(priority, status, verifState = "unvalidated") {
+    createIcon(priority, status, verifState = "unvalidated", isNomination = false) {
         const size = priority === "high" ? 15 : priority === "medium" ? 13 : 11;
         const color = statusColor(status);
+        // a nomination is pure-entry work, worn as a dashed teal ring on a
+        // hollow marker (state = ring, never fill), apart from every
+        // validation-state ring hue
+        if (isNomination) {
+            return L.divIcon({
+                className: "",
+                html: `<div class="verification-marker vm-nomination" style="width:${size}px;height:${size}px;"></div>`,
+                iconSize: [size, size],
+                iconAnchor: [size / 2, size / 2],
+            });
+        }
         // the validation state is worn as a RING (box-shadow) or, for in_review,
         // a dashed hollow border — never as the fill hue, so it never competes
         // with the religion/context colour. Ring hues (blue, slate, amber,
@@ -3460,7 +3530,7 @@ class NzVerificationMap {
                     ${this.backend?.configured
                         ? this.portalMode === "add"
                             ? `Use <strong>＋ Add a missing place</strong> above, then find the building by searching a name or address, typing coordinates, or clicking the map. Drag the pin onto the building before confirming.`
-                            : RAPID_CURRENT_ENTRY
+                            : RAPID_ASSIGNED_ENTRY
                                 ? `Work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. For each place, choose one current-status answer, record how you know it, and use <em>Submit for review</em>.`
                                 : `Work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when useful evidence remains incomplete, and <em>Submit for review</em> when a case is ready for JB.`
                         : `This link points to <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>, but this deployment does not yet have the shared backend enabled.`}
@@ -3470,7 +3540,7 @@ class NzVerificationMap {
                     <div class="disabled-panel">
                         ${this.portalMode === "add"
                             ? `Before nominating, check whether the place is already on the map. Nearby existing records are listed automatically after you confirm a pin location.`
-                            : RAPID_CURRENT_ENTRY
+                            : RAPID_ASSIGNED_ENTRY
                             ? `For each assigned place, record what you can confirm at the observation date: whether the place exists and whether it is used for worship. Do not infer worship use from the building alone. Historical target years (${escapeHtml(COUNTRY_CONFIG.targetYears.join(", "))}) stay unassessed here; use the detailed form for historical or complicated cases.`
                             : `For each assigned case, answer the task question, seek non-OSM evidence where possible, record ${escapeHtml(COUNTRY_CONFIG.targetYears.join(", "))} status, preserve any useful opening or closure dates, and submit unresolved notes for cases that should stay visible but cannot yet be resolved.`}
                     </div>
@@ -3761,10 +3831,18 @@ class NzVerificationMap {
         return this.revisionDraftIdsByTaskId.has(taskId);
     }
 
+    // which form a task's detail shows: assigned tasks follow the country's
+    // batch design; nominations use the rapid pure-entry form wherever the
+    // server's intake registry allows it (jb 2026-08-31)
+    taskUsesRapidForm(props) {
+        if (RAPID_ASSIGNED_ENTRY) return true;
+        return RAPID_NOMINATION_ENTRY && isNominationProps(props);
+    }
+
     taskIsReadOnly(taskId) {
         const backendTask = this.backendTasksById.get(taskId);
         if (!ASSIGNMENT_MODE || !backendTask) return false;
-        if (RAPID_CURRENT_ENTRY && this.rapidCorrectionTaskIds.has(taskId)) return false;
+        if (RAPID_ANY_ENTRY && this.rapidCorrectionTaskIds.has(taskId)) return false;
         return READ_ONLY_ASSIGNMENT_STATUSES.has(backendTask.status) && !this.taskIsRevisionMode(taskId);
     }
 
@@ -3775,7 +3853,7 @@ class NzVerificationMap {
         const backendTask = this.backendTasksById.get(taskId);
         const draft = this.latestDraftForTask(taskId);
         return Boolean(
-            RAPID_CURRENT_ENTRY
+            RAPID_ANY_ENTRY
             && backendTask
             && REVISION_ELIGIBLE_STATUSES.has(backendTask.status)
             && draft?.observation_contract_version === "rapid_current_v1"
@@ -3949,7 +4027,7 @@ class NzVerificationMap {
     renderDetailPreservingForm(feature) {
         const taskId = feature?.properties?.task_id;
         if (
-            RAPID_CURRENT_ENTRY
+            RAPID_ANY_ENTRY
             && taskId
             && this.formDirty
             && this.formDirtyTaskId === taskId
@@ -4181,7 +4259,7 @@ class NzVerificationMap {
     }
 
     siteTaskBriefHtml(props) {
-        if (RAPID_CURRENT_ENTRY && !this.taskIsReadOnly(props.task_id)) {
+        if (this.taskUsesRapidForm(props) && !this.taskIsReadOnly(props.task_id)) {
             return `
                 <h3>Record current information</h3>
                 <div class="copy-help">
@@ -4336,7 +4414,7 @@ class NzVerificationMap {
         const readOnly = props?.task_id ? this.taskIsReadOnly(props.task_id) : false;
         const revisionMode = props?.task_id ? this.taskIsRevisionMode(props.task_id) : false;
         if (this.backend?.configured && this.backendUser) {
-            if (RAPID_CURRENT_ENTRY && !readOnly) {
+            if (this.taskUsesRapidForm(props) && !readOnly) {
                 return `
                     <div class="pilot-note">
                         Record only what you can confirm now. The server keeps every historical target year unassessed, derives the provisional review fields, and sends the observation to human review without changing the public map.
@@ -4651,8 +4729,9 @@ class NzVerificationMap {
         submitButton.disabled = true;
         if (status) status.textContent = "Submitting securely for review...";
         try {
-            const result = await this.backend.submitVanuatuCurrentObservation({
+            const result = await this.backend.submitCurrentObservation({
                 clientSubmissionId: form.dataset.submissionId,
+                countryCode: COUNTRY_CONFIG.countryCode,
                 ...(options.props?.task_id ? { taskId: options.props.task_id } : { candidate }),
                 observation: window.PowRapidEntry.observationPayload(values),
                 clientContext: {
@@ -4661,7 +4740,7 @@ class NzVerificationMap {
                         proximity_checked: true,
                         nearby_count: this.pinNearbyCount,
                     } : {}),
-                    portal_version: "vanuatu-rapid-current-v1",
+                    portal_version: "rapid-current-v1-multicountry",
                 },
             });
             this.clearFormDirty();
@@ -4995,10 +5074,10 @@ class NzVerificationMap {
         const revisionMode = taskId ? this.taskIsRevisionMode(taskId) : false;
         const canRevise = taskId ? this.taskCanRevise(taskId) : false;
         const canAddHistory = taskId ? this.taskCanAddHistory(taskId) : false;
-        if (RAPID_CURRENT_ENTRY && !readOnly) {
+        if (this.taskUsesRapidForm(props) && !readOnly) {
             return this.rapidCurrentReviewFormHtml(props);
         }
-        if (RAPID_CURRENT_ENTRY && readOnly) {
+        if (this.taskUsesRapidForm(props) && readOnly) {
             const latest = this.latestDraftForTask(taskId);
             const draftLoaded = this.latestDraftsByTaskId.has(taskId);
             // a guided (detailed) submission keeps its own revision route; the
@@ -6230,7 +6309,7 @@ class NzVerificationMap {
     // actionable entry point is the header "Add a place" button; the
     // transient cards render into #pinCardHost when pin mode is armed
     pinNominationHtml() {
-        if (RAPID_CURRENT_ENTRY) {
+        if (RAPID_NOMINATION_ENTRY) {
             return `
                 <div class="copy-help">
                     Record a place by confirming its building location and what you can establish about its current worship use. Each observation is time-stamped and sent to human review; it does not update the public map directly.
@@ -6248,7 +6327,7 @@ class NzVerificationMap {
     // mode is active (kept here, near the map, rather than buried in the
     // nomination panel). ids are unchanged so all pin logic still binds
     pinCardsHtml() {
-        const formFields = RAPID_CURRENT_ENTRY
+        const formFields = RAPID_NOMINATION_ENTRY
             ? this.rapidObservationFieldsHtml("pin", {
                 submitLabel: "Save and add another",
                 submissionId: this.pinSubmissionId,
@@ -6332,7 +6411,7 @@ class NzVerificationMap {
             </div>
             <div id="pinConfirmCard" class="pin-card" hidden>
                 <div class="pin-coords">Pin: <span id="pinLat"></span>, <span id="pinLng"></span></div>
-                ${RAPID_CURRENT_ENTRY ? "" : `
+                ${RAPID_NOMINATION_ENTRY ? "" : `
                     <label>
                         What does this pin represent?
                         <select id="pinLocationMode">
@@ -6404,7 +6483,7 @@ class NzVerificationMap {
                 }
             });
         });
-        if (RAPID_CURRENT_ENTRY) {
+        if (RAPID_NOMINATION_ENTRY) {
             ["pinNameInput", "pinAddressInput", "pinLocalityInput"].forEach(id => {
                 document.getElementById(id)?.addEventListener("input", () => this.markFormDirty("rapid-pin"));
             });
@@ -6453,7 +6532,7 @@ class NzVerificationMap {
         this.pinMode = true;
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
-        this.pinSubmissionId = RAPID_CURRENT_ENTRY ? window.PowRapidEntry.secureSubmissionId() : null;
+        this.pinSubmissionId = RAPID_NOMINATION_ENTRY ? window.PowRapidEntry.secureSubmissionId() : null;
         this.mountPinCards();
         this.map.getContainer().classList.add("pin-placement");
         // the button itself carries the in-progress instruction, so the
@@ -6517,7 +6596,7 @@ class NzVerificationMap {
         const card = document.getElementById("pinConfirmCard");
         if (card) card.hidden = false;
         const status = document.getElementById("pinStatus");
-        if (status) status.textContent = RAPID_CURRENT_ENTRY
+        if (status) status.textContent = RAPID_NOMINATION_ENTRY
             ? "Drag the pin onto the building, zoom in, then confirm the location."
             : "Choose what the pin represents, place it on the building or at the centre of the supported area, then confirm.";
         this.updatePinConfirmCard();
@@ -6654,7 +6733,7 @@ class NzVerificationMap {
     }
 
     pinLocationMode() {
-        return RAPID_CURRENT_ENTRY
+        return RAPID_NOMINATION_ENTRY
             ? "building_identified"
             : (document.getElementById("pinLocationMode")?.value || "building_identified");
     }

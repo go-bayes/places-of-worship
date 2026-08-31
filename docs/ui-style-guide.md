@@ -76,6 +76,7 @@ Do not reuse these colours for unrelated meanings.
 | Not assessed | `.status-not-assessed` | pale blue, currently around `#e8f1fb`, `#1f4e79` |
 | Warning or demo-only message | `.demo-warning` | amber warning |
 | Disabled or unavailable state | `.disabled-panel`, `.backend-card.disabled` | light grey |
+| Pure data entry (nominations, walk-up records) — containers only, never the action button | `.portal-mode-bar.mode-add`, `.nominations-panel`, `.entry-badge`, `.task-row.entry-card`, `.pin-card-host`, `.verification-marker.vm-nomination` | teal, `--entry` `#0f766e`, `--entry-ink` `#115e59`, `--entry-bg` `#e6f4f1` (JB separation ruling, 2026-08-31) |
 
 If these colours change, update both the CSS and this table. On
 `verification.html` these meanings now live as CSS custom properties in the

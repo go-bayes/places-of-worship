@@ -37,6 +37,9 @@
             --priority-medium: #d68910;
             --priority-low: #1e8449;
             --danger: #b03a2e;            /* destructive or clearing actions */
+            --entry: #0f766e;             /* pure data entry: nominations, walk-up records */
+            --entry-ink: #115e59;
+            --entry-bg: #e6f4f1;
         }
 
         body {
@@ -756,7 +759,7 @@
         .pin-card-host {
             padding: 12px 16px;
             border-bottom: 1px solid #d8dee4;
-            background: #f2f8fc;
+            background: var(--entry-bg);
             display: grid;
             gap: 8px;
         }
@@ -769,7 +772,7 @@
             margin: 0;
             font-size: 14px;
             font-weight: 700;
-            color: #1f4e79;
+            color: var(--entry-ink);
         }
 
         .nomination-panel summary {
@@ -1013,6 +1016,58 @@
         .attachment-row button {
             font-size: 12px;
             padding: 3px 8px;
+        }
+
+        /* pure entry wears the entry (teal) container hue; the primary
+           action button keeps its one blue meaning (ui-style-guide) */
+        .portal-mode-bar.mode-add {
+            background: var(--entry-bg);
+            color: var(--entry-ink);
+        }
+
+        .chooser-option#chooseAddButton strong {
+            color: var(--entry);
+        }
+
+        .nominations-panel {
+            display: none;
+            padding: 12px 16px;
+            border-bottom: 1px solid #d8dee4;
+        }
+
+        body.portal-add .nominations-panel {
+            display: block;
+        }
+
+        .nominations-panel h2 {
+            margin: 0 0 8px 0;
+            font-size: 15px;
+            color: var(--entry-ink);
+        }
+
+        .task-row.entry-card {
+            border-left: 4px solid var(--entry);
+        }
+
+        .entry-badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 1px 7px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            background: var(--entry-bg);
+            color: var(--entry-ink);
+        }
+
+        .verification-marker.vm-nomination {
+            background: #ffffff !important;
+            border: 2px dashed var(--entry);
+        }
+
+        .legend-dot.vm-nomination-swatch {
+            background: #ffffff;
+            border: 2px dashed #0f766e;
         }
 
         .copy-help kbd {
@@ -2014,6 +2069,7 @@
             <section id="sessionPanel" class="session-panel"></section>
             <section id="nominationPanel" class="nomination-panel"></section>
             <section id="pinCardHost" class="pin-card-host" hidden></section>
+            <section id="nominationsPanel" class="nominations-panel" aria-label="My nominations"></section>
             <section id="detailPanel" class="detail-panel" tabindex="-1"></section>
         </aside>
 
@@ -2027,10 +2083,10 @@
          hides itself when the key is absent -->
     <script src="../../global/config.public.js"></script>
     <script src="js/convex-config.js?v=20260707-changes-requested"></script>
-    <script src="js/convex-task-client.js?v=20260831a"></script>
+    <script src="js/convex-task-client.js?v=20260831b"></script>
     <script src="js/rapid-entry-contract.js?v=20260826a"></script>
     <script src="js/historical-claim-contract.js?v=20260828a"></script>
     <script src="js/location-assertion-contract.js?v=20260828a"></script>
-    <script src="js/verification-map.js?v=20260831c"></script>
+    <script src="js/verification-map.js?v=20260831d"></script>
 </body>
 </html>
