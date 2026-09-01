@@ -203,12 +203,15 @@
 
 ## Agent And PR Coordination
 
-- Prefer one focused branch or pull request from current `origin/main`.
+- Start each substantive unit on one focused branch created from current `origin/main` after the preflight below. Push the branch after its first coherent commit so active work has an off-machine ref.
 - Apply the branch safeguards below even when Joseph is the only maintainer: another agent, worktree, or merged pull request can advance `main` while a branch is idle.
+- Configure every clone with `git config --local pull.ff only` and `git config --local fetch.prune true`. These repository-local settings make `git pull` refuse non-fast-forward integration and remove deleted remote-tracking refs during fetch.
 - Before beginning or resuming a topic branch, run `git fetch --prune origin`, account for every working-tree change, and inspect `git rev-list --left-right --count origin/main...HEAD`. Do not infer the branch relationship from a stale local `main`.
 - Treat a topic branch as inactive after its pull request merges or its tip becomes an ancestor of `origin/main`. Start later work on a new branch from current `origin/main`; retain the inactive branch only until the updated checkout and merged work are verified.
 - When `origin/main` and a topic branch both contain unique commits, create a dated local archive ref and push that ref before rebasing, merging, or cherry-picking. Reconcile on a new branch from current `origin/main`; never rewrite the only copy of unpublished commits.
 - Ahead/behind counts describe commit ancestry. Before replaying branch-only commits, use `git range-diff` and compare the changed files and their content against `origin/main`, because a squash or consolidated commit may already contain the work under different hashes.
+- Before advancing `main`, fetch again and require `git merge-base --is-ancestor origin/main <branch>` to succeed. Switch to `main`, integrate with `git merge --ff-only <branch>`, push `main`, and verify local, upstream, and live-remote hashes. Stop if `git merge-base` or `git merge --ff-only` returns a non-zero status.
+- After verified integration, leave `main` checked out. Delete an ordinary merged branch only after confirming that `main` contains its tip; retain a dated archive branch until Joseph explicitly releases it.
 - Do not stack pull requests unless the user explicitly asks for a stack.
 - If a stack is necessary, state the stack order, base branch, changed files,
   and test plan in each pull request. After a lower branch is squash-merged,
