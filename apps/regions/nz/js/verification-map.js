@@ -7281,7 +7281,7 @@ class NzVerificationMap {
             this.placePin(latlng);
         }
         const status = document.getElementById("pinStatus");
-        if (status) status.textContent = "Drag the pin onto the building before confirming — searches and typed coordinates are rarely building-exact.";
+        if (status) status.textContent = "Drag the pin onto the building before confirming — searches and typed coordinates are rarely building-exact. If you know only the vicinity, choose \"I can only place an area\" instead.";
     }
 
     // one nominatim request per explicit submit, spaced out and biased to
