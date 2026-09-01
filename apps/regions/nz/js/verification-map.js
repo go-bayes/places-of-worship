@@ -4557,7 +4557,8 @@ class NzVerificationMap {
         const checked = value => pre.current_observation_status === value ? " checked" : "";
         const preBasis = pre.current_observation_basis || "direct_field_observation";
         const preNamed = preBasis === "named_public_source" || preBasis === "other";
-        const optionalOpen = Boolean(pre.denomination_or_tradition_raw || pre.evidence_note || pre.uncertainty_note);
+        const optionalOpen = Boolean(pre.denomination_or_tradition_raw || pre.evidence_note || pre.uncertainty_note
+            || pre.current_observation_status === "could_not_determine");
         return `
             <form id="${prefix}RapidCurrentForm" class="rapid-current-form" data-submission-id="${escapeHtml(submissionId)}">
                 <fieldset class="rapid-choice-group" id="${prefix}CurrentStatusGroup">
@@ -4602,7 +4603,7 @@ class NzVerificationMap {
                         <input id="${prefix}SourceReference" type="text" maxlength="4096" value="${escapeHtml(preNamed ? pre.source_url_or_file || "" : "")}">
                     </label>
                 </div>
-                <details class="optional-block"${optionalOpen ? " open" : ""}>
+                <details id="${prefix}OptionalBlock" class="optional-block"${optionalOpen ? " open" : ""}>
                     <summary>Denomination or notes</summary>
                     <div class="rapid-optional-fields">
                         <label>
@@ -4620,8 +4621,9 @@ class NzVerificationMap {
                             <textarea id="${prefix}DirectObservation" rows="2" maxlength="2000">${escapeHtml(pre.evidence_note || "")}</textarea>
                         </label>
                         <label>
-                            What remains uncertain? (optional unless you could not determine the status)
+                            What remains uncertain? <span id="${prefix}UncertaintyChip" class="req-chip" hidden>required</span>
                             <textarea id="${prefix}UncertaintyNote" rows="2" maxlength="2000">${escapeHtml(pre.uncertainty_note || "")}</textarea>
+                            <small class="label-help">Optional — unless you could not determine the status; then explain in at least 12 characters.</small>
                         </label>
                     </div>
                 </details>
@@ -4806,6 +4808,7 @@ class NzVerificationMap {
         if (flag && values.flagForDiscussion) flag.checked = true;
         this.updateRapidSourceFields(prefix);
         this.updateRapidDiscussionFields(prefix);
+        this.updateRapidUncertaintyField(prefix);
         if (values.denominationRaw || values.directObservation || values.uncertaintyNote) {
             const optional = document.querySelector(`#${prefix}RapidCurrentForm .optional-block`);
             if (optional) optional.open = true;
@@ -4821,6 +4824,11 @@ class NzVerificationMap {
             ? document.getElementById(`${prefix}CurrentStatusGroup`)
             : document.getElementById(`${prefix}${error.field}`);
         if (!target) return;
+        // a field inside a collapsed <details> cannot be scrolled to or
+        // focused; open every enclosing block before pointing at it
+        for (let block = target.closest("details"); block; block = block.parentElement?.closest("details")) {
+            block.open = true;
+        }
         const holder = target.closest("label") || target;
         holder.classList.add("field-invalid");
         holder.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -4845,6 +4853,19 @@ class NzVerificationMap {
         if (fields) fields.hidden = basis !== "named_public_source" && basis !== "other";
     }
 
+    // the uncertainty note becomes required when the status could not be
+    // determined, so the collapsed optional block must open and say so
+    updateRapidUncertaintyField(prefix) {
+        const selected = document.querySelector(`input[name="${prefix}CurrentStatus"]:checked`)?.value;
+        const required = selected === "could_not_determine";
+        const chip = document.getElementById(`${prefix}UncertaintyChip`);
+        if (chip) chip.hidden = !required;
+        if (required) {
+            const block = document.getElementById(`${prefix}OptionalBlock`);
+            if (block) block.open = true;
+        }
+    }
+
     bindRapidObservationForm(prefix, options = {}) {
         const form = document.getElementById(`${prefix}RapidCurrentForm`);
         if (!form || !window.PowRapidEntry) return;
@@ -4856,9 +4877,10 @@ class NzVerificationMap {
             );
             this.persistRapidDraft(prefix, draftKey, extra);
             const status = document.getElementById(`${prefix}RapidStatus`);
-            if (status && !status.textContent.startsWith("Draft kept")) {
+            // never overwrite a visible validation error with the draft notice
+            if (status && !status.classList.contains("copy-status-error")
+                && !status.textContent.startsWith("Draft kept")) {
                 status.textContent = "Draft kept on this device until you submit.";
-                status.classList.remove("copy-status-error");
             }
         };
         let persistTimer = 0;
@@ -4878,8 +4900,12 @@ class NzVerificationMap {
         document.getElementById(`${prefix}FlagForDiscussion`)?.addEventListener("change", () => {
             this.updateRapidDiscussionFields(prefix);
         });
+        form.querySelectorAll(`input[name="${prefix}CurrentStatus"]`).forEach(radio => {
+            radio.addEventListener("change", () => this.updateRapidUncertaintyField(prefix));
+        });
         this.updateRapidSourceFields(prefix);
         this.updateRapidDiscussionFields(prefix);
+        this.updateRapidUncertaintyField(prefix);
         // a correction prefill outranks the device draft; otherwise restore
         // unsubmitted work so a lost session costs nothing
         if (!options.prefill) {
@@ -5577,7 +5603,12 @@ class NzVerificationMap {
             this.renderHistoricalClaimEntry(this.historicalClaimContext(props, draft));
         });
         if (document.getElementById("taskRapidCurrentForm")) {
-            this.bindRapidObservationForm("task", { props });
+            // a correction renders with the previous draft prefilled; pass that
+            // prefill through so the device-draft restore cannot overwrite it
+            const previousDraft = this.rapidCorrectionTaskIds.has(props?.task_id)
+                ? this.latestDraftForTask(props.task_id)
+                : null;
+            this.bindRapidObservationForm("task", { props, prefill: previousDraft });
             document.getElementById("taskFormCancelButton")?.addEventListener("click", () => this.cancelRapidCorrection(props));
             // the rapid form renders its own attachments block; initialise it
             // here so photos can be added before submitting, as on the guided form

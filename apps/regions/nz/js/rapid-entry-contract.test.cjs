@@ -41,6 +41,12 @@ check("future observation dates are rejected", /cannot be in the future/.test(ra
 check("existence choice is explicit", /Choose what/.test(rapid.validateObservation({ ...valid, currentStatus: "" })));
 check("sensitivity choice is explicit", /sensitivity/.test(rapid.validateObservation({ ...valid, privacyFlag: "" })));
 check("uncertainty needs an account", /remains uncertain/.test(rapid.validateObservation({ ...valid, currentStatus: "could_not_determine" })));
+check("uncertainty error discloses the minimum length", /at least 12 characters/.test(rapid.validateObservation({ ...valid, currentStatus: "could_not_determine", uncertaintyNote: "unsure" })));
+check("a full uncertainty note satisfies could-not-determine", rapid.validateObservation({
+  ...valid,
+  currentStatus: "could_not_determine",
+  uncertaintyNote: "Locked gate; no signage visible from the road.",
+}) === "");
 check("named source needs a reference", /source URL/.test(rapid.validateObservation({
   ...valid,
   observationBasis: "named_public_source",
@@ -76,6 +82,16 @@ check("flagged entry requires a discussion note", (() => {
   const error = rapid.validateObservationDetailed({ ...flaggedPartial, discussionNote: "" }, { flagForDiscussion: true });
   return error?.field === "DiscussionNote";
 })());
+check("flagged entry accepts the uncertainty note as its explanation", rapid.validateObservationDetailed({
+  ...flaggedPartial,
+  discussionNote: "",
+  uncertaintyNote: "Two map dots may record the same church.",
+}, { flagForDiscussion: true }) === null);
+check("flagged payload carries the uncertainty-note explanation", rapid.observationPayload({
+  ...flaggedPartial,
+  discussionNote: "",
+  uncertaintyNote: "Two map dots may record the same church.",
+}, { flagForDiscussion: true }).uncertainty_note === "Two map dots may record the same church.");
 check("flagged entry still validates dates", (() => {
   const error = rapid.validateObservationDetailed({ ...flaggedPartial, observedOn: "2100-01-01" }, { flagForDiscussion: true });
   return error?.field === "ObservedOn";

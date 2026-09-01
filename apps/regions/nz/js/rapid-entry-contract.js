@@ -42,8 +42,12 @@
         if (!values.privacyFlag) {
             return fail("Choose the sensitivity and privacy setting.", "PrivacyFlag");
         }
-        if (flagged && (values.discussionNote?.trim().length || 0) < 12) {
-            return fail("Briefly explain what needs discussion before flagging this entry.", "DiscussionNote");
+        // either textarea may carry the explanation: the payload merges the
+        // uncertainty note into the discussion text the reviewer sees
+        if (flagged
+            && (values.discussionNote?.trim().length || 0) < 12
+            && (values.uncertaintyNote?.trim().length || 0) < 12) {
+            return fail("Briefly explain what needs discussion (at least 12 characters) before flagging this entry.", "DiscussionNote");
         }
         if (!flagged && values.observationBasis === "named_public_source" && !values.sourceTitle?.trim()) {
             return fail("Enter the public source title.", "SourceTitle");
@@ -55,7 +59,7 @@
             return fail("Briefly record the local observation supporting this entry.", "DirectObservation");
         }
         if (!flagged && values.currentStatus === "could_not_determine" && (values.uncertaintyNote?.trim().length || 0) < 12) {
-            return fail("Explain what remains uncertain.", "UncertaintyNote");
+            return fail("Explain what remains uncertain (at least 12 characters).", "UncertaintyNote");
         }
         // denomination wording stays genuinely optional: an unknown
         // provenance is recorded as unknown rather than blocking the entry
