@@ -204,11 +204,16 @@
 ## Agent And PR Coordination
 
 - Prefer one focused branch or pull request from current `origin/main`.
+- Apply the branch safeguards below even when Joseph is the only maintainer: another agent, worktree, or merged pull request can advance `main` while a branch is idle.
+- Before beginning or resuming a topic branch, run `git fetch --prune origin`, account for every working-tree change, and inspect `git rev-list --left-right --count origin/main...HEAD`. Do not infer the branch relationship from a stale local `main`.
+- Treat a topic branch as inactive after its pull request merges or its tip becomes an ancestor of `origin/main`. Start later work on a new branch from current `origin/main`; retain the inactive branch only until the updated checkout and merged work are verified.
+- When `origin/main` and a topic branch both contain unique commits, create a dated local archive ref and push that ref before rebasing, merging, or cherry-picking. Reconcile on a new branch from current `origin/main`; never rewrite the only copy of unpublished commits.
 - Do not stack pull requests unless the user explicitly asks for a stack.
 - If a stack is necessary, state the stack order, base branch, changed files,
   and test plan in each pull request. After a lower branch is squash-merged,
   rebase or otherwise restack the next branch onto current `main` and retarget
   it before merge.
+- End each work sitting by pushing every commit and recording the repository, branch, upstream, `HEAD`, `origin/main`, ahead/behind counts, and working-tree state in the applicable private handover.
 - Give agents narrow, non-overlapping ownership. A useful default is: one agent
   drafts an implementation PR; another performs a read-only review.
 - Do not mix implementation and review on the same files at the same time
