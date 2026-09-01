@@ -407,6 +407,51 @@
         .osm-history-events .osm-history-changes { grid-column: 2; }
         .osm-history code { font-size: 11px; background: #f1f2ee; padding: 0 3px; border-radius: 3px; }
         .popup-osm-history-body { margin-top: 6px; max-height: 220px; overflow-y: auto; }
+
+        /* occupancy and derived years (jb 2026-09-02): the interval bar uses
+           the not-assessed blue for the certain core and amber for the
+           uncertainty windows; present green is reserved for a reviewed
+           state, matching docs/ui-style-guide.md colour meanings */
+        .pill.blue { background: var(--blue-soft); color: var(--blue); }
+        .pill.grey { background: #e5e7eb; color: #374151; }
+        .occupancy-panel h4 { margin: 14px 0 6px; font-size: 14px; }
+        .occupancy-parent + .occupancy-parent { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 10px; }
+        .occupancy-bar { display: block; max-height: 120px; background: #fbfcfd; border: 1px solid var(--line); border-radius: 6px; }
+        .occupancy-bar .ob-band { fill: #e8f1fb; opacity: 0.7; }
+        .occupancy-bar .ob-tick { stroke: #9aa9bb; stroke-width: 1; }
+        .occupancy-bar .ob-tick-label { font-size: 10px; fill: #1f4e79; font-weight: 700; }
+        .occupancy-bar .ob-core { fill: #1f4e79; }
+        .occupancy-bar .ob-window { fill: #fff7e6; stroke: #d68910; stroke-width: 1.2; stroke-dasharray: 4 3; }
+        .occupancy-bar .ob-arrow { fill: #1f4e79; opacity: 0.6; }
+        .occupancy-bar .ob-asof { stroke: #1f4e79; stroke-width: 2; }
+        .occupancy-bar .ob-label { font-size: 10px; font-weight: 700; fill: #17202a; paint-order: stroke; stroke: #fff; stroke-width: 3; }
+        .occupancy-key { font-size: 12px; margin: 4px 0 8px; }
+        .occupancy-periods { margin: 0 0 10px; padding-left: 18px; font-size: 14px; }
+        .occupancy-periods li { margin: 3px 0; }
+        .derived-year-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 6px 0; }
+        .derived-year-toolbar button { min-height: 36px; padding: 6px 12px; }
+        .derived-year-row { border-top: 1px solid var(--line); padding: 8px 0; font-size: 14px; }
+        .derived-year-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 4px; }
+        .derived-year-head strong { font-size: 15px; min-width: 3em; }
+        .derived-year-locations div { margin: 2px 0 2px 12px; }
+        .derived-year-actions { margin-top: 6px; }
+        .derived-year-actions button { min-height: 36px; padding: 6px 12px; }
+        .derived-year-form { margin-top: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 6px; background: #f8fafc; }
+        .derived-year-form textarea { min-height: 64px; }
+        .derived-year-form .review-actions { align-items: center; margin-top: 0; }
+        .derived-trail { margin-top: 12px; font-size: 13px; }
+        .derived-events { list-style: none; padding: 0; margin: 4px 0 0; }
+        .derived-events li { padding: 3px 0; border-top: 1px solid #e3e6e2; }
+        .derived-event-time { font-variant-numeric: tabular-nums; color: var(--muted); margin-right: 6px; }
+        .occupancy-map-strip { margin-top: 12px; font-size: 13px; }
+        .occupancy-scatter-wrap { display: flex; gap: 12px; align-items: flex-start; margin-top: 4px; }
+        .occupancy-scatter { flex: 0 0 auto; background: #fbfcfd; border: 1px solid var(--line); border-radius: 6px; }
+        .occupancy-scatter .os-axis { stroke: #e3e6e2; stroke-width: 1; }
+        .occupancy-scatter .os-task { fill: #b42318; }
+        .occupancy-scatter .os-point { fill: #1f4e79; fill-opacity: 0.8; }
+        .occupancy-scatter .os-point.approx { fill: #fff7e6; fill-opacity: 0.8; stroke: #d68910; stroke-width: 1.2; stroke-dasharray: 3 2; }
+        .occupancy-scatter .os-label { font-size: 9px; font-weight: 700; fill: #17202a; }
+        .occupancy-scatter-legend { font-size: 12px; }
 </style>
 </head>
 <body>
@@ -483,6 +528,7 @@
     <script src="js/claude-review-panel.js?v=20260825-ai-review"></script>
     <script src="js/location-assertion-contract.js?v=20260902a"></script>
     <script src="js/osm-history.js?v=20260902c"></script>
-    <script src="js/review-portal.js?v=20260902c"></script>
+    <script src="js/occupancy-review.js?v=20260902e"></script>
+    <script src="js/review-portal.js?v=20260902e"></script>
 </body>
 </html>
