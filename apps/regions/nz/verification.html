@@ -2081,6 +2081,75 @@
             margin-top: 6px;
         }
 
+        /* occupancy lane: one card per period, teal entry framing */
+        .occupancy-cards {
+            display: grid;
+            gap: 12px;
+        }
+
+        .occupancy-card {
+            display: grid;
+            gap: 10px;
+            margin: 0;
+            padding: 10px 12px;
+            border: 1px solid #b6c2cf;
+            border-left: 4px solid var(--entry);
+            border-radius: 6px;
+            background: #f8fafc;
+        }
+
+        .occupancy-card legend {
+            padding: 0 4px;
+            color: var(--entry-ink);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .occupancy-block {
+            display: grid;
+            gap: 8px;
+        }
+
+        .occupancy-block-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #243447;
+        }
+
+        .occupancy-card .checkbox-label {
+            display: grid;
+            grid-template-columns: 22px minmax(0, 1fr);
+            align-items: start;
+            gap: 8px;
+            min-height: 44px;
+            font-weight: 600;
+        }
+
+        .occupancy-card .checkbox-label input {
+            width: auto;
+            margin-top: 3px;
+        }
+
+        .occupancy-distinct {
+            display: grid;
+            gap: 8px;
+        }
+
+        .occupancy-bounds {
+            font-size: 13px;
+            color: var(--entry-ink);
+            font-weight: 600;
+        }
+
+        .occupancy-provenance legend {
+            color: #243447;
+            font-weight: 700;
+        }
+
+        .occupancy-form [hidden] {
+            display: none !important;
+        }
+
         .history-count {
             margin: 10px 0;
             color: #145a32;
@@ -2367,8 +2436,9 @@
     <script src="js/wide-evidence-fields.js?v=20260902d"></script>
     <script src="js/rapid-entry-contract.js?v=20260901a"></script>
     <script src="js/historical-claim-contract.js?v=20260828a"></script>
+    <script src="js/occupancy-contract.js?v=20260902e"></script>
     <script src="js/location-assertion-contract.js?v=20260902a"></script>
     <script src="js/osm-history.js?v=20260902c"></script>
-    <script src="js/verification-map.js?v=20260902c"></script>
+    <script src="js/verification-map.js?v=20260902e"></script>
 </body>
 </html>
