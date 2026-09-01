@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { reviewDecisionInput, taskStatus } from "./model";
-import { chooseActorRole, requireUser } from "./lib/auth";
+import { canReview, chooseActorRole, requireUser } from "./lib/auth";
 import {
   LONG_TEXT_MAX,
   MEDIUM_TEXT_MAX,
@@ -115,10 +115,13 @@ export const listReviewQueue = query({
       latestAgentReview: v.any(),
       contributor_label: v.optional(v.string()),
       reviewer_label: v.optional(v.string()),
+      review_claimant_label: v.optional(v.string()),
+      review_claimed_by_me: v.optional(v.boolean()),
+      submitted_by_me: v.optional(v.boolean()),
     }),
   ),
   handler: async (ctx, args) => {
-    await requireUser(ctx, ["reviewer", "curator", "admin"]);
+    const user = await requireUser(ctx, ["reviewer", "curator", "admin"]);
     const status = args.status ?? "needs_review";
     const limit = Math.min(Math.max(args.limit ?? 100, 1), 500);
     let tasks: Doc<"tasks">[];
@@ -160,6 +163,11 @@ export const listReviewQueue = query({
         latestAgentReview: agentReview,
         contributor_label: await labelFor(latestDraft?.created_by),
         reviewer_label: await labelFor(latestReview?.reviewer_user_id),
+        review_claimant_label: await labelFor(task.review_claimed_by),
+        review_claimed_by_me: task.review_claimed_by === user._id,
+        // the author-exclusion rule: the portal greys the decision form
+        // for the reviewer's own submissions
+        submitted_by_me: latestDraft?.created_by === user._id,
       });
     }
     return rows;
@@ -265,6 +273,33 @@ export const recordReviewDecision = mutation({
     if (args.decision.decision_status === "accepted_for_export" && draft === null) {
       throw new Error("Accepted-for-export decisions require an evidence draft.");
     }
+    // jb ruling 2026-09-01: the submission's author may not judge it; only
+    // the author is excluded, any other qualified reviewer may decide
+    const judgedDraft = draft ?? await latestDraftForReview(ctx, args.taskId);
+    if (judgedDraft !== null && judgedDraft.created_by === user._id) {
+      throw new Error("You submitted this evidence; another team member must record the review decision.");
+    }
+    // second/third-opinion gate (jb 2026-09-01): acceptance for export waits
+    // until the requested number of other reviewers have recorded decisions
+    if (args.decision.decision_status === "accepted_for_export" && (task.extra_opinions_required ?? 0) > 0) {
+      const prior = await ctx.db
+        .query("review_decisions")
+        .withIndex("by_task", (q: any) => q.eq("task_id", args.taskId))
+        .collect();
+      const otherReviewers = new Set(
+        prior
+          .filter((row: Doc<"review_decisions">) => row.reviewer_user_id !== user._id)
+          .map((row: Doc<"review_decisions">) => String(row.reviewer_user_id)),
+      );
+      const needed = task.extra_opinions_required ?? 0;
+      if (otherReviewers.size < needed) {
+        throw new Error(
+          `This task asked for ${needed} additional opinion${needed === 1 ? "" : "s"} before acceptance; `
+          + `${otherReviewers.size} other reviewer${otherReviewers.size === 1 ? " has" : "s have"} recorded a decision so far. `
+          + "Record a non-acceptance decision to add your opinion, or wait for the others.",
+        );
+      }
+    }
     // provenance of the AI recommendation the reviewer saw: the artifact
     // must exist and belong to this task; agreement without an artifact
     // reference is meaningless and rejected
@@ -340,6 +375,8 @@ export const recordReviewDecision = mutation({
 
     await ctx.db.patch(task._id, {
       status: newTaskStatus,
+      // a recorded decision settles the claim either way
+      ...(task.review_claimed_by !== undefined ? { review_claimed_by: undefined, review_claimed_at: undefined } : {}),
       updated_at: now,
       last_event_at: now,
     });
@@ -367,5 +404,139 @@ export const recordReviewDecision = mutation({
       review_decision_id: reviewDecisionId,
       task_status: newTaskStatus,
     };
+  },
+});
+
+// statuses a reviewer can act on; mirrors the portal's decision-form gate
+const REVIEW_OPEN_STATUSES = new Set([
+  "needs_review",
+  "unresolved_note",
+  "changes_requested",
+  "provisionally_closed",
+]);
+
+// review-side claim pool (jb 2026-09-01): mirrors the ra claim semantics.
+// any qualified reviewer except the draft's author may claim a task, so
+// two reviewers do not unknowingly work the same submission
+export const claimReviewTask = mutation({
+  args: { taskId: v.string() },
+  returns: v.object({ task_id: v.string(), review_claimed: v.boolean() }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["reviewer", "curator", "admin"]);
+    const task = await getTaskOrThrow(ctx, args.taskId);
+    if (!REVIEW_OPEN_STATUSES.has(task.status)) {
+      throw new Error("This task is not open for review.");
+    }
+    if (task.review_claimed_by !== undefined && task.review_claimed_by !== user._id) {
+      throw new Error("Another reviewer has already claimed this task.");
+    }
+    const latestDraft = await latestDraftForReview(ctx, args.taskId);
+    if (latestDraft !== null && latestDraft.created_by === user._id) {
+      throw new Error("You submitted this evidence; another team member must review it.");
+    }
+    if (task.review_claimed_by === user._id) {
+      return { task_id: args.taskId, review_claimed: true };
+    }
+    const now = Date.now();
+    await ctx.db.patch(task._id, {
+      review_claimed_by: user._id,
+      review_claimed_at: now,
+      updated_at: now,
+      last_event_at: now,
+    });
+    await appendTaskEvent(ctx, {
+      taskId: args.taskId,
+      eventType: "review_claimed",
+      actorUserId: user._id,
+      actorRole: chooseActorRole(user, ["reviewer", "curator", "admin"]),
+      previousStatus: task.status,
+      newStatus: task.status,
+      reason: "Task claimed for review.",
+    });
+    return { task_id: args.taskId, review_claimed: true };
+  },
+});
+
+export const releaseReviewTask = mutation({
+  args: { taskId: v.string() },
+  returns: v.object({ task_id: v.string(), review_claimed: v.boolean() }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["reviewer", "curator", "admin"]);
+    const task = await getTaskOrThrow(ctx, args.taskId);
+    if (task.review_claimed_by === undefined) {
+      return { task_id: args.taskId, review_claimed: false };
+    }
+    const isClaimant = task.review_claimed_by === user._id;
+    const isCuratorOrAdmin = user.roles.includes("curator") || user.roles.includes("admin");
+    if (!isClaimant && !isCuratorOrAdmin) {
+      throw new Error("Only the claimant, a curator, or an admin may release this review claim.");
+    }
+    const now = Date.now();
+    await ctx.db.patch(task._id, {
+      review_claimed_by: undefined,
+      review_claimed_at: undefined,
+      updated_at: now,
+      last_event_at: now,
+    });
+    await appendTaskEvent(ctx, {
+      taskId: args.taskId,
+      eventType: "review_released",
+      actorUserId: user._id,
+      actorRole: chooseActorRole(user, ["reviewer", "curator", "admin"]),
+      previousStatus: task.status,
+      newStatus: task.status,
+      reason: isClaimant ? "Review claim released." : "Review claim released by a curator or admin.",
+    });
+    return { task_id: args.taskId, review_claimed: false };
+  },
+});
+
+// second/third-opinion request (jb 2026-09-01): callable at submission by
+// the people involved with the task and at review by any review role; each
+// call asks for one more independent reviewer before acceptance, capped at
+// a third opinion
+export const requestAdditionalOpinion = mutation({
+  args: {
+    taskId: v.string(),
+    note: v.string(),
+  },
+  returns: v.object({ task_id: v.string(), extra_opinions_required: v.number() }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
+    const note = args.note.trim();
+    if (note.length < 8) {
+      throw new Error("Briefly say why another opinion is needed.");
+    }
+    assertMaxString("opinion request note", note, TASK_REASON_MAX);
+    const task = await getTaskOrThrow(ctx, args.taskId);
+    if (!canReview(user.roles)) {
+      const latestDraft = await latestDraftForReview(ctx, args.taskId);
+      const involved = task.assigned_to === user._id
+        || task.claimed_by === user._id
+        || latestDraft?.created_by === user._id;
+      if (!involved) {
+        throw new Error("Only the task's contributor or a review role can request another opinion here.");
+      }
+    }
+    const current = task.extra_opinions_required ?? 0;
+    if (current >= 2) {
+      throw new Error("A third opinion is already requested; that is the cap.");
+    }
+    const now = Date.now();
+    await ctx.db.patch(task._id, {
+      extra_opinions_required: current + 1,
+      updated_at: now,
+      last_event_at: now,
+    });
+    await appendTaskEvent(ctx, {
+      taskId: args.taskId,
+      eventType: "opinion_requested",
+      actorUserId: user._id,
+      actorRole: chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]),
+      previousStatus: task.status,
+      newStatus: task.status,
+      reason: note,
+    });
+    return { task_id: args.taskId, extra_opinions_required: current + 1 };
   },
 });

@@ -444,6 +444,14 @@
                             <option value="reviewer">last reviewer</option>
                         </select>
                     </div>
+                    <div>
+                        <label for="queueClaimFilter">Show</label>
+                        <select id="queueClaimFilter">
+                            <option value="">all tasks</option>
+                            <option value="unclaimed">unclaimed pool</option>
+                            <option value="mine">claimed by me</option>
+                        </select>
+                    </div>
                     <button id="refreshQueue" class="secondary" type="button">Refresh</button>
                 </div>
                 <div id="queueStatusText" class="status">Sign in to load the queue.</div>

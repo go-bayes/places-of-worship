@@ -3653,6 +3653,7 @@ class NzVerificationMap {
                     ? `<button id="nominateAnotherButton"${knownHistory ? ` class="secondary"` : ""} type="button">Add another place</button>`
                     : `<button id="openNextTaskButton"${knownHistory ? ` class="secondary"` : ""} type="button">Open next task</button>`}
                 ${skipped ? `<button id="undoSkipButton" class="secondary" type="button">Undo skip</button>` : ""}
+                ${!skipped && props.task_id ? `<button id="requestOpinionButton" class="secondary" type="button">Request a second opinion</button>` : ""}
             </div>
             <div id="confirmPaneStatus" class="copy-status" aria-live="polite"></div>
             <div class="pilot-note" role="note">
@@ -3669,6 +3670,19 @@ class NzVerificationMap {
         document.getElementById("nominateAnotherButton")?.addEventListener("click", guarded(() => this.enterPinMode()));
         document.getElementById("addKnownHistoryButton")?.addEventListener("click", guarded(() => this.renderHistoricalClaimEntry(knownHistory)));
         document.getElementById("undoSkipButton")?.addEventListener("click", () => this.undoSkip(props.task_id));
+        // submission-side second-opinion call (jb 2026-09-01): the entry
+        // then needs an extra independent reviewer before acceptance
+        document.getElementById("requestOpinionButton")?.addEventListener("click", async () => {
+            const note = window.prompt("Why should a second reviewer look at this entry? (at least 8 characters)") || "";
+            if (!note.trim()) return;
+            const statusEl = document.getElementById("confirmPaneStatus");
+            try {
+                const result = await this.backend.requestAdditionalOpinion({ taskId: props.task_id, note: note.trim() });
+                if (statusEl) statusEl.textContent = `Second opinion requested: acceptance now needs ${result.extra_opinions_required} extra independent reviewer decision${result.extra_opinions_required === 1 ? "" : "s"}.`;
+            } catch (error) {
+                if (statusEl) statusEl.textContent = error.message || "Could not request a second opinion.";
+            }
+        });
         // photos and documents attach to the task record just created, so a
         // nomination can carry its site photo immediately after submission
         this.pendingEvidenceAttachTaskId = !skipped && nomination && hasEvidenceFiles && props.task_id
