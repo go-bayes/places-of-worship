@@ -14,9 +14,20 @@ import {
   assertTaskReasonLimit,
 } from "./lib/limits";
 import { assertNotRapidContract, isRapidCurrentDraft } from "./lib/rapidEntry";
+import { defaultTargetYears } from "./lib/countryYears";
+import { assertWideEvidenceRowFields } from "./lib/wideEvidenceFields";
 import { resolveCitedSource } from "./lib/sources";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { evidenceDraftDoc } from "./lib/validators";
+
+
+// the waves a task's wide row must carry: the task's own, else the
+// country default (pr-b0: the export header is the shared list for these)
+function taskTargetYears(task: { target_years?: number[]; country_code: string }): number[] {
+  return task.target_years && task.target_years.length > 0
+    ? task.target_years
+    : defaultTargetYears(task.country_code);
+}
 
 async function getTaskOrThrow(ctx: any, taskId: string): Promise<Doc<"tasks">> {
   const task = await ctx.db
@@ -305,6 +316,7 @@ async function importSubmittedSpreadsheetDraft(
 
   const draftId = item.evidence_draft_id ?? `${item.task_id}:spreadsheet:${now}`;
   const task = await getTaskOrThrow(ctx, item.task_id);
+  assertWideEvidenceRowFields(item.draft.generated_wide_row, taskTargetYears(task));
   const actorRole = chooseActorRole(user, ["service", "admin"]);
   const existing = await ctx.db
     .query("evidence_drafts")
@@ -377,6 +389,7 @@ export const saveEvidenceDraft = mutation({
     assertOwnsOrCanReview(user._id, user.roles, task.assigned_to);
     assertNotRapidContract(args.draft, "the general draft route");
     assertEvidenceDraftLimits(args.draft);
+    assertWideEvidenceRowFields(args.draft.generated_wide_row, taskTargetYears(task));
     assertClientContextLimit(args.clientContext);
     // a cited register source must exist and be active before it is stored
     await resolveCitedSource(ctx, args.draft.source_id, args.draft.source_locator);
@@ -654,6 +667,7 @@ export const submitEvidenceDraft = mutation({
     assertNotRapidContract(draft, "the general submission route");
     assertEvidenceDraftSubmission(draft, false);
     const task = await getTaskOrThrow(ctx, draft.task_id);
+    assertWideEvidenceRowFields(draft.generated_wide_row, taskTargetYears(task));
     const now = Date.now();
 
     await ctx.db.patch(draft._id, {

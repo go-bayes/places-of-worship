@@ -115,7 +115,7 @@ change.
 | --- | --- | --- | --- | --- |
 | `getEvidenceDraft` | query | draft owner, `reviewer`, `curator`, `admin` | Return one evidence draft if the caller owns it or can review it. | None |
 | `listTaskEvidence` | query | `ra`, `reviewer`, `curator`, `admin` | List evidence drafts for a task. RAs see only their own drafts; reviewers and maintainers can see all task evidence. | None |
-| `saveEvidenceDraft` | mutation | `ra`, `reviewer`, `curator`, `admin` | Create or update a size-limited user evidence draft and mark the task draft-saved. Rejects the `rapid_current_v1` contract and rapid fields, and refuses to patch an existing rapid draft. | `evidence_drafts`, `tasks`, `task_events` |
+| `saveEvidenceDraft` | mutation | `ra`, `reviewer`, `curator`, `admin` | Create or update a size-limited user evidence draft and mark the task draft-saved. Rejects the `rapid_current_v1` contract and rapid fields, and refuses to patch an existing rapid draft. A `generated_wide_row` whose field list differs from the shared column list for the task's waves is refused with a reload message (PR-B0). | `evidence_drafts`, `tasks`, `task_events` |
 | `importSubmittedEvidenceDrafts` | mutation | `admin`, `service` | Import spreadsheet-submitted rows as provisional tasks and submitted evidence drafts so they enter the reviewer queue. Rejects `rapid_current_v1` rows and never overwrites an existing rapid draft. | `task_batches`, `tasks`, `evidence_drafts`, `task_events` |
 | `submitEvidenceDraft` | mutation | draft owner, `reviewer`, `curator`, `admin` | Submit a draft for reviewer attention and mark the task needs-review. Rejects rapid drafts. | `evidence_drafts`, `tasks`, `task_events` |
 | `submitUnresolvedNote` | mutation | draft owner, `reviewer`, `curator`, `admin` | Submit useful but incomplete evidence for reviewer triage and mark the task unresolved-note. Rejects rapid drafts. | `evidence_drafts`, `tasks`, `task_events` |
@@ -171,7 +171,7 @@ tasks, drafts, or review decisions.
 | Function | Kind | Roles | Purpose | Writes |
 | --- | --- | --- | --- | --- |
 | `listExportBatches` | query | `curator`, `admin` | List export batches, optionally by country and status. | None |
-| `createExportBatch` | mutation | `curator`, `admin` | Create a draft export batch from reviewed tasks or explicit task ids. | `export_batches` |
+| `createExportBatch` | mutation | `curator`, `admin` | Create a draft export batch from reviewed tasks or explicit task ids. The wide CSV header is the shared column list for the country's waves (`convex/lib/wideEvidenceFields.ts`); rows are placed by column name and the manifest reports `field_list_mismatch_count` (PR-B0, 2026-09-02). | `export_batches` |
 | `freezeExportBatch` | mutation | `curator`, `admin` | Freeze a draft export batch and mark included tasks exported. | `export_batches`, `tasks`, `task_events` |
 | `getExportBundle` | query | `curator`, `admin` | Return raw task records plus file contents for materialising the export bundle. | None |
 

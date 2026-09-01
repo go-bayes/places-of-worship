@@ -714,46 +714,12 @@ const REOPEN_ELIGIBLE_STATUSES = new Set([
     "provisionally_closed",
     "reviewed",
 ]);
-const WIDE_EVIDENCE_FIELDS = [
-    "evidence_row_id", "collection_batch", "country_code", "area_hint",
-    "source_dataset_id", "source_type", "provider", "source_title",
-    "source_url_or_file", "source_record_id", "retrieval_date", "retrieved_by",
-    "licence", "access_limits", "redistribution_limits", "raw_file_location",
-    "source_notes", "name_raw", "name_standardised",
-    "denomination_or_tradition_raw", "site_type", "address_raw",
-    "historical_address_raw", "historical_locality_raw",
-    "modern_address_candidate", "address_standardised", "locality_raw",
-    "territorial_authority_hint", "address_change_note", "geocoding_basis",
-    "geocoding_confidence", "latitude", "longitude", "geometry_wkt_or_geojson",
-    "matched_osm_id", "osm_object_type", "osm_version_timestamp",
-    "osm_tags_raw", "osm_start_date", "osm_old_start_date", "osm_end_date",
-    "osm_lifecycle_date_notes", "matched_current_site_id", "candidate_site_id",
-    "match_method", "match_confidence", "candidate_match_notes",
-    "visual_verification_source", "visual_verification_url_or_file",
-    "visual_verification_capture_date", "visual_verification_summary",
-    "organisation_founded_date", "organisation_founded_date_precision",
-    "site_opened_date", "site_opened_date_precision",
-    "building_opened_or_dedicated_date",
-    "building_opened_or_dedicated_date_precision",
-    "origin_not_earlier_than_date", "origin_not_earlier_than_date_precision",
-    "origin_not_later_than_date", "origin_not_later_than_date_precision",
-    "first_seen_date", "first_seen_date_precision", "last_seen_date",
-    "last_seen_date_precision", "site_closed_date", "site_closed_date_precision",
-    "closure_not_earlier_than_date", "closure_not_earlier_than_date_precision",
-    "closure_not_later_than_date", "closure_not_later_than_date_precision",
-    "building_demolished_date", "building_demolished_date_precision",
-    "use_changed_date", "use_changed_date_precision", "relocated_date",
-    "relocated_date_precision", "date_evidence_raw", "date_evidence_summary",
-    "existence_status", "worship_use_status", "public_access_status",
-    ...TARGET_YEARS.flatMap(year => [
-        `target_year_${year}_status`,
-        `target_year_${year}_probability`,
-        `target_year_${year}_evidence`,
-    ]),
-    "quality_flag", "review_status",
-    "privacy_flag", "licence_flag", "extracted_by", "extracted_at",
-    "reviewed_by", "reviewed_at", "review_note", "exclusion_reason",
-];
+// the export column list comes from the shared mirror
+// (js/wide-evidence-fields.js of convex/lib/wideEvidenceFields.ts); the
+// server refuses a draft whose list disagrees with its own (pr-b0)
+const WIDE_EVIDENCE_FIELDS = window.PowWideEvidenceFields
+    ? window.PowWideEvidenceFields.fields(TARGET_YEARS.map(Number))
+    : [];
 const EXISTENCE_STATUS_OPTIONS = [
     ["present", "Present"],
     ["absent", "Absent"],
