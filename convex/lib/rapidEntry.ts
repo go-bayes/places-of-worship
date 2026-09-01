@@ -53,6 +53,13 @@ export function manualBatchId(countryCode: string): string {
   return `manual-${countryCode.toLowerCase()}`;
 }
 
+// the country's issue batch: revisions of existing records filed from a
+// grey context dot land here, and the rapid path accepts observations on
+// them exactly as on nominations (revise-with-evidence lane, jb 2026-09-02)
+export function issueBatchId(countryCode: string): string {
+  return `ra-issues-${countryCode.toLowerCase()}`;
+}
+
 export type RapidCandidateContext = {
   placement_zoom?: number;
   proximity_checked?: boolean;

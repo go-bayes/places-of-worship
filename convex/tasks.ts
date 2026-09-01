@@ -17,7 +17,7 @@ import {
 import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser } from "./lib/auth";
 import { defaultTargetYears } from "./lib/countryYears";
 import { assertAssertionMatchesTaskPoint, assertCountryAllowsAssertionMode } from "./lib/locationAssertions";
-import { manualBatchId } from "./lib/rapidEntry";
+import { issueBatchId, manualBatchId } from "./lib/rapidEntry";
 import {
   MEDIUM_TEXT_MAX,
   SHORT_TEXT_MAX,
@@ -801,17 +801,25 @@ export const createIssueTask = mutation({
     sourceUrl: v.optional(v.string()),
     targetYears: v.optional(v.array(v.number())),
     clientContext: v.optional(v.any()),
+    // revise-with-evidence lane (jb 2026-09-02): the reporter's confirmed
+    // location for the record (may differ from the record's own point),
+    // the record's original point for the reviewer, and a claim so the
+    // reporter can submit an observation on the task straight away
+    locationAssertion: v.optional(locationAssertionInput),
+    originalLatitude: v.optional(v.number()),
+    originalLongitude: v.optional(v.number()),
+    assignToReporter: v.optional(v.boolean()),
   },
   returns: v.union(
     v.object({
       task_id: v.string(),
-      status: v.literal("open"),
+      status: v.union(v.literal("open"), v.literal("in_progress")),
       deduped: v.literal(true),
     }),
     v.object({
       task_id: v.string(),
       batch_id: v.string(),
-      status: v.literal("open"),
+      status: v.union(v.literal("open"), v.literal("in_progress")),
       deduped: v.literal(false),
     }),
   ),
@@ -828,8 +836,13 @@ export const createIssueTask = mutation({
     assertClientContextLimit(args.clientContext);
 
     const cc = args.countryCode.toLowerCase();
-    const batchId = `ra-issues-${cc}`;
+    const batchId = issueBatchId(args.countryCode);
     const actorRole = chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]);
+    const assign = args.assignToReporter === true;
+    if (args.locationAssertion !== undefined) {
+      assertCountryAllowsAssertionMode(args.countryCode, args.locationAssertion.mode);
+      assertAssertionMatchesTaskPoint(args.locationAssertion, args.latitude, args.longitude);
+    }
 
     let duplicateTask: Doc<"tasks"> | null = null;
     if (args.siteId !== undefined) {
@@ -857,18 +870,44 @@ export const createIssueTask = mutation({
     }
 
     if (duplicateTask !== null) {
+      const dupNow = Date.now();
+      // an open, unclaimed issue for the same record becomes the reporter's
+      // revision task, so the observation they are about to submit lands
+      // on the existing thread rather than a second task
+      const claimed = assign && duplicateTask.assigned_to === undefined;
       await appendTaskEvent(ctx, {
         taskId: duplicateTask.task_id,
         eventType: "note_added",
         actorUserId: user._id,
         actorRole,
         previousStatus: duplicateTask.status,
-        newStatus: duplicateTask.status,
+        newStatus: claimed ? "in_progress" : duplicateTask.status,
         reason: args.note,
         clientContext: args.clientContext,
       });
-      await ctx.db.patch(duplicateTask._id, { last_event_at: Date.now() });
-      return { task_id: duplicateTask.task_id, status: "open" as const, deduped: true as const };
+      await ctx.db.patch(duplicateTask._id, {
+        last_event_at: dupNow,
+        ...(claimed
+          ? {
+            status: "in_progress" as const,
+            assigned_to: user._id,
+            claimed_by: user._id,
+            claimed_at: dupNow,
+            updated_at: dupNow,
+            ...(args.locationAssertion !== undefined
+              ? {
+                geometry: { type: "Point", coordinates: [args.longitude, args.latitude] },
+                initial_location_assertion: args.locationAssertion,
+              }
+              : {}),
+          }
+          : {}),
+      });
+      return {
+        task_id: duplicateTask.task_id,
+        status: claimed ? ("in_progress" as const) : ("open" as const),
+        deduped: true as const,
+      };
     }
 
     const now = Date.now();
@@ -899,7 +938,8 @@ export const createIssueTask = mutation({
       // task_type stays within the closed export vocabulary
       task_type: args.issueType === "submitted_in_error" ? ("verify_existing_site" as const) : args.issueType,
       priority: "medium" as const,
-      status: "open" as const,
+      status: assign ? ("in_progress" as const) : ("open" as const),
+      ...(assign ? { assigned_to: user._id, claimed_by: user._id, claimed_at: now } : {}),
       target_years: args.targetYears ?? [],
       matched_current_site_id: args.siteId,
       matched_osm_id: args.osmId,
@@ -908,6 +948,7 @@ export const createIssueTask = mutation({
         type: "Point",
         coordinates: [args.longitude, args.latitude],
       },
+      ...(args.locationAssertion !== undefined ? { initial_location_assertion: args.locationAssertion } : {}),
       nearby_site_refs: [],
       automated_checks: [
         {
@@ -921,6 +962,10 @@ export const createIssueTask = mutation({
       source_context: {
         issue_report: {
           reported_by: user._id,
+          ...(assign ? { evidence_lane: "rapid_revision" } : {}),
+          ...(args.originalLatitude !== undefined && args.originalLongitude !== undefined
+            ? { original_point: [args.originalLongitude, args.originalLatitude] }
+            : {}),
           ...(args.relatedSiteId !== undefined ? { related_site_id: args.relatedSiteId } : {}),
           ...(args.sourceTitle !== undefined ? { source_title: args.sourceTitle } : {}),
           ...(args.sourceUrl !== undefined ? { source_url: args.sourceUrl } : {}),
@@ -938,11 +983,16 @@ export const createIssueTask = mutation({
       eventType: "opened",
       actorUserId: user._id,
       actorRole,
-      newStatus: "open",
+      newStatus: assign ? "in_progress" : "open",
       reason: args.note,
       clientContext: args.clientContext,
     });
-    return { task_id: taskId, batch_id: batchId, status: "open" as const, deduped: false as const };
+    return {
+      task_id: taskId,
+      batch_id: batchId,
+      status: assign ? ("in_progress" as const) : ("open" as const),
+      deduped: false as const,
+    };
   },
 });
 

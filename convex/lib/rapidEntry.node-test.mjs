@@ -6,6 +6,7 @@ import {
   manualBatchId,
   assertNotRapidContract,
   assertRapidCandidateContext,
+  issueBatchId,
   assertRapidDerivedConsistency,
   assertRapidSubmissionId,
   deriveCurrentObservation,
@@ -231,3 +232,9 @@ test("the nomination-batch contract and assigned-rapid flag are declared once", 
   assert.equal(COUNTRY_INTAKE_BOUNDS.VU.assignedRapid, true);
   assert.equal(COUNTRY_INTAKE_BOUNDS.NZ.assignedRapid, undefined);
 });
+
+test("the issue batch name is shared by createIssueTask and the rapid path", () => {
+  assert.equal(issueBatchId("VU"), "ra-issues-vu");
+  assert.equal(issueBatchId("nz"), "ra-issues-nz");
+});
+
