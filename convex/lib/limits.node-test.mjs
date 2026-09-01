@@ -269,14 +269,24 @@ test("named-source rapid observations require title and reference", () => {
   );
 });
 
-test("rapid denomination wording requires a known evidence basis", () => {
-  assert.throws(
+test("rapid denomination wording with unknown provenance is accepted (jb 2026-09-01)", () => {
+  assert.doesNotThrow(
     () => assertEvidenceDraftSubmission({
       ...rapidCurrentDraft,
       denomination_or_tradition_raw: "Example Fellowship",
       denomination_label_basis: "unknown",
     }, false),
-    /Choose where the denomination or tradition wording came from/,
+  );
+});
+
+test("per-year confidence requires an assessed status for that year", () => {
+  assert.throws(
+    () => assertEvidenceDraftSubmission({
+      ...rapidCurrentDraft,
+      target_year_statuses: { "2023": "not_assessed" },
+      target_year_confidence: { "2023": "high" },
+    }, false),
+    /Confidence for 2023 requires an assessed status/,
   );
 });
 
