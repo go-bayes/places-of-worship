@@ -1,8 +1,8 @@
 # Operational definition of a place of worship
 
-**At a specified time, a place of worship is a reproducibly mappable site for which source evidence supports recurring religious worship by or for a community.**
+Version: 0.1.4. Date: 2026-09-01. Status: adopted working operational definition. This dated snapshot preserves version 0.1.4. The [canonical operational definition](../operational-definition.md) presents the current version.
 
-Current version: 0.1.4. Adopted: 2026-09-01.
+**At a specified time, a place of worship is a reproducibly mappable site for which source evidence supports recurring religious worship by or for a community.**
 
 ## Criteria
 
@@ -34,6 +34,6 @@ Source records, OpenStreetMap objects, and field observations provide evidence a
 
 Each study states its target population, observation times, evidence standard, and filters.
 
-## Version history
+## Revision note (0.1.3 → 0.1.4)
 
-Versioned snapshots preserve the rule used by each study: [version 0.1.4](development/place-of-worship-definition-2026-09-01-v0.1.4.md), [version 0.1.3](development/place-of-worship-definition-2026-08-31-v0.1.3.md), [version 0.1.2](development/place-of-worship-definition-2026-08-27-v0.1.2.md), [version 0.1.1](development/place-of-worship-definition-2026-08-27-v0.1.1.md), [version 0.1.0](development/place-of-worship-definition-2026-08-27.md), and the [version 0.0.1 discussion draft](development/place-of-worship-definition-2026-08-22.md). A later revision records its implications for accepted states, event derivations, study populations, and earlier estimates.
+This revision restates identity over time (JB ruling, 2026-09-01). Version 0.1.3 lodged identity in the location: `site_id` named the physical place, and a relocated congregation normally linked to a new `site_id`. Version 0.1.4 makes the place of worship a continuant whose identity survives relocation, demolition and rebuilding, and complete material replacement, realised through dated occupancy records under a one-place-at-a-time constraint; splits and mergers are adjudicated review decisions. The superseded relocation rule is withdrawn: an identifier now follows the place of worship through a relocation rather than ending at it. Identifiers created under the earlier rule remain valid; a predecessor–successor link created for a relocation is reread as one place of worship's occupancy history. The temporal-redesign relocation mechanics (ruling D10, 2026-08-31) are reread the same way. Accepted states, event derivations, study populations, and earlier estimates are otherwise unaffected, and identity decisions remain explicit, revisable, and reviewer-adjudicated.
