@@ -5280,6 +5280,18 @@ class NzVerificationMap {
         const canRevise = taskId ? this.taskCanRevise(taskId) : false;
         const canAddHistory = taskId ? this.taskCanAddHistory(taskId) : false;
         if (this.taskUsesRapidForm(props) && !readOnly) {
+            // the rapid form must not render (and accept a submission) while
+            // the latest draft is still loading: a nomination that already
+            // holds guided evidence belongs on the guided form
+            if (
+                !RAPID_ASSIGNED_ENTRY
+                && taskId
+                && this.backend?.signedIn
+                && this.backendTasksById.has(taskId)
+                && !this.latestDraftsByTaskId.has(taskId)
+            ) {
+                return `<div class="copy-status">Loading the recorded evidence...</div>`;
+            }
             return this.rapidCurrentReviewFormHtml(props);
         }
         if (this.taskUsesRapidForm(props) && readOnly) {
@@ -5567,6 +5579,9 @@ class NzVerificationMap {
         if (document.getElementById("taskRapidCurrentForm")) {
             this.bindRapidObservationForm("task", { props });
             document.getElementById("taskFormCancelButton")?.addEventListener("click", () => this.cancelRapidCorrection(props));
+            // the rapid form renders its own attachments block; initialise it
+            // here so photos can be added before submitting, as on the guided form
+            this.initAttachmentsBlock(props);
             return;
         }
         const actionSelect = document.getElementById("raActionSelect");
@@ -6218,7 +6233,9 @@ class NzVerificationMap {
             source_notes: row.source_notes || undefined,
             action: values.action,
             target_year_statuses: values.targetYearStatuses,
-            target_year_confidence: Object.keys(values.targetYearConfidence || {}).length ? values.targetYearConfidence : undefined,
+            // always sent, so clearing every confidence select overwrites a
+            // previously stored map instead of leaving it behind on the draft
+            target_year_confidence: values.targetYearConfidence || {},
             target_year_evidence: targetYearEvidence,
             existence_status: values.existenceStatus,
             worship_use_status: values.worshipUseStatus,

@@ -224,6 +224,18 @@ export const submitCurrentObservation = mutation({
       }
       if (ACTIVE_INTAKE_STATUSES.has(authorisedExistingTask.status)) {
         assertOwnsOrCanReview(user._id, user.roles, authorisedExistingTask.assigned_to);
+        // a task already holding the author's guided evidence must not be
+        // overwritten through the rapid path (separation ruling)
+        for (const draftStatus of ["draft", "submitted", "unresolved_note"] as const) {
+          const held = await ctx.db
+            .query("evidence_drafts")
+            .withIndex("by_task_creator_status", (q) => q.eq("task_id", authorisedExistingTask!.task_id).eq("created_by", user._id).eq("draft_status", draftStatus))
+            .order("desc")
+            .first();
+          if (held !== null && !isRapidCurrentDraft(held)) {
+            throw new Error("This task holds detailed evidence. Revise it through the detailed form instead of the rapid path.");
+          }
+        }
       } else if (CORRECTION_STATUSES.has(authorisedExistingTask.status)) {
         correctedDraft = await activeRapidObservationBy(ctx, authorisedExistingTask.task_id, user._id);
         if (correctedDraft === null) {

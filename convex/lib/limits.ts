@@ -154,12 +154,8 @@ export function assertRapidCurrentObservation(draft: EvidenceDraftLimitInput): v
   if (basis === "local_investigator_account" && directObservation.length < 5) {
     throw new Error("A local investigator account requires a short direct observation.");
   }
-  if (
-    draft.denomination_or_tradition_raw?.trim()
-    && (!draft.denomination_label_basis || draft.denomination_label_basis === "unknown")
-  ) {
-    throw new Error("Choose where the denomination or tradition wording came from.");
-  }
+  // denomination wording with unknown provenance is recorded as unknown
+  // rather than rejected (jb 2026-09-01: the label is genuinely optional)
   if (status === "could_not_determine" && uncertainty.length < 12) {
     throw new Error("Explain what remains uncertain before submitting this observation.");
   }

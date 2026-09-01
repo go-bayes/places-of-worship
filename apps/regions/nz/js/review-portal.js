@@ -323,16 +323,16 @@
         } else {
             // group by the submitting contributor or the last reviewer, with
             // named groups alphabetical and unattributed rows at the end
-            const labelOf = (row) => (groupBy === "contributor" ? row.contributor_label : row.reviewer_label)
-                || (groupBy === "contributor" ? "No submission on record" : "Not yet reviewed");
+            const sentinel = groupBy === "contributor" ? "No submission on record" : "Not yet reviewed";
+            const labelOf = (row) => (groupBy === "contributor" ? row.contributor_label : row.reviewer_label) || sentinel;
             const groups = new Map();
             state.queue.forEach((row) => {
                 const label = labelOf(row);
                 if (!groups.has(label)) groups.set(label, []);
                 groups.get(label).push(row);
             });
-            const named = [...groups.keys()].filter((label) => !label.startsWith("No") && !label.startsWith("Not")).sort();
-            const rest = [...groups.keys()].filter((label) => !named.includes(label));
+            const named = [...groups.keys()].filter((label) => label !== sentinel).sort();
+            const rest = groups.has(sentinel) ? [sentinel] : [];
             els.queueList.innerHTML = [...named, ...rest]
                 .map((label) => `
                     <div class="queue-group-header">${escapeHtml(label)} <span class="muted">(${groups.get(label).length})</span></div>

@@ -77,14 +77,23 @@
         const uncertainty = [values.uncertaintyNote?.trim(), discussion]
             .filter(Boolean)
             .join("\n") || undefined;
-        // a flagged named-public-source entry without its title cannot
-        // satisfy that basis; it falls back to the catch-all basis
-        const basis = flagged && values.observationBasis === "named_public_source" && !values.sourceTitle?.trim()
-            ? "other"
-            : values.observationBasis;
+        // a flagged partial entry may not satisfy its chosen basis's server
+        // requirements (named source needs title AND reference; a local
+        // account needs a short observation); those fall back to the
+        // catch-all basis so the partial entry still lands for discussion
+        let basis = values.observationBasis;
+        if (flagged) {
+            if (basis === "named_public_source" && (!values.sourceTitle?.trim() || !values.sourceReference?.trim())) {
+                basis = "other";
+            }
+            if (basis === "local_investigator_account" && (values.directObservation?.trim().length || 0) < 5) {
+                basis = "other";
+            }
+            if (!basis) basis = "other";
+        }
         return {
             current_status: values.currentStatus || (flagged ? "could_not_determine" : values.currentStatus),
-            observation_basis: basis || (flagged ? "other" : basis),
+            observation_basis: basis,
             observed_on: values.observedOn,
             source_title: values.sourceTitle?.trim() || undefined,
             source_reference: values.sourceReference?.trim() || undefined,

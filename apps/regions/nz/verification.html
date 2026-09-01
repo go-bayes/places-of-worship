@@ -144,10 +144,11 @@
         body.assignment-mode.portal-add #quickstartBanner,
         body.assignment-mode.portal-add .filters,
         body.assignment-mode.portal-add .stats,
-        body.assignment-mode.portal-add #taskList,
-        body.assignment-mode.portal-add #sessionPanel {
+        body.assignment-mode.portal-add #taskList {
             display: none;
         }
+        /* the session panel stays visible in add mode: it carries the
+           changes-requested alerts for bounced nominations */
 
         .portal-chooser {
             padding: 14px 16px;
@@ -2304,9 +2305,9 @@
     <script src="../../global/config.public.js"></script>
     <script src="js/convex-config.js?v=20260707-changes-requested"></script>
     <script src="js/convex-task-client.js?v=20260831b"></script>
-    <script src="js/rapid-entry-contract.js?v=20260826a"></script>
+    <script src="js/rapid-entry-contract.js?v=20260901a"></script>
     <script src="js/historical-claim-contract.js?v=20260828a"></script>
     <script src="js/location-assertion-contract.js?v=20260828a"></script>
-    <script src="js/verification-map.js?v=20260831f"></script>
+    <script src="js/verification-map.js?v=20260901a"></script>
 </body>
 </html>
