@@ -2561,6 +2561,18 @@ class NzVerificationMap {
             });
             dot.bindPopup(() => this.contextDotPopupHtml(feature), { maxWidth: 320 });
             dot.on("popupopen", event => this.bindContextDotPopup(event.popup, feature));
+            // a single click opens the case, matching task markers: a
+            // matched task's detail, or the revise/issue card for a place
+            // with no task yet. the popup stays open beside it for the
+            // street view / osm links and the explicit reopen entry
+            dot.on("click", () => {
+                const matched = this.matchContextTask(feature);
+                if (matched?.task_id) {
+                    this.selectTaskById(matched.task_id, { focusDetail: true });
+                } else {
+                    this.openContextIssueForm(feature, { keepPopup: true });
+                }
+            });
             this.contextDotLayer.addLayer(dot);
         });
     }
@@ -2659,7 +2671,7 @@ class NzVerificationMap {
     // standalone issue form, pre-filled with the place name and coordinates.
     // Reuses issueFormHtml/bindIssueForm, so signed-out degrades the same way
     // (disabled submit plus a sign-in prompt).
-    openContextIssueForm(feature) {
+    openContextIssueForm(feature, options = {}) {
         const props = feature.properties || {};
         const coords = feature.geometry?.coordinates || [];
         const context = {
@@ -2672,10 +2684,10 @@ class NzVerificationMap {
         };
         const panel = document.getElementById("detailPanel");
         if (!panel) return;
-        this.map.closePopup();
+        if (!options.keepPopup) this.map.closePopup();
         const hasCoords = Number.isFinite(context.latitude) && Number.isFinite(context.longitude);
         panel.innerHTML = `
-            <h2>Report an issue</h2>
+            <h2>Revise this place or report an issue</h2>
             <div class="pilot-note" role="note">
                 Reporting an issue for <strong>${escapeHtml(context.name || "an unnamed place")}</strong>${hasCoords ? ` at ${context.latitude.toFixed(5)}, ${context.longitude.toFixed(5)}` : ""}.
             </div>
