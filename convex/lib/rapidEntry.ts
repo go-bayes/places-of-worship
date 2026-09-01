@@ -25,6 +25,9 @@ export type CountryIntakeBounds = {
   // true only where the country's assigned batch itself uses the rapid
   // design; nominations are rapid-eligible in every registry country
   assignedRapid?: boolean;
+  // false refuses the approximate-area location mode for the country;
+  // absent or true accepts it (jb ruling r1, 2026-09-02)
+  approximateArea?: boolean;
 };
 
 // closed per-country registry of rapid-intake bounding boxes, keyed by
@@ -37,11 +40,11 @@ export const COUNTRY_INTAKE_BOUNDS: Record<string, CountryIntakeBounds> = {
   // so rapid observations are accepted on its existing batch tasks; for
   // every other country the rapid task path is restricted to the
   // country's manual nomination batch (jb separation ruling 2026-08-31)
-  VU: { name: "Vanuatu", west: 166.491, south: -20.303, east: 170.289, north: -13.022, assignedRapid: true },
+  VU: { name: "Vanuatu", west: 166.491, south: -20.303, east: 170.289, north: -13.022, assignedRapid: true, approximateArea: true },
   // nz includes the chatham islands near 176.5°W, so the box crosses the
   // antimeridian: a longitude is inside when it falls in [165.5, 180] or
   // in the wrapped run [-180, -176] (east 184 - 360)
-  NZ: { name: "New Zealand", west: 165.5, south: -47.5, east: 184.0, north: -34.0 },
+  NZ: { name: "New Zealand", west: 165.5, south: -47.5, east: 184.0, north: -34.0, approximateArea: true },
 };
 
 // one home for the nomination-batch naming contract shared by the rapid
@@ -166,10 +169,23 @@ export function assertCountryIntakePoint(countryCode: string, latitude: number, 
   }
 }
 
+// zoom floors mirror the portal: a building must be placed at building
+// zoom; an approximate area only needs its centre placed at locality zoom
+export const BUILDING_PLACEMENT_MIN_ZOOM = 15;
+export const APPROXIMATE_AREA_MIN_ZOOM = 8;
+
 // Requires the map-side precision and duplicate-check gates for a new point.
-export function assertRapidCandidateContext(context: RapidCandidateContext | undefined): void {
-  if (context?.placement_zoom === undefined || context.placement_zoom < 15) {
-    throw new Error("Zoom to building level and confirm the candidate location before submitting.");
+export function assertRapidCandidateContext(
+  context: RapidCandidateContext | undefined,
+  locationMode: "building_identified" | "approximate_area" = "building_identified",
+): void {
+  const requiredZoom = locationMode === "approximate_area" ? APPROXIMATE_AREA_MIN_ZOOM : BUILDING_PLACEMENT_MIN_ZOOM;
+  if (context?.placement_zoom === undefined || context.placement_zoom < requiredZoom) {
+    throw new Error(
+      locationMode === "approximate_area"
+        ? "Zoom in far enough to place the centre of the approximate area before submitting."
+        : "Zoom to building level and confirm the candidate location before submitting.",
+    );
   }
   if (context.proximity_checked !== true || !Number.isInteger(context.nearby_count)) {
     throw new Error("Check nearby places before submitting a new candidate.");

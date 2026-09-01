@@ -491,6 +491,7 @@
           "enum": ["osm_object", "building_outline", "geocoded_address", "street_imagery", "aerial_imagery", "historical_map", "directory_address", "reviewer_point", "inferred_locality", "corrected_coordinate", "other"]
         },
         "distance_from_previous_m": { "type": ["number", "null"], "minimum": 0 },
+        "uncertainty_radius_m": { "type": ["integer", "null"], "minimum": 0 },
         "culturally_sensitive": { "type": "boolean", "default": false },
         "sensitivity_basis": { "type": ["string", "null"] }
       }

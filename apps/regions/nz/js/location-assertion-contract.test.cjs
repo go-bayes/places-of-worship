@@ -44,3 +44,12 @@ assert.match(contract.validate({ ...approximate, contributorConfirmed: false }),
 assert.match(contract.validate({ ...building, uncertaintyRadiusM: 100 }), /cannot include an uncertainty radius/);
 
 console.log("location assertion contract tests passed");
+
+// the derived grade matches the server thresholds
+assert.equal(contract.grade(building), "building");
+assert.equal(contract.grade({ mode: "approximate_area", uncertaintyRadiusM: 100 }), "parcel_or_compound");
+assert.equal(contract.grade({ mode: "approximate_area", uncertaintyRadiusM: 300 }), "street");
+assert.equal(contract.grade({ mode: "approximate_area", uncertaintyRadiusM: 2000 }), "locality");
+assert.equal(contract.grade({ mode: "approximate_area", uncertaintyRadiusM: 2001 }), "area");
+assert.equal(contract.gradeLabel({ mode: "approximate_area", uncertaintyRadiusM: 1000 }), "locality-level");
+

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-02
+
+- Opened the location uncertainty radius in every country and every add-place flow (JB rulings R1 and R2, `docs/portal-location-and-occupancy-plan.md`). The confirm card now asks "How sure are you of this location?" in Vanuatu as well as New Zealand and in the rapid flow, not only the `?detailed=1` guided form; an approximate area takes a radius from 50 m to 100 km (or a typed value within the server's 25 m–100 km bounds), shows its circle, names the master-data grade it will carry, and in the rapid flow records the area's basis and wording on the card. Rapid nominations now write `initial_location_assertion` on the task (building identified at the pin when the RA does not change the default), with the approximate-area centre gated at zoom 8 instead of 15. Server: `BUILDING_LEVEL_ONLY_COUNTRIES` replaced by an `approximateArea` flag on the intake registry (VU and NZ true); `locationConfidenceGrade` derives `building | parcel_or_compound | street | locality | area` from mode and radius; the reviewer pane shows the grade. Schemas: optional `uncertainty_radius_m` on `geometry-history` and the change-event geometry payload. Files: `convex/lib/{locationAssertions,rapidEntry}.ts`, `convex/rapidEntry.ts`, `apps/regions/nz/js/{verification-map,review-portal,location-assertion-contract}.js`, `apps/regions/nz/{verification,review}.html`, `apps/guides/ra.html`, `schemas/{geometry-history,change-event}.schema.json`.
+
 ### 2026-08-31
 
 - Separated assigned-task work from pure data entry in the contributor portal (JB ruling). The assignment sheet, its filters, stats, counters, and My work now cover only the batch's tasks; the contributor's own nominations appear in a teal "My nominations" panel in Add places, scoped to the signed-in author, with changes-requested nominations still raising the alert panel and badge wherever the RA is working. Nominations stay on the map for the duplicate check, as dashed teal rings while healthy and with their validation-state ring once disputed or validated. Files: `apps/regions/nz/js/verification-map.js`, `apps/regions/nz/verification.html`, `docs/ui-style-guide.md`.

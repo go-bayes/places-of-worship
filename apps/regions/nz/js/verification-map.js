@@ -49,7 +49,6 @@ const COUNTRY_CONFIGS = {
         assignmentHeading: "Vanuatu source-first test",
         rapidCurrentEntry: true,
         rapidNominationEntry: true,
-        buildingLevelOnly: true,
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -842,18 +841,17 @@ const PORTAL_MODE_KEY = `pow_portal_mode_v1:${COUNTRY_CONFIG.countryCode.toLower
 // portal stays well inside the osmf usage policy
 const NOMINATIM_SEARCH_URL = "https://nominatim.openstreetmap.org/search";
 const NOMINATIM_MIN_INTERVAL_MS = 1500;
-// vu is building-level only (kastom-sensitive intake; the server enforces
-// the same rule in convex/lib/locationAssertions.ts), so its detailed form
-// must not offer the approximate-area mode the server will refuse
-const LOCATION_MODE_OPTIONS = COUNTRY_CONFIG.buildingLevelOnly
-    ? [["building_identified", "I identified the building"]]
-    : [
-        ["building_identified", "I identified the building"],
-        // approximate area: use when local knowledge places the site in a
-        // vicinity but not at a building; the radius states the uncertainty
-        ["approximate_area", "I only know the approximate area"],
-    ];
+// both location modes are offered in every country and every flow (jb
+// ruling r1, 2026-09-02; the server mirrors it in
+// convex/lib/locationAssertions.ts). approximate area: use when the place
+// is known only to a vicinity, as historical places often are; the radius
+// states the uncertainty and the master-data grade derives from it
+const LOCATION_MODE_OPTIONS = [
+    ["building_identified", "I can pinpoint the building"],
+    ["approximate_area", "I can only place an area"],
+];
 const LOCATION_RADIUS_OPTIONS = [
+    ["50", "Within about 50 m"],
     ["100", "Within about 100 m"],
     ["250", "Within about 250 m"],
     ["500", "Within about 500 m"],
@@ -862,6 +860,9 @@ const LOCATION_RADIUS_OPTIONS = [
     ["5000", "Within about 5 km"],
     ["10000", "Within about 10 km"],
     ["25000", "Within about 25 km"],
+    ["50000", "Within about 50 km"],
+    ["100000", "Within about 100 km"],
+    ["custom", "Other radius (metres)"],
 ];
 const LOCATION_BASIS_OPTIONS = [
     ["map_placement", "I identified it on the map"],
@@ -7000,20 +7001,37 @@ class NzVerificationMap {
             </div>
             <div id="pinConfirmCard" class="pin-card" hidden>
                 <div class="pin-coords">Pin: <span id="pinLat"></span>, <span id="pinLng"></span></div>
-                ${RAPID_NOMINATION_ENTRY ? "" : `
+                <label>
+                    How sure are you of this location?
+                    <select id="pinLocationMode">
+                        ${selectOptionsHtml(LOCATION_MODE_OPTIONS, "building_identified")}
+                    </select>
+                </label>
+                <div id="pinLocationRadiusField" hidden>
                     <label>
-                        What does this pin represent?
-                        <select id="pinLocationMode">
-                            ${selectOptionsHtml(LOCATION_MODE_OPTIONS, "building_identified")}
-                        </select>
-                    </label>
-                    <label id="pinLocationRadiusField" hidden>
-                        Approximate area
+                        How far could it be from the pin?
                         <select id="pinLocationRadius">
                             ${selectOptionsHtml(LOCATION_RADIUS_OPTIONS, "500")}
                         </select>
                     </label>
-                `}
+                    <label id="pinLocationRadiusCustomField" hidden>
+                        Radius in metres (25 to 100000)
+                        <input id="pinLocationRadiusCustom" type="number" inputmode="numeric" min="25" max="100000" step="1" placeholder="e.g. 750">
+                    </label>
+                    <div id="pinLocationGrade" class="copy-help" aria-live="polite"></div>
+                    ${RAPID_NOMINATION_ENTRY ? `
+                        <label>
+                            How was the area established?
+                            <select id="pinLocationBasis">
+                                ${selectOptionsHtml(LOCATION_BASIS_OPTIONS, "address_or_locality")}
+                            </select>
+                        </label>
+                        <label>
+                            What places it here? (required for an area)
+                            <textarea id="pinLocationWording" rows="2" maxlength="2000" placeholder="e.g. the 1989 list gives only the village name; elders say it stood near the old wharf."></textarea>
+                        </label>
+                    ` : ""}
+                </div>
                 <div id="pinZoomGate" class="pin-zoom-gate">
                     Zoom in further to place the pin precisely — the recorded location must be building-accurate.
                 </div>
@@ -7055,6 +7073,7 @@ class NzVerificationMap {
         document.getElementById("pinSubmitButton")?.addEventListener("click", () => this.submitPinNomination());
         document.getElementById("pinLocationMode")?.addEventListener("change", () => this.updatePinConfirmCard());
         document.getElementById("pinLocationRadius")?.addEventListener("change", () => this.updatePinConfirmCard());
+        document.getElementById("pinLocationRadiusCustom")?.addEventListener("input", () => this.updatePinConfirmCard());
         // locate card: search and typed coordinates feed the same pending pin
         document.getElementById("pinSearchButton")?.addEventListener("click", () => this.submitPinSearch());
         document.getElementById("pinSearchInput")?.addEventListener("keydown", event => {
@@ -7080,12 +7099,29 @@ class NzVerificationMap {
                 draftExtraIds: ["pinNameInput", "pinAddressInput", "pinLocalityInput"],
                 getCandidate: () => {
                     if (!this.pinConfirmed) return null;
+                    const approximate = this.pinConfirmed.locationMode === "approximate_area";
+                    // the location assertion rides on the task, outside the
+                    // rapid draft contract; confirming the pin is the
+                    // contributor's confirmation of the location description
+                    const locationAssertion = window.PowLocationAssertion
+                        ? window.PowLocationAssertion.payload({
+                            mode: this.pinConfirmed.locationMode,
+                            basis: approximate ? (this.pinConfirmed.basis || "address_or_locality") : "map_placement",
+                            latitude: this.pinConfirmed.latitude,
+                            longitude: this.pinConfirmed.longitude,
+                            uncertaintyRadiusM: approximate ? this.pinConfirmed.uncertaintyRadiusM : undefined,
+                            sourceWording: approximate ? this.pinConfirmed.sourceWording : "",
+                            confidence: approximate ? "moderate" : "high",
+                            contributorConfirmed: true,
+                        })
+                        : undefined;
                     return {
                         name: (document.getElementById("pinNameInput")?.value || "").trim() || "Unknown place of worship",
                         address: (document.getElementById("pinAddressInput")?.value || "").trim() || undefined,
                         locality: (document.getElementById("pinLocalityInput")?.value || "").trim() || undefined,
                         latitude: this.pinConfirmed.latitude,
                         longitude: this.pinConfirmed.longitude,
+                        ...(locationAssertion ? { locationAssertion } : {}),
                     };
                 },
             });
@@ -7323,14 +7359,15 @@ class NzVerificationMap {
     }
 
     pinLocationMode() {
-        return RAPID_NOMINATION_ENTRY
-            ? "building_identified"
-            : (document.getElementById("pinLocationMode")?.value || "building_identified");
+        return document.getElementById("pinLocationMode")?.value || "building_identified";
     }
 
     pinLocationRadius() {
         if (this.pinLocationMode() !== "approximate_area") return undefined;
-        return Number(document.getElementById("pinLocationRadius")?.value || 500);
+        const preset = document.getElementById("pinLocationRadius")?.value || "500";
+        if (preset !== "custom") return Number(preset);
+        const custom = Number(document.getElementById("pinLocationRadiusCustom")?.value);
+        return Number.isFinite(custom) && custom > 0 ? Math.round(custom) : NaN;
     }
 
     updatePinUncertaintyCircle(position) {
@@ -7389,6 +7426,17 @@ class NzVerificationMap {
         }
         const radiusField = document.getElementById("pinLocationRadiusField");
         if (radiusField) radiusField.hidden = mode !== "approximate_area";
+        const customField = document.getElementById("pinLocationRadiusCustomField");
+        if (customField) customField.hidden = document.getElementById("pinLocationRadius")?.value !== "custom";
+        const gradeEl = document.getElementById("pinLocationGrade");
+        if (gradeEl) {
+            const radius = this.pinLocationRadius();
+            // the ra sees the grade the master data will carry, derived from
+            // the radius exactly as the server derives it
+            gradeEl.textContent = mode === "approximate_area" && Number.isFinite(radius) && window.PowLocationAssertion
+                ? `Recorded as ${window.PowLocationAssertion.gradeLabel({ mode, uncertaintyRadiusM: radius })}, within ${radius >= 1000 ? `${radius / 1000} km` : `${radius} m`} of the pin.`
+                : "";
+        }
         this.updatePinUncertaintyCircle(position);
     }
 
@@ -7397,13 +7445,32 @@ class NzVerificationMap {
         const requiredZoom = mode === "approximate_area" ? PIN_MIN_APPROXIMATE_ZOOM : PIN_MIN_PLACEMENT_ZOOM;
         if (!this.pinMarker || this.map.getZoom() < requiredZoom) return;
         if (!this.map.getBounds().contains(this.pinMarker.getLatLng())) return;
+        const status = document.getElementById("pinStatus");
+        const radius = this.pinLocationRadius();
+        if (mode === "approximate_area" && (!Number.isInteger(radius) || radius < 25 || radius > 100000)) {
+            if (status) status.textContent = "Enter a whole-metre radius from 25 to 100000 before confirming.";
+            return;
+        }
+        // the rapid flow carries the area's basis and wording on the confirm
+        // card (the detailed form asks for them later); the server refuses
+        // an approximate area with no retained wording
+        const rapidWording = (document.getElementById("pinLocationWording")?.value || "").trim();
+        if (RAPID_NOMINATION_ENTRY && mode === "approximate_area" && !rapidWording) {
+            if (status) status.textContent = "Say what places this area here before confirming.";
+            return;
+        }
+        if (status) status.textContent = "";
         const position = this.pinMarker.getLatLng();
         this.pinConfirmed = {
             latitude: position.lat,
             longitude: position.lng,
             zoom: this.map.getZoom(),
             locationMode: mode,
-            uncertaintyRadiusM: this.pinLocationRadius(),
+            uncertaintyRadiusM: radius,
+            ...(RAPID_NOMINATION_ENTRY ? {
+                basis: document.getElementById("pinLocationBasis")?.value || "map_placement",
+                sourceWording: rapidWording,
+            } : {}),
         };
         // the confirmed position is what gets recorded; freeze the pin
         this.pinMarker.dragging.disable();

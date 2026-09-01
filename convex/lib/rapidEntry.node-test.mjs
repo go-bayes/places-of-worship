@@ -108,6 +108,22 @@ test("new candidates require building-level placement and a nearby-place check",
   );
 });
 
+test("an approximate-area candidate only needs its centre placed at locality zoom", () => {
+  assert.doesNotThrow(() => assertRapidCandidateContext(
+    { placement_zoom: 8, proximity_checked: true, nearby_count: 0 },
+    "approximate_area",
+  ));
+  assert.throws(
+    () => assertRapidCandidateContext({ placement_zoom: 7, proximity_checked: true, nearby_count: 0 }, "approximate_area"),
+    /centre of the approximate area/,
+  );
+  // the default mode keeps the building-level floor unchanged
+  assert.throws(
+    () => assertRapidCandidateContext({ placement_zoom: 14, proximity_checked: true, nearby_count: 0 }, "building_identified"),
+    /building level/,
+  );
+});
+
 // the exact server-side mapping from the observer's answer to the
 // provisional review fields; any change here is a contract change
 const EXPECTED_MAPPING = {

@@ -5,6 +5,7 @@ import {
   assertAssertionMatchesTaskPoint,
   assertCountryAllowsAssertionMode,
   assertLocationAssertion,
+  locationConfidenceGrade,
 } from "./locationAssertions.ts";
 
 const building = {
@@ -68,17 +69,22 @@ test("rejects a location assertion that differs from the submitted point", () =>
   );
 });
 
-test("building-level countries refuse an approximate area from a crafted call", () => {
-  assert.throws(
-    () => assertCountryAllowsAssertionMode("VU", "approximate_area"),
-    /Nominations for VU must identify the building/,
-  );
-  // lower-case codes normalise to the same rule
-  assert.throws(
-    () => assertCountryAllowsAssertionMode("vu", "approximate_area"),
-    /Nominations for VU must identify the building/,
-  );
+test("every registry country accepts an approximate area (jb ruling r1, 2026-09-02)", () => {
+  assert.doesNotThrow(() => assertCountryAllowsAssertionMode("VU", "approximate_area"));
+  assert.doesNotThrow(() => assertCountryAllowsAssertionMode("vu", "approximate_area"));
   assert.doesNotThrow(() => assertCountryAllowsAssertionMode("VU", "building_identified"));
+});
+
+test("the location grade derives from mode and radius (jb ruling r2, 2026-09-02)", () => {
+  assert.equal(locationConfidenceGrade({ mode: "building_identified" }), "building");
+  assert.equal(locationConfidenceGrade({ mode: "approximate_area", uncertainty_radius_m: 50 }), "parcel_or_compound");
+  assert.equal(locationConfidenceGrade({ mode: "approximate_area", uncertainty_radius_m: 100 }), "parcel_or_compound");
+  assert.equal(locationConfidenceGrade({ mode: "approximate_area", uncertainty_radius_m: 250 }), "street");
+  assert.equal(locationConfidenceGrade({ mode: "approximate_area", uncertainty_radius_m: 300 }), "street");
+  assert.equal(locationConfidenceGrade({ mode: "approximate_area", uncertainty_radius_m: 1_000 }), "locality");
+  assert.equal(locationConfidenceGrade({ mode: "approximate_area", uncertainty_radius_m: 2_000 }), "locality");
+  assert.equal(locationConfidenceGrade({ mode: "approximate_area", uncertainty_radius_m: 5_000 }), "area");
+  assert.equal(locationConfidenceGrade({ mode: "approximate_area", uncertainty_radius_m: 100_000 }), "area");
 });
 
 test("other countries keep both location modes, matching the portal form", () => {

@@ -468,6 +468,9 @@
                         ["Location representation", locationAssertion ? human(locationAssertion.mode) : undefined],
                         ["Location basis", locationAssertion ? human(locationAssertion.basis) : undefined],
                         ["Uncertainty radius", locationAssertion?.uncertainty_radius_m !== undefined ? `${locationAssertion.uncertainty_radius_m} m` : undefined],
+                        ["Location grade", locationAssertion && window.PowLocationAssertion
+                            ? window.PowLocationAssertion.gradeLabel({ mode: locationAssertion.mode, uncertaintyRadiusM: locationAssertion.uncertainty_radius_m })
+                            : undefined],
                         ["Location confidence", locationAssertion?.confidence],
                         ["Contributor confirmed", locationAssertion?.contributor_confirmed ? "yes" : undefined],
                         ["Retained location wording", locationAssertion?.source_wording],
