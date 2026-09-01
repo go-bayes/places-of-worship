@@ -3627,6 +3627,7 @@ class NzVerificationMap {
         deduped = false,
         knownHistory = null,
         nomination = false,
+        hasEvidenceFiles = false,
     } = {}) {
         const panel = document.getElementById("detailPanel");
         if (!panel) return;
@@ -3644,6 +3645,7 @@ class NzVerificationMap {
                                 ? "corrected observation submitted for review; the earlier record is kept as superseded."
                                 : "saved to the shared backend and submitted for review."}
             </div>
+            ${!skipped && props.task_id ? `<div id="confirmAttachmentsBlock" class="attachments-block" hidden></div>` : ""}
             <div class="button-row">
                 ${knownHistory ? `<button id="addKnownHistoryButton" type="button">Add known history</button>` : ""}
                 ${nomination
@@ -3651,19 +3653,41 @@ class NzVerificationMap {
                     : `<button id="openNextTaskButton"${knownHistory ? ` class="secondary"` : ""} type="button">Open next task</button>`}
                 ${skipped ? `<button id="undoSkipButton" class="secondary" type="button">Undo skip</button>` : ""}
             </div>
-            ${!skipped && props.task_id ? `<div id="attachmentsBlock" class="attachments-block" hidden></div>` : ""}
             <div id="confirmPaneStatus" class="copy-status" aria-live="polite"></div>
             <div class="pilot-note" role="note">
                 Pick another task from the map or list.${this.filterActiveHint()}
             </div>
         `;
-        document.getElementById("openNextTaskButton")?.addEventListener("click", () => this.openNextAvailableTask());
-        document.getElementById("nominateAnotherButton")?.addEventListener("click", () => this.enterPinMode());
-        document.getElementById("addKnownHistoryButton")?.addEventListener("click", () => this.renderHistoricalClaimEntry(knownHistory));
+        // leaving this pane forfeits the promised attach step, so each exit
+        // button asks first when files were promised or an upload is running
+        const guarded = handler => () => {
+            if (!this.confirmLeavePendingAttachments()) return;
+            handler();
+        };
+        document.getElementById("openNextTaskButton")?.addEventListener("click", guarded(() => this.openNextAvailableTask()));
+        document.getElementById("nominateAnotherButton")?.addEventListener("click", guarded(() => this.enterPinMode()));
+        document.getElementById("addKnownHistoryButton")?.addEventListener("click", guarded(() => this.renderHistoricalClaimEntry(knownHistory)));
         document.getElementById("undoSkipButton")?.addEventListener("click", () => this.undoSkip(props.task_id));
         // photos and documents attach to the task record just created, so a
         // nomination can carry its site photo immediately after submission
-        if (!skipped && props.task_id) this.initAttachmentsBlock(props);
+        this.pendingEvidenceAttachTaskId = !skipped && nomination && hasEvidenceFiles && props.task_id
+            ? props.task_id
+            : null;
+        if (!skipped && props.task_id) {
+            this.initAttachmentsBlock(props, document.getElementById("confirmAttachmentsBlock"), { prominent: nomination });
+        }
+    }
+
+    // a nominator who said they had photos gets one chance to reconsider
+    // before leaving the confirmation pane with nothing attached
+    confirmLeavePendingAttachments() {
+        if (!this.pendingEvidenceAttachTaskId && !this.attachmentUploadInFlight) return true;
+        const message = this.attachmentUploadInFlight
+            ? "An upload is still in progress. Leave anyway?"
+            : "You said you had photos or documents for this place and none are attached yet. Leave anyway?";
+        const leave = window.confirm(message);
+        if (leave) this.pendingEvidenceAttachTaskId = null;
+        return leave;
     }
 
     // first task in the current filtered list order — the same
@@ -4645,9 +4669,10 @@ class NzVerificationMap {
                     <textarea id="${prefix}DiscussionNote" rows="2" maxlength="2000" placeholder="e.g. this place is recorded twice on the map; two denominations share the building"></textarea>
                 </label>
                 ${options.attachmentsHint ? `
-                    <div class="copy-help">
-                        <strong>Photos &amp; documents:</strong> attach them on the next screen, straight after you save this place.
-                    </div>
+                    <label class="flag-discussion">
+                        <input type="checkbox" id="${prefix}HasEvidenceFiles"${pre.hasEvidenceFiles ? " checked" : ""}>
+                        <span><strong>I have photos or documents for this place</strong><small>You attach them right after saving, on the confirmation screen.</small></span>
+                    </label>
                 ` : ""}
                 <div class="button-row">
                     <button id="${prefix}RapidSubmit" type="submit" data-submit-label="${escapeHtml(submitLabel)}">${escapeHtml(submitLabel)}</button>
@@ -4669,7 +4694,7 @@ class NzVerificationMap {
                     Your earlier observation stays on record, marked superseded.
                 </div>
             ` : this.formModeNoticeHtml(props)}
-            <div id="attachmentsBlock" class="attachments-block" hidden></div>
+            <div id="taskAttachmentsBlock" class="attachments-block" hidden></div>
             ${this.rapidObservationFieldsHtml("task", {
                 submitLabel: correcting ? "Submit correction for review" : "Submit for review",
                 showCancel: correcting,
@@ -4743,6 +4768,7 @@ class NzVerificationMap {
             privacyFlag: document.getElementById(`${prefix}PrivacyFlag`)?.value || "",
             flagForDiscussion: Boolean(document.getElementById(`${prefix}FlagForDiscussion`)?.checked),
             discussionNote: document.getElementById(`${prefix}DiscussionNote`)?.value || "",
+            hasEvidenceFiles: Boolean(document.getElementById(`${prefix}HasEvidenceFiles`)?.checked),
         };
     }
 
@@ -4806,6 +4832,8 @@ class NzVerificationMap {
         setValue("DiscussionNote", values.discussionNote);
         const flag = document.getElementById(`${prefix}FlagForDiscussion`);
         if (flag && values.flagForDiscussion) flag.checked = true;
+        const evidenceFlag = document.getElementById(`${prefix}HasEvidenceFiles`);
+        if (evidenceFlag && values.hasEvidenceFiles) evidenceFlag.checked = true;
         this.updateRapidSourceFields(prefix);
         this.updateRapidDiscussionFields(prefix);
         this.updateRapidUncertaintyField(prefix);
@@ -5040,6 +5068,7 @@ class NzVerificationMap {
             this.renderSubmissionRecordedDetail(submittedProps, {
                 deduped: Boolean(result.deduped),
                 nomination: true,
+                hasEvidenceFiles: Boolean(values.hasEvidenceFiles),
                 knownHistory: {
                     taskId: result.task_id,
                     parentEvidenceDraftId: result.evidence_draft_id,
@@ -5538,7 +5567,7 @@ class NzVerificationMap {
                         : revisionMode
                             ? `<div class="copy-help">Save a revision draft while working. Submit the revision when the corrected or extended evidence is ready for review.</div>`
                             : ""}
-                    <div id="attachmentsBlock" class="attachments-block" hidden></div>
+                    <div id="guidedAttachmentsBlock" class="attachments-block" hidden></div>
                     ${readOnly ? `
                         ${canRevise ? `
                             <div class="button-row">
@@ -5612,7 +5641,7 @@ class NzVerificationMap {
             document.getElementById("taskFormCancelButton")?.addEventListener("click", () => this.cancelRapidCorrection(props));
             // the rapid form renders its own attachments block; initialise it
             // here so photos can be added before submitting, as on the guided form
-            this.initAttachmentsBlock(props);
+            this.initAttachmentsBlock(props, document.getElementById("taskAttachmentsBlock"));
             return;
         }
         const actionSelect = document.getElementById("raActionSelect");
@@ -5780,7 +5809,7 @@ class NzVerificationMap {
 
         document.getElementById("copyEvidenceRowButton")?.addEventListener("click", () => this.copyEvidenceRow(props));
         document.getElementById("copyDecisionButton")?.addEventListener("click", () => this.copyDecision(props));
-        this.initAttachmentsBlock(props);
+        this.initAttachmentsBlock(props, document.getElementById("guidedAttachmentsBlock"));
         document.getElementById("saveDraftButton")?.addEventListener("click", () => this.saveEvidenceToBackend(props, { submit: false }));
         document.getElementById("submitUnresolvedButton")?.addEventListener("click", () => this.saveEvidenceToBackend(props, { unresolved: true }));
         document.getElementById("submitReviewButton")?.addEventListener("click", () => this.saveEvidenceToBackend(props, { submit: true }));
@@ -6312,9 +6341,14 @@ class NzVerificationMap {
     // review-tier by ruling (2026-08-31): visible only through the signed-in
     // portal; every view uses a fresh short-lived url minted by the backend
 
-    async initAttachmentsBlock(props) {
-        const block = document.getElementById("attachmentsBlock");
+    async initAttachmentsBlock(props, block, { prominent = false } = {}) {
         if (!block || !this.backend?.configured || !this.backendUser) return;
+        if (prominent) {
+            // show the step immediately rather than popping in after the
+            // enablement round-trip; collapse again only if storage is off
+            block.hidden = false;
+            block.textContent = "Checking attachment storage...";
+        }
         if (this.attachmentsEnabledCache === undefined) {
             try {
                 this.attachmentsEnabledCache = await this.backend.attachmentsEnabled();
@@ -6322,25 +6356,31 @@ class NzVerificationMap {
                 this.attachmentsEnabledCache = false;
             }
         }
-        if (!this.attachmentsEnabledCache) return;
+        if (!this.attachmentsEnabledCache) {
+            block.hidden = true;
+            block.textContent = "";
+            return;
+        }
         block.hidden = false;
         block.innerHTML = `
-            <strong>Photos &amp; documents (optional)</strong>
+            ${prominent
+                ? `<h3>Step 2 of 2 — attach photos &amp; documents</h3>`
+                : `<strong>Photos &amp; documents (optional)</strong>`}
             <div class="copy-help">JPEG, PNG, WebP or PDF, under 10&nbsp;MB each. Choose several at once if useful. Review-only — never public.</div>
-            <input id="attachmentFileInput" type="file" multiple accept="image/jpeg,image/png,image/webp,application/pdf">
-            <input id="attachmentCaptionInput" type="text" maxlength="500" placeholder="Caption — what do these show? (optional)">
+            <input class="attachment-file-input" type="file" multiple accept="image/jpeg,image/png,image/webp,application/pdf">
+            <input class="attachment-caption-input" type="text" maxlength="500" placeholder="Caption — what do these show? (optional)">
             <div class="button-row">
-                <button id="attachmentUploadButton" class="secondary" type="button">Add file(s)</button>
+                <button class="attachment-upload-button secondary" type="button">Add file(s)</button>
             </div>
-            <div id="attachmentStatus" class="copy-status"></div>
-            <div id="attachmentList" class="attachment-list"></div>
+            <div class="attachment-status copy-status"></div>
+            <div class="attachment-list"></div>
         `;
-        document.getElementById("attachmentUploadButton")?.addEventListener("click", () => this.uploadAttachment(props.task_id));
-        this.refreshAttachmentList(props.task_id);
+        block.querySelector(".attachment-upload-button")?.addEventListener("click", () => this.uploadAttachment(props.task_id, block));
+        this.refreshAttachmentList(props.task_id, block);
     }
 
-    async refreshAttachmentList(taskId) {
-        const list = document.getElementById("attachmentList");
+    async refreshAttachmentList(taskId, block) {
+        const list = block?.querySelector(".attachment-list");
         if (!list) return;
         let rows = [];
         try {
@@ -6373,33 +6413,34 @@ class NzVerificationMap {
                     const grant = await this.backend.requestAttachmentView({ attachmentId });
                     window.open(grant.view_url, "_blank", "noopener");
                 } catch (error) {
-                    const status = document.getElementById("attachmentStatus");
+                    const status = block.querySelector(".attachment-status");
                     if (status) status.textContent = error.message || "Could not open the file.";
                 }
             });
             rowEl.querySelector(".attachment-remove")?.addEventListener("click", async () => {
                 try {
                     await this.backend.removeAttachment({ attachmentId });
-                    this.refreshAttachmentList(taskId);
+                    this.refreshAttachmentList(taskId, block);
                 } catch (error) {
-                    const status = document.getElementById("attachmentStatus");
+                    const status = block.querySelector(".attachment-status");
                     if (status) status.textContent = error.message || "Could not remove the file.";
                 }
             });
         });
     }
 
-    async uploadAttachment(taskId) {
-        const input = document.getElementById("attachmentFileInput");
-        const status = document.getElementById("attachmentStatus");
-        const button = document.getElementById("attachmentUploadButton");
+    async uploadAttachment(taskId, block) {
+        const input = block?.querySelector(".attachment-file-input");
+        const status = block?.querySelector(".attachment-status");
+        const button = block?.querySelector(".attachment-upload-button");
         const files = [...(input?.files || [])];
         if (!files.length) {
             if (status) status.textContent = "Choose a file first.";
             return;
         }
-        const caption = (document.getElementById("attachmentCaptionInput")?.value || "").trim();
+        const caption = (block?.querySelector(".attachment-caption-input")?.value || "").trim();
         if (button) button.disabled = true;
+        this.attachmentUploadInFlight = true;
         let added = 0;
         try {
             for (const file of files) {
@@ -6421,14 +6462,19 @@ class NzVerificationMap {
             }
             if (status) status.textContent = added === 1 ? "File added." : `${added} files added.`;
             if (input) input.value = "";
-            const captionInput = document.getElementById("attachmentCaptionInput");
+            const captionInput = block?.querySelector(".attachment-caption-input");
             if (captionInput) captionInput.value = "";
         } catch (error) {
             const base = error.message || "Upload failed.";
             if (status) status.textContent = added > 0 ? `${base} ${added} file(s) were added before the failure.` : base;
         } finally {
+            this.attachmentUploadInFlight = false;
+            // a successful upload settles the promised-files reminder
+            if (added > 0 && this.pendingEvidenceAttachTaskId === taskId) {
+                this.pendingEvidenceAttachTaskId = null;
+            }
             if (button) button.disabled = false;
-            this.refreshAttachmentList(taskId);
+            this.refreshAttachmentList(taskId, block);
         }
     }
 

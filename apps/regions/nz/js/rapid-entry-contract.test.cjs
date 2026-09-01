@@ -63,6 +63,11 @@ check("unknown-provenance wording records basis unknown", rapid.observationPaylo
   denominationLabelBasis: "unknown",
 }).denomination_label_basis === "unknown");
 
+check("evidence-files intent stays client-side", (() => {
+  const withFiles = rapid.observationPayload({ ...valid, hasEvidenceFiles: true });
+  return !("has_evidence_files" in withFiles) && !("hasEvidenceFiles" in withFiles);
+})());
+
 const payload = rapid.observationPayload({ ...valid, directObservation: "  Sign and regular service times displayed.  " });
 check("payload trims direct observation", payload.direct_observation === "Sign and regular service times displayed.");
 check("empty optional values are omitted", payload.source_title === undefined);
