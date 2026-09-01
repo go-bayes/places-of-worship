@@ -90,6 +90,80 @@ function canReviewEvidence(user: Doc<"users">): boolean {
   return canReview(user.roles);
 }
 
+// the audited "delete": the author (or a review role) marks a draft
+// withdrawn. the row stays on record, and the task leaves the review
+// queue only when no other active submission remains on it
+export const withdrawEvidenceDraft = mutation({
+  args: {
+    evidenceDraftId: v.string(),
+    reason: v.optional(v.string()),
+  },
+  returns: v.object({
+    evidence_draft_id: v.string(),
+    task_id: v.string(),
+    task_status: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
+    assertTaskReasonLimit("withdraw reason", args.reason);
+    const draft = await ctx.db
+      .query("evidence_drafts")
+      .withIndex("by_evidence_draft_id", (q) => q.eq("evidence_draft_id", args.evidenceDraftId))
+      .unique();
+    if (draft === null) {
+      throw new Error("Evidence draft not found.");
+    }
+    if (draft.created_by !== user._id && !canReviewEvidence(user)) {
+      throw new Error("Evidence draft belongs to another user.");
+    }
+    const task = await getTaskOrThrow(ctx, draft.task_id);
+    if (draft.draft_status === "withdrawn") {
+      return { evidence_draft_id: draft.evidence_draft_id, task_id: draft.task_id, task_status: task.status };
+    }
+    if (draft.draft_status === "superseded") {
+      throw new Error("A superseded draft is already inactive; withdraw the current version instead.");
+    }
+    if (draft.draft_status === "accepted_for_export" || draft.draft_status === "rejected") {
+      throw new Error("A decided draft stays on record. Ask a reviewer to reopen the task instead.");
+    }
+    const now = Date.now();
+    await ctx.db.patch(draft._id, { draft_status: "withdrawn", updated_at: now });
+    const remainingActive = (
+      await Promise.all(
+        (["submitted", "unresolved_note"] as const).map((activeStatus) =>
+          ctx.db
+            .query("evidence_drafts")
+            .withIndex("by_task_status", (q) => q.eq("task_id", draft.task_id).eq("draft_status", activeStatus))
+            .collect(),
+        ),
+      )
+    ).flat().filter((doc) => doc._id !== draft._id);
+    let newTaskStatus = task.status;
+    if (
+      remainingActive.length === 0
+      && ["needs_review", "unresolved_note", "draft_saved", "changes_requested"].includes(task.status)
+    ) {
+      newTaskStatus = "in_progress";
+    }
+    await ctx.db.patch(task._id, {
+      ...(newTaskStatus === task.status ? {} : { status: newTaskStatus }),
+      updated_at: now,
+      last_event_at: now,
+    });
+    await appendTaskEvent(ctx, {
+      taskId: draft.task_id,
+      eventType: "draft_withdrawn",
+      actorUserId: user._id,
+      actorRole: chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]),
+      previousStatus: task.status,
+      newStatus: newTaskStatus,
+      evidenceDraftId: draft.evidence_draft_id,
+      reason: args.reason?.trim() || "Draft withdrawn by its author.",
+    });
+    return { evidence_draft_id: draft.evidence_draft_id, task_id: draft.task_id, task_status: newTaskStatus };
+  },
+});
+
 // marks the author's other active (submitted/unresolved_note) drafts on the
 // task as superseded so only one active submission exists per author; indexed
 // per-status reads cover every draft, however many the task holds

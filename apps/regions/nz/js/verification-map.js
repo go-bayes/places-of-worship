@@ -804,6 +804,7 @@ const ISSUE_TYPE_OPTIONS = [
     ["possible_duplicate", "Possible duplicate"],
     ["geometry_check", "Wrong location"],
     ["verify_existing_site", "Not / no longer a place of worship"],
+    ["submitted_in_error", "Submitted in error — this entry should not be on the record"],
     ["osm_identity_link", "OSM link wrong"],
     ["other", "Other"],
 ];
@@ -3738,7 +3739,10 @@ class NzVerificationMap {
         const signedIn = Boolean(this.backend?.configured && this.backend.signedIn);
         return `
             <details id="issueReportDetails" class="skip-form issue-form"${open ? " open" : ""}>
-                <summary>Report an issue with this place</summary>
+                <summary>Revise this place or report an issue</summary>
+                <div class="copy-help">
+                    Nothing is edited or removed directly: your report opens a review task, and a reviewer decides against sources.
+                </div>
                 ${signedIn ? "" : `
                     <div class="demo-warning" role="alert">
                         Sign in with Google at the top of this panel to file an issue.
@@ -3976,6 +3980,32 @@ class NzVerificationMap {
         this.rapidCorrectionTaskIds.delete(taskId);
         this.clearFormDirty();
         this.renderDetail(this.featureForTaskId(taskId) || this.selectedTask);
+    }
+
+    // the audited "delete": withdraws the recorded draft from review while
+    // the row stays in the task history, and the task returns to the ra
+    async withdrawRapidDraft(props) {
+        const taskId = props?.task_id || "";
+        const draft = taskId ? this.latestDraftForTask(taskId) : null;
+        const status = document.getElementById("copyStatus");
+        if (!draft?.evidence_draft_id || !this.backend?.configured || !this.backend.signedIn) return;
+        if (!window.confirm("Delete this draft? It is withdrawn from review but stays in the audit history.")) return;
+        const button = document.getElementById("withdrawDraftButton");
+        if (button) button.disabled = true;
+        try {
+            await this.backend.withdrawEvidenceDraft({ evidenceDraftId: draft.evidence_draft_id });
+            this.rapidCorrectionTaskIds.delete(taskId);
+            this.latestDraftsByTaskId.delete(taskId);
+            this.taskHistoryByTaskId.delete(taskId);
+            this.clearFormDirty();
+            await this.refreshBackendTasks();
+            this.applyFilters();
+            this.renderDetail(this.featureForTaskId(taskId) || this.selectedTask);
+            this.focusDetailPanel();
+        } catch (error) {
+            if (button) button.disabled = false;
+            if (status) status.textContent = error.message || "Could not delete the draft.";
+        }
     }
 
     // starts a revision for the selected task through the same server
@@ -4758,8 +4788,9 @@ class NzVerificationMap {
                 <div class="button-row">
                     ${canAddHistory ? `<button id="addKnownHistoryFromRecordedButton" type="button">Add known history</button>` : ""}
                     ${canCorrect ? `<button id="correctObservationButton"${canAddHistory ? ` class="secondary"` : ""} type="button">Correct this observation</button>` : ""}
+                    ${canCorrect ? `<button id="withdrawDraftButton" class="secondary" type="button">Delete this draft</button>` : ""}
                 </div>
-                ${canCorrect ? `<div class="copy-help">Only for a mistake or new information.</div>` : ""}
+                ${canCorrect ? `<div class="copy-help">Correct only for a mistake or new information. Delete withdraws the draft from review; it stays in the audit history.</div>` : ""}
             ` : ""}
             <div id="copyStatus" class="copy-status" aria-live="polite"></div>
         `;
@@ -5737,6 +5768,7 @@ class NzVerificationMap {
 
     bindRaActionForm(props) {
         document.getElementById("correctObservationButton")?.addEventListener("click", () => this.startRapidCorrection(props));
+        document.getElementById("withdrawDraftButton")?.addEventListener("click", () => this.withdrawRapidDraft(props));
         document.getElementById("addKnownHistoryFromRecordedButton")?.addEventListener("click", () => {
             const draft = this.latestDraftForTask(props.task_id);
             if (!draft) return;
