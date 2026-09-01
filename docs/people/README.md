@@ -29,6 +29,8 @@ facts set the policy:
 - `docs/people/jw/` — JW, co-investigator and reviewer.
 - `docs/people/guy/` — Guy Lavender Forsyth, Vanuatu census
   collaborator.
+- `docs/people/rw/` — Robert Woodberry, historical mission-station
+  data collaborator and reviewer.
 - Engineering and agents: `docs/development/`, `docs/playbooks/`,
   `AGENTS.md` (unchanged homes).
 - `docs/people/research-tier-onboarding.md` — how team members join the
