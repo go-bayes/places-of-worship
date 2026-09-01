@@ -34,6 +34,7 @@ import { evidenceDraftDoc, reviewDecisionDoc, taskDoc, taskEventDoc } from "./li
 type IssueTaskType =
   | "possible_duplicate"
   | "verify_existing_site"
+  | "submitted_in_error"
   | "geometry_check"
   | "osm_identity_link"
   | "other";
@@ -58,6 +59,8 @@ function issueTaskBrief(issueType: IssueTaskType): string {
       return "Review this RA-reported possible duplicate and confirm whether the two points are one place of worship before any export.";
     case "verify_existing_site":
       return "Review this RA-reported existing-site concern and confirm the mapped place of worship state before any export.";
+    case "submitted_in_error":
+      return "Review this RA-reported challenge: the reporter believes this entry was submitted in error and should not stand as a place of worship record. Confirm or refute against sources before any export.";
     case "geometry_check":
       return "Review this RA-reported geometry concern and confirm that the point location represents the worship site before any export.";
     case "osm_identity_link":
@@ -783,6 +786,7 @@ export const createIssueTask = mutation({
     issueType: v.union(
       v.literal("possible_duplicate"),
       v.literal("verify_existing_site"),
+      v.literal("submitted_in_error"),
       v.literal("geometry_check"),
       v.literal("osm_identity_link"),
       v.literal("other"),
@@ -891,7 +895,9 @@ export const createIssueTask = mutation({
       task_id: taskId,
       batch_id: batchId,
       country_code: args.countryCode,
-      task_type: args.issueType,
+      // the challenge keeps its own issue type in automated_checks below;
+      // task_type stays within the closed export vocabulary
+      task_type: args.issueType === "submitted_in_error" ? ("verify_existing_site" as const) : args.issueType,
       priority: "medium" as const,
       status: "open" as const,
       target_years: args.targetYears ?? [],

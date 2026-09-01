@@ -804,6 +804,7 @@ const ISSUE_TYPE_OPTIONS = [
     ["possible_duplicate", "Possible duplicate"],
     ["geometry_check", "Wrong location"],
     ["verify_existing_site", "Not / no longer a place of worship"],
+    ["submitted_in_error", "Submitted in error — this entry should not be on the record"],
     ["osm_identity_link", "OSM link wrong"],
     ["other", "Other"],
 ];
@@ -3738,7 +3739,10 @@ class NzVerificationMap {
         const signedIn = Boolean(this.backend?.configured && this.backend.signedIn);
         return `
             <details id="issueReportDetails" class="skip-form issue-form"${open ? " open" : ""}>
-                <summary>Report an issue with this place</summary>
+                <summary>Revise this place or report an issue</summary>
+                <div class="copy-help">
+                    Nothing is edited or removed directly: your report opens a review task, and a reviewer decides against sources.
+                </div>
                 ${signedIn ? "" : `
                     <div class="demo-warning" role="alert">
                         Sign in with Google at the top of this panel to file an issue.
