@@ -2218,7 +2218,19 @@
                 display: none;
             }
         }
-    </style>
+            .osm-history-host { margin: 8px 0; }
+        .osm-history { font-size: 12px; line-height: 1.4; }
+        .osm-history p { margin: 0 0 6px; }
+        .osm-history-note, .osm-history-meta { color: #4a5865; }
+        .osm-history-flags { color: #a15c07; }
+        .osm-history-events { list-style: none; padding: 0; margin: 0 0 6px; }
+        .osm-history-events li { display: grid; grid-template-columns: 5.5em 1fr; gap: 0 8px; padding: 3px 0; border-top: 1px solid #e3e6e2; }
+        .osm-history-events .osm-history-date { font-variant-numeric: tabular-nums; font-weight: 600; }
+        .osm-history-events .osm-history-meta { grid-column: 2; font-size: 11px; }
+        .osm-history-events .osm-history-changes { grid-column: 2; }
+        .osm-history code { font-size: 11px; background: #f1f2ee; padding: 0 3px; border-radius: 3px; }
+        .popup-osm-history-body { margin-top: 6px; max-height: 220px; overflow-y: auto; }
+</style>
 </head>
 <body>
     <script>
@@ -2355,6 +2367,7 @@
     <script src="js/rapid-entry-contract.js?v=20260901a"></script>
     <script src="js/historical-claim-contract.js?v=20260828a"></script>
     <script src="js/location-assertion-contract.js?v=20260902a"></script>
-    <script src="js/verification-map.js?v=20260902b"></script>
+    <script src="js/osm-history.js?v=20260902c"></script>
+    <script src="js/verification-map.js?v=20260902c"></script>
 </body>
 </html>

@@ -2638,6 +2638,8 @@ class NzVerificationMap {
         const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
         const name = props.name || "Unnamed place";
         const coordStr = hasCoords ? `${lat.toFixed(5)},${lng.toFixed(5)}` : "";
+        const osmType = window.PowOsmHistory ? window.PowOsmHistory.normaliseType(props.osm_type) : "";
+        const osmId = props.osm_id !== undefined && props.osm_id !== null ? String(props.osm_id) : "";
         const matched = this.matchContextTask(feature);
         const matchedTaskId = matched?.task_id || "";
         const backendTask = matchedTaskId ? this.backendTasksById.get(matchedTaskId) : null;
@@ -2659,8 +2661,10 @@ class NzVerificationMap {
                 ${this.linkHtml("Street View", streetViewUrlForCoordinates(coords), "popup-link")}
                 <a class="popup-link" href="${escapeHtml(osmPointUrl(lat, lng))}" target="_blank" rel="noopener noreferrer">Open OSM</a>
                 <button class="popup-link popup-copy-coords" type="button" data-copy="${escapeHtml(coordStr)}">Copy coords</button>` : ""}
+                ${osmType && osmId ? `<button class="popup-link popup-osm-history" type="button" data-osm-history="${escapeHtml(`${osmType}/${osmId}`)}">OSM history</button>` : ""}
                 ${issueButton}
             </div>
+            <div class="popup-osm-history-body" hidden></div>
         `;
     }
 
@@ -2679,6 +2683,18 @@ class NzVerificationMap {
         });
         el.querySelector("[data-report-issue]")?.addEventListener("click", () => {
             this.openContextIssueForm(feature);
+        });
+        // osm edit history on demand (jb 2026-09-02): one fetch per object
+        // per session; the popup grows in place
+        el.querySelector("[data-osm-history]")?.addEventListener("click", async (event) => {
+            const [type, id] = String(event.currentTarget.dataset.osmHistory || "").split("/");
+            const body = el.querySelector(".popup-osm-history-body");
+            if (!body || !window.PowOsmHistory) return;
+            body.hidden = false;
+            event.currentTarget.disabled = true;
+            // no popup.update() afterwards: leaflet would re-render the
+            // stored content string and wipe the loaded timeline
+            await window.PowOsmHistory.loadInto(body, type, id);
         });
     }
 
@@ -2711,6 +2727,10 @@ class NzVerificationMap {
             <div class="pilot-note" role="note">
                 <strong>${escapeHtml(context.name || "An unnamed place")}</strong>${hasCoords ? ` at ${context.latitude.toFixed(5)}, ${context.longitude.toFixed(5)}` : ""}.
             </div>
+            ${(() => {
+                const t = window.PowOsmHistory ? window.PowOsmHistory.normaliseType(props.osm_type) : "";
+                return t && context.osmId ? `<div id="reviseOsmHistory" class="osm-history-host" data-osm-type="${escapeHtml(t)}" data-osm-id="${escapeHtml(context.osmId)}"></div>` : "";
+            })()}
             ${canRevise ? `
                 <div class="copy-help">Record what you can establish about this place today — its location, current worship use, how you know, and photos — exactly as for a new place. Your evidence goes to human review; the record is not edited directly.</div>
                 <div class="button-row">
@@ -2720,6 +2740,10 @@ class NzVerificationMap {
             ${this.issueFormHtml(context, { open: !canRevise, flagOnly: canRevise })}
         `;
         document.getElementById("reviseWithEvidenceButton")?.addEventListener("click", () => this.enterReviseMode(context));
+        const historyHost = document.getElementById("reviseOsmHistory");
+        if (historyHost && window.PowOsmHistory) {
+            window.PowOsmHistory.loadInto(historyHost, historyHost.dataset.osmType, historyHost.dataset.osmId);
+        }
         this.bindIssueForm(context);
         this.bindCopyCoords(panel);
         this.focusDetailPanel();
