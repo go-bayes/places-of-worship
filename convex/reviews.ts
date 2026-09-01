@@ -113,6 +113,8 @@ export const listReviewQueue = query({
       latestDraft: v.any(),
       latestReview: v.any(),
       latestAgentReview: v.any(),
+      contributor_label: v.optional(v.string()),
+      reviewer_label: v.optional(v.string()),
     }),
   ),
   handler: async (ctx, args) => {
@@ -133,12 +135,32 @@ export const listReviewQueue = query({
         .take(limit);
     }
 
+    // person labels let the portal arrange the queue by contributor or by
+    // the reviewer who made the last decision; ids stay server-side
+    const labelCache = new Map<string, string | undefined>();
+    const labelFor = async (userId: Doc<"users">["_id"] | undefined): Promise<string | undefined> => {
+      if (userId === undefined) return undefined;
+      const key = String(userId);
+      if (!labelCache.has(key)) {
+        const person = await ctx.db.get(userId);
+        labelCache.set(key, person?.display_name || person?.initials || person?.email);
+      }
+      return labelCache.get(key);
+    };
+
     const rows = [];
     for (const task of tasks) {
       const latestDraft = await latestDraftForReview(ctx, task.task_id);
       const latestReview = await latestReviewDecision(ctx, task.task_id);
       const agentReview = await latestAgentReview(ctx, task.task_id);
-      rows.push({ task, latestDraft, latestReview, latestAgentReview: agentReview });
+      rows.push({
+        task,
+        latestDraft,
+        latestReview,
+        latestAgentReview: agentReview,
+        contributor_label: await labelFor(latestDraft?.created_by),
+        reviewer_label: await labelFor(latestReview?.reviewer_user_id),
+      });
     }
     return rows;
   },

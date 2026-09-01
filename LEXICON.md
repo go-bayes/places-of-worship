@@ -99,6 +99,16 @@ The planned authenticated task system, likely using Convex for the pilot. It
 will show the same task status to multiple people: open, claimed, skipped,
 provisionally done, needs review, reviewed, or reopened.
 
+### Add A Missing Place (Nomination)
+
+The portal action for telling the project about a place of worship that is
+not on the map. The contributor locates the place (by searching a name or
+address, typing coordinates, or dropping and dragging a pin on the map),
+then records what they know. The nomination goes to human review as a
+candidate site; it does not change the public map. Some code and older
+documents call this flow `Nominate missing PoW`; treat that as a technical
+label.
+
 ### Task
 
 One thing to check. Examples: confirm a current place, investigate a possible

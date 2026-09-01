@@ -21,6 +21,28 @@ export type LocationAssertionInput = {
   contributor_confirmed: true;
 };
 
+// the single per-country location-mode rule, mirroring the portal's
+// nomination forms: a building-level-only country records only identified
+// buildings, and its portal (rapid and detailed forms alike) offers no
+// approximate-area option, so such an assertion can only come from a
+// crafted call (follow-up recorded 2026-08-28; server gate ruled with the
+// generalisation, jb 2026-08-31). the client mirror is buildingLevelOnly
+// in the portal's country config.
+const BUILDING_LEVEL_ONLY_COUNTRIES: ReadonlySet<string> = new Set(["VU"]);
+
+// enforces the per-country rule server-side; countries outside the set
+// keep both modes, matching the portal's ordinary nomination form
+export function assertCountryAllowsAssertionMode(
+  countryCode: string,
+  mode: LocationAssertionMode,
+): void {
+  if (mode === "approximate_area" && BUILDING_LEVEL_ONLY_COUNTRIES.has(countryCode.toUpperCase())) {
+    throw new Error(
+      `Nominations for ${countryCode.toUpperCase()} must identify the building; an approximate area cannot be accepted.`,
+    );
+  }
+}
+
 const MAX_LOCATION_WORDING = 2_000;
 const MIN_UNCERTAINTY_RADIUS_M = 25;
 const MAX_UNCERTAINTY_RADIUS_M = 100_000;

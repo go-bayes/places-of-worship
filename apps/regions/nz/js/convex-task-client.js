@@ -211,7 +211,7 @@
                 throw new Error("Convex is not configured for this map.");
             }
             await this.ensureFreshToken();
-            const endpoint = kind === "query" ? "query" : "mutation";
+            const endpoint = kind === "query" ? "query" : kind === "action" ? "action" : "mutation";
             const headers = {
                 "Content-Type": "application/json",
                 "Convex-Client": "placesmap-static-workbench",
@@ -340,8 +340,42 @@
             return await this.request("mutation", "tasks:createManualCandidateTask", args);
         }
 
-        async submitVanuatuCurrentObservation(args) {
-            return await this.request("mutation", "rapidEntry:submitVanuatuCurrentObservation", args);
+        // --- evidence attachments: photo/document citations on a task.
+        // bytes go browser -> r2 via presigned urls; convex holds metadata
+        // and mints access per request (ruling 2026-08-31, review-tier only)
+
+        async attachmentsEnabled() {
+            return await this.request("query", "attachments:attachmentsEnabled", {});
+        }
+
+        async requestAttachmentUpload(args) {
+            return await this.request("action", "attachments:requestAttachmentUpload", args);
+        }
+
+        async confirmAttachmentUpload(args) {
+            return await this.request("mutation", "attachments:confirmAttachmentUpload", args);
+        }
+
+        async setAttachmentCaption(args) {
+            return await this.request("mutation", "attachments:setAttachmentCaption", args);
+        }
+
+        async removeAttachment(args) {
+            return await this.request("mutation", "attachments:removeAttachment", args);
+        }
+
+        async listTaskAttachments(args) {
+            return await this.request("query", "attachments:listTaskAttachments", args);
+        }
+
+        async requestAttachmentView(args) {
+            return await this.request("action", "attachments:requestAttachmentView", args);
+        }
+
+        async submitCurrentObservation(args) {
+            // canonical multi-country route; the old vanuatu-named alias
+            // stays registered server-side for previously cached clients
+            return await this.request("mutation", "rapidEntry:submitCurrentObservation", args);
         }
 
         async submitHistoricalClaim(args) {

@@ -21,34 +21,79 @@
         return `${hex.slice(0, 4).join("")}-${hex.slice(4, 6).join("")}-${hex.slice(6, 8).join("")}-${hex.slice(8, 10).join("")}-${hex.slice(10).join("")}`;
     }
 
-    function validateObservation(values) {
-        if (!values.currentStatus) return "Choose what you can confirm at the observation date.";
-        if (!values.observationBasis) return "Choose how you know this.";
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(values.observedOn || "")) return "Enter the observation date.";
-        if (values.observedOn > localIsoDate()) return "The observation date cannot be in the future.";
-        if (!values.privacyFlag) return "Choose the sensitivity and privacy setting.";
-        if (values.observationBasis === "named_public_source" && !values.sourceTitle?.trim()) {
-            return "Enter the public source title.";
+    // detailed validation names the offending field so the form can
+    // highlight it; a flagged partial entry keeps only the checks that
+    // protect dates, privacy, and the discussion explanation
+    function validateObservationDetailed(values, options = {}) {
+        const flagged = Boolean(options.flagForDiscussion);
+        const fail = (message, field) => ({ message, field });
+        if (!flagged && !values.currentStatus) {
+            return fail("Choose what you can confirm at the observation date.", "CurrentStatus");
         }
-        if (values.observationBasis === "named_public_source" && !values.sourceReference?.trim()) {
-            return "Enter the public source URL or agreed file reference.";
+        if (!flagged && !values.observationBasis) {
+            return fail("Choose how you know this.", "ObservationBasis");
         }
-        if (values.observationBasis === "local_investigator_account" && (values.directObservation?.trim().length || 0) < 5) {
-            return "Briefly record the local observation supporting this entry.";
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(values.observedOn || "")) {
+            return fail("Enter the observation date.", "ObservedOn");
         }
-        if (values.currentStatus === "could_not_determine" && (values.uncertaintyNote?.trim().length || 0) < 12) {
-            return "Explain what remains uncertain.";
+        if (values.observedOn > localIsoDate()) {
+            return fail("The observation date cannot be in the future.", "ObservedOn");
         }
-        if (values.denominationRaw?.trim() && (!values.denominationLabelBasis || values.denominationLabelBasis === "unknown")) {
-            return "Choose where the denomination or tradition wording came from.";
+        if (!values.privacyFlag) {
+            return fail("Choose the sensitivity and privacy setting.", "PrivacyFlag");
         }
-        return "";
+        if (flagged && (values.discussionNote?.trim().length || 0) < 12) {
+            return fail("Briefly explain what needs discussion before flagging this entry.", "DiscussionNote");
+        }
+        if (!flagged && values.observationBasis === "named_public_source" && !values.sourceTitle?.trim()) {
+            return fail("Enter the public source title.", "SourceTitle");
+        }
+        if (!flagged && values.observationBasis === "named_public_source" && !values.sourceReference?.trim()) {
+            return fail("Enter the public source URL or agreed file reference.", "SourceReference");
+        }
+        if (!flagged && values.observationBasis === "local_investigator_account" && (values.directObservation?.trim().length || 0) < 5) {
+            return fail("Briefly record the local observation supporting this entry.", "DirectObservation");
+        }
+        if (!flagged && values.currentStatus === "could_not_determine" && (values.uncertaintyNote?.trim().length || 0) < 12) {
+            return fail("Explain what remains uncertain.", "UncertaintyNote");
+        }
+        // denomination wording stays genuinely optional: an unknown
+        // provenance is recorded as unknown rather than blocking the entry
+        return null;
     }
 
-    function observationPayload(values) {
+    function validateObservation(values, options = {}) {
+        return validateObservationDetailed(values, options)?.message || "";
+    }
+
+    function observationPayload(values, options = {}) {
+        const flagged = Boolean(options.flagForDiscussion);
+        // a flagged partial entry may omit the controlled answers; it lands
+        // as could-not-determine with the discussion text preserved in the
+        // uncertainty note so the reviewer sees exactly what to settle
+        const discussion = flagged && values.discussionNote?.trim()
+            ? `For discussion: ${values.discussionNote.trim()}`
+            : "";
+        const uncertainty = [values.uncertaintyNote?.trim(), discussion]
+            .filter(Boolean)
+            .join("\n") || undefined;
+        // a flagged partial entry may not satisfy its chosen basis's server
+        // requirements (named source needs title AND reference; a local
+        // account needs a short observation); those fall back to the
+        // catch-all basis so the partial entry still lands for discussion
+        let basis = values.observationBasis;
+        if (flagged) {
+            if (basis === "named_public_source" && (!values.sourceTitle?.trim() || !values.sourceReference?.trim())) {
+                basis = "other";
+            }
+            if (basis === "local_investigator_account" && (values.directObservation?.trim().length || 0) < 5) {
+                basis = "other";
+            }
+            if (!basis) basis = "other";
+        }
         return {
-            current_status: values.currentStatus,
-            observation_basis: values.observationBasis,
+            current_status: values.currentStatus || (flagged ? "could_not_determine" : values.currentStatus),
+            observation_basis: basis,
             observed_on: values.observedOn,
             source_title: values.sourceTitle?.trim() || undefined,
             source_reference: values.sourceReference?.trim() || undefined,
@@ -57,7 +102,7 @@
                 ? values.denominationLabelBasis
                 : undefined,
             direct_observation: values.directObservation?.trim() || undefined,
-            uncertainty_note: values.uncertaintyNote?.trim() || undefined,
+            uncertainty_note: uncertainty,
             privacy_flag: values.privacyFlag,
         };
     }
@@ -66,6 +111,7 @@
         localIsoDate,
         secureSubmissionId,
         validateObservation,
+        validateObservationDetailed,
         observationPayload,
     };
 })();

@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   assertAssertionMatchesTaskPoint,
+  assertCountryAllowsAssertionMode,
   assertLocationAssertion,
 } from "./locationAssertions.ts";
 
@@ -65,4 +66,22 @@ test("rejects a location assertion that differs from the submitted point", () =>
     () => assertAssertionMatchesTaskPoint(building, -41.2864, 174.7762),
     /does not match/,
   );
+});
+
+test("building-level countries refuse an approximate area from a crafted call", () => {
+  assert.throws(
+    () => assertCountryAllowsAssertionMode("VU", "approximate_area"),
+    /Nominations for VU must identify the building/,
+  );
+  // lower-case codes normalise to the same rule
+  assert.throws(
+    () => assertCountryAllowsAssertionMode("vu", "approximate_area"),
+    /Nominations for VU must identify the building/,
+  );
+  assert.doesNotThrow(() => assertCountryAllowsAssertionMode("VU", "building_identified"));
+});
+
+test("other countries keep both location modes, matching the portal form", () => {
+  assert.doesNotThrow(() => assertCountryAllowsAssertionMode("NZ", "approximate_area"));
+  assert.doesNotThrow(() => assertCountryAllowsAssertionMode("NZ", "building_identified"));
 });

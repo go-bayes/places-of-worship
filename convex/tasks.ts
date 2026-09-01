@@ -16,7 +16,8 @@ import {
 } from "./model";
 import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser } from "./lib/auth";
 import { defaultTargetYears } from "./lib/countryYears";
-import { assertAssertionMatchesTaskPoint } from "./lib/locationAssertions";
+import { assertAssertionMatchesTaskPoint, assertCountryAllowsAssertionMode } from "./lib/locationAssertions";
+import { manualBatchId } from "./lib/rapidEntry";
 import {
   MEDIUM_TEXT_MAX,
   SHORT_TEXT_MAX,
@@ -978,6 +979,10 @@ export const createManualCandidateTask = mutation({
       confidence: "high" as const,
       contributor_confirmed: true as const,
     };
+    // server-side mirror of the portal's per-country gate: a crafted call
+    // must not record an approximate area where the country requires an
+    // identified building
+    assertCountryAllowsAssertionMode(args.countryCode, locationAssertion.mode);
     assertAssertionMatchesTaskPoint(locationAssertion, args.latitude, args.longitude);
     const now = Date.now();
     const taskId = manualTaskId(args.countryCode, args.name, now);
@@ -988,7 +993,7 @@ export const createManualCandidateTask = mutation({
 
     await ctx.db.insert("tasks", {
       task_id: taskId,
-      batch_id: `manual-${args.countryCode.toLowerCase()}`,
+      batch_id: manualBatchId(args.countryCode),
       country_code: args.countryCode,
       task_type: args.taskType ?? "missing_from_project_map",
       priority: args.priority ?? "high",

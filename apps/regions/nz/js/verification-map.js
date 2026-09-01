@@ -20,6 +20,8 @@ const COUNTRY_CONFIGS = {
         defaultAssignmentBatchId: "nz-temporal-ra-workpack-001",
         datedPlaces: "../nz/data/dated_places.geojson",
         assignmentHeading: "New Zealand source-first test",
+        // pure entry only: nz assigned tasks keep the guided form
+        rapidNominationEntry: true,
         temporalLossAction: {
             value: "present_2013_absent_2018",
             label: "Present in 2013, absent in 2018",
@@ -46,6 +48,8 @@ const COUNTRY_CONFIGS = {
         defaultAssignmentBatchId: "vu-source-first-test-001",
         assignmentHeading: "Vanuatu source-first test",
         rapidCurrentEntry: true,
+        rapidNominationEntry: true,
+        buildingLevelOnly: true,
         temporalLossAction: {
             value: "target_year_loss_or_changed_use",
             label: "Present in one target year, absent in a later target year",
@@ -608,11 +612,22 @@ const ASSIGNMENT_BATCH_ID = FULL_MAP_MODE
     ? ""
     : (REQUESTED_ASSIGNMENT_BATCH_ID || (BACKEND_CONFIGURED ? DEFAULT_ASSIGNMENT_BATCH_ID : ""));
 const ASSIGNMENT_MODE = ASSIGNMENT_BATCH_ID.length > 0;
-const RAPID_CURRENT_ENTRY = Boolean(
+// two gates where one used to conflate assigned work with pure entry
+// (jb 2026-08-31): rapidCurrentEntry keeps a country's ASSIGNED batch on
+// the rapid form (vu's source-first design); rapidNominationEntry puts
+// PURE ENTRY (add places) on the same rapid form wherever the server's
+// country intake registry has bounds (vu and nz today)
+const RAPID_ASSIGNED_ENTRY = Boolean(
     COUNTRY_CONFIG.rapidCurrentEntry
     && ASSIGNMENT_MODE
     && SEARCH_PARAMS.get("detailed") !== "1"
 );
+const RAPID_NOMINATION_ENTRY = Boolean(
+    COUNTRY_CONFIG.rapidNominationEntry
+    && ASSIGNMENT_MODE
+    && SEARCH_PARAMS.get("detailed") !== "1"
+);
+const RAPID_ANY_ENTRY = RAPID_ASSIGNED_ENTRY || RAPID_NOMINATION_ENTRY;
 const HISTORICAL_CLAIM_ENTRY = ASSIGNMENT_MODE;
 // optional personalised hint: invitation links may include ?email=ra@example.com
 // so the sign-in card can name the specific invited account
@@ -806,10 +821,37 @@ const SKIP_REASON_CHIPS = [
 const PIN_MIN_PLACEMENT_ZOOM = 15;
 const PIN_MIN_APPROXIMATE_ZOOM = 8;
 const PIN_PROXIMITY_METRES = 150;
-const LOCATION_MODE_OPTIONS = [
-    ["building_identified", "I identified the building"],
-    ["approximate_area", "I only know the approximate area"],
-];
+// satellite basemap: maptiler's paid plan (ruled 2026-08-29) so contributors
+// can steer the pin onto the actual building; absent key hides the option
+const MAPTILER_API_KEY = String(window.MAPTILER_API_KEY || "").trim();
+const SATELLITE_TILE_URL = MAPTILER_API_KEY
+    ? `https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+    : "";
+// hybrid = the same imagery with street and place labels drawn over it, so
+// the contributor keeps orientation while steering the pin (JB 2026-08-31)
+const HYBRID_TILE_URL = MAPTILER_API_KEY
+    ? `https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+    : "";
+// add mode prefers imagery once streets stop showing individual buildings
+const PORTAL_AUTO_SATELLITE_ZOOM = 15;
+// signed-in portal activity, kept per country and batch for the tab's life
+const PORTAL_MODES = new Set(["assigned", "add"]);
+const PORTAL_MODE_KEY = `pow_portal_mode_v1:${COUNTRY_CONFIG.countryCode.toLowerCase()}${ASSIGNMENT_SESSION_SEGMENT}`;
+// place-name search: one nominatim request per submit, spaced out, so the
+// portal stays well inside the osmf usage policy
+const NOMINATIM_SEARCH_URL = "https://nominatim.openstreetmap.org/search";
+const NOMINATIM_MIN_INTERVAL_MS = 1500;
+// vu is building-level only (kastom-sensitive intake; the server enforces
+// the same rule in convex/lib/locationAssertions.ts), so its detailed form
+// must not offer the approximate-area mode the server will refuse
+const LOCATION_MODE_OPTIONS = COUNTRY_CONFIG.buildingLevelOnly
+    ? [["building_identified", "I identified the building"]]
+    : [
+        ["building_identified", "I identified the building"],
+        // approximate area: use when local knowledge places the site in a
+        // vicinity but not at a building; the radius states the uncertainty
+        ["approximate_area", "I only know the approximate area"],
+    ];
 const LOCATION_RADIUS_OPTIONS = [
     ["100", "Within about 100 m"],
     ["250", "Within about 250 m"],
@@ -1077,15 +1119,32 @@ function statusOptionsHtml() {
     `;
 }
 
+// one year per row with the selects in aligned columns, so the eye can
+// run down the years and compare states and confidence at a glance
 function targetYearStatusControlsHtml() {
-    return TARGET_YEARS.map(year => `
-        <label>
-            ${escapeHtml(year)} status
-            <select id="status${escapeHtml(year)}">
-                ${statusOptionsHtml()}
-            </select>
-        </label>
-    `).join("");
+    return `
+        <div class="year-status-grid" role="group" aria-label="Status and confidence for each target year">
+            <div class="year-status-row year-status-head" aria-hidden="true">
+                <span class="year-status-year"></span>
+                <span>Status</span>
+                <span>Confidence</span>
+            </div>
+            ${TARGET_YEARS.map(year => `
+                <div class="year-status-row">
+                    <label class="year-status-year" for="status${escapeHtml(year)}">${escapeHtml(year)}</label>
+                    <select id="status${escapeHtml(year)}" aria-label="${escapeHtml(year)} status">
+                        ${statusOptionsHtml()}
+                    </select>
+                    <select id="confidence${escapeHtml(year)}" aria-label="${escapeHtml(year)} confidence">
+                        <option value="">Confidence…</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+            `).join("")}
+        </div>
+    `;
 }
 
 function nominationTypeOptionsHtml() {
@@ -1509,6 +1568,12 @@ function osmPointUrl(lat, lng) {
     return `https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}`;
 }
 
+// a nomination lives in the country's manual batch: it is the ra's own
+// pure-entry work, ruled separate from the assignment sheet (jb 2026-08-31)
+function isNominationProps(props) {
+    return (props?.batch_id || "").startsWith("manual-");
+}
+
 function featureFromBackendTask(task) {
     const context = task.source_context || {};
     const survey = context.survey || {};
@@ -1583,7 +1648,6 @@ function assignmentQuickstartHtml() {
                 <li>Work from source-backed leads. OSM is sparse in Vanuatu, so treat any OSM record as context rather than the main evidence.</li>
                 <li>Record 1989, 1999, 2009, and 2020 status only where a source supports a target-year judgement.</li>
                 <li>Use lifecycle fields for older historical evidence, including mission, church, building, relocation, closure, or changed-use dates back to 1600.</li>
-                <li>Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when useful evidence remains unclear, and <em>Submit for review</em> when the evidence is ready for JB or JW.</li>
             </ol>
         `;
     }
@@ -1594,7 +1658,6 @@ function assignmentQuickstartHtml() {
                 <li>Work down the assigned ${COUNTRY_CONFIG.countryName} task list in order. Stop at a natural stopping point and tell JB where you stopped.</li>
                 <li>Open Street View or Google Maps to look around the site, and use the OSM object only as context. Record the imagery capture date if Street View is your evidence.</li>
                 <li>Record ${targetYearAndListText()} status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
-                <li>Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when the case remains unclear after useful checking, and <em>Submit for review</em> when the evidence is ready for JB.</li>
             </ol>
         `;
     }
@@ -1602,10 +1665,8 @@ function assignmentQuickstartHtml() {
         <ol>
             <li>Sign in with Google at the top of this panel.</li>
             <li>Work down the assigned task list in order. Stop at a natural stopping point and tell JB where you stopped.</li>
-            <li>How the list was made: <a href="https://github.com/go-bayes/places-of-worship/blob/main/scripts/build_nz_temporal_ra_workpack.R" target="_blank" rel="noopener">this R script</a> first selects every date-tag row whose <code>candidate_date_tag_windows</code> contains <code>candidate_gain</code>; then, after excluding used <code>osm_key</code>s, adds five OSM-present-then-absent rows with a nearby replacement object, five rows with parser warnings, uncertain target-year status, or <code>candidate_status_change</code>, and five present-present-present controls with no candidate window or parser warning. Treat OSM as the prompt to check, not as final evidence.</li>
             <li>Open Street View or Google Maps to look around the site, and use the OSM object only as context. Record the imagery capture date if Street View is your evidence.</li>
             <li>Record 2013, 2018, and 2023 status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
-            <li>Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when the case remains unclear after useful checking, and <em>Submit for review</em> when the evidence is ready for JB.</li>
         </ol>
     `;
 }
@@ -1631,6 +1692,8 @@ class NzVerificationMap {
         this.backendTasksById = new Map();
         this.latestDraftsByTaskId = new Map();
         this.myWorkItems = [];
+        this.myNominationItems = [];
+        this.nominationFeatures = [];
         this.revisionDraftIdsByTaskId = new Map();
         // rapid tasks awaiting review that the observer has chosen to correct;
         // a correction is a new observation, so no server draft exists until
@@ -1657,7 +1720,20 @@ class NzVerificationMap {
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
         this.pinSubmissionId = null;
+        this.pinHistory = [];
         this.manualTasksById = new Map();
+        // signed-in portal activity: null while signed out or choosing,
+        // otherwise "assigned" or "add" (see setPortalMode)
+        this.portalMode = null;
+        // basemap: streets by default; auto switches (add mode, pin
+        // placement) yield to a manual choice for the rest of the session
+        this.basemap = "streets";
+        this.basemapUserChosen = false;
+        this.streetsLayer = null;
+        this.satelliteLayer = null;
+        this.hybridLayer = null;
+        this.imageryBroken = false;
+        this.lastNominatimRequestAt = 0;
         // context dots: lazily fetched dated places, keyed off the target
         // year in period mode; task history responses cached per task
         this.pointsMode = "off";
@@ -1825,6 +1901,7 @@ class NzVerificationMap {
                         : "Not configured on this deployment. The page is using the local demo and spreadsheet fallback."}</span>
                 </div>
             `;
+            this.syncPortalChrome();
             return;
         }
 
@@ -1836,10 +1913,10 @@ class NzVerificationMap {
                     <span>${ASSIGNMENT_MODE
                         ? `${INVITED_EMAIL_HINT
                             ? `Use ${escapeHtml(INVITED_EMAIL_HINT)}, the Google account JB invited.`
-                            : "Use the Google account JB invited (check the invitation email if you're not sure which one)."} Your assigned tasks load after sign-in, and saved work goes straight to the shared review queue.`
+                            : "Use the Google account JB invited (check the invitation email if you're not sure which one)."} After sign-in, choose between your assigned tasks and adding missing places; saved work goes straight to the shared review queue.`
                         : "Sign in with Google to load assigned tasks and save evidence directly for review."}</span>
                     <div id="googleSignInButton" class="google-sign-in-host"></div>
-                    <span class="backend-help">The Google button shows accounts already signed into this browser. If the wrong name appears, choose another Google account or use a browser profile signed into the invited account.</span>
+                    <details class="backend-help"><summary>Wrong account showing?</summary>The Google button shows accounts already signed into this browser. If the wrong name appears, choose another Google account or use a browser profile signed into the invited account.</details>
                     ${this.backendLastError ? `<span class="copy-status">${escapeHtml(this.backendLastError)}</span>` : ""}
                 </div>
             `;
@@ -1848,6 +1925,9 @@ class NzVerificationMap {
                 onSignedIn: async user => {
                     this.backendUser = user;
                     await this.refreshBackendTasks();
+                    // a reload or an expired session lands back in the
+                    // activity the contributor had chosen, else the chooser
+                    this.restorePortalMode();
                     this.renderBackendPanel();
                     this.applyFilters();
                     if (this.selectedTask) {
@@ -1863,16 +1943,25 @@ class NzVerificationMap {
                 this.backendLastError = error.message || "Could not initialise sign-in.";
                 this.renderBackendPanel();
             });
+            this.syncPortalChrome();
             return;
         }
 
         const label = this.backendUser.initials || this.backendUser.email || "signed in";
+        const assignedAvailable = this.tasks.filter(feature => !isNominationProps(feature.properties)).length;
         const assignmentStatusText = ASSIGNMENT_MODE
-            ? `${this.tasks.length} available task${this.tasks.length === 1 ? "" : "s"}; ${this.myWorkItems.length} item${this.myWorkItems.length === 1 ? "" : "s"} in My work.`
+            ? `${assignedAvailable} available task${assignedAvailable === 1 ? "" : "s"}; ${this.myWorkItems.length} item${this.myWorkItems.length === 1 ? "" : "s"} in My work.`
             : "Saves and submissions go to Convex for reviewer follow-up.";
+        const signedInHeading = !ASSIGNMENT_MODE
+            ? "Shared task backend"
+            : this.portalMode === "assigned"
+                ? "Signed in. Choose a task below."
+                : this.portalMode === "add"
+                    ? "Signed in. Add missing places."
+                    : "Signed in. Choose an activity below.";
         panel.innerHTML = `
             <div class="backend-card signed-in">
-                <strong>${ASSIGNMENT_MODE ? "Signed in. Choose a task below." : "Shared task backend"}</strong>
+                <strong>${signedInHeading}</strong>
                 ${assignmentLabel}
                 <span>Signed in as ${escapeHtml(label)}. ${escapeHtml(assignmentStatusText)}</span>
                 <span id="backendRefreshStatus" class="copy-status" aria-live="polite">${escapeHtml(this.backendTransientStatus || "")}</span>
@@ -1882,6 +1971,7 @@ class NzVerificationMap {
                 </div>
             </div>
         `;
+        this.syncPortalChrome();
         document.getElementById("refreshBackendTasksButton")?.addEventListener("click", async event => {
             // lock the button for the flight; the refresh re-renders this
             // card, so the outcome reports through the fresh copy
@@ -1896,7 +1986,7 @@ class NzVerificationMap {
             }
             this.setBackendTransientStatus(this.backendLastError
                 ? this.backendLastError
-                : `Task list refreshed — ${this.tasks.length} available, ${this.myWorkItems.length} in My work.`);
+                : `Task list refreshed — ${this.tasks.filter(feature => !isNominationProps(feature.properties)).length} available, ${this.myWorkItems.length} in My work.`);
         });
         document.getElementById("signOutButton")?.addEventListener("click", () => this.signOutBackend());
     }
@@ -1918,9 +2008,19 @@ class NzVerificationMap {
     signOutBackend() {
         this.backend?.signOut();
         this.backendUser = null;
+        // a deliberate sign-out forgets the chosen activity; an expired
+        // session (backendUser cleared elsewhere) keeps it for the return
+        if (this.pinMode) this.exitPinMode();
+        this.portalMode = null;
+        try {
+            sessionStorage.removeItem(PORTAL_MODE_KEY);
+        } catch (error) {
+            // storage unavailable: nothing to forget
+        }
         this.backendTasksById.clear();
         this.latestDraftsByTaskId.clear();
         this.myWorkItems = [];
+        this.myNominationItems = [];
         this.revisionDraftIdsByTaskId.clear();
         // sign-out discards the form with the panel; a lingering dirty flag
         // would fire beforeunload against a page showing no form at all
@@ -2022,6 +2122,11 @@ class NzVerificationMap {
         }
         const items = this.myWorkItems || [];
         const total = items.length;
+        // a bounced nomination must reach the ra with the reviewer's note
+        // wherever they are working, so the alert panel and badge cover
+        // nominations too even though the my-work list itself is batch-only
+        const nominationChangesRequested = (this.myNominationItems || [])
+            .filter(item => item.task?.status === "changes_requested");
         // a task awaiting review with an editable draft alongside is a
         // revision in progress; count it as a draft, not as submitted work
         const isRevisionItem = item =>
@@ -2031,7 +2136,9 @@ class NzVerificationMap {
         const submitted = items.filter(item => item.task?.status === "needs_review" && !isRevisionItem(item)).length;
         const unresolved = items.filter(item => item.task?.status === "unresolved_note" && !isRevisionItem(item)).length;
         const drafts = items.filter(item => item.task?.status === "draft_saved").length + revisionDrafts;
-        const changesRequested = items.filter(item => item.task?.status === "changes_requested");
+        const changesRequested = items
+            .filter(item => item.task?.status === "changes_requested")
+            .concat(nominationChangesRequested);
         const needsMore = changesRequested.length;
         const skipped = items.filter(item => item.task?.status === "skipped").length;
         const reviewed = items.filter(item => item.task?.status === "reviewed" || item.task?.status === "exported").length;
@@ -2039,7 +2146,7 @@ class NzVerificationMap {
             ${this.changesRequestedPanelHtml(changesRequested)}
             <details ${total > 0 ? "open" : ""}>
                 <summary>My work
-                    <span class="ra-initials">${escapeHtml(`${total} item${total === 1 ? "" : "s"}: ${drafts} draft, ${submitted} submitted, ${unresolved} unresolved, ${needsMore} needs more evidence, ${skipped} skipped, ${reviewed} reviewed`)}</span>
+                    <span class="ra-initials">${escapeHtml(`${total} item${total === 1 ? "" : "s"} · ${needsMore + unresolved} need${needsMore + unresolved === 1 ? "s" : ""} attention`)}</span>
                 </summary>
                 ${total === 0 ? `
                     <div class="session-empty">No saved, submitted, skipped, or reviewed tasks yet.</div>
@@ -2050,7 +2157,6 @@ class NzVerificationMap {
                     ${total > SESSION_RECENT_LIMIT ? `
                         <button type="button" class="secondary" id="myWorkShowAllButton">${this.myWorkShowAll ? `Show recent ${SESSION_RECENT_LIMIT} only` : `Show all ${total}`}</button>
                     ` : ""}
-                    <div class="session-empty">Submitted and reviewed work stays here so you do not repeat it. Revise only when you have new evidence or need to correct a mistake.</div>
                 `}
             </details>
         `;
@@ -2248,13 +2354,38 @@ class NzVerificationMap {
         this.map = L.map("map", { preferCanvas: true }).setView(COUNTRY_CONFIG.mapCentre, COUNTRY_CONFIG.mapZoom);
         // openstreetmap standard tiles: no key to ship, and building
         // footprints render unwatermarked at the zooms pin placement needs
-        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        // keep the zoom-out floor at 5 for compact countries, but let
+        // continental configs (au/br/ca/mx/us open below 5) take effect
+        const minZoom = Math.min(5, Math.floor(COUNTRY_CONFIG.mapZoom));
+        this.streetsLayer = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             maxZoom: 19,
-            // keep the zoom-out floor at 5 for compact countries, but let
-            // continental configs (au/br/ca/mx/us open below 5) take effect
-            minZoom: Math.min(5, Math.floor(COUNTRY_CONFIG.mapZoom)),
+            minZoom,
         }).addTo(this.map);
+        if (SATELLITE_TILE_URL) {
+            // imagery so the pin can be steered onto the real building;
+            // maptiler serves z20 (upsampled where no aerial exists)
+            const imageryAttribution = '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+            this.satelliteLayer = L.tileLayer(SATELLITE_TILE_URL, {
+                attribution: imageryAttribution,
+                maxZoom: 20,
+                minZoom,
+            });
+            this.hybridLayer = L.tileLayer(HYBRID_TILE_URL, {
+                attribution: imageryAttribution,
+                maxZoom: 20,
+                minZoom,
+            });
+            this.watchImageryLayer(this.satelliteLayer);
+            this.watchImageryLayer(this.hybridLayer);
+            this.addBasemapControl();
+            // add mode: imagery takes over once buildings are resolvable,
+            // unless the contributor has picked a basemap by hand
+            this.map.on("zoomend", () => {
+                if (this.portalMode !== "add" || this.basemapUserChosen) return;
+                if (this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM) this.setBasemap("hybrid");
+            });
+        }
 
         // context dots ride the canvas (preferCanvas), so they always paint
         // beneath the dom-based task markers
@@ -2276,14 +2407,15 @@ class NzVerificationMap {
             // uniform option order across surfaces (per the historical-points
             // standard): period first where a dated product is wired, then all,
             // then off; all/off only where no dated product exists
-            const modes = COUNTRY_CONFIG.datedPlaces
-                ? [["period", "Points: period"], ["all", "Points: all"], ["off", "Points: off"]]
-                : [["all", "Points: all"], ["off", "Points: off"]];
+            // without a dated context layer the select would load nothing,
+            // so it does not render: an inert control reads as broken
+            const modes = [["period", "Points: period"], ["all", "Points: all"], ["off", "Points: off"]];
             div.innerHTML = `
+                ${COUNTRY_CONFIG.datedPlaces ? `
                 <select id="portalPointsSelect" aria-label="Context dots">
                     ${modes.map(([value, label]) => `<option value="${value}"${value === this.pointsMode ? " selected" : ""}>${label}</option>`).join("")}
                 </select>
-                <div id="portalPointsNote" class="points-mode-note" hidden></div>
+                <div id="portalPointsNote" class="points-mode-note" hidden></div>` : ""}
                 <div class="map-legend">
                     <span class="legend-caption">Validation ring</span>
                     <span class="legend-row"><span class="legend-dot vm-validated-present-swatch"></span>validated present</span>
@@ -2291,13 +2423,14 @@ class NzVerificationMap {
                     <span class="legend-row"><span class="legend-dot vm-in-review-swatch"></span>in review</span>
                     <span class="legend-row"><span class="legend-dot vm-disputed-swatch"></span>disputed</span>
                     <span class="legend-row"><span class="legend-dot vm-default-swatch"></span>unvalidated</span>
+                    <span class="legend-row"><span class="legend-dot vm-nomination-swatch"></span>nomination</span>
                     ${COUNTRY_CONFIG.datedPlaces ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>context dots</span>` : ""}
                 </div>
             `;
             // keep map gestures away from the control
             L.DomEvent.disableClickPropagation(div);
             L.DomEvent.disableScrollPropagation(div);
-            div.querySelector("#portalPointsSelect").addEventListener("change", (event) => {
+            div.querySelector("#portalPointsSelect")?.addEventListener("change", (event) => {
                 this.setPointsMode(event.target.value);
             });
             return div;
@@ -2559,20 +2692,7 @@ class NzVerificationMap {
                 : `${COUNTRY_CONFIG.countryName} OSM Verification`;
         }
 
-        const notice = document.getElementById("modeNotice");
-        if (notice) {
-            notice.classList.toggle("demo-warning", DEMO_MODE);
-            notice.innerHTML = DEMO_MODE
-                ? (ASSIGNMENT_MODE
-                    ? (this.backend?.configured
-                        ? `Assigned web workpack: <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Sign in to load tasks and save evidence. Do not enter private or sensitive data.`
-                        : `Assigned web workpack: <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. The shared backend is not configured here, so the assignment cannot be used on this deployment yet.`)
-                    : this.backend?.configured
-                    ? "Draft controls enabled. Sign in through the shared backend panel to save or submit evidence. Do not enter private or sensitive data."
-                    : "Draft controls enabled. The shared backend is not configured here, so nothing is uploaded or saved until you use the spreadsheet fallback. Do not enter private or sensitive data.")
-                : `Inspection only: form controls live in <a href="${escapeHtml(demoUrl())}">demo mode</a>. Nothing is uploaded either way.`;
-            notice.setAttribute("role", DEMO_MODE ? "alert" : "note");
-        }
+        this.renderModeNotice();
 
         const quickstart = document.getElementById("quickstartBanner");
         const quickstartKey = ASSIGNMENT_MODE
@@ -2594,7 +2714,7 @@ class NzVerificationMap {
                             <li>Open the source links in step 1 of the task panel.</li>
                             <li>In step 2, choose what your evidence shows and confirm year statuses.</li>
                             <li>In step 3, paste a short evidence note and the source URL or file reference.</li>
-                            <li>In step 4, use <em>Save draft</em>, <em>Submit unresolved note</em>, or <em>Submit for review</em> when the shared backend is enabled. Use <em>Copy spreadsheet row</em> only as the fallback.</li>
+                            <li>In step 4, save or submit; use <em>Copy spreadsheet row</em> only as the fallback.</li>
                         </ol>
                     `}
                     <button type="button" class="quickstart-dismiss" id="quickstartDismiss">Hide this guide for this workpack</button>
@@ -2619,17 +2739,231 @@ class NzVerificationMap {
                 </div>
             `;
             if (ASSIGNMENT_MODE) {
-                // the single pin-drop entry point lives in the header now;
+                // one label serves every country (rapid entry included);
                 // the transient cards render into #pinCardHost on demand
-                const addPlaceButton = document.getElementById("addPlaceButton");
-                if (addPlaceButton && RAPID_CURRENT_ENTRY) {
-                    addPlaceButton.textContent = "＋ Nominate missing PoW";
-                }
-                addPlaceButton?.addEventListener("click", () => this.enterPinMode());
+                document.getElementById("addPlaceButton")?.addEventListener("click", () => this.enterPinMode());
             }
         }
 
+        this.renderPortalChooser();
+        this.renderPortalModeBar();
+        this.syncPortalChrome();
         this.renderInitialDetail();
+    }
+
+    // header notice; re-rendered when sign-in state changes so a signed-in
+    // sidebar never keeps a stale "sign in to load tasks" instruction
+    renderModeNotice() {
+        const notice = document.getElementById("modeNotice");
+        if (!notice) return;
+        notice.classList.toggle("demo-warning", DEMO_MODE);
+        notice.innerHTML = DEMO_MODE
+            ? (ASSIGNMENT_MODE
+                ? (this.backend?.configured
+                    // one line, load-bearing: the blanket rule must appear on
+                    // the live signed-in flow, not only inside the forms
+                    ? "Do not enter private or sensitive data."
+                    : `Assigned web workpack: <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. The shared backend is not configured here, so the assignment cannot be used on this deployment yet.`)
+                : this.backend?.configured
+                ? "Draft controls enabled. Sign in through the shared backend panel to save or submit evidence."
+                : "Draft controls enabled. The shared backend is not configured here, so nothing is uploaded or saved until you use the spreadsheet fallback.")
+            : `Inspection only: form controls live in <a href="${escapeHtml(demoUrl())}">demo mode</a>. Nothing is uploaded either way.`;
+        notice.setAttribute("role", DEMO_MODE ? "alert" : "note");
+    }
+
+    // --- signed-in portal activity: chooser, assigned sheet, add flow ---
+
+    // body classes drive which sidebar sections show (see the css gating
+    // block); derived from the user and the chosen activity, never set by
+    // hand elsewhere
+    syncPortalChrome() {
+        if (!ASSIGNMENT_MODE) {
+            document.body.classList.remove("portal-signed-out", "portal-chooser", "portal-assigned", "portal-add");
+            return;
+        }
+        const signedOut = !this.backendUser;
+        const mode = signedOut ? null : (PORTAL_MODES.has(this.portalMode) ? this.portalMode : "chooser");
+        this.renderModeNotice();
+        document.body.classList.toggle("portal-signed-out", signedOut);
+        document.body.classList.toggle("portal-chooser", mode === "chooser");
+        document.body.classList.toggle("portal-assigned", mode === "assigned");
+        document.body.classList.toggle("portal-add", mode === "add");
+        const chooser = document.getElementById("portalChooser");
+        if (chooser) chooser.hidden = mode !== "chooser";
+        const bar = document.getElementById("portalModeBar");
+        if (bar) bar.hidden = !(mode === "assigned" || mode === "add");
+        if (mode === "chooser") this.renderPortalChooser();
+        if (mode === "assigned" || mode === "add") this.renderPortalModeBar();
+    }
+
+    renderPortalChooser() {
+        const chooser = document.getElementById("portalChooser");
+        if (!chooser || !ASSIGNMENT_MODE) return;
+        const available = this.tasks.filter(feature => (feature.properties?.batch_id || ASSIGNMENT_BATCH_ID) === ASSIGNMENT_BATCH_ID).length;
+        const assignedSummary = available
+            ? `${available} task${available === 1 ? "" : "s"} available in ${ASSIGNMENT_BATCH_ID}${this.myWorkItems.length ? `; ${this.myWorkItems.length} in My work` : ""}.`
+            : `No tasks are assigned to you in ${ASSIGNMENT_BATCH_ID} right now. You can still add places.`;
+        chooser.innerHTML = `
+            <h2>What would you like to do?</h2>
+            <button type="button" class="chooser-option" id="chooseAssignedButton">
+                <strong>Assigned tasks</strong>
+                <span>${escapeHtml(assignedSummary)}</span>
+            </button>
+            <button type="button" class="chooser-option" id="chooseAddButton">
+                <strong>Add places</strong>
+                <span>Nominate a place that is missing.${(this.myNominationItems || []).length ? ` You have ${this.myNominationItems.length} under review.` : ""}</span>
+            </button>
+        `;
+        document.getElementById("chooseAssignedButton")?.addEventListener("click", () => this.setPortalMode("assigned"));
+        document.getElementById("chooseAddButton")?.addEventListener("click", () => this.setPortalMode("add"));
+    }
+
+    renderPortalModeBar() {
+        const bar = document.getElementById("portalModeBar");
+        if (!bar || !ASSIGNMENT_MODE) return;
+        const label = this.portalMode === "add" ? "Add places" : "Assigned tasks";
+        bar.classList.toggle("mode-add", this.portalMode === "add");
+        bar.innerHTML = `
+            <span>${label}</span>
+            <button type="button" class="link-button" id="changeActivityButton">← Change activity</button>
+        `;
+        document.getElementById("changeActivityButton")?.addEventListener("click", () => this.setPortalMode(null));
+    }
+
+    // switches activity in place (no reload); null returns to the chooser.
+    // the choice persists for the tab so a reload lands where the
+    // contributor was
+    setPortalMode(mode) {
+        if (!ASSIGNMENT_MODE || !this.backendUser) return;
+        const next = PORTAL_MODES.has(mode) ? mode : null;
+        if (next === this.portalMode) return;
+        if (this.formDirty && !window.confirm("You have unsaved entries. Change activity and discard them?")) return;
+        if (this.pinMode) this.exitPinMode();
+        this.clearFormDirty();
+        this.portalMode = next;
+        try {
+            if (next) {
+                sessionStorage.setItem(PORTAL_MODE_KEY, next);
+            } else {
+                sessionStorage.removeItem(PORTAL_MODE_KEY);
+            }
+        } catch (error) {
+            // storage unavailable: the choice lives in memory only
+        }
+        if (next === "add") {
+            // imagery is the working surface for placing a pin, once close
+            // enough for buildings to show
+            if (this.map && this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM && !this.basemapUserChosen) {
+                this.setBasemap("hybrid");
+            }
+        } else if (this.basemap !== "streets" && !this.basemapUserChosen) {
+            this.setBasemap("streets");
+        }
+        this.selectedTask = null;
+        this.renderInitialDetail();
+        this.renderBackendPanel();
+        document.querySelector(".sidebar")?.scrollTo({ top: 0 });
+    }
+
+    restorePortalMode() {
+        if (!ASSIGNMENT_MODE) return;
+        if (PORTAL_MODES.has(this.portalMode)) return;
+        let stored = "";
+        try {
+            stored = sessionStorage.getItem(PORTAL_MODE_KEY) || "";
+        } catch (error) {
+            stored = "";
+        }
+        this.portalMode = PORTAL_MODES.has(stored) ? stored : null;
+        if (this.portalMode === "add" && this.map && this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM) {
+            this.setBasemap("hybrid");
+        }
+    }
+
+    // --- basemap: streets (osm) or satellite (maptiler) ---
+
+    addBasemapControl() {
+        const control = L.control({ position: "topright" });
+        control.onAdd = () => {
+            const div = L.DomUtil.create("div", "basemap-toggle");
+            div.setAttribute("role", "group");
+            div.setAttribute("aria-label", "Basemap");
+            div.innerHTML = `
+                <button type="button" data-basemap="streets" aria-pressed="true">Streets</button>
+                <button type="button" data-basemap="hybrid" aria-pressed="false">Hybrid</button>
+                <button type="button" data-basemap="satellite" aria-pressed="false">Satellite</button>
+            `;
+            L.DomEvent.disableClickPropagation(div);
+            L.DomEvent.disableScrollPropagation(div);
+            div.querySelectorAll("button").forEach(button => {
+                button.addEventListener("click", () => {
+                    this.basemapUserChosen = true;
+                    this.setBasemap(button.dataset.basemap);
+                });
+            });
+            return div;
+        };
+        control.addTo(this.map);
+    }
+
+    // a referrer-blocked or exhausted key must not leave the contributor on
+    // a blank map: repeated tile errors with no successful load drop the map
+    // to streets and retire the imagery options for the session
+    watchImageryLayer(layer) {
+        let errors = 0;
+        let loaded = false;
+        layer.on("tileload", () => { loaded = true; });
+        layer.on("tileerror", () => {
+            errors += 1;
+            if (loaded || errors < 3) return;
+            this.markImageryBroken();
+        });
+    }
+
+    // img tiles render even on http 403 — maptiler ships a blocked-notice
+    // image — so tileerror alone cannot detect a refused key. one fetch
+    // probe per session sees the real status the first time imagery is used
+    probeImagery() {
+        if (this._imageryProbe) return this._imageryProbe;
+        const url = (HYBRID_TILE_URL || SATELLITE_TILE_URL).replace("{z}/{x}/{y}", "1/1/1");
+        this._imageryProbe = fetch(url)
+            .then(response => {
+                if (!response.ok) this.markImageryBroken();
+            })
+            .catch(() => this.markImageryBroken());
+        return this._imageryProbe;
+    }
+
+    markImageryBroken() {
+        if (this.imageryBroken) return;
+        this.imageryBroken = true;
+        this.setBasemap("streets");
+        document.querySelectorAll(".basemap-toggle button").forEach(button => {
+            if (button.dataset.basemap !== "streets") {
+                button.setAttribute("disabled", "true");
+                button.title = "Imagery is unavailable right now";
+            }
+        });
+    }
+
+    setBasemap(name) {
+        if (!this.map || !this.streetsLayer) return;
+        const layers = { streets: this.streetsLayer, hybrid: this.hybridLayer, satellite: this.satelliteLayer };
+        const next = layers[name] && !(this.imageryBroken && name !== "streets") ? name : "streets";
+        if (next !== "streets") this.probeImagery();
+        if (next !== this.basemap) {
+            const incoming = layers[next];
+            Object.entries(layers).forEach(([key, layer]) => {
+                if (layer && key !== next && this.map.hasLayer(layer)) this.map.removeLayer(layer);
+            });
+            if (!this.map.hasLayer(incoming)) incoming.addTo(this.map);
+            // tiles sit beneath the canvas dots and dom markers
+            incoming.bringToBack();
+            this.basemap = next;
+        }
+        document.querySelectorAll(".basemap-toggle button").forEach(button => {
+            button.setAttribute("aria-pressed", button.dataset.basemap === this.basemap ? "true" : "false");
+        });
     }
 
     setupFilters() {
@@ -2736,7 +3070,7 @@ class NzVerificationMap {
             }
             // no batch scope: my work covers the assignment batch and the
             // ra's own nominated candidates in the manual batch
-            this.myWorkItems = ASSIGNMENT_MODE
+            const myItems = ASSIGNMENT_MODE
                 ? ((await this.backend.listMyTasks({
                     countryCode: COUNTRY_CONFIG.countryCode,
                     statuses: MY_WORK_STATUSES,
@@ -2747,6 +3081,14 @@ class NzVerificationMap {
                         || batchId === `manual-${COUNTRY_CONFIG.countryCode.toLowerCase()}`;
                 })
                 : [];
+            // assignment work and the ra's own nominations are separate
+            // lists (jb 2026-08-31): my work covers the batch; nominations
+            // live in their own panel in add mode
+            this.myWorkItems = myItems.filter(item => !isNominationProps(item?.task));
+            this.myNominationItems = myItems.filter(item => isNominationProps(item?.task));
+            // the nominations panel depends on this list and the selection
+            // only, so it renders here and on selectTask, not per keystroke
+            this.renderNominationList();
             if (ASSIGNMENT_MODE) {
                 // nominated candidates join the map and list whatever their
                 // status: their author needs a route back to them, and the
@@ -2757,14 +3099,15 @@ class NzVerificationMap {
                         nominatedTasks.push(manualTask);
                     }
                 }
-                this.tasks = allTasks
-                    .filter(task => this.assignmentTaskIsAvailable(task))
+                const availableTasks = allTasks.filter(task => this.assignmentTaskIsAvailable(task));
+                this.tasks = availableTasks
                     .concat(nominatedTasks)
                     .map(featureFromBackendTask);
                 const snapshotEl = document.getElementById("snapshotId");
                 if (snapshotEl) {
-                    const total = allTasks.length;
-                    snapshotEl.textContent = `${ASSIGNMENT_BATCH_ID} | ${this.tasks.length} available of ${total}`;
+                    // batch numbers only: nominations are separate work and
+                    // count in their own panel, not the assignment header
+                    snapshotEl.textContent = `${ASSIGNMENT_BATCH_ID} | ${availableTasks.length} available of ${allTasks.length}`;
                 }
                 const selectedId = this.selectedTask?.properties?.task_id;
                 if (selectedId && !this.backendTasksById.has(selectedId)) {
@@ -2797,7 +3140,7 @@ class NzVerificationMap {
         const action = document.getElementById("actionFilter")?.value || "all";
         const status = document.getElementById("statusFilter")?.value || "all";
 
-        this.filteredTasks = this.tasks.filter(feature => {
+        const matchesFilters = feature => {
             const props = feature.properties || {};
             const temporal = deriveTargetYearStatus(props, this.targetYear);
             const searchText = [
@@ -2817,18 +3160,58 @@ class NzVerificationMap {
             if (action !== "all" && props.automated_suggested_action !== action) return false;
             if (status !== "all" && temporal.status !== status) return false;
             return true;
-        });
+        };
+        // one partition pass: nominations stay off the assignment sheet and
+        // its filters, but always stay on the map for the duplicate check
+        // and the route back to them
+        this.nominationFeatures = [];
+        this.filteredTasks = [];
+        for (const feature of this.tasks) {
+            if (isNominationProps(feature.properties)) {
+                this.nominationFeatures.push(feature);
+            } else if (matchesFilters(feature)) {
+                this.filteredTasks.push(feature);
+            }
+        }
 
         this.renderMarkers();
         this.renderTaskList();
         this.updateStats();
     }
 
+    // the ra's own nominations, listed apart from the assignment sheet in
+    // add mode: name, status, and the route back — nothing else
+    renderNominationList() {
+        const panel = document.getElementById("nominationsPanel");
+        if (!panel) return;
+        // author-scoped: listMyTasks returns only the signed-in ra's work,
+        // so this list never presents another contributor's nominations as
+        // "my nominations" (the country-wide manual batch stays map-only)
+        const rows = this.myNominationItems || [];
+        panel.innerHTML = `
+            <h2>My nominations${rows.length ? ` (${rows.length})` : ""}</h2>
+            ${rows.length ? rows.map(item => {
+                const task = item.task || {};
+                const statusText = (task.status || "in review").replaceAll("_", " ");
+                const activeClass = this.selectedTask?.properties?.task_id === task.task_id ? " active" : "";
+                return `
+                    <button class="task-row entry-card${activeClass}" type="button" data-task-id="${escapeHtml(task.task_id || "")}">
+                        <span class="task-row-title">${escapeHtml(task.name || "Unnamed place")}<span class="entry-badge">${escapeHtml(statusText)}</span></span>
+                        <span class="task-row-meta">${escapeHtml(task.locality || task.address || "")}</span>
+                    </button>
+                `;
+            }).join("") : `<div class="task-row-meta">None yet.</div>`}
+        `;
+        panel.querySelectorAll(".task-row").forEach(row => {
+            row.addEventListener("click", () => this.selectTaskById(row.dataset.taskId));
+        });
+    }
+
     renderMarkers() {
         this.markerLayer.clearLayers();
         this.markersByTaskId.clear();
 
-        this.filteredTasks.forEach(feature => {
+        this.filteredTasks.concat(this.nominationFeatures || []).forEach(feature => {
             const coordinates = feature.geometry?.coordinates || [];
             if (coordinates.length < 2) return;
             const [lng, lat] = coordinates;
@@ -2855,7 +3238,7 @@ class NzVerificationMap {
                 this.markerLayer.addLayer(area);
             }
             const marker = L.marker([lat, lng], {
-                icon: this.createIcon(props.verification_priority, temporal.status, verifState),
+                icon: this.createIcon(props.verification_priority, temporal.status, verifState, isNominationProps(props)),
             });
 
             marker.on("click", () => this.selectTask(feature, true));
@@ -2882,9 +3265,22 @@ class NzVerificationMap {
         ].filter(Boolean).join(" · ");
     }
 
-    createIcon(priority, status, verifState = "unvalidated") {
+    createIcon(priority, status, verifState = "unvalidated", isNomination = false) {
         const size = priority === "high" ? 15 : priority === "medium" ? 13 : 11;
         const color = statusColor(status);
+        // a nomination is pure-entry work, worn as a dashed teal ring on a
+        // hollow marker (state = ring, never fill), apart from every
+        // validation-state ring hue. only the healthy states take the teal:
+        // disputed and validated nominations keep their state ring so a
+        // stalled nomination stays visible on the map
+        if (isNomination && (verifState === "unvalidated" || verifState === "in_review")) {
+            return L.divIcon({
+                className: "",
+                html: `<div class="verification-marker vm-nomination" style="width:${size}px;height:${size}px;"></div>`,
+                iconSize: [size, size],
+                iconAnchor: [size / 2, size / 2],
+            });
+        }
         // the validation state is worn as a RING (box-shadow) or, for in_review,
         // a dashed hollow border — never as the fill hue, so it never competes
         // with the religion/context colour. Ring hues (blue, slate, amber,
@@ -3109,6 +3505,7 @@ class NzVerificationMap {
         }
 
         this.renderTaskList();
+        this.renderNominationList();
         this.renderDetailPreservingForm(feature);
         if (this.backend?.signedIn && props.task_id && !this.latestDraftsByTaskId.has(props.task_id)) {
             this.loadLatestDraftForTask(props.task_id).then(() => {
@@ -3169,18 +3566,22 @@ class NzVerificationMap {
         if (!panel) return;
         if (ASSIGNMENT_MODE) {
             panel.innerHTML = `
-                <h2>Assigned web workpack</h2>
+                <h2>${this.portalMode === "add" ? "Add places" : "Assigned web workpack"}</h2>
                 <div class="${this.backend?.configured ? "pilot-note" : "demo-warning"}" role="${this.backend?.configured ? "note" : "alert"}">
                     ${this.backend?.configured
-                        ? RAPID_CURRENT_ENTRY
-                            ? `Sign in with Google at the top of this panel, then work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. For each place, choose one current-status answer, record how you know it, and use <em>Submit for review</em>.`
-                            : `Sign in with Google at the top of this panel, then work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when useful evidence remains incomplete, and <em>Submit for review</em> when a case is ready for JB.`
+                        ? this.portalMode === "add"
+                            ? `Use <strong>＋ Add a missing place</strong> above, then find the building by searching a name or address, typing coordinates, or clicking the map. Drag the pin onto the building before confirming.`
+                            : RAPID_ASSIGNED_ENTRY
+                                ? `Work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. For each place, choose one current-status answer, record how you know it, and use <em>Submit for review</em>.`
+                                : `Work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when useful evidence remains incomplete, and <em>Submit for review</em> when a case is ready for JB.`
                         : `This link points to <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>, but this deployment does not yet have the shared backend enabled.`}
                 </div>
                 <div class="detail-section">
                     <h3>What to check</h3>
                     <div class="disabled-panel">
-                        ${RAPID_CURRENT_ENTRY
+                        ${this.portalMode === "add"
+                            ? `Before nominating, check whether the place is already on the map. Nearby existing records are listed automatically after you confirm a pin location.`
+                            : RAPID_ASSIGNED_ENTRY
                             ? `For each assigned place, record what you can confirm at the observation date: whether the place exists and whether it is used for worship. Do not infer worship use from the building alone. Historical target years (${escapeHtml(COUNTRY_CONFIG.targetYears.join(", "))}) stay unassessed here; use the detailed form for historical or complicated cases.`
                             : `For each assigned case, answer the task question, seek non-OSM evidence where possible, record ${escapeHtml(COUNTRY_CONFIG.targetYears.join(", "))} status, preserve any useful opening or closure dates, and submit unresolved notes for cases that should stay visible but cannot yet be resolved.`}
                     </div>
@@ -3201,9 +3602,6 @@ class NzVerificationMap {
             </div>
             <div class="detail-section">
                 <h3>New or missing sites</h3>
-                <div class="disabled-panel">
-                    Use the draft nomination form in the sidebar to inspect fields for a site missing from the project map, a lost site, or a shared or changed site. OSM may already have a candidate object; record that id as evidence rather than as the project site id.
-                </div>
                 <button type="button" class="secondary" id="openNominationPanelButton">Open draft nomination form</button>
             </div>
         ` : `
@@ -3249,10 +3647,11 @@ class NzVerificationMap {
             <div class="button-row">
                 ${knownHistory ? `<button id="addKnownHistoryButton" type="button">Add known history</button>` : ""}
                 ${nomination
-                    ? `<button id="nominateAnotherButton"${knownHistory ? ` class="secondary"` : ""} type="button">Nominate another PoW</button>`
+                    ? `<button id="nominateAnotherButton"${knownHistory ? ` class="secondary"` : ""} type="button">Add another place</button>`
                     : `<button id="openNextTaskButton"${knownHistory ? ` class="secondary"` : ""} type="button">Open next task</button>`}
                 ${skipped ? `<button id="undoSkipButton" class="secondary" type="button">Undo skip</button>` : ""}
             </div>
+            ${!skipped && props.task_id ? `<div id="attachmentsBlock" class="attachments-block" hidden></div>` : ""}
             <div id="confirmPaneStatus" class="copy-status" aria-live="polite"></div>
             <div class="pilot-note" role="note">
                 Pick another task from the map or list.${this.filterActiveHint()}
@@ -3262,6 +3661,9 @@ class NzVerificationMap {
         document.getElementById("nominateAnotherButton")?.addEventListener("click", () => this.enterPinMode());
         document.getElementById("addKnownHistoryButton")?.addEventListener("click", () => this.renderHistoricalClaimEntry(knownHistory));
         document.getElementById("undoSkipButton")?.addEventListener("click", () => this.undoSkip(props.task_id));
+        // photos and documents attach to the task record just created, so a
+        // nomination can carry its site photo immediately after submission
+        if (!skipped && props.task_id) this.initAttachmentsBlock(props);
     }
 
     // first task in the current filtered list order — the same
@@ -3471,10 +3873,25 @@ class NzVerificationMap {
         return this.revisionDraftIdsByTaskId.has(taskId);
     }
 
+    // which form a task's detail shows: assigned tasks follow the country's
+    // batch design; nominations use the rapid pure-entry form wherever the
+    // server's intake registry allows it (jb 2026-08-31)
+    taskUsesRapidForm(props) {
+        if (RAPID_ASSIGNED_ENTRY) return true;
+        if (!(RAPID_NOMINATION_ENTRY && isNominationProps(props))) return false;
+        // a nomination already holding guided evidence stays on the guided
+        // form: the rapid form must never hide or overwrite a guided draft
+        // (mirrors the read-only branch's contract check)
+        const taskId = props?.task_id;
+        const latest = taskId ? this.latestDraftForTask(taskId) : null;
+        const draftLoaded = taskId ? this.latestDraftsByTaskId.has(taskId) : false;
+        return !draftLoaded || !latest || latest.observation_contract_version === "rapid_current_v1";
+    }
+
     taskIsReadOnly(taskId) {
         const backendTask = this.backendTasksById.get(taskId);
         if (!ASSIGNMENT_MODE || !backendTask) return false;
-        if (RAPID_CURRENT_ENTRY && this.rapidCorrectionTaskIds.has(taskId)) return false;
+        if (RAPID_ANY_ENTRY && this.rapidCorrectionTaskIds.has(taskId)) return false;
         return READ_ONLY_ASSIGNMENT_STATUSES.has(backendTask.status) && !this.taskIsRevisionMode(taskId);
     }
 
@@ -3485,7 +3902,7 @@ class NzVerificationMap {
         const backendTask = this.backendTasksById.get(taskId);
         const draft = this.latestDraftForTask(taskId);
         return Boolean(
-            RAPID_CURRENT_ENTRY
+            RAPID_ANY_ENTRY
             && backendTask
             && REVISION_ELIGIBLE_STATUSES.has(backendTask.status)
             && draft?.observation_contract_version === "rapid_current_v1"
@@ -3595,14 +4012,7 @@ class NzVerificationMap {
                 </div>
             `;
         }
-        const revisionText = this.taskIsRevisionMode(props.task_id)
-            ? " Revision mode is active; saving creates a new evidence version."
-            : "";
-        return `
-            <div class="pilot-note">
-                Shared backend status: <strong>${escapeHtml(backendTask.status.replaceAll("_", " "))}</strong>.${escapeHtml(revisionText)}
-            </div>
-        `;
+        return "";
     }
 
     // mark the evidence form as carrying unsaved typed work for a task
@@ -3625,6 +4035,7 @@ class NzVerificationMap {
             observation_contract_version: this.observationContractVersionFor(values),
             action: values.action,
             target_year_statuses: values.targetYearStatuses,
+            target_year_confidence: values.targetYearConfidence,
             source_type: values.sourceType,
             existence_status: values.existenceStatus,
             worship_use_status: values.rawWorshipUseStatus,
@@ -3659,7 +4070,7 @@ class NzVerificationMap {
     renderDetailPreservingForm(feature) {
         const taskId = feature?.properties?.task_id;
         if (
-            RAPID_CURRENT_ENTRY
+            RAPID_ANY_ENTRY
             && taskId
             && this.formDirty
             && this.formDirtyTaskId === taskId
@@ -3769,6 +4180,10 @@ class NzVerificationMap {
 
             <div class="detail-section">
                 ${this.issueFormHtml(issueContext, { open: this.issueFormOpenTaskId === props.task_id })}
+            </div>
+
+            <div class="detail-section">
+                ${this.taskSkipControlHtml(props)}
             </div>
 
             <div class="detail-section">
@@ -3891,12 +4306,9 @@ class NzVerificationMap {
     }
 
     siteTaskBriefHtml(props) {
-        if (RAPID_CURRENT_ENTRY && !this.taskIsReadOnly(props.task_id)) {
+        if (this.taskUsesRapidForm(props) && !this.taskIsReadOnly(props.task_id)) {
             return `
                 <h3>Record current information</h3>
-                <div class="copy-help">
-                    Record what you can confirm now. This observation will not fill Vanuatu's historical target years or change the public map before review.
-                </div>
             `;
         }
         const checks = props.automated_checks || [];
@@ -4046,7 +4458,7 @@ class NzVerificationMap {
         const readOnly = props?.task_id ? this.taskIsReadOnly(props.task_id) : false;
         const revisionMode = props?.task_id ? this.taskIsRevisionMode(props.task_id) : false;
         if (this.backend?.configured && this.backendUser) {
-            if (RAPID_CURRENT_ENTRY && !readOnly) {
+            if (this.taskUsesRapidForm(props) && !readOnly) {
                 return `
                     <div class="pilot-note">
                         Record only what you can confirm now. The server keeps every historical target year unassessed, derives the provisional review fields, and sends the observation to human review without changing the public map.
@@ -4063,21 +4475,21 @@ class NzVerificationMap {
             if (readOnly && status === "needs_review") {
                 return `
                     <div class="pilot-note">
-                        This submission is waiting for review. View it here, or use <strong>Revise submission</strong> if you have new evidence or need to correct a mistake.
+                        Waiting for review — use <strong>Revise submission</strong> if you have new evidence.
                     </div>
                 `;
             }
             if (readOnly && status === "unresolved_note") {
                 return `
                     <div class="pilot-note">
-                        This unresolved note is waiting for review. View it here, or use <strong>Revise submission</strong> if you find better evidence.
+                        Unresolved note waiting for review — use <strong>Revise submission</strong> if you have new evidence.
                     </div>
                 `;
             }
             if (readOnly && status === "changes_requested") {
                 return `
                     <div class="pilot-note">
-                        A reviewer asked for more evidence. Use <strong>Revise submission</strong> to respond with a new evidence version.
+                        Changes requested — use <strong>Revise submission</strong> to respond.
                     </div>
                 `;
             }
@@ -4148,8 +4560,8 @@ class NzVerificationMap {
         const optionalOpen = Boolean(pre.denomination_or_tradition_raw || pre.evidence_note || pre.uncertainty_note);
         return `
             <form id="${prefix}RapidCurrentForm" class="rapid-current-form" data-submission-id="${escapeHtml(submissionId)}">
-                <fieldset class="rapid-choice-group">
-                    <legend>What can you confirm at the observation date?</legend>
+                <fieldset class="rapid-choice-group" id="${prefix}CurrentStatusGroup">
+                    <legend>What can you confirm at the observation date? <span class="req-chip">required</span></legend>
                     <label class="rapid-choice">
                         <input type="radio" name="${prefix}CurrentStatus" value="currently_used_for_worship"${checked("currently_used_for_worship")}>
                         <span><strong>This site is used for worship</strong><small>At the observation date, the place exists and worship use is confirmed.</small></span>
@@ -4169,11 +4581,12 @@ class NzVerificationMap {
                 </fieldset>
                 <div class="field-grid">
                     <label>
-                        Observation date
+                        Observation date <span class="req-chip">required</span>
                         <input id="${prefix}ObservedOn" type="date" max="${escapeHtml(window.PowRapidEntry.localIsoDate())}" value="${escapeHtml(pre.source_date_or_capture_date || window.PowRapidEntry.localIsoDate())}">
+                        <small class="label-help">This is also the source or capture date: the date of your visit, or of the imagery or source you used.</small>
                     </label>
                     <label>
-                        How do you know this?
+                        How do you know this? <span class="req-chip">required</span>
                         <select id="${prefix}ObservationBasis">
                             ${Object.entries(RAPID_BASIS_LABELS).map(([value, label]) => `<option value="${escapeHtml(value)}"${value === preBasis ? " selected" : ""}>${escapeHtml(label)}</option>`).join("")}
                         </select>
@@ -4181,11 +4594,11 @@ class NzVerificationMap {
                 </div>
                 <div id="${prefix}NamedSourceFields" class="rapid-conditional"${preNamed ? "" : " hidden"}>
                     <label>
-                        Source title or brief description
+                        Source title or brief description <span class="req-chip">required for a named source</span>
                         <input id="${prefix}SourceTitle" type="text" maxlength="2048" value="${escapeHtml(preNamed ? pre.source_title || "" : "")}">
                     </label>
                     <label>
-                        Source URL or agreed file reference (if one exists)
+                        Source URL or agreed file reference (if one exists) <span class="req-chip">required for a named source</span>
                         <input id="${prefix}SourceReference" type="text" maxlength="4096" value="${escapeHtml(preNamed ? pre.source_url_or_file || "" : "")}">
                     </label>
                 </div>
@@ -4197,7 +4610,7 @@ class NzVerificationMap {
                             <input id="${prefix}DenominationRaw" type="text" maxlength="2048" placeholder="Copy the wording exactly" value="${escapeHtml(pre.denomination_or_tradition_raw || "")}">
                         </label>
                         <label>
-                            Where did that wording come from?
+                            Where did that wording come from? (if known)
                             <select id="${prefix}DenominationBasis">
                                 ${selectOptionsHtml(DENOMINATION_LABEL_BASIS_OPTIONS, pre.denomination_label_basis || "unknown")}
                             </select>
@@ -4213,16 +4626,29 @@ class NzVerificationMap {
                     </div>
                 </details>
                 <label>
-                    Sensitivity and privacy
+                    Sensitivity and privacy <span class="req-chip">required</span>
                     <select id="${prefix}PrivacyFlag">
                         ${selectOptionsHtml(PRIVACY_FLAG_OPTIONS, pre.privacy_flag || "needs_review")}
                     </select>
                 </label>
                 <div class="copy-help">
-                    Do not enter personal contact details or private conversations. Choose restricted when the observation could expose a culturally restricted place or identifiable person. Every submission enters human review and does not update the public map directly.
+                    No contact details or private conversations. Choose restricted for culturally restricted places or identifiable people.
                 </div>
+                <label class="flag-discussion">
+                    <input type="checkbox" id="${prefix}FlagForDiscussion">
+                    <span><strong>Flag for discussion</strong><small>Record a partial entry — for example a duplicate on the map, shared denominations, or a case the form does not fit — and bring it to the team.</small></span>
+                </label>
+                <label id="${prefix}DiscussionField" hidden>
+                    What needs discussion? <span class="req-chip">required when flagged</span>
+                    <textarea id="${prefix}DiscussionNote" rows="2" maxlength="2000" placeholder="e.g. this place is recorded twice on the map; two denominations share the building"></textarea>
+                </label>
+                ${options.attachmentsHint ? `
+                    <div class="copy-help">
+                        <strong>Photos &amp; documents:</strong> attach them on the next screen, straight after you save this place.
+                    </div>
+                ` : ""}
                 <div class="button-row">
-                    <button id="${prefix}RapidSubmit" type="submit">${escapeHtml(submitLabel)}</button>
+                    <button id="${prefix}RapidSubmit" type="submit" data-submit-label="${escapeHtml(submitLabel)}">${escapeHtml(submitLabel)}</button>
                     ${options.showCancel ? `<button id="${prefix}FormCancelButton" type="button" class="secondary">Cancel</button>` : ""}
                 </div>
                 <div id="${prefix}RapidStatus" class="copy-status" aria-live="polite"></div>
@@ -4238,9 +4664,10 @@ class NzVerificationMap {
             <h3>${correcting ? "Correct your observation" : "Current observation"}</h3>
             ${correcting ? `
                 <div class="pilot-note">
-                    Submitting records a new observation and marks your earlier one as superseded. The earlier record stays on file for reviewers; it is not rewritten.
+                    Your earlier observation stays on record, marked superseded.
                 </div>
             ` : this.formModeNoticeHtml(props)}
+            <div id="attachmentsBlock" class="attachments-block" hidden></div>
             ${this.rapidObservationFieldsHtml("task", {
                 submitLabel: correcting ? "Submit correction for review" : "Submit for review",
                 showCancel: correcting,
@@ -4294,7 +4721,7 @@ class NzVerificationMap {
                     ${canAddHistory ? `<button id="addKnownHistoryFromRecordedButton" type="button">Add known history</button>` : ""}
                     ${canCorrect ? `<button id="correctObservationButton"${canAddHistory ? ` class="secondary"` : ""} type="button">Correct this observation</button>` : ""}
                 </div>
-                ${canCorrect ? `<div class="copy-help">Correct the current observation only for a mistake or new information. Your earlier observation stays on record and is marked superseded.</div>` : ""}
+                ${canCorrect ? `<div class="copy-help">Only for a mistake or new information.</div>` : ""}
             ` : ""}
             <div id="copyStatus" class="copy-status" aria-live="polite"></div>
         `;
@@ -4312,7 +4739,104 @@ class NzVerificationMap {
             directObservation: document.getElementById(`${prefix}DirectObservation`)?.value || "",
             uncertaintyNote: document.getElementById(`${prefix}UncertaintyNote`)?.value || "",
             privacyFlag: document.getElementById(`${prefix}PrivacyFlag`)?.value || "",
+            flagForDiscussion: Boolean(document.getElementById(`${prefix}FlagForDiscussion`)?.checked),
+            discussionNote: document.getElementById(`${prefix}DiscussionNote`)?.value || "",
         };
+    }
+
+    // ---- unsubmitted rapid drafts, kept on this device only ----
+
+    rapidDraftStorageKey(key) {
+        return `powRapidDraft:${COUNTRY_CONFIG.countryCode}:${key}`;
+    }
+
+    persistRapidDraft(prefix, key, extraValues = {}) {
+        try {
+            const record = {
+                saved_at: Date.now(),
+                values: this.rapidObservationValues(prefix),
+                extra: extraValues,
+            };
+            window.localStorage.setItem(this.rapidDraftStorageKey(key), JSON.stringify(record));
+        } catch (error) {
+            // private windows or blocked storage lose autosave only
+        }
+    }
+
+    readRapidDraft(key) {
+        try {
+            const raw = window.localStorage.getItem(this.rapidDraftStorageKey(key));
+            return raw ? JSON.parse(raw) : null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    clearRapidDraft(key) {
+        try {
+            window.localStorage.removeItem(this.rapidDraftStorageKey(key));
+        } catch (error) {
+            // nothing to clear when storage is unavailable
+        }
+    }
+
+    restoreRapidDraft(prefix, key) {
+        const record = this.readRapidDraft(key);
+        if (!record?.values) return null;
+        const values = record.values;
+        const setValue = (id, value) => {
+            const el = document.getElementById(`${prefix}${id}`);
+            if (el && value !== undefined && value !== "") el.value = value;
+        };
+        if (values.currentStatus) {
+            const radio = document.querySelector(`input[name="${prefix}CurrentStatus"][value="${values.currentStatus}"]`);
+            if (radio) radio.checked = true;
+        }
+        setValue("ObservationBasis", values.observationBasis);
+        setValue("ObservedOn", values.observedOn);
+        setValue("SourceTitle", values.sourceTitle);
+        setValue("SourceReference", values.sourceReference);
+        setValue("DenominationRaw", values.denominationRaw);
+        setValue("DenominationBasis", values.denominationLabelBasis);
+        setValue("DirectObservation", values.directObservation);
+        setValue("UncertaintyNote", values.uncertaintyNote);
+        setValue("PrivacyFlag", values.privacyFlag);
+        setValue("DiscussionNote", values.discussionNote);
+        const flag = document.getElementById(`${prefix}FlagForDiscussion`);
+        if (flag && values.flagForDiscussion) flag.checked = true;
+        this.updateRapidSourceFields(prefix);
+        this.updateRapidDiscussionFields(prefix);
+        if (values.denominationRaw || values.directObservation || values.uncertaintyNote) {
+            const optional = document.querySelector(`#${prefix}RapidCurrentForm .optional-block`);
+            if (optional) optional.open = true;
+        }
+        return record;
+    }
+
+    // highlights the field named by validation and scrolls it into view
+    showRapidFieldError(prefix, error) {
+        document.querySelectorAll(".field-invalid").forEach(el => el.classList.remove("field-invalid"));
+        if (!error?.field) return;
+        const target = error.field === "CurrentStatus"
+            ? document.getElementById(`${prefix}CurrentStatusGroup`)
+            : document.getElementById(`${prefix}${error.field}`);
+        if (!target) return;
+        const holder = target.closest("label") || target;
+        holder.classList.add("field-invalid");
+        holder.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (typeof target.focus === "function") target.focus({ preventScroll: true });
+    }
+
+    updateRapidDiscussionFields(prefix) {
+        const flagged = Boolean(document.getElementById(`${prefix}FlagForDiscussion`)?.checked);
+        const field = document.getElementById(`${prefix}DiscussionField`);
+        if (field) field.hidden = !flagged;
+        const submit = document.getElementById(`${prefix}RapidSubmit`);
+        if (submit) {
+            submit.textContent = flagged
+                ? "Flag for discussion"
+                : submit.dataset.submitLabel || "Submit for review";
+        }
     }
 
     updateRapidSourceFields(prefix) {
@@ -4324,16 +4848,58 @@ class NzVerificationMap {
     bindRapidObservationForm(prefix, options = {}) {
         const form = document.getElementById(`${prefix}RapidCurrentForm`);
         if (!form || !window.PowRapidEntry) return;
-        const markDirty = () => this.markFormDirty(options.props?.task_id || `rapid-${prefix}`);
+        const draftKey = options.props?.task_id || `rapid-${prefix}`;
+        const extraIds = options.draftExtraIds || [];
+        const persist = () => {
+            const extra = Object.fromEntries(
+                extraIds.map(id => [id, document.getElementById(id)?.value || ""]).filter(([, value]) => value),
+            );
+            this.persistRapidDraft(prefix, draftKey, extra);
+            const status = document.getElementById(`${prefix}RapidStatus`);
+            if (status && !status.textContent.startsWith("Draft kept")) {
+                status.textContent = "Draft kept on this device until you submit.";
+                status.classList.remove("copy-status-error");
+            }
+        };
+        let persistTimer = 0;
+        const markDirty = () => {
+            this.markFormDirty(options.props?.task_id || `rapid-${prefix}`);
+            window.clearTimeout(persistTimer);
+            persistTimer = window.setTimeout(persist, 400);
+        };
         form.addEventListener("input", markDirty);
         form.addEventListener("change", markDirty);
+        form.addEventListener("input", event => {
+            event.target?.closest?.("label, fieldset")?.classList?.remove("field-invalid");
+        });
         document.getElementById(`${prefix}ObservationBasis`)?.addEventListener("change", () => {
             this.updateRapidSourceFields(prefix);
         });
+        document.getElementById(`${prefix}FlagForDiscussion`)?.addEventListener("change", () => {
+            this.updateRapidDiscussionFields(prefix);
+        });
         this.updateRapidSourceFields(prefix);
+        this.updateRapidDiscussionFields(prefix);
+        // a correction prefill outranks the device draft; otherwise restore
+        // unsubmitted work so a lost session costs nothing
+        if (!options.prefill) {
+            const restored = this.restoreRapidDraft(prefix, draftKey);
+            if (restored) {
+                extraIds.forEach(id => {
+                    const value = restored.extra?.[id];
+                    const el = document.getElementById(id);
+                    if (el && value) el.value = value;
+                });
+                const status = document.getElementById(`${prefix}RapidStatus`);
+                if (status) {
+                    const savedAt = restored.saved_at ? new Date(restored.saved_at).toLocaleString() : "";
+                    status.textContent = `Restored your unsubmitted draft from this device${savedAt ? ` (saved ${savedAt})` : ""}.`;
+                }
+            }
+        }
         form.addEventListener("submit", event => {
             event.preventDefault();
-            this.submitRapidObservation(prefix, options);
+            this.submitRapidObservation(prefix, { ...options, draftKey });
         });
     }
 
@@ -4347,33 +4913,43 @@ class NzVerificationMap {
             return;
         }
         const values = this.rapidObservationValues(prefix);
-        const inputError = window.PowRapidEntry.validateObservation(values);
+        const flagOptions = { flagForDiscussion: values.flagForDiscussion };
+        const inputError = window.PowRapidEntry.validateObservationDetailed(values, flagOptions);
         if (inputError) {
-            if (status) status.textContent = inputError;
+            if (status) {
+                status.textContent = inputError.message;
+                status.classList.add("copy-status-error");
+            }
+            this.showRapidFieldError(prefix, inputError);
             return;
         }
+        if (status) status.classList.remove("copy-status-error");
+        this.showRapidFieldError(prefix, null);
         const candidate = options.getCandidate?.();
         if (options.getCandidate && !candidate) {
             if (status) status.textContent = "Confirm the map location before recording this observation.";
             return;
         }
         submitButton.disabled = true;
-        if (status) status.textContent = "Submitting securely for review...";
+        if (status) status.textContent = values.flagForDiscussion ? "Flagging securely for discussion..." : "Submitting securely for review...";
         try {
-            const result = await this.backend.submitVanuatuCurrentObservation({
+            const result = await this.backend.submitCurrentObservation({
                 clientSubmissionId: form.dataset.submissionId,
+                countryCode: COUNTRY_CONFIG.countryCode,
                 ...(options.props?.task_id ? { taskId: options.props.task_id } : { candidate }),
-                observation: window.PowRapidEntry.observationPayload(values),
+                observation: window.PowRapidEntry.observationPayload(values, flagOptions),
+                ...(values.flagForDiscussion ? { flagForDiscussion: true } : {}),
                 clientContext: {
                     ...(this.pinConfirmed?.zoom !== undefined ? { placement_zoom: this.pinConfirmed.zoom } : {}),
                     ...(options.getCandidate ? {
                         proximity_checked: true,
                         nearby_count: this.pinNearbyCount,
                     } : {}),
-                    portal_version: "vanuatu-rapid-current-v1",
+                    portal_version: "rapid-current-v1-multicountry",
                 },
             });
             this.clearFormDirty();
+            if (options.draftKey) this.clearRapidDraft(options.draftKey);
             if (options.props?.task_id) {
                 const taskId = options.props.task_id;
                 this.rapidCorrectionTaskIds.delete(taskId);
@@ -4421,10 +4997,10 @@ class NzVerificationMap {
                 automated_checks: [{
                     check_id: "rapid_current_nomination",
                     severity: "info",
-                    message: "An invited RA submitted a current-place observation through the Vanuatu rapid-entry path.",
+                    message: "An invited RA submitted a current-place observation through the rapid-entry path.",
                     suggested_action: "review_identity_and_current_use",
                 }],
-                task_brief: "Review this Vanuatu current-place observation. Confirm site identity, present worship use, sensitivity, and whether an existing project or OSM record already represents the place before export.",
+                task_brief: "Review this current-place observation. Confirm site identity, present worship use, sensitivity, and whether an existing project or OSM record already represents the place before export.",
             };
             this.manualTasksById.set(result.task_id, manualTask);
             this.backendTasksById.set(result.task_id, manualTask);
@@ -4495,7 +5071,6 @@ class NzVerificationMap {
                 </label>
                 <fieldset class="historical-date-block">
                     <legend>Supported date bounds</legend>
-                    <div class="copy-help">Use YYYY, YYYY-MM, or YYYY-MM-DD. Leave a bound blank when the source does not support one.</div>
                     <div class="field-grid">
                         <label>
                             Earliest supported date (optional)
@@ -4704,10 +5279,22 @@ class NzVerificationMap {
         const revisionMode = taskId ? this.taskIsRevisionMode(taskId) : false;
         const canRevise = taskId ? this.taskCanRevise(taskId) : false;
         const canAddHistory = taskId ? this.taskCanAddHistory(taskId) : false;
-        if (RAPID_CURRENT_ENTRY && !readOnly) {
+        if (this.taskUsesRapidForm(props) && !readOnly) {
+            // the rapid form must not render (and accept a submission) while
+            // the latest draft is still loading: a nomination that already
+            // holds guided evidence belongs on the guided form
+            if (
+                !RAPID_ASSIGNED_ENTRY
+                && taskId
+                && this.backend?.signedIn
+                && this.backendTasksById.has(taskId)
+                && !this.latestDraftsByTaskId.has(taskId)
+            ) {
+                return `<div class="copy-status">Loading the recorded evidence...</div>`;
+            }
             return this.rapidCurrentReviewFormHtml(props);
         }
-        if (RAPID_CURRENT_ENTRY && readOnly) {
+        if (this.taskUsesRapidForm(props) && readOnly) {
             const latest = this.latestDraftForTask(taskId);
             const draftLoaded = this.latestDraftsByTaskId.has(taskId);
             // a guided (detailed) submission keeps its own revision route; the
@@ -4717,9 +5304,6 @@ class NzVerificationMap {
                 return this.rapidReadOnlyHtml(props, latest, draftLoaded);
             }
         }
-        const skipControl = ASSIGNMENT_MODE
-            ? (assignmentTaskAvailable && !readOnly && !revisionMode ? this.skipFormHtml() : "")
-            : this.skipFormHtml();
         // collapsed optional blocks open when the saved draft or a pending
         // unsaved snapshot already carries values for them
         const prefill = this.formSnapshotsByTaskId.get(taskId) || this.latestDraftForTask(taskId) || {};
@@ -4743,8 +5327,8 @@ class NzVerificationMap {
                         <option value="denomination_or_shared_use">Denomination/shared use</option>
                     </select>
                 </label>
+                ${targetYearStatusControlsHtml()}
                 <div class="field-grid">
-                    ${targetYearStatusControlsHtml()}
                     <label>
                         Source type
                         <select id="sourceTypeSelect">
@@ -4788,13 +5372,16 @@ class NzVerificationMap {
                     <input id="sourceProviderInput" type="text" placeholder="e.g. Google Street View, Apple Look Around, Mapillary, RA field observation">
                 </label>
                 <label>
-                    Source title
+                    Source title <span class="req-chip">required to submit</span>
                     <input id="sourceTitleInput" type="text" placeholder="e.g. Anglican Diocese of Wellington directory 2018, Google Street View imagery">
                 </label>
                 <label>
-                    Source date or imagery capture date
+                    Source date or imagery capture date <span class="req-chip">required for a field observation</span>
                     <input id="sourceDateInput" type="text" placeholder="e.g. 2018-09, 2023, or 2026-05-03 for a field visit">
                 </label>
+                <div class="copy-help">
+                    The date belongs to the source, not to today. If the source gives no date, leave this blank and say so in “What did you directly observe or read in the source?” below.
+                </div>
                 <details class="skip-form optional-block" id="addressBlockDetails"${addressOpen ? " open" : ""}>
                     <summary>Address or locality (optional)</summary>
                     <div class="copy-help">
@@ -4895,7 +5482,7 @@ class NzVerificationMap {
                     </label>
                 </fieldset>
                 <label>
-                    What did you directly observe or read in the source?
+                    What did you directly observe or read in the source? <span class="req-chip">required to submit</span>
                     <textarea id="decisionNote" data-question-id="direct_observation_v1" rows="3" maxlength="2000" placeholder="Record the direct observation. Copy names, denomination wording, dates, or notices exactly where relevant."></textarea>
                 </label>
                 <div class="copy-help" id="legacyNoteUpgradeHelp" hidden>
@@ -4916,17 +5503,16 @@ class NzVerificationMap {
                     </select>
                 </label>
                 <div class="copy-help">
-                    Choose review or restricted when the account may identify people, expose a culturally restricted place, or require local judgement. Evidence marked needs review or restricted is withheld from external AI services.
+                    Mark review or restricted if the account could identify a person or a restricted place; such evidence is withheld from external AI services.
                 </div>
                 <h3>4. Save or submit</h3>
                 ${this.backend?.configured && this.backendUser ? `
-                    <div class="copy-help">
-                        ${readOnly
-                            ? "This saved work is visible for reference. Revisions create a new evidence version; they do not rewrite the submitted record."
-                            : revisionMode
-                                ? "Save a revision draft while working. Submit the revision when the corrected or extended evidence is ready for review."
-                                : "Save drafts while working. Use Submit unresolved note when you have checked sources but cannot resolve the case. Use Submit for review when the evidence is ready for a decision."}
-                    </div>
+                    ${readOnly
+                        ? `<div class="copy-help">This saved work is visible for reference. Revisions create a new evidence version; they do not rewrite the submitted record.</div>`
+                        : revisionMode
+                            ? `<div class="copy-help">Save a revision draft while working. Submit the revision when the corrected or extended evidence is ready for review.</div>`
+                            : ""}
+                    <div id="attachmentsBlock" class="attachments-block" hidden></div>
                     ${readOnly ? `
                         ${canRevise ? `
                             <div class="button-row">
@@ -4951,7 +5537,8 @@ class NzVerificationMap {
                     </div>
                 ` : `
                     <div class="copy-help">
-                        <strong>Fallback:</strong> Copies one tab-separated row to your clipboard. Switch to the working evidence spreadsheet, click column A in the next empty row under the unchanged header, and paste with <kbd>Cmd</kbd>+<kbd>V</kbd> (Mac) or <kbd>Ctrl</kbd>+<kbd>V</kbd> (Windows). Nothing is uploaded.
+                        <strong>Fallback:</strong> Copies one tab-separated row to your clipboard. Nothing is uploaded.
+                        <details><summary>How to paste</summary>Switch to the working evidence spreadsheet, click column A in the next empty row under the unchanged header, and paste with <kbd>Cmd</kbd>+<kbd>V</kbd> (Mac) or <kbd>Ctrl</kbd>+<kbd>V</kbd> (Windows).</details>
                     </div>
                 `}
                 ${ASSIGNMENT_MODE ? "" : `
@@ -4963,9 +5550,23 @@ class NzVerificationMap {
                     <textarea id="decisionJsonOutput" class="json-output" rows="5" readonly></textarea>
                 `}
                 <div id="copyStatus" class="copy-status" aria-live="polite"></div>
-                ${skipControl}
             </div>
         `;
+    }
+
+    // skip sits after the issue form in the panel: report a problem with the
+    // place first, give up on the task last
+    taskSkipControlHtml(props) {
+        const taskId = props?.task_id || "";
+        if (!INTAKE_ENABLED) return "";
+        if (this.taskUsesRapidForm(props)) return "";
+        if (!ASSIGNMENT_MODE) return this.skipFormHtml();
+        const assignmentTaskAvailable = this.backend?.configured
+            && this.backendUser
+            && this.backendTasksById.has(taskId);
+        const readOnly = taskId ? this.taskIsReadOnly(taskId) : false;
+        const revisionMode = taskId ? this.taskIsRevisionMode(taskId) : false;
+        return assignmentTaskAvailable && !readOnly && !revisionMode ? this.skipFormHtml() : "";
     }
 
     bindRaActionForm(props) {
@@ -4978,6 +5579,9 @@ class NzVerificationMap {
         if (document.getElementById("taskRapidCurrentForm")) {
             this.bindRapidObservationForm("task", { props });
             document.getElementById("taskFormCancelButton")?.addEventListener("click", () => this.cancelRapidCorrection(props));
+            // the rapid form renders its own attachments block; initialise it
+            // here so photos can be added before submitting, as on the guided form
+            this.initAttachmentsBlock(props);
             return;
         }
         const actionSelect = document.getElementById("raActionSelect");
@@ -5000,6 +5604,12 @@ class NzVerificationMap {
         actionSelect?.addEventListener("change", () => {
             markDirty();
             applyDefaults();
+            // a duplicate claim needs its counterpart on record, so the
+            // related-ids block opens the moment the action names one
+            if (actionSelect.value === "possible_duplicate") {
+                const related = document.getElementById("relatedIdsBlockDetails");
+                if (related) related.open = true;
+            }
         });
         applyDefaults();
         const latestDraft = this.latestDraftForTask(props.task_id);
@@ -5132,10 +5742,14 @@ class NzVerificationMap {
                 this.applyControlledAssessmentDefaults();
                 this.updateWorkflowSteps();
             });
+            document.getElementById(`confidence${year}`)?.addEventListener("change", () => {
+                markDirty();
+            });
         });
 
         document.getElementById("copyEvidenceRowButton")?.addEventListener("click", () => this.copyEvidenceRow(props));
         document.getElementById("copyDecisionButton")?.addEventListener("click", () => this.copyDecision(props));
+        this.initAttachmentsBlock(props);
         document.getElementById("saveDraftButton")?.addEventListener("click", () => this.saveEvidenceToBackend(props, { submit: false }));
         document.getElementById("submitUnresolvedButton")?.addEventListener("click", () => this.saveEvidenceToBackend(props, { unresolved: true }));
         document.getElementById("submitReviewButton")?.addEventListener("click", () => this.saveEvidenceToBackend(props, { submit: true }));
@@ -5183,6 +5797,7 @@ class NzVerificationMap {
         setValue("raActionSelect", draft.action, false);
         TARGET_YEARS.forEach(year => {
             setValue(`status${year}`, draft.target_year_statuses?.[year], false);
+            setValue(`confidence${year}`, draft.target_year_confidence?.[year], false);
         });
         setValue("sourceTypeSelect", draft.source_type);
         setValue("existenceStatusSelect", draft.existence_status);
@@ -5271,12 +5886,18 @@ class NzVerificationMap {
             year,
             document.getElementById(`status${year}`)?.value || "not_assessed",
         ]));
+        // per-year confidence rides beside each assessed status; unset
+        // years are simply omitted from the map
+        const targetYearConfidence = Object.fromEntries(TARGET_YEARS
+            .map(year => [year, document.getElementById(`confidence${year}`)?.value || ""])
+            .filter(([, confidence]) => confidence));
         const action = document.getElementById("raActionSelect")?.value || "needs_review";
         const rawWorshipUseStatus = document.getElementById("worshipUseStatusSelect")?.value || "uncertain";
         const noBuilding = action === "no_building_present" || rawWorshipUseStatus === "no_building_present";
         return {
             action,
             targetYearStatuses,
+            targetYearConfidence,
             sourceType: document.getElementById("sourceTypeSelect")?.value || "other",
             existenceStatus: noBuilding ? "absent" : document.getElementById("existenceStatusSelect")?.value || "uncertain",
             worshipUseStatus: noBuilding ? "not_worship" : rawWorshipUseStatus,
@@ -5319,9 +5940,14 @@ class NzVerificationMap {
         if (!this.observationContractVersionFor(values) && hasNewGuidedContent) {
             return "Review and rewrite the legacy evidence note as a direct observation before adding the new guided fields.";
         }
+        for (const [year, confidence] of Object.entries(values.targetYearConfidence || {})) {
+            if (confidence && (values.targetYearStatuses[year] || "not_assessed") === "not_assessed") {
+                return `Set the ${year} status, or clear its confidence: confidence describes an assessed year.`;
+            }
+        }
         if (unresolved) {
             if (values.sourceTitle.trim() && isPlaceholderText(values.sourceTitle)) {
-                return "Do not use NA or N/A as a source title. Add the actual source title, or leave it blank and explain what you checked.";
+                return "Do not use NA or N/A as a source title. Add the actual source title, or leave it blank and explain what you checked in “What did you directly observe or read in the source?”.";
             }
             if (`${values.note} ${values.uncertaintyNote}`.trim().length < 12) {
                 return "Add a short unresolved-note explanation: what you checked, what remains unclear, or why the case needs review.";
@@ -5368,6 +5994,9 @@ class NzVerificationMap {
         if (values.action === "denomination_or_shared_use" && !values.denominationRaw.trim() && !values.uncertaintyNote.trim()) {
             return "Add the exact denomination or tradition label, or explain what remains uncertain.";
         }
+        if (values.action === "possible_duplicate" && !values.relatedIds.trim()) {
+            return "Name the duplicate: put the other record's id or a short note in “Related ids or duplicate note”.";
+        }
         if (values.denominationRelation === "record_correction" && values.changeClass === "genuine_change") {
             return "Choose map correction or can't tell yet: a denomination record correction is not a genuine change.";
         }
@@ -5382,7 +6011,7 @@ class NzVerificationMap {
             return "Choose can't tell yet for change class: this denomination relation is provisional rather than a classified change.";
         }
         if (values.sourceDate.trim() && !isValidPartialDateText(values.sourceDate)) {
-            return "Use YYYY, YYYY-MM, or YYYY-MM-DD for source and capture dates. If the date is unknown, leave it blank and explain in the note.";
+            return "Use YYYY, YYYY-MM, or YYYY-MM-DD for source and capture dates. If the date is unknown, leave it blank and explain in “What did you directly observe or read in the source?”.";
         }
         const hasLifecycleDetail = values.lifecycleEvent || values.lifecycleDate.trim() || values.lifecycleNote.trim();
         if (hasLifecycleDetail && !values.lifecycleEvent) {
@@ -5604,6 +6233,9 @@ class NzVerificationMap {
             source_notes: row.source_notes || undefined,
             action: values.action,
             target_year_statuses: values.targetYearStatuses,
+            // always sent, so clearing every confidence select overwrites a
+            // previously stored map instead of leaving it behind on the draft
+            target_year_confidence: values.targetYearConfidence || {},
             target_year_evidence: targetYearEvidence,
             existence_status: values.existenceStatus,
             worship_use_status: values.worshipUseStatus,
@@ -5643,6 +6275,130 @@ class NzVerificationMap {
                 messages: validationMessages,
             },
         };
+    }
+
+    // --- evidence attachments: photo/document citations on the task.
+    // review-tier by ruling (2026-08-31): visible only through the signed-in
+    // portal; every view uses a fresh short-lived url minted by the backend
+
+    async initAttachmentsBlock(props) {
+        const block = document.getElementById("attachmentsBlock");
+        if (!block || !this.backend?.configured || !this.backendUser) return;
+        if (this.attachmentsEnabledCache === undefined) {
+            try {
+                this.attachmentsEnabledCache = await this.backend.attachmentsEnabled();
+            } catch (error) {
+                this.attachmentsEnabledCache = false;
+            }
+        }
+        if (!this.attachmentsEnabledCache) return;
+        block.hidden = false;
+        block.innerHTML = `
+            <strong>Photos &amp; documents (optional)</strong>
+            <div class="copy-help">JPEG, PNG, WebP or PDF, under 10&nbsp;MB each. Choose several at once if useful. Review-only — never public.</div>
+            <input id="attachmentFileInput" type="file" multiple accept="image/jpeg,image/png,image/webp,application/pdf">
+            <input id="attachmentCaptionInput" type="text" maxlength="500" placeholder="Caption — what do these show? (optional)">
+            <div class="button-row">
+                <button id="attachmentUploadButton" class="secondary" type="button">Add file(s)</button>
+            </div>
+            <div id="attachmentStatus" class="copy-status"></div>
+            <div id="attachmentList" class="attachment-list"></div>
+        `;
+        document.getElementById("attachmentUploadButton")?.addEventListener("click", () => this.uploadAttachment(props.task_id));
+        this.refreshAttachmentList(props.task_id);
+    }
+
+    async refreshAttachmentList(taskId) {
+        const list = document.getElementById("attachmentList");
+        if (!list) return;
+        let rows = [];
+        try {
+            rows = await this.backend.listTaskAttachments({ taskId });
+        } catch (error) {
+            list.textContent = "";
+            return;
+        }
+        if (!rows.length) {
+            list.textContent = "";
+            return;
+        }
+        list.innerHTML = rows.map(row => {
+            const sizeKb = Math.max(1, Math.round(row.byte_size / 1024));
+            const kind = row.content_type === "application/pdf" ? "PDF" : "Photo";
+            return `
+                <div class="attachment-row" data-attachment-id="${escapeHtml(row.attachment_id)}">
+                    <span class="attachment-label">${kind} · ${sizeKb} KB${row.caption ? ` — ${escapeHtml(row.caption)}` : ""}</span>
+                    <span class="attachment-actions">
+                        <button type="button" class="secondary attachment-view">View</button>
+                        ${row.author_is_me ? `<button type="button" class="secondary attachment-remove">Remove</button>` : ""}
+                    </span>
+                </div>
+            `;
+        }).join("");
+        list.querySelectorAll(".attachment-row").forEach(rowEl => {
+            const attachmentId = rowEl.dataset.attachmentId;
+            rowEl.querySelector(".attachment-view")?.addEventListener("click", async () => {
+                try {
+                    const grant = await this.backend.requestAttachmentView({ attachmentId });
+                    window.open(grant.view_url, "_blank", "noopener");
+                } catch (error) {
+                    const status = document.getElementById("attachmentStatus");
+                    if (status) status.textContent = error.message || "Could not open the file.";
+                }
+            });
+            rowEl.querySelector(".attachment-remove")?.addEventListener("click", async () => {
+                try {
+                    await this.backend.removeAttachment({ attachmentId });
+                    this.refreshAttachmentList(taskId);
+                } catch (error) {
+                    const status = document.getElementById("attachmentStatus");
+                    if (status) status.textContent = error.message || "Could not remove the file.";
+                }
+            });
+        });
+    }
+
+    async uploadAttachment(taskId) {
+        const input = document.getElementById("attachmentFileInput");
+        const status = document.getElementById("attachmentStatus");
+        const button = document.getElementById("attachmentUploadButton");
+        const files = [...(input?.files || [])];
+        if (!files.length) {
+            if (status) status.textContent = "Choose a file first.";
+            return;
+        }
+        const caption = (document.getElementById("attachmentCaptionInput")?.value || "").trim();
+        if (button) button.disabled = true;
+        let added = 0;
+        try {
+            for (const file of files) {
+                if (status) {
+                    status.textContent = files.length > 1
+                        ? `Uploading ${file.name} (${added + 1} of ${files.length})...`
+                        : "Uploading...";
+                }
+                const grant = await this.backend.requestAttachmentUpload({
+                    taskId,
+                    contentType: file.type,
+                    byteSize: file.size,
+                    caption: caption || undefined,
+                });
+                const put = await fetch(grant.upload_url, { method: "PUT", body: file });
+                if (!put.ok) throw new Error(`Upload of ${file.name} failed (${put.status}). Try again.`);
+                await this.backend.confirmAttachmentUpload({ attachmentId: grant.attachment_id });
+                added += 1;
+            }
+            if (status) status.textContent = added === 1 ? "File added." : `${added} files added.`;
+            if (input) input.value = "";
+            const captionInput = document.getElementById("attachmentCaptionInput");
+            if (captionInput) captionInput.value = "";
+        } catch (error) {
+            const base = error.message || "Upload failed.";
+            if (status) status.textContent = added > 0 ? `${base} ${added} file(s) were added before the failure.` : base;
+        } finally {
+            if (button) button.disabled = false;
+            this.refreshAttachmentList(taskId);
+        }
     }
 
     async saveEvidenceToBackend(props, options = {}) {
@@ -5784,6 +6540,7 @@ class NzVerificationMap {
             action: values.action,
             action_label: actionLabelForRa(values.action),
             target_year_statuses: values.targetYearStatuses,
+            target_year_confidence: values.targetYearConfidence,
             lifecycle_event: values.lifecycleEvent,
             lifecycle_event_label: values.lifecycleEvent ? optionLabel(LIFECYCLE_EVENT_OPTIONS, values.lifecycleEvent) : "",
             lifecycle_date: values.lifecycleDate,
@@ -5824,29 +6581,26 @@ class NzVerificationMap {
     // actionable entry point is the header "Add a place" button; the
     // transient cards render into #pinCardHost when pin mode is armed
     pinNominationHtml() {
-        if (RAPID_CURRENT_ENTRY) {
+        if (RAPID_NOMINATION_ENTRY) {
             return `
                 <div class="copy-help">
                     Record a place by confirming its building location and what you can establish about its current worship use. Each observation is time-stamped and sent to human review; it does not update the public map directly.
                 </div>
             `;
         }
-        return `
-            <div class="copy-help">
-                Know a place of worship that is not on the map? Use <strong>Add a place that's missing</strong>, then identify either the building or the approximate area supported by your evidence. Local knowledge counts as evidence.
-            </div>
-        `;
+        return "";
     }
 
     // the transient pin-drop cards, rendered into #pinCardHost while pin
     // mode is active (kept here, near the map, rather than buried in the
     // nomination panel). ids are unchanged so all pin logic still binds
     pinCardsHtml() {
-        const formFields = RAPID_CURRENT_ENTRY
+        const formFields = RAPID_NOMINATION_ENTRY
             ? this.rapidObservationFieldsHtml("pin", {
                 submitLabel: "Save and add another",
                 submissionId: this.pinSubmissionId,
                 showCancel: true,
+                attachmentsHint: true,
             })
             : `
                 <fieldset>
@@ -5884,23 +6638,46 @@ class NzVerificationMap {
                 </label>
                 <label>
                     What kind of claim is this?
-                    <select id="pinChangeClassSelect">
+                    <select id="pinChangeClassSelect" title="This distinction drives the annual census: real change is counted, map corrections rewrite history.">
                         ${selectOptionsHtml(CHANGE_CLASS_OPTIONS, "uncertain")}
                     </select>
                 </label>
-                <div class="copy-help">
-                    This distinction drives the annual census: real change is counted, map corrections rewrite history.
-                </div>
                 <div class="button-row">
                     <button id="pinSubmitButton" type="button">Create candidate task</button>
                     <button id="pinFormCancelButton" type="button" class="secondary">Cancel</button>
                 </div>
             `;
         return `
-            <h2 class="pin-host-title">${RAPID_CURRENT_ENTRY ? "Nominate missing PoW" : "Add a place that's missing"}</h2>
+            <h2 class="pin-host-title">Add a missing place</h2>
+            <div id="pinLocateCard" class="pin-card">
+                <div class="copy-help">
+                    Search, type coordinates, or click the map. Drag the pin onto the building.
+                </div>
+                <div class="pin-locate-row">
+                    <label>
+                        Address or place name
+                        <input id="pinSearchInput" type="search" placeholder="e.g. Mele, Efate" autocomplete="off">
+                    </label>
+                    <button id="pinSearchButton" type="button" class="secondary">Search</button>
+                </div>
+                <ul id="pinSearchResults" class="pin-search-results" hidden></ul>
+                <div id="pinSearchStatus" class="copy-status" aria-live="polite"></div>
+                <div class="pin-coord-row">
+                    <label>
+                        Latitude
+                        <input id="pinLatInput" type="text" inputmode="decimal" placeholder="-17.74043" autocomplete="off">
+                    </label>
+                    <label>
+                        Longitude
+                        <input id="pinLngInput" type="text" inputmode="decimal" placeholder="168.32100" autocomplete="off">
+                    </label>
+                    <button id="pinCoordButton" type="button" class="secondary">Move pin</button>
+                </div>
+                <div class="copy-help">Search results by Nominatim &copy; OpenStreetMap contributors.</div>
+            </div>
             <div id="pinConfirmCard" class="pin-card" hidden>
                 <div class="pin-coords">Pin: <span id="pinLat"></span>, <span id="pinLng"></span></div>
-                ${RAPID_CURRENT_ENTRY ? "" : `
+                ${RAPID_NOMINATION_ENTRY ? "" : `
                     <label>
                         What does this pin represent?
                         <select id="pinLocationMode">
@@ -5955,11 +6732,29 @@ class NzVerificationMap {
         document.getElementById("pinSubmitButton")?.addEventListener("click", () => this.submitPinNomination());
         document.getElementById("pinLocationMode")?.addEventListener("change", () => this.updatePinConfirmCard());
         document.getElementById("pinLocationRadius")?.addEventListener("change", () => this.updatePinConfirmCard());
-        if (RAPID_CURRENT_ENTRY) {
+        // locate card: search and typed coordinates feed the same pending pin
+        document.getElementById("pinSearchButton")?.addEventListener("click", () => this.submitPinSearch());
+        document.getElementById("pinSearchInput")?.addEventListener("keydown", event => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                this.submitPinSearch();
+            }
+        });
+        document.getElementById("pinCoordButton")?.addEventListener("click", () => this.applyTypedCoordinates());
+        ["pinLatInput", "pinLngInput"].forEach(id => {
+            document.getElementById(id)?.addEventListener("keydown", event => {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    this.applyTypedCoordinates();
+                }
+            });
+        });
+        if (RAPID_NOMINATION_ENTRY) {
             ["pinNameInput", "pinAddressInput", "pinLocalityInput"].forEach(id => {
                 document.getElementById(id)?.addEventListener("input", () => this.markFormDirty("rapid-pin"));
             });
             this.bindRapidObservationForm("pin", {
+                draftExtraIds: ["pinNameInput", "pinAddressInput", "pinLocalityInput"],
                 getCandidate: () => {
                     if (!this.pinConfirmed) return null;
                     return {
@@ -5988,7 +6783,8 @@ class NzVerificationMap {
                 document.getElementById(id)?.addEventListener("change", () => this.markFormDirty("location-pin"));
             });
         }
-        this.revealPinHost();
+        // no scroll on entry: the armed button carries the instruction, and
+        // the transient cards already sit at the top of the working column
     }
 
     // pull the pin-card host to the top of the sidebar scroll so the armed
@@ -6003,16 +6799,46 @@ class NzVerificationMap {
         this.pinMode = true;
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
-        this.pinSubmissionId = RAPID_CURRENT_ENTRY ? window.PowRapidEntry.secureSubmissionId() : null;
+        this.pinSubmissionId = RAPID_NOMINATION_ENTRY ? window.PowRapidEntry.secureSubmissionId() : null;
         this.mountPinCards();
         this.map.getContainer().classList.add("pin-placement");
-        document.getElementById("addPlaceButton")?.setAttribute("disabled", "true");
+        // the button itself carries the in-progress instruction, so the
+        // click never reads as a dead control
+        const addPlaceButton = document.getElementById("addPlaceButton");
+        if (addPlaceButton) {
+            addPlaceButton.setAttribute("disabled", "true");
+            addPlaceButton.classList.add("placing");
+            addPlaceButton.textContent = "Placing pin — click the building on the map · Esc cancels";
+        }
+        // structures must be visible so the pin lands on the actual building
+        this.setBasemap("hybrid");
         const status = document.getElementById("pinStatus");
-        if (status) status.textContent = "Click the building on the map to drop the pin. Press Escape to cancel.";
-        this._pinClickHandler = (event) => this.placePin(event.latlng);
-        this.map.once("click", this._pinClickHandler);
+        if (status) status.textContent = "Click the building on the map to drop the pin, or use search or coordinates above. Press Escape to cancel.";
+        // every map click while armed lands the same pending pin: the first
+        // click places it and later clicks move it, exactly as the sidebar
+        // promises; the handler stays bound until exitPinMode
+        this._pinClickHandler = (event) => {
+            if (this.pinConfirmed) return;
+            if (this.pinMarker) {
+                this.setPendingPin(event.latlng.lat, event.latlng.lng, { zoom: this.map.getZoom() });
+            } else {
+                this.placePin(event.latlng);
+            }
+        };
+        this.map.on("click", this._pinClickHandler);
         this._pinKeyHandler = (event) => {
-            if (event.key === "Escape") this.exitPinMode();
+            if (event.key === "Escape") {
+                this.exitPinMode();
+                return;
+            }
+            // cmd/ctrl+z steps the pin back through its placements; text
+            // fields keep their own undo
+            const undoCombo = (event.metaKey || event.ctrlKey) && !event.shiftKey && event.key.toLowerCase() === "z";
+            if (!undoCombo) return;
+            const target = event.target;
+            if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+            event.preventDefault();
+            this.undoPinMove();
         };
         document.addEventListener("keydown", this._pinKeyHandler);
     }
@@ -6029,21 +6855,152 @@ class NzVerificationMap {
                 iconAnchor: [9, 9],
             }),
         }).addTo(this.map);
+        this.pinHistory = [L.latLng(latlng)];
         this.pinMarker.on("drag", () => this.updatePinConfirmCard());
+        this.pinMarker.on("dragend", () => this.recordPinPosition());
         this._pinZoomHandler = () => this.updatePinConfirmCard();
         this.map.on("zoomend", this._pinZoomHandler);
         const card = document.getElementById("pinConfirmCard");
         if (card) card.hidden = false;
         const status = document.getElementById("pinStatus");
-        if (status) status.textContent = RAPID_CURRENT_ENTRY
+        if (status) status.textContent = RAPID_NOMINATION_ENTRY
             ? "Drag the pin onto the building, zoom in, then confirm the location."
             : "Choose what the pin represents, place it on the building or at the centre of the supported area, then confirm.";
         this.updatePinConfirmCard();
         this.revealPinHost();
     }
 
+    // undo history for the pending pin: every placement, click-move, typed
+    // move, and drag lands here so cmd/ctrl+z can step back through them
+    recordPinPosition() {
+        if (!this.pinMarker) return;
+        const position = this.pinMarker.getLatLng();
+        const last = this.pinHistory[this.pinHistory.length - 1];
+        if (last && last.equals(position)) return;
+        this.pinHistory.push(L.latLng(position.lat, position.lng));
+    }
+
+    undoPinMove() {
+        if (!this.pinMode || this.pinConfirmed || !this.pinMarker) return;
+        this.pinHistory.pop();
+        const previous = this.pinHistory[this.pinHistory.length - 1];
+        if (previous) {
+            this.pinMarker.setLatLng(previous);
+            if (!this.map.getBounds().contains(previous)) this.map.panTo(previous);
+            this.updatePinConfirmCard();
+            return;
+        }
+        // undoing the first drop removes the pin; placement stays armed
+        this.map.removeLayer(this.pinMarker);
+        this.pinMarker = null;
+        if (this.pinUncertaintyCircle) {
+            this.map.removeLayer(this.pinUncertaintyCircle);
+            this.pinUncertaintyCircle = null;
+        }
+        if (this._pinZoomHandler) {
+            this.map.off("zoomend", this._pinZoomHandler);
+            this._pinZoomHandler = null;
+        }
+        const card = document.getElementById("pinConfirmCard");
+        if (card) card.hidden = true;
+        const status = document.getElementById("pinStatus");
+        if (status) status.textContent = "Pin removed. Click the building on the map to drop it again.";
+    }
+
+    // search, typed coordinates, and the map click all land here: one
+    // pending location, one draggable pin
+    setPendingPin(lat, lng, { zoom = 18 } = {}) {
+        if (!this.pinMode || this.pinConfirmed || !this.map) return;
+        const latlng = L.latLng(lat, lng);
+        const maxZoom = this.basemap !== "streets" ? 20 : 19;
+        this.map.setView(latlng, Math.min(Math.max(this.map.getZoom(), zoom), maxZoom));
+        if (this.pinMarker) {
+            this.pinMarker.setLatLng(latlng);
+            this.recordPinPosition();
+            this.updatePinConfirmCard();
+        } else {
+            this.placePin(latlng);
+        }
+        const status = document.getElementById("pinStatus");
+        if (status) status.textContent = "Drag the pin onto the building before confirming — searches and typed coordinates are rarely building-exact.";
+    }
+
+    // one nominatim request per explicit submit, spaced out and biased to
+    // this portal's country, per the osmf usage policy
+    async submitPinSearch() {
+        const status = document.getElementById("pinSearchStatus");
+        const resultsEl = document.getElementById("pinSearchResults");
+        const button = document.getElementById("pinSearchButton");
+        const query = (document.getElementById("pinSearchInput")?.value || "").trim();
+        if (!query) {
+            if (status) status.textContent = "Type an address or place name first.";
+            return;
+        }
+        if (Date.now() - this.lastNominatimRequestAt < NOMINATIM_MIN_INTERVAL_MS) {
+            if (status) status.textContent = "One search at a time — try again in a moment.";
+            return;
+        }
+        this.lastNominatimRequestAt = Date.now();
+        if (button) button.disabled = true;
+        if (status) status.textContent = "Searching…";
+        if (resultsEl) {
+            resultsEl.hidden = true;
+            resultsEl.innerHTML = "";
+        }
+        try {
+            const params = new URLSearchParams({
+                format: "jsonv2",
+                q: query,
+                limit: "5",
+                countrycodes: COUNTRY_CONFIG.countryCode.toLowerCase(),
+            });
+            const response = await fetch(`${NOMINATIM_SEARCH_URL}?${params.toString()}`, {
+                headers: { Accept: "application/json" },
+            });
+            if (!response.ok) throw new Error(`Search failed (${response.status}). Try again shortly or click the map instead.`);
+            const rows = await response.json();
+            if (!Array.isArray(rows) || rows.length === 0) {
+                if (status) status.textContent = "No match found. Add the town or island to the search, or click the map instead.";
+                return;
+            }
+            if (status) status.textContent = "";
+            if (resultsEl) {
+                resultsEl.hidden = false;
+                resultsEl.innerHTML = rows.map((row, index) => `
+                    <li><button type="button" data-result-index="${index}">${escapeHtml(row.display_name || "Unnamed result")}</button></li>
+                `).join("");
+                resultsEl.querySelectorAll("button").forEach(resultButton => {
+                    resultButton.addEventListener("click", () => {
+                        const row = rows[Number(resultButton.dataset.resultIndex)];
+                        const lat = Number(row?.lat);
+                        const lng = Number(row?.lon);
+                        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+                        resultsEl.hidden = true;
+                        this.setPendingPin(lat, lng);
+                    });
+                });
+            }
+        } catch (error) {
+            if (status) status.textContent = error.message || "Search failed — check the connection or click the map instead.";
+        } finally {
+            if (button) button.disabled = false;
+        }
+    }
+
+    applyTypedCoordinates() {
+        const status = document.getElementById("pinSearchStatus");
+        const lat = Number.parseFloat(document.getElementById("pinLatInput")?.value || "");
+        const lng = Number.parseFloat(document.getElementById("pinLngInput")?.value || "");
+        if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+            if (status) status.textContent = "Enter decimal degrees: latitude between -90 and 90, longitude between -180 and 180.";
+            return;
+        }
+        if (status) status.textContent = "";
+        this.setPendingPin(lat, lng);
+    }
+
     pinLocationMode() {
-        return RAPID_CURRENT_ENTRY
+        return RAPID_NOMINATION_ENTRY
             ? "building_identified"
             : (document.getElementById("pinLocationMode")?.value || "building_identified");
     }
@@ -6078,24 +7035,34 @@ class NzVerificationMap {
         const lngEl = document.getElementById("pinLng");
         if (latEl) latEl.textContent = position.lat.toFixed(5);
         if (lngEl) lngEl.textContent = position.lng.toFixed(5);
+        // the typed-coordinate fields track the pin, unless being edited
+        [["pinLatInput", position.lat], ["pinLngInput", position.lng]].forEach(([id, value]) => {
+            const field = document.getElementById(id);
+            if (field && document.activeElement !== field) field.value = value.toFixed(5);
+        });
         const mode = this.pinLocationMode();
         const requiredZoom = mode === "approximate_area" ? PIN_MIN_APPROXIMATE_ZOOM : PIN_MIN_PLACEMENT_ZOOM;
         const zoomOk = this.map.getZoom() >= requiredZoom;
+        // a pin the contributor cannot see must not be confirmable: a stray
+        // early click can leave it far off-screen (even at sea)
+        const inView = this.map.getBounds().contains(position);
         const confirmButton = document.getElementById("pinConfirmButton");
-        if (confirmButton) confirmButton.disabled = !zoomOk;
+        if (confirmButton) confirmButton.disabled = !zoomOk || !inView;
         if (confirmButton) confirmButton.textContent = mode === "approximate_area"
             ? "Confirm approximate area"
             : "Confirm building location";
         const gate = document.getElementById("pinZoomGate");
         if (gate) {
             gate.hidden = false;
-            gate.textContent = zoomOk
-                ? (mode === "approximate_area"
-                    ? "The shaded circle is an uncertainty area, not an accepted site boundary."
-                    : "The pin will be recorded as the building location you identified.")
-                : (mode === "approximate_area"
-                    ? "Zoom in far enough to place the centre of the supported area."
-                    : "Zoom in further — a building-level point requires building-level placement.");
+            gate.textContent = !inView
+                ? "The pin is off screen — pan back to it, or click the map here to move it, before confirming."
+                : zoomOk
+                    ? (mode === "approximate_area"
+                        ? "The shaded circle is an uncertainty area, not an accepted site boundary."
+                        : "The pin will be recorded as the building location you identified.")
+                    : (mode === "approximate_area"
+                        ? "Zoom in far enough to place the centre of the supported area."
+                        : "Zoom in further — a building-level point requires building-level placement.");
         }
         const radiusField = document.getElementById("pinLocationRadiusField");
         if (radiusField) radiusField.hidden = mode !== "approximate_area";
@@ -6106,6 +7073,7 @@ class NzVerificationMap {
         const mode = this.pinLocationMode();
         const requiredZoom = mode === "approximate_area" ? PIN_MIN_APPROXIMATE_ZOOM : PIN_MIN_PLACEMENT_ZOOM;
         if (!this.pinMarker || this.map.getZoom() < requiredZoom) return;
+        if (!this.map.getBounds().contains(this.pinMarker.getLatLng())) return;
         const position = this.pinMarker.getLatLng();
         this.pinConfirmed = {
             latitude: position.lat,
@@ -6122,6 +7090,9 @@ class NzVerificationMap {
         }
         const confirmCard = document.getElementById("pinConfirmCard");
         if (confirmCard) confirmCard.hidden = true;
+        // the location is settled; the locate tools would now be misleading
+        const locateCard = document.getElementById("pinLocateCard");
+        if (locateCard) locateCard.hidden = true;
         const nearby = this.nearbyTaskRows(position, this.pinConfirmed.uncertaintyRadiusM);
         this.pinNearbyCount = nearby.length;
         if (nearby.length) {
@@ -6329,6 +7300,7 @@ class NzVerificationMap {
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
         this.pinSubmissionId = null;
+        this.pinHistory = [];
         if (this._pinClickHandler) {
             this.map.off("click", this._pinClickHandler);
             this._pinClickHandler = null;
@@ -6357,7 +7329,12 @@ class NzVerificationMap {
             host.innerHTML = "";
             host.hidden = true;
         }
-        document.getElementById("addPlaceButton")?.removeAttribute("disabled");
+        const addPlaceButton = document.getElementById("addPlaceButton");
+        if (addPlaceButton) {
+            addPlaceButton.removeAttribute("disabled");
+            addPlaceButton.classList.remove("placing");
+            addPlaceButton.textContent = "＋ Add a missing place";
+        }
     }
 
     nominationFormHtml() {
@@ -6464,6 +7441,7 @@ class NzVerificationMap {
                 action: values.action,
                 action_label: actionLabelForRa(values.action),
                 target_year_statuses: values.targetYearStatuses,
+                target_year_confidence: values.targetYearConfidence,
                 lifecycle_event: values.lifecycleEvent,
                 lifecycle_event_label: values.lifecycleEvent ? optionLabel(LIFECYCLE_EVENT_OPTIONS, values.lifecycleEvent) : "",
                 lifecycle_date: values.lifecycleDate,

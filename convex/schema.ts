@@ -37,6 +37,7 @@ import {
   taskType,
   targetYearAffect,
   targetYearEvidenceSet,
+  targetYearConfidenceSet,
   targetYearStatusSet,
   userStatus,
 } from "./model";
@@ -151,6 +152,7 @@ export default defineSchema({
     action: v.optional(v.string()),
     change_class: v.optional(changeClass),
     target_year_statuses: v.optional(targetYearStatusSet),
+    target_year_confidence: v.optional(targetYearConfidenceSet),
     target_year_evidence: v.optional(targetYearEvidenceSet),
     existence_status: v.optional(v.string()),
     worship_use_status: v.optional(v.string()),
@@ -318,4 +320,26 @@ export default defineSchema({
     .index("by_export_batch_id", ["export_batch_id"])
     .index("by_country_status", ["country_code", "status"])
     .index("by_created_time", ["created_at"]),
+
+  // photo and document citations for a task's evidence: metadata only —
+  // the bytes live in a private r2 bucket reached through short-lived
+  // presigned urls minted per request by role-checked actions. review-tier
+  // by ruling (2026-08-31): nothing here reaches a public surface. rows
+  // are never hard-deleted; "removed" preserves the audit trail.
+  evidence_attachments: defineTable({
+    attachment_id: v.string(),
+    task_id: v.string(),
+    author_user_id: v.id("users"),
+    author_role: projectRole,
+    r2_key: v.string(),
+    content_type: v.string(),
+    byte_size: v.number(),
+    caption: v.optional(v.string()),
+    status: v.union(v.literal("pending"), v.literal("uploaded"), v.literal("removed")),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_attachment_id", ["attachment_id"])
+    .index("by_task_status", ["task_id", "status"])
+    .index("by_author_time", ["author_user_id", "created_at"]),
 });

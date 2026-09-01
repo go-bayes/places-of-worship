@@ -37,6 +37,9 @@
             --priority-medium: #d68910;
             --priority-low: #1e8449;
             --danger: #b03a2e;            /* destructive or clearing actions */
+            --entry: #0f766e;             /* pure data entry: nominations, walk-up records */
+            --entry-ink: #115e59;
+            --entry-bg: #e6f4f1;
         }
 
         body {
@@ -95,15 +98,148 @@
         }
 
         /* the one dominant action in the sidebar: adding a missing place.
-           shown only in assignment mode (the demo/full map keeps its own
-           JSON nomination form lower down) */
+           shown only in the portal's add mode (the demo/full map keeps its
+           own JSON nomination form lower down) */
         .sidebar-actions {
             display: none;
-            margin-top: 14px;
+            padding: 14px 16px 12px 16px;
+            border-bottom: 1px solid #d8dee4;
         }
 
-        body.assignment-mode .sidebar-actions {
+        body.portal-add .sidebar-actions {
             display: block;
+        }
+
+        .sidebar-actions-help {
+            margin: 8px 0 0 0;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #5d6d7e;
+        }
+
+        /* portal gating (assignment mode only): signed out shows the header
+           and the sign-in card; the chooser adds its two options; each mode
+           then shows its own sheet. the sections themselves are unchanged,
+           the body class decides which are visible */
+        body.assignment-mode.portal-signed-out #modeNotice,
+        body.assignment-mode.portal-signed-out #quickstartBanner,
+        body.assignment-mode.portal-signed-out .filters,
+        body.assignment-mode.portal-signed-out .stats,
+        body.assignment-mode.portal-signed-out #taskList,
+        body.assignment-mode.portal-signed-out #sessionPanel,
+        body.assignment-mode.portal-signed-out #nominationPanel,
+        body.assignment-mode.portal-signed-out #pinCardHost,
+        body.assignment-mode.portal-signed-out #detailPanel,
+        body.assignment-mode.portal-chooser #modeNotice,
+        body.assignment-mode.portal-chooser #quickstartBanner,
+        body.assignment-mode.portal-chooser .filters,
+        body.assignment-mode.portal-chooser .stats,
+        body.assignment-mode.portal-chooser #taskList,
+        body.assignment-mode.portal-chooser #sessionPanel,
+        body.assignment-mode.portal-chooser #nominationPanel,
+        body.assignment-mode.portal-chooser #pinCardHost,
+        body.assignment-mode.portal-chooser #detailPanel,
+        body.assignment-mode.portal-assigned #nominationPanel,
+        body.assignment-mode.portal-assigned #pinCardHost,
+        body.assignment-mode.portal-add #quickstartBanner,
+        body.assignment-mode.portal-add .filters,
+        body.assignment-mode.portal-add .stats,
+        body.assignment-mode.portal-add #taskList {
+            display: none;
+        }
+        /* the session panel stays visible in add mode: it carries the
+           changes-requested alerts for bounced nominations */
+
+        .portal-chooser {
+            padding: 14px 16px;
+            border-bottom: 1px solid #d8dee4;
+            display: grid;
+            gap: 10px;
+        }
+
+        .portal-chooser[hidden],
+        .portal-mode-bar[hidden] {
+            display: none;
+        }
+
+        .portal-chooser h2 {
+            margin: 0;
+            font-size: 16px;
+            color: #1f4e79;
+        }
+
+        .chooser-option {
+            width: 100%;
+            text-align: left;
+            display: grid;
+            gap: 4px;
+            padding: 12px 14px;
+            min-height: 64px;
+            border: 1px solid var(--action);
+            border-radius: 6px;
+            background: #ffffff;
+            color: #1f2d3d;
+            cursor: pointer;
+            font-weight: 400;
+            line-height: 1.4;
+        }
+
+        .chooser-option strong {
+            font-size: 16px;
+            color: var(--action);
+        }
+
+        .chooser-option span {
+            font-size: 13px;
+            color: #34495e;
+        }
+
+        .chooser-option:hover {
+            background: var(--action-active-bg);
+        }
+
+        .chooser-option:focus-visible {
+            outline: 3px solid #9ecbe8;
+            outline-offset: 2px;
+        }
+
+        /* per-mode bar: names the activity and offers the way back */
+        .portal-mode-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 8px 16px;
+            border-bottom: 1px solid #d8dee4;
+            background: #f8fafc;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1f4e79;
+        }
+
+        .portal-mode-bar .link-button {
+            background: none;
+            border: 0;
+            padding: 6px 0;
+            min-height: 32px;
+            width: auto;
+            color: var(--action);
+            font-size: 13px;
+            font-weight: 400;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        /* in-place feedback while the map waits for the pin: the button
+           itself carries the instruction on the amber in-progress pair */
+        .primary-action.placing,
+        .primary-action.placing:disabled {
+            background: var(--uncertain-bg);
+            border-color: var(--uncertain);
+            color: var(--uncertain-ink);
+            opacity: 1;
+            cursor: default;
+            box-shadow: none;
         }
 
         .primary-action {
@@ -624,7 +760,7 @@
         .pin-card-host {
             padding: 12px 16px;
             border-bottom: 1px solid #d8dee4;
-            background: #f2f8fc;
+            background: var(--entry-bg);
             display: grid;
             gap: 8px;
         }
@@ -637,7 +773,7 @@
             margin: 0;
             font-size: 14px;
             font-weight: 700;
-            color: #1f4e79;
+            color: var(--entry-ink);
         }
 
         .nomination-panel summary {
@@ -656,6 +792,98 @@
         /* pin-drop nomination: placement cursor, live marker, confirm card */
         .leaflet-container.pin-placement {
             cursor: crosshair;
+            box-shadow: inset 0 0 0 4px var(--action);
+        }
+
+        /* locate card: search, typed coordinates, or the map click all move
+           the same pending pin */
+        .pin-locate-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 6px;
+            align-items: end;
+        }
+
+        .pin-locate-row button {
+            min-height: 40px;
+            width: auto;
+            padding: 0 12px;
+            font-size: 13px;
+        }
+
+        .pin-coord-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 6px;
+            align-items: end;
+        }
+
+        .pin-coord-row button {
+            min-height: 40px;
+            width: auto;
+            padding: 0 12px;
+            font-size: 13px;
+        }
+
+        .pin-search-results {
+            display: grid;
+            gap: 4px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .pin-search-results[hidden] {
+            display: none;
+        }
+
+        .pin-search-results button {
+            width: 100%;
+            text-align: left;
+            background: #ffffff;
+            color: #1f2d3d;
+            border: 1px solid #b6c2cf;
+            font-weight: 400;
+            font-size: 13px;
+            line-height: 1.35;
+            padding: 6px 8px;
+            min-height: 36px;
+        }
+
+        .pin-search-results button:hover {
+            background: var(--action-active-bg);
+        }
+
+        /* streets/satellite pill, top-right of the map */
+        .basemap-toggle {
+            display: inline-flex;
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid #b6c2cf;
+            border-radius: 5px;
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.25);
+            overflow: hidden;
+        }
+
+        .basemap-toggle button {
+            background: #ffffff;
+            color: #34495e;
+            border: 0;
+            border-radius: 0;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 6px 10px;
+            min-height: 32px;
+            width: auto;
+            cursor: pointer;
+        }
+
+        .basemap-toggle button + button {
+            border-left: 1px solid #b6c2cf;
+        }
+
+        .basemap-toggle button[aria-pressed="true"] {
+            background: var(--action);
+            color: #ffffff;
         }
 
         .pin-drop-marker {
@@ -747,6 +975,100 @@
             border-radius: 5px;
             padding: 8px 10px;
             margin-top: -4px;
+        }
+
+        .attachments-block {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border: 1px solid #d5dde5;
+            border-radius: 6px;
+            padding: 10px;
+        }
+
+        .attachments-block input[type="file"] {
+            font-size: 13px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .attachments-block input[type="text"] {
+            font-size: 13px;
+            padding: 6px 8px;
+            border: 1px solid #b6c2cf;
+            border-radius: 5px;
+        }
+
+        .attachment-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            padding: 4px 0;
+            border-bottom: 1px solid #eef2f6;
+        }
+
+        .attachment-row span {
+            flex: 1;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .attachment-row button {
+            font-size: 12px;
+            padding: 3px 8px;
+        }
+
+        /* pure entry wears the entry (teal) container hue; the primary
+           action button keeps its one blue meaning (ui-style-guide) */
+        .portal-mode-bar.mode-add {
+            background: var(--entry-bg);
+            color: var(--entry-ink);
+        }
+
+        .chooser-option#chooseAddButton strong {
+            color: var(--entry);
+        }
+
+        .nominations-panel {
+            display: none;
+            padding: 12px 16px;
+            border-bottom: 1px solid #d8dee4;
+        }
+
+        body.portal-add .nominations-panel {
+            display: block;
+        }
+
+        .nominations-panel h2 {
+            margin: 0 0 8px 0;
+            font-size: 15px;
+            color: var(--entry-ink);
+        }
+
+        .task-row.entry-card {
+            border-left: 4px solid var(--entry);
+        }
+
+        .entry-badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 1px 7px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            background: var(--entry-bg);
+            color: var(--entry-ink);
+        }
+
+        .verification-marker.vm-nomination {
+            background: #ffffff !important;
+            border: 2px dashed var(--entry);
+        }
+
+        .legend-dot.vm-nomination-swatch {
+            background: #ffffff;
+            border: 2px dashed var(--entry);
         }
 
         .copy-help kbd {
@@ -1492,6 +1814,226 @@
             font-weight: 700;
         }
 
+        .req-chip {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 1px 7px;
+            border-radius: 9px;
+            background: #fff1e6;
+            border: 1px solid #d97706;
+            color: #9a3412;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .field-invalid {
+            border: 2px solid #b91c1c !important;
+            border-radius: 6px;
+            padding: 6px;
+            background: #fef2f2;
+        }
+
+        .copy-status-error {
+            color: #b91c1c;
+            font-weight: 700;
+        }
+
+        .flag-discussion {
+            display: grid;
+            grid-template-columns: 24px minmax(0, 1fr);
+            align-items: start;
+            gap: 9px;
+            padding: 10px;
+            border: 1px dashed #b45309;
+            border-radius: 6px;
+            background: #fffbeb;
+            cursor: pointer;
+        }
+
+        .flag-discussion input {
+            width: 20px;
+            height: 20px;
+            margin: 1px 0 0;
+        }
+
+        .flag-discussion span {
+            display: grid;
+            gap: 3px;
+            line-height: 1.3;
+        }
+
+        .flag-discussion small {
+            color: #7c5307;
+            font-size: 12px;
+        }
+
+        .label-help {
+            font-weight: 400;
+            color: #526477;
+            font-size: 12px;
+            line-height: 1.35;
+        }
+
+        .year-status-grid {
+            display: grid;
+            gap: 6px;
+        }
+
+        .year-status-row {
+            display: grid;
+            grid-template-columns: 52px minmax(0, 1.2fr) minmax(0, 1fr);
+            align-items: center;
+            gap: 10px;
+        }
+
+        .year-status-head {
+            font-size: 12px;
+            font-weight: 700;
+            color: #526477;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .year-status-year {
+            font-weight: 700;
+            font-size: 15px;
+            text-align: right;
+        }
+
+        .attachments-block input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            border: 1.5px dashed #7b8a99;
+            border-radius: 6px;
+            background: #f8fafc;
+        }
+
+        .attachment-list {
+            display: grid;
+            gap: 6px;
+        }
+
+        .attachment-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 8px 10px;
+            border: 1px solid #d5dde5;
+            border-radius: 6px;
+            background: #ffffff;
+        }
+
+        .attachment-label {
+            min-width: 0;
+            overflow-wrap: anywhere;
+            line-height: 1.35;
+        }
+
+        .attachment-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        /* high-legibility inputs: large type, strong borders, obvious focus */
+        .review-form input[type="text"],
+        .review-form input[type="date"],
+        .review-form input[type="url"],
+        .review-form select,
+        .review-form textarea,
+        .rapid-current-form input[type="text"],
+        .rapid-current-form input[type="date"],
+        .rapid-current-form select,
+        .rapid-current-form textarea,
+        .attachments-block input[type="text"],
+        .pin-card input[type="text"],
+        .pin-card input[type="search"],
+        .pin-card select {
+            font-size: 16px;
+            padding: 10px 12px;
+            border: 1.5px solid #5b6b7c;
+            border-radius: 6px;
+            background: #ffffff;
+            color: #1f2c3a;
+            min-height: 44px;
+        }
+
+        .review-form textarea,
+        .rapid-current-form textarea {
+            min-height: 64px;
+        }
+
+        .review-form input:focus-visible,
+        .review-form select:focus-visible,
+        .review-form textarea:focus-visible,
+        .rapid-current-form input:focus-visible,
+        .rapid-current-form select:focus-visible,
+        .rapid-current-form textarea:focus-visible,
+        .pin-card input:focus-visible,
+        .pin-card select:focus-visible {
+            outline: 3px solid rgba(37, 99, 235, 0.45);
+            outline-offset: 1px;
+            border-color: #2563eb;
+        }
+
+        .review-form input::placeholder,
+        .rapid-current-form input::placeholder,
+        .rapid-current-form textarea::placeholder {
+            color: #7b8a99;
+        }
+
+        /* logical progression: numbered step headers read as milestones on
+           the way to submit */
+        #detailPanel h3 {
+            margin: 18px 0 8px;
+            padding: 6px 10px;
+            border-left: 5px solid #1d4ed8;
+            border-radius: 0 6px 6px 0;
+            background: #eff6ff;
+            color: #1e3a5f;
+            font-size: 15px;
+        }
+
+        /* colour code: amber-tinted boxes must be filled, grey blocks are
+           optional; related fields stay together either way */
+        label:has(> .req-chip) input,
+        label:has(> .req-chip) select,
+        label:has(> .req-chip) textarea {
+            border-color: #b45309;
+            background: #fffdf6;
+        }
+
+        .rapid-choice-group {
+            border-left: 4px solid #d97706;
+            padding-left: 10px;
+            border-radius: 2px;
+        }
+
+        .optional-block {
+            border: 1px solid #d5dde5;
+            border-radius: 6px;
+            background: #f6f8fa;
+            padding: 8px 10px;
+        }
+
+        .optional-block > summary {
+            color: #526477;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* the submit row closes the progression with a clear boundary */
+        .rapid-current-form .button-row,
+        .review-form .button-row {
+            border-top: 2px solid #e2e8f0;
+            padding-top: 12px;
+            margin-top: 6px;
+        }
+
         .history-count {
             margin: 10px 0;
             color: #145a32;
@@ -1643,7 +2185,9 @@
                 var params = new URLSearchParams(window.location.search);
                 var fullMap = params.get("full") === "1" || params.get("batch") === "all";
                 if (!fullMap) {
-                    document.body.classList.add("assignment-mode");
+                    // signed-out portal shows only the header and the
+                    // sign-in card; js lifts the class once a user is known
+                    document.body.classList.add("assignment-mode", "portal-signed-out");
                 }
             } catch (error) {
                 // URLSearchParams missing on very old browsers; skip and let JS handle it
@@ -1655,16 +2199,26 @@
             <header class="sidebar-header">
                 <h1>NZ OSM Verification</h1>
                 <p><span id="snapshotId">Connecting...</span></p>
+                <!-- cross-map links confused RAs mid-task (JB 2026-08-31):
+                     one Exit to the public map, plus the guide -->
                 <div class="nav-links">
-                    <a href="./">NZ map</a>
-                    <a href="../../global/">Global map</a>
+                    <a href="../../global/">Exit</a>
                     <a href="https://religionmap.org/apps/guides/ra.html" target="_blank" rel="noopener">Guide</a>
                 </div>
-                <div class="sidebar-actions"><button type="button" id="addPlaceButton" class="primary-action">＋ Add a place that's missing</button></div>
                 <div id="modeNotice" class="pilot-note"></div>
             </header>
 
             <section id="backendPanel" class="backend-panel"></section>
+
+            <!-- signed-in chooser (assigned tasks / add places) and the
+                 per-mode bar with the way back; both rendered by js -->
+            <section id="portalChooser" class="portal-chooser" hidden></section>
+            <section id="portalModeBar" class="portal-mode-bar" hidden></section>
+
+            <div class="sidebar-actions">
+                <button type="button" id="addPlaceButton" class="primary-action">＋ Add a missing place</button>
+                <p class="sidebar-actions-help">Goes to human review — not straight to the public map.</p>
+            </div>
 
             <div id="quickstartBanner"></div>
 
@@ -1736,6 +2290,7 @@
             <section id="sessionPanel" class="session-panel"></section>
             <section id="nominationPanel" class="nomination-panel"></section>
             <section id="pinCardHost" class="pin-card-host" hidden></section>
+            <section id="nominationsPanel" class="nominations-panel" aria-label="My nominations"></section>
             <section id="detailPanel" class="detail-panel" tabindex="-1"></section>
         </aside>
 
@@ -1745,11 +2300,14 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
+    <!-- public keys: the satellite basemap reads window.MAPTILER_API_KEY and
+         hides itself when the key is absent -->
+    <script src="../../global/config.public.js"></script>
     <script src="js/convex-config.js?v=20260707-changes-requested"></script>
-    <script src="js/convex-task-client.js?v=20260828a"></script>
-    <script src="js/rapid-entry-contract.js?v=20260826a"></script>
+    <script src="js/convex-task-client.js?v=20260831b"></script>
+    <script src="js/rapid-entry-contract.js?v=20260901a"></script>
     <script src="js/historical-claim-contract.js?v=20260828a"></script>
     <script src="js/location-assertion-contract.js?v=20260828a"></script>
-    <script src="js/verification-map.js?v=20260828e"></script>
+    <script src="js/verification-map.js?v=20260901a"></script>
 </body>
 </html>

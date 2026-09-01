@@ -305,6 +305,15 @@ export const sourceType = v.union(
 
 export const targetYearStatusSet = v.record(v.string(), targetYearStatus);
 
+// per-year confidence in the recorded status; only assessed years carry one
+export const targetYearConfidence = v.union(
+  v.literal("high"),
+  v.literal("medium"),
+  v.literal("low"),
+);
+
+export const targetYearConfidenceSet = v.record(v.string(), targetYearConfidence);
+
 export const targetYearEvidenceSet = v.record(v.string(), v.string());
 
 export const targetYearAffect = v.object({
@@ -376,6 +385,7 @@ export const evidenceDraftInput = v.object({
   action: v.optional(v.string()),
   change_class: v.optional(changeClass),
   target_year_statuses: v.optional(targetYearStatusSet),
+  target_year_confidence: v.optional(targetYearConfidenceSet),
   target_year_evidence: v.optional(targetYearEvidenceSet),
   existence_status: v.optional(v.string()),
   worship_use_status: v.optional(v.string()),

@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  COUNTRY_INTAKE_BOUNDS,
+  assertCountryIntakePoint,
+  manualBatchId,
   assertNotRapidContract,
   assertRapidCandidateContext,
   assertRapidDerivedConsistency,
   assertRapidSubmissionId,
-  assertVanuatuPoint,
   deriveCurrentObservation,
   isRapidCurrentDraft,
   sourceFieldsForObservationBasis,
@@ -56,10 +58,38 @@ test("submission identifiers must be UUID v4 values", () => {
   assert.throws(() => assertRapidSubmissionId("predictable-1"), /submission identifier is invalid/);
 });
 
-test("candidate points must fall inside the Vanuatu intake area", () => {
-  assert.doesNotThrow(() => assertVanuatuPoint(-17.7333, 168.3273));
-  assert.throws(() => assertVanuatuPoint(-41.2865, 174.7762), /outside the Vanuatu intake area/);
-  assert.throws(() => assertVanuatuPoint(Number.NaN, 168), /finite coordinates/);
+test("vanuatu candidate points keep the release-one bounds and errors", () => {
+  assert.doesNotThrow(() => assertCountryIntakePoint("VU", -17.7333, 168.3273));
+  assert.throws(() => assertCountryIntakePoint("VU", -41.2865, 174.7762), /outside the Vanuatu intake area/);
+  assert.throws(() => assertCountryIntakePoint("VU", Number.NaN, 168), /finite coordinates/);
+});
+
+test("new zealand points are accepted on both sides of the antimeridian", () => {
+  // wellington, auckland, invercargill on the eastern-hemisphere side
+  assert.doesNotThrow(() => assertCountryIntakePoint("NZ", -41.2865, 174.7762));
+  assert.doesNotThrow(() => assertCountryIntakePoint("NZ", -36.8485, 174.7633));
+  assert.doesNotThrow(() => assertCountryIntakePoint("NZ", -46.4132, 168.3538));
+  // chatham islands sit past 180, reported as negative longitude
+  assert.doesNotThrow(() => assertCountryIntakePoint("NZ", -43.9535, -176.5597));
+  // lower-case codes normalise to the registry key
+  assert.doesNotThrow(() => assertCountryIntakePoint("nz", -41.2865, 174.7762));
+});
+
+test("points outside the new zealand box are rejected", () => {
+  // sydney: west of the box
+  assert.throws(() => assertCountryIntakePoint("NZ", -33.8688, 151.2093), /outside the New Zealand intake area/);
+  // port vila: north of the box
+  assert.throws(() => assertCountryIntakePoint("NZ", -17.7333, 168.3273), /outside the New Zealand intake area/);
+  // south of the box, below the chathams
+  assert.throws(() => assertCountryIntakePoint("NZ", -50.5, 166.0), /outside the New Zealand intake area/);
+  // east of the wrapped edge (-176), beyond the chathams
+  assert.throws(() => assertCountryIntakePoint("NZ", -43.9, -170.0), /outside the New Zealand intake area/);
+  assert.throws(() => assertCountryIntakePoint("NZ", Number.NaN, 174), /finite coordinates/);
+});
+
+test("countries without a declared intake ruling are refused, not defaulted open", () => {
+  assert.throws(() => assertCountryIntakePoint("AU", -33.8688, 151.2093), /Rapid entry is not yet enabled for AU\./);
+  assert.throws(() => assertCountryIntakePoint("xx", 0, 0), /Rapid entry is not yet enabled for XX\./);
 });
 
 test("new candidates require building-level placement and a nearby-place check", () => {
@@ -169,4 +199,19 @@ test("general write routes reject the rapid contract and its fields", () => {
     () => assertNotRapidContract({ current_observation_basis: "other" }, "the general submission route"),
     /general submission route/,
   );
+});
+
+test("out-of-range longitudes normalise before the bounds test", () => {
+  // leaflet's continuous world: a chatham islands pin reached by panning
+  // east across the antimeridian arrives as about +183.4
+  assert.doesNotThrow(() => assertCountryIntakePoint("NZ", -43.95, 183.44));
+  assert.doesNotThrow(() => assertCountryIntakePoint("NZ", -43.95, -176.56));
+  assert.throws(() => assertCountryIntakePoint("NZ", -43.95, 190.1), /outside the New Zealand intake area/);
+});
+
+test("the nomination-batch contract and assigned-rapid flag are declared once", () => {
+  assert.equal(manualBatchId("VU"), "manual-vu");
+  assert.equal(manualBatchId("nz"), "manual-nz");
+  assert.equal(COUNTRY_INTAKE_BOUNDS.VU.assignedRapid, true);
+  assert.equal(COUNTRY_INTAKE_BOUNDS.NZ.assignedRapid, undefined);
 });

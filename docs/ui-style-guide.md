@@ -10,8 +10,13 @@ The live reference today is `apps/regions/nz/verification.html` and
 
 ## Product Wording
 
-- Use `Nominate missing PoW`, not `Add to map`, for user-created candidate
-  intake.
+- Use `＋ Add a missing place`, not `Add to map`, for user-created candidate
+  intake (ruled 2026-08-29). One label serves every country, rapid entry
+  included. Pair it with the helper line "Your nomination goes to human
+  review — it does not change the public map.", which carries the nomination
+  semantics the older `Nominate missing PoW` label expressed. Treat
+  `Nominate missing PoW` as a legacy technical label where it survives in
+  code or older documents.
 - Use `Save draft` when the RA is still gathering evidence.
 - Use `Submit for review` when the RA wants JB or a reviewer to inspect the
   evidence.
@@ -35,6 +40,31 @@ The map interface has two primary regions:
   state, and task detail.
 - `#map`: the map and spatial task markers.
 
+The contributor portal (assignment mode) gates its sidebar behind sign-in
+(ruled 2026-08-29). Signed out, the sidebar shows only the header and the
+sign-in card; the map stays visible for read-only browsing. After sign-in a
+chooser offers two activities — `Assigned tasks` and `Add places` — and the
+sidebar then shows only the chosen activity's sections. A `← Change activity`
+link returns to the chooser; the choice persists for the tab
+(`sessionStorage`), so a reload lands where the contributor was.
+
+The map offers `Streets` (OSM standard tiles), `Hybrid` (MapTiler imagery
+with street and place labels), and `Satellite` (bare MapTiler imagery)
+basemaps through a small pill control. Add-places mode prefers hybrid once
+buildings are resolvable and switches to it when pin placement starts, so
+contributors can guide the pin onto the actual building without losing
+street-name orientation; a manual toggle choice wins for the rest of the
+session. The imagery options hide when no MapTiler key is configured, and
+the portal falls back to streets (disabling the imagery buttons) when the
+key is refused or exhausted.
+
+Assigned-task work and pure entry are separate activities (ruled
+2026-08-31): the assignment sheet lists only the batch's tasks, while the
+contributor's own nominations live in a teal `My nominations` panel in Add
+places. Nominations always stay on the map — as dashed teal rings while
+healthy, keeping their validation-state ring once disputed or validated —
+so the duplicate check and the route back to them survive the separation.
+
 Keep the sidebar dense but readable. This is a workbench, not a landing page.
 Avoid hero copy, decorative cards, and explanatory blocks that push the task
 list below the fold.
@@ -56,6 +86,7 @@ Do not reuse these colours for unrelated meanings.
 | Not assessed | `.status-not-assessed` | pale blue, currently around `#e8f1fb`, `#1f4e79` |
 | Warning or demo-only message | `.demo-warning` | amber warning |
 | Disabled or unavailable state | `.disabled-panel`, `.backend-card.disabled` | light grey |
+| Pure data entry (nominations, walk-up records) — containers only, never the action button | `.portal-mode-bar.mode-add`, `.nominations-panel`, `.entry-badge`, `.task-row.entry-card`, `.pin-card-host`, `.verification-marker.vm-nomination`, `.legend-dot.vm-nomination-swatch`, `.chooser-option#chooseAddButton strong` | teal, `--entry` `#0f766e`, `--entry-ink` `#115e59`, `--entry-bg` `#e6f4f1` (JB separation ruling, 2026-08-31) |
 
 If these colours change, update both the CSS and this table. On
 `verification.html` these meanings now live as CSS custom properties in the

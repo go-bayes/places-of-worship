@@ -46,15 +46,54 @@ check("named source needs a reference", /source URL/.test(rapid.validateObservat
   observationBasis: "named_public_source",
   sourceTitle: "Vanuatu Council of Churches directory",
 })));
-check("denomination wording needs a basis", /wording came from/.test(rapid.validateObservation({
+check("denomination wording with unknown provenance still submits", rapid.validateObservation({
   ...valid,
   denominationRaw: "Example Fellowship",
   denominationLabelBasis: "unknown",
-})));
+}) === "");
+check("unknown-provenance wording records basis unknown", rapid.observationPayload({
+  ...valid,
+  denominationRaw: "Example Fellowship",
+  denominationLabelBasis: "unknown",
+}).denomination_label_basis === "unknown");
 
 const payload = rapid.observationPayload({ ...valid, directObservation: "  Sign and regular service times displayed.  " });
 check("payload trims direct observation", payload.direct_observation === "Sign and regular service times displayed.");
 check("empty optional values are omitted", payload.source_title === undefined);
+
+const detailed = rapid.validateObservationDetailed({ ...valid, currentStatus: "" });
+check("detailed validation names the field", detailed.field === "CurrentStatus" && /Choose what/.test(detailed.message));
+check("detailed validation passes clean input", rapid.validateObservationDetailed(valid) === null);
+
+const flaggedPartial = {
+  observedOn: "2026-08-26",
+  privacyFlag: "needs_review",
+  flagForDiscussion: true,
+  discussionNote: "This place is recorded twice on the map.",
+};
+check("flagged partial entry validates without status or basis", rapid.validateObservationDetailed(flaggedPartial, { flagForDiscussion: true }) === null);
+check("flagged entry requires a discussion note", (() => {
+  const error = rapid.validateObservationDetailed({ ...flaggedPartial, discussionNote: "" }, { flagForDiscussion: true });
+  return error?.field === "DiscussionNote";
+})());
+check("flagged entry still validates dates", (() => {
+  const error = rapid.validateObservationDetailed({ ...flaggedPartial, observedOn: "2100-01-01" }, { flagForDiscussion: true });
+  return error?.field === "ObservedOn";
+})());
+
+const flaggedPayload = rapid.observationPayload(flaggedPartial, { flagForDiscussion: true });
+check("flagged payload lands as could-not-determine", flaggedPayload.current_status === "could_not_determine");
+check("flagged payload keeps a controlled basis", flaggedPayload.observation_basis === "other");
+check("flagged payload carries the discussion note", /^For discussion: This place is recorded twice/.test(flaggedPayload.uncertainty_note));
+check("flagged named source without title falls back to other", rapid.observationPayload({
+  ...flaggedPartial,
+  observationBasis: "named_public_source",
+}, { flagForDiscussion: true }).observation_basis === "other");
+check("unflagged payload is unchanged by the flag options", rapid.observationPayload({ ...valid, uncertaintyNote: "Original doubt." }).uncertainty_note === "Original doubt.");
+check("flagged discussion appends after existing uncertainty", rapid.observationPayload({
+  ...flaggedPartial,
+  uncertaintyNote: "Original doubt.",
+}, { flagForDiscussion: true }).uncertainty_note === "Original doubt.\nFor discussion: This place is recorded twice on the map.");
 
 console.log(failures === 0 ? "ALL RAPID ENTRY TESTS PASSED" : `${failures} FAILURES`);
 process.exit(failures === 0 ? 0 : 1);

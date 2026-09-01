@@ -50,6 +50,7 @@
         authPanel: document.getElementById("authPanel"),
         authStatus: document.getElementById("authStatus"),
         detailPanel: document.getElementById("detailPanel"),
+        queueGroupBy: document.getElementById("queueGroupBy"),
         queueList: document.getElementById("queueList"),
         queueStatus: document.getElementById("queueStatus"),
         queueStatusText: document.getElementById("queueStatusText"),
@@ -185,7 +186,7 @@
         return escapeHtml(text);
     }
 
-    function targetYearTable(statuses, evidence) {
+    function targetYearTable(statuses, evidence, confidence) {
         const entries = Object.entries(statuses || {});
         if (entries.length === 0) {
             return `<p class="muted">No target-year statuses recorded.</p>`;
@@ -197,6 +198,7 @@
                         <div>${escapeHtml(year)}</div>
                         <div>
                             <span class="pill ${status === "present" ? "green" : status === "uncertain" ? "amber" : ""}">${escapeHtml(status)}</span>
+                            ${confidence?.[year] ? `<span class="pill">${escapeHtml(confidence[year])} confidence</span>` : ""}
                             ${evidence?.[year] ? `<p>${escapeHtml(evidence[year])}</p>` : ""}
                         </div>
                     `)
@@ -305,18 +307,39 @@
             els.queueList.innerHTML = `<div class="empty">No tasks in this queue.</div>`;
             return;
         }
-        els.queueList.innerHTML = state.queue
-            .map(({ task, latestDraft, latestReview, latestAgentReview }) => `
-                <button class="task-button ${state.selected?.task?.task_id === task.task_id ? "active" : ""}"
-                    type="button"
-                    data-task-id="${escapeHtml(task.task_id)}">
-                    <strong>${escapeHtml(task.name)}</strong>
-                    <span class="muted">${escapeHtml(taskSubtitle(task))}</span>
-                    <span class="pill-row">${taskPills(task, latestDraft, latestAgentReview)}</span>
-                    ${latestReview?.decision_status ? `<span class="muted">Last decision: ${escapeHtml(decisionLabel(latestReview.decision_status))}</span>` : ""}
-                </button>
-            `)
-            .join("");
+        const taskButton = ({ task, latestDraft, latestReview, latestAgentReview }) => `
+            <button class="task-button ${state.selected?.task?.task_id === task.task_id ? "active" : ""}"
+                type="button"
+                data-task-id="${escapeHtml(task.task_id)}">
+                <strong>${escapeHtml(task.name)}</strong>
+                <span class="muted">${escapeHtml(taskSubtitle(task))}</span>
+                <span class="pill-row">${taskPills(task, latestDraft, latestAgentReview)}</span>
+                ${latestReview?.decision_status ? `<span class="muted">Last decision: ${escapeHtml(decisionLabel(latestReview.decision_status))}</span>` : ""}
+            </button>
+        `;
+        const groupBy = els.queueGroupBy?.value || "";
+        if (!groupBy) {
+            els.queueList.innerHTML = state.queue.map(taskButton).join("");
+        } else {
+            // group by the submitting contributor or the last reviewer, with
+            // named groups alphabetical and unattributed rows at the end
+            const sentinel = groupBy === "contributor" ? "No submission on record" : "Not yet reviewed";
+            const labelOf = (row) => (groupBy === "contributor" ? row.contributor_label : row.reviewer_label) || sentinel;
+            const groups = new Map();
+            state.queue.forEach((row) => {
+                const label = labelOf(row);
+                if (!groups.has(label)) groups.set(label, []);
+                groups.get(label).push(row);
+            });
+            const named = [...groups.keys()].filter((label) => label !== sentinel).sort();
+            const rest = groups.has(sentinel) ? [sentinel] : [];
+            els.queueList.innerHTML = [...named, ...rest]
+                .map((label) => `
+                    <div class="queue-group-header">${escapeHtml(label)} <span class="muted">(${groups.get(label).length})</span></div>
+                    ${groups.get(label).map(taskButton).join("")}
+                `)
+                .join("");
+        }
         els.queueList.querySelectorAll(".task-button").forEach((button) => {
             button.addEventListener("click", () => selectTask(button.dataset.taskId));
         });
@@ -329,18 +352,22 @@
         state.drafts = [];
         state.historicalClaims = [];
         state.events = [];
+        state.attachments = [];
         state.agentAgreementChoice = null;
         renderQueue();
         renderDetail(true);
         try {
-            const [drafts, historicalClaims, events] = await Promise.all([
+            const [drafts, historicalClaims, events, attachments] = await Promise.all([
                 client.listTaskEvidence({ taskId, limit: 20 }),
                 client.listTaskHistoricalClaims({ taskId, limit: 100 }),
                 client.getTaskEvents({ taskId, limit: 50 }),
+                // deployments without a bucket simply show no files section
+                client.listTaskAttachments({ taskId }).catch(() => []),
             ]);
             state.drafts = drafts || [];
             state.historicalClaims = historicalClaims || [];
             state.events = events || [];
+            state.attachments = attachments || [];
             renderDetail(false);
         } catch (error) {
             renderDetail(false, error.message || "Could not load task details.");
@@ -470,7 +497,7 @@
 
             <section class="panel">
                 <h3>Target-year statuses</h3>
-                ${draft ? targetYearTable(draft.target_year_statuses, draft.target_year_evidence) : `<p class="muted">No target-year statuses recorded.</p>`}
+                ${draft ? targetYearTable(draft.target_year_statuses, draft.target_year_evidence, draft.target_year_confidence) : `<p class="muted">No target-year statuses recorded.</p>`}
             </section>
 
             <section class="panel">
@@ -501,6 +528,20 @@
                         </details>
                     `).join("")}
                 <p class="muted">These provisional claims remain distinct evidence for review. They do not fill target-year states or become accepted events automatically.</p>
+            </section>
+
+            <section class="panel">
+                <h3>Evidence files</h3>
+                ${state.attachments.length === 0
+                    ? `<p class="muted">No photos or documents were added for this task.</p>`
+                    : state.attachments.map((file) => `
+                        <p>
+                            ${escapeHtml(file.content_type === "application/pdf" ? "PDF" : "Photo")}
+                            · ${Math.max(1, Math.round(file.byte_size / 1024))} KB
+                            ${file.caption ? `— ${escapeHtml(file.caption)}` : ""}
+                            <button type="button" class="attachment-open" data-attachment-id="${escapeHtml(file.attachment_id)}">Open</button>
+                        </p>
+                    `).join("")}
             </section>
 
             ${window.PowAgentReviewPanel ? window.PowAgentReviewPanel.panelHtml(agentReview) : ""}
@@ -536,6 +577,21 @@
             form.addEventListener("submit", submitDecision);
         }
         wireAgentReviewPanel(form, agentReview);
+        // evidence files open through a fresh short-lived url per click —
+        // nothing in the page holds a durable link to the private bucket
+        els.detailPanel.querySelectorAll(".attachment-open").forEach((button) => {
+            button.addEventListener("click", async () => {
+                button.disabled = true;
+                try {
+                    const grant = await client.requestAttachmentView({ attachmentId: button.dataset.attachmentId });
+                    window.open(grant.view_url, "_blank", "noopener");
+                } catch (error) {
+                    button.textContent = "Could not open";
+                } finally {
+                    button.disabled = false;
+                }
+            });
+        });
     }
 
     // the explicit affordances on the AI recommendation: prefill-and-agree
@@ -792,6 +848,7 @@
             renderEmptyDetail("Select a submitted task after the queue loads.");
             loadQueue();
         });
+        els.queueGroupBy?.addEventListener("change", () => renderQueue());
         renderAuth();
         renderQueue();
     }

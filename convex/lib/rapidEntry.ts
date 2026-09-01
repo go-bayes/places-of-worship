@@ -16,12 +16,39 @@ export type DerivedCurrentObservation = {
   worship_use_status: "confirmed_worship" | "not_worship" | "uncertain";
 };
 
-const VANUATU_BOUNDS = {
-  west: 166.491,
-  south: -20.303,
-  east: 170.289,
-  north: -13.022,
+export type CountryIntakeBounds = {
+  name: string;
+  west: number;
+  south: number;
+  east: number;
+  north: number;
+  // true only where the country's assigned batch itself uses the rapid
+  // design; nominations are rapid-eligible in every registry country
+  assignedRapid?: boolean;
 };
+
+// closed per-country registry of rapid-intake bounding boxes, keyed by
+// upper-case iso2 code. a country absent here refuses rapid intake rather
+// than defaulting open; enabling a country is a deliberate bounds ruling
+// (jb, 2026-08-31). an east edge greater than 180 marks a box that crosses
+// the antimeridian and is read as east - 360 on the wrapped side.
+export const COUNTRY_INTAKE_BOUNDS: Record<string, CountryIntakeBounds> = {
+  // assignedRapid: the country's ASSIGNED batch is designed source-first,
+  // so rapid observations are accepted on its existing batch tasks; for
+  // every other country the rapid task path is restricted to the
+  // country's manual nomination batch (jb separation ruling 2026-08-31)
+  VU: { name: "Vanuatu", west: 166.491, south: -20.303, east: 170.289, north: -13.022, assignedRapid: true },
+  // nz includes the chatham islands near 176.5°W, so the box crosses the
+  // antimeridian: a longitude is inside when it falls in [165.5, 180] or
+  // in the wrapped run [-180, -176] (east 184 - 360)
+  NZ: { name: "New Zealand", west: 165.5, south: -47.5, east: 184.0, north: -34.0 },
+};
+
+// one home for the nomination-batch naming contract shared by the rapid
+// candidate path, createManualCandidateTask, and the portal
+export function manualBatchId(countryCode: string): string {
+  return `manual-${countryCode.toLowerCase()}`;
+}
 
 export type RapidCandidateContext = {
   placement_zoom?: number;
@@ -98,18 +125,44 @@ export function assertRapidSubmissionId(value: string): void {
   }
 }
 
-// Vanuatu rapid entry is deliberately country-scoped in its first release.
-export function assertVanuatuPoint(latitude: number, longitude: number): void {
+// resolves a country's intake bounds; the closed registry, not the caller,
+// decides which countries accept rapid intake at all
+export function countryIntakeBounds(countryCode: string): CountryIntakeBounds {
+  const bounds = COUNTRY_INTAKE_BOUNDS[countryCode.toUpperCase()];
+  if (bounds === undefined) {
+    throw new Error(`Rapid entry is not yet enabled for ${countryCode.toUpperCase()}.`);
+  }
+  return bounds;
+}
+
+function longitudeWithinBounds(bounds: CountryIntakeBounds, longitude: number): boolean {
+  // leaflet's world is continuous, so a pin dropped after panning across
+  // the antimeridian arrives as e.g. +183.4; normalise to [-180, 180)
+  // before testing so a point inside the box is never refused
+  longitude = ((longitude + 180) % 360 + 360) % 360 - 180;
+  if (bounds.east <= 180) {
+    return longitude >= bounds.west && longitude <= bounds.east;
+  }
+  // antimeridian-crossing box: the eastern-hemisphere run up to 180 plus
+  // the wrapped western-hemisphere run from -180 to east - 360
+  return (
+    (longitude >= bounds.west && longitude <= 180)
+    || (longitude >= -180 && longitude <= bounds.east - 360)
+  );
+}
+
+// a new candidate point must fall inside its country's declared intake box
+export function assertCountryIntakePoint(countryCode: string, latitude: number, longitude: number): void {
+  const bounds = countryIntakeBounds(countryCode);
   if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
     throw new Error("The candidate location must contain finite coordinates.");
   }
   if (
-    longitude < VANUATU_BOUNDS.west
-    || longitude > VANUATU_BOUNDS.east
-    || latitude < VANUATU_BOUNDS.south
-    || latitude > VANUATU_BOUNDS.north
+    latitude < bounds.south
+    || latitude > bounds.north
+    || !longitudeWithinBounds(bounds, longitude)
   ) {
-    throw new Error("The candidate location falls outside the Vanuatu intake area.");
+    throw new Error(`The candidate location falls outside the ${bounds.name} intake area.`);
   }
 }
 
@@ -167,14 +220,14 @@ export function assertRapidDerivedConsistency(draft: RapidDraftShape): void {
   }
 }
 
-// only rapidEntry:submitVanuatuCurrentObservation may create or replace a
+// only rapidEntry:submitCurrentObservation may create or replace a
 // rapid observation; every other write route rejects the contract and its
 // fields so a client cannot reach the rapid record through a generic door
 export function assertNotRapidContract(draft: RapidDraftShape | null | undefined, route: string): void {
   if (draft === null || draft === undefined) return;
   if (isRapidCurrentDraft(draft) || draft.current_observation_status || draft.current_observation_basis) {
     throw new Error(
-      `Rapid current observations cannot be written through ${route}. Use the Vanuatu rapid-entry submission, which keeps the original observation on record.`,
+      `Rapid current observations cannot be written through ${route}. Use the rapid-entry submission, which keeps the original observation on record.`,
     );
   }
 }

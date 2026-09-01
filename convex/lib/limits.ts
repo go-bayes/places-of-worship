@@ -27,6 +27,7 @@ type EvidenceDraftLimitInput = {
   action?: string;
   change_class?: string;
   target_year_statuses?: unknown;
+  target_year_confidence?: unknown;
   target_year_evidence?: unknown;
   existence_status?: string;
   worship_use_status?: string;
@@ -110,6 +111,7 @@ export function assertEvidenceDraftLimits(draft: EvidenceDraftLimitInput): void 
   assertMaxString("current observation status", draft.current_observation_status, SHORT_TEXT_MAX);
   assertMaxString("current observation basis", draft.current_observation_basis, SHORT_TEXT_MAX);
   assertMaxJson("target-year statuses", draft.target_year_statuses, VALIDATION_SUMMARY_MAX);
+  assertMaxJson("target-year confidence", draft.target_year_confidence, VALIDATION_SUMMARY_MAX);
   assertMaxJson("target-year evidence", draft.target_year_evidence, VALIDATION_SUMMARY_MAX);
   assertMaxJson("generated wide row", draft.generated_wide_row, GENERATED_ROW_MAX);
   assertMaxJson("validation summary", draft.validation_summary, VALIDATION_SUMMARY_MAX);
@@ -152,12 +154,8 @@ export function assertRapidCurrentObservation(draft: EvidenceDraftLimitInput): v
   if (basis === "local_investigator_account" && directObservation.length < 5) {
     throw new Error("A local investigator account requires a short direct observation.");
   }
-  if (
-    draft.denomination_or_tradition_raw?.trim()
-    && (!draft.denomination_label_basis || draft.denomination_label_basis === "unknown")
-  ) {
-    throw new Error("Choose where the denomination or tradition wording came from.");
-  }
+  // denomination wording with unknown provenance is recorded as unknown
+  // rather than rejected (jb 2026-09-01: the label is genuinely optional)
   if (status === "could_not_determine" && uncertainty.length < 12) {
     throw new Error("Explain what remains uncertain before submitting this observation.");
   }
@@ -201,6 +199,15 @@ export function assertEvidenceDraftSubmission(draft: EvidenceDraftLimitInput, un
   const sourceDate = draft.source_date_or_capture_date?.trim() ?? "";
   const lifecycleDate = draft.lifecycle_date?.trim() ?? "";
   const lifecyclePrecision = draft.lifecycle_date_precision?.trim() ?? "";
+
+  // confidence annotates an assessed year; it cannot stand alone
+  const confidenceYearStatuses = (draft.target_year_statuses as Record<string, unknown> | undefined) ?? {};
+  const yearConfidence = (draft.target_year_confidence as Record<string, unknown> | undefined) ?? {};
+  for (const year of Object.keys(yearConfidence)) {
+    if ((confidenceYearStatuses[year] ?? "not_assessed") === "not_assessed") {
+      throw new Error(`Confidence for ${year} requires an assessed status for that year.`);
+    }
+  }
 
   if (isRapidCurrent) {
     assertRapidCurrentObservation(draft);
