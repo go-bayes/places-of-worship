@@ -50,6 +50,7 @@
         authPanel: document.getElementById("authPanel"),
         authStatus: document.getElementById("authStatus"),
         detailPanel: document.getElementById("detailPanel"),
+        queueGroupBy: document.getElementById("queueGroupBy"),
         queueList: document.getElementById("queueList"),
         queueStatus: document.getElementById("queueStatus"),
         queueStatusText: document.getElementById("queueStatusText"),
@@ -185,7 +186,7 @@
         return escapeHtml(text);
     }
 
-    function targetYearTable(statuses, evidence) {
+    function targetYearTable(statuses, evidence, confidence) {
         const entries = Object.entries(statuses || {});
         if (entries.length === 0) {
             return `<p class="muted">No target-year statuses recorded.</p>`;
@@ -197,6 +198,7 @@
                         <div>${escapeHtml(year)}</div>
                         <div>
                             <span class="pill ${status === "present" ? "green" : status === "uncertain" ? "amber" : ""}">${escapeHtml(status)}</span>
+                            ${confidence?.[year] ? `<span class="pill">${escapeHtml(confidence[year])} confidence</span>` : ""}
                             ${evidence?.[year] ? `<p>${escapeHtml(evidence[year])}</p>` : ""}
                         </div>
                     `)
@@ -305,18 +307,39 @@
             els.queueList.innerHTML = `<div class="empty">No tasks in this queue.</div>`;
             return;
         }
-        els.queueList.innerHTML = state.queue
-            .map(({ task, latestDraft, latestReview, latestAgentReview }) => `
-                <button class="task-button ${state.selected?.task?.task_id === task.task_id ? "active" : ""}"
-                    type="button"
-                    data-task-id="${escapeHtml(task.task_id)}">
-                    <strong>${escapeHtml(task.name)}</strong>
-                    <span class="muted">${escapeHtml(taskSubtitle(task))}</span>
-                    <span class="pill-row">${taskPills(task, latestDraft, latestAgentReview)}</span>
-                    ${latestReview?.decision_status ? `<span class="muted">Last decision: ${escapeHtml(decisionLabel(latestReview.decision_status))}</span>` : ""}
-                </button>
-            `)
-            .join("");
+        const taskButton = ({ task, latestDraft, latestReview, latestAgentReview }) => `
+            <button class="task-button ${state.selected?.task?.task_id === task.task_id ? "active" : ""}"
+                type="button"
+                data-task-id="${escapeHtml(task.task_id)}">
+                <strong>${escapeHtml(task.name)}</strong>
+                <span class="muted">${escapeHtml(taskSubtitle(task))}</span>
+                <span class="pill-row">${taskPills(task, latestDraft, latestAgentReview)}</span>
+                ${latestReview?.decision_status ? `<span class="muted">Last decision: ${escapeHtml(decisionLabel(latestReview.decision_status))}</span>` : ""}
+            </button>
+        `;
+        const groupBy = els.queueGroupBy?.value || "";
+        if (!groupBy) {
+            els.queueList.innerHTML = state.queue.map(taskButton).join("");
+        } else {
+            // group by the submitting contributor or the last reviewer, with
+            // named groups alphabetical and unattributed rows at the end
+            const labelOf = (row) => (groupBy === "contributor" ? row.contributor_label : row.reviewer_label)
+                || (groupBy === "contributor" ? "No submission on record" : "Not yet reviewed");
+            const groups = new Map();
+            state.queue.forEach((row) => {
+                const label = labelOf(row);
+                if (!groups.has(label)) groups.set(label, []);
+                groups.get(label).push(row);
+            });
+            const named = [...groups.keys()].filter((label) => !label.startsWith("No") && !label.startsWith("Not")).sort();
+            const rest = [...groups.keys()].filter((label) => !named.includes(label));
+            els.queueList.innerHTML = [...named, ...rest]
+                .map((label) => `
+                    <div class="queue-group-header">${escapeHtml(label)} <span class="muted">(${groups.get(label).length})</span></div>
+                    ${groups.get(label).map(taskButton).join("")}
+                `)
+                .join("");
+        }
         els.queueList.querySelectorAll(".task-button").forEach((button) => {
             button.addEventListener("click", () => selectTask(button.dataset.taskId));
         });
@@ -474,7 +497,7 @@
 
             <section class="panel">
                 <h3>Target-year statuses</h3>
-                ${draft ? targetYearTable(draft.target_year_statuses, draft.target_year_evidence) : `<p class="muted">No target-year statuses recorded.</p>`}
+                ${draft ? targetYearTable(draft.target_year_statuses, draft.target_year_evidence, draft.target_year_confidence) : `<p class="muted">No target-year statuses recorded.</p>`}
             </section>
 
             <section class="panel">
@@ -825,6 +848,7 @@
             renderEmptyDetail("Select a submitted task after the queue loads.");
             loadQueue();
         });
+        els.queueGroupBy?.addEventListener("change", () => renderQueue());
         renderAuth();
         renderQueue();
     }

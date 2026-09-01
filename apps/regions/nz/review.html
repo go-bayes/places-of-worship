@@ -186,6 +186,16 @@
             overflow: auto;
         }
 
+        .queue-group-header {
+            margin: 12px 0 4px;
+            padding: 5px 8px;
+            border-left: 4px solid var(--accent, #1d4ed8);
+            background: #eff6ff;
+            border-radius: 0 6px 6px 0;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
         .task-button {
             width: 100%;
             border: 1px solid var(--line);
@@ -424,6 +434,14 @@
                             <option value="provisionally_closed">provisionally closed</option>
                             <option value="reviewed">reviewed</option>
                             <option value="exported">exported</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="queueGroupBy">Arrange by</label>
+                        <select id="queueGroupBy">
+                            <option value="">newest first</option>
+                            <option value="contributor">contributor</option>
+                            <option value="reviewer">last reviewer</option>
                         </select>
                     </div>
                     <button id="refreshQueue" class="secondary" type="button">Refresh</button>
