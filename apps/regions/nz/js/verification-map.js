@@ -3677,7 +3677,7 @@ class NzVerificationMap {
                 <div class="${this.backend?.configured ? "pilot-note" : "demo-warning"}" role="${this.backend?.configured ? "note" : "alert"}">
                     ${this.backend?.configured
                         ? this.portalMode === "add"
-                            ? `Use <strong>＋ Add a missing place</strong> above, then find the building by searching a name or address, typing coordinates, or clicking the map. Drag the pin onto the building before confirming. To revise a place already recorded, click its grey dot and choose "Report an issue here".`
+                            ? `Use <strong>＋ Add a missing place</strong> above, then find the building by searching a name or address, typing coordinates, or clicking the map. Drag the pin onto the building before confirming. To revise a place already recorded, click its grey dot and choose "Revise or report an issue".`
                             : RAPID_ASSIGNED_ENTRY
                                 ? `Work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. For each place, choose one current-status answer, record how you know it, and use <em>Submit for review</em>.`
                                 : `Work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when useful evidence remains incomplete, and <em>Submit for review</em> when a case is ready for JB.`
