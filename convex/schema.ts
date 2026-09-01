@@ -40,6 +40,20 @@ import {
   targetYearConfidenceSet,
   targetYearStatusSet,
   userStatus,
+  occupancyContractVersion,
+  occupancyStartMode,
+  occupancyEndMode,
+  occupancyStartBasis,
+  occupancyEndBasis,
+  occupancyEndReason,
+  occupancyDatePrecision,
+  occupancyLocationRelation,
+  derivedPresenceStatus,
+  derivedReviewState,
+  derivedLocationStatus,
+  derivedStateAction,
+  targetYearBasisSet,
+  locationAssertionMode,
 } from "./model";
 
 export default defineSchema({
@@ -190,6 +204,9 @@ export default defineSchema({
     current_observation_basis: v.optional(currentObservationBasis),
     intake_submission_key: v.optional(v.string()),
     generated_wide_row: v.optional(v.any()),
+    // basis of each recorded target-year status (occupancy lane): absent
+    // means source_observation, the pre-2026-09-02 default
+    target_year_basis: v.optional(targetYearBasisSet),
     privacy_flag: privacyFlag,
     licence_flag: licenceFlag,
     validation_summary: v.optional(v.any()),
@@ -242,6 +259,129 @@ export default defineSchema({
     .index("by_task_and_created_at", ["task_id", "created_at"])
     .index("by_task_creator_and_created_at", ["task_id", "created_by", "created_at"])
     .index("by_intake_submission_key", ["intake_submission_key"]),
+
+  // occupancy_v1 rows: one period at one location per row, attached to a
+  // submitted parent draft as historical claims are; supersede-on-revise
+  site_occupancies: defineTable({
+    occupancy_id: v.string(),
+    task_id: v.string(),
+    parent_evidence_draft_id: v.string(),
+    claim_status: historicalClaimStatus,
+    contract_version: occupancyContractVersion,
+    submission_key: v.string(),
+    segment_index: v.number(),
+    start_mode: occupancyStartMode,
+    start_date: v.optional(v.string()),
+    start_not_earlier_than: v.optional(v.string()),
+    start_not_later_than: v.optional(v.string()),
+    start_precision: occupancyDatePrecision,
+    start_basis: occupancyStartBasis,
+    end_mode: occupancyEndMode,
+    end_date: v.optional(v.string()),
+    end_not_earlier_than: v.optional(v.string()),
+    end_not_later_than: v.optional(v.string()),
+    end_precision: occupancyDatePrecision,
+    end_basis: occupancyEndBasis,
+    end_reason: v.optional(occupancyEndReason),
+    still_active_asof: v.optional(v.string()),
+    successor_site_id: v.optional(v.string()),
+    location_relation: occupancyLocationRelation,
+    latitude: v.number(),
+    longitude: v.number(),
+    location_mode: locationAssertionMode,
+    location_basis: v.string(),
+    uncertainty_radius_m: v.optional(v.number()),
+    location_wording: v.optional(v.string()),
+    location_confidence: v.string(),
+    confidence: historicalClaimConfidence,
+    confidence_basis: v.string(),
+    source_basis: historicalClaimSourceBasis,
+    source_title: v.string(),
+    source_reference: v.optional(v.string()),
+    source_account: v.string(),
+    uncertainty_note: v.optional(v.string()),
+    privacy_flag: privacyFlag,
+    created_by: v.id("users"),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_occupancy_id", ["occupancy_id"])
+    .index("by_parent_evidence_draft_id", ["parent_evidence_draft_id"])
+    .index("by_task_and_created_at", ["task_id", "created_at"])
+    .index("by_submission_key", ["submission_key"]),
+
+  // derived per-census-year presence: proposals from the occupancy rules,
+  // confirmed by a reviewer before entering target_year_statuses
+  derived_target_year_states: defineTable({
+    derived_state_id: v.string(),
+    task_id: v.string(),
+    parent_evidence_draft_id: v.string(),
+    target_year: v.number(),
+    derived_status: derivedPresenceStatus,
+    rule_id: v.string(),
+    segment_rules: v.array(v.object({
+      occupancy_id: v.string(),
+      rule_id: v.string(),
+      status: derivedPresenceStatus,
+    })),
+    derivation_version: v.string(),
+    inputs_hash: v.string(),
+    review_state: derivedReviewState,
+    override_status: v.optional(derivedPresenceStatus),
+    conflicts_observation: v.boolean(),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_derived_state_id", ["derived_state_id"])
+    .index("by_parent_evidence_draft_id", ["parent_evidence_draft_id"])
+    .index("by_task", ["task_id"]),
+
+  // derived per-census-year location candidates (rules l1–l4)
+  derived_year_locations: defineTable({
+    derived_location_id: v.string(),
+    task_id: v.string(),
+    parent_evidence_draft_id: v.string(),
+    target_year: v.number(),
+    occupancy_id: v.string(),
+    location_status: derivedLocationStatus,
+    rule_id: v.string(),
+    latitude: v.number(),
+    longitude: v.number(),
+    location_mode: locationAssertionMode,
+    location_basis: v.string(),
+    uncertainty_radius_m: v.optional(v.number()),
+    gap_years: v.optional(v.number()),
+    transition_group: v.optional(v.string()),
+    derivation_version: v.string(),
+    inputs_hash: v.string(),
+    review_state: derivedReviewState,
+    override_latitude: v.optional(v.number()),
+    override_longitude: v.optional(v.number()),
+    override_uncertainty_radius_m: v.optional(v.number()),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_derived_location_id", ["derived_location_id"])
+    .index("by_parent_evidence_draft_id", ["parent_evidence_draft_id"])
+    .index("by_task", ["task_id"]),
+
+  // append-only trail of every action on a derived year (jb 2026-08-31)
+  derived_state_events: defineTable({
+    event_id: v.string(),
+    task_id: v.string(),
+    parent_evidence_draft_id: v.string(),
+    target_year: v.number(),
+    action: derivedStateAction,
+    actor_user_id: v.id("users"),
+    actor_role: v.string(),
+    before: v.optional(v.any()),
+    after: v.optional(v.any()),
+    note: v.optional(v.string()),
+    created_at: v.number(),
+  })
+    .index("by_event_id", ["event_id"])
+    .index("by_parent_evidence_draft_id", ["parent_evidence_draft_id"])
+    .index("by_task_and_created_at", ["task_id", "created_at"]),
 
   review_decisions: defineTable({
     review_decision_id: v.string(),

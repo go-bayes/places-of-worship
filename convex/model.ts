@@ -255,6 +255,77 @@ export const historicalClaimReferenceDateBasis = v.union(
   v.literal("claim_recorded_date"),
 );
 
+// occupancy_v1 (docs/development/occupancy-build-brief-2026-09-02.md):
+// a period with uncertainty at one location with uncertainty
+export const occupancyContractVersion = v.literal("occupancy_v1");
+export const occupancyStartMode = v.union(
+  v.literal("known"), v.literal("between"), v.literal("by"), v.literal("unknown"),
+);
+export const occupancyEndMode = v.union(
+  v.literal("still_active"), v.literal("known"), v.literal("between"), v.literal("after"), v.literal("unknown"),
+);
+export const occupancyStartBasis = v.union(
+  v.literal("founding_stated"), v.literal("organisation_founded"), v.literal("building_dedication"),
+  v.literal("first_seen_only"), v.literal("unknown"),
+);
+export const occupancyEndBasis = v.union(
+  v.literal("closure_stated"), v.literal("last_seen_only"), v.literal("unknown"),
+);
+export const occupancyEndReason = v.union(
+  v.literal("closed"), v.literal("relocated"), v.literal("demolished"), v.literal("use_changed"), v.literal("unknown"),
+);
+export const occupancyDatePrecision = v.union(
+  v.literal("day"), v.literal("month"), v.literal("year"), v.literal("bounded"), v.literal("unknown"),
+);
+export const occupancyLocationRelation = v.union(
+  v.literal("same_as_task_point"), v.literal("distinct"),
+);
+export const occupancySegmentInput = v.object({
+  contract_version: occupancyContractVersion,
+  segment_index: v.number(),
+  start_mode: occupancyStartMode,
+  start_date: v.optional(v.string()),
+  start_not_earlier_than: v.optional(v.string()),
+  start_not_later_than: v.optional(v.string()),
+  start_basis: occupancyStartBasis,
+  end_mode: occupancyEndMode,
+  end_date: v.optional(v.string()),
+  end_not_earlier_than: v.optional(v.string()),
+  end_not_later_than: v.optional(v.string()),
+  end_basis: occupancyEndBasis,
+  end_reason: v.optional(occupancyEndReason),
+  still_active_asof: v.optional(v.string()),
+  successor_site_id: v.optional(v.string()),
+  location_relation: occupancyLocationRelation,
+  location: v.optional(locationAssertionInput),
+  confidence: historicalClaimConfidence,
+  confidence_basis: v.string(),
+  source_basis: historicalClaimSourceBasis,
+  source_title: v.string(),
+  source_reference: v.optional(v.string()),
+  source_account: v.string(),
+  uncertainty_note: v.optional(v.string()),
+  privacy_flag: privacyFlag,
+});
+export const derivedPresenceStatus = v.union(
+  v.literal("present"), v.literal("absent"), v.literal("uncertain"),
+);
+export const derivedReviewState = v.union(
+  v.literal("derived_unconfirmed"), v.literal("reviewer_confirmed"), v.literal("reviewer_overridden"),
+  v.literal("reviewer_rejected"), v.literal("superseded"),
+);
+export const derivedLocationStatus = v.union(
+  v.literal("located"), v.literal("located_uncertain"), v.literal("imputed"),
+);
+export const derivedStateAction = v.union(
+  v.literal("derived"), v.literal("invalidated"), v.literal("confirmed"), v.literal("overridden"), v.literal("rejected"),
+);
+// how a target-year status on a draft came to be (ruled basis vocabulary)
+export const targetYearBasis = v.union(
+  v.literal("source_observation"), v.literal("reviewer_confirmed_derivation"), v.literal("reviewer_override"),
+);
+export const targetYearBasisSet = v.record(v.string(), targetYearBasis);
+
 export const observationContractVersion = v.union(
   v.literal("guided_observation_v1"),
   v.literal("rapid_current_v1"),

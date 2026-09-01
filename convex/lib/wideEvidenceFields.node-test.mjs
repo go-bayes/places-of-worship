@@ -41,13 +41,14 @@ test("the ra template header is the nz column list", () => {
 test("target-year columns follow the country's waves in order", () => {
   const vu = wideEvidenceFields([1989, 1999, 2009, 2020]);
   const nz = wideEvidenceFields([2013, 2018, 2023]);
-  assert.equal(vu.length, nz.length + 3);
+  assert.equal(vu.length, nz.length + 8);
   assert.ok(vu.includes("target_year_1989_status"));
   assert.ok(!nz.includes("target_year_1989_status"));
-  assert.equal(vu.indexOf("target_year_2020_evidence") + 1, vu.indexOf("quality_flag"));
+  assert.equal(vu.indexOf("target_year_2020_location_basis") + 1, vu.indexOf("quality_flag"));
 });
 
 const nzFields = wideEvidenceFields([2013, 2018, 2023]);
+// 86 fixed columns plus eight per wave
 
 test("a row built from the shared list passes", () => {
   assert.doesNotThrow(() => assertWideEvidenceRowFields({ fields: nzFields, row: { evidence_row_id: "x" } }, [2013, 2018, 2023]));

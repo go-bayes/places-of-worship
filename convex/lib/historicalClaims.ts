@@ -52,14 +52,14 @@ export function historicalClaimReferenceDate(
 }
 
 // converts a supported partial date to its earliest possible calendar date.
-function partialDateLower(value: string): string {
+export function partialDateLower(value: string): string {
   if (/^\d{4}$/.test(value)) return `${value}-01-01`;
   if (/^\d{4}-\d{2}$/.test(value)) return `${value}-01`;
   return value;
 }
 
 // converts a supported partial date to its latest possible calendar date.
-function partialDateUpper(value: string): string {
+export function partialDateUpper(value: string): string {
   if (/^\d{4}$/.test(value)) return `${value}-12-31`;
   if (/^\d{4}-\d{2}$/.test(value)) {
     const [year, month] = value.split("-").map(Number);
