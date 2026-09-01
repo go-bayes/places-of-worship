@@ -2561,6 +2561,18 @@ class NzVerificationMap {
             });
             dot.bindPopup(() => this.contextDotPopupHtml(feature), { maxWidth: 320 });
             dot.on("popupopen", event => this.bindContextDotPopup(event.popup, feature));
+            // a single click opens the case, matching task markers: a
+            // matched task's detail, or the revise/issue card for a place
+            // with no task yet. the popup stays open beside it for the
+            // street view / osm links and the explicit reopen entry
+            dot.on("click", () => {
+                const matched = this.matchContextTask(feature);
+                if (matched?.task_id) {
+                    this.selectTaskById(matched.task_id, { focusDetail: true });
+                } else {
+                    this.openContextIssueForm(feature, { keepPopup: true });
+                }
+            });
             this.contextDotLayer.addLayer(dot);
         });
     }
@@ -2659,7 +2671,7 @@ class NzVerificationMap {
     // standalone issue form, pre-filled with the place name and coordinates.
     // Reuses issueFormHtml/bindIssueForm, so signed-out degrades the same way
     // (disabled submit plus a sign-in prompt).
-    openContextIssueForm(feature) {
+    openContextIssueForm(feature, options = {}) {
         const props = feature.properties || {};
         const coords = feature.geometry?.coordinates || [];
         const context = {
@@ -2672,10 +2684,10 @@ class NzVerificationMap {
         };
         const panel = document.getElementById("detailPanel");
         if (!panel) return;
-        this.map.closePopup();
+        if (!options.keepPopup) this.map.closePopup();
         const hasCoords = Number.isFinite(context.latitude) && Number.isFinite(context.longitude);
         panel.innerHTML = `
-            <h2>Report an issue</h2>
+            <h2>Revise this place or report an issue</h2>
             <div class="pilot-note" role="note">
                 Reporting an issue for <strong>${escapeHtml(context.name || "an unnamed place")}</strong>${hasCoords ? ` at ${context.latitude.toFixed(5)}, ${context.longitude.toFixed(5)}` : ""}.
             </div>
@@ -2838,7 +2850,7 @@ class NzVerificationMap {
         const available = this.tasks.filter(feature => (feature.properties?.batch_id || ASSIGNMENT_BATCH_ID) === ASSIGNMENT_BATCH_ID).length;
         const assignedSummary = available
             ? `${available} task${available === 1 ? "" : "s"} available in ${ASSIGNMENT_BATCH_ID}${this.myWorkItems.length ? `; ${this.myWorkItems.length} in My work` : ""}.`
-            : `No tasks are assigned to you in ${ASSIGNMENT_BATCH_ID} right now. You can still add places.`;
+            : `No tasks are assigned to you in ${ASSIGNMENT_BATCH_ID} right now. You can still add or revise places.`;
         chooser.innerHTML = `
             <h2>What would you like to do?</h2>
             <button type="button" class="chooser-option" id="chooseAssignedButton">
@@ -2846,8 +2858,8 @@ class NzVerificationMap {
                 <span>${escapeHtml(assignedSummary)}</span>
             </button>
             <button type="button" class="chooser-option" id="chooseAddButton">
-                <strong>Add places</strong>
-                <span>Nominate a place that is missing.${(this.myNominationItems || []).length ? ` You have ${this.myNominationItems.length} under review.` : ""}</span>
+                <strong>Add or revise places</strong>
+                <span>Nominate a missing place, or click a grey dot on the map to revise a place already recorded.${(this.myNominationItems || []).length ? ` You have ${this.myNominationItems.length} under review.` : ""}</span>
             </button>
         `;
         document.getElementById("chooseAssignedButton")?.addEventListener("click", () => this.setPortalMode("assigned"));
@@ -2857,7 +2869,7 @@ class NzVerificationMap {
     renderPortalModeBar() {
         const bar = document.getElementById("portalModeBar");
         if (!bar || !ASSIGNMENT_MODE) return;
-        const label = this.portalMode === "add" ? "Add places" : "Assigned tasks";
+        const label = this.portalMode === "add" ? "Add or revise places" : "Assigned tasks";
         bar.classList.toggle("mode-add", this.portalMode === "add");
         bar.innerHTML = `
             <span>${label}</span>
@@ -2891,6 +2903,13 @@ class NzVerificationMap {
             // enough for buildings to show
             if (this.map && this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM && !this.basemapUserChosen) {
                 this.setBasemap("hybrid");
+            }
+            // "revise" in the mode's name must be visible on arrival: show
+            // the mapped places so their revise entry point exists on screen
+            if (this.pointsMode === "off" && COUNTRY_CONFIG.datedPlaces) {
+                this.setPointsMode("period");
+                const pointsSelect = document.getElementById("portalPointsSelect");
+                if (pointsSelect) pointsSelect.value = "period";
             }
         } else if (this.basemap !== "streets" && !this.basemapUserChosen) {
             this.setBasemap("streets");
@@ -3606,7 +3625,7 @@ class NzVerificationMap {
                 <div class="${this.backend?.configured ? "pilot-note" : "demo-warning"}" role="${this.backend?.configured ? "note" : "alert"}">
                     ${this.backend?.configured
                         ? this.portalMode === "add"
-                            ? `Use <strong>＋ Add a missing place</strong> above, then find the building by searching a name or address, typing coordinates, or clicking the map. Drag the pin onto the building before confirming.`
+                            ? `Use <strong>＋ Add a missing place</strong> above, then find the building by searching a name or address, typing coordinates, or clicking the map. Drag the pin onto the building before confirming. To revise a place already recorded, click its grey dot and choose "Report an issue here".`
                             : RAPID_ASSIGNED_ENTRY
                                 ? `Work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. For each place, choose one current-status answer, record how you know it, and use <em>Submit for review</em>.`
                                 : `Work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when useful evidence remains incomplete, and <em>Submit for review</em> when a case is ready for JB.`
