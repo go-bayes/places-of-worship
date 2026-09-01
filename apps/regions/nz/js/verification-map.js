@@ -4373,10 +4373,44 @@ class NzVerificationMap {
         `;
     }
 
+    // the diagnosis behind the assignment: which flags fired, where the task
+    // came from, and what set its priority — the checklist tells the ra what
+    // to do, this says why the task exists at all
+    taskWhyHtml(props) {
+        const checks = props.automated_checks || [];
+        const flagged = checks
+            .filter(check => check?.message)
+            .map(check => `${check.message}${check.severity && check.severity !== "info" ? ` — ${check.severity}` : ""}`);
+        const origin = props.batch_id
+            ? `From batch ${props.batch_id}${props.case_type ? ` (${String(props.case_type).replaceAll("_", " ")})` : ""}.`
+            : "";
+        const priorityWhy = props.verification_priority === "high"
+            ? "Priority high: flagged checks block export until a person resolves them."
+            : props.verification_priority === "low"
+                ? "Priority low: background check; no flag demands urgency."
+                : "Priority medium: standard verification.";
+        const items = uniqueItems([
+            props.selection_reason || "",
+            origin,
+            ...flagged,
+            priorityWhy,
+        ]);
+        if (!items.length) return "";
+        return `
+            <div class="task-why">
+                <strong>Why you have this task</strong>
+                <ul>
+                    ${items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}
+                </ul>
+            </div>
+        `;
+    }
+
     siteTaskBriefHtml(props) {
         if (this.taskUsesRapidForm(props) && !this.taskIsReadOnly(props.task_id)) {
             return `
                 <h3>Record current information</h3>
+                ${this.taskWhyHtml(props)}
             `;
         }
         const checks = props.automated_checks || [];
@@ -4399,6 +4433,7 @@ class NzVerificationMap {
                     <span class="task-focus">${escapeHtml(focus.label)}</span>
                     <span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))}</span>
                 </div>
+                ${this.taskWhyHtml(props)}
                 <p>${escapeHtml(briefText)}</p>
                 ${props.source_hints ? `<p><strong>Source hints:</strong> ${escapeHtml(props.source_hints)}</p>` : ""}
                 <ol>
