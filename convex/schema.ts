@@ -145,6 +145,10 @@ export default defineSchema({
     source_title: v.optional(v.string()),
     source_url_or_file: v.optional(v.string()),
     source_date_or_capture_date: v.optional(v.string()),
+    // optional reference into the shared source register; the denormalised
+    // source strings stay the at-submission snapshot
+    source_id: v.optional(v.string()),
+    source_locator: v.optional(v.string()),
     address_raw: v.optional(v.string()),
     locality_raw: v.optional(v.string()),
     address_change_note: v.optional(v.string()),
@@ -191,6 +195,7 @@ export default defineSchema({
     .index("by_source_url", ["source_url_or_file"])
     .index("by_source_claim_key", ["source_claim_key"])
     .index("by_claim_hash", ["claim_hash"])
+    .index("by_source_id", ["source_id"])
     .index("by_intake_submission_key", ["intake_submission_key"]),
 
   historical_claims: defineTable({
@@ -342,4 +347,38 @@ export default defineSchema({
     .index("by_attachment_id", ["attachment_id"])
     .index("by_task_status", ["task_id", "status"])
     .index("by_author_time", ["author_user_id", "created_at"]),
+
+  // shared source register: one row per reusable source (a phonebook pdf, a
+  // directory), cited from many drafts by source_id while the drafts keep
+  // their denormalised source strings as at-submission snapshots. jb rulings
+  // 2026-09-01: any collaborator may create a row, creation is identified,
+  // and rows are visible to all collaborators. rows are never hard-deleted;
+  // "merged"/"retired" preserve the audit trail.
+  sources: defineTable({
+    source_id: v.string(),
+    country_code: v.optional(v.string()),
+    source_type: v.string(),
+    title: v.string(),
+    title_key: v.string(),
+    provider: v.optional(v.string()),
+    url: v.optional(v.string()),
+    archive_ref: v.optional(v.string()),
+    licence: v.optional(v.string()),
+    publication_date: v.optional(v.string()),
+    consulted_date: v.optional(v.string()),
+    access_limits: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    status: v.union(v.literal("active"), v.literal("merged"), v.literal("retired")),
+    merged_into_source_id: v.optional(v.string()),
+    created_by: v.id("users"),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_source_id", ["source_id"])
+    .index("by_title_key", ["title_key"])
+    .index("by_country_status", ["country_code", "status"])
+    .searchIndex("search_title", {
+      searchField: "title",
+      filterFields: ["status", "country_code"],
+    }),
 });

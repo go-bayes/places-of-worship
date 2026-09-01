@@ -14,6 +14,7 @@ import {
   assertTaskReasonLimit,
 } from "./lib/limits";
 import { assertNotRapidContract, isRapidCurrentDraft } from "./lib/rapidEntry";
+import { resolveCitedSource } from "./lib/sources";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { evidenceDraftDoc } from "./lib/validators";
 
@@ -303,6 +304,8 @@ export const saveEvidenceDraft = mutation({
     assertNotRapidContract(args.draft, "the general draft route");
     assertEvidenceDraftLimits(args.draft);
     assertClientContextLimit(args.clientContext);
+    // a cited register source must exist and be active before it is stored
+    await resolveCitedSource(ctx, args.draft.source_id, args.draft.source_locator);
 
     const now = Date.now();
     const draftId = args.evidenceDraftId ?? `${args.taskId}:${user._id}:draft`;

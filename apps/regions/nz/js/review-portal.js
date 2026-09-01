@@ -353,6 +353,7 @@
         state.historicalClaims = [];
         state.events = [];
         state.attachments = [];
+        state.sharedSource = null;
         state.agentAgreementChoice = null;
         renderQueue();
         renderDetail(true);
@@ -368,6 +369,23 @@
             state.historicalClaims = historicalClaims || [];
             state.events = events || [];
             state.attachments = attachments || [];
+            state.sharedSource = null;
+            // a draft citing the shared register shows the register row and
+            // how many other entries cite it (visible to all collaborators)
+            const draftWithSource = state.selected?.latestDraft || state.drafts[0] || null;
+            if (draftWithSource?.source_id) {
+                try {
+                    const [register, citing] = await Promise.all([
+                        client.getSource({ sourceId: draftWithSource.source_id }),
+                        client.listDraftsCitingSource({ sourceId: draftWithSource.source_id }),
+                    ]);
+                    state.sharedSource = register
+                        ? { ...register, cited_by: (citing || []).length }
+                        : null;
+                } catch (error) {
+                    state.sharedSource = null;
+                }
+            }
             renderDetail(false);
         } catch (error) {
             renderDetail(false, error.message || "Could not load task details.");
@@ -449,6 +467,14 @@
                         ["Provider", draft.provider],
                         ["URL or file", draft.source_url_or_file],
                         ["Source date", draft.source_date_or_capture_date],
+                        ["Shared source", state.sharedSource
+                            ? `${state.sharedSource.title}${state.sharedSource.created_by_initials ? ` — added by ${state.sharedSource.created_by_initials}` : ""}`
+                            : undefined],
+                        ["Locator in source", draft.source_locator],
+                        ["Shared source licence", state.sharedSource?.licence],
+                        ["Cited by", state.sharedSource
+                            ? `${state.sharedSource.cited_by} entr${state.sharedSource.cited_by === 1 ? "y" : "ies"} across the project`
+                            : undefined],
                         ["Address found", draft.address_raw],
                         ["Locality found", draft.locality_raw],
                         ["Address note", draft.address_change_note],

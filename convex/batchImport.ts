@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { chooseActorRole, requireUser } from "./lib/auth";
+import { makeSourceId, normalizeTitleKey, sourceClaimKey } from "./lib/sources";
 import {
   MEDIUM_TEXT_MAX,
   SHORT_TEXT_MAX,
@@ -220,7 +221,35 @@ export const importNominationBatch = mutation({
       });
     }
 
-    const sourceKeyOf = (locator: string) => `${args.source.title}#${locator}`;
+    // the shared source register makes "one file, one source record" a real
+    // reference: every draft from this run carries the register row's id
+    const titleKey = normalizeTitleKey(args.source.title);
+    let registerSource = (
+      await ctx.db
+        .query("sources")
+        .withIndex("by_title_key", (q) => q.eq("title_key", titleKey))
+        .collect()
+    ).find((row) => row.status === "active" && row.country_code === countryCode) ?? null;
+    if (registerSource === null) {
+      const registerDocId = await ctx.db.insert("sources", {
+        source_id: makeSourceId(titleKey, countryCode),
+        country_code: countryCode,
+        source_type: args.source.source_type,
+        title: args.source.title.trim(),
+        title_key: titleKey,
+        url: args.source.url_or_file?.trim() || undefined,
+        archive_ref: args.source.archive_ref?.trim() || undefined,
+        licence: args.source.licence?.trim() || undefined,
+        consulted_date: args.source.consulted_date?.trim() || undefined,
+        status: "active",
+        created_by: user._id,
+        created_at: now,
+        updated_at: now,
+      });
+      registerSource = (await ctx.db.get(registerDocId))!;
+    }
+
+    const sourceKeyOf = (locator: string) => sourceClaimKey(args.source.title, locator);
 
     let imported = 0;
     let rejected = 0;
@@ -314,6 +343,8 @@ export const importNominationBatch = mutation({
         source_title: args.source.title,
         source_url_or_file: args.source.url_or_file ?? args.source.archive_ref,
         source_date_or_capture_date: args.source.consulted_date,
+        source_id: registerSource.source_id,
+        source_locator: row.source_locator,
         locality_raw: row.locality,
         source_notes: [
           args.source.licence ? `Licence: ${args.source.licence}` : undefined,
