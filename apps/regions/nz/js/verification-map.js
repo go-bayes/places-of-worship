@@ -2704,8 +2704,12 @@ class NzVerificationMap {
                 </div>
             ` : ""}
             ${this.issueFormHtml(context, { open: !canRevise, flagOnly: canRevise })}
+            <div class="button-row">
+                <button id="reviseReturnButton" type="button" class="secondary">Cancel and return to the map</button>
+            </div>
         `;
         document.getElementById("reviseWithEvidenceButton")?.addEventListener("click", () => this.enterReviseMode(context));
+        document.getElementById("reviseReturnButton")?.addEventListener("click", () => this.discardEntryAttempt());
         const historyHost = document.getElementById("reviseOsmHistory");
         if (historyHost && window.PowOsmHistory) {
             window.PowOsmHistory.loadInto(historyHost, historyHost.dataset.osmType, historyHost.dataset.osmId);
@@ -7113,6 +7117,9 @@ class NzVerificationMap {
                     <input id="pinLocalityInput" type="text">
                 </label>
                 ${formFields}
+                <div class="button-row pin-discard-row">
+                    <button id="pinDiscardButton" type="button" class="secondary">Discard entry</button>
+                </div>
             </div>
             <div id="pinStatus" class="copy-status" aria-live="polite"></div>
         `;
@@ -7128,6 +7135,9 @@ class NzVerificationMap {
         document.getElementById("pinConfirmButton")?.addEventListener("click", () => this.confirmPinLocation());
         document.getElementById("pinCancelButton")?.addEventListener("click", () => this.exitPinMode());
         document.getElementById("pinFormCancelButton")?.addEventListener("click", () => this.exitPinMode());
+        // cancel keeps the device draft to resume; discard wipes it and
+        // returns the panel to rest (jb 2026-09-02)
+        document.getElementById("pinDiscardButton")?.addEventListener("click", () => this.discardEntryAttempt());
         document.getElementById("pinSubmitButton")?.addEventListener("click", () => this.submitPinNomination());
         document.getElementById("pinLocationMode")?.addEventListener("change", () => this.updatePinConfirmCard());
         document.getElementById("pinLocationRadius")?.addEventListener("change", () => this.updatePinConfirmCard());
@@ -7211,6 +7221,26 @@ class NzVerificationMap {
     // instant (not smooth): a nested-scroll smooth animation was unreliable
     revealPinHost() {
         document.getElementById("pinCardHost")?.scrollIntoView({ block: "start" });
+    }
+
+    // wipes an unfinished entry attempt and returns the panel to its resting
+    // state (jb 2026-09-02): the device draft is discarded, pin mode torn
+    // down, and nothing is left behind to resume. asks first only when
+    // there is something to lose
+    discardEntryAttempt({ confirmFirst = true } = {}) {
+        const somethingToLose = Boolean(this.formDirty || this.pinConfirmed);
+        if (confirmFirst && somethingToLose && !window.confirm("Discard this entry? Nothing has been saved.")) return false;
+        this.clearRapidDraft("rapid-pin");
+        this.clearFormDirty();
+        if (this.pinMode) this.exitPinMode();
+        this.reviseContext = null;
+        this.issueFormOpenTaskId = null;
+        this.selectedTask = null;
+        this.map?.closePopup();
+        this.renderInitialDetail();
+        const status = document.getElementById("copyStatus");
+        if (status) status.textContent = "Entry discarded. Nothing was saved.";
+        return true;
     }
 
     // revise-with-evidence (jb 2026-09-02): the pin flow with the existing
@@ -7824,6 +7854,7 @@ class NzVerificationMap {
         if (this.formDirtyTaskId === "rapid-pin" || this.formDirtyTaskId === "location-pin") {
             this.clearFormDirty();
         }
+        const wasRevision = Boolean(this.reviseContext);
         this.pinMode = false;
         this.reviseContext = null;
         this.pinConfirmed = null;
@@ -7863,6 +7894,11 @@ class NzVerificationMap {
             addPlaceButton.removeAttribute("disabled");
             addPlaceButton.classList.remove("placing");
             addPlaceButton.textContent = "＋ Add a missing place";
+        }
+        if (wasRevision) {
+            // the revise pane would otherwise sit in the detail panel with
+            // its two options as a dead end
+            this.renderInitialDetail();
         }
     }
 
