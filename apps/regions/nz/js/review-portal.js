@@ -507,6 +507,12 @@ function human(value) {
                         ])}
                     </section>
                 ` : ""}
+                ${task.osm_object_type && task.matched_osm_id ? `
+                    <section class="panel">
+                        <h3>OSM history</h3>
+                        <div id="reviewOsmHistory" class="osm-history-host"></div>
+                    </section>
+                ` : ""}
 
                 <section class="panel">
                     <h3>Source</h3>
@@ -646,6 +652,11 @@ function human(value) {
                     `).join("")}
             </section>
         `;
+        // osm edit history for the matched object (jb 2026-09-02): fetched
+        // on demand from the public osm api, cached per object per session
+        if (task.osm_object_type && task.matched_osm_id && window.PowOsmHistory) {
+            window.PowOsmHistory.loadInto(document.getElementById("reviewOsmHistory"), task.osm_object_type, task.matched_osm_id);
+        }
         const form = document.getElementById("reviewDecisionForm");
         if (form) {
             wireDecisionForm(form);
