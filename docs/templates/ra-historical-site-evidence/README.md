@@ -25,7 +25,7 @@ validation for the main controlled fields in `site_evidence_wide`.
 
 The generated workbook includes:
 
-- `site_evidence_wide.csv`, the main RA working tab
+- `site_evidence_wide.csv`, the main RA working tab. Its header is held equal to the shared column list in `convex/lib/wideEvidenceFields.ts` (and the portal mirror `apps/regions/nz/js/wide-evidence-fields.js`) by `convex/lib/wideEvidenceFields.node-test.mjs`; change all three together.
 - `controlled_vocabularies.csv`
 - `sources.csv`
 - `site_observations.csv`

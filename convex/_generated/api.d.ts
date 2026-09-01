@@ -29,6 +29,7 @@ import type * as lib_sha256 from "../lib/sha256.js";
 import type * as lib_sources from "../lib/sources.js";
 import type * as lib_taskEvents from "../lib/taskEvents.js";
 import type * as lib_validators from "../lib/validators.js";
+import type * as lib_wideEvidenceFields from "../lib/wideEvidenceFields.js";
 import type * as model from "../model.js";
 import type * as rapidEntry from "../rapidEntry.js";
 import type * as reviews from "../reviews.js";
@@ -66,6 +67,7 @@ declare const fullApi: ApiFromModules<{
   "lib/sources": typeof lib_sources;
   "lib/taskEvents": typeof lib_taskEvents;
   "lib/validators": typeof lib_validators;
+  "lib/wideEvidenceFields": typeof lib_wideEvidenceFields;
   model: typeof model;
   rapidEntry: typeof rapidEntry;
   reviews: typeof reviews;

@@ -5,6 +5,8 @@ import { exportFormat, exportBatchStatus } from "./model";
 import { chooseActorRole, requireUser } from "./lib/auth";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { isWideEvidenceExportEligible } from "./lib/exportEligibility";
+import { defaultTargetYears } from "./lib/countryYears";
+import { readGeneratedWideRow, wideEvidenceFields, wideEvidenceRowValues } from "./lib/wideEvidenceFields";
 import {
   evidenceDraftDoc,
   exportBatchDoc,
@@ -53,12 +55,17 @@ function acceptedEvidenceDraftIds(reviewDecisions: Doc<"review_decisions">[]): S
 }
 
 function siteEvidenceWideCsv(
+  countryCode: string,
   evidenceDrafts: Doc<"evidence_drafts">[],
   reviewDecisions: Doc<"review_decisions">[],
-): { csv: string; rowCount: number; fieldCount: number } {
+): { csv: string; rowCount: number; fieldCount: number; fieldMismatchCount: number } {
   const acceptedDraftIds = acceptedEvidenceDraftIds(reviewDecisions);
+  // the header is the shared column list for the country's waves (pr-b0);
+  // every row is placed by column name, so a draft saved under an earlier
+  // or divergent field list loses nothing and shifts nothing
+  const fields = wideEvidenceFields(defaultTargetYears(countryCode));
   const rows: Record<string, unknown>[] = [];
-  let fields: string[] = [];
+  let fieldMismatchCount = 0;
 
   for (const draft of evidenceDrafts) {
     if (!acceptedDraftIds.has(draft.evidence_draft_id)) {
@@ -67,30 +74,36 @@ function siteEvidenceWideCsv(
     if (!isWideEvidenceExportEligible(draft)) {
       continue;
     }
-    const generated = draft.generated_wide_row as
-      | { fields?: unknown; row?: unknown }
-      | undefined;
-    if (!generated || !Array.isArray(generated.fields) || typeof generated.row !== "object" || generated.row === null) {
+    let generated;
+    try {
+      generated = readGeneratedWideRow(draft.generated_wide_row);
+    } catch {
+      generated = undefined;
+    }
+    if (generated === undefined) {
       continue;
     }
-    if (fields.length === 0) {
-      fields = generated.fields.map((field) => String(field));
+    const sameFields = generated.fields.length === fields.length
+      && generated.fields.every((field, index) => field === fields[index]);
+    if (!sameFields) {
+      fieldMismatchCount += 1;
     }
-    rows.push(generated.row as Record<string, unknown>);
+    rows.push(generated.row);
   }
 
-  if (fields.length === 0) {
-    return { csv: "", rowCount: 0, fieldCount: 0 };
+  if (rows.length === 0) {
+    return { csv: "", rowCount: 0, fieldCount: 0, fieldMismatchCount };
   }
 
   const lines = [csvLine(fields)];
   for (const row of rows) {
-    lines.push(csvLine(fields.map((field) => row[field] ?? "")));
+    lines.push(csvLine(wideEvidenceRowValues(row, fields)));
   }
   return {
     csv: `${lines.join("\n")}\n`,
     rowCount: rows.length,
     fieldCount: fields.length,
+    fieldMismatchCount,
   };
 }
 
@@ -102,7 +115,7 @@ function exportFiles(
   historicalClaims: Doc<"historical_claims">[],
   reviewDecisions: Doc<"review_decisions">[],
 ) {
-  const wide = siteEvidenceWideCsv(evidenceDrafts, reviewDecisions);
+  const wide = siteEvidenceWideCsv(String(manifest.country_code ?? ""), evidenceDrafts, reviewDecisions);
   const fileManifest = {
     ...manifest,
     files: [
@@ -117,6 +130,9 @@ function exportFiles(
         content_type: "text/csv",
         record_count: wide.rowCount,
         field_count: wide.fieldCount,
+        // drafts whose stored field list differed from the shared header;
+        // their values were placed by name, never dropped
+        field_list_mismatch_count: wide.fieldMismatchCount,
       },
     ],
   };
