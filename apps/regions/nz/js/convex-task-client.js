@@ -372,6 +372,25 @@
             return await this.request("action", "attachments:requestAttachmentView", args);
         }
 
+        // --- shared source register (rulings 2026-09-01): any collaborator
+        // may create a source, creation is identified, visible to all
+
+        async searchSources(args) {
+            return await this.request("query", "sources:searchSources", args);
+        }
+
+        async createSource(args) {
+            return await this.request("mutation", "sources:createSource", args);
+        }
+
+        async getSource(args) {
+            return await this.request("query", "sources:getSource", args);
+        }
+
+        async listDraftsCitingSource(args) {
+            return await this.request("query", "sources:listDraftsCitingSource", args);
+        }
+
         async submitCurrentObservation(args) {
             // canonical multi-country route; the old vanuatu-named alias
             // stays registered server-side for previously cached clients

@@ -4620,11 +4620,22 @@ class NzVerificationMap {
                 <div id="${prefix}NamedSourceFields" class="rapid-conditional"${preNamed ? "" : " hidden"}>
                     <label>
                         Source title or brief description <span class="req-chip">required for a named source</span>
-                        <input id="${prefix}SourceTitle" type="text" maxlength="2048" value="${escapeHtml(preNamed ? pre.source_title || "" : "")}">
+                        <input id="${prefix}SourceTitle" type="text" maxlength="2048" autocomplete="off" value="${escapeHtml(preNamed ? pre.source_title || "" : "")}">
+                        <small class="label-help">Start typing to pick a source the team has already registered.</small>
                     </label>
+                    <div id="${prefix}SourcePickList" class="source-pick-list" hidden></div>
+                    <input id="${prefix}SourceId" type="hidden" value="${escapeHtml(preNamed ? pre.source_id || "" : "")}">
                     <label>
                         Source URL or agreed file reference (if one exists) <span class="req-chip">required for a named source</span>
                         <input id="${prefix}SourceReference" type="text" maxlength="4096" value="${escapeHtml(preNamed ? pre.source_url_or_file || "" : "")}">
+                    </label>
+                    <label id="${prefix}SourceLocatorField"${preNamed && pre.source_id ? "" : " hidden"}>
+                        Page or entry number in this source (optional)
+                        <input id="${prefix}SourceLocator" type="text" maxlength="256" placeholder="e.g. p. 214 or entry 1187" value="${escapeHtml(preNamed ? pre.source_locator || "" : "")}">
+                    </label>
+                    <label class="flag-discussion" id="${prefix}SaveSourceField">
+                        <input type="checkbox" id="${prefix}SaveSourceToRegister">
+                        <span><strong>Add this source to the shared register</strong><small>Lets the whole team pick and cite it; your name is recorded as its creator.</small></span>
                     </label>
                 </div>
                 <details id="${prefix}OptionalBlock" class="optional-block"${optionalOpen ? " open" : ""}>
@@ -4761,6 +4772,9 @@ class NzVerificationMap {
             observedOn: document.getElementById(`${prefix}ObservedOn`)?.value || "",
             sourceTitle: document.getElementById(`${prefix}SourceTitle`)?.value || "",
             sourceReference: document.getElementById(`${prefix}SourceReference`)?.value || "",
+            sourceId: document.getElementById(`${prefix}SourceId`)?.value || "",
+            sourceLocator: document.getElementById(`${prefix}SourceLocator`)?.value || "",
+            saveSourceToRegister: Boolean(document.getElementById(`${prefix}SaveSourceToRegister`)?.checked),
             denominationRaw: document.getElementById(`${prefix}DenominationRaw`)?.value || "",
             denominationLabelBasis: document.getElementById(`${prefix}DenominationBasis`)?.value || "unknown",
             directObservation: document.getElementById(`${prefix}DirectObservation`)?.value || "",
@@ -4824,6 +4838,8 @@ class NzVerificationMap {
         setValue("ObservedOn", values.observedOn);
         setValue("SourceTitle", values.sourceTitle);
         setValue("SourceReference", values.sourceReference);
+        setValue("SourceId", values.sourceId);
+        setValue("SourceLocator", values.sourceLocator);
         setValue("DenominationRaw", values.denominationRaw);
         setValue("DenominationBasis", values.denominationLabelBasis);
         setValue("DirectObservation", values.directObservation);
@@ -4837,6 +4853,7 @@ class NzVerificationMap {
         this.updateRapidSourceFields(prefix);
         this.updateRapidDiscussionFields(prefix);
         this.updateRapidUncertaintyField(prefix);
+        this.updateSourceLocatorField(prefix);
         if (values.denominationRaw || values.directObservation || values.uncertaintyNote) {
             const optional = document.querySelector(`#${prefix}RapidCurrentForm .optional-block`);
             if (optional) optional.open = true;
@@ -4879,6 +4896,82 @@ class NzVerificationMap {
         const basis = document.getElementById(`${prefix}ObservationBasis`)?.value || "";
         const fields = document.getElementById(`${prefix}NamedSourceFields`);
         if (fields) fields.hidden = basis !== "named_public_source" && basis !== "other";
+    }
+
+    // the locator only means something inside a picked register source
+    updateSourceLocatorField(prefix) {
+        const picked = Boolean(document.getElementById(`${prefix}SourceId`)?.value);
+        const field = document.getElementById(`${prefix}SourceLocatorField`);
+        if (field) field.hidden = !picked;
+        if (!picked) {
+            const locator = document.getElementById(`${prefix}SourceLocator`);
+            if (locator) locator.value = "";
+        }
+        const save = document.getElementById(`${prefix}SaveSourceField`);
+        if (save) save.hidden = picked;
+    }
+
+    // typeahead over the shared source register: picking a row fills the
+    // citation snapshot and stamps the register id on the entry. a
+    // deployment without the register simply offers no picker
+    bindSourceTypeahead(prefix) {
+        const title = document.getElementById(`${prefix}SourceTitle`);
+        const list = document.getElementById(`${prefix}SourcePickList`);
+        if (!title || !list || !this.backend?.configured) return;
+        let searchTimer = 0;
+        const hideList = () => {
+            list.hidden = true;
+            list.innerHTML = "";
+        };
+        title.addEventListener("input", () => {
+            // editing the title breaks the pick: the stored snapshot must
+            // match the register row it cites
+            const idEl = document.getElementById(`${prefix}SourceId`);
+            if (idEl && idEl.value) {
+                idEl.value = "";
+                this.updateSourceLocatorField(prefix);
+            }
+            window.clearTimeout(searchTimer);
+            const search = title.value.trim();
+            if (search.length < 2 || !this.backend.signedIn) {
+                hideList();
+                return;
+            }
+            searchTimer = window.setTimeout(async () => {
+                let rows = [];
+                try {
+                    rows = await this.backend.searchSources({ search, countryCode: COUNTRY_CONFIG.countryCode });
+                } catch (error) {
+                    hideList();
+                    return;
+                }
+                if (!rows.length || (document.getElementById(`${prefix}SourceTitle`)?.value.trim() ?? "") !== search) {
+                    hideList();
+                    return;
+                }
+                list.innerHTML = rows.map(row => `
+                    <button type="button" class="source-pick-row"
+                        data-source-id="${escapeHtml(row.source_id)}"
+                        data-title="${escapeHtml(row.title)}"
+                        data-reference="${escapeHtml(row.url || row.archive_ref || "")}">
+                        ${escapeHtml(row.title)}${row.provider ? ` — ${escapeHtml(row.provider)}` : ""}${row.created_by_initials ? ` <small>(added by ${escapeHtml(row.created_by_initials)})</small>` : ""}
+                    </button>
+                `).join("");
+                list.hidden = false;
+                list.querySelectorAll(".source-pick-row").forEach(rowEl => {
+                    rowEl.addEventListener("click", () => {
+                        title.value = rowEl.dataset.title;
+                        const reference = document.getElementById(`${prefix}SourceReference`);
+                        if (reference && !reference.value.trim()) reference.value = rowEl.dataset.reference || "";
+                        if (idEl) idEl.value = rowEl.dataset.sourceId;
+                        hideList();
+                        this.updateSourceLocatorField(prefix);
+                    });
+                });
+            }, 300);
+        });
+        // a click on a pick row fires before this delayed hide
+        title.addEventListener("blur", () => window.setTimeout(hideList, 250));
     }
 
     // the uncertainty note becomes required when the status could not be
@@ -4931,9 +5024,11 @@ class NzVerificationMap {
         form.querySelectorAll(`input[name="${prefix}CurrentStatus"]`).forEach(radio => {
             radio.addEventListener("change", () => this.updateRapidUncertaintyField(prefix));
         });
+        this.bindSourceTypeahead(prefix);
         this.updateRapidSourceFields(prefix);
         this.updateRapidDiscussionFields(prefix);
         this.updateRapidUncertaintyField(prefix);
+        this.updateSourceLocatorField(prefix);
         // a correction prefill outranks the device draft; otherwise restore
         // unsubmitted work so a lost session costs nothing
         if (!options.prefill) {
@@ -4987,6 +5082,22 @@ class NzVerificationMap {
         submitButton.disabled = true;
         if (status) status.textContent = values.flagForDiscussion ? "Flagging securely for discussion..." : "Submitting securely for review...";
         try {
+            // an opted-in new source is registered first so this entry can
+            // cite it; register failure falls back to the snapshot strings
+            if (!values.sourceId && values.saveSourceToRegister
+                && values.sourceTitle?.trim() && values.sourceReference?.trim()) {
+                try {
+                    const created = await this.backend.createSource({
+                        countryCode: COUNTRY_CONFIG.countryCode,
+                        sourceType: "other",
+                        title: values.sourceTitle.trim(),
+                        url: values.sourceReference.trim(),
+                    });
+                    values.sourceId = created.source_id;
+                } catch (error) {
+                    // the register is optional; the citation strings still land
+                }
+            }
             const result = await this.backend.submitCurrentObservation({
                 clientSubmissionId: form.dataset.submissionId,
                 countryCode: COUNTRY_CONFIG.countryCode,

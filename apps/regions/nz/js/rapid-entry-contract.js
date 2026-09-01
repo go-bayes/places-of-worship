@@ -95,12 +95,18 @@
             }
             if (!basis) basis = "other";
         }
+        // a register citation travels only with a named-source basis; the
+        // picker is unreachable outside those fields
+        const named = basis === "named_public_source" || basis === "other";
+        const sourceId = named ? values.sourceId?.trim() || undefined : undefined;
         return {
             current_status: values.currentStatus || (flagged ? "could_not_determine" : values.currentStatus),
             observation_basis: basis,
             observed_on: values.observedOn,
             source_title: values.sourceTitle?.trim() || undefined,
             source_reference: values.sourceReference?.trim() || undefined,
+            source_id: sourceId,
+            source_locator: sourceId ? values.sourceLocator?.trim() || undefined : undefined,
             denomination_or_tradition_raw: values.denominationRaw?.trim() || undefined,
             denomination_label_basis: values.denominationRaw?.trim()
                 ? values.denominationLabelBasis

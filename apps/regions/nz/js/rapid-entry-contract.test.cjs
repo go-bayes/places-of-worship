@@ -68,6 +68,30 @@ check("evidence-files intent stays client-side", (() => {
   return !("has_evidence_files" in withFiles) && !("hasEvidenceFiles" in withFiles);
 })());
 
+check("register citation travels with a named source", (() => {
+  const p = rapid.observationPayload({
+    ...valid,
+    observationBasis: "named_public_source",
+    sourceTitle: "NZ Phonebook 1953",
+    sourceReference: "https://example.org/phonebook",
+    sourceId: "src:nz:0123456789abcdef",
+    sourceLocator: "p. 214",
+  });
+  return p.source_id === "src:nz:0123456789abcdef" && p.source_locator === "p. 214";
+})());
+check("register citation is dropped outside a named-source basis", rapid.observationPayload({
+  ...valid,
+  sourceId: "src:nz:0123456789abcdef",
+  sourceLocator: "p. 214",
+}).source_id === undefined);
+check("a locator never travels without its source", rapid.observationPayload({
+  ...valid,
+  observationBasis: "named_public_source",
+  sourceTitle: "NZ Phonebook 1953",
+  sourceReference: "https://example.org/phonebook",
+  sourceLocator: "p. 214",
+}).source_locator === undefined);
+
 const payload = rapid.observationPayload({ ...valid, directObservation: "  Sign and regular service times displayed.  " });
 check("payload trims direct observation", payload.direct_observation === "Sign and regular service times displayed.");
 check("empty optional values are omitted", payload.source_title === undefined);

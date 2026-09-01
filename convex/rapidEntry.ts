@@ -24,6 +24,7 @@ import {
   manualBatchId,
   sourceFieldsForObservationBasis,
 } from "./lib/rapidEntry";
+import { resolveCitedSource } from "./lib/sources";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { privacyFlag, rapidCurrentObservationInput, taskStatus } from "./model";
 
@@ -193,6 +194,21 @@ export const submitCurrentObservation = mutation({
       args.observation.source_title,
       args.observation.source_reference,
     );
+    // a picked register source is resolved and stamped; the denormalised
+    // strings below remain the at-submission snapshot, with the register
+    // filling gaps the ra left blank
+    const citedSource = await resolveCitedSource(
+      ctx,
+      args.observation.source_id,
+      args.observation.source_locator,
+    );
+    const sourceSnapshot = citedSource === null
+      ? source
+      : {
+          ...source,
+          source_title: source.source_title || citedSource.title,
+          source_url_or_file: source.source_url_or_file ?? citedSource.url ?? citedSource.archive_ref,
+        };
     const now = Date.now();
     const actorRole = chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]);
 
@@ -368,7 +384,11 @@ export const submitCurrentObservation = mutation({
       created_at: now,
       updated_at: now,
       observation_contract_version: "rapid_current_v1" as const,
-      ...source,
+      ...sourceSnapshot,
+      ...(citedSource === null ? {} : { source_id: citedSource.source_id }),
+      ...(args.observation.source_locator?.trim()
+        ? { source_locator: args.observation.source_locator.trim() }
+        : {}),
       provider: "Project RA",
       source_date_or_capture_date: args.observation.observed_on,
       action: derived.action,
