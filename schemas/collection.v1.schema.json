@@ -1,0 +1,417 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://go-bayes.github.io/places-of-worship/schemas/collection.v1.schema.json",
+  "title": "Collection v1",
+  "description": "A dated map collection: units with point locations, a time extent, optional metric series or coded state values, optional person tenures, per-unit provenance, and a collection passport. The place of worship is the project's unit of analysis (JB ruling 2026-08-29), so a collection whose units are places of worship is not a parallel ontology: it is a governed view of site-level indicator observations carrying its own provenance, licence, credit and time model, and it declares meta.units_are_places_of_worship true. The structure is unit x time x attribute with extensible columns: a newly learned attribute is added as a metric declaration in meta.metrics and a keyed entry in each unit's series or values, never by editing this schema. Supersedes the prototype contract pow.unit-time-series.v1, whose consumer (the NZ Anglican parish feed) is being migrated to emit this schema. Two engine renderers exist (interval and stages); the series renderer is deferred, so a series collection stays on its own page until ruled. Collections are their own data source on a page: never merged with census products or with each other.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "schema_version", "meta", "features"],
+  "properties": {
+    "type": { "const": "FeatureCollection" },
+    "schema_version": { "const": "collection.v1" },
+    "meta": { "$ref": "#/$defs/Meta" },
+    "features": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/Unit" }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["meta"],
+        "properties": {
+          "meta": {
+            "required": ["units_are_places_of_worship"],
+            "properties": { "units_are_places_of_worship": { "const": true } }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "features": {
+            "items": {
+              "properties": {
+                "properties": { "required": ["unit_id", "name", "pow_site_ref"] }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "Meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "collection_id",
+        "label",
+        "country_codes",
+        "unit_kind",
+        "units_are_places_of_worship",
+        "construct",
+        "credit",
+        "person_names_public",
+        "source_datasets",
+        "temporal_model",
+        "metrics"
+      ],
+      "properties": {
+        "collection_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+        },
+        "label": {
+          "type": "string",
+          "description": "Public label of the collection as it appears in the data-source control and legend."
+        },
+        "country_codes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^[A-Z]{2}$" }
+        },
+        "unit_kind": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Default kind for every unit (e.g. mission_station, parish, culture); a unit may override."
+        },
+        "units_are_places_of_worship": {
+          "type": "boolean",
+          "description": "Whether the units of this collection are places of worship. True makes the collection a governed view of site-level observations inside the places-of-worship family: every unit then carries a pow_site_ref slot (null until matched), the units feed the master through the review lane, and area statistics computed from them are derived quantities inheriting this collection's coverage limits. False marks units that are genuinely something else (Pulotu cultures are cultures); the never-merge rule is what keeps such a collection outside the family."
+        },
+        "construct": {
+          "type": "string",
+          "description": "One-line measurement-regime statement rendered on the legend (measurement-diversity principle): what kind of record this collection renders, e.g. 'documented mission stations from atlas georeferences, never counts'."
+        },
+        "credit": {
+          "type": "string",
+          "description": "Display credit rendered in the passport and popup."
+        },
+        "person_names_public": {
+          "type": "boolean",
+          "description": "Whether tenure person names may be published. The flag governs publication, not retention. False means names must not be rendered on any public surface: a conforming product may still carry name in a private or access-controlled feed for audit, provided that feed is not published, and the consuming page drops the names at load so no render path can reach one. This schema permits name regardless of the flag, which is what lets such an audit feed validate. Do not strip names from a private feed to satisfy the flag: that destroys the audit trail without protecting anyone, since the protection comes from not rendering them. The flag guards living people, not presentation taste: set it true only when the dataset's persons are established as historical, and treat a recorded death date as the only positive evidence of decease. Absence of recent activity is not such evidence — the Anglican incumbent series, for example, names 1844 people of whom 583 have activity in 2000 or later and 258 hold open-ended tenures."
+        },
+        "source_datasets": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/SourceDataset" }
+        },
+        "temporal_model": { "$ref": "#/$defs/TemporalModel" },
+        "metrics": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Metric" }
+        },
+        "currency_schedule": {
+          "type": "array",
+          "description": "Optional currency rule for monetary series (Anglican offerings precedent): the interface reads this, never infers it.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["from_year", "currency"],
+            "properties": {
+              "from_year": { "type": "integer" },
+              "currency": { "type": "string" },
+              "note": { "type": "string" }
+            }
+          }
+        },
+        "notes": { "type": "string" },
+        "extensions": {
+          "type": "object",
+          "description": "Builder-specific extras (data-manifest.v2 precedent); never read by the runtime."
+        }
+      }
+    },
+    "TemporalModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "axis", "stops"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["interval", "series", "stages"],
+          "description": "interval: units carry start_year/end_year filtered against calendar stops. series: units carry per-metric year series (standalone renderer only, for now). stages: units carry coded values per ordinal stage (Pulotu precedent)."
+        },
+        "axis": {
+          "type": "string",
+          "enum": ["calendar_year", "ordinal"]
+        },
+        "stops": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "oneOf": [
+              { "type": "integer" },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "label"],
+                "properties": {
+                  "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]*$" },
+                  "label": { "type": "string" },
+                  "note": { "type": "string" }
+                }
+              }
+            ]
+          },
+          "description": "Calendar axes list years (integers); ordinal axes list {id, label} stages. The time control rebuilds from these stops; it never scans features."
+        },
+        "per_metric_stops": {
+          "type": "object",
+          "description": "Optional metric-id keyed stop lists when metrics carry unequal year sets (Anglican precedent).",
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "Metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One declared attribute of the units, in the unit x time x attribute structure. Adding an attribute means adding a Metric here and keying values or series by its id; this schema does not change. Fields shared with indicator.schema.json (label, description, unit, denominator, method, quality notes) carry the same meaning there; id corresponds to indicator_id, and unit is a closed enum here where indicator.schema.json leaves it open (see the collection.v1 section of schemas/README.md).",
+      "required": ["id", "label", "unit", "kind"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "label": { "type": "string" },
+        "unit": {
+          "type": "string",
+          "enum": ["count", "percent", "rate", "currency", "code", "year"]
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["seq", "div", "cat"],
+          "description": "Ramp kind: sequential, diverging, or categorical. Categorical metrics declare codes with colours visually distinct from every census palette."
+        },
+        "description": {
+          "type": "string",
+          "description": "Aligned with indicator.schema.json description: what the attribute measures."
+        },
+        "denominator_metric_id": {
+          "type": ["string", "null"],
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Aligned with indicator.schema.json denominator_indicator_id, resolved within this product's own metric registry."
+        },
+        "method": {
+          "type": "string",
+          "description": "Aligned with indicator.schema.json method: how the value was derived or transcribed."
+        },
+        "quality_notes": {
+          "type": ["string", "null"],
+          "description": "Aligned with indicator.schema.json quality_notes."
+        },
+        "decimals": { "type": "integer", "minimum": 0 },
+        "codes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "label"],
+            "properties": {
+              "code": { "type": ["string", "integer"] },
+              "label": { "type": "string" },
+              "colour": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+            }
+          }
+        },
+        "stage_id": {
+          "type": "string",
+          "description": "For stages models: the stop this metric belongs to; the metric select repopulates per active stage."
+        },
+        "note": { "type": "string" }
+      },
+      "if": { "properties": { "kind": { "const": "cat" } } },
+      "then": { "required": ["id", "label", "unit", "kind", "codes"] }
+    },
+    "Unit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "geometry", "properties"],
+      "properties": {
+        "type": { "const": "Feature" },
+        "geometry": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["type", "coordinates"],
+              "properties": {
+                "type": { "const": "Point" },
+                "coordinates": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 3,
+                  "items": { "type": "number" }
+                }
+              }
+            }
+          ],
+          "description": "Point or null. The map never fabricates a position: a unit that cannot be pinned carries null geometry plus representative_area or location_basis recording why, and belongs in the portal's matching queue rather than permanently beside the map."
+        },
+        "properties": { "$ref": "#/$defs/UnitProperties" }
+      },
+      "if": {
+        "required": ["geometry"],
+        "properties": { "geometry": { "type": "null" } }
+      },
+      "then": {
+        "properties": {
+          "properties": {
+            "anyOf": [
+              { "required": ["representative_area"] },
+              { "required": ["location_basis"] }
+            ]
+          }
+        }
+      }
+    },
+    "UnitProperties": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The invariant: every unit is locatable on a map in time. A unit therefore carries a time extent (an integer start_year or end_year, or per-stage anchors, or a metric series), and a unit without a point carries the basis on which it cannot yet be pinned. An unplaced unit is a work-queue item for the portal's matching lane, not a permanent display state.",
+      "required": ["unit_id", "name"],
+      "anyOf": [
+        { "required": ["start_year"], "properties": { "start_year": { "type": "integer" } } },
+        { "required": ["end_year"], "properties": { "end_year": { "type": "integer" } } },
+        { "required": ["anchors"] },
+        { "required": ["series"] }
+      ],
+      "properties": {
+        "unit_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]*$" },
+        "unit_kind": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "name": { "type": "string" },
+        "country_iso2": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Z]{2}$",
+          "description": "The modern country the unit falls in, as a derived tag. Required where known (null only when the record cannot be placed in a country); country pages filter a multi-country collection on this field."
+        },
+        "start_year": { "type": ["integer", "null"] },
+        "end_year": {
+          "type": ["integer", "null"],
+          "description": "Null with a non-null start_year means presence continues through the collection's latest stop; the basis fields carry what that claim rests on."
+        },
+        "start_basis": {
+          "type": "string",
+          "enum": ["founding_stated", "organisation_founded", "building_dedication", "first_seen_only", "unknown"],
+          "description": "site_lifespan_v1 vocabulary. Only founding_stated licenses an absence inference before the start; first_seen_only never manufactures absence."
+        },
+        "end_basis": {
+          "type": "string",
+          "enum": ["closure_stated", "last_seen_only", "unknown"],
+          "description": "Only closure_stated licenses an absence inference after the end; last_seen_only never manufactures absence."
+        },
+        "series": {
+          "type": "object",
+          "description": "Metric-id keyed year series: arrays of [year, value] pairs. The slider reads stops from meta, never from these rows.",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "prefixItems": [
+                { "type": "integer" },
+                { "type": ["number", "string"] }
+              ]
+            }
+          }
+        },
+        "values": {
+          "type": "object",
+          "description": "Metric-id keyed coded state values with per-value sourcing (Pulotu precedent); used by stages models.",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code"],
+            "properties": {
+              "code": { "type": ["string", "integer"] },
+              "label": { "type": "string" },
+              "sources": { "type": "array", "items": { "type": "string" } },
+              "taxonomy_code": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "anchors": {
+          "type": "object",
+          "description": "Stage-id keyed calendar anchors for stages models (Pulotu time foci): each unit declares its own dates for the ordinal stops.",
+          "additionalProperties": { "type": ["integer", "null"] }
+        },
+        "tenures": {
+          "type": "array",
+          "description": "People attached to the unit, never units themselves. Names are published only when meta.person_names_public is true; person_ref stays stable either way, and a private audit feed may carry name under a false flag.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["person_ref"],
+            "properties": {
+              "person_ref": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]*$" },
+              "name": { "type": "string" },
+              "role": { "type": "string" },
+              "start_year": { "type": ["integer", "null"] },
+              "end_year": { "type": ["integer", "null"] },
+              "date_precision": { "type": "string", "enum": ["year", "circa", "decade", "unknown"] },
+              "source": { "type": "string" },
+              "extensions": {
+                "type": "object",
+                "description": "Renderer-specific extras for this tenure; never read by the engine. Present because its absence forced the Anglican migration to fold a starred marker into the source string."
+              }
+            }
+          }
+        },
+        "location_basis": {
+          "type": "string",
+          "description": "How the point was placed (e.g. osm_exact, osm_fuzzy, atlas_georeference, sa2_locality, described_locality)."
+        },
+        "location_confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+        "representative_area": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["level", "code"],
+          "properties": {
+            "level": { "type": "string" },
+            "code": { "type": "string" }
+          },
+          "description": "For low-confidence locality placements: the area the point represents, so the interface can show the actual match basis."
+        },
+        "sources": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Per-unit provenance references in the collection's citation style."
+        },
+        "record_url": { "type": "string" },
+        "taxonomy_code": {
+          "type": ["string", "null"],
+          "description": "Optional denomination-taxonomy code: the one cross-layer join key."
+        },
+        "pow_site_ref": {
+          "type": ["string", "null"],
+          "description": "Identity link to an accepted place-of-worship site, once one exists; the runtime dedupe rule keys on this. Mandatory as a slot (null until matched) on every unit of a collection declaring units_are_places_of_worship true."
+        },
+        "extensions": { "type": "object" }
+      }
+    },
+    "SourceDataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Same local relaxation as area-summary.v2: retrieval_date accepts a date or a date-time.",
+      "required": ["source_dataset_id", "name", "provider", "licence", "citation"],
+      "properties": {
+        "source_dataset_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]*$" },
+        "name": { "type": "string" },
+        "provider": { "type": "string" },
+        "licence": { "type": "string" },
+        "citation": { "type": "string" },
+        "url": { "type": ["string", "null"] },
+        "retrieval_date": {
+          "type": ["string", "null"],
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}([Tt ].*)?$"
+        },
+        "notes": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

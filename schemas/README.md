@@ -7,6 +7,52 @@ JSON Schemas that define the core data structures used across the project.
   generations validate against this base schema).
 - area-summary.v2.schema.json: the area-summary.v2 contract — structured
   per-row composition and optional service_url, declared-version validated.
+- collection.v1.schema.json: the collection.v1 contract — a dated map
+  collection (mission stations, cultural reconstructions, parish series):
+  units with nullable point locations, dated presence with the
+  site_lifespan_v1 basis vocabulary, metric series or coded state values,
+  person tenures, and a collection passport (construct, credit,
+  temporal_model, metric registry). Supersedes the prototype contract
+  pow.unit-time-series.v1, whose consumer (the NZ Anglican parish feed) is
+  being migrated to emit collection.v1. Defined 2026-08-29; first consumer
+  pending (the VU Woodberry mission collection; the Pulotu product converts
+  behind a shim when the collections runtime lands). Fixture and Pulotu
+  mapping note under fixtures/; gated by scripts/validate_collections.sh.
+  Under the unit-of-analysis ruling (2026-08-29), a collection declaring
+  units_are_places_of_worship true is a governed view of site-level
+  indicator observations inside the places-of-worship family, and carries a
+  pow_site_ref slot on every unit; false marks units that are genuinely
+  something else (Pulotu cultures). Attributes extend by declared metric,
+  never by schema change. The unit drift against indicator.schema.json is
+  RULED (JB, 2026-08-31): the closed enum wins. Here unit names a
+  measurement unit — how a value is scaled (count, percent, rate, currency,
+  code, year) — and is distinct from the unit of analysis, which the
+  2026-08-29 ruling establishes as the place of worship.
+  indicator.schema.json leaves unit an open string whose examples
+  (places_per_10000_residents) name a whole indicator rather than a unit;
+  the correct decomposition uses the unit rate and declares the denominator
+  through denominator_indicator_id. Correct that schema to the closed enum
+  and this decomposition when it next gains a consumer (it is aspirational;
+  none exists yet). The enum grows only by versioned vocabulary change,
+  under the same discipline as denomination-taxonomy.json — publish a new
+  version with supersession links; never reopen the string, and never edit
+  values in place.
+  person_names_public governs publication, not retention: false means names
+  must not be rendered on any public surface, while a private or
+  access-controlled feed may still carry name for audit. The schema permits
+  name under either setting deliberately. Stripping names from a private
+  feed protects nobody — the protection comes from not rendering them — and
+  destroys the audit trail.
+  Known gap list for a future collection.v2, banked from the Anglican
+  migration (pow-research 5f101a9, 941 features validating with no errors):
+  the migration had to carry diocese, lifecycle events (kind, verbatim
+  source_text, date_precision, source page), wave presence, aliases, matched
+  place name, and collection-level counts in extensions, because the
+  standalone renderer reads them and no typed field exists. They stay in
+  extensions while the series engine mode is deferred; type them in v2 if
+  that mode lands. The tenure item gained its own extensions object in v1
+  because its absence forced a real data compromise — a starred marker had
+  to be folded into the source string.
 - change-event.schema.json: append-only staged or accepted revision event,
   including worship-function state changes needed for `pow diff`.
 - data-manifest.schema.json: checksummed data artefact manifest for local cache,

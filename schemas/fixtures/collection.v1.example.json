@@ -1,0 +1,137 @@
+{
+  "type": "FeatureCollection",
+  "schema_version": "collection.v1",
+  "meta": {
+    "collection_id": "vu-example-missions",
+    "label": "Example mission stations",
+    "country_codes": [
+      "VU"
+    ],
+    "unit_kind": "mission_station",
+    "units_are_places_of_worship": true,
+    "construct": "documented mission stations georeferenced from historical atlases; records of documentation, never counts",
+    "credit": "Example data compiled by A. Contributor; atlas sources as cited per station.",
+    "person_names_public": true,
+    "source_datasets": [
+      {
+        "source_dataset_id": "example-atlas-1900",
+        "name": "Example Mission Atlas (1900)",
+        "provider": "Example Missionary Society",
+        "licence": "public domain (published 1900)",
+        "citation": "Example Missionary Society (1900). Example Mission Atlas.",
+        "url": null,
+        "retrieval_date": "2026-08-29",
+        "notes": null
+      }
+    ],
+    "temporal_model": {
+      "kind": "interval",
+      "axis": "calendar_year",
+      "stops": [
+        1850,
+        1875,
+        1900,
+        1925,
+        1950
+      ]
+    },
+    "metrics": [
+      {
+        "id": "tradition",
+        "label": "Tradition",
+        "unit": "code",
+        "kind": "cat",
+        "codes": [
+          {
+            "code": "protestant",
+            "label": "Protestant",
+            "colour": "#7b5aa6"
+          },
+          {
+            "code": "catholic",
+            "label": "Catholic",
+            "colour": "#3f8fb5"
+          }
+        ]
+      }
+    ]
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          168.32,
+          -17.74
+        ]
+      },
+      "properties": {
+        "unit_id": "vu-example-missions:station-001",
+        "name": "Example Bay Mission",
+        "country_iso2": "VU",
+        "start_year": 1852,
+        "end_year": 1910,
+        "start_basis": "founding_stated",
+        "end_basis": "last_seen_only",
+        "values": {
+          "tradition": {
+            "code": "protestant",
+            "sources": [
+              "example-atlas-1900 p. 12"
+            ]
+          }
+        },
+        "tenures": [
+          {
+            "person_ref": "vu-example-missions:person-jones-t",
+            "name": "T. Jones",
+            "role": "missionary",
+            "start_year": 1852,
+            "end_year": 1861,
+            "date_precision": "year",
+            "source": "example-atlas-1900 p. 12"
+          }
+        ],
+        "location_basis": "atlas_georeference",
+        "location_confidence": "medium",
+        "sources": [
+          "example-atlas-1900 p. 12"
+        ],
+        "taxonomy_code": null,
+        "pow_site_ref": null
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "unit_id": "vu-example-missions:station-002",
+        "name": "Unlocated Inland Station",
+        "country_iso2": "VU",
+        "start_year": 1888,
+        "end_year": null,
+        "start_basis": "first_seen_only",
+        "end_basis": "unknown",
+        "values": {
+          "tradition": {
+            "code": "catholic",
+            "sources": [
+              "example-atlas-1900 p. 31"
+            ]
+          }
+        },
+        "location_basis": "described_locality",
+        "location_confidence": "low",
+        "representative_area": {
+          "level": "province",
+          "code": "VU-MAP"
+        },
+        "sources": [
+          "example-atlas-1900 p. 31"
+        ],
+        "pow_site_ref": null
+      }
+    }
+  ]
+}
