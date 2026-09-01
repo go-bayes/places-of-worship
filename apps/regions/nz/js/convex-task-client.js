@@ -397,6 +397,10 @@
             return await this.request("mutation", "rapidEntry:submitCurrentObservation", args);
         }
 
+        async withdrawEvidenceDraft(args) {
+            return await this.request("mutation", "evidence:withdrawEvidenceDraft", args);
+        }
+
         async submitHistoricalClaim(args) {
             return await this.request("mutation", "historicalClaims:submitHistoricalClaim", args);
         }
