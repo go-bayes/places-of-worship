@@ -208,6 +208,7 @@
 - Before beginning or resuming a topic branch, run `git fetch --prune origin`, account for every working-tree change, and inspect `git rev-list --left-right --count origin/main...HEAD`. Do not infer the branch relationship from a stale local `main`.
 - Treat a topic branch as inactive after its pull request merges or its tip becomes an ancestor of `origin/main`. Start later work on a new branch from current `origin/main`; retain the inactive branch only until the updated checkout and merged work are verified.
 - When `origin/main` and a topic branch both contain unique commits, create a dated local archive ref and push that ref before rebasing, merging, or cherry-picking. Reconcile on a new branch from current `origin/main`; never rewrite the only copy of unpublished commits.
+- Ahead/behind counts describe commit ancestry. Before replaying branch-only commits, use `git range-diff` and compare the changed files and their content against `origin/main`, because a squash or consolidated commit may already contain the work under different hashes.
 - Do not stack pull requests unless the user explicitly asks for a stack.
 - If a stack is necessary, state the stack order, base branch, changed files,
   and test plan in each pull request. After a lower branch is squash-merged,
