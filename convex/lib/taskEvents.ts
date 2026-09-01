@@ -36,7 +36,9 @@ export type TaskEventType =
   | "draft_withdrawn"
   | "review_claimed"
   | "review_released"
-  | "opinion_requested";
+  | "opinion_requested"
+  | "comment_requested"
+  | "comment_provided";
 
 export async function appendTaskEvent(
   ctx: MutationCtx,

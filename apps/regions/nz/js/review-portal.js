@@ -673,6 +673,17 @@
                 "Another opinion requested before acceptance.",
             );
         });
+        // return-for-comment: hold the decision and ask the contributor to
+        // answer — e.g. respond to an AI recommendation to reject
+        document.getElementById("requestCommentButton")?.addEventListener("click", (event) => {
+            const comment = window.prompt("Question or comment for the contributor (at least 8 characters):") || "";
+            if (!comment.trim()) return;
+            run(
+                event.currentTarget,
+                () => client.requestContributorComment({ taskId: task.task_id, comment: comment.trim() }),
+                "Returned to the contributor for comment; the task comes back to the queue when they answer.",
+            );
+        });
     }
 
     // the explicit affordances on the AI recommendation: prefill-and-agree
@@ -761,11 +772,13 @@
                 ${ownSubmission ? `<div class="review-warning">You submitted this evidence; another team member must record the decision (only the author is excluded).</div>` : ""}
                 ${claimedByOther ? `<div class="review-warning">Claimed for review by ${escapeHtml(row.review_claimant_label)}. Coordinate before deciding, or ask a curator to release the claim.</div>` : ""}
                 ${opinions ? `<div class="review-warning">Second opinion requested (${opinions}): acceptance for export needs ${opinions} other reviewer decision${opinions === 1 ? "" : "s"} on record first.</div>` : ""}
+                ${task.pending_reviewer_comment ? `<div class="review-warning">Awaiting the contributor's answer: "${escapeHtml(task.pending_reviewer_comment)}"</div>` : ""}
                 <div class="review-actions">
                     ${ownSubmission || claimedByOther ? "" : mine
                         ? `<button type="button" class="secondary" id="releaseReviewButton">Release review claim</button>`
                         : `<button type="button" class="secondary" id="claimReviewButton">Claim for review</button>`}
                     ${opinions >= 2 ? "" : `<button type="button" class="secondary" id="requestOpinionButton">Call for another opinion</button>`}
+                    ${task.pending_reviewer_comment ? "" : `<button type="button" class="secondary" id="requestCommentButton">Return for comment</button>`}
                 </div>
                 <div id="claimStatusText" class="muted" aria-live="polite"></div>
             </div>

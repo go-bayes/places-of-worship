@@ -420,6 +420,14 @@
         async requestAdditionalOpinion(args) {
             return await this.request("mutation", "reviews:requestAdditionalOpinion", args);
         }
+
+        async requestContributorComment(args) {
+            return await this.request("mutation", "reviews:requestContributorComment", args);
+        }
+
+        async respondToReviewerComment(args) {
+            return await this.request("mutation", "tasks:respondToReviewerComment", args);
+        }
     }
 
     window.PowConvexTaskClient = PowConvexTaskClient;
