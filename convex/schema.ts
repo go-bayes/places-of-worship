@@ -89,6 +89,10 @@ export default defineSchema({
     // second/third-opinion gate: acceptance for export requires this many
     // other reviewers' recorded decisions on the task first
     extra_opinions_required: v.optional(v.number()),
+    // return-for-comment (jb 2026-09-01): a reviewer's open question to the
+    // contributor, shown in the ra panel until answered or decided; the
+    // audit copy lives in task events
+    pending_reviewer_comment: v.optional(v.string()),
     selected_target_year: v.optional(v.number()),
     target_years: v.array(v.number()),
     matched_current_site_id: v.optional(v.string()),

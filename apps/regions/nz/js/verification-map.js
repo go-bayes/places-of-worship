@@ -2171,6 +2171,9 @@ class NzVerificationMap {
         panel.querySelectorAll(".revise-now").forEach(btn => {
             btn.addEventListener("click", () => this.reviseNow(btn.dataset.taskId, btn.closest(".changes-entry")));
         });
+        panel.querySelectorAll(".comment-reply-send").forEach(btn => {
+            btn.addEventListener("click", () => this.sendCommentReply(btn.dataset.taskId, btn.closest(".changes-entry")));
+        });
         this.renderChangesRequestedBadge(needsMore);
     }
 
@@ -2193,24 +2196,56 @@ class NzVerificationMap {
         const task = item.task || {};
         const review = item.latestReview || {};
         const taskId = task.task_id || "";
+        const question = task.pending_reviewer_comment || "";
         const note = review.decision_note
             ? `<div class="changes-note"><span class="changes-label">Reviewer note</span>${escapeHtml(review.decision_note)}</div>`
             : "";
         const followUp = review.required_follow_up
             ? `<div class="changes-note"><span class="changes-label">Required follow-up</span>${escapeHtml(review.required_follow_up)}</div>`
             : "";
+        // a pending question offers a reply box beside the revision path:
+        // answering returns the task to the review queue without a new draft
+        const commentBlock = question ? `
+            <div class="changes-note"><span class="changes-label">Reviewer question</span>${escapeHtml(question)}</div>
+            <textarea class="comment-reply-input" rows="2" maxlength="2000" placeholder="Answer the reviewer (at least 8 characters)"></textarea>
+        ` : "";
         return `
             <div class="changes-entry" role="listitem">
                 <span class="entry-title">${escapeHtml(task.name || "Unnamed site")}</span>
                 <span class="entry-meta">${escapeHtml(taskId)}</span>
                 ${note}
                 ${followUp}
+                ${commentBlock}
                 <div class="changes-error" role="alert"></div>
                 <div class="entry-actions">
-                    <button type="button" class="revise-now" data-task-id="${escapeHtml(taskId)}">Revise now</button>
+                    ${question ? `<button type="button" class="comment-reply-send" data-task-id="${escapeHtml(taskId)}">Send answer</button>` : ""}
+                    <button type="button" class="revise-now${question ? " secondary" : ""}" data-task-id="${escapeHtml(taskId)}">Revise now</button>
                 </div>
             </div>
         `;
+    }
+
+    // answers a reviewer's return-for-comment question from the panel; the
+    // reply lands in the audit trail and the task rejoins the review queue
+    async sendCommentReply(taskId, entryEl) {
+        const input = entryEl?.querySelector(".comment-reply-input");
+        const errorEl = entryEl?.querySelector(".changes-error");
+        const button = entryEl?.querySelector(".comment-reply-send");
+        const response = (input?.value || "").trim();
+        if (response.length < 8) {
+            if (errorEl) errorEl.textContent = "Write a short answer (at least 8 characters).";
+            return;
+        }
+        if (button) button.disabled = true;
+        try {
+            await this.backend.respondToReviewerComment({ taskId, response });
+            this.taskHistoryByTaskId.delete(taskId);
+            await this.refreshBackendTasks();
+            this.applyFilters();
+        } catch (error) {
+            if (button) button.disabled = false;
+            if (errorEl) errorEl.textContent = error.message || "Could not send the answer.";
+        }
     }
 
     // starts an editable revision for a changes_requested task via the server

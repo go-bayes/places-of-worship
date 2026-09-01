@@ -1045,3 +1045,48 @@ export const createManualCandidateTask = mutation({
     return { task_id: taskId, candidate_site_id: candidateSiteId, status: "in_progress" as const };
   },
 });
+
+// answers a reviewer's return-for-comment question (jb 2026-09-01): the
+// reply is recorded as an audit event and the task returns to the review
+// queue; the contributor may instead revise the draft, which keeps the
+// question open until a decision clears it
+export const respondToReviewerComment = mutation({
+  args: {
+    taskId: v.string(),
+    response: v.string(),
+  },
+  returns: v.object({ task_id: v.string(), task_status: v.string() }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
+    const response = args.response.trim();
+    if (response.length < 8) {
+      throw new Error("Write a short answer to the reviewer's question.");
+    }
+    assertMaxString("comment response", response, TASK_REASON_MAX);
+    const task = await getTaskOrThrow(ctx, args.taskId);
+    if (task.pending_reviewer_comment === undefined) {
+      throw new Error("No reviewer question is waiting on this task.");
+    }
+    if (!canReview(user.roles) && task.assigned_to !== user._id && task.claimed_by !== user._id) {
+      throw new Error("Only the task's contributor or a review role can answer this question.");
+    }
+    const now = Date.now();
+    const newStatus = task.status === "changes_requested" ? ("needs_review" as const) : task.status;
+    await ctx.db.patch(task._id, {
+      status: newStatus,
+      pending_reviewer_comment: undefined,
+      updated_at: now,
+      last_event_at: now,
+    });
+    await appendTaskEvent(ctx, {
+      taskId: args.taskId,
+      eventType: "comment_provided",
+      actorUserId: user._id,
+      actorRole: chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]),
+      previousStatus: task.status,
+      newStatus,
+      reason: response,
+    });
+    return { task_id: args.taskId, task_status: newStatus };
+  },
+});

@@ -375,8 +375,9 @@ export const recordReviewDecision = mutation({
 
     await ctx.db.patch(task._id, {
       status: newTaskStatus,
-      // a recorded decision settles the claim either way
+      // a recorded decision settles the claim and any open question
       ...(task.review_claimed_by !== undefined ? { review_claimed_by: undefined, review_claimed_at: undefined } : {}),
+      ...(task.pending_reviewer_comment !== undefined ? { pending_reviewer_comment: undefined } : {}),
       updated_at: now,
       last_event_at: now,
     });
@@ -538,5 +539,47 @@ export const requestAdditionalOpinion = mutation({
       reason: note,
     });
     return { task_id: args.taskId, extra_opinions_required: current + 1 };
+  },
+});
+
+// return-for-comment (jb 2026-09-01): instead of deciding, the reviewer
+// sends the contributor a question — for example to answer an AI
+// recommendation to reject — and holds the decision until the reply.
+// the task shows in the ra's changes-requested panel with a reply box;
+// answering returns it to the review queue
+export const requestContributorComment = mutation({
+  args: {
+    taskId: v.string(),
+    comment: v.string(),
+  },
+  returns: v.object({ task_id: v.string(), task_status: v.string() }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["reviewer", "curator", "admin"]);
+    const comment = args.comment.trim();
+    if (comment.length < 8) {
+      throw new Error("Write the question or comment the contributor should answer.");
+    }
+    assertMaxString("reviewer comment", comment, TASK_REASON_MAX);
+    const task = await getTaskOrThrow(ctx, args.taskId);
+    if (!REVIEW_OPEN_STATUSES.has(task.status)) {
+      throw new Error("This task is not open for review.");
+    }
+    const now = Date.now();
+    await ctx.db.patch(task._id, {
+      status: "changes_requested",
+      pending_reviewer_comment: comment,
+      updated_at: now,
+      last_event_at: now,
+    });
+    await appendTaskEvent(ctx, {
+      taskId: args.taskId,
+      eventType: "comment_requested",
+      actorUserId: user._id,
+      actorRole: chooseActorRole(user, ["reviewer", "curator", "admin"]),
+      previousStatus: task.status,
+      newStatus: "changes_requested",
+      reason: comment,
+    });
+    return { task_id: args.taskId, task_status: "changes_requested" };
   },
 });
