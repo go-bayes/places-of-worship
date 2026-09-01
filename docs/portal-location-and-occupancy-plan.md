@@ -1,6 +1,6 @@
 # Portal Location Uncertainty And Occupancy Timeline Plan
 
-Status: DRAFT for JB's ruling, 2026-09-02. Produced from JB's ask of 2026-09-02 for the "Add or revise places" portal: (1) an uncertainty radius for location, important for historical work; (2) a timeline with uncertainty that imputes historical locations. Planned against the ruled temporal plan (`docs/portal-temporal-redesign-plan.md` on branch `design/portal-temporal-redesign`, PR #43, ruled 2026-08-31) and the handover of 2026-09-01. No code in this plan has been implemented.
+Status: RULED (JB, 2026-09-02) — all five section-6 decisions ruled as recommended; section 8 records the rulings. Drafted 2026-09-02. Produced from JB's ask of 2026-09-02 for the "Add or revise places" portal: (1) an uncertainty radius for location, important for historical work; (2) a timeline with uncertainty that imputes historical locations. Planned against the ruled temporal plan (`docs/portal-temporal-redesign-plan.md` on branch `design/portal-temporal-redesign`, PR #43, ruled 2026-08-31) and the handover of 2026-09-01. No code in this plan has been implemented.
 
 Static render for review: `local/review/2026-09-02-location-occupancy-plan/plan.html` (git-ignored, per the F2 method). Portal hub: `docs/portal-data-entry-plan.md`. Master data vocabulary: `schemas/geometry-history.schema.json`.
 
@@ -108,7 +108,7 @@ Against the 2026-09-01 handover queue (reviewer map increment 1 agreed as the ne
 
 The reviewer map increment 1 touches `review-portal.js` and Convex task creation, not these files, and can run in parallel with PR-L1 and PR-B0. Ruling R5 asks which goes first.
 
-## 6. Decisions Needing JB's Ruling
+## 6. Decisions Put To JB
 
 - R1 Approximate area everywhere. Allow the approximate-area mode in every country including Vanuatu and in the default rapid flow, with building identified as the default and the zoom-15 gate kept for buildings only. Recommended yes; the 2026-08-31 building-only ruling for VU predates the historical use case.
 - R2 Radius grade thresholds. Building identified → `building`; ≤100 m → `parcel_or_compound`; ≤300 m → `street`; ≤2 km → `locality`; >2 km → `area`. Recommended as stated; the presets align to the boundaries.
@@ -119,3 +119,16 @@ The reviewer map increment 1 touches `review-portal.js` and Convex task creation
 ## 7. Amendments To The Ruled Temporal Plan
 
 Recorded so the design branch can be reconciled when it lands: `site_lifespans` becomes `site_occupancies` with an embedded location (3.1); the guided-only parent rule is proposed relaxed (R3); D10's successor links reread as occupancy history per definition v0.1.4, with `successor_site_id` reserved for splits; the derivation gains the location table and rules L1 to L5 (3.3); the review event log is named `derived_state_events` and covers both derived tables (3.4); the dated-places product changes from one feature per site to one per occupancy (3.5).
+
+## 8. JB Rulings — 2026-09-02
+
+Recorded from JB's reply to the plan the same day. All five decisions ruled as recommended.
+
+- **R1 ruled yes.** The approximate-area mode is allowed in every country, Vanuatu included, and in the default rapid flow; building identified stays the default and the zoom-15 placement gate applies to buildings only. This supersedes the 2026-08-31 building-level-only rule for VU.
+- **R2 ruled yes.** Grade thresholds as tabled: building identified → `building`; ≤100 m → `parcel_or_compound`; ≤300 m → `street`; ≤2 000 m → `locality`; above → `area`. The ordinal is derived, never entered.
+- **R3 ruled yes.** Occupancy rows attach to rapid as well as guided parent drafts, on the historical-claims precedent; the rapid draft contract is untouched. This amends the ruled PR-B guided-only rule.
+- **R4 ruled yes.** Imputation rule L4 stands: nearest dated occupancy's location, stored as `imputed` with the gap recorded, radius unchanged, reviewer confirmation required before it enters the master lane.
+- **R5 ruled: PR-L1 and PR-B0 first.** The reviewer map increment 1 follows, or runs in parallel where hands allow.
+
+Build queue is therefore unblocked in the section-5 order: PR-L1 → PR-B0 → PR-B′ → PR-C → PR-D.
+
