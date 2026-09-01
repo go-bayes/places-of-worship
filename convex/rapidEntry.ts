@@ -133,6 +133,9 @@ export const submitCurrentObservation = mutation({
     candidate: v.optional(candidateInput),
     observation: rapidCurrentObservationInput,
     clientContext: v.optional(rapidClientContext),
+    // a partial entry the observer wants discussed rather than reviewed
+    // as complete; it lands as an unresolved note instead of needs_review
+    flagForDiscussion: v.optional(v.boolean()),
   },
   returns: v.object({
     task_id: v.string(),
@@ -337,12 +340,18 @@ export const submitCurrentObservation = mutation({
       });
     }
 
+    const flagged = args.flagForDiscussion === true;
+    if (flagged && (args.observation.uncertainty_note?.trim().length ?? 0) < 12) {
+      // a discussion flag must carry its explanation; the client keeps it
+      // in the uncertainty note so the reviewer sees what needs settling
+      throw new Error("Explain what needs discussion before flagging this entry.");
+    }
     const denominationRaw = args.observation.denomination_or_tradition_raw?.trim() || undefined;
     const draftId = `${task.task_id}:${user._id}:rapid:${args.clientSubmissionId}`;
     const draftRecord = {
       evidence_draft_id: draftId,
       task_id: task.task_id,
-      draft_status: "submitted" as const,
+      draft_status: flagged ? ("unresolved_note" as const) : ("submitted" as const),
       created_by: user._id,
       created_at: now,
       updated_at: now,
@@ -377,29 +386,32 @@ export const submitCurrentObservation = mutation({
       },
       intake_submission_key: submissionKey,
     };
+    const landedStatus = flagged ? ("unresolved_note" as const) : ("needs_review" as const);
     assertEvidenceDraftLimits(draftRecord);
-    assertEvidenceDraftSubmission(draftRecord, false);
+    assertEvidenceDraftSubmission(draftRecord, flagged);
     await ctx.db.insert("evidence_drafts", draftRecord);
     await supersedeEarlierSubmissions(ctx, task.task_id, user._id, draftId, now);
     await ctx.db.patch(task._id, {
       assigned_to: task.assigned_to ?? user._id,
       claimed_by: task.claimed_by ?? user._id,
       claimed_at: task.claimed_at ?? now,
-      status: "needs_review",
+      status: landedStatus,
       updated_at: now,
       last_event_at: now,
     });
     await appendTaskEvent(ctx, {
       taskId: task.task_id,
-      eventType: "submitted_for_review",
+      eventType: flagged ? "submitted_unresolved_note" : "submitted_for_review",
       actorUserId: user._id,
       actorRole,
       previousStatus: task.status,
-      newStatus: "needs_review",
+      newStatus: landedStatus,
       evidenceDraftId: draftId,
-      reason: correctedDraft !== null
-        ? `Corrected ${intake.name} current observation submitted for review; supersedes ${correctedDraft.evidence_draft_id}.`
-        : `${intake.name} current observation submitted for review.`,
+      reason: flagged
+        ? `${intake.name} partial current observation flagged for discussion.`
+        : correctedDraft !== null
+          ? `Corrected ${intake.name} current observation submitted for review; supersedes ${correctedDraft.evidence_draft_id}.`
+          : `${intake.name} current observation submitted for review.`,
       clientContext: {
         ...(args.clientContext ?? {}),
         ...(correctedDraft !== null ? { corrects_evidence_draft_id: correctedDraft.evidence_draft_id } : {}),
@@ -410,7 +422,7 @@ export const submitCurrentObservation = mutation({
       task_id: task.task_id,
       evidence_draft_id: draftId,
       ...(task.candidate_site_id !== undefined ? { candidate_site_id: task.candidate_site_id } : {}),
-      task_status: "needs_review" as const,
+      task_status: landedStatus,
       deduped: false,
       corrected: correctedDraft !== null,
       ...(correctedDraft !== null ? { superseded_evidence_draft_id: correctedDraft.evidence_draft_id } : {}),

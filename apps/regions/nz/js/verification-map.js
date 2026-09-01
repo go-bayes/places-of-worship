@@ -1119,15 +1119,32 @@ function statusOptionsHtml() {
     `;
 }
 
+// one year per row with the selects in aligned columns, so the eye can
+// run down the years and compare states and confidence at a glance
 function targetYearStatusControlsHtml() {
-    return TARGET_YEARS.map(year => `
-        <label>
-            ${escapeHtml(year)} status
-            <select id="status${escapeHtml(year)}">
-                ${statusOptionsHtml()}
-            </select>
-        </label>
-    `).join("");
+    return `
+        <div class="year-status-grid" role="group" aria-label="Status and confidence for each target year">
+            <div class="year-status-row year-status-head" aria-hidden="true">
+                <span class="year-status-year"></span>
+                <span>Status</span>
+                <span>Confidence</span>
+            </div>
+            ${TARGET_YEARS.map(year => `
+                <div class="year-status-row">
+                    <label class="year-status-year" for="status${escapeHtml(year)}">${escapeHtml(year)}</label>
+                    <select id="status${escapeHtml(year)}" aria-label="${escapeHtml(year)} status">
+                        ${statusOptionsHtml()}
+                    </select>
+                    <select id="confidence${escapeHtml(year)}" aria-label="${escapeHtml(year)} confidence">
+                        <option value="">Confidence…</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+            `).join("")}
+        </div>
+    `;
 }
 
 function nominationTypeOptionsHtml() {
@@ -3634,6 +3651,7 @@ class NzVerificationMap {
                     : `<button id="openNextTaskButton"${knownHistory ? ` class="secondary"` : ""} type="button">Open next task</button>`}
                 ${skipped ? `<button id="undoSkipButton" class="secondary" type="button">Undo skip</button>` : ""}
             </div>
+            ${!skipped && props.task_id ? `<div id="attachmentsBlock" class="attachments-block" hidden></div>` : ""}
             <div id="confirmPaneStatus" class="copy-status" aria-live="polite"></div>
             <div class="pilot-note" role="note">
                 Pick another task from the map or list.${this.filterActiveHint()}
@@ -3643,6 +3661,9 @@ class NzVerificationMap {
         document.getElementById("nominateAnotherButton")?.addEventListener("click", () => this.enterPinMode());
         document.getElementById("addKnownHistoryButton")?.addEventListener("click", () => this.renderHistoricalClaimEntry(knownHistory));
         document.getElementById("undoSkipButton")?.addEventListener("click", () => this.undoSkip(props.task_id));
+        // photos and documents attach to the task record just created, so a
+        // nomination can carry its site photo immediately after submission
+        if (!skipped && props.task_id) this.initAttachmentsBlock(props);
     }
 
     // first task in the current filtered list order — the same
@@ -4014,6 +4035,7 @@ class NzVerificationMap {
             observation_contract_version: this.observationContractVersionFor(values),
             action: values.action,
             target_year_statuses: values.targetYearStatuses,
+            target_year_confidence: values.targetYearConfidence,
             source_type: values.sourceType,
             existence_status: values.existenceStatus,
             worship_use_status: values.rawWorshipUseStatus,
@@ -4158,6 +4180,10 @@ class NzVerificationMap {
 
             <div class="detail-section">
                 ${this.issueFormHtml(issueContext, { open: this.issueFormOpenTaskId === props.task_id })}
+            </div>
+
+            <div class="detail-section">
+                ${this.taskSkipControlHtml(props)}
             </div>
 
             <div class="detail-section">
@@ -4534,8 +4560,8 @@ class NzVerificationMap {
         const optionalOpen = Boolean(pre.denomination_or_tradition_raw || pre.evidence_note || pre.uncertainty_note);
         return `
             <form id="${prefix}RapidCurrentForm" class="rapid-current-form" data-submission-id="${escapeHtml(submissionId)}">
-                <fieldset class="rapid-choice-group">
-                    <legend>What can you confirm at the observation date?</legend>
+                <fieldset class="rapid-choice-group" id="${prefix}CurrentStatusGroup">
+                    <legend>What can you confirm at the observation date? <span class="req-chip">required</span></legend>
                     <label class="rapid-choice">
                         <input type="radio" name="${prefix}CurrentStatus" value="currently_used_for_worship"${checked("currently_used_for_worship")}>
                         <span><strong>This site is used for worship</strong><small>At the observation date, the place exists and worship use is confirmed.</small></span>
@@ -4555,11 +4581,12 @@ class NzVerificationMap {
                 </fieldset>
                 <div class="field-grid">
                     <label>
-                        Observation date
+                        Observation date <span class="req-chip">required</span>
                         <input id="${prefix}ObservedOn" type="date" max="${escapeHtml(window.PowRapidEntry.localIsoDate())}" value="${escapeHtml(pre.source_date_or_capture_date || window.PowRapidEntry.localIsoDate())}">
+                        <small class="label-help">This is also the source or capture date: the date of your visit, or of the imagery or source you used.</small>
                     </label>
                     <label>
-                        How do you know this?
+                        How do you know this? <span class="req-chip">required</span>
                         <select id="${prefix}ObservationBasis">
                             ${Object.entries(RAPID_BASIS_LABELS).map(([value, label]) => `<option value="${escapeHtml(value)}"${value === preBasis ? " selected" : ""}>${escapeHtml(label)}</option>`).join("")}
                         </select>
@@ -4567,11 +4594,11 @@ class NzVerificationMap {
                 </div>
                 <div id="${prefix}NamedSourceFields" class="rapid-conditional"${preNamed ? "" : " hidden"}>
                     <label>
-                        Source title or brief description
+                        Source title or brief description <span class="req-chip">required for a named source</span>
                         <input id="${prefix}SourceTitle" type="text" maxlength="2048" value="${escapeHtml(preNamed ? pre.source_title || "" : "")}">
                     </label>
                     <label>
-                        Source URL or agreed file reference (if one exists)
+                        Source URL or agreed file reference (if one exists) <span class="req-chip">required for a named source</span>
                         <input id="${prefix}SourceReference" type="text" maxlength="4096" value="${escapeHtml(preNamed ? pre.source_url_or_file || "" : "")}">
                     </label>
                 </div>
@@ -4583,7 +4610,7 @@ class NzVerificationMap {
                             <input id="${prefix}DenominationRaw" type="text" maxlength="2048" placeholder="Copy the wording exactly" value="${escapeHtml(pre.denomination_or_tradition_raw || "")}">
                         </label>
                         <label>
-                            Where did that wording come from?
+                            Where did that wording come from? (if known)
                             <select id="${prefix}DenominationBasis">
                                 ${selectOptionsHtml(DENOMINATION_LABEL_BASIS_OPTIONS, pre.denomination_label_basis || "unknown")}
                             </select>
@@ -4599,7 +4626,7 @@ class NzVerificationMap {
                     </div>
                 </details>
                 <label>
-                    Sensitivity and privacy
+                    Sensitivity and privacy <span class="req-chip">required</span>
                     <select id="${prefix}PrivacyFlag">
                         ${selectOptionsHtml(PRIVACY_FLAG_OPTIONS, pre.privacy_flag || "needs_review")}
                     </select>
@@ -4607,8 +4634,21 @@ class NzVerificationMap {
                 <div class="copy-help">
                     No contact details or private conversations. Choose restricted for culturally restricted places or identifiable people.
                 </div>
+                <label class="flag-discussion">
+                    <input type="checkbox" id="${prefix}FlagForDiscussion">
+                    <span><strong>Flag for discussion</strong><small>Record a partial entry — for example a duplicate on the map, shared denominations, or a case the form does not fit — and bring it to the team.</small></span>
+                </label>
+                <label id="${prefix}DiscussionField" hidden>
+                    What needs discussion? <span class="req-chip">required when flagged</span>
+                    <textarea id="${prefix}DiscussionNote" rows="2" maxlength="2000" placeholder="e.g. this place is recorded twice on the map; two denominations share the building"></textarea>
+                </label>
+                ${options.attachmentsHint ? `
+                    <div class="copy-help">
+                        <strong>Photos &amp; documents:</strong> attach them on the next screen, straight after you save this place.
+                    </div>
+                ` : ""}
                 <div class="button-row">
-                    <button id="${prefix}RapidSubmit" type="submit">${escapeHtml(submitLabel)}</button>
+                    <button id="${prefix}RapidSubmit" type="submit" data-submit-label="${escapeHtml(submitLabel)}">${escapeHtml(submitLabel)}</button>
                     ${options.showCancel ? `<button id="${prefix}FormCancelButton" type="button" class="secondary">Cancel</button>` : ""}
                 </div>
                 <div id="${prefix}RapidStatus" class="copy-status" aria-live="polite"></div>
@@ -4699,7 +4739,104 @@ class NzVerificationMap {
             directObservation: document.getElementById(`${prefix}DirectObservation`)?.value || "",
             uncertaintyNote: document.getElementById(`${prefix}UncertaintyNote`)?.value || "",
             privacyFlag: document.getElementById(`${prefix}PrivacyFlag`)?.value || "",
+            flagForDiscussion: Boolean(document.getElementById(`${prefix}FlagForDiscussion`)?.checked),
+            discussionNote: document.getElementById(`${prefix}DiscussionNote`)?.value || "",
         };
+    }
+
+    // ---- unsubmitted rapid drafts, kept on this device only ----
+
+    rapidDraftStorageKey(key) {
+        return `powRapidDraft:${COUNTRY_CONFIG.countryCode}:${key}`;
+    }
+
+    persistRapidDraft(prefix, key, extraValues = {}) {
+        try {
+            const record = {
+                saved_at: Date.now(),
+                values: this.rapidObservationValues(prefix),
+                extra: extraValues,
+            };
+            window.localStorage.setItem(this.rapidDraftStorageKey(key), JSON.stringify(record));
+        } catch (error) {
+            // private windows or blocked storage lose autosave only
+        }
+    }
+
+    readRapidDraft(key) {
+        try {
+            const raw = window.localStorage.getItem(this.rapidDraftStorageKey(key));
+            return raw ? JSON.parse(raw) : null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    clearRapidDraft(key) {
+        try {
+            window.localStorage.removeItem(this.rapidDraftStorageKey(key));
+        } catch (error) {
+            // nothing to clear when storage is unavailable
+        }
+    }
+
+    restoreRapidDraft(prefix, key) {
+        const record = this.readRapidDraft(key);
+        if (!record?.values) return null;
+        const values = record.values;
+        const setValue = (id, value) => {
+            const el = document.getElementById(`${prefix}${id}`);
+            if (el && value !== undefined && value !== "") el.value = value;
+        };
+        if (values.currentStatus) {
+            const radio = document.querySelector(`input[name="${prefix}CurrentStatus"][value="${values.currentStatus}"]`);
+            if (radio) radio.checked = true;
+        }
+        setValue("ObservationBasis", values.observationBasis);
+        setValue("ObservedOn", values.observedOn);
+        setValue("SourceTitle", values.sourceTitle);
+        setValue("SourceReference", values.sourceReference);
+        setValue("DenominationRaw", values.denominationRaw);
+        setValue("DenominationBasis", values.denominationLabelBasis);
+        setValue("DirectObservation", values.directObservation);
+        setValue("UncertaintyNote", values.uncertaintyNote);
+        setValue("PrivacyFlag", values.privacyFlag);
+        setValue("DiscussionNote", values.discussionNote);
+        const flag = document.getElementById(`${prefix}FlagForDiscussion`);
+        if (flag && values.flagForDiscussion) flag.checked = true;
+        this.updateRapidSourceFields(prefix);
+        this.updateRapidDiscussionFields(prefix);
+        if (values.denominationRaw || values.directObservation || values.uncertaintyNote) {
+            const optional = document.querySelector(`#${prefix}RapidCurrentForm .optional-block`);
+            if (optional) optional.open = true;
+        }
+        return record;
+    }
+
+    // highlights the field named by validation and scrolls it into view
+    showRapidFieldError(prefix, error) {
+        document.querySelectorAll(".field-invalid").forEach(el => el.classList.remove("field-invalid"));
+        if (!error?.field) return;
+        const target = error.field === "CurrentStatus"
+            ? document.getElementById(`${prefix}CurrentStatusGroup`)
+            : document.getElementById(`${prefix}${error.field}`);
+        if (!target) return;
+        const holder = target.closest("label") || target;
+        holder.classList.add("field-invalid");
+        holder.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (typeof target.focus === "function") target.focus({ preventScroll: true });
+    }
+
+    updateRapidDiscussionFields(prefix) {
+        const flagged = Boolean(document.getElementById(`${prefix}FlagForDiscussion`)?.checked);
+        const field = document.getElementById(`${prefix}DiscussionField`);
+        if (field) field.hidden = !flagged;
+        const submit = document.getElementById(`${prefix}RapidSubmit`);
+        if (submit) {
+            submit.textContent = flagged
+                ? "Flag for discussion"
+                : submit.dataset.submitLabel || "Submit for review";
+        }
     }
 
     updateRapidSourceFields(prefix) {
@@ -4711,16 +4848,58 @@ class NzVerificationMap {
     bindRapidObservationForm(prefix, options = {}) {
         const form = document.getElementById(`${prefix}RapidCurrentForm`);
         if (!form || !window.PowRapidEntry) return;
-        const markDirty = () => this.markFormDirty(options.props?.task_id || `rapid-${prefix}`);
+        const draftKey = options.props?.task_id || `rapid-${prefix}`;
+        const extraIds = options.draftExtraIds || [];
+        const persist = () => {
+            const extra = Object.fromEntries(
+                extraIds.map(id => [id, document.getElementById(id)?.value || ""]).filter(([, value]) => value),
+            );
+            this.persistRapidDraft(prefix, draftKey, extra);
+            const status = document.getElementById(`${prefix}RapidStatus`);
+            if (status && !status.textContent.startsWith("Draft kept")) {
+                status.textContent = "Draft kept on this device until you submit.";
+                status.classList.remove("copy-status-error");
+            }
+        };
+        let persistTimer = 0;
+        const markDirty = () => {
+            this.markFormDirty(options.props?.task_id || `rapid-${prefix}`);
+            window.clearTimeout(persistTimer);
+            persistTimer = window.setTimeout(persist, 400);
+        };
         form.addEventListener("input", markDirty);
         form.addEventListener("change", markDirty);
+        form.addEventListener("input", event => {
+            event.target?.closest?.("label, fieldset")?.classList?.remove("field-invalid");
+        });
         document.getElementById(`${prefix}ObservationBasis`)?.addEventListener("change", () => {
             this.updateRapidSourceFields(prefix);
         });
+        document.getElementById(`${prefix}FlagForDiscussion`)?.addEventListener("change", () => {
+            this.updateRapidDiscussionFields(prefix);
+        });
         this.updateRapidSourceFields(prefix);
+        this.updateRapidDiscussionFields(prefix);
+        // a correction prefill outranks the device draft; otherwise restore
+        // unsubmitted work so a lost session costs nothing
+        if (!options.prefill) {
+            const restored = this.restoreRapidDraft(prefix, draftKey);
+            if (restored) {
+                extraIds.forEach(id => {
+                    const value = restored.extra?.[id];
+                    const el = document.getElementById(id);
+                    if (el && value) el.value = value;
+                });
+                const status = document.getElementById(`${prefix}RapidStatus`);
+                if (status) {
+                    const savedAt = restored.saved_at ? new Date(restored.saved_at).toLocaleString() : "";
+                    status.textContent = `Restored your unsubmitted draft from this device${savedAt ? ` (saved ${savedAt})` : ""}.`;
+                }
+            }
+        }
         form.addEventListener("submit", event => {
             event.preventDefault();
-            this.submitRapidObservation(prefix, options);
+            this.submitRapidObservation(prefix, { ...options, draftKey });
         });
     }
 
@@ -4734,24 +4913,32 @@ class NzVerificationMap {
             return;
         }
         const values = this.rapidObservationValues(prefix);
-        const inputError = window.PowRapidEntry.validateObservation(values);
+        const flagOptions = { flagForDiscussion: values.flagForDiscussion };
+        const inputError = window.PowRapidEntry.validateObservationDetailed(values, flagOptions);
         if (inputError) {
-            if (status) status.textContent = inputError;
+            if (status) {
+                status.textContent = inputError.message;
+                status.classList.add("copy-status-error");
+            }
+            this.showRapidFieldError(prefix, inputError);
             return;
         }
+        if (status) status.classList.remove("copy-status-error");
+        this.showRapidFieldError(prefix, null);
         const candidate = options.getCandidate?.();
         if (options.getCandidate && !candidate) {
             if (status) status.textContent = "Confirm the map location before recording this observation.";
             return;
         }
         submitButton.disabled = true;
-        if (status) status.textContent = "Submitting securely for review...";
+        if (status) status.textContent = values.flagForDiscussion ? "Flagging securely for discussion..." : "Submitting securely for review...";
         try {
             const result = await this.backend.submitCurrentObservation({
                 clientSubmissionId: form.dataset.submissionId,
                 countryCode: COUNTRY_CONFIG.countryCode,
                 ...(options.props?.task_id ? { taskId: options.props.task_id } : { candidate }),
-                observation: window.PowRapidEntry.observationPayload(values),
+                observation: window.PowRapidEntry.observationPayload(values, flagOptions),
+                ...(values.flagForDiscussion ? { flagForDiscussion: true } : {}),
                 clientContext: {
                     ...(this.pinConfirmed?.zoom !== undefined ? { placement_zoom: this.pinConfirmed.zoom } : {}),
                     ...(options.getCandidate ? {
@@ -4762,6 +4949,7 @@ class NzVerificationMap {
                 },
             });
             this.clearFormDirty();
+            if (options.draftKey) this.clearRapidDraft(options.draftKey);
             if (options.props?.task_id) {
                 const taskId = options.props.task_id;
                 this.rapidCorrectionTaskIds.delete(taskId);
@@ -5104,9 +5292,6 @@ class NzVerificationMap {
                 return this.rapidReadOnlyHtml(props, latest, draftLoaded);
             }
         }
-        const skipControl = ASSIGNMENT_MODE
-            ? (assignmentTaskAvailable && !readOnly && !revisionMode ? this.skipFormHtml() : "")
-            : this.skipFormHtml();
         // collapsed optional blocks open when the saved draft or a pending
         // unsaved snapshot already carries values for them
         const prefill = this.formSnapshotsByTaskId.get(taskId) || this.latestDraftForTask(taskId) || {};
@@ -5130,8 +5315,8 @@ class NzVerificationMap {
                         <option value="denomination_or_shared_use">Denomination/shared use</option>
                     </select>
                 </label>
+                ${targetYearStatusControlsHtml()}
                 <div class="field-grid">
-                    ${targetYearStatusControlsHtml()}
                     <label>
                         Source type
                         <select id="sourceTypeSelect">
@@ -5175,13 +5360,16 @@ class NzVerificationMap {
                     <input id="sourceProviderInput" type="text" placeholder="e.g. Google Street View, Apple Look Around, Mapillary, RA field observation">
                 </label>
                 <label>
-                    Source title
+                    Source title <span class="req-chip">required to submit</span>
                     <input id="sourceTitleInput" type="text" placeholder="e.g. Anglican Diocese of Wellington directory 2018, Google Street View imagery">
                 </label>
                 <label>
-                    Source date or imagery capture date
+                    Source date or imagery capture date <span class="req-chip">required for a field observation</span>
                     <input id="sourceDateInput" type="text" placeholder="e.g. 2018-09, 2023, or 2026-05-03 for a field visit">
                 </label>
+                <div class="copy-help">
+                    The date belongs to the source, not to today. If the source gives no date, leave this blank and say so in “What did you directly observe or read in the source?” below.
+                </div>
                 <details class="skip-form optional-block" id="addressBlockDetails"${addressOpen ? " open" : ""}>
                     <summary>Address or locality (optional)</summary>
                     <div class="copy-help">
@@ -5282,7 +5470,7 @@ class NzVerificationMap {
                     </label>
                 </fieldset>
                 <label>
-                    What did you directly observe or read in the source?
+                    What did you directly observe or read in the source? <span class="req-chip">required to submit</span>
                     <textarea id="decisionNote" data-question-id="direct_observation_v1" rows="3" maxlength="2000" placeholder="Record the direct observation. Copy names, denomination wording, dates, or notices exactly where relevant."></textarea>
                 </label>
                 <div class="copy-help" id="legacyNoteUpgradeHelp" hidden>
@@ -5350,9 +5538,23 @@ class NzVerificationMap {
                     <textarea id="decisionJsonOutput" class="json-output" rows="5" readonly></textarea>
                 `}
                 <div id="copyStatus" class="copy-status" aria-live="polite"></div>
-                ${skipControl}
             </div>
         `;
+    }
+
+    // skip sits after the issue form in the panel: report a problem with the
+    // place first, give up on the task last
+    taskSkipControlHtml(props) {
+        const taskId = props?.task_id || "";
+        if (!INTAKE_ENABLED) return "";
+        if (this.taskUsesRapidForm(props)) return "";
+        if (!ASSIGNMENT_MODE) return this.skipFormHtml();
+        const assignmentTaskAvailable = this.backend?.configured
+            && this.backendUser
+            && this.backendTasksById.has(taskId);
+        const readOnly = taskId ? this.taskIsReadOnly(taskId) : false;
+        const revisionMode = taskId ? this.taskIsRevisionMode(taskId) : false;
+        return assignmentTaskAvailable && !readOnly && !revisionMode ? this.skipFormHtml() : "";
     }
 
     bindRaActionForm(props) {
@@ -5387,6 +5589,12 @@ class NzVerificationMap {
         actionSelect?.addEventListener("change", () => {
             markDirty();
             applyDefaults();
+            // a duplicate claim needs its counterpart on record, so the
+            // related-ids block opens the moment the action names one
+            if (actionSelect.value === "possible_duplicate") {
+                const related = document.getElementById("relatedIdsBlockDetails");
+                if (related) related.open = true;
+            }
         });
         applyDefaults();
         const latestDraft = this.latestDraftForTask(props.task_id);
@@ -5519,6 +5727,9 @@ class NzVerificationMap {
                 this.applyControlledAssessmentDefaults();
                 this.updateWorkflowSteps();
             });
+            document.getElementById(`confidence${year}`)?.addEventListener("change", () => {
+                markDirty();
+            });
         });
 
         document.getElementById("copyEvidenceRowButton")?.addEventListener("click", () => this.copyEvidenceRow(props));
@@ -5571,6 +5782,7 @@ class NzVerificationMap {
         setValue("raActionSelect", draft.action, false);
         TARGET_YEARS.forEach(year => {
             setValue(`status${year}`, draft.target_year_statuses?.[year], false);
+            setValue(`confidence${year}`, draft.target_year_confidence?.[year], false);
         });
         setValue("sourceTypeSelect", draft.source_type);
         setValue("existenceStatusSelect", draft.existence_status);
@@ -5659,12 +5871,18 @@ class NzVerificationMap {
             year,
             document.getElementById(`status${year}`)?.value || "not_assessed",
         ]));
+        // per-year confidence rides beside each assessed status; unset
+        // years are simply omitted from the map
+        const targetYearConfidence = Object.fromEntries(TARGET_YEARS
+            .map(year => [year, document.getElementById(`confidence${year}`)?.value || ""])
+            .filter(([, confidence]) => confidence));
         const action = document.getElementById("raActionSelect")?.value || "needs_review";
         const rawWorshipUseStatus = document.getElementById("worshipUseStatusSelect")?.value || "uncertain";
         const noBuilding = action === "no_building_present" || rawWorshipUseStatus === "no_building_present";
         return {
             action,
             targetYearStatuses,
+            targetYearConfidence,
             sourceType: document.getElementById("sourceTypeSelect")?.value || "other",
             existenceStatus: noBuilding ? "absent" : document.getElementById("existenceStatusSelect")?.value || "uncertain",
             worshipUseStatus: noBuilding ? "not_worship" : rawWorshipUseStatus,
@@ -5707,9 +5925,14 @@ class NzVerificationMap {
         if (!this.observationContractVersionFor(values) && hasNewGuidedContent) {
             return "Review and rewrite the legacy evidence note as a direct observation before adding the new guided fields.";
         }
+        for (const [year, confidence] of Object.entries(values.targetYearConfidence || {})) {
+            if (confidence && (values.targetYearStatuses[year] || "not_assessed") === "not_assessed") {
+                return `Set the ${year} status, or clear its confidence: confidence describes an assessed year.`;
+            }
+        }
         if (unresolved) {
             if (values.sourceTitle.trim() && isPlaceholderText(values.sourceTitle)) {
-                return "Do not use NA or N/A as a source title. Add the actual source title, or leave it blank and explain what you checked.";
+                return "Do not use NA or N/A as a source title. Add the actual source title, or leave it blank and explain what you checked in “What did you directly observe or read in the source?”.";
             }
             if (`${values.note} ${values.uncertaintyNote}`.trim().length < 12) {
                 return "Add a short unresolved-note explanation: what you checked, what remains unclear, or why the case needs review.";
@@ -5756,6 +5979,9 @@ class NzVerificationMap {
         if (values.action === "denomination_or_shared_use" && !values.denominationRaw.trim() && !values.uncertaintyNote.trim()) {
             return "Add the exact denomination or tradition label, or explain what remains uncertain.";
         }
+        if (values.action === "possible_duplicate" && !values.relatedIds.trim()) {
+            return "Name the duplicate: put the other record's id or a short note in “Related ids or duplicate note”.";
+        }
         if (values.denominationRelation === "record_correction" && values.changeClass === "genuine_change") {
             return "Choose map correction or can't tell yet: a denomination record correction is not a genuine change.";
         }
@@ -5770,7 +5996,7 @@ class NzVerificationMap {
             return "Choose can't tell yet for change class: this denomination relation is provisional rather than a classified change.";
         }
         if (values.sourceDate.trim() && !isValidPartialDateText(values.sourceDate)) {
-            return "Use YYYY, YYYY-MM, or YYYY-MM-DD for source and capture dates. If the date is unknown, leave it blank and explain in the note.";
+            return "Use YYYY, YYYY-MM, or YYYY-MM-DD for source and capture dates. If the date is unknown, leave it blank and explain in “What did you directly observe or read in the source?”.";
         }
         const hasLifecycleDetail = values.lifecycleEvent || values.lifecycleDate.trim() || values.lifecycleNote.trim();
         if (hasLifecycleDetail && !values.lifecycleEvent) {
@@ -5992,6 +6218,7 @@ class NzVerificationMap {
             source_notes: row.source_notes || undefined,
             action: values.action,
             target_year_statuses: values.targetYearStatuses,
+            target_year_confidence: Object.keys(values.targetYearConfidence || {}).length ? values.targetYearConfidence : undefined,
             target_year_evidence: targetYearEvidence,
             existence_status: values.existenceStatus,
             worship_use_status: values.worshipUseStatus,
@@ -6051,14 +6278,14 @@ class NzVerificationMap {
         block.hidden = false;
         block.innerHTML = `
             <strong>Photos &amp; documents (optional)</strong>
-            <div class="copy-help">JPEG, PNG, WebP or PDF, under 10&nbsp;MB. Review-only — never public.</div>
+            <div class="copy-help">JPEG, PNG, WebP or PDF, under 10&nbsp;MB each. Choose several at once if useful. Review-only — never public.</div>
+            <input id="attachmentFileInput" type="file" multiple accept="image/jpeg,image/png,image/webp,application/pdf">
+            <input id="attachmentCaptionInput" type="text" maxlength="500" placeholder="Caption — what do these show? (optional)">
             <div class="button-row">
-                <input id="attachmentFileInput" type="file" accept="image/jpeg,image/png,image/webp,application/pdf">
-                <button id="attachmentUploadButton" class="secondary" type="button">Add file</button>
+                <button id="attachmentUploadButton" class="secondary" type="button">Add file(s)</button>
             </div>
-            <input id="attachmentCaptionInput" type="text" maxlength="500" placeholder="Caption — what does this show? (optional)">
             <div id="attachmentStatus" class="copy-status"></div>
-            <div id="attachmentList"></div>
+            <div id="attachmentList" class="attachment-list"></div>
         `;
         document.getElementById("attachmentUploadButton")?.addEventListener("click", () => this.uploadAttachment(props.task_id));
         this.refreshAttachmentList(props.task_id);
@@ -6083,9 +6310,11 @@ class NzVerificationMap {
             const kind = row.content_type === "application/pdf" ? "PDF" : "Photo";
             return `
                 <div class="attachment-row" data-attachment-id="${escapeHtml(row.attachment_id)}">
-                    <span>${kind} · ${sizeKb} KB${row.caption ? ` — ${escapeHtml(row.caption)}` : ""}</span>
-                    <button type="button" class="secondary attachment-view">View</button>
-                    ${row.author_is_me ? `<button type="button" class="secondary attachment-remove">Remove</button>` : ""}
+                    <span class="attachment-label">${kind} · ${sizeKb} KB${row.caption ? ` — ${escapeHtml(row.caption)}` : ""}</span>
+                    <span class="attachment-actions">
+                        <button type="button" class="secondary attachment-view">View</button>
+                        ${row.author_is_me ? `<button type="button" class="secondary attachment-remove">Remove</button>` : ""}
+                    </span>
                 </div>
             `;
         }).join("");
@@ -6116,33 +6345,42 @@ class NzVerificationMap {
         const input = document.getElementById("attachmentFileInput");
         const status = document.getElementById("attachmentStatus");
         const button = document.getElementById("attachmentUploadButton");
-        const file = input?.files?.[0];
-        if (!file) {
+        const files = [...(input?.files || [])];
+        if (!files.length) {
             if (status) status.textContent = "Choose a file first.";
             return;
         }
         const caption = (document.getElementById("attachmentCaptionInput")?.value || "").trim();
         if (button) button.disabled = true;
-        if (status) status.textContent = "Uploading...";
+        let added = 0;
         try {
-            const grant = await this.backend.requestAttachmentUpload({
-                taskId,
-                contentType: file.type,
-                byteSize: file.size,
-                caption: caption || undefined,
-            });
-            const put = await fetch(grant.upload_url, { method: "PUT", body: file });
-            if (!put.ok) throw new Error(`Upload failed (${put.status}). Try again.`);
-            await this.backend.confirmAttachmentUpload({ attachmentId: grant.attachment_id });
-            if (status) status.textContent = "File added.";
+            for (const file of files) {
+                if (status) {
+                    status.textContent = files.length > 1
+                        ? `Uploading ${file.name} (${added + 1} of ${files.length})...`
+                        : "Uploading...";
+                }
+                const grant = await this.backend.requestAttachmentUpload({
+                    taskId,
+                    contentType: file.type,
+                    byteSize: file.size,
+                    caption: caption || undefined,
+                });
+                const put = await fetch(grant.upload_url, { method: "PUT", body: file });
+                if (!put.ok) throw new Error(`Upload of ${file.name} failed (${put.status}). Try again.`);
+                await this.backend.confirmAttachmentUpload({ attachmentId: grant.attachment_id });
+                added += 1;
+            }
+            if (status) status.textContent = added === 1 ? "File added." : `${added} files added.`;
             if (input) input.value = "";
             const captionInput = document.getElementById("attachmentCaptionInput");
             if (captionInput) captionInput.value = "";
-            this.refreshAttachmentList(taskId);
         } catch (error) {
-            if (status) status.textContent = error.message || "Upload failed.";
+            const base = error.message || "Upload failed.";
+            if (status) status.textContent = added > 0 ? `${base} ${added} file(s) were added before the failure.` : base;
         } finally {
             if (button) button.disabled = false;
+            this.refreshAttachmentList(taskId);
         }
     }
 
@@ -6285,6 +6523,7 @@ class NzVerificationMap {
             action: values.action,
             action_label: actionLabelForRa(values.action),
             target_year_statuses: values.targetYearStatuses,
+            target_year_confidence: values.targetYearConfidence,
             lifecycle_event: values.lifecycleEvent,
             lifecycle_event_label: values.lifecycleEvent ? optionLabel(LIFECYCLE_EVENT_OPTIONS, values.lifecycleEvent) : "",
             lifecycle_date: values.lifecycleDate,
@@ -6344,6 +6583,7 @@ class NzVerificationMap {
                 submitLabel: "Save and add another",
                 submissionId: this.pinSubmissionId,
                 showCancel: true,
+                attachmentsHint: true,
             })
             : `
                 <fieldset>
@@ -6497,6 +6737,7 @@ class NzVerificationMap {
                 document.getElementById(id)?.addEventListener("input", () => this.markFormDirty("rapid-pin"));
             });
             this.bindRapidObservationForm("pin", {
+                draftExtraIds: ["pinNameInput", "pinAddressInput", "pinLocalityInput"],
                 getCandidate: () => {
                     if (!this.pinConfirmed) return null;
                     return {
@@ -7183,6 +7424,7 @@ class NzVerificationMap {
                 action: values.action,
                 action_label: actionLabelForRa(values.action),
                 target_year_statuses: values.targetYearStatuses,
+                target_year_confidence: values.targetYearConfidence,
                 lifecycle_event: values.lifecycleEvent,
                 lifecycle_event_label: values.lifecycleEvent ? optionLabel(LIFECYCLE_EVENT_OPTIONS, values.lifecycleEvent) : "",
                 lifecycle_date: values.lifecycleDate,

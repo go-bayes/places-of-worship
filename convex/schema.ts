@@ -37,6 +37,7 @@ import {
   taskType,
   targetYearAffect,
   targetYearEvidenceSet,
+  targetYearConfidenceSet,
   targetYearStatusSet,
   userStatus,
 } from "./model";
@@ -151,6 +152,7 @@ export default defineSchema({
     action: v.optional(v.string()),
     change_class: v.optional(changeClass),
     target_year_statuses: v.optional(targetYearStatusSet),
+    target_year_confidence: v.optional(targetYearConfidenceSet),
     target_year_evidence: v.optional(targetYearEvidenceSet),
     existence_status: v.optional(v.string()),
     worship_use_status: v.optional(v.string()),
