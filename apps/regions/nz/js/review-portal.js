@@ -51,6 +51,7 @@
         authStatus: document.getElementById("authStatus"),
         detailPanel: document.getElementById("detailPanel"),
         queueGroupBy: document.getElementById("queueGroupBy"),
+        queueClaimFilter: document.getElementById("queueClaimFilter"),
         queueList: document.getElementById("queueList"),
         queueStatus: document.getElementById("queueStatus"),
         queueStatusText: document.getElementById("queueStatusText"),
@@ -303,30 +304,44 @@
             els.queueList.innerHTML = "";
             return;
         }
-        if (state.queue.length === 0) {
-            els.queueList.innerHTML = `<div class="empty">No tasks in this queue.</div>`;
+        // claim filter mirrors the ra sidebar's assigned/unassigned split
+        const claimFilter = els.queueClaimFilter?.value || "";
+        const visibleQueue = state.queue.filter((row) => {
+            if (claimFilter === "mine") return Boolean(row.review_claimed_by_me);
+            if (claimFilter === "unclaimed") return !row.review_claimant_label;
+            return true;
+        });
+        if (visibleQueue.length === 0) {
+            els.queueList.innerHTML = `<div class="empty">No tasks in this queue${claimFilter ? " for this filter" : ""}.</div>`;
             return;
         }
-        const taskButton = ({ task, latestDraft, latestReview, latestAgentReview }) => `
+        const taskButton = (row) => {
+            const { task, latestDraft, latestReview, latestAgentReview } = row;
+            const opinions = Number(task.extra_opinions_required || 0);
+            return `
             <button class="task-button ${state.selected?.task?.task_id === task.task_id ? "active" : ""}"
                 type="button"
                 data-task-id="${escapeHtml(task.task_id)}">
                 <strong>${escapeHtml(task.name)}</strong>
                 <span class="muted">${escapeHtml(taskSubtitle(task))}</span>
                 <span class="pill-row">${taskPills(task, latestDraft, latestAgentReview)}</span>
+                ${row.review_claimant_label ? `<span class="muted">Claimed by ${row.review_claimed_by_me ? "you" : escapeHtml(row.review_claimant_label)}</span>` : ""}
+                ${row.submitted_by_me ? `<span class="muted">Your submission — another reviewer must decide</span>` : ""}
+                ${opinions ? `<span class="muted">Second opinion requested (${opinions})</span>` : ""}
                 ${latestReview?.decision_status ? `<span class="muted">Last decision: ${escapeHtml(decisionLabel(latestReview.decision_status))}</span>` : ""}
             </button>
         `;
+        };
         const groupBy = els.queueGroupBy?.value || "";
         if (!groupBy) {
-            els.queueList.innerHTML = state.queue.map(taskButton).join("");
+            els.queueList.innerHTML = visibleQueue.map(taskButton).join("");
         } else {
             // group by the submitting contributor or the last reviewer, with
             // named groups alphabetical and unattributed rows at the end
             const sentinel = groupBy === "contributor" ? "No submission on record" : "Not yet reviewed";
             const labelOf = (row) => (groupBy === "contributor" ? row.contributor_label : row.reviewer_label) || sentinel;
             const groups = new Map();
-            state.queue.forEach((row) => {
+            visibleQueue.forEach((row) => {
                 const label = labelOf(row);
                 if (!groups.has(label)) groups.set(label, []);
                 groups.get(label).push(row);
@@ -602,6 +617,7 @@
             wireDecisionForm(form);
             form.addEventListener("submit", submitDecision);
         }
+        wireClaimControls(task);
         wireAgentReviewPanel(form, agentReview);
         // evidence files open through a fresh short-lived url per click —
         // nothing in the page holds a durable link to the private bucket
@@ -617,6 +633,45 @@
                     button.disabled = false;
                 }
             });
+        });
+    }
+
+    // claim-pool controls (jb 2026-09-01): claiming is coordination, the
+    // recorded decision stays the act; only the submission's author is
+    // excluded from judging it
+    function wireClaimControls(task) {
+        const statusLine = () => document.getElementById("claimStatusText");
+        const run = async (button, action, doneMessage) => {
+            button.disabled = true;
+            try {
+                await action();
+                await loadQueue();
+                const refreshed = state.queue.find((entry) => entry.task.task_id === task.task_id);
+                if (refreshed) {
+                    await selectTask(task.task_id);
+                } else {
+                    renderDetail(false);
+                }
+                if (statusLine()) statusLine().textContent = doneMessage;
+            } catch (error) {
+                button.disabled = false;
+                if (statusLine()) statusLine().textContent = error.message || "The action failed.";
+            }
+        };
+        document.getElementById("claimReviewButton")?.addEventListener("click", (event) => {
+            run(event.currentTarget, () => client.claimReviewTask({ taskId: task.task_id }), "Claimed for review.");
+        });
+        document.getElementById("releaseReviewButton")?.addEventListener("click", (event) => {
+            run(event.currentTarget, () => client.releaseReviewTask({ taskId: task.task_id }), "Review claim released.");
+        });
+        document.getElementById("requestOpinionButton")?.addEventListener("click", (event) => {
+            const note = window.prompt("Why is another opinion needed? (at least 8 characters)") || "";
+            if (!note.trim()) return;
+            run(
+                event.currentTarget,
+                () => client.requestAdditionalOpinion({ taskId: task.task_id, note: note.trim() }),
+                "Another opinion requested before acceptance.",
+            );
         });
     }
 
@@ -696,7 +751,27 @@
             || task.status === "unresolved_note"
             || task.status === "changes_requested"
             || task.status === "provisionally_closed";
+        const row = state.selected || {};
+        const mine = Boolean(row.review_claimed_by_me);
+        const claimedByOther = Boolean(row.review_claimant_label) && !mine;
+        const ownSubmission = Boolean(row.submitted_by_me);
+        const opinions = Number(task.extra_opinions_required || 0);
+        const claimBar = canDecide ? `
+            <div class="review-claim-bar">
+                ${ownSubmission ? `<div class="review-warning">You submitted this evidence; another team member must record the decision (only the author is excluded).</div>` : ""}
+                ${claimedByOther ? `<div class="review-warning">Claimed for review by ${escapeHtml(row.review_claimant_label)}. Coordinate before deciding, or ask a curator to release the claim.</div>` : ""}
+                ${opinions ? `<div class="review-warning">Second opinion requested (${opinions}): acceptance for export needs ${opinions} other reviewer decision${opinions === 1 ? "" : "s"} on record first.</div>` : ""}
+                <div class="review-actions">
+                    ${ownSubmission || claimedByOther ? "" : mine
+                        ? `<button type="button" class="secondary" id="releaseReviewButton">Release review claim</button>`
+                        : `<button type="button" class="secondary" id="claimReviewButton">Claim for review</button>`}
+                    ${opinions >= 2 ? "" : `<button type="button" class="secondary" id="requestOpinionButton">Call for another opinion</button>`}
+                </div>
+                <div id="claimStatusText" class="muted" aria-live="polite"></div>
+            </div>
+        ` : "";
         return `
+            ${claimBar}
             <form id="reviewDecisionForm" class="decision-form">
                 <div>
                     <label for="decisionStatus">Decision</label>
@@ -742,7 +817,7 @@
                             <button type="button" class="secondary" id="requestMoreEvidence">Needs more evidence</button>
                         </div>
                     ` : ""}
-                    <button type="submit" ${state.busy || !canDecide ? "disabled" : ""}>Record review decision</button>
+                    <button type="submit" ${state.busy || !canDecide || ownSubmission ? "disabled" : ""}>Record review decision</button>
                     <span id="decisionStatusText" class="muted">${draft ? `Draft: ${escapeHtml(draft.evidence_draft_id)}` : "Accepted-for-export requires an evidence draft."}</span>
                 </div>
                 <input type="hidden" name="taskId" value="${escapeHtml(task.task_id)}">
@@ -875,6 +950,7 @@
             loadQueue();
         });
         els.queueGroupBy?.addEventListener("change", () => renderQueue());
+        els.queueClaimFilter?.addEventListener("change", () => renderQueue());
         renderAuth();
         renderQueue();
     }

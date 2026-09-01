@@ -97,6 +97,9 @@ export const taskEventType = v.union(
   v.literal("exported"),
   v.literal("note_added"),
   v.literal("draft_withdrawn"),
+  v.literal("review_claimed"),
+  v.literal("review_released"),
+  v.literal("opinion_requested"),
 );
 
 export const evidenceDraftStatus = v.union(

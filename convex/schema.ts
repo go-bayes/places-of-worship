@@ -82,6 +82,13 @@ export default defineSchema({
     assigned_to: v.optional(v.id("users")),
     claimed_by: v.optional(v.id("users")),
     claimed_at: v.optional(v.number()),
+    // review-side claim pool, mirroring ra claim semantics (jb 2026-09-01);
+    // any qualified reviewer except the draft's author may claim
+    review_claimed_by: v.optional(v.id("users")),
+    review_claimed_at: v.optional(v.number()),
+    // second/third-opinion gate: acceptance for export requires this many
+    // other reviewers' recorded decisions on the task first
+    extra_opinions_required: v.optional(v.number()),
     selected_target_year: v.optional(v.number()),
     target_years: v.array(v.number()),
     matched_current_site_id: v.optional(v.string()),
@@ -111,7 +118,8 @@ export default defineSchema({
     .index("by_source_record_id", ["source_record_id"])
     .index("by_matched_site", ["matched_current_site_id"])
     .index("by_candidate_site", ["candidate_site_id"])
-    .index("by_osm", ["matched_osm_id"]),
+    .index("by_osm", ["matched_osm_id"])
+    .index("by_review_claimant", ["review_claimed_by", "status"]),
 
   task_events: defineTable({
     event_id: v.string(),

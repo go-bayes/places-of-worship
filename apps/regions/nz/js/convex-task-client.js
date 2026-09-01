@@ -408,6 +408,18 @@
         async recordReviewDecision(args) {
             return await this.request("mutation", "reviews:recordReviewDecision", args);
         }
+
+        async claimReviewTask(args) {
+            return await this.request("mutation", "reviews:claimReviewTask", args);
+        }
+
+        async releaseReviewTask(args) {
+            return await this.request("mutation", "reviews:releaseReviewTask", args);
+        }
+
+        async requestAdditionalOpinion(args) {
+            return await this.request("mutation", "reviews:requestAdditionalOpinion", args);
+        }
     }
 
     window.PowConvexTaskClient = PowConvexTaskClient;
