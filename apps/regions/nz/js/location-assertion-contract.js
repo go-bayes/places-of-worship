@@ -78,5 +78,29 @@
         };
     }
 
-    window.PowLocationAssertion = Object.freeze({ validate, payload });
+    // master-data location grade, derived from mode and radius exactly as
+    // convex/lib/locationAssertions.ts does (jb ruling r2, 2026-09-02)
+    function grade(values) {
+        const candidate = normalise(values);
+        if (candidate.mode !== "approximate_area") return "building";
+        const radius = Number.isFinite(candidate.uncertaintyRadiusM) ? candidate.uncertaintyRadiusM : Infinity;
+        if (radius <= 100) return "parcel_or_compound";
+        if (radius <= 300) return "street";
+        if (radius <= 2000) return "locality";
+        return "area";
+    }
+
+    const GRADE_LABELS = {
+        building: "building-level",
+        parcel_or_compound: "parcel or compound",
+        street: "street-level",
+        locality: "locality-level",
+        area: "area-level",
+    };
+
+    function gradeLabel(values) {
+        return GRADE_LABELS[grade(values)];
+    }
+
+    window.PowLocationAssertion = Object.freeze({ validate, payload, grade, gradeLabel });
 })();

@@ -26,7 +26,8 @@ import {
 } from "./lib/rapidEntry";
 import { resolveCitedSource } from "./lib/sources";
 import { appendTaskEvent } from "./lib/taskEvents";
-import { privacyFlag, rapidCurrentObservationInput, taskStatus } from "./model";
+import { assertAssertionMatchesTaskPoint, assertCountryAllowsAssertionMode } from "./lib/locationAssertions";
+import { locationAssertionInput, privacyFlag, rapidCurrentObservationInput, taskStatus } from "./model";
 
 // the first release was vanuatu-only; an omitted country keeps the deployed
 // portal's behaviour exactly while newer clients name their country
@@ -52,6 +53,10 @@ const candidateInput = v.object({
   locality: v.optional(v.string()),
   latitude: v.number(),
   longitude: v.number(),
+  // how sure the observer is of the point: absent means an identified
+  // building at the pin (the pre-2026-09-02 behaviour), otherwise the
+  // same location_assertion_v1 the curator nomination path records
+  locationAssertion: v.optional(locationAssertionInput),
 });
 
 const rapidClientContext = v.object({
@@ -185,8 +190,24 @@ export const submitCurrentObservation = mutation({
     assertMaxString("uncertainty or follow-up", args.observation.uncertainty_note, 2_000);
 
     const newCandidate = args.candidate !== undefined;
-    if (newCandidate) {
-      assertRapidCandidateContext(args.clientContext);
+    const candidateLocation = args.candidate === undefined
+      ? undefined
+      : args.candidate.locationAssertion ?? {
+        contract_version: "location_assertion_v1" as const,
+        mode: "building_identified" as const,
+        basis: "map_placement" as const,
+        latitude: args.candidate.latitude,
+        longitude: args.candidate.longitude,
+        confidence: "high" as const,
+        contributor_confirmed: true as const,
+      };
+    if (args.candidate !== undefined && candidateLocation !== undefined) {
+      // task-level location contract, outside the locked rapid draft
+      // contract: the country gate and the point match are enforced
+      // exactly as on the curator nomination path
+      assertCountryAllowsAssertionMode(args.countryCode?.trim().toUpperCase() ?? DEFAULT_RAPID_ENTRY_COUNTRY, candidateLocation.mode);
+      assertAssertionMatchesTaskPoint(candidateLocation, args.candidate.latitude, args.candidate.longitude);
+      assertRapidCandidateContext(args.clientContext, candidateLocation.mode);
     }
     const derived = deriveCurrentObservation(args.observation.current_status, newCandidate);
     const source = sourceFieldsForObservationBasis(
@@ -333,6 +354,7 @@ export const submitCurrentObservation = mutation({
           type: "Point",
           coordinates: [candidate.longitude, candidate.latitude],
         },
+        ...(candidateLocation !== undefined ? { initial_location_assertion: candidateLocation } : {}),
         nearby_site_refs: [],
         automated_checks: [{
           check_id: "rapid_current_nomination",
@@ -345,6 +367,7 @@ export const submitCurrentObservation = mutation({
           intake_mode: "rapid_current_v1",
           proximity_checked: args.clientContext?.proximity_checked ?? false,
           nearby_count: args.clientContext?.nearby_count ?? 0,
+          ...(candidateLocation !== undefined ? { location_mode: candidateLocation.mode } : {}),
         },
         intake_submission_key: submissionKey,
         created_at: now,

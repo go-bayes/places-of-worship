@@ -1,3 +1,5 @@
+import { COUNTRY_INTAKE_BOUNDS } from "./rapidEntry.ts";
+
 export type LocationAssertionMode = "building_identified" | "approximate_area";
 
 export type LocationAssertionBasis =
@@ -21,26 +23,38 @@ export type LocationAssertionInput = {
   contributor_confirmed: true;
 };
 
-// the single per-country location-mode rule, mirroring the portal's
-// nomination forms: a building-level-only country records only identified
-// buildings, and its portal (rapid and detailed forms alike) offers no
-// approximate-area option, so such an assertion can only come from a
-// crafted call (follow-up recorded 2026-08-28; server gate ruled with the
-// generalisation, jb 2026-08-31). the client mirror is buildingLevelOnly
-// in the portal's country config.
-const BUILDING_LEVEL_ONLY_COUNTRIES: ReadonlySet<string> = new Set(["VU"]);
-
-// enforces the per-country rule server-side; countries outside the set
-// keep both modes, matching the portal's ordinary nomination form
+// per-country location-mode rule. every registry country now accepts both
+// modes (jb ruling r1, 2026-09-02: the approximate-area mode is allowed
+// everywhere, vanuatu included, because historical places are often known
+// only to a locality); a country may still opt out by declaring
+// approximateArea: false in the intake registry, and countries outside the
+// registry keep both modes for the curator nomination path
 export function assertCountryAllowsAssertionMode(
   countryCode: string,
   mode: LocationAssertionMode,
 ): void {
-  if (mode === "approximate_area" && BUILDING_LEVEL_ONLY_COUNTRIES.has(countryCode.toUpperCase())) {
+  const entry = COUNTRY_INTAKE_BOUNDS[countryCode.toUpperCase()];
+  if (mode === "approximate_area" && entry !== undefined && entry.approximateArea === false) {
     throw new Error(
       `Nominations for ${countryCode.toUpperCase()} must identify the building; an approximate area cannot be accepted.`,
     );
   }
+}
+
+// the master-data location grade (geometry-history location_confidence) is
+// derived from the mode and radius, never entered by hand: thresholds per
+// jb ruling r2, 2026-09-02
+export type LocationConfidenceGrade = "building" | "parcel_or_compound" | "street" | "locality" | "area";
+
+export function locationConfidenceGrade(
+  assertion: Pick<LocationAssertionInput, "mode" | "uncertainty_radius_m">,
+): LocationConfidenceGrade {
+  if (assertion.mode === "building_identified") return "building";
+  const radius = assertion.uncertainty_radius_m ?? Number.POSITIVE_INFINITY;
+  if (radius <= 100) return "parcel_or_compound";
+  if (radius <= 300) return "street";
+  if (radius <= 2_000) return "locality";
+  return "area";
 }
 
 const MAX_LOCATION_WORDING = 2_000;
