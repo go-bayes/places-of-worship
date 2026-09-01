@@ -21,6 +21,7 @@ import {
   countryIntakeBounds,
   deriveCurrentObservation,
   isRapidCurrentDraft,
+  issueBatchId,
   manualBatchId,
   sourceFieldsForObservationBasis,
 } from "./lib/rapidEntry";
@@ -253,7 +254,11 @@ export const submitCurrentObservation = mutation({
       // country's nomination batch, or any batch where the country's
       // assigned work itself is rapid (vu). a crafted call must not put a
       // rapid draft on a guided-design assigned task (separation ruling)
-      if (!taskIntake.assignedRapid && authorisedExistingTask.batch_id !== manualBatchId(intakeCountry)) {
+      if (
+        !taskIntake.assignedRapid
+        && authorisedExistingTask.batch_id !== manualBatchId(intakeCountry)
+        && authorisedExistingTask.batch_id !== issueBatchId(intakeCountry)
+      ) {
         throw new Error("This task uses the detailed evidence form. Record it through the portal's guided workflow.");
       }
       if (requestedCountry !== undefined && requestedCountry !== intakeCountry) {

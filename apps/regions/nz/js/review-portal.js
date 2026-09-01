@@ -80,7 +80,16 @@
             .replaceAll("'", "&#039;");
     }
 
-    function human(value) {
+    // great-circle distance in metres between two [lng, lat] pairs
+function distanceMetres(a, b) {
+    const toRad = value => (Number(value) * Math.PI) / 180;
+    const dLat = toRad(b[1] - a[1]);
+    const dLng = toRad(b[0] - a[0]);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a[1])) * Math.cos(toRad(b[1])) * Math.sin(dLng / 2) ** 2;
+    return 2 * 6371000 * Math.asin(Math.sqrt(h));
+}
+
+function human(value) {
         return String(value ?? "")
             .replaceAll("_", " ")
             .replace(/\b\w/g, (letter) => letter.toUpperCase());
@@ -431,6 +440,10 @@
         const review = currentReview();
         const agentReview = row.latestAgentReview || null;
         const locationAssertion = task.initial_location_assertion || null;
+        // revise-with-evidence lane: the reporter's framing and the record's
+        // own point travel on the task, beside the observation they filed
+        const issueReport = task.source_context?.issue_report || null;
+        const issueCheck = (task.automated_checks || []).find(check => check?.check_id === "ra_issue_report") || null;
         const coordinates = Array.isArray(task.geometry?.coordinates)
             ? `${task.geometry.coordinates[1]}, ${task.geometry.coordinates[0]}`
             : "";
@@ -476,6 +489,24 @@
                         ["Retained location wording", locationAssertion?.source_wording],
                     ])}
                 </section>
+                ${issueReport ? `
+                    <section class="panel">
+                        <h3>Issue report</h3>
+                        ${renderFieldGrid([
+                            ["Issue type", issueCheck ? human(issueCheck.suggested_action) : undefined],
+                            ["Reporter's note", issueCheck?.message],
+                            ["Evidence lane", issueReport.evidence_lane ? human(issueReport.evidence_lane) : "flag only"],
+                            ["Record's original point", Array.isArray(issueReport.original_point)
+                                ? `${issueReport.original_point[1]}, ${issueReport.original_point[0]}`
+                                : undefined],
+                            ["Pin moved from the record", Array.isArray(issueReport.original_point) && Array.isArray(task.geometry?.coordinates)
+                                ? (distanceMetres(issueReport.original_point, task.geometry.coordinates) < 1 ? "no" : `yes, about ${Math.round(distanceMetres(issueReport.original_point, task.geometry.coordinates))} m`)
+                                : undefined],
+                            ["Reported source", issueReport.source_title],
+                            ["Reported source URL", issueReport.source_url],
+                        ])}
+                    </section>
+                ` : ""}
 
                 <section class="panel">
                     <h3>Source</h3>

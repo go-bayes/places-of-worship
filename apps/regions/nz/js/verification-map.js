@@ -807,6 +807,16 @@ const ISSUE_TYPE_OPTIONS = [
     ["osm_identity_link", "OSM link wrong"],
     ["other", "Other"],
 ];
+// the revise-with-evidence lane: same server vocabulary, worded for an ra
+// who is adding evidence rather than only flagging; the withdrawal stays
+// on the flag-only path
+const REVISE_ISSUE_OPTIONS = [
+    ["verify_existing_site", "Confirming or updating this record"],
+    ["geometry_check", "Wrong location — I moved the pin"],
+    ["possible_duplicate", "Possible duplicate of another record"],
+    ["osm_identity_link", "OSM link wrong"],
+    ["other", "Other"],
+];
 // quick skip reasons; the duplicate and data-error chips also point the ra
 // at the issue pipeline so real data problems stay visible for review
 const SKIP_REASON_CHIPS = [
@@ -1572,8 +1582,11 @@ function osmPointUrl(lat, lng) {
 
 // a nomination lives in the country's manual batch: it is the ra's own
 // pure-entry work, ruled separate from the assignment sheet (jb 2026-08-31)
+// the ra's own entries: nominations in the manual batch and, since the
+// revise-with-evidence lane (jb 2026-09-02), revisions in the issue batch
 function isNominationProps(props) {
-    return (props?.batch_id || "").startsWith("manual-");
+    const batchId = props?.batch_id || "";
+    return batchId.startsWith("manual-") || batchId.startsWith("ra-issues-");
 }
 
 function featureFromBackendTask(task) {
@@ -1717,6 +1730,7 @@ class NzVerificationMap {
         // position, and locally created manual tasks (the assignment-batch
         // refresh cannot see the manual batch, so we re-merge these)
         this.pinMode = false;
+        this.reviseContext = null;
         this.pinMarker = null;
         this.pinUncertaintyCircle = null;
         this.pinConfirmed = null;
@@ -2633,9 +2647,9 @@ class NzVerificationMap {
             issueButton = `<button class="popup-report-issue" type="button" data-reopen-task-id="${escapeHtml(matchedTaskId)}">Reopen issue</button>`;
         } else if (matchedTaskId) {
             // matched a task not in a reopenable state: route into its issue form
-            issueButton = `<button class="popup-report-issue" type="button" data-open-task-id="${escapeHtml(matchedTaskId)}">Report an issue here</button>`;
+            issueButton = `<button class="popup-report-issue" type="button" data-open-task-id="${escapeHtml(matchedTaskId)}">Revise or report an issue</button>`;
         } else {
-            issueButton = `<button class="popup-report-issue" type="button" data-report-issue="1">Report an issue here</button>`;
+            issueButton = `<button class="popup-report-issue" type="button" data-report-issue="1">Revise or report an issue</button>`;
         }
         return `
             <strong>${escapeHtml(name)}</strong><br>
@@ -2687,13 +2701,25 @@ class NzVerificationMap {
         if (!panel) return;
         if (!options.keepPopup) this.map.closePopup();
         const hasCoords = Number.isFinite(context.latitude) && Number.isFinite(context.longitude);
+        // the evidence lane mirrors a nomination (location, current use,
+        // how you know, photos) with the record as prefill; flag-only stays
+        // for an ra who noticed something but has nothing to add
+        const canRevise = RAPID_NOMINATION_ENTRY && hasCoords
+            && Boolean(this.backend?.configured && this.backend.signedIn);
         panel.innerHTML = `
             <h2>Revise this place or report an issue</h2>
             <div class="pilot-note" role="note">
-                Reporting an issue for <strong>${escapeHtml(context.name || "an unnamed place")}</strong>${hasCoords ? ` at ${context.latitude.toFixed(5)}, ${context.longitude.toFixed(5)}` : ""}.
+                <strong>${escapeHtml(context.name || "An unnamed place")}</strong>${hasCoords ? ` at ${context.latitude.toFixed(5)}, ${context.longitude.toFixed(5)}` : ""}.
             </div>
-            ${this.issueFormHtml(context, { open: true })}
+            ${canRevise ? `
+                <div class="copy-help">Record what you can establish about this place today — its location, current worship use, how you know, and photos — exactly as for a new place. Your evidence goes to human review; the record is not edited directly.</div>
+                <div class="button-row">
+                    <button id="reviseWithEvidenceButton" type="button">Record evidence for this place</button>
+                </div>
+            ` : ""}
+            ${this.issueFormHtml(context, { open: !canRevise, flagOnly: canRevise })}
         `;
+        document.getElementById("reviseWithEvidenceButton")?.addEventListener("click", () => this.enterReviseMode(context));
         this.bindIssueForm(context);
         this.bindCopyCoords(panel);
         this.focusDetailPanel();
@@ -3134,7 +3160,8 @@ class NzVerificationMap {
                 })) || []).filter(item => {
                     const batchId = item?.task?.batch_id || "";
                     return batchId === ASSIGNMENT_BATCH_ID
-                        || batchId === `manual-${COUNTRY_CONFIG.countryCode.toLowerCase()}`;
+                        || batchId === `manual-${COUNTRY_CONFIG.countryCode.toLowerCase()}`
+                        || batchId === `ra-issues-${COUNTRY_CONFIG.countryCode.toLowerCase()}`;
                 })
                 : [];
             // assignment work and the ra's own nominations are separate
@@ -3683,12 +3710,13 @@ class NzVerificationMap {
         deduped = false,
         knownHistory = null,
         nomination = false,
+        revision = false,
         hasEvidenceFiles = false,
     } = {}) {
         const panel = document.getElementById("detailPanel");
         if (!panel) return;
         panel.innerHTML = `
-            <h2>${skipped ? "Task skipped" : unresolved ? "Unresolved note submitted" : corrected ? "Correction submitted" : "Submitted for review"}</h2>
+            <h2>${skipped ? "Task skipped" : unresolved ? "Unresolved note submitted" : corrected ? "Correction submitted" : revision ? "Revision submitted for review" : "Submitted for review"}</h2>
             <div class="copy-status" role="status">
                 ${escapeHtml(props.name || "Unnamed site")} ${props.task_id ? `(${escapeHtml(props.task_id)})` : ""} —
                 ${skipped
@@ -3804,11 +3832,11 @@ class NzVerificationMap {
 
     // low-prominence issue report: files map problems (duplicates, wrong
     // locations, non-places) as open tasks in the country's ra-issues batch
-    issueFormHtml(context, { open = false } = {}) {
+    issueFormHtml(context, { open = false, flagOnly = false } = {}) {
         const signedIn = Boolean(this.backend?.configured && this.backend.signedIn);
         return `
             <details id="issueReportDetails" class="skip-form issue-form"${open ? " open" : ""}>
-                <summary>Revise this place or report an issue</summary>
+                <summary>${flagOnly ? "Just flag it — nothing to add" : "Revise this place or report an issue"}</summary>
                 <div class="copy-help">
                     Nothing is edited or removed directly: your report opens a review task, and a reviewer decides against sources.
                 </div>
@@ -5210,7 +5238,7 @@ class NzVerificationMap {
         if (status) status.classList.remove("copy-status-error");
         this.showRapidFieldError(prefix, null);
         const candidate = options.getCandidate?.();
-        if (options.getCandidate && !candidate) {
+        if ((options.getCandidate && !candidate) || (options.createTask && !this.pinConfirmed)) {
             if (status) status.textContent = "Confirm the map location before recording this observation.";
             return;
         }
@@ -5233,10 +5261,17 @@ class NzVerificationMap {
                     // the register is optional; the citation strings still land
                 }
             }
+            // a revision first opens (or claims) its task in the issue
+            // batch, then submits the observation against that task
+            const revision = options.createTask ? await options.createTask() : null;
             const result = await this.backend.submitCurrentObservation({
                 clientSubmissionId: form.dataset.submissionId,
                 countryCode: COUNTRY_CONFIG.countryCode,
-                ...(options.props?.task_id ? { taskId: options.props.task_id } : { candidate }),
+                ...(options.props?.task_id
+                    ? { taskId: options.props.task_id }
+                    : revision
+                        ? { taskId: revision.task_id }
+                        : { candidate }),
                 observation: window.PowRapidEntry.observationPayload(values, flagOptions),
                 ...(values.flagForDiscussion ? { flagForDiscussion: true } : {}),
                 clientContext: {
@@ -5269,6 +5304,28 @@ class NzVerificationMap {
                         referenceDate: values.observedOn,
                         referenceDateFromParent: true,
                         nomination: false,
+                    },
+                });
+                this.focusDetailPanel();
+                return;
+            }
+            if (revision) {
+                await this.refreshBackendTasks();
+                this.applyFilters();
+                this.exitPinMode();
+                const revisedProps = { task_id: revision.task_id, name: revision.name };
+                this.renderSubmissionRecordedDetail(revisedProps, {
+                    deduped: Boolean(result.deduped),
+                    nomination: true,
+                    revision: true,
+                    hasEvidenceFiles: Boolean(values.hasEvidenceFiles),
+                    knownHistory: {
+                        taskId: revision.task_id,
+                        parentEvidenceDraftId: result.evidence_draft_id,
+                        taskName: revision.name,
+                        referenceDate: values.observedOn,
+                        referenceDateFromParent: true,
+                        nomination: true,
                     },
                 });
                 this.focusDetailPanel();
@@ -6971,11 +7028,14 @@ class NzVerificationMap {
                     <button id="pinFormCancelButton" type="button" class="secondary">Cancel</button>
                 </div>
             `;
+        const revise = this.reviseContext;
         return `
-            <h2 class="pin-host-title">Add a missing place</h2>
+            <h2 class="pin-host-title">${revise ? `Revise ${escapeHtml(revise.name || "this place")}` : "Add a missing place"}</h2>
             <div id="pinLocateCard" class="pin-card">
                 <div class="copy-help">
-                    Search, type coordinates, or click the map. Drag the pin onto the building.
+                    ${revise
+                        ? "The pin marks the current record. Drag it onto the right building if the record is misplaced, or confirm it as it stands."
+                        : "Search, type coordinates, or click the map. Drag the pin onto the building."}
                 </div>
                 <div class="pin-locate-row">
                     <label>
@@ -7042,9 +7102,17 @@ class NzVerificationMap {
             </div>
             <div id="pinProximityCard" class="pin-card" hidden></div>
             <div id="pinFormCard" class="pin-card" hidden>
+                ${revise ? `
+                    <label>
+                        What is wrong or new about this record?
+                        <select id="pinIssueType">
+                            ${selectOptionsHtml(REVISE_ISSUE_OPTIONS, "verify_existing_site")}
+                        </select>
+                    </label>
+                ` : ""}
                 <label>
                     Name (optional)
-                    <input id="pinNameInput" type="text" placeholder="Unknown place of worship">
+                    <input id="pinNameInput" type="text" placeholder="Unknown place of worship"${revise?.name ? ` value="${escapeHtml(revise.name)}"` : ""}>
                 </label>
                 <label>
                     Address (optional)
@@ -7095,9 +7163,11 @@ class NzVerificationMap {
             ["pinNameInput", "pinAddressInput", "pinLocalityInput"].forEach(id => {
                 document.getElementById(id)?.addEventListener("input", () => this.markFormDirty("rapid-pin"));
             });
+            const reviseTarget = this.reviseContext;
             this.bindRapidObservationForm("pin", {
                 draftExtraIds: ["pinNameInput", "pinAddressInput", "pinLocalityInput"],
-                getCandidate: () => {
+                ...(reviseTarget ? { createTask: () => this.createRevisionTask(reviseTarget) } : {}),
+                getCandidate: reviseTarget ? undefined : () => {
                     if (!this.pinConfirmed) return null;
                     const approximate = this.pinConfirmed.locationMode === "approximate_area";
                     // the location assertion rides on the task, outside the
@@ -7151,6 +7221,78 @@ class NzVerificationMap {
     // instant (not smooth): a nested-scroll smooth animation was unreliable
     revealPinHost() {
         document.getElementById("pinCardHost")?.scrollIntoView({ block: "start" });
+    }
+
+    // revise-with-evidence (jb 2026-09-02): the pin flow with the existing
+    // record as prefill. the pin starts on the record's point; confirming
+    // it (moved or not) records a location assertion, and the observation
+    // form, attachments step, and known-history entry follow as for a
+    // nomination. the task lands in the country's issue batch, claimed by
+    // the ra, so the observation submits against it immediately
+    enterReviseMode(context) {
+        if (!this.map || !RAPID_NOMINATION_ENTRY) return;
+        if (!Number.isFinite(context?.latitude) || !Number.isFinite(context?.longitude)) return;
+        if (this.pinMode) this.exitPinMode();
+        this.reviseContext = { ...context };
+        this.enterPinMode();
+        if (!this.pinMode) {
+            this.reviseContext = null;
+            return;
+        }
+        const latlng = L.latLng(context.latitude, context.longitude);
+        this.map.setView(latlng, Math.max(this.map.getZoom(), 17));
+        this.placePin(latlng);
+        const status = document.getElementById("pinStatus");
+        if (status) status.textContent = "The pin sits on the current record. Drag it, or click the map, if the place is really elsewhere; then confirm the location.";
+    }
+
+    // opens (or claims) the revision task for the record, carrying the
+    // confirmed location; returns the task id the observation submits to
+    async createRevisionTask(target) {
+        const confirmed = this.pinConfirmed;
+        if (!confirmed) throw new Error("Confirm the map location before recording this observation.");
+        const approximate = confirmed.locationMode === "approximate_area";
+        const locationAssertion = window.PowLocationAssertion
+            ? window.PowLocationAssertion.payload({
+                mode: confirmed.locationMode,
+                basis: approximate ? (confirmed.basis || "address_or_locality") : "map_placement",
+                latitude: confirmed.latitude,
+                longitude: confirmed.longitude,
+                uncertaintyRadiusM: approximate ? confirmed.uncertaintyRadiusM : undefined,
+                sourceWording: approximate ? confirmed.sourceWording : "",
+                confidence: approximate ? "moderate" : "high",
+                contributorConfirmed: true,
+            })
+            : undefined;
+        const name = (document.getElementById("pinNameInput")?.value || "").trim() || target.name || "Unnamed site";
+        const moved = Math.abs(confirmed.latitude - target.latitude) > 1e-7
+            || Math.abs(confirmed.longitude - target.longitude) > 1e-7;
+        const note = moved
+            ? `Revision with evidence: the pin was moved from the record's point ${target.latitude.toFixed(5)}, ${target.longitude.toFixed(5)}.`
+            : "Revision with evidence recorded against the existing record.";
+        const result = await this.backend.createIssueTask({
+            countryCode: COUNTRY_CONFIG.countryCode,
+            name,
+            issueType: document.getElementById("pinIssueType")?.value || "verify_existing_site",
+            note,
+            latitude: confirmed.latitude,
+            longitude: confirmed.longitude,
+            siteId: target.siteId || undefined,
+            osmId: target.osmId || undefined,
+            originalLatitude: target.latitude,
+            originalLongitude: target.longitude,
+            ...(locationAssertion ? { locationAssertion } : {}),
+            assignToReporter: true,
+            targetYears: COUNTRY_CONFIG.targetYears.map(Number),
+            clientContext: {
+                source: "portal_revise_place",
+                country_code: COUNTRY_CONFIG.countryCode,
+                page_path: window.location.pathname,
+                placement_zoom: confirmed.zoom,
+                location_mode: confirmed.locationMode,
+            },
+        });
+        return { task_id: result.task_id, name, deduped: Boolean(result.deduped) };
     }
 
     enterPinMode() {
@@ -7483,6 +7625,12 @@ class NzVerificationMap {
         // the location is settled; the locate tools would now be misleading
         const locateCard = document.getElementById("pinLocateCard");
         if (locateCard) locateCard.hidden = true;
+        if (this.reviseContext) {
+            // the record itself would be the nearest match; the form opens directly
+            this.pinNearbyCount = 0;
+            this.showPinForm();
+            return;
+        }
         const nearby = this.nearbyTaskRows(position, this.pinConfirmed.uncertaintyRadiusM);
         this.pinNearbyCount = nearby.length;
         if (nearby.length) {
@@ -7687,6 +7835,7 @@ class NzVerificationMap {
             this.clearFormDirty();
         }
         this.pinMode = false;
+        this.reviseContext = null;
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
         this.pinSubmissionId = null;
