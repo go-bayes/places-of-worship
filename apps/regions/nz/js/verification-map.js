@@ -807,9 +807,16 @@ const ISSUE_TYPE_OPTIONS = [
     ["osm_identity_link", "OSM link wrong"],
     ["other", "Other"],
 ];
-// the revise-with-evidence lane offers the same framings minus the
-// withdrawal, which stays on the flag-only path
-const REVISE_ISSUE_OPTIONS = ISSUE_TYPE_OPTIONS.filter(([value]) => value !== "submitted_in_error");
+// the revise-with-evidence lane: same server vocabulary, worded for an ra
+// who is adding evidence rather than only flagging; the withdrawal stays
+// on the flag-only path
+const REVISE_ISSUE_OPTIONS = [
+    ["verify_existing_site", "Confirming or updating this record"],
+    ["geometry_check", "Wrong location — I moved the pin"],
+    ["possible_duplicate", "Possible duplicate of another record"],
+    ["osm_identity_link", "OSM link wrong"],
+    ["other", "Other"],
+];
 // quick skip reasons; the duplicate and data-error chips also point the ra
 // at the issue pipeline so real data problems stay visible for review
 const SKIP_REASON_CHIPS = [
