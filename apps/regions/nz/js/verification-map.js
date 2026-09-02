@@ -633,6 +633,34 @@ const HISTORICAL_CLAIM_ENTRY = ASSIGNMENT_MODE;
 // optional personalised hint: invitation links may include ?email=ra@example.com
 // so the sign-in card can name the specific invited account
 const INVITED_EMAIL_HINT = (SEARCH_PARAMS.get("email") || "").trim();
+
+// public-map hand-off (jb 2026-09-03): ?revise=1 opens the revise flow for
+// the linked place; ?report_issue=1 keeps the standalone issue form. pure
+// so the parse is testable; the caller decides what to open and when
+function deepLinkContextFromParams(params) {
+    const mode = params.get("revise") === "1"
+        ? "revise"
+        : params.get("report_issue") === "1" ? "report_issue" : null;
+    if (!mode) return null;
+    const latitude = Number.parseFloat(params.get("lat") || "");
+    const longitude = Number.parseFloat(params.get("lng") || "");
+    const osmId = (params.get("osm_id") || "").trim();
+    const osmTypeRaw = (params.get("osm_type") || "").trim().toLowerCase();
+    const osmType = osmId
+        ? (["node", "way", "relation"].includes(osmTypeRaw) ? osmTypeRaw : "node")
+        : undefined;
+    return {
+        mode,
+        name: (params.get("name") || "").trim(),
+        latitude,
+        longitude,
+        hasCoords: Number.isFinite(latitude) && Number.isFinite(longitude)
+            && Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180,
+        siteId: (params.get("site_id") || "").trim() || undefined,
+        osmId: osmId || undefined,
+        osmType,
+    };
+}
 const ASSIGNMENT_SESSION_SEGMENT = ASSIGNMENT_BATCH_ID
     ? `:${ASSIGNMENT_BATCH_ID.toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-|-$/g, "").slice(0, 64)}`
     : "";
@@ -1738,6 +1766,9 @@ class NzVerificationMap {
         // refresh cannot see the manual batch, so we re-merge these)
         this.pinMode = false;
         this.reviseContext = null;
+        // a ?revise=1 hand-off waiting for sign-in (assignment mode gates
+        // the sidebar); applied once the contributor is in
+        this.pendingDeepLink = null;
         this.pinMarker = null;
         this.pinUncertaintyCircle = null;
         this.pinConfirmed = null;
@@ -1937,6 +1968,7 @@ class NzVerificationMap {
                 <div class="backend-card auth-required">
                     <strong>${ASSIGNMENT_MODE ? "1. Sign in to start" : "Shared task backend"}</strong>
                     ${assignmentLabel}
+                    ${this.pendingDeepLink ? `<span class="pilot-note" role="note">You followed a link to revise <strong>${escapeHtml(this.pendingDeepLink.name || "a place on the map")}</strong>. Sign in and it opens here.</span>` : ""}
                     <span>${ASSIGNMENT_MODE
                         ? `${INVITED_EMAIL_HINT
                             ? `Use ${escapeHtml(INVITED_EMAIL_HINT)}, the Google account JB invited.`
@@ -1961,6 +1993,7 @@ class NzVerificationMap {
                         // sign-in after an expired save must not wipe typed values
                         this.renderDetailPreservingForm(this.selectedTask);
                     }
+                    this.applyPendingDeepLink();
                 },
                 onError: error => {
                     this.backendLastError = error.message || "Could not sign in to the shared backend.";
@@ -4033,22 +4066,35 @@ class NzVerificationMap {
         }
     }
 
-    // public-map hand-off: ?report_issue=1&name=..&lat=..&lng=..&site_id=..
-    // &osm_id=.. opens a prefilled standalone issue form; tolerant of
-    // missing params — submit validation names anything absent
+    // public-map hand-off. ?revise=1&name=..&lat=..&lng=..&osm_type=..&osm_id=..
+    // (jb 2026-09-03) opens the revise card for that place, the same one a
+    // click on its dot opens, waiting for sign-in where the sidebar is
+    // gated. ?report_issue=1 (plus site_id) keeps opening the prefilled
+    // standalone issue form; tolerant of missing params — submit
+    // validation names anything absent
     maybeOpenIssueDeepLink() {
-        if (SEARCH_PARAMS.get("report_issue") !== "1") return;
+        const link = deepLinkContextFromParams(SEARCH_PARAMS);
+        if (!link) return;
+        if (link.hasCoords) {
+            this.map.setView([link.latitude, link.longitude], Math.max(this.map.getZoom(), 16));
+        }
+        if (link.mode === "revise") {
+            this.pendingDeepLink = link;
+            this.applyPendingDeepLink();
+            if (this.pendingDeepLink) this.renderBackendPanel();
+            return;
+        }
         const context = {
             taskId: "",
-            name: (SEARCH_PARAMS.get("name") || "").trim(),
-            latitude: Number.parseFloat(SEARCH_PARAMS.get("lat") || ""),
-            longitude: Number.parseFloat(SEARCH_PARAMS.get("lng") || ""),
-            siteId: (SEARCH_PARAMS.get("site_id") || "").trim() || undefined,
-            osmId: (SEARCH_PARAMS.get("osm_id") || "").trim() || undefined,
+            name: link.name,
+            latitude: link.latitude,
+            longitude: link.longitude,
+            siteId: link.siteId,
+            osmId: link.osmId,
         };
         const panel = document.getElementById("detailPanel");
         if (!panel) return;
-        const hasCoords = Number.isFinite(context.latitude) && Number.isFinite(context.longitude);
+        const hasCoords = link.hasCoords;
         panel.innerHTML = `
             <h2>Report an issue</h2>
             <div class="pilot-note" role="note">
@@ -4057,10 +4103,31 @@ class NzVerificationMap {
             ${this.issueFormHtml(context, { open: true })}
         `;
         this.bindIssueForm(context);
-        if (hasCoords) {
-            this.map.setView([context.latitude, context.longitude], Math.max(this.map.getZoom(), 16));
-        }
         this.focusDetailPanel();
+    }
+
+    // opens the pending revise hand-off: in assignment mode only once a
+    // contributor is signed in, landing in add places where the revise
+    // entry lives. a place matched to a loaded task opens that task, as
+    // the dot's popup does; otherwise the revise card for the place
+    applyPendingDeepLink() {
+        const link = this.pendingDeepLink;
+        if (!link) return;
+        if (ASSIGNMENT_MODE && !this.backendUser) return;
+        this.pendingDeepLink = null;
+        if (ASSIGNMENT_MODE) this.setPortalMode("add");
+        const feature = {
+            type: "Feature",
+            properties: { name: link.name, osm_type: link.osmType, osm_id: link.osmId },
+            geometry: link.hasCoords ? { type: "Point", coordinates: [link.longitude, link.latitude] } : null,
+        };
+        const matched = this.matchContextTask(feature);
+        if (matched?.task_id) {
+            this.issueFormOpenTaskId = matched.task_id;
+            this.selectTaskById(matched.task_id, { focusDetail: true });
+        } else {
+            this.openContextIssueForm(feature);
+        }
     }
 
     focusNominationPanel() {
@@ -9565,6 +9632,7 @@ class NzVerificationMap {
     }
 }
 
+NzVerificationMap.deepLinkContextFromParams = deepLinkContextFromParams;
 window.NzVerificationMap = NzVerificationMap;
 if (!window.__POW_TEST_NO_BOOTSTRAP__) {
     window.nzVerificationMap = new NzVerificationMap();

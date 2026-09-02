@@ -37,6 +37,7 @@ jobs:
           node apps/regions/nz/js/assigned-periods-dom.test.cjs
           node apps/regions/nz/js/occupancy-review.test.cjs
           node apps/regions/nz/js/osm-history.test.cjs
+          node apps/regions/nz/js/deep-link-context.test.cjs
       - name: dated-places builder tests
         run: python3 -m unittest scripts/test_build_occupancy_dated_places.py
       - name: woodberry import builder tests
