@@ -6,6 +6,7 @@
 // (jb 2026-09-02). derived values are proposals: they reach the observed
 // vocabulary only through reviewer confirmation in convex/occupancies.ts.
 import { partialDateLower, partialDateUpper } from "./historicalClaims.ts";
+import { DEFAULT_DATE_FLOOR_YEAR } from "./countryYears.ts";
 import { isValidPartialDate } from "./limits.ts";
 import { assertLocationAssertion, type LocationAssertionInput } from "./locationAssertions.ts";
 import { canonicalJson, sha256 } from "./sha256.ts";
@@ -72,7 +73,6 @@ export type OccupancySegment = {
   uncertainty_radius_m?: number;
 };
 
-const DATE_FLOOR_YEAR = 1600;
 const MAX_TEXT = 2_000;
 const MIN_UNCERTAINTY_NOTE = 12;
 
@@ -80,10 +80,10 @@ function blank(value: string | undefined): boolean {
   return value === undefined || value.trim() === "";
 }
 
-function assertPartialDate(label: string, value: string | undefined, referenceDate: string): string {
+function assertPartialDate(label: string, value: string | undefined, referenceDate: string, floorYear: number): string {
   const text = (value ?? "").trim();
-  if (!isValidPartialDate(text) || Number(text.slice(0, 4)) < DATE_FLOOR_YEAR) {
-    throw new Error(`${label} must be a real date as YYYY, YYYY-MM, or YYYY-MM-DD from ${DATE_FLOOR_YEAR} onward.`);
+  if (!isValidPartialDate(text) || Number(text.slice(0, 4)) < floorYear) {
+    throw new Error(`${label} must be a real date as YYYY, YYYY-MM, or YYYY-MM-DD from ${floorYear} onward.`);
   }
   if (partialDateLower(text) > partialDateUpper(referenceDate)) {
     throw new Error(`${label} cannot be later than the submission date (${referenceDate}).`);
@@ -118,7 +118,11 @@ export function endPrecision(segment: Pick<OccupancySegmentInput, "end_mode" | "
 }
 
 // validates one segment's own fields against the submission date
-export function assertOccupancySegment(segment: OccupancySegmentInput, referenceDate: string): void {
+export function assertOccupancySegment(
+  segment: OccupancySegmentInput,
+  referenceDate: string,
+  floorYear: number = DEFAULT_DATE_FLOOR_YEAR,
+): void {
   if (segment.contract_version !== OCCUPANCY_CONTRACT) {
     throw new Error("Unsupported occupancy contract version.");
   }
@@ -129,20 +133,20 @@ export function assertOccupancySegment(segment: OccupancySegmentInput, reference
   // start
   switch (s.start_mode) {
     case "known":
-      assertPartialDate("The start date", s.start_date, referenceDate);
+      assertPartialDate("The start date", s.start_date, referenceDate, floorYear);
       assertAbsent("The start bounds", s.start_not_earlier_than, "when the start date is known");
       assertAbsent("The start bounds", s.start_not_later_than, "when the start date is known");
       break;
     case "between":
-      assertPartialDate("The earliest possible start", s.start_not_earlier_than, referenceDate);
-      assertPartialDate("The latest possible start", s.start_not_later_than, referenceDate);
+      assertPartialDate("The earliest possible start", s.start_not_earlier_than, referenceDate, floorYear);
+      assertPartialDate("The latest possible start", s.start_not_later_than, referenceDate, floorYear);
       if (partialDateLower(s.start_not_earlier_than!.trim()) > partialDateUpper(s.start_not_later_than!.trim())) {
         throw new Error("The earliest possible start must not be after the latest possible start.");
       }
       assertAbsent("The start date", s.start_date, "when the start is given as bounds");
       break;
     case "by":
-      assertPartialDate("The latest possible start", s.start_not_later_than, referenceDate);
+      assertPartialDate("The latest possible start", s.start_not_later_than, referenceDate, floorYear);
       assertAbsent("The start date", s.start_date, "when the start is given as a latest date");
       assertAbsent("The earliest possible start", s.start_not_earlier_than, "when the start is given as a latest date");
       break;
@@ -164,7 +168,7 @@ export function assertOccupancySegment(segment: OccupancySegmentInput, reference
   // end
   switch (s.end_mode) {
     case "still_active":
-      assertPartialDate("The still-active date", s.still_active_asof, referenceDate);
+      assertPartialDate("The still-active date", s.still_active_asof, referenceDate, floorYear);
       assertAbsent("The end date", s.end_date, "while the place is still active");
       assertAbsent("The end bounds", s.end_not_earlier_than, "while the place is still active");
       assertAbsent("The end bounds", s.end_not_later_than, "while the place is still active");
@@ -173,20 +177,20 @@ export function assertOccupancySegment(segment: OccupancySegmentInput, reference
       }
       break;
     case "known":
-      assertPartialDate("The end date", s.end_date, referenceDate);
+      assertPartialDate("The end date", s.end_date, referenceDate, floorYear);
       assertAbsent("The end bounds", s.end_not_earlier_than, "when the end date is known");
       assertAbsent("The end bounds", s.end_not_later_than, "when the end date is known");
       break;
     case "between":
-      assertPartialDate("The earliest possible end", s.end_not_earlier_than, referenceDate);
-      assertPartialDate("The latest possible end", s.end_not_later_than, referenceDate);
+      assertPartialDate("The earliest possible end", s.end_not_earlier_than, referenceDate, floorYear);
+      assertPartialDate("The latest possible end", s.end_not_later_than, referenceDate, floorYear);
       if (partialDateLower(s.end_not_earlier_than!.trim()) > partialDateUpper(s.end_not_later_than!.trim())) {
         throw new Error("The earliest possible end must not be after the latest possible end.");
       }
       assertAbsent("The end date", s.end_date, "when the end is given as bounds");
       break;
     case "after":
-      assertPartialDate("The earliest possible end", s.end_not_earlier_than, referenceDate);
+      assertPartialDate("The earliest possible end", s.end_not_earlier_than, referenceDate, floorYear);
       assertAbsent("The end date", s.end_date, "when the end is given as an earliest date");
       assertAbsent("The latest possible end", s.end_not_later_than, "when the end is given as an earliest date");
       break;
@@ -265,6 +269,7 @@ export function assertOccupancySet(
   segments: OccupancySegmentInput[],
   referenceDate: string,
   taskPoint: { latitude: number; longitude: number },
+  floorYear: number = DEFAULT_DATE_FLOOR_YEAR,
 ): void {
   if (!Array.isArray(segments) || segments.length === 0) {
     throw new Error("Record at least one period.");
@@ -272,7 +277,7 @@ export function assertOccupancySet(
   if (segments.length > 20) {
     throw new Error("A submission carries at most 20 periods.");
   }
-  segments.forEach((segment) => assertOccupancySegment(segment, referenceDate));
+  segments.forEach((segment) => assertOccupancySegment(segment, referenceDate, floorYear));
   const ordered = [...segments].sort((a, b) => a.segment_index - b.segment_index);
   ordered.forEach((segment, index) => {
     if (segment.segment_index !== index) {

@@ -21,6 +21,14 @@ FILE_KEYS = {
     "review_decisions_jsonl": "review_decisions.jsonl",
     "site_evidence_wide_csv": "site_evidence_wide.csv",
 }
+# the occupancy lane's files (PR-B′, 2026-09-02); bundles frozen before it
+# lack them, so their absence is reported rather than fatal
+OPTIONAL_FILE_KEYS = {
+    "site_occupancies_jsonl": "site_occupancies.jsonl",
+    "derived_target_year_states_jsonl": "derived_target_year_states.jsonl",
+    "derived_year_locations_jsonl": "derived_year_locations.jsonl",
+    "derived_state_events_jsonl": "derived_state_events.jsonl",
+}
 
 
 # Return a stable hash for bytes written into the export directory.
@@ -62,7 +70,17 @@ def bundle_files(bundle: dict[str, Any]) -> dict[str, str]:
         if not isinstance(value, str):
             raise ValueError(f"Convex export bundle is missing files.{key}.")
         selected[filename] = value
+    for key, filename in OPTIONAL_FILE_KEYS.items():
+        value = files.get(key)
+        if isinstance(value, str):
+            selected[filename] = value
     return selected
+
+
+# Keys present in the bundle's file block (for reporting absent optional files).
+def contents_keys(bundle: dict[str, Any]) -> set[str]:
+    files = bundle.get("files")
+    return set(files.keys()) if isinstance(files, dict) else set()
 
 
 # Build a manifest with local hashes for every materialised file.
@@ -96,7 +114,12 @@ def materialise(bundle: dict[str, Any], destination: Path) -> dict[str, Any]:
             },
         )
 
+    missing_optional = [
+        filename for key, filename in OPTIONAL_FILE_KEYS.items() if key not in contents_keys(bundle)
+    ]
     manifest = local_manifest(bundle, file_entries)
+    if missing_optional:
+        manifest["optional_files_absent"] = missing_optional
     manifest_payload = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode("utf-8")
     manifest_path = destination / "export_manifest.json"
     manifest_path.write_bytes(manifest_payload)

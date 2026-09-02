@@ -1,10 +1,16 @@
 (function () {
+    // F1: the floor is per country (date-floor.js); 1600 when the page sets none
+    function floorYear() {
+        const value = Number(window.POW_DATE_FLOOR_YEAR);
+        return Number.isInteger(value) && value > 0 ? value : 1600;
+    }
     function isValidPartialDate(value) {
         if (!value) return true;
-        if (/^\d{4}$/.test(value)) return Number(value) >= 1600;
-        if (/^\d{4}-(0[1-9]|1[0-2])$/.test(value)) return Number(value.slice(0, 4)) >= 1600;
+        const floor = floorYear();
+        if (/^\d{4}$/.test(value)) return Number(value) >= floor;
+        if (/^\d{4}-(0[1-9]|1[0-2])$/.test(value)) return Number(value.slice(0, 4)) >= floor;
         const match = value.match(/^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/);
-        if (!match || Number(match[1]) < 1600) return false;
+        if (!match || Number(match[1]) < floor) return false;
         const parsed = new Date(`${value}T00:00:00Z`);
         return parsed.getUTCFullYear() === Number(match[1])
             && parsed.getUTCMonth() + 1 === Number(match[2])
@@ -36,8 +42,8 @@
         if (!earliest && !latest && (values.uncertaintyNote?.trim().length || 0) < 12) {
             return "Add supported date bounds or explain why the dates remain unresolved.";
         }
-        if (earliest && !isValidPartialDate(earliest)) return "Use YYYY, YYYY-MM, or YYYY-MM-DD from 1600 onward for the earliest supported date.";
-        if (latest && !isValidPartialDate(latest)) return "Use YYYY, YYYY-MM, or YYYY-MM-DD from 1600 onward for the latest supported date.";
+        if (earliest && !isValidPartialDate(earliest)) return `Use YYYY, YYYY-MM, or YYYY-MM-DD from ${floorYear()} onward for the earliest supported date.`;
+        if (latest && !isValidPartialDate(latest)) return `Use YYYY, YYYY-MM, or YYYY-MM-DD from ${floorYear()} onward for the latest supported date.`;
         if (earliest && partialDateLower(earliest) > partialDateUpper(referenceDate)) return "The earliest supported date cannot be after the evidence reference date.";
         if (latest && partialDateLower(latest) > partialDateUpper(referenceDate)) return "The latest supported date cannot be after the evidence reference date.";
         if (earliest && latest && partialDateLower(earliest) > partialDateUpper(latest)) return "The earliest supported date cannot be after the latest supported date.";

@@ -14,6 +14,7 @@ import {
   MEDIUM_TEXT_MAX,
   SHORT_TEXT_MAX,
 } from "./lib/limits";
+import { dateFloorYear } from "./lib/countryYears";
 import { intakeRateLimiter } from "./lib/rateLimits";
 import { assertRapidSubmissionId } from "./lib/rapidEntry";
 import { appendTaskEvent } from "./lib/taskEvents";
@@ -137,7 +138,7 @@ export const submitHistoricalClaim = mutation({
       parent.source_date_or_capture_date,
       new Date().toISOString().slice(0, 10),
     );
-    assertHistoricalClaim(args.claim, referenceDate);
+    assertHistoricalClaim(args.claim, referenceDate, dateFloorYear(task.country_code));
 
     await intakeRateLimiter.limit(ctx, "historicalClaimPerUser", { key: user._id, throws: true });
     await intakeRateLimiter.limit(ctx, "historicalClaimGlobal", { throws: true });

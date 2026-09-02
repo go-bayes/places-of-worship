@@ -600,6 +600,8 @@ const CONFIG_COUNTRY_KEY = countryConfigKey(CONFIG_COUNTRY_PARAM);
 const REQUESTED_COUNTRY_KEY = countryConfigKey(REQUESTED_COUNTRY_PARAM);
 const COUNTRY_KEY = REQUESTED_COUNTRY_KEY || PATH_COUNTRY_KEY || CONFIG_COUNTRY_KEY || "nz";
 const COUNTRY_CONFIG = COUNTRY_CONFIGS[COUNTRY_KEY];
+// F1: the contracts validate dates against this country's floor (date-floor.js)
+window.POW_DATE_FLOOR_YEAR = window.PowDateFloor ? window.PowDateFloor.yearFor(COUNTRY_CONFIG.countryCode) : 1600;
 const TARGET_YEARS = COUNTRY_CONFIG.targetYears;
 const DEFAULT_TARGET_YEAR = COUNTRY_CONFIG.defaultTargetYear || TARGET_YEARS[TARGET_YEARS.length - 1];
 const BACKEND_CONFIG = window.POW_CONVEX_CONFIG || {};

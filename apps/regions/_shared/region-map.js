@@ -4044,9 +4044,67 @@ function effectivePointsMode() {
   if (placesDotState.mode) return placesDotState.mode;
   return placeSnapshotStale() && RC.datedPlaces ? "period" : "all";
 }
-const DATED = { source: "pow-dated", layer: "pow-dated-points", futureLayer: "pow-dated-future-points" };
+const DATED = {
+  source: "pow-dated",
+  layer: "pow-dated-points",
+  futureLayer: "pow-dated-future-points",
+  // PR-C (docs/development/public-map-occupancy-slider-brief-2026-09-02.md):
+  // reviewed occupancy features carry start/end windows, a radius, and
+  // transition lines; these layers render them beside the OSM-tag dots
+  windowLayer: "pow-dated-window-points",
+  areaLayer: "pow-dated-area",
+  transitionLayer: "pow-dated-transition",
+  ringImage: "pow-dashed-ring",
+};
+const DATED_AMBER = "#d68910";
 let datedHandlersAttached = false;
 let datedStartYears = null;
+// whether the wired product carries reviewed occupancy features; the
+// legend explains the window and transition marks only when it does
+let datedHasReviewed = false;
+// the amber dashed ring for a year inside a start or end window: circle
+// layers cannot dash a stroke, so the ring is a canvas icon on a symbol
+// layer. re-added after every style swap (the image dies with the style)
+function ensureDashedRingImage() {
+  if (map.hasImage(DATED.ringImage)) return;
+  const size = 40;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  ctx.strokeStyle = DATED_AMBER;
+  ctx.lineWidth = 4;
+  ctx.setLineDash([5, 4]);
+  ctx.beginPath();
+  ctx.arc(size / 2, size / 2, 14, 0, Math.PI * 2);
+  ctx.stroke();
+  map.addImage(DATED.ringImage, ctx.getImageData(0, 0, size, size), { pixelRatio: 2 });
+}
+// the predicate for a place alive at year Y (identical on every surface,
+// docs/development/temporal-place-layer.md): start_year present and <= Y,
+// end_year absent, null, or >= Y. point geometry only: transition lines
+// share the source
+function datedAliveFilter(year) {
+  return ["all",
+    ["==", ["geometry-type"], "Point"],
+    ["has", "start_year"],
+    ["<=", ["get", "start_year"], year],
+    ["any",
+      ["!", ["has", "end_year"]],
+      ["==", ["get", "end_year"], null],
+      [">=", ["get", "end_year"], year]]
+  ];
+}
+// Y sits inside a window when the start is not yet certain (Y before
+// start_upper), the end is no longer certain (Y after end_lower), or the
+// end is undated altogether (rule 10) and Y is past the certain start
+function datedWindowFilter(year) {
+  return ["any",
+    ["all", ["has", "start_upper"], ["<", year, ["get", "start_upper"]]],
+    ["all", ["has", "end_lower"], [">", year, ["get", "end_lower"]]],
+    ["all", ["==", ["get", "end_unknown"], true], ["has", "start_upper"], [">", year, ["get", "start_upper"]]]
+  ];
+}
 function addDatedPlacesLayer() {
   if (!RC.datedPlaces || map.getSource(DATED.source)) return;
   map.addSource(DATED.source, { type: "geojson", data: RC.datedPlaces });
@@ -4079,14 +4137,65 @@ function addDatedPlacesLayer() {
       "circle-stroke-color": "#334155"
     }
   });
+  // approximate places (a radius on the feature): a soft ring at low zoom,
+  // the true circle from zoom 13 (metres → pixels through cos_lat). sits
+  // under the dots so the point stays legible inside its area
+  map.addLayer({
+    id: DATED.areaLayer,
+    type: "circle",
+    source: DATED.source,
+    layout: { visibility: "none" },
+    paint: {
+      "circle-radius": ["interpolate", ["exponential", 2], ["zoom"],
+        12, 9,
+        13, ["/", ["*", ["get", "radius_m"], 0.05233], ["coalesce", ["get", "cos_lat"], 1]],
+        20, ["/", ["*", ["get", "radius_m"], 6.6983], ["coalesce", ["get", "cos_lat"], 1]]],
+      "circle-color": DATED_AMBER,
+      "circle-opacity": 0.12,
+      "circle-stroke-width": 1,
+      "circle-stroke-color": DATED_AMBER,
+      "circle-stroke-opacity": 0.6
+    }
+  }, DATED.layer);
+  // window tier: amber hollow dashed ring where Y falls inside a start or
+  // end window of a reviewed occupancy
+  ensureDashedRingImage();
+  map.addLayer({
+    id: DATED.windowLayer,
+    type: "symbol",
+    source: DATED.source,
+    layout: {
+      visibility: "none",
+      "icon-image": DATED.ringImage,
+      "icon-size": ["interpolate", ["linear"], ["zoom"], 4, 0.6, 9, 0.85, 16, 1.15],
+      "icon-allow-overlap": true,
+      "icon-ignore-placement": true
+    }
+  });
+  // transition tier: a thin dashed line between the two members of a
+  // relocation while Y lies in the transition's years
+  map.addLayer({
+    id: DATED.transitionLayer,
+    type: "line",
+    source: DATED.source,
+    layout: { visibility: "none", "line-cap": "round" },
+    paint: {
+      "line-color": DATED_AMBER,
+      "line-width": 1.5,
+      "line-dasharray": [2, 2],
+      "line-opacity": 0.9
+    }
+  });
   // the future count feeds the legend: an honest "2 places founded after
   // 2018" stops an almost-empty layer reading as a broken control
   if (!datedStartYears) {
     datedStartYears = [];
     fetch(RC.datedPlaces).then((r) => r.json()).then((geo) => {
-      datedStartYears = (geo.features || [])
+      const features = geo.features || [];
+      datedStartYears = features
         .map((f) => f.properties && f.properties.start_year)
         .filter((y) => Number.isFinite(y));
+      datedHasReviewed = features.some((f) => f.properties && f.properties.source === "reviewed_occupancy");
       updateCensusLegend();
     }).catch(() => { /* count stays empty; the legend simply omits it */ });
   }
@@ -4097,7 +4206,24 @@ function addDatedPlacesLayer() {
       if (!f) return;
       const pr = f.properties || {};
       const name = pr.name || "Unnamed place";
-      const span = `${pr.start_year || "?"}–${pr.end_year || "present"}`;
+      const reviewed = pr.source === "reviewed_occupancy";
+      // a reviewed period states its windows: "1899–1901 to 1960" reads
+      // as a start somewhere in 1899–1901 and an end in 1960
+      const startWords = reviewed && Number.isFinite(pr.start_lower) && Number.isFinite(pr.start_upper) && pr.start_lower !== pr.start_upper
+        ? `${pr.start_lower}–${pr.start_upper}`
+        : reviewed && !Number.isFinite(pr.start_lower) && Number.isFinite(pr.start_upper)
+          ? `by ${pr.start_upper}`
+          : `${pr.start_year || "?"}`;
+      const endWords = reviewed && pr.end_unknown
+        ? "end undated"
+        : reviewed && Number.isFinite(pr.end_lower) && Number.isFinite(pr.end_upper) && pr.end_lower !== pr.end_upper
+          ? `${pr.end_lower}–${pr.end_upper}`
+          : reviewed && Number.isFinite(pr.end_lower) && !Number.isFinite(pr.end_upper)
+            ? `after ${pr.end_lower}`
+            : reviewed && pr.still_active_asof
+              ? `in use as of ${pr.still_active_asof}`
+              : `${pr.end_year || "present"}`;
+      const span = reviewed ? `${startWords} to ${endWords}` : `${pr.start_year || "?"}–${pr.end_year || "present"}`;
       const prospective = censusState.enabled &&
         Number.isFinite(pr.start_year) && pr.start_year > censusState.year;
       const [lng, lat] = f.geometry.coordinates;
@@ -4109,18 +4235,22 @@ function addDatedPlacesLayer() {
           (pr.religion ? `<div class="place-attr"><span class="place-attr-key">Religion</span><span class="place-attr-val">${pr.religion}</span></div>` : "") +
           (pr.denomination ? `<div class="place-attr"><span class="place-attr-key">Denomination</span><span class="place-attr-val">${pr.denomination}</span></div>` : "") +
           `<div class="place-attr"><span class="place-attr-key">Dated</span><span class="place-attr-val">${span}</span></div>` +
+          (reviewed && Number.isFinite(pr.radius_m) ? `<div class="place-attr"><span class="place-attr-key">Location</span><span class="place-attr-val">approximate, within ${pr.radius_m >= 1000 ? `${pr.radius_m / 1000} km` : `${pr.radius_m} m`}</span></div>` : "") +
+          (reviewed && pr.end_reason ? `<div class="place-attr"><span class="place-attr-key">Ended</span><span class="place-attr-val">${String(pr.end_reason).replace(/_/g, " ")}</span></div>` : "") +
           `</div>` +
           (prospective ? `<div class="place-note">Founded after ${censusState.year} — shown because "show later foundations" is on.</div>` : "") +
-          `<div class="place-note">Dates from OpenStreetMap tags — provisional until reviewed evidence replaces them.</div>` +
+          (reviewed
+            ? `<div class="place-note">A period of use recorded from evidence and accepted by a reviewer; a dashed ring means ${censusState.year} falls inside a start or end window.</div>`
+            : `<div class="place-note">Dates from OpenStreetMap tags — provisional until reviewed evidence replaces them.</div>`) +
           `<div class="popup-actions">` +
           `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat.toFixed(6)},${lng.toFixed(6)}" target="_blank" rel="noopener">Streetview</a>` +
-          `<a href="https://www.openstreetmap.org/${pr.osm_type}/${pr.osm_id}" target="_blank" rel="noopener">Open OSM</a>` +
+          (pr.osm_type && pr.osm_id ? `<a href="https://www.openstreetmap.org/${pr.osm_type}/${pr.osm_id}" target="_blank" rel="noopener">Open OSM</a>` : "") +
           `</div>`
         )
         .addTo(map);
       trackPlacePopup(popup);
     };
-    for (const layerId of [DATED.layer, DATED.futureLayer]) {
+    for (const layerId of [DATED.layer, DATED.futureLayer, DATED.windowLayer]) {
       map.on("click", layerId, openDatedPopup);
       map.on("mouseenter", layerId, () => { map.getCanvas().style.cursor = "pointer"; });
       map.on("mouseleave", layerId, () => { map.getCanvas().style.cursor = ""; });
@@ -4131,25 +4261,38 @@ function syncDatedPlaces(showAlive, showFuture) {
   if (!RC.datedPlaces) return;
   addDatedPlacesLayer();
   if (!map.getLayer(DATED.layer)) return;
+  const year = censusState.year;
+  const alive = datedAliveFilter(year);
+  const window_ = datedWindowFilter(year);
+  const setVisible = (layerId, visible) => {
+    if (map.getLayer(layerId)) map.setLayoutProperty(layerId, "visibility", visible ? "visible" : "none");
+  };
   if (showAlive) {
     // open-ended places carry end_year as an explicit null (the key is
-    // present), so ["has","end_year"] is true for them; test the value for
-    // null as well, or every still-open place would be filtered out.
-    map.setFilter(DATED.layer, ["all",
-      ["has", "start_year"],
-      ["<=", ["get", "start_year"], censusState.year],
-      ["any",
-        ["!", ["has", "end_year"]],
-        ["==", ["get", "end_year"], null],
-        [">=", ["get", "end_year"], censusState.year]]
-    ]);
-    map.setLayoutProperty(DATED.layer, "visibility", "visible");
-  } else {
-    map.setLayoutProperty(DATED.layer, "visibility", "none");
+    // present), so ["has","end_year"] is true for them; datedAliveFilter
+    // tests the value for null as well, or every still-open place would
+    // be filtered out. a year inside a reviewed window moves the place
+    // from the solid dot to the dashed ring
+    map.setFilter(DATED.layer, ["all", alive, ["!", window_]]);
+    if (map.getLayer(DATED.windowLayer)) map.setFilter(DATED.windowLayer, ["all", alive, window_]);
+    if (map.getLayer(DATED.areaLayer)) map.setFilter(DATED.areaLayer, ["all", alive, ["has", "radius_m"]]);
+    if (map.getLayer(DATED.transitionLayer)) {
+      map.setFilter(DATED.transitionLayer, ["all",
+        ["==", ["geometry-type"], "LineString"],
+        ["==", ["get", "kind"], "transition"],
+        ["<=", ["get", "year_lower"], year],
+        [">=", ["get", "year_upper"], year]
+      ]);
+    }
   }
+  setVisible(DATED.layer, showAlive);
+  setVisible(DATED.windowLayer, showAlive);
+  setVisible(DATED.areaLayer, showAlive);
+  setVisible(DATED.transitionLayer, showAlive);
   if (!map.getLayer(DATED.futureLayer)) return;
   if (showFuture) {
     map.setFilter(DATED.futureLayer, ["all",
+      ["==", ["geometry-type"], "Point"],
       ["has", "start_year"],
       [">", ["get", "start_year"], censusState.year]
     ]);
@@ -4829,10 +4972,16 @@ function updateCensusLegend() {
   const futureCount = placesDotState.future && Array.isArray(datedStartYears)
     ? datedStartYears.filter((y) => y > censusState.year).length
     : null;
+  const datedSourceWords = datedHasReviewed
+    ? "OpenStreetMap date tags or reviewed evidence"
+    : "OpenStreetMap date tags";
+  const windowWords = datedHasReviewed
+    ? `; a dashed amber ring marks a reviewed place whose start or end is only bounded around ${censusState.year}, a dashed line a relocation in progress, a pale disc an approximate location`
+    : "";
   const dotEraNote = pointsMode === "period"
-    ? `<div class="census-legend-note">showing only places whose OpenStreetMap date tags say they existed in ${censusState.year} — today's undated snapshot is hidden${placesDotState.future ? `; hollow rings mark places founded after ${censusState.year}${futureCount !== null ? ` (${futureCount} in this dataset)` : ""}` : ""}</div>`
+    ? `<div class="census-legend-note">showing only places whose ${datedSourceWords} say they existed in ${censusState.year} — today's undated snapshot is hidden${windowWords}${placesDotState.future ? `; hollow slate rings mark places founded after ${censusState.year}${futureCount !== null ? ` (${futureCount} in this dataset)` : ""}` : ""}</div>`
     : pointsMode === "all" && placeSnapshotStale()
-      ? `<div class="census-legend-note">place dots show today's OpenStreetMap places, not ${censusState.year} places${RC.datedPlaces ? ` — amber-ringed dots carry OpenStreetMap date tags saying they existed in ${censusState.year}` : " — historical place layers are being assembled from evidence"}</div>`
+      ? `<div class="census-legend-note">place dots show today's OpenStreetMap places, not ${censusState.year} places${RC.datedPlaces ? ` — amber-ringed dots carry ${datedSourceWords} saying they existed in ${censusState.year}${windowWords}` : " — historical place layers are being assembled from evidence"}</div>`
       : "";
   // the ramp clamps at the 2nd-98th percentile; mark the ends when
   // values continue beyond them
