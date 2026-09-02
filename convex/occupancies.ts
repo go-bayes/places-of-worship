@@ -8,7 +8,7 @@ import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
-import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser } from "./lib/auth";
+import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser, type ProjectRole } from "./lib/auth";
 import { dateFloorYear, defaultTargetYears } from "./lib/countryYears";
 import { isHistoricalClaimParentContract } from "./lib/historicalClaims";
 import {
@@ -28,6 +28,7 @@ import {
   resolveLocation,
   startPrecision,
   type OccupancySegment,
+  type OccupancySegmentInput,
 } from "./lib/occupancies";
 import { intakeRateLimiter } from "./lib/rateLimits";
 import { assertRapidSubmissionId } from "./lib/rapidEntry";
@@ -328,6 +329,98 @@ async function rederive(
   return { years: presences.map((p) => p.target_year), conflicts };
 }
 
+// the one write route for a set of periods: supersedes the author's earlier
+// set for the parent, inserts the rows, rederives the census-year proposals,
+// and records the task event. the ra mutation and the bulk import both call
+// it, so the stored shape cannot drift between them. the caller has already
+// authorised the actor and validated the set
+export async function recordOccupancySet(
+  ctx: MutationCtx,
+  args: {
+    task: Doc<"tasks">;
+    parent: Doc<"evidence_drafts">;
+    user: Doc<"users">;
+    actorRole: ProjectRole;
+    submissionKey: string;
+    submissionToken: string;
+    segments: OccupancySegmentInput[];
+    now: number;
+    clientContext?: unknown;
+  },
+): Promise<{ occupancyIds: string[]; derived: { years: number[]; conflicts: number[] } }> {
+  const { task, parent, user, actorRole, now } = args;
+  const point = taskPoint(task);
+  // the author's earlier set for this parent is superseded, never rewritten
+  for (const row of await activeOccupancies(ctx, parent.evidence_draft_id)) {
+    if (row.created_by === user._id) {
+      await ctx.db.patch(row._id, { claim_status: "superseded", updated_at: now });
+    }
+  }
+  const occupancyIds: string[] = [];
+  for (const segment of [...args.segments].sort((a, b) => a.segment_index - b.segment_index)) {
+    const location = resolveLocation(segment, point);
+    const occupancyId = `${task.task_id}:${user._id}:occupancy:${args.submissionToken}:${segment.segment_index}`;
+    occupancyIds.push(occupancyId);
+    const trimmed = (value: string | undefined) => (value?.trim() ? value.trim() : undefined);
+    await ctx.db.insert("site_occupancies", {
+      occupancy_id: occupancyId,
+      task_id: task.task_id,
+      parent_evidence_draft_id: parent.evidence_draft_id,
+      claim_status: "submitted",
+      contract_version: "occupancy_v1",
+      submission_key: args.submissionKey,
+      segment_index: segment.segment_index,
+      start_mode: segment.start_mode,
+      ...(trimmed(segment.start_date) ? { start_date: trimmed(segment.start_date) } : {}),
+      ...(trimmed(segment.start_not_earlier_than) ? { start_not_earlier_than: trimmed(segment.start_not_earlier_than) } : {}),
+      ...(trimmed(segment.start_not_later_than) ? { start_not_later_than: trimmed(segment.start_not_later_than) } : {}),
+      start_precision: startPrecision(segment),
+      start_basis: segment.start_basis,
+      end_mode: segment.end_mode,
+      ...(trimmed(segment.end_date) ? { end_date: trimmed(segment.end_date) } : {}),
+      ...(trimmed(segment.end_not_earlier_than) ? { end_not_earlier_than: trimmed(segment.end_not_earlier_than) } : {}),
+      ...(trimmed(segment.end_not_later_than) ? { end_not_later_than: trimmed(segment.end_not_later_than) } : {}),
+      end_precision: endPrecision(segment),
+      end_basis: segment.end_basis,
+      ...(segment.end_reason !== undefined ? { end_reason: segment.end_reason } : {}),
+      ...(trimmed(segment.still_active_asof) ? { still_active_asof: trimmed(segment.still_active_asof) } : {}),
+      ...(trimmed(segment.successor_site_id) ? { successor_site_id: trimmed(segment.successor_site_id) } : {}),
+      location_relation: segment.location_relation,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      location_mode: location.location_mode,
+      location_basis: location.location_basis,
+      ...(location.uncertainty_radius_m !== undefined ? { uncertainty_radius_m: location.uncertainty_radius_m } : {}),
+      ...(location.location_wording ? { location_wording: location.location_wording } : {}),
+      location_confidence: location.location_confidence,
+      confidence: segment.confidence,
+      confidence_basis: segment.confidence_basis.trim(),
+      source_basis: segment.source_basis,
+      source_title: segment.source_title.trim(),
+      ...(trimmed(segment.source_reference) ? { source_reference: trimmed(segment.source_reference) } : {}),
+      source_account: segment.source_account.trim(),
+      ...(trimmed(segment.uncertainty_note) ? { uncertainty_note: trimmed(segment.uncertainty_note) } : {}),
+      privacy_flag: segment.privacy_flag as "clear" | "needs_review" | "restricted",
+      created_by: user._id,
+      created_at: now,
+      updated_at: now,
+    });
+  }
+  const derived = await rederive(ctx, task, parent, user._id, actorRole, now);
+  await appendTaskEvent(ctx, {
+    taskId: task.task_id,
+    eventType: "note_added",
+    actorUserId: user._id,
+    actorRole,
+    previousStatus: task.status,
+    newStatus: task.status,
+    reason: `Recorded ${args.segments.length} occupancy period${args.segments.length === 1 ? "" : "s"}; derived ${derived.years.length} census-year proposal${derived.years.length === 1 ? "" : "s"} awaiting reviewer confirmation.`,
+    evidenceDraftId: parent.evidence_draft_id,
+    clientContext: args.clientContext,
+  });
+  return { occupancyIds, derived };
+}
+
 // lists the task's periods: reviewers see all, an ra sees their own
 export const listTaskOccupancies = query({
   args: {
@@ -445,72 +538,15 @@ export const submitOccupancies = mutation({
 
     const now = Date.now();
     const actorRole = chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]);
-    // the author's earlier set for this parent is superseded, never rewritten
-    for (const row of await activeOccupancies(ctx, parent.evidence_draft_id)) {
-      if (row.created_by === user._id) {
-        await ctx.db.patch(row._id, { claim_status: "superseded", updated_at: now });
-      }
-    }
-    const occupancyIds: string[] = [];
-    for (const segment of [...args.segments].sort((a, b) => a.segment_index - b.segment_index)) {
-      const location = resolveLocation(segment, point);
-      const occupancyId = `${task.task_id}:${user._id}:occupancy:${args.clientSubmissionId}:${segment.segment_index}`;
-      occupancyIds.push(occupancyId);
-      const trimmed = (value: string | undefined) => (value?.trim() ? value.trim() : undefined);
-      await ctx.db.insert("site_occupancies", {
-        occupancy_id: occupancyId,
-        task_id: task.task_id,
-        parent_evidence_draft_id: parent.evidence_draft_id,
-        claim_status: "submitted",
-        contract_version: "occupancy_v1",
-        submission_key: submissionKey,
-        segment_index: segment.segment_index,
-        start_mode: segment.start_mode,
-        ...(trimmed(segment.start_date) ? { start_date: trimmed(segment.start_date) } : {}),
-        ...(trimmed(segment.start_not_earlier_than) ? { start_not_earlier_than: trimmed(segment.start_not_earlier_than) } : {}),
-        ...(trimmed(segment.start_not_later_than) ? { start_not_later_than: trimmed(segment.start_not_later_than) } : {}),
-        start_precision: startPrecision(segment),
-        start_basis: segment.start_basis,
-        end_mode: segment.end_mode,
-        ...(trimmed(segment.end_date) ? { end_date: trimmed(segment.end_date) } : {}),
-        ...(trimmed(segment.end_not_earlier_than) ? { end_not_earlier_than: trimmed(segment.end_not_earlier_than) } : {}),
-        ...(trimmed(segment.end_not_later_than) ? { end_not_later_than: trimmed(segment.end_not_later_than) } : {}),
-        end_precision: endPrecision(segment),
-        end_basis: segment.end_basis,
-        ...(segment.end_reason !== undefined ? { end_reason: segment.end_reason } : {}),
-        ...(trimmed(segment.still_active_asof) ? { still_active_asof: trimmed(segment.still_active_asof) } : {}),
-        ...(trimmed(segment.successor_site_id) ? { successor_site_id: trimmed(segment.successor_site_id) } : {}),
-        location_relation: segment.location_relation,
-        latitude: location.latitude,
-        longitude: location.longitude,
-        location_mode: location.location_mode,
-        location_basis: location.location_basis,
-        ...(location.uncertainty_radius_m !== undefined ? { uncertainty_radius_m: location.uncertainty_radius_m } : {}),
-        ...(location.location_wording ? { location_wording: location.location_wording } : {}),
-        location_confidence: location.location_confidence,
-        confidence: segment.confidence,
-        confidence_basis: segment.confidence_basis.trim(),
-        source_basis: segment.source_basis,
-        source_title: segment.source_title.trim(),
-        ...(trimmed(segment.source_reference) ? { source_reference: trimmed(segment.source_reference) } : {}),
-        source_account: segment.source_account.trim(),
-        ...(trimmed(segment.uncertainty_note) ? { uncertainty_note: trimmed(segment.uncertainty_note) } : {}),
-        privacy_flag: segment.privacy_flag,
-        created_by: user._id,
-        created_at: now,
-        updated_at: now,
-      });
-    }
-    const derived = await rederive(ctx, task, parent, user._id, actorRole, now);
-    await appendTaskEvent(ctx, {
-      taskId: task.task_id,
-      eventType: "note_added",
-      actorUserId: user._id,
+    const { occupancyIds, derived } = await recordOccupancySet(ctx, {
+      task,
+      parent,
+      user,
       actorRole,
-      previousStatus: task.status,
-      newStatus: task.status,
-      reason: `Recorded ${args.segments.length} occupancy period${args.segments.length === 1 ? "" : "s"}; derived ${derived.years.length} census-year proposal${derived.years.length === 1 ? "" : "s"} awaiting reviewer confirmation.`,
-      evidenceDraftId: parent.evidence_draft_id,
+      submissionKey,
+      submissionToken: args.clientSubmissionId,
+      segments: args.segments,
+      now,
       clientContext: args.clientContext,
     });
     return {

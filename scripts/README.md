@@ -27,6 +27,7 @@ Current NZ cleanup utilities:
 
 Current global pipeline scaffolding:
 
+- `scripts/build_vu_woodberry_import.py`: build the PR-D bulk occupancy import for Bob Woodberry's Vanuatu mission stations from the two station workbooks quarantined in `~/GIT/pow-research/data/raw/vu_woodberry/` (hash-checked): per workbook a bulk-import CSV (one row per period), chunked run files for `batchImport:adminImportOccupancyBatch`, and a build report naming every repair, exclusion, and reading rule; outputs go to git-ignored `~/GIT/pow-research/data/derived/vu_woodberry_import/`. Run with `uv run --with openpyxl python scripts/build_vu_woodberry_import.py`. Tests: `python3 -m unittest scripts/test_build_vu_woodberry_import.py`.
 - `scripts/build_occupancy_dated_places.py`: merge one dated-places feature per reviewer-accepted occupancy (plus relocation transition lines) from materialised Convex exports into `apps/regions/<cc>/data/dated_places.geojson`; OSM date-tag features are kept. Tests: `python3 -m unittest scripts/test_build_occupancy_dated_places.py`.
 - `scripts/extract_global_data.R`: raw global extractor that writes dated country payloads to `data/raw/osm/<snapshot_date>/`.
 - `scripts/normalize_global_places.R`: normalise raw country payloads into a stable intermediate schema under `data/intermediate/global/<snapshot_date>/`.

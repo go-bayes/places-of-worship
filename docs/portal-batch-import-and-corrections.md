@@ -83,6 +83,31 @@ Row columns (header names exact; unknown columns preserved as notes):
 | `culturally_sensitive` | Required for VU rows (`yes`/`no`); optional elsewhere. |
 | `notes` | Optional free text. |
 
+### Occupancy columns (PR-D, ruled 2026-09-02)
+
+Section 4 of `docs/portal-location-and-occupancy-plan.md` extends the row
+with one period per row: rows of one place share `source_locator` (and
+`name`) and are numbered by `segment_index` from 0. The columns are the
+`occupancy_v1` contract in CSV form; `convex/lib/occupancyImport.ts` is the
+single reading of them, and the whole set is validated by
+`assertOccupancySet` exactly as an RA submission is.
+
+| Column | Rule |
+| --- | --- |
+| `segment_index` | 0-based, contiguous within a place. |
+| `start_mode`, `start_date`, `start_not_earlier_than`, `start_not_later_than`, `start_basis` | As the occupancy contract: known needs the date; between needs both bounds; by needs the latest date; unknown carries basis `unknown`. |
+| `end_mode`, `end_date`, `end_not_earlier_than`, `end_not_later_than`, `end_basis`, `end_reason`, `still_active_asof` | As the occupancy contract; a dated end needs its reason; `after` with `last_seen_only` says "in use at the last observation, nothing after". |
+| `latitude`, `longitude` | The period's own point; when it differs from the row's `lat`/`lng` the period is `distinct`, when absent or equal it describes the task point. |
+| `location_mode`, `uncertainty_radius_m`, `location_basis`, `location_wording` | The embedded `location_assertion_v1`; an approximate area needs a whole-metre radius (25 m–100 km) and its wording. The assertion's confidence is derived from mode and radius. |
+| `occupancy_confidence`, `occupancy_confidence_basis`, `occupancy_source_basis`, `occupancy_source_reference`, `occupancy_source_account`, `occupancy_uncertainty_note` | Provenance per period; defaults: `moderate`, an import basis sentence, `named_public_source`, the row's locator, a generated account. |
+
+Legacy `first_date` and `last_date` still import as first-seen and
+last-seen lifecycle claims and never derive an absence. Rows with these
+columns enter through `batchImport:adminImportOccupancyBatch` (admin key,
+named service actor), which lands each place submitted for review with its
+periods and derived census-year proposals; the workbench curator screen has
+not adopted the columns yet and imports drafts without periods.
+
 ### Validation is three-layered and repairable
 
 File level: parseable CSV, required headers present, one country, row
