@@ -112,7 +112,12 @@ function verificationStub(data) {
   // collapse the long quickstart so the task list is visible in captures
   document.querySelector("details.quickstart")?.removeAttribute("open");
   app.renderBackendPanel();
-  app.renderSessionPanel();
+  if (typeof app.renderSessionPanel === "function") app.renderSessionPanel();
+  // the portal now opens on an activity chooser (jb 2026-08-31); the
+  // assigned-task list renders only once that mode is chosen
+  if (typeof app.setPortalMode === "function") {
+    try { app.setPortalMode("assigned"); } catch (error) { /* older portal */ }
+  }
   app.applyFilters();
 }
 
@@ -186,7 +191,18 @@ const flows = [
       await step("Open a task from the list; the detail panel shows the brief and source links.");
       await page.locator("#raActionSelect").scrollIntoViewIfNeeded();
       await page.selectOption("#raActionSelect", "confirm_current_record");
-      await step("Choose what your evidence shows; target-year statuses prefill from the action.");
+      // pr-e: the periods are the temporal entry; the still-in-use card is
+      // anchored to the source date, so that is filled first
+      await page.fill("#sourceDateInput", "2024-05");
+      await page.locator("#guidedPeriodsCards").scrollIntoViewIfNeeded();
+      const card = page.locator('#guidedPeriodsCards .occupancy-card[data-index="0"]');
+      await card.locator('[data-field="startMode"]').selectOption("known");
+      await card.locator('[data-field="startDate"]').fill("1905");
+      await card.locator('[data-field="startBasis"]').selectOption("founding_stated");
+      await card.locator('[data-field="endMode"]').selectOption("still_active");
+      await card.locator('[data-field="stillActiveAsof"]').fill("2024-05");
+      await page.waitForTimeout(300);
+      await step("Choose what your evidence shows, then record when the place was used for worship; the strip under the cards states the census-year states the portal will propose.");
       await page.locator("#sourceTitleInput").scrollIntoViewIfNeeded();
       await fillEvidenceBasics(page);
       await step("Record the source title, date, URL, and a short evidence note.");

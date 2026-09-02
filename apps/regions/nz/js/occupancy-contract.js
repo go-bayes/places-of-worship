@@ -17,7 +17,7 @@
 
     const START_MODES = new Set(["known", "between", "by", "unknown"]);
     const END_MODES = new Set(["still_active", "known", "between", "after", "unknown"]);
-    const START_BASES = new Set(["founding_stated", "organisation_founded", "building_dedication", "first_seen_only", "unknown"]);
+    const START_BASES = new Set(["founding_stated", "reopening_stated", "organisation_founded", "building_dedication", "first_seen_only", "unknown"]);
     const END_BASES = new Set(["closure_stated", "last_seen_only", "unknown"]);
     const END_REASONS = new Set(["closed", "relocated", "demolished", "use_changed", "unknown"]);
     const CONFIDENCE = new Set(["high", "moderate", "low", "uncertain"]);
@@ -26,6 +26,7 @@
 
     const START_BASIS_WORDS = {
         founding_stated: "founding stated",
+        reopening_stated: "reopening stated",
         organisation_founded: "organisation founded",
         building_dedication: "building dedicated",
         first_seen_only: "first seen only",
@@ -205,7 +206,7 @@
             if (error) return error;
         }
         if (s.startMode !== "unknown" && (!START_BASES.has(s.startBasis) || s.startBasis === "unknown")) {
-            return "Say how the start is known: founding stated, organisation founded, building dedicated, or first seen only.";
+            return "Say how the start is known: founding stated, reopening stated, organisation founded, building dedicated, or first seen only.";
         }
         // end
         if (!END_MODES.has(s.endMode)) return "Choose how the end is known.";
@@ -419,6 +420,7 @@
     const PRESENCE_RULE_WORDS = {
         inside_interval: "inside the period",
         before_stated_founding: "before the stated founding",
+        before_stated_reopening: "before the stated reopening",
         before_first_record: "before the first record",
         after_stated_closure: "after the stated closure",
         after_last_record: "after the last record",
@@ -439,9 +441,9 @@
             return fire("inside_interval", "present");
         }
         if (b.startLower !== undefined && yEnd < b.startLower) {
-            return s.startBasis === "founding_stated"
-                ? fire("before_stated_founding", "absent")
-                : fire("before_first_record", "uncertain");
+            if (s.startBasis === "founding_stated") return fire("before_stated_founding", "absent");
+            if (s.startBasis === "reopening_stated") return fire("before_stated_reopening", "absent");
+            return fire("before_first_record", "uncertain");
         }
         if (b.endUpper !== undefined && yStart > b.endUpper) {
             return s.endBasis === "closure_stated"
@@ -530,9 +532,9 @@
                 first.endMode = "after";
                 first.endNotEarlierThan = text(st.earliest);
             } else {
-                first.endMode = "between";
-                first.endNotEarlierThan = "";
-                first.endNotLaterThan = text(st.latest);
+                // a latest-only end has no supported mode (there is no "by"
+                // for ends), so the prompt asks for both bounds or the date
+                return { problem: "Give both the earliest and latest dates it could have stopped, or the date itself; a latest date alone cannot be recorded." };
             }
         } else {
             first.endMode = "unknown";
@@ -559,6 +561,74 @@
         second.startAround = false;
         second.startBasis = second.startMode === "unknown" ? "" : "first_seen_only";
         return { first, second };
+    }
+
+    // the guided form's assessment confidence is numeric (0.9 / 0.7 / 0.5);
+    // the occupancy vocabulary is high / moderate / low / uncertain. a blank
+    // assessment cannot stand in for the periods' confidence (ruling r-e4:
+    // the reviewer's confirmation is the confidence of record, but the ra
+    // still states one)
+    const PARENT_CONFIDENCE = { "0.9": "high", "0.7": "moderate", "0.5": "low", high: "high", medium: "moderate", moderate: "moderate", low: "low" };
+
+    function provenanceFromParent(values, gapNote) {
+        const v = values || {};
+        const confidence = PARENT_CONFIDENCE[text(v.assessmentConfidence)] || "";
+        if (!confidence) {
+            return { provenance: null, problem: "Choose an assessment confidence for this evidence, or untick \"same source\" and give the periods their own confidence." };
+        }
+        const account = text(v.note);
+        const uncertainty = [text(v.uncertaintyNote), text(gapNote)].filter(Boolean).join(" ");
+        return {
+            provenance: {
+                confidence,
+                confidenceBasis: "Same source and assessment as the evidence record submitted with these periods.",
+                sourceBasis: text(v.sourceType) === "field_observation" ? "local_investigator_account" : "named_public_source",
+                sourceTitle: text(v.sourceTitle) || text(v.sourceProvider),
+                sourceReference: text(v.sourceUrl),
+                sourceAccount: account.length >= MIN_SOURCE_ACCOUNT ? account : `${account} Periods as recorded in the source cited on this evidence record.`.trim(),
+                uncertaintyNote: uncertainty,
+                privacyFlag: text(v.privacyFlag) || "clear",
+            },
+            problem: "",
+        };
+    }
+
+    // whether a card has been touched beyond the blank the form opens with
+    function cardsTouched(segments) {
+        return (segments || []).some(seg => text(seg.startDate) || text(seg.startNotEarlierThan) || text(seg.startNotLaterThan) || text(seg.startBasis)
+            || text(seg.endDate) || text(seg.endNotEarlierThan) || text(seg.endNotLaterThan) || text(seg.endBasis) || text(seg.endReason) || seg.location
+            || seg.startMode === "unknown" || seg.endMode === "unknown" || seg.startMode === "between" || seg.startMode === "by");
+    }
+
+    // ruling r-e1: on an ordinary guided submission the periods are the
+    // temporal record. a place can go without them only when the hand grid
+    // carries a status with its reason, or when the record is a duplicate
+    // of another place, whose history lives there
+    function periodsRequirement({ action, touched, gridAssessed, reason }) {
+        if (touched) return "";
+        if (action === "possible_duplicate") return "";
+        if (gridAssessed) {
+            return text(reason) ? "" : "Give the reason the periods cannot express this case, or record at least one period.";
+        }
+        return "Record at least one period for this place: when it was in use for worship. If you cannot, set the census-year statuses by hand with a reason, or submit an unresolved note.";
+    }
+
+    // a still-in-use card is anchored to the evidence date, not to the day
+    // the page was opened: when the source date changes, cards that still
+    // carry the old anchor (or none) follow it
+    function syncStillActive(segments, previousReference, nextReference) {
+        const prev = text(previousReference);
+        const next = text(nextReference);
+        let changed = 0;
+        for (const seg of segments || []) {
+            if (seg.endMode !== "still_active") continue;
+            const asof = text(seg.stillActiveAsof);
+            if (asof === "" || asof === prev) {
+                seg.stillActiveAsof = next;
+                changed += 1;
+            }
+        }
+        return changed;
     }
 
     // the inverse of payload for a stored row: a card the entry pane can show
@@ -641,6 +711,7 @@
     window.PowOccupancy = Object.freeze({
         CONTRACT_VERSION,
         PRESENCE_RULE_WORDS,
+        cardsTouched,
         combinePresence,
         derivePresence,
         describeBounds,
@@ -653,9 +724,12 @@
         partialDateLower,
         partialDateUpper,
         payload,
+        periodsRequirement,
+        provenanceFromParent,
         provenanceFromRow,
         segmentBounds,
         segmentFromRow,
+        syncStillActive,
         validateSegment,
         validateSet,
     });

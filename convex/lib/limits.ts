@@ -49,6 +49,8 @@ type EvidenceDraftLimitInput = {
   current_observation_basis?: string;
   generated_wide_row?: unknown;
   validation_summary?: unknown;
+  target_year_entry_reason?: string;
+  pending_occupancy_cards?: unknown;
 };
 
 export function assertMaxString(label: string, value: string | undefined, maxLength: number): void {
@@ -115,6 +117,8 @@ export function assertEvidenceDraftLimits(draft: EvidenceDraftLimitInput): void 
   assertMaxJson("target-year evidence", draft.target_year_evidence, VALIDATION_SUMMARY_MAX);
   assertMaxJson("generated wide row", draft.generated_wide_row, GENERATED_ROW_MAX);
   assertMaxJson("validation summary", draft.validation_summary, VALIDATION_SUMMARY_MAX);
+  assertMaxString("target-year entry reason", draft.target_year_entry_reason, MEDIUM_TEXT_MAX);
+  assertMaxJson("pending occupancy cards", draft.pending_occupancy_cards, VALIDATION_SUMMARY_MAX);
 }
 
 export function isValidPartialDate(value: string): boolean {

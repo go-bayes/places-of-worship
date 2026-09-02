@@ -16,7 +16,7 @@ Status: build spec, 2026-09-02. Implements section 3 of `docs/portal-location-an
 | start_mode | known, between, by, unknown | |
 | start_date, start_not_earlier_than, start_not_later_than | partial dates | which are present follows the mode |
 | start_precision | day, month, year, bounded, unknown | computed server-side from the dates, never entered |
-| start_basis | founding_stated, organisation_founded, building_dedication, first_seen_only, unknown | `unknown` iff start_mode unknown |
+| start_basis | founding_stated, reopening_stated (PR-E), organisation_founded, building_dedication, first_seen_only, unknown | `unknown` iff start_mode unknown |
 | end_mode | still_active, known, between, after, unknown | |
 | end_date, end_not_earlier_than, end_not_later_than | partial dates | follows the mode |
 | end_precision | as start | computed |
@@ -95,6 +95,7 @@ Bounds per segment: start ⇒ `[startLower, startUpper]`; end ⇒ `[endLower, en
 |---|---|---|---|
 | 1 | inside_interval | startUpper ≤ Y-01-01 and Y-12-31 ≤ endLower | present |
 | 2 | before_stated_founding | Y-12-31 < startLower and founding_stated | absent |
+| 2b | before_stated_reopening | Y-12-31 < startLower and reopening_stated (PR-E: a stated reopening states the place was out of use until then) | absent |
 | 3 | before_first_record | Y-12-31 < startLower, other basis | uncertain |
 | 4 | after_stated_closure | Y-01-01 > endUpper and closure_stated | absent |
 | 5 | after_last_record | Y-01-01 > endUpper, other basis | uncertain |

@@ -63,7 +63,14 @@ const FIXTURES = {
   ],
   "gap: demolished then rebuilt (absent, absent, present)": [
     { startMode: "known", startDate: "1905", startBasis: "founding_stated", endMode: "known", endDate: "2011", endBasis: "closure_stated", endReason: "demolished" },
-    { startMode: "known", startDate: "2019", startBasis: "founding_stated", endMode: "still_active", stillActiveAsof: "2026-09-02" },
+    { startMode: "known", startDate: "2019", startBasis: "reopening_stated", endMode: "still_active", stillActiveAsof: "2026-09-02" },
+  ],
+  "gap: rebuilt, reopening dated only by dedication (uncertain, uncertain, present)": [
+    { startMode: "known", startDate: "1905", startBasis: "founding_stated", endMode: "known", endDate: "2011", endBasis: "closure_stated", endReason: "demolished" },
+    { startMode: "known", startDate: "2019", startBasis: "building_dedication", endMode: "still_active", stillActiveAsof: "2026-09-02" },
+  ],
+  "closed, never reopened (absent, absent, absent)": [
+    { startMode: "known", startDate: "1905", startBasis: "founding_stated", endMode: "known", endDate: "2011", endBasis: "closure_stated", endReason: "closed" },
   ],
   "gap: not established (bounds, ruling r-e4)": [
     { startMode: "known", startDate: "1905", startBasis: "founding_stated", endMode: "between", endNotEarlierThan: "2011", endNotLaterThan: "2011", endBasis: "last_seen_only", endReason: "unknown" },
@@ -95,6 +102,54 @@ test("every presence rule fires at least once across the fixtures", () => {
   for (const rule of Object.keys(mirror.PRESENCE_RULE_WORDS)) assert.ok(fired.has(rule), `rule ${rule} never fired`);
 });
 
+// the worked cases of the pr-e brief, section 4, asserted year by year
+const NZ = [2013, 2018, 2023];
+const statuses = (cards) => mirror.derivePresence(cards, NZ).map((r) => `${r.target_year}:${r.derived_status}:${r.rule_id}`);
+
+test("worked case: demolished 2011, reopening stated 2019", () => {
+  assert.deepEqual(statuses(FIXTURES["gap: demolished then rebuilt (absent, absent, present)"]), [
+    "2013:absent:after_stated_closure",
+    "2018:absent:after_stated_closure",
+    "2023:present:inside_interval",
+  ]);
+  assert.ok(mirror.derivePresence(FIXTURES["gap: demolished then rebuilt (absent, absent, present)"], [2015])[0].segment_rules.some((f) => f.rule_id === "before_stated_reopening"));
+});
+
+test("worked case: a dedication does not license absence before it", () => {
+  // uncertain outranks absent when the firings combine: the dedication says
+  // nothing about the years before it, so the closure's absence cannot stand
+  assert.deepEqual(statuses(FIXTURES["gap: rebuilt, reopening dated only by dedication (uncertain, uncertain, present)"]), [
+    "2013:uncertain:before_first_record",
+    "2018:uncertain:before_first_record",
+    "2023:present:inside_interval",
+  ]);
+});
+
+test("worked case: closed 2011, never reopened", () => {
+  assert.deepEqual(statuses(FIXTURES["closed, never reopened (absent, absent, absent)"]), [
+    "2013:absent:after_stated_closure",
+    "2018:absent:after_stated_closure",
+    "2023:absent:after_stated_closure",
+  ]);
+});
+
+test("worked case: gap not established (bounds) derives uncertain, present, present", () => {
+  assert.deepEqual(statuses(FIXTURES["gap: not established (bounds, ruling r-e4)"]), [
+    "2013:uncertain:after_last_record",
+    "2018:present:inside_interval",
+    "2023:present:inside_interval",
+  ]);
+});
+
+test("worked case: still in use as of the evidence date, not today", () => {
+  const cards = [{ startMode: "known", startDate: "1905", startBasis: "founding_stated", endMode: "still_active", stillActiveAsof: "2016-05" }];
+  assert.deepEqual(statuses(cards), [
+    "2013:present:inside_interval",
+    "2018:uncertain:beyond_active_anchor",
+    "2023:uncertain:beyond_active_anchor",
+  ]);
+});
+
 test("describePresence names years, rules, and conflicts", () => {
   const derived = mirror.derivePresence(FIXTURES["gap: demolished then rebuilt (absent, absent, present)"], [2013, 2018, 2023]);
   const out = mirror.describePresence(derived, [2013, 2018, 2023], { 2013: "present", 2018: "not_assessed" });
@@ -111,6 +166,8 @@ test("gapBounds puts the doubt into bounds, never a date", () => {
   assert.equal(both.first.endReason, "unknown");
   assert.equal(both.second.startMode, "by");
   assert.equal(both.second.startBasis, "first_seen_only");
+  const latestOnly = mirror.gapBounds({ latest: "2012" }, { by: "2016" });
+  assert.match(latestOnly.problem, /both the earliest and latest/);
   const none = mirror.gapBounds({}, {});
   assert.equal(none.first.endMode, "unknown");
   assert.equal(none.second.startMode, "unknown");

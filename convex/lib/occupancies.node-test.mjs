@@ -76,6 +76,12 @@ test("the worked example: founded 1980, still going in 2010", () => {
 test("a stated founding licenses absence before it; a first record does not", () => {
   const founded = stored("a", { start_date: "1995" });
   assert.equal(presenceForSegment(founded, 1989).rule_id, "before_stated_founding");
+  const reopened = { ...founded, start_basis: "reopening_stated" };
+  assert.equal(presenceForSegment(reopened, 1989).rule_id, "before_stated_reopening");
+  assert.equal(presenceForSegment(reopened, 1989).status, "absent");
+  const dedicatedStart = { ...founded, start_basis: "building_dedication" };
+  assert.equal(presenceForSegment(dedicatedStart, 1989).rule_id, "before_first_record");
+  assert.equal(presenceForSegment(dedicatedStart, 1989).status, "uncertain");
   assert.equal(presenceForSegment(founded, 1989).status, "absent");
   const seen = stored("a", { start_date: "1995", start_basis: "first_seen_only" });
   assert.equal(presenceForSegment(seen, 1989).rule_id, "before_first_record");

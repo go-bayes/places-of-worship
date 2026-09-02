@@ -356,6 +356,30 @@ export async function recordOccupancySet(
       await ctx.db.patch(row._id, { claim_status: "superseded", updated_at: now });
     }
   }
+  // pr-e (revision lineage): a set recorded against a revision parent
+  // replaces the author's set on the task's earlier parents, so one author
+  // holds one active set per task. those parents' derived proposals are
+  // rederived to nothing, which marks them superseded with an event each
+  const earlierParents = new Set<string>();
+  for (const row of await ctx.db
+    .query("site_occupancies")
+    .withIndex("by_task_and_created_at", (q) => q.eq("task_id", task.task_id))
+    .collect()) {
+    if (row.created_by !== user._id || row.claim_status !== "submitted" || row.parent_evidence_draft_id === parent.evidence_draft_id) continue;
+    await ctx.db.patch(row._id, { claim_status: "superseded", updated_at: now });
+    earlierParents.add(row.parent_evidence_draft_id);
+  }
+  for (const earlierParentId of earlierParents) {
+    const earlierParent = await ctx.db
+      .query("evidence_drafts")
+      .withIndex("by_evidence_draft_id", (q) => q.eq("evidence_draft_id", earlierParentId))
+      .unique();
+    if (earlierParent !== null) await rederive(ctx, task, earlierParent, user._id, actorRole, now);
+  }
+  // the cards saved with the draft are now rows
+  if (parent.pending_occupancy_cards !== undefined) {
+    await ctx.db.patch(parent._id, { pending_occupancy_cards: undefined, updated_at: now });
+  }
   const occupancyIds: string[] = [];
   for (const segment of [...args.segments].sort((a, b) => a.segment_index - b.segment_index)) {
     const location = resolveLocation(segment, point);
@@ -724,7 +748,7 @@ export const confirmAllDerived = mutation({
   handler: async (ctx, args) => {
     const { user, task, parent } = await reviewerAndParent(ctx, args.taskId, args.parentEvidenceDraftId);
     assertMaxString("decision note", args.note, TASK_REASON_MAX);
-    const confirmable = new Set(["inside_interval", "before_stated_founding", "after_stated_closure"]);
+    const confirmable = new Set(["inside_interval", "before_stated_founding", "before_stated_reopening", "after_stated_closure"]);
     const rows = (await presenceRows(ctx, parent.evidence_draft_id))
       .filter((row) => row.review_state === "derived_unconfirmed")
       .sort((a, b) => a.target_year - b.target_year);

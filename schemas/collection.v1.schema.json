@@ -296,8 +296,8 @@
         },
         "start_basis": {
           "type": "string",
-          "enum": ["founding_stated", "organisation_founded", "building_dedication", "first_seen_only", "unknown"],
-          "description": "site_lifespan_v1 vocabulary. Only founding_stated licenses an absence inference before the start; first_seen_only never manufactures absence."
+          "enum": ["founding_stated", "reopening_stated", "organisation_founded", "building_dedication", "first_seen_only", "unknown"],
+          "description": "site_lifespan_v1 vocabulary. founding_stated and reopening_stated license an absence inference before the start (a stated reopening states the place was out of use until then); first_seen_only never manufactures absence."
         },
         "end_basis": {
           "type": "string",

@@ -710,6 +710,7 @@ const OCCUPANCY_START_MODE_OPTIONS = [
 ];
 const OCCUPANCY_START_BASIS_OPTIONS = [
     ["founding_stated", "Founding stated by the source"],
+    ["reopening_stated", "Reopening stated by the source"],
     ["organisation_founded", "Organisation or congregation founded"],
     ["building_dedication", "Building dedicated"],
     ["first_seen_only", "First seen in a record only"],
@@ -2048,6 +2049,9 @@ class NzVerificationMap {
         // would fire beforeunload against a page showing no form at all
         this.clearFormDirty();
         this.formSnapshotsByTaskId.clear();
+        // pr-e: period cards leave with the session; on a shared computer
+        // the next user must not find them
+        this.clearAllGuidedPeriods();
         this.backendLastError = "Signed out here. On a shared computer, also sign out of Google in the browser.";
         if (ASSIGNMENT_MODE) {
             this.tasks = [];
@@ -3642,6 +3646,7 @@ class NzVerificationMap {
                 return;
             }
             this.formSnapshotsByTaskId.delete(this.formDirtyTaskId);
+            this.clearGuidedPeriods(this.formDirtyTaskId);
             this.clearFormDirty();
         }
         this.selectedTask = feature;
@@ -4375,6 +4380,8 @@ class NzVerificationMap {
             evidence_note: values.note,
             interpretation_note: values.interpretationNote,
             uncertainty_note: values.uncertaintyNote,
+            target_year_entry_reason: values.yearGridReason,
+            pending_occupancy_cards: this.guidedPeriodsSnapshot(taskId),
         });
     }
 
@@ -6022,6 +6029,8 @@ class NzVerificationMap {
                 <div class="button-row">
                     <button id="occupancyAddPeriodButton" type="button" class="secondary">Add another period</button>
                 </div>
+                ${this.periodsGapPromptHtml("pane")}
+                ${this.periodsPreviewHtml("pane")}
                 ${this.occupancyProvenanceHtml(p)}
                 <div class="button-row">
                     <button id="occupancySubmitButton" type="submit">Record these periods for review</button>
@@ -6086,23 +6095,114 @@ class NzVerificationMap {
     // reviewer confirms. state lives per task so a rebuild of the detail
     // panel (pin flow, year change, sign-in) keeps the cards
 
+    currentTaskIdForForm() {
+        return this.selectedTask?.properties?.task_id || "";
+    }
+
+    // the evidence date anchors a still-in-use card (finding 7): the source
+    // date typed in the form, else nothing until the ra supplies it
+    guidedReferenceDate() {
+        return document.getElementById("sourceDateInput")?.value?.trim() || "";
+    }
+
+    // device persistence, keyed by country, user, and task, so a shared
+    // browser never shows one user's cards to another
+    guidedPeriodsStorageKey(taskId) {
+        const user = this.backendUser?._id || this.backend?.user?._id || "anon";
+        return `powGuidedPeriods:${COUNTRY_CONFIG.countryCode}:${user}:${taskId}`;
+    }
+
+    persistGuidedPeriods(taskId) {
+        const state = this.guidedPeriodsByTaskId.get(taskId);
+        if (!state) return;
+        try {
+            window.localStorage.setItem(this.guidedPeriodsStorageKey(taskId), JSON.stringify({
+                saved_at: Date.now(),
+                segments: state.segments,
+                gapAnswer: state.gapAnswer,
+                gapNote: state.gapNote,
+                sameSource: state.sameSource,
+                provenance: state.provenance,
+            }));
+        } catch (error) {
+            // private windows or blocked storage lose autosave only
+        }
+    }
+
+    readGuidedPeriodsStorage(taskId) {
+        try {
+            const raw = window.localStorage.getItem(this.guidedPeriodsStorageKey(taskId));
+            const record = raw ? JSON.parse(raw) : null;
+            return record && Array.isArray(record.segments) && record.segments.length ? record : null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    clearGuidedPeriods(taskId) {
+        if (!taskId) return;
+        this.guidedPeriodsByTaskId.delete(taskId);
+        try {
+            window.localStorage.removeItem(this.guidedPeriodsStorageKey(taskId));
+        } catch (error) {
+            // nothing to clear when storage is unavailable
+        }
+    }
+
+    clearAllGuidedPeriods() {
+        this.guidedPeriodsByTaskId.clear();
+        try {
+            const prefix = `powGuidedPeriods:${COUNTRY_CONFIG.countryCode}:`;
+            const keys = [];
+            for (let i = 0; i < window.localStorage.length; i += 1) {
+                const key = window.localStorage.key(i);
+                if (key && key.startsWith(prefix)) keys.push(key);
+            }
+            keys.forEach(key => window.localStorage.removeItem(key));
+        } catch (error) {
+            // storage unavailable: nothing persisted to clear
+        }
+    }
+
     guidedPeriodsState(taskId) {
         let state = this.guidedPeriodsByTaskId.get(taskId);
         if (!state) {
-            const context = { taskId, referenceDate: window.PowRapidEntry?.localIsoDate?.() || new Date().toISOString().slice(0, 10), referenceDateFromParent: true };
-            state = { segments: [this.occupancyBlankSegment(context)], gapAnswer: "", sameSource: true, provenance: this.occupancyBlankProvenance(), gapNote: "" };
+            const stored = this.readGuidedPeriodsStorage(taskId);
+            const referenceDate = this.guidedReferenceDate();
+            state = stored
+                ? { segments: stored.segments, gapAnswer: stored.gapAnswer || "", sameSource: stored.sameSource !== false, provenance: stored.provenance || this.occupancyBlankProvenance(), gapNote: stored.gapNote || "", referenceDate, loadedFrom: "" }
+                : { segments: [this.occupancyBlankSegment({ referenceDate, referenceDateFromParent: true })], gapAnswer: "", sameSource: true, provenance: this.occupancyBlankProvenance(), gapNote: "", referenceDate, loadedFrom: "" };
             this.guidedPeriodsByTaskId.set(taskId, state);
         }
+        return state;
+    }
+
+    // the cards as saved with the draft (finding 2): plain card values, the
+    // shared provenance, and the gap answer, so a later open restores them
+    guidedPeriodsSnapshot(taskId) {
+        const state = this.guidedPeriodsByTaskId.get(taskId);
+        if (!state || !window.PowOccupancy?.cardsTouched(state.segments)) return undefined;
+        return state.segments.map(seg => ({ ...seg, _gapAnswer: state.gapAnswer, _gapNote: state.gapNote, _sameSource: state.sameSource, _provenance: state.provenance }));
+    }
+
+    adoptGuidedPeriods(taskId, cards, provenance, reason) {
+        const state = this.guidedPeriodsState(taskId);
+        const first = cards[0] || {};
+        state.segments = cards.map(card => {
+            const { _gapAnswer, _gapNote, _sameSource, _provenance, ...values } = card;
+            return values;
+        });
+        state.gapAnswer = first._gapAnswer || state.gapAnswer;
+        state.gapNote = first._gapNote || state.gapNote;
+        state.sameSource = first._sameSource !== false;
+        state.provenance = first._provenance || provenance || state.provenance;
         return state;
     }
 
     // true when the ra has typed anything into the cards beyond the blank
     guidedPeriodsTouched(taskId) {
         const state = this.guidedPeriodsByTaskId.get(taskId);
-        if (!state) return false;
-        return state.segments.some(seg => seg.startDate || seg.startNotEarlierThan || seg.startNotLaterThan || seg.startBasis
-            || seg.endDate || seg.endNotEarlierThan || seg.endNotLaterThan || seg.endBasis || seg.endReason || seg.location
-            || seg.startMode === "unknown" || seg.endMode === "unknown" || seg.startMode === "between" || seg.startMode === "by");
+        return Boolean(state && window.PowOccupancy?.cardsTouched(state.segments));
     }
 
     guidedPeriodsHtml(taskId) {
@@ -6118,30 +6218,8 @@ class NzVerificationMap {
                 <div class="button-row">
                     <button id="guidedAddPeriodButton" class="secondary" type="button">Add another period</button>
                 </div>
-                <div id="guidedGapPrompt" class="gap-prompt" role="group" aria-label="Gap question" hidden>
-                    <p><strong>Was there any spell when no worship happened here</strong> — a closure, a demolition, a rebuild?</p>
-                    <div class="button-row">
-                        <button type="button" class="secondary" data-gap="yes">Yes — add the later period</button>
-                        <button type="button" class="secondary" data-gap="no">No</button>
-                        <button type="button" class="secondary" data-gap="unsure">Not sure</button>
-                    </div>
-                    <div id="guidedGapUnsure" class="gap-unsure" hidden>
-                        <p>Give what you know; leave the rest blank. Bounds are recorded, never an invented date.</p>
-                        <div class="field-grid">
-                            <label>It stopped in (date)<input id="gapStopDate" type="text" inputmode="numeric" maxlength="10" placeholder="2011 or 2011-02"></label>
-                            <label>…or between<input id="gapStopEarliest" type="text" inputmode="numeric" maxlength="10" placeholder="earliest, e.g. 2011"></label>
-                            <label>and<input id="gapStopLatest" type="text" inputmode="numeric" maxlength="10" placeholder="latest, e.g. 2012"></label>
-                        </div>
-                        <div class="field-grid">
-                            <label>In use again from (date)<input id="gapAgainDate" type="text" inputmode="numeric" maxlength="10" placeholder="2019"></label>
-                            <label>…or by<input id="gapAgainBy" type="text" inputmode="numeric" maxlength="10" placeholder="2016"></label>
-                        </div>
-                        <div class="button-row">
-                            <button type="button" data-gap="apply">Record as two periods with these bounds</button>
-                        </div>
-                    </div>
-                </div>
-                <div id="guidedPeriodsPreview" class="periods-preview" aria-live="polite"></div>
+                ${this.periodsGapPromptHtml("guided")}
+                ${this.periodsPreviewHtml("guided")}
                 <label class="checkbox-label">
                     <input id="guidedPeriodsSameSource" type="checkbox"${state.sameSource ? " checked" : ""}>
                     <span>These periods rest on the same source and confidence as the evidence below</span>
@@ -6151,6 +6229,124 @@ class NzVerificationMap {
                 </div>
             </div>
         `;
+    }
+
+    // the gap question and the derived preview, shared by the guided form
+    // (prefix "guided") and the periods pane (prefix "pane")
+    periodsGapPromptHtml(prefix) {
+        return `
+                <div id="${prefix}GapPrompt" class="gap-prompt" role="group" aria-label="Gap question" hidden>
+                    <p><strong>Was there any spell when no worship happened here</strong> — a closure, a demolition, a rebuild?</p>
+                    <div class="button-row">
+                        <button type="button" class="secondary" data-gap="yes">Yes — add the later period</button>
+                        <button type="button" class="secondary" data-gap="no">No</button>
+                        <button type="button" class="secondary" data-gap="unsure">Not sure</button>
+                    </div>
+                    <div id="${prefix}GapUnsure" class="gap-unsure" hidden>
+                        <p>Give what you know; leave the rest blank. Bounds are recorded, never an invented date. For the stop, give the date, or both the earliest and latest it could have been.</p>
+                        <div class="field-grid">
+                            <label>It stopped in (date)<input id="${prefix}GapStopDate" type="text" inputmode="numeric" maxlength="10" placeholder="2011 or 2011-02"></label>
+                            <label>…or between<input id="${prefix}GapStopEarliest" type="text" inputmode="numeric" maxlength="10" placeholder="earliest, e.g. 2011"></label>
+                            <label>and<input id="${prefix}GapStopLatest" type="text" inputmode="numeric" maxlength="10" placeholder="latest, e.g. 2012"></label>
+                        </div>
+                        <div class="field-grid">
+                            <label>In use again from (date)<input id="${prefix}GapAgainDate" type="text" inputmode="numeric" maxlength="10" placeholder="2019"></label>
+                            <label>…or by<input id="${prefix}GapAgainBy" type="text" inputmode="numeric" maxlength="10" placeholder="2016"></label>
+                        </div>
+                        <div class="button-row">
+                            <button type="button" data-gap="apply">Record as two periods with these bounds</button>
+                        </div>
+                        <div id="${prefix}GapProblem" class="copy-status copy-status-error" aria-live="polite"></div>
+                    </div>
+                </div>`;
+    }
+
+    periodsPreviewHtml(prefix) {
+        return `<div id="${prefix}PeriodsPreview" class="periods-preview" aria-live="polite"></div>`;
+    }
+
+    // shows the prompt while the state has one complete card and no answer
+    updateGapPrompt(prefix, state) {
+        const prompt = document.getElementById(`${prefix}GapPrompt`);
+        if (!state || !prompt) return;
+        const show = state.segments.length === 1 && !state.gapAnswer && this.guidedPeriodDatesComplete(state.segments[0]);
+        prompt.hidden = !show;
+        if (!show) {
+            const unsure = document.getElementById(`${prefix}GapUnsure`);
+            if (unsure) unsure.hidden = true;
+        }
+    }
+
+    updatePeriodsPreview(prefix, state, observed) {
+        const preview = document.getElementById(`${prefix}PeriodsPreview`);
+        if (!state || !preview || !window.PowOccupancy) return;
+        const incomplete = state.segments.map((segment, index) => (this.guidedPeriodDatesComplete(segment) ? null : index + 1)).filter(Boolean);
+        if (!window.PowOccupancy.cardsTouched(state.segments)) {
+            preview.textContent = state.loadedFrom ? state.loadedFrom : "";
+            preview.classList.remove("periods-preview-conflict");
+            return;
+        }
+        if (incomplete.length) {
+            preview.textContent = `Complete period ${incomplete.join(", ")} to preview the census-year states.`;
+            preview.classList.remove("periods-preview-conflict");
+            return;
+        }
+        const derived = window.PowOccupancy.derivePresence(state.segments, TARGET_YEARS.map(Number));
+        const described = window.PowOccupancy.describePresence(derived, TARGET_YEARS, observed || {});
+        preview.textContent = described.conflicts.length
+            ? `${described.sentence} Conflict — ${described.conflicts.join("; ")}. Fix one of them before submitting.`
+            : `${described.sentence} A reviewer confirms each year.`;
+        preview.classList.toggle("periods-preview-conflict", described.conflicts.length > 0);
+    }
+
+    // answers the gap question on any state: "yes" adds the later period,
+    // "unsure" takes bounds (finding 9: a latest-only stop is refused with a
+    // message rather than forged into a between). rerender(focusIndex)
+    // repaints the owner's cards
+    answerGap(prefix, state, answer, appendPeriod, rerender) {
+        if (answer === "yes") {
+            state.gapAnswer = "yes";
+            appendPeriod();
+            rerender(state.segments.length - 1);
+            return;
+        }
+        if (answer === "no") {
+            state.gapAnswer = "no";
+            this.updateGapPrompt(prefix, state);
+            return;
+        }
+        if (answer === "unsure") {
+            const unsure = document.getElementById(`${prefix}GapUnsure`);
+            if (unsure) unsure.hidden = false;
+            return;
+        }
+        if (answer === "apply") {
+            const value = id => document.getElementById(`${prefix}${id}`)?.value || "";
+            const bounds = window.PowOccupancy.gapBounds(
+                { date: value("GapStopDate"), earliest: value("GapStopEarliest"), latest: value("GapStopLatest") },
+                { date: value("GapAgainDate"), by: value("GapAgainBy") },
+            );
+            const problem = document.getElementById(`${prefix}GapProblem`);
+            if (bounds.problem) {
+                if (problem) problem.textContent = bounds.problem;
+                return;
+            }
+            if (problem) problem.textContent = "";
+            const first = state.segments[0];
+            const wasActive = first.endMode === "still_active";
+            const asof = first.stillActiveAsof;
+            Object.assign(first, bounds.first);
+            const second = appendPeriod(bounds.second);
+            if (wasActive) {
+                second.endMode = "still_active";
+                second.stillActiveAsof = asof;
+            }
+            const stopWords = value("GapStopDate") || [value("GapStopEarliest"), value("GapStopLatest")].filter(Boolean).join("–") || "an unknown date";
+            const againWords = value("GapAgainDate") || (value("GapAgainBy") ? `by ${value("GapAgainBy")}` : "an unknown date");
+            state.gapNote = `Gap possible, not established: worship may have stopped ${stopWords} and was in use again ${againWords}; the bounds record what is known.`;
+            state.gapAnswer = "unsure";
+            rerender(1);
+        }
     }
 
     readGuidedPeriods(taskId) {
@@ -6215,39 +6411,12 @@ class NzVerificationMap {
     }
 
     updateGuidedGapPrompt(taskId) {
-        const state = this.guidedPeriodsByTaskId.get(taskId);
-        const prompt = document.getElementById("guidedGapPrompt");
-        if (!state || !prompt) return;
-        const show = state.segments.length === 1 && !state.gapAnswer && this.guidedPeriodDatesComplete(state.segments[0]);
-        prompt.hidden = !show;
-        if (!show) {
-            const unsure = document.getElementById("guidedGapUnsure");
-            if (unsure) unsure.hidden = true;
-        }
+        this.updateGapPrompt("guided", this.guidedPeriodsByTaskId.get(taskId));
     }
 
     updateGuidedPeriodsPreview(taskId) {
-        const state = this.guidedPeriodsByTaskId.get(taskId);
-        const preview = document.getElementById("guidedPeriodsPreview");
-        if (!state || !preview || !window.PowOccupancy) return;
-        const incomplete = state.segments.map((segment, index) => (this.guidedPeriodDatesComplete(segment) ? null : index + 1)).filter(Boolean);
-        if (!this.guidedPeriodsTouched(taskId)) {
-            preview.textContent = "";
-            preview.classList.remove("periods-preview-conflict");
-            return;
-        }
-        if (incomplete.length) {
-            preview.textContent = `Complete period ${incomplete.join(", ")} to preview the census-year states.`;
-            preview.classList.remove("periods-preview-conflict");
-            return;
-        }
         const observed = Object.fromEntries(TARGET_YEARS.map(year => [year, document.getElementById(`status${year}`)?.value || "not_assessed"]));
-        const derived = window.PowOccupancy.derivePresence(state.segments, TARGET_YEARS.map(Number));
-        const described = window.PowOccupancy.describePresence(derived, TARGET_YEARS, observed);
-        preview.textContent = described.conflicts.length
-            ? `${described.sentence} Conflict — ${described.conflicts.join("; ")}. Fix one of them before submitting.`
-            : `${described.sentence} A reviewer confirms each year.`;
-        preview.classList.toggle("periods-preview-conflict", described.conflicts.length > 0);
+        this.updatePeriodsPreview("guided", this.guidedPeriodsByTaskId.get(taskId), observed);
     }
 
     bindGuidedPeriods(props) {
@@ -6258,11 +6427,29 @@ class NzVerificationMap {
         const sync = event => {
             this.readGuidedPeriods(taskId);
             this.markFormDirty(taskId);
+            this.persistGuidedPeriods(taskId);
             const card = event?.target?.closest?.(".occupancy-card");
             if (card) this.updateOccupancyCard(card, state.segments[Number(card.dataset.index)]);
             this.updateGuidedGapPrompt(taskId);
             this.updateGuidedPeriodsPreview(taskId);
         };
+        // finding 7: a still-in-use card is anchored to the evidence date
+        const sourceDate = document.getElementById("sourceDateInput");
+        sourceDate?.addEventListener("input", () => {
+            const next = sourceDate.value.trim();
+            const changed = window.PowOccupancy.syncStillActive(state.segments, state.referenceDate, next);
+            state.referenceDate = next;
+            if (changed) {
+                this.persistGuidedPeriods(taskId);
+                this.rerenderGuidedPeriods(taskId);
+            }
+        });
+        // finding 4: a revision (or any reopened guided form) starts from the
+        // periods this ra already recorded for the task, so a resubmission
+        // re-records the whole set against the new parent instead of losing it
+        if (!window.PowOccupancy.cardsTouched(state.segments) && this.backend?.configured && this.backend.signedIn && !state.loadedFrom) {
+            this.loadGuidedPeriodsFromRows(taskId).catch(() => {});
+        }
         block.addEventListener("input", sync);
         block.addEventListener("change", event => {
             sync(event);
@@ -6289,7 +6476,13 @@ class NzVerificationMap {
             const gap = event.target?.closest?.("button[data-gap]");
             if (gap) {
                 this.readGuidedPeriods(taskId);
-                this.guidedGapAnswer(taskId, gap.dataset.gap);
+                this.answerGap("guided", state, gap.dataset.gap,
+                    overrides => this.guidedAppendPeriod(taskId, overrides),
+                    focusIndex => {
+                        this.markFormDirty(taskId);
+                        this.persistGuidedPeriods(taskId);
+                        this.rerenderGuidedPeriods(taskId, { focusIndex });
+                    });
                 return;
             }
             const button = event.target?.closest?.("button[data-action]");
@@ -6328,11 +6521,37 @@ class NzVerificationMap {
         this.updateGuidedPeriodsPreview(taskId);
     }
 
+    async loadGuidedPeriodsFromRows(taskId) {
+        const rows = await this.backend.listTaskOccupancies({ taskId });
+        const state = this.guidedPeriodsState(taskId);
+        if (!Array.isArray(rows) || rows.length === 0 || window.PowOccupancy.cardsTouched(state.segments)) return;
+        const mine = rows.filter(row => row.claim_status === "submitted" && (!this.backendUser?._id || row.created_by === this.backendUser._id));
+        if (mine.length === 0) return;
+        // the latest parent's set is the active one
+        const latestParent = mine.reduce((best, row) => (best === null || row.created_at > best.created_at ? row : best), null).parent_evidence_draft_id;
+        const set = mine.filter(row => row.parent_evidence_draft_id === latestParent).sort((a, b) => a.segment_index - b.segment_index);
+        state.segments = set.map(row => window.PowOccupancy.segmentFromRow(row));
+        state.provenance = window.PowOccupancy.provenanceFromRow(set[0]);
+        state.sameSource = false;
+        state.gapAnswer = state.segments.length > 1 ? "yes" : "no";
+        state.loadedFrom = `Loaded the ${set.length} period${set.length === 1 ? "" : "s"} you recorded earlier for this place; submitting records them again against this evidence and replaces the earlier set.`;
+        const sameSource = document.getElementById("guidedPeriodsSameSource");
+        if (sameSource) sameSource.checked = false;
+        const provenanceBlock = document.getElementById("guidedPeriodsProvenance");
+        if (provenanceBlock) {
+            provenanceBlock.hidden = false;
+            provenanceBlock.innerHTML = this.occupancyProvenanceHtml(state.provenance);
+        }
+        this.rerenderGuidedPeriods(taskId);
+        const preview = document.getElementById("guidedPeriodsPreview");
+        if (preview && !preview.textContent) preview.textContent = state.loadedFrom;
+    }
+
     // the newest period is the one still in use; the earlier card needs an end
     guidedAppendPeriod(taskId, overrides = {}) {
         const state = this.guidedPeriodsState(taskId);
         const last = state.segments[state.segments.length - 1];
-        const reference = last?.stillActiveAsof || "";
+        const reference = last?.stillActiveAsof || state.referenceDate || this.guidedReferenceDate();
         if (last?.endMode === "still_active") {
             state.segments.push(this.occupancyBlankSegment({ referenceDate: reference, referenceDateFromParent: Boolean(reference) }, { endMode: "still_active", stillActiveAsof: reference, ...overrides }));
             last.endMode = "known";
@@ -6343,80 +6562,41 @@ class NzVerificationMap {
         return state.segments[state.segments.length - 1];
     }
 
-    guidedGapAnswer(taskId, answer) {
-        const state = this.guidedPeriodsState(taskId);
-        if (answer === "yes") {
-            state.gapAnswer = "yes";
-            this.guidedAppendPeriod(taskId);
-            this.markFormDirty(taskId);
-            this.rerenderGuidedPeriods(taskId, { focusIndex: state.segments.length - 1 });
-            return;
-        }
-        if (answer === "no") {
-            state.gapAnswer = "no";
-            this.updateGuidedGapPrompt(taskId);
-            return;
-        }
-        if (answer === "unsure") {
-            const unsure = document.getElementById("guidedGapUnsure");
-            if (unsure) unsure.hidden = false;
-            return;
-        }
-        if (answer === "apply") {
-            const value = id => document.getElementById(id)?.value || "";
-            const bounds = window.PowOccupancy.gapBounds(
-                { date: value("gapStopDate"), earliest: value("gapStopEarliest"), latest: value("gapStopLatest") },
-                { date: value("gapAgainDate"), by: value("gapAgainBy") },
-            );
-            const first = state.segments[0];
-            const wasActive = first.endMode === "still_active";
-            const asof = first.stillActiveAsof;
-            Object.assign(first, bounds.first);
-            const second = this.guidedAppendPeriod(taskId, bounds.second);
-            if (wasActive) {
-                second.endMode = "still_active";
-                second.stillActiveAsof = asof;
-            }
-            const stopWords = value("gapStopDate") || [value("gapStopEarliest"), value("gapStopLatest")].filter(Boolean).join("–") || "an unknown date";
-            const againWords = value("gapAgainDate") || (value("gapAgainBy") ? `by ${value("gapAgainBy")}` : "an unknown date");
-            state.gapNote = `Gap possible, not established: worship may have stopped ${stopWords} and was in use again ${againWords}; the bounds record what is known.`;
-            state.gapAnswer = "unsure";
-            this.markFormDirty(taskId);
-            this.rerenderGuidedPeriods(taskId, { focusIndex: 1 });
-        }
-    }
-
-    // the provenance a periods submission carries: the guided form's own
-    // source when the ra ticked "same source", else the typed block
+    // {provenance, problem}: the guided form's own source and assessment
+    // when the ra ticked "same source" (mapped through the contract mirror,
+    // finding 6), else the typed block
     guidedPeriodsProvenance(taskId, values) {
         const state = this.guidedPeriodsState(taskId);
         const gapNote = state.gapNote ? ` ${state.gapNote}` : "";
         if (!state.sameSource) {
-            return { ...state.provenance, uncertaintyNote: `${state.provenance.uncertaintyNote}${gapNote}`.trim() };
+            return { provenance: { ...state.provenance, uncertaintyNote: `${state.provenance.uncertaintyNote}${gapNote}`.trim() }, problem: "" };
         }
-        const confidenceMap = { high: "high", medium: "moderate", low: "low" };
-        const account = (values.note || "").trim();
-        return {
-            confidence: confidenceMap[values.assessmentConfidence] || "moderate",
-            confidenceBasis: "Same source and assessment as the evidence record submitted with these periods.",
-            sourceBasis: values.sourceType === "field_observation" ? "local_investigator_account" : "named_public_source",
-            sourceTitle: values.sourceTitle || values.sourceProvider || "",
-            sourceReference: values.sourceUrl || "",
-            sourceAccount: account.length >= 12 ? account : `${account} Periods as recorded in the source cited on this evidence record.`.trim(),
-            uncertaintyNote: `${values.uncertaintyNote || ""}${gapNote}`.trim(),
-            privacyFlag: values.privacyFlag || "clear",
-        };
+        return window.PowOccupancy.provenanceFromParent(values, state.gapNote);
     }
 
     // the periods' own validation, run before the parent is submitted so a
-    // bad set never leaves half a submission behind
+    // bad set never leaves half a submission behind (finding 3: an ordinary
+    // submission needs a period unless the hand grid, with its reason, or
+    // a duplicate claim stands in)
     guidedPeriodsError(taskId, values) {
-        if (!window.PowOccupancy || !this.guidedPeriodsTouched(taskId)) return "";
+        if (!window.PowOccupancy) return "";
         this.readGuidedPeriods(taskId);
         const state = this.guidedPeriodsState(taskId);
-        const provenance = this.guidedPeriodsProvenance(taskId, values);
+        const gridAssessed = Object.values(values.targetYearStatuses || {}).some(status => status && status !== "not_assessed");
+        const requirement = window.PowOccupancy.periodsRequirement({
+            action: values.action,
+            touched: this.guidedPeriodsTouched(taskId),
+            gridAssessed,
+            reason: values.yearGridReason,
+        });
+        if (requirement) return requirement;
+        if (!this.guidedPeriodsTouched(taskId)) return "";
+        const read = this.guidedPeriodsProvenance(taskId, values);
+        if (read.problem) return `Periods: ${read.problem}`;
+        const provenance = read.provenance;
         const segments = state.segments.map((segment, index) => ({ ...segment, ...provenance, segmentIndex: index }));
-        const reference = values.sourceDate || window.PowRapidEntry?.localIsoDate?.() || "";
+        const reference = values.sourceDate || "";
+        if (!reference) return "Add the source or capture date: the periods are anchored to it.";
         const error = window.PowOccupancy.validateSet(segments, reference, this.occupancyTaskPoint(taskId));
         if (error && state.sameSource && /source|confidence/i.test(error)) {
             return `Periods rest on this evidence's source: ${error.replace(/^Period \d+: /, "").replace(/\.$/, "")} in the source fields below, or untick "same source" and fill the periods' own source block.`;
@@ -6425,7 +6605,7 @@ class NzVerificationMap {
         const observed = values.targetYearStatuses || {};
         const described = window.PowOccupancy.describePresence(window.PowOccupancy.derivePresence(state.segments, TARGET_YEARS.map(Number)), TARGET_YEARS, observed);
         if (described.conflicts.length) return `Periods: ${described.conflicts[0]}. Fix one of them before submitting.`;
-        if (Object.values(observed).some(status => status && status !== "not_assessed") && !(document.getElementById("yearGridReason")?.value || "").trim()) {
+        if (gridAssessed && !(values.yearGridReason || "").trim()) {
             return "Say why the periods cannot express this case, or clear the hand-set census-year statuses.";
         }
         return "";
@@ -6436,7 +6616,7 @@ class NzVerificationMap {
         const taskId = props.task_id;
         if (!this.guidedPeriodsTouched(taskId) || !window.PowOccupancy) return null;
         const state = this.guidedPeriodsState(taskId);
-        const provenance = this.guidedPeriodsProvenance(taskId, values);
+        const provenance = this.guidedPeriodsProvenance(taskId, values).provenance;
         const segments = state.segments.map((segment, index) => ({ ...segment, ...provenance, segmentIndex: index }));
         const submissionId = state.submissionId || window.PowRapidEntry.secureSubmissionId();
         state.submissionId = submissionId;
@@ -6456,14 +6636,15 @@ class NzVerificationMap {
                 segments: segments.map(v => window.PowOccupancy.payload(v)),
                 clientContext: { portal_version: "occupancy-v1-inline" },
             });
-            this.guidedPeriodsByTaskId.delete(taskId);
+            this.clearGuidedPeriods(taskId);
             this.taskHistoryByTaskId.delete(taskId);
             return { ok: true, result, count: segments.length };
         } catch (error) {
             // the parent stands; the cards reopen in the periods pane so
-            // nothing typed is lost
-            this.occupancyDraft = { taskId, context, submissionId, segments: state.segments, provenance };
-            this.guidedPeriodsByTaskId.delete(taskId);
+            // nothing typed is lost, and the pane is marked dirty so leaving
+            // it asks first (finding 2)
+            this.occupancyDraft = { taskId, context, submissionId, segments: state.segments, provenance, gapAnswer: state.gapAnswer || "no", gapNote: "" };
+            this.clearGuidedPeriods(taskId);
             return { ok: false, error, context };
         }
     }
@@ -6480,9 +6661,27 @@ class NzVerificationMap {
                 submissionId: window.PowRapidEntry.secureSubmissionId(),
                 segments: [this.occupancyBlankSegment(context)],
                 provenance: this.occupancyBlankProvenance(),
+                gapAnswer: "",
+                gapNote: "",
             };
         }
         const draft = this.occupancyDraft;
+        const paneObserved = () => this.latestDraftForTask(context.taskId)?.target_year_statuses || {};
+        const paneRefresh = () => {
+            this.updateGapPrompt("pane", draft);
+            this.updatePeriodsPreview("pane", draft, paneObserved());
+        };
+        const paneAppend = overrides => {
+            const last = draft.segments[draft.segments.length - 1];
+            if (last?.endMode === "still_active") {
+                draft.segments.push(this.occupancyBlankSegment(context, { endMode: "still_active", stillActiveAsof: last.stillActiveAsof, ...overrides }));
+                last.endMode = "known";
+                last.stillActiveAsof = "";
+            } else {
+                draft.segments.push(this.occupancyBlankSegment(context, { endMode: "known", stillActiveAsof: "", ...overrides }));
+            }
+            return draft.segments[draft.segments.length - 1];
+        };
         panel.innerHTML = this.occupancyEntryHtml(context, draft, options);
         const form = document.getElementById("occupancyForm");
         const dirtyKey = `occupancy-${context.taskId}`;
@@ -6491,6 +6690,7 @@ class NzVerificationMap {
             this.readOccupancyForm();
             const card = event.target?.closest?.(".occupancy-card");
             if (card) this.updateOccupancyCard(card);
+            paneRefresh();
         };
         form?.addEventListener("input", syncFrom);
         form?.addEventListener("change", event => {
@@ -6506,6 +6706,14 @@ class NzVerificationMap {
             }
         });
         form?.addEventListener("click", event => {
+            const gap = event.target?.closest?.("button[data-gap]");
+            if (gap) {
+                this.readOccupancyForm();
+                this.answerGap("pane", draft, gap.dataset.gap, paneAppend, focusIndex => {
+                    this.renderOccupancyEntry(context, { restore: true, focusIndex, markDirty: true });
+                });
+                return;
+            }
             const button = event.target?.closest?.("button[data-action]");
             if (!button) return;
             const card = button.closest(".occupancy-card");
@@ -6533,6 +6741,7 @@ class NzVerificationMap {
             } else {
                 draft.segments.push(this.occupancyBlankSegment(context, { endMode: "known", stillActiveAsof: "" }));
             }
+            draft.gapAnswer = draft.gapAnswer || "yes";
             this.renderOccupancyEntry(context, { restore: true, focusIndex: draft.segments.length - 1, markDirty: true, statusMessage });
         });
         form?.addEventListener("submit", event => {
@@ -6541,6 +6750,7 @@ class NzVerificationMap {
         });
         document.getElementById("occupancyDoneButton")?.addEventListener("click", () => this.finishOccupancyEntry(context));
         form?.querySelectorAll(".occupancy-card").forEach(card => this.updateOccupancyCard(card));
+        paneRefresh();
         if (options.markDirty) this.markFormDirty(dirtyKey);
         if (Number.isInteger(options.focusIndex)) {
             const card = form?.querySelector(`.occupancy-card[data-index="${options.focusIndex}"]`);
@@ -6706,8 +6916,12 @@ class NzVerificationMap {
             return;
         }
         this.readOccupancyForm();
-        // the shared provenance is copied into every period
-        const segments = draft.segments.map((segment, index) => ({ ...segment, ...draft.provenance, segmentIndex: index }));
+        // the shared provenance is copied into every period; a gap answered
+        // "not sure" adds its note to the uncertainty
+        const provenance = draft.gapNote
+            ? { ...draft.provenance, uncertaintyNote: `${draft.provenance.uncertaintyNote || ""} ${draft.gapNote}`.trim() }
+            : draft.provenance;
+        const segments = draft.segments.map((segment, index) => ({ ...segment, ...provenance, segmentIndex: index }));
         const inputError = window.PowOccupancy.validateSet(segments, context.referenceDate, this.occupancyTaskPoint(context.taskId));
         if (inputError) {
             if (status) status.textContent = inputError;
@@ -7323,6 +7537,23 @@ class NzVerificationMap {
         };
 
         setValue("raActionSelect", draft.action, false);
+        // pr-e: the hand grid's reason, and the grid opens when a saved
+        // draft assessed a year by hand
+        setValue("yearGridReason", draft.target_year_entry_reason, false);
+        const gridDetails = document.getElementById("yearGridDetails");
+        if (gridDetails && (draft.target_year_entry_reason || Object.values(draft.target_year_statuses || {}).some(status => status && status !== "not_assessed"))) {
+            gridDetails.open = true;
+        }
+        // pr-e: period cards saved with the draft come back with it, unless
+        // the ra has already typed new ones here
+        if (Array.isArray(draft.pending_occupancy_cards) && draft.pending_occupancy_cards.length && this.currentTaskIdForForm()) {
+            const taskId = this.currentTaskIdForForm();
+            const state = this.guidedPeriodsState(taskId);
+            if (!window.PowOccupancy?.cardsTouched(state.segments)) {
+                this.adoptGuidedPeriods(taskId, draft.pending_occupancy_cards, draft.pending_occupancy_provenance || null, draft.target_year_entry_reason);
+                this.rerenderGuidedPeriods(taskId);
+            }
+        }
         TARGET_YEARS.forEach(year => {
             setValue(`status${year}`, draft.target_year_statuses?.[year], false);
             setValue(`confidence${year}`, draft.target_year_confidence?.[year], false);
@@ -7372,12 +7603,14 @@ class NzVerificationMap {
     applyRaActionDefaults(props) {
         const action = document.getElementById("raActionSelect")?.value || "needs_review";
         // pr-e (ruling r-e1): census-year states come from the periods; the
-        // action prefills the hand grid only while the ra has it open
+        // action prefills the hand grid only while the ra has it open, but
+        // the current-observation defaults still follow the action's
+        // implied statuses whether or not the grid is visible
+        const impliedStatuses = statusDefaultsForAction(action, this.targetYear, props);
         if (document.getElementById("yearGridDetails")?.open) {
-            const statuses = statusDefaultsForAction(action, this.targetYear, props);
             TARGET_YEARS.forEach(year => {
                 const select = document.getElementById(`status${year}`);
-                if (select) select.value = statuses[year] || "not_assessed";
+                if (select) select.value = impliedStatuses[year] || "not_assessed";
             });
         }
 
@@ -7389,12 +7622,14 @@ class NzVerificationMap {
             note.placeholder = reviewNoteForAction(action);
         }
 
-        this.applyControlledAssessmentDefaults();
+        this.applyControlledAssessmentDefaults(document.getElementById("yearGridDetails")?.open ? undefined : impliedStatuses);
     }
 
-    applyControlledAssessmentDefaults() {
+    // statusesOverride: the action's implied statuses when the hand grid is
+    // closed (pr-e), else the grid's own values
+    applyControlledAssessmentDefaults(statusesOverride) {
         const action = document.getElementById("raActionSelect")?.value || "needs_review";
-        const statuses = Object.fromEntries(TARGET_YEARS.map(year => [
+        const statuses = statusesOverride || Object.fromEntries(TARGET_YEARS.map(year => [
             year,
             document.getElementById(`status${year}`)?.value || "not_assessed",
         ]));
@@ -7454,6 +7689,7 @@ class NzVerificationMap {
             denominationLabelBasis: document.getElementById("denominationLabelBasisSelect")?.value || "unknown",
             denominationRelation: document.getElementById("denominationRelationSelect")?.value || "uncertain",
             note: document.getElementById("decisionNote")?.value || "",
+            yearGridReason: document.getElementById("yearGridReason")?.value || "",
             interpretationNote: document.getElementById("interpretationNote")?.value || "",
             uncertaintyNote: document.getElementById("uncertaintyNote")?.value || "",
             privacyFlag: document.getElementById("privacyFlagSelect")?.value || (COUNTRY_CONFIG.countryCode === "VU" ? "needs_review" : "clear"),
@@ -8038,6 +8274,7 @@ class NzVerificationMap {
                     this.applyFilters();
                     this.renderOccupancyEntry(periods.context, {
                         restore: true,
+                        markDirty: true,
                         statusMessage: `Your evidence was submitted, but the periods were not recorded: ${periods.error?.message || "unknown error"}. They are loaded here; try again.`,
                     });
                     if (periods.error?.authExpired) {
@@ -8133,6 +8370,8 @@ class NzVerificationMap {
             evidence_note: values.note,
             interpretation_note: values.interpretationNote,
             uncertainty_note: values.uncertaintyNote,
+            target_year_entry_reason: values.yearGridReason || undefined,
+            pending_occupancy_cards: this.guidedPeriodsSnapshot(props.task_id),
             privacy_flag: values.privacyFlag,
             source: COUNTRY_CONFIG.mapSource,
             saved_or_submitted: false,
@@ -9260,6 +9499,7 @@ class NzVerificationMap {
                 // the skip intentionally discards any typed values for this task
                 this.clearFormDirty();
                 this.formSnapshotsByTaskId.delete(props.task_id);
+                this.clearGuidedPeriods(props.task_id);
                 await this.refreshBackendTasks();
                 // a recorded skip closes the task for this ra too: same
                 // return-to-list as submit, with skip wording

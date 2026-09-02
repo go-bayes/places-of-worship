@@ -207,6 +207,8 @@ export default defineSchema({
     // basis of each recorded target-year status (occupancy lane): absent
     // means source_observation, the pre-2026-09-02 default
     target_year_basis: v.optional(targetYearBasisSet),
+    target_year_entry_reason: v.optional(v.string()),
+    pending_occupancy_cards: v.optional(v.any()),
     privacy_flag: privacyFlag,
     licence_flag: licenceFlag,
     validation_summary: v.optional(v.any()),

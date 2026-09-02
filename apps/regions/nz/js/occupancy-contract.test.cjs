@@ -199,5 +199,30 @@ const activeTrip = occupancy.payload({ ...restoredActive, ...restoredProvenance,
 check("still-active round trip validates", occupancy.validateSegment({ ...restoredActive, ...restoredProvenance, uncertaintyNote: "Founding date not recorded anywhere seen." }, REFERENCE) === "" && activeTrip.still_active_asof === "2010-06-01" && activeTrip.start_basis === "unknown");
 check("a between with unequal slack stays a between", occupancy.segmentFromRow({ ...STORED_ROW, start_not_earlier_than: "1950", start_not_later_than: "1955" }).startMode === "between");
 
+// pr-e helpers (findings 3, 6, 7, 9)
+{
+  const parent = occupancy.provenanceFromParent({ assessmentConfidence: "0.9", sourceType: "denominational_directory", sourceTitle: "Directory 2024", sourceUrl: "https://example.org/d", note: "Listed as active in the 2024 directory.", uncertaintyNote: "", privacyFlag: "clear" }, "");
+  check("provenanceFromParent maps 0.9 to high", parent.problem === "" && parent.provenance.confidence === "high");
+  check("provenanceFromParent uses the named public source basis for a directory", parent.provenance.sourceBasis === "named_public_source" && parent.provenance.sourceTitle === "Directory 2024" && parent.provenance.sourceReference === "https://example.org/d");
+  check("provenanceFromParent maps 0.7 to moderate and 0.5 to low", occupancy.provenanceFromParent({ assessmentConfidence: "0.7", note: "x" }).provenance.confidence === "moderate" && occupancy.provenanceFromParent({ assessmentConfidence: "0.5", note: "x" }).provenance.confidence === "low");
+  const blank = occupancy.provenanceFromParent({ assessmentConfidence: "", note: "x" });
+  check("provenanceFromParent refuses a blank assessment confidence", blank.provenance === null && /assessment confidence/.test(blank.problem));
+  const field = occupancy.provenanceFromParent({ assessmentConfidence: "0.9", sourceType: "field_observation", note: "short" }, "Gap possible, not established.");
+  check("provenanceFromParent uses the investigator basis for a field observation and pads a short account", field.provenance.sourceBasis === "local_investigator_account" && field.provenance.sourceAccount.length >= 12);
+  check("provenanceFromParent carries the gap note into the uncertainty", field.provenance.uncertaintyNote === "Gap possible, not established.");
+  const touched = { startMode: "known", startDate: "1905", startBasis: "founding_stated", endMode: "still_active", stillActiveAsof: "2024-05" };
+  check("cardsTouched is false for the blank card and true once dated", !occupancy.cardsTouched([{ startMode: "known", endMode: "still_active" }]) && occupancy.cardsTouched([touched]));
+  check("periodsRequirement demands a period on an ordinary submission", /at least one period/.test(occupancy.periodsRequirement({ action: "confirm_current_record", touched: false, gridAssessed: false, reason: "" })));
+  check("periodsRequirement accepts a touched card", occupancy.periodsRequirement({ action: "confirm_current_record", touched: true, gridAssessed: false, reason: "" }) === "");
+  check("periodsRequirement lets a duplicate claim go without periods", occupancy.periodsRequirement({ action: "possible_duplicate", touched: false, gridAssessed: false, reason: "" }) === "");
+  check("periodsRequirement needs a reason for the hand grid", /reason/.test(occupancy.periodsRequirement({ action: "confirm_current_record", touched: false, gridAssessed: true, reason: "" })) && occupancy.periodsRequirement({ action: "confirm_current_record", touched: false, gridAssessed: true, reason: "hall, no fixed site" }) === "");
+  const segs = [{ endMode: "still_active", stillActiveAsof: "" }, { endMode: "still_active", stillActiveAsof: "2024-05" }, { endMode: "known", endDate: "2011", stillActiveAsof: "" }, { endMode: "still_active", stillActiveAsof: "1999" }];
+  const changed = occupancy.syncStillActive(segs, "2024-05", "2023-10");
+  check("syncStillActive moves blank and old-anchor cards to the new source date and leaves others", changed === 2 && segs[0].stillActiveAsof === "2023-10" && segs[1].stillActiveAsof === "2023-10" && segs[3].stillActiveAsof === "1999" && segs[2].endMode === "known");
+  check("gapBounds refuses a latest-only stop", /both the earliest and latest/.test(occupancy.gapBounds({ latest: "2012" }, {}).problem || ""));
+  check("gapBounds reads an earliest-only stop as after", occupancy.gapBounds({ earliest: "2011" }, {}).first.endMode === "after");
+  check("reopening stated is an accepted start basis", occupancy.validateSegment({ ...valid, startBasis: "reopening_stated" }, REFERENCE) === "");
+}
+
 console.log(failures === 0 ? "ALL OCCUPANCY CONTRACT TESTS PASSED" : `${failures} FAILURES`);
 process.exit(failures === 0 ? 0 : 1);

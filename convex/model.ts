@@ -265,8 +265,8 @@ export const occupancyEndMode = v.union(
   v.literal("still_active"), v.literal("known"), v.literal("between"), v.literal("after"), v.literal("unknown"),
 );
 export const occupancyStartBasis = v.union(
-  v.literal("founding_stated"), v.literal("organisation_founded"), v.literal("building_dedication"),
-  v.literal("first_seen_only"), v.literal("unknown"),
+  v.literal("founding_stated"), v.literal("reopening_stated"), v.literal("organisation_founded"),
+  v.literal("building_dedication"), v.literal("first_seen_only"), v.literal("unknown"),
 );
 export const occupancyEndBasis = v.union(
   v.literal("closure_stated"), v.literal("last_seen_only"), v.literal("unknown"),
@@ -488,6 +488,11 @@ export const evidenceDraftInput = v.object({
   privacy_flag: v.optional(privacyFlag),
   licence_flag: v.optional(licenceFlag),
   validation_summary: v.optional(v.any()),
+  // pr-e: why the ra set census-year statuses by hand instead of periods
+  target_year_entry_reason: v.optional(v.string()),
+  // pr-e: period cards typed in the guided form and saved with the draft;
+  // cleared by recordOccupancySet once the periods are rows
+  pending_occupancy_cards: v.optional(v.any()),
 });
 
 export const rapidCurrentObservationInput = v.object({

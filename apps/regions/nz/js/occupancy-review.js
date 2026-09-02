@@ -8,6 +8,7 @@
     const PRESENCE_RULE_TEXT = {
         inside_interval: "the year falls inside the recorded period",
         before_stated_founding: "the year is before the stated founding",
+        before_stated_reopening: "the year is before the stated reopening",
         before_first_record: "the year is before the first record, which does not prove absence",
         after_stated_closure: "the year is after the stated closure",
         after_last_record: "the year is after the last record, which does not prove absence",
@@ -379,7 +380,7 @@
 
     // mirrors the confirm-all rule in convex/occupancies.ts: unconfirmed,
     // rule 1, 2, or 4, no conflict, and every location row l1
-    const CONFIRMABLE_RULES = new Set(["inside_interval", "before_stated_founding", "after_stated_closure"]);
+    const CONFIRMABLE_RULES = new Set(["inside_interval", "before_stated_founding", "before_stated_reopening", "after_stated_closure"]);
 
     function confirmAllEligibleYears(presenceRows, locationRows) {
         const live = (locationRows || []).filter((row) => row.review_state !== "superseded");
