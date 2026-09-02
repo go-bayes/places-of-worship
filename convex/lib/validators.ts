@@ -41,3 +41,28 @@ export const exportBatchDoc = v.object({
   _creationTime: v.number(),
   ...schema.tables.export_batches.validator.fields,
 });
+
+export const siteOccupancyDoc = v.object({
+  _id: v.id("site_occupancies"),
+  _creationTime: v.number(),
+  ...schema.tables.site_occupancies.validator.fields,
+});
+
+export const derivedTargetYearStateDoc = v.object({
+  _id: v.id("derived_target_year_states"),
+  _creationTime: v.number(),
+  ...schema.tables.derived_target_year_states.validator.fields,
+});
+
+export const derivedYearLocationDoc = v.object({
+  _id: v.id("derived_year_locations"),
+  _creationTime: v.number(),
+  ...schema.tables.derived_year_locations.validator.fields,
+});
+
+export const derivedStateEventDoc = v.object({
+  _id: v.id("derived_state_events"),
+  _creationTime: v.number(),
+  ...schema.tables.derived_state_events.validator.fields,
+});
+

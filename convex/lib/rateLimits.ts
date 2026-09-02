@@ -23,4 +23,14 @@ export const intakeRateLimiter = new RateLimiter(components.rateLimiter, {
     rate: 1_000,
     period: HOUR,
   },
+  occupancyPerUser: {
+    kind: "fixed window",
+    rate: 240,
+    period: HOUR,
+  },
+  occupancyGlobal: {
+    kind: "fixed window",
+    rate: 1_000,
+    period: HOUR,
+  },
 });

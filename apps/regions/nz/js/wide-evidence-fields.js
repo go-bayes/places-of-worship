@@ -38,7 +38,10 @@
         "relocated_date_precision", "date_evidence_raw", "date_evidence_summary",
         "existence_status", "worship_use_status", "public_access_status",
     ]);
-    const TARGET_YEAR_SUFFIXES = Object.freeze(["status", "probability", "evidence"]);
+    const TARGET_YEAR_SUFFIXES = Object.freeze([
+        "status", "probability", "evidence",
+        "basis", "latitude", "longitude", "uncertainty_radius_m", "location_basis",
+    ]);
     const TRAILING = Object.freeze([
         "quality_flag", "review_status",
         "privacy_flag", "licence_flag", "extracted_by", "extracted_at",

@@ -44,6 +44,11 @@
         // Use-recommendation / Decide-differently buttons; null = no
         // explicit choice, agreement derives from the decision itself
         agentAgreementChoice: null,
+        // occupancy lane (jb 2026-09-02): the task's periods and the derived
+        // per-year proposals, loaded after the detail renders and refreshed
+        // on their own after each per-year decision
+        occupancy: null,
+        occupancyBusy: false,
     };
 
     const els = {
@@ -379,6 +384,7 @@ function human(value) {
         state.attachments = [];
         state.sharedSource = null;
         state.agentAgreementChoice = null;
+        state.occupancy = null;
         renderQueue();
         renderDetail(true);
         try {
@@ -581,6 +587,8 @@ function human(value) {
                 ${draft ? targetYearTable(draft.target_year_statuses, draft.target_year_evidence, draft.target_year_confidence) : `<p class="muted">No target-year statuses recorded.</p>`}
             </section>
 
+            <div id="occupancyPanelHost"></div>
+
             <section class="panel">
                 <h3>Known history claims</h3>
                 ${state.historicalClaims.length === 0
@@ -657,6 +665,11 @@ function human(value) {
         if (task.osm_object_type && task.matched_osm_id && window.PowOsmHistory) {
             window.PowOsmHistory.loadInto(document.getElementById("reviewOsmHistory"), task.osm_object_type, task.matched_osm_id);
         }
+        // occupancy periods and derived census years, fetched once the
+        // detail is settled; the panel stays empty for tasks without periods
+        if (!loading) {
+            loadOccupancyPanel(task);
+        }
         const form = document.getElementById("reviewDecisionForm");
         if (form) {
             wireDecisionForm(form);
@@ -677,6 +690,437 @@ function human(value) {
                 } finally {
                     button.disabled = false;
                 }
+            });
+        });
+    }
+
+    // occupancy panel (jb 2026-09-02, docs/development/occupancy-build-brief-2026-09-02.md
+    // section 5): the drawn interval per parent draft, the derived year rows
+    // with their rules in words, per-year confirm / override / reject, the
+    // event trail, and a scatter of the periods' points. loads into its host
+    // after the detail renders and re-renders alone after each decision.
+    async function loadOccupancyPanel(task, message = "", messageKind = "ok") {
+        const host = document.getElementById("occupancyPanelHost");
+        if (!host || !window.PowOccupancyReview) return;
+        try {
+            const [occupancies, derived] = await Promise.all([
+                client.listTaskOccupancies({ taskId: task.task_id, limit: 200 }),
+                client.listDerivedStates({ taskId: task.task_id }),
+            ]);
+            // the reviewer may have moved on while the fetch was in flight
+            if (state.selected?.task?.task_id !== task.task_id) return;
+            state.occupancy = {
+                occupancies: occupancies || [],
+                derived: derived || { presence: [], locations: [], events: [] },
+            };
+        } catch (error) {
+            if (state.selected?.task?.task_id !== task.task_id) return;
+            state.occupancy = null;
+            host.innerHTML = `
+                <section class="panel occupancy-panel">
+                    <h3>Occupancy and derived years</h3>
+                    <div class="status error">${escapeHtml(error.message || "Could not load the occupancy periods.")}</div>
+                </section>
+            `;
+            return;
+        }
+        renderOccupancyPanel(task, message, messageKind);
+    }
+
+    function occupancyTaskPoint(task) {
+        const coordinates = task.geometry?.coordinates;
+        if (!Array.isArray(coordinates) || coordinates.length < 2) return null;
+        return { latitude: Number(coordinates[1]), longitude: Number(coordinates[0]) };
+    }
+
+    // the inline svg interval: census bands and ticks along the top, one row
+    // per period with a solid core, dashed uncertainty windows, an open fade
+    // past a still-active anchor, and the anchor marker
+    function occupancyBarSvg(segments, targetYears, key) {
+        const occ = window.PowOccupancyReview;
+        const g = occ.barGeometry(segments, targetYears, { width: 640, rowHeight: 22, top: 18 });
+        const barH = 10;
+        const fadeId = `obFade-${key}`;
+        const width = (pair) => Math.max(1, pair.x2 - pair.x1);
+        const ticks = g.ticks.map((tick) => `
+            <rect class="ob-band" x="${tick.x1.toFixed(1)}" y="${g.top - 4}" width="${width(tick).toFixed(1)}" height="${(g.height - g.top).toFixed(1)}"></rect>
+            <line class="ob-tick" x1="${tick.x.toFixed(1)}" y1="${g.top - 4}" x2="${tick.x.toFixed(1)}" y2="${g.height - 2}"></line>
+            <text class="ob-tick-label" x="${tick.x.toFixed(1)}" y="11" text-anchor="middle">${tick.year}</text>
+        `).join("");
+        const bars = g.bars.map((bar) => {
+            const cy = bar.y + g.rowHeight / 2;
+            const y = (cy - barH / 2).toFixed(1);
+            const parts = [];
+            if (bar.startWindow) {
+                parts.push(`<rect class="ob-window" x="${bar.startWindow.x1.toFixed(1)}" y="${y}" width="${width(bar.startWindow).toFixed(1)}" height="${barH}"></rect>`);
+            }
+            if (bar.core) {
+                parts.push(`<rect class="ob-core" x="${bar.core.x1.toFixed(1)}" y="${y}" width="${width(bar.core).toFixed(1)}" height="${barH}"></rect>`);
+            }
+            if (bar.endWindow) {
+                parts.push(`<rect class="ob-window" x="${bar.endWindow.x1.toFixed(1)}" y="${y}" width="${width(bar.endWindow).toFixed(1)}" height="${barH}"></rect>`);
+            }
+            if (bar.open) {
+                const x2 = bar.open.x2;
+                parts.push(`<rect class="ob-open" fill="url(#${fadeId})" x="${bar.open.x1.toFixed(1)}" y="${y}" width="${width(bar.open).toFixed(1)}" height="${barH}"></rect>`);
+                parts.push(`<polygon class="ob-arrow" points="${(x2 - 6).toFixed(1)},${(cy - 5).toFixed(1)} ${x2.toFixed(1)},${cy.toFixed(1)} ${(x2 - 6).toFixed(1)},${(cy + 5).toFixed(1)}"></polygon>`);
+            }
+            if (bar.asof !== null) {
+                parts.push(`<line class="ob-asof" x1="${bar.asof.toFixed(1)}" y1="${(cy - 8).toFixed(1)}" x2="${bar.asof.toFixed(1)}" y2="${(cy + 8).toFixed(1)}"></line>`);
+            }
+            parts.push(`<text class="ob-label" x="2" y="${(cy + 3.5).toFixed(1)}">${bar.segment_index + 1}</text>`);
+            return parts.join("");
+        }).join("");
+        return `
+            <svg class="occupancy-bar" viewBox="0 0 ${g.width} ${g.height}" width="100%" height="${g.height}" role="img" aria-label="Occupancy periods against the census years">
+                <defs>
+                    <linearGradient id="${fadeId}" x1="0" x2="1" y1="0" y2="0">
+                        <stop offset="0" stop-color="#1f4e79" stop-opacity="0.85"></stop>
+                        <stop offset="1" stop-color="#1f4e79" stop-opacity="0.08"></stop>
+                    </linearGradient>
+                </defs>
+                ${ticks}
+                ${bars}
+            </svg>
+        `;
+    }
+
+    // the tiny scatter of the periods' points around the task point, used
+    // only when no map library is on the page
+    function occupancyScatterHtml(segments, taskPoint) {
+        const occ = window.PowOccupancyReview;
+        if (!taskPoint) return `<p class="muted">This task has no point, so the periods cannot be placed against it.</p>`;
+        const s = occ.scatterGeometry(segments, taskPoint, { size: 120, margin: 14 });
+        const points = s.points.map((p) => `
+            <circle class="os-point${p.approximate ? " approx" : ""}" cx="${p.cx.toFixed(1)}" cy="${p.cy.toFixed(1)}" r="${p.r.toFixed(1)}"></circle>
+            <text class="os-label" x="${(p.cx + 5).toFixed(1)}" y="${(p.cy - 5).toFixed(1)}">${p.segment_index + 1}</text>
+        `).join("");
+        const legend = s.points.map((p) => {
+            const segment = segments.find((row) => row.segment_index === p.segment_index) || {};
+            const radius = segment.location_mode === "approximate_area" && Number.isFinite(segment.uncertainty_radius_m)
+                ? ` (${Math.round(segment.uncertainty_radius_m)} m radius)`
+                : "";
+            return `Period ${p.segment_index + 1}: ${p.distance_m === 0 ? "at the pin" : `${p.distance_m} m from the pin`}${radius}`;
+        }).join(" · ");
+        return `
+            <div class="occupancy-scatter-wrap">
+                <svg class="occupancy-scatter" viewBox="0 0 ${s.size} ${s.size}" width="${s.size}" height="${s.size}" role="img" aria-label="Period points relative to the task point">
+                    <line class="os-axis" x1="${s.centre}" y1="4" x2="${s.centre}" y2="${s.size - 4}"></line>
+                    <line class="os-axis" x1="4" y1="${s.centre}" x2="${s.size - 4}" y2="${s.centre}"></line>
+                    ${points}
+                    <circle class="os-task" cx="${s.centre}" cy="${s.centre}" r="3"></circle>
+                </svg>
+                <div class="muted occupancy-scatter-legend">
+                    ${escapeHtml(legend)}
+                    ${s.extent_m > 0 ? `<br>Box spans about ±${s.extent_m} m; north is up.` : "<br>All periods sit at the pin."}
+                </div>
+            </div>
+        `;
+    }
+
+    function derivedLocationLine(location, segments, taskPoint) {
+        const occ = window.PowOccupancyReview;
+        const segment = segments.find((row) => row.occupancy_id === location.occupancy_id) || null;
+        const label = segment ? `period ${segment.segment_index + 1}` : "period";
+        const where = segment ? occ.describeLocation(segment, taskPoint) : `${location.latitude}, ${location.longitude}`;
+        const status = human(location.location_status).toLowerCase();
+        const rule = occ.LOCATION_RULE_TEXT[location.rule_id] || location.rule_id;
+        const gap = location.gap_years !== undefined ? `, ${location.gap_years} year${location.gap_years === 1 ? "" : "s"} from the nearest dated bound` : "";
+        const overridden = location.override_latitude !== undefined
+            ? ` — overridden to ${location.override_latitude}, ${location.override_longitude}${location.override_uncertainty_radius_m !== undefined ? `, ${location.override_uncertainty_radius_m} m radius` : ""}`
+            : location.override_uncertainty_radius_m !== undefined
+                ? ` — radius overridden to ${location.override_uncertainty_radius_m} m`
+                : "";
+        return `<div>${escapeHtml(label)}: ${escapeHtml(where)} — <em>${escapeHtml(status)}</em>, ${escapeHtml(rule)}${escapeHtml(gap)}${escapeHtml(overridden)}</div>`;
+    }
+
+    function derivedYearRowHtml(presence, locations, segments, taskPoint, observedStatus, isAuthor) {
+        const occ = window.PowOccupancyReview;
+        const status = occ.effectiveStatus(presence);
+        const reviewPill = occ.reviewStatePill(presence.review_state);
+        const statusCls = occ.statusPillClass(status, presence.review_state);
+        const overriddenFrom = presence.review_state === "reviewer_overridden" && presence.override_status && presence.override_status !== presence.derived_status
+            ? ` <span class="muted">(derived ${escapeHtml(presence.derived_status)})</span>`
+            : "";
+        const rule = occ.PRESENCE_RULE_TEXT[presence.rule_id] || presence.rule_id;
+        const firings = (presence.segment_rules || []).length > 1
+            ? `<div class="muted">${(presence.segment_rules || []).map((f) => {
+                const segment = segments.find((row) => row.occupancy_id === f.occupancy_id);
+                return `period ${segment ? segment.segment_index + 1 : "?"}: ${escapeHtml(f.status)} — ${escapeHtml(occ.PRESENCE_RULE_TEXT[f.rule_id] || f.rule_id)}`;
+            }).join("; ")}</div>`
+            : "";
+        const yearLocations = locations.filter((row) => row.target_year === presence.target_year);
+        const locationHtml = yearLocations.length === 0
+            ? `<div class="muted">Location: none proposed${status === "absent" ? " (absent)" : ""}.</div>`
+            : `<div class="derived-year-locations">Location: ${yearLocations.map((row) => derivedLocationLine(row, segments, taskPoint)).join("")}</div>`;
+        const conflict = presence.conflicts_observation
+            ? `<div class="review-warning">Conflicts with the observed status for ${presence.target_year}${observedStatus ? ` (observed <strong>${escapeHtml(observedStatus)}</strong>, derived <strong>${escapeHtml(presence.derived_status)}</strong>)` : ""}. Confirm is refused; override with a note or reject.</div>`
+            : "";
+        const actions = isAuthor
+            ? `<div class="muted">You submitted this evidence; another team member must decide its derived years.</div>`
+            : `
+                <div class="review-actions derived-year-actions">
+                    <button type="button" class="secondary" data-occ-action="confirm" ${presence.conflicts_observation ? `disabled title="Confirm is refused while the derived state conflicts with an observed status; override with a note or reject."` : ""}>Confirm</button>
+                    <button type="button" class="secondary" data-occ-action="override">Override</button>
+                    <button type="button" class="secondary" data-occ-action="reject">Reject</button>
+                </div>
+                <div class="derived-year-form-host"></div>
+            `;
+        return `
+            <div class="derived-year-row" data-year="${presence.target_year}">
+                <div class="derived-year-head">
+                    <strong>${presence.target_year}</strong>
+                    <span class="pill ${statusCls}">${escapeHtml(status)}</span>${overriddenFrom}
+                    <span class="pill ${reviewPill.cls}">${escapeHtml(reviewPill.label)}</span>
+                </div>
+                <div>Presence: ${escapeHtml(rule)}.</div>
+                ${firings}
+                ${locationHtml}
+                ${conflict}
+                ${actions}
+            </div>
+        `;
+    }
+
+    function derivedEventLine(event) {
+        const note = event.note ? ` — ${escapeHtml(event.note)}` : "";
+        return `<li><span class="derived-event-time">${escapeHtml(formatDateTime(event.created_at))}</span> ${event.target_year} ${escapeHtml(event.action)} · ${escapeHtml(event.actor_role || "")}${note}</li>`;
+    }
+
+    function renderOccupancyPanel(task, message = "", messageKind = "ok") {
+        const host = document.getElementById("occupancyPanelHost");
+        const occ = window.PowOccupancyReview;
+        if (!host || !occ || !state.occupancy) return;
+        const groups = occ.groupByParent(state.occupancy.occupancies);
+        if (groups.length === 0) {
+            host.innerHTML = "";
+            return;
+        }
+        const derived = state.occupancy.derived;
+        const taskPoint = occupancyTaskPoint(task);
+        const presenceYears = derived.presence.map((row) => row.target_year);
+        const targetYears = Array.isArray(task.target_years) && task.target_years.length > 0
+            ? task.target_years
+            : [...new Set(presenceYears)];
+        const hasLeaflet = typeof window.L !== "undefined" && window.L && typeof window.L.map === "function";
+
+        const groupHtml = groups.map((group, groupIndex) => {
+            const parentId = group.parent_evidence_draft_id;
+            const parentDraft = state.drafts.find((draft) => draft.evidence_draft_id === parentId) || null;
+            const authorId = parentDraft?.created_by || group.created_by;
+            const isAuthor = Boolean(state.user?._id) && authorId === state.user._id;
+            const presence = derived.presence
+                .filter((row) => row.parent_evidence_draft_id === parentId && row.review_state !== "superseded")
+                .sort((a, b) => a.target_year - b.target_year);
+            const locations = derived.locations
+                .filter((row) => row.parent_evidence_draft_id === parentId && row.review_state !== "superseded");
+            const events = derived.events
+                .filter((row) => row.parent_evidence_draft_id === parentId)
+                .sort((a, b) => b.created_at - a.created_at);
+            const eligible = isAuthor ? [] : occ.confirmAllEligibleYears(presence, locations);
+            const observed = parentDraft?.target_year_statuses || {};
+            const periodLines = group.segments.map((segment) => `
+                <li>
+                    <strong>Period ${segment.segment_index + 1}</strong>:
+                    ${escapeHtml(occ.describeStart(segment))}; ${escapeHtml(occ.describeEnd(segment))}; ${escapeHtml(occ.describeLocation(segment, taskPoint))}
+                    <span class="muted">(${escapeHtml(segment.confidence)} confidence, ${escapeHtml(human(segment.source_basis).toLowerCase())})</span>
+                </li>
+            `).join("");
+            const eventList = events.map(derivedEventLine).join("");
+            const eventsHtml = events.length === 0
+                ? `<p class="muted">No events recorded yet.</p>`
+                : events.length > 5
+                    ? `<details><summary>${events.length} events</summary><ul class="derived-events">${eventList}</ul></details>`
+                    : `<ul class="derived-events">${eventList}</ul>`;
+            return `
+                <div class="occupancy-parent" data-parent="${escapeHtml(parentId)}">
+                    ${groups.length > 1 ? `<h4>${groupIndex === 0 ? "Latest submission" : "Earlier submission"} <span class="muted">${escapeHtml(parentId)}</span></h4>` : ""}
+                    ${occupancyBarSvg(group.segments, targetYears, `${groupIndex}`)}
+                    <div class="occupancy-key muted">Solid: certain core. Dashed: start or end uncertainty window. Fade with arrow: still active past the marked as-of date. Shaded bands: census years.</div>
+                    <ul class="occupancy-periods">${periodLines}</ul>
+                    <div class="derived-year-list">
+                        <div class="derived-year-toolbar">
+                            <strong>Derived census years</strong>
+                            ${eligible.length > 0 ? `<button type="button" class="secondary" data-occ-confirm-all ${state.occupancyBusy ? "disabled" : ""}>Confirm all eligible (${eligible.join(", ")})</button>` : ""}
+                            ${isAuthor ? `<span class="muted">You submitted this evidence.</span>` : ""}
+                        </div>
+                        ${presence.length === 0
+                            ? `<p class="muted">No census year was derived from these periods.</p>`
+                            : presence.map((row) => derivedYearRowHtml(row, locations, group.segments, taskPoint, observed[String(row.target_year)], isAuthor)).join("")}
+                    </div>
+                    <div class="derived-trail">
+                        <strong>Event trail</strong>
+                        ${eventsHtml}
+                    </div>
+                    ${hasLeaflet ? "" : `<div class="occupancy-map-strip"><strong>Period points</strong>${occupancyScatterHtml(group.segments, taskPoint)}</div>`}
+                </div>
+            `;
+        }).join("");
+
+        host.innerHTML = `
+            <section class="panel occupancy-panel">
+                <h3>Occupancy and derived years</h3>
+                <p class="muted">Derived states are proposals from the recorded periods. Only a confirmation or override writes a census-year status onto the evidence record.</p>
+                ${message ? `<div class="status ${escapeHtml(messageKind)}" id="occupancyStatus" aria-live="polite">${escapeHtml(message)}</div>` : `<div id="occupancyStatus" aria-live="polite"></div>`}
+                ${groupHtml}
+            </section>
+        `;
+        wireOccupancyPanel(task);
+    }
+
+    function occupancyFormHtml(action, presence) {
+        const noteField = `
+            <div class="wide">
+                <label>Note (at least 8 characters)</label>
+                <textarea name="note" required minlength="8" placeholder="${action === "override" ? "Why the derived value is wrong and what the source supports." : "Why this derived year should not be written."}"></textarea>
+            </div>
+        `;
+        const overrideFields = action === "override" ? `
+            <div>
+                <label>Status</label>
+                <select name="status">
+                    <option value="">keep derived (${escapeHtml(presence.derived_status)})</option>
+                    <option value="present">present</option>
+                    <option value="absent">absent</option>
+                    <option value="uncertain">uncertain</option>
+                </select>
+            </div>
+            <div>
+                <label>Uncertainty radius (m, optional)</label>
+                <input name="radius" type="number" min="0" step="1" placeholder="leave blank to keep">
+            </div>
+            <div>
+                <label>Latitude (optional)</label>
+                <input name="latitude" type="number" step="any" placeholder="leave blank to keep">
+            </div>
+            <div>
+                <label>Longitude (optional)</label>
+                <input name="longitude" type="number" step="any" placeholder="leave blank to keep">
+            </div>
+        ` : "";
+        return `
+            <form class="derived-year-form decision-form" data-occ-form="${action}">
+                ${overrideFields}
+                ${noteField}
+                <div class="wide review-actions">
+                    <button type="submit">${action === "override" ? "Save override" : "Reject this year"}</button>
+                    <button type="button" class="secondary" data-occ-cancel>Cancel</button>
+                    <span class="muted" data-occ-form-status></span>
+                </div>
+            </form>
+        `;
+    }
+
+    // one per-year decision against the server; the panel alone re-renders
+    async function decideOccupancyYear(task, parentId, year, action, note, override) {
+        if (state.occupancyBusy) return;
+        state.occupancyBusy = true;
+        try {
+            const result = await client.decideDerivedYear({
+                taskId: task.task_id,
+                parentEvidenceDraftId: parentId,
+                targetYear: year,
+                action,
+                ...(note ? { note } : {}),
+                ...(override ? { override } : {}),
+            });
+            const stateWords = String(result.review_state || "").replaceAll("_", " ");
+            const written = result.written_status
+                ? ` ${result.written_status} written to the evidence record.`
+                : " Nothing written to the evidence record.";
+            state.occupancyBusy = false;
+            await loadOccupancyPanel(task, `${result.target_year}: ${stateWords}.${written}`, "ok");
+        } catch (error) {
+            state.occupancyBusy = false;
+            await loadOccupancyPanel(task, error.message || "The decision failed.", "error");
+        }
+    }
+
+    function wireOccupancyPanel(task) {
+        const host = document.getElementById("occupancyPanelHost");
+        if (!host) return;
+        host.querySelectorAll(".occupancy-parent").forEach((parentEl) => {
+            const parentId = parentEl.dataset.parent;
+            parentEl.querySelector("[data-occ-confirm-all]")?.addEventListener("click", async (event) => {
+                if (state.occupancyBusy) return;
+                event.currentTarget.disabled = true;
+                state.occupancyBusy = true;
+                try {
+                    const result = await client.confirmAllDerived({ taskId: task.task_id, parentEvidenceDraftId: parentId });
+                    state.occupancyBusy = false;
+                    await loadOccupancyPanel(task, window.PowOccupancyReview.confirmAllSummary(result), result.confirmed.length > 0 ? "ok" : "");
+                } catch (error) {
+                    state.occupancyBusy = false;
+                    await loadOccupancyPanel(task, error.message || "Confirm all failed.", "error");
+                }
+            });
+            parentEl.querySelectorAll(".derived-year-row").forEach((rowEl) => {
+                const year = Number(rowEl.dataset.year);
+                const presence = (state.occupancy?.derived?.presence || []).find(
+                    (row) => row.parent_evidence_draft_id === parentId && row.target_year === year && row.review_state !== "superseded",
+                );
+                const formHost = rowEl.querySelector(".derived-year-form-host");
+                rowEl.querySelectorAll("[data-occ-action]").forEach((button) => {
+                    button.addEventListener("click", () => {
+                        const action = button.dataset.occAction;
+                        if (action === "confirm") {
+                            rowEl.querySelectorAll("[data-occ-action]").forEach((b) => { b.disabled = true; });
+                            decideOccupancyYear(task, parentId, year, "confirm");
+                            return;
+                        }
+                        if (!formHost || !presence) return;
+                        // one open form per row; clicking the same action again closes it
+                        if (formHost.dataset.open === action) {
+                            formHost.innerHTML = "";
+                            delete formHost.dataset.open;
+                            return;
+                        }
+                        formHost.dataset.open = action;
+                        formHost.innerHTML = occupancyFormHtml(action, presence);
+                        const form = formHost.querySelector("form");
+                        form.querySelector("[data-occ-cancel]").addEventListener("click", () => {
+                            formHost.innerHTML = "";
+                            delete formHost.dataset.open;
+                        });
+                        form.addEventListener("submit", (event) => {
+                            event.preventDefault();
+                            const statusEl = form.querySelector("[data-occ-form-status]");
+                            const note = form.note.value.trim();
+                            if (note.length < 8) {
+                                statusEl.textContent = "Add a note of at least 8 characters.";
+                                return;
+                            }
+                            let override;
+                            if (action === "override") {
+                                const status = form.status.value || undefined;
+                                const lat = form.latitude.value.trim();
+                                const lng = form.longitude.value.trim();
+                                const radius = form.radius.value.trim();
+                                if ((lat === "") !== (lng === "")) {
+                                    statusEl.textContent = "An overriding point needs both latitude and longitude.";
+                                    return;
+                                }
+                                override = {
+                                    ...(status ? { status } : {}),
+                                    ...(lat !== "" ? { latitude: Number(lat), longitude: Number(lng) } : {}),
+                                    ...(radius !== "" ? { uncertainty_radius_m: Number(radius) } : {}),
+                                };
+                                if (Object.keys(override).length === 0) {
+                                    statusEl.textContent = "An override needs a status, a point, or a radius.";
+                                    return;
+                                }
+                                if ([override.latitude, override.longitude, override.uncertainty_radius_m].some((v) => v !== undefined && !Number.isFinite(v))) {
+                                    statusEl.textContent = "Latitude, longitude, and radius must be numbers.";
+                                    return;
+                                }
+                            }
+                            form.querySelector('button[type="submit"]').disabled = true;
+                            statusEl.textContent = "Recording...";
+                            decideOccupancyYear(task, parentId, year, action, note, override);
+                        });
+                        form.note.focus();
+                    });
+                });
             });
         });
     }

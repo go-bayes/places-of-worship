@@ -43,8 +43,12 @@ export const WIDE_EVIDENCE_LEADING_FIELDS: readonly string[] = Object.freeze([
   "existence_status", "worship_use_status", "public_access_status",
 ]);
 
-// one triple per census wave, in wave order
-export const TARGET_YEAR_FIELD_SUFFIXES: readonly string[] = Object.freeze(["status", "probability", "evidence"]);
+// per census wave, in wave order: the observed triple, then the basis of
+// the status and the confirmed derived location (occupancy lane, 2026-09-02)
+export const TARGET_YEAR_FIELD_SUFFIXES: readonly string[] = Object.freeze([
+  "status", "probability", "evidence",
+  "basis", "latitude", "longitude", "uncertainty_radius_m", "location_basis",
+]);
 
 export const WIDE_EVIDENCE_TRAILING_FIELDS: readonly string[] = Object.freeze([
   "quality_flag", "review_status",

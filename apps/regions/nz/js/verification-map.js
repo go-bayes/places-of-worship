@@ -698,6 +698,38 @@ const HISTORICAL_SOURCE_BASIS_LABELS = {
     named_public_source: "Named public source",
     other: "Other source or informant basis",
 };
+// occupancy_v1 vocab (docs/development/occupancy-build-brief-2026-09-02.md);
+// the client mirror in occupancy-contract.js validates against the same sets
+const OCCUPANCY_START_MODE_OPTIONS = [
+    ["known", "Known date"],
+    ["between", "Between two dates"],
+    ["by", "By a date (no earlier bound)"],
+    ["unknown", "Unknown"],
+];
+const OCCUPANCY_START_BASIS_OPTIONS = [
+    ["founding_stated", "Founding stated by the source"],
+    ["organisation_founded", "Organisation or congregation founded"],
+    ["building_dedication", "Building dedicated"],
+    ["first_seen_only", "First seen in a record only"],
+];
+const OCCUPANCY_END_MODE_OPTIONS = [
+    ["still_active", "Still in use"],
+    ["known", "Known date"],
+    ["between", "Between two dates"],
+    ["after", "After a date (no later bound)"],
+    ["unknown", "Unknown"],
+];
+const OCCUPANCY_END_BASIS_OPTIONS = [
+    ["closure_stated", "Closure stated by the source"],
+    ["last_seen_only", "Last seen in a record only"],
+];
+const OCCUPANCY_END_REASON_OPTIONS = [
+    ["closed", "Closed"],
+    ["relocated", "Relocated to another place"],
+    ["demolished", "Demolished"],
+    ["use_changed", "Use changed"],
+    ["unknown", "Unknown"],
+];
 const READ_ONLY_ASSIGNMENT_STATUSES = new Set([
     "needs_review",
     "unresolved_note",
@@ -1702,6 +1734,10 @@ class NzVerificationMap {
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
         this.pinSubmissionId = null;
+        // occupancy lane: the period cards under entry, and the card whose
+        // location the pin flow is currently placing
+        this.occupancyDraft = null;
+        this.occupancyPinContext = null;
         this.pinHistory = [];
         this.manualTasksById = new Map();
         // signed-in portal activity: null while signed out or choosing,
@@ -3726,6 +3762,7 @@ class NzVerificationMap {
             ${!skipped && props.task_id ? `<div id="confirmAttachmentsBlock" class="attachments-block" hidden></div>` : ""}
             <div class="button-row">
                 ${knownHistory ? `<button id="addKnownHistoryButton" type="button">Add known history</button>` : ""}
+                ${knownHistory && window.PowOccupancy ? `<button id="addOccupancyButton" class="secondary" type="button">Add where and when</button>` : ""}
                 ${nomination
                     ? `<button id="nominateAnotherButton"${knownHistory ? ` class="secondary"` : ""} type="button">Add another place</button>`
                     : `<button id="openNextTaskButton"${knownHistory ? ` class="secondary"` : ""} type="button">Open next task</button>`}
@@ -3746,6 +3783,7 @@ class NzVerificationMap {
         document.getElementById("openNextTaskButton")?.addEventListener("click", guarded(() => this.openNextAvailableTask()));
         document.getElementById("nominateAnotherButton")?.addEventListener("click", guarded(() => this.enterPinMode()));
         document.getElementById("addKnownHistoryButton")?.addEventListener("click", guarded(() => this.renderHistoricalClaimEntry(knownHistory)));
+        document.getElementById("addOccupancyButton")?.addEventListener("click", guarded(() => this.renderOccupancyEntry(knownHistory)));
         document.getElementById("undoSkipButton")?.addEventListener("click", () => this.undoSkip(props.task_id));
         // submission-side second-opinion call (jb 2026-09-01): the entry
         // then needs an extra independent reviewer before acceptance
@@ -5487,6 +5525,7 @@ class NzVerificationMap {
                 <div class="button-row">
                     <button id="submitHistoricalClaimButton" type="submit">Record this claim for review</button>
                     <button id="finishHistoricalClaimsButton" class="secondary" type="button">${context.nomination ? "Done — nominate another PoW" : "Done — open next task"}</button>
+                    ${window.PowOccupancy ? `<button id="historyToOccupancyButton" class="secondary" type="button">Add where and when</button>` : ""}
                 </div>
                 <div id="historicalClaimStatus" class="copy-status" aria-live="polite"></div>
             </form>
@@ -5555,6 +5594,12 @@ class NzVerificationMap {
                 this.openNextAvailableTask();
             }
         });
+        // the periods pane attaches to the same parent evidence record
+        document.getElementById("historyToOccupancyButton")?.addEventListener("click", () => {
+            if (this.formDirty && !window.confirm("Discard this unfinished historical claim?")) return;
+            this.clearFormDirty();
+            this.renderOccupancyEntry(context);
+        });
         this.focusDetailPanel();
     }
 
@@ -5603,6 +5648,494 @@ class NzVerificationMap {
             submitButton.disabled = false;
             if (status) status.textContent = `${error.message || "Could not record the historical claim."} Your entries remain here; try again.`;
         }
+    }
+
+    // ---- occupancy lane: where and when the place was used for worship ----
+    // (docs/development/occupancy-build-brief-2026-09-02.md section 5). one
+    // submission is a set of period cards plus one shared provenance block,
+    // attached to the same parent evidence record as known history. the
+    // cards live in this.occupancyDraft so a detour through the pin flow for
+    // one card's location returns to the pane with every card intact.
+
+    occupancyBlankSegment(context, overrides = {}) {
+        const fromParent = Boolean(context?.referenceDateFromParent);
+        return {
+            startMode: "known",
+            startDate: "",
+            startNotEarlierThan: "",
+            startNotLaterThan: "",
+            startAround: false,
+            startBasis: "",
+            endMode: fromParent ? "still_active" : "known",
+            endDate: "",
+            endNotEarlierThan: "",
+            endNotLaterThan: "",
+            endAround: false,
+            endBasis: "",
+            endReason: "",
+            stillActiveAsof: fromParent ? context.referenceDate : "",
+            sameAsPin: true,
+            location: null,
+            locationSummary: "",
+            ...overrides,
+        };
+    }
+
+    occupancyBlankProvenance() {
+        return {
+            confidence: "",
+            confidenceBasis: "",
+            sourceBasis: "",
+            sourceTitle: "",
+            sourceReference: "",
+            sourceAccount: "",
+            uncertaintyNote: "",
+            privacyFlag: "needs_review",
+        };
+    }
+
+    // the task's point, when the map knows it; the server resolves
+    // "same place as the pin" against it either way
+    occupancyTaskPoint(taskId) {
+        const coords = this.featureForTaskId(taskId)?.geometry?.coordinates || [];
+        if (coords.length < 2) return null;
+        return { latitude: Number(coords[1]), longitude: Number(coords[0]) };
+    }
+
+    occupancyCardHtml(segment, index, count) {
+        const s = segment;
+        const dateInput = (name, placeholder) => `<input data-field="${name}" type="text" inputmode="numeric" maxlength="10" placeholder="${placeholder}" value="${escapeHtml(s[name] || "")}">`;
+        return `
+            <fieldset class="occupancy-card" data-index="${index}">
+                <legend>Period ${index + 1}${count > 1 ? ` of ${count}` : ""}</legend>
+                <div class="occupancy-block" data-block="start">
+                    <div class="occupancy-block-title">Began</div>
+                    <div class="field-grid">
+                        <label>
+                            How is the start known?
+                            <select data-field="startMode">${selectOptionsHtml(OCCUPANCY_START_MODE_OPTIONS, s.startMode || "known")}</select>
+                        </label>
+                        <label data-show="known">
+                            Date
+                            ${dateInput("startDate", "1954 or 1954-03-01")}
+                        </label>
+                        <label data-show="between">
+                            Not earlier than
+                            ${dateInput("startNotEarlierThan", "1950")}
+                        </label>
+                        <label data-show="between by">
+                            Not later than
+                            ${dateInput("startNotLaterThan", "1956")}
+                        </label>
+                    </div>
+                    <label class="checkbox-label" data-show="known">
+                        <input data-field="startAround" type="checkbox"${s.startAround ? " checked" : ""}>
+                        <span>Around this year (records the year before to the year after)</span>
+                    </label>
+                    <label data-show="dated">
+                        How is the start date known?
+                        <select data-field="startBasis"><option value="">Choose one...</option>${selectOptionsHtml(OCCUPANCY_START_BASIS_OPTIONS, s.startBasis || "")}</select>
+                    </label>
+                </div>
+                <div class="occupancy-block" data-block="end">
+                    <div class="occupancy-block-title">Ended</div>
+                    <div class="field-grid">
+                        <label>
+                            How is the end known?
+                            <select data-field="endMode">${selectOptionsHtml(OCCUPANCY_END_MODE_OPTIONS, s.endMode || "known")}</select>
+                        </label>
+                        <label data-show="still_active">
+                            Still in use as of
+                            ${dateInput("stillActiveAsof", "2010-06-01")}
+                        </label>
+                        <label data-show="known">
+                            Date
+                            ${dateInput("endDate", "1980 or 1980-11")}
+                        </label>
+                        <label data-show="between after">
+                            Not earlier than
+                            ${dateInput("endNotEarlierThan", "1978")}
+                        </label>
+                        <label data-show="between">
+                            Not later than
+                            ${dateInput("endNotLaterThan", "1982")}
+                        </label>
+                    </div>
+                    <label class="checkbox-label" data-show="known">
+                        <input data-field="endAround" type="checkbox"${s.endAround ? " checked" : ""}>
+                        <span>Around this year (records the year before to the year after)</span>
+                    </label>
+                    <div class="field-grid" data-show="dated">
+                        <label>
+                            How is the end date known?
+                            <select data-field="endBasis"><option value="">Choose one...</option>${selectOptionsHtml(OCCUPANCY_END_BASIS_OPTIONS, s.endBasis || "")}</select>
+                        </label>
+                        <label>
+                            Why did it end?
+                            <select data-field="endReason"><option value="">Choose one...</option>${selectOptionsHtml(OCCUPANCY_END_REASON_OPTIONS, s.endReason || "")}</select>
+                        </label>
+                    </div>
+                </div>
+                <div class="occupancy-block" data-block="location">
+                    <div class="occupancy-block-title">Location</div>
+                    <label class="checkbox-label">
+                        <input data-field="sameAsPin" type="checkbox"${s.sameAsPin !== false ? " checked" : ""}>
+                        <span>Same place as the pin</span>
+                    </label>
+                    <div class="occupancy-distinct" data-role="distinct"${s.sameAsPin === false ? "" : " hidden"}>
+                        <div class="copy-status" data-role="locationSummary">${escapeHtml(s.locationSummary || "No location placed yet.")}</div>
+                        <button type="button" class="secondary" data-action="place">${s.location ? "Move this period on the map" : "Place this period on the map"}</button>
+                    </div>
+                </div>
+                <div class="occupancy-bounds" data-role="bounds" aria-live="polite"></div>
+                ${count > 1 ? `<button type="button" class="tertiary" data-action="remove">Remove period ${index + 1}</button>` : ""}
+            </fieldset>
+        `;
+    }
+
+    occupancyEntryHtml(context, draft, { statusMessage = "" } = {}) {
+        const p = draft.provenance;
+        const labelledOptions = (labels, selected) => Object.entries(labels)
+            .map(([value, label]) => `<option value="${escapeHtml(value)}"${value === selected ? " selected" : ""}>${escapeHtml(label)}</option>`)
+            .join("");
+        return `
+            <h2>Where and when was this place used for worship?</h2>
+            <div class="pilot-note">
+                One card per period at one location. Bounds are fine. The portal derives a proposal for each census year; a reviewer confirms it.
+            </div>
+            ${statusMessage ? `<div class="copy-status" role="status">${escapeHtml(statusMessage)}</div>` : ""}
+            <form id="occupancyForm" class="rapid-current-form occupancy-form" data-submission-id="${escapeHtml(draft.submissionId)}">
+                <div id="occupancyCards" class="occupancy-cards">
+                    ${draft.segments.map((segment, index) => this.occupancyCardHtml(segment, index, draft.segments.length)).join("")}
+                </div>
+                <div class="button-row">
+                    <button id="occupancyAddPeriodButton" type="button" class="secondary">Add another period</button>
+                </div>
+                <fieldset class="historical-date-block occupancy-provenance">
+                    <legend>Source for these periods</legend>
+                    <div class="field-grid">
+                        <label>
+                            Confidence
+                            <select id="occConfidence"><option value="">Choose one...</option>${labelledOptions(HISTORICAL_CONFIDENCE_LABELS, p.confidence)}</select>
+                        </label>
+                        <label>
+                            Why this confidence?
+                            <input id="occConfidenceBasis" type="text" maxlength="2000" value="${escapeHtml(p.confidenceBasis)}">
+                        </label>
+                    </div>
+                    <div class="field-grid">
+                        <label>
+                            Source or informant basis
+                            <select id="occSourceBasis"><option value="">Choose one...</option>${labelledOptions(HISTORICAL_SOURCE_BASIS_LABELS, p.sourceBasis)}</select>
+                        </label>
+                        <label>
+                            Source title or brief description
+                            <input id="occSourceTitle" type="text" maxlength="2000" placeholder="e.g. foundation plaque at west entrance" value="${escapeHtml(p.sourceTitle)}">
+                        </label>
+                    </div>
+                    <label>
+                        Source URL, archive reference, or agreed file reference (required for a named public source)
+                        <input id="occSourceReference" type="text" maxlength="2000" value="${escapeHtml(p.sourceReference)}">
+                    </label>
+                    <label>
+                        What the source says about these periods
+                        <textarea id="occSourceAccount" rows="3" maxlength="2000" placeholder="Retain the source wording. Do not turn ‘after the war’ into years unless the source does.">${escapeHtml(p.sourceAccount)}</textarea>
+                    </label>
+                    <label>
+                        What remains uncertain? (required when a period has no dated start or end)
+                        <textarea id="occUncertainty" rows="2" maxlength="2000">${escapeHtml(p.uncertaintyNote)}</textarea>
+                    </label>
+                    <label>
+                        Sensitivity and privacy
+                        <select id="occPrivacyFlag">${selectOptionsHtml(PRIVACY_FLAG_OPTIONS, p.privacyFlag || "needs_review")}</select>
+                    </label>
+                </fieldset>
+                <div class="button-row">
+                    <button id="occupancySubmitButton" type="submit">Record these periods for review</button>
+                    <button id="occupancyDoneButton" class="secondary" type="button">${context.nomination ? "Done — nominate another PoW" : "Done — open next task"}</button>
+                </div>
+                <div id="occupancyStatus" class="copy-status" aria-live="polite"></div>
+            </form>
+        `;
+    }
+
+    // mounts the pane; a fresh draft unless restoring after the pin flow
+    renderOccupancyEntry(context, options = {}) {
+        const panel = document.getElementById("detailPanel");
+        if (!panel || !context || !window.PowOccupancy) return;
+        const restoring = Boolean(options.restore) && this.occupancyDraft?.taskId === context.taskId;
+        if (!restoring) {
+            this.occupancyDraft = {
+                taskId: context.taskId,
+                context,
+                submissionId: window.PowRapidEntry.secureSubmissionId(),
+                segments: [this.occupancyBlankSegment(context)],
+                provenance: this.occupancyBlankProvenance(),
+            };
+        }
+        const draft = this.occupancyDraft;
+        panel.innerHTML = this.occupancyEntryHtml(context, draft, options);
+        const form = document.getElementById("occupancyForm");
+        const dirtyKey = `occupancy-${context.taskId}`;
+        const syncFrom = event => {
+            this.markFormDirty(dirtyKey);
+            this.readOccupancyForm();
+            const card = event.target?.closest?.(".occupancy-card");
+            if (card) this.updateOccupancyCard(card);
+        };
+        form?.addEventListener("input", syncFrom);
+        form?.addEventListener("change", event => {
+            syncFrom(event);
+            const target = event.target;
+            const card = target?.closest?.(".occupancy-card");
+            if (!card) return;
+            const index = Number(card.dataset.index);
+            // a relocation opens the next card at a new place
+            if (target.dataset?.field === "endReason" && target.value === "relocated" && index === draft.segments.length - 1) {
+                draft.segments.push(this.occupancyBlankSegment(context, { sameAsPin: false }));
+                this.renderOccupancyEntry(context, { restore: true, focusIndex: index + 1, markDirty: true });
+            }
+        });
+        form?.addEventListener("click", event => {
+            const button = event.target?.closest?.("button[data-action]");
+            if (!button) return;
+            const card = button.closest(".occupancy-card");
+            const index = Number(card?.dataset.index);
+            if (!Number.isInteger(index)) return;
+            this.readOccupancyForm();
+            if (button.dataset.action === "place") {
+                this.enterOccupancyPin(context, index);
+            } else if (button.dataset.action === "remove" && draft.segments.length > 1) {
+                draft.segments.splice(index, 1);
+                this.renderOccupancyEntry(context, { restore: true, markDirty: true });
+            }
+        });
+        document.getElementById("occupancyAddPeriodButton")?.addEventListener("click", () => {
+            this.readOccupancyForm();
+            const last = draft.segments[draft.segments.length - 1];
+            let statusMessage = "";
+            if (last?.endMode === "still_active") {
+                // the newest period is the one still in use; the earlier
+                // card now needs an end
+                draft.segments.push(this.occupancyBlankSegment(context, { endMode: "still_active", stillActiveAsof: last.stillActiveAsof }));
+                last.endMode = "known";
+                last.stillActiveAsof = "";
+                statusMessage = `Period ${draft.segments.length} is now the one still in use; say how period ${draft.segments.length - 1} ended.`;
+            } else {
+                draft.segments.push(this.occupancyBlankSegment(context, { endMode: "known", stillActiveAsof: "" }));
+            }
+            this.renderOccupancyEntry(context, { restore: true, focusIndex: draft.segments.length - 1, markDirty: true, statusMessage });
+        });
+        form?.addEventListener("submit", event => {
+            event.preventDefault();
+            this.submitOccupancies(context);
+        });
+        document.getElementById("occupancyDoneButton")?.addEventListener("click", () => this.finishOccupancyEntry(context));
+        form?.querySelectorAll(".occupancy-card").forEach(card => this.updateOccupancyCard(card));
+        if (options.markDirty) this.markFormDirty(dirtyKey);
+        if (Number.isInteger(options.focusIndex)) {
+            const card = form?.querySelector(`.occupancy-card[data-index="${options.focusIndex}"]`);
+            card?.scrollIntoView?.({ block: "start", behavior: "smooth" });
+            card?.querySelector("select, input")?.focus({ preventScroll: true });
+        } else {
+            this.focusDetailPanel();
+        }
+    }
+
+    // copies every card and the shared provenance block into the draft
+    readOccupancyForm() {
+        const draft = this.occupancyDraft;
+        const form = document.getElementById("occupancyForm");
+        if (!draft || !form) return;
+        form.querySelectorAll(".occupancy-card").forEach(card => {
+            const segment = draft.segments[Number(card.dataset.index)];
+            if (!segment) return;
+            card.querySelectorAll("[data-field]").forEach(field => {
+                segment[field.dataset.field] = field.type === "checkbox" ? field.checked : field.value;
+            });
+        });
+        const value = id => document.getElementById(id)?.value || "";
+        draft.provenance = {
+            confidence: value("occConfidence"),
+            confidenceBasis: value("occConfidenceBasis"),
+            sourceBasis: value("occSourceBasis"),
+            sourceTitle: value("occSourceTitle"),
+            sourceReference: value("occSourceReference"),
+            sourceAccount: value("occSourceAccount"),
+            uncertaintyNote: value("occUncertainty"),
+            privacyFlag: value("occPrivacyFlag"),
+        };
+    }
+
+    // shows only the fields the chosen modes use and restates the bounds
+    // the card will record
+    updateOccupancyCard(card) {
+        const segment = this.occupancyDraft?.segments[Number(card.dataset.index)];
+        if (!segment || !window.PowOccupancy) return;
+        const startMode = segment.startMode || "known";
+        const endMode = segment.endMode || "known";
+        const startTokens = new Set([startMode, ...(startMode !== "unknown" ? ["dated"] : [])]);
+        const endTokens = new Set([endMode, ...(["known", "between", "after"].includes(endMode) ? ["dated"] : [])]);
+        const apply = (block, tokens) => {
+            card.querySelectorAll(`[data-block="${block}"] [data-show]`).forEach(element => {
+                element.hidden = !element.dataset.show.split(" ").some(token => tokens.has(token));
+            });
+        };
+        apply("start", startTokens);
+        apply("end", endTokens);
+        const distinct = card.querySelector('[data-role="distinct"]');
+        if (distinct) distinct.hidden = segment.sameAsPin !== false;
+        const bounds = card.querySelector('[data-role="bounds"]');
+        if (bounds) bounds.textContent = window.PowOccupancy.describeBounds(segment);
+    }
+
+    // re-arms the pin flow for one card; confirmPinLocation hands the
+    // confirmed assertion back through completeOccupancyPin
+    enterOccupancyPin(context, index) {
+        if (!this.map || !this.occupancyDraft?.segments[index]) return;
+        this.readOccupancyForm();
+        if (this.pinMode) this.exitPinMode();
+        this.occupancyPinContext = { context, index };
+        this.enterPinMode();
+        if (!this.pinMode) {
+            this.occupancyPinContext = null;
+            return;
+        }
+        const point = this.occupancyTaskPoint(context.taskId);
+        if (point) {
+            const latlng = L.latLng(point.latitude, point.longitude);
+            this.map.setView(latlng, Math.max(this.map.getZoom(), 17));
+            this.placePin(latlng);
+        }
+        const status = document.getElementById("pinStatus");
+        if (status) {
+            status.textContent = `Period ${index + 1}: drag the pin, or click the map, to where the place stood then; choose an area if you only know the vicinity; then confirm. Escape returns to the periods.`;
+        }
+    }
+
+    completeOccupancyPin() {
+        const pin = this.occupancyPinContext;
+        const confirmed = this.pinConfirmed;
+        const segment = pin ? this.occupancyDraft?.segments[pin.index] : null;
+        const status = document.getElementById("pinStatus");
+        if (!pin || !confirmed || !segment || !window.PowLocationAssertion) {
+            this.exitPinMode();
+            return;
+        }
+        const approximate = confirmed.locationMode === "approximate_area";
+        let assertion;
+        try {
+            assertion = window.PowLocationAssertion.payload({
+                mode: confirmed.locationMode,
+                basis: approximate ? (confirmed.basis || "address_or_locality") : "map_placement",
+                latitude: confirmed.latitude,
+                longitude: confirmed.longitude,
+                uncertaintyRadiusM: approximate ? confirmed.uncertaintyRadiusM : undefined,
+                sourceWording: approximate ? confirmed.sourceWording : "",
+                confidence: approximate ? "moderate" : "high",
+                contributorConfirmed: true,
+            });
+        } catch (error) {
+            // reopen the confirm card so the ra can fix the assertion
+            if (status) status.textContent = error.message || "Could not record this location.";
+            this.pinConfirmed = null;
+            this.pinMarker?.dragging.enable();
+            this._pinZoomHandler = () => this.updatePinConfirmCard();
+            this.map.on("zoomend", this._pinZoomHandler);
+            ["pinConfirmCard", "pinLocateCard"].forEach(id => {
+                const card = document.getElementById(id);
+                if (card) card.hidden = false;
+            });
+            return;
+        }
+        const at = `${confirmed.latitude.toFixed(5)}, ${confirmed.longitude.toFixed(5)}`;
+        const radius = assertion.uncertainty_radius_m;
+        const grade = approximate ? window.PowLocationAssertion.gradeLabel({ mode: "approximate_area", uncertaintyRadiusM: radius }) : "";
+        segment.sameAsPin = false;
+        segment.location = assertion;
+        segment.locationSummary = approximate
+            ? `${grade.charAt(0).toUpperCase()}${grade.slice(1)} area within ${radius >= 1000 ? `${radius / 1000} km` : `${radius} m`} of ${at}.`
+            : `Building at ${at}.`;
+        this.occupancyPinContext = null;
+        this.exitPinMode();
+        this.renderOccupancyEntry(pin.context, { restore: true, focusIndex: pin.index, markDirty: true });
+    }
+
+    finishOccupancyEntry(context) {
+        if (this.formDirty && !window.confirm("Discard these unfinished periods?")) return;
+        this.clearFormDirty();
+        this.occupancyDraft = null;
+        if (context.nomination) {
+            this.enterPinMode();
+        } else {
+            this.openNextAvailableTask();
+        }
+    }
+
+    async submitOccupancies(context) {
+        const form = document.getElementById("occupancyForm");
+        const status = document.getElementById("occupancyStatus");
+        const submitButton = document.getElementById("occupancySubmitButton");
+        const draft = this.occupancyDraft;
+        if (!form || !draft || !window.PowOccupancy) return;
+        if (!this.backend?.configured || !this.backend.signedIn) {
+            if (status) status.textContent = "Sign in before recording periods.";
+            return;
+        }
+        this.readOccupancyForm();
+        // the shared provenance is copied into every period
+        const segments = draft.segments.map((segment, index) => ({ ...segment, ...draft.provenance, segmentIndex: index }));
+        const inputError = window.PowOccupancy.validateSet(segments, context.referenceDate, this.occupancyTaskPoint(context.taskId));
+        if (inputError) {
+            if (status) status.textContent = inputError;
+            return;
+        }
+        submitButton.disabled = true;
+        if (status) status.textContent = "Recording these periods for review...";
+        try {
+            const result = await this.backend.submitOccupancies({
+                clientSubmissionId: draft.submissionId,
+                taskId: context.taskId,
+                parentEvidenceDraftId: context.parentEvidenceDraftId,
+                segments: segments.map(values => window.PowOccupancy.payload(values)),
+                clientContext: { portal_version: "occupancy-v1" },
+            });
+            this.clearFormDirty();
+            this.taskHistoryByTaskId.delete(context.taskId);
+            this.occupancyDraft = null;
+            this.renderOccupancyRecorded(context, result, segments.length);
+        } catch (error) {
+            if (error.authExpired) {
+                this.backendUser = null;
+                this.backendLastError = error.message;
+                this.renderBackendPanel();
+            }
+            submitButton.disabled = false;
+            if (status) status.textContent = `${error.message || "Could not record the periods."} Your entries remain here; try again.`;
+        }
+    }
+
+    renderOccupancyRecorded(context, result, count) {
+        const panel = document.getElementById("detailPanel");
+        if (!panel) return;
+        const years = Array.isArray(result?.derived_years) ? result.derived_years : [];
+        const conflicts = Array.isArray(result?.conflict_years) ? result.conflict_years : [];
+        const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+        const recorded = result?.deduped
+            ? "These periods were already recorded; nothing was duplicated."
+            : `Recorded ${plural(count, "period")}; ${plural(years.length, "census-year proposal")}${years.length ? ` (${years.join(", ")})` : ""} await${years.length === 1 ? "s" : ""} reviewer confirmation.`;
+        panel.innerHTML = `
+            <h2>Periods recorded</h2>
+            <div class="copy-status" role="status">${escapeHtml(recorded)}</div>
+            ${conflicts.length ? `<div class="pilot-note" role="note">${escapeHtml(`${plural(conflicts.length, "year")} (${conflicts.join(", ")}) conflict${conflicts.length === 1 ? "s" : ""} with the observed status; a reviewer must settle ${conflicts.length === 1 ? "it" : "them"}.`)}</div>` : ""}
+            <div class="button-row">
+                <button id="occupancyDoneButton" type="button">${context.nomination ? "Done — nominate another PoW" : "Done — open next task"}</button>
+                <button id="occupancyHistoryButton" class="secondary" type="button">Add known history</button>
+            </div>
+        `;
+        document.getElementById("occupancyDoneButton")?.addEventListener("click", () => this.finishOccupancyEntry(context));
+        document.getElementById("occupancyHistoryButton")?.addEventListener("click", () => this.renderHistoricalClaimEntry(context));
+        this.focusDetailPanel();
     }
 
     reviewFormHtml(props) {
@@ -7023,13 +7556,20 @@ class NzVerificationMap {
                 </div>
             `;
         const revise = this.reviseContext;
+        const occupancyPin = this.occupancyPinContext;
+        const hostTitle = occupancyPin
+            ? `Place period ${occupancyPin.index + 1} on the map`
+            : revise ? `Revise ${escapeHtml(revise.name || "this place")}` : "Add a missing place";
+        const locateHelp = occupancyPin
+            ? "The pin starts on the task's point. Drag it, or click the map, to where the place stood in this period; choose an area if you only know the vicinity."
+            : revise
+                ? "The pin marks the current record. Drag it onto the right building if the record is misplaced, or confirm it as it stands."
+                : "Search, type coordinates, or click the map. Drag the pin onto the building.";
         return `
-            <h2 class="pin-host-title">${revise ? `Revise ${escapeHtml(revise.name || "this place")}` : "Add a missing place"}</h2>
+            <h2 class="pin-host-title">${hostTitle}</h2>
             <div id="pinLocateCard" class="pin-card">
                 <div class="copy-help">
-                    ${revise
-                        ? "The pin marks the current record. Drag it onto the right building if the record is misplaced, or confirm it as it stands."
-                        : "Search, type coordinates, or click the map. Drag the pin onto the building."}
+                    ${locateHelp}
                 </div>
                 <div class="pin-locate-row">
                     <label>
@@ -7073,7 +7613,7 @@ class NzVerificationMap {
                         <input id="pinLocationRadiusCustom" type="number" inputmode="numeric" min="25" max="100000" step="1" placeholder="e.g. 750">
                     </label>
                     <div id="pinLocationGrade" class="copy-help" aria-live="polite"></div>
-                    ${RAPID_NOMINATION_ENTRY ? `
+                    ${this.pinCardCarriesBasis() ? `
                         <label>
                             How was the area established?
                             <select id="pinLocationBasis">
@@ -7617,7 +8157,7 @@ class NzVerificationMap {
         // card (the detailed form asks for them later); the server refuses
         // an approximate area with no retained wording
         const rapidWording = (document.getElementById("pinLocationWording")?.value || "").trim();
-        if (RAPID_NOMINATION_ENTRY && mode === "approximate_area" && !rapidWording) {
+        if (this.pinCardCarriesBasis() && mode === "approximate_area" && !rapidWording) {
             if (status) status.textContent = "Say what places this area here before confirming.";
             return;
         }
@@ -7629,7 +8169,7 @@ class NzVerificationMap {
             zoom: this.map.getZoom(),
             locationMode: mode,
             uncertaintyRadiusM: radius,
-            ...(RAPID_NOMINATION_ENTRY ? {
+            ...(this.pinCardCarriesBasis() ? {
                 basis: document.getElementById("pinLocationBasis")?.value || "map_placement",
                 sourceWording: rapidWording,
             } : {}),
@@ -7645,6 +8185,12 @@ class NzVerificationMap {
         // the location is settled; the locate tools would now be misleading
         const locateCard = document.getElementById("pinLocateCard");
         if (locateCard) locateCard.hidden = true;
+        if (this.occupancyPinContext) {
+            // a period's location: freeze the assertion into its card and
+            // return to the periods pane
+            this.completeOccupancyPin();
+            return;
+        }
         if (this.reviseContext) {
             // the record itself would be the nearest match; the form opens directly
             this.pinNearbyCount = 0;
@@ -7854,6 +8400,9 @@ class NzVerificationMap {
         if (this.formDirtyTaskId === "rapid-pin" || this.formDirtyTaskId === "location-pin") {
             this.clearFormDirty();
         }
+        // a cancelled period placement returns to the pane with its cards
+        const occupancyPin = this.occupancyPinContext;
+        this.occupancyPinContext = null;
         const wasRevision = Boolean(this.reviseContext);
         this.pinMode = false;
         this.reviseContext = null;
@@ -7895,11 +8444,19 @@ class NzVerificationMap {
             addPlaceButton.classList.remove("placing");
             addPlaceButton.textContent = "＋ Add a missing place";
         }
-        if (wasRevision) {
+        if (occupancyPin && this.occupancyDraft) {
+            this.renderOccupancyEntry(occupancyPin.context, { restore: true, focusIndex: occupancyPin.index, markDirty: true });
+        } else if (wasRevision) {
             // the revise pane would otherwise sit in the detail panel with
             // its two options as a dead end
             this.renderInitialDetail();
         }
+    }
+
+    // the confirm card carries the area's basis and wording when the rapid
+    // flow or a period placement needs them (the detailed form asks later)
+    pinCardCarriesBasis() {
+        return RAPID_NOMINATION_ENTRY || Boolean(this.occupancyPinContext);
     }
 
     nominationFormHtml() {

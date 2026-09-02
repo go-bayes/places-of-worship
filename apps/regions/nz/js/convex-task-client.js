@@ -405,6 +405,27 @@
             return await this.request("mutation", "historicalClaims:submitHistoricalClaim", args);
         }
 
+        // occupancy lane (docs/development/occupancy-build-brief-2026-09-02.md)
+        async listTaskOccupancies(args) {
+            return await this.request("query", "occupancies:listTaskOccupancies", args);
+        }
+
+        async listDerivedStates(args) {
+            return await this.request("query", "occupancies:listDerivedStates", args);
+        }
+
+        async submitOccupancies(args) {
+            return await this.request("mutation", "occupancies:submitOccupancies", args);
+        }
+
+        async decideDerivedYear(args) {
+            return await this.request("mutation", "occupancies:decideDerivedYear", args);
+        }
+
+        async confirmAllDerived(args) {
+            return await this.request("mutation", "occupancies:confirmAllDerived", args);
+        }
+
         async recordReviewDecision(args) {
             return await this.request("mutation", "reviews:recordReviewDecision", args);
         }
