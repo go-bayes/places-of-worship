@@ -28,11 +28,13 @@ A period asserts that worship happened at that place throughout it. The RA's one
 
 | Case (Christchurch after 2011) | Periods the RA records | Derived proposals (2013, 2018, 2023) |
 |---|---|---|
-| Church demolished 2011, rebuilt on the same site, reopened 2019 | 1: known 1905 founding_stated → known 2011, closure_stated, `demolished`. 2: known 2019, building_dedication → still in use as of today. | absent (after stated closure), absent, present |
+| Church demolished 2011, rebuilt on the same site, reopened 2019 | 1: known 1905 founding_stated → known 2011, closure_stated, `demolished`. 2: known 2019, founding_stated (the reopening is stated) → still in use as of today. | absent (after stated closure), absent (before stated founding), present |
 | Church demolished 2011, congregation moved to a new site 2014 | 1: … → 2011, `relocated`. 2: 2014 at the new point → still in use. | absent, present at the new point (transition line in the year the move spans), present |
 | Church closed 2011, never reopened | 1: … → 2011, closure_stated, `closed`. | absent, absent, absent |
 | Church damaged 2011, out of use for an unknown spell, in use again by 2016 | 1: … → between 2011 and 2011, `closed`. 2: by 2016, first_seen_only → still in use. | absent, uncertain (within start window), present |
 | Gap suspected but not established | one period with the note "gap possible, not established" | present throughout, the note visible to the reviewer |
+
+A basis detail the tie test caught: only `founding_stated` licenses absence before a start (rule 2); `building_dedication` or `first_seen_only` before the start derives uncertain (rule 3). So a reopening the source states is recorded as `founding_stated`, and 2018 in the first row derives absent only because of it.
 
 The fourth row is the one to teach: a partial date bound ("by 2016") is how the RA records what they know without inventing a reopening date, and the engine answers uncertain for the year inside the window rather than present.
 

@@ -2132,6 +2132,47 @@
         }
 
         /* occupancy lane: one card per period, teal entry framing */
+        .guided-periods {
+            margin: 10px 0 14px;
+            padding: 10px 12px;
+            border: 1px solid #d6dde6;
+            border-radius: 10px;
+            background: #f9fbfd;
+        }
+
+        .gap-prompt {
+            margin: 10px 0;
+            padding: 10px 12px;
+            border-left: 4px solid #d98c1f;
+            background: #fff7e8;
+            border-radius: 6px;
+        }
+
+        .gap-prompt p {
+            margin: 0 0 6px;
+        }
+
+        .gap-unsure {
+            margin-top: 8px;
+        }
+
+        .periods-preview {
+            margin: 8px 0;
+            padding: 8px 10px;
+            border-radius: 6px;
+            background: #eef4fb;
+            font-size: 0.92rem;
+        }
+
+        .periods-preview:empty {
+            display: none;
+        }
+
+        .periods-preview-conflict {
+            background: #fde8e8;
+            color: #8a1c1c;
+        }
+
         .occupancy-cards {
             display: grid;
             gap: 12px;
@@ -2487,9 +2528,9 @@
     <script src="js/rapid-entry-contract.js?v=20260901a"></script>
     <script src="js/historical-claim-contract.js?v=20260902a"></script>
     <script src="js/date-floor.js?v=20260902a"></script>
-    <script src="js/occupancy-contract.js?v=20260902g"></script>
+    <script src="js/occupancy-contract.js?v=20260902h"></script>
     <script src="js/location-assertion-contract.js?v=20260902a"></script>
     <script src="js/osm-history.js?v=20260902c"></script>
-    <script src="js/verification-map.js?v=20260902k"></script>
+    <script src="js/verification-map.js?v=20260902l"></script>
 </body>
 </html>

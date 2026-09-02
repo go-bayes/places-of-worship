@@ -410,6 +410,157 @@
         return `${start}; ${end}${where}.`;
     }
 
+    // the ruled presence rules, ported verbatim from convex/lib/occupancies.ts
+    // (presenceForSegment, combinePresence, derivePresence) so the entry
+    // form can preview what the server will propose for each census year.
+    // the server remains the authority; occupancyDerivationMirror.node-test
+    // holds the two equal. card values are accepted directly (normalise
+    // runs inside segmentBounds)
+    const PRESENCE_RULE_WORDS = {
+        inside_interval: "inside the period",
+        before_stated_founding: "before the stated founding",
+        before_first_record: "before the first record",
+        after_stated_closure: "after the stated closure",
+        after_last_record: "after the last record",
+        within_start_window: "inside the start window",
+        within_end_window: "inside the end window",
+        beyond_active_anchor: "after the still-in-use date",
+        start_unknown: "start unknown",
+        end_unknown: "end unknown",
+    };
+
+    function presenceForSegment(values, year) {
+        const s = normalise(values);
+        const yStart = `${year}-01-01`;
+        const yEnd = `${year}-12-31`;
+        const b = segmentBounds(s);
+        const fire = (rule_id, status) => ({ segment_index: s.segmentIndex, rule_id, status });
+        if (b.startUpper !== undefined && b.startUpper <= yStart && b.endLower !== undefined && yEnd <= b.endLower) {
+            return fire("inside_interval", "present");
+        }
+        if (b.startLower !== undefined && yEnd < b.startLower) {
+            return s.startBasis === "founding_stated"
+                ? fire("before_stated_founding", "absent")
+                : fire("before_first_record", "uncertain");
+        }
+        if (b.endUpper !== undefined && yStart > b.endUpper) {
+            return s.endBasis === "closure_stated"
+                ? fire("after_stated_closure", "absent")
+                : fire("after_last_record", "uncertain");
+        }
+        if (b.startUpper !== undefined && yStart < b.startUpper && (b.startLower === undefined || yEnd >= b.startLower)) {
+            return fire("within_start_window", "uncertain");
+        }
+        if (b.open && b.asof !== undefined && yEnd > b.asof) {
+            return fire("beyond_active_anchor", "uncertain");
+        }
+        if (!b.open && b.endLower !== undefined && yEnd > b.endLower && (b.endUpper === undefined || yStart <= b.endUpper)) {
+            return fire("within_end_window", "uncertain");
+        }
+        if (b.startUpper === undefined && b.startLower === undefined && (b.endLower === undefined || yEnd <= b.endLower)) {
+            return fire("start_unknown", "uncertain");
+        }
+        if (b.startUpper !== undefined && b.startUpper <= yStart && b.endLower === undefined && !b.open) {
+            return fire("end_unknown", "uncertain");
+        }
+        return null;
+    }
+
+    function combinePresence(year, firings) {
+        if (firings.length === 0) return null;
+        const pick = status => firings.find(f => f.status === status);
+        const present = pick("present");
+        if (present) return { target_year: year, derived_status: "present", rule_id: present.rule_id, segment_rules: firings };
+        const uncertain = pick("uncertain");
+        if (uncertain) return { target_year: year, derived_status: "uncertain", rule_id: uncertain.rule_id, segment_rules: firings };
+        return { target_year: year, derived_status: "absent", rule_id: firings[0].rule_id, segment_rules: firings };
+    }
+
+    function derivePresence(segments, targetYears) {
+        const out = [];
+        const indexed = (segments || []).map((values, index) => ({ ...values, segmentIndex: index }));
+        for (const year of targetYears || []) {
+            const firings = indexed.map(values => presenceForSegment(values, Number(year))).filter(Boolean);
+            const combined = combinePresence(Number(year), firings);
+            if (combined !== null) out.push(combined);
+        }
+        return out;
+    }
+
+    // the preview strip's sentence: "From your periods: 2013 present (inside
+    // the period); 2018 absent (after the stated closure)." years no rule
+    // reaches are named as not assessed; observed statuses that differ are
+    // returned as conflicts so the form can show them before submission
+    function describePresence(derived, targetYears, observed) {
+        const byYear = new Map((derived || []).map(d => [String(d.target_year), d]));
+        const parts = [];
+        const conflicts = [];
+        for (const year of targetYears || []) {
+            const d = byYear.get(String(year));
+            if (!d) {
+                parts.push(`${year} not assessed`);
+                continue;
+            }
+            parts.push(`${year} ${d.derived_status} (${PRESENCE_RULE_WORDS[d.rule_id] || d.rule_id})`);
+            const seen = observed ? observed[String(year)] : undefined;
+            if (seen && seen !== "not_assessed" && seen !== d.derived_status) {
+                conflicts.push(`${year}: your status ${seen} differs from the periods (${d.derived_status})`);
+            }
+        }
+        return { sentence: parts.length ? `From your periods: ${parts.join("; ")}.` : "", conflicts };
+    }
+
+    // the gap prompt's "not sure" branch (ruling r-e4): the doubt about a
+    // spell out of use goes into the bounds of the two periods, never into
+    // an invented date. stop: {date} | {earliest, latest} | {} ; again:
+    // {date} | {by} | {}. returns the two card patches to apply
+    function gapBounds(stop, again) {
+        const st = stop || {};
+        const ag = again || {};
+        const first = {};
+        if (text(st.date)) {
+            first.endMode = "known";
+            first.endDate = text(st.date);
+        } else if (text(st.earliest) || text(st.latest)) {
+            if (text(st.earliest) && text(st.latest)) {
+                first.endMode = "between";
+                first.endNotEarlierThan = text(st.earliest);
+                first.endNotLaterThan = text(st.latest);
+            } else if (text(st.earliest)) {
+                first.endMode = "after";
+                first.endNotEarlierThan = text(st.earliest);
+            } else {
+                first.endMode = "between";
+                first.endNotEarlierThan = "";
+                first.endNotLaterThan = text(st.latest);
+            }
+        } else {
+            first.endMode = "unknown";
+        }
+        first.stillActiveAsof = "";
+        first.endAround = false;
+        if (first.endMode !== "unknown") {
+            first.endBasis = "last_seen_only";
+            first.endReason = "unknown";
+        } else {
+            first.endBasis = "";
+            first.endReason = "";
+        }
+        const second = {};
+        if (text(ag.date)) {
+            second.startMode = "known";
+            second.startDate = text(ag.date);
+        } else if (text(ag.by)) {
+            second.startMode = "by";
+            second.startNotLaterThan = text(ag.by);
+        } else {
+            second.startMode = "unknown";
+        }
+        second.startAround = false;
+        second.startBasis = second.startMode === "unknown" ? "" : "first_seen_only";
+        return { first, second };
+    }
+
     // the inverse of payload for a stored row: a card the entry pane can show
     // again. a between whose bounds are Y-1 and Y+1 collapses back to
     // "around Y" (the compile is idempotent, so the round trip is exact)
@@ -489,7 +640,13 @@
 
     window.PowOccupancy = Object.freeze({
         CONTRACT_VERSION,
+        PRESENCE_RULE_WORDS,
+        combinePresence,
+        derivePresence,
         describeBounds,
+        describePresence,
+        gapBounds,
+        presenceForSegment,
         expandAround,
         isValidPartialDate,
         normalise,
