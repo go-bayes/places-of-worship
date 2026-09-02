@@ -1629,6 +1629,38 @@
             box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #d68910, 0 0 5px rgba(0, 0, 0, 0.45);
         }
 
+        /* imagery basemaps (hybrid, satellite): every marker gains an outer
+           halo so the white border, the blue rings, and the dashed in-review
+           border survive tree canopy and pale roofs (jb 2026-09-02). the
+           ring encoding itself is unchanged: the halo sits outside it. */
+        .basemap-imagery .verification-marker {
+            box-shadow: 0 0 0 1px #0f172a, 0 0 6px rgba(0, 0, 0, 0.7);
+        }
+
+        .basemap-imagery .verification-marker.vm-validated-present {
+            box-shadow: 0 0 0 2px #ffffff, 0 0 0 5px #2874a6, 0 0 0 7px #ffffff, 0 0 6px 7px rgba(0, 0, 0, 0.6);
+        }
+
+        .basemap-imagery .verification-marker.vm-validated-absent {
+            box-shadow: 0 0 0 2px #ffffff, 0 0 0 5px #1f2937, 0 0 0 7px #ffffff, 0 0 6px 7px rgba(0, 0, 0, 0.6);
+        }
+
+        .basemap-imagery .verification-marker.vm-in-review {
+            box-shadow: 0 0 0 2px #ffffff, 0 0 6px 2px rgba(0, 0, 0, 0.7);
+        }
+
+        .basemap-imagery .verification-marker.vm-disputed {
+            box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #d68910, 0 0 0 6px #ffffff, 0 0 6px 6px rgba(0, 0, 0, 0.6);
+        }
+
+        .basemap-imagery .verification-marker.vm-stale {
+            box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #7d3c98, 0 0 0 6px #ffffff, 0 0 6px 6px rgba(0, 0, 0, 0.6);
+        }
+
+        .basemap-imagery .verification-marker.vm-nomination {
+            box-shadow: 0 0 0 2px #ffffff, 0 0 6px 2px rgba(0, 0, 0, 0.7);
+        }
+
         /* stale_validation: reserved treatment (violet intermediate ring).
            Unreachable until per-wave re-confirmation data exists; see
            validationState() in verification-map.js. */
@@ -2439,6 +2471,6 @@
     <script src="js/occupancy-contract.js?v=20260902e"></script>
     <script src="js/location-assertion-contract.js?v=20260902a"></script>
     <script src="js/osm-history.js?v=20260902c"></script>
-    <script src="js/verification-map.js?v=20260902g"></script>
+    <script src="js/verification-map.js?v=20260902h"></script>
 </body>
 </html>
