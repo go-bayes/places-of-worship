@@ -10,7 +10,7 @@ On an assigned New Zealand task the guided form still asks the RA to set a statu
 
 1. **Periods become the temporal entry on assigned tasks.** The guided form's step "What do the target years show?" is replaced by the period cards (the same cards as the post-submission pane, rendered inline in the form). The year grid is kept, collapsed, under the detailed form (`?detailed=1`) as the fallback for a case the periods cannot express, with a one-line reason field when it is used.
 2. **Derived preview under the cards.** As the RA edits, a read-only strip states what the periods will propose: "From your periods: 2013 present (inside the period), 2018 absent (after the stated closure), 2023 present". This needs the presence rules mirrored client-side: `occupancy-contract.js` gains `derivePresence` (a verbatim port of `presenceForSegment`, `combinePresence`, and `derivePresence` from `convex/lib/occupancies.ts`), with a tie test that runs one fixture set through both and requires identical output, as `wideEvidenceFields` and `date-floor` already do. Location rules are not previewed; the reviewer panel shows them.
-3. **Gap prompt.** After the first card is saved the form asks once: "Was there any spell when no worship happened here — a closure, a demolition, a rebuild? Record it as separate periods, not one long one." Answering "yes" opens the next card with the end reason of the first pre-selected to `closed` / `demolished` (the RA picks) and the start of the second empty. Answering "no" or "not sure" records nothing extra; "not sure" adds a suggested uncertainty note to the period ("gap possible, not established").
+3. **Gap prompt.** After the first card is saved the form asks once: "Was there any spell when no worship happened here — a closure, a demolition, a rebuild? Record it as separate periods, not one long one." Answering "yes" opens the next card with the end reason of the first pre-selected to `closed` / `demolished` (the RA picks) and the start of the second empty. Answering "no" records nothing extra. Answering "not sure" (JB's edge case, ruling R-E4) asks two more things: "When did it stop? A date, or the earliest and latest it could have been" and "When was it in use again? A date, or a 'by' date", and writes them as the bounds of the two periods (end `between` or `unknown`; start `between` or `by`, basis `first_seen_only`), with the period's confidence left for the RA to set. The doubt then lives in the bounds, where the engine can read it: a census year inside the doubtful range derives uncertain, while the years the RA is sure of derive present or absent as before.
 4. **One submission.** The periods are held in the device draft with the rest of the form. On submit the client sends the parent evidence first (unchanged mutation), then `submitOccupancies` against the new parent, as it already does from the post-submission pane. If the second call fails the pane stays open with the cards loaded and the parent stands, which is today's behaviour for a pane submission. No server change.
 5. **Guide.** `apps/guides/ra.html` gains the gap rule with the Christchurch example (section 4) and drops the "target-year statuses prefill from the action" sentence.
 
@@ -43,10 +43,19 @@ The fourth row is the one to teach: a partial date bound ("by 2016") is how the 
 - **R-E3** The gap prompt is one question after the first card (recommended) rather than a per-year checklist, which would reintroduce the grid by another name.
 - **R-E4** Per-year confidence disappears from the RA's entry: a period carries one confidence and its basis, and a derived year carries the rule. Reviewer confirmation is the confidence statement of record (recommended; consistent with the ruled basis vocabulary).
 
+## 5a. JB rulings — 2026-09-02 (evening)
+
+All four ruled as recommended, R-E4 with an edge case to design for.
+
+- **R-E1 ruled yes.** The year grid is demoted to the detailed form on assigned tasks.
+- **R-E2 ruled yes.** Periods enter the same form and submit right after the parent evidence.
+- **R-E3 ruled yes.** One gap question after the first card, not a per-year checklist.
+- **R-E4 ruled yes, with the edge case:** an RA may be confident about most of a place's history and unsure only whether it was inactive over a specific range. Per-year confidence would have let them mark those years low; without it the doubt must be expressible in the periods themselves. It is: the doubt goes into the bounds (an end `between` two dates, a start `between` or `by`), and the per-period confidence stays high on the periods the RA is sure of. The engine derives uncertain exactly for the census years inside the doubtful range (rules 6 and 7) and present or absent elsewhere, and the reviewer confirms uncertain or overrides with a note. The "not sure" branch of the gap prompt (section 2.3) is the place this is elicited, so the RA is never asked to invent a stop or restart date. Row 4 of the section 4 table is the worked case.
+
 ## 6. Acceptance
 
 - `node apps/regions/nz/js/occupancy-contract.test.cjs` gains the derivation tie fixtures (every rule 1–10 fires at least once, both combining outcomes, one conflict); `convex/lib/occupancies.node-test.mjs` unchanged.
-- A stub-DOM contract test for the preview strip and the gap prompt (rendering only).
+- A stub-DOM contract test for the preview strip and the gap prompt (rendering only), including the "not sure" branch producing bounded periods.
 - Live check on dev with a signed-in RA: an assigned NZ task submitted with two periods and a gap shows, in the reviewer's occupancy panel, absent–absent–present with the rules named; `Confirm all eligible` confirms all three; the export row then carries the three statuses with basis `reviewer_confirmed_derivation`.
 - Cache stamps bumped on `verification-map.js` and `occupancy-contract.js`; guide updated in the same PR.
 
