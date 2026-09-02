@@ -2561,21 +2561,45 @@ class NzVerificationMap {
                 return props.end_year === undefined || props.end_year === null || props.end_year >= year;
             })
             : this.datedFeatures;
+        // on imagery a slate dot vanishes against canopy and roofs, so the
+        // context dot becomes a pale disc with a dark edge over a white halo
+        // (jb 2026-09-02); on streets it keeps its subordinate slate
+        const imagery = this.basemap !== undefined && this.basemap !== "streets";
         show.forEach(feature => {
             const coords = feature.geometry?.coordinates || [];
             if (coords.length < 2) return;
+            const latlng = [coords[1], coords[0]];
+            if (imagery) {
+                this.contextDotLayer.addLayer(L.circleMarker(latlng, {
+                    radius: 6,
+                    stroke: false,
+                    fillColor: "#ffffff",
+                    fillOpacity: 0.9,
+                    interactive: false,
+                }));
+            }
             // legible but subordinate to task markers: a touch larger and
             // darker than before, and now interactive so each dot opens the
             // shared action row plus an issue/reopen entry
-            const dot = L.circleMarker([coords[1], coords[0]], {
-                radius: 4,
-                color: "#475569",
-                weight: 1,
-                fillColor: "#64748b",
-                fillOpacity: 0.65,
-                opacity: 0.85,
-                interactive: true,
-            });
+            const dot = L.circleMarker(latlng, imagery
+                ? {
+                    radius: 4,
+                    color: "#0f172a",
+                    weight: 1.5,
+                    fillColor: "#e2e8f0",
+                    fillOpacity: 1,
+                    opacity: 1,
+                    interactive: true,
+                }
+                : {
+                    radius: 4,
+                    color: "#475569",
+                    weight: 1,
+                    fillColor: "#64748b",
+                    fillOpacity: 0.65,
+                    opacity: 0.85,
+                    interactive: true,
+                });
             dot.bindPopup(() => this.contextDotPopupHtml(feature), { maxWidth: 320 });
             dot.on("popupopen", event => this.bindContextDotPopup(event.popup, feature));
             // a single click opens the case, matching task markers: a
@@ -3072,6 +3096,10 @@ class NzVerificationMap {
             // tiles sit beneath the canvas dots and dom markers
             incoming.bringToBack();
             this.basemap = next;
+            // imagery needs haloed markers: the css rings and the canvas
+            // context dots switch treatment on this class (jb 2026-09-02)
+            this.map.getContainer().classList.toggle("basemap-imagery", next !== "streets");
+            this.syncContextDots();
         }
         document.querySelectorAll(".basemap-toggle button").forEach(button => {
             button.setAttribute("aria-pressed", button.dataset.basemap === this.basemap ? "true" : "false");
