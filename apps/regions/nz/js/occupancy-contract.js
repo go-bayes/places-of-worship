@@ -405,6 +405,83 @@
         return `${start}; ${end}${where}.`;
     }
 
+    // the inverse of payload for a stored row: a card the entry pane can show
+    // again. a between whose bounds are Y-1 and Y+1 collapses back to
+    // "around Y" (the compile is idempotent, so the round trip is exact)
+    function collapseAround(lower, upper) {
+        if (!/^\d{4}$/.test(lower || "") || !/^\d{4}$/.test(upper || "")) return "";
+        const lo = Number(lower);
+        const hi = Number(upper);
+        return hi - lo === 2 ? String(lo + 1) : "";
+    }
+
+    function segmentFromRow(row) {
+        const r = row || {};
+        const distinct = r.location_relation === "distinct";
+        const segment = {
+            startMode: text(r.start_mode) || "known",
+            startDate: text(r.start_date),
+            startNotEarlierThan: text(r.start_not_earlier_than),
+            startNotLaterThan: text(r.start_not_later_than),
+            startAround: false,
+            startBasis: r.start_basis === "unknown" ? "" : text(r.start_basis),
+            endMode: text(r.end_mode) || "known",
+            endDate: text(r.end_date),
+            endNotEarlierThan: text(r.end_not_earlier_than),
+            endNotLaterThan: text(r.end_not_later_than),
+            endAround: false,
+            endBasis: r.end_basis === "unknown" ? "" : text(r.end_basis),
+            endReason: text(r.end_reason),
+            stillActiveAsof: text(r.still_active_asof),
+            successorSiteId: text(r.successor_site_id),
+            sameAsPin: !distinct,
+            location: distinct ? {
+                contract_version: "location_assertion_v1",
+                mode: text(r.location_mode) || "building_identified",
+                basis: text(r.location_basis) || "map_placement",
+                latitude: Number(r.latitude),
+                longitude: Number(r.longitude),
+                ...(r.uncertainty_radius_m !== undefined && r.uncertainty_radius_m !== null ? { uncertainty_radius_m: Number(r.uncertainty_radius_m) } : {}),
+                ...(text(r.location_wording) ? { source_wording: text(r.location_wording) } : {}),
+                confidence: text(r.location_confidence) || "high",
+                contributor_confirmed: true,
+            } : null,
+            locationSummary: "",
+        };
+        const startAround = segment.startMode === "between" ? collapseAround(segment.startNotEarlierThan, segment.startNotLaterThan) : "";
+        if (startAround) {
+            segment.startMode = "known";
+            segment.startDate = startAround;
+            segment.startAround = true;
+            segment.startNotEarlierThan = "";
+            segment.startNotLaterThan = "";
+        }
+        const endAround = segment.endMode === "between" ? collapseAround(segment.endNotEarlierThan, segment.endNotLaterThan) : "";
+        if (endAround) {
+            segment.endMode = "known";
+            segment.endDate = endAround;
+            segment.endAround = true;
+            segment.endNotEarlierThan = "";
+            segment.endNotLaterThan = "";
+        }
+        return segment;
+    }
+
+    // the shared provenance block of a submission, read from any of its rows
+    function provenanceFromRow(row) {
+        const r = row || {};
+        return {
+            confidence: text(r.confidence),
+            confidenceBasis: text(r.confidence_basis),
+            sourceBasis: text(r.source_basis),
+            sourceTitle: text(r.source_title),
+            sourceReference: text(r.source_reference),
+            sourceAccount: text(r.source_account),
+            uncertaintyNote: text(r.uncertainty_note),
+            privacyFlag: text(r.privacy_flag) || "needs_review",
+        };
+    }
+
     window.PowOccupancy = Object.freeze({
         CONTRACT_VERSION,
         describeBounds,
@@ -414,7 +491,9 @@
         partialDateLower,
         partialDateUpper,
         payload,
+        provenanceFromRow,
         segmentBounds,
+        segmentFromRow,
         validateSegment,
         validateSet,
     });
