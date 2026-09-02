@@ -2688,6 +2688,7 @@ class NzVerificationMap {
                 <a class="popup-link" href="${escapeHtml(osmPointUrl(lat, lng))}" target="_blank" rel="noopener noreferrer">Open OSM</a>
                 <button class="popup-link popup-copy-coords" type="button" data-copy="${escapeHtml(coordStr)}">Copy coords</button>` : ""}
                 ${osmType && osmId ? `<button class="popup-link popup-osm-history" type="button" data-osm-history="${escapeHtml(`${osmType}/${osmId}`)}">OSM history</button>` : ""}
+                ${matchedTaskId && this.taskCanAddOccupancy(matchedTaskId) ? `<button class="popup-link popup-add-occupancy" type="button" data-occupancy-task-id="${escapeHtml(matchedTaskId)}">Add where and when</button>` : ""}
                 ${issueButton}
             </div>
             <div class="popup-osm-history-body" hidden></div>
@@ -2709,6 +2710,11 @@ class NzVerificationMap {
         });
         el.querySelector("[data-report-issue]")?.addEventListener("click", () => {
             this.openContextIssueForm(feature);
+        });
+        el.querySelector("[data-occupancy-task-id]")?.addEventListener("click", (event) => {
+            const taskId = event.currentTarget.dataset.occupancyTaskId;
+            const task = this.featureForTaskId(taskId)?.properties || this.matchContextTask(feature) || { task_id: taskId };
+            this.openOccupancyFromRecord(task);
         });
         // osm edit history on demand (jb 2026-09-02): one fetch per object
         // per session; the popup grows in place
@@ -2749,7 +2755,7 @@ class NzVerificationMap {
         const canRevise = RAPID_NOMINATION_ENTRY && hasCoords
             && Boolean(this.backend?.configured && this.backend.signedIn);
         panel.innerHTML = `
-            <h2>Revise this place or report an issue</h2>
+            <h2 class="revise-heading">Revise this place or report an issue</h2>
             <div class="pilot-note" role="note">
                 <strong>${escapeHtml(context.name || "An unnamed place")}</strong>${hasCoords ? ` at ${context.latitude.toFixed(5)}, ${context.longitude.toFixed(5)}` : ""}.
             </div>
@@ -2761,12 +2767,15 @@ class NzVerificationMap {
                 <div class="copy-help">Record what you can establish about this place today — its location, current worship use, how you know, and photos — exactly as for a new place. Your evidence goes to human review; the record is not edited directly.</div>
                 <div class="button-row">
                     <button id="reviseWithEvidenceButton" type="button">Record evidence for this place</button>
+                    <button id="reviseReturnButton" type="button" class="secondary">Cancel and return to the map</button>
                 </div>
             ` : ""}
             ${this.issueFormHtml(context, { open: !canRevise, flagOnly: canRevise })}
+            ${canRevise ? "" : `
             <div class="button-row">
                 <button id="reviseReturnButton" type="button" class="secondary">Cancel and return to the map</button>
             </div>
+            `}
         `;
         document.getElementById("reviseWithEvidenceButton")?.addEventListener("click", () => this.enterReviseMode(context));
         document.getElementById("reviseReturnButton")?.addEventListener("click", () => this.discardEntryAttempt());
@@ -3466,6 +3475,7 @@ class NzVerificationMap {
                 ${this.linkHtml("Street View", props.street_view_url, "popup-link")}
                 <a class="popup-link" href="${escapeHtml(osmPointUrl(lat, lng))}" target="_blank" rel="noopener noreferrer">Open OSM</a>
                 <button class="popup-link popup-copy-coords" type="button" data-copy="${escapeHtml(coordStr)}">Copy coords</button>
+                ${this.taskCanAddOccupancy(props.task_id) ? `<button class="popup-link popup-add-occupancy" type="button" data-task-id="${escapeHtml(props.task_id)}">Add where and when</button>` : ""}
                 <button class="popup-report-issue" type="button" data-task-id="${escapeHtml(props.task_id)}">Report an issue</button>
             </div>
         `;
@@ -3478,6 +3488,14 @@ class NzVerificationMap {
         if (button) {
             button.addEventListener("click", () => {
                 this.selectTaskById(button.dataset.taskId, { focusDetail: true });
+            });
+        }
+        // periods for a place this ra has already recorded (site-card route)
+        const occupancyButton = popup.getElement()?.querySelector(".popup-add-occupancy");
+        if (occupancyButton) {
+            occupancyButton.addEventListener("click", () => {
+                const feature = this.featureForTaskId(occupancyButton.dataset.taskId);
+                this.openOccupancyFromRecord(feature?.properties || { task_id: occupancyButton.dataset.taskId });
             });
         }
         // low-prominence issue entry: open the task with its issue form expanded
@@ -3896,7 +3914,7 @@ class NzVerificationMap {
         const signedIn = Boolean(this.backend?.configured && this.backend.signedIn);
         return `
             <details id="issueReportDetails" class="skip-form issue-form"${open ? " open" : ""}>
-                <summary>${flagOnly ? "Just flag it — nothing to add" : "Revise this place or report an issue"}</summary>
+                <summary${flagOnly ? "" : ` class="revise-heading"`}>${flagOnly ? "Just flag it — nothing to add" : "Revise this place or report an issue"}</summary>
                 <div class="copy-help">
                     Nothing is edited or removed directly: your report opens a review task, and a reviewer decides against sources.
                 </div>
@@ -4122,6 +4140,80 @@ class NzVerificationMap {
             referenceDateFromParent: Boolean(parentDate),
             nomination,
         };
+    }
+
+    // periods attach to the same parent as known history, under the same
+    // author-and-status rule; the site card offers them wherever it offers
+    // history (brief section 5, second route)
+    taskCanAddOccupancy(taskId) {
+        return Boolean(window.PowOccupancy) && this.taskCanAddHistory(taskId);
+    }
+
+    // the second route into the periods pane: from a recorded place's site
+    // card (popup or detail) rather than the post-submission pane. the ra's
+    // periods already recorded for this parent load into the cards, because
+    // a new submission replaces the earlier set rather than adding to it
+    async openOccupancyFromRecord(props) {
+        const taskId = props?.task_id || "";
+        if (!taskId || !window.PowOccupancy) return;
+        this.map?.closePopup();
+        if (!this.latestDraftsByTaskId.has(taskId)) await this.loadLatestDraftForTask(taskId);
+        if (!this.taskCanAddOccupancy(taskId)) {
+            const status = document.getElementById("copyStatus");
+            if (status) status.textContent = "Periods can be recorded only by the author of this place's submitted evidence while it awaits review.";
+            return;
+        }
+        const draft = this.latestDraftForTask(taskId);
+        const context = { ...this.historicalClaimContext(props, draft, isNominationProps(props)), fromRecord: true };
+        let rows = [];
+        let loadNote = "";
+        try {
+            rows = (await this.backend.listTaskOccupancies({ taskId })) || [];
+        } catch (error) {
+            if (error.authExpired) {
+                this.backendUser = null;
+                this.backendLastError = error.message;
+                this.renderBackendPanel();
+                return;
+            }
+            loadNote = "Your earlier periods could not be loaded; saving now would replace them. Reload the portal before recording.";
+        }
+        const mine = rows
+            .filter(row => row.claim_status === "submitted"
+                && row.parent_evidence_draft_id === draft.evidence_draft_id
+                && row.created_by === this.backendUser?._id)
+            .sort((a, b) => a.segment_index - b.segment_index);
+        if (!mine.length) {
+            this.occupancyDraft = null;
+            this.renderOccupancyEntry(context, loadNote ? { statusMessage: loadNote } : {});
+            return;
+        }
+        this.occupancyDraft = {
+            taskId,
+            context,
+            submissionId: window.PowRapidEntry.secureSubmissionId(),
+            segments: mine.map(row => {
+                const segment = window.PowOccupancy.segmentFromRow(row);
+                segment.locationSummary = segment.location ? this.occupancyLocationSummary(segment.location) : "";
+                return segment;
+            }),
+            provenance: window.PowOccupancy.provenanceFromRow(mine[0]),
+        };
+        this.renderOccupancyEntry(context, {
+            restore: true,
+            statusMessage: `Your ${mine.length} recorded period${mine.length === 1 ? "" : "s"} ${mine.length === 1 ? "is" : "are"} loaded. Saving records the whole set again and replaces the earlier set for review.`,
+        });
+    }
+
+    // one line naming a card's distinct location, from its assertion
+    occupancyLocationSummary(assertion) {
+        const at = `${Number(assertion.latitude).toFixed(5)}, ${Number(assertion.longitude).toFixed(5)}`;
+        if (assertion.mode !== "approximate_area") return `Building at ${at}.`;
+        const radius = Number(assertion.uncertainty_radius_m);
+        const grade = window.PowLocationAssertion
+            ? window.PowLocationAssertion.gradeLabel({ mode: "approximate_area", uncertaintyRadiusM: radius })
+            : "approximate";
+        return `${grade.charAt(0).toUpperCase()}${grade.slice(1)} area within ${radius >= 1000 ? `${radius / 1000} km` : `${radius} m`} of ${at}.`;
     }
 
     startRapidCorrection(props) {
@@ -4949,6 +5041,7 @@ class NzVerificationMap {
         const status = backendTask?.status || "";
         const canCorrect = this.taskCanCorrectRapid(taskId);
         const canAddHistory = this.taskCanAddHistory(taskId);
+        const canAddOccupancy = this.taskCanAddOccupancy(taskId);
         const statusNote = status === "changes_requested"
             ? "A reviewer asked for more evidence. Submit a corrected observation to respond."
             : status === "needs_review" || status === "unresolved_note"
@@ -4979,6 +5072,7 @@ class NzVerificationMap {
             ${canCorrect || canAddHistory ? `
                 <div class="button-row">
                     ${canAddHistory ? `<button id="addKnownHistoryFromRecordedButton" type="button">Add known history</button>` : ""}
+                    ${canAddOccupancy ? `<button id="addOccupancyFromRecordedButton" class="secondary" type="button">Add where and when</button>` : ""}
                     ${canCorrect ? `<button id="correctObservationButton"${canAddHistory ? ` class="secondary"` : ""} type="button">Correct this observation</button>` : ""}
                     ${canCorrect ? `<button id="withdrawDraftButton" class="secondary" type="button">Delete this draft</button>` : ""}
                 </div>
@@ -5880,7 +5974,7 @@ class NzVerificationMap {
                 </fieldset>
                 <div class="button-row">
                     <button id="occupancySubmitButton" type="submit">Record these periods for review</button>
-                    <button id="occupancyDoneButton" class="secondary" type="button">${context.nomination ? "Done — nominate another PoW" : "Done — open next task"}</button>
+                    <button id="occupancyDoneButton" class="secondary" type="button">${this.occupancyDoneLabel(context)}</button>
                 </div>
                 <div id="occupancyStatus" class="copy-status" aria-live="polite"></div>
             </form>
@@ -6076,24 +6170,28 @@ class NzVerificationMap {
             });
             return;
         }
-        const at = `${confirmed.latitude.toFixed(5)}, ${confirmed.longitude.toFixed(5)}`;
-        const radius = assertion.uncertainty_radius_m;
-        const grade = approximate ? window.PowLocationAssertion.gradeLabel({ mode: "approximate_area", uncertaintyRadiusM: radius }) : "";
         segment.sameAsPin = false;
         segment.location = assertion;
-        segment.locationSummary = approximate
-            ? `${grade.charAt(0).toUpperCase()}${grade.slice(1)} area within ${radius >= 1000 ? `${radius / 1000} km` : `${radius} m`} of ${at}.`
-            : `Building at ${at}.`;
+        segment.locationSummary = this.occupancyLocationSummary(assertion);
         this.occupancyPinContext = null;
         this.exitPinMode();
         this.renderOccupancyEntry(pin.context, { restore: true, focusIndex: pin.index, markDirty: true });
+    }
+
+    occupancyDoneLabel(context) {
+        if (context.fromRecord) return "Done — back to this place";
+        return context.nomination ? "Done — nominate another PoW" : "Done — open next task";
     }
 
     finishOccupancyEntry(context) {
         if (this.formDirty && !window.confirm("Discard these unfinished periods?")) return;
         this.clearFormDirty();
         this.occupancyDraft = null;
-        if (context.nomination) {
+        if (context.fromRecord) {
+            // the site-card route returns to the record it came from
+            this.latestDraftsByTaskId.delete(context.taskId);
+            this.selectTaskById(context.taskId, { focusDetail: true });
+        } else if (context.nomination) {
             this.enterPinMode();
         } else {
             this.openNextAvailableTask();
@@ -6157,7 +6255,7 @@ class NzVerificationMap {
             <div class="copy-status" role="status">${escapeHtml(recorded)}</div>
             ${conflicts.length ? `<div class="pilot-note" role="note">${escapeHtml(`${plural(conflicts.length, "year")} (${conflicts.join(", ")}) conflict${conflicts.length === 1 ? "s" : ""} with the observed status; a reviewer must settle ${conflicts.length === 1 ? "it" : "them"}.`)}</div>` : ""}
             <div class="button-row">
-                <button id="occupancyDoneButton" type="button">${context.nomination ? "Done — nominate another PoW" : "Done — open next task"}</button>
+                <button id="occupancyDoneButton" type="button">${this.occupancyDoneLabel(context)}</button>
                 <button id="occupancyHistoryButton" class="secondary" type="button">Add known history</button>
             </div>
         `;
@@ -6430,6 +6528,7 @@ class NzVerificationMap {
                         ${canRevise ? `
                             <div class="button-row">
                                 ${canAddHistory ? `<button id="addKnownHistoryFromRecordedButton" type="button">Add known history</button>` : ""}
+                                ${canAddHistory && this.taskCanAddOccupancy(taskId) ? `<button id="addOccupancyFromRecordedButton" class="secondary" type="button">Add where and when</button>` : ""}
                                 <button id="reviseSubmissionButton"${canAddHistory ? ` class="secondary"` : ""} type="button">Revise submission</button>
                             </div>
                         ` : `
@@ -6490,6 +6589,7 @@ class NzVerificationMap {
             if (!draft) return;
             this.renderHistoricalClaimEntry(this.historicalClaimContext(props, draft));
         });
+        document.getElementById("addOccupancyFromRecordedButton")?.addEventListener("click", () => this.openOccupancyFromRecord(props));
         if (document.getElementById("taskRapidCurrentForm")) {
             // a correction renders with the previous draft prefilled; pass that
             // prefill through so the device-draft restore cannot overwrite it
