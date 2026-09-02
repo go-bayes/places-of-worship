@@ -142,7 +142,7 @@ const SCHEMA_BASE = RC.schemaBase || "../../../schemas/";
   <div id="contribute-panel" class="shell-panel" hidden aria-label="Contribute">
     <a id="contribute-osm" href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener"><strong>Improve OpenStreetMap</strong><span>Anyone can edit OpenStreetMap. Edits reach this map at the next annual audit.</span></a>
     ${CONTRIBUTE_ROUTES.portal
-      ? `<a id="contribute-portal" href="${CONTRIBUTE_ROUTES.portal.href}"><strong>Submit evidence to Religion Map</strong><span>Project members sign in with Google. If you are not yet a member, the sign-in page explains how to ask to join.</span></a>`
+      ? `<a id="contribute-portal" href="${CONTRIBUTE_ROUTES.portal.href}"><strong>Submit evidence to Religion Map</strong><span>Project members sign in with Google. If you are not yet a member, the sign-in page says how to get in touch.</span></a>`
         + (CONTRIBUTE_ROUTES.review ? `<a id="contribute-review" class="shell-panel-minor" href="${CONTRIBUTE_ROUTES.review.href}">Review evidence</a>` : "")
       : (CONTRIBUTE_ROUTES.repo ? `<a id="contribute-about" class="shell-panel-minor" href="${CONTRIBUTE_ROUTES.repo.href}" target="_blank" rel="noopener">About the project</a>` : "")}
   </div>

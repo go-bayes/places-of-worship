@@ -1977,6 +1977,7 @@ class NzVerificationMap {
                             : "Use the Google account JB invited (check the invitation email if you're not sure which one)."} After sign-in, choose between your assigned tasks and adding missing places; saved work goes straight to the shared review queue.`
                         : "Sign in with Google to load assigned tasks and save evidence directly for review."}</span>
                     <div id="googleSignInButton" class="google-sign-in-host"></div>
+                    <span class="copy-help">Not a project member yet? Access is by invitation from the project team; the <a href="https://github.com/go-bayes/places-of-worship" target="_blank" rel="noopener">project page</a> says how to get in touch.</span>
                     <details class="backend-help"><summary>Wrong account showing?</summary>The Google button shows accounts already signed into this browser. If the wrong name appears, choose another Google account or use a browser profile signed into the invited account.</details>
                     ${this.backendLastError ? `<span class="copy-status">${escapeHtml(this.backendLastError)}</span>` : ""}
                 </div>
