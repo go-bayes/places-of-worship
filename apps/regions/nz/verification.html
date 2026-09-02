@@ -487,10 +487,20 @@
             outline-offset: -2px;
         }
 
-        /* jb 2026-09-02: the revise/report entry reads as a warning, in red */
+        /* jb 2026-09-02: the revise/report entry reads as a warning, in red;
+           pr-g: larger, with the primary button directly beneath it */
         .detail-panel h2.revise-heading,
         .issue-form summary.revise-heading {
             color: var(--danger);
+        }
+
+        .detail-panel h2.revise-heading {
+            font-size: 24px;
+        }
+
+        .revise-primary-row button.revise-primary {
+            font-size: 16px;
+            padding: 12px 18px;
         }
 
         .detail-panel h2 {
@@ -597,7 +607,7 @@
             cursor: pointer;
         }
 
-        /* low-prominence issue entry: quiet text button under the pair */
+        /* low-prominence issue entry on task markers: quiet text button */
         .popup-actions .popup-report-issue {
             grid-column: 1 / -1;
             min-height: 28px;
@@ -608,6 +618,25 @@
             font-weight: 400;
             text-decoration: underline;
             cursor: pointer;
+        }
+
+        /* pr-g (jb 2026-09-02): on a recorded place's dot the revise entry
+           is the first, primary action; the links sit beneath it */
+        .popup-actions .popup-report-issue.popup-revise-primary {
+            min-height: 40px;
+            background: var(--action);
+            border: 1px solid var(--action);
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: inherit;
+            text-decoration: none;
+        }
+
+        .popup-actions .popup-revise-primary:hover,
+        .popup-actions .popup-revise-primary:focus-visible {
+            filter: brightness(1.08);
         }
 
         .skip-reason-chips {
@@ -1781,10 +1810,11 @@
         }
 
         .legend-dot.context-dot-swatch {
-            background: rgba(100, 116, 139, 0.75);
-            border: 1px solid #475569;
-            width: 8px;
-            height: 8px;
+            background: #f59e0b;
+            border: 1px solid #7c2d12;
+            box-shadow: 0 0 0 2px #ffffff;
+            width: 10px;
+            height: 10px;
         }
 
         .task-row-title .legend-dot {
@@ -2395,7 +2425,7 @@
 
             <div class="sidebar-actions">
                 <button type="button" id="addPlaceButton" class="primary-action">＋ Add a missing place</button>
-                <p class="sidebar-actions-help">Goes to human review — not straight to the public map. To revise a place already recorded, click its grey dot on the map and choose "Report an issue here".</p>
+                <p class="sidebar-actions-help">Goes to human review — not straight to the public map. To revise a place already recorded, click its amber dot on the map and press "Revise this place".</p>
             </div>
 
             <div id="quickstartBanner"></div>
@@ -2490,6 +2520,6 @@
     <script src="js/occupancy-contract.js?v=20260902g"></script>
     <script src="js/location-assertion-contract.js?v=20260902a"></script>
     <script src="js/osm-history.js?v=20260902c"></script>
-    <script src="js/verification-map.js?v=20260902k"></script>
+    <script src="js/verification-map.js?v=20260902m"></script>
 </body>
 </html>

@@ -1531,6 +1531,10 @@ function deriveTargetYearStatus(props, targetYear) {
     };
 }
 
+// pr-g: the context-dot colour, mirrored by .legend-dot.context-dot-swatch
+// and recorded in docs/ui-style-guide.md
+const CONTEXT_DOT_COLOUR = "#f59e0b";
+
 function osmObjectUrl(osmType, osmId) {
     if (!osmType || !osmId) return "";
     return `https://www.openstreetmap.org/${encodeURIComponent(osmType)}/${encodeURIComponent(osmId)}`;
@@ -2563,45 +2567,33 @@ class NzVerificationMap {
                 return props.end_year === undefined || props.end_year === null || props.end_year >= year;
             })
             : this.datedFeatures;
-        // on imagery a slate dot vanishes against canopy and roofs, so the
-        // context dot becomes a pale disc with a dark edge over a white halo
-        // (jb 2026-09-02); on streets it keeps its subordinate slate
-        const imagery = this.basemap !== undefined && this.basemap !== "streets";
+        // pr-g (jb 2026-09-02): a recorded place you can revise is one class
+        // on every basemap — an amber disc, a touch larger than before, with
+        // a dark hairline over a white halo. slate vanished on streets as
+        // well as on imagery; amber is the free colour beside the teal
+        // nominations and the blue task markers
         show.forEach(feature => {
             const coords = feature.geometry?.coordinates || [];
             if (coords.length < 2) return;
             const latlng = [coords[1], coords[0]];
-            if (imagery) {
-                this.contextDotLayer.addLayer(L.circleMarker(latlng, {
-                    radius: 6,
-                    stroke: false,
-                    fillColor: "#ffffff",
-                    fillOpacity: 0.9,
-                    interactive: false,
-                }));
-            }
-            // legible but subordinate to task markers: a touch larger and
-            // darker than before, and now interactive so each dot opens the
-            // shared action row plus an issue/reopen entry
-            const dot = L.circleMarker(latlng, imagery
-                ? {
-                    radius: 4,
-                    color: "#0f172a",
-                    weight: 1.5,
-                    fillColor: "#e2e8f0",
-                    fillOpacity: 1,
-                    opacity: 1,
-                    interactive: true,
-                }
-                : {
-                    radius: 4,
-                    color: "#475569",
-                    weight: 1,
-                    fillColor: "#64748b",
-                    fillOpacity: 0.65,
-                    opacity: 0.85,
-                    interactive: true,
-                });
+            this.contextDotLayer.addLayer(L.circleMarker(latlng, {
+                radius: 8,
+                stroke: false,
+                fillColor: "#ffffff",
+                fillOpacity: 0.9,
+                interactive: false,
+            }));
+            // interactive: each dot opens the shared action row with the
+            // revise entry first
+            const dot = L.circleMarker(latlng, {
+                radius: 5.5,
+                color: "#7c2d12",
+                weight: 1.25,
+                fillColor: CONTEXT_DOT_COLOUR,
+                fillOpacity: 0.95,
+                opacity: 1,
+                interactive: true,
+            });
             dot.bindPopup(() => this.contextDotPopupHtml(feature), { maxWidth: 320 });
             dot.on("popupopen", event => this.bindContextDotPopup(event.popup, feature));
             // a single click opens the case, matching task markers: a
@@ -2674,24 +2666,24 @@ class NzVerificationMap {
         const canReopen = Boolean(backendTask && REOPEN_ELIGIBLE_STATUSES.has(backendTask.status));
         let issueButton;
         if (matchedTaskId && canReopen) {
-            issueButton = `<button class="popup-report-issue" type="button" data-reopen-task-id="${escapeHtml(matchedTaskId)}">Reopen issue</button>`;
+            issueButton = `<button class="popup-report-issue popup-revise-primary" type="button" data-reopen-task-id="${escapeHtml(matchedTaskId)}">Reopen this place's issue</button>`;
         } else if (matchedTaskId) {
             // matched a task not in a reopenable state: route into its issue form
-            issueButton = `<button class="popup-report-issue" type="button" data-open-task-id="${escapeHtml(matchedTaskId)}">Revise or report an issue</button>`;
+            issueButton = `<button class="popup-report-issue popup-revise-primary" type="button" data-open-task-id="${escapeHtml(matchedTaskId)}">Revise this place</button>`;
         } else {
-            issueButton = `<button class="popup-report-issue" type="button" data-report-issue="1">Revise or report an issue</button>`;
+            issueButton = `<button class="popup-report-issue popup-revise-primary" type="button" data-report-issue="1">Revise this place</button>`;
         }
         return `
             <strong>${escapeHtml(name)}</strong><br>
             <span>${escapeHtml(coordStr)}</span><br>
             <div class="popup-actions">
+                ${issueButton}
                 ${hasCoords ? `
                 ${this.linkHtml("Street View", streetViewUrlForCoordinates(coords), "popup-link")}
                 <a class="popup-link" href="${escapeHtml(osmPointUrl(lat, lng))}" target="_blank" rel="noopener noreferrer">Open OSM</a>
                 <button class="popup-link popup-copy-coords" type="button" data-copy="${escapeHtml(coordStr)}">Copy coords</button>` : ""}
                 ${osmType && osmId ? `<button class="popup-link popup-osm-history" type="button" data-osm-history="${escapeHtml(`${osmType}/${osmId}`)}">OSM history</button>` : ""}
                 ${matchedTaskId && this.taskCanAddOccupancy(matchedTaskId) ? `<button class="popup-link popup-add-occupancy" type="button" data-occupancy-task-id="${escapeHtml(matchedTaskId)}">Add where and when</button>` : ""}
-                ${issueButton}
             </div>
             <div class="popup-osm-history-body" hidden></div>
         `;
@@ -2761,16 +2753,18 @@ class NzVerificationMap {
             <div class="pilot-note" role="note">
                 <strong>${escapeHtml(context.name || "An unnamed place")}</strong>${hasCoords ? ` at ${context.latitude.toFixed(5)}, ${context.longitude.toFixed(5)}` : ""}.
             </div>
+            ${canRevise ? `
+                <div class="button-row revise-primary-row">
+                    <button id="reviseWithEvidenceButton" type="button" class="revise-primary">Revise this place</button>
+                    <button id="reviseReturnButton" type="button" class="secondary">Cancel and return to the map</button>
+                </div>
+            ` : ""}
             ${(() => {
                 const t = window.PowOsmHistory ? window.PowOsmHistory.normaliseType(props.osm_type) : "";
                 return t && context.osmId ? `<div id="reviseOsmHistory" class="osm-history-host" data-osm-type="${escapeHtml(t)}" data-osm-id="${escapeHtml(context.osmId)}"></div>` : "";
             })()}
             ${canRevise ? `
-                <div class="copy-help">Record what you can establish about this place today — its location, current worship use, how you know, and photos — exactly as for a new place. Your evidence goes to human review; the record is not edited directly.</div>
-                <div class="button-row">
-                    <button id="reviseWithEvidenceButton" type="button">Record evidence for this place</button>
-                    <button id="reviseReturnButton" type="button" class="secondary">Cancel and return to the map</button>
-                </div>
+                <div class="copy-help"><strong>Revise this place</strong> records what you can establish about it today — its location, current worship use, how you know, and photos — exactly as for a new place. Your evidence goes to human review; the record is not edited directly.</div>
             ` : ""}
             ${this.issueFormHtml(context, { open: !canRevise, flagOnly: canRevise })}
             ${canRevise ? "" : `
@@ -2951,7 +2945,7 @@ class NzVerificationMap {
             </button>
             <button type="button" class="chooser-option" id="chooseAddButton">
                 <strong>Add or revise places</strong>
-                <span>Nominate a missing place, or click a grey dot on the map to revise a place already recorded.${(this.myNominationItems || []).length ? ` You have ${this.myNominationItems.length} under review.` : ""}</span>
+                <span>Nominate a missing place, or click an amber dot on the map to revise a place already recorded.${(this.myNominationItems || []).length ? ` You have ${this.myNominationItems.length} under review.` : ""}</span>
             </button>
         `;
         document.getElementById("chooseAssignedButton")?.addEventListener("click", () => this.setPortalMode("assigned"));
@@ -3731,7 +3725,7 @@ class NzVerificationMap {
                 <div class="${this.backend?.configured ? "pilot-note" : "demo-warning"}" role="${this.backend?.configured ? "note" : "alert"}">
                     ${this.backend?.configured
                         ? this.portalMode === "add"
-                            ? `Use <strong>＋ Add a missing place</strong> above, then find the building by searching a name or address, typing coordinates, or clicking the map. Drag the pin onto the building before confirming. To revise a place already recorded, click its grey dot and choose "Revise or report an issue".`
+                            ? `Use <strong>＋ Add a missing place</strong> above, then find the building by searching a name or address, typing coordinates, or clicking the map. Drag the pin onto the building before confirming. To revise a place already recorded, click its amber dot and choose "Revise this place".`
                             : RAPID_ASSIGNED_ENTRY
                                 ? `Work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. For each place, choose one current-status answer, record how you know it, and use <em>Submit for review</em>.`
                                 : `Work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when useful evidence remains incomplete, and <em>Submit for review</em> when a case is ready for JB.`
