@@ -796,6 +796,21 @@ export const submitEvidenceDraftWithOccupancies = mutation({
     if (draft.draft_status !== "draft") {
       throw new Error("Submit periods against the current editable draft, not an earlier submitted version.");
     }
+    // a lost reply can leave the browser retrying the same submission id
+    // against a fresh draft after a reload; the rows already exist under
+    // the key, so refuse rather than record a second set with the same ids
+    const priorRows = await ctx.db
+      .query("site_occupancies")
+      .withIndex("by_submission_key", (q) => q.eq("submission_key", submissionKey))
+      .take(1);
+    if (priorRows.length > 0) {
+      if (priorRows[0].created_by !== user._id) {
+        throw new Error("The submission identifier is already in use.");
+      }
+      throw new Error(
+        "These periods were already recorded against an earlier evidence version. Refresh the task list before trying again.",
+      );
+    }
     const requirement = assignedTaskPeriodProblem(task, draft, args.segments.length);
     if (requirement) throw new Error(requirement);
 
