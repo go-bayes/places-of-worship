@@ -104,7 +104,7 @@ Bounds per segment: start ⇒ `[startLower, startUpper]`; end ⇒ `[endLower, en
 | 9 | start_unknown | no start bound and (no endLower or Y-12-31 ≤ endLower) | uncertain |
 | 10 | end_unknown | dated start before the year, end undated and not still_active | uncertain |
 
-Rule 8 is evaluated before rule 7 so that an open segment reports its anchor, as the ruled text intends. Rule 10 is an addition: the ruled table has no case for a dated start with an undated end after it; writing `uncertain` is a judgement, silence would be `not_assessed`. Flagged for ratification.
+Rule 8 is evaluated before rule 7 so that an open segment reports its anchor, as the ruled text intends. Rule 10 is an addition to the ruled table, which has no case for a dated start with an undated end after it; writing `uncertain` is a judgement, silence would be `not_assessed`. **Ratified by JB, 2026-09-02** ("Rule 10 is exactly right").
 
 Combination across segments: any present ⇒ present; else any uncertain ⇒ uncertain; else all absent ⇒ absent; none ⇒ no row.
 
