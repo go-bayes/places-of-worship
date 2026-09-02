@@ -2755,7 +2755,7 @@ class NzVerificationMap {
         const canRevise = RAPID_NOMINATION_ENTRY && hasCoords
             && Boolean(this.backend?.configured && this.backend.signedIn);
         panel.innerHTML = `
-            <h2>Revise this place or report an issue</h2>
+            <h2 class="revise-heading">Revise this place or report an issue</h2>
             <div class="pilot-note" role="note">
                 <strong>${escapeHtml(context.name || "An unnamed place")}</strong>${hasCoords ? ` at ${context.latitude.toFixed(5)}, ${context.longitude.toFixed(5)}` : ""}.
             </div>
@@ -2767,12 +2767,15 @@ class NzVerificationMap {
                 <div class="copy-help">Record what you can establish about this place today — its location, current worship use, how you know, and photos — exactly as for a new place. Your evidence goes to human review; the record is not edited directly.</div>
                 <div class="button-row">
                     <button id="reviseWithEvidenceButton" type="button">Record evidence for this place</button>
+                    <button id="reviseReturnButton" type="button" class="secondary">Cancel and return to the map</button>
                 </div>
             ` : ""}
             ${this.issueFormHtml(context, { open: !canRevise, flagOnly: canRevise })}
+            ${canRevise ? "" : `
             <div class="button-row">
                 <button id="reviseReturnButton" type="button" class="secondary">Cancel and return to the map</button>
             </div>
+            `}
         `;
         document.getElementById("reviseWithEvidenceButton")?.addEventListener("click", () => this.enterReviseMode(context));
         document.getElementById("reviseReturnButton")?.addEventListener("click", () => this.discardEntryAttempt());
@@ -3911,7 +3914,7 @@ class NzVerificationMap {
         const signedIn = Boolean(this.backend?.configured && this.backend.signedIn);
         return `
             <details id="issueReportDetails" class="skip-form issue-form"${open ? " open" : ""}>
-                <summary>${flagOnly ? "Just flag it — nothing to add" : "Revise this place or report an issue"}</summary>
+                <summary${flagOnly ? "" : ` class="revise-heading"`}>${flagOnly ? "Just flag it — nothing to add" : "Revise this place or report an issue"}</summary>
                 <div class="copy-help">
                     Nothing is edited or removed directly: your report opens a review task, and a reviewer decides against sources.
                 </div>
