@@ -86,6 +86,7 @@ Do not reuse these colours for unrelated meanings.
 | Not assessed | `.status-not-assessed` | pale blue, currently around `#e8f1fb`, `#1f4e79` |
 | Warning or demo-only message | `.demo-warning` | amber warning |
 | Disabled or unavailable state | `.disabled-panel`, `.backend-card.disabled` | light grey |
+| Recorded place on the map that an RA can revise (context dot) — marks only, never a status pill | `.legend-dot.context-dot-swatch`, `CONTEXT_DOT_COLOUR` in `verification-map.js` | amber disc `#f59e0b` with hairline `#7c2d12` over a white halo, on every basemap (JB, 2026-09-02, PR-G). Distinct in use from the uncertain-state amber, which is a pill colour; the two never meet on one surface. |
 | Pure data entry (nominations, walk-up records) — containers only, never the action button | `.portal-mode-bar.mode-add`, `.nominations-panel`, `.entry-badge`, `.task-row.entry-card`, `.pin-card-host`, `.verification-marker.vm-nomination`, `.legend-dot.vm-nomination-swatch`, `.chooser-option#chooseAddButton strong` | teal, `--entry` `#0f766e`, `--entry-ink` `#115e59`, `--entry-bg` `#e6f4f1` (JB separation ruling, 2026-08-31) |
 
 If these colours change, update both the CSS and this table. On
