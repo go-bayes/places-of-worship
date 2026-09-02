@@ -9,6 +9,7 @@ import {
   derivePresence,
   gapYears,
   occupancyInputsHash,
+  occupancyReferenceDate,
   presenceForSegment,
   segmentBounds,
   startPrecision,
@@ -18,6 +19,11 @@ import {
 const REF = "2026-09-02";
 const VU_YEARS = [1989, 1999, 2009, 2020];
 const PIN = { latitude: -17.74, longitude: 168.32 };
+
+test("period validation uses the parent evidence date with a legacy recorded-date fallback", () => {
+  assert.equal(occupancyReferenceDate("2016-07", Date.UTC(2026, 8, 2)), "2016-07");
+  assert.equal(occupancyReferenceDate(undefined, Date.UTC(2026, 8, 2)), "2026-09-02");
+});
 
 const provenance = {
   confidence: "moderate",
@@ -76,6 +82,12 @@ test("the worked example: founded 1980, still going in 2010", () => {
 test("a stated founding licenses absence before it; a first record does not", () => {
   const founded = stored("a", { start_date: "1995" });
   assert.equal(presenceForSegment(founded, 1989).rule_id, "before_stated_founding");
+  const reopened = { ...founded, start_basis: "reopening_stated" };
+  assert.equal(presenceForSegment(reopened, 1989).rule_id, "before_stated_reopening");
+  assert.equal(presenceForSegment(reopened, 1989).status, "absent");
+  const dedicatedStart = { ...founded, start_basis: "building_dedication" };
+  assert.equal(presenceForSegment(dedicatedStart, 1989).rule_id, "before_first_record");
+  assert.equal(presenceForSegment(dedicatedStart, 1989).status, "uncertain");
   assert.equal(presenceForSegment(founded, 1989).status, "absent");
   const seen = stored("a", { start_date: "1995", start_basis: "first_seen_only" });
   assert.equal(presenceForSegment(seen, 1989).rule_id, "before_first_record");
@@ -218,7 +230,7 @@ test("mode and date fields must agree", () => {
   assert.throws(() => assertOccupancySegment(input({ start_date: undefined }), REF), /start date must be a real date/);
   assert.throws(() => assertOccupancySegment(input({ start_not_later_than: "1985" }), REF), /must be blank when the start date is known/);
   assert.throws(() => assertOccupancySegment(input({ start_mode: "between", start_date: undefined, start_not_earlier_than: "1990", start_not_later_than: "1985" }), REF), /earliest possible start must not be after/);
-  assert.throws(() => assertOccupancySegment(input({ still_active_asof: "2030" }), REF), /cannot be later than the submission date/);
+  assert.throws(() => assertOccupancySegment(input({ still_active_asof: "2030" }), REF), /cannot be later than the evidence reference date/);
   assert.throws(() => assertOccupancySegment(input({ end_mode: "known", end_date: "1970", end_basis: "closure_stated", end_reason: "closed", still_active_asof: undefined }), REF), /cannot end before it begins/);
   assert.throws(() => assertOccupancySegment(input({ start_date: "1500" }), REF), /from 1600 onward/);
 });

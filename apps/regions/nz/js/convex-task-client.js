@@ -302,6 +302,10 @@
             return await this.request("mutation", "evidence:submitEvidenceDraft", args);
         }
 
+        async submitEvidenceDraftWithOccupancies(args) {
+            return await this.request("mutation", "evidence:submitEvidenceDraftWithOccupancies", args);
+        }
+
         async submitUnresolvedNote(args) {
             return await this.request("mutation", "evidence:submitUnresolvedNote", args);
         }

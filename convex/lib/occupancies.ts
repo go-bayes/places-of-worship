@@ -14,9 +14,15 @@ import { canonicalJson, sha256 } from "./sha256.ts";
 export const OCCUPANCY_CONTRACT = "occupancy_v1";
 export const OCCUPANCY_DERIVATION_VERSION = "occupancy_derivation_v1";
 
+// Period dates are interpreted against the evidence they describe. The
+// recorded date is only a legacy fallback for parents that predate that field.
+export function occupancyReferenceDate(parentEvidenceDate: string | undefined, recordedAt: number): string {
+  return parentEvidenceDate?.trim() || new Date(recordedAt).toISOString().slice(0, 10);
+}
+
 export type StartMode = "known" | "between" | "by" | "unknown";
 export type EndMode = "still_active" | "known" | "between" | "after" | "unknown";
-export type StartBasis = "founding_stated" | "organisation_founded" | "building_dedication" | "first_seen_only" | "unknown";
+export type StartBasis = "founding_stated" | "reopening_stated" | "organisation_founded" | "building_dedication" | "first_seen_only" | "unknown";
 export type EndBasis = "closure_stated" | "last_seen_only" | "unknown";
 export type EndReason = "closed" | "relocated" | "demolished" | "use_changed" | "unknown";
 export type DatePrecision = "day" | "month" | "year" | "bounded" | "unknown";
@@ -86,7 +92,7 @@ function assertPartialDate(label: string, value: string | undefined, referenceDa
     throw new Error(`${label} must be a real date as YYYY, YYYY-MM, or YYYY-MM-DD from ${floorYear} onward.`);
   }
   if (partialDateLower(text) > partialDateUpper(referenceDate)) {
-    throw new Error(`${label} cannot be later than the submission date (${referenceDate}).`);
+    throw new Error(`${label} cannot be later than the evidence reference date (${referenceDate}).`);
   }
   return text;
 }
@@ -117,7 +123,7 @@ export function endPrecision(segment: Pick<OccupancySegmentInput, "end_mode" | "
   return "bounded";
 }
 
-// validates one segment's own fields against the submission date
+// validates one segment's own fields against the parent evidence date
 export function assertOccupancySegment(
   segment: OccupancySegmentInput,
   referenceDate: string,
@@ -163,7 +169,7 @@ export function assertOccupancySegment(
     throw new Error("An unknown start cannot carry a start basis; record it as unknown.");
   }
   if (s.start_mode !== "unknown" && s.start_basis === "unknown") {
-    throw new Error("A dated start needs its basis: founding stated, organisation founded, building dedication, or first seen only.");
+    throw new Error("A dated start needs its basis: founding stated, reopening stated, organisation founded, building dedication, or first seen only.");
   }
   // end
   switch (s.end_mode) {
@@ -400,6 +406,7 @@ export type PresenceStatus = "present" | "absent" | "uncertain";
 export type PresenceRuleId =
   | "inside_interval"
   | "before_stated_founding"
+  | "before_stated_reopening"
   | "before_first_record"
   | "after_stated_closure"
   | "after_last_record"
@@ -426,10 +433,13 @@ export function presenceForSegment(segment: OccupancySegment, year: number): Seg
   if (b.startUpper !== undefined && b.startUpper <= yStart && b.endLower !== undefined && yEnd <= b.endLower) {
     return fire("inside_interval", "present");
   }
+  // a stated founding or a stated reopening both license absence before
+  // the start: a source that states a reopening states that the place was
+  // out of use until then (rule 2 and its pr-e twin 2b)
   if (b.startLower !== undefined && yEnd < b.startLower) {
-    return segment.start_basis === "founding_stated"
-      ? fire("before_stated_founding", "absent")
-      : fire("before_first_record", "uncertain");
+    if (segment.start_basis === "founding_stated") return fire("before_stated_founding", "absent");
+    if (segment.start_basis === "reopening_stated") return fire("before_stated_reopening", "absent");
+    return fire("before_first_record", "uncertain");
   }
   if (b.endUpper !== undefined && yStart > b.endUpper) {
     return segment.end_basis === "closure_stated"
@@ -606,6 +616,7 @@ export function occupancyInputsHash(segments: OccupancySegment[]): string {
 export const PRESENCE_RULE_TEXT: Record<PresenceRuleId, string> = {
   inside_interval: "the year falls inside the recorded period",
   before_stated_founding: "the year is before the stated founding",
+  before_stated_reopening: "the year is before the stated reopening",
   before_first_record: "the year is before the first record, which does not prove absence",
   after_stated_closure: "the year is after the stated closure",
   after_last_record: "the year is after the last record, which does not prove absence",

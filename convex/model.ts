@@ -265,8 +265,8 @@ export const occupancyEndMode = v.union(
   v.literal("still_active"), v.literal("known"), v.literal("between"), v.literal("after"), v.literal("unknown"),
 );
 export const occupancyStartBasis = v.union(
-  v.literal("founding_stated"), v.literal("organisation_founded"), v.literal("building_dedication"),
-  v.literal("first_seen_only"), v.literal("unknown"),
+  v.literal("founding_stated"), v.literal("reopening_stated"), v.literal("organisation_founded"),
+  v.literal("building_dedication"), v.literal("first_seen_only"), v.literal("unknown"),
 );
 export const occupancyEndBasis = v.union(
   v.literal("closure_stated"), v.literal("last_seen_only"), v.literal("unknown"),
@@ -307,6 +307,45 @@ export const occupancySegmentInput = v.object({
   uncertainty_note: v.optional(v.string()),
   privacy_flag: privacyFlag,
 });
+
+// The guided form persists its editable card shape before it is compiled to
+// occupancy_v1 rows. Keep this validator explicit: drafts are an authenticated
+// write boundary, not a place for arbitrary client JSON.
+const pendingOccupancyProvenance = v.object({
+  confidence: v.string(),
+  confidenceBasis: v.string(),
+  sourceBasis: v.string(),
+  sourceTitle: v.string(),
+  sourceReference: v.string(),
+  sourceAccount: v.string(),
+  uncertaintyNote: v.string(),
+  privacyFlag: v.string(),
+});
+
+export const pendingOccupancyCards = v.array(v.object({
+  startMode: occupancyStartMode,
+  startDate: v.string(),
+  startNotEarlierThan: v.string(),
+  startNotLaterThan: v.string(),
+  startAround: v.boolean(),
+  startBasis: v.union(v.literal(""), occupancyStartBasis),
+  endMode: occupancyEndMode,
+  endDate: v.string(),
+  endNotEarlierThan: v.string(),
+  endNotLaterThan: v.string(),
+  endAround: v.boolean(),
+  endBasis: v.union(v.literal(""), occupancyEndBasis),
+  endReason: v.union(v.literal(""), occupancyEndReason),
+  stillActiveAsof: v.string(),
+  successorSiteId: v.optional(v.string()),
+  sameAsPin: v.boolean(),
+  location: v.union(v.null(), locationAssertionInput),
+  locationSummary: v.string(),
+  _gapAnswer: v.optional(v.union(v.literal(""), v.literal("yes"), v.literal("no"), v.literal("unsure"))),
+  _gapNote: v.optional(v.string()),
+  _sameSource: v.optional(v.boolean()),
+  _provenance: v.optional(pendingOccupancyProvenance),
+}));
 export const derivedPresenceStatus = v.union(
   v.literal("present"), v.literal("absent"), v.literal("uncertain"),
 );
@@ -488,6 +527,11 @@ export const evidenceDraftInput = v.object({
   privacy_flag: v.optional(privacyFlag),
   licence_flag: v.optional(licenceFlag),
   validation_summary: v.optional(v.any()),
+  // pr-e: why the ra set census-year statuses by hand instead of periods
+  target_year_entry_reason: v.optional(v.string()),
+  // pr-e: period cards typed in the guided form and saved with the draft;
+  // cleared by recordOccupancySet once the periods are rows
+  pending_occupancy_cards: v.optional(pendingOccupancyCards),
 });
 
 export const rapidCurrentObservationInput = v.object({

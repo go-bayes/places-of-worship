@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { assertEvidenceDraftSubmission } from "./limits.ts";
+import { assertEvidenceDraftLimits, assertEvidenceDraftSubmission } from "./limits.ts";
 
 const validDraft = {
   observation_contract_version: "guided_observation_v1",
@@ -13,6 +13,14 @@ const validDraft = {
   source_type: "other",
   source_url_or_file: "https://example.org/source",
 };
+
+test("pending occupancy cards are bounded independently of their JSON size", () => {
+  assert.doesNotThrow(() => assertEvidenceDraftLimits({ pending_occupancy_cards: Array.from({ length: 20 }, () => ({})) }));
+  assert.throws(
+    () => assertEvidenceDraftLimits({ pending_occupancy_cards: Array.from({ length: 21 }, () => ({})) }),
+    /at most 20 pending occupancy cards/,
+  );
+});
 
 test("guided denomination evidence passes when the raw label and both dimensions are present", () => {
   assert.doesNotThrow(() => assertEvidenceDraftSubmission(validDraft, false));

@@ -77,7 +77,7 @@ export type OccupancyImportDefaults = {
 
 const START_MODES = new Set(["known", "between", "by", "unknown"]);
 const END_MODES = new Set(["still_active", "known", "between", "after", "unknown"]);
-const START_BASES = new Set(["founding_stated", "organisation_founded", "building_dedication", "first_seen_only", "unknown"]);
+const START_BASES = new Set(["founding_stated", "reopening_stated", "organisation_founded", "building_dedication", "first_seen_only", "unknown"]);
 const END_BASES = new Set(["closure_stated", "last_seen_only", "unknown"]);
 const END_REASONS = new Set(["closed", "relocated", "demolished", "use_changed", "unknown"]);
 const LOCATION_MODES = new Set(["building_identified", "approximate_area"]);

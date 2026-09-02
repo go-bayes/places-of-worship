@@ -487,10 +487,20 @@
             outline-offset: -2px;
         }
 
-        /* jb 2026-09-02: the revise/report entry reads as a warning, in red */
+        /* jb 2026-09-02: the revise/report entry reads as a warning, in red;
+           pr-g: larger, with the primary button directly beneath it */
         .detail-panel h2.revise-heading,
         .issue-form summary.revise-heading {
             color: var(--danger);
+        }
+
+        .detail-panel h2.revise-heading {
+            font-size: 24px;
+        }
+
+        .revise-primary-row button.revise-primary {
+            font-size: 16px;
+            padding: 12px 18px;
         }
 
         .detail-panel h2 {
@@ -597,7 +607,7 @@
             cursor: pointer;
         }
 
-        /* low-prominence issue entry: quiet text button under the pair */
+        /* low-prominence issue entry on task markers: quiet text button */
         .popup-actions .popup-report-issue {
             grid-column: 1 / -1;
             min-height: 28px;
@@ -608,6 +618,25 @@
             font-weight: 400;
             text-decoration: underline;
             cursor: pointer;
+        }
+
+        /* pr-g (jb 2026-09-02): on a recorded place's dot the revise entry
+           is the first, primary action; the links sit beneath it */
+        .popup-actions .popup-report-issue.popup-revise-primary {
+            min-height: 40px;
+            background: var(--action);
+            border: 1px solid var(--action);
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: inherit;
+            text-decoration: none;
+        }
+
+        .popup-actions .popup-revise-primary:hover,
+        .popup-actions .popup-revise-primary:focus-visible {
+            filter: brightness(1.08);
         }
 
         .skip-reason-chips {
@@ -1781,10 +1810,11 @@
         }
 
         .legend-dot.context-dot-swatch {
-            background: rgba(100, 116, 139, 0.75);
-            border: 1px solid #475569;
-            width: 8px;
-            height: 8px;
+            background: #f59e0b;
+            border: 1px solid #7c2d12;
+            box-shadow: 0 0 0 2px #ffffff;
+            width: 10px;
+            height: 10px;
         }
 
         .task-row-title .legend-dot {
@@ -2132,6 +2162,47 @@
         }
 
         /* occupancy lane: one card per period, teal entry framing */
+        .guided-periods {
+            margin: 10px 0 14px;
+            padding: 10px 12px;
+            border: 1px solid #d6dde6;
+            border-radius: 10px;
+            background: #f9fbfd;
+        }
+
+        .gap-prompt {
+            margin: 10px 0;
+            padding: 10px 12px;
+            border-left: 4px solid #d98c1f;
+            background: #fff7e8;
+            border-radius: 6px;
+        }
+
+        .gap-prompt p {
+            margin: 0 0 6px;
+        }
+
+        .gap-unsure {
+            margin-top: 8px;
+        }
+
+        .periods-preview {
+            margin: 8px 0;
+            padding: 8px 10px;
+            border-radius: 6px;
+            background: #eef4fb;
+            font-size: 0.92rem;
+        }
+
+        .periods-preview:empty {
+            display: none;
+        }
+
+        .periods-preview-conflict {
+            background: #fde8e8;
+            color: #8a1c1c;
+        }
+
         .occupancy-cards {
             display: grid;
             gap: 12px;
@@ -2395,7 +2466,7 @@
 
             <div class="sidebar-actions">
                 <button type="button" id="addPlaceButton" class="primary-action">＋ Add a missing place</button>
-                <p class="sidebar-actions-help">Goes to human review — not straight to the public map. To revise a place already recorded, click its grey dot on the map and choose "Report an issue here".</p>
+                <p class="sidebar-actions-help">Goes to human review — not straight to the public map. To revise a place already recorded, click its amber dot on the map and press "Revise this place".</p>
             </div>
 
             <div id="quickstartBanner"></div>
@@ -2482,14 +2553,14 @@
          hides itself when the key is absent -->
     <script src="../../global/config.public.js"></script>
     <script src="js/convex-config.js?v=20260707-changes-requested"></script>
-    <script src="js/convex-task-client.js?v=20260902e"></script>
+    <script src="js/convex-task-client.js?v=20260902f"></script>
     <script src="js/wide-evidence-fields.js?v=20260902d"></script>
     <script src="js/rapid-entry-contract.js?v=20260901a"></script>
     <script src="js/historical-claim-contract.js?v=20260902a"></script>
     <script src="js/date-floor.js?v=20260902a"></script>
-    <script src="js/occupancy-contract.js?v=20260902g"></script>
+    <script src="js/occupancy-contract.js?v=20260902j"></script>
     <script src="js/location-assertion-contract.js?v=20260902a"></script>
     <script src="js/osm-history.js?v=20260902c"></script>
-    <script src="js/verification-map.js?v=20260902k"></script>
+    <script src="js/verification-map.js?v=20260902o"></script>
 </body>
 </html>

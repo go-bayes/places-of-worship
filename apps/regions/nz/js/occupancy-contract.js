@@ -17,7 +17,7 @@
 
     const START_MODES = new Set(["known", "between", "by", "unknown"]);
     const END_MODES = new Set(["still_active", "known", "between", "after", "unknown"]);
-    const START_BASES = new Set(["founding_stated", "organisation_founded", "building_dedication", "first_seen_only", "unknown"]);
+    const START_BASES = new Set(["founding_stated", "reopening_stated", "organisation_founded", "building_dedication", "first_seen_only", "unknown"]);
     const END_BASES = new Set(["closure_stated", "last_seen_only", "unknown"]);
     const END_REASONS = new Set(["closed", "relocated", "demolished", "use_changed", "unknown"]);
     const CONFIDENCE = new Set(["high", "moderate", "low", "uncertain"]);
@@ -26,6 +26,7 @@
 
     const START_BASIS_WORDS = {
         founding_stated: "founding stated",
+        reopening_stated: "reopening stated",
         organisation_founded: "organisation founded",
         building_dedication: "building dedicated",
         first_seen_only: "first seen only",
@@ -205,7 +206,7 @@
             if (error) return error;
         }
         if (s.startMode !== "unknown" && (!START_BASES.has(s.startBasis) || s.startBasis === "unknown")) {
-            return "Say how the start is known: founding stated, organisation founded, building dedicated, or first seen only.";
+            return "Say how the start is known: founding stated, reopening stated, organisation founded, building dedicated, or first seen only.";
         }
         // end
         if (!END_MODES.has(s.endMode)) return "Choose how the end is known.";
@@ -410,6 +411,235 @@
         return `${start}; ${end}${where}.`;
     }
 
+    // the ruled presence rules, ported verbatim from convex/lib/occupancies.ts
+    // (presenceForSegment, combinePresence, derivePresence) so the entry
+    // form can preview what the server will propose for each census year.
+    // the server remains the authority; occupancyDerivationMirror.node-test
+    // holds the two equal. card values are accepted directly (normalise
+    // runs inside segmentBounds)
+    const PRESENCE_RULE_WORDS = {
+        inside_interval: "inside the period",
+        before_stated_founding: "before the stated founding",
+        before_stated_reopening: "before the stated reopening",
+        before_first_record: "before the first record",
+        after_stated_closure: "after the stated closure",
+        after_last_record: "after the last record",
+        within_start_window: "inside the start window",
+        within_end_window: "inside the end window",
+        beyond_active_anchor: "after the still-in-use date",
+        start_unknown: "start unknown",
+        end_unknown: "end unknown",
+    };
+
+    function presenceForSegment(values, year) {
+        const s = normalise(values);
+        const yStart = `${year}-01-01`;
+        const yEnd = `${year}-12-31`;
+        const b = segmentBounds(s);
+        const fire = (rule_id, status) => ({ segment_index: s.segmentIndex, rule_id, status });
+        if (b.startUpper !== undefined && b.startUpper <= yStart && b.endLower !== undefined && yEnd <= b.endLower) {
+            return fire("inside_interval", "present");
+        }
+        if (b.startLower !== undefined && yEnd < b.startLower) {
+            if (s.startBasis === "founding_stated") return fire("before_stated_founding", "absent");
+            if (s.startBasis === "reopening_stated") return fire("before_stated_reopening", "absent");
+            return fire("before_first_record", "uncertain");
+        }
+        if (b.endUpper !== undefined && yStart > b.endUpper) {
+            return s.endBasis === "closure_stated"
+                ? fire("after_stated_closure", "absent")
+                : fire("after_last_record", "uncertain");
+        }
+        if (b.startUpper !== undefined && yStart < b.startUpper && (b.startLower === undefined || yEnd >= b.startLower)) {
+            return fire("within_start_window", "uncertain");
+        }
+        if (b.open && b.asof !== undefined && yEnd > b.asof) {
+            return fire("beyond_active_anchor", "uncertain");
+        }
+        if (!b.open && b.endLower !== undefined && yEnd > b.endLower && (b.endUpper === undefined || yStart <= b.endUpper)) {
+            return fire("within_end_window", "uncertain");
+        }
+        if (b.startUpper === undefined && b.startLower === undefined && (b.endLower === undefined || yEnd <= b.endLower)) {
+            return fire("start_unknown", "uncertain");
+        }
+        if (b.startUpper !== undefined && b.startUpper <= yStart && b.endLower === undefined && !b.open) {
+            return fire("end_unknown", "uncertain");
+        }
+        return null;
+    }
+
+    function combinePresence(year, firings) {
+        if (firings.length === 0) return null;
+        const pick = status => firings.find(f => f.status === status);
+        const present = pick("present");
+        if (present) return { target_year: year, derived_status: "present", rule_id: present.rule_id, segment_rules: firings };
+        const uncertain = pick("uncertain");
+        if (uncertain) return { target_year: year, derived_status: "uncertain", rule_id: uncertain.rule_id, segment_rules: firings };
+        return { target_year: year, derived_status: "absent", rule_id: firings[0].rule_id, segment_rules: firings };
+    }
+
+    function derivePresence(segments, targetYears) {
+        const out = [];
+        const indexed = (segments || []).map((values, index) => ({ ...values, segmentIndex: index }));
+        for (const year of targetYears || []) {
+            const firings = indexed.map(values => presenceForSegment(values, Number(year))).filter(Boolean);
+            const combined = combinePresence(Number(year), firings);
+            if (combined !== null) out.push(combined);
+        }
+        return out;
+    }
+
+    // the preview strip's sentence: "From your periods: 2013 present (inside
+    // the period); 2018 absent (after the stated closure)." years no rule
+    // reaches are named as not assessed; observed statuses that differ are
+    // returned as conflicts so the form can show them before submission
+    function describePresence(derived, targetYears, observed) {
+        const byYear = new Map((derived || []).map(d => [String(d.target_year), d]));
+        const parts = [];
+        const conflicts = [];
+        for (const year of targetYears || []) {
+            const d = byYear.get(String(year));
+            if (!d) {
+                parts.push(`${year} not assessed`);
+                continue;
+            }
+            parts.push(`${year} ${d.derived_status} (${PRESENCE_RULE_WORDS[d.rule_id] || d.rule_id})`);
+            const seen = observed ? observed[String(year)] : undefined;
+            if (seen && seen !== "not_assessed" && seen !== d.derived_status) {
+                conflicts.push(`${year}: your status ${seen} differs from the periods (${d.derived_status})`);
+            }
+        }
+        return { sentence: parts.length ? `From your periods: ${parts.join("; ")}.` : "", conflicts };
+    }
+
+    // the gap prompt's "not sure" branch (ruling r-e4): the doubt about a
+    // spell out of use goes into the bounds of the two periods, never into
+    // an invented date. stop: {date} | {earliest, latest} | {} ; again:
+    // {date} | {by} | {}. returns the two card patches to apply
+    function gapBounds(stop, again) {
+        const st = stop || {};
+        const ag = again || {};
+        const first = {};
+        if (text(st.date)) {
+            first.endMode = "known";
+            first.endDate = text(st.date);
+        } else if (text(st.earliest) || text(st.latest)) {
+            if (text(st.earliest) && text(st.latest)) {
+                first.endMode = "between";
+                first.endNotEarlierThan = text(st.earliest);
+                first.endNotLaterThan = text(st.latest);
+            } else if (text(st.earliest)) {
+                first.endMode = "after";
+                first.endNotEarlierThan = text(st.earliest);
+            } else {
+                // a latest-only end has no supported mode (there is no "by"
+                // for ends), so the prompt asks for both bounds or the date
+                return { problem: "Give both the earliest and latest dates it could have stopped, or the date itself; a latest date alone cannot be recorded." };
+            }
+        } else {
+            first.endMode = "unknown";
+        }
+        first.stillActiveAsof = "";
+        first.endAround = false;
+        if (first.endMode !== "unknown") {
+            first.endBasis = "last_seen_only";
+            first.endReason = "unknown";
+        } else {
+            first.endBasis = "";
+            first.endReason = "";
+        }
+        const second = {};
+        if (text(ag.date)) {
+            second.startMode = "known";
+            second.startDate = text(ag.date);
+        } else if (text(ag.by)) {
+            second.startMode = "by";
+            second.startNotLaterThan = text(ag.by);
+        } else {
+            second.startMode = "unknown";
+        }
+        second.startAround = false;
+        second.startBasis = second.startMode === "unknown" ? "" : "first_seen_only";
+        return { first, second };
+    }
+
+    // the guided form's assessment confidence is numeric (0.9 / 0.7 / 0.5);
+    // the occupancy vocabulary is high / moderate / low / uncertain. a blank
+    // assessment cannot stand in for the periods' confidence (ruling r-e4:
+    // the reviewer's confirmation is the confidence of record, but the ra
+    // still states one)
+    const PARENT_CONFIDENCE = { "0.9": "high", "0.7": "moderate", "0.5": "low", high: "high", medium: "moderate", moderate: "moderate", low: "low" };
+
+    function provenanceFromParent(values, gapNote) {
+        const v = values || {};
+        const confidence = PARENT_CONFIDENCE[text(v.assessmentConfidence)] || "";
+        if (!confidence) {
+            return { provenance: null, problem: "Choose an assessment confidence for this evidence, or untick \"same source\" and give the periods their own confidence." };
+        }
+        const account = text(v.note);
+        if (account.length < MIN_SOURCE_ACCOUNT) {
+            return { provenance: null, problem: `Record what the source says about these periods (at least ${MIN_SOURCE_ACCOUNT} characters). The portal will not invent or pad a source account.` };
+        }
+        const uncertainty = [text(v.uncertaintyNote), text(gapNote)].filter(Boolean).join(" ");
+        return {
+            provenance: {
+                confidence,
+                confidenceBasis: "Same source and assessment as the evidence record submitted with these periods.",
+                sourceBasis: text(v.sourceType) === "field_observation" ? "local_investigator_account" : "named_public_source",
+                sourceTitle: text(v.sourceTitle) || text(v.sourceProvider),
+                sourceReference: text(v.sourceUrl),
+                sourceAccount: account,
+                uncertaintyNote: uncertainty,
+                privacyFlag: text(v.privacyFlag) || "clear",
+            },
+            problem: "",
+        };
+    }
+
+    // whether a card has been touched beyond the blank the form opens with
+    function cardsTouched(segments) {
+        return (segments || []).some(seg => text(seg.startDate) || text(seg.startNotEarlierThan) || text(seg.startNotLaterThan) || text(seg.startBasis)
+            || text(seg.endDate) || text(seg.endNotEarlierThan) || text(seg.endNotLaterThan) || text(seg.endBasis) || text(seg.endReason) || seg.location
+            || seg.startMode === "unknown" || seg.endMode === "unknown" || seg.startMode === "between" || seg.startMode === "by");
+    }
+
+    function guidedPeriodsStoragePrefix(countryCode, userId) {
+        const country = text(countryCode);
+        const user = text(userId);
+        return country && user ? `powGuidedPeriods:${country}:${user}:` : "";
+    }
+
+    // ruling r-e1: on an ordinary guided submission the periods are the
+    // temporal record. a place can go without them only when the hand grid
+    // carries a status with its reason, or when the record is a duplicate
+    // of another place, whose history lives there
+    function periodsRequirement({ action, touched, gridAssessed, reason }) {
+        if (touched) return "";
+        if (action === "possible_duplicate") return "";
+        if (gridAssessed) {
+            return text(reason) ? "" : "Give the reason the periods cannot express this case, or record at least one period.";
+        }
+        return "Record at least one period for this place: when it was in use for worship. If you cannot, set the census-year statuses by hand with a reason, or submit an unresolved note.";
+    }
+
+    // a still-in-use card is anchored to the evidence date, not to the day
+    // the page was opened: when the source date changes, cards that still
+    // carry the old anchor (or none) follow it
+    function syncStillActive(segments, previousReference, nextReference) {
+        const prev = text(previousReference);
+        const next = text(nextReference);
+        let changed = 0;
+        for (const seg of segments || []) {
+            if (seg.endMode !== "still_active") continue;
+            const asof = text(seg.stillActiveAsof);
+            if (asof === "" || asof === prev) {
+                seg.stillActiveAsof = next;
+                changed += 1;
+            }
+        }
+        return changed;
+    }
+
     // the inverse of payload for a stored row: a card the entry pane can show
     // again. a between whose bounds are Y-1 and Y+1 collapses back to
     // "around Y" (the compile is idempotent, so the round trip is exact)
@@ -489,16 +719,27 @@
 
     window.PowOccupancy = Object.freeze({
         CONTRACT_VERSION,
+        PRESENCE_RULE_WORDS,
+        cardsTouched,
+        combinePresence,
+        derivePresence,
         describeBounds,
+        describePresence,
+        gapBounds,
+        guidedPeriodsStoragePrefix,
+        presenceForSegment,
         expandAround,
         isValidPartialDate,
         normalise,
         partialDateLower,
         partialDateUpper,
         payload,
+        periodsRequirement,
+        provenanceFromParent,
         provenanceFromRow,
         segmentBounds,
         segmentFromRow,
+        syncStillActive,
         validateSegment,
         validateSet,
     });

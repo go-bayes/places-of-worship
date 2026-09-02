@@ -16,13 +16,13 @@ Status: build spec, 2026-09-02. Implements section 3 of `docs/portal-location-an
 | start_mode | known, between, by, unknown | |
 | start_date, start_not_earlier_than, start_not_later_than | partial dates | which are present follows the mode |
 | start_precision | day, month, year, bounded, unknown | computed server-side from the dates, never entered |
-| start_basis | founding_stated, organisation_founded, building_dedication, first_seen_only, unknown | `unknown` iff start_mode unknown |
+| start_basis | founding_stated, reopening_stated (PR-E), organisation_founded, building_dedication, first_seen_only, unknown | `unknown` iff start_mode unknown |
 | end_mode | still_active, known, between, after, unknown | |
 | end_date, end_not_earlier_than, end_not_later_than | partial dates | follows the mode |
 | end_precision | as start | computed |
 | end_basis | closure_stated, last_seen_only, unknown | `unknown` iff end_mode is still_active or unknown |
 | end_reason | closed, relocated, demolished, use_changed, unknown | absent when still_active; `relocated` requires a following segment at a distinct location |
-| still_active_asof | date | required iff still_active; never after the submission date |
+| still_active_asof | date | required iff still_active; never after the parent evidence date (the recorded date is the legacy fallback when the parent has no evidence date) |
 | successor_site_id | string | only for a split into a new place of worship (definition v0.1.4), never for a same-identity relocation |
 | location_relation | same_as_task_point, distinct | |
 | latitude, longitude | number | always stored; copied from the task point when same_as_task_point |
@@ -79,8 +79,8 @@ Status: build spec, 2026-09-02. Implements section 3 of `docs/portal-location-an
 ## 2. Validation (`convex/lib/occupancies.ts`, `assertOccupancySet`)
 
 - Mode ⇒ dates: known needs the date; between needs both bounds with lower ≤ upper; by needs only the not-later-than; after needs only the not-earlier-than; unknown needs none. Partial dates reuse `isValidPartialDate` and the 1600 floor (F1 later).
-- Basis asymmetry enforced (ruling 2.2): `founding_stated`, `organisation_founded`, `building_dedication`, and `first_seen_only` all need a dated start; `closure_stated` and `last_seen_only` need a dated end; `unknown` basis iff undated.
-- still_active needs `still_active_asof` ≤ the submission date and no end_reason. Every date ≤ the submission date.
+- Basis asymmetry enforced (ruling 2.2, extended by PR-E): `founding_stated`, `reopening_stated`, `organisation_founded`, `building_dedication`, and `first_seen_only` all need a dated start; `closure_stated` and `last_seen_only` need a dated end; `unknown` basis iff undated.
+- still_active needs `still_active_asof` no later than the parent evidence date and no end_reason. Every period date is validated against that evidence date; only a legacy parent without one falls back to the date on which the period set is recorded.
 - A segment with no dated bound at either end needs an uncertainty note of at least 12 characters.
 - Segments are ordered by segment_index; certain cores must not overlap: `endLower(i) ≤ startUpper(i+1)` where both exist (one place at a time).
 - `relocated` needs a following segment whose location differs from this one's.
@@ -95,6 +95,7 @@ Bounds per segment: start ⇒ `[startLower, startUpper]`; end ⇒ `[endLower, en
 |---|---|---|---|
 | 1 | inside_interval | startUpper ≤ Y-01-01 and Y-12-31 ≤ endLower | present |
 | 2 | before_stated_founding | Y-12-31 < startLower and founding_stated | absent |
+| 2b | before_stated_reopening | Y-12-31 < startLower and reopening_stated (PR-E: a stated reopening states the place was out of use until then) | absent |
 | 3 | before_first_record | Y-12-31 < startLower, other basis | uncertain |
 | 4 | after_stated_closure | Y-01-01 > endUpper and closure_stated | absent |
 | 5 | after_last_record | Y-01-01 > endUpper, other basis | uncertain |

@@ -585,6 +585,7 @@ function human(value) {
             <section class="panel">
                 <h3>Target-year statuses</h3>
                 ${draft ? targetYearTable(draft.target_year_statuses, draft.target_year_evidence, draft.target_year_confidence) : `<p class="muted">No target-year statuses recorded.</p>`}
+                ${draft?.target_year_entry_reason ? `<p class="muted">Set by hand because: ${escapeHtml(draft.target_year_entry_reason)}</p>` : ""}
             </section>
 
             <div id="occupancyPanelHost"></div>

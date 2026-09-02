@@ -34,6 +34,7 @@ jobs:
           node apps/regions/nz/js/location-assertion-contract.test.cjs
           node apps/regions/nz/js/rapid-entry-contract.test.cjs
           node apps/regions/nz/js/occupancy-contract.test.cjs
+          node apps/regions/nz/js/assigned-periods-dom.test.cjs
           node apps/regions/nz/js/occupancy-review.test.cjs
           node apps/regions/nz/js/osm-history.test.cjs
       - name: dated-places builder tests
