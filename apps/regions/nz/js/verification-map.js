@@ -4933,6 +4933,11 @@ class NzVerificationMap {
                         </select>
                     </label>
                 </div>
+                <div class="source-quick-fill" id="${prefix}SourceQuickFill">
+                    <span class="label-help">Checked a usual source? Fill it in one click:</span>
+                    <button type="button" class="tertiary" id="${prefix}QuickFillOsm" title="Cite the OpenStreetMap record (or the map at this point) as your named source">OpenStreetMap record</button>
+                    <button type="button" class="tertiary" id="${prefix}QuickFillStreetView" title="Cite Google Street View imagery at this point as your named source">Google Street View</button>
+                </div>
                 <div id="${prefix}NamedSourceFields" class="rapid-conditional"${preNamed ? "" : " hidden"}>
                     <label>
                         Source title or brief description <span class="req-chip">required for a named source</span>
@@ -5211,6 +5216,74 @@ class NzVerificationMap {
         }
     }
 
+    // the usual sources an ra checks (jb 2026-09-02): one click cites the
+    // osm record or street view at this point as the named public source,
+    // switching the basis and filling title and reference. the ra still
+    // owns the observation date (also the capture date) and the status
+    rapidQuickSources(prefix, options = {}) {
+        const props = options.props || {};
+        let coordinates = null;
+        const taskPoint = props.geometry?.coordinates;
+        if (Array.isArray(taskPoint) && taskPoint.length >= 2) {
+            coordinates = taskPoint;
+        } else if (prefix === "pin" && this.pinConfirmed) {
+            coordinates = [this.pinConfirmed.longitude, this.pinConfirmed.latitude];
+        } else if (this.pinMarker?.getLatLng) {
+            const at = this.pinMarker.getLatLng();
+            coordinates = [at.lng, at.lat];
+        }
+        const osmObject = props.osm_object_url || (props.osm_type && props.osm_id ? osmObjectUrl(props.osm_type, props.osm_id) : "");
+        const osmPoint = coordinates ? osmPointUrl(coordinates[1], coordinates[0]) : "";
+        const streetView = props.street_view_url || (coordinates ? streetViewUrlForCoordinates(coordinates) : "");
+        return {
+            osm: {
+                title: osmObject ? `OpenStreetMap ${props.osm_type || ""} ${props.osm_id || ""}`.replace(/\s+/g, " ").trim() : "OpenStreetMap map view at this point",
+                reference: osmObject || osmPoint,
+                missing: "Confirm the pin first so the OpenStreetMap link can point at it.",
+            },
+            street_view: {
+                title: "Google Street View imagery at this point",
+                reference: streetView,
+                missing: "Confirm the pin first so the Street View link can point at it.",
+            },
+        };
+    }
+
+    rapidQuickFill(prefix, options, kind) {
+        const source = this.rapidQuickSources(prefix, options)[kind];
+        const status = document.getElementById(`${prefix}RapidStatus`);
+        if (!source || !source.reference) {
+            if (status) status.textContent = source?.missing || "No link is available for this source yet.";
+            return;
+        }
+        const basis = document.getElementById(`${prefix}ObservationBasis`);
+        if (basis) {
+            basis.value = "named_public_source";
+            basis.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        this.updateRapidSourceFields(prefix);
+        const title = document.getElementById(`${prefix}SourceTitle`);
+        const reference = document.getElementById(`${prefix}SourceReference`);
+        const sourceId = document.getElementById(`${prefix}SourceId`);
+        if (sourceId) sourceId.value = "";
+        if (title) {
+            title.value = source.title;
+            title.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        if (reference) {
+            reference.value = source.reference;
+            reference.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        this.updateSourceLocatorField(prefix);
+        if (status) {
+            status.classList.remove("copy-status-error");
+            status.textContent = kind === "street_view"
+                ? "Street View cited. Set the observation date to the capture date Google shows."
+                : "OpenStreetMap cited. The OSM record is context for identity; say in the note what you saw there.";
+        }
+        reference?.focus();
+    }
+
     updateRapidSourceFields(prefix) {
         const basis = document.getElementById(`${prefix}ObservationBasis`)?.value || "";
         const fields = document.getElementById(`${prefix}NamedSourceFields`);
@@ -5344,6 +5417,12 @@ class NzVerificationMap {
             radio.addEventListener("change", () => this.updateRapidUncertaintyField(prefix));
         });
         this.bindSourceTypeahead(prefix);
+        document.getElementById(`${prefix}QuickFillOsm`)?.addEventListener("click", () => {
+            this.rapidQuickFill(prefix, options, "osm");
+        });
+        document.getElementById(`${prefix}QuickFillStreetView`)?.addEventListener("click", () => {
+            this.rapidQuickFill(prefix, options, "street_view");
+        });
         this.updateRapidSourceFields(prefix);
         this.updateRapidDiscussionFields(prefix);
         this.updateRapidUncertaintyField(prefix);
