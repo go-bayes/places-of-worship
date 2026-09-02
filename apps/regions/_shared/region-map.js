@@ -11,6 +11,19 @@
 // the whole country-specific surface: copy, camera, census levels, geocode
 // bias, cross-links. everything below reads this and the data products.
 const RC = window.REGION_CONFIG;
+// contribute routes (jb 2026-09-03): the portal and review links come from
+// the page's own wordmark config, so a page without a portal gets the osm
+// route alone; a github link, when present, stands in as "about the project"
+const CONTRIBUTE_ROUTES = (() => {
+  const links = RC.wordmarkLinks || [];
+  const byId = (id) => links.find((link) => link && link.id === id) || null;
+  return {
+    portal: byId("verification-link"),
+    review: byId("review-link"),
+    repo: links.find((link) => link && /github\.com/.test(String(link.href || ""))) || null,
+  };
+})();
+const CONTRIBUTE_LINK_IDS = new Set(["verification-link", "review-link"]);
 if (!RC) {
   throw new Error("REGION_CONFIG missing");
 }
@@ -40,8 +53,10 @@ const SCHEMA_BASE = RC.schemaBase || "../../../schemas/";
       ? `<a href="${link.href}" target="_blank" rel="noopener">${link.label}</a>`
       : `<a href="${link.href}">${link.label}</a>`)
     .join("\n      ");
-  // wordmark: config links lead; the fix-map link and theme select are shared
+  // wordmark: config links lead; the contribute entry and theme select are
+  // shared. the portal and review links move into the contribute panel
   const wordmarkLinks = (RC.wordmarkLinks || [])
+    .filter((link) => !CONTRIBUTE_LINK_IDS.has(link.id))
     .map((link) => `<a id="${link.id}" href="${link.href}" ${link.external ? 'target="_blank" rel="noopener" ' : ""}title="${link.title}">${link.label}</a>`)
     .join("\n    ");
   // key wrapper: the global map keeps its top-centre #counts-wrap (styled
@@ -121,8 +136,15 @@ const SCHEMA_BASE = RC.schemaBase || "../../../schemas/";
   </div>
   <div id="wordmark" class="shell-pill shell-top-right shell-divided">
     ${wordmarkLinks}
-    <a id="fixmap-link" href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener" title="Improve this map area on OpenStreetMap">fix OSM map</a>
+    <button id="contribute-toggle" type="button" aria-expanded="false" aria-controls="contribute-panel" title="Improve OpenStreetMap or submit evidence to this project">Contribute</button>
     <select id="basemapSelect" class="shell-pill-select" aria-label="Theme"></select>
+  </div>
+  <div id="contribute-panel" class="shell-panel" hidden aria-label="Contribute">
+    <a id="contribute-osm" href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener"><strong>Improve OpenStreetMap</strong><span>Anyone can edit OpenStreetMap. Edits reach this map at the next annual audit.</span></a>
+    ${CONTRIBUTE_ROUTES.portal
+      ? `<a id="contribute-portal" href="${CONTRIBUTE_ROUTES.portal.href}"><strong>Submit evidence to Religion Map</strong><span>Project members sign in with Google. If you are not yet a member, the sign-in page says how to get in touch.</span></a>`
+        + (CONTRIBUTE_ROUTES.review ? `<a id="contribute-review" class="shell-panel-minor" href="${CONTRIBUTE_ROUTES.review.href}">Review evidence</a>` : "")
+      : (CONTRIBUTE_ROUTES.repo ? `<a id="contribute-about" class="shell-panel-minor" href="${CONTRIBUTE_ROUTES.repo.href}" target="_blank" rel="noopener">About the project</a>` : "")}
   </div>
   <button id="corner-reset" class="shell-pill shell-top-right" type="button" aria-label="Set North">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -466,14 +488,35 @@ if (nearMe) {
   }
 }
 
-// the wordmark's fix-map link deep-links the osm editor to whatever the
-// user is looking at; href is computed at click time so it tracks the view
-const fixmapLink = document.getElementById("fixmap-link");
-if (fixmapLink) {
-  fixmapLink.addEventListener("click", () => {
-    const centre = map.getCenter();
-    const zoom = Math.round(map.getZoom());
-    fixmapLink.href = `https://www.openstreetmap.org/edit#map=${zoom}/${centre.lat.toFixed(5)}/${centre.lng.toFixed(5)}`;
+// the wordmark's contribute entry (jb 2026-09-03): one pill, two routes.
+// the osm editor href is computed when the panel opens so it tracks the
+// view; the portal routes come from CONTRIBUTE_ROUTES. escape and a click
+// outside close it; focus lands on the first route when it opens
+const contributeToggle = document.getElementById("contribute-toggle");
+const contributePanel = document.getElementById("contribute-panel");
+if (contributeToggle && contributePanel) {
+  const osmLink = document.getElementById("contribute-osm");
+  const setContributeOpen = (open) => {
+    contributePanel.hidden = !open;
+    contributeToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open && osmLink) {
+      const centre = map.getCenter();
+      const zoom = Math.round(map.getZoom());
+      osmLink.href = `https://www.openstreetmap.org/edit#map=${zoom}/${centre.lat.toFixed(5)}/${centre.lng.toFixed(5)}`;
+    }
+    if (open) contributePanel.querySelector("a")?.focus();
+  };
+  contributeToggle.addEventListener("click", () => setContributeOpen(contributePanel.hidden));
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !contributePanel.hidden) {
+      setContributeOpen(false);
+      contributeToggle.focus();
+    }
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (contributePanel.hidden) return;
+    if (contributePanel.contains(event.target) || contributeToggle.contains(event.target)) return;
+    setContributeOpen(false);
   });
 }
 
@@ -580,6 +623,25 @@ function ensureNearestLine() {
 // holding focus keys on osm identity so the line survives popup close
 // (useful for planning); clicking the same place again, or changing the
 // measuring point, releases the line back to the nearest place
+// deep link into the portal's revise flow for a public-map place (jb
+// 2026-09-03): the portal reads ?revise=1 and opens the same card a click
+// on the place's dot would. empty on pages without a portal
+function portalReviseHref(name, latFixed, lngFixed, props) {
+  const portal = CONTRIBUTE_ROUTES.portal;
+  if (!portal) return "";
+  const params = new URLSearchParams({ revise: "1", lat: latFixed, lng: lngFixed });
+  if (name && name !== "Loading place…" && name !== "Unnamed") params.set("name", name);
+  const osmId = props && props.osm_id !== undefined && props.osm_id !== null ? String(props.osm_id) : "";
+  if (osmId) {
+    params.set("osm_type", String(props.osm_type || "node"));
+    params.set("osm_id", osmId);
+  }
+  return `${portal.href}${portal.href.includes("?") ? "&" : "?"}${params.toString()}`;
+}
+function reviseLinkHtml(name, latFixed, lngFixed, props) {
+  const href = portalReviseHref(name, latFixed, lngFixed, props);
+  return href ? `<a class="popup-revise" href="${href}" title="Open the contributor portal at this place">Revise this place</a>` : "";
+}
 function placeKey(props, coords) {
   return props && props.osm_id ? `${props.osm_type || "node"}/${props.osm_id}` : coords.join(",");
 }
@@ -875,12 +937,13 @@ function showMobileStreetViewPopup(name, coords, featureId) {
   const lngFixed = coords[0].toFixed(6);
   const openStreetViewLink = `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Streetview</a>`;
   const directionsLink = `<a href="${directionsUrl(latFixed, lngFixed)}" target="_blank" rel="noopener">Directions</a>`;
+  const reviseLink = reviseLinkHtml(name, latFixed, lngFixed, null);
   const popup = new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
     .setLngLat(coords)
     .setHTML(
       `<div class="popup-header"><span class="popup-title">${name || "Unnamed"}</span></div>` +
       distanceRowsHtml(coords) +
-      `<div class="popup-actions" style="margin-top:6px;">${openStreetViewLink}${directionsLink}</div>`
+      `<div class="popup-actions" style="margin-top:6px;">${reviseLink}${openStreetViewLink}${directionsLink}</div>`
     )
     .addTo(map);
   trackPlacePopup(popup);
@@ -897,7 +960,7 @@ function showMobileStreetViewPopup(name, coords, featureId) {
     if (betterName) {
       popup.setHTML(
         `<div class="popup-header"><span class="popup-title">${betterName}</span></div>` +
-        `<div class="popup-actions" style="margin-top:6px;">${openStreetViewLink}</div>`
+        `<div class="popup-actions" style="margin-top:6px;">${reviseLinkHtml(betterName, latFixed, lngFixed, p)}${openStreetViewLink}${directionsLink}</div>`
       );
     }
   };
@@ -1127,6 +1190,7 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
       .setHTML(
         `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
         `<div class="popup-actions" style="margin-top:6px;">` +
+        reviseLinkHtml(name, latFixed, lngFixed, props) +
         `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>` +
         `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +
         `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
@@ -1144,6 +1208,7 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
       distanceRowsHtml(coords) +
       `<div class="streetview" id="${panoId}">Loading Street View…</div>` +
       `<div class="popup-actions">` +
+      reviseLinkHtml(name, latFixed, lngFixed, props) +
       `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Streetview</a>` +
       `<a href="${directionsUrl(latFixed, lngFixed)}" target="_blank" rel="noopener">Directions</a>` +
       `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +

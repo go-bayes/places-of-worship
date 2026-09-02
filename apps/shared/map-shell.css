@@ -231,3 +231,67 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
   width: 24px;
   height: 24px;
 }
+
+/* contribute entry (jb 2026-09-03): the wordmark's button is text in the
+   pill like its neighbours (the divided rule cannot reach a button's own
+   border, so the divider is restated); the panel is a small dark card
+   under the pill's right edge with two routes. the popup's revise link
+   is the primary action, so it takes the pill's brighter face */
+#contribute-toggle {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border-width: 0 0 0 1px;
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.18);
+  padding: 0 0 0 8px;
+  margin: 0;
+  color: #e2e8f0;
+  font: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#contribute-toggle:hover,
+#contribute-toggle[aria-expanded="true"] { color: #fff; text-decoration: underline; }
+#contribute-toggle:focus-visible { outline: 2px solid #f8fafc; outline-offset: 2px; border-radius: 4px; }
+#contribute-panel {
+  position: fixed;
+  right: var(--safe-right);
+  top: calc(var(--safe-top) + 40px);
+  z-index: 14;
+  width: min(320px, calc(100vw - 24px));
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  font-size: 13px;
+}
+#contribute-panel a {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  color: #e2e8f0;
+  text-decoration: none;
+}
+#contribute-panel a:hover,
+#contribute-panel a:focus-visible { background: rgba(255, 255, 255, 0.08); outline: none; }
+#contribute-panel a:focus-visible { box-shadow: inset 0 0 0 2px #f8fafc; }
+#contribute-panel a strong { font-weight: 700; color: #fff; }
+#contribute-panel a span { color: #cbd5e1; line-height: 1.35; }
+#contribute-panel a.shell-panel-minor { padding: 6px 10px; color: #cbd5e1; text-decoration: underline; }
+.maplibregl-popup-content .popup-actions a.popup-revise {
+  background: rgba(248, 250, 252, 0.92);
+  border-color: rgba(248, 250, 252, 0.92);
+  color: #0f172a;
+  font-weight: 700;
+}
+@media (max-width: 640px) {
+  #contribute-panel { display: none; }
+}
