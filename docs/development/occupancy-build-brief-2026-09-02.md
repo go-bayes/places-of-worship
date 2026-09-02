@@ -22,7 +22,7 @@ Status: build spec, 2026-09-02. Implements section 3 of `docs/portal-location-an
 | end_precision | as start | computed |
 | end_basis | closure_stated, last_seen_only, unknown | `unknown` iff end_mode is still_active or unknown |
 | end_reason | closed, relocated, demolished, use_changed, unknown | absent when still_active; `relocated` requires a following segment at a distinct location |
-| still_active_asof | date | required iff still_active; never after the submission date |
+| still_active_asof | date | required iff still_active; never after the parent evidence date (the recorded date is the legacy fallback when the parent has no evidence date) |
 | successor_site_id | string | only for a split into a new place of worship (definition v0.1.4), never for a same-identity relocation |
 | location_relation | same_as_task_point, distinct | |
 | latitude, longitude | number | always stored; copied from the task point when same_as_task_point |
@@ -79,8 +79,8 @@ Status: build spec, 2026-09-02. Implements section 3 of `docs/portal-location-an
 ## 2. Validation (`convex/lib/occupancies.ts`, `assertOccupancySet`)
 
 - Mode ⇒ dates: known needs the date; between needs both bounds with lower ≤ upper; by needs only the not-later-than; after needs only the not-earlier-than; unknown needs none. Partial dates reuse `isValidPartialDate` and the 1600 floor (F1 later).
-- Basis asymmetry enforced (ruling 2.2): `founding_stated`, `organisation_founded`, `building_dedication`, and `first_seen_only` all need a dated start; `closure_stated` and `last_seen_only` need a dated end; `unknown` basis iff undated.
-- still_active needs `still_active_asof` ≤ the submission date and no end_reason. Every date ≤ the submission date.
+- Basis asymmetry enforced (ruling 2.2, extended by PR-E): `founding_stated`, `reopening_stated`, `organisation_founded`, `building_dedication`, and `first_seen_only` all need a dated start; `closure_stated` and `last_seen_only` need a dated end; `unknown` basis iff undated.
+- still_active needs `still_active_asof` no later than the parent evidence date and no end_reason. Every period date is validated against that evidence date; only a legacy parent without one falls back to the date on which the period set is recorded.
 - A segment with no dated bound at either end needs an uncertainty note of at least 12 characters.
 - Segments are ordered by segment_index; certain cores must not overlap: `endLower(i) ≤ startUpper(i+1)` where both exist (one place at a time).
 - `relocated` needs a following segment whose location differs from this one's.

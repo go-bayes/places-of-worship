@@ -204,11 +204,13 @@ check("a between with unequal slack stays a between", occupancy.segmentFromRow({
   const parent = occupancy.provenanceFromParent({ assessmentConfidence: "0.9", sourceType: "denominational_directory", sourceTitle: "Directory 2024", sourceUrl: "https://example.org/d", note: "Listed as active in the 2024 directory.", uncertaintyNote: "", privacyFlag: "clear" }, "");
   check("provenanceFromParent maps 0.9 to high", parent.problem === "" && parent.provenance.confidence === "high");
   check("provenanceFromParent uses the named public source basis for a directory", parent.provenance.sourceBasis === "named_public_source" && parent.provenance.sourceTitle === "Directory 2024" && parent.provenance.sourceReference === "https://example.org/d");
-  check("provenanceFromParent maps 0.7 to moderate and 0.5 to low", occupancy.provenanceFromParent({ assessmentConfidence: "0.7", note: "x" }).provenance.confidence === "moderate" && occupancy.provenanceFromParent({ assessmentConfidence: "0.5", note: "x" }).provenance.confidence === "low");
+  check("provenanceFromParent maps 0.7 to moderate and 0.5 to low", occupancy.provenanceFromParent({ assessmentConfidence: "0.7", note: "The directory says worship continued." }).provenance.confidence === "moderate" && occupancy.provenanceFromParent({ assessmentConfidence: "0.5", note: "The directory says worship continued." }).provenance.confidence === "low");
   const blank = occupancy.provenanceFromParent({ assessmentConfidence: "", note: "x" });
   check("provenanceFromParent refuses a blank assessment confidence", blank.provenance === null && /assessment confidence/.test(blank.problem));
-  const field = occupancy.provenanceFromParent({ assessmentConfidence: "0.9", sourceType: "field_observation", note: "short" }, "Gap possible, not established.");
-  check("provenanceFromParent uses the investigator basis for a field observation and pads a short account", field.provenance.sourceBasis === "local_investigator_account" && field.provenance.sourceAccount.length >= 12);
+  const short = occupancy.provenanceFromParent({ assessmentConfidence: "0.9", sourceType: "field_observation", note: "short" }, "Gap possible, not established.");
+  check("provenanceFromParent refuses rather than pads a short source account", short.provenance === null && /will not invent or pad/.test(short.problem));
+  const field = occupancy.provenanceFromParent({ assessmentConfidence: "0.9", sourceType: "field_observation", note: "Observed worship notices on the building." }, "Gap possible, not established.");
+  check("provenanceFromParent uses the investigator basis for a field observation", field.provenance.sourceBasis === "local_investigator_account" && field.provenance.sourceAccount === "Observed worship notices on the building.");
   check("provenanceFromParent carries the gap note into the uncertainty", field.provenance.uncertaintyNote === "Gap possible, not established.");
   const touched = { startMode: "known", startDate: "1905", startBasis: "founding_stated", endMode: "still_active", stillActiveAsof: "2024-05" };
   check("cardsTouched is false for the blank card and true once dated", !occupancy.cardsTouched([{ startMode: "known", endMode: "still_active" }]) && occupancy.cardsTouched([touched]));
@@ -222,6 +224,8 @@ check("a between with unequal slack stays a between", occupancy.segmentFromRow({
   check("gapBounds refuses a latest-only stop", /both the earliest and latest/.test(occupancy.gapBounds({ latest: "2012" }, {}).problem || ""));
   check("gapBounds reads an earliest-only stop as after", occupancy.gapBounds({ earliest: "2011" }, {}).first.endMode === "after");
   check("reopening stated is an accepted start basis", occupancy.validateSegment({ ...valid, startBasis: "reopening_stated" }, REFERENCE) === "");
+  const ownPrefix = occupancy.guidedPeriodsStoragePrefix("NZ", "user_1");
+  check("the guided-period storage prefix selects only the signed-out user", "powGuidedPeriods:NZ:user_1:task_a".startsWith(ownPrefix) && !"powGuidedPeriods:NZ:user_2:task_b".startsWith(ownPrefix));
 }
 
 console.log(failures === 0 ? "ALL OCCUPANCY CONTRACT TESTS PASSED" : `${failures} FAILURES`);

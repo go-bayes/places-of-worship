@@ -48,6 +48,7 @@ import {
   occupancyEndReason,
   occupancyDatePrecision,
   occupancyLocationRelation,
+  pendingOccupancyCards,
   derivedPresenceStatus,
   derivedReviewState,
   derivedLocationStatus,
@@ -208,7 +209,9 @@ export default defineSchema({
     // means source_observation, the pre-2026-09-02 default
     target_year_basis: v.optional(targetYearBasisSet),
     target_year_entry_reason: v.optional(v.string()),
-    pending_occupancy_cards: v.optional(v.any()),
+    pending_occupancy_cards: v.optional(pendingOccupancyCards),
+    // idempotency key for the atomic guided evidence + periods submission
+    guided_submission_key: v.optional(v.string()),
     privacy_flag: privacyFlag,
     licence_flag: licenceFlag,
     validation_summary: v.optional(v.any()),
@@ -310,6 +313,8 @@ export default defineSchema({
     .index("by_occupancy_id", ["occupancy_id"])
     .index("by_parent_evidence_draft_id", ["parent_evidence_draft_id"])
     .index("by_task_and_created_at", ["task_id", "created_at"])
+    .index("by_parent_status_and_segment", ["parent_evidence_draft_id", "claim_status", "segment_index"])
+    .index("by_task_creator_status_and_created_at", ["task_id", "created_by", "claim_status", "created_at"])
     .index("by_submission_key", ["submission_key"]),
 
   // derived per-census-year presence: proposals from the occupancy rules,

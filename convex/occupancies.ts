@@ -25,6 +25,7 @@ import {
   endPrecision,
   OCCUPANCY_DERIVATION_VERSION,
   occupancyInputsHash,
+  occupancyReferenceDate,
   resolveLocation,
   startPrecision,
   type OccupancySegment,
@@ -74,7 +75,7 @@ async function getParentEvidenceOrThrow(
   return draft;
 }
 
-function taskPoint(task: Doc<"tasks">): { latitude: number; longitude: number } {
+export function taskPoint(task: Doc<"tasks">): { latitude: number; longitude: number } {
   const coordinates = (task.geometry as { coordinates?: unknown } | undefined)?.coordinates;
   if (!Array.isArray(coordinates) || coordinates.length < 2) {
     throw new Error("This task has no usable point, so periods cannot be located against it.");
@@ -116,9 +117,14 @@ function segmentOf(row: Doc<"site_occupancies">): OccupancySegment {
 async function activeOccupancies(ctx: QueryCtx | MutationCtx, parentEvidenceDraftId: string): Promise<Doc<"site_occupancies">[]> {
   const rows = await ctx.db
     .query("site_occupancies")
-    .withIndex("by_parent_evidence_draft_id", (q) => q.eq("parent_evidence_draft_id", parentEvidenceDraftId))
-    .collect();
-  return rows.filter((row) => row.claim_status === "submitted").sort((a, b) => a.segment_index - b.segment_index);
+    .withIndex("by_parent_status_and_segment", (q) =>
+      q.eq("parent_evidence_draft_id", parentEvidenceDraftId).eq("claim_status", "submitted"),
+    )
+    .take(21);
+  if (rows.length > 20) {
+    throw new Error("This evidence record has more than 20 active periods. Ask JB to repair the duplicate active set before continuing.");
+  }
+  return rows.sort((a, b) => a.segment_index - b.segment_index);
 }
 
 async function presenceRows(ctx: QueryCtx | MutationCtx, parentEvidenceDraftId: string): Promise<Doc<"derived_target_year_states">[]> {
@@ -329,6 +335,41 @@ async function rederive(
   return { years: presences.map((p) => p.target_year), conflicts };
 }
 
+// Supersede this author's active periods on every other parent for the task.
+// The exact task+author+status index makes the read proportional to one active
+// set; more than 20 rows violates the submission invariant and fails closed.
+async function supersedeEarlierOccupancySets(
+  ctx: MutationCtx,
+  task: Doc<"tasks">,
+  parent: Doc<"evidence_drafts">,
+  user: Doc<"users">,
+  actorRole: ProjectRole,
+  now: number,
+): Promise<void> {
+  const rows = await ctx.db
+    .query("site_occupancies")
+    .withIndex("by_task_creator_status_and_created_at", (q) =>
+      q.eq("task_id", task.task_id).eq("created_by", user._id).eq("claim_status", "submitted"),
+    )
+    .take(21);
+  if (rows.length > 20) {
+    throw new Error("This task has more than 20 active periods for the contributor. Ask JB to repair the duplicate active set before continuing.");
+  }
+  const earlierParents = new Set<string>();
+  for (const row of rows) {
+    if (row.parent_evidence_draft_id === parent.evidence_draft_id) continue;
+    await ctx.db.patch(row._id, { claim_status: "superseded", updated_at: now });
+    earlierParents.add(row.parent_evidence_draft_id);
+  }
+  for (const earlierParentId of earlierParents) {
+    const earlierParent = await ctx.db
+      .query("evidence_drafts")
+      .withIndex("by_evidence_draft_id", (q) => q.eq("evidence_draft_id", earlierParentId))
+      .unique();
+    if (earlierParent !== null) await rederive(ctx, task, earlierParent, user._id, actorRole, now);
+  }
+}
+
 // the one write route for a set of periods: supersedes the author's earlier
 // set for the parent, inserts the rows, rederives the census-year proposals,
 // and records the task event. the ra mutation and the bulk import both call
@@ -346,10 +387,11 @@ export async function recordOccupancySet(
     segments: OccupancySegmentInput[];
     now: number;
     clientContext?: unknown;
+    eventTaskStatus?: Doc<"tasks">["status"];
   },
 ): Promise<{ occupancyIds: string[]; derived: { years: number[]; conflicts: number[] } }> {
   const { task, parent, user, actorRole, now } = args;
-  const point = taskPoint(task);
+  const point = args.segments.length > 0 ? taskPoint(task) : null;
   // the author's earlier set for this parent is superseded, never rewritten
   for (const row of await activeOccupancies(ctx, parent.evidence_draft_id)) {
     if (row.created_by === user._id) {
@@ -360,29 +402,14 @@ export async function recordOccupancySet(
   // replaces the author's set on the task's earlier parents, so one author
   // holds one active set per task. those parents' derived proposals are
   // rederived to nothing, which marks them superseded with an event each
-  const earlierParents = new Set<string>();
-  for (const row of await ctx.db
-    .query("site_occupancies")
-    .withIndex("by_task_and_created_at", (q) => q.eq("task_id", task.task_id))
-    .collect()) {
-    if (row.created_by !== user._id || row.claim_status !== "submitted" || row.parent_evidence_draft_id === parent.evidence_draft_id) continue;
-    await ctx.db.patch(row._id, { claim_status: "superseded", updated_at: now });
-    earlierParents.add(row.parent_evidence_draft_id);
-  }
-  for (const earlierParentId of earlierParents) {
-    const earlierParent = await ctx.db
-      .query("evidence_drafts")
-      .withIndex("by_evidence_draft_id", (q) => q.eq("evidence_draft_id", earlierParentId))
-      .unique();
-    if (earlierParent !== null) await rederive(ctx, task, earlierParent, user._id, actorRole, now);
-  }
+  await supersedeEarlierOccupancySets(ctx, task, parent, user, actorRole, now);
   // the cards saved with the draft are now rows
   if (parent.pending_occupancy_cards !== undefined) {
     await ctx.db.patch(parent._id, { pending_occupancy_cards: undefined, updated_at: now });
   }
   const occupancyIds: string[] = [];
   for (const segment of [...args.segments].sort((a, b) => a.segment_index - b.segment_index)) {
-    const location = resolveLocation(segment, point);
+    const location = resolveLocation(segment, point!);
     const occupancyId = `${task.task_id}:${user._id}:occupancy:${args.submissionToken}:${segment.segment_index}`;
     occupancyIds.push(occupancyId);
     const trimmed = (value: string | undefined) => (value?.trim() ? value.trim() : undefined);
@@ -436,8 +463,8 @@ export async function recordOccupancySet(
     eventType: "note_added",
     actorUserId: user._id,
     actorRole,
-    previousStatus: task.status,
-    newStatus: task.status,
+    previousStatus: args.eventTaskStatus ?? task.status,
+    newStatus: args.eventTaskStatus ?? task.status,
     reason: `Recorded ${args.segments.length} occupancy period${args.segments.length === 1 ? "" : "s"}; derived ${derived.years.length} census-year proposal${derived.years.length === 1 ? "" : "s"} awaiting reviewer confirmation.`,
     evidenceDraftId: parent.evidence_draft_id,
     clientContext: args.clientContext,
@@ -526,7 +553,7 @@ export const submitOccupancies = mutation({
     const existing = await ctx.db
       .query("site_occupancies")
       .withIndex("by_submission_key", (q) => q.eq("submission_key", submissionKey))
-      .collect();
+      .take(21);
     if (existing.length > 0) {
       if (existing[0].created_by !== user._id) {
         throw new Error("The submission identifier is already in use.");
@@ -553,14 +580,14 @@ export const submitOccupancies = mutation({
     if (parent.draft_status !== "submitted" && parent.draft_status !== "unresolved_note") {
       throw new Error("Record periods against the latest submitted evidence record, not an earlier version.");
     }
-    const referenceDate = new Date().toISOString().slice(0, 10);
+    const now = Date.now();
+    const referenceDate = occupancyReferenceDate(parent.source_date_or_capture_date, now);
     const point = taskPoint(task);
     assertOccupancySet(args.segments, referenceDate, point, dateFloorYear(task.country_code));
 
     await intakeRateLimiter.limit(ctx, "occupancyPerUser", { key: user._id, throws: true });
     await intakeRateLimiter.limit(ctx, "occupancyGlobal", { throws: true });
 
-    const now = Date.now();
     const actorRole = chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]);
     const { occupancyIds, derived } = await recordOccupancySet(ctx, {
       task,

@@ -100,6 +100,20 @@ test("a different point makes the period distinct", () => {
   assert.equal(segment.end_basis, "unknown");
 });
 
+test("a stated reopening survives the import vocabulary", () => {
+  const { segment, problems } = segmentFromImportRow({
+    start_mode: "known",
+    start_date: "1951",
+    start_basis: "reopening_stated",
+    end_mode: "still_active",
+    still_active_asof: "2026-09-02",
+    occupancy_source_account: "The source states that worship reopened at this place in 1951.",
+  }, DEFAULTS);
+  assert.deepEqual(problems, []);
+  assert.equal(segment.start_basis, "reopening_stated");
+  assert.doesNotThrow(() => assertOccupancySet([segment], REF, POINT));
+});
+
 test("defaults fill the basis for undated ends and the provenance text", () => {
   const { segment, problems } = segmentFromImportRow({
     start_mode: "unknown",

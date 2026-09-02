@@ -12,6 +12,7 @@ export const TASK_NAME_MAX = 512;
 export const GUIDED_DIRECT_OBSERVATION_MAX = 2_000;
 export const GUIDED_INTERPRETATION_MAX = 1_000;
 export const GUIDED_UNCERTAINTY_MAX = 2_000;
+export const PENDING_OCCUPANCY_CARD_MAX = 20;
 
 type EvidenceDraftLimitInput = {
   observation_contract_version?: string;
@@ -119,6 +120,9 @@ export function assertEvidenceDraftLimits(draft: EvidenceDraftLimitInput): void 
   assertMaxJson("validation summary", draft.validation_summary, VALIDATION_SUMMARY_MAX);
   assertMaxString("target-year entry reason", draft.target_year_entry_reason, MEDIUM_TEXT_MAX);
   assertMaxJson("pending occupancy cards", draft.pending_occupancy_cards, VALIDATION_SUMMARY_MAX);
+  if (Array.isArray(draft.pending_occupancy_cards) && draft.pending_occupancy_cards.length > PENDING_OCCUPANCY_CARD_MAX) {
+    throw new Error(`A draft may hold at most ${PENDING_OCCUPANCY_CARD_MAX} pending occupancy cards.`);
+  }
 }
 
 export function isValidPartialDate(value: string): boolean {

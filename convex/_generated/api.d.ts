@@ -15,6 +15,7 @@ import type * as devSeed from "../devSeed.js";
 import type * as evidence from "../evidence.js";
 import type * as exports from "../exports.js";
 import type * as historicalClaims from "../historicalClaims.js";
+import type * as lib_assignedTaskPeriods from "../lib/assignedTaskPeriods.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_countryYears from "../lib/countryYears.js";
 import type * as lib_exportEligibility from "../lib/exportEligibility.js";
@@ -56,6 +57,7 @@ declare const fullApi: ApiFromModules<{
   evidence: typeof evidence;
   exports: typeof exports;
   historicalClaims: typeof historicalClaims;
+  "lib/assignedTaskPeriods": typeof lib_assignedTaskPeriods;
   "lib/auth": typeof lib_auth;
   "lib/countryYears": typeof lib_countryYears;
   "lib/exportEligibility": typeof lib_exportEligibility;

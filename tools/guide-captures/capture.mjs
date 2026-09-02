@@ -79,6 +79,7 @@ function verificationStub(data) {
     listTasks: async () => data.tasks,
     listMyTasks: async () => data.myWork || [],
     listTaskEvidence: async () => [],
+    listTaskOccupancies: async () => [],
     getTaskHistory: async () => window.__historyStub || { events: [], draft_count: 0, latest_review: null },
     saveEvidenceDraft: async () => ({ evidence_draft_id: "draft_demo_001" }),
     // a submitted demo task leaves the available queue, as it does live
@@ -87,6 +88,23 @@ function verificationStub(data) {
       if (t) t.status = "needs_review";
       return {};
     },
+    submitEvidenceDraftWithOccupancies: async (args) => {
+      const t = data.tasks.find((x) => x.task_id === (app.selectedTask?.properties?.task_id));
+      if (t) t.status = "needs_review";
+      return {
+        occupancy_ids: args.segments.map((_, index) => `occupancy_demo_${index}`),
+        derived_years: [2013, 2018, 2023],
+        conflict_years: [],
+        period_count: args.segments.length,
+        deduped: false,
+      };
+    },
+    submitOccupancies: async (args) => ({
+      occupancy_ids: args.segments.map((_, index) => `occupancy_demo_${index}`),
+      derived_years: [2013, 2018, 2023],
+      conflict_years: [],
+      deduped: false,
+    }),
     submitUnresolvedNote: async () => ({}),
     skipTask: async () => {
       const t = data.tasks.find((x) => x.task_id === (app.selectedTask?.properties?.task_id));
@@ -218,6 +236,11 @@ const flows = [
       await page.click('.task-row[data-task-id="task_demo_001"]');
       await page.waitForTimeout(400);
       await fillEvidenceBasics(page);
+      const card = page.locator('#guidedPeriodsCards .occupancy-card[data-index="0"]');
+      await card.locator('[data-field="startMode"]').selectOption("known");
+      await card.locator('[data-field="startDate"]').fill("1905");
+      await card.locator('[data-field="startBasis"]').selectOption("founding_stated");
+      await card.locator('[data-field="endMode"]').selectOption("still_active");
       await page.locator("#saveDraftButton").scrollIntoViewIfNeeded();
       await page.click("#saveDraftButton");
       await page.waitForTimeout(600);

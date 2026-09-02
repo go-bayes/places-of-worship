@@ -577,6 +577,9 @@
             return { provenance: null, problem: "Choose an assessment confidence for this evidence, or untick \"same source\" and give the periods their own confidence." };
         }
         const account = text(v.note);
+        if (account.length < MIN_SOURCE_ACCOUNT) {
+            return { provenance: null, problem: `Record what the source says about these periods (at least ${MIN_SOURCE_ACCOUNT} characters). The portal will not invent or pad a source account.` };
+        }
         const uncertainty = [text(v.uncertaintyNote), text(gapNote)].filter(Boolean).join(" ");
         return {
             provenance: {
@@ -585,7 +588,7 @@
                 sourceBasis: text(v.sourceType) === "field_observation" ? "local_investigator_account" : "named_public_source",
                 sourceTitle: text(v.sourceTitle) || text(v.sourceProvider),
                 sourceReference: text(v.sourceUrl),
-                sourceAccount: account.length >= MIN_SOURCE_ACCOUNT ? account : `${account} Periods as recorded in the source cited on this evidence record.`.trim(),
+                sourceAccount: account,
                 uncertaintyNote: uncertainty,
                 privacyFlag: text(v.privacyFlag) || "clear",
             },
@@ -598,6 +601,12 @@
         return (segments || []).some(seg => text(seg.startDate) || text(seg.startNotEarlierThan) || text(seg.startNotLaterThan) || text(seg.startBasis)
             || text(seg.endDate) || text(seg.endNotEarlierThan) || text(seg.endNotLaterThan) || text(seg.endBasis) || text(seg.endReason) || seg.location
             || seg.startMode === "unknown" || seg.endMode === "unknown" || seg.startMode === "between" || seg.startMode === "by");
+    }
+
+    function guidedPeriodsStoragePrefix(countryCode, userId) {
+        const country = text(countryCode);
+        const user = text(userId);
+        return country && user ? `powGuidedPeriods:${country}:${user}:` : "";
     }
 
     // ruling r-e1: on an ordinary guided submission the periods are the
@@ -717,6 +726,7 @@
         describeBounds,
         describePresence,
         gapBounds,
+        guidedPeriodsStoragePrefix,
         presenceForSegment,
         expandAround,
         isValidPartialDate,

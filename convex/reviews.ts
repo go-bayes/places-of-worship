@@ -276,6 +276,9 @@ export const recordReviewDecision = mutation({
     // jb ruling 2026-09-01: the submission's author may not judge it; only
     // the author is excluded, any other qualified reviewer may decide
     const judgedDraft = draft ?? await latestDraftForReview(ctx, args.taskId);
+    if ((judgedDraft?.pending_occupancy_cards?.length ?? 0) > 0) {
+      throw new Error("This evidence still has pending period cards and is not ready for review. Ask the contributor to resubmit it through the current portal.");
+    }
     if (judgedDraft !== null && judgedDraft.created_by === user._id) {
       throw new Error("You submitted this evidence; another team member must record the review decision.");
     }

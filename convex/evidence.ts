@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
-import { evidenceDraftInput, taskBatchInput, taskInput } from "./model";
+import { evidenceDraftInput, occupancySegmentInput, taskBatchInput, taskInput } from "./model";
 import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser } from "./lib/auth";
 import {
   MEDIUM_TEXT_MAX,
@@ -14,7 +14,12 @@ import {
   assertTaskReasonLimit,
 } from "./lib/limits";
 import { assertNotRapidContract, isRapidCurrentDraft } from "./lib/rapidEntry";
-import { defaultTargetYears } from "./lib/countryYears";
+import { dateFloorYear, defaultTargetYears } from "./lib/countryYears";
+import { assignedTaskPeriodProblem } from "./lib/assignedTaskPeriods";
+import { assertOccupancySet, occupancyReferenceDate } from "./lib/occupancies";
+import { intakeRateLimiter } from "./lib/rateLimits";
+import { assertRapidSubmissionId } from "./lib/rapidEntry";
+import { recordOccupancySet, taskPoint } from "./occupancies";
 import { assertWideEvidenceRowFields } from "./lib/wideEvidenceFields";
 import { resolveCitedSource } from "./lib/sources";
 import { appendTaskEvent } from "./lib/taskEvents";
@@ -186,10 +191,15 @@ async function supersedeOtherActiveDrafts(
   for (const status of ["submitted", "unresolved_note"] as const) {
     const others = await ctx.db
       .query("evidence_drafts")
-      .withIndex("by_task_status", (q) => q.eq("task_id", draft.task_id).eq("draft_status", status))
-      .collect();
+      .withIndex("by_task_creator_status", (q) =>
+        q.eq("task_id", draft.task_id).eq("created_by", draft.created_by).eq("draft_status", status),
+      )
+      .take(21);
+    if (others.length > 20) {
+      throw new Error("This contributor has more than 20 active drafts for the task. Ask JB to repair the duplicate active set before continuing.");
+    }
     for (const otherDraft of others) {
-      if (otherDraft._id !== draft._id && otherDraft.created_by === draft.created_by) {
+      if (otherDraft._id !== draft._id) {
         // a generic submission must never displace an active rapid
         // observation; only rapidEntry's correction path may supersede it
         if (isRapidCurrentDraft(otherDraft)) {
@@ -204,6 +214,35 @@ async function supersedeOtherActiveDrafts(
       }
     }
   }
+}
+
+async function markDraftSubmitted(
+  ctx: MutationCtx,
+  draft: Doc<"evidence_drafts">,
+  task: Doc<"tasks">,
+  user: Doc<"users">,
+  now: number,
+  note: string | undefined,
+  clientContext?: unknown,
+): Promise<void> {
+  await ctx.db.patch(draft._id, { draft_status: "submitted", updated_at: now });
+  await supersedeOtherActiveDrafts(ctx, draft, now);
+  await ctx.db.patch(task._id, {
+    status: "needs_review",
+    updated_at: now,
+    last_event_at: now,
+  });
+  await appendTaskEvent(ctx, {
+    taskId: draft.task_id,
+    eventType: "submitted_for_review",
+    actorUserId: user._id,
+    actorRole: chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]),
+    previousStatus: task.status,
+    newStatus: "needs_review",
+    evidenceDraftId: draft.evidence_draft_id,
+    reason: note,
+    clientContext,
+  });
 }
 
 const closedTaskStatuses = new Set(["reviewed", "exported"]);
@@ -605,6 +644,7 @@ export const reviseEvidenceDraft = mutation({
         source_claim_key: _sourceSourceClaimKey,
         claim_hash: _sourceClaimHash,
         import_batch_id: _sourceImportBatchId,
+        guided_submission_key: _sourceGuidedSubmissionKey,
         ...draftContent
       } = sourceDraft;
 
@@ -668,29 +708,129 @@ export const submitEvidenceDraft = mutation({
     assertEvidenceDraftSubmission(draft, false);
     const task = await getTaskOrThrow(ctx, draft.task_id);
     assertWideEvidenceRowFields(draft.generated_wide_row, taskTargetYears(task));
+    if (
+      task.country_code === "NZ"
+      && task.assigned_to !== undefined
+      && draft.observation_contract_version === "guided_observation_v1"
+    ) {
+      throw new Error("Assigned guided tasks must submit evidence and periods together. Reload the portal and try again.");
+    }
     const now = Date.now();
-
-    await ctx.db.patch(draft._id, {
-      draft_status: "submitted",
-      updated_at: now,
-    });
-    await supersedeOtherActiveDrafts(ctx, draft, now);
-    await ctx.db.patch(task._id, {
-      status: "needs_review",
-      updated_at: now,
-      last_event_at: now,
-    });
-    await appendTaskEvent(ctx, {
-      taskId: draft.task_id,
-      eventType: "submitted_for_review",
-      actorUserId: user._id,
-      actorRole: chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]),
-      previousStatus: task.status,
-      newStatus: "needs_review",
-      evidenceDraftId: args.evidenceDraftId,
-      reason: args.note,
-    });
+    await markDraftSubmitted(ctx, draft, task, user, now, args.note);
     return { task_id: draft.task_id, evidence_draft_id: args.evidenceDraftId, task_status: "needs_review" as const };
+  },
+});
+
+const guidedSubmissionClientContext = v.object({
+  source: v.optional(v.string()),
+  country_code: v.optional(v.string()),
+  batch_id: v.optional(v.string()),
+  selected_target_year: v.optional(v.number()),
+  page_path: v.optional(v.string()),
+  portal_version: v.optional(v.string()),
+});
+
+// Final assigned-task submission is one Convex transaction: the evidence
+// transition, period replacement, derived proposals, and events either all
+// commit or all roll back. Saved draft cards therefore remain recoverable
+// after any failed final submission.
+export const submitEvidenceDraftWithOccupancies = mutation({
+  args: {
+    evidenceDraftId: v.string(),
+    note: v.optional(v.string()),
+    clientSubmissionId: v.string(),
+    segments: v.array(occupancySegmentInput),
+    clientContext: v.optional(guidedSubmissionClientContext),
+  },
+  returns: v.object({
+    task_id: v.string(),
+    evidence_draft_id: v.string(),
+    task_status: v.literal("needs_review"),
+    occupancy_ids: v.array(v.string()),
+    derived_years: v.array(v.number()),
+    conflict_years: v.array(v.number()),
+    period_count: v.number(),
+    deduped: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
+    assertTaskReasonLimit("submission note", args.note);
+    assertRapidSubmissionId(args.clientSubmissionId);
+    assertMaxString("evidence draft id", args.evidenceDraftId, MEDIUM_TEXT_MAX);
+    assertClientContextLimit(args.clientContext);
+    const draft = await getDraftOrThrow(ctx, args.evidenceDraftId);
+    if (draft.created_by !== user._id) {
+      throw new Error("Only the contributor who saved this evidence can submit its periods.");
+    }
+    assertNotRapidContract(draft, "the guided evidence-and-periods route");
+    assertEvidenceDraftSubmission(draft, false);
+    const task = await getTaskOrThrow(ctx, draft.task_id);
+    assertWideEvidenceRowFields(draft.generated_wide_row, taskTargetYears(task));
+    const submissionKey = `${user._id}:${args.clientSubmissionId}`;
+
+    if (draft.guided_submission_key !== undefined) {
+      if (draft.guided_submission_key !== submissionKey) {
+        throw new Error("This evidence has already been submitted. Refresh the task list before trying again.");
+      }
+      const existing = await ctx.db
+        .query("site_occupancies")
+        .withIndex("by_submission_key", (q) => q.eq("submission_key", submissionKey))
+        .take(21);
+      if (existing.length > 20) {
+        throw new Error("This submission has more than 20 active periods. Ask JB to repair the duplicate set before continuing.");
+      }
+      const submittedForDraft = existing.filter(
+        (row) => row.parent_evidence_draft_id === draft.evidence_draft_id,
+      );
+      return {
+        task_id: draft.task_id,
+        evidence_draft_id: draft.evidence_draft_id,
+        task_status: "needs_review" as const,
+        occupancy_ids: submittedForDraft.map((row) => row.occupancy_id),
+        derived_years: [],
+        conflict_years: [],
+        period_count: submittedForDraft.length,
+        deduped: true,
+      };
+    }
+    if (draft.draft_status !== "draft") {
+      throw new Error("Submit periods against the current editable draft, not an earlier submitted version.");
+    }
+    const requirement = assignedTaskPeriodProblem(task, draft, args.segments.length);
+    if (requirement) throw new Error(requirement);
+
+    const now = Date.now();
+    if (args.segments.length > 0) {
+      const referenceDate = occupancyReferenceDate(draft.source_date_or_capture_date, now);
+      assertOccupancySet(args.segments, referenceDate, taskPoint(task), dateFloorYear(task.country_code));
+      await intakeRateLimiter.limit(ctx, "occupancyPerUser", { key: user._id, throws: true });
+      await intakeRateLimiter.limit(ctx, "occupancyGlobal", { throws: true });
+    }
+    const actorRole = chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]);
+    await markDraftSubmitted(ctx, draft, task, user, now, args.note, args.clientContext);
+    await ctx.db.patch(draft._id, { guided_submission_key: submissionKey, updated_at: now });
+    const { occupancyIds, derived } = await recordOccupancySet(ctx, {
+      task,
+      parent: draft,
+      user,
+      actorRole,
+      submissionKey,
+      submissionToken: args.clientSubmissionId,
+      segments: args.segments,
+      now,
+      clientContext: args.clientContext,
+      eventTaskStatus: "needs_review",
+    });
+    return {
+      task_id: draft.task_id,
+      evidence_draft_id: draft.evidence_draft_id,
+      task_status: "needs_review" as const,
+      occupancy_ids: occupancyIds,
+      derived_years: derived.years,
+      conflict_years: derived.conflicts,
+      period_count: args.segments.length,
+      deduped: false,
+    };
   },
 });
 

@@ -2029,6 +2029,7 @@ class NzVerificationMap {
     }
 
     signOutBackend() {
+        const signedOutUserId = this.backendUser?._id || this.backend?.user?._id || "";
         this.backend?.signOut();
         this.backendUser = null;
         // a deliberate sign-out forgets the chosen activity; an expired
@@ -2051,7 +2052,7 @@ class NzVerificationMap {
         this.formSnapshotsByTaskId.clear();
         // pr-e: period cards leave with the session; on a shared computer
         // the next user must not find them
-        this.clearAllGuidedPeriods();
+        this.clearAllGuidedPeriods(signedOutUserId);
         this.backendLastError = "Signed out here. On a shared computer, also sign out of Google in the browser.";
         if (ASSIGNMENT_MODE) {
             this.tasks = [];
@@ -6109,7 +6110,9 @@ class NzVerificationMap {
     // browser never shows one user's cards to another
     guidedPeriodsStorageKey(taskId) {
         const user = this.backendUser?._id || this.backend?.user?._id || "anon";
-        return `powGuidedPeriods:${COUNTRY_CONFIG.countryCode}:${user}:${taskId}`;
+        const prefix = window.PowOccupancy?.guidedPeriodsStoragePrefix(COUNTRY_CONFIG.countryCode, user)
+            || `powGuidedPeriods:${COUNTRY_CONFIG.countryCode}:${user}:`;
+        return `${prefix}${taskId}`;
     }
 
     persistGuidedPeriods(taskId) {
@@ -6118,6 +6121,7 @@ class NzVerificationMap {
         try {
             window.localStorage.setItem(this.guidedPeriodsStorageKey(taskId), JSON.stringify({
                 saved_at: Date.now(),
+                submissionId: state.submissionId || "",
                 segments: state.segments,
                 gapAnswer: state.gapAnswer,
                 gapNote: state.gapNote,
@@ -6149,10 +6153,11 @@ class NzVerificationMap {
         }
     }
 
-    clearAllGuidedPeriods() {
+    clearAllGuidedPeriods(userId) {
         this.guidedPeriodsByTaskId.clear();
         try {
-            const prefix = `powGuidedPeriods:${COUNTRY_CONFIG.countryCode}:`;
+            const prefix = window.PowOccupancy?.guidedPeriodsStoragePrefix(COUNTRY_CONFIG.countryCode, userId);
+            if (!prefix) return;
             const keys = [];
             for (let i = 0; i < window.localStorage.length; i += 1) {
                 const key = window.localStorage.key(i);
@@ -6170,8 +6175,8 @@ class NzVerificationMap {
             const stored = this.readGuidedPeriodsStorage(taskId);
             const referenceDate = this.guidedReferenceDate();
             state = stored
-                ? { segments: stored.segments, gapAnswer: stored.gapAnswer || "", sameSource: stored.sameSource !== false, provenance: stored.provenance || this.occupancyBlankProvenance(), gapNote: stored.gapNote || "", referenceDate, loadedFrom: "" }
-                : { segments: [this.occupancyBlankSegment({ referenceDate, referenceDateFromParent: true })], gapAnswer: "", sameSource: true, provenance: this.occupancyBlankProvenance(), gapNote: "", referenceDate, loadedFrom: "" };
+                ? { submissionId: stored.submissionId || "", segments: stored.segments, gapAnswer: stored.gapAnswer || "", sameSource: stored.sameSource !== false, provenance: stored.provenance || this.occupancyBlankProvenance(), gapNote: stored.gapNote || "", referenceDate, loadedFrom: "" }
+                : { submissionId: "", segments: [this.occupancyBlankSegment({ referenceDate, referenceDateFromParent: true })], gapAnswer: "", sameSource: true, provenance: this.occupancyBlankProvenance(), gapNote: "", referenceDate, loadedFrom: "" };
             this.guidedPeriodsByTaskId.set(taskId, state);
         }
         return state;
@@ -6181,7 +6186,7 @@ class NzVerificationMap {
     // shared provenance, and the gap answer, so a later open restores them
     guidedPeriodsSnapshot(taskId) {
         const state = this.guidedPeriodsByTaskId.get(taskId);
-        if (!state || !window.PowOccupancy?.cardsTouched(state.segments)) return undefined;
+        if (!state || !window.PowOccupancy?.cardsTouched(state.segments)) return [];
         return state.segments.map(seg => ({ ...seg, _gapAnswer: state.gapAnswer, _gapNote: state.gapNote, _sameSource: state.sameSource, _provenance: state.provenance }));
     }
 
@@ -6611,42 +6616,22 @@ class NzVerificationMap {
         return "";
     }
 
-    // after the parent evidence is submitted: record the periods against it
-    async submitGuidedPeriods(props, values, parentEvidenceDraftId) {
-        const taskId = props.task_id;
-        if (!this.guidedPeriodsTouched(taskId) || !window.PowOccupancy) return null;
+    // Compile the guided cards before the atomic evidence + periods mutation.
+    // An empty set is intentional only for the server-checked duplicate or
+    // hand-grid exception; the browser guard has already applied that rule.
+    guidedPeriodsSubmission(taskId, values) {
+        if (!window.PowOccupancy) return { clientSubmissionId: window.PowRapidEntry.secureSubmissionId(), segments: [] };
         const state = this.guidedPeriodsState(taskId);
-        const provenance = this.guidedPeriodsProvenance(taskId, values).provenance;
-        const segments = state.segments.map((segment, index) => ({ ...segment, ...provenance, segmentIndex: index }));
         const submissionId = state.submissionId || window.PowRapidEntry.secureSubmissionId();
         state.submissionId = submissionId;
-        const context = {
-            taskId,
-            parentEvidenceDraftId,
-            taskName: props.name || "Unnamed site",
-            referenceDate: values.sourceDate || window.PowRapidEntry.localIsoDate(),
-            referenceDateFromParent: Boolean(values.sourceDate),
-            nomination: false,
+        this.persistGuidedPeriods(taskId);
+        if (!this.guidedPeriodsTouched(taskId)) return { clientSubmissionId: submissionId, segments: [] };
+        const provenance = this.guidedPeriodsProvenance(taskId, values).provenance;
+        const segments = state.segments.map((segment, index) => ({ ...segment, ...provenance, segmentIndex: index }));
+        return {
+            clientSubmissionId: submissionId,
+            segments: segments.map(segment => window.PowOccupancy.payload(segment)),
         };
-        try {
-            const result = await this.backend.submitOccupancies({
-                clientSubmissionId: submissionId,
-                taskId,
-                parentEvidenceDraftId,
-                segments: segments.map(v => window.PowOccupancy.payload(v)),
-                clientContext: { portal_version: "occupancy-v1-inline" },
-            });
-            this.clearGuidedPeriods(taskId);
-            this.taskHistoryByTaskId.delete(taskId);
-            return { ok: true, result, count: segments.length };
-        } catch (error) {
-            // the parent stands; the cards reopen in the periods pane so
-            // nothing typed is lost, and the pane is marked dirty so leaving
-            // it asks first (finding 2)
-            this.occupancyDraft = { taskId, context, submissionId, segments: state.segments, provenance, gapAnswer: state.gapAnswer || "no", gapNote: "" };
-            this.clearGuidedPeriods(taskId);
-            return { ok: false, error, context };
-        }
     }
 
     // mounts the pane; a fresh draft unless restoring after the pin flow
@@ -8208,6 +8193,9 @@ class NzVerificationMap {
 
         const row = this.buildWideEvidenceRow(props);
         const draft = this.buildEvidenceDraft(props, row, { unresolved });
+        const guidedSubmission = submit && !unresolved
+            ? this.guidedPeriodsSubmission(props.task_id, values)
+            : null;
         // prefer the tracked revision draft; otherwise continue the latest
         // editable draft. the fallback covers a reload after a server-side
         // revision start (task in_progress, clone loaded), where the default
@@ -8228,28 +8216,35 @@ class NzVerificationMap {
                         ? "Saving and submitting..."
                         : "Saving draft...";
             }
+            const clientContext = {
+                source: "static_verification_map",
+                country_code: COUNTRY_CONFIG.countryCode,
+                batch_id: ASSIGNMENT_BATCH_ID || undefined,
+                selected_target_year: this.targetYear,
+                page_path: window.location.pathname,
+            };
             const saved = await this.backend.saveEvidenceDraft({
                 taskId: props.task_id,
                 evidenceDraftId: revisionDraftId || undefined,
                 draft,
-                clientContext: {
-                    source: "static_verification_map",
-                    country_code: COUNTRY_CONFIG.countryCode,
-                    batch_id: ASSIGNMENT_BATCH_ID || undefined,
-                    selected_target_year: this.targetYear,
-                    page_path: window.location.pathname,
-                },
+                clientContext,
             });
+            let periods = null;
             if (unresolved) {
                 await this.backend.submitUnresolvedNote({
                     evidenceDraftId: saved.evidence_draft_id,
                     note: values.note || undefined,
                 });
             } else if (submit) {
-                await this.backend.submitEvidenceDraft({
+                const result = await this.backend.submitEvidenceDraftWithOccupancies({
                     evidenceDraftId: saved.evidence_draft_id,
                     note: values.note || undefined,
+                    clientSubmissionId: guidedSubmission.clientSubmissionId,
+                    segments: guidedSubmission.segments,
+                    clientContext: { ...clientContext, portal_version: "assigned-periods-atomic-v1" },
                 });
+                periods = result.period_count > 0 ? { ok: true, result, count: result.period_count } : null;
+                this.clearGuidedPeriods(props.task_id);
             }
             this.latestDraftsByTaskId.set(props.task_id, {
                 ...draft,
@@ -8267,23 +8262,6 @@ class NzVerificationMap {
             this.taskHistoryByTaskId.delete(props.task_id);
             await this.refreshBackendTasks();
             if (unresolved || submit) {
-                // pr-e: the periods typed in the form follow the parent
-                const periods = submit && !unresolved ? await this.submitGuidedPeriods(props, values, saved.evidence_draft_id) : null;
-                if (periods && !periods.ok) {
-                    this.selectedTask = null;
-                    this.applyFilters();
-                    this.renderOccupancyEntry(periods.context, {
-                        restore: true,
-                        markDirty: true,
-                        statusMessage: `Your evidence was submitted, but the periods were not recorded: ${periods.error?.message || "unknown error"}. They are loaded here; try again.`,
-                    });
-                    if (periods.error?.authExpired) {
-                        this.backendUser = null;
-                        this.backendLastError = periods.error.message;
-                        this.renderBackendPanel();
-                    }
-                    return;
-                }
                 // a recorded submission closes the task for this ra: mirror
                 // the review portal's return-to-list by clearing the
                 // selection, re-rendering the queue, and replacing the detail
@@ -8326,7 +8304,7 @@ class NzVerificationMap {
                 this.backendLastError = error.message;
                 this.renderBackendPanel();
             }
-            if (status) status.textContent = `${error.message || "Backend save failed."} Nothing was saved.`;
+            if (status) status.textContent = `${error.message || "Backend save failed."} Your entries remain in the form; any completed draft save remains editable. Correct the problem and try again.`;
         } finally {
             writeButtons.forEach(button => { button.disabled = false; });
         }
@@ -9593,4 +9571,7 @@ class NzVerificationMap {
     }
 }
 
-window.nzVerificationMap = new NzVerificationMap();
+window.NzVerificationMap = NzVerificationMap;
+if (!window.__POW_TEST_NO_BOOTSTRAP__) {
+    window.nzVerificationMap = new NzVerificationMap();
+}

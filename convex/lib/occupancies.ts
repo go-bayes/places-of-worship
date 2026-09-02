@@ -14,6 +14,12 @@ import { canonicalJson, sha256 } from "./sha256.ts";
 export const OCCUPANCY_CONTRACT = "occupancy_v1";
 export const OCCUPANCY_DERIVATION_VERSION = "occupancy_derivation_v1";
 
+// Period dates are interpreted against the evidence they describe. The
+// recorded date is only a legacy fallback for parents that predate that field.
+export function occupancyReferenceDate(parentEvidenceDate: string | undefined, recordedAt: number): string {
+  return parentEvidenceDate?.trim() || new Date(recordedAt).toISOString().slice(0, 10);
+}
+
 export type StartMode = "known" | "between" | "by" | "unknown";
 export type EndMode = "still_active" | "known" | "between" | "after" | "unknown";
 export type StartBasis = "founding_stated" | "reopening_stated" | "organisation_founded" | "building_dedication" | "first_seen_only" | "unknown";
@@ -86,7 +92,7 @@ function assertPartialDate(label: string, value: string | undefined, referenceDa
     throw new Error(`${label} must be a real date as YYYY, YYYY-MM, or YYYY-MM-DD from ${floorYear} onward.`);
   }
   if (partialDateLower(text) > partialDateUpper(referenceDate)) {
-    throw new Error(`${label} cannot be later than the submission date (${referenceDate}).`);
+    throw new Error(`${label} cannot be later than the evidence reference date (${referenceDate}).`);
   }
   return text;
 }
@@ -117,7 +123,7 @@ export function endPrecision(segment: Pick<OccupancySegmentInput, "end_mode" | "
   return "bounded";
 }
 
-// validates one segment's own fields against the submission date
+// validates one segment's own fields against the parent evidence date
 export function assertOccupancySegment(
   segment: OccupancySegmentInput,
   referenceDate: string,
