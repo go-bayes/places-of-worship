@@ -132,12 +132,15 @@ Convex mirror of the curator batch import
 (`docs/portal-batch-import-and-corrections.md`). Rows are parsed client-side
 and re-validated server-side with the same rules as
 `apps/workbench/src/data/batchImport.ts`; rule changes must land in both
-places. Imported rows arrive as drafts, never auto-submitted, so the review
-gates are untouched.
+places. Curator-imported rows arrive as drafts, never auto-submitted, so the
+review gates are untouched. The admin-key occupancy ingest (PR-D) is the
+exception by design: the admin running it under a named service or admin user
+is the deliberate human act, and its places land submitted for review.
 
 | Function | Kind | Roles | Purpose | Writes |
 | --- | --- | --- | --- | --- |
 | `importNominationBatch` | mutation | `curator`, `admin` | Import up to 200 validated nomination rows from one source file as draft-saved tasks with draft evidence. Idempotent per source: a row whose (source, locator) key or claim hash matches an earlier import is skipped; invalid rows are rejected with per-row reports; VU rows without a kastom answer are parked for individual handling. | `task_batches`, `tasks`, `evidence_drafts`, `task_events` |
+| `adminImportOccupancyBatch` | internalMutation (admin key only) | acts as a named active `service` or `admin` user (`actor_email`) | PR-D bulk ingest of places with their recorded periods (`docs/development/woodberry-import-brief-2026-09-02.md`): one import row per period, rows of a place sharing `source_locator` and numbered by `segment_index`, with the occupancy columns (`convex/lib/occupancyImport.ts`). Each accepted place lands SUBMITTED: a `needs_review` task with the first period's location assertion, a submitted `guided_observation_v1` draft (all target years `not_assessed`), its `site_occupancies` rows, and the derived census-year proposals as `derived_unconfirmed`, written through the same `recordOccupancySet` route as `submitOccupancies`. Validation is the nomination import's row rules plus `assertOccupancySet`; failing places are rejected with per-place reports; VU places without a kastom answer are parked; a place whose (source, locator) key or claim hash already exists is skipped. Caps: 100 places or 400 rows per run. Never writes `target_year_statuses`. | `task_batches`, `sources`, `tasks`, `evidence_drafts`, `task_events`, `site_occupancies`, `derived_target_year_states`, `derived_year_locations`, `derived_state_events` |
 
 ## `reviews.ts`
 

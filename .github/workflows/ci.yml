@@ -38,6 +38,8 @@ jobs:
           node apps/regions/nz/js/osm-history.test.cjs
       - name: dated-places builder tests
         run: python3 -m unittest scripts/test_build_occupancy_dated_places.py
+      - name: woodberry import builder tests
+        run: python3 -m unittest scripts/test_build_vu_woodberry_import.py
       - uses: astral-sh/setup-uv@v5
       - name: validate area summaries
         run: bash scripts/validate_area_summaries.sh
