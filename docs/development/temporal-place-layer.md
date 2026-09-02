@@ -57,6 +57,26 @@ snapshot tier, so the country maps' longer copy would mislead there).
 The country maps do this via `dotEraNote`; the portal via
 `updatePointsNote`.
 
+**Reviewed tier (PR-C, 2026-09-02).** A `dated_places.geojson` may carry,
+beside its OSM date-tag features, one feature per reviewer-accepted
+occupancy (`source: "reviewed_occupancy"`, `kind: "occupancy"`) and
+`LineString` transition features (`kind: "transition"`), built by
+`scripts/build_occupancy_dated_places.py` from a materialised Convex
+export. The date predicate above is unchanged and still decides
+aliveness from `start_year` and `end_year`; a reviewed feature sets
+`start_year` to its earliest possible start and `end_year` to its
+latest possible end, so it stays alive through both windows. The
+country maps add a window rule on top: year Y is inside a window when
+`Y < start_upper`, or `Y > end_lower`, or `end_unknown` and
+`Y > start_upper`; such a place renders as an amber dashed ring instead
+of the solid dot, an approximate place adds a pale disc for `radius_m`,
+and a transition line renders while `year_lower <= Y <= year_upper`.
+Every point layer filters on point geometry so the line features never
+reach a circle layer. The portal keeps its plain predicate and skips
+features without two coordinates; it does not render windows or
+transitions (its context dots stay subordinate to task markers). Full
+contract: `public-map-occupancy-slider-brief-2026-09-02.md`.
+
 **Wiring rule for data products.** A `dated_places.geojson` with zero
 features is unwired everywhere (no `datedPlaces` key in the region
 config, no `datedPlaces` in the portal's `COUNTRY_CONFIGS`) — an empty

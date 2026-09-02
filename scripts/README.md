@@ -27,6 +27,7 @@ Current NZ cleanup utilities:
 
 Current global pipeline scaffolding:
 
+- `scripts/build_occupancy_dated_places.py`: merge one dated-places feature per reviewer-accepted occupancy (plus relocation transition lines) from materialised Convex exports into `apps/regions/<cc>/data/dated_places.geojson`; OSM date-tag features are kept. Tests: `python3 -m unittest scripts/test_build_occupancy_dated_places.py`.
 - `scripts/extract_global_data.R`: raw global extractor that writes dated country payloads to `data/raw/osm/<snapshot_date>/`.
 - `scripts/normalize_global_places.R`: normalise raw country payloads into a stable intermediate schema under `data/intermediate/global/<snapshot_date>/`.
 - `scripts/clean_global_places.R`: apply conservative shared cleaning rules to normalised country datasets and write cleaned outputs and manifests under `data/intermediate/global/<snapshot_date>/`.

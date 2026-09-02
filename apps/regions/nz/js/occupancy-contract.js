@@ -5,7 +5,11 @@
 // contract per docs/development/occupancy-build-brief-2026-09-02.md.
 (function () {
     const CONTRACT_VERSION = "occupancy_v1";
-    const DATE_FLOOR_YEAR = 1600;
+    // F1: the floor is per country (date-floor.js); 1600 when the page sets none
+    function floorYear() {
+        const value = Number(window.POW_DATE_FLOOR_YEAR);
+        return Number.isInteger(value) && value > 0 ? value : 1600;
+    }
     const MAX_TEXT = 2000;
     const MAX_SEGMENTS = 20;
     const MIN_UNCERTAINTY_NOTE = 12;
@@ -40,10 +44,11 @@
 
     function isValidPartialDate(value) {
         if (!value) return false;
-        if (/^\d{4}$/.test(value)) return Number(value) >= DATE_FLOOR_YEAR;
-        if (/^\d{4}-(0[1-9]|1[0-2])$/.test(value)) return Number(value.slice(0, 4)) >= DATE_FLOOR_YEAR;
+        const floor = floorYear();
+        if (/^\d{4}$/.test(value)) return Number(value) >= floor;
+        if (/^\d{4}-(0[1-9]|1[0-2])$/.test(value)) return Number(value.slice(0, 4)) >= floor;
         const match = value.match(/^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/);
-        if (!match || Number(match[1]) < DATE_FLOOR_YEAR) return false;
+        if (!match || Number(match[1]) < floor) return false;
         const parsed = new Date(`${value}T00:00:00Z`);
         return parsed.getUTCFullYear() === Number(match[1])
             && parsed.getUTCMonth() + 1 === Number(match[2])
@@ -171,7 +176,7 @@
 
     function dateError(label, value, referenceDate) {
         if (!isValidPartialDate(value)) {
-            return `${label}: use YYYY, YYYY-MM, or YYYY-MM-DD from ${DATE_FLOOR_YEAR} onward.`;
+            return `${label}: use YYYY, YYYY-MM, or YYYY-MM-DD from ${floorYear()} onward.`;
         }
         if (referenceDate && partialDateLower(value) > partialDateUpper(referenceDate)) {
             return `${label} cannot be later than ${referenceDate}.`;

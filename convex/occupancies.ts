@@ -9,7 +9,7 @@ import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser } from "./lib/auth";
-import { defaultTargetYears } from "./lib/countryYears";
+import { dateFloorYear, defaultTargetYears } from "./lib/countryYears";
 import { isHistoricalClaimParentContract } from "./lib/historicalClaims";
 import {
   assertClientContextLimit,
@@ -438,7 +438,7 @@ export const submitOccupancies = mutation({
     }
     const referenceDate = new Date().toISOString().slice(0, 10);
     const point = taskPoint(task);
-    assertOccupancySet(args.segments, referenceDate, point);
+    assertOccupancySet(args.segments, referenceDate, point, dateFloorYear(task.country_code));
 
     await intakeRateLimiter.limit(ctx, "occupancyPerUser", { key: user._id, throws: true });
     await intakeRateLimiter.limit(ctx, "occupancyGlobal", { throws: true });

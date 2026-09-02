@@ -33,6 +33,11 @@ jobs:
           node apps/regions/nz/js/historical-claim-contract.test.cjs
           node apps/regions/nz/js/location-assertion-contract.test.cjs
           node apps/regions/nz/js/rapid-entry-contract.test.cjs
+          node apps/regions/nz/js/occupancy-contract.test.cjs
+          node apps/regions/nz/js/occupancy-review.test.cjs
+          node apps/regions/nz/js/osm-history.test.cjs
+      - name: dated-places builder tests
+        run: python3 -m unittest scripts/test_build_occupancy_dated_places.py
       - uses: astral-sh/setup-uv@v5
       - name: validate area summaries
         run: bash scripts/validate_area_summaries.sh

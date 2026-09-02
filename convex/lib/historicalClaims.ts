@@ -5,6 +5,7 @@ import {
   assertMaxString,
   isValidPartialDate,
 } from "./limits.ts";
+import { DEFAULT_DATE_FLOOR_YEAR } from "./countryYears.ts";
 
 export type HistoricalClaimShape = {
   claim_kind: "structure" | "worship_function" | "denomination_or_affiliation" | "leadership" | "shared_use" | "other";
@@ -73,6 +74,7 @@ export function partialDateUpper(value: string): string {
 export function assertHistoricalClaim(
   claim: HistoricalClaimShape,
   referenceDate: string,
+  floorYear: number = DEFAULT_DATE_FLOOR_YEAR,
 ): void {
   const claimText = claim.claim_text.trim();
   const confidenceBasis = claim.confidence_basis.trim();
@@ -117,8 +119,8 @@ export function assertHistoricalClaim(
 
   for (const [label, value] of [["earliest", earliest], ["latest", latest]] as const) {
     if (!value) continue;
-    if (!isValidPartialDate(value) || Number(value.slice(0, 4)) < 1600) {
-      throw new Error(`Use YYYY, YYYY-MM, or YYYY-MM-DD from 1600 onward for the ${label} supported date.`);
+    if (!isValidPartialDate(value) || Number(value.slice(0, 4)) < floorYear) {
+      throw new Error(`Use YYYY, YYYY-MM, or YYYY-MM-DD from ${floorYear} onward for the ${label} supported date.`);
     }
     if (partialDateLower(value) > partialDateUpper(referenceDate)) {
       throw new Error(`The ${label} supported date cannot be after the evidence reference date.`);
