@@ -1767,8 +1767,10 @@ class NzVerificationMap {
         this.pinMode = false;
         this.reviseContext = null;
         // a ?revise=1 hand-off waiting for sign-in (assignment mode gates
-        // the sidebar); applied once the contributor is in
-        this.pendingDeepLink = null;
+        // the sidebar): parsed here so the first sign-in card can say so,
+        // applied once the contributor is in
+        const deepLink = deepLinkContextFromParams(SEARCH_PARAMS);
+        this.pendingDeepLink = deepLink?.mode === "revise" ? deepLink : null;
         this.pinMarker = null;
         this.pinUncertaintyCircle = null;
         this.pinConfirmed = null;
@@ -1968,7 +1970,7 @@ class NzVerificationMap {
                 <div class="backend-card auth-required">
                     <strong>${ASSIGNMENT_MODE ? "1. Sign in to start" : "Shared task backend"}</strong>
                     ${assignmentLabel}
-                    ${this.pendingDeepLink ? `<span class="pilot-note" role="note">You followed a link to revise <strong>${escapeHtml(this.pendingDeepLink.name || "a place on the map")}</strong>. Sign in and it opens here.</span>` : ""}
+                    ${this.pendingDeepLink ? `<span role="note">You followed a link to revise <em>${escapeHtml(this.pendingDeepLink.name || "a place on the map")}</em>. Sign in and it opens here.</span>` : ""}
                     <span>${ASSIGNMENT_MODE
                         ? `${INVITED_EMAIL_HINT
                             ? `Use ${escapeHtml(INVITED_EMAIL_HINT)}, the Google account JB invited.`
@@ -4079,9 +4081,7 @@ class NzVerificationMap {
             this.map.setView([link.latitude, link.longitude], Math.max(this.map.getZoom(), 16));
         }
         if (link.mode === "revise") {
-            this.pendingDeepLink = link;
             this.applyPendingDeepLink();
-            if (this.pendingDeepLink) this.renderBackendPanel();
             return;
         }
         const context = {
