@@ -132,3 +132,10 @@ Recorded from JB's reply to the plan the same day. All five decisions ruled as r
 
 Build queue is therefore unblocked in the section-5 order: PR-L1 → PR-B0 → PR-B′ → PR-C → PR-D.
 
+### PR-C rulings — 2026-09-02 (after #66 merged)
+
+Recorded from JB's replies to the PR-C brief (`docs/development/public-map-occupancy-slider-brief-2026-09-02.md`).
+
+- **R6 ruled: accept the date-floor table** (brief §4) as an interim typo guard: NZ, VU, AU 1600; US, CA, MX, BR 1500; IE, UK, PT, RO, SK, IN, KR 1000; countries without waves 1600. Accepted knowing what it excludes (brief §7): the four-digit year format, not the table, is the binding limit, and a deep-time date format (signed years, BCE, one sanity bound near 12000 BCE) is a separate follow-on ruling, scheduled after PR-D.
+- **R7 ruled: country maps keep the census-wave slider.** A reviewed occupancy is evaluated at the waves and nowhere else on a country page. Two directions offered, not yet ruled: a continuous slider on the main site, which carries no census layers; or slider domains that follow the interest and purpose of a layer, as the Pulotu source already does by swapping the temporal frame to its own three time points. JB: "this is a deep point" — to be developed with the layer-families design (`docs/development/layer-families-design.md`, collections declaring their own temporal frame), not settled inside PR-C.
+

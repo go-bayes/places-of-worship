@@ -33,7 +33,7 @@ Line features (`kind: "transition"`): a `LineString` from a period ended by `rel
 
 Both feature kinds share the source; every point layer filters on `geometry-type == Point`, the transition layer on `LineString`. The portal's context-dot code skips features without two coordinates, so a `LineString` never reaches its `circleMarker`.
 
-## 4. F1 table (assumption, for JB's ruling)
+## 4. F1 table (ruled R6, 2026-09-02: accepted as an interim typo guard)
 
 | countries | floor |
 |---|---|
@@ -45,7 +45,7 @@ The floor is a typo guard, not a claim about when worship began. Countries witho
 
 ## 5. Not in this PR
 
-- **Slider domain.** The public slider still steps through census waves; a reviewed occupancy is evaluated at those years only. Extending the domain below the first wave needs a ruling on what the choropleth shows in a pre-census year (nothing? the nearest wave washed out?). Until then the F1 floor governs validation, not the slider.
+- **Slider domain (ruled R7, 2026-09-02).** Country maps keep the census-wave slider; a reviewed occupancy is evaluated at those years only. Open directions from JB: a continuous slider on the main site (no census layers), or per-layer slider domains following a layer's purpose (precedent: the Pulotu source swaps the temporal frame to its own three points). To be developed with the layer-families design, not here. The F1 floor governs validation, not the slider.
 - **Overrides on the public map** (§2).
 - **Vanuatu wiring.** The VU product stays empty until the first occupancy is confirmed; the builder's summary flags `wiring_needed` the run that changes that, and the standard's wiring rule then applies (region config and portal `COUNTRY_CONFIGS` together).
 - **Automation.** The builder runs by hand after a frozen export; the export → dated-places feedback loop in `revision-pipeline-all-countries.md` (phase R4) is the place to schedule it.
@@ -54,3 +54,29 @@ The floor is a typo guard, not a claim about when worship began. Countries witho
 
 - `node --test convex/lib/*.node-test.mjs` (122, including the floor tie test), portal contract tests (7 files), `python3 -m unittest scripts/test_build_occupancy_dated_places.py` (11), `npx tsc --noEmit`.
 - Browser: fixture export (a relocation with a 300 m approximate first site and a 2010–2015 start window; a second place with an undated end) built into the NZ product on localhost:8000. At 2013 the first site renders as the pale disc with the dashed ring; at 2018 it is gone, the new site is solid, and the dashed transition line joins them; at 2023 only the new site remains. Popup and legend wording checked. The NZ product was restored after the check (no reviewed rows exist yet).
+
+## 7. Date-floor context: the oldest places of worship (recorded for R6)
+
+JB asked what the convention excludes before accepting R6. Dates are approximate and several are contested; "in use" means worship continues on the site today. The binding limit is the four-digit year format: nothing before 1000 CE and no BCE date can be entered at all, whatever the floor. In the countries with census waves, the 1000 floor excludes St Martin's Canterbury and the Saxon churches, the Irish monastic sites, the Portuguese Visigothic churches, every Indian temple before 1000, and the great Korean temples; the 1600 default excludes, for Italy alone, the Pantheon and hundreds of early churches. NZ, Vanuatu and Australia lose no building at 1600; whether Aboriginal sacred sites of far greater antiquity are places of worship is a definition-layer question, not a date-format one. The deep-time date format (signed years, BCE, one sanity bound near 12000 BCE) removes every exclusion below and is the scheduled follow-on.
+
+| Place | Country | Date | Status |
+|---|---|---|---|
+| Göbekli Tepe | Turkey | c. 9500 BCE | ruin; "temple" reading disputed |
+| Ġgantija temples | Malta | c. 3600 BCE | ruin |
+| Temple of Confucius, Qufu | China | 478 BCE | in use, rebuilt |
+| Mahabodhi Temple, Bodh Gaya | India | 3rd c. BCE foundation, 5th–6th c. structure | in use |
+| Western Wall | Jerusalem | 19 BCE | in use |
+| Mundeshwari Temple, Bihar | India | c. 108 CE (claimed) | in use |
+| Etchmiadzin Cathedral | Armenia | 301–303 | in use, oldest cathedral |
+| Church of the Nativity | Bethlehem | 339, rebuilt 565 | in use |
+| Yazd Atash Behram fire | Iran | burning since c. 470 | in use |
+| Clonmacnoise, Glendalough | Ireland | 6th c. | ruins, pilgrimage continues |
+| St Martin's, Canterbury | UK | 597 | in use, oldest church in the English-speaking world |
+| Hōryū-ji | Japan | 607 | in use, oldest wooden building |
+| Pantheon as a church | Italy | 609 | in use |
+| Quba Mosque, Medina | Saudi Arabia | 622 | in use, rebuilt |
+| Great Mosque of Kairouan | Tunisia | 670 | in use |
+| Kailasanathar, Kanchipuram | India | 685–705 | in use |
+| Bulguksa, Haeinsa | Korea | 774, 802 | in use |
+| São Pedro de Balsemão | Portugal | 7th c. (Visigothic) | in use |
+| Old Synagogue, Erfurt | Germany | 1094 | oldest intact synagogue |
