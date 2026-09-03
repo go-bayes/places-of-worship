@@ -190,3 +190,17 @@ test("a multi-segment place passes the set rules end to end", () => {
   assert.ok(segments.every(Boolean));
   assert.doesNotThrow(() => assertOccupancySet(segments, REF, POINT));
 });
+
+test("pr-f: the import accepts use_frequency and the desacralised end reason", () => {
+  const base = {
+    segment_index: 0, start_mode: "known", start_date: "1903", start_basis: "founding_stated",
+    end_mode: "known", end_date: "1988", end_basis: "closure_stated", end_reason: "desacralised",
+    latitude: -15.3, longitude: 167.86, use_frequency: "annual",
+  };
+  const ok = segmentFromImportRow(base, { sourceTitle: "Atlas", sourceLocator: "row 1", taskPoint: { latitude: -15.3, longitude: 167.86 }, privacyFlag: "clear" });
+  assert.deepEqual(ok.problems, []);
+  assert.equal(ok.segment.use_frequency, "annual");
+  assert.equal(ok.segment.end_reason, "desacralised");
+  const bad = segmentFromImportRow({ ...base, use_frequency: "weekly" }, { sourceTitle: "Atlas", sourceLocator: "row 1", taskPoint: { latitude: -15.3, longitude: 167.86 }, privacyFlag: "clear" });
+  assert.ok(bad.problems.some((p) => /use_frequency/.test(p)));
+});

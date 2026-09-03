@@ -272,3 +272,15 @@ test("a set must be numbered, non-overlapping, and relocations must move", () =>
   assert.throws(() => assertOccupancySet([input({}), input({ segment_index: 1, start_date: "2011" })], REF, PIN), /still-active period must be the last/);
   assert.throws(() => assertOccupancySet([], REF, PIN), /at least one period/);
 });
+
+test("rule 11: intermittent use covers the year without establishing use (ruling r-f1)", () => {
+  const annual = { occupancy_id: "a", segment_index: 0, start_mode: "known", start_date: "2014", start_basis: "first_seen_only", end_mode: "still_active", still_active_asof: "2024-05", end_basis: "unknown", use_frequency: "annual", latitude: -37.2, longitude: 174.8, location_mode: "building_identified", location_basis: "map_placement" };
+  assert.deepEqual(presenceForSegment(annual, 2018), { occupancy_id: "a", rule_id: "intermittent_use", status: "uncertain" });
+  assert.equal(presenceForSegment({ ...annual, use_frequency: "monthly" }, 2018).rule_id, "inside_interval");
+  assert.equal(presenceForSegment({ ...annual, use_frequency: undefined }, 2018).rule_id, "inside_interval");
+  // the frequency is a consumed input, so it changes the hash
+  assert.notEqual(occupancyInputsHash([annual]), occupancyInputsHash([{ ...annual, use_frequency: "regular" }]));
+  // desacralised is an accepted end reason with a stated closure
+  assert.doesNotThrow(() => assertOccupancySegment(input({ end_mode: "known", end_date: "2014", end_basis: "closure_stated", end_reason: "desacralised", still_active_asof: undefined, use_frequency: "regular" }), REF));
+  assert.throws(() => assertOccupancySegment(input({ use_frequency: "weekly" }), REF), /how often/);
+});

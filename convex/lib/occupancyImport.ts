@@ -22,6 +22,7 @@ export const OCCUPANCY_IMPORT_COLUMNS = [
   "end_basis",
   "end_reason",
   "still_active_asof",
+  "use_frequency",
   "latitude",
   "longitude",
   "location_mode",
@@ -54,6 +55,7 @@ export type OccupancyImportRow = {
   end_basis?: string;
   end_reason?: string;
   still_active_asof?: string;
+  use_frequency?: string;
   latitude?: number | string;
   longitude?: number | string;
   location_mode?: string;
@@ -79,7 +81,8 @@ const START_MODES = new Set(["known", "between", "by", "unknown"]);
 const END_MODES = new Set(["still_active", "known", "between", "after", "unknown"]);
 const START_BASES = new Set(["founding_stated", "reopening_stated", "organisation_founded", "building_dedication", "first_seen_only", "unknown"]);
 const END_BASES = new Set(["closure_stated", "last_seen_only", "unknown"]);
-const END_REASONS = new Set(["closed", "relocated", "demolished", "use_changed", "unknown"]);
+const END_REASONS = new Set(["closed", "relocated", "demolished", "use_changed", "desacralised", "unknown"]);
+const USE_FREQUENCIES = new Set(["regular", "monthly", "several_times_a_year", "annual", "occasional", "uncertain"]);
 const LOCATION_MODES = new Set(["building_identified", "approximate_area"]);
 const LOCATION_BASES = new Set(["map_placement", "address_or_locality", "named_source_description", "local_investigator_account", "other"]);
 const CONFIDENCES = new Set(["high", "moderate", "low", "uncertain"]);
@@ -200,6 +203,8 @@ export function segmentFromImportRow(
   }
   const endReason = text(row.end_reason);
   if (endReason !== undefined && !END_REASONS.has(endReason)) problems.push(`Unknown end_reason: ${endReason}.`);
+  const useFrequency = text(row.use_frequency);
+  if (useFrequency !== undefined && !USE_FREQUENCIES.has(useFrequency)) problems.push(`Unknown use_frequency: ${useFrequency}.`);
   const confidence = text(row.occupancy_confidence) ?? "moderate";
   if (!CONFIDENCES.has(confidence)) problems.push(`Unknown occupancy_confidence: ${confidence}.`);
   const sourceBasis = text(row.occupancy_source_basis) ?? "named_public_source";
@@ -223,6 +228,7 @@ export function segmentFromImportRow(
     end_basis: endBasis as OccupancySegmentInput["end_basis"],
     ...(endReason !== undefined ? { end_reason: endReason as OccupancySegmentInput["end_reason"] } : {}),
     ...(text(row.still_active_asof) ? { still_active_asof: text(row.still_active_asof) } : {}),
+    ...(useFrequency !== undefined ? { use_frequency: useFrequency as OccupancySegmentInput["use_frequency"] } : {}),
     location_relation: relation,
     ...(location !== undefined ? { location } : {}),
     confidence: confidence as OccupancySegmentInput["confidence"],

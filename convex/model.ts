@@ -271,8 +271,18 @@ export const occupancyStartBasis = v.union(
 export const occupancyEndBasis = v.union(
   v.literal("closure_stated"), v.literal("last_seen_only"), v.literal("unknown"),
 );
+// pr-f (ruling r-f2): a desacralisation is a datable ecclesiastical act,
+// distinct from a change of use
 export const occupancyEndReason = v.union(
-  v.literal("closed"), v.literal("relocated"), v.literal("demolished"), v.literal("use_changed"), v.literal("unknown"),
+  v.literal("closed"), v.literal("relocated"), v.literal("demolished"), v.literal("use_changed"),
+  v.literal("desacralised"), v.literal("unknown"),
+);
+// pr-f: how often the place was used for worship during a period; the
+// census derivation counts regular, monthly, and several_times_a_year as
+// in use and the rest as uncertain (ruling r-f1)
+export const occupancyUseFrequency = v.union(
+  v.literal("regular"), v.literal("monthly"), v.literal("several_times_a_year"),
+  v.literal("annual"), v.literal("occasional"), v.literal("uncertain"),
 );
 export const occupancyDatePrecision = v.union(
   v.literal("day"), v.literal("month"), v.literal("year"), v.literal("bounded"), v.literal("unknown"),
@@ -296,6 +306,7 @@ export const occupancySegmentInput = v.object({
   end_reason: v.optional(occupancyEndReason),
   still_active_asof: v.optional(v.string()),
   successor_site_id: v.optional(v.string()),
+  use_frequency: v.optional(occupancyUseFrequency),
   location_relation: occupancyLocationRelation,
   location: v.optional(locationAssertionInput),
   confidence: historicalClaimConfidence,
@@ -306,6 +317,57 @@ export const occupancySegmentInput = v.object({
   source_account: v.string(),
   uncertainty_note: v.optional(v.string()),
   privacy_flag: privacyFlag,
+});
+
+// pr-f function_chain_v1 (docs/development/function-chain-brief-2026-09-02.md,
+// rulings r-f1 to r-f4): what the place was and how that changed. one
+// label at the start, then ordered changes; a state ends when the next
+// begins, so the ra never types an end date for a state
+export const functionChainContractVersion = v.literal("function_chain_v1");
+export const functionChainChange = v.union(
+  v.literal("denomination_changed"), v.literal("shared_use_began"), v.literal("shared_use_ended"),
+  v.literal("building_rebuilt"), v.literal("use_became_intermittent"), v.literal("desacralised"),
+  v.literal("other"),
+);
+export const functionChainDateInput = v.object({
+  mode: v.union(v.literal("known"), v.literal("between"), v.literal("by")),
+  date: v.optional(v.string()),
+  not_earlier_than: v.optional(v.string()),
+  not_later_than: v.optional(v.string()),
+});
+export const functionChainChangeInput = v.object({
+  change: functionChainChange,
+  date: functionChainDateInput,
+  label: v.optional(v.string()),
+  note: v.optional(v.string()),
+  use_frequency: v.optional(occupancyUseFrequency),
+});
+export const functionChainInput = v.object({
+  contract_version: functionChainContractVersion,
+  start: v.object({
+    label: v.string(),
+    label_basis: v.optional(denominationLabelBasis),
+    date: functionChainDateInput,
+  }),
+  changes: v.array(functionChainChangeInput),
+});
+// the chain as typed in the form, saved with the draft beside the cards
+const pendingFunctionChainDate = {
+  dateMode: v.string(),
+  date: v.string(),
+  notEarlierThan: v.string(),
+  notLaterThan: v.string(),
+  around: v.boolean(),
+};
+export const pendingFunctionChain = v.object({
+  start: v.object({ label: v.string(), labelBasis: v.string(), ...pendingFunctionChainDate }),
+  changes: v.array(v.object({
+    change: v.string(),
+    label: v.string(),
+    note: v.string(),
+    frequency: v.string(),
+    ...pendingFunctionChainDate,
+  })),
 });
 
 // The guided form persists its editable card shape before it is compiled to
@@ -338,6 +400,7 @@ export const pendingOccupancyCards = v.array(v.object({
   endReason: v.union(v.literal(""), occupancyEndReason),
   stillActiveAsof: v.string(),
   successorSiteId: v.optional(v.string()),
+  useFrequency: v.optional(v.union(v.literal(""), occupancyUseFrequency)),
   sameAsPin: v.boolean(),
   location: v.union(v.null(), locationAssertionInput),
   locationSummary: v.string(),
@@ -345,10 +408,18 @@ export const pendingOccupancyCards = v.array(v.object({
   _gapNote: v.optional(v.string()),
   _sameSource: v.optional(v.boolean()),
   _provenance: v.optional(pendingOccupancyProvenance),
+  // pr-f: the function chain typed under the cards travels on the first card
+  _chain: v.optional(pendingFunctionChain),
 }));
 export const derivedPresenceStatus = v.union(
   v.literal("present"), v.literal("absent"), v.literal("uncertain"),
 );
+// pr-f: the denomination in force for a census year, or an uncertain year
+// inside a change window naming both candidates
+export const derivedFunctionStatus = v.union(
+  v.literal("stated"), v.literal("uncertain"),
+);
+export const derivationKind = v.union(v.literal("presence"), v.literal("function"));
 export const derivedReviewState = v.union(
   v.literal("derived_unconfirmed"), v.literal("reviewer_confirmed"), v.literal("reviewer_overridden"),
   v.literal("reviewer_rejected"), v.literal("superseded"),
