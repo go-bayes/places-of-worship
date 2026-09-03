@@ -19,6 +19,9 @@
     const STATE_CHANGES = new Set(["denomination_changed", "shared_use_began", "shared_use_ended", "desacralised"]);
     const USE_FREQUENCIES = ["regular", "monthly", "several_times_a_year", "annual", "occasional", "uncertain"];
 
+    // mirrors DESACRALISED_BY_DATE_MESSAGE in convex/lib/functionChain.ts
+    const DESACRALISED_BY_DATE_MESSAGE = "A desacralisation needs its date, or the earliest and latest dates it could have been; a latest date alone cannot close the period.";
+
     // mirrors CHAIN_CHANGE_TEXT in convex/lib/functionChain.ts
     const CHANGE_WORDS = {
         denomination_changed: "denomination changed",
@@ -219,6 +222,7 @@
             if (desacralised && STATE_CHANGES.has(change.change)) return `${label}: after a desacralisation only intermittent use, a rebuild, or a note can follow.`;
             if (change.change === "desacralised") {
                 if (desacralised) return `${label}: the chain already records a desacralisation.`;
+                if (change.date.mode === "by") return DESACRALISED_BY_DATE_MESSAGE;
                 desacralised = true;
             }
         }
@@ -275,7 +279,8 @@
                     row = { target_year: Number(year), derived_status: "uncertain", candidate_labels: [stateLabel(state)], rule_id: "within_start_window" };
                     break;
                 }
-                if (to !== undefined && to.lower !== undefined && to.upper !== undefined && yEnd >= to.lower && yStart <= to.upper && afterStart) {
+                const windowLower = to === undefined ? undefined : (to.lower !== undefined ? to.lower : from.upper);
+                if (to !== undefined && to.upper !== undefined && windowLower !== undefined && yEnd >= windowLower && yStart <= to.upper && afterStart) {
                     const next = states[i + 1];
                     const candidates = next ? [stateLabel(state), stateLabel(next)] : [stateLabel(state)];
                     row = { target_year: Number(year), derived_status: "uncertain", candidate_labels: candidates, rule_id: "within_change_window" };
@@ -329,14 +334,17 @@
         const notes = [];
         const p = payload(chain);
         const inUse = seg => !seg.useFrequency || ["regular", "monthly", "several_times_a_year"].includes(seg.useFrequency);
+        // a by-date cannot end a period (no latest-only end mode), so the
+        // chain never forges bounds from it: validateChain refuses it
         const endAt = (seg, d, reason) => {
             if (d.dateMode === "known") { seg.endMode = "known"; seg.endDate = d.date; seg.endNotEarlierThan = ""; seg.endNotLaterThan = ""; }
             else if (d.dateMode === "between") { seg.endMode = "between"; seg.endDate = ""; seg.endNotEarlierThan = d.notEarlierThan; seg.endNotLaterThan = d.notLaterThan; }
-            else { seg.endMode = "between"; seg.endDate = ""; seg.endNotEarlierThan = d.notLaterThan; seg.endNotLaterThan = d.notLaterThan; }
+            else return false;
             seg.endAround = false;
             seg.stillActiveAsof = "";
             seg.endBasis = "closure_stated";
             seg.endReason = reason;
+            return true;
         };
         const endsAt = (seg, d) => (d.dateMode === "known" ? seg.endMode === "known" && seg.endDate === d.date : seg.endMode === "between" && seg.endNotLaterThan === d.notLaterThan);
         const startsAt = (seg, d) => (d.dateMode === "known" ? seg.startMode === "known" && seg.startDate === d.date : seg.startNotLaterThan === d.notLaterThan);
@@ -346,7 +354,7 @@
                 const target = [...cards].reverse().find(seg => seg.endReason === "desacralised" || (seg.endMode === "still_active" && inUse(seg)));
                 if (!target) return;
                 if (target.endReason === "desacralised" && endsAt(target, d)) return;
-                endAt(target, d, "desacralised");
+                if (!endAt(target, d, "desacralised")) return;
                 notes.push(`Period ${cards.indexOf(target) + 1} now ends ${dateText(p.changes[index].date)}, desacralised.`);
             }
             if (change.change === "use_became_intermittent" && cards.length && text(change.frequency)) {
@@ -354,7 +362,7 @@
                 const seg = cards[cards.length - 1];
                 const wasActive = seg.endMode === "still_active";
                 const asof = seg.stillActiveAsof || referenceDate || "";
-                if (wasActive) endAt(seg, d, "use_changed");
+                if (wasActive && !endAt(seg, d, "use_changed")) return;
                 const openAfter = wasActive || seg.endReason === "desacralised";
                 cards.push({
                     ...seg,

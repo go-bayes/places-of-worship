@@ -54,7 +54,7 @@ for (const [name, chain] of Object.entries(FIXTURES)) {
     const payload = mirror.payload(chain);
     assert.doesNotThrow(() => assertFunctionChain(payload, REF));
     assert.equal(mirror.validateChain(chain, REF), "");
-    assert.deepEqual(strip(mirror.deriveFunctions(chain, [...NZ, 1888, 1925, 1935, 2016, 2018])), strip(deriveFunctions(payload, [...NZ, 1888, 1925, 1935, 2016, 2018])));
+    assert.deepEqual(strip(mirror.deriveFunctions(chain, [...NZ, 1888, 1925, 1930, 1935, 2016, 2018])), strip(deriveFunctions(payload, [...NZ, 1888, 1925, 1930, 1935, 2016, 2018])));
     assert.deepEqual(mirror.compileChain(chain).states.map((s) => mirror.stateLabel(s)), compileChain(payload).states.map(stateLabel));
   });
 }
@@ -70,6 +70,11 @@ test("every function rule fires at least once across the fixtures", () => {
 test("worked case: kohekohe derives presbyterian in 2013 and nothing after the desacralisation", () => {
   const rows = mirror.deriveFunctions(FIXTURES["kohekohe (brief section 4)"], NZ);
   assert.deepEqual(rows.map((r) => `${r.target_year}:${r.derived_status}:${r.label}`), ["2013:stated:Presbyterian"]);
+  // p2-3: shared use ended by 1930, so 1930 is uncertain between both labels on both sides
+  const y1930 = mirror.deriveFunctions(FIXTURES["kohekohe (brief section 4)"], [1930]);
+  assert.deepEqual(y1930.map((r) => `${r.target_year}:${r.derived_status}:${r.candidate_labels.join("|")}:${r.rule_id}`), [
+    "1930:uncertain:Presbyterian, shared with Methodist|Presbyterian:within_change_window",
+  ]);
   assert.equal(mirror.describeFunctions(rows, NZ), "Denomination: 2013 Presbyterian (inside the recorded state); 2018 not assessed; 2023 not assessed.");
 });
 
@@ -77,6 +82,15 @@ test("the mirror refuses what the server refuses", () => {
   const bad = { ...FIXTURES["kohekohe (brief section 4)"], start: { ...FIXTURES["kohekohe (brief section 4)"].start, label: "" } };
   assert.match(mirror.validateChain(bad, REF), /Name the tradition/);
   assert.throws(() => assertFunctionChain(mirror.payload(bad), REF), /Name the tradition/);
+  // p2-2: a latest-only desacralisation is refused with the same words on both sides
+  const byDesacralised = { ...FIXTURES["kohekohe (brief section 4)"], changes: [{ change: "desacralised", label: "", note: "", frequency: "", dateMode: "by", date: "", notEarlierThan: "", notLaterThan: "2014", around: false }] };
+  const message = mirror.validateChain(byDesacralised, REF);
+  assert.match(message, /latest date alone cannot close the period/);
+  assert.throws(() => assertFunctionChain(mirror.payload(byDesacralised), REF), new RegExp(message.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  // and applying it to the cards forges nothing
+  const untouched = mirror.applyToPeriods(byDesacralised, [{ startMode: "known", startDate: "1888", startBasis: "founding_stated", endMode: "still_active", stillActiveAsof: REF, useFrequency: "regular", sameAsPin: true }], REF);
+  assert.equal(untouched.segments[0].endMode, "still_active");
+  assert.deepEqual(untouched.notes, []);
   const unordered = { ...FIXTURES["kohekohe (brief section 4)"], changes: [FIXTURES["kohekohe (brief section 4)"].changes[2], FIXTURES["kohekohe (brief section 4)"].changes[0]] };
   assert.match(mirror.validateChain(unordered, REF), /date order/);
   assert.throws(() => assertFunctionChain(mirror.payload(unordered), REF), /date order/);
