@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>religionmap.org · week in review, 4 September 2026</title>
+<meta name="description" content="What the places-of-worship project built between 28 August and 4 September 2026, and where the team's feedback is wanted.">
+<style>
+  :root {
+    --bg: #f4f6f8; --panel: #ffffff; --panel-2: #f3f6f9;
+    --ink: #17202a; --muted: #5b6776; --line: #cfd6df;
+    --action: #1f618d; --action-soft: #e8f1fb;
+    --caution: #6b4e00; --caution-soft: #fff4dc;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 17px; line-height: 1.55; -webkit-text-size-adjust: 100%; }
+  body { margin: 0; }
+  main { max-width: 46rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  header { margin-bottom: 2.5rem; }
+  .kicker { color: var(--muted); font-size: 0.9rem; letter-spacing: 0.02em; text-transform: uppercase; margin: 0 0 0.5rem; }
+  h1 { font-size: 2rem; line-height: 1.15; margin: 0 0 0.75rem; font-weight: 700; }
+  .lede { font-size: 1.15rem; color: var(--ink); margin: 0 0 0.75rem; }
+  .byline { color: var(--muted); font-size: 0.95rem; margin: 0; }
+  h2 { font-size: 1.4rem; line-height: 1.25; margin: 2.75rem 0 0.75rem; font-weight: 700; }
+  h3 { font-size: 1.1rem; margin: 1.75rem 0 0.5rem; font-weight: 600; }
+  p, li { margin: 0 0 0.9rem; }
+  ul, ol { padding-left: 1.4rem; }
+  li { margin-bottom: 0.5rem; }
+  a { color: var(--action); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:hover { color: #17527a; }
+  figure { margin: 1.5rem 0 1.75rem; }
+  figure img { display: block; width: 100%; max-width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+  figcaption { color: var(--muted); font-size: 0.92rem; margin-top: 0.55rem; line-height: 1.45; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 640px) { .pair { grid-template-columns: 1fr; } html { font-size: 16px; } h1 { font-size: 1.65rem; } }
+  .callout { background: var(--action-soft); border: 1px solid #c6dbf0; border-radius: 12px; padding: 1rem 1.25rem; margin: 1.5rem 0; }
+  .callout p:last-child, .callout ol:last-child { margin-bottom: 0; }
+  .ask { background: var(--caution-soft); border: 1px solid #ead9a8; border-radius: 12px; padding: 1rem 1.25rem; margin: 1.5rem 0; }
+  .ask p:last-child { margin-bottom: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0 1.5rem; font-size: 0.95rem; }
+  th, td { text-align: left; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-weight: 600; color: var(--muted); }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; background: var(--panel-2); padding: 0.05em 0.3em; border-radius: 4px; }
+  .links li { margin-bottom: 0.35rem; }
+  footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <p class="kicker">religionmap.org · week in review</p>
+  <h1>Anyone on the team can now add or revise a place of worship in any country, and say when it was used</h1>
+  <p class="lede">This page summarises what the places-of-worship project built between 28 August and 4 September 2026, shows the new screens, and asks for your feedback on any part of it: the workflow, the wording, the colours, the data model, or the science it serves.</p>
+  <p class="byline">Prepared by Claude for Joseph Bulbulia, 4 September 2026. Everything described here is live at <a href="https://religionmap.org/">religionmap.org</a> unless marked otherwise.</p>
+</header>
+
+<div class="ask">
+  <p><strong>How to send feedback.</strong> Reply to Joseph's email, or open an issue on the public repository at <a href="https://github.com/go-bayes/places-of-worship/issues/new">github.com/go-bayes/places-of-worship</a>. Nothing is too small: a confusing label or an unreadable colour is as useful to us as a design objection. Section 6 lists the questions we most want answered.</p>
+</div>
+
+<h2>1. From the public map into the evidence portal, for any country</h2>
+
+<p>Until this week the public map was a shop front with no door. A visitor who noticed a missing church or a wrong name could edit OpenStreetMap, but the project's own evidence portal was reachable only for New Zealand and 23 other configured countries, and only by people who knew its address. The public map and every one of the 100 country pages now offer a <strong>Contribute</strong> entry with three ways in: improve OpenStreetMap (open to anyone), submit evidence to religionmap.org (project members), and review evidence (reviewers). The second names the country under the map, so a member looking at Suva is offered the Fiji portal, not the New Zealand one.</p>
+
+<div class="pair">
+  <figure>
+    <img src="img/fiji-page-contribute-panel.jpg" alt="The Contribute panel on the Fiji country page, offering Improve OpenStreetMap, Submit evidence to religionmap.org · Fiji, and Review evidence" width="311" height="250" loading="lazy">
+    <figcaption>The Contribute panel on the Fiji page. The project entry names the country.</figcaption>
+  </figure>
+  <figure>
+    <img src="img/nz-popup-revise-crop.jpg" alt="A place popup on the New Zealand map with Revise this place as the first action" width="680" height="400" loading="lazy">
+    <figcaption>Clicking a place on the public map now offers <em>Revise this place</em> first, which opens the portal on that record.</figcaption>
+  </figure>
+</div>
+
+<p>The portal itself now opens for any country. A world registry of 198 countries supplies the name, the camera, and the census target years where we have them. Where no country-specific data product exists yet, the portal draws every place-of-worship point from the same map tiles the public map uses, so a member in Fiji, Tonga, or Kenya sees today's OpenStreetMap places and can revise any of them. The review portal uses the same registry, so every country has a review lane from the first submission. Signed out, a visitor can still see the dots, look at Street View, and open the OpenStreetMap record; pressing <em>Sign in to revise this place</em> remembers the place and opens it after sign-in.</p>
+
+<div class="pair">
+  <figure>
+    <img src="img/fiji-portal-signed-out.jpg" alt="The Fiji evidence portal, signed out, with a popup on an unvalidated place offering Sign in to revise this place" width="1091" height="1120" loading="lazy">
+    <figcaption>The Fiji portal, signed out. Amber dots are today's OpenStreetMap places, drawn from the map tiles; the design pass in section 5 turns them slate grey.</figcaption>
+  </figure>
+  <figure>
+    <img src="img/fiji-sign-in-names-place.jpg" alt="The portal sign-in card reading Sign in to revise Unnamed; it opens here after sign-in" width="1091" height="1120" loading="lazy">
+    <figcaption>The sign-in card names the place the visitor chose, and opens it after sign-in.</figcaption>
+  </figure>
+</div>
+
+<h2>2. Where and when a place was used for worship</h2>
+
+<p>The scientific object of the project is not a building but a time-indexed state: was this site used for recurring religious worship at a given date? This week the portal started recording that state directly. When a member adds or revises a place, the form asks what they can confirm at the observation date (in use, exists but use uncertain, exists but not used, no longer exists) with a sentence of guidance under each option. Below that, one card per <strong>period</strong> records when worship began and ended, how each date is known, how often the place was used, and where it stood. A period may begin with a known date, a range, or a bound; an end may be unknown without blocking the record.</p>
+
+<div class="pair">
+  <figure>
+    <img src="img/portal-add-place-options.jpg" alt="The add-a-missing-place form with four observation options, each with a sentence of guidance" width="1091" height="1120" loading="lazy">
+    <figcaption>What can you confirm at the observation date? Each option has its own sentence of guidance.</figcaption>
+  </figure>
+  <figure>
+    <img src="img/portal-periods.jpg" alt="The periods block inside the entry form: began, ended, frequency, and location for Period 1, with Add another period beneath" width="1091" height="1120" loading="lazy">
+    <figcaption>One card per period. Under the cards, the function chain records what the place was and any change.</figcaption>
+  </figure>
+</div>
+
+<p>Under the period cards, the <strong>function chain</strong> records what the place was at the start (the tradition or denomination as the source gives it) and each change in order, including desacralisation and the resumption of worship. From the periods, the server derives a presence state for each census year (present, absent, or uncertain) with the rule that produced it; from the chain, it derives the denomination in force in that year. A reviewer confirms, overrides, or rejects each derived year. The derivations are recomputed whenever the underlying periods change, and an author cannot confirm their own. The exported evidence table includes the derived state and denomination for every census year.</p>
+
+<p>Three further changes serve the same object. First, every add-place flow in every country now asks how sure the contributor is of the location and records an uncertainty radius, which the server converts to a location grade (parcel, street, locality, or area). Second, the OpenStreetMap edit history of a clicked record is shown as context, with the first place-of-worship tagging presented as the earliest OpenStreetMap evidence rather than as a founding date. Third, revising an existing record now collects the same evidence as adding a new one, including photographs and documents, and every named source goes into a shared source register that reviewers can cross-reference.</p>
+
+<h2>3. Review</h2>
+
+<p>Review work now runs from a claim pool. A reviewer claims a task, cannot review their own submission, and may request a second or third opinion. A reviewer who needs more from the contributor can return the task for comment, and the contributor's answer comes back on the same task. The reviewer sees the derived census-year states with their rules, the location grade and any pin movement, the OpenStreetMap history, and the attachments. Every country now has a review lane.</p>
+
+<h2>4. Data in, and the definition</h2>
+
+<p>Robert Woodberry's Vanuatu mission-station data entered the review queue this week through a new bulk occupancy import: 80 stations across the Catholic and Protestant atlases, each with its periods, waiting for reviewer confirmation. The import writes the same period records the portal writes, so bulk and hand-entered data are reviewed by the same rules.</p>
+
+<p>The operational definition of a place of worship advanced three times, from version 0.1.2 to <a href="https://github.com/go-bayes/places-of-worship/blob/main/docs/operational-definition.md">version 0.1.5</a>. Version 0.1.3 records why criterion 3 says worship "by or for" a community, which places chaplaincies and specialist-performed worship in scope. Version 0.1.4 makes a place of worship a continuant: it may relocate or be rebuilt and remain the same place, and identity is recorded as an explicit, revisable review decision rather than lodged in the building. Version 0.1.5 states how a recorded frequency of use enters the census-year derivation, with the amendment that an annual service is certain knowledge of rare use rather than uncertainty. Each version is kept as an immutable snapshot so a study can cite the rule it used.</p>
+
+<h2>5. A design pass is under way, and your eye is wanted</h2>
+
+<p>The screens above show the portal as it looks today, and they show the problem. Three surfaces written at different times disagree on colour, type size, and button style. An audit this week counted about 120 distinct colours in the portal stylesheet and found amber doing seven jobs at once; text that research assistants read for hours is set at caption size; and several controls fall below the contrast that accessibility guidelines require. Joseph has ruled on the policy questions, and a pass that reduces the three surfaces to one system of tokens is being built now. Three decisions in particular deserve a second opinion from the team:</p>
+
+<ul>
+  <li><strong>Unvalidated places</strong> (today's OpenStreetMap points that nobody has yet verified) change from amber to a small slate-grey disc with a white halo, so that amber can mean only "needs attention": uncertain, disputed, or a caution.</li>
+  <li><strong>On phones</strong>, Contribute joins the bottom row of actions and offers only the link to the portal, since the OpenStreetMap editor does not work on a phone.</li>
+  <li><strong>Priority</strong> leaves colour altogether and becomes a word in the task row, because a red-green priority dot beside a green status pill cannot be told apart by readers with the commonest colour-vision deficiency.</li>
+</ul>
+
+<p>If you have opinions about colour, type, or layout, this is the week to voice them. The full audit and decision set is in the repository at <a href="https://github.com/go-bayes/places-of-worship/blob/main/docs/development/ui-design-audit-2026-09-03.md">docs/development/ui-design-audit-2026-09-03.md</a>.</p>
+
+<h2>6. Where we most want your feedback</h2>
+
+<div class="callout">
+<ol>
+  <li><strong>The observation options.</strong> Are the four options in the add-place form (in use; exists but use uncertain; exists but not used; no longer exists) the right partition for what you can observe in the field or in a source? Is any case missing or ambiguous?</li>
+  <li><strong>Periods and the function chain.</strong> Does one card per period, with the function chain beneath, match how your sources describe a place's history? Is there a kind of change the chain cannot express?</li>
+  <li><strong>Derived census-year states.</strong> The server derives present, absent, or uncertain for each census year from the periods. Would you trust a derived state you had not entered yourself, given that a reviewer must confirm it? Would you want to see the rule that produced it?</li>
+  <li><strong>The unvalidated dots.</strong> Every country's portal now shows today's OpenStreetMap places as revisable dots. Is that the right promise to make to a new research assistant, or does it invite revision of places we know nothing about?</li>
+  <li><strong>Review.</strong> Is the claim pool, with second opinions and return-for-comment, enough for the review you expect to do? What would you need that is not there?</li>
+  <li><strong>Design.</strong> Anything about colour, type size, wording, or layout, on any screen, on any device.</li>
+</ol>
+</div>
+
+<h2>7. Try it</h2>
+
+<ul class="links">
+  <li><a href="https://religionmap.org/">The public map</a>. Zoom to a country and open <em>Contribute</em> at the top right.</li>
+  <li><a href="https://religionmap.org/apps/regions/fj/">The Fiji page</a>, one of the 100 country pages.</li>
+  <li><a href="https://religionmap.org/apps/regions/nz/verification.html?country=fj">The evidence portal for Fiji</a>. Change <code>fj</code> to any two-letter country code.</li>
+  <li><a href="https://religionmap.org/apps/regions/nz/review.html?country=nz">The review portal for New Zealand</a>, for reviewers.</li>
+  <li><a href="https://religionmap.org/apps/guides/ra.html">The research-assistant guide</a>, which walks through the portal step by step.</li>
+  <li><a href="https://github.com/go-bayes/places-of-worship/blob/main/CHANGELOG.md">The changelog</a>, which records every change with the ruling behind it.</li>
+</ul>
+
+<p>Access to the portal is by invitation. If you are on the team and your Google account is not yet recognised, tell Joseph which account to invite.</p>
+
+<h2>By the numbers</h2>
+
+<table>
+  <tr><th>Pull requests merged, 28 August to 3 September</th><td>41</td></tr>
+  <tr><th>Countries the evidence and review portals now open for</th><td>198</td></tr>
+  <tr><th>Country pages with the Contribute entry</th><td>100, plus the global map</td></tr>
+  <tr><th>Vanuatu mission stations imported for review</th><td>80</td></tr>
+  <tr><th>Operational definition</th><td>version 0.1.5</td></tr>
+</table>
+
+<footer>
+  <p>Places of Worship project, Victoria University of Wellington. Map data © OpenStreetMap contributors. This page is public; it does not include anyone's private details and links only to public documents.</p>
+</footer>
+</main>
+</body>
+</html>
