@@ -2,6 +2,7 @@ export type CurrentObservationStatus =
   | "currently_used_for_worship"
   | "place_exists_worship_uncertain"
   | "place_exists_not_used_for_worship"
+  | "place_no_longer_exists"
   | "could_not_determine";
 
 export type CurrentObservationBasis =
@@ -12,7 +13,7 @@ export type CurrentObservationBasis =
 
 export type DerivedCurrentObservation = {
   action: "confirm_current_record" | "missing_current_site" | "closed_or_changed_use" | "needs_review";
-  existence_status: "present" | "uncertain";
+  existence_status: "present" | "absent" | "uncertain";
   worship_use_status: "confirmed_worship" | "not_worship" | "uncertain";
 };
 
@@ -88,6 +89,14 @@ export function deriveCurrentObservation(
       return {
         action: "closed_or_changed_use",
         existence_status: "present",
+        worship_use_status: "not_worship",
+      };
+    // jb 2026-09-03: the building or site is gone; the reviewer assesses
+    // when, and the periods carry any known dates
+    case "place_no_longer_exists":
+      return {
+        action: "closed_or_changed_use",
+        existence_status: "absent",
         worship_use_status: "not_worship",
       };
     case "could_not_determine":
@@ -214,6 +223,7 @@ const CURRENT_OBSERVATION_STATUSES: readonly CurrentObservationStatus[] = [
   "currently_used_for_worship",
   "place_exists_worship_uncertain",
   "place_exists_not_used_for_worship",
+  "place_no_longer_exists",
   "could_not_determine",
 ];
 
