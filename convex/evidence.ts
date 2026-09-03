@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
-import { evidenceDraftInput, occupancySegmentInput, taskBatchInput, taskInput } from "./model";
+import { evidenceDraftInput, functionChainInput, occupancySegmentInput, taskBatchInput, taskInput } from "./model";
 import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser } from "./lib/auth";
 import {
   MEDIUM_TEXT_MAX,
@@ -17,9 +17,10 @@ import { assertNotRapidContract, isRapidCurrentDraft } from "./lib/rapidEntry";
 import { dateFloorYear, defaultTargetYears } from "./lib/countryYears";
 import { assignedTaskPeriodProblem } from "./lib/assignedTaskPeriods";
 import { assertOccupancySet, occupancyReferenceDate } from "./lib/occupancies";
+import { assertChainAgreesWithPeriods, assertFunctionChain } from "./lib/functionChain";
 import { intakeRateLimiter } from "./lib/rateLimits";
 import { assertRapidSubmissionId } from "./lib/rapidEntry";
-import { recordOccupancySet, taskPoint } from "./occupancies";
+import { recordFunctionChain, recordOccupancySet, taskPoint } from "./occupancies";
 import { assertWideEvidenceRowFields } from "./lib/wideEvidenceFields";
 import { resolveCitedSource } from "./lib/sources";
 import { appendTaskEvent } from "./lib/taskEvents";
@@ -740,6 +741,8 @@ export const submitEvidenceDraftWithOccupancies = mutation({
     note: v.optional(v.string()),
     clientSubmissionId: v.string(),
     segments: v.array(occupancySegmentInput),
+    // pr-f: the function chain recorded under the period cards
+    chain: v.optional(functionChainInput),
     clientContext: v.optional(guidedSubmissionClientContext),
   },
   returns: v.object({
@@ -749,6 +752,7 @@ export const submitEvidenceDraftWithOccupancies = mutation({
     occupancy_ids: v.array(v.string()),
     derived_years: v.array(v.number()),
     conflict_years: v.array(v.number()),
+    derived_function_years: v.optional(v.array(v.number())),
     period_count: v.number(),
     deduped: v.boolean(),
   }),
@@ -815,11 +819,20 @@ export const submitEvidenceDraftWithOccupancies = mutation({
     if (requirement) throw new Error(requirement);
 
     const now = Date.now();
+    const referenceDate = occupancyReferenceDate(draft.source_date_or_capture_date, now);
     if (args.segments.length > 0) {
-      const referenceDate = occupancyReferenceDate(draft.source_date_or_capture_date, now);
       assertOccupancySet(args.segments, referenceDate, taskPoint(task), dateFloorYear(task.country_code));
       await intakeRateLimiter.limit(ctx, "occupancyPerUser", { key: user._id, throws: true });
       await intakeRateLimiter.limit(ctx, "occupancyGlobal", { throws: true });
+    }
+    // the chain is validated before any write so a bad chain leaves the
+    // draft and its cards editable, exactly as a bad period does
+    if (args.chain !== undefined) {
+      if (args.segments.length === 0) {
+        throw new Error("The function chain rests on the periods' source; record at least one period with it.");
+      }
+      assertFunctionChain(args.chain, referenceDate, dateFloorYear(task.country_code));
+      assertChainAgreesWithPeriods(args.chain, args.segments);
     }
     const actorRole = chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]);
     await markDraftSubmitted(ctx, draft, task, user, now, args.note, args.clientContext);
@@ -836,6 +849,23 @@ export const submitEvidenceDraftWithOccupancies = mutation({
       clientContext: args.clientContext,
       eventTaskStatus: "needs_review",
     });
+    let functionYears: number[] = [];
+    if (args.chain !== undefined) {
+      const latestDraft = (await ctx.db.get(draft._id)) ?? draft;
+      const recorded = await recordFunctionChain(ctx, {
+        task,
+        parent: latestDraft,
+        user,
+        actorRole,
+        submissionKey,
+        submissionToken: args.clientSubmissionId,
+        chain: args.chain,
+        segments: args.segments,
+        referenceDate,
+        now,
+      });
+      functionYears = recorded.derivedYears;
+    }
     return {
       task_id: draft.task_id,
       evidence_draft_id: draft.evidence_draft_id,
@@ -843,6 +873,7 @@ export const submitEvidenceDraftWithOccupancies = mutation({
       occupancy_ids: occupancyIds,
       derived_years: derived.years,
       conflict_years: derived.conflicts,
+      derived_function_years: functionYears,
       period_count: args.segments.length,
       deduped: false,
     };

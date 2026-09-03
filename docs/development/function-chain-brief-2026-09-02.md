@@ -1,6 +1,6 @@
 # PR-F build brief — the function chain and intermittent use (2026-09-02)
 
-Status: build spec, drafted at JB's request on 2026-09-02 (evening) from his Kohekohe example. Builds on PR-E (`assigned-task-periods-brief-2026-09-02.md`, rulings R-E1–R-E4) and the occupancy lane (`occupancy-build-brief-2026-09-02.md`). Nothing here asks the RA about a census year: the census-year states keep deriving from the periods, and the denomination per census year will derive from the chain.
+Status: BUILT 2026-09-03 on `feat/function-chain` after JB's rulings R-F1–R-F4 (section 5a); build spec drafted at JB's request on 2026-09-02 (evening) from his Kohekohe example. Builds on PR-E (`assigned-task-periods-brief-2026-09-02.md`, rulings R-E1–R-E4) and the occupancy lane (`occupancy-build-brief-2026-09-02.md`). Nothing here asks the RA about a census year: the census-year states keep deriving from the periods, and the denomination per census year will derive from the chain.
 
 ## 1. The problem
 
@@ -8,7 +8,7 @@ A place of worship has two histories that the portal now records unevenly. Where
 
 ## 2. What ships
 
-1. **The change chain.** Under the period cards, one block: "What was it, and did that change?" The first row records the tradition or denomination at the start (label as the source gives it, with the existing label basis and relation fields) and defaults its date to the period's start. One control, *Add a change*, offers: denomination changed; shared use began; shared use ended; building rebuilt; use became intermittent; desacralised; other. Each change takes the same date widget as the periods (known, around, between, by) and the new label where one applies. The previous state ends when the next begins, so the chain is contiguous by construction and the RA never types an end date for a state.
+1. **The change chain.** Under the period cards, one block: "What was it, and did that change?" The first row records the tradition or denomination at the start (label as the source gives it, with the existing label basis and relation fields) and defaults its date to the period's start. One control, *Add a change*, offers: denomination changed; shared use began; shared use ended; building rebuilt; use became intermittent; desacralised; worship resumed (R-F5); other. Each change takes the same date widget as the periods (known, around, between, by) and the new label where one applies. The previous state ends when the next begins, so the chain is contiguous by construction and the RA never types an end date for a state.
 2. **Desacralised closes the period.** Choosing it writes the enclosing period's end (date, `closure_stated`, reason `desacralised`) so the RA is not asked twice; `desacralised` joins the end-reason vocabulary (`closed`, `relocated`, `demolished`, `use_changed`, `desacralised`, `unknown`) on server, mirror, and export.
 3. **Use frequency on a period.** Each period gains `use_frequency`, an ordinal: `regular` (weekly or more, the default), `monthly`, `several_times_a_year`, `annual`, `occasional` (rarer or irregular), `uncertain`. "Use became intermittent" in the chain splits the period at that date and sets the new period's frequency. The preview and the reviewer panel state the frequency beside the period. What frequency counts as "in use" for the census derivation is a definition-layer ruling (section 5); until ruled, periods at `annual`, `occasional`, or `uncertain` derive `uncertain` for the years they cover rather than `present`, and the rule is named (`intermittent_use`).
 4. **Storage.** The chain compiles to ordered `historical_claims` of kind denomination-or-affiliation state (existing contract) with a new `chain_index` and `chain_id`, one claim per state, plus one claim per rebuild; superseded on resubmission as a set, as periods are. No new table.
@@ -49,6 +49,7 @@ Whether the last row is a period or a note is exactly ruling R-F1. Recording it 
 - **R-F2** yes: `desacralised` is its own end reason.
 - **R-F3** yes: the seven chain changes of section 2.1, with `other` carrying a required note.
 - **R-F4** yes: derived denomination confirmation rides in the same reviewer panel and the same *Confirm all eligible* action.
+- **R-F5** (JB, 2026-09-03) yes, option 2: an eighth change `worship_resumed`, so a deconsecrated building that returns to worship under another (or the same) denomination is one chain on one site. Its label is the resuming denomination (required, like the start label); it is permitted only after a `desacralised` change, and after it the ordinary changes are permitted again. On the cards it opens a new period at its date with `start_basis: reopening_stated` (PR-E rule 2b), so the years between the desacralisation and the resumption derive absent for presence and nothing for denomination; the resumed state derives by the same rules as any other.
 
 ## 6. Acceptance
 

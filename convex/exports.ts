@@ -9,6 +9,7 @@ import { defaultTargetYears } from "./lib/countryYears";
 import { readGeneratedWideRow, wideEvidenceFields, wideEvidenceRowValues } from "./lib/wideEvidenceFields";
 import {
   derivedStateEventDoc,
+  derivedTargetYearFunctionDoc,
   derivedTargetYearStateDoc,
   derivedYearLocationDoc,
   evidenceDraftDoc,
@@ -70,6 +71,9 @@ function overlayTargetYears(
 ): Record<string, unknown> {
   const statuses = (draft.target_year_statuses ?? {}) as Record<string, string>;
   const bases = (draft.target_year_basis ?? {}) as Record<string, string>;
+  // pr-f: the confirmed or overridden denomination per year, never a proposal
+  const denominations = (draft.target_year_denominations ?? {}) as Record<string, string>;
+  const denominationBases = (draft.target_year_denomination_basis ?? {}) as Record<string, string>;
   const out = { ...row };
   for (const year of targetYears) {
     const key = String(year);
@@ -77,6 +81,10 @@ function overlayTargetYears(
     if (status !== undefined) out[`target_year_${year}_status`] = status;
     if (status !== undefined && status !== "not_assessed") {
       out[`target_year_${year}_basis`] = bases[key] ?? "source_observation";
+    }
+    if (denominations[key] !== undefined) {
+      out[`target_year_${year}_denomination`] = denominations[key];
+      out[`target_year_${year}_denomination_basis`] = denominationBases[key] ?? "reviewer_confirmed_derivation";
     }
     const settled = draftLocations.find(
       (l) => l.target_year === year && (l.review_state === "reviewer_confirmed" || l.review_state === "reviewer_overridden"),
@@ -156,6 +164,7 @@ type OccupancyBundle = {
   occupancies: Doc<"site_occupancies">[];
   derivedStates: Doc<"derived_target_year_states">[];
   derivedLocations: Doc<"derived_year_locations">[];
+  derivedFunctions: Doc<"derived_target_year_functions">[];
   derivedEvents: Doc<"derived_state_events">[];
 };
 
@@ -166,7 +175,7 @@ function exportFiles(
   evidenceDrafts: Doc<"evidence_drafts">[],
   historicalClaims: Doc<"historical_claims">[],
   reviewDecisions: Doc<"review_decisions">[],
-  occupancy: OccupancyBundle = { occupancies: [], derivedStates: [], derivedLocations: [], derivedEvents: [] },
+  occupancy: OccupancyBundle = { occupancies: [], derivedStates: [], derivedLocations: [], derivedFunctions: [], derivedEvents: [] },
 ) {
   const wide = siteEvidenceWideCsv(String(manifest.country_code ?? ""), evidenceDrafts, reviewDecisions, occupancy.derivedLocations);
   const fileManifest = {
@@ -181,6 +190,7 @@ function exportFiles(
       { filename: "site_occupancies.jsonl", content_type: "application/x-ndjson", record_count: occupancy.occupancies.length },
       { filename: "derived_target_year_states.jsonl", content_type: "application/x-ndjson", record_count: occupancy.derivedStates.length },
       { filename: "derived_year_locations.jsonl", content_type: "application/x-ndjson", record_count: occupancy.derivedLocations.length },
+      { filename: "derived_target_year_functions.jsonl", content_type: "application/x-ndjson", record_count: occupancy.derivedFunctions.length },
       { filename: "derived_state_events.jsonl", content_type: "application/x-ndjson", record_count: occupancy.derivedEvents.length },
       {
         filename: "site_evidence_wide.csv",
@@ -204,6 +214,7 @@ function exportFiles(
     site_occupancies_jsonl: jsonl(occupancy.occupancies),
     derived_target_year_states_jsonl: jsonl(occupancy.derivedStates),
     derived_year_locations_jsonl: jsonl(occupancy.derivedLocations),
+    derived_target_year_functions_jsonl: jsonl(occupancy.derivedFunctions),
     derived_state_events_jsonl: jsonl(occupancy.derivedEvents),
     site_evidence_wide_csv: wide.csv,
   };
@@ -381,6 +392,7 @@ export const getExportBundle = query({
     site_occupancies: v.array(siteOccupancyDoc),
     derived_target_year_states: v.array(derivedTargetYearStateDoc),
     derived_year_locations: v.array(derivedYearLocationDoc),
+    derived_target_year_functions: v.array(derivedTargetYearFunctionDoc),
     derived_state_events: v.array(derivedStateEventDoc),
     files: v.object({
       export_manifest_json: v.string(),
@@ -392,6 +404,7 @@ export const getExportBundle = query({
       site_occupancies_jsonl: v.string(),
       derived_target_year_states_jsonl: v.string(),
       derived_year_locations_jsonl: v.string(),
+      derived_target_year_functions_jsonl: v.string(),
       derived_state_events_jsonl: v.string(),
       site_evidence_wide_csv: v.string(),
     }),
@@ -413,6 +426,7 @@ export const getExportBundle = query({
     const occupancies: Doc<"site_occupancies">[] = [];
     const derivedStates: Doc<"derived_target_year_states">[] = [];
     const derivedLocations: Doc<"derived_year_locations">[] = [];
+    const derivedFunctions: Doc<"derived_target_year_functions">[] = [];
     const derivedEvents: Doc<"derived_state_events">[] = [];
     for (const taskId of batch.included_task_ids) {
       const task = await taskByTaskId(ctx, taskId);
@@ -457,6 +471,12 @@ export const getExportBundle = query({
           .withIndex("by_task", (q) => q.eq("task_id", taskId))
           .collect()),
       );
+      derivedFunctions.push(
+        ...(await ctx.db
+          .query("derived_target_year_functions")
+          .withIndex("by_task", (q) => q.eq("task_id", taskId))
+          .collect()),
+      );
       derivedEvents.push(
         ...(await ctx.db
           .query("derived_state_events")
@@ -498,6 +518,7 @@ export const getExportBundle = query({
       site_occupancies: occupancies,
       derived_target_year_states: derivedStates,
       derived_year_locations: derivedLocations,
+      derived_target_year_functions: derivedFunctions,
       derived_state_events: derivedEvents,
       historical_claims: historicalClaims,
       review_decisions: reviewDecisions,
@@ -505,6 +526,7 @@ export const getExportBundle = query({
         occupancies,
         derivedStates,
         derivedLocations,
+        derivedFunctions,
         derivedEvents,
       }),
     };

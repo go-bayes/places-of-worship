@@ -19,7 +19,11 @@
     const END_MODES = new Set(["still_active", "known", "between", "after", "unknown"]);
     const START_BASES = new Set(["founding_stated", "reopening_stated", "organisation_founded", "building_dedication", "first_seen_only", "unknown"]);
     const END_BASES = new Set(["closure_stated", "last_seen_only", "unknown"]);
-    const END_REASONS = new Set(["closed", "relocated", "demolished", "use_changed", "unknown"]);
+    const END_REASONS = new Set(["closed", "relocated", "demolished", "use_changed", "desacralised", "unknown"]);
+    // pr-f (ruling r-f1): regular, monthly, and several times a year count
+    // as in use for the census derivation; the rest derive uncertain
+    const USE_FREQUENCIES = new Set(["regular", "monthly", "several_times_a_year", "annual", "occasional", "uncertain"]);
+    const IN_USE_FREQUENCIES = new Set(["regular", "monthly", "several_times_a_year"]);
     const CONFIDENCE = new Set(["high", "moderate", "low", "uncertain"]);
     const SOURCE_BASES = new Set(["inscription_or_document_observed", "local_investigator_account", "named_public_source", "other"]);
     const PRIVACY_FLAGS = new Set(["clear", "needs_review", "restricted"]);
@@ -40,7 +44,16 @@
         relocated: "relocated",
         demolished: "demolished",
         use_changed: "use changed",
+        desacralised: "desacralised",
         unknown: "reason unknown",
+    };
+    const USE_FREQUENCY_WORDS = {
+        regular: "regular use",
+        monthly: "monthly use",
+        several_times_a_year: "used several times a year",
+        annual: "annual use",
+        occasional: "occasional use",
+        uncertain: "frequency uncertain",
     };
 
     function isValidPartialDate(value) {
@@ -102,6 +115,7 @@
             endAroundYear: "",
             stillActiveAsof: text(v.stillActiveAsof),
             successorSiteId: text(v.successorSiteId),
+            useFrequency: text(v.useFrequency),
             sameAsPin: v.sameAsPin !== false,
             location: v.location && typeof v.location === "object" ? v.location : null,
             confidence: text(v.confidence),
@@ -232,7 +246,10 @@
             return "Say how the end is known: closure stated or last seen only.";
         }
         if (endDated && !END_REASONS.has(s.endReason)) {
-            return "Say why the period ended: closed, relocated, demolished, use changed, or unknown.";
+            return "Say why the period ended: closed, relocated, demolished, use changed, desacralised, or unknown.";
+        }
+        if (s.useFrequency && !USE_FREQUENCIES.has(s.useFrequency)) {
+            return "Choose how often the place was used: regular, monthly, several times a year, annual, occasional, or uncertain.";
         }
         if (s.endMode === "unknown" && s.endReason && !END_REASONS.has(s.endReason)) {
             return "Choose a listed end reason.";
@@ -350,6 +367,7 @@
             ...(s.endMode !== "still_active" && s.endReason ? { end_reason: s.endReason } : {}),
             ...(s.endMode === "still_active" && s.stillActiveAsof ? { still_active_asof: s.stillActiveAsof } : {}),
             ...(s.successorSiteId ? { successor_site_id: s.successorSiteId } : {}),
+            ...(s.useFrequency ? { use_frequency: s.useFrequency } : {}),
             location_relation: s.sameAsPin ? "same_as_task_point" : "distinct",
             ...(!s.sameAsPin && s.location ? { location: s.location } : {}),
             confidence: s.confidence,
@@ -408,7 +426,8 @@
         if (endNotes.length) end += ` (${endNotes.join(", ")})`;
 
         const where = s.sameAsPin ? "" : "; at a different place";
-        return `${start}; ${end}${where}.`;
+        const how = s.useFrequency && s.useFrequency !== "regular" ? `; ${USE_FREQUENCY_WORDS[s.useFrequency] || s.useFrequency}` : "";
+        return `${start}; ${end}${where}${how}.`;
     }
 
     // the ruled presence rules, ported verbatim from convex/lib/occupancies.ts
@@ -429,6 +448,7 @@
         beyond_active_anchor: "after the still-in-use date",
         start_unknown: "start unknown",
         end_unknown: "end unknown",
+        intermittent_use: "inside a period of intermittent use",
     };
 
     function presenceForSegment(values, year) {
@@ -438,6 +458,11 @@
         const b = segmentBounds(s);
         const fire = (rule_id, status) => ({ segment_index: s.segmentIndex, rule_id, status });
         if (b.startUpper !== undefined && b.startUpper <= yStart && b.endLower !== undefined && yEnd <= b.endLower) {
+            // rule 11 (pr-f): annual, occasional, or uncertain use covers the
+            // year without establishing a place of worship in use
+            if (s.useFrequency && !IN_USE_FREQUENCIES.has(s.useFrequency)) {
+                return fire("intermittent_use", "uncertain");
+            }
             return fire("inside_interval", "present");
         }
         if (b.startLower !== undefined && yEnd < b.startLower) {
@@ -669,6 +694,7 @@
             endReason: text(r.end_reason),
             stillActiveAsof: text(r.still_active_asof),
             successorSiteId: text(r.successor_site_id),
+            useFrequency: text(r.use_frequency),
             sameAsPin: !distinct,
             location: distinct ? {
                 contract_version: "location_assertion_v1",
@@ -720,6 +746,7 @@
     window.PowOccupancy = Object.freeze({
         CONTRACT_VERSION,
         PRESENCE_RULE_WORDS,
+        USE_FREQUENCY_WORDS,
         cardsTouched,
         combinePresence,
         derivePresence,

@@ -55,6 +55,12 @@ import {
   derivedStateAction,
   targetYearBasisSet,
   locationAssertionMode,
+  occupancyUseFrequency,
+  functionChainInput,
+  functionChainChange,
+  derivedFunctionStatus,
+  derivedFunctionRule,
+  derivationKind,
 } from "./model";
 
 export default defineSchema({
@@ -212,6 +218,12 @@ export default defineSchema({
     pending_occupancy_cards: v.optional(pendingOccupancyCards),
     // idempotency key for the atomic guided evidence + periods submission
     guided_submission_key: v.optional(v.string()),
+    // pr-f: the function chain recorded with the periods (what the place
+    // was and how that changed), and the per-census-year denomination a
+    // reviewer confirmed or overrode from its derivation
+    function_chain: v.optional(functionChainInput),
+    target_year_denominations: v.optional(v.record(v.string(), v.string())),
+    target_year_denomination_basis: v.optional(targetYearBasisSet),
     privacy_flag: privacyFlag,
     licence_flag: licenceFlag,
     validation_summary: v.optional(v.any()),
@@ -258,6 +270,12 @@ export default defineSchema({
     uncertainty_note: v.optional(v.string()),
     privacy_flag: privacyFlag,
     intake_submission_key: v.string(),
+    // pr-f: a claim compiled from the function chain carries its place in
+    // the chain; the chain itself is stored typed on the parent draft
+    chain_id: v.optional(v.string()),
+    chain_index: v.optional(v.number()),
+    chain_change: v.optional(v.union(v.literal("start"), functionChainChange)),
+    chain_label: v.optional(v.string()),
   })
     .index("by_historical_claim_id", ["historical_claim_id"])
     .index("by_parent_evidence_draft_id", ["parent_evidence_draft_id"])
@@ -290,6 +308,8 @@ export default defineSchema({
     end_reason: v.optional(occupancyEndReason),
     still_active_asof: v.optional(v.string()),
     successor_site_id: v.optional(v.string()),
+    // pr-f: absent on rows recorded before 2026-09-03 means regular
+    use_frequency: v.optional(occupancyUseFrequency),
     location_relation: occupancyLocationRelation,
     latitude: v.number(),
     longitude: v.number(),
@@ -372,6 +392,29 @@ export default defineSchema({
     .index("by_parent_evidence_draft_id", ["parent_evidence_draft_id"])
     .index("by_task", ["task_id"]),
 
+  // pr-f: derived per-census-year denomination from the function chain,
+  // confirmed by a reviewer before entering target_year_denominations
+  derived_target_year_functions: defineTable({
+    derived_function_id: v.string(),
+    task_id: v.string(),
+    parent_evidence_draft_id: v.string(),
+    target_year: v.number(),
+    derived_status: derivedFunctionStatus,
+    label: v.optional(v.string()),
+    candidate_labels: v.array(v.string()),
+    rule_id: derivedFunctionRule,
+    chain_id: v.string(),
+    derivation_version: v.string(),
+    inputs_hash: v.string(),
+    review_state: derivedReviewState,
+    override_label: v.optional(v.string()),
+    created_at: v.number(),
+    updated_at: v.number(),
+  })
+    .index("by_derived_function_id", ["derived_function_id"])
+    .index("by_parent_evidence_draft_id", ["parent_evidence_draft_id"])
+    .index("by_task", ["task_id"]),
+
   // append-only trail of every action on a derived year (jb 2026-08-31)
   derived_state_events: defineTable({
     event_id: v.string(),
@@ -379,6 +422,8 @@ export default defineSchema({
     parent_evidence_draft_id: v.string(),
     target_year: v.number(),
     action: derivedStateAction,
+    // pr-f: absent means presence (the only derivation before 2026-09-03)
+    derivation: v.optional(derivationKind),
     actor_user_id: v.id("users"),
     actor_role: v.string(),
     before: v.optional(v.any()),

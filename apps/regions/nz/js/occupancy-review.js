@@ -17,6 +17,37 @@
         beyond_active_anchor: "the year is after the still-active date; an observation cannot speak past itself",
         start_unknown: "the start is unknown",
         end_unknown: "the end is unknown",
+        intermittent_use: "the year falls inside a period of annual, occasional, or uncertain use, which does not establish a place of worship in use",
+    };
+
+    // mirrors FUNCTION_RULE_TEXT in convex/lib/functionChain.ts; change both
+    const FUNCTION_RULE_TEXT = {
+        inside_state: "the year falls inside one recorded function state",
+        within_change_window: "the year falls inside the window of a change, so both labels are candidates",
+        within_start_window: "the year falls inside the start window of the first recorded state",
+    };
+
+    // mirrors USE_FREQUENCY_TEXT in convex/lib/occupancies.ts; change both
+    const USE_FREQUENCY_TEXT = {
+        regular: "regular (weekly or more)",
+        monthly: "monthly",
+        several_times_a_year: "several times a year",
+        annual: "annual",
+        occasional: "occasional or irregular",
+        uncertain: "frequency uncertain",
+    };
+
+    // mirrors CHAIN_CHANGE_TEXT in convex/lib/functionChain.ts
+    const CHAIN_CHANGE_TEXT = {
+        start: "at the start",
+        denomination_changed: "denomination changed",
+        shared_use_began: "shared use began",
+        shared_use_ended: "shared use ended",
+        building_rebuilt: "building rebuilt",
+        use_became_intermittent: "use became intermittent",
+        desacralised: "desacralised",
+        worship_resumed: "worship resumed",
+        other: "other change",
     };
 
     // mirrors LOCATION_RULE_TEXT in convex/lib/occupancies.ts; change both
@@ -29,6 +60,7 @@
 
     const START_BASIS_TEXT = {
         founding_stated: "founding stated",
+        reopening_stated: "reopening stated",
         organisation_founded: "organisation founded",
         building_dedication: "building dedication",
         first_seen_only: "first seen only",
@@ -46,6 +78,7 @@
         relocated: "relocated",
         demolished: "demolished",
         use_changed: "use changed",
+        desacralised: "desacralised",
         unknown: "reason unknown",
     };
 
@@ -275,6 +308,14 @@
         }
     }
 
+    // the frequency beside a period; absent on rows recorded before pr-f
+    // means regular, which stays unsaid
+    function describeFrequency(segment) {
+        const frequency = segment.use_frequency;
+        if (!frequency || frequency === "regular") return "";
+        return `${USE_FREQUENCY_TEXT[frequency] || frequency} use`;
+    }
+
     function describeEnd(segment) {
         const basis = END_BASIS_TEXT[segment.end_basis] || segment.end_basis || "";
         const reason = segment.end_reason ? `; ${END_REASON_TEXT[segment.end_reason] || segment.end_reason}` : "";
@@ -395,13 +436,39 @@
             .sort((a, b) => a - b);
     }
 
+    // mirrors the function half of confirm-all in convex/occupancies.ts
+    // (ruling r-f4): unconfirmed, inside one state, stated
+    function confirmAllEligibleFunctionYears(functionRows) {
+        return (functionRows || [])
+            .filter((row) => row.review_state === "derived_unconfirmed")
+            .filter((row) => row.rule_id === "inside_state" && row.derived_status === "stated")
+            .map((row) => row.target_year)
+            .sort((a, b) => a - b);
+    }
+
+    // the effective label after review: an override replaces the derived
+    // label, a rejection leaves nothing written
+    function effectiveLabel(row) {
+        if (!row) return null;
+        if (row.review_state === "reviewer_overridden" && row.override_label) return row.override_label;
+        return row.derived_status === "stated" ? row.label : null;
+    }
+
     function confirmAllSummary(result) {
         const confirmed = result?.confirmed || [];
         const skipped = result?.skipped || [];
+        const confirmedFunctions = result?.confirmed_functions || [];
+        const skippedFunctions = result?.skipped_functions || [];
         const parts = [];
         parts.push(confirmed.length === 0 ? "No years confirmed." : `Confirmed ${confirmed.join(", ")}.`);
         if (skipped.length > 0) {
             parts.push(`Skipped ${skipped.map((s) => `${s.target_year} (${s.reason})`).join("; ")}.`);
+        }
+        if (confirmedFunctions.length > 0) {
+            parts.push(`Confirmed denominations for ${confirmedFunctions.join(", ")}.`);
+        }
+        if (skippedFunctions.length > 0) {
+            parts.push(`Skipped denominations for ${skippedFunctions.map((s) => `${s.target_year} (${s.reason})`).join("; ")}.`);
         }
         return parts.join(" ");
     }
@@ -409,6 +476,12 @@
     const api = {
         PRESENCE_RULE_TEXT,
         LOCATION_RULE_TEXT,
+        FUNCTION_RULE_TEXT,
+        USE_FREQUENCY_TEXT,
+        CHAIN_CHANGE_TEXT,
+        describeFrequency,
+        confirmAllEligibleFunctionYears,
+        effectiveLabel,
         START_BASIS_TEXT,
         END_BASIS_TEXT,
         END_REASON_TEXT,

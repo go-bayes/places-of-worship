@@ -12,6 +12,18 @@ import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser, type Pr
 import { dateFloorYear, defaultTargetYears } from "./lib/countryYears";
 import { isHistoricalClaimParentContract } from "./lib/historicalClaims";
 import {
+  assertChainAgreesWithPeriods,
+  assertFunctionChain,
+  chainDateText,
+  compileChain,
+  deriveFunctions,
+  FUNCTION_DERIVATION_VERSION,
+  functionChainInputsHash,
+  stateLabel,
+  type ChainDateInput,
+  type FunctionChainInput,
+} from "./lib/functionChain";
+import {
   assertClientContextLimit,
   assertMaxString,
   MEDIUM_TEXT_MAX,
@@ -36,11 +48,12 @@ import { assertRapidSubmissionId } from "./lib/rapidEntry";
 import { appendTaskEvent } from "./lib/taskEvents";
 import {
   derivedStateEventDoc,
+  derivedTargetYearFunctionDoc,
   derivedTargetYearStateDoc,
   derivedYearLocationDoc,
   siteOccupancyDoc,
 } from "./lib/validators";
-import { derivedPresenceStatus, occupancySegmentInput } from "./model";
+import { derivedPresenceStatus, functionChainInput, occupancySegmentInput } from "./model";
 
 const ACTIVE_HISTORY_STATUSES = new Set(["needs_review", "unresolved_note", "changes_requested"]);
 const DECISION_NOTE_MIN = 8;
@@ -106,6 +119,7 @@ function segmentOf(row: Doc<"site_occupancies">): OccupancySegment {
     end_basis: row.end_basis,
     end_reason: row.end_reason,
     still_active_asof: row.still_active_asof,
+    use_frequency: row.use_frequency,
     latitude: row.latitude,
     longitude: row.longitude,
     location_mode: row.location_mode,
@@ -141,6 +155,26 @@ async function locationRows(ctx: QueryCtx | MutationCtx, parentEvidenceDraftId: 
     .collect();
 }
 
+async function functionRows(ctx: QueryCtx | MutationCtx, parentEvidenceDraftId: string): Promise<Doc<"derived_target_year_functions">[]> {
+  return await ctx.db
+    .query("derived_target_year_functions")
+    .withIndex("by_parent_evidence_draft_id", (q) => q.eq("parent_evidence_draft_id", parentEvidenceDraftId))
+    .collect();
+}
+
+function snapshotFunction(row: Doc<"derived_target_year_functions"> | null) {
+  if (row === null) return null;
+  return {
+    derived_status: row.derived_status,
+    label: row.label ?? null,
+    candidate_labels: row.candidate_labels,
+    rule_id: row.rule_id,
+    review_state: row.review_state,
+    override_label: row.override_label ?? null,
+    inputs_hash: row.inputs_hash,
+  };
+}
+
 function snapshotPresence(row: Doc<"derived_target_year_states"> | null) {
   if (row === null) return null;
   return {
@@ -171,6 +205,7 @@ async function appendDerivedEvent(
     parentEvidenceDraftId: string;
     targetYear: number;
     action: "derived" | "invalidated" | "confirmed" | "overridden" | "rejected";
+    derivation?: "presence" | "function";
     actorUserId: Id<"users">;
     actorRole: string;
     before?: unknown;
@@ -180,11 +215,12 @@ async function appendDerivedEvent(
   },
 ): Promise<void> {
   await ctx.db.insert("derived_state_events", {
-    event_id: `${args.parentEvidenceDraftId}:${args.targetYear}:${args.action}:${args.now}:${args.actorUserId}`,
+    event_id: `${args.parentEvidenceDraftId}:${args.derivation === "function" ? "function:" : ""}${args.targetYear}:${args.action}:${args.now}:${args.actorUserId}`,
     task_id: args.taskId,
     parent_evidence_draft_id: args.parentEvidenceDraftId,
     target_year: args.targetYear,
     action: args.action,
+    ...(args.derivation === "function" ? { derivation: "function" as const } : {}),
     actor_user_id: args.actorUserId,
     actor_role: args.actorRole,
     ...(args.before !== undefined ? { before: args.before } : {}),
@@ -335,6 +371,258 @@ async function rederive(
   return { years: presences.map((p) => p.target_year), conflicts };
 }
 
+// pr-f: re-runs the function derivation for a parent draft against its
+// stored chain (or none) and reconciles the derived_target_year_functions
+// rows exactly as rederive does for presence: unchanged rows keep their
+// review state, changed rows go back to derived_unconfirmed with an
+// invalidated event, rows no rule produces any more become superseded
+async function rederiveFunctions(
+  ctx: MutationCtx,
+  task: Doc<"tasks">,
+  parent: Doc<"evidence_drafts">,
+  chain: FunctionChainInput | undefined,
+  chainId: string,
+  actorUserId: Id<"users">,
+  actorRole: string,
+  now: number,
+): Promise<number[]> {
+  const targetYears = taskTargetYears(task);
+  const derived = chain === undefined ? [] : deriveFunctions(chain, targetYears);
+  const inputsHash = chain === undefined ? "" : functionChainInputsHash(chain);
+  const existing = new Map((await functionRows(ctx, parent.evidence_draft_id)).map((row) => [row.target_year, row]));
+  const derivedYears = new Set(derived.map((d) => d.target_year));
+  for (const row of derived) {
+    const year = row.target_year;
+    const current = existing.get(year) ?? null;
+    if (current !== null && current.inputs_hash === inputsHash && current.review_state !== "superseded") continue;
+    const before = snapshotFunction(current);
+    const record = {
+      derived_status: row.derived_status,
+      label: row.label,
+      candidate_labels: row.candidate_labels,
+      rule_id: row.rule_id,
+      chain_id: chainId,
+      derivation_version: FUNCTION_DERIVATION_VERSION,
+      inputs_hash: inputsHash,
+      review_state: "derived_unconfirmed" as const,
+      override_label: undefined,
+      updated_at: now,
+    };
+    if (current === null) {
+      await ctx.db.insert("derived_target_year_functions", {
+        derived_function_id: `${parent.evidence_draft_id}:function:${year}`,
+        task_id: task.task_id,
+        parent_evidence_draft_id: parent.evidence_draft_id,
+        target_year: year,
+        ...record,
+        created_at: now,
+      });
+    } else {
+      await ctx.db.patch(current._id, record);
+    }
+    await appendDerivedEvent(ctx, {
+      taskId: task.task_id,
+      parentEvidenceDraftId: parent.evidence_draft_id,
+      targetYear: year,
+      action: current === null ? "derived" : "invalidated",
+      derivation: "function",
+      actorUserId,
+      actorRole,
+      before,
+      after: { function: { derived_status: row.derived_status, label: row.label ?? null, candidate_labels: row.candidate_labels, rule_id: row.rule_id, review_state: "derived_unconfirmed", inputs_hash: inputsHash } },
+      now,
+    });
+  }
+  for (const [year, row] of existing) {
+    if (derivedYears.has(year) || row.review_state === "superseded") continue;
+    await ctx.db.patch(row._id, { review_state: "superseded", updated_at: now });
+    await appendDerivedEvent(ctx, {
+      taskId: task.task_id,
+      parentEvidenceDraftId: parent.evidence_draft_id,
+      targetYear: year,
+      action: "invalidated",
+      derivation: "function",
+      actorUserId,
+      actorRole,
+      before: snapshotFunction(row),
+      after: null,
+      now,
+    });
+  }
+  return derived.map((d) => d.target_year);
+}
+
+// pr-f: the author's earlier chain claims on the task are superseded as a
+// set on every set write, whether or not the new set carries a chain, so
+// a resubmission without one never leaves an earlier chain active. the
+// affected parents (this one and earlier ones) lose their stored chain
+// and their derived denominations are rederived to nothing
+async function supersedeEarlierFunctionChains(
+  ctx: MutationCtx,
+  task: Doc<"tasks">,
+  parent: Doc<"evidence_drafts">,
+  user: Doc<"users">,
+  actorRole: ProjectRole,
+  now: number,
+): Promise<void> {
+  const earlier = await ctx.db
+    .query("historical_claims")
+    .withIndex("by_task_creator_and_created_at", (q) => q.eq("task_id", task.task_id).eq("created_by", user._id))
+    .take(501);
+  if (earlier.length > 500) {
+    throw new Error("This task has more than 500 historical claims for the contributor. Ask JB to repair the set before continuing.");
+  }
+  const affectedParents = new Set<string>();
+  for (const claim of earlier) {
+    if (claim.chain_id === undefined || claim.claim_status !== "submitted") continue;
+    await ctx.db.patch(claim._id, { claim_status: "superseded", updated_at: now });
+    affectedParents.add(claim.parent_evidence_draft_id);
+  }
+  if (parent.function_chain !== undefined) affectedParents.add(parent.evidence_draft_id);
+  for (const affectedId of affectedParents) {
+    const affected = affectedId === parent.evidence_draft_id
+      ? parent
+      : await ctx.db
+        .query("evidence_drafts")
+        .withIndex("by_evidence_draft_id", (q) => q.eq("evidence_draft_id", affectedId))
+        .unique();
+    if (affected === null) continue;
+    if (affected.function_chain !== undefined) {
+      await ctx.db.patch(affected._id, { function_chain: undefined, updated_at: now });
+    }
+    await rederiveFunctions(ctx, task, affected, undefined, "", user._id, actorRole, now);
+  }
+}
+
+// the claim ledger's bound columns for a chain date: a by-date has no
+// earliest bound, and none is invented for it
+function claimBounds(date: ChainDateInput): { earliest?: string; latest?: string } {
+  const t = (value: string | undefined) => (value ?? "").trim();
+  switch (date.mode) {
+    case "known":
+      return { earliest: t(date.date), latest: t(date.date) };
+    case "between":
+      return { earliest: t(date.not_earlier_than), latest: t(date.not_later_than) };
+    case "by":
+      return { latest: t(date.not_later_than) };
+    default:
+      return {};
+  }
+}
+
+// pr-f: the one write route for a function chain. validates the chain
+// against the parent evidence date and the just-recorded periods,
+// compiles it to ordered historical claims that share the periods'
+// provenance, stores the chain typed on the parent, and derives the
+// denomination per census year as unconfirmed proposals. the author's
+// earlier chains were superseded by recordOccupancySet before this runs
+export async function recordFunctionChain(
+  ctx: MutationCtx,
+  args: {
+    task: Doc<"tasks">;
+    parent: Doc<"evidence_drafts">;
+    user: Doc<"users">;
+    actorRole: ProjectRole;
+    submissionKey: string;
+    submissionToken: string;
+    chain: FunctionChainInput;
+    segments: OccupancySegmentInput[];
+    referenceDate: string;
+    now: number;
+  },
+): Promise<{ states: number; changes: number; derivedYears: number[] }> {
+  const { task, parent, user, actorRole, chain, now } = args;
+  assertFunctionChain(chain, args.referenceDate, dateFloorYear(task.country_code));
+  if (args.segments.length === 0) {
+    throw new Error("The function chain rests on the periods' source; record at least one period with it.");
+  }
+  assertChainAgreesWithPeriods(chain, args.segments);
+  const chainId = `${task.task_id}:${user._id}:chain:${args.submissionToken}`;
+  const provenance = args.segments[0];
+  const { states, events } = compileChain(chain);
+  const claimBase = {
+    task_id: task.task_id,
+    parent_evidence_draft_id: parent.evidence_draft_id,
+    claim_status: "submitted" as const,
+    contract_version: "historical_claim_v1" as const,
+    created_by: user._id,
+    created_at: now,
+    updated_at: now,
+    reference_date: args.referenceDate,
+    reference_date_basis: "parent_evidence_date" as const,
+    confidence: provenance.confidence,
+    confidence_basis: provenance.confidence_basis.trim(),
+    source_basis: provenance.source_basis,
+    source_title: provenance.source_title.trim(),
+    ...(provenance.source_reference?.trim() ? { source_reference: provenance.source_reference.trim() } : {}),
+    source_account: provenance.source_account.trim(),
+    ...(provenance.uncertainty_note?.trim() ? { uncertainty_note: provenance.uncertainty_note.trim() } : {}),
+    privacy_flag: provenance.privacy_flag as "clear" | "needs_review" | "restricted",
+    chain_id: chainId,
+  };
+  let claimIndex = 0;
+  for (const state of states) {
+    const label = stateLabel(state);
+    const from = chainDateText(state.from);
+    const to = state.to ? chainDateText(state.to) : "";
+    const fromBounds = claimBounds(state.from);
+    const toBounds = state.to ? claimBounds(state.to) : {};
+    await ctx.db.insert("historical_claims", {
+      ...claimBase,
+      historical_claim_id: `${chainId}:${claimIndex}`,
+      intake_submission_key: `${args.submissionKey}:chain:${claimIndex}`,
+      claim_kind: state.shared_with ? "shared_use" : "denomination_or_affiliation",
+      claim_timing: "state",
+      claim_text: `${label} from ${from}${to ? ` until ${to} (${String(state.ended_by).replaceAll("_", " ")})` : ""}`,
+      ...(fromBounds.earliest ? { earliest_supported_date: fromBounds.earliest } : {}),
+      ...(toBounds.latest ? { latest_supported_date: toBounds.latest } : {}),
+      continues_through_observation: state.to === undefined,
+      chain_index: claimIndex,
+      chain_change: state.began_by,
+      chain_label: label,
+    });
+    claimIndex += 1;
+  }
+  for (const event of events) {
+    const kind = event.change === "building_rebuilt" ? "structure" : event.change === "other" ? "other" : "worship_function";
+    const when = chainDateText(event.date);
+    const words = event.change === "use_became_intermittent"
+      ? `Use became intermittent (${event.use_frequency}) ${when}`
+      : event.change === "desacralised"
+        ? `Desacralised ${when}`
+        : event.change === "building_rebuilt"
+          ? `Building rebuilt ${when}`
+          : `${event.note ?? "Other change"} (${when})`;
+    await ctx.db.insert("historical_claims", {
+      ...claimBase,
+      historical_claim_id: `${chainId}:${claimIndex}`,
+      intake_submission_key: `${args.submissionKey}:chain:${claimIndex}`,
+      claim_kind: kind,
+      claim_timing: "event",
+      claim_text: words,
+      ...(claimBounds(event.date).earliest ? { earliest_supported_date: claimBounds(event.date).earliest } : {}),
+      ...(claimBounds(event.date).latest ? { latest_supported_date: claimBounds(event.date).latest } : {}),
+      continues_through_observation: false,
+      chain_index: claimIndex,
+      chain_change: event.change,
+    });
+    claimIndex += 1;
+  }
+  await ctx.db.patch(parent._id, { function_chain: chain, updated_at: now });
+  const derivedYears = await rederiveFunctions(ctx, task, parent, chain, chainId, user._id, actorRole, now);
+  await appendTaskEvent(ctx, {
+    taskId: task.task_id,
+    eventType: "note_added",
+    actorUserId: user._id,
+    actorRole,
+    previousStatus: task.status,
+    newStatus: task.status,
+    reason: `Recorded a function chain of ${states.length} state${states.length === 1 ? "" : "s"} and ${chain.changes.length} change${chain.changes.length === 1 ? "" : "s"}; derived ${derivedYears.length} census-year denomination proposal${derivedYears.length === 1 ? "" : "s"} awaiting reviewer confirmation.`,
+    evidenceDraftId: parent.evidence_draft_id,
+  });
+  return { states: states.length, changes: chain.changes.length, derivedYears };
+}
+
 // Supersede this author's active periods on every other parent for the task.
 // The exact task+author+status index makes the read proportional to one active
 // set; more than 20 rows violates the submission invariant and fails closed.
@@ -403,6 +691,8 @@ export async function recordOccupancySet(
   // holds one active set per task. those parents' derived proposals are
   // rederived to nothing, which marks them superseded with an event each
   await supersedeEarlierOccupancySets(ctx, task, parent, user, actorRole, now);
+  // pr-f: the author's earlier function chains go the same way, chain or no chain
+  await supersedeEarlierFunctionChains(ctx, task, parent, user, actorRole, now);
   // the cards saved with the draft are now rows
   if (parent.pending_occupancy_cards !== undefined) {
     await ctx.db.patch(parent._id, { pending_occupancy_cards: undefined, updated_at: now });
@@ -436,6 +726,7 @@ export async function recordOccupancySet(
       ...(segment.end_reason !== undefined ? { end_reason: segment.end_reason } : {}),
       ...(trimmed(segment.still_active_asof) ? { still_active_asof: trimmed(segment.still_active_asof) } : {}),
       ...(trimmed(segment.successor_site_id) ? { successor_site_id: trimmed(segment.successor_site_id) } : {}),
+      ...(segment.use_frequency !== undefined ? { use_frequency: segment.use_frequency } : {}),
       location_relation: segment.location_relation,
       latitude: location.latitude,
       longitude: location.longitude,
@@ -500,6 +791,7 @@ export const listDerivedStates = query({
   returns: v.object({
     presence: v.array(derivedTargetYearStateDoc),
     locations: v.array(derivedYearLocationDoc),
+    functions: v.array(derivedTargetYearFunctionDoc),
     events: v.array(derivedStateEventDoc),
   }),
   handler: async (ctx, args) => {
@@ -516,12 +808,16 @@ export const listDerivedStates = query({
       .query("derived_year_locations")
       .withIndex("by_task", (q) => q.eq("task_id", task.task_id))
       .collect();
+    const functions = await ctx.db
+      .query("derived_target_year_functions")
+      .withIndex("by_task", (q) => q.eq("task_id", task.task_id))
+      .collect();
     const events = await ctx.db
       .query("derived_state_events")
       .withIndex("by_task_and_created_at", (q) => q.eq("task_id", task.task_id))
       .order("desc")
       .take(200);
-    return { presence, locations, events };
+    return { presence, locations, functions, events };
   },
 });
 
@@ -533,12 +829,14 @@ export const submitOccupancies = mutation({
     taskId: v.string(),
     parentEvidenceDraftId: v.string(),
     segments: v.array(occupancySegmentInput),
+    chain: v.optional(functionChainInput),
     clientContext: v.optional(occupancyClientContext),
   },
   returns: v.object({
     occupancy_ids: v.array(v.string()),
     derived_years: v.array(v.number()),
     conflict_years: v.array(v.number()),
+    derived_function_years: v.optional(v.array(v.number())),
     deduped: v.boolean(),
   }),
   handler: async (ctx, args) => {
@@ -600,10 +898,27 @@ export const submitOccupancies = mutation({
       now,
       clientContext: args.clientContext,
     });
+    let functionYears: number[] = [];
+    if (args.chain !== undefined) {
+      const recorded = await recordFunctionChain(ctx, {
+        task,
+        parent,
+        user,
+        actorRole,
+        submissionKey,
+        submissionToken: args.clientSubmissionId,
+        chain: args.chain,
+        segments: args.segments,
+        referenceDate,
+        now,
+      });
+      functionYears = recorded.derivedYears;
+    }
     return {
       occupancy_ids: occupancyIds,
       derived_years: derived.years,
       conflict_years: derived.conflicts,
+      derived_function_years: functionYears,
       deduped: false,
     };
   },
@@ -710,19 +1025,83 @@ async function reviewerAndParent(
   return { user, task, parent };
 }
 
-// one reviewer action on one derived census year
+// pr-f: one reviewer action on one derived census-year denomination;
+// confirm writes the derived label (an uncertain year has none, so it
+// needs an override naming the label or a rejection), override writes
+// the reviewer's label, reject writes nothing
+async function applyFunctionDecision(
+  ctx: MutationCtx,
+  user: Doc<"users">,
+  task: Doc<"tasks">,
+  parent: Doc<"evidence_drafts">,
+  row: Doc<"derived_target_year_functions">,
+  action: DecisionAction,
+  note: string | undefined,
+  overrideLabel: string | undefined,
+  now: number,
+): Promise<string | null> {
+  const year = row.target_year;
+  const actorRole = chooseActorRole(user, ["reviewer", "curator", "admin"]);
+  const before = snapshotFunction(row);
+  let written: string | null = null;
+  const writeLabel = async (label: string, basis: "reviewer_confirmed_derivation" | "reviewer_override") => {
+    const latest = (await ctx.db.get(parent._id)) ?? parent;
+    await ctx.db.patch(parent._id, {
+      target_year_denominations: { ...((latest.target_year_denominations ?? {}) as Record<string, string>), [String(year)]: label },
+      target_year_denomination_basis: { ...((latest.target_year_denomination_basis ?? {}) as Record<string, "source_observation" | "reviewer_confirmed_derivation" | "reviewer_override">), [String(year)]: basis },
+      updated_at: now,
+    });
+  };
+  if (action === "confirm") {
+    if (row.derived_status !== "stated" || row.label === undefined) {
+      throw new Error(`The derived ${year} denomination is uncertain (${row.candidate_labels.join(" or ")}); override it with the label the source supports, or reject it.`);
+    }
+    await ctx.db.patch(row._id, { review_state: "reviewer_confirmed", override_label: undefined, updated_at: now });
+    written = row.label;
+    await writeLabel(row.label, "reviewer_confirmed_derivation");
+  } else if (action === "override") {
+    const label = overrideLabel?.trim() ?? "";
+    if (label.length < 2) throw new Error("An override of a derived denomination needs the label to write.");
+    assertMaxString("override label", label, SHORT_TEXT_MAX);
+    await ctx.db.patch(row._id, { review_state: "reviewer_overridden", override_label: label, updated_at: now });
+    written = label;
+    await writeLabel(label, "reviewer_override");
+  } else {
+    await ctx.db.patch(row._id, { review_state: "reviewer_rejected", override_label: undefined, updated_at: now });
+  }
+  const after = await ctx.db.get(row._id);
+  await appendDerivedEvent(ctx, {
+    taskId: task.task_id,
+    parentEvidenceDraftId: parent.evidence_draft_id,
+    targetYear: year,
+    action: action === "confirm" ? "confirmed" : action === "override" ? "overridden" : "rejected",
+    derivation: "function",
+    actorUserId: user._id,
+    actorRole,
+    before,
+    after: { function: snapshotFunction(after), written_label: written },
+    ...(note !== undefined ? { note } : {}),
+    now,
+  });
+  return written;
+}
+
+// one reviewer action on one derived census year (presence by default;
+// derivation "function" decides the year's denomination instead)
 export const decideDerivedYear = mutation({
   args: {
     taskId: v.string(),
     parentEvidenceDraftId: v.string(),
     targetYear: v.number(),
     action: v.union(v.literal("confirm"), v.literal("override"), v.literal("reject")),
+    derivation: v.optional(v.union(v.literal("presence"), v.literal("function"))),
     note: v.optional(v.string()),
     override: v.optional(v.object({
       status: v.optional(derivedPresenceStatus),
       latitude: v.optional(v.number()),
       longitude: v.optional(v.number()),
       uncertainty_radius_m: v.optional(v.number()),
+      label: v.optional(v.string()),
     })),
   },
   returns: v.object({
@@ -736,6 +1115,28 @@ export const decideDerivedYear = mutation({
     const note = args.note?.trim();
     if (args.action !== "confirm" && (note ?? "").length < DECISION_NOTE_MIN) {
       throw new Error(`An override or rejection needs a note of at least ${DECISION_NOTE_MIN} characters.`);
+    }
+    if (args.derivation === "function") {
+      const row = (await functionRows(ctx, parent.evidence_draft_id)).find(
+        (r) => r.target_year === args.targetYear && r.review_state !== "superseded",
+      );
+      if (row === undefined) {
+        throw new Error(`No derived denomination exists for ${args.targetYear} on this evidence record.`);
+      }
+      const now = Date.now();
+      const written = await applyFunctionDecision(ctx, user, task, parent, row, args.action, note, args.override?.label, now);
+      await appendTaskEvent(ctx, {
+        taskId: task.task_id,
+        eventType: "note_added",
+        actorUserId: user._id,
+        actorRole: chooseActorRole(user, ["reviewer", "curator", "admin"]),
+        previousStatus: task.status,
+        newStatus: task.status,
+        reason: `Derived ${args.targetYear} denomination ${args.action === "confirm" ? "confirmed" : args.action === "override" ? "overridden" : "rejected"}${written ? ` as ${written}` : ""}.`,
+        evidenceDraftId: parent.evidence_draft_id,
+      });
+      const after = await ctx.db.get(row._id);
+      return { target_year: args.targetYear, review_state: after?.review_state ?? "derived_unconfirmed", written_status: written };
     }
     const presence = (await presenceRows(ctx, parent.evidence_draft_id)).find(
       (row) => row.target_year === args.targetYear && row.review_state !== "superseded",
@@ -771,6 +1172,8 @@ export const confirmAllDerived = mutation({
   returns: v.object({
     confirmed: v.array(v.number()),
     skipped: v.array(v.object({ target_year: v.number(), reason: v.string() })),
+    confirmed_functions: v.optional(v.array(v.number())),
+    skipped_functions: v.optional(v.array(v.object({ target_year: v.number(), reason: v.string() }))),
   }),
   handler: async (ctx, args) => {
     const { user, task, parent } = await reviewerAndParent(ctx, args.taskId, args.parentEvidenceDraftId);
@@ -800,7 +1203,22 @@ export const confirmAllDerived = mutation({
       await applyYearDecision(ctx, user, task, parent, row, "confirm", args.note?.trim() || undefined, undefined, now + confirmed.length);
       confirmed.push(row.target_year);
     }
-    if (confirmed.length > 0) {
+    // pr-f (ruling r-f4): a year inside one function state with no window
+    // rides the same action; uncertain years need a per-year decision
+    const confirmedFunctions: number[] = [];
+    const skippedFunctions: { target_year: number; reason: string }[] = [];
+    const functionsToDecide = (await functionRows(ctx, parent.evidence_draft_id))
+      .filter((row) => row.review_state === "derived_unconfirmed")
+      .sort((a, b) => a.target_year - b.target_year);
+    for (const row of functionsToDecide) {
+      if (row.rule_id !== "inside_state" || row.derived_status !== "stated") {
+        skippedFunctions.push({ target_year: row.target_year, reason: "uncertain denomination needs a per-year decision" });
+        continue;
+      }
+      await applyFunctionDecision(ctx, user, task, parent, row, "confirm", args.note?.trim() || undefined, undefined, now + confirmed.length + confirmedFunctions.length);
+      confirmedFunctions.push(row.target_year);
+    }
+    if (confirmed.length > 0 || confirmedFunctions.length > 0) {
       await appendTaskEvent(ctx, {
         taskId: task.task_id,
         eventType: "note_added",
@@ -808,10 +1226,13 @@ export const confirmAllDerived = mutation({
         actorRole: chooseActorRole(user, ["reviewer", "curator", "admin"]),
         previousStatus: task.status,
         newStatus: task.status,
-        reason: `Confirmed derived states for ${confirmed.join(", ")}.`,
+        reason: [
+          confirmed.length > 0 ? `Confirmed derived states for ${confirmed.join(", ")}.` : "",
+          confirmedFunctions.length > 0 ? `Confirmed derived denominations for ${confirmedFunctions.join(", ")}.` : "",
+        ].filter(Boolean).join(" "),
         evidenceDraftId: parent.evidence_draft_id,
       });
     }
-    return { confirmed, skipped };
+    return { confirmed, skipped, confirmed_functions: confirmedFunctions, skipped_functions: skippedFunctions };
   },
 });
