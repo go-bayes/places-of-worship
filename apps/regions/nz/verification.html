@@ -1206,17 +1206,37 @@
         .nominations-panel {
             display: none;
             padding: 12px 16px;
-            border-bottom: 1px solid var(--line);
+            border-top: 1px solid var(--line);
         }
 
-        body.portal-add .nominations-panel {
+        /* the selected work holds the sidebar (jb 2026-09-04): the list
+           shows only once the card's button opens it */
+        body.portal-add .nominations-panel.open {
             display: block;
         }
 
-        .nominations-panel h2 {
+        .nominations-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 8px;
             margin: 0 0 8px 0;
+        }
+
+        .nominations-panel h2 {
+            margin: 0;
             font-size: var(--fs-md);
             color: var(--entry);
+        }
+
+        .detail-panel .card-actions {
+            margin-top: 12px;
+        }
+
+        .past-submissions-none {
+            margin: 12px 0 0;
+            color: var(--muted);
+            font-size: var(--fs-sm);
         }
 
         .task-row.entry-card {
@@ -1418,6 +1438,16 @@
         .session-panel {
             padding: 12px 16px 16px 16px;
             border-bottom: 1px solid var(--line);
+        }
+
+        .session-panel:empty {
+            display: none;
+        }
+
+        /* in add or revise the way out of an entry is the card's own
+           buttons, not the signed-in line (jb 2026-09-04) */
+        body.portal-add .backend-card .entry-only {
+            display: none;
         }
 
         .backend-panel {
@@ -1819,6 +1849,37 @@
             font-size: var(--fs-sm);
             color: var(--ink);
             box-shadow: 0 1px 4px rgba(15, 23, 42, 0.25);
+        }
+
+        /* the grip: a small bar the contributor drags to move the panel
+           (touch or mouse); touch-action none keeps the browser from
+           scrolling instead */
+        .legend-grip {
+            justify-self: stretch;
+            width: auto;
+            min-height: 24px;
+            margin: -2px 0 0;
+            padding: 2px 6px;
+            border: 0;
+            border-radius: var(--r-sm);
+            background: var(--panel-2);
+            color: var(--muted);
+            font-size: var(--fs-xs);
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            text-align: center;
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .points-legend-control.dragging {
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.35);
+        }
+
+        .points-legend-control.dragging .legend-grip {
+            cursor: grabbing;
         }
 
         .points-legend-control select {
@@ -2714,8 +2775,10 @@
             <section id="taskList" class="task-list" aria-label="Verification tasks"></section>
             <section id="sessionPanel" class="session-panel"></section>
             <section id="nominationPanel" class="nomination-panel"></section>
-            <section id="nominationsPanel" class="nominations-panel" aria-label="My nominations"></section>
             <section id="detailPanel" class="detail-panel" tabindex="-1"></section>
+            <!-- past add or revise submissions: below the card, opened from
+                 its "Revise a past submission" button (jb 2026-09-04) -->
+            <section id="nominationsPanel" class="nominations-panel" aria-label="My past submissions"></section>
         </aside>
 
         <div id="map"></div>
@@ -2742,6 +2805,6 @@
     <script src="js/function-chain-contract.js?v=20260903a"></script>
     <script src="js/location-assertion-contract.js?v=20260902a"></script>
     <script src="js/osm-history.js?v=20260902c"></script>
-    <script src="js/verification-map.js?v=20260904a"></script>
+    <script src="js/verification-map.js?v=20260904c"></script>
 </body>
 </html>

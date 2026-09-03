@@ -2119,9 +2119,12 @@ class NzVerificationMap {
 
         const label = this.backendUser.initials || this.backendUser.email || "signed in";
         const assignedAvailable = this.tasks.filter(feature => !isNominationProps(feature.properties)).length;
-        const assignmentStatusText = ASSIGNMENT_MODE
-            ? `${assignedAvailable} available task${assignedAvailable === 1 ? "" : "s"}; ${this.myWorkItems.length} item${this.myWorkItems.length === 1 ? "" : "s"} in My work.`
-            : "Saves and submissions go to Convex for reviewer follow-up.";
+        const pastSubmissions = (this.myNominationItems || []).length;
+        const assignmentStatusText = !ASSIGNMENT_MODE
+            ? "Saves and submissions go to Convex for reviewer follow-up."
+            : this.portalMode === "add"
+                ? `${pastSubmissions} past submission${pastSubmissions === 1 ? "" : "s"}.`
+                : `${assignedAvailable} available task${assignedAvailable === 1 ? "" : "s"}; ${this.myWorkItems.length} item${this.myWorkItems.length === 1 ? "" : "s"} in My work.`;
         const signedInHeading = !ASSIGNMENT_MODE
             ? "Shared task backend"
             : this.portalMode === "assigned"
@@ -2304,6 +2307,22 @@ class NzVerificationMap {
         // nominations too even though the my-work list itself is batch-only
         const nominationChangesRequested = (this.myNominationItems || [])
             .filter(item => item.task?.status === "changes_requested");
+        // my work is the assigned activity's list (jb 2026-09-04, phone
+        // walkthrough: the selected work holds the sidebar). add or revise
+        // shows only a bounced nomination's alert; past submissions open
+        // from the card button
+        if (ASSIGNMENT_MODE && this.portalMode === "add") {
+            panel.innerHTML = this.changesRequestedPanelHtml(nominationChangesRequested);
+            panel.querySelectorAll(".revise-now").forEach(btn => {
+                btn.addEventListener("click", () => this.reviseNow(btn.dataset.taskId, btn.closest(".changes-entry")));
+            });
+            panel.querySelectorAll(".comment-reply-send").forEach(btn => {
+                btn.addEventListener("click", () => this.sendCommentReply(btn.dataset.taskId, btn.closest(".changes-entry")));
+            });
+            this.renderChangesRequestedBadge(nominationChangesRequested.length
+                + items.filter(item => item.task?.status === "changes_requested").length);
+            return;
+        }
         // a task awaiting review with an editable draft alongside is a
         // revision in progress; count it as a draft, not as submitted work
         const isRevisionItem = item =>
@@ -2629,7 +2648,12 @@ class NzVerificationMap {
             const modes = source === "dated"
                 ? [["period", "Unvalidated: period"], ["all", "Unvalidated: all"], ["off", "Unvalidated: off"]]
                 : [["all", "Unvalidated: all"], ["off", "Unvalidated: off"]];
+            // the control is movable (jb 2026-09-04, phone walkthrough): on
+            // a phone the bottom-left corner sits under the browser's own
+            // toolbar, so the contributor drags it by the grip to wherever
+            // the map is clear; the spot is kept on this device
             div.innerHTML = `
+                <button type="button" class="legend-grip" aria-label="Move this panel: drag it">⠿ move</button>
                 ${source !== "none" ? `
                 <select id="portalPointsSelect" aria-label="Unvalidated places">
                     ${modes.map(([value, label]) => `<option value="${value}"${value === this.pointsMode ? " selected" : ""}>${label}</option>`).join("")}
@@ -2658,6 +2682,7 @@ class NzVerificationMap {
             div.querySelector("#portalPointsSelect")?.addEventListener("change", (event) => {
                 this.setPointsMode(event.target.value);
             });
+            this.makeControlMovable(div, div.querySelector(".legend-grip"));
             return div;
         };
         control.addTo(this.map);
@@ -2673,6 +2698,81 @@ class NzVerificationMap {
             const pointsSelect = document.getElementById("portalPointsSelect");
             if (pointsSelect) pointsSelect.value = mode;
         }
+    }
+
+    // drags a leaflet control by its grip (pointer events, so touch and
+    // mouse alike): the control keeps its corner and carries an offset as
+    // a transform, clamped so it never leaves the map. the offset is kept
+    // per device so the panel stays where the contributor put it; a map
+    // resize (rotation, keyboard) re-clamps it into view
+    makeControlMovable(div, grip) {
+        if (!div || !grip || !this.map) return;
+        const key = "pow-points-control-offset";
+        let offset = { x: 0, y: 0 };
+        try {
+            const saved = JSON.parse(localStorage.getItem(key) || "null");
+            if (saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)) offset = saved;
+        } catch (error) {
+            // storage unavailable or unreadable: start in the corner
+        }
+        const apply = () => {
+            div.style.transform = offset.x || offset.y ? `translate(${offset.x}px, ${offset.y}px)` : "";
+            div.classList.toggle("moved", Boolean(offset.x || offset.y));
+        };
+        // keep the whole control inside the map container
+        const clamp = () => {
+            const mapRect = this.map.getContainer().getBoundingClientRect();
+            div.style.transform = "";
+            const rest = div.getBoundingClientRect();
+            const minX = mapRect.left - rest.left;
+            const maxX = mapRect.right - rest.right;
+            const minY = mapRect.top - rest.top;
+            const maxY = mapRect.bottom - rest.bottom;
+            offset = {
+                x: Math.round(Math.min(Math.max(offset.x, Math.min(minX, 0)), Math.max(maxX, 0))),
+                y: Math.round(Math.min(Math.max(offset.y, Math.min(minY, 0)), Math.max(maxY, 0))),
+            };
+            apply();
+        };
+        const save = () => {
+            try {
+                localStorage.setItem(key, JSON.stringify(offset));
+            } catch (error) {
+                // storage unavailable: the spot lives for this page only
+            }
+        };
+        let drag = null;
+        grip.addEventListener("pointerdown", (event) => {
+            if (event.button !== undefined && event.button !== 0) return;
+            drag = { startX: event.clientX, startY: event.clientY, fromX: offset.x, fromY: offset.y };
+            grip.setPointerCapture?.(event.pointerId);
+            div.classList.add("dragging");
+            event.preventDefault();
+        });
+        grip.addEventListener("pointermove", (event) => {
+            if (!drag) return;
+            offset = { x: drag.fromX + (event.clientX - drag.startX), y: drag.fromY + (event.clientY - drag.startY) };
+            apply();
+        });
+        const end = (event) => {
+            if (!drag) return;
+            drag = null;
+            grip.releasePointerCapture?.(event.pointerId);
+            div.classList.remove("dragging");
+            clamp();
+            save();
+        };
+        grip.addEventListener("pointerup", end);
+        grip.addEventListener("pointercancel", end);
+        // a double tap on the grip sends the panel home
+        grip.addEventListener("dblclick", () => {
+            offset = { x: 0, y: 0 };
+            apply();
+            save();
+        });
+        this.map.on("resize", clamp);
+        // the corner is laid out after the control is added; clamp then
+        setTimeout(clamp, 0);
     }
 
     // where the unvalidated dots come from: the country's dated product
@@ -3332,6 +3432,7 @@ class NzVerificationMap {
         if (this.pinMode) this.exitPinMode();
         this.clearFormDirty();
         this.portalMode = next;
+        this.setPastSubmissionsOpen(false);
         try {
             if (next) {
                 sessionStorage.setItem(PORTAL_MODE_KEY, next);
@@ -3602,6 +3703,11 @@ class NzVerificationMap {
             // the nominations panel depends on this list and the selection
             // only, so it renders here and on selectTask, not per keystroke
             this.renderNominationList();
+            // the add card counts past submissions; refresh it while at rest
+            if (ASSIGNMENT_MODE && this.portalMode === "add" && !this.selectedTask
+                && !document.body?.classList?.contains("entry-open")) {
+                this.renderInitialDetail();
+            }
             if (ASSIGNMENT_MODE) {
                 // nominated candidates join the map and list whatever their
                 // status: their author needs a route back to them, and the
@@ -3693,16 +3799,33 @@ class NzVerificationMap {
     }
 
     // the ra's own nominations, listed apart from the assignment sheet in
-    // add mode: name, status, and the route back — nothing else
+    // add mode: name, status, and the route back — nothing else. the list
+    // sits below the card and opens from its "Revise a past submission"
+    // button (jb 2026-09-04): the selected work holds the top of the
+    // sidebar, past work is a step away
+    setPastSubmissionsOpen(open) {
+        this.pastSubmissionsOpen = Boolean(open);
+        const panel = document.getElementById("nominationsPanel");
+        if (panel) panel.classList.toggle("open", this.pastSubmissionsOpen);
+        document.getElementById("pastSubmissionsButton")?.setAttribute("aria-expanded", String(this.pastSubmissionsOpen));
+        if (this.pastSubmissionsOpen) {
+            panel?.scrollIntoView({ block: "start", behavior: "smooth" });
+        }
+    }
+
     renderNominationList() {
         const panel = document.getElementById("nominationsPanel");
         if (!panel) return;
+        panel.classList.toggle("open", Boolean(this.pastSubmissionsOpen));
         // author-scoped: listMyTasks returns only the signed-in ra's work,
         // so this list never presents another contributor's nominations as
         // "my nominations" (the country-wide manual batch stays map-only)
         const rows = this.myNominationItems || [];
         panel.innerHTML = `
-            <h2>My nominations${rows.length ? ` (${rows.length})` : ""}</h2>
+            <div class="nominations-head">
+                <h2>My past submissions${rows.length ? ` (${rows.length})` : ""}</h2>
+                <button type="button" class="link-button" id="hidePastSubmissionsButton">Hide</button>
+            </div>
             ${rows.length ? rows.map(item => {
                 const task = item.task || {};
                 const statusText = (task.status || "in review").replaceAll("_", " ");
@@ -3718,6 +3841,7 @@ class NzVerificationMap {
         panel.querySelectorAll(".task-row").forEach(row => {
             row.addEventListener("click", () => this.selectTaskById(row.dataset.taskId));
         });
+        document.getElementById("hidePastSubmissionsButton")?.addEventListener("click", () => this.setPastSubmissionsOpen(false));
     }
 
     renderMarkers() {
@@ -4086,6 +4210,18 @@ class NzVerificationMap {
         panel.scrollIntoView({ block: "start", behavior: "smooth" });
     }
 
+    // the card's route to past add or revise work (jb 2026-09-04): a button
+    // on the card, not a list at the top of the sidebar
+    pastSubmissionsButtonHtml() {
+        const count = (this.myNominationItems || []).length;
+        if (!count) return `<p class="past-submissions-none">No past submissions yet.</p>`;
+        return `
+            <div class="button-row card-actions">
+                <button type="button" class="secondary" id="pastSubmissionsButton" aria-expanded="${this.pastSubmissionsOpen ? "true" : "false"}" aria-controls="nominationsPanel">Revise a past submission (${count})</button>
+            </div>
+        `;
+    }
+
     renderInitialDetail() {
         this.setEntryOpen(false);
         const panel = document.getElementById("detailPanel");
@@ -4112,7 +4248,11 @@ class NzVerificationMap {
                             : `For each assigned case, answer the task question, seek non-OSM evidence where possible, ${COUNTRY_CONFIG.targetYears.length ? `record ${escapeHtml(COUNTRY_CONFIG.targetYears.join(", "))} status, ` : ""}preserve any useful opening or closure dates, and submit unresolved notes for cases that should stay visible but cannot yet be resolved.`}
                     </div>
                 </div>
+                ${this.portalMode === "add" && this.backend?.configured ? this.pastSubmissionsButtonHtml() : ""}
             `;
+            document.getElementById("pastSubmissionsButton")?.addEventListener("click", () => {
+                this.setPastSubmissionsOpen(!this.pastSubmissionsOpen);
+            });
             return;
         }
         panel.innerHTML = DEMO_MODE ? `
