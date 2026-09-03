@@ -1,3 +1,5 @@
+import { WORLD_INTAKE_BOUNDS } from "./countryRegistry.generated.ts";
+
 export type CurrentObservationStatus =
   | "currently_used_for_worship"
   | "place_exists_worship_uncertain"
@@ -145,14 +147,20 @@ export function assertRapidSubmissionId(value: string): void {
   }
 }
 
-// resolves a country's intake bounds; the closed registry, not the caller,
-// decides which countries accept rapid intake at all
+// resolves a country's intake bounds: the hand-ruled registry first, then
+// the generated world registry (jb ruling r-h1, 2026-09-03: every country
+// takes evidence, without assignments). a world entry accepts nominations
+// and the approximate-area mode and never marks an assigned batch rapid;
+// a code in neither table still refuses
 export function countryIntakeBounds(countryCode: string): CountryIntakeBounds {
-  const bounds = COUNTRY_INTAKE_BOUNDS[countryCode.toUpperCase()];
-  if (bounds === undefined) {
-    throw new Error(`Rapid entry is not yet enabled for ${countryCode.toUpperCase()}.`);
+  const code = countryCode.toUpperCase();
+  const ruled = COUNTRY_INTAKE_BOUNDS[code];
+  if (ruled !== undefined) return ruled;
+  const world = WORLD_INTAKE_BOUNDS[code];
+  if (world === undefined) {
+    throw new Error(`Rapid entry is not yet enabled for ${code}.`);
   }
-  return bounds;
+  return { ...world, approximateArea: true };
 }
 
 function longitudeWithinBounds(bounds: CountryIntakeBounds, longitude: number): boolean {
