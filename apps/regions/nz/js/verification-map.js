@@ -1294,12 +1294,6 @@ function nominationTypeOptionsHtml() {
     ].join("");
 }
 
-function priorityColor(priority) {
-    if (priority === "high") return "#c0392b";
-    if (priority === "medium") return "#d68910";
-    return "#1e8449";
-}
-
 function statusLabel(status) {
     if (status === "present") return "Present";
     if (status === "absent") return "Absent";
@@ -1307,11 +1301,13 @@ function statusLabel(status) {
     return "Not assessed";
 }
 
+// marker fill = target-year status, in the page's own tokens; not assessed
+// is hollow (createIcon), so it has no fill here
 function statusColor(status) {
-    if (status === "present") return "#1e8449";
-    if (status === "absent") return "#6b7280";
-    if (status === "uncertain") return "#d68910";
-    return "#2874a6";
+    if (status === "present") return "var(--present)";
+    if (status === "absent") return "var(--absent)";
+    if (status === "uncertain") return "var(--caution-strong)";
+    return "";
 }
 
 function statusClass(status) {
@@ -1660,9 +1656,11 @@ function deriveTargetYearStatus(props, targetYear) {
     };
 }
 
-// pr-g: the context-dot colour, mirrored by .legend-dot.context-dot-swatch
-// and recorded in docs/ui-style-guide.md
-const CONTEXT_DOT_COLOUR = "#f59e0b";
+// r-d1 (jb 2026-09-04): the unvalidated dot is a small slate disc with a
+// white halo; amber is left to mean "needs attention" (uncertain, caution,
+// disputed). mirrors --marker-unvalidated and .legend-dot.context-dot-swatch
+const CONTEXT_DOT_COLOUR = "#64748b";
+const CONTEXT_DOT_HALO = "#ffffff";
 // unvalidated places for a country without a dated product (jb 2026-09-03,
 // "all points"): the shop front's places tiles, drawn by leaflet.vectorgrid.
 // every tile feature carries osm_id, osm_type, name and country_code, so
@@ -2610,8 +2608,9 @@ class NzVerificationMap {
         this.addPointsLegendControl();
     }
 
-    // corner control: the points-mode select plus the always-visible
-    // verification-state legend; period is offered only where the country
+    // corner control: the points-mode select plus the one marker legend
+    // (fills, then rings, then the unvalidated dot, in the status pills'
+    // own words); period is offered only where the country
     // ships a dated context layer with real features (config-gated, like
     // the data maps)
     addPointsLegendControl() {
@@ -2637,14 +2636,19 @@ class NzVerificationMap {
                 </select>
                 <div id="portalPointsNote" class="points-mode-note" hidden></div>` : ""}
                 <div class="map-legend">
-                    <span class="legend-caption">Validation ring</span>
-                    <span class="legend-row"><span class="legend-dot vm-validated-present-swatch"></span>validated present</span>
+                    ${TARGET_YEARS.length ? `
+                    <span class="legend-caption">Fill: status in the target year</span>
+                    <span class="legend-row"><span class="legend-dot fill-present-swatch"></span>present</span>
+                    <span class="legend-row"><span class="legend-dot fill-absent-swatch"></span>absent</span>
+                    <span class="legend-row"><span class="legend-dot fill-uncertain-swatch"></span>uncertain</span>
+                    <span class="legend-row"><span class="legend-dot fill-not-assessed-swatch"></span>not assessed</span>` : ""}
+                    <span class="legend-row"><span class="legend-dot vm-nomination-swatch"></span>your nomination</span>
+                    <span class="legend-caption">Ring: validation</span>
+                    <span class="legend-row"><span class="legend-dot vm-validated-present-swatch"></span>validated</span>
                     <span class="legend-row"><span class="legend-dot vm-validated-absent-swatch"></span>validated absent</span>
-                    <span class="legend-row"><span class="legend-dot vm-in-review-swatch"></span>in review</span>
                     <span class="legend-row"><span class="legend-dot vm-disputed-swatch"></span>disputed</span>
-                    <span class="legend-row"><span class="legend-dot vm-default-swatch"></span>task, not yet validated</span>
-                    <span class="legend-row"><span class="legend-dot vm-nomination-swatch"></span>nomination</span>
-                    ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>unvalidated</span>` : ""}
+                    <span class="legend-row"><span class="legend-dot vm-in-review-swatch"></span>in review</span>
+                    ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>unvalidated place, click to revise</span>` : ""}
                 </div>
             `;
             // keep map gestures away from the control
@@ -2732,9 +2736,9 @@ class NzVerificationMap {
         }
         if (!this.tileDotLayer) {
             const style = {
-                radius: 5.5,
-                color: "#7c2d12",
-                weight: 1.25,
+                radius: 5,
+                color: CONTEXT_DOT_HALO,
+                weight: 2,
                 fill: true,
                 fillColor: CONTEXT_DOT_COLOUR,
                 fillOpacity: 0.95,
@@ -2888,28 +2892,26 @@ class NzVerificationMap {
                 return props.end_year === undefined || props.end_year === null || props.end_year >= year;
             })
             : this.datedFeatures;
-        // pr-g (jb 2026-09-02): a recorded place you can revise is one class
-        // on every basemap — an amber disc, a touch larger than before, with
-        // a dark hairline over a white halo. slate vanished on streets as
-        // well as on imagery; amber is the free colour beside the teal
-        // nominations and the blue task markers
+        // r-d1 (jb 2026-09-04): a recorded place you can revise is one class
+        // on every basemap: a small slate disc with a white halo, the halo
+        // doing the work on streets and on imagery alike
         show.forEach(feature => {
             const coords = feature.geometry?.coordinates || [];
             if (coords.length < 2) return;
             const latlng = [coords[1], coords[0]];
             this.contextDotLayer.addLayer(L.circleMarker(latlng, {
-                radius: 8,
+                radius: 7.5,
                 stroke: false,
-                fillColor: "#ffffff",
+                fillColor: CONTEXT_DOT_HALO,
                 fillOpacity: 0.9,
                 interactive: false,
             }));
             // interactive: each dot opens the shared action row with the
             // revise entry first
             const dot = L.circleMarker(latlng, {
-                radius: 5.5,
-                color: "#7c2d12",
-                weight: 1.25,
+                radius: 5,
+                color: CONTEXT_DOT_HALO,
+                weight: 2,
                 fillColor: CONTEXT_DOT_COLOUR,
                 fillOpacity: 0.95,
                 opacity: 1,
@@ -3299,7 +3301,7 @@ class NzVerificationMap {
             </button>
             <button type="button" class="chooser-option" id="chooseAddButton">
                 <strong>Add or revise places</strong>
-                <span>Nominate a missing place, or click an amber dot on the map to revise a place already recorded.${(this.myNominationItems || []).length ? ` You have ${this.myNominationItems.length} under review.` : ""}</span>
+                <span>Nominate a missing place, or click a grey dot on the map to revise a place already recorded.${(this.myNominationItems || []).length ? ` You have ${this.myNominationItems.length} under review.` : ""}</span>
             </button>
         `;
         document.getElementById("chooseAssignedButton")?.addEventListener("click", () => this.setPortalMode("assigned"));
@@ -3738,10 +3740,10 @@ class NzVerificationMap {
             ) {
                 const area = L.circle([lat, lng], {
                     radius: locationAssertion.uncertainty_radius_m,
-                    color: "#a15c07",
+                    color: "#9a6700",
                     weight: 2,
                     opacity: 0.85,
-                    fillColor: "#f4c46b",
+                    fillColor: "#9a6700",
                     fillOpacity: 0.14,
                     interactive: false,
                 });
@@ -3804,16 +3806,19 @@ class NzVerificationMap {
             stale_validation: " vm-stale",
             unvalidated: "",
         }[verifState] || "";
-        // in_review is the only hollow treatment: white fill with a dashed
-        // validation-blue border (set in CSS), so the ring stays in the
-        // validation palette and never borrows the status/religion hue. All
-        // other states keep the status fill and add their ring via box-shadow.
-        const style = verifState === "in_review"
+        // two hollow treatments: in_review (white, dashed validation-blue
+        // border, set in CSS) and not assessed (white, grey border), so a
+        // validated not-assessed site is no longer a blue dot in a blue ring.
+        // Every other state keeps the status fill and adds its ring via
+        // box-shadow.
+        const hollow = verifState === "in_review" || !color;
+        const style = hollow
             ? `width:${size}px;height:${size}px;`
             : `width:${size}px;height:${size}px;background:${color};`;
+        const fillClass = !color && verifState !== "in_review" ? " vm-unknown" : "";
         return L.divIcon({
             className: "",
-            html: `<div class="verification-marker${stateClass}" style="${style}"></div>`,
+            html: `<div class="verification-marker${stateClass}${fillClass}" style="${style}"></div>`,
             iconSize: [size, size],
             iconAnchor: [size / 2, size / 2],
         });
@@ -3831,7 +3836,7 @@ class NzVerificationMap {
             ${TARGET_YEARS.length ? `<span>${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))} (${escapeHtml(temporal.basis)})</span><br>` : ""}
             <span>Action: ${escapeHtml(actionLabel(props.automated_suggested_action))}</span><br>
             <div class="popup-actions">
-                <button class="popup-open-task" type="button" data-task-id="${escapeHtml(props.task_id)}">Open task</button>
+                <button class="popup-open-task primary" type="button" data-task-id="${escapeHtml(props.task_id)}">Open task</button>
                 ${this.linkHtml("Street View", props.street_view_url, "popup-link")}
                 <a class="popup-link" href="${escapeHtml(osmPointUrl(lat, lng))}" target="_blank" rel="noopener noreferrer">Open OSM</a>
                 <button class="popup-link popup-copy-coords" type="button" data-copy="${escapeHtml(coordStr)}">Copy coords</button>
@@ -3926,7 +3931,7 @@ class NzVerificationMap {
             // subtle state dot mirroring the map's validation ring
             const verifState = validationState(backendTask?.status, temporal.status);
             const stateSwatch = {
-                validated_present: ["vm-validated-present-swatch", "validated present"],
+                validated_present: ["vm-validated-present-swatch", "validated"],
                 validated_absent: ["vm-validated-absent-swatch", "validated absent"],
                 in_review: ["vm-in-review-swatch", "in review"],
                 disputed: ["vm-disputed-swatch", "disputed"],
@@ -3938,11 +3943,10 @@ class NzVerificationMap {
             return `
                 <button class="task-row${activeClass}" type="button" data-task-id="${escapeHtml(props.task_id)}">
                     <span class="task-row-title">
-                        <span class="priority-dot priority-${escapeHtml(props.verification_priority)}"></span>
                         ${stateDot}${escapeHtml(props.name || "Unnamed site")}${outcomeBadge}
                     </span>
                     ${TARGET_YEARS.length ? `<span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))}</span>` : ""}
-                    <span class="task-row-meta">${escapeHtml(cap(props.religion)) || "Unknown"} | ${escapeHtml(props.master_site_id || props.source_record_id || "")}</span>
+                    <span class="task-row-meta">Priority: ${escapeHtml(props.verification_priority || "unknown")} | ${escapeHtml(cap(props.religion)) || "Unknown"} | ${escapeHtml(props.master_site_id || props.source_record_id || "")}</span>
                     <span class="task-row-meta">${escapeHtml(actionLabel(props.automated_suggested_action))} | ${props.automated_check_count} checks</span>
                 </button>
             `;
@@ -4091,7 +4095,7 @@ class NzVerificationMap {
                 <div class="${this.backend?.configured ? "pilot-note" : "demo-warning"}" role="${this.backend?.configured ? "note" : "alert"}">
                     ${this.backend?.configured
                         ? this.portalMode === "add"
-                            ? `Use <strong>＋ Add a missing place</strong> above, then find the building by searching a name or address, typing coordinates, or clicking the map. Drag the pin onto the building before confirming. To revise a place already recorded, click its amber dot and choose "Revise this place".`
+                            ? `Use <strong>＋ Add a missing place</strong> above, then find the building by searching a name or address, typing coordinates, or clicking the map. Drag the pin onto the building before confirming. To revise a place already recorded, click its grey dot and choose "Revise this place".`
                             : RAPID_ASSIGNED_ENTRY
                                 ? `Work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. For each place, choose one current-status answer, record how you know it, and use <em>Submit for review</em>.`
                                 : `Work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when useful evidence remains incomplete, and <em>Submit for review</em> when a case is ready for JB.`
@@ -4178,11 +4182,11 @@ class NzVerificationMap {
             ${periodsError ? `<div class="pilot-note" role="alert">Your observation is recorded, but the periods were not: ${escapeHtml(periodsError)} Your cards are kept — press <em>Add where and when</em> to record them.</div>` : ""}
             ${!skipped && props.task_id ? `<div id="confirmAttachmentsBlock" class="attachments-block" hidden></div>` : ""}
             <div class="button-row">
-                ${knownHistory ? `<button id="addKnownHistoryButton" type="button">Add known history</button>` : ""}
+                ${knownHistory ? `<button id="addKnownHistoryButton" class="primary" type="button">Add known history</button>` : ""}
                 ${knownHistory && window.PowOccupancy ? `<button id="addOccupancyButton" class="secondary" type="button">Add where and when</button>` : ""}
                 ${nomination
-                    ? `<button id="nominateAnotherButton"${knownHistory ? ` class="secondary"` : ""} type="button">Add another place</button>`
-                    : `<button id="openNextTaskButton"${knownHistory ? ` class="secondary"` : ""} type="button">Open next task</button>`}
+                    ? `<button id="nominateAnotherButton" class="${knownHistory ? "secondary" : "primary"}" type="button">Add another place</button>`
+                    : `<button id="openNextTaskButton" class="${knownHistory ? "secondary" : "primary"}" type="button">Open next task</button>`}
                 ${skipped ? `<button id="undoSkipButton" class="secondary" type="button">Undo skip</button>` : ""}
                 ${!skipped && props.task_id ? `<button id="requestOpinionButton" class="secondary" type="button">Request a second opinion</button>` : ""}
             </div>
@@ -4313,7 +4317,7 @@ class NzVerificationMap {
                     <input id="issueSourceUrlInput" type="url">
                 </label>
                 <div class="button-row">
-                    <button id="issueSubmitButton" type="button"${signedIn ? "" : " disabled"}>File issue for review</button>
+                    <button id="issueSubmitButton" class="primary" type="button"${signedIn ? "" : " disabled"}>File issue for review</button>
                     <button id="issueCancelButton" class="secondary" type="button">Close without filing</button>
                 </div>
                 <div id="issueStatus" class="copy-status" aria-live="polite"></div>
@@ -5088,11 +5092,12 @@ class NzVerificationMap {
     }
 
     workflowStepsHtml(currentStep, doneSteps = []) {
+        // the chips carry the section headings' names: one numbering
         const steps = [
-            { id: "inspect", title: "1. Inspect", subtitle: "Open links" },
-            { id: "decide", title: "2. Decide", subtitle: "Choose action" },
-            { id: "evidence", title: "3. Evidence", subtitle: "Source + note" },
-            { id: "copy", title: "4. Save", subtitle: this.backend?.configured ? "Save & submit" : "Fallback copy" },
+            { id: "inspect", title: "1. Open source links" },
+            { id: "decide", title: "2. Choose what your evidence shows" },
+            { id: "evidence", title: "3. Evidence" },
+            { id: "copy", title: "4. Save or submit" },
         ];
         return `
             <div class="workflow-steps" id="workflowSteps">
@@ -5103,7 +5108,6 @@ class NzVerificationMap {
                     return `
                         <div class="workflow-step ${cls}" data-step="${step.id}">
                             <strong>${step.title}</strong>
-                            <span>${step.subtitle}</span>
                         </div>
                     `;
                 }).join("")}
@@ -5419,7 +5423,7 @@ class NzVerificationMap {
                 ` : ""}
                 ${options.beforeButtons || ""}
                 <div class="button-row">
-                    <button id="${prefix}RapidSubmit" type="submit" data-submit-label="${escapeHtml(submitLabel)}">${escapeHtml(submitLabel)}</button>
+                    <button id="${prefix}RapidSubmit" class="primary" type="submit" data-submit-label="${escapeHtml(submitLabel)}">${escapeHtml(submitLabel)}</button>
                     ${options.showCancel ? `<button id="${prefix}FormCancelButton" type="button" class="secondary" title="Leaves the form; what you typed stays saved on this device">Back to map (keeps your draft)</button>` : ""}
                 </div>
                 <div id="${prefix}RapidStatus" class="copy-status" aria-live="polite"></div>
@@ -5490,9 +5494,9 @@ class NzVerificationMap {
             ${summary}
             ${canCorrect || canAddHistory ? `
                 <div class="button-row">
-                    ${canAddHistory ? `<button id="addKnownHistoryFromRecordedButton" type="button">Add known history</button>` : ""}
+                    ${canAddHistory ? `<button id="addKnownHistoryFromRecordedButton" class="primary" type="button">Add known history</button>` : ""}
                     ${canAddOccupancy ? `<button id="addOccupancyFromRecordedButton" class="secondary" type="button">Add where and when</button>` : ""}
-                    ${canCorrect ? `<button id="correctObservationButton"${canAddHistory ? ` class="secondary"` : ""} type="button">Correct this observation</button>` : ""}
+                    ${canCorrect ? `<button id="correctObservationButton" class="${canAddHistory ? "secondary" : "primary"}" type="button">Correct this observation</button>` : ""}
                     ${canCorrect ? `<button id="withdrawDraftButton" class="secondary" type="button">Delete this draft</button>` : ""}
                 </div>
                 ${canCorrect ? `<div class="copy-help">Correct only for a mistake or new information. Delete withdraws the draft from review; it stays in the audit history.</div>` : ""}
@@ -6091,7 +6095,7 @@ class NzVerificationMap {
                 </label>
                 <fieldset class="historical-date-block">
                     <legend>Supported date bounds</legend>
-                    <div class="field-grid">
+                    <div class="field-grid field-pair">
                         <label>
                             Earliest supported date (optional)
                             <input id="historicalEarliestDate" type="text" inputmode="numeric" placeholder="1880" maxlength="10">
@@ -6153,7 +6157,7 @@ class NzVerificationMap {
                 </label>
                 <div class="copy-help">Do not enter personal contact details or private conversations. Choose restricted when the claim could expose a culturally restricted place or identifiable person.</div>
                 <div class="button-row">
-                    <button id="submitHistoricalClaimButton" type="submit">Record this claim for review</button>
+                    <button id="submitHistoricalClaimButton" class="primary" type="submit">Record this claim for review</button>
                     <button id="finishHistoricalClaimsButton" class="secondary" type="button">${context.nomination ? "Done — nominate another PoW" : "Done — open next task"}</button>
                     ${window.PowOccupancy ? `<button id="historyToOccupancyButton" class="secondary" type="button">Add where and when</button>` : ""}
                 </div>
@@ -6461,7 +6465,7 @@ class NzVerificationMap {
                 ${this.periodsPreviewHtml("pane")}
                 ${this.occupancyProvenanceHtml(p)}
                 <div class="button-row">
-                    <button id="occupancySubmitButton" type="submit">Record these periods for review</button>
+                    <button id="occupancySubmitButton" class="primary" type="submit">Record these periods for review</button>
                     <button id="occupancyDoneButton" class="secondary" type="button">${this.occupancyDoneLabel(context)}</button>
                 </div>
                 <div id="occupancyStatus" class="copy-status" aria-live="polite"></div>
@@ -6689,7 +6693,7 @@ class NzVerificationMap {
         const modeSel = selectOptionsHtml(FUNCTION_CHAIN_DATE_MODE_OPTIONS, d.dateMode || "known");
         const input = (name, placeholder) => `<input data-chain-field="${name}" type="text" inputmode="numeric" maxlength="10" placeholder="${placeholder}" value="${escapeHtml(d[name] || "")}">`;
         return `
-            <div class="field-grid chain-date" data-chain-scope="${scope}">
+            <div class="field-grid field-pair chain-date" data-chain-scope="${scope}">
                 <label>When<select data-chain-field="dateMode">${modeSel}</select></label>
                 <label data-chain-show="known">Date${input("date", "1888 or 1888-03")}</label>
                 <label data-chain-show="between">Not earlier than${input("notEarlierThan", "1920")}</label>
@@ -6837,17 +6841,17 @@ class NzVerificationMap {
                     </div>
                     <div id="${prefix}GapUnsure" class="gap-unsure" hidden>
                         <p>Give what you know; leave the rest blank. Bounds are recorded, never an invented date. For the stop, give the date, or both the earliest and latest it could have been.</p>
-                        <div class="field-grid">
+                        <div class="field-grid field-pair">
                             <label>It stopped in (date)<input id="${prefix}GapStopDate" type="text" inputmode="numeric" maxlength="10" placeholder="2011 or 2011-02"></label>
                             <label>…or between<input id="${prefix}GapStopEarliest" type="text" inputmode="numeric" maxlength="10" placeholder="earliest, e.g. 2011"></label>
                             <label>and<input id="${prefix}GapStopLatest" type="text" inputmode="numeric" maxlength="10" placeholder="latest, e.g. 2012"></label>
                         </div>
-                        <div class="field-grid">
+                        <div class="field-grid field-pair">
                             <label>In use again from (date)<input id="${prefix}GapAgainDate" type="text" inputmode="numeric" maxlength="10" placeholder="2019"></label>
                             <label>…or by<input id="${prefix}GapAgainBy" type="text" inputmode="numeric" maxlength="10" placeholder="2016"></label>
                         </div>
                         <div class="button-row">
-                            <button type="button" data-gap="apply">Record as two periods with these bounds</button>
+                            <button type="button" class="primary" data-gap="apply">Record as two periods with these bounds</button>
                         </div>
                         <div id="${prefix}GapProblem" class="copy-status copy-status-error" aria-live="polite"></div>
                     </div>
@@ -7625,7 +7629,7 @@ class NzVerificationMap {
             <div class="copy-status" role="status">${escapeHtml(recorded)}</div>
             ${conflicts.length ? `<div class="pilot-note" role="note">${escapeHtml(`${plural(conflicts.length, "year")} (${conflicts.join(", ")}) conflict${conflicts.length === 1 ? "s" : ""} with the observed status; a reviewer must settle ${conflicts.length === 1 ? "it" : "them"}.`)}</div>` : ""}
             <div class="button-row">
-                <button id="occupancyDoneButton" type="button">${this.occupancyDoneLabel(context)}</button>
+                <button id="occupancyDoneButton" class="primary" type="button">${this.occupancyDoneLabel(context)}</button>
                 <button id="occupancyHistoryButton" class="secondary" type="button">Add known history</button>
             </div>
         `;
@@ -7758,7 +7762,7 @@ class NzVerificationMap {
                         </select>
                     </label>
                 </div>
-                <h3>3. Evidence: where did the answer come from?</h3>
+                <h3>3. Evidence</h3>
                 <label>
                     Provider or observer
                     <input id="sourceProviderInput" type="text" placeholder="e.g. Google Street View, Apple Look Around, Mapillary, RA field observation">
@@ -7908,9 +7912,9 @@ class NzVerificationMap {
                     ${readOnly ? `
                         ${canRevise ? `
                             <div class="button-row">
-                                ${canAddHistory ? `<button id="addKnownHistoryFromRecordedButton" type="button">Add known history</button>` : ""}
+                                ${canAddHistory ? `<button id="addKnownHistoryFromRecordedButton" class="primary" type="button">Add known history</button>` : ""}
                                 ${canAddHistory && this.taskCanAddOccupancy(taskId) ? `<button id="addOccupancyFromRecordedButton" class="secondary" type="button">Add where and when</button>` : ""}
-                                <button id="reviseSubmissionButton"${canAddHistory ? ` class="secondary"` : ""} type="button">Revise submission</button>
+                                <button id="reviseSubmissionButton" class="${canAddHistory ? "secondary" : "primary"}" type="button">Revise submission</button>
                             </div>
                         ` : `
                             <div class="disabled-panel">
@@ -7918,10 +7922,12 @@ class NzVerificationMap {
                             </div>
                         `}
                     ` : `
+                        <!-- one primary per row: submit filled, save outlined,
+                             the unresolved note a text link -->
                         <div class="button-row">
-                            <button id="saveDraftButton" type="button">${revisionMode ? "Save revision draft" : "Save draft"}</button>
-                            <button id="submitUnresolvedButton" class="secondary" type="button">${revisionMode ? "Submit revision as unresolved note" : "Submit unresolved note"}</button>
-                            <button id="submitReviewButton" type="button">${revisionMode ? "Submit revision for review" : "Submit for review"}</button>
+                            <button id="submitReviewButton" class="primary" type="button">${revisionMode ? "Submit revision for review" : "Submit for review"}</button>
+                            <button id="saveDraftButton" class="secondary" type="button">${revisionMode ? "Save revision draft" : "Save draft"}</button>
+                            <button id="submitUnresolvedButton" class="link-button" type="button">${revisionMode ? "Submit revision as unresolved note" : "Submit unresolved note"}</button>
                         </div>
                     `}
                 ` : ASSIGNMENT_MODE ? `
@@ -7937,7 +7943,7 @@ class NzVerificationMap {
                 ${ASSIGNMENT_MODE ? "" : `
                     <div class="button-row">
                         <button id="copyEvidenceRowButton" class="secondary" type="button">Copy spreadsheet row</button>
-                        <button id="copyDecisionButton" type="button">Copy review JSON</button>
+                        <button id="copyDecisionButton" class="primary" type="button">Copy review JSON</button>
                     </div>
                     <textarea id="evidenceRowOutput" class="json-output wide-output" rows="4" readonly></textarea>
                     <textarea id="decisionJsonOutput" class="json-output" rows="5" readonly></textarea>
@@ -8771,8 +8777,8 @@ class NzVerificationMap {
                 <div class="attachment-row" data-attachment-id="${escapeHtml(row.attachment_id)}">
                     <span class="attachment-label">${kind} · ${sizeKb} KB${row.caption ? ` — ${escapeHtml(row.caption)}` : ""}</span>
                     <span class="attachment-actions">
-                        <button type="button" class="secondary attachment-view">View</button>
-                        ${row.author_is_me ? `<button type="button" class="secondary attachment-remove">Remove</button>` : ""}
+                        <button type="button" class="tertiary attachment-view">View</button>
+                        ${row.author_is_me ? `<button type="button" class="tertiary attachment-remove">Remove</button>` : ""}
                     </span>
                 </div>
             `;
@@ -9262,7 +9268,7 @@ class NzVerificationMap {
                     </select>
                 </label>
                 <div class="button-row">
-                    <button id="pinSubmitButton" type="button">Create candidate task</button>
+                    <button id="pinSubmitButton" class="primary" type="button">Create candidate task</button>
                     <button id="pinFormCancelButton" type="button" class="secondary" title="Leaves the form; what you typed stays saved on this device">Back to map (keeps your draft)</button>
                 </div>
             `;
@@ -9342,7 +9348,7 @@ class NzVerificationMap {
                     Zoom in further to place the pin precisely — the recorded location must be building-accurate.
                 </div>
                 <div class="button-row">
-                    <button id="pinConfirmButton" type="button" disabled>Confirm location</button>
+                    <button id="pinConfirmButton" class="primary" type="button" disabled>Confirm location</button>
                     <button id="pinCancelButton" type="button" class="secondary">Cancel placement</button>
                 </div>
             </div>
@@ -9831,10 +9837,10 @@ class NzVerificationMap {
         if (!position || !Number.isFinite(radius)) return;
         this.pinUncertaintyCircle = L.circle(position, {
             radius,
-            color: "#a15c07",
+            color: "#9a6700",
             weight: 2,
             opacity: 0.9,
-            fillColor: "#f4c46b",
+            fillColor: "#9a6700",
             fillOpacity: 0.18,
             interactive: false,
         }).addTo(this.map);
@@ -10250,7 +10256,7 @@ class NzVerificationMap {
                         Evidence note
                         <textarea id="nominationNote" rows="3">Demo only: describe what source-backed evidence would go here.</textarea>
                     </label>
-                    <button id="copyNominationButton" type="button">Generate demo nomination JSON</button>
+                    <button id="copyNominationButton" class="primary" type="button">Generate demo nomination JSON</button>
                     <div id="nominationCopyStatus" class="copy-status"></div>
                     <textarea id="nominationJsonOutput" class="json-output" rows="5" readonly></textarea>
                 </div>
