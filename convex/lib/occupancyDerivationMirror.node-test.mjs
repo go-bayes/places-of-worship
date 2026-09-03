@@ -35,6 +35,7 @@ function serverSegment(index, card) {
     end_basis: card.endMode === "still_active" || card.endMode === "unknown" ? "unknown" : card.endBasis,
     end_reason: card.endReason || undefined,
     still_active_asof: card.stillActiveAsof,
+    use_frequency: card.useFrequency || undefined,
     ...AT,
   };
 }
@@ -75,6 +76,10 @@ const FIXTURES = {
   "gap: not established (bounds, ruling r-e4)": [
     { startMode: "known", startDate: "1905", startBasis: "founding_stated", endMode: "between", endNotEarlierThan: "2011", endNotLaterThan: "2011", endBasis: "last_seen_only", endReason: "unknown" },
     { startMode: "by", startNotLaterThan: "2016", startBasis: "first_seen_only", endMode: "still_active", stillActiveAsof: "2026-09-02" },
+  ],
+  "intermittent use after desacralisation (rule 11, pr-f)": [
+    { startMode: "between", startNotEarlierThan: "1887", startNotLaterThan: "1889", startBasis: "founding_stated", endMode: "known", endDate: "2014", endBasis: "closure_stated", endReason: "desacralised", useFrequency: "regular" },
+    { startMode: "known", startDate: "2014", startBasis: "first_seen_only", endMode: "still_active", stillActiveAsof: "2024-05", useFrequency: "annual" },
   ],
   "around a year (between)": [
     { startMode: "known", startDate: "1999", startAround: true, startBasis: "founding_stated", endMode: "still_active", stillActiveAsof: "2026-09-02" },
@@ -177,4 +182,12 @@ test("gapBounds puts the doubt into bounds, never a date", () => {
   assert.equal(dated.second.startMode, "known");
   const onlyEarliest = mirror.gapBounds({ earliest: "2011" }, {});
   assert.equal(onlyEarliest.first.endMode, "after");
+});
+
+test("worked case (pr-f, kohekohe): desacralised 2014 with an annual service after derives present, uncertain, uncertain", () => {
+  assert.deepEqual(statuses(FIXTURES["intermittent use after desacralisation (rule 11, pr-f)"]), [
+    "2013:present:inside_interval",
+    "2018:uncertain:intermittent_use",
+    "2023:uncertain:intermittent_use",
+  ]);
 });
