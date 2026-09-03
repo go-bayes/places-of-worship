@@ -79,23 +79,17 @@ Do not reuse these colours for unrelated meanings.
 
 | Meaning | Current class | Current colours |
 | --- | --- | --- |
-| Primary action or active focus | `button`, `.workflow-step.active`, link emphasis | blue, currently around `#1f618d` and `#e8f1fb` |
+| Primary action, focus, links, and the validated ring | `button.primary`, `.workflow-step.active`, links, focus outlines | the one blue `--action` `#1f618d`, hover `#17527a`, soft `#e8f1fb` (PR-H3: headings are ink, not blue) |
 | Present target-year state | `.status-present`, `.workflow-step.done`, `.closed-badge` | green, currently around `#1e8449`, `#145a32`, `#d7f1df` |
 | Absent target-year state | `.status-absent` | neutral grey, currently around `#e5e7eb`, `#374151` |
-| Uncertain or skip state | `.status-uncertain`, `.skip-badge`, `.skip-form button.skip-confirm` | amber, currently around `#d68910`, `#fff3cd`, `#fff7e6` |
-| Not assessed | `.status-not-assessed` | pale blue, currently around `#e8f1fb`, `#1f4e79` |
+| Uncertain, caution, or disputed | `.status-uncertain`, `.skip-badge`, `.skip-form button.skip-confirm`, the disputed ring | the one amber pair `--caution` `#6b4e00` on `--caution-soft` `#fff4dc`, `--caution-strong` `#9a6700` for borders and the disputed ring (PR-H3, 2026-09-04) |
+| Not assessed | `.status-not-assessed`; the map marker is hollow white with a `--muted` border (PR-H3) | `--not-assessed` `#1f4e79` on `--not-assessed-soft` `#e8f1fb` |
 | Warning or demo-only message | `.demo-warning` | amber warning |
 | Disabled or unavailable state | `.disabled-panel`, `.backend-card.disabled` | light grey |
-| Recorded place on the map that an RA can revise (context dot) — marks only, never a status pill | `.legend-dot.context-dot-swatch`, `CONTEXT_DOT_COLOUR` in `verification-map.js` | amber disc `#f59e0b` with hairline `#7c2d12` over a white halo, on every basemap (JB, 2026-09-02, PR-G). Distinct in use from the uncertain-state amber, which is a pill colour; the two never meet on one surface. |
+| Recorded place on the map that an RA can revise (unvalidated dot) — marks only, never a status pill | `.legend-dot.context-dot-swatch`, `CONTEXT_DOT_COLOUR` and `CONTEXT_DOT_HALO` in `verification-map.js` | slate disc `#64748b` with a white halo, on every basemap (JB ruling R-D1, 2026-09-04, PR-H3, overriding the amber of 2026-09-02). Amber is reserved for "needs attention": uncertain, caution, disputed. |
 | Pure data entry (nominations, walk-up records) — containers only, never the action button | `.portal-mode-bar.mode-add`, `.nominations-panel`, `.entry-badge`, `.task-row.entry-card`, `.pin-card-host`, `.verification-marker.vm-nomination`, `.legend-dot.vm-nomination-swatch`, `.chooser-option#chooseAddButton strong` | teal, `--entry` `#0f766e`, `--entry-ink` `#115e59`, `--entry-bg` `#e6f4f1` (JB separation ruling, 2026-08-31) |
 
-If these colours change, update both the CSS and this table. On
-`verification.html` these meanings now live as CSS custom properties in the
-page's `:root` block (`--action`, `--present*`, `--absent*`, `--uncertain*`,
-`--warning*`, `--not-assessed*`, `--priority-*`, `--danger`), with values
-unchanged — change a meaning by changing its variable, then update this table.
-The page also links `apps/shared/map-shell.css` for the shared type stack and
-tokens; its colours stay page-owned.
+If these colours change, update both the CSS and this table. Since PR-H3 (2026-09-04) the three surfaces share one token system, the block in section 3 of `docs/development/ui-design-audit-2026-09-03.md`: `verification.html` and `review.html` each declare it in their `:root` (`--bg`, `--panel`, `--panel-2`, `--ink`, `--muted`, `--line`, `--control-line`, `--action*`, `--danger*`, `--caution*`, `--present*`, `--absent*`, `--not-assessed*`, `--entry*`, `--marker-unvalidated`, `--font`, `--fs-*`, `--sp-*`, `--r-*`), and the public map shell scopes its dark variant under `.map-chrome` in `apps/shared/map-shell.css`. Change a meaning by changing its variable, then update this table. Type: base 16 px in the working tools, meta and pills 14 px, nothing under 13 px; labels 600, prose 400; the system font stack everywhere, declared once. Buttons: one filled primary per row, the outline as the secondary idiom, disabled controls keep readable text (grey face, muted ink, never opacity).
 
 ## Status Components
 
