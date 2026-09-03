@@ -65,7 +65,7 @@ check(fc.ASSIGNMENT_MODE === false, "Without a configured backend or ?batch=, as
 // r-h4 on a tile dot, signed out
 const app = Object.create(fiji.window.NzVerificationMap.prototype);
 app.backendUser = null;
-app.backend = { configured: false, signedIn: false };
+app.backend = { configured: true, signedIn: false };
 app.tasks = [];
 app.backendTasksById = new Map();
 app.map = null;
@@ -89,6 +89,16 @@ check(opened === 0 && app.pendingDeepLink, "The pending revise must wait for sig
 app.backendUser = { _id: "user_1" };
 app.applyPendingDeepLink();
 check(opened === 1 && app.pendingDeepLink === null, "After sign-in the pending revise must open and clear.");
+// p3-8: a deployment without a backend keeps the issue form on the popup
+app.backendUser = null;
+app.backend = { configured: false, signedIn: false };
+check(app.contextDotPopupHtml(suvaCathedral).includes("data-report-issue") && !app.contextDotPopupHtml(suvaCathedral).includes("Sign in to revise"), "Without a backend the popup must keep the issue form entry.");
+app.backend = { configured: true, signedIn: false };
+// p2-4: confirming the current record still means present and in use with no census years
+const confirmDefaults = fc.assessmentDefaultsForAction("confirm_current_record", fc.statusDefaultsForAction("confirm_current_record", undefined, {}));
+check(confirmDefaults.existenceStatus === "present" && confirmDefaults.worshipUseStatus === "confirmed_worship", `No census years must not turn a confirmation uncertain: ${JSON.stringify(confirmDefaults)}`);
+// p3-7: no "the target year" leaks into copy
+check(fc.targetYearListText() === "" && fc.targetYearAndListText() === "", "Empty year lists must render as nothing, not as 'the target year'.");
 // signed in, the popup offers revise; a dot across the border names its portal
 const signedInHtml = app.contextDotPopupHtml(suvaCathedral);
 check(signedInHtml.includes("Revise this place") && !signedInHtml.includes("Sign in to revise"), "Signed in, the popup must offer the revise entry.");

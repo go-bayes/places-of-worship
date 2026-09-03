@@ -1172,12 +1172,12 @@ function cap(value) {
 }
 
 function targetYearListText(years = TARGET_YEARS) {
-    if (years.length <= 1) return years[0] || "the target year";
+    if (years.length <= 1) return years[0] || "";
     return `${years.slice(0, -1).join(", ")} or ${years[years.length - 1]}`;
 }
 
 function targetYearAndListText(years = TARGET_YEARS) {
-    if (years.length <= 1) return years[0] || "the target year";
+    if (years.length <= 1) return years[0] || "";
     if (years.length === 2) return `${years[0]} and ${years[1]}`;
     return `${years.slice(0, -1).join(", ")}, and ${years[years.length - 1]}`;
 }
@@ -1462,7 +1462,9 @@ function statusDefaultsForAction(action, targetYear, props) {
 
 function assessmentDefaultsForAction(action, statuses = {}) {
     const statusValues = TARGET_YEARS.map(year => statuses[year]);
-    const anyPresent = statusValues.includes("present");
+    // with no census years there is no per-year status to read "present"
+    // from; confirming the current record still means present and in use
+    const anyPresent = statusValues.includes("present") || (!TARGET_YEARS.length && action === "confirm_current_record");
     const anyAbsent = statusValues.includes("absent");
     const isMissing = action === "missing_current_site";
     const isDuplicate = action === "possible_duplicate";
@@ -1540,7 +1542,7 @@ function taskFocusForAction(action, priority) {
 function checklistItemForCheck(check) {
     const id = check?.check_id || "";
     if (id === "missing_osm_lifecycle_date") {
-        return `Look for opening, first-seen, closure, or changed-use evidence that helps assess ${targetYearListText()} worship use.`;
+        return `Look for opening, first-seen, closure, or changed-use evidence that helps assess ${TARGET_YEARS.length ? `${targetYearListText()} ` : ""}worship use.`;
     }
     if (id === "missing_address") {
         return "Find a source-backed street address or locality, and note if the location remains approximate.";
@@ -1807,7 +1809,7 @@ function assignmentQuickstartHtml() {
                 <li>Sign in with Google at the top of this panel.</li>
                 <li>Work down the assigned ${COUNTRY_CONFIG.countryName} task list in order. Stop at a natural stopping point and tell JB where you stopped.</li>
                 <li>Open Street View or Google Maps to look around the site, and use the OSM object only as context. Record the imagery capture date if Street View is your evidence.</li>
-                <li>Record ${targetYearAndListText()} status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
+                <li>Record ${TARGET_YEARS.length ? `${targetYearAndListText()} status` : "the current status"}, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
             </ol>
         `;
     }
@@ -2991,9 +2993,10 @@ class NzVerificationMap {
             ? `<span class="popup-foreign-note">In ${escapeHtml(foreign.name)}. <a href="verification.html?country=${escapeHtml(foreign.code)}">Open the ${escapeHtml(foreign.name)} portal</a> to revise it.</span><br>`
             : "";
         let issueButton;
-        if (!this.backendUser) {
+        if (!this.backendUser && this.backend?.configured) {
             // r-h4 (jb 2026-09-03): looking is free, revising needs an
-            // account; the place waits on the sign-in card as a deep link does
+            // account; the place waits on the sign-in card as a deep link does.
+            // a deployment without a backend keeps the copy-json issue form
             issueButton = `<button class="popup-report-issue popup-revise-primary" type="button" data-sign-in-revise="1">Sign in to revise this place</button>`;
         } else if (matchedTaskId && canReopen) {
             issueButton = `<button class="popup-report-issue popup-revise-primary" type="button" data-reopen-task-id="${escapeHtml(matchedTaskId)}">Reopen this place's issue</button>`;
@@ -3821,7 +3824,7 @@ class NzVerificationMap {
             <strong>${escapeHtml(props.name || "Unnamed site")}</strong><br>
             <span>${escapeHtml(cap(props.religion))}${props.denomination ? ` | ${escapeHtml(cap(props.denomination))}` : ""}</span><br>
             <span>Priority: ${escapeHtml(props.verification_priority)}</span><br>
-            <span>${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))} (${escapeHtml(temporal.basis)})</span><br>
+            ${TARGET_YEARS.length ? `<span>${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))} (${escapeHtml(temporal.basis)})</span><br>` : ""}
             <span>Action: ${escapeHtml(actionLabel(props.automated_suggested_action))}</span><br>
             <div class="popup-actions">
                 <button class="popup-open-task" type="button" data-task-id="${escapeHtml(props.task_id)}">Open task</button>
@@ -3934,7 +3937,7 @@ class NzVerificationMap {
                         <span class="priority-dot priority-${escapeHtml(props.verification_priority)}"></span>
                         ${stateDot}${escapeHtml(props.name || "Unnamed site")}${outcomeBadge}
                     </span>
-                    <span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))}</span>
+                    ${TARGET_YEARS.length ? `<span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))}</span>` : ""}
                     <span class="task-row-meta">${escapeHtml(cap(props.religion)) || "Unknown"} | ${escapeHtml(props.master_site_id || props.source_record_id || "")}</span>
                     <span class="task-row-meta">${escapeHtml(actionLabel(props.automated_suggested_action))} | ${props.automated_check_count} checks</span>
                 </button>
@@ -5054,7 +5057,7 @@ class NzVerificationMap {
         const briefText = props.task_brief || focus.text;
         const checklist = uniqueItems([
             "Confirm that the source evidence refers to this site, not only a similarly named organisation or nearby building.",
-            `Assess worship-use status for ${this.targetYear}. The current map aid says ${statusLabel(temporal.status).toLowerCase()}; verify with sources.`,
+            TARGET_YEARS.length ? `Assess worship-use status for ${this.targetYear}. The current map aid says ${statusLabel(temporal.status).toLowerCase()}; verify with sources.` : "",
             context.andre_check || "",
             ...checks.map(checklistItemForCheck),
             "Record the closest supported action, target-year statuses, source title, URL or file reference, and a short evidence note.",
@@ -5065,7 +5068,7 @@ class NzVerificationMap {
             <div class="task-brief">
                 <div class="task-brief-header">
                     <span class="task-focus">${escapeHtml(focus.label)}</span>
-                    <span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))}</span>
+                    ${TARGET_YEARS.length ? `<span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))}</span>` : ""}
                 </div>
                 ${this.taskWhyHtml(props)}
                 <p>${escapeHtml(briefText)}</p>
@@ -5143,7 +5146,7 @@ class NzVerificationMap {
         return `
             <h3>Target-year status</h3>
             <div class="temporal-summary">
-                <div><span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(status)}</span></div>
+                ${TARGET_YEARS.length ? `<div><span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(status)}</span></div>` : `<div>No census years are set for ${escapeHtml(COUNTRY_CONFIG.countryName)} yet.</div>`}
                 <div><strong>Basis:</strong> ${escapeHtml(temporal.basis)}</div>
                 <div><strong>OSM date tags:</strong> ${escapeHtml(lifecycle)}</div>
                 <div><strong>Interpretation:</strong> ${escapeHtml(temporal.note)}</div>
@@ -10278,7 +10281,7 @@ class NzVerificationMap {
             return;
         }
         const hasAssessedTargetYear = Object.values(values.targetYearStatuses).some((value) => value !== "not_assessed");
-        if (!hasAssessedTargetYear) {
+        if (TARGET_YEARS.length && !hasAssessedTargetYear) {
             if (status) {
                 status.textContent = "No target year has been assessed. Use Copy review JSON instead; nothing was copied.";
             }
