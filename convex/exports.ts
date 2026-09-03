@@ -74,6 +74,8 @@ function overlayTargetYears(
   // pr-f: the confirmed or overridden denomination per year, never a proposal
   const denominations = (draft.target_year_denominations ?? {}) as Record<string, string>;
   const denominationBases = (draft.target_year_denomination_basis ?? {}) as Record<string, string>;
+  // r-f1': the confirmed level of use beside a present year
+  const useLevels = (draft.target_year_use_levels ?? {}) as Record<string, string>;
   const out = { ...row };
   for (const year of targetYears) {
     const key = String(year);
@@ -82,6 +84,7 @@ function overlayTargetYears(
     if (status !== undefined && status !== "not_assessed") {
       out[`target_year_${year}_basis`] = bases[key] ?? "source_observation";
     }
+    if (useLevels[key] !== undefined) out[`target_year_${year}_use_level`] = useLevels[key];
     if (denominations[key] !== undefined) {
       out[`target_year_${year}_denomination`] = denominations[key];
       out[`target_year_${year}_denomination_basis`] = denominationBases[key] ?? "reviewer_confirmed_derivation";

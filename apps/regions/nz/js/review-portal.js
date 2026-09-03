@@ -937,9 +937,10 @@ function human(value) {
                 <div class="derived-year-head">
                     <strong>${presence.target_year}</strong>
                     <span class="pill ${statusCls}">${escapeHtml(status)}</span>${overriddenFrom}
+                    ${status === "present" && presence.use_level ? `<span class="pill grey">${escapeHtml(presence.use_level)} use</span>` : ""}
                     <span class="pill ${reviewPill.cls}">${escapeHtml(reviewPill.label)}</span>
                 </div>
-                <div>Presence: ${escapeHtml(rule)}.</div>
+                <div>Presence: ${escapeHtml(rule)}.${status === "present" && presence.use_level ? ` Level of use: ${escapeHtml(presence.use_level)}, confirmed with the presence.` : ""}</div>
                 ${firings}
                 ${locationHtml}
                 ${conflict}

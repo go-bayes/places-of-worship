@@ -273,11 +273,18 @@ test("a set must be numbered, non-overlapping, and relocations must move", () =>
   assert.throws(() => assertOccupancySet([], REF, PIN), /at least one period/);
 });
 
-test("rule 11: intermittent use covers the year without establishing use (ruling r-f1)", () => {
+test("rule 11 (r-f1'): annual use is present at the intermittent level; only an uncertain frequency is uncertain", () => {
   const annual = { occupancy_id: "a", segment_index: 0, start_mode: "known", start_date: "2014", start_basis: "first_seen_only", end_mode: "still_active", still_active_asof: "2024-05", end_basis: "unknown", use_frequency: "annual", latitude: -37.2, longitude: 174.8, location_mode: "building_identified", location_basis: "map_placement" };
-  assert.deepEqual(presenceForSegment(annual, 2018), { occupancy_id: "a", rule_id: "intermittent_use", status: "uncertain" });
-  assert.equal(presenceForSegment({ ...annual, use_frequency: "monthly" }, 2018).rule_id, "inside_interval");
-  assert.equal(presenceForSegment({ ...annual, use_frequency: undefined }, 2018).rule_id, "inside_interval");
+  assert.deepEqual(presenceForSegment(annual, 2018), { occupancy_id: "a", rule_id: "inside_interval", status: "present", use_level: "intermittent" });
+  assert.deepEqual(presenceForSegment({ ...annual, use_frequency: "occasional" }, 2018), { occupancy_id: "a", rule_id: "inside_interval", status: "present", use_level: "intermittent" });
+  assert.deepEqual(presenceForSegment({ ...annual, use_frequency: "uncertain" }, 2018), { occupancy_id: "a", rule_id: "intermittent_use", status: "uncertain" });
+  assert.deepEqual(presenceForSegment({ ...annual, use_frequency: "monthly" }, 2018), { occupancy_id: "a", rule_id: "inside_interval", status: "present", use_level: "regular" });
+  assert.equal(presenceForSegment({ ...annual, use_frequency: undefined }, 2018).use_level, "regular");
+  // a year covered by a regular and an intermittent period is regular
+  const regular = { ...annual, occupancy_id: "b", use_frequency: "regular" };
+  assert.equal(derivePresence([annual, regular], [2018])[0].use_level, "regular");
+  assert.equal(derivePresence([annual], [2018])[0].use_level, "intermittent");
+  assert.equal(derivePresence([{ ...annual, use_frequency: "uncertain" }], [2018])[0].use_level, undefined);
   // the frequency is a consumed input, so it changes the hash
   assert.notEqual(occupancyInputsHash([annual]), occupancyInputsHash([{ ...annual, use_frequency: "regular" }]));
   // desacralised is an accepted end reason with a stated closure

@@ -175,11 +175,24 @@ function snapshotFunction(row: Doc<"derived_target_year_functions"> | null) {
   };
 }
 
+// the parent's per-year use levels after one year is written or cleared
+function useLevelsAfter(
+  parent: Doc<"evidence_drafts">,
+  year: number,
+  level: "regular" | "intermittent" | undefined,
+): Record<string, "regular" | "intermittent"> {
+  const next = { ...((parent.target_year_use_levels ?? {}) as Record<string, "regular" | "intermittent">) };
+  if (level === undefined) delete next[String(year)];
+  else next[String(year)] = level;
+  return next;
+}
+
 function snapshotPresence(row: Doc<"derived_target_year_states"> | null) {
   if (row === null) return null;
   return {
     derived_status: row.derived_status,
     rule_id: row.rule_id,
+    use_level: row.use_level ?? null,
     review_state: row.review_state,
     override_status: row.override_status ?? null,
     inputs_hash: row.inputs_hash,
@@ -268,6 +281,7 @@ async function rederive(
     const record = {
       derived_status: presence.derived_status,
       rule_id: presence.rule_id,
+      use_level: presence.use_level,
       segment_rules: presence.segment_rules,
       derivation_version: OCCUPANCY_DERIVATION_VERSION,
       inputs_hash: inputsHash,
@@ -957,6 +971,8 @@ async function applyYearDecision(
     await ctx.db.patch(parent._id, {
       target_year_statuses: { ...((parent.target_year_statuses ?? {}) as Record<string, "present" | "absent" | "uncertain" | "not_assessed">), [String(year)]: presence.derived_status },
       target_year_basis: { ...((parent.target_year_basis ?? {}) as Record<string, "source_observation" | "reviewer_confirmed_derivation" | "reviewer_override">), [String(year)]: "reviewer_confirmed_derivation" },
+      // r-f1': the level of use is confirmed with the presence
+      target_year_use_levels: useLevelsAfter(parent, year, presence.derived_status === "present" ? presence.use_level : undefined),
       updated_at: now,
     });
   } else if (action === "override") {
@@ -980,6 +996,9 @@ async function applyYearDecision(
     await ctx.db.patch(parent._id, {
       target_year_statuses: { ...((parent.target_year_statuses ?? {}) as Record<string, "present" | "absent" | "uncertain" | "not_assessed">), [String(year)]: status },
       target_year_basis: { ...((parent.target_year_basis ?? {}) as Record<string, "source_observation" | "reviewer_confirmed_derivation" | "reviewer_override">), [String(year)]: "reviewer_override" },
+      // an overriding present keeps the derived level of use; any other
+      // status carries none
+      target_year_use_levels: useLevelsAfter(parent, year, status === "present" ? presence.use_level : undefined),
       updated_at: now,
     });
   } else {

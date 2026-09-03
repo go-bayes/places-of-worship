@@ -61,6 +61,8 @@ import {
   derivedFunctionStatus,
   derivedFunctionRule,
   derivationKind,
+  derivedUseLevel,
+  targetYearUseLevelSet,
 } from "./model";
 
 export default defineSchema({
@@ -224,6 +226,9 @@ export default defineSchema({
     function_chain: v.optional(functionChainInput),
     target_year_denominations: v.optional(v.record(v.string(), v.string())),
     target_year_denomination_basis: v.optional(targetYearBasisSet),
+    // r-f1': the level of use (regular or intermittent) a reviewer confirmed
+    // with each present census year
+    target_year_use_levels: v.optional(targetYearUseLevelSet),
     privacy_flag: privacyFlag,
     licence_flag: licenceFlag,
     validation_summary: v.optional(v.any()),
@@ -346,10 +351,13 @@ export default defineSchema({
     target_year: v.number(),
     derived_status: derivedPresenceStatus,
     rule_id: v.string(),
+    // r-f1': present years carry the level of use behind them
+    use_level: v.optional(derivedUseLevel),
     segment_rules: v.array(v.object({
       occupancy_id: v.string(),
       rule_id: v.string(),
       status: derivedPresenceStatus,
+      use_level: v.optional(derivedUseLevel),
     })),
     derivation_version: v.string(),
     inputs_hash: v.string(),

@@ -128,16 +128,19 @@ test("kohekohe derives presbyterian in 2013 and nothing after the desacralisatio
   ]);
 });
 
-test("kohekohe periods derive present, uncertain, uncertain under rule 11", () => {
+test("kohekohe fictional continuation derives present regular, then present intermittent (r-f1')", () => {
   const segments = KOHEKOHE_PERIODS.map((s, i) => ({ ...s, occupancy_id: `s${i}`, ...AT }));
-  assert.deepEqual(derivePresence(segments, NZ).map((r) => `${r.target_year}:${r.derived_status}:${r.rule_id}`), [
-    "2013:present:inside_interval",
-    "2018:uncertain:intermittent_use",
-    "2023:uncertain:intermittent_use",
+  assert.deepEqual(derivePresence(segments, NZ).map((r) => `${r.target_year}:${r.derived_status}:${r.rule_id}:${r.use_level}`), [
+    "2013:present:inside_interval:regular",
+    "2018:present:inside_interval:intermittent",
+    "2023:present:inside_interval:intermittent",
   ]);
-  // several times a year still counts as in use (ruling r-f1)
+  // several times a year is regular use
   const monthly = segments.map((s) => (s.segment_index === 1 ? { ...s, use_frequency: "several_times_a_year" } : s));
-  assert.equal(derivePresence(monthly, [2018])[0].derived_status, "present");
+  assert.equal(derivePresence(monthly, [2018])[0].use_level, "regular");
+  // an uncertain frequency is the only case that leaves the year uncertain
+  const unsure = segments.map((s) => (s.segment_index === 1 ? { ...s, use_frequency: "uncertain" } : s));
+  assert.deepEqual(derivePresence(unsure, [2018]).map((r) => `${r.derived_status}:${r.rule_id}:${r.use_level}`), ["uncertain:intermittent_use:undefined"]);
 });
 
 test("the chain must agree with the periods it closes and splits", () => {

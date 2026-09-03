@@ -38,8 +38,9 @@
         "relocated_date_precision", "date_evidence_raw", "date_evidence_summary",
         "existence_status", "worship_use_status", "public_access_status",
     ]);
+    // r-f1': use_level sits beside the status
     const TARGET_YEAR_SUFFIXES = Object.freeze([
-        "status", "probability", "evidence",
+        "status", "use_level", "probability", "evidence",
         "basis", "latitude", "longitude", "uncertainty_radius_m", "location_basis",
         "denomination", "denomination_basis",
     ]);

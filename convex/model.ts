@@ -170,6 +170,7 @@ export const currentObservationStatus = v.union(
   v.literal("currently_used_for_worship"),
   v.literal("place_exists_worship_uncertain"),
   v.literal("place_exists_not_used_for_worship"),
+  v.literal("place_no_longer_exists"),
   v.literal("could_not_determine"),
 );
 
@@ -414,6 +415,9 @@ export const pendingOccupancyCards = v.array(v.object({
 export const derivedPresenceStatus = v.union(
   v.literal("present"), v.literal("absent"), v.literal("uncertain"),
 );
+// r-f1' (jb 2026-09-03): the level of use behind a present census year
+export const derivedUseLevel = v.union(v.literal("regular"), v.literal("intermittent"));
+export const targetYearUseLevelSet = v.record(v.string(), derivedUseLevel);
 // pr-f: the denomination in force for a census year, or an uncertain year
 // inside a change window naming both candidates
 export const derivedFunctionStatus = v.union(
