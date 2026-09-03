@@ -157,8 +157,37 @@
     return feature;
   }
 
+  // the contribute panel's second route (jb rulings r-h1 to r-h3,
+  // 2026-09-03). a page's own config links win; else a country (the page's
+  // own, or the one under the global map's centre) routes to the shared
+  // portal by code, named so a panning user knows where evidence lands;
+  // below the offer zoom the centre names nothing; over open water there
+  // is no country. pure, so the decision is testable
+  function contributeRoutesFor(input) {
+    const opts = input || {};
+    if (opts.configPortal) {
+      return { kind: "config", portal: opts.configPortal, review: opts.configReview || "", name: "" };
+    }
+    const country = opts.country;
+    if (country && country.code) {
+      const code = String(country.code).toLowerCase();
+      const base = opts.portalBase || "";
+      return {
+        kind: "country",
+        portal: `${base}verification.html?country=${code}`,
+        review: `${base}review.html?country=${code}`,
+        name: country.name || code.toUpperCase()
+      };
+    }
+    if (typeof opts.zoom === "number" && typeof opts.minZoom === "number" && opts.zoom < opts.minZoom) {
+      return { kind: "zoom", portal: "", review: "", name: "" };
+    }
+    return { kind: "none", portal: "", review: "", name: "" };
+  }
+
   window.RegionResolve = {
     normaliseLng,
+    contributeRoutesFor,
     boxContains,
     boxArea,
     pointInRings,
