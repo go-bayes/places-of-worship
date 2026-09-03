@@ -1,6 +1,6 @@
 # Annual OSM audit of places of worship, all countries — scoping note (2026-09-03)
 
-Status: SCOPING, nothing built. Rulings R-O1 to R-O5 in section 5 await JB. A rendered copy is at https://claude.ai/code/artifact/7afa35c1-b3f2-4ff8-baa8-8d0eeab63c2a.
+Status: SCOPING, rulings R-O1 to R-O5 made by JB on 2026-09-03 (section 5a); nothing built yet. A rendered copy is at https://claude.ai/code/artifact/7afa35c1-b3f2-4ff8-baa8-8d0eeab63c2a.
 
 The goal is a yearly pull of every OpenStreetMap `amenity=place_of_worship` record for every country, taken at one fixed anchor date, stored durably with hashes, and diffed against the previous edition to give a census of change. New Zealand has a working prototype of the historical pull. Nothing else on the path exists yet.
 
@@ -41,15 +41,31 @@ Scale is unknown: neither repository holds a global count of OSM places of worsh
 ## 5. Decisions put to JB
 
 - **R-O1 Historical-state source.** ohsome/OSHDB or planet full-history extracts? Recommended: ohsome for editions 1 and 2. Proven in NZ, exact point-in-time state, per-country cost is a bounding box or boundary that Natural Earth already supplies. Revisit planet history only if ohsome throttles a full-globe run.
+
 - **R-O2 Durable store.** Recommended: a dedicated R2 bucket (`pow-osm-editions`), partitioned as the storage document rules. Account, wrangler and upload code already exist for tiles and guide media; GCS would add a second cloud for no gain. Execute Milestone 1 for NZ into that bucket first, as the template.
+
 - **R-O3 Edition 1 scope.** Strict `amenity=place_of_worship` only, or the broad building and religion filter? Relations in or out? Recommended: strict, nodes and ways, relations out, matching the NZ default. The broad filter can be pulled later from the same anchor because ohsome is historical.
+
 - **R-O4 Canonical hash field list for the OSM record class.** Recommended: version it before edition 1 is stamped: OSM id and type, centroid to six decimals, and the evidential tag set the NZ cleaning rules already name (amenity, disused and was amenity, name, religion, denomination, building, start, end and opening dates). Any later change re-baselines, so the list is a ruling, not a default.
+
 - **R-O5 Runner.** Extend the global Overpass script, or generalise the 21-country ohsome script? Recommended: generalise the ohsome script. It already retries, hashes and manifests; it lacks a country loop over Natural Earth boundaries, resumability, and an R2 upload step. The Overpass script would have to gain historical queries from nothing.
+
+### 5a. Rulings (JB, 2026-09-03, his words)
+
+- **R-O1** ohsome.
+- **R-O2** yes; and a good point to consider design of data stores as we have many data types (country-level data, polygons used, etc.). What will be both efficient and reproducible? To be discussed.
+- **R-O3** strict; and further, we must consider efficient pruning for duplicates (if we can). This will be difficult for human-only review at this scale, again to be discussed.
+- **R-O4** agree.
+- **R-O5** agree, the Overpass script is not state of the art; ohsome to generalise.
+
+Two follow-on design discussions are therefore open: the layout of the project's data stores across data types (R-O2), and duplicate pruning at scale with less than full human review (R-O3).
 
 ## 6. Proposed order of work
 
 1. Count query per country at 1 September 2025 and 2026 through ohsome, to size the corpus and the run.
-2. JB rules R-O1 to R-O5.
+2. JB rules R-O1 to R-O5 (done 2026-09-03).
 3. Milestone 1: hash manifest for the existing NZ run, uploaded to the chosen store, validated against the schema, with `docs/manifests/` created.
 4. All-country runner brief (server sitting), then the runner, with a ten-country dry run before the full pull.
 5. Edition 1 pull at the anchor, then the record-class diff against the 2025 NZ snapshot as the first census of change.
+
+Yes, this order makes sense.

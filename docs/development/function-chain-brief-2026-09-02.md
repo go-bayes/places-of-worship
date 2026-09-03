@@ -36,9 +36,19 @@ Whether the last row is a period or a note is exactly ruling R-F1. Recording it 
 ## 5. Decisions put to JB
 
 - **R-F1 Frequency threshold.** Which `use_frequency` values count as "in use as a place of worship" for the census derivation. Recommended: `regular`, `monthly`, and `several_times_a_year` derive present; `annual`, `occasional`, and `uncertain` derive uncertain. This belongs in the definition (v0.1.5) as well as here.
+
 - **R-F2 Desacralised as its own end reason** rather than `use_changed`. Recommended yes: the reviewer and the export read the reason, and a deconsecration is a datable ecclesiastical act.
+
 - **R-F3 Chain vocabulary.** The seven changes in section 2.1, or a longer list. Recommended the seven, with "other" carrying a required note.
+
 - **R-F4 Derived denomination confirmation** rides in the same reviewer panel and the same *Confirm all eligible* action (a year whose state is inside one function state with no window). Recommended yes.
+
+### 5a. Rulings (JB, 2026-09-03)
+
+- **R-F1** yes: `regular`, `monthly`, and `several_times_a_year` derive present; `annual`, `occasional`, and `uncertain` derive uncertain. Goes into the definition as v0.1.5.
+- **R-F2** yes: `desacralised` is its own end reason.
+- **R-F3** yes: the seven chain changes of section 2.1, with `other` carrying a required note.
+- **R-F4** yes: derived denomination confirmation rides in the same reviewer panel and the same *Confirm all eligible* action.
 
 ## 6. Acceptance
 
