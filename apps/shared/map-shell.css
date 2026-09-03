@@ -286,6 +286,7 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
 #contribute-panel a strong { font-weight: 700; color: #fff; }
 #contribute-panel a span { color: #cbd5e1; line-height: 1.35; }
 #contribute-panel a.shell-panel-minor { padding: 6px 10px; color: #cbd5e1; text-decoration: underline; }
+#contribute-panel .shell-panel-note { display: block; padding: 8px 10px; color: #cbd5e1; line-height: 1.35; }
 .maplibregl-popup-content .popup-actions a.popup-revise {
   background: rgba(248, 250, 252, 0.92);
   border-color: rgba(248, 250, 252, 0.92);
