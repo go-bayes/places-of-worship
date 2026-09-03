@@ -14,7 +14,7 @@ import {
   assertTaskReasonLimit,
 } from "./lib/limits";
 import { assertNotRapidContract, isRapidCurrentDraft } from "./lib/rapidEntry";
-import { dateFloorYear, defaultTargetYears } from "./lib/countryYears";
+import { dateFloorYear, targetYearsOrEmpty } from "./lib/countryYears";
 import { assignedTaskPeriodProblem } from "./lib/assignedTaskPeriods";
 import { assertOccupancySet, occupancyReferenceDate } from "./lib/occupancies";
 import { assertChainAgreesWithPeriods, assertFunctionChain } from "./lib/functionChain";
@@ -32,7 +32,7 @@ import { evidenceDraftDoc } from "./lib/validators";
 function taskTargetYears(task: { target_years?: number[]; country_code: string }): number[] {
   return task.target_years && task.target_years.length > 0
     ? task.target_years
-    : defaultTargetYears(task.country_code);
+    : targetYearsOrEmpty(task.country_code);
 }
 
 async function getTaskOrThrow(ctx: any, taskId: string): Promise<Doc<"tasks">> {

@@ -9,7 +9,7 @@ import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser, type ProjectRole } from "./lib/auth";
-import { dateFloorYear, defaultTargetYears } from "./lib/countryYears";
+import { dateFloorYear, targetYearsOrEmpty } from "./lib/countryYears";
 import { isHistoricalClaimParentContract } from "./lib/historicalClaims";
 import {
   assertChainAgreesWithPeriods,
@@ -99,7 +99,7 @@ export function taskPoint(task: Doc<"tasks">): { latitude: number; longitude: nu
 function taskTargetYears(task: Doc<"tasks">): number[] {
   return task.target_years && task.target_years.length > 0
     ? task.target_years
-    : defaultTargetYears(task.country_code);
+    : targetYearsOrEmpty(task.country_code);
 }
 
 // the derivation input shape of a stored row

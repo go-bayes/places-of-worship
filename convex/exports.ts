@@ -5,7 +5,7 @@ import { exportFormat, exportBatchStatus } from "./model";
 import { chooseActorRole, requireUser } from "./lib/auth";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { isWideEvidenceExportEligible } from "./lib/exportEligibility";
-import { defaultTargetYears } from "./lib/countryYears";
+import { targetYearsOrEmpty } from "./lib/countryYears";
 import { readGeneratedWideRow, wideEvidenceFields, wideEvidenceRowValues } from "./lib/wideEvidenceFields";
 import {
   derivedStateEventDoc,
@@ -113,7 +113,7 @@ function siteEvidenceWideCsv(
   // the header is the shared column list for the country's waves (pr-b0);
   // every row is placed by column name, so a draft saved under an earlier
   // or divergent field list loses nothing and shifts nothing
-  const targetYears = defaultTargetYears(countryCode);
+  const targetYears = targetYearsOrEmpty(countryCode);
   const fields = wideEvidenceFields(targetYears);
   const rows: Record<string, unknown>[] = [];
   let fieldMismatchCount = 0;
