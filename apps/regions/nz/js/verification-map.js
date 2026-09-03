@@ -637,7 +637,11 @@ function registryCountryConfig(entry) {
     };
 }
 function countryConfigKey(value) {
-    const key = String(value || "").toLowerCase();
+    const raw = String(value || "").toLowerCase();
+    // the tiles and the public map may hand over an iso code (gb) where the
+    // project keeps its own (uk); either spelling opens the same country
+    const byIso = COUNTRY_REGISTRY_BY_ISO.get(raw.toUpperCase());
+    const key = byIso ? String(byIso.code).toLowerCase() : raw;
     if (Object.prototype.hasOwnProperty.call(COUNTRY_CONFIGS, key)) return key;
     const entry = COUNTRY_REGISTRY.get(key);
     if (!entry) return "";

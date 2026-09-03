@@ -24,6 +24,18 @@ const CONTRIBUTE_ROUTES = (() => {
   };
 })();
 const CONTRIBUTE_LINK_IDS = new Set(["verification-link", "review-link"]);
+// the shared portal (apps/regions/nz/verification.html) opens for any
+// country by code (pr-h1); every page routes there when its config names
+// no portal of its own (jb ruling r-h1, 2026-09-03)
+const PORTAL_BASE = `${RC.regionsBase || "../"}nz/`;
+const SHARED_BASE = RC.sharedBase || `${RC.regionsBase || "../"}../shared/`;
+// the tiles name a place's country by iso code; the portal keys on the
+// project code where the two differ
+const PROJECT_CODE_FOR_ISO = { gb: "uk" };
+function projectCountryCode(code) {
+  const key = String(code || "").toLowerCase();
+  return PROJECT_CODE_FOR_ISO[key] || key;
+}
 if (!RC) {
   throw new Error("REGION_CONFIG missing");
 }
@@ -141,10 +153,7 @@ const SCHEMA_BASE = RC.schemaBase || "../../../schemas/";
   </div>
   <div id="contribute-panel" class="shell-panel" hidden aria-label="Contribute">
     <a id="contribute-osm" href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener"><strong>Improve OpenStreetMap</strong><span>Anyone can edit OpenStreetMap. Edits reach this map at the next annual audit.</span></a>
-    ${CONTRIBUTE_ROUTES.portal
-      ? `<a id="contribute-portal" href="${CONTRIBUTE_ROUTES.portal.href}"><strong>Submit evidence to Religion Map</strong><span>Project members sign in with Google. If you are not yet a member, the sign-in page says how to get in touch.</span></a>`
-        + (CONTRIBUTE_ROUTES.review ? `<a id="contribute-review" class="shell-panel-minor" href="${CONTRIBUTE_ROUTES.review.href}">Review evidence</a>` : "")
-      : (CONTRIBUTE_ROUTES.repo ? `<a id="contribute-about" class="shell-panel-minor" href="${CONTRIBUTE_ROUTES.repo.href}" target="_blank" rel="noopener">About the project</a>` : "")}
+    <div id="contribute-routes"></div>
   </div>
   <button id="corner-reset" class="shell-pill shell-top-right" type="button" aria-label="Set North">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -496,6 +505,27 @@ const contributeToggle = document.getElementById("contribute-toggle");
 const contributePanel = document.getElementById("contribute-panel");
 if (contributeToggle && contributePanel) {
   const osmLink = document.getElementById("contribute-osm");
+  const routesHost = document.getElementById("contribute-routes");
+  // the project route renders when the panel opens (r-h1 to r-h3): a
+  // moving map never rewrites a panel the user is reading, and a country
+  // change while it is open takes effect on the next open
+  const contributeEscape = (value) => String(value).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const renderContributeRoutes = () => {
+    if (!routesHost) return;
+    const decision = contributeDecision();
+    const about = CONTRIBUTE_ROUTES.repo
+      ? `<a id="contribute-about" class="shell-panel-minor" href="${CONTRIBUTE_ROUTES.repo.href}" target="_blank" rel="noopener">About the project</a>`
+      : "";
+    if (decision.kind === "config" || decision.kind === "country") {
+      const named = decision.name ? ` · ${contributeEscape(decision.name)}` : "";
+      routesHost.innerHTML =
+        `<a id="contribute-portal" href="${decision.portal}"><strong>Submit evidence to religionmap.org${named}</strong><span>Project members sign in with Google. If you are not yet a member, the sign-in page says how to get in touch.</span></a>` +
+        (decision.review ? `<a id="contribute-review" class="shell-panel-minor" href="${decision.review}">Review evidence</a>` : "");
+      return;
+    }
+    routesHost.innerHTML =
+      `<span id="contribute-note" class="shell-panel-note" role="note">Zoom to a country to submit evidence</span>` + about;
+  };
   const setContributeOpen = (open) => {
     contributePanel.hidden = !open;
     contributeToggle.setAttribute("aria-expanded", open ? "true" : "false");
@@ -504,6 +534,7 @@ if (contributeToggle && contributePanel) {
       const zoom = Math.round(map.getZoom());
       osmLink.href = `https://www.openstreetmap.org/edit#map=${zoom}/${centre.lat.toFixed(5)}/${centre.lng.toFixed(5)}`;
     }
+    if (open) renderContributeRoutes();
     if (open) contributePanel.querySelector("a")?.focus();
   };
   contributeToggle.addEventListener("click", () => setContributeOpen(contributePanel.hidden));
@@ -626,9 +657,28 @@ function ensureNearestLine() {
 // deep link into the portal's revise flow for a public-map place (jb
 // 2026-09-03): the portal reads ?revise=1 and opens the same card a click
 // on the place's dot would. empty on pages without a portal
+// the country a public-map place belongs to, for its revise link (pr-h2):
+// the page's own country; else the dot's tile country code; else the
+// country under the point (page manifest, then world outlines). null when
+// nothing names one (a dot at sea, or before the manifests arrive)
+function countryForPlace(props, lat, lng) {
+  if (RC.countryCode) return { code: RC.countryCode };
+  const tileCode = props && props.country_code ? String(props.country_code) : "";
+  if (tileCode) return { code: projectCountryCode(tileCode) };
+  if (Number.isFinite(lat) && Number.isFinite(lng)) {
+    const region = countryUnderPoint(lng, lat);
+    if (region) return { code: region.code, name: region.name };
+  }
+  return null;
+}
 function portalReviseHref(name, latFixed, lngFixed, props) {
-  const portal = CONTRIBUTE_ROUTES.portal;
-  if (!portal) return "";
+  const configPortal = CONTRIBUTE_ROUTES.portal;
+  let base = configPortal ? configPortal.href : "";
+  if (!base) {
+    const country = countryForPlace(props, Number(latFixed), Number(lngFixed));
+    if (!country) return "";
+    base = `${PORTAL_BASE}verification.html?country=${String(country.code).toLowerCase()}`;
+  }
   const params = new URLSearchParams({ revise: "1", lat: latFixed, lng: lngFixed });
   if (name && name !== "Loading place…" && name !== "Unnamed") params.set("name", name);
   const osmId = props && props.osm_id !== undefined && props.osm_id !== null ? String(props.osm_id) : "";
@@ -636,7 +686,7 @@ function portalReviseHref(name, latFixed, lngFixed, props) {
     params.set("osm_type", String(props.osm_type || "node"));
     params.set("osm_id", osmId);
   }
-  return `${portal.href}${portal.href.includes("?") ? "&" : "?"}${params.toString()}`;
+  return `${base}${base.includes("?") ? "&" : "?"}${params.toString()}`;
 }
 function reviseLinkHtml(name, latFixed, lngFixed, props) {
   const href = portalReviseHref(name, latFixed, lngFixed, props);
@@ -5459,6 +5509,10 @@ const HANDOFF_ORIGIN_PARAM = "handoff-from";
 // nothing in particular
 const HANDOFF_MIN_ZOOM = 3;
 let handoffRegions = null;
+// countries without a page, from natural earth 1:110m (world-outlines.json,
+// pr-h2), read by the global map after the page manifest: the contribute
+// entry names them, the data pill never offers them (they have no page)
+let worldRegions = null;
 let handoffTapTarget = null; // a tap-made offer outlives programmatic moveends
 const handoffPrefetched = new Set();
 
@@ -5476,6 +5530,50 @@ function handoffNeighbourAt(lng, lat) {
   if (!handoffRegions) return null;
   // no homeCode on the global map: every data country resolves, none is home
   return window.RegionResolve.resolveAt(handoffRegions, lng, lat, HANDOFF_HOME ? { homeCode: HANDOFF_HOME } : undefined);
+}
+
+// any country under a point for the contribute entry: the page manifest
+// first (exact boundaries, the home country included), then the world
+// outlines. null over open water or before either manifest arrives
+function countryUnderPoint(lng, lat) {
+  const x = normaliseLng(lng);
+  if (handoffRegions) {
+    const page = window.RegionResolve.resolveAt(handoffRegions, x, lat);
+    if (page) return page;
+  }
+  if (worldRegions) {
+    const world = window.RegionResolve.resolveAt(worldRegions, x, lat);
+    if (world) return world;
+  }
+  return null;
+}
+
+// the contribute panel's project route for this page and view (r-h1 to
+// r-h3): config links win; a country page names itself; the global map
+// names the country under the centre at offer zoom, and nothing below it
+function contributeDecision() {
+  const configPortal = CONTRIBUTE_ROUTES.portal;
+  if (configPortal) {
+    return window.RegionResolve.contributeRoutesFor({
+      configPortal: configPortal.href,
+      configReview: CONTRIBUTE_ROUTES.review ? CONTRIBUTE_ROUTES.review.href : ""
+    });
+  }
+  let country = null;
+  if (RC.countryCode) {
+    const code = String(RC.countryCode).toLowerCase();
+    const entry = handoffRegions ? handoffRegions.find((r) => r.code === code) : null;
+    country = { code, name: entry ? entry.name : "" };
+  } else if (map.getZoom() >= HANDOFF_MIN_ZOOM) {
+    const centre = map.getCenter();
+    country = countryUnderPoint(centre.lng, centre.lat);
+  }
+  return window.RegionResolve.contributeRoutesFor({
+    country,
+    zoom: map.getZoom(),
+    minZoom: HANDOFF_MIN_ZOOM,
+    portalBase: PORTAL_BASE
+  });
 }
 
 // the census view a departure carries (roam v1): metric and year are
@@ -5663,6 +5761,16 @@ if (offerGo && !RC.disableBorderHandoff) {
       .then((doc) => {
         if (!doc || !Array.isArray(doc.regions)) return;
         handoffRegions = doc.regions;
+        // the global map also learns the countries without a page, for
+        // the contribute entry alone; deferred behind the page manifest
+        if (!HANDOFF_HOME) {
+          fetch(`${SHARED_BASE}data/world-outlines.json`)
+            .then((res) => (res.ok ? res.json() : null))
+            .then((world) => {
+              if (world && Array.isArray(world.regions)) worldRegions = world.regions;
+            })
+            .catch(() => {});
+        }
         // consume the legacy arrival marker so older links stay clean
         writeHashParam(HANDOFF_ORIGIN_PARAM, null);
         if (HANDOFF_HOME) {

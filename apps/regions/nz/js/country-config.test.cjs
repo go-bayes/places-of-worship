@@ -136,4 +136,8 @@ const ukLoaded = load("?country=uk");
 const uk = new Proxy({}, { get: (_, name) => ukLoaded.get(String(name)) });
 check(uk.COUNTRY_CONFIG.countryName === "United Kingdom" && uk.COUNTRY_CONFIG.fromRegistry === undefined, "uk must keep its tuned config.");
 
+const gbLoaded = load("?country=gb");
+const gb = new Proxy({}, { get: (_, name) => gbLoaded.get(String(name)) });
+check(gb.COUNTRY_CONFIG.countryCode === "UK", `The iso code gb must open the uk config: ${gb.COUNTRY_CONFIG.countryCode}`);
+
 console.log(`country config: ${checks} checks passed`);
