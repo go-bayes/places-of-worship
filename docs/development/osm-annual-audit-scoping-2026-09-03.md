@@ -36,7 +36,7 @@ The OSM audit is the raw-source counterpart. The working protocol in the researc
 4. No manifest tooling in the public repo. Validation and generation scripts exist privately, unwired.
 5. Run time and rate limits unmodelled. A serial per-country loop with a 40-minute timeout per country would take days, with no retry on the global path and no documented ohsome or Overpass ceiling.
 
-Scale is unknown: neither repository holds a global count of OSM places of worship or a per-country table. A single ohsome count query per country at the anchor date would settle this in an afternoon and should precede any design commitment.
+Scale, measured 2026-09-03 (step 1 done; `assets/osm-pow-counts-2026-09-03.md`): 1,544,023 nodes and ways inside Natural Earth 1:110m country polygons at ohsome's latest timestamp (2026-07-27), 1,485,702 at 2025-09-01; taginfo's global figure is 1,608,654 nodes and ways at 2026-09-02, the difference being coastline clipping at 1:110m. The ten largest countries (Indonesia, Japan, Germany, Italy, India, France, Brazil, Turkey, the UK, Spain) hold about 46 percent of the total; the USA alone holds about 283,000. Per-country ohsome requests take 30–120 s and multi-country batches fail, so a full count pass is under an hour; ohsome data lags live OSM by five to six weeks, so a 1 September anchor is pulled in mid-October or defined as the latest ohsome timestamp on or before 1 September (addendum to R-O1).
 
 ## 5. Decisions put to JB
 
@@ -62,7 +62,7 @@ Two follow-on design discussions are therefore open: the layout of the project's
 
 ## 6. Proposed order of work
 
-1. Count query per country at 1 September 2025 and 2026 through ohsome, to size the corpus and the run.
+1. Count query per country at 1 September 2025 and 2026 through ohsome, to size the corpus and the run (done 2026-09-03).
 2. JB rules R-O1 to R-O5 (done 2026-09-03).
 3. Milestone 1: hash manifest for the existing NZ run, uploaded to the chosen store, validated against the schema, with `docs/manifests/` created.
 4. All-country runner brief (server sitting), then the runner, with a ten-country dry run before the full pull.
