@@ -18,8 +18,10 @@ const known = (date) => ({ mode: "known", date });
 const between = (a, b) => ({ mode: "between", not_earlier_than: a, not_later_than: b });
 const by = (date) => ({ mode: "by", not_later_than: date });
 
-// the brief's worked case (section 4): presbyterian from 1888, shared with
-// methodists in the 1920s, desacralised 2014, an annual service after
+// the brief's illustration (section 4b): a kohekohe-shaped case with fictional
+// dates — presbyterian from 1888, shared with methodists in the 1920s,
+// desacralised 2014, an annual service after. the true record (opened 1886,
+// deconsecrated after the 1975 sale) is in section 4a; these dates are not it
 const KOHEKOHE = {
   contract_version: "function_chain_v1",
   start: { label: "Presbyterian", label_basis: "named_documentary_source", date: between("1887", "1889") },

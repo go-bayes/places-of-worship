@@ -170,7 +170,8 @@ if (localStorage.getItem("powGuidedPeriods:NZ:user_1:task_1") !== null || localS
 // pr-f: the function chain renders under the cards, a change is added
 // through the actual click handler, a complete desacralisation and
 // intermittent-use change write the cards (the ra never types the date
-// twice), and the preview names the denomination per year (kohekohe)
+// twice), and the preview names the denomination per year (kohekohe-shaped
+// illustration with fictional dates; brief section 4b)
 const chainState = app.guidedPeriodsState("task_chain");
 chainState.segments = [app.occupancyBlankSegment(
   { referenceDate: "2024-05", referenceDateFromParent: true },

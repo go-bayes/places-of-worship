@@ -19,6 +19,7 @@ import type * as lib_assignedTaskPeriods from "../lib/assignedTaskPeriods.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_countryYears from "../lib/countryYears.js";
 import type * as lib_exportEligibility from "../lib/exportEligibility.js";
+import type * as lib_functionChain from "../lib/functionChain.js";
 import type * as lib_historicalClaims from "../lib/historicalClaims.js";
 import type * as lib_limits from "../lib/limits.js";
 import type * as lib_locationAssertions from "../lib/locationAssertions.js";
@@ -61,6 +62,7 @@ declare const fullApi: ApiFromModules<{
   "lib/auth": typeof lib_auth;
   "lib/countryYears": typeof lib_countryYears;
   "lib/exportEligibility": typeof lib_exportEligibility;
+  "lib/functionChain": typeof lib_functionChain;
   "lib/historicalClaims": typeof lib_historicalClaims;
   "lib/limits": typeof lib_limits;
   "lib/locationAssertions": typeof lib_locationAssertions;
