@@ -56,6 +56,9 @@ const SCHEMA_BASE = RC.schemaBase || "../../../schemas/";
   if (!root) {
     throw new Error("#region-root missing");
   }
+  // the chrome tokens in map-shell.css are scoped to this class, so the
+  // light working tools that link the same sheet keep their own ink
+  root.classList.add("map-chrome");
   const onboardBullets = (RC.onboarding.bullets || [])
     .map((item) => `<li>${item}</li>`)
     .join("\n      ");
@@ -155,6 +158,9 @@ const SCHEMA_BASE = RC.schemaBase || "../../../schemas/";
     <a id="contribute-osm" href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener"><strong>Improve OpenStreetMap</strong><span>Anyone can edit OpenStreetMap. Edits reach this map at the next annual audit.</span></a>
     <div id="contribute-routes"></div>
   </div>
+  <!-- phones (r-d2, jb 2026-09-04): the wordmark hides, so the action row's
+       contribute pill opens this sheet with the portal route alone -->
+  <div id="contribute-sheet" class="shell-panel" hidden aria-label="Submit evidence"></div>
   <button id="corner-reset" class="shell-pill shell-top-right" type="button" aria-label="Set North">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path d="M12 3L17 12L7 12L12 3Z" fill="#ef4444"/>
@@ -176,6 +182,7 @@ const SCHEMA_BASE = RC.schemaBase || "../../../schemas/";
       <a id="datamaps-go" href="${REGIONS_BASE}" title="Country data maps"><span class="dm-label-long">Data Maps</span><span class="dm-label-short">Data</span></a>
       <button id="datamaps-caret" type="button" aria-label="Search all country data maps"><span class="dm-caret-word">Countries</span><span class="dm-caret-glyph" aria-hidden="true">▴</span></button>
     </div>
+    <button id="contribute-go" class="shell-pill" type="button" aria-expanded="false" aria-controls="contribute-sheet" title="Submit evidence to this project">Contribute</button>
   </div>
   <!-- top-left: the denomination key for the place dots -->
   ${keyWrapOpen}
@@ -503,13 +510,23 @@ if (nearMe) {
 // outside close it; focus lands on the first route when it opens
 const contributeToggle = document.getElementById("contribute-toggle");
 const contributePanel = document.getElementById("contribute-panel");
+const contributeEscape = (value) => String(value).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+// the portal route as the panel shows it, or the zoom note when the view
+// names no country; one renderer for the wordmark's panel and the phone
+// sheet so the two can never disagree (ids are prefixed so both may exist)
+function contributePortalMarkup(decision, idPrefix) {
+  if (decision.kind === "config" || decision.kind === "country") {
+    const named = decision.name ? ` · ${contributeEscape(decision.name)}` : "";
+    return `<a id="${idPrefix}-portal" href="${decision.portal}"><strong>Submit evidence to religionmap.org${named}</strong><span>Project members sign in with Google. If you are not yet a member, the sign-in page says how to get in touch.</span></a>`;
+  }
+  return `<span id="${idPrefix}-note" class="shell-panel-note" role="note">Zoom to a country to submit evidence</span>`;
+}
 if (contributeToggle && contributePanel) {
   const osmLink = document.getElementById("contribute-osm");
   const routesHost = document.getElementById("contribute-routes");
   // the project route renders when the panel opens (r-h1 to r-h3): a
   // moving map never rewrites a panel the user is reading, and a country
   // change while it is open takes effect on the next open
-  const contributeEscape = (value) => String(value).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const renderContributeRoutes = () => {
     if (!routesHost) return;
     const decision = contributeDecision();
@@ -517,14 +534,12 @@ if (contributeToggle && contributePanel) {
       ? `<a id="contribute-about" class="shell-panel-minor" href="${CONTRIBUTE_ROUTES.repo.href}" target="_blank" rel="noopener">About the project</a>`
       : "";
     if (decision.kind === "config" || decision.kind === "country") {
-      const named = decision.name ? ` · ${contributeEscape(decision.name)}` : "";
       routesHost.innerHTML =
-        `<a id="contribute-portal" href="${decision.portal}"><strong>Submit evidence to religionmap.org${named}</strong><span>Project members sign in with Google. If you are not yet a member, the sign-in page says how to get in touch.</span></a>` +
+        contributePortalMarkup(decision, "contribute") +
         (decision.review ? `<a id="contribute-review" class="shell-panel-minor" href="${decision.review}">Review evidence</a>` : "");
       return;
     }
-    routesHost.innerHTML =
-      `<span id="contribute-note" class="shell-panel-note" role="note">Zoom to a country to submit evidence</span>` + about;
+    routesHost.innerHTML = contributePortalMarkup(decision, "contribute") + about;
   };
   const setContributeOpen = (open) => {
     contributePanel.hidden = !open;
@@ -548,6 +563,37 @@ if (contributeToggle && contributePanel) {
     if (contributePanel.hidden) return;
     if (contributePanel.contains(event.target) || contributeToggle.contains(event.target)) return;
     setContributeOpen(false);
+  });
+}
+
+// contribute on phones (jb ruling r-d2, 2026-09-04): the wordmark hides
+// under 640px, so the action row seats a contribute pill whose sheet
+// carries the portal route alone, never the osm editor (iD does not work
+// on phones). the route comes from the same decision as the wordmark's
+// panel, so the zoom gate and the "zoom to a country" note are shared;
+// the sheet renders on open for the same reason the panel does
+const contributeGo = document.getElementById("contribute-go");
+const contributeSheet = document.getElementById("contribute-sheet");
+if (contributeGo && contributeSheet) {
+  const setSheetOpen = (open) => {
+    contributeSheet.hidden = !open;
+    contributeGo.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open) {
+      contributeSheet.innerHTML = contributePortalMarkup(contributeDecision(), "contribute-go");
+      contributeSheet.querySelector("a")?.focus();
+    }
+  };
+  contributeGo.addEventListener("click", () => setSheetOpen(contributeSheet.hidden));
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !contributeSheet.hidden) {
+      setSheetOpen(false);
+      contributeGo.focus();
+    }
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (contributeSheet.hidden) return;
+    if (contributeSheet.contains(event.target) || contributeGo.contains(event.target)) return;
+    setSheetOpen(false);
   });
 }
 
@@ -985,7 +1031,7 @@ function showMobileStreetViewPopup(name, coords, featureId) {
   if (!coords) return;
   const latFixed = coords[1].toFixed(6);
   const lngFixed = coords[0].toFixed(6);
-  const openStreetViewLink = `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Streetview</a>`;
+  const openStreetViewLink = `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Street View</a>`;
   const directionsLink = `<a href="${directionsUrl(latFixed, lngFixed)}" target="_blank" rel="noopener">Directions</a>`;
   const reviseLink = reviseLinkHtml(name, latFixed, lngFixed, null);
   const popup = new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
@@ -993,7 +1039,7 @@ function showMobileStreetViewPopup(name, coords, featureId) {
     .setHTML(
       `<div class="popup-header"><span class="popup-title">${name || "Unnamed"}</span></div>` +
       distanceRowsHtml(coords) +
-      `<div class="popup-actions" style="margin-top:6px;">${reviseLink}${openStreetViewLink}${directionsLink}</div>`
+      `<div class="popup-actions">${reviseLink}${openStreetViewLink}${directionsLink}</div>`
     )
     .addTo(map);
   trackPlacePopup(popup);
@@ -1010,7 +1056,7 @@ function showMobileStreetViewPopup(name, coords, featureId) {
     if (betterName) {
       popup.setHTML(
         `<div class="popup-header"><span class="popup-title">${betterName}</span></div>` +
-        `<div class="popup-actions" style="margin-top:6px;">${reviseLinkHtml(betterName, latFixed, lngFixed, p)}${openStreetViewLink}${directionsLink}</div>`
+        `<div class="popup-actions">${reviseLinkHtml(betterName, latFixed, lngFixed, p)}${openStreetViewLink}${directionsLink}</div>`
       );
     }
   };
@@ -1225,7 +1271,7 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
   const panoId = `pano-${Date.now()}`;
   const latFixed = coords[1].toFixed(6);
   const lngFixed = coords[0].toFixed(6);
-  const openStreetViewLink = `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>`;
+  const openStreetViewLink = `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Street View</a>`;
 
   // Mobile: always allow Street View link at any zoom, with retry to fetch name
   if (IS_MOBILE) {
@@ -1239,9 +1285,9 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
       .setLngLat(coords)
       .setHTML(
         `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
-        `<div class="popup-actions" style="margin-top:6px;">` +
+        `<div class="popup-actions">` +
         reviseLinkHtml(name, latFixed, lngFixed, props) +
-        `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Open Street View</a>` +
+        `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Street View</a>` +
         `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +
         `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
         `</div>`
@@ -1259,7 +1305,7 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
       `<div class="streetview" id="${panoId}">Loading Street View…</div>` +
       `<div class="popup-actions">` +
       reviseLinkHtml(name, latFixed, lngFixed, props) +
-      `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Streetview</a>` +
+      `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Street View</a>` +
       `<a href="${directionsUrl(latFixed, lngFixed)}" target="_blank" rel="noopener">Directions</a>` +
       `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +
       `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
@@ -4358,7 +4404,7 @@ function addDatedPlacesLayer() {
             ? `<div class="place-note">A period of use recorded from evidence and accepted by a reviewer; a dashed ring means ${censusState.year} falls inside a start or end window.</div>`
             : `<div class="place-note">Dates from OpenStreetMap tags — provisional until reviewed evidence replaces them.</div>`) +
           `<div class="popup-actions">` +
-          `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat.toFixed(6)},${lng.toFixed(6)}" target="_blank" rel="noopener">Streetview</a>` +
+          `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat.toFixed(6)},${lng.toFixed(6)}" target="_blank" rel="noopener">Street View</a>` +
           (pr.osm_type && pr.osm_id ? `<a href="https://www.openstreetmap.org/${pr.osm_type}/${pr.osm_id}" target="_blank" rel="noopener">Open OSM</a>` : "") +
           `</div>`
         )
