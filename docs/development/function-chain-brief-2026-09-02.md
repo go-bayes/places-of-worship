@@ -66,6 +66,8 @@ The automated fixtures (`convex/lib/functionChain.node-test.mjs`, `functionChain
 - **R-F4** yes: derived denomination confirmation rides in the same reviewer panel and the same *Confirm all eligible* action.
 - **R-F5** (JB, 2026-09-03) yes, option 2: an eighth change `worship_resumed`, so a deconsecrated building that returns to worship under another (or the same) denomination is one chain on one site. Its label is the resuming denomination (required, like the start label); it is permitted only after a `desacralised` change, and after it the ordinary changes are permitted again. On the cards it opens a new period at its date with `start_basis: reopening_stated` (PR-E rule 2b), so the years between the desacralisation and the resumption derive absent for presence and nothing for denomination; the resumed state derives by the same rules as any other.
 
+- **R-W1** (JB, 2026-09-03 evening, recorded in `ra-portal-walkthrough-2026-09-03.md`): a period with no stated frequency derives presence but no `use_level`; nothing is asserted that the source did not give.
+
 ## 6. Acceptance
 
 - Server: `use_frequency` and `desacralised` on `site_occupancies` (schema, validators, mirror, export columns); `chain_id`/`chain_index` on historical claims; the function derivation with rules named; tests in `convex/lib/*.node-test.mjs` and a mirror tie test as PR-E's.
