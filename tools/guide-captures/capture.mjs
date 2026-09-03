@@ -119,6 +119,10 @@ function verificationStub(data) {
     createIssueTask: async () => window.__issueResult
       || { task_id: "task_demo_issue_001", batch_id: "ra-issues-nz", status: "open", deduped: false },
     createManualCandidateTask: async () => ({ task_id: "task_demo_pin_001", candidate_site_id: "candidate:task_demo_pin_001", status: "in_progress" }),
+    // nominations and revisions now submit through the rapid current-observation call
+    submitCurrentObservation: async () => ({
+      task_id: "task_demo_pin_001", evidence_draft_id: "draft_demo_pin_001", status: "in_progress", deduped: false, corrected: false,
+    }),
     reviseEvidenceDraft: async () => ({ evidence_draft_id: "draft_demo_revision_001" }),
     signOut: () => {},
   };
@@ -241,6 +245,8 @@ const flows = [
       await card.locator('[data-field="startDate"]').fill("1905");
       await card.locator('[data-field="startBasis"]').selectOption("founding_stated");
       await card.locator('[data-field="endMode"]').selectOption("still_active");
+      // the function chain needs the tradition at the start before a submission is accepted
+      await page.locator('.chain-start [data-chain-field="label"]').first().fill("Presbyterian");
       await page.locator("#saveDraftButton").scrollIntoViewIfNeeded();
       await page.click("#saveDraftButton");
       await page.waitForTimeout(600);
@@ -259,7 +265,7 @@ const flows = [
       await openVerificationPage(page);
       await page.click('.task-row[data-task-id="task_demo_001"]');
       await page.waitForTimeout(400);
-      const skipForm = page.locator("details.skip-form:not(.issue-form):not(.history-section)");
+      const skipForm = page.locator("details.skip-form:has(#skipTaskButton)");
       await skipForm.locator("summary").click();
       await skipForm.scrollIntoViewIfNeeded();
       await page.waitForTimeout(300);
@@ -320,7 +326,11 @@ const flows = [
         app.applyFilters();
       });
       await page.waitForTimeout(300);
-      await step("Add a place that's missing sits at the top of the sidebar, above the task panel.");
+      await page.click("#changeActivityButton");
+      await page.waitForTimeout(400);
+      await step("Change activity opens the chooser; Add or revise places starts a nomination.");
+      await page.click("#chooseAddButton");
+      await page.waitForTimeout(400);
       await page.click("#addPlaceButton");
       await page.evaluate(() => {
         const app = window.nzVerificationMap;
@@ -336,7 +346,13 @@ const flows = [
       });
       await page.waitForTimeout(400);
       await step("Below zoom 15 the confirm button stays disabled: placement must be building-accurate.");
-      await page.evaluate(() => { window.nzVerificationMap.map.setZoom(16, { animate: false }); });
+      // the confirm gate also needs the pin in view, so centre on it as a user would
+      await page.evaluate(() => {
+        const app = window.nzVerificationMap;
+        app.map.setView(app.pinMarker.getLatLng(), 16, { animate: false });
+        app.map.fire("moveend");
+        app.map.fire("zoomend");
+      });
       await page.waitForTimeout(900);
       await step("Zoom in to pass the gate, then confirm the location.");
       await page.click("#pinConfirmButton");
@@ -345,13 +361,22 @@ const flows = [
       await page.click("#pinProximityContinue");
       await page.waitForTimeout(400);
       await page.fill("#pinNameInput", "Demo Coastal Chapel");
-      await page.fill("#pinSourceNoteInput", "Demo note: I attend services here; the building is one street from the market.");
-      await page.selectOption("#pinChangeClassSelect", "genuine_change");
-      await page.locator("#pinFormCard").scrollIntoViewIfNeeded();
-      await step("Describe how you know the place; local knowledge counts, and the change-class question rides along.");
-      await page.click("#pinSubmitButton");
+      // the nomination form is the rapid current-observation form: choose what the observation shows
+      await page.click('input[name="pinCurrentStatus"][value="currently_used_for_worship"]');
+      await page.waitForTimeout(300);
+      const sourceNote = page.locator("#pinSourceNoteInput");
+      if (await sourceNote.isVisible()) await sourceNote.fill("Demo note: I attend services here; the building is one street from the market.");
+      const changeClass = page.locator("#pinChangeClassSelect");
+      if (await changeClass.isVisible()) await changeClass.selectOption("genuine_change");
+      const quickOsm = page.locator("#pinQuickFillOsm");
+      if (await quickOsm.isVisible()) await quickOsm.click();
+      const rapidSubmit = page.locator('#pinRapidCurrentForm button[type="submit"]').first();
+      await page.locator("#pinCurrentStatusGroup").scrollIntoViewIfNeeded();
+      await step("Say what you can confirm at the observation date, and cite the map or Street View with one click.");
+      await rapidSubmit.scrollIntoViewIfNeeded();
+      await rapidSubmit.click();
       await page.waitForTimeout(900);
-      await step("Creating the candidate lands you in its task, ready for the normal evidence flow.");
+      await step("Save sends the nomination to review and offers the next steps: known history, where and when, another place.");
     },
   },
   {
@@ -587,6 +612,8 @@ async function runFlow(browser, flow) {
     await flow.run(page, step);
   } catch (error) {
     failure = String(error).split("\n")[0];
+    // a failure still leaves a frame behind so the broken step can be seen
+    try { await page.screenshot({ path: path.join(flowDir, `${flow.id}-FAIL.png`) }); } catch {}
   }
   await context.close();
   manifest.push({ flow_id: flow.id, title: flow.title, audience: flow.audience, steps });
