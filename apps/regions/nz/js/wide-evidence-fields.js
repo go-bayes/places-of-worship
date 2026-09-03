@@ -41,6 +41,7 @@
     const TARGET_YEAR_SUFFIXES = Object.freeze([
         "status", "probability", "evidence",
         "basis", "latitude", "longitude", "uncertainty_radius_m", "location_basis",
+        "denomination", "denomination_basis",
     ]);
     const TRAILING = Object.freeze([
         "quality_flag", "review_status",
