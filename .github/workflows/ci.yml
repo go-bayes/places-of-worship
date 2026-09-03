@@ -39,10 +39,13 @@ jobs:
           node apps/regions/nz/js/occupancy-review.test.cjs
           node apps/regions/nz/js/osm-history.test.cjs
           node apps/regions/nz/js/deep-link-context.test.cjs
+          node apps/regions/nz/js/country-config.test.cjs
       - name: dated-places builder tests
         run: python3 -m unittest scripts/test_build_occupancy_dated_places.py
       - name: woodberry import builder tests
         run: python3 -m unittest scripts/test_build_vu_woodberry_import.py
+      - name: country registry tests
+        run: python3 -m unittest scripts/test_build_country_registry.py
       - uses: astral-sh/setup-uv@v5
       - name: validate area summaries
         run: bash scripts/validate_area_summaries.sh
