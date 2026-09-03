@@ -41,7 +41,7 @@ test("the ra template header is the nz column list", () => {
 test("target-year columns follow the country's waves in order", () => {
   const vu = wideEvidenceFields([1989, 1999, 2009, 2020]);
   const nz = wideEvidenceFields([2013, 2018, 2023]);
-  assert.equal(vu.length, nz.length + 10);
+  assert.equal(vu.length, nz.length + 11);
   assert.ok(vu.includes("target_year_1989_status"));
   assert.ok(!nz.includes("target_year_1989_status"));
   assert.equal(vu.indexOf("target_year_2020_denomination_basis") + 1, vu.indexOf("quality_flag"));

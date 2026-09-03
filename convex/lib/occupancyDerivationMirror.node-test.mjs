@@ -81,12 +81,15 @@ const FIXTURES = {
     { startMode: "between", startNotEarlierThan: "1887", startNotLaterThan: "1889", startBasis: "founding_stated", endMode: "known", endDate: "2014", endBasis: "closure_stated", endReason: "desacralised", useFrequency: "regular" },
     { startMode: "known", startDate: "2014", startBasis: "first_seen_only", endMode: "still_active", stillActiveAsof: "2024-05", useFrequency: "annual" },
   ],
+  "uncertain frequency of use (rule 11, r-f1')": [
+    { startMode: "known", startDate: "2014", startBasis: "first_seen_only", endMode: "still_active", stillActiveAsof: "2024-05", useFrequency: "uncertain" },
+  ],
   "around a year (between)": [
     { startMode: "known", startDate: "1999", startAround: true, startBasis: "founding_stated", endMode: "still_active", stillActiveAsof: "2026-09-02" },
   ],
 };
 
-const strip = (rows) => rows.map((r) => ({ y: r.target_year, s: r.derived_status, r: r.rule_id, n: r.segment_rules.length }));
+const strip = (rows) => rows.map((r) => ({ y: r.target_year, s: r.derived_status, r: r.rule_id, n: r.segment_rules.length, u: r.use_level }));
 
 for (const [name, cards] of Object.entries(FIXTURES)) {
   test(`mirror equals server: ${name}`, () => {
@@ -184,9 +187,17 @@ test("gapBounds puts the doubt into bounds, never a date", () => {
   assert.equal(onlyEarliest.first.endMode, "after");
 });
 
-test("worked case (pr-f, kohekohe fictional continuation): desacralised 2014 with an annual service after derives present, uncertain, uncertain", () => {
-  assert.deepEqual(statuses(FIXTURES["intermittent use after desacralisation (rule 11, pr-f)"]), [
-    "2013:present:inside_interval",
+test("worked case (pr-f, kohekohe fictional continuation, r-f1'): desacralised 2014 with an annual service after derives present regular, present intermittent, present intermittent", () => {
+  const rows = mirror.derivePresence(FIXTURES["intermittent use after desacralisation (rule 11, pr-f)"], NZ);
+  assert.deepEqual(rows.map((r) => `${r.target_year}:${r.derived_status}:${r.rule_id}:${r.use_level}`), [
+    "2013:present:inside_interval:regular",
+    "2018:present:inside_interval:intermittent",
+    "2023:present:inside_interval:intermittent",
+  ]);
+  const { sentence } = mirror.describePresence(rows, NZ, {});
+  assert.ok(sentence.includes("2018 present, intermittent (inside the period, annual use)"), sentence);
+  assert.deepEqual(statuses(FIXTURES["uncertain frequency of use (rule 11, r-f1')"]), [
+    "2013:uncertain:before_first_record",
     "2018:uncertain:intermittent_use",
     "2023:uncertain:intermittent_use",
   ]);

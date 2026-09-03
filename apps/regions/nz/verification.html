@@ -110,6 +110,52 @@
             display: block;
         }
 
+        /* entry focus (jb 2026-09-03): while a pin flow, guided form,
+           periods pane, or history pane is open, the task list, My work,
+           filters, stats, long help, and the assignment counts leave the
+           sidebar; the one-line signed-in state and the way back stay */
+        body.entry-open .sidebar-actions-help,
+        body.entry-open #modeNotice,
+        body.entry-open #quickstartBanner,
+        body.entry-open .filters,
+        body.entry-open .stats,
+        body.entry-open #taskList,
+        body.entry-open #sessionPanel,
+        body.entry-open #nominationPanel,
+        body.entry-open #nominationsPanel,
+        body.entry-open .backend-card .entry-hide {
+            display: none !important;
+        }
+
+        .backend-card .entry-only {
+            display: none;
+        }
+
+        body.entry-open .backend-card .entry-only {
+            display: inline;
+        }
+
+        /* the way back from entry focus is a text link on the signed-in line,
+           not a block button */
+        .backend-card .entry-only .link-button {
+            display: inline;
+            width: auto;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            background: none;
+            color: var(--action, #1f5f6b);
+            font: inherit;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        /* while the pin flow is armed its cards are the entry; the detail
+           panel's resting intro would only repeat them below */
+        body.pin-open #detailPanel {
+            display: none !important;
+        }
+
         .sidebar-actions-help {
             margin: 8px 0 0 0;
             font-size: 13px;
@@ -2510,6 +2556,10 @@
                 <p class="sidebar-actions-help">Goes to human review — not straight to the public map. To revise a place already recorded, click its amber dot on the map and press "Revise this place".</p>
             </div>
 
+            <!-- the transient pin cards (address search, coordinates, confirm,
+                 form) sit directly under the add-place control (jb 2026-09-03) -->
+            <section id="pinCardHost" class="pin-card-host" hidden></section>
+
             <div id="quickstartBanner"></div>
 
             <section class="filters">
@@ -2579,7 +2629,6 @@
             <section id="taskList" class="task-list" aria-label="Verification tasks"></section>
             <section id="sessionPanel" class="session-panel"></section>
             <section id="nominationPanel" class="nomination-panel"></section>
-            <section id="pinCardHost" class="pin-card-host" hidden></section>
             <section id="nominationsPanel" class="nominations-panel" aria-label="My nominations"></section>
             <section id="detailPanel" class="detail-panel" tabindex="-1"></section>
         </aside>
@@ -2595,14 +2644,14 @@
     <script src="../../global/config.public.js"></script>
     <script src="js/convex-config.js?v=20260707-changes-requested"></script>
     <script src="js/convex-task-client.js?v=20260902f"></script>
-    <script src="js/wide-evidence-fields.js?v=20260903a"></script>
+    <script src="js/wide-evidence-fields.js?v=20260903b"></script>
     <script src="js/rapid-entry-contract.js?v=20260901a"></script>
     <script src="js/historical-claim-contract.js?v=20260902a"></script>
     <script src="js/date-floor.js?v=20260902a"></script>
-    <script src="js/occupancy-contract.js?v=20260903a"></script>
+    <script src="js/occupancy-contract.js?v=20260903c"></script>
     <script src="js/function-chain-contract.js?v=20260903a"></script>
     <script src="js/location-assertion-contract.js?v=20260902a"></script>
     <script src="js/osm-history.js?v=20260902c"></script>
-    <script src="js/verification-map.js?v=20260903b"></script>
+    <script src="js/verification-map.js?v=20260903d"></script>
 </body>
 </html>

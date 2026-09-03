@@ -13,7 +13,11 @@ import { canonicalJson, sha256 } from "./sha256.ts";
 
 export const OCCUPANCY_CONTRACT = "occupancy_v1";
 // v2 (pr-f): rule 11 intermittent_use reads use_frequency (ruling r-f1)
-export const OCCUPANCY_DERIVATION_VERSION = "occupancy_derivation_v2";
+// v3 (r-f1', jb 2026-09-03): presence stays epistemic — annual or occasional
+// use derives present with use_level "intermittent"; only an uncertain
+// frequency derives uncertain. rarity can be the significance; certainty
+// about rare use is still certainty
+export const OCCUPANCY_DERIVATION_VERSION = "occupancy_derivation_v3";
 
 // Period dates are interpreted against the evidence they describe. The
 // recorded date is only a legacy fallback for parents that predate that field.
@@ -30,6 +34,19 @@ export type UseFrequency = "regular" | "monthly" | "several_times_a_year" | "ann
 // ruling r-f1: these frequencies count as in use for the census derivation;
 // annual, occasional, and uncertain derive uncertain (rule 11)
 export const IN_USE_FREQUENCIES: ReadonlySet<UseFrequency> = new Set<UseFrequency>(["regular", "monthly", "several_times_a_year"]);
+// the level of use a present census year carries (r-f1'): regular from
+// regular, monthly, or several-times-a-year use; intermittent from annual
+// or occasional use; none when the frequency was not stated (an unstated
+// frequency asserts nothing — every pr-e and woodberry period is here) or
+// is uncertain (which derives an uncertain presence instead)
+export type UseLevel = "regular" | "intermittent";
+export const INTERMITTENT_FREQUENCIES: ReadonlySet<UseFrequency> = new Set<UseFrequency>(["annual", "occasional"]);
+export function useLevelFor(frequency: UseFrequency | undefined): UseLevel | undefined {
+  if (frequency === undefined) return undefined;
+  if (IN_USE_FREQUENCIES.has(frequency)) return "regular";
+  if (INTERMITTENT_FREQUENCIES.has(frequency)) return "intermittent";
+  return undefined;
+}
 export const USE_FREQUENCIES: readonly UseFrequency[] = ["regular", "monthly", "several_times_a_year", "annual", "occasional", "uncertain"];
 export type DatePrecision = "day" | "month" | "year" | "bounded" | "unknown";
 export type LocationRelation = "same_as_task_point" | "distinct";
@@ -432,6 +449,7 @@ export type SegmentFiring = {
   occupancy_id: string;
   rule_id: PresenceRuleId;
   status: PresenceStatus;
+  use_level?: UseLevel;
 };
 
 // the ruled rule table, first match wins; rule 8 precedes rule 7 so an open
@@ -443,13 +461,13 @@ export function presenceForSegment(segment: OccupancySegment, year: number): Seg
   const fire = (rule_id: PresenceRuleId, status: PresenceStatus): SegmentFiring => ({ occupancy_id: segment.occupancy_id, rule_id, status });
 
   if (b.startUpper !== undefined && b.startUpper <= yStart && b.endLower !== undefined && yEnd <= b.endLower) {
-    // rule 11 (pr-f, ruling r-f1): a period used only annually, occasionally,
-    // or at an uncertain frequency covers the year without establishing
-    // that the place was in use as a place of worship
-    if (segment.use_frequency !== undefined && !IN_USE_FREQUENCIES.has(segment.use_frequency)) {
+    // rule 11 (pr-f, r-f1'): only an uncertain frequency of use leaves the
+    // covered year uncertain; annual or occasional use is present at the
+    // intermittent level, regular or more is present at the regular level
+    if (segment.use_frequency === "uncertain") {
       return fire("intermittent_use", "uncertain");
     }
-    return fire("inside_interval", "present");
+    return { ...fire("inside_interval", "present"), use_level: useLevelFor(segment.use_frequency) };
   }
   // a stated founding or a stated reopening both license absence before
   // the start: a source that states a reopening states that the place was
@@ -487,14 +505,26 @@ export type DerivedPresence = {
   derived_status: PresenceStatus;
   rule_id: string;
   segment_rules: SegmentFiring[];
+  // r-f1': the level of use behind a present year; absent otherwise
+  use_level?: UseLevel;
 };
+
+// a present year is regular if any covering period is regular, else intermittent
+export function combinedUseLevel(firings: SegmentFiring[]): UseLevel | undefined {
+  const present = firings.filter((f) => f.status === "present" && f.use_level !== undefined);
+  if (present.length === 0) return undefined;
+  return present.some((f) => f.use_level === "regular") ? "regular" : "intermittent";
+}
 
 // combines the per-segment firings for one year
 export function combinePresence(year: number, firings: SegmentFiring[]): DerivedPresence | null {
   if (firings.length === 0) return null;
   const pick = (status: PresenceStatus) => firings.find((f) => f.status === status);
   const present = pick("present");
-  if (present) return { target_year: year, derived_status: "present", rule_id: present.rule_id, segment_rules: firings };
+  if (present) {
+    const use_level = combinedUseLevel(firings);
+    return { target_year: year, derived_status: "present", rule_id: present.rule_id, segment_rules: firings, ...(use_level ? { use_level } : {}) };
+  }
   const uncertain = pick("uncertain");
   if (uncertain) return { target_year: year, derived_status: "uncertain", rule_id: uncertain.rule_id, segment_rules: firings };
   return { target_year: year, derived_status: "absent", rule_id: firings[0].rule_id, segment_rules: firings };
@@ -644,7 +674,7 @@ export const PRESENCE_RULE_TEXT: Record<PresenceRuleId, string> = {
   beyond_active_anchor: "the year is after the still-active date; an observation cannot speak past itself",
   start_unknown: "the start is unknown",
   end_unknown: "the end is unknown",
-  intermittent_use: "the year falls inside a period of annual, occasional, or uncertain use, which does not establish a place of worship in use",
+  intermittent_use: "the year falls inside a period whose frequency of use is uncertain, which does not establish a place of worship in use",
 };
 
 export const USE_FREQUENCY_TEXT: Record<UseFrequency, string> = {

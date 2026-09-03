@@ -210,7 +210,7 @@ if (!applied || chainState.segments.length !== 2 || chainState.segments[0].endRe
 }
 const chainPreview = element("guidedPeriodsPreview", { hidden: false });
 app.updatePeriodsPreview("guided", chainState, {});
-if (!chainPreview.textContent.includes("2013 present") || !chainPreview.textContent.includes("2018 uncertain") || !chainPreview.textContent.includes("2023 uncertain")
+if (!chainPreview.textContent.includes("2013 present (") || !chainPreview.textContent.includes("2018 present, intermittent (inside the period, annual use)") || !chainPreview.textContent.includes("2023 present, intermittent")
   || !chainPreview.textContent.includes("Denomination: 2013 Presbyterian (inside the recorded state); 2018 not assessed; 2023 not assessed.")) {
   throw new Error(`The preview did not name the kohekohe states and denominations: ${chainPreview.textContent}`);
 }

@@ -49,6 +49,7 @@ worship_use_status,probable_worship,Source makes worship use probable
 worship_use_status,organisation_only,Source identifies an organisation but not a worship site
 worship_use_status,building_only,Source identifies a building but not worship use
 worship_use_status,not_worship,Source indicates the site is not a place of worship
+worship_use_status,no_building_present,No building here now: the building or site has gone; the RA may have recorded when it stood and was used
 worship_use_status,uncertain,Worship use is unclear
 public_access_status,public,Source indicates ordinary public access
 public_access_status,private,Source indicates private or restricted access

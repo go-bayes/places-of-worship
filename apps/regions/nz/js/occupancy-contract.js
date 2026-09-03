@@ -24,6 +24,16 @@
     // as in use for the census derivation; the rest derive uncertain
     const USE_FREQUENCIES = new Set(["regular", "monthly", "several_times_a_year", "annual", "occasional", "uncertain"]);
     const IN_USE_FREQUENCIES = new Set(["regular", "monthly", "several_times_a_year"]);
+    // r-f1': annual or occasional use is present at the intermittent level;
+    // only an uncertain frequency leaves the year uncertain
+    const INTERMITTENT_FREQUENCIES = new Set(["annual", "occasional"]);
+    function useLevelFor(frequency) {
+        if (!frequency) return undefined;
+        if (IN_USE_FREQUENCIES.has(frequency)) return "regular";
+        if (INTERMITTENT_FREQUENCIES.has(frequency)) return "intermittent";
+        return undefined;
+    }
+    const USE_LEVEL_WORDS = { annual: "annual use", occasional: "occasional use" };
     const CONFIDENCE = new Set(["high", "moderate", "low", "uncertain"]);
     const SOURCE_BASES = new Set(["inscription_or_document_observed", "local_investigator_account", "named_public_source", "other"]);
     const PRIVACY_FLAGS = new Set(["clear", "needs_review", "restricted"]);
@@ -448,7 +458,7 @@
         beyond_active_anchor: "after the still-in-use date",
         start_unknown: "start unknown",
         end_unknown: "end unknown",
-        intermittent_use: "inside a period of intermittent use",
+        intermittent_use: "inside a period whose frequency of use is uncertain",
     };
 
     function presenceForSegment(values, year) {
@@ -458,12 +468,12 @@
         const b = segmentBounds(s);
         const fire = (rule_id, status) => ({ segment_index: s.segmentIndex, rule_id, status });
         if (b.startUpper !== undefined && b.startUpper <= yStart && b.endLower !== undefined && yEnd <= b.endLower) {
-            // rule 11 (pr-f): annual, occasional, or uncertain use covers the
-            // year without establishing a place of worship in use
-            if (s.useFrequency && !IN_USE_FREQUENCIES.has(s.useFrequency)) {
+            // rule 11 (pr-f, r-f1'): only an uncertain frequency leaves the
+            // covered year uncertain; the level of use rides on a present firing
+            if (s.useFrequency === "uncertain") {
                 return fire("intermittent_use", "uncertain");
             }
-            return fire("inside_interval", "present");
+            return { ...fire("inside_interval", "present"), use_level: useLevelFor(s.useFrequency), use_frequency: s.useFrequency || undefined };
         }
         if (b.startLower !== undefined && yEnd < b.startLower) {
             if (s.startBasis === "founding_stated") return fire("before_stated_founding", "absent");
@@ -497,7 +507,11 @@
         if (firings.length === 0) return null;
         const pick = status => firings.find(f => f.status === status);
         const present = pick("present");
-        if (present) return { target_year: year, derived_status: "present", rule_id: present.rule_id, segment_rules: firings };
+        if (present) {
+            const levelled = firings.filter(f => f.status === "present" && f.use_level);
+            const use_level = levelled.length === 0 ? undefined : (levelled.some(f => f.use_level === "regular") ? "regular" : "intermittent");
+            return { target_year: year, derived_status: "present", rule_id: present.rule_id, segment_rules: firings, ...(use_level ? { use_level } : {}) };
+        }
         const uncertain = pick("uncertain");
         if (uncertain) return { target_year: year, derived_status: "uncertain", rule_id: uncertain.rule_id, segment_rules: firings };
         return { target_year: year, derived_status: "absent", rule_id: firings[0].rule_id, segment_rules: firings };
@@ -528,7 +542,13 @@
                 parts.push(`${year} not assessed`);
                 continue;
             }
-            parts.push(`${year} ${d.derived_status} (${PRESENCE_RULE_WORDS[d.rule_id] || d.rule_id})`);
+            // r-f1': "2018 present, intermittent (inside the period, annual use)"
+            const intermittent = d.use_level === "intermittent"
+                ? (d.segment_rules || []).find(f => f.status === "present" && f.use_level === "intermittent")
+                : null;
+            const level = intermittent ? ", intermittent" : "";
+            const why = intermittent && USE_LEVEL_WORDS[intermittent.use_frequency] ? `, ${USE_LEVEL_WORDS[intermittent.use_frequency]}` : "";
+            parts.push(`${year} ${d.derived_status}${level} (${PRESENCE_RULE_WORDS[d.rule_id] || d.rule_id}${why})`);
             const seen = observed ? observed[String(year)] : undefined;
             if (seen && seen !== "not_assessed" && seen !== d.derived_status) {
                 conflicts.push(`${year}: your status ${seen} differs from the periods (${d.derived_status})`);

@@ -434,6 +434,16 @@ function human(value) {
         els.detailPanel.innerHTML = `<div class="panel empty">${escapeHtml(message)}</div>`;
     }
 
+    // "no building here now" is one action for one fact (a rapid "used to
+    // exist here, but no longer does" answer routes to it); when the author
+    // recorded periods, say so
+    function actionLabel(draft) {
+        if (!draft) return "";
+        if (draft.action !== "no_building_present") return draft.action;
+        const periods = (state.occupancy?.occupancies || []).filter((row) => row.parent_evidence_draft_id === draft.evidence_draft_id && row.claim_status !== "superseded").length;
+        return `No building here now${periods ? " — the RA recorded when it stood and was used" : ""}`;
+    }
+
     function renderDetail(loading = false, errorMessage = "") {
         const row = state.selected;
         if (!row) {
@@ -549,7 +559,7 @@ function human(value) {
                 <section class="panel">
                     <h3>Evidence summary</h3>
                     ${draft ? renderFieldGrid([
-                        ["Action", draft.action],
+                        ["Action", actionLabel(draft)],
                         ["Starting source wording", task.source_context?.survey?.religion_as_given || task.source_context?.denomination],
                         ["Starting project taxonomy code", task.source_context?.denomination_code || task.source_context?.survey?.denomination_code],
                         ["Exact observed or reported label", draft.denomination_or_tradition_raw],
@@ -937,9 +947,10 @@ function human(value) {
                 <div class="derived-year-head">
                     <strong>${presence.target_year}</strong>
                     <span class="pill ${statusCls}">${escapeHtml(status)}</span>${overriddenFrom}
+                    ${status === "present" ? `<span class="pill grey">${presence.use_level ? `${escapeHtml(presence.use_level)} use` : "level of use not stated"}</span>` : ""}
                     <span class="pill ${reviewPill.cls}">${escapeHtml(reviewPill.label)}</span>
                 </div>
-                <div>Presence: ${escapeHtml(rule)}.</div>
+                <div>Presence: ${escapeHtml(rule)}.${status === "present" ? (presence.use_level ? ` Level of use: ${escapeHtml(presence.use_level)}, confirmed with the presence.` : " Level of use not stated: the period carries no frequency, so confirming writes none.") : ""}</div>
                 ${firings}
                 ${locationHtml}
                 ${conflict}
@@ -1061,6 +1072,14 @@ function human(value) {
                     <option value="present">present</option>
                     <option value="absent">absent</option>
                     <option value="uncertain">uncertain</option>
+                </select>
+            </div>
+            <div>
+                <label>Level of use (with present)</label>
+                <select name="use_level">
+                    <option value="">keep derived (${escapeHtml(presence.use_level || "not stated")})</option>
+                    <option value="regular">regular</option>
+                    <option value="intermittent">intermittent</option>
                 </select>
             </div>
             <div>
@@ -1221,6 +1240,7 @@ function human(value) {
                             let override;
                             if (action === "override") {
                                 const status = form.status.value || undefined;
+                                const useLevel = form.use_level?.value || undefined;
                                 const lat = form.latitude.value.trim();
                                 const lng = form.longitude.value.trim();
                                 const radius = form.radius.value.trim();
@@ -1230,11 +1250,12 @@ function human(value) {
                                 }
                                 override = {
                                     ...(status ? { status } : {}),
+                                    ...(useLevel ? { use_level: useLevel } : {}),
                                     ...(lat !== "" ? { latitude: Number(lat), longitude: Number(lng) } : {}),
                                     ...(radius !== "" ? { uncertainty_radius_m: Number(radius) } : {}),
                                 };
                                 if (Object.keys(override).length === 0) {
-                                    statusEl.textContent = "An override needs a status, a point, or a radius.";
+                                    statusEl.textContent = "An override needs a status, a level of use, a point, or a radius.";
                                     return;
                                 }
                                 if ([override.latitude, override.longitude, override.uncertainty_radius_m].some((v) => v !== undefined && !Number.isFinite(v))) {

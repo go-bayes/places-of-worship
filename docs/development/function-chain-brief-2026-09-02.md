@@ -42,10 +42,10 @@ To show R-F1 and R-F5 at work, the tests and the guide use a fictional continuat
 
 | Step | Entry (fictional) | Derives |
 |---|---|---|
-| Intermittent use | Change: use became intermittent, 2014, frequency annual → a second period from 2014 at `annual`, same place. | 2018, 2023 uncertain (`intermittent_use`, rule 11) |
+| Intermittent use | Change: use became intermittent, 2014, frequency annual → a second period from 2014 at `annual`, same place. | 2018, 2023 present at the intermittent level (`inside_interval`, `use_level: intermittent`; R-F1′) |
 | Worship resumed (R-F5) | Change: worship resumed, Anglican, 1950 (a separate contrived fixture with the desacralisation moved to 1930). | 1940 nothing; 1960 and 2013 Anglican |
 
-The automated fixtures (`convex/lib/functionChain.node-test.mjs`, `functionChainMirror.node-test.mjs`, `occupancyDerivationMirror.node-test.mjs`, `apps/regions/nz/js/assigned-periods-dom.test.cjs`) use these fictional dates and are labelled as the fictional continuation. Whether the annual service is a period or a note was exactly ruling R-F1: recording it as an `annual` period keeps the fact in the data with an honest derived state; recording it as a note loses it from every product.
+The automated fixtures (`convex/lib/functionChain.node-test.mjs`, `functionChainMirror.node-test.mjs`, `occupancyDerivationMirror.node-test.mjs`, `apps/regions/nz/js/assigned-periods-dom.test.cjs`) use these fictional dates and are labelled as the fictional continuation. Whether the annual service is a period or a note was exactly ruling R-F1: recording it as an `annual` period keeps the fact in the data with an honest derived state; recording it as a note loses it from every product. R-F1′ (later the same day) settled what that honest state is: present, at the intermittent level.
 
 ## 5. Decisions put to JB
 
@@ -60,6 +60,7 @@ The automated fixtures (`convex/lib/functionChain.node-test.mjs`, `functionChain
 ### 5a. Rulings (JB, 2026-09-03)
 
 - **R-F1** yes: `regular`, `monthly`, and `several_times_a_year` derive present; `annual`, `occasional`, and `uncertain` derive uncertain. Goes into the definition as v0.1.5.
+- **R-F1′** (JB, later on 2026-09-03) revises R-F1. JB's reasoning: "uncertain" is epistemic (we do not know), while an annual service is certain knowledge of rare use, and rarity can itself be the significance; so the two axes stay apart. Presence remains epistemic (present / absent / uncertain): a period with `use_frequency` `annual` or `occasional` derives **present** with the same certainty as any present year; only `use_frequency: uncertain` derives an uncertain presence (rule 11 `intermittent_use` keeps its id for that case). A new derived field per census year, `use_level` (`regular` from regular, monthly, several-times-a-year, or unstated use; `intermittent` from annual or occasional use; omitted when the presence is uncertain), rides on `derived_target_year_states`, is confirmed with the presence in the reviewer panel, is written to the parent as `target_year_use_levels`, and exports as `target_year_<Y>_use_level` beside the status. The derivation version is `occupancy_derivation_v3`, so confirmed presence rows reset once. The Kohekohe fictional continuation therefore derives 2013 present regular / Presbyterian, 2018 present intermittent, 2023 present intermittent; no denomination after the desacralisation is unchanged. Definition v0.1.5 is amended in place (its revision note carries the amendment).
 - **R-F2** yes: `desacralised` is its own end reason.
 - **R-F3** yes: the seven chain changes of section 2.1, with `other` carrying a required note.
 - **R-F4** yes: derived denomination confirmation rides in the same reviewer panel and the same *Confirm all eligible* action.
