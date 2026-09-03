@@ -5,21 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Review submitted evidence | Places of Worship</title>
     <style>
+        /* shared tokens (docs/development/ui-design-audit-2026-09-03.md, section 3) */
         :root {
             color-scheme: light;
-            --bg: #f6f7f9;
+            --bg: #f4f6f8;
             --panel: #ffffff;
+            --panel-2: #f3f6f9;
             --ink: #17202a;
-            --muted: #667085;
-            --line: #d7dde5;
-            --blue: #1f618d;
-            --blue-soft: #e8f1fb;
-            --green: #1e8449;
-            --green-soft: #dff3e6;
-            --amber: #a36200;
-            --amber-soft: #fff4dc;
-            --red: #b42318;
-            --red-soft: #fee4e2;
+            --muted: #5b6776;
+            --line: #cfd6df;
+            --control-line: #8c96a5;
+            --action: #1f618d;
+            --action-hover: #17527a;
+            --action-soft: #e8f1fb;
+            --danger: #b42318;
+            --danger-soft: #fee4e2;
+            /* one amber: uncertain, caution, disputed */
+            --caution: #6b4e00;
+            --caution-soft: #fff4dc;
+            --caution-strong: #9a6700;
+            --present: #145a32;
+            --present-soft: #dff3e6;
+            --absent: #374151;
+            --absent-soft: #e5e7eb;
+            --not-assessed: #1f4e79;
+            --not-assessed-soft: #e8f1fb;
+            --entry: #0f766e;
+            --entry-soft: #e6f4f1;
+            --marker-unvalidated: #f59e0b;
+            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --fs-xs: 13px;
+            --fs-sm: 14px;
+            --fs-md: 16px;
+            --fs-lg: 18px;
+            --fs-xl: 22px;
+            --sp-1: 4px;
+            --sp-2: 8px;
+            --sp-3: 12px;
+            --sp-4: 16px;
+            --sp-5: 24px;
+            --r-sm: 6px;
+            --r-md: 12px;
+            --r-lg: 16px;
+            --r-pill: 999px;
         }
 
         * {
@@ -30,13 +58,13 @@
             margin: 0;
             background: var(--bg);
             color: var(--ink);
-            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            font-size: 15px;
+            font-family: var(--font);
+            font-size: var(--fs-md);
             line-height: 1.45;
         }
 
         a {
-            color: var(--blue);
+            color: var(--action);
         }
 
         button,
@@ -46,43 +74,99 @@
             font: inherit;
         }
 
+        /* an unclassed button is the one primary in its row; the outline is
+           the secondary idiom, red says destructive */
         button {
             min-height: 44px;
-            border: 0;
-            border-radius: 6px;
-            background: var(--blue);
-            color: #fff;
+            border: 1px solid var(--action);
+            border-radius: var(--r-sm);
+            background: var(--action);
+            color: var(--panel);
             padding: 10px 14px;
             cursor: pointer;
-            font-weight: 700;
+            font-weight: 600;
+        }
+
+        button:hover:not(:disabled) {
+            background: var(--action-hover);
+            border-color: var(--action-hover);
         }
 
         button.secondary {
-            background: #e6ebf1;
-            color: var(--ink);
+            background: var(--panel);
+            color: var(--action);
+            border-color: var(--action);
+        }
+
+        button.secondary:hover:not(:disabled) {
+            background: var(--action-soft);
+            border-color: var(--action);
         }
 
         button.tertiary {
             min-height: 36px;
             background: transparent;
-            color: var(--blue);
+            border-color: transparent;
+            color: var(--action);
             padding: 6px 0;
         }
 
+        button.tertiary:hover:not(:disabled) {
+            background: transparent;
+            border-color: transparent;
+            text-decoration: underline;
+        }
+
+        button.danger {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: var(--panel);
+        }
+
+        button.danger:hover:not(:disabled) {
+            background: var(--danger);
+            border-color: var(--danger);
+            filter: brightness(0.9);
+        }
+
+        button.danger-outline {
+            background: var(--panel);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        button.danger-outline:hover:not(:disabled) {
+            background: var(--danger-soft);
+            border-color: var(--danger);
+        }
+
+        /* a solid grey face keeps the label and its tooltip readable */
         button:disabled {
             cursor: not-allowed;
-            opacity: 0.55;
+            background: var(--absent-soft);
+            border-color: var(--line);
+            color: var(--muted);
+        }
+
+        button:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible,
+        input:focus-visible,
+        summary:focus-visible,
+        a:focus-visible {
+            outline: 2px solid var(--action);
+            outline-offset: 2px;
         }
 
         header {
             background: var(--panel);
             border-bottom: 1px solid var(--line);
-            padding: 18px 24px;
+            padding: 18px var(--sp-5);
         }
 
         header h1 {
             margin: 0;
-            font-size: 24px;
+            font-size: var(--fs-xl);
             letter-spacing: 0;
         }
 
@@ -99,10 +183,14 @@
         }
 
         .header-links a {
-            color: var(--blue);
-            font-size: 14px;
-            font-weight: 700;
+            color: var(--action);
+            font-size: var(--fs-sm);
+            font-weight: 600;
             text-decoration: none;
+        }
+
+        .header-links a:hover {
+            text-decoration: underline;
         }
 
         .layout {
@@ -118,21 +206,29 @@
 
         .sidebar {
             border-right: 1px solid var(--line);
-            background: #fbfcfd;
+            background: var(--panel-2);
         }
 
         .panel {
             background: var(--panel);
             border: 1px solid var(--line);
-            border-radius: 8px;
+            border-radius: var(--r-md);
             padding: 14px;
             margin-bottom: 14px;
         }
 
-        .panel h2,
+        .panel h2 {
+            margin: 0 0 10px;
+            font-size: var(--fs-lg);
+        }
+
         .panel h3 {
             margin: 0 0 10px;
-            font-size: 16px;
+            font-size: var(--fs-md);
+        }
+
+        .decision-panel h3 {
+            font-size: var(--fs-lg);
         }
 
         .panel p {
@@ -141,11 +237,6 @@
 
         .muted {
             color: var(--muted);
-        }
-
-        .boundary {
-            border-color: #f1c36d;
-            background: var(--amber-soft);
         }
 
         .controls {
@@ -157,9 +248,9 @@
 
         label {
             display: block;
-            color: #344054;
-            font-size: 13px;
-            font-weight: 700;
+            color: var(--muted);
+            font-size: var(--fs-sm);
+            font-weight: 600;
             margin-bottom: 5px;
         }
 
@@ -167,11 +258,25 @@
         textarea,
         input {
             width: 100%;
-            border: 1px solid #b9c2cf;
-            border-radius: 6px;
+            border: 1px solid var(--control-line);
+            border-radius: var(--r-sm);
             padding: 9px 10px;
-            background: #fff;
+            background: var(--panel);
             color: var(--ink);
+        }
+
+        select:hover:not(:disabled),
+        textarea:hover:not(:disabled),
+        input:hover:not(:disabled) {
+            border-color: var(--action);
+        }
+
+        select:disabled,
+        textarea:disabled,
+        input:disabled {
+            background: var(--panel-2);
+            border-color: var(--line);
+            color: var(--muted);
         }
 
         textarea {
@@ -189,32 +294,41 @@
         .queue-group-header {
             margin: 12px 0 4px;
             padding: 5px 8px;
-            border-left: 4px solid var(--accent, #1d4ed8);
-            background: #eff6ff;
-            border-radius: 0 6px 6px 0;
-            font-weight: 700;
-            font-size: 14px;
+            border-left: 4px solid var(--action);
+            background: var(--action-soft);
+            border-radius: 0 var(--r-sm) var(--r-sm) 0;
+            font-weight: 600;
+            font-size: var(--fs-sm);
         }
 
         .task-button {
             width: 100%;
+            min-height: 0;
             border: 1px solid var(--line);
-            border-radius: 8px;
-            background: #fff;
+            border-radius: var(--r-md);
+            background: var(--panel);
             color: var(--ink);
             padding: 10px;
             text-align: left;
             cursor: pointer;
+            font-weight: 400;
         }
 
-        .task-button.active {
-            border-color: var(--blue);
-            box-shadow: inset 4px 0 0 var(--blue);
+        .task-button:hover:not(:disabled) {
+            background: var(--panel);
+            border-color: var(--control-line);
+        }
+
+        .task-button.active,
+        .task-button.active:hover:not(:disabled) {
+            border-color: var(--action);
+            box-shadow: inset 4px 0 0 var(--action);
         }
 
         .task-button strong {
             display: block;
             margin-bottom: 3px;
+            font-weight: 600;
         }
 
         .pill-row {
@@ -227,52 +341,52 @@
         .pill {
             display: inline-flex;
             align-items: center;
-            border-radius: 999px;
+            border-radius: var(--r-pill);
             padding: 3px 8px;
-            background: #eef2f7;
-            color: #344054;
-            font-size: 12px;
-            font-weight: 700;
+            background: var(--absent-soft);
+            color: var(--absent);
+            font-size: var(--fs-sm);
+            font-weight: 600;
         }
 
         .pill.green {
-            background: var(--green-soft);
-            color: var(--green);
+            background: var(--present-soft);
+            color: var(--present);
         }
 
         .pill.amber {
-            background: var(--amber-soft);
-            color: var(--amber);
+            background: var(--caution-soft);
+            color: var(--caution);
         }
 
         .pill.red {
-            background: var(--red-soft);
-            color: var(--red);
+            background: var(--danger-soft);
+            color: var(--danger);
         }
 
         .status {
-            border-radius: 6px;
+            border-radius: var(--r-sm);
             padding: 9px 10px;
-            background: #eef2f7;
-            color: #344054;
+            background: var(--panel-2);
+            color: var(--ink);
             margin-top: 10px;
         }
 
         .status.error {
-            background: var(--red-soft);
-            color: var(--red);
+            background: var(--danger-soft);
+            color: var(--danger);
         }
 
         .status.ok {
-            background: var(--green-soft);
-            color: var(--green);
+            background: var(--present-soft);
+            color: var(--present);
         }
 
         .review-warning {
-            border: 1px solid #f1c36d;
-            border-radius: 6px;
-            background: var(--amber-soft);
-            color: #5f4200;
+            border: 1px solid var(--caution-strong);
+            border-radius: var(--r-sm);
+            background: var(--caution-soft);
+            color: var(--caution);
             padding: 9px 10px;
             margin-top: 10px;
         }
@@ -286,6 +400,15 @@
 
         .review-actions button {
             width: auto;
+        }
+
+        /* small outlined control so a task with four photos does not show
+           four primaries above the decision */
+        .attachment-open {
+            min-height: 32px;
+            padding: 4px 10px;
+            margin-left: 6px;
+            font-size: var(--fs-sm);
         }
 
         .detail-grid {
@@ -308,32 +431,55 @@
         }
 
         .field-grid div:nth-child(odd) {
-            color: #475467;
-            background: #f8fafc;
-            font-weight: 700;
+            color: var(--muted);
+            background: var(--panel-2);
+            font-weight: 600;
         }
 
         details {
             border: 1px solid var(--line);
-            border-radius: 8px;
-            background: #fff;
+            border-radius: var(--r-md);
+            background: var(--panel);
             padding: 10px 12px;
             margin-top: 10px;
         }
 
         summary {
             cursor: pointer;
-            font-weight: 800;
+            font-weight: 600;
+        }
+
+        summary:hover {
+            color: var(--action);
+        }
+
+        /* r-d3 (jb 2026-09-04): standing instructions fold away after the
+           first visit; a quiet surface, not an alert */
+        .boundary {
+            margin-top: 0;
+            padding: 14px;
+            background: var(--panel-2);
+            border-color: var(--line);
+        }
+
+        .boundary summary h2 {
+            display: inline;
+            margin: 0;
+        }
+
+        .boundary[open] summary {
+            margin-bottom: 6px;
         }
 
         pre {
             white-space: pre-wrap;
             overflow-wrap: anywhere;
-            background: #0f172a;
-            color: #e5e7eb;
-            border-radius: 6px;
+            background: var(--bg);
+            color: var(--ink);
+            border: 1px solid var(--line);
+            border-radius: var(--r-sm);
             padding: 10px;
-            font-size: 12px;
+            font-size: var(--fs-xs);
             max-height: 360px;
             overflow: auto;
         }
@@ -395,67 +541,68 @@
                 box-shadow: none;
             }
         }
-            .osm-history-host { margin: 8px 0; }
-        .osm-history { font-size: 12px; line-height: 1.4; }
+        .osm-history-host { margin: 8px 0; }
+        .osm-history { font-size: var(--fs-sm); line-height: 1.4; }
         .osm-history p { margin: 0 0 6px; }
-        .osm-history-note, .osm-history-meta { color: #4a5865; }
-        .osm-history-flags { color: #a15c07; }
+        .osm-history-note, .osm-history-meta { color: var(--muted); }
+        .osm-history-flags { color: var(--caution); }
         .osm-history-events { list-style: none; padding: 0; margin: 0 0 6px; }
-        .osm-history-events li { display: grid; grid-template-columns: 5.5em 1fr; gap: 0 8px; padding: 3px 0; border-top: 1px solid #e3e6e2; }
+        .osm-history-events li { display: grid; grid-template-columns: 5.5em 1fr; gap: 0 8px; padding: 3px 0; border-top: 1px solid var(--line); }
         .osm-history-events .osm-history-date { font-variant-numeric: tabular-nums; font-weight: 600; }
-        .osm-history-events .osm-history-meta { grid-column: 2; font-size: 11px; }
+        .osm-history-events .osm-history-meta { grid-column: 2; font-size: var(--fs-xs); }
         .osm-history-events .osm-history-changes { grid-column: 2; }
-        .osm-history code { font-size: 11px; background: #f1f2ee; padding: 0 3px; border-radius: 3px; }
+        .osm-history code { font-size: var(--fs-xs); background: var(--panel-2); padding: 0 3px; border-radius: 3px; }
         .popup-osm-history-body { margin-top: 6px; max-height: 220px; overflow-y: auto; }
 
         /* occupancy and derived years (jb 2026-09-02): the interval bar uses
            the not-assessed blue for the certain core and amber for the
            uncertainty windows; present green is reserved for a reviewed
-           state, matching docs/ui-style-guide.md colour meanings */
-        .pill.blue { background: var(--blue-soft); color: var(--blue); }
-        .pill.grey { background: #e5e7eb; color: #374151; }
-        .occupancy-panel h4 { margin: 14px 0 6px; font-size: 14px; }
+           state, matching docs/ui-style-guide.md colour meanings; svg
+           annotations sit at the 11px floor */
+        .pill.blue { background: var(--action-soft); color: var(--action); }
+        .pill.grey { background: var(--absent-soft); color: var(--absent); }
+        .occupancy-panel h4 { margin: 14px 0 6px; font-size: var(--fs-md); font-weight: 600; }
         .occupancy-parent + .occupancy-parent { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 10px; }
-        .occupancy-bar { display: block; max-height: 120px; background: #fbfcfd; border: 1px solid var(--line); border-radius: 6px; }
-        .occupancy-bar .ob-band { fill: #e8f1fb; opacity: 0.7; }
-        .occupancy-bar .ob-tick { stroke: #9aa9bb; stroke-width: 1; }
-        .occupancy-bar .ob-tick-label { font-size: 10px; fill: #1f4e79; font-weight: 700; }
-        .occupancy-bar .ob-core { fill: #1f4e79; }
-        .occupancy-bar .ob-window { fill: #fff7e6; stroke: #d68910; stroke-width: 1.2; stroke-dasharray: 4 3; }
-        .occupancy-bar .ob-arrow { fill: #1f4e79; opacity: 0.6; }
-        .occupancy-bar .ob-asof { stroke: #1f4e79; stroke-width: 2; }
-        .occupancy-bar .ob-label { font-size: 10px; font-weight: 700; fill: #17202a; paint-order: stroke; stroke: #fff; stroke-width: 3; }
-        .occupancy-key { font-size: 12px; margin: 4px 0 8px; }
-        .occupancy-periods { margin: 0 0 10px; padding-left: 18px; font-size: 14px; }
+        .occupancy-bar { display: block; max-height: 120px; background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--r-sm); }
+        .occupancy-bar .ob-band { fill: var(--not-assessed-soft); opacity: 0.7; }
+        .occupancy-bar .ob-tick { stroke: var(--line); stroke-width: 1; }
+        .occupancy-bar .ob-tick-label { font-size: 11px; fill: var(--not-assessed); font-weight: 600; }
+        .occupancy-bar .ob-core { fill: var(--not-assessed); }
+        .occupancy-bar .ob-window { fill: var(--caution-soft); stroke: var(--caution-strong); stroke-width: 1.2; stroke-dasharray: 4 3; }
+        .occupancy-bar .ob-arrow { fill: var(--not-assessed); opacity: 0.6; }
+        .occupancy-bar .ob-asof { stroke: var(--not-assessed); stroke-width: 2; }
+        .occupancy-bar .ob-label { font-size: 11px; font-weight: 600; fill: var(--ink); paint-order: stroke; stroke: var(--panel); stroke-width: 3; }
+        .occupancy-key { font-size: var(--fs-xs); margin: 4px 0 8px; }
+        .occupancy-periods { margin: 0 0 10px; padding-left: 18px; font-size: var(--fs-sm); }
         .occupancy-periods li { margin: 3px 0; }
         .derived-year-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 6px 0; }
         /* pr-f: the denomination line of a derived year and the chain under the periods */
-        .derived-year-function { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #d1d5db; }
+        .derived-year-function { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
         .occupancy-chain { margin: 10px 0; }
         .occupancy-chain-list { margin: 4px 0 0; padding-left: 20px; }
         .derived-year-toolbar button { min-height: 36px; padding: 6px 12px; }
-        .derived-year-row { border-top: 1px solid var(--line); padding: 8px 0; font-size: 14px; }
+        .derived-year-row { border-top: 1px solid var(--line); padding: 8px 0; font-size: var(--fs-sm); }
         .derived-year-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 4px; }
-        .derived-year-head strong { font-size: 15px; min-width: 3em; }
+        .derived-year-head strong { font-size: var(--fs-md); min-width: 3em; }
         .derived-year-locations div { margin: 2px 0 2px 12px; }
         .derived-year-actions { margin-top: 6px; }
         .derived-year-actions button { min-height: 36px; padding: 6px 12px; }
-        .derived-year-form { margin-top: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 6px; background: #f8fafc; }
+        .derived-year-form { margin-top: 8px; padding: 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--panel-2); }
         .derived-year-form textarea { min-height: 64px; }
         .derived-year-form .review-actions { align-items: center; margin-top: 0; }
-        .derived-trail { margin-top: 12px; font-size: 13px; }
+        .derived-trail { margin-top: 12px; font-size: var(--fs-sm); }
         .derived-events { list-style: none; padding: 0; margin: 4px 0 0; }
-        .derived-events li { padding: 3px 0; border-top: 1px solid #e3e6e2; }
+        .derived-events li { padding: 3px 0; border-top: 1px solid var(--line); }
         .derived-event-time { font-variant-numeric: tabular-nums; color: var(--muted); margin-right: 6px; }
-        .occupancy-map-strip { margin-top: 12px; font-size: 13px; }
+        .occupancy-map-strip { margin-top: 12px; font-size: var(--fs-sm); }
         .occupancy-scatter-wrap { display: flex; gap: 12px; align-items: flex-start; margin-top: 4px; }
-        .occupancy-scatter { flex: 0 0 auto; background: #fbfcfd; border: 1px solid var(--line); border-radius: 6px; }
-        .occupancy-scatter .os-axis { stroke: #e3e6e2; stroke-width: 1; }
-        .occupancy-scatter .os-task { fill: #b42318; }
-        .occupancy-scatter .os-point { fill: #1f4e79; fill-opacity: 0.8; }
-        .occupancy-scatter .os-point.approx { fill: #fff7e6; fill-opacity: 0.8; stroke: #d68910; stroke-width: 1.2; stroke-dasharray: 3 2; }
-        .occupancy-scatter .os-label { font-size: 9px; font-weight: 700; fill: #17202a; }
-        .occupancy-scatter-legend { font-size: 12px; }
+        .occupancy-scatter { flex: 0 0 auto; background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--r-sm); }
+        .occupancy-scatter .os-axis { stroke: var(--line); stroke-width: 1; }
+        .occupancy-scatter .os-task { fill: var(--danger); }
+        .occupancy-scatter .os-point { fill: var(--not-assessed); fill-opacity: 0.8; }
+        .occupancy-scatter .os-point.approx { fill: var(--caution-soft); fill-opacity: 0.8; stroke: var(--caution-strong); stroke-width: 1.2; stroke-dasharray: 3 2; }
+        .occupancy-scatter .os-label { font-size: 11px; font-weight: 600; fill: var(--ink); }
+        .occupancy-scatter-legend { font-size: var(--fs-xs); }
 </style>
 </head>
 <body>
@@ -476,12 +623,12 @@
                 <div id="authStatus" class="status">Checking review access...</div>
             </section>
 
-            <section class="panel boundary">
-                <h2>Review boundary</h2>
+            <details class="panel boundary" id="reviewBoundary" open>
+                <summary><h2>Review boundary</h2></summary>
                 <p>Use <strong>accepted for export</strong> only when the evidence draft is ready for the governed export and <code>pow</code> validation path.</p>
                 <p>Use <strong>unresolved notes</strong> for useful but incomplete RA submissions. These are modelled on map-note workflows: keep the lead visible, then ask for more evidence, defer, reject, or accept after review.</p>
                 <p>Use <strong>needs more evidence</strong> when the RA should clarify a source, date, identity match, or lifecycle claim.</p>
-            </section>
+            </details>
 
             <section class="panel">
                 <h2>Queue</h2>
@@ -534,6 +681,6 @@
     <script src="js/location-assertion-contract.js?v=20260902a"></script>
     <script src="js/osm-history.js?v=20260902c"></script>
     <script src="js/occupancy-review.js?v=20260903a"></script>
-    <script src="js/review-portal.js?v=20260903e"></script>
+    <script src="js/review-portal.js?v=20260904a"></script>
 </body>
 </html>
