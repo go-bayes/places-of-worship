@@ -593,20 +593,74 @@ const COUNTRY_CONFIGS = {
         },
     },
 };
+// every country opens the portal (jb ruling r-h1, 2026-09-03): a code
+// outside the hand-tuned configs above resolves through the world registry
+// (apps/shared/data/country-registry.js, generated) into a config with no
+// census years and no assigned work. the periods and the chain record as
+// usual; the census-year derivations start the day the registry names a
+// year. the nomination batch stands in as the assignment batch so the
+// sidebar keeps its sign-in gate and the rapid entry lanes
+const COUNTRY_REGISTRY = (() => {
+    const doc = window.POW_COUNTRY_REGISTRY;
+    const list = doc && Array.isArray(doc.countries) ? doc.countries : [];
+    return new Map(list.map(entry => [String(entry.code || "").toLowerCase(), entry]));
+})();
+// the tiles name a place's country by iso code (GB where the project says uk)
+const COUNTRY_REGISTRY_BY_ISO = new Map([...COUNTRY_REGISTRY.values()].map(entry => [String(entry.iso2 || entry.code || "").toUpperCase(), entry]));
+function registryCountryConfig(entry) {
+    const code = String(entry.code || "").toLowerCase();
+    const name = entry.name || code.toUpperCase();
+    return {
+        countryCode: code.toUpperCase(),
+        countryName: name,
+        targetYears: [],
+        defaultTargetYear: "",
+        dataPath: "",
+        mapCentre: Array.isArray(entry.centre) ? entry.centre : [0, 0],
+        mapZoom: Number.isFinite(entry.zoom) ? entry.zoom : 2,
+        collectionBatch: `${code}-map-workbench-demo`,
+        sourceDatasetId: `${code}_static_verification_map`,
+        mapSource: `${code}_verification_static_map_workbench`,
+        nominationSource: `${code}_verification_static_map_nomination`,
+        defaultAssignmentBatchId: `manual-${code}`,
+        assignmentsOffered: false,
+        assignmentHeading: `${name} evidence`,
+        rapidCurrentEntry: true,
+        rapidNominationEntry: true,
+        fromRegistry: true,
+        temporalLossAction: {
+            value: "target_year_loss_or_changed_use",
+            label: "Present in one target year, absent in a later target year",
+            statuses: {},
+            note: "Evidence appears to support worship use in one target year and absence or changed use in a later target year; reviewer to confirm dates and status.",
+        },
+    };
+}
 function countryConfigKey(value) {
     const key = String(value || "").toLowerCase();
-    return Object.prototype.hasOwnProperty.call(COUNTRY_CONFIGS, key) ? key : "";
+    if (Object.prototype.hasOwnProperty.call(COUNTRY_CONFIGS, key)) return key;
+    const entry = COUNTRY_REGISTRY.get(key);
+    if (!entry) return "";
+    COUNTRY_CONFIGS[key] = registryCountryConfig(entry);
+    return key;
 }
 
 const PATH_COUNTRY_KEY = countryConfigKey(PATH_COUNTRY_PARAM);
 const CONFIG_COUNTRY_KEY = countryConfigKey(CONFIG_COUNTRY_PARAM);
 const REQUESTED_COUNTRY_KEY = countryConfigKey(REQUESTED_COUNTRY_PARAM);
-const COUNTRY_KEY = REQUESTED_COUNTRY_KEY || PATH_COUNTRY_KEY || CONFIG_COUNTRY_KEY || "nz";
+// an explicit code nobody knows opens a neutral world view rather than
+// new zealand (iso 3166 reserves zz for "unknown"; the server refuses its
+// intake, so nothing can be filed against it); the path and config keys
+// keep their new zealand default
+if (REQUESTED_COUNTRY_PARAM && !REQUESTED_COUNTRY_KEY) {
+    COUNTRY_CONFIGS.zz = registryCountryConfig({ code: "zz", name: "the world", centre: [10, 20], zoom: 2 });
+}
+const COUNTRY_KEY = REQUESTED_COUNTRY_KEY || (REQUESTED_COUNTRY_PARAM ? "zz" : "") || PATH_COUNTRY_KEY || CONFIG_COUNTRY_KEY || "nz";
 const COUNTRY_CONFIG = COUNTRY_CONFIGS[COUNTRY_KEY];
 // F1: the contracts validate dates against this country's floor (date-floor.js)
 window.POW_DATE_FLOOR_YEAR = window.PowDateFloor ? window.PowDateFloor.yearFor(COUNTRY_CONFIG.countryCode) : 1600;
 const TARGET_YEARS = COUNTRY_CONFIG.targetYears;
-const DEFAULT_TARGET_YEAR = COUNTRY_CONFIG.defaultTargetYear || TARGET_YEARS[TARGET_YEARS.length - 1];
+const DEFAULT_TARGET_YEAR = COUNTRY_CONFIG.defaultTargetYear || TARGET_YEARS[TARGET_YEARS.length - 1] || "";
 const BACKEND_CONFIG = window.POW_CONVEX_CONFIG || {};
 const BACKEND_CONFIGURED = Boolean(BACKEND_CONFIG.enabled && BACKEND_CONFIG.url && BACKEND_CONFIG.googleClientId);
 const FULL_MAP_MODE = SEARCH_PARAMS.get("full") === "1" || SEARCH_PARAMS.get("batch") === "all";
@@ -1118,12 +1172,12 @@ function cap(value) {
 }
 
 function targetYearListText(years = TARGET_YEARS) {
-    if (years.length <= 1) return years[0] || "the target year";
+    if (years.length <= 1) return years[0] || "";
     return `${years.slice(0, -1).join(", ")} or ${years[years.length - 1]}`;
 }
 
 function targetYearAndListText(years = TARGET_YEARS) {
-    if (years.length <= 1) return years[0] || "the target year";
+    if (years.length <= 1) return years[0] || "";
     if (years.length === 2) return `${years[0]} and ${years[1]}`;
     return `${years.slice(0, -1).join(", ")}, and ${years[years.length - 1]}`;
 }
@@ -1197,6 +1251,9 @@ function statusOptionsHtml() {
 // one year per row with the selects in aligned columns, so the eye can
 // run down the years and compare states and confidence at a glance
 function targetYearStatusControlsHtml() {
+    if (!TARGET_YEARS.length) {
+        return `<p class="no-target-years" role="note">No census years are set for ${escapeHtml(COUNTRY_CONFIG.countryName)} yet, so there is no per-year status to record; the dates you enter carry the history.</p>`;
+    }
     return `
         <div class="year-status-grid" role="group" aria-label="Status and confidence for each target year">
             <div class="year-status-row year-status-head" aria-hidden="true">
@@ -1378,6 +1435,9 @@ function statusDefaultsForAction(action, targetYear, props) {
     const statuses = Object.fromEntries(TARGET_YEARS.map(year => [year, "not_assessed"]));
     const latestYear = TARGET_YEARS[TARGET_YEARS.length - 1];
     const lossAction = COUNTRY_CONFIG.temporalLossAction;
+    // no census years for this country yet (registry countries): nothing
+    // to default; the periods carry the dates
+    if (!TARGET_YEARS.length) return statuses;
 
     if (action === "confirm_current_record") {
         statuses[targetYear] = "present";
@@ -1402,7 +1462,9 @@ function statusDefaultsForAction(action, targetYear, props) {
 
 function assessmentDefaultsForAction(action, statuses = {}) {
     const statusValues = TARGET_YEARS.map(year => statuses[year]);
-    const anyPresent = statusValues.includes("present");
+    // with no census years there is no per-year status to read "present"
+    // from; confirming the current record still means present and in use
+    const anyPresent = statusValues.includes("present") || (!TARGET_YEARS.length && action === "confirm_current_record");
     const anyAbsent = statusValues.includes("absent");
     const isMissing = action === "missing_current_site";
     const isDuplicate = action === "possible_duplicate";
@@ -1480,7 +1542,7 @@ function taskFocusForAction(action, priority) {
 function checklistItemForCheck(check) {
     const id = check?.check_id || "";
     if (id === "missing_osm_lifecycle_date") {
-        return `Look for opening, first-seen, closure, or changed-use evidence that helps assess ${targetYearListText()} worship use.`;
+        return `Look for opening, first-seen, closure, or changed-use evidence that helps assess ${TARGET_YEARS.length ? `${targetYearListText()} ` : ""}worship use.`;
     }
     if (id === "missing_address") {
         return "Find a source-backed street address or locality, and note if the location remains approximate.";
@@ -1597,6 +1659,14 @@ function deriveTargetYearStatus(props, targetYear) {
 // pr-g: the context-dot colour, mirrored by .legend-dot.context-dot-swatch
 // and recorded in docs/ui-style-guide.md
 const CONTEXT_DOT_COLOUR = "#f59e0b";
+// unvalidated places for a country without a dated product (jb 2026-09-03,
+// "all points"): the shop front's places tiles, drawn by leaflet.vectorgrid.
+// every tile feature carries osm_id, osm_type, name and country_code, so
+// the revise card opens from a tile dot exactly as from a dated one
+const PLACES_TILE_URL = "https://tiles.placemap.org/places/{z}/{x}/{y}";
+const PLACES_TILE_LAYER = "places";
+const PLACES_TILE_MAX_NATIVE_ZOOM = 18;
+const TILE_DOTS_MIN_ZOOM = 8;
 
 function osmObjectUrl(osmType, osmId) {
     if (!osmType || !osmId) return "";
@@ -1739,7 +1809,7 @@ function assignmentQuickstartHtml() {
                 <li>Sign in with Google at the top of this panel.</li>
                 <li>Work down the assigned ${COUNTRY_CONFIG.countryName} task list in order. Stop at a natural stopping point and tell JB where you stopped.</li>
                 <li>Open Street View or Google Maps to look around the site, and use the OSM object only as context. Record the imagery capture date if Street View is your evidence.</li>
-                <li>Record ${targetYearAndListText()} status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
+                <li>Record ${TARGET_YEARS.length ? `${targetYearAndListText()} status` : "the current status"}, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
             </ol>
         `;
     }
@@ -1834,6 +1904,7 @@ class NzVerificationMap {
         this.contextDotLayer = null;
         this.datedFeatures = null;
         this.datedLoadPromise = null;
+        this.tileDotLayer = null;
         this.taskHistoryByTaskId = new Map();
         this.init();
     }
@@ -1983,7 +2054,7 @@ class NzVerificationMap {
         const panel = document.getElementById("backendPanel");
         if (!panel) return;
         const assignmentLabel = ASSIGNMENT_MODE
-            ? `<span>Assigned batch: <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong></span>`
+            ? (COUNTRY_CONFIG.assignmentsOffered === false ? "" : `<span>Assigned batch: <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong></span>`)
             : "";
         if (!this.backend?.configured) {
             panel.innerHTML = `
@@ -2004,11 +2075,11 @@ class NzVerificationMap {
                 <div class="backend-card auth-required">
                     <strong>${ASSIGNMENT_MODE ? "1. Sign in to start" : "Shared task backend"}</strong>
                     ${assignmentLabel}
-                    ${this.pendingDeepLink ? `<span role="note">You followed a link to revise <em>${escapeHtml(this.pendingDeepLink.name || "a place on the map")}</em>. Sign in and it opens here.</span>` : ""}
+                    ${this.pendingDeepLink ? `<span role="note">Sign in to revise <em>${escapeHtml(this.pendingDeepLink.name || "a place on the map")}</em>; it opens here after sign-in.</span>` : ""}
                     <span>${ASSIGNMENT_MODE
                         ? `${INVITED_EMAIL_HINT
                             ? `Use ${escapeHtml(INVITED_EMAIL_HINT)}, the Google account JB invited.`
-                            : "Use the Google account JB invited (check the invitation email if you're not sure which one)."} After sign-in, choose between your assigned tasks and adding missing places; saved work goes straight to the shared review queue.`
+                            : "Use the Google account JB invited (check the invitation email if you're not sure which one)."} After sign-in, ${COUNTRY_CONFIG.assignmentsOffered === false ? "add missing places or revise places already on the map" : "choose between your assigned tasks and adding missing places"}; saved work goes straight to the shared review queue.`
                         : "Sign in with Google to load assigned tasks and save evidence directly for review."}</span>
                     <div id="googleSignInButton" class="google-sign-in-host"></div>
                     <span class="copy-help">Not a project member yet? Access is by invitation from the project team; the <a href="https://github.com/go-bayes/places-of-worship" target="_blank" rel="noopener">project page</a> says how to get in touch.</span>
@@ -2136,7 +2207,9 @@ class NzVerificationMap {
             this.markerLayer?.clearLayers();
             const snapshotEl = document.getElementById("snapshotId");
             if (snapshotEl) {
-                snapshotEl.textContent = `${ASSIGNMENT_BATCH_ID} | sign in to load assigned tasks`;
+                snapshotEl.textContent = COUNTRY_CONFIG.assignmentsOffered === false
+                    ? `${COUNTRY_CONFIG.countryName} | sign in to add or revise places`
+                    : `${ASSIGNMENT_BATCH_ID} | sign in to load assigned tasks`;
             }
             this.renderInitialDetail();
         }
@@ -2546,10 +2619,16 @@ class NzVerificationMap {
             // then off; all/off only where no dated product exists
             // without a dated context layer the select would load nothing,
             // so it does not render: an inert control reads as broken
-            const modes = [["period", "Points: period"], ["all", "Points: all"], ["off", "Points: off"]];
+            // "unvalidated" names the dots (jb 2026-09-03): nearly every
+            // place of worship is one at this stage. period only where the
+            // dated product supplies dates; the tiles know only today
+            const source = this.contextDotSource();
+            const modes = source === "dated"
+                ? [["period", "Unvalidated: period"], ["all", "Unvalidated: all"], ["off", "Unvalidated: off"]]
+                : [["all", "Unvalidated: all"], ["off", "Unvalidated: off"]];
             div.innerHTML = `
-                ${COUNTRY_CONFIG.datedPlaces ? `
-                <select id="portalPointsSelect" aria-label="Context dots">
+                ${source !== "none" ? `
+                <select id="portalPointsSelect" aria-label="Unvalidated places">
                     ${modes.map(([value, label]) => `<option value="${value}"${value === this.pointsMode ? " selected" : ""}>${label}</option>`).join("")}
                 </select>
                 <div id="portalPointsNote" class="points-mode-note" hidden></div>` : ""}
@@ -2559,9 +2638,9 @@ class NzVerificationMap {
                     <span class="legend-row"><span class="legend-dot vm-validated-absent-swatch"></span>validated absent</span>
                     <span class="legend-row"><span class="legend-dot vm-in-review-swatch"></span>in review</span>
                     <span class="legend-row"><span class="legend-dot vm-disputed-swatch"></span>disputed</span>
-                    <span class="legend-row"><span class="legend-dot vm-default-swatch"></span>unvalidated</span>
+                    <span class="legend-row"><span class="legend-dot vm-default-swatch"></span>task, not yet validated</span>
                     <span class="legend-row"><span class="legend-dot vm-nomination-swatch"></span>nomination</span>
-                    ${COUNTRY_CONFIG.datedPlaces ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>context dots</span>` : ""}
+                    ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>unvalidated</span>` : ""}
                 </div>
             `;
             // keep map gestures away from the control
@@ -2575,6 +2654,25 @@ class NzVerificationMap {
         control.addTo(this.map);
         // seed the per-mode note for the initial (default off) state
         this.updatePointsNote();
+        // the unvalidated places show on arrival for everyone (r-h4:
+        // looking is free): dated countries in period mode, tile countries
+        // in all
+        const source = this.contextDotSource();
+        if (source !== "none" && this.pointsMode === "off") {
+            const mode = source === "dated" ? "period" : "all";
+            this.setPointsMode(mode);
+            const pointsSelect = document.getElementById("portalPointsSelect");
+            if (pointsSelect) pointsSelect.value = mode;
+        }
+    }
+
+    // where the unvalidated dots come from: the country's dated product
+    // where one ships (it carries the dates the period mode needs), else
+    // the places tiles, else nothing (no leaflet.vectorgrid on the page)
+    contextDotSource() {
+        if (COUNTRY_CONFIG.datedPlaces) return "dated";
+        if (typeof L !== "undefined" && L.vectorGrid && typeof L.vectorGrid.protobuf === "function") return "tiles";
+        return "none";
     }
 
     // one-line note under the points select explaining the active mode, per
@@ -2589,7 +2687,11 @@ class NzVerificationMap {
             note.textContent = `showing places whose OpenStreetMap date tags say they existed in ${year}`;
             note.hidden = false;
         } else if (this.pointsMode === "all") {
-            note.textContent = `dots show today's OpenStreetMap places, not ${year} places`;
+            note.textContent = TARGET_YEARS.length
+                ? `dots show today's OpenStreetMap places, not ${year} places`
+                : (this.contextDotSource() === "tiles"
+                    ? `dots show today's OpenStreetMap places from zoom ${TILE_DOTS_MIN_ZOOM}; click one to revise it`
+                    : "dots show today's OpenStreetMap places");
             note.hidden = false;
         } else {
             note.textContent = "";
@@ -2600,12 +2702,149 @@ class NzVerificationMap {
     setPointsMode(mode) {
         this.pointsMode = mode;
         this.updatePointsNote();
+        if (this.contextDotSource() === "tiles") {
+            this.syncTileDots();
+            return;
+        }
         if (mode === "off") {
             this.contextDotLayer.clearLayers();
             return;
         }
         // lazy, cached load on the first non-off selection
         this.ensureDatedPlaces().then(() => this.syncContextDots());
+    }
+
+    // the tile-backed unvalidated layer: built once, shown in "all", removed
+    // in "off". a click builds a geojson-shaped feature from the tile
+    // properties so the popup, the task match and the revise card are the
+    // ones the dated dots use. the click point stands in for the feature's
+    // own coordinate (the tile renderer does not hand it back); the pin
+    // flow lets the contributor settle the exact spot
+    syncTileDots() {
+        if (!this.map) return;
+        if (this.pointsMode === "off") {
+            if (this.tileDotLayer && this.map.hasLayer(this.tileDotLayer)) this.map.removeLayer(this.tileDotLayer);
+            return;
+        }
+        if (!this.tileDotLayer) {
+            const style = {
+                radius: 5.5,
+                color: "#7c2d12",
+                weight: 1.25,
+                fill: true,
+                fillColor: CONTEXT_DOT_COLOUR,
+                fillOpacity: 0.95,
+                opacity: 1,
+            };
+            this.tileDotLayer = L.vectorGrid.protobuf(PLACES_TILE_URL, {
+                vectorTileLayerStyles: { [PLACES_TILE_LAYER]: style },
+                // not interactive: an interactive path swallows the click
+                // before the map sees it; the map-level hit test below owns
+                // every click instead
+                interactive: false,
+                // the overlay pane sits above every basemap tile and below
+                // the task markers and popups, where the canvas dots live
+                pane: "overlayPane",
+                minZoom: TILE_DOTS_MIN_ZOOM,
+                maxNativeZoom: PLACES_TILE_MAX_NATIVE_ZOOM,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                getFeatureId: props => `${props.osm_type || "node"}/${props.osm_id}`,
+            });
+            // vectorgrid 1.3.0's own hit-testing predates leaflet 1.8 and
+            // never fires here, so the map's click is hit-tested against the
+            // rendered dots instead: the nearest one within a finger's width
+            // opens. the feature's exact coordinate comes back from the tile
+            // (pixel offset within the tile at the tile's zoom)
+            this.map.on("click", event => this.handleTileDotClick(event));
+        }
+        if (!this.map.hasLayer(this.tileDotLayer)) this.tileDotLayer.addTo(this.map);
+    }
+
+    // the rendered tile dot nearest a container point, with its feature
+    // rebuilt in geojson shape; null when none sits within `radiusPx`
+    tileDotAt(containerPoint, radiusPx = 14) {
+        const layer = this.tileDotLayer;
+        if (!layer || !layer._vectorTiles) return null;
+        const tileSize = layer.getTileSize();
+        let best = null;
+        let bestDistance = radiusPx;
+        Object.values(layer._vectorTiles).forEach(renderer => {
+            const coord = renderer && renderer._tileCoord;
+            const symbols = renderer && renderer._layers ? Object.values(renderer._layers) : [];
+            symbols.forEach(symbol => {
+                if (!symbol || !symbol._point || !coord) return;
+                const projected = L.point(coord.x, coord.y).scaleBy(tileSize).add(symbol._point);
+                const latlng = this.map.unproject(projected, coord.z);
+                const onScreen = this.map.latLngToContainerPoint(latlng);
+                const distance = onScreen.distanceTo(containerPoint);
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    best = { latlng, properties: symbol.properties || {} };
+                }
+            });
+        });
+        if (!best) return null;
+        const props = best.properties;
+        return {
+            latlng: best.latlng,
+            feature: {
+                type: "Feature",
+                properties: { ...props, osm_type: props.osm_type || "node", name: props.name || "" },
+                geometry: { type: "Point", coordinates: [best.latlng.lng, best.latlng.lat] },
+            },
+        };
+    }
+
+    handleTileDotClick(event) {
+        if (this.pointsMode === "off" || !this.tileDotLayer || !this.map.hasLayer(this.tileDotLayer)) return;
+        // placing a pin owns the click; a dot under the pin is not a target
+        if (this.pinMode) return;
+        const hit = this.tileDotAt(event.containerPoint);
+        if (!hit) return;
+        this.openContextDot(hit.feature, hit.latlng);
+    }
+
+    // one entry for a tile dot (r-h4, jb 2026-09-03): the popup opens for
+    // everyone; signed in, a matched task opens beside it, else the revise
+    // card, the popup kept for its links. the dated dots reach the same
+    // outcome through their bound popup and click handler
+    openContextDot(feature, latlng) {
+        const popup = L.popup({ maxWidth: 320 }).setLatLng(latlng).setContent(this.contextDotPopupHtml(feature));
+        popup.openOn(this.map);
+        this.bindContextDotPopup(popup, feature);
+        if (!this.backendUser) return;
+        const matched = this.matchContextTask(feature);
+        if (matched?.task_id) {
+            this.selectTaskById(matched.task_id, { focusDetail: true });
+        } else {
+            this.openContextIssueForm(feature, { keepPopup: true });
+        }
+    }
+
+    // r-h4: signed out, the place becomes the pending deep link, the
+    // sign-in card names it, and applyPendingDeepLink opens its card after
+    // sign-in — the path the public map's ?revise=1 link already takes
+    requestSignInToRevise(feature) {
+        const props = feature.properties || {};
+        const coords = feature.geometry?.coordinates || [];
+        const latitude = Number(coords[1]);
+        const longitude = Number(coords[0]);
+        const osmId = props.osm_id !== undefined && props.osm_id !== null ? String(props.osm_id) : "";
+        const osmTypeRaw = window.PowOsmHistory ? window.PowOsmHistory.normaliseType(props.osm_type) : String(props.osm_type || "");
+        this.pendingDeepLink = {
+            mode: "revise",
+            name: String(props.name || "").trim(),
+            latitude,
+            longitude,
+            hasCoords: Number.isFinite(latitude) && Number.isFinite(longitude),
+            siteId: undefined,
+            osmId: osmId || undefined,
+            osmType: osmId ? (osmTypeRaw || "node") : undefined,
+        };
+        if (this.map && typeof this.map.closePopup === "function") this.map.closePopup();
+        this.renderBackendPanel();
+        const panel = document.getElementById("backendPanel");
+        if (panel && typeof panel.scrollIntoView === "function") panel.scrollIntoView({ block: "start", behavior: "smooth" });
     }
 
     ensureDatedPlaces() {
@@ -2679,6 +2918,8 @@ class NzVerificationMap {
             // with no task yet. the popup stays open beside it for the
             // street view / osm links and the explicit reopen entry
             dot.on("click", () => {
+                // signed out: the bound popup alone, with its sign-in entry (r-h4)
+                if (!this.backendUser) return;
                 const matched = this.matchContextTask(feature);
                 if (matched?.task_id) {
                     this.selectTaskById(matched.task_id, { focusDetail: true });
@@ -2742,8 +2983,22 @@ class NzVerificationMap {
         const matchedTaskId = matched?.task_id || "";
         const backendTask = matchedTaskId ? this.backendTasksById.get(matchedTaskId) : null;
         const canReopen = Boolean(backendTask && REOPEN_ELIGIBLE_STATUSES.has(backendTask.status));
+        // a tile dot in a neighbouring country (a border, an enclave) is
+        // offered with its own portal rather than filed under this one
+        const dotCountry = String(props.country_code || "").toUpperCase();
+        const ownEntry = COUNTRY_REGISTRY.get(COUNTRY_CONFIG.countryCode.toLowerCase());
+        const ownIso = String(ownEntry?.iso2 || COUNTRY_CONFIG.countryCode).toUpperCase();
+        const foreign = dotCountry && dotCountry !== ownIso ? COUNTRY_REGISTRY_BY_ISO.get(dotCountry) : null;
+        const foreignNote = foreign
+            ? `<span class="popup-foreign-note">In ${escapeHtml(foreign.name)}. <a href="verification.html?country=${escapeHtml(foreign.code)}">Open the ${escapeHtml(foreign.name)} portal</a> to revise it.</span><br>`
+            : "";
         let issueButton;
-        if (matchedTaskId && canReopen) {
+        if (!this.backendUser && this.backend?.configured) {
+            // r-h4 (jb 2026-09-03): looking is free, revising needs an
+            // account; the place waits on the sign-in card as a deep link does.
+            // a deployment without a backend keeps the copy-json issue form
+            issueButton = `<button class="popup-report-issue popup-revise-primary" type="button" data-sign-in-revise="1">Sign in to revise this place</button>`;
+        } else if (matchedTaskId && canReopen) {
             issueButton = `<button class="popup-report-issue popup-revise-primary" type="button" data-reopen-task-id="${escapeHtml(matchedTaskId)}">Reopen this place's issue</button>`;
         } else if (matchedTaskId) {
             // matched a task not in a reopenable state: route into its issue form
@@ -2753,7 +3008,7 @@ class NzVerificationMap {
         }
         return `
             <strong>${escapeHtml(name)}</strong><br>
-            <span>${escapeHtml(coordStr)}</span><br>
+            ${foreignNote}<span>${escapeHtml(coordStr)}</span><br>
             <div class="popup-actions">
                 ${issueButton}
                 ${hasCoords ? `
@@ -2782,6 +3037,9 @@ class NzVerificationMap {
         });
         el.querySelector("[data-report-issue]")?.addEventListener("click", () => {
             this.openContextIssueForm(feature);
+        });
+        el.querySelector("[data-sign-in-revise]")?.addEventListener("click", () => {
+            this.requestSignInToRevise(feature);
         });
         el.querySelector("[data-occupancy-task-id]")?.addEventListener("click", (event) => {
             const taskId = event.currentTarget.dataset.occupancyTaskId;
@@ -3019,6 +3277,12 @@ class NzVerificationMap {
     renderPortalChooser() {
         const chooser = document.getElementById("portalChooser");
         if (!chooser || !ASSIGNMENT_MODE) return;
+        // no assigned work in a registry country (r-h1): straight to add or
+        // revise, nothing to choose between
+        if (COUNTRY_CONFIG.assignmentsOffered === false) {
+            this.setPortalMode("add");
+            return;
+        }
         const available = this.tasks.filter(feature => (feature.properties?.batch_id || ASSIGNMENT_BATCH_ID) === ASSIGNMENT_BATCH_ID).length;
         const assignedSummary = available
             ? `${available} task${available === 1 ? "" : "s"} available in ${ASSIGNMENT_BATCH_ID}${this.myWorkItems.length ? `; ${this.myWorkItems.length} in My work` : ""}.`
@@ -3045,7 +3309,7 @@ class NzVerificationMap {
         bar.classList.toggle("mode-add", this.portalMode === "add");
         bar.innerHTML = `
             <span>${label}</span>
-            <button type="button" class="link-button" id="changeActivityButton">← Change activity</button>
+            ${COUNTRY_CONFIG.assignmentsOffered === false ? "" : `<button type="button" class="link-button" id="changeActivityButton">← Change activity</button>`}
         `;
         document.getElementById("changeActivityButton")?.addEventListener("click", () => this.setPortalMode(null));
     }
@@ -3078,10 +3342,12 @@ class NzVerificationMap {
             }
             // "revise" in the mode's name must be visible on arrival: show
             // the mapped places so their revise entry point exists on screen
-            if (this.pointsMode === "off" && COUNTRY_CONFIG.datedPlaces) {
-                this.setPointsMode("period");
+            const source = this.contextDotSource();
+            if (this.pointsMode === "off" && source !== "none") {
+                const mode = source === "dated" ? "period" : "all";
+                this.setPointsMode(mode);
                 const pointsSelect = document.getElementById("portalPointsSelect");
-                if (pointsSelect) pointsSelect.value = "period";
+                if (pointsSelect) pointsSelect.value = mode;
             }
         } else if (this.basemap !== "streets" && !this.basemapUserChosen) {
             this.setBasemap("streets");
@@ -3206,6 +3472,12 @@ class NzVerificationMap {
 
         const targetYearSelect = document.getElementById("targetYearSelect");
         if (targetYearSelect) {
+            // no census years: the select has nothing to offer, so hide it
+            // with its label rather than render an empty control
+            if (!TARGET_YEARS.length) {
+                const wrapper = typeof targetYearSelect.closest === "function" ? targetYearSelect.closest("label") : null;
+                (wrapper || targetYearSelect).hidden = true;
+            }
             targetYearSelect.innerHTML = TARGET_YEARS.slice().reverse().map(year => `
                 <option value="${escapeHtml(year)}">${escapeHtml(year)}</option>
             `).join("");
@@ -3236,7 +3508,9 @@ class NzVerificationMap {
             const snapshotEl = document.getElementById("snapshotId");
             if (snapshotEl) {
                 snapshotEl.textContent = this.backend?.configured
-                    ? `${ASSIGNMENT_BATCH_ID} | sign in to load assigned tasks`
+                    ? (COUNTRY_CONFIG.assignmentsOffered === false
+                        ? `${COUNTRY_CONFIG.countryName} | sign in to add or revise places`
+                        : `${ASSIGNMENT_BATCH_ID} | sign in to load assigned tasks`)
                     : `${ASSIGNMENT_BATCH_ID} | shared backend not configured`;
             }
             return;
@@ -3550,7 +3824,7 @@ class NzVerificationMap {
             <strong>${escapeHtml(props.name || "Unnamed site")}</strong><br>
             <span>${escapeHtml(cap(props.religion))}${props.denomination ? ` | ${escapeHtml(cap(props.denomination))}` : ""}</span><br>
             <span>Priority: ${escapeHtml(props.verification_priority)}</span><br>
-            <span>${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))} (${escapeHtml(temporal.basis)})</span><br>
+            ${TARGET_YEARS.length ? `<span>${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))} (${escapeHtml(temporal.basis)})</span><br>` : ""}
             <span>Action: ${escapeHtml(actionLabel(props.automated_suggested_action))}</span><br>
             <div class="popup-actions">
                 <button class="popup-open-task" type="button" data-task-id="${escapeHtml(props.task_id)}">Open task</button>
@@ -3663,7 +3937,7 @@ class NzVerificationMap {
                         <span class="priority-dot priority-${escapeHtml(props.verification_priority)}"></span>
                         ${stateDot}${escapeHtml(props.name || "Unnamed site")}${outcomeBadge}
                     </span>
-                    <span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))}</span>
+                    ${TARGET_YEARS.length ? `<span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))}</span>` : ""}
                     <span class="task-row-meta">${escapeHtml(cap(props.religion)) || "Unknown"} | ${escapeHtml(props.master_site_id || props.source_record_id || "")}</span>
                     <span class="task-row-meta">${escapeHtml(actionLabel(props.automated_suggested_action))} | ${props.automated_check_count} checks</span>
                 </button>
@@ -3825,8 +4099,8 @@ class NzVerificationMap {
                         ${this.portalMode === "add"
                             ? `Before nominating, check whether the place is already on the map. Nearby existing records are listed automatically after you confirm a pin location.`
                             : RAPID_ASSIGNED_ENTRY
-                            ? `For each assigned place, record what you can confirm at the observation date: whether the place exists and whether it is used for worship. Do not infer worship use from the building alone. Historical target years (${escapeHtml(COUNTRY_CONFIG.targetYears.join(", "))}) stay unassessed here; use the detailed form for historical or complicated cases.`
-                            : `For each assigned case, answer the task question, seek non-OSM evidence where possible, record ${escapeHtml(COUNTRY_CONFIG.targetYears.join(", "))} status, preserve any useful opening or closure dates, and submit unresolved notes for cases that should stay visible but cannot yet be resolved.`}
+                            ? `For each assigned place, record what you can confirm at the observation date: whether the place exists and whether it is used for worship. Do not infer worship use from the building alone. ${COUNTRY_CONFIG.targetYears.length ? `Historical target years (${escapeHtml(COUNTRY_CONFIG.targetYears.join(", "))}) stay unassessed here; use` : "Use"} the detailed form for historical or complicated cases.`
+                            : `For each assigned case, answer the task question, seek non-OSM evidence where possible, ${COUNTRY_CONFIG.targetYears.length ? `record ${escapeHtml(COUNTRY_CONFIG.targetYears.join(", "))} status, ` : ""}preserve any useful opening or closure dates, and submit unresolved notes for cases that should stay visible but cannot yet be resolved.`}
                     </div>
                 </div>
             `;
@@ -4161,7 +4435,8 @@ class NzVerificationMap {
     applyPendingDeepLink() {
         const link = this.pendingDeepLink;
         if (!link) return;
-        if (ASSIGNMENT_MODE && !this.backendUser) return;
+        // revising needs an account in every mode (r-h4)
+        if (!this.backendUser) return;
         this.pendingDeepLink = null;
         if (ASSIGNMENT_MODE) this.setPortalMode("add");
         const feature = {
@@ -4782,7 +5057,7 @@ class NzVerificationMap {
         const briefText = props.task_brief || focus.text;
         const checklist = uniqueItems([
             "Confirm that the source evidence refers to this site, not only a similarly named organisation or nearby building.",
-            `Assess worship-use status for ${this.targetYear}. The current map aid says ${statusLabel(temporal.status).toLowerCase()}; verify with sources.`,
+            TARGET_YEARS.length ? `Assess worship-use status for ${this.targetYear}. The current map aid says ${statusLabel(temporal.status).toLowerCase()}; verify with sources.` : "",
             context.andre_check || "",
             ...checks.map(checklistItemForCheck),
             "Record the closest supported action, target-year statuses, source title, URL or file reference, and a short evidence note.",
@@ -4793,7 +5068,7 @@ class NzVerificationMap {
             <div class="task-brief">
                 <div class="task-brief-header">
                     <span class="task-focus">${escapeHtml(focus.label)}</span>
-                    <span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))}</span>
+                    ${TARGET_YEARS.length ? `<span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))}</span>` : ""}
                 </div>
                 ${this.taskWhyHtml(props)}
                 <p>${escapeHtml(briefText)}</p>
@@ -4871,7 +5146,7 @@ class NzVerificationMap {
         return `
             <h3>Target-year status</h3>
             <div class="temporal-summary">
-                <div><span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(status)}</span></div>
+                ${TARGET_YEARS.length ? `<div><span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(status)}</span></div>` : `<div>No census years are set for ${escapeHtml(COUNTRY_CONFIG.countryName)} yet.</div>`}
                 <div><strong>Basis:</strong> ${escapeHtml(temporal.basis)}</div>
                 <div><strong>OSM date tags:</strong> ${escapeHtml(lifecycle)}</div>
                 <div><strong>Interpretation:</strong> ${escapeHtml(temporal.note)}</div>
@@ -6602,6 +6877,11 @@ class NzVerificationMap {
         }
         if (incomplete.length) {
             preview.textContent = `Complete period ${incomplete.join(", ")} to preview the census-year states.`;
+            preview.classList.remove("periods-preview-conflict");
+            return;
+        }
+        if (!TARGET_YEARS.length) {
+            preview.textContent = `Periods recorded. No census years are set for ${COUNTRY_CONFIG.countryName} yet; the census-year states derive once they are.`;
             preview.classList.remove("periods-preview-conflict");
             return;
         }
@@ -10001,7 +10281,7 @@ class NzVerificationMap {
             return;
         }
         const hasAssessedTargetYear = Object.values(values.targetYearStatuses).some((value) => value !== "not_assessed");
-        if (!hasAssessedTargetYear) {
+        if (TARGET_YEARS.length && !hasAssessedTargetYear) {
             if (status) {
                 status.textContent = "No target year has been assessed. Use Copy review JSON instead; nothing was copied.";
             }

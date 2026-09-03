@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   COUNTRY_INTAKE_BOUNDS,
+  countryIntakeBounds,
   assertCountryIntakePoint,
   manualBatchId,
   assertNotRapidContract,
@@ -88,8 +89,10 @@ test("points outside the new zealand box are rejected", () => {
   assert.throws(() => assertCountryIntakePoint("NZ", Number.NaN, 174), /finite coordinates/);
 });
 
-test("countries without a declared intake ruling are refused, not defaulted open", () => {
-  assert.throws(() => assertCountryIntakePoint("AU", -33.8688, 151.2093), /Rapid entry is not yet enabled for AU\./);
+test("countries outside both registries are refused, not defaulted open", () => {
+  // australia moved into the world registry under r-h1 (2026-09-03); a
+  // code in neither table is the case that must still refuse
+  assert.throws(() => assertCountryIntakePoint("ZQ", -33.8688, 151.2093), /Rapid entry is not yet enabled for ZQ\./);
   assert.throws(() => assertCountryIntakePoint("xx", 0, 0), /Rapid entry is not yet enabled for XX\./);
 });
 
@@ -243,3 +246,23 @@ test("the issue batch name is shared by createIssueTask and the rapid path", () 
   assert.equal(issueBatchId("nz"), "ra-issues-nz");
 });
 
+
+test("every registry country takes rapid intake; the hand-ruled table still wins (r-h1)", () => {
+  // fiji comes from the generated world registry: nominations accepted,
+  // approximate area allowed, no rapid assigned batch
+  const fiji = countryIntakeBounds("fj");
+  assert.equal(fiji.name, "Fiji");
+  assert.equal(fiji.approximateArea, true);
+  assert.equal(fiji.assignedRapid, undefined);
+  // fiji straddles the antimeridian: suva (178.44 E) and the lau group's
+  // wrapped side (178.8 W) are both inside
+  assert.doesNotThrow(() => assertCountryIntakePoint("FJ", -18.1416, 178.4419));
+  assert.doesNotThrow(() => assertCountryIntakePoint("FJ", -17.6, -178.8));
+  assert.throws(() => assertCountryIntakePoint("FJ", -41.29, 174.78), /outside the Fiji intake area/);
+  // vanuatu keeps its ruled entry, rapid assigned batch and all
+  assert.equal(countryIntakeBounds("VU").assignedRapid, true);
+  // the united kingdom resolves under the project code and the iso code
+  assert.equal(countryIntakeBounds("UK").name, countryIntakeBounds("GB").name);
+  // a code in neither table still refuses rather than defaulting open
+  assert.throws(() => countryIntakeBounds("ZQ"), /not yet enabled/);
+});

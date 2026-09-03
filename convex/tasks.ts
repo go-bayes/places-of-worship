@@ -15,7 +15,7 @@ import {
   taskType,
 } from "./model";
 import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser } from "./lib/auth";
-import { defaultTargetYears } from "./lib/countryYears";
+import { targetYearsOrEmpty } from "./lib/countryYears";
 import { assertAssertionMatchesTaskPoint, assertCountryAllowsAssertionMode } from "./lib/locationAssertions";
 import { issueBatchId, manualBatchId } from "./lib/rapidEntry";
 import {
@@ -1057,7 +1057,7 @@ export const createManualCandidateTask = mutation({
       assigned_to: user._id,
       claimed_by: user._id,
       claimed_at: now,
-      target_years: args.targetYears ?? defaultTargetYears(args.countryCode),
+      target_years: args.targetYears ?? targetYearsOrEmpty(args.countryCode),
       candidate_site_id: candidateSiteId,
       name: args.name,
       address: args.address,

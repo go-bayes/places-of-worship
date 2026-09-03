@@ -3,7 +3,7 @@ import type { Doc } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 import { mutation } from "./_generated/server";
 import { assertOwnsOrCanReview, chooseActorRole, requireUser } from "./lib/auth";
-import { defaultTargetYears } from "./lib/countryYears";
+import { targetYearsOrEmpty } from "./lib/countryYears";
 import {
   MEDIUM_TEXT_MAX,
   SHORT_TEXT_MAX,
@@ -299,7 +299,7 @@ export const submitCurrentObservation = mutation({
     }
     const intake = countryIntakeBounds(intakeCountry);
     const rapidEntryBatch = manualBatchId(intakeCountry);
-    const targetYears = defaultTargetYears(intakeCountry);
+    const targetYears = targetYearsOrEmpty(intakeCountry);
     const targetYearStatuses = Object.fromEntries(targetYears.map((year) => [String(year), "not_assessed" as const]));
 
     // Consume capacity only after malformed and unauthorised requests fail.

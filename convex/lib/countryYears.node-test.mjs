@@ -5,7 +5,7 @@ import test from "node:test";
 import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 
-import { DATE_FLOOR_YEARS, DEFAULT_DATE_FLOOR_YEAR, DEFAULT_TARGET_YEARS, dateFloorYear } from "./countryYears.ts";
+import { DATE_FLOOR_YEARS, DEFAULT_DATE_FLOOR_YEAR, DEFAULT_TARGET_YEARS, dateFloorYear, defaultTargetYears, targetYearsOrEmpty } from "./countryYears.ts";
 import { assertHistoricalClaim } from "./historicalClaims.ts";
 import { assertOccupancySegment } from "./occupancies.ts";
 
@@ -86,4 +86,12 @@ test("an occupancy segment honours the country floor", () => {
   assert.throws(() => assertOccupancySegment(segment, "2026-09-02"), /from 1600 onward/);
   assert.throws(() => assertOccupancySegment(segment, "2026-09-02", dateFloorYear("VU")), /from 1600 onward/);
   assert.doesNotThrow(() => assertOccupancySegment(segment, "2026-09-02", dateFloorYear("MX")));
+});
+
+test("a registry country carries no census years until one is ruled (r-h1)", () => {
+  assert.deepEqual(targetYearsOrEmpty("FJ"), []);
+  assert.deepEqual(targetYearsOrEmpty("fj"), []);
+  assert.deepEqual(targetYearsOrEmpty("NZ"), defaultTargetYears("NZ"));
+  // the throwing form stays for batch imports and seeds
+  assert.throws(() => defaultTargetYears("FJ"), /No default target years/);
 });

@@ -54,6 +54,14 @@ export function dateFloorYear(countryCode?: string): number {
 // resolve a country's default waves; callers should pass target years
 // explicitly — this exists so an omitted argument never inherits another
 // country's waves, and unknown countries fail loudly instead of silently
+// the census years a registry country carries until one is ruled: none.
+// every write path that used to demand a wave list reads this instead
+// (jb ruling r-h1, 2026-09-03); the throwing form below stays for batch
+// imports and seeds, where a wave list is genuinely required
+export function targetYearsOrEmpty(countryCode: string): number[] {
+  return DEFAULT_TARGET_YEARS[countryCode.toUpperCase()] ?? [];
+}
+
 export function defaultTargetYears(countryCode: string): number[] {
   const years = DEFAULT_TARGET_YEARS[countryCode.toUpperCase()];
   if (!years) {

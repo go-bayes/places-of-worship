@@ -26,8 +26,17 @@
         za: { code: "ZA", label: "South Africa" },
         zm: { code: "ZM", label: "Zambia" },
     };
-    const countryFromQuery = countryLabels[String(searchParams.get("country") || "").toLowerCase()];
-    const countryFromConfig = countryLabels[String(config.countryCode || "").toLowerCase()];
+    // every country has a review lane (jb ruling r-h1, 2026-09-03): a code
+    // outside the hand-named table resolves through the world registry
+    // (apps/shared/data/country-registry.js, generated)
+    const registry = new Map(((window.POW_COUNTRY_REGISTRY || {}).countries || [])
+        .map(entry => [String(entry.code || "").toLowerCase(), { code: String(entry.code || "").toUpperCase(), label: entry.name || String(entry.code || "").toUpperCase() }]));
+    const countryFor = value => {
+        const key = String(value || "").toLowerCase();
+        return countryLabels[key] || registry.get(key) || null;
+    };
+    const countryFromQuery = countryFor(searchParams.get("country"));
+    const countryFromConfig = countryFor(config.countryCode);
     const country = countryFromQuery || countryFromConfig || countryLabels.nz;
     const countryCode = country.code;
     const countryName = country.label;
