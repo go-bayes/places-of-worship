@@ -13,7 +13,7 @@ A place of worship has two histories that the portal now records unevenly. Where
 3. **Use frequency on a period.** Each period gains `use_frequency`, an ordinal: `regular` (weekly or more, the default), `monthly`, `several_times_a_year`, `annual`, `occasional` (rarer or irregular), `uncertain`. "Use became intermittent" in the chain splits the period at that date and sets the new period's frequency. The preview and the reviewer panel state the frequency beside the period. What frequency counts as "in use" for the census derivation is a definition-layer ruling (section 5); until ruled, periods at `annual`, `occasional`, or `uncertain` derive `uncertain` for the years they cover rather than `present`, and the rule is named (`intermittent_use`).
 4. **Storage.** The chain compiles to ordered `historical_claims` of kind denomination-or-affiliation state (existing contract) with a new `chain_index` and `chain_id`, one claim per state, plus one claim per rebuild; superseded on resubmission as a set, as periods are. No new table.
 5. **Derived denomination per census year.** A new derivation, `derived_target_year_functions`, one row per (parent draft, census year) naming the state in force with the same window logic as the presence rules (inside a state → that label; inside a change window → uncertain, both labels named; before the first or after the last state → not assessed). Reviewer confirms, overrides, or rejects it in the occupancy panel beside the presence row; only a reviewer action writes the year's denomination on the parent draft. The export gains `target_year_<Y>_denomination` and `_denomination_basis`.
-6. **Guide.** The Kohekohe walk-through (section 4a for the record, 4b marked as illustration) replaces the current one-claim-at-a-time description.
+6. **Guide.** The Kohekohe walk-through (section 4a for the record, 4b the fictional continuation) replaces the current one-claim-at-a-time description.
 
 ## 3. What the RA is never asked
 
@@ -23,7 +23,7 @@ A place of worship has two histories that the portal now records unevenly. Where
 
 ## 4. Kohekohe, entered
 
-Two parts. Section 4a is the record: the history of the Kohekohe Presbyterian Church (former), 1189 Awhitu Road, Waiuku, as given in the Auckland Council Heritage Unit's historic heritage evaluation of June 2017 (Rebecca Freeman), which adapts Paul Dixon, *Backbreak Peninsula* (2004), pp. 39–44. Section 4b is an illustration only: a fictional continuation after the deconsecration, written to exercise intermittent use (R-F1) and worship resumed (R-F5). It is not the record and must never be entered as evidence for this place.
+Two parts. Section 4a is the record: the history of the Kohekohe Presbyterian Church (former), 1189 Awhitu Road, Waiuku, as given in the Auckland Council Heritage Unit's historic heritage evaluation of June 2017 (Rebecca Freeman), which adapts Paul Dixon, *Backbreak Peninsula* (2004), pp. 39–44. Section 4b is a fictional continuation after the deconsecration, written to exercise intermittent use (R-F1) and worship resumed (R-F5). Never enter it as evidence for this place.
 
 ### 4a. The record (source: Auckland Council Heritage Unit, 2017, after Dixon 2004)
 
@@ -36,7 +36,7 @@ Two parts. Section 4a is the record: the history of the Kohekohe Presbyterian Ch
 
 The NZ census years all fall after the deconsecration, so the real record derives absent and no denomination for every target year. That is the correct answer, and the reviewer confirms it. Earlier target years, if a later product asks for them, derive the Presbyterian and shared-use states above.
 
-### 4b. Illustration only (fictional continuation; not the record)
+### 4b. Fictional continuation
 
 To show R-F1 and R-F5 at work, the tests and the guide use a fictional continuation of the Kohekohe shape. **None of the following happened.**
 
@@ -45,7 +45,7 @@ To show R-F1 and R-F5 at work, the tests and the guide use a fictional continuat
 | Intermittent use | Change: use became intermittent, 2014, frequency annual → a second period from 2014 at `annual`, same place. | 2018, 2023 uncertain (`intermittent_use`, rule 11) |
 | Worship resumed (R-F5) | Change: worship resumed, Anglican, 1950 (a separate contrived fixture with the desacralisation moved to 1930). | 1940 nothing; 1960 and 2013 Anglican |
 
-The automated fixtures (`convex/lib/functionChain.node-test.mjs`, `functionChainMirror.node-test.mjs`, `occupancyDerivationMirror.node-test.mjs`, `apps/regions/nz/js/assigned-periods-dom.test.cjs`) use these fictional dates and are labelled as illustrations. Whether the annual service is a period or a note was exactly ruling R-F1: recording it as an `annual` period keeps the fact in the data with an honest derived state; recording it as a note loses it from every product.
+The automated fixtures (`convex/lib/functionChain.node-test.mjs`, `functionChainMirror.node-test.mjs`, `occupancyDerivationMirror.node-test.mjs`, `apps/regions/nz/js/assigned-periods-dom.test.cjs`) use these fictional dates and are labelled as the fictional continuation. Whether the annual service is a period or a note was exactly ruling R-F1: recording it as an `annual` period keeps the fact in the data with an honest derived state; recording it as a note loses it from every product.
 
 ## 5. Decisions put to JB
 
@@ -69,7 +69,7 @@ The automated fixtures (`convex/lib/functionChain.node-test.mjs`, `functionChain
 
 - Server: `use_frequency` and `desacralised` on `site_occupancies` (schema, validators, mirror, export columns); `chain_id`/`chain_index` on historical claims; the function derivation with rules named; tests in `convex/lib/*.node-test.mjs` and a mirror tie test as PR-E's.
 - Portal: the chain block inside the guided form and the periods pane; the preview names the denomination per year beside the presence; the reviewer panel shows the function row with confirm / override / reject.
-- Live check on dev with a signed-in RA: Kohekohe entered as in section 4a derives the table's states (absent, no denomination, in every NZ census year), and the 4b illustration derives its stated states; the reviewer confirms; the export row carries the denomination columns.
+- Live check on dev with a signed-in RA: Kohekohe entered as in section 4a derives the table's states (absent, no denomination, in every NZ census year), and the 4b fictional continuation derives its stated states; the reviewer confirms; the export row carries the denomination columns.
 - Convex before static: this PR touches `convex/`; deploy before merge.
 
 ## 7. Sequence

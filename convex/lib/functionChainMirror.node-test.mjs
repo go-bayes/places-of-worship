@@ -1,7 +1,7 @@
 // holds the portal's function-chain mirror (apps/regions/nz/js/function-chain-contract.js)
 // equal to the server (convex/lib/functionChain.ts) on the brief's worked
 // case and a fixture set that fires every function rule, and asserts the
-// exact per-year output for the kohekohe-shaped illustration (fictional dates)
+// exact per-year output for the kohekohe fictional continuation
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
@@ -21,7 +21,7 @@ const REF = "2024-05";
 
 // form-shaped fixtures, as the cards hold them
 const FIXTURES = {
-  "kohekohe illustration (brief section 4b, fictional dates)": {
+  "kohekohe fictional continuation (brief section 4b)": {
     start: { label: "Presbyterian", labelBasis: "named_documentary_source", dateMode: "known", date: "1888", notEarlierThan: "", notLaterThan: "", around: true },
     changes: [
       { change: "shared_use_began", label: "Methodist", note: "", frequency: "", dateMode: "between", date: "", notEarlierThan: "1920", notLaterThan: "1929", around: false },
@@ -75,10 +75,10 @@ test("every function rule fires at least once across the fixtures", () => {
 });
 
 test("worked case: kohekohe derives presbyterian in 2013 and nothing after the desacralisation", () => {
-  const rows = mirror.deriveFunctions(FIXTURES["kohekohe illustration (brief section 4b, fictional dates)"], NZ);
+  const rows = mirror.deriveFunctions(FIXTURES["kohekohe fictional continuation (brief section 4b)"], NZ);
   assert.deepEqual(rows.map((r) => `${r.target_year}:${r.derived_status}:${r.label}`), ["2013:stated:Presbyterian"]);
   // p2-3: shared use ended by 1930, so 1930 is uncertain between both labels on both sides
-  const y1930 = mirror.deriveFunctions(FIXTURES["kohekohe illustration (brief section 4b, fictional dates)"], [1930]);
+  const y1930 = mirror.deriveFunctions(FIXTURES["kohekohe fictional continuation (brief section 4b)"], [1930]);
   assert.deepEqual(y1930.map((r) => `${r.target_year}:${r.derived_status}:${r.candidate_labels.join("|")}:${r.rule_id}`), [
     "1930:uncertain:Presbyterian, shared with Methodist|Presbyterian:within_change_window",
   ]);
@@ -108,11 +108,11 @@ test("worked case (r-f5): the gap derives nothing and the resumed state derives 
 });
 
 test("the mirror refuses what the server refuses", () => {
-  const bad = { ...FIXTURES["kohekohe illustration (brief section 4b, fictional dates)"], start: { ...FIXTURES["kohekohe illustration (brief section 4b, fictional dates)"].start, label: "" } };
+  const bad = { ...FIXTURES["kohekohe fictional continuation (brief section 4b)"], start: { ...FIXTURES["kohekohe fictional continuation (brief section 4b)"].start, label: "" } };
   assert.match(mirror.validateChain(bad, REF), /Name the tradition/);
   assert.throws(() => assertFunctionChain(mirror.payload(bad), REF), /Name the tradition/);
   // p2-2: a latest-only desacralisation is refused with the same words on both sides
-  const byDesacralised = { ...FIXTURES["kohekohe illustration (brief section 4b, fictional dates)"], changes: [{ change: "desacralised", label: "", note: "", frequency: "", dateMode: "by", date: "", notEarlierThan: "", notLaterThan: "2014", around: false }] };
+  const byDesacralised = { ...FIXTURES["kohekohe fictional continuation (brief section 4b)"], changes: [{ change: "desacralised", label: "", note: "", frequency: "", dateMode: "by", date: "", notEarlierThan: "", notLaterThan: "2014", around: false }] };
   const message = mirror.validateChain(byDesacralised, REF);
   assert.match(message, /latest date alone cannot close the period/);
   assert.throws(() => assertFunctionChain(mirror.payload(byDesacralised), REF), new RegExp(message.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
@@ -120,14 +120,14 @@ test("the mirror refuses what the server refuses", () => {
   const untouched = mirror.applyToPeriods(byDesacralised, [{ startMode: "known", startDate: "1888", startBasis: "founding_stated", endMode: "still_active", stillActiveAsof: REF, useFrequency: "regular", sameAsPin: true }], REF);
   assert.equal(untouched.segments[0].endMode, "still_active");
   assert.deepEqual(untouched.notes, []);
-  const unordered = { ...FIXTURES["kohekohe illustration (brief section 4b, fictional dates)"], changes: [FIXTURES["kohekohe illustration (brief section 4b, fictional dates)"].changes[2], FIXTURES["kohekohe illustration (brief section 4b, fictional dates)"].changes[0]] };
+  const unordered = { ...FIXTURES["kohekohe fictional continuation (brief section 4b)"], changes: [FIXTURES["kohekohe fictional continuation (brief section 4b)"].changes[2], FIXTURES["kohekohe fictional continuation (brief section 4b)"].changes[0]] };
   assert.match(mirror.validateChain(unordered, REF), /date order/);
   assert.throws(() => assertFunctionChain(mirror.payload(unordered), REF), /date order/);
 });
 
 test("the chain writes the period it closes and the period it splits (brief 2.2, 2.3)", () => {
   const cards = [{ startMode: "known", startDate: "1888", startAround: true, startBasis: "founding_stated", endMode: "still_active", stillActiveAsof: REF, endBasis: "", endReason: "", useFrequency: "regular", sameAsPin: true, location: null }];
-  const applied = mirror.applyToPeriods(FIXTURES["kohekohe illustration (brief section 4b, fictional dates)"], cards, REF);
+  const applied = mirror.applyToPeriods(FIXTURES["kohekohe fictional continuation (brief section 4b)"], cards, REF);
   assert.equal(applied.segments.length, 2);
   assert.equal(applied.segments[0].endMode, "known");
   assert.equal(applied.segments[0].endDate, "2014");
@@ -138,13 +138,13 @@ test("the chain writes the period it closes and the period it splits (brief 2.2,
   assert.equal(applied.segments[1].endMode, "still_active");
   assert.equal(applied.segments[1].useFrequency, "annual");
   // applying again changes nothing
-  const again = mirror.applyToPeriods(FIXTURES["kohekohe illustration (brief section 4b, fictional dates)"], applied.segments, REF);
+  const again = mirror.applyToPeriods(FIXTURES["kohekohe fictional continuation (brief section 4b)"], applied.segments, REF);
   assert.equal(again.segments.length, 2);
   assert.deepEqual(again.notes, []);
   // the stored payload round-trips to the form shape
-  const back = mirror.chainFromPayload(mirror.payload(FIXTURES["kohekohe illustration (brief section 4b, fictional dates)"]));
+  const back = mirror.chainFromPayload(mirror.payload(FIXTURES["kohekohe fictional continuation (brief section 4b)"]));
   assert.equal(back.start.label, "Presbyterian");
   assert.equal(back.changes.length, 4);
   assert.equal(back.changes[3].frequency, "annual");
-  assert.deepEqual(mirror.payload(back).changes, mirror.payload(FIXTURES["kohekohe illustration (brief section 4b, fictional dates)"]).changes);
+  assert.deepEqual(mirror.payload(back).changes, mirror.payload(FIXTURES["kohekohe fictional continuation (brief section 4b)"]).changes);
 });

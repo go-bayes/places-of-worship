@@ -184,7 +184,7 @@ test("gapBounds puts the doubt into bounds, never a date", () => {
   assert.equal(onlyEarliest.first.endMode, "after");
 });
 
-test("worked case (pr-f, kohekohe-shaped illustration, fictional dates): desacralised 2014 with an annual service after derives present, uncertain, uncertain", () => {
+test("worked case (pr-f, kohekohe fictional continuation): desacralised 2014 with an annual service after derives present, uncertain, uncertain", () => {
   assert.deepEqual(statuses(FIXTURES["intermittent use after desacralisation (rule 11, pr-f)"]), [
     "2013:present:inside_interval",
     "2018:uncertain:intermittent_use",
