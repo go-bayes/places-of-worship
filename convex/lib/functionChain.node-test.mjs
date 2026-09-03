@@ -56,6 +56,52 @@ const KOHEKOHE_PERIODS = [
   },
 ];
 
+// ruling r-f5 (option 2): the same building deconsecrated 1930 and resumed
+// as anglican in 1950 is one chain on one site
+const RESUMED = {
+  contract_version: "function_chain_v1",
+  start: { label: "Presbyterian", date: known("1888") },
+  changes: [
+    { change: "desacralised", date: known("1930") },
+    { change: "worship_resumed", label: "Anglican", date: known("1950") },
+  ],
+};
+const RESUMED_PERIODS = [
+  { ...KOHEKOHE_PERIODS[0], start_mode: "known", start_date: "1888", start_not_earlier_than: undefined, start_not_later_than: undefined, end_date: "1930" },
+  { ...KOHEKOHE_PERIODS[1], start_date: "1950", start_basis: "reopening_stated", use_frequency: "regular" },
+];
+
+test("r-f5: worship resumed after a desacralisation is one chain, deriving the new label after the gap", () => {
+  assert.doesNotThrow(() => assertFunctionChain(RESUMED, REF));
+  const { states, events } = compileChain(RESUMED);
+  assert.deepEqual(states.map(stateLabel), ["Presbyterian", "Anglican"]);
+  assert.equal(states[0].ended_by, "desacralised");
+  assert.equal(states[1].began_by, "worship_resumed");
+  assert.deepEqual(events.map((e) => e.change), ["desacralised"]);
+  assert.deepEqual(deriveFunctions(RESUMED, [1925, 1940, 1960, 2013]).map((r) => `${r.target_year}:${r.derived_status}:${r.label}:${r.rule_id}`), [
+    "1925:stated:Presbyterian:inside_state",
+    "1960:stated:Anglican:inside_state",
+    "2013:stated:Anglican:inside_state",
+  ]);
+  // a resumption dated by bounds has its own start window
+  const bounded = { ...RESUMED, changes: [RESUMED.changes[0], { change: "worship_resumed", label: "Anglican", date: between("1948", "1952") }] };
+  assert.deepEqual(deriveFunctions(bounded, [1950]).map((r) => `${r.target_year}:${r.derived_status}:${r.candidate_labels.join("|")}:${r.rule_id}`), ["1950:uncertain:Anglican:within_start_window"]);
+  // after the resumption ordinary changes are permitted again
+  const again = { ...RESUMED, changes: [...RESUMED.changes, { change: "denomination_changed", label: "Uniting", date: known("1970") }] };
+  assert.doesNotThrow(() => assertFunctionChain(again, REF));
+  assert.deepEqual(deriveFunctions(again, [1980]).map((r) => r.label), ["Uniting"]);
+  // and the resumption is refused without a desacralisation, or without its label
+  assert.throws(() => assertFunctionChain({ ...RESUMED, changes: [RESUMED.changes[1]] }, REF), /only after a recorded desacralisation/);
+  assert.throws(() => assertFunctionChain({ ...RESUMED, changes: [RESUMED.changes[0], { change: "worship_resumed", date: known("1950") }] }, REF), /denomination that resumed worship/);
+  // the periods must carry the stated reopening
+  assert.doesNotThrow(() => assertChainAgreesWithPeriods(RESUMED, RESUMED_PERIODS));
+  const notReopened = RESUMED_PERIODS.map((s) => (s.segment_index === 1 ? { ...s, start_basis: "first_seen_only" } : s));
+  assert.throws(() => assertChainAgreesWithPeriods(RESUMED, notReopened), /basis reopening stated/);
+  // presence across the gap: absent between the stated closure and the stated reopening
+  const segments = RESUMED_PERIODS.map((s, i) => ({ ...s, occupancy_id: `s${i}`, ...AT }));
+  assert.deepEqual(derivePresence(segments, [1925, 1940, 1960]).map((r) => `${r.target_year}:${r.derived_status}`), ["1925:present", "1940:absent", "1960:present"]);
+});
+
 test("kohekohe compiles to three states and two events", () => {
   const { states, events } = compileChain(KOHEKOHE);
   assert.deepEqual(states.map(stateLabel), ["Presbyterian", "Presbyterian, shared with Methodist", "Presbyterian"]);

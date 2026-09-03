@@ -24,15 +24,20 @@ export type ChainChange =
   | "building_rebuilt"
   | "use_became_intermittent"
   | "desacralised"
+  | "worship_resumed"
   | "other";
 
+// eight changes: the seven of ruling r-f3 and worship_resumed (ruling r-f5,
+// jb 2026-09-03, option 2): a deconsecrated building that returns to
+// worship under another or the same denomination stays one chain
 export const CHAIN_CHANGES: readonly ChainChange[] = [
   "denomination_changed", "shared_use_began", "shared_use_ended", "building_rebuilt",
-  "use_became_intermittent", "desacralised", "other",
+  "use_became_intermittent", "desacralised", "worship_resumed", "other",
 ];
 
-// the changes that end one function state and begin the next
-const STATE_CHANGES = new Set<ChainChange>(["denomination_changed", "shared_use_began", "shared_use_ended", "desacralised"]);
+// the changes that end one function state and begin the next; a
+// resumption begins a state after the gap a desacralisation left
+const STATE_CHANGES = new Set<ChainChange>(["denomination_changed", "shared_use_began", "shared_use_ended", "desacralised", "worship_resumed"]);
 
 export type ChainDateInput = {
   mode: "known" | "between" | "by";
@@ -125,6 +130,9 @@ function assertChainDate(label: string, date: ChainDateInput, referenceDate: str
 // a desacralisation closes a period, and a period's end has no latest-only
 // mode; the same wording refuses it on the client
 export const DESACRALISED_BY_DATE_MESSAGE = "A desacralisation needs its date, or the earliest and latest dates it could have been; a latest date alone cannot close the period.";
+// a resumption only makes sense after the chain records the desacralisation
+// it follows; the same wording refuses it on the client
+export const RESUMED_NEEDS_DESACRALISATION_MESSAGE = "Worship can resume only after a recorded desacralisation; add the desacralisation first.";
 
 export const CHAIN_CHANGE_TEXT: Record<ChainChange, string> = {
   denomination_changed: "denomination changed",
@@ -133,6 +141,7 @@ export const CHAIN_CHANGE_TEXT: Record<ChainChange, string> = {
   building_rebuilt: "building rebuilt",
   use_became_intermittent: "use became intermittent",
   desacralised: "desacralised",
+  worship_resumed: "worship resumed",
   other: "other change",
 };
 
@@ -177,9 +186,10 @@ export function assertFunctionChain(
     }
     previousLower = bounds.lower ?? previousLower;
     const changeLabel = t(change.label);
-    if (change.change === "denomination_changed" || change.change === "shared_use_began") {
+    if (change.change === "denomination_changed" || change.change === "shared_use_began" || change.change === "worship_resumed") {
       if (changeLabel.length < MIN_LABEL) {
-        throw new Error(`${label}: name the ${change.change === "shared_use_began" ? "group that shared the place" : "new denomination"}, as the source gives it.`);
+        const what = change.change === "shared_use_began" ? "group that shared the place" : change.change === "worship_resumed" ? "denomination that resumed worship" : "new denomination";
+        throw new Error(`${label}: name the ${what}, as the source gives it.`);
       }
     }
     if (changeLabel.length > SHORT_TEXT_MAX) {
@@ -206,8 +216,13 @@ export function assertFunctionChain(
     } else if (change.use_frequency !== undefined) {
       throw new Error(`${label}: only "use became intermittent" carries a frequency.`);
     }
-    if (desacralisedAt >= 0 && STATE_CHANGES.has(change.change)) {
-      throw new Error(`${label}: after a desacralisation only intermittent use, a rebuild, or a note can follow.`);
+    if (change.change === "worship_resumed") {
+      if (desacralisedAt < 0) throw new Error(`${label}: ${RESUMED_NEEDS_DESACRALISATION_MESSAGE}`);
+      // the chain is open again: ordinary changes may follow
+      desacralisedAt = -1;
+      sharedInForce = false;
+    } else if (desacralisedAt >= 0 && STATE_CHANGES.has(change.change)) {
+      throw new Error(`${label}: after a desacralisation only worship resuming, intermittent use, a rebuild, or a note can follow.`);
     }
     if (change.change === "desacralised") {
       if (desacralisedAt >= 0) throw new Error(`${label}: the chain already records a desacralisation.`);
@@ -242,6 +257,16 @@ export function assertChainAgreesWithPeriods(chain: FunctionChainInput, segments
       });
       if (!begun) {
         throw new Error("Intermittent use in the chain needs its period: begin a period at that date with the same frequency.");
+      }
+    }
+    // a resumption opens a period whose start is the stated reopening (pr-e rule 2b)
+    if (change.change === "worship_resumed") {
+      const reopened = segments.some((s) => {
+        const b = segmentBounds(s);
+        return s.start_basis === "reopening_stated" && overlaps(at, { lower: b.startLower, upper: b.startUpper });
+      });
+      if (!reopened) {
+        throw new Error("Worship resumed in the chain needs its period: begin a period at that date with the basis reopening stated.");
       }
     }
   }
@@ -280,6 +305,12 @@ export function compileChain(chain: FunctionChainInput): { states: FunctionState
     const current = states[states.length - 1];
     if (!STATE_CHANGES.has(change.change)) {
       events.push({ index: index + 1, change: change.change, date: change.date, label: t(change.label) || undefined, note: t(change.note) || undefined, use_frequency: change.use_frequency });
+      return;
+    }
+    if (change.change === "worship_resumed") {
+      // the previous state ended at the desacralisation; the resumed state
+      // begins after the gap
+      states.push({ index: states.length, label: t(change.label), began_by: change.change, from: change.date });
       return;
     }
     current.to = change.date;
@@ -330,8 +361,9 @@ export function deriveFunctions(chain: FunctionChainInput, targetYears: readonly
         row = { target_year: year, derived_status: "stated", label: stateLabel(state), candidate_labels: [stateLabel(state)], rule_id: "inside_state" };
         break;
       }
-      // the start window of the first state: the year may precede the label
-      if (i === 0 && from.upper !== undefined && yStart < from.upper && (from.lower === undefined || yEnd >= from.lower)) {
+      // the start window of the first state, or of a state that resumed
+      // worship after a gap: the year may precede the label
+      if ((i === 0 || state.began_by === "worship_resumed") && from.upper !== undefined && yStart < from.upper && (from.lower === undefined || yEnd >= from.lower)) {
         row = { target_year: year, derived_status: "uncertain", candidate_labels: [stateLabel(state)], rule_id: "within_start_window" };
         break;
       }
@@ -363,5 +395,5 @@ export function functionChainInputsHash(chain: FunctionChainInput): string {
 export const FUNCTION_RULE_TEXT: Record<FunctionRuleId, string> = {
   inside_state: "the year falls inside one recorded function state",
   within_change_window: "the year falls inside the window of a change, so both labels are candidates",
-  within_start_window: "the year falls inside the start window of the first recorded state",
+  within_start_window: "the year falls inside the start window of the first recorded state, or of the state that resumed worship after a gap",
 };

@@ -15,12 +15,14 @@
         return Number.isInteger(value) && value > 0 ? value : 1600;
     }
 
-    const CHANGES = ["denomination_changed", "shared_use_began", "shared_use_ended", "building_rebuilt", "use_became_intermittent", "desacralised", "other"];
-    const STATE_CHANGES = new Set(["denomination_changed", "shared_use_began", "shared_use_ended", "desacralised"]);
+    const CHANGES = ["denomination_changed", "shared_use_began", "shared_use_ended", "building_rebuilt", "use_became_intermittent", "desacralised", "worship_resumed", "other"];
+    const STATE_CHANGES = new Set(["denomination_changed", "shared_use_began", "shared_use_ended", "desacralised", "worship_resumed"]);
     const USE_FREQUENCIES = ["regular", "monthly", "several_times_a_year", "annual", "occasional", "uncertain"];
 
     // mirrors DESACRALISED_BY_DATE_MESSAGE in convex/lib/functionChain.ts
     const DESACRALISED_BY_DATE_MESSAGE = "A desacralisation needs its date, or the earliest and latest dates it could have been; a latest date alone cannot close the period.";
+    // mirrors RESUMED_NEEDS_DESACRALISATION_MESSAGE in convex/lib/functionChain.ts
+    const RESUMED_NEEDS_DESACRALISATION_MESSAGE = "Worship can resume only after a recorded desacralisation; add the desacralisation first.";
 
     // mirrors CHAIN_CHANGE_TEXT in convex/lib/functionChain.ts
     const CHANGE_WORDS = {
@@ -30,6 +32,7 @@
         building_rebuilt: "building rebuilt",
         use_became_intermittent: "use became intermittent",
         desacralised: "desacralised",
+        worship_resumed: "worship resumed",
         other: "other change",
     };
 
@@ -203,8 +206,9 @@
             if (ordering < previousLower) return `${label} is dated before the change that precedes it; the chain runs in date order.`;
             previousLower = bounds.lower || previousLower;
             const changeLabel = text(change.label);
-            if ((change.change === "denomination_changed" || change.change === "shared_use_began") && changeLabel.length < MIN_LABEL) {
-                return `${label}: name the ${change.change === "shared_use_began" ? "group that shared the place" : "new denomination"}, as the source gives it.`;
+            if ((change.change === "denomination_changed" || change.change === "shared_use_began" || change.change === "worship_resumed") && changeLabel.length < MIN_LABEL) {
+                const what = change.change === "shared_use_began" ? "group that shared the place" : change.change === "worship_resumed" ? "denomination that resumed worship" : "new denomination";
+                return `${label}: name the ${what}, as the source gives it.`;
             }
             if (changeLabel.length > MAX_LABEL) return `${label}: the label must be ${MAX_LABEL} characters or fewer.`;
             if (change.change === "shared_use_began") {
@@ -219,7 +223,13 @@
             if (change.change === "use_became_intermittent" && !USE_FREQUENCIES.includes(change.use_frequency || "")) {
                 return `${label}: say how often the place was used after the change (annual, occasional, or uncertain).`;
             }
-            if (desacralised && STATE_CHANGES.has(change.change)) return `${label}: after a desacralisation only intermittent use, a rebuild, or a note can follow.`;
+            if (change.change === "worship_resumed") {
+                if (!desacralised) return `${label}: ${RESUMED_NEEDS_DESACRALISATION_MESSAGE}`;
+                desacralised = false;
+                sharedInForce = false;
+            } else if (desacralised && STATE_CHANGES.has(change.change)) {
+                return `${label}: after a desacralisation only worship resuming, intermittent use, a rebuild, or a note can follow.`;
+            }
             if (change.change === "desacralised") {
                 if (desacralised) return `${label}: the chain already records a desacralisation.`;
                 if (change.date.mode === "by") return DESACRALISED_BY_DATE_MESSAGE;
@@ -242,6 +252,10 @@
             const current = states[states.length - 1];
             if (!STATE_CHANGES.has(change.change)) {
                 events.push({ index: index + 1, change: change.change, date: change.date, label: change.label, note: change.note, use_frequency: change.use_frequency });
+                return;
+            }
+            if (change.change === "worship_resumed") {
+                states.push({ index: states.length, label: change.label, began_by: change.change, from: change.date });
                 return;
             }
             current.to = change.date;
@@ -275,7 +289,7 @@
                     row = { target_year: Number(year), derived_status: "stated", label: stateLabel(state), candidate_labels: [stateLabel(state)], rule_id: "inside_state" };
                     break;
                 }
-                if (i === 0 && from.upper !== undefined && yStart < from.upper && (from.lower === undefined || yEnd >= from.lower)) {
+                if ((i === 0 || state.began_by === "worship_resumed") && from.upper !== undefined && yStart < from.upper && (from.lower === undefined || yEnd >= from.lower)) {
                     row = { target_year: Number(year), derived_status: "uncertain", candidate_labels: [stateLabel(state)], rule_id: "within_start_window" };
                     break;
                 }
@@ -351,7 +365,12 @@
         (chain.changes || []).forEach((change, index) => {
             const d = normaliseDate(change);
             if (change.change === "desacralised" && cards.length) {
-                const target = [...cards].reverse().find(seg => seg.endReason === "desacralised" || (seg.endMode === "still_active" && inUse(seg)));
+                // the period it closes began no later than the desacralisation,
+                // so a period that resumed worship afterwards is never the target
+                const dUpper = partialDateUpper(d.dateMode === "known" ? d.date : d.notLaterThan);
+                const startUpper = seg => partialDateUpper(seg.startMode === "known" ? text(seg.startDate) : text(seg.startNotLaterThan));
+                const target = [...cards].reverse().find(seg => (seg.endReason === "desacralised" && endsAt(seg, d))
+                    || (seg.endMode === "still_active" && inUse(seg) && startUpper(seg) && startUpper(seg) <= dUpper));
                 if (!target) return;
                 if (target.endReason === "desacralised" && endsAt(target, d)) return;
                 if (!endAt(target, d, "desacralised")) return;
@@ -383,6 +402,32 @@
                     useFrequency: change.frequency,
                 });
                 notes.push(`Period ${cards.length} added from ${dateText(p.changes[index].date)} at ${change.frequency.replaceAll("_", " ")} use, same place.`);
+            }
+            // r-f5: worship resumed opens a period whose start is the stated
+            // reopening (pr-e rule 2b); a by-date is a supported start mode
+            if (change.change === "worship_resumed" && cards.length) {
+                if (cards.some(seg => seg.startBasis === "reopening_stated" && startsAt(seg, d))) return;
+                const seg = cards[cards.length - 1];
+                const asof = seg.stillActiveAsof || referenceDate || "";
+                cards.push({
+                    ...seg,
+                    startMode: d.dateMode === "known" ? "known" : d.dateMode === "between" ? "between" : "by",
+                    startDate: d.dateMode === "known" ? d.date : "",
+                    startNotEarlierThan: d.dateMode === "between" ? d.notEarlierThan : "",
+                    startNotLaterThan: d.dateMode !== "known" ? d.notLaterThan : "",
+                    startAround: false,
+                    startBasis: "reopening_stated",
+                    endMode: "still_active",
+                    endDate: "",
+                    endNotEarlierThan: "",
+                    endNotLaterThan: "",
+                    endAround: false,
+                    endBasis: "",
+                    endReason: "",
+                    stillActiveAsof: asof,
+                    useFrequency: "regular",
+                });
+                notes.push(`Period ${cards.length} added from ${dateText(p.changes[index].date)}, reopening stated, same place.`);
             }
         });
         return { segments: cards, notes };

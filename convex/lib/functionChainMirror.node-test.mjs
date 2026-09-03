@@ -30,6 +30,13 @@ const FIXTURES = {
       { change: "use_became_intermittent", label: "", note: "", frequency: "annual", dateMode: "known", date: "2014", notEarlierThan: "", notLaterThan: "", around: false },
     ],
   },
+  "desacralised then resumed as anglican (r-f5)": {
+    start: { label: "Presbyterian", labelBasis: "", dateMode: "known", date: "1888", notEarlierThan: "", notLaterThan: "", around: false },
+    changes: [
+      { change: "desacralised", label: "", note: "", frequency: "", dateMode: "known", date: "1930", notEarlierThan: "", notLaterThan: "", around: false },
+      { change: "worship_resumed", label: "Anglican", note: "", frequency: "", dateMode: "known", date: "1950", notEarlierThan: "", notLaterThan: "", around: false },
+    ],
+  },
   "denomination changed with a dated window": {
     start: { label: "Wesleyan", labelBasis: "", dateMode: "known", date: "1900", notEarlierThan: "", notLaterThan: "", around: false },
     changes: [
@@ -54,7 +61,7 @@ for (const [name, chain] of Object.entries(FIXTURES)) {
     const payload = mirror.payload(chain);
     assert.doesNotThrow(() => assertFunctionChain(payload, REF));
     assert.equal(mirror.validateChain(chain, REF), "");
-    assert.deepEqual(strip(mirror.deriveFunctions(chain, [...NZ, 1888, 1925, 1930, 1935, 2016, 2018])), strip(deriveFunctions(payload, [...NZ, 1888, 1925, 1930, 1935, 2016, 2018])));
+    assert.deepEqual(strip(mirror.deriveFunctions(chain, [...NZ, 1888, 1925, 1930, 1935, 1940, 1960, 2016, 2018])), strip(deriveFunctions(payload, [...NZ, 1888, 1925, 1930, 1935, 1940, 1960, 2016, 2018])));
     assert.deepEqual(mirror.compileChain(chain).states.map((s) => mirror.stateLabel(s)), compileChain(payload).states.map(stateLabel));
   });
 }
@@ -76,6 +83,28 @@ test("worked case: kohekohe derives presbyterian in 2013 and nothing after the d
     "1930:uncertain:Presbyterian, shared with Methodist|Presbyterian:within_change_window",
   ]);
   assert.equal(mirror.describeFunctions(rows, NZ), "Denomination: 2013 Presbyterian (inside the recorded state); 2018 not assessed; 2023 not assessed.");
+});
+
+test("worked case (r-f5): the gap derives nothing and the resumed state derives the new label on both sides", () => {
+  const chain = FIXTURES["desacralised then resumed as anglican (r-f5)"];
+  const expected = ["1925:stated:Presbyterian:inside_state", "1960:stated:Anglican:inside_state"];
+  const words = (rows) => rows.map((r) => `${r.target_year}:${r.derived_status}:${r.label}:${r.rule_id}`);
+  assert.deepEqual(words(mirror.deriveFunctions(chain, [1925, 1940, 1960])), expected);
+  assert.deepEqual(words(deriveFunctions(mirror.payload(chain), [1925, 1940, 1960])), expected);
+  // the same refusal on both sides when the desacralisation is missing
+  const noGap = { ...chain, changes: [chain.changes[1]] };
+  const message = mirror.validateChain(noGap, REF);
+  assert.match(message, /only after a recorded desacralisation/);
+  assert.throws(() => assertFunctionChain(mirror.payload(noGap), REF), new RegExp(message.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  // the resumption opens a period with the stated reopening
+  const cards = [{ startMode: "known", startDate: "1888", startBasis: "founding_stated", endMode: "still_active", stillActiveAsof: REF, useFrequency: "regular", sameAsPin: true, location: null }];
+  const applied = mirror.applyToPeriods(chain, cards, REF);
+  assert.equal(applied.segments.length, 2);
+  assert.equal(applied.segments[0].endReason, "desacralised");
+  assert.equal(applied.segments[1].startDate, "1950");
+  assert.equal(applied.segments[1].startBasis, "reopening_stated");
+  assert.equal(applied.segments[1].endMode, "still_active");
+  assert.deepEqual(mirror.applyToPeriods(chain, applied.segments, REF).notes, []);
 });
 
 test("the mirror refuses what the server refuses", () => {

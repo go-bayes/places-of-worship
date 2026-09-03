@@ -46,6 +46,7 @@
         building_rebuilt: "building rebuilt",
         use_became_intermittent: "use became intermittent",
         desacralised: "desacralised",
+        worship_resumed: "worship resumed",
         other: "other change",
     };
 

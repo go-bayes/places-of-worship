@@ -327,7 +327,7 @@ export const functionChainContractVersion = v.literal("function_chain_v1");
 export const functionChainChange = v.union(
   v.literal("denomination_changed"), v.literal("shared_use_began"), v.literal("shared_use_ended"),
   v.literal("building_rebuilt"), v.literal("use_became_intermittent"), v.literal("desacralised"),
-  v.literal("other"),
+  v.literal("worship_resumed"), v.literal("other"),
 );
 export const functionChainDateInput = v.object({
   mode: v.union(v.literal("known"), v.literal("between"), v.literal("by")),

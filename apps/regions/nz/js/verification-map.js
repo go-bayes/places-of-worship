@@ -779,6 +779,7 @@ const FUNCTION_CHAIN_CHANGE_OPTIONS = [
     ["building_rebuilt", "Building rebuilt"],
     ["use_became_intermittent", "Use became intermittent"],
     ["desacralised", "Desacralised"],
+    ["worship_resumed", "Worship resumed"],
     ["other", "Other change"],
 ];
 const FUNCTION_CHAIN_DATE_MODE_OPTIONS = [
@@ -6364,8 +6365,12 @@ class NzVerificationMap {
         const labelBasis = `<option value="">Label basis (choose one)...</option>${selectOptionsHtml(DENOMINATION_LABEL_BASIS_OPTIONS, c.start.labelBasis || "")}`;
         const changeRows = (c.changes || []).map((change, index) => {
             const words = FUNCTION_CHAIN_CHANGE_OPTIONS.find(([value]) => value === change.change)?.[1] || change.change;
-            const needsLabel = change.change === "denomination_changed" || change.change === "shared_use_began";
-            const labelPlaceholder = change.change === "shared_use_began" ? "Group that shared the place, as the source gives it" : "New denomination, as the source gives it";
+            const needsLabel = change.change === "denomination_changed" || change.change === "shared_use_began" || change.change === "worship_resumed";
+            const labelPlaceholder = change.change === "shared_use_began"
+                ? "Group that shared the place, as the source gives it"
+                : change.change === "worship_resumed"
+                    ? "Denomination that resumed worship, as the source gives it"
+                    : "New denomination, as the source gives it";
             return `
                 <fieldset class="chain-change" data-chain-index="${index}">
                     <legend>Change ${index + 1}: ${escapeHtml(words)}</legend>
