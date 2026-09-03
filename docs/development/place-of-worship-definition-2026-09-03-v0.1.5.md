@@ -1,8 +1,8 @@
 # Operational definition of a place of worship
 
-**At a specified time, a place of worship is a reproducibly mappable site for which source evidence supports recurring religious worship by or for a community.**
+Version: 0.1.5. Date: 2026-09-03. Status: adopted working operational definition. This dated snapshot preserves version 0.1.5. The [canonical operational definition](../operational-definition.md) presents the current version.
 
-Current version: 0.1.5. Adopted: 2026-09-03.
+**At a specified time, a place of worship is a reproducibly mappable site for which source evidence supports recurring religious worship by or for a community.**
 
 ## Criteria
 
@@ -34,6 +34,6 @@ Source records, OpenStreetMap objects, and field observations provide evidence a
 
 Each study states its target population, observation times, evidence standard, and filters.
 
-## Version history
+## Revision note (0.1.4 → 0.1.5)
 
-Versioned snapshots preserve the rule used by each study: [version 0.1.5](development/place-of-worship-definition-2026-09-03-v0.1.5.md), [version 0.1.4](development/place-of-worship-definition-2026-09-01-v0.1.4.md), [version 0.1.3](development/place-of-worship-definition-2026-08-31-v0.1.3.md), [version 0.1.2](development/place-of-worship-definition-2026-08-27-v0.1.2.md), [version 0.1.1](development/place-of-worship-definition-2026-08-27-v0.1.1.md), [version 0.1.0](development/place-of-worship-definition-2026-08-27.md), and the [version 0.0.1 discussion draft](development/place-of-worship-definition-2026-08-22.md). A later revision records its implications for accepted states, event derivations, study populations, and earlier estimates.
+This revision states the frequency threshold for the census-year derivation (JB ruling R-F1, 2026-09-03, `docs/development/function-chain-brief-2026-09-02.md`). Version 0.1.4 admitted seasonal practice and an established annual pilgrimage as recurring worship without saying how a recorded frequency bears on a census year. Version 0.1.5 keeps that admission for the definition and fixes the derivation: regular, monthly, and several-times-a-year use establishes a place of worship in use for the years a period covers; annual, occasional, and uncertain use covers them without establishing it, so those years derive uncertain and reach a recorded state only by reviewer decision. The rule is deliberately conservative: an annual service in a deconsecrated building keeps the fact in the data with an honest derived state rather than losing it from every product. Identity over time, the one-place-at-a-time constraint, accepted states, event derivations, study populations, and earlier estimates are unaffected; a study that treats annual worship as in use states that choice and re-derives from the recorded frequency.

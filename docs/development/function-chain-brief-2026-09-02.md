@@ -1,6 +1,6 @@
 # PR-F build brief — the function chain and intermittent use (2026-09-02)
 
-Status: build spec, drafted at JB's request on 2026-09-02 (evening) from his Kohekohe example. Builds on PR-E (`assigned-task-periods-brief-2026-09-02.md`, rulings R-E1–R-E4) and the occupancy lane (`occupancy-build-brief-2026-09-02.md`). Nothing here asks the RA about a census year: the census-year states keep deriving from the periods, and the denomination per census year will derive from the chain.
+Status: BUILT 2026-09-03 on `feat/function-chain` after JB's rulings R-F1–R-F4 (section 5a); build spec drafted at JB's request on 2026-09-02 (evening) from his Kohekohe example. Builds on PR-E (`assigned-task-periods-brief-2026-09-02.md`, rulings R-E1–R-E4) and the occupancy lane (`occupancy-build-brief-2026-09-02.md`). Nothing here asks the RA about a census year: the census-year states keep deriving from the periods, and the denomination per census year will derive from the chain.
 
 ## 1. The problem
 
