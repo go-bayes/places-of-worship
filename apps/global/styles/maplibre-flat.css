@@ -1,27 +1,9 @@
     /* tokens, base styles, and the pill/toast/popup/corner primitives
        live in ../../shared/map-shell.css (linked before this sheet);
-       this file keeps the global app's own layout and machinery */
+       this file keeps the global app's own layout and machinery. every
+       colour, size, radius and shadow here is a chrome token from that
+       sheet (design audit 2026-09-03) */
     #map { position: fixed; inset: 0; }
-    #hud {
-      position: fixed; top: 12px; left: 12px; right: 12px; max-width: 520px;
-      padding: 14px 16px; background: var(--panel); border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 12px; backdrop-filter: blur(12px); box-shadow: 0 8px 30px rgba(0,0,0,0.25); z-index: 10;
-    }
-    #hud h1 { margin: 0 0 4px; font-weight: 600; letter-spacing: -0.02em; font-size: 18px; }
-    #hud p { margin: 0 0 10px; color: var(--muted); font-size: 13px; line-height: 1.4; }
-    #hud .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    #hud button {
-      background: var(--accent); color: #0b0c10; border: none; border-radius: 15px; padding: 14px 18px;
-      font-weight: 700; cursor: pointer; transition: transform 120ms ease, box-shadow 120ms ease; font-size: 20px;
-    }
-    #hud button.secondary { background: rgba(255,255,255,0.08); color: var(--text); }
-    #hud button:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.25); }
-    #legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
-    .chip {
-      display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted);
-      background: rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.06);
-    }
-    .chip i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
     #dock {
       position: fixed; left: 50%; bottom: calc(var(--safe-bottom) + 64px); transform: translateX(-50%);
       display: flex; flex-direction: column; gap: 6px; z-index: 11;
@@ -29,35 +11,35 @@
       max-width: 94dvw;
     }
     .dock-panel {
-      background: rgba(15, 23, 42, 0.62); border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 12px; padding: 6px 8px; backdrop-filter: blur(10px);
-      box-shadow: 0 8px 18px rgba(0,0,0,0.24);
+      background: var(--chrome-face); border: 1px solid var(--chrome-line);
+      border-radius: var(--r-md); padding: 6px 8px; backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-2);
       width: 100%;
-      opacity: 0.95;
     }
     .dock-row { display: flex; gap: 6px; flex-wrap: nowrap; align-items: center; min-height: 24px; width: 100%; }
+    /* the search input stays at 18px: below 16px ios zooms the page on focus */
     .dock-row input {
-      flex: 1 1 auto; min-width: 0; background: rgba(255,255,255,0.08); border: 1px solid transparent;
-      color: var(--text); padding: 14px 12px; border-radius: 12px; font-size: clamp(18px, 2.4vw, 22px);
+      flex: 1 1 auto; min-width: 0; background: var(--chrome-wash); border: 1px solid transparent;
+      color: var(--ink); padding: 14px 12px; border-radius: var(--r-md); font-size: var(--fs-chrome-xl);
     }
     .dock-row select {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: var(--text);
+      background: var(--chrome-wash);
+      border: 1px solid var(--chrome-line);
+      color: var(--ink);
       padding: 3px 8px;
-      border-radius: 8px;
-      font-size: clamp(11px, 2.7vw, 13px);
+      border-radius: var(--r-sm);
+      font-size: var(--fs-chrome);
       min-width: 104px;
       flex-shrink: 0;
     }
-    .dock-row input::placeholder { color: rgba(226,232,240,0.6); }
+    .dock-row input::placeholder { color: var(--muted); }
     .dock-row button {
-      background: rgba(226, 232, 240, 0.16); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px; padding: 7px 14px; font-weight: 700; cursor: pointer;
-      transition: transform 120ms ease, box-shadow 120ms ease; font-size: clamp(16px, 3.2vw, 18px);
+      background: var(--chrome-wash); color: var(--ink); border: 1px solid var(--chrome-line);
+      border-radius: var(--r-md); padding: 7px 14px; font-weight: 600; cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease; font-size: var(--fs-chrome-lg);
     }
-    .dock-row button.secondary { background: rgba(255,255,255,0.12); color: var(--text); }
-    .dock-row button:hover { transform: translateY(-1px); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
+    .dock-row button.secondary { background: var(--chrome-wash); color: var(--ink); }
+    .dock-row button:hover { transform: translateY(-1px); box-shadow: var(--shadow-1); }
     .dock-cities-row { align-items: center; }
     .dock-cities {
       display: flex;
@@ -72,27 +54,27 @@
       touch-action: pan-x;
       overscroll-behavior-x: contain;
       scrollbar-width: thin;
-      scrollbar-color: rgba(148,163,184,0.4) rgba(15,23,42,0.2);
+      scrollbar-color: var(--chrome-line) transparent;
       -webkit-overflow-scrolling: touch;
     }
     .dock-cities.dragging { cursor: grabbing; }
     .dock-cities::-webkit-scrollbar {
       height: 8px;
-      background: rgba(15,23,42,0.2);
+      background: transparent;
     }
     .dock-cities::-webkit-scrollbar-thumb {
-      background: rgba(148,163,184,0.4);
-      border-radius: 4px;
+      background: var(--chrome-line);
+      border-radius: var(--r-pill);
     }
     .dock-cities::-webkit-scrollbar-thumb:hover {
-      background: rgba(148,163,184,0.6);
+      background: var(--muted);
     }
     .dock-chip {
-      background: rgba(148,163,184,0.14); color: var(--text); border: 1px solid rgba(255,255,255,0.05);
-      padding: 3px 9px; border-radius: 999px; font-size: clamp(11px, 2.7vw, 13px); cursor: pointer;
+      background: var(--chrome-wash); color: var(--ink); border: 1px solid var(--chrome-line);
+      padding: 3px 9px; border-radius: var(--r-pill); font-size: var(--fs-chrome); cursor: pointer;
       transition: transform 120ms ease, background 120ms ease;
     }
-    .dock-chip:hover { transform: translateY(-1px); background: rgba(148,163,184,0.28); }
+    .dock-chip:hover { transform: translateY(-1px); background: var(--chrome-line); }
     .dock-row + .dock-row { margin-top: 4px; }
     .streetview {
       width: 100%;
@@ -101,14 +83,14 @@
       min-height: 160px;
       max-width: 100%;
       max-height: 72vh;
-      border-radius: 10px;
+      border-radius: var(--r-md);
       overflow: hidden;
-      background: rgba(15, 23, 42, 0.8);
-      color: #e2e8f0;
+      background: var(--chrome-face);
+      color: var(--ink);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: var(--fs-chrome);
       margin-top: 8px;
       resize: both;
       position: relative;
@@ -123,7 +105,8 @@
        popups drag by their body on every pointer type, so the content opts
        out of browser pan/zoom; interactive children keep native gestures
        via the drag-start exclusions, and .streetview declares its own
-       touch-action for the pano */
+       touch-action for the pano. the expand button wears the shared
+       action-row recipe like its neighbours (one weight, one face) */
     .maplibregl-popup-content {
       cursor: grab;
       touch-action: none;
@@ -136,32 +119,24 @@
     .maplibregl-popup-content.dragging {
       cursor: grabbing;
     }
-    /* outranks the shared sheet's scoped popup-action recipe (0,2,1) */
-    .maplibregl-popup-content .popup-actions .streetview-expand {
-      background: rgba(15, 23, 42, 0.85);
-      border-color: rgba(255,255,255,0.2);
-      color: #f8fafc;
-      font-weight: 700;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-    }
     .popup-drag-toast {
       position: absolute;
       left: 50%;
       top: 10px;
       transform: translateX(-50%);
       padding: 6px 12px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.88);
-      border: 1px solid rgba(255,255,255,0.16);
-      color: #e2e8f0;
-      font-size: 12px;
+      border-radius: var(--r-pill);
+      background: var(--chrome-face);
+      border: 1px solid var(--chrome-line);
+      color: var(--ink);
+      font-size: var(--fs-chrome);
       opacity: 0;
       transition: opacity 200ms ease;
       pointer-events: none;
       z-index: 2;
     }
     .popup-drag-toast.visible {
-      opacity: 0.9;
+      opacity: 1;
     }
     .popup-header {
       display: flex;
@@ -175,12 +150,12 @@
     .popup-header.dragging { cursor: grabbing; }
     .popup-title {
       font-weight: 600;
-      color: #e2e8f0;
-      font-size: 14px;
+      color: var(--ink);
+      font-size: var(--fs-chrome-lg);
     }
     .popup-drag-hint {
-      font-size: 11px;
-      color: #cbd5f5;
+      font-size: var(--fs-chrome-xs);
+      color: var(--muted);
       letter-spacing: 0.02em;
     }
     .sv-resize-handle {
@@ -189,24 +164,22 @@
       bottom: 6px;
       width: 18px;
       height: 18px;
-      background: rgba(15, 23, 42, 0.65);
-      border: 1px solid rgba(255,255,255,0.55);
-      border-radius: 5px;
+      background: var(--chrome-face);
+      border: 1px solid var(--chrome-line);
+      border-radius: var(--r-sm);
       cursor: nwse-resize;
       z-index: 3;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      box-shadow: var(--shadow-1);
       display: grid;
       place-items: center;
-      color: #e2e8f0;
-      font-size: 11px;
+      color: var(--ink);
+      font-size: var(--fs-chrome-xs);
       line-height: 1;
-      font-weight: 700;
+      font-weight: 600;
       user-select: none;
       pointer-events: auto;
     }
     #corner-reset {
-      --pill-bg: rgba(15, 23, 42, 0.6);
-      --pill-border: rgba(255, 255, 255, 0.06);
       --pill-shadow: none;
       width: 69px;
       height: 69px;
@@ -214,9 +187,10 @@
       text-decoration: none;
       cursor: pointer;
       /* the set-north badge seats on the right (jb 2026-07-17): below the
-         top-right wordmark on desktop; phones hide the wordmark, so the
-         badge takes the corner itself (media rule below) */
-      top: calc(var(--safe-top) + 34px);
+         top-right wordmark on desktop (the wordmark is ~35px tall at the
+         chrome size); phones hide the wordmark, so the badge takes the
+         corner itself (media rule below) */
+      top: calc(var(--safe-top) + 42px);
       /* compass on demand: hidden until the map is rotated off north */
       display: none;
       align-items: center;
@@ -238,12 +212,12 @@
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(15, 23, 42, 1);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: #e2e8f0;
-      border-radius: 999px;
+      background: var(--chrome-face);
+      border: 1px solid var(--chrome-line);
+      color: var(--ink);
+      border-radius: var(--r-pill);
       padding: 3px 8px;
-      font-size: 8px;
+      font-size: var(--fs-chrome-xs);
       opacity: 0;
       pointer-events: none;
       transition: opacity 200ms ease;
@@ -266,29 +240,29 @@
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
-      background: rgba(15, 23, 42, 0.78);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px;
+      background: var(--chrome-face);
+      border: 1px solid var(--chrome-line);
+      border-radius: var(--r-lg);
       padding: 12px 14px;
-      color: #e2e8f0;
-      box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+      color: var(--ink);
+      box-shadow: var(--shadow-2);
     }
     #onboard.visible { display: block; }
     #onboard h3 {
       margin: 0 0 6px;
-      font-size: 16px;
+      font-size: var(--fs-chrome-lg);
       font-weight: 600;
     }
     #onboard p {
       margin: 0 0 8px;
-      font-size: 13px;
-      color: #cbd5f5;
+      font-size: var(--fs-chrome);
+      color: var(--ink);
     }
     #onboard ul {
       margin: 0 0 10px;
       padding-left: 16px;
-      font-size: 13px;
-      color: #cbd5f5;
+      font-size: var(--fs-chrome);
+      color: var(--ink);
     }
     #onboard li { margin-bottom: 4px; }
     #onboard .onboard-actions {
@@ -302,18 +276,21 @@
       align-items: center;
       justify-content: center;
       padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(15, 23, 42, 0.35);
-      color: #e2e8f0;
-      font-size: 12px;
+      border-radius: var(--r-pill);
+      border: 1px solid var(--chrome-line);
+      background: var(--chrome-wash);
+      color: var(--ink);
+      font: inherit;
+      font-size: var(--fs-chrome);
       text-decoration: none;
       cursor: pointer;
     }
+    /* the dismiss button is the card's one primary: the light face the
+       popup's revise link also wears */
     #onboard .onboard-actions button {
-      background: rgba(255,255,255,0.9);
-      color: #0b0c10;
-      border-color: rgba(15, 23, 42, 0.35);
+      background: rgba(248, 250, 252, 0.92);
+      color: #0f172a;
+      border-color: rgba(248, 250, 252, 0.92);
       font-weight: 600;
     }
     #bottom-actions {
@@ -321,10 +298,13 @@
       gap: 8px;
       align-items: center;
     }
+    /* the action row's pills keep the loud size (18px): the page's three
+       primary controls, and the phone contribute pill beside them */
     #dock-toggle,
-    #near-me {
+    #near-me,
+    #contribute-go {
       padding: 12px 22px;
-      font-size: 18px;
+      font-size: var(--fs-chrome-xl);
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -337,7 +317,7 @@
        the zones so each is its own full-height target */
     #datamaps-pill {
       padding: 0;
-      font-size: 18px;
+      font-size: var(--fs-chrome-xl);
       display: inline-flex;
       align-items: stretch;
       white-space: nowrap;
@@ -372,10 +352,10 @@
       margin-left: 2px;
       background: none;
       border: none;
-      border-left: 1px solid rgba(255, 255, 255, 0.18);
+      border-left: 1px solid var(--chrome-line);
       color: inherit;
       font: inherit;
-      font-size: 14px;
+      font-size: var(--fs-chrome);
       cursor: pointer;
     }
     /* the caret zone names its object: the visible word says a menu of
@@ -388,14 +368,15 @@
     /* offering: the main zone names the country under the map centre and
        the pill wears the chrome's "go" colour: emerald glass, distinct
        from amber (caution) and the blue data ramp, and separable from
-       both without colour vision */
+       both without colour vision. the face matches the chrome alpha and
+       the pale mint ink clears AA over the light basemap */
     #datamaps-pill.offering {
       --pill-opacity: 1;
-      background: rgba(6, 78, 59, 0.78);
+      background: rgba(6, 78, 59, 0.85);
       border-color: rgba(52, 211, 153, 0.55);
-      color: #a7f3d0;
+      color: #d1fae5;
     }
-    #datamaps-pill.offering:hover { background: rgba(6, 95, 70, 0.88); color: #d1fae5; }
+    #datamaps-pill.offering:hover { background: rgba(6, 95, 70, 0.9); }
     #datamaps-pill.offering #datamaps-caret { border-left-color: rgba(52, 211, 153, 0.45); }
     /* the census toggle dot (country pages, over home): filled blue —
        the data ramp's colour — while the choropleth is on, hollow when
@@ -404,25 +385,26 @@
       width: 11px;
       height: 11px;
       border-radius: 50%;
-      border: 2px solid #94a3b8;
+      border: 2px solid var(--muted);
       background: transparent;
       box-sizing: border-box;
       flex: none;
       margin-right: 8px;
     }
     .dm-dot.on {
-      border-color: #3b82f6;
-      background: #3b82f6;
+      border-color: var(--action);
+      background: var(--action);
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
     }
     /* hint state (global map, far out over a data country): an
        instruction to zoom, not yet an offer, so the label dims */
-    #datamaps-pill.hinting #datamaps-go { color: #94a3b8; }
+    #datamaps-pill.hinting #datamaps-go { color: var(--muted); }
     /* the pill names its action in full on desktop and by its object on
        phones, mirroring the census pill's long/short label swap */
     #datamaps-pill .dm-label-short { display: none; }
-    /* phones: every resting pill shrinks as one (the filter chip too),
-       and an overfull row wraps upward instead of running off-screen */
+    /* phones: every resting pill shrinks as one (the filter chip and the
+       contribute pill too), and an overfull row wraps upward instead of
+       running off-screen */
     @media (max-width: 640px) {
       #bottom-actions {
         flex-wrap: wrap;
@@ -431,16 +413,17 @@
       }
       #dock-toggle,
       #near-me,
+      #contribute-go,
       #filters-clear {
         padding: 10px 13px;
-        font-size: 14px;
+        font-size: var(--fs-chrome);
       }
-      #datamaps-pill { font-size: 14px; }
+      #datamaps-pill { font-size: var(--fs-chrome); }
       #datamaps-go {
         padding: 10px 8px 10px 13px;
         max-width: 56vw;
       }
-      #datamaps-caret { padding: 10px 12px 10px 8px; font-size: 12px; }
+      #datamaps-caret { padding: 10px 12px 10px 8px; font-size: var(--fs-chrome-xs); }
       #datamaps-pill .dm-label-long { display: none; }
       #datamaps-pill .dm-label-short { display: inline; }
     }
@@ -448,15 +431,15 @@
       width: 11px;
       height: 11px;
       border-radius: 50%;
-      border: 2px solid #94a3b8;
+      border: 2px solid var(--muted);
       background: transparent;
       box-sizing: border-box;
       flex: none;
     }
     #near-me.active .nm-dot {
-      border-color: #3b82f6;
-      background: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.35);
+      border-color: var(--action);
+      background: var(--action);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
     }
     /* the labelled near-me pill replaces the stock geolocate icon */
     .maplibregl-ctrl-group:has(.maplibregl-ctrl-geolocate) { display: none; }
@@ -505,11 +488,10 @@
       gap: 8px;
     }
     #counts-toggle {
-      --pill-shadow: 0 8px 16px rgba(0, 0, 0, 0.28);
       z-index: 12;
       /* compact pull-down: three palette dots and a caret, panel on tap */
       padding: 7px 14px;
-      font-size: 14px;
+      font-size: var(--fs-chrome);
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -531,25 +513,30 @@
       margin-left: 2px;
     }
     #counts-toggle .key-caret {
-      color: #94a3b8;
-      font-size: 12px;
+      color: var(--muted);
+      font-size: var(--fs-chrome-xs);
     }
-    #counts-toggle[disabled] { opacity: 0.45; cursor: default; }
+    /* disabled keeps its label readable: muted ink, dimmed dots, never
+       element opacity */
+    #counts-toggle[disabled] { color: var(--muted); cursor: default; }
+    #counts-toggle[disabled] .key-dot { opacity: 0.5; }
+    /* the denomination key: list at the chrome size, heading one step up;
+       the legend must not be the loudest text on the map */
     #counts {
       display: none;
       z-index: 11;
-      background: rgba(15, 23, 42, 0.62);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 24px;
+      background: var(--chrome-face);
+      border: 1px solid var(--chrome-line);
+      border-radius: var(--r-lg);
       padding: 12px 16px;
-      font-size: 20px;
-      color: #e2e8f0;
+      font-size: var(--fs-chrome);
+      color: var(--ink);
       width: min(260px, 30vw);
       min-width: 236px;
     }
     #counts h3 {
       margin: 0 0 12px;
-      font-size: 20px;
+      font-size: var(--fs-chrome-lg);
       font-weight: 600;
       letter-spacing: 0.01em;
     }
@@ -563,15 +550,15 @@
     #countsHint {
       display: none;
       text-align: center;
-      color: #cbd5f5;
-      font-size: 18px;
+      color: var(--ink);
+      font-size: var(--fs-chrome);
       padding: 4px 0 12px;
     }
     #counts li {
       display: flex;
       justify-content: space-between;
       gap: 12px;
-      color: #cbd5f5;
+      color: var(--ink);
       align-items: center;
     }
     #counts .legend {
@@ -582,16 +569,15 @@
     #counts .dot {
       width: 16px;
       height: 16px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: var(--r-pill);
+      border: 1px solid var(--chrome-line);
     }
     #counts .count-total {
       margin-top: 12px;
       font-weight: 600;
-      color: #f1f5f9;
+      color: var(--ink);
     }
     #corner-refresh {
-      --pill-bg: rgba(15, 23, 42, 0.6);
       width: 55px;
       height: 55px;
       display: grid;
@@ -604,9 +590,7 @@
       height: 26px;
       display: block;
     }
-    #corner-refresh:hover { opacity: 1; }
     @media (max-width: 640px) {
-      #hud { max-width: 94vw; }
       #dock {
         left: 50%;
         right: auto;
@@ -622,8 +606,8 @@
       #corner-refresh {
         width: 44px;
         height: 44px;
-        /* the three-pill action row needs the whole bottom band on a
-           phone, so the refresh button steps up out of its way */
+        /* the action row needs the whole bottom band on a phone, so the
+           refresh button steps up out of its way */
         bottom: calc(var(--safe-bottom) + 60px);
       }
       #corner-refresh svg { width: 22px; height: 22px; }
@@ -642,19 +626,18 @@
         max-height: min(50vh, 480px);
         overflow-y: auto;
         padding: 12px 16px;
-        font-size: 22px;
-        opacity: 0.85;
+        font-size: var(--fs-chrome-lg);
       }
-      #counts h3 { font-size: 22px; }
+      #counts h3 { font-size: var(--fs-chrome-lg); }
       #counts ul { gap: 6px; }
-      #counts li { font-size: 22px; }
+      #counts li { font-size: var(--fs-chrome-lg); }
       #counts .dot { width: 12px; height: 12px; }
       #cityChips { display: none; }
       .dock-row { gap: 4px; }
-      .dock-row input { padding: 12px 12px; font-size: 19px; }
-      .dock-row button { padding: 5px 9px; font-size: clamp(11px, 3vw, 12px); }
+      .dock-row input { padding: 12px 12px; font-size: var(--fs-chrome-xl); }
+      .dock-row button { padding: 5px 9px; font-size: var(--fs-chrome); }
       .dock-cities { gap: 6px; }
-      .dock-chip { font-size: clamp(9px, 2.1vw, 11px); padding: 3px 6px; }
+      .dock-chip { font-size: var(--fs-chrome-xs); padding: 3px 6px; }
       #counts-toggle {
         gap: 9px;
         padding: 6px 20px;
@@ -689,22 +672,21 @@
   }
 }
 
-/* top-right wordmark: repo link plus an osm fix-map deep-link; the pill,
-   corner seat, and entry dividers come from the shared sheet */
+/* top-right wordmark: repo link plus the contribute entry and the theme
+   select; the pill, corner seat, and entry dividers come from the shared
+   sheet. it holds contribute, so it wears the pill default in full ink
+   at the chrome size (it was the faintest, smallest control on the page) */
 #wordmark {
-  --pill-bg: rgba(15, 23, 42, 0.55);
-  --pill-border: rgba(255, 255, 255, 0.06);
-  --pill-shadow: none;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #cbd5e1;
-  padding: 5px 12px;
-  font-size: 12px;
+  color: var(--ink);
+  padding: 8px 14px;
+  font-size: var(--fs-chrome);
   letter-spacing: 0.02em;
 }
 #wordmark a {
-  color: #e2e8f0;
+  color: var(--ink);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -713,19 +695,21 @@
   text-decoration: underline;
 }
 /* phones: the shared sheet (map-shell.css) hides the whole wordmark pill
-   below 640px — phones are exploration surfaces (jb ruling 2026-07-16) */
+   below 640px — phones are exploration surfaces (jb ruling 2026-07-16);
+   the action row's contribute pill stands in there (r-d2, 2026-09-04) */
 
 /* lazy street view: the popup shows a button until someone asks */
 .streetview .sv-show {
   padding: 9px 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(255,255,255,0.08);
-  color: #e2e8f0;
-  font-size: 13px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--chrome-line);
+  background: var(--chrome-wash);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-chrome);
   cursor: pointer;
 }
-.streetview .sv-show:hover { background: rgba(255,255,255,0.16); }
+.streetview .sv-show:hover { background: var(--chrome-line); }
 
 /* filter chips inside the search panel */
 .dock-filters {
@@ -743,11 +727,11 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  color: #e2e8f0;
-  background: rgba(148,163,184,0.14);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 999px;
+  font-size: var(--fs-chrome);
+  color: var(--ink);
+  background: var(--chrome-wash);
+  border: 1px solid var(--chrome-line);
+  border-radius: var(--r-pill);
   padding: 3px 9px;
   cursor: pointer;
   user-select: none;
@@ -756,7 +740,7 @@
   margin: 0;
   width: 13px;
   height: 13px;
-  accent-color: #3b82f6;
+  accent-color: var(--action);
 }
 .filter-chip .dot {
   width: 9px;
@@ -764,19 +748,23 @@
   border-radius: 50%;
   flex: none;
 }
-.filter-chip.unchecked { opacity: 0.45; }
+/* an unchecked chip recedes by muted ink and a bare face, not by fading
+   its label */
+.filter-chip.unchecked { color: var(--muted); background: transparent; }
+.filter-chip.unchecked .dot { opacity: 0.5; }
 /* the denomination row nests under the christian chip */
 #denom-filters {
   margin-left: 14px;
-  border-left: 2px solid rgba(255,255,255,0.14);
+  border-left: 2px solid var(--chrome-line);
   padding-left: 10px;
 }
 .dock-filters-row { min-height: 0; }
 #filters-toggle {
   background: none;
   border: none;
-  color: #cbd5e1;
-  font-size: 14px;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-chrome);
   font-weight: 600;
   cursor: pointer;
   /* a real touch target: full row width, thumb-sized height */
@@ -788,7 +776,7 @@
 #filters-toggle:hover { color: #fff; }
 @media (max-width: 640px) {
   #filters-toggle {
-    font-size: 15px;
+    font-size: var(--fs-chrome);
     padding: 11px 6px;
     /* the id rule above outranks the class-based .shell-touch floor,
        so the thumb floor is restated here */
@@ -798,8 +786,8 @@
 #dock-close {
   background: none;
   border: none;
-  color: #94a3b8;
-  font-size: 20px;
+  color: var(--muted);
+  font-size: var(--fs-chrome-xl);
   line-height: 1;
   cursor: pointer;
   padding: 0 6px;
@@ -818,12 +806,16 @@
 #filters-clear {
   --pill-bg: rgba(59, 130, 246, 0.22);
   --pill-border: rgba(59, 130, 246, 0.5);
-  --pill-opacity: 1;
   padding: 12px 14px;
-  font-size: 15px;
+  font-size: var(--fs-chrome);
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
 }
 #filters-clear:hover { background: rgba(59,130,246,0.32); }
 
+/* the phone-only contribute pill: the bottom-row group above sets inline-flex, so re-hide it here and let only the phone breakpoint show it (r-d2) */
+#contribute-go { display: none; }
+@media (max-width: 640px) {
+  #contribute-go { display: inline-flex; }
+}

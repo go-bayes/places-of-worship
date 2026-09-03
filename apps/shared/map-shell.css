@@ -8,23 +8,52 @@
    load order: link this sheet before the app stylesheet so app rules
    can override it. */
 
-/* tokens: safe-area insets with minimums, surface and text colours.
+/* tokens: safe-area insets with minimums, the page ground, the body ink,
+   and the one type stack every surface shares (design audit 2026-09-03:
+   the system stack, declared once; the unlinked work sans is gone).
    apps override per token after linking (e.g. a different --bg). */
 :root {
   --bg: #f8fafc;
-  --panel: rgba(13, 16, 23, 0.82);
-  --text: #e8edf2;
-  --accent: #cbd5f5;
-  --muted: #94a3b8;
+  --text: #f1f5f9;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --safe-top: max(12px, env(safe-area-inset-top, 0px));
   --safe-right: max(12px, env(safe-area-inset-right, 0px));
   --safe-bottom: max(10px, env(safe-area-inset-bottom, 0px));
   --safe-left: max(12px, env(safe-area-inset-left, 0px));
 }
 
+/* map chrome tokens (design audit 2026-09-03, section 3): one face, one
+   hairline, one inner wash, one ink, one muted, one action, one caution,
+   the chrome type scale, one radius per class and one shadow pair. the
+   face is opaque enough (0.85) that ink reads AA over the light default
+   basemap, so no control fades its text with element opacity any more.
+   scoped to the injected map root (region-map.js adds the class) and to
+   maplibre popups, so the light working tools that also link this sheet
+   keep their own --ink and --muted */
+.map-chrome, .maplibregl-popup-content {
+  --chrome-face: rgba(15, 23, 42, 0.85);
+  --chrome-line: rgba(255, 255, 255, 0.16);
+  --chrome-wash: rgba(255, 255, 255, 0.08);
+  --ink: #f1f5f9;
+  --muted: #b8c2d0;
+  --action: #3b82f6;
+  --caution: #fcd34d;
+  --fs-chrome-xs: 13px;
+  --fs-chrome: 14px;
+  --fs-chrome-lg: 16px;
+  --fs-chrome-xl: 18px;
+  --fs-chrome-2xl: 22px;
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-pill: 999px;
+  --shadow-1: 0 6px 14px rgba(0, 0, 0, 0.25);
+  --shadow-2: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
 /* base: one box model, full-bleed page, the shared type stack */
 * { box-sizing: border-box; }
-body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: "Work Sans", -apple-system, "Segoe UI", sans-serif; }
+body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); }
 
 /* any author display rule silently defeats the hidden attribute; restore
    its authority once here instead of per-element companion rules */
@@ -32,16 +61,18 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
 
 /* the dark pill: every floating control wears this. sizing, typography,
    and display stay with the app; the knobs let a control brighten,
-   tint, or drop the shadow without leaving the recipe. */
+   tint, or drop the shadow without leaving the recipe. the opacity knob
+   defaults to 1: element opacity fades the text with the face, which is
+   what pushed every pill under AA over the light basemap */
 .shell-pill {
-  --pill-bg: rgba(15, 23, 42, 0.72);
-  --pill-border: rgba(255, 255, 255, 0.08);
-  --pill-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
-  --pill-opacity: 0.85;
+  --pill-bg: var(--chrome-face);
+  --pill-border: var(--chrome-line);
+  --pill-shadow: var(--shadow-1);
+  --pill-opacity: 1;
   background: var(--pill-bg);
   border: 1px solid var(--pill-border);
-  border-radius: 999px;
-  color: #e2e8f0;
+  border-radius: var(--r-pill);
+  color: var(--ink);
   box-shadow: var(--pill-shadow);
   opacity: var(--pill-opacity);
 }
@@ -70,18 +101,18 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
 /* identity-pill internals: a quiet divider between entries, and selects
    stripped of native chrome so they sit in the pill as text with a
    caret, not as a widget */
-.shell-divided > * + * { border-left: 1px solid rgba(255, 255, 255, 0.18); padding-left: 8px; }
+.shell-divided > * + * { border-left: 1px solid var(--chrome-line); padding-left: 8px; }
 .shell-pill-select {
   appearance: none;
   -webkit-appearance: none;
-  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='6'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right center;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='6'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%23b8c2d0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right center;
   border: none;
-  border-left: 1px solid rgba(255, 255, 255, 0.18);
+  border-left: 1px solid var(--chrome-line);
   border-radius: 0;
   padding-left: 8px;
   padding-right: 13px;
-  color: #e2e8f0;
-  font-size: 12px;
+  color: var(--ink);
+  font-size: var(--fs-chrome);
   line-height: 1;
   cursor: pointer;
 }
@@ -94,27 +125,27 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
   left: 50%;
   top: 48%;
   transform: translate(-50%, -50%);
-  background: rgba(15, 23, 42, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #e2e8f0;
-  border-radius: 999px;
+  background: var(--chrome-face);
+  border: 1px solid var(--chrome-line);
+  color: var(--ink);
+  border-radius: var(--r-pill);
   padding: 10px 18px;
-  font-size: 28px;
+  font-size: var(--fs-chrome-2xl);
   opacity: 0;
   pointer-events: none;
   transition: opacity 180ms ease;
   z-index: 12;
   white-space: nowrap;
 }
-.shell-toast.visible { opacity: 0.8; }
+.shell-toast.visible { opacity: 1; }
 @media (max-width: 640px) {
   .shell-toast {
-    font-size: 14px;
+    font-size: var(--fs-chrome);
     padding: 8px 14px;
     max-width: 86vw;
     white-space: normal;
     text-align: center;
-    border-radius: 16px;
+    border-radius: var(--r-lg);
   }
 }
 
@@ -125,13 +156,15 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
 
 /* phones are exploration surfaces (jb ruling 2026-07-16): the whole
    top-right wordmark pill hides below 640px. its contents are desktop
-   affordances — evidence submission, the OSM editor, the theme select,
-   the repo link — and cross-map travel already rides the bottom-bar
-   data maps pill. this supersedes the member-by-member hide, which
-   since the data-maps link retirement left the global page's pill an
-   empty lozenge on phones. the class qualifier outranks the surface
-   sheets' unqualified #wordmark display rules, which load after this
-   sheet and would otherwise win the cascade tie */
+   affordances — the OSM editor, the theme select, the repo link — and
+   cross-map travel already rides the bottom-bar data maps pill. this
+   supersedes the member-by-member hide, which since the data-maps link
+   retirement left the global page's pill an empty lozenge on phones.
+   evidence submission alone follows the user to the phone: the action
+   row seats its own contribute pill there (jb ruling r-d2, 2026-09-04;
+   see the contribute block below). the class qualifier outranks the
+   surface sheets' unqualified #wordmark display rules, which load after
+   this sheet and would otherwise win the cascade tie */
 @media (max-width: 640px) {
   #wordmark.shell-pill { display: none; }
 }
@@ -140,26 +173,27 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
    attribute grid, footnotes in white — never the grey whisper */
 .maplibregl-popup-content {
   max-width: min(1080px, 92vw);
-  background: rgba(15, 23, 42, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 16px;
-  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.22);
-  color: #e2e8f0;
+  background: var(--chrome-face);
+  border: 1px solid var(--chrome-line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-2);
+  color: var(--ink);
   overflow: hidden;
 }
 .maplibregl-popup-tip { display: none; }
 .maplibregl-popup-close-button {
   width: 28px;
   height: 28px;
-  font-size: 20px;
+  font-size: var(--fs-chrome-xl);
   line-height: 26px;
-  border-radius: 999px;
-  color: #f8fafc;
-  background: rgba(15, 23, 42, 0.6);
+  border-radius: var(--r-pill);
+  color: var(--ink);
+  background: var(--chrome-face);
 }
 /* the idiom's content classes are scoped to maplibre popups so pages
    with their own popup-actions (e.g. the leaflet verification surface)
-   are untouched by this sheet */
+   are untouched by this sheet. action rows sit at the chrome size in one
+   weight, smaller than the title they act on */
 .maplibregl-popup-content .popup-actions {
   display: flex;
   flex-wrap: wrap;
@@ -171,13 +205,15 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
-  padding: 8px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(15, 23, 42, 0.45);
-  color: #e2e8f0;
-  font-size: 17px;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--chrome-line);
+  background: var(--chrome-wash);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-chrome);
+  font-weight: 600;
   text-decoration: none;
   cursor: pointer;
 }
@@ -186,46 +222,47 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
   grid-template-columns: auto 1fr;
   gap: 2px 14px;
   margin: 4px 0 2px;
-  font-size: 13px;
-  color: #cbd5e1;
+  font-size: var(--fs-chrome);
+  color: var(--ink);
 }
 .maplibregl-popup-content .place-attr { display: contents; }
 .maplibregl-popup-content .place-attr-key {
-  color: #94a3b8;
+  color: var(--muted);
   font-weight: 600;
 }
-.maplibregl-popup-content .place-attr-val { color: #e2e8f0; }
+.maplibregl-popup-content .place-attr-val { color: var(--ink); }
 .maplibregl-popup-content .place-note {
   margin: 4px 0 2px;
-  font-size: 11px;
-  color: #e2e8f0;
+  font-size: var(--fs-chrome-xs);
+  color: var(--ink);
 }
 
 /* stock controls: attribution at the true corner, credits always
-   legible (the places data is odbl), and the collapsed credit disc
-   stays thumb-tappable despite the tiny text */
+   legible (the places data is odbl, and the credit is a licence
+   condition, so 10px is the floor), and the collapsed credit disc
+   stays thumb-tappable despite the small text */
 .maplibregl-ctrl-bottom-right { bottom: 0; }
 .maplibregl-ctrl-attrib,
 .maplibregl-ctrl-attrib.maplibregl-compact {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.85);
   color: #0f172a;
   border: 1px solid rgba(15, 23, 42, 0.2);
-  border-radius: 6px;
-  padding: 0 3px;
-  font-size: 7px;
-  line-height: 1.05;
-  box-shadow: 0 5px 10px rgba(15, 23, 42, 0.2);
+  border-radius: var(--r-sm);
+  padding: 0 4px;
+  font-size: 10px;
+  line-height: 1.2;
+  box-shadow: var(--shadow-1);
 }
 .maplibregl-ctrl-attrib a {
   color: #0f172a;
 }
 .maplibregl-ctrl-attrib a:hover {
-  color: #1e293b;
+  text-decoration: underline;
 }
 .maplibregl-ctrl-attrib.maplibregl-compact:not(.maplibregl-compact-show) {
   min-width: 24px;
   min-height: 24px;
-  border-radius: 12px;
+  border-radius: var(--r-pill);
 }
 .maplibregl-ctrl-attrib-button {
   width: 24px;
@@ -236,17 +273,17 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
    pill like its neighbours (the divided rule cannot reach a button's own
    border, so the divider is restated); the panel is a small dark card
    under the pill's right edge with two routes. the popup's revise link
-   is the primary action, so it takes the pill's brighter face */
+   is the primary action, so it takes a light face */
 #contribute-toggle {
   appearance: none;
   -webkit-appearance: none;
   background: transparent;
   border-width: 0 0 0 1px;
   border-style: solid;
-  border-color: rgba(255, 255, 255, 0.18);
+  border-color: var(--chrome-line);
   padding: 0 0 0 8px;
   margin: 0;
-  color: #e2e8f0;
+  color: var(--ink);
   font: inherit;
   letter-spacing: inherit;
   line-height: inherit;
@@ -255,44 +292,66 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
 }
 #contribute-toggle:hover,
 #contribute-toggle[aria-expanded="true"] { color: #fff; text-decoration: underline; }
-#contribute-toggle:focus-visible { outline: 2px solid #f8fafc; outline-offset: 2px; border-radius: 4px; }
-#contribute-panel {
+#contribute-toggle:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: var(--r-sm); }
+/* the card recipe is shared by the wordmark's panel and the phone sheet */
+.shell-panel {
   position: fixed;
-  right: var(--safe-right);
-  top: calc(var(--safe-top) + 40px);
   z-index: 14;
   width: min(320px, calc(100vw - 24px));
   display: grid;
   gap: 4px;
   padding: 8px;
-  border-radius: 14px;
-  background: rgba(15, 23, 42, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #e2e8f0;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
-  font-size: 13px;
+  border-radius: var(--r-lg);
+  background: var(--chrome-face);
+  border: 1px solid var(--chrome-line);
+  color: var(--ink);
+  box-shadow: var(--shadow-2);
+  font-size: var(--fs-chrome);
 }
-#contribute-panel a {
+.shell-panel a {
   display: grid;
   gap: 2px;
   padding: 8px 10px;
-  border-radius: 10px;
-  color: #e2e8f0;
+  border-radius: var(--r-md);
+  color: var(--ink);
   text-decoration: none;
 }
-#contribute-panel a:hover,
-#contribute-panel a:focus-visible { background: rgba(255, 255, 255, 0.08); outline: none; }
-#contribute-panel a:focus-visible { box-shadow: inset 0 0 0 2px #f8fafc; }
-#contribute-panel a strong { font-weight: 700; color: #fff; }
-#contribute-panel a span { color: #cbd5e1; line-height: 1.35; }
-#contribute-panel a.shell-panel-minor { padding: 6px 10px; color: #cbd5e1; text-decoration: underline; }
-#contribute-panel .shell-panel-note { display: block; padding: 8px 10px; color: #cbd5e1; line-height: 1.35; }
+.shell-panel a:hover,
+.shell-panel a:focus-visible { background: var(--chrome-wash); outline: none; }
+.shell-panel a:focus-visible { box-shadow: inset 0 0 0 2px var(--ink); }
+.shell-panel a strong { font-weight: 600; color: #fff; }
+.shell-panel a span { color: var(--muted); line-height: 1.35; }
+.shell-panel a.shell-panel-minor { padding: 6px 10px; color: var(--ink); text-decoration: underline; }
+.shell-panel .shell-panel-note { display: block; padding: 8px 10px; color: var(--muted); line-height: 1.35; }
+/* the wordmark's panel hangs under the pill's right edge */
+#contribute-panel {
+  right: var(--safe-right);
+  top: calc(var(--safe-top) + 46px);
+}
 .maplibregl-popup-content .popup-actions a.popup-revise {
   background: rgba(248, 250, 252, 0.92);
   border-color: rgba(248, 250, 252, 0.92);
   color: #0f172a;
-  font-weight: 700;
 }
 @media (max-width: 640px) {
   #contribute-panel { display: none; }
+}
+
+/* contribute on phones (jb ruling r-d2, 2026-09-04): the wordmark hides
+   under 640px, so the action row seats its own contribute pill there;
+   the sheet it opens rises above the row and carries the portal route
+   alone, never the OSM editor (iD does not work on phones). both are
+   absent on desktop, where the wordmark's panel serves. the sheet's
+   display rule is guarded by :not([hidden]) so the hidden attribute
+   keeps its authority */
+#contribute-go { display: none; }
+#contribute-sheet {
+  display: none;
+  left: 50%;
+  bottom: calc(var(--safe-bottom) + 100px);
+  transform: translateX(-50%);
+}
+@media (max-width: 640px) {
+  #contribute-go { display: inline-flex; }
+  #contribute-sheet:not([hidden]) { display: grid; }
 }

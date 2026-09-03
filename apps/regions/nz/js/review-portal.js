@@ -138,7 +138,7 @@ function human(value) {
         const pills = [
             `<span class="pill">${escapeHtml(task.status)}</span>`,
             `<span class="pill">${escapeHtml(task.task_type)}</span>`,
-            `<span class="pill amber">${escapeHtml(task.priority)}</span>`,
+            `<span class="pill">${escapeHtml(task.priority)}</span>`,
         ];
         if (agentReview && window.PowAgentReviewPanel) {
             pills.push(window.PowAgentReviewPanel.queuePillHtml(agentReview));
@@ -648,7 +648,7 @@ function human(value) {
                             ${escapeHtml(file.content_type === "application/pdf" ? "PDF" : "Photo")}
                             · ${Math.max(1, Math.round(file.byte_size / 1024))} KB
                             ${file.caption ? `— ${escapeHtml(file.caption)}` : ""}
-                            <button type="button" class="attachment-open" data-attachment-id="${escapeHtml(file.attachment_id)}">Open</button>
+                            <button type="button" class="secondary attachment-open" data-attachment-id="${escapeHtml(file.attachment_id)}">Open</button>
                         </p>
                     `).join("")}
             </section>
@@ -795,8 +795,8 @@ function human(value) {
             <svg class="occupancy-bar" viewBox="0 0 ${g.width} ${g.height}" width="100%" height="${g.height}" role="img" aria-label="Occupancy periods against the census years">
                 <defs>
                     <linearGradient id="${fadeId}" x1="0" x2="1" y1="0" y2="0">
-                        <stop offset="0" stop-color="#1f4e79" stop-opacity="0.85"></stop>
-                        <stop offset="1" stop-color="#1f4e79" stop-opacity="0.08"></stop>
+                        <stop offset="0" style="stop-color: var(--not-assessed)" stop-opacity="0.85"></stop>
+                        <stop offset="1" style="stop-color: var(--not-assessed)" stop-opacity="0.08"></stop>
                     </linearGradient>
                 </defs>
                 ${ticks}
@@ -870,9 +870,9 @@ function human(value) {
             : "";
         const actions = isAuthor ? "" : `
                 <div class="review-actions derived-year-actions derived-function-actions">
-                    <button type="button" class="secondary" data-fn-action="confirm" ${fn.derived_status !== "stated" ? `disabled title="An uncertain denomination needs an override naming the label, or a rejection."` : ""}>Confirm denomination</button>
+                    <button type="button" data-fn-action="confirm" ${fn.derived_status !== "stated" ? `disabled title="An uncertain denomination needs an override naming the label, or a rejection."` : ""}>Confirm denomination</button>
                     <button type="button" class="secondary" data-fn-action="override">Override</button>
-                    <button type="button" class="secondary" data-fn-action="reject">Reject</button>
+                    <button type="button" class="danger-outline" data-fn-action="reject">Reject</button>
                 </div>
                 <div class="derived-function-form-host"></div>`;
         return `
@@ -896,7 +896,7 @@ function human(value) {
                     <textarea name="note" required minlength="8" placeholder="${action === "override" ? "Why the derived label is wrong and what the source supports." : "Why this derived denomination should not be written."}"></textarea>
                 </div>
                 <div class="wide review-actions">
-                    <button type="submit">${action === "override" ? "Save override" : "Reject this denomination"}</button>
+                    <button type="submit" ${action === "override" ? "" : `class="danger"`}>${action === "override" ? "Save override" : "Reject this denomination"}</button>
                     <button type="button" class="secondary" data-fn-cancel>Cancel</button>
                     <span class="muted" data-fn-form-status></span>
                 </div>
@@ -945,9 +945,9 @@ function human(value) {
             ? `<div class="muted">You submitted this evidence; another team member must decide its derived years.</div>`
             : `
                 <div class="review-actions derived-year-actions">
-                    <button type="button" class="secondary" data-occ-action="confirm" ${presence.conflicts_observation ? `disabled title="Confirm is refused while the derived state conflicts with an observed status; override with a note or reject."` : ""}>Confirm</button>
+                    <button type="button" data-occ-action="confirm" ${presence.conflicts_observation ? `disabled title="Confirm is refused while the derived state conflicts with an observed status; override with a note or reject."` : ""}>Confirm</button>
                     <button type="button" class="secondary" data-occ-action="override">Override</button>
-                    <button type="button" class="secondary" data-occ-action="reject">Reject</button>
+                    <button type="button" class="danger-outline" data-occ-action="reject">Reject</button>
                 </div>
                 <div class="derived-year-form-host"></div>
             `;
@@ -1038,7 +1038,7 @@ function human(value) {
                     <div class="derived-year-list">
                         <div class="derived-year-toolbar">
                             <strong>Derived census years</strong>
-                            ${eligible.length > 0 || eligibleFunctions.length > 0 ? `<button type="button" class="secondary" data-occ-confirm-all ${state.occupancyBusy ? "disabled" : ""}>Confirm all eligible (${eligibleWords})</button>` : ""}
+                            ${eligible.length > 0 || eligibleFunctions.length > 0 ? `<button type="button" data-occ-confirm-all ${state.occupancyBusy ? "disabled" : ""}>Confirm all eligible (${eligibleWords})</button>` : ""}
                             ${isAuthor ? `<span class="muted">You submitted this evidence.</span>` : ""}
                         </div>
                         ${presence.length === 0
@@ -1109,7 +1109,7 @@ function human(value) {
                 ${overrideFields}
                 ${noteField}
                 <div class="wide review-actions">
-                    <button type="submit">${action === "override" ? "Save override" : "Reject this year"}</button>
+                    <button type="submit" ${action === "override" ? "" : `class="danger"`}>${action === "override" ? "Save override" : "Reject this year"}</button>
                     <button type="button" class="secondary" data-occ-cancel>Cancel</button>
                     <span class="muted" data-occ-form-status></span>
                 </div>
@@ -1601,8 +1601,25 @@ function human(value) {
         }
     }
 
+    // r-d3 (jb 2026-09-04): the standing review boundary is open on a
+    // reviewer's first visit and closed on later ones; without storage it
+    // stays open every time
+    function setupBoundary() {
+        const boundary = document.getElementById("reviewBoundary");
+        if (!boundary) return;
+        const key = "pow-review-boundary-seen";
+        try {
+            const seen = window.localStorage.getItem(key) === "1";
+            boundary.open = !seen;
+            if (!seen) window.localStorage.setItem(key, "1");
+        } catch (_error) {
+            boundary.open = true;
+        }
+    }
+
     function init() {
         setupPageLabel();
+        setupBoundary();
         els.refreshQueue.addEventListener("click", loadQueue);
         els.queueStatus.addEventListener("change", () => {
             state.selected = null;
