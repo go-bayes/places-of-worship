@@ -59,9 +59,11 @@ the portal falls back to streets (disabling the imagery buttons) when the
 key is refused or exhausted.
 
 Assigned-task work and pure entry are separate activities (ruled
-2026-08-31): the assignment sheet lists only the batch's tasks, while the
-contributor's own nominations live in a teal `My nominations` panel in Add
-places. Nominations always stay on the map — as dashed teal rings while
+2026-08-31): the assignment sheet lists only the batch's tasks, with My work
+beneath it; the contributor's own nominations open from `Revise a past
+submission` on the Add places card into a teal `My past submissions` list
+below the card (ruled 2026-09-04: the selected work holds the sidebar; past
+work is a card button away, never a list at the top). Nominations always stay on the map — as dashed teal rings while
 healthy, keeping their validation-state ring once disputed or validated —
 so the duplicate check and the route back to them survive the separation.
 
