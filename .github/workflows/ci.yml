@@ -35,6 +35,7 @@ jobs:
           node apps/regions/nz/js/rapid-entry-contract.test.cjs
           node apps/regions/nz/js/occupancy-contract.test.cjs
           node apps/regions/nz/js/assigned-periods-dom.test.cjs
+          node apps/regions/nz/js/portal-walkthrough-dom.test.cjs
           node apps/regions/nz/js/occupancy-review.test.cjs
           node apps/regions/nz/js/osm-history.test.cjs
           node apps/regions/nz/js/deep-link-context.test.cjs
