@@ -420,6 +420,9 @@ export const derivedFunctionStatus = v.union(
   v.literal("stated"), v.literal("uncertain"),
 );
 export const derivationKind = v.union(v.literal("presence"), v.literal("function"));
+export const derivedFunctionRule = v.union(
+  v.literal("inside_state"), v.literal("within_change_window"), v.literal("within_start_window"),
+);
 export const derivedReviewState = v.union(
   v.literal("derived_unconfirmed"), v.literal("reviewer_confirmed"), v.literal("reviewer_overridden"),
   v.literal("reviewer_rejected"), v.literal("superseded"),

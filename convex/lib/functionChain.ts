@@ -122,6 +122,10 @@ function assertChainDate(label: string, date: ChainDateInput, referenceDate: str
   }
 }
 
+// a desacralisation closes a period, and a period's end has no latest-only
+// mode; the same wording refuses it on the client
+export const DESACRALISED_BY_DATE_MESSAGE = "A desacralisation needs its date, or the earliest and latest dates it could have been; a latest date alone cannot close the period.";
+
 export const CHAIN_CHANGE_TEXT: Record<ChainChange, string> = {
   denomination_changed: "denomination changed",
   shared_use_began: "shared use began",
@@ -207,6 +211,7 @@ export function assertFunctionChain(
     }
     if (change.change === "desacralised") {
       if (desacralisedAt >= 0) throw new Error(`${label}: the chain already records a desacralisation.`);
+      if (change.date.mode === "by") throw new Error(DESACRALISED_BY_DATE_MESSAGE);
       desacralisedAt = index;
     }
   });
@@ -330,8 +335,10 @@ export function deriveFunctions(chain: FunctionChainInput, targetYears: readonly
         row = { target_year: year, derived_status: "uncertain", candidate_labels: [stateLabel(state)], rule_id: "within_start_window" };
         break;
       }
-      // the change window that ends this state
-      if (to !== undefined && to.lower !== undefined && to.upper !== undefined && yEnd >= to.lower && yStart <= to.upper && afterStart) {
+      // the change window that ends this state; a by-dated change has no
+      // earliest bound, so its window runs from the state's certain start
+      const windowLower = to === undefined ? undefined : (to.lower ?? from.upper);
+      if (to !== undefined && to.upper !== undefined && windowLower !== undefined && yEnd >= windowLower && yStart <= to.upper && afterStart) {
         const next = states[i + 1];
         const candidates = next ? [stateLabel(state), stateLabel(next)] : [stateLabel(state)];
         row = { target_year: year, derived_status: "uncertain", candidate_labels: candidates, rule_id: "within_change_window" };

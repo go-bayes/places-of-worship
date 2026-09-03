@@ -59,6 +59,7 @@ import {
   functionChainInput,
   functionChainChange,
   derivedFunctionStatus,
+  derivedFunctionRule,
   derivationKind,
 } from "./model";
 
@@ -401,7 +402,7 @@ export default defineSchema({
     derived_status: derivedFunctionStatus,
     label: v.optional(v.string()),
     candidate_labels: v.array(v.string()),
-    rule_id: v.string(),
+    rule_id: derivedFunctionRule,
     chain_id: v.string(),
     derivation_version: v.string(),
     inputs_hash: v.string(),

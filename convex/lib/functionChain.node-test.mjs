@@ -118,6 +118,16 @@ test("chain validation: labels, notes, frequency, order, and the desacralisation
   assert.throws(() => assertFunctionChain(endedWithoutShared, REF), /no shared use is in force/);
   const future = { ...KOHEKOHE, changes: [{ change: "desacralised", date: known("2030") }] };
   assert.throws(() => assertFunctionChain(future, REF), /reference date/);
+  // p2-2: a latest-only desacralisation cannot close a period, so it is refused
+  const byDesacralised = { ...KOHEKOHE, changes: [{ change: "desacralised", date: by("2014") }] };
+  assert.throws(() => assertFunctionChain(byDesacralised, REF), /latest date alone cannot close the period/);
+});
+
+test("p2-3: a by-dated change window runs from the state's certain start", () => {
+  // shared use ended by 1930: 1930 falls inside that window with both labels
+  assert.deepEqual(deriveFunctions(KOHEKOHE, [1930]).map((r) => `${r.target_year}:${r.derived_status}:${r.candidate_labels.join("|")}:${r.rule_id}`), [
+    "1930:uncertain:Presbyterian, shared with Methodist|Presbyterian:within_change_window",
+  ]);
 });
 
 test("chain date bounds and the inputs hash", () => {

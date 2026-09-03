@@ -20,6 +20,7 @@ import {
   FUNCTION_DERIVATION_VERSION,
   functionChainInputsHash,
   stateLabel,
+  type ChainDateInput,
   type FunctionChainInput,
 } from "./lib/functionChain";
 import {
@@ -451,19 +452,70 @@ async function rederiveFunctions(
   return derived.map((d) => d.target_year);
 }
 
-// the date text of a chain date for the claim ledger's bound columns
-function chainBound(text: string, which: "earliest" | "latest"): string {
-  const parts = text.replace(/^by /, "").split("–");
-  return which === "earliest" ? parts[0] : parts[parts.length - 1];
+// pr-f: the author's earlier chain claims on the task are superseded as a
+// set on every set write, whether or not the new set carries a chain, so
+// a resubmission without one never leaves an earlier chain active. the
+// affected parents (this one and earlier ones) lose their stored chain
+// and their derived denominations are rederived to nothing
+async function supersedeEarlierFunctionChains(
+  ctx: MutationCtx,
+  task: Doc<"tasks">,
+  parent: Doc<"evidence_drafts">,
+  user: Doc<"users">,
+  actorRole: ProjectRole,
+  now: number,
+): Promise<void> {
+  const earlier = await ctx.db
+    .query("historical_claims")
+    .withIndex("by_task_creator_and_created_at", (q) => q.eq("task_id", task.task_id).eq("created_by", user._id))
+    .take(501);
+  if (earlier.length > 500) {
+    throw new Error("This task has more than 500 historical claims for the contributor. Ask JB to repair the set before continuing.");
+  }
+  const affectedParents = new Set<string>();
+  for (const claim of earlier) {
+    if (claim.chain_id === undefined || claim.claim_status !== "submitted") continue;
+    await ctx.db.patch(claim._id, { claim_status: "superseded", updated_at: now });
+    affectedParents.add(claim.parent_evidence_draft_id);
+  }
+  if (parent.function_chain !== undefined) affectedParents.add(parent.evidence_draft_id);
+  for (const affectedId of affectedParents) {
+    const affected = affectedId === parent.evidence_draft_id
+      ? parent
+      : await ctx.db
+        .query("evidence_drafts")
+        .withIndex("by_evidence_draft_id", (q) => q.eq("evidence_draft_id", affectedId))
+        .unique();
+    if (affected === null) continue;
+    if (affected.function_chain !== undefined) {
+      await ctx.db.patch(affected._id, { function_chain: undefined, updated_at: now });
+    }
+    await rederiveFunctions(ctx, task, affected, undefined, "", user._id, actorRole, now);
+  }
+}
+
+// the claim ledger's bound columns for a chain date: a by-date has no
+// earliest bound, and none is invented for it
+function claimBounds(date: ChainDateInput): { earliest?: string; latest?: string } {
+  const t = (value: string | undefined) => (value ?? "").trim();
+  switch (date.mode) {
+    case "known":
+      return { earliest: t(date.date), latest: t(date.date) };
+    case "between":
+      return { earliest: t(date.not_earlier_than), latest: t(date.not_later_than) };
+    case "by":
+      return { latest: t(date.not_later_than) };
+    default:
+      return {};
+  }
 }
 
 // pr-f: the one write route for a function chain. validates the chain
 // against the parent evidence date and the just-recorded periods,
-// supersedes the author's earlier chain claims on the task (this parent
-// and earlier parents, whose derived denominations are rederived to
-// nothing), compiles the chain to ordered historical claims that share
-// the periods' provenance, stores the chain typed on the parent, and
-// derives the denomination per census year as unconfirmed proposals
+// compiles it to ordered historical claims that share the periods'
+// provenance, stores the chain typed on the parent, and derives the
+// denomination per census year as unconfirmed proposals. the author's
+// earlier chains were superseded by recordOccupancySet before this runs
 export async function recordFunctionChain(
   ctx: MutationCtx,
   args: {
@@ -485,29 +537,6 @@ export async function recordFunctionChain(
     throw new Error("The function chain rests on the periods' source; record at least one period with it.");
   }
   assertChainAgreesWithPeriods(chain, args.segments);
-  // the author's earlier chains on the task are superseded as a set
-  const earlier = await ctx.db
-    .query("historical_claims")
-    .withIndex("by_task_creator_and_created_at", (q) => q.eq("task_id", task.task_id).eq("created_by", user._id))
-    .take(501);
-  if (earlier.length > 500) {
-    throw new Error("This task has more than 500 historical claims for the contributor. Ask JB to repair the set before continuing.");
-  }
-  const earlierParents = new Set<string>();
-  for (const claim of earlier) {
-    if (claim.chain_id === undefined || claim.claim_status !== "submitted") continue;
-    await ctx.db.patch(claim._id, { claim_status: "superseded", updated_at: now });
-    if (claim.parent_evidence_draft_id !== parent.evidence_draft_id) earlierParents.add(claim.parent_evidence_draft_id);
-  }
-  for (const earlierParentId of earlierParents) {
-    const earlierParent = await ctx.db
-      .query("evidence_drafts")
-      .withIndex("by_evidence_draft_id", (q) => q.eq("evidence_draft_id", earlierParentId))
-      .unique();
-    if (earlierParent === null) continue;
-    await ctx.db.patch(earlierParent._id, { function_chain: undefined, updated_at: now });
-    await rederiveFunctions(ctx, task, earlierParent, undefined, "", user._id, actorRole, now);
-  }
   const chainId = `${task.task_id}:${user._id}:chain:${args.submissionToken}`;
   const provenance = args.segments[0];
   const { states, events } = compileChain(chain);
@@ -536,6 +565,8 @@ export async function recordFunctionChain(
     const label = stateLabel(state);
     const from = chainDateText(state.from);
     const to = state.to ? chainDateText(state.to) : "";
+    const fromBounds = claimBounds(state.from);
+    const toBounds = state.to ? claimBounds(state.to) : {};
     await ctx.db.insert("historical_claims", {
       ...claimBase,
       historical_claim_id: `${chainId}:${claimIndex}`,
@@ -543,8 +574,8 @@ export async function recordFunctionChain(
       claim_kind: state.shared_with ? "shared_use" : "denomination_or_affiliation",
       claim_timing: "state",
       claim_text: `${label} from ${from}${to ? ` until ${to} (${String(state.ended_by).replaceAll("_", " ")})` : ""}`,
-      earliest_supported_date: chainBound(from, "earliest"),
-      ...(to ? { latest_supported_date: chainBound(to, "latest") } : {}),
+      ...(fromBounds.earliest ? { earliest_supported_date: fromBounds.earliest } : {}),
+      ...(toBounds.latest ? { latest_supported_date: toBounds.latest } : {}),
       continues_through_observation: state.to === undefined,
       chain_index: claimIndex,
       chain_change: state.began_by,
@@ -569,8 +600,8 @@ export async function recordFunctionChain(
       claim_kind: kind,
       claim_timing: "event",
       claim_text: words,
-      earliest_supported_date: chainBound(when, "earliest"),
-      latest_supported_date: chainBound(when, "latest"),
+      ...(claimBounds(event.date).earliest ? { earliest_supported_date: claimBounds(event.date).earliest } : {}),
+      ...(claimBounds(event.date).latest ? { latest_supported_date: claimBounds(event.date).latest } : {}),
       continues_through_observation: false,
       chain_index: claimIndex,
       chain_change: event.change,
@@ -660,6 +691,8 @@ export async function recordOccupancySet(
   // holds one active set per task. those parents' derived proposals are
   // rederived to nothing, which marks them superseded with an event each
   await supersedeEarlierOccupancySets(ctx, task, parent, user, actorRole, now);
+  // pr-f: the author's earlier function chains go the same way, chain or no chain
+  await supersedeEarlierFunctionChains(ctx, task, parent, user, actorRole, now);
   // the cards saved with the draft are now rows
   if (parent.pending_occupancy_cards !== undefined) {
     await ctx.db.patch(parent._id, { pending_occupancy_cards: undefined, updated_at: now });
