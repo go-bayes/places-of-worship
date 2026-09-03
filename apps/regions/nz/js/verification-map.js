@@ -2641,7 +2641,8 @@ class NzVerificationMap {
                     <span class="legend-row"><span class="legend-dot fill-present-swatch"></span>present</span>
                     <span class="legend-row"><span class="legend-dot fill-absent-swatch"></span>absent</span>
                     <span class="legend-row"><span class="legend-dot fill-uncertain-swatch"></span>uncertain</span>
-                    <span class="legend-row"><span class="legend-dot fill-not-assessed-swatch"></span>not assessed</span>` : ""}
+                    <span class="legend-row"><span class="legend-dot fill-not-assessed-swatch"></span>not assessed</span>` : `
+                    <span class="legend-caption">Fill</span>`}
                     <span class="legend-row"><span class="legend-dot vm-nomination-swatch"></span>your nomination</span>
                     <span class="legend-caption">Ring: validation</span>
                     <span class="legend-row"><span class="legend-dot vm-validated-present-swatch"></span>validated</span>

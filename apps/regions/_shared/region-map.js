@@ -160,7 +160,7 @@ const SCHEMA_BASE = RC.schemaBase || "../../../schemas/";
   </div>
   <!-- phones (r-d2, jb 2026-09-04): the wordmark hides, so the action row's
        contribute pill opens this sheet with the portal route alone -->
-  <div id="contribute-sheet" class="shell-panel" hidden aria-label="Submit evidence"></div>
+  <div id="contribute-sheet" class="shell-panel" role="dialog" hidden aria-label="Submit evidence"></div>
   <button id="corner-reset" class="shell-pill shell-top-right" type="button" aria-label="Set North">
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path d="M12 3L17 12L7 12L12 3Z" fill="#ef4444"/>
