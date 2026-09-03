@@ -53,7 +53,7 @@ import {
   derivedYearLocationDoc,
   siteOccupancyDoc,
 } from "./lib/validators";
-import { derivedPresenceStatus, functionChainInput, occupancySegmentInput } from "./model";
+import { derivedPresenceStatus, derivedUseLevel, functionChainInput, occupancySegmentInput } from "./model";
 
 const ACTIVE_HISTORY_STATUSES = new Set(["needs_review", "unresolved_note", "changes_requested"]);
 const DECISION_NOTE_MIN = 8;
@@ -949,7 +949,7 @@ async function applyYearDecision(
   presence: Doc<"derived_target_year_states">,
   action: DecisionAction,
   note: string | undefined,
-  override: { status?: "present" | "absent" | "uncertain"; latitude?: number; longitude?: number; uncertainty_radius_m?: number } | undefined,
+  override: { status?: "present" | "absent" | "uncertain"; use_level?: "regular" | "intermittent"; latitude?: number; longitude?: number; uncertainty_radius_m?: number } | undefined,
   now: number,
 ): Promise<string | null> {
   const year = presence.target_year;
@@ -976,7 +976,7 @@ async function applyYearDecision(
       updated_at: now,
     });
   } else if (action === "override") {
-    if (override === undefined || (override.status === undefined && override.latitude === undefined && override.longitude === undefined && override.uncertainty_radius_m === undefined)) {
+    if (override === undefined || (override.status === undefined && override.use_level === undefined && override.latitude === undefined && override.longitude === undefined && override.uncertainty_radius_m === undefined)) {
       throw new Error("An override needs a status, a point, or a radius.");
     }
     if ((override.latitude === undefined) !== (override.longitude === undefined)) {
@@ -996,9 +996,9 @@ async function applyYearDecision(
     await ctx.db.patch(parent._id, {
       target_year_statuses: { ...((parent.target_year_statuses ?? {}) as Record<string, "present" | "absent" | "uncertain" | "not_assessed">), [String(year)]: status },
       target_year_basis: { ...((parent.target_year_basis ?? {}) as Record<string, "source_observation" | "reviewer_confirmed_derivation" | "reviewer_override">), [String(year)]: "reviewer_override" },
-      // an overriding present keeps the derived level of use; any other
-      // status carries none
-      target_year_use_levels: useLevelsAfter(parent, year, status === "present" ? presence.use_level : undefined),
+      // an overriding present carries the reviewer's level of use, else
+      // the derived one; any other status carries none
+      target_year_use_levels: useLevelsAfter(parent, year, status === "present" ? (override.use_level ?? presence.use_level) : undefined),
       updated_at: now,
     });
   } else {
@@ -1117,6 +1117,8 @@ export const decideDerivedYear = mutation({
     note: v.optional(v.string()),
     override: v.optional(v.object({
       status: v.optional(derivedPresenceStatus),
+      // r-f1': an overriding present may name its level of use
+      use_level: v.optional(derivedUseLevel),
       latitude: v.optional(v.number()),
       longitude: v.optional(v.number()),
       uncertainty_radius_m: v.optional(v.number()),

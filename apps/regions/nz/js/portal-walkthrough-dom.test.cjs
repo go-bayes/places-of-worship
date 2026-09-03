@@ -149,4 +149,62 @@ app.clearGuidedPeriods(key);
 if (localStorage.getItem("powGuidedPeriods:NZ:user_1:rapid-pin-periods") !== null) {
   throw new Error("Discarding did not clear the rapid cards.");
 }
-console.log("portal walkthrough dom test passed");
+
+// --- the gone option turns the block into the record of when the place stood ---
+const title = element("guidedPeriodsTitle", { textContent: "When was this place used for worship?" });
+const summary = { textContent: "Dates, denomination, and changes (optional now)" };
+const details = element("pinPeriodsDetails", { open: false, querySelector: () => summary });
+const goneState = app.guidedPeriodsState(key);
+goneState.segments[0].endMode = "still_active";
+goneState.segments[0].stillActiveAsof = "2026-09-01";
+app.syncGoneStatusPeriods(key, true);
+if (!details.open || !title.textContent.startsWith("When did this place exist") || !summary.textContent.startsWith("When did this place exist")) {
+  throw new Error(`Choosing the gone option did not open and rename the periods block: ${title.textContent} / ${summary.textContent}`);
+}
+if (goneState.segments[0].endMode !== "known" || goneState.segments[0].stillActiveAsof !== "") {
+  throw new Error("Choosing the gone option left the first card still in use.");
+}
+app.syncGoneStatusPeriods(key, false);
+if (title.textContent !== "When was this place used for worship?" || goneState.segments[0].endMode !== "known") {
+  throw new Error("Choosing another option did not restore the heading while keeping the card's end.");
+}
+app.clearGuidedPeriods(key);
+
+// --- cards saved for one place never leak to another (review p2-3) ---
+app.reviseContext = { latitude: -37.1928, longitude: 174.6558 };
+app.reconcileRapidPeriodsPlace(app.rapidPinPlaceKey());
+const kohekohe = app.guidedPeriodsState(key);
+kohekohe.segments[0].startDate = "1886";
+kohekohe.segments[0].startBasis = "founding_stated";
+app.persistGuidedPeriods(key);
+app.reviseContext = null;
+app.reconcileRapidPeriodsPlace(app.rapidPinPlaceKey());
+if (app.guidedPeriodsState(key).segments[0].startDate !== "" || app.guidedPeriodsState(key).placeKey !== "new-place") {
+  throw new Error("Cards saved for a revised place leaked into a new-place entry.");
+}
+app.guidedPeriodsState(key).segments[0].startDate = "1900";
+app.persistGuidedPeriods(key);
+app.reconcileRapidPeriodsPlace(app.rapidPinPlaceKey());
+if (app.guidedPeriodsState(key).segments[0].startDate !== "1900") {
+  throw new Error("Returning to the same place did not keep the draft cards.");
+}
+
+// --- a failed period write keeps the cards on the pane's draft, not the form's key ---
+app.backend = { user: app.backendUser, submitOccupancies: async () => { throw new Error("backend down"); } };
+app.taskHistoryByTaskId = new Map();
+const failedPlan = { submissionId: "22222222-2222-4222-8222-222222222222", segments: [{ startDate: "1900" }], chain: undefined, count: 1, state: app.guidedPeriodsState(key) };
+app.recordRapidPeriods(failedPlan, { task_id: "task_9", evidence_draft_id: "draft_9" }, key).then((outcome) => {
+  if (!outcome.periodsError || !outcome.periodsError.includes("backend down")) {
+    throw new Error(`A failed period write was not reported: ${JSON.stringify(outcome)}`);
+  }
+  if (!app.occupancyDraft || app.occupancyDraft.taskId !== "task_9" || app.occupancyDraft.segments[0].startDate !== "1900") {
+    throw new Error("The failed cards were not moved to the pane's draft.");
+  }
+  if (localStorage.getItem("powGuidedPeriods:NZ:user_1:rapid-pin-periods") !== null || app.guidedPeriodsByTaskId.has(key)) {
+    throw new Error("The failed cards stayed on the rapid form's key and could leak to the next place.");
+  }
+  console.log("portal walkthrough dom test passed");
+}).catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

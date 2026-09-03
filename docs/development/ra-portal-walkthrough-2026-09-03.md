@@ -30,6 +30,21 @@ Finding 2 was reproduced in code: `applyTypedCoordinates` parsed the two coordin
 - Chrome, simulated signed-in session on the worktree build: the add-mode sidebar at rest; pin mode with the address search directly under the control and the panels gone; the rapid form with the five options and their helpers; the button row and the collapsed periods block; the periods block open inside the form; the Kohekohe revise flow with the period cards and the chain block open before submission. Screenshots in `.private/screens-2026-09-03/walkthrough-01…06`.
 - Not verified: a live signed-in submission of a revision with periods (needs a Google session) — the plan and record helpers are exercised by the DOM test, and the server route is the one the post-submission pane has used since PR-B′.
 
+## 4a. Review of PR #77 (same day), applied
+
+- **P2-1 (ruling applied: unstated frequency derives no level — JB to confirm).** `useLevelFor(undefined)` now returns nothing on server and mirror; the card's frequency select opens on "Not stated" and the payload omits an unchosen frequency; the reviewer row says "level of use not stated" and confirming such a year writes no level; the export column stays blank. Every PR-E period and all 88 Woodberry periods fall here.
+- **P2-2.** The guide's rule-11 sentence replaced; the leftover "2018 and 2023 uncertain (intermittent use)" removed.
+- **P2-3.** A failed rapid period write moves the cards to the pane's draft and clears the form's key; opening the pin flow for a different place (or a new place after a revision, and the reverse) clears cards saved for another place, while "Back to map (keeps your draft)" keeps them for the same place. DOM tests cover both.
+- **P3-1 (assumption for JB).** `place_no_longer_exists` now derives the guided form's `no_building_present` action (building gone → no building present), existence absent, worship use not worship.
+- **P3-2.** No change needed: a revision's issue task is created at the confirmed pin (`convex/tasks.ts`, `createIssueTask` geometry from the confirmed point, the record's point kept as `original_point`), so "same place as the pin" resolves to the confirmed pin on the server; the client validates against the same point (`occupancyTaskPoint` for the rapid key, tested).
+- **P3-4.** Entry focus hides My nominations while an entry is open; the changes-requested badge on the signed-in line stays visible.
+- **P3-5.** Implemented (about 20 lines): `override.use_level` on `decideDerivedYear`, applied by `applyYearDecision` when the written status is present (else the derived level), and a "Level of use (with present)" select on the reviewer's override form.
+- **Placeholders.** The pin panel's search and coordinate placeholders come from the country config (`pinExample`; NZ "St Paul's, Wellington", −41.28650 / 174.77620; VU keeps Mele, Efate) and fall back to the country's map centre and name on the other 21 portals, all of which declare `mapCentre`.
+
+## 4b. JB's addition (same day): the gone option must show it records a past building
+
+Rapid form: the option reads "Used to exist here, but no longer does" with the helper "Choose this when the building has gone. You can then record below when it stood and was used for worship." Guided form: "No building present" is relabelled "No building here now" with the same helper. Choosing either opens the periods block, renames its heading to "When did this place exist and was it used for worship?", and turns the first card's end from "still in use" to a known end awaiting the RA's date; the preview derives absent for years after a stated closure. Reviewer: the action reads "No building here now", plus "the RA recorded when it stood and was used" when periods exist on the draft. Vocabulary row added for `worship_use_status: no_building_present`; guide sentence added; DOM test covers the expansion, the heading, and the card end.
+
 ## 5. What remains open
 
 - The frequency wording is settled by R-F1′ (section 7); nothing remains open on it.

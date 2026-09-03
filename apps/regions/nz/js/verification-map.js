@@ -20,6 +20,8 @@ const COUNTRY_CONFIGS = {
         defaultAssignmentBatchId: "nz-temporal-ra-workpack-001",
         datedPlaces: "../nz/data/dated_places.geojson",
         assignmentHeading: "New Zealand source-first test",
+        // the pin panel's search and coordinate placeholders
+        pinExample: { place: "St Paul's, Wellington", lat: -41.2865, lng: 174.7762 },
         // pure entry only: nz assigned tasks keep the guided form
         rapidNominationEntry: true,
         temporalLossAction: {
@@ -35,6 +37,7 @@ const COUNTRY_CONFIGS = {
     },
     vu: {
         countryCode: "VU",
+        pinExample: { place: "Mele, Efate", lat: -17.74043, lng: 168.321 },
         countryName: "Vanuatu",
         targetYears: ["1989", "1999", "2009", "2020"],
         defaultTargetYear: "2020",
@@ -700,7 +703,7 @@ const RAPID_STATUS_LABELS = {
     currently_used_for_worship: "Used for worship",
     place_exists_worship_uncertain: "Exists; worship use uncertain",
     place_exists_not_used_for_worship: "Exists; not used for worship",
-    place_no_longer_exists: "Existed; no longer exists",
+    place_no_longer_exists: "Used to exist here; gone now",
     could_not_determine: "Could not determine",
 };
 const RAPID_BASIS_LABELS = {
@@ -824,7 +827,7 @@ const WORSHIP_USE_STATUS_OPTIONS = [
     ["probable_worship", "Probable worship"],
     ["organisation_only", "Organisation only"],
     ["building_only", "Building only"],
-    ["no_building_present", "No building present"],
+    ["no_building_present", "No building here now"],
     ["not_worship", "Not worship"],
     ["uncertain", "Uncertain"],
 ];
@@ -1433,7 +1436,7 @@ function actionLabelForRa(action) {
     if (action === "possible_duplicate") return "Possible duplicate";
     if (action === COUNTRY_CONFIG.temporalLossAction.value) return COUNTRY_CONFIG.temporalLossAction.label;
     if (action === "closed_or_changed_use") return "Closed or changed use";
-    if (action === "no_building_present") return "No building present";
+    if (action === "no_building_present") return "No building here now";
     if (action === "denomination_or_shared_use") return "Denomination/shared use";
     return "Needs review";
 }
@@ -5042,7 +5045,7 @@ class NzVerificationMap {
                     </label>
                     <label class="rapid-choice">
                         <input type="radio" name="${prefix}CurrentStatus" value="place_no_longer_exists"${checked("place_no_longer_exists")}>
-                        <span><strong>This place existed but no longer exists</strong><small>The building or site is gone (demolished, destroyed, or built over). Record when it was used, and when it went, in the periods below if you know them.</small></span>
+                        <span><strong>Used to exist here, but no longer does</strong><small>Choose this when the building has gone. You can then record below when it stood and was used for worship.</small></span>
                     </label>
                     <label class="rapid-choice">
                         <input type="radio" name="${prefix}CurrentStatus" value="could_not_determine"${checked("could_not_determine")}>
@@ -5544,7 +5547,10 @@ class NzVerificationMap {
             this.updateRapidDiscussionFields(prefix);
         });
         form.querySelectorAll(`input[name="${prefix}CurrentStatus"]`).forEach(radio => {
-            radio.addEventListener("change", () => this.updateRapidUncertaintyField(prefix));
+            radio.addEventListener("change", () => {
+                this.updateRapidUncertaintyField(prefix);
+                if (options.periodsKey) this.syncGoneStatusPeriods(options.periodsKey, radio.checked && radio.value === "place_no_longer_exists");
+            });
         });
         this.bindSourceTypeahead(prefix);
         document.getElementById(`${prefix}QuickFillOsm`)?.addEventListener("click", () => {
@@ -6020,7 +6026,9 @@ class NzVerificationMap {
             endBasis: "",
             endReason: "",
             stillActiveAsof: fromParent ? context.referenceDate : "",
-            useFrequency: "regular",
+            // r-f1': not stated until the ra chooses; an unstated frequency
+            // derives no level of use
+            useFrequency: "",
             sameAsPin: true,
             location: null,
             locationSummary: "",
@@ -6131,7 +6139,7 @@ class NzVerificationMap {
                 <div class="occupancy-block" data-block="use">
                     <label>
                         How often was it used for worship in this period?
-                        <select data-field="useFrequency">${selectOptionsHtml(OCCUPANCY_USE_FREQUENCY_OPTIONS, s.useFrequency || "regular")}</select>
+                        <select data-field="useFrequency"><option value=""${s.useFrequency ? "" : " selected"}>Not stated</option>${selectOptionsHtml(OCCUPANCY_USE_FREQUENCY_OPTIONS, s.useFrequency || "")}</select>
                     </label>
                 </div>
                 <div class="occupancy-block" data-block="location">
@@ -6275,6 +6283,7 @@ class NzVerificationMap {
                 sameSource: state.sameSource,
                 provenance: state.provenance,
                 chain: state.chain,
+                ...(state.placeKey ? { placeKey: state.placeKey } : {}),
             }));
         } catch (error) {
             // private windows or blocked storage lose autosave only
@@ -6324,7 +6333,7 @@ class NzVerificationMap {
             const referenceDate = this.guidedReferenceDate(taskId);
             const blankChain = () => (window.PowFunctionChain ? window.PowFunctionChain.blankChain() : null);
             state = stored
-                ? { submissionId: stored.submissionId || "", segments: stored.segments, gapAnswer: stored.gapAnswer || "", sameSource: stored.sameSource !== false, provenance: stored.provenance || this.occupancyBlankProvenance(), gapNote: stored.gapNote || "", referenceDate, loadedFrom: "", chain: stored.chain || blankChain() }
+                ? { submissionId: stored.submissionId || "", segments: stored.segments, gapAnswer: stored.gapAnswer || "", sameSource: stored.sameSource !== false, provenance: stored.provenance || this.occupancyBlankProvenance(), gapNote: stored.gapNote || "", referenceDate, loadedFrom: "", chain: stored.chain || blankChain(), ...(stored.placeKey ? { placeKey: stored.placeKey } : {}) }
                 : { submissionId: "", segments: [this.occupancyBlankSegment({ referenceDate, referenceDateFromParent: true })], gapAnswer: "", sameSource: this.guidedPeriodsDefaultSameSource(taskId), provenance: this.occupancyBlankProvenance(), gapNote: "", referenceDate, loadedFrom: "", chain: blankChain() };
             this.guidedPeriodsByTaskId.set(taskId, state);
         }
@@ -6371,7 +6380,7 @@ class NzVerificationMap {
         const state = this.guidedPeriodsState(taskId);
         return `
             <div class="guided-periods" id="guidedPeriods">
-                <div class="occupancy-block-title">When was this place used for worship?</div>
+                <div class="occupancy-block-title" id="guidedPeriodsTitle">When was this place used for worship?</div>
                 <div class="copy-help">One card per period at one location; bounds are fine. The census-year states are derived from these and a reviewer confirms them. Never let one period span a spell when no worship happened here.</div>
                 <div id="guidedPeriodsCards" class="occupancy-cards">
                     ${state.segments.map((segment, index) => this.occupancyCardHtml(segment, index, state.segments.length)).join("")}
@@ -7413,10 +7422,10 @@ class NzVerificationMap {
                         <option value="possible_duplicate">Possible duplicate</option>
                         <option value="${escapeHtml(COUNTRY_CONFIG.temporalLossAction.value)}">${escapeHtml(COUNTRY_CONFIG.temporalLossAction.label)}</option>
                         <option value="closed_or_changed_use">Closed or changed use</option>
-                        <option value="no_building_present">No building present</option>
+                        <option value="no_building_present">No building here now</option>
                         <option value="denomination_or_shared_use">Denomination/shared use</option>
                     </select>
-                    <small class="label-help">"Confirm current site" means the place exists and worship happens here at any known frequency; give the frequency in the periods below, where once-a-year use counts as in use at an intermittent level. A place that existed but is gone is "No building present", with its dates in the periods.</small>
+                    <small class="label-help">"Confirm current site" means the place exists and worship happens here at any known frequency; give the frequency in the periods below, where once-a-year use counts as in use at an intermittent level. "No building here now" is for a building that has gone: choose it when the building has gone, and you can then record below when it stood and was used for worship.</small>
                 </label>
                 ${this.guidedPeriodsHtml(taskId)}
                 <details class="skip-form optional-block" id="yearGridDetails"${gridOpen ? " open" : ""}>
@@ -7713,6 +7722,7 @@ class NzVerificationMap {
         actionSelect?.addEventListener("change", () => {
             markDirty();
             applyDefaults();
+            this.syncGoneStatusPeriods(props.task_id, actionSelect.value === "no_building_present");
             // a duplicate claim needs its counterpart on record, so the
             // related-ids block opens the moment the action names one
             if (actionSelect.value === "possible_duplicate") {
@@ -8741,6 +8751,53 @@ class NzVerificationMap {
         };
     }
 
+    // jb 2026-09-03: choosing "used to exist here, but no longer does" (rapid)
+    // or "no building here now" (guided) turns the periods block into the
+    // record of when the place stood: the block opens, its heading asks when
+    // the place existed, and the first card stops defaulting to "still in
+    // use" so the ra gives the end (the preview then derives absent after a
+    // stated closure). choosing another option restores the heading only
+    syncGoneStatusPeriods(taskId, gone) {
+        const heading = gone ? "When did this place exist and was it used for worship?" : "When was this place used for worship?";
+        const title = document.getElementById("guidedPeriodsTitle");
+        if (title) title.textContent = heading;
+        const details = document.getElementById("pinPeriodsDetails");
+        if (details && gone) {
+            details.open = true;
+            const summary = details.querySelector?.("summary");
+            if (summary) summary.textContent = heading;
+        }
+        if (!gone || !window.PowOccupancy) return;
+        const state = this.guidedPeriodsState(taskId);
+        const first = state.segments[0];
+        if (first && first.endMode === "still_active") {
+            first.endMode = "known";
+            first.stillActiveAsof = "";
+            this.persistGuidedPeriods(taskId);
+            this.rerenderGuidedPeriods(taskId);
+        }
+    }
+
+    // the place the rapid cards belong to: the record being revised, or a
+    // new place; "back to map" keeps the draft for the same place, and a
+    // different place starts clean (review of pr #77, finding p2-3)
+    rapidPinPlaceKey() {
+        const revise = this.reviseContext;
+        if (revise && Number.isFinite(revise.latitude) && Number.isFinite(revise.longitude)) {
+            return `revise:${revise.latitude.toFixed(5)},${revise.longitude.toFixed(5)}`;
+        }
+        return "new-place";
+    }
+
+    reconcileRapidPeriodsPlace(placeKey) {
+        const key = RAPID_PIN_PERIODS_KEY;
+        const held = this.guidedPeriodsByTaskId.get(key)?.placeKey ?? this.readGuidedPeriodsStorage(key)?.placeKey;
+        if (held && held !== placeKey) this.clearGuidedPeriods(key);
+        const state = this.guidedPeriodsState(key);
+        state.placeKey = placeKey;
+        this.persistGuidedPeriods(key);
+    }
+
     // the cards under a rapid form, validated before the observation goes so
     // a bad set never leaves half a submission; returns null when untouched,
     // { problem } when they cannot go, else the payload to record
@@ -8817,6 +8874,9 @@ class NzVerificationMap {
                 chain: state.chain,
                 referenceDate: state.referenceDate,
             };
+            // the cards now live on the pane's draft; the form's key must not
+            // hand them to the next place the ra opens
+            this.clearGuidedPeriods(periodsKey);
             return { periodsError: error.message || "Could not record the periods." };
         }
     }
@@ -8843,6 +8903,20 @@ class NzVerificationMap {
     // the transient pin-drop cards, rendered into #pinCardHost while pin
     // mode is active (kept here, near the map, rather than buried in the
     // nomination panel). ids are unchanged so all pin logic still binds
+    // search and coordinate placeholders for this country: a named example
+    // where the config gives one, else the map centre (review of pr #77)
+    pinPlaceholderExample() {
+        const example = COUNTRY_CONFIG.pinExample;
+        const centre = Array.isArray(COUNTRY_CONFIG.mapCentre) ? COUNTRY_CONFIG.mapCentre : [];
+        const lat = Number(example?.lat ?? centre[0]);
+        const lng = Number(example?.lng ?? centre[1]);
+        return {
+            place: example?.place || `a town or street in ${COUNTRY_CONFIG.countryName || "this country"}`,
+            lat: Number.isFinite(lat) ? lat.toFixed(5) : "latitude",
+            lng: Number.isFinite(lng) ? lng.toFixed(5) : "longitude",
+        };
+    }
+
     pinPeriodsBlockHtml(revise) {
         if (!window.PowOccupancy) return "";
         return `
@@ -8910,6 +8984,7 @@ class NzVerificationMap {
             `;
         const revise = this.reviseContext;
         const occupancyPin = this.occupancyPinContext;
+        const pinExample = this.pinPlaceholderExample();
         const hostTitle = occupancyPin
             ? `Place period ${occupancyPin.index + 1} on the map`
             : revise ? `Revise ${escapeHtml(revise.name || "this place")}` : "Add a missing place";
@@ -8927,7 +9002,7 @@ class NzVerificationMap {
                 <div class="pin-locate-row">
                     <label>
                         Address or place name
-                        <input id="pinSearchInput" type="search" placeholder="e.g. Mele, Efate" autocomplete="off">
+                        <input id="pinSearchInput" type="search" placeholder="e.g. ${escapeHtml(pinExample.place)}" autocomplete="off">
                     </label>
                     <button id="pinSearchButton" type="button" class="secondary">Search</button>
                 </div>
@@ -8936,11 +9011,11 @@ class NzVerificationMap {
                 <div class="pin-coord-row">
                     <label>
                         Latitude
-                        <input id="pinLatInput" type="text" inputmode="decimal" placeholder="-17.74043" autocomplete="off">
+                        <input id="pinLatInput" type="text" inputmode="decimal" placeholder="${escapeHtml(pinExample.lat)}" autocomplete="off">
                     </label>
                     <label>
                         Longitude
-                        <input id="pinLngInput" type="text" inputmode="decimal" placeholder="168.32100" autocomplete="off">
+                        <input id="pinLngInput" type="text" inputmode="decimal" placeholder="${escapeHtml(pinExample.lng)}" autocomplete="off">
                     </label>
                     <button id="pinCoordButton" type="button" class="secondary">Move pin</button>
                 </div>
@@ -9221,6 +9296,8 @@ class NzVerificationMap {
         this.pinSearchRows = [];
         this.setEntryOpen(true);
         document.body?.classList?.add("pin-open");
+        // cards saved with an earlier entry belong to that place only
+        this.reconcileRapidPeriodsPlace(this.rapidPinPlaceKey());
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
         this.pinSubmissionId = RAPID_NOMINATION_ENTRY ? window.PowRapidEntry.secureSubmissionId() : null;

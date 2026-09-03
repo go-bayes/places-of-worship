@@ -144,12 +144,7 @@ const EXPECTED_MAPPING = {
     worship_use_status: "not_worship",
   },
   place_no_longer_exists: {
-    actions: ["closed_or_changed_use"],
-    existence_status: "absent",
-    worship_use_status: "not_worship",
-  },
-  place_no_longer_exists: {
-    actions: ["closed_or_changed_use"],
+    actions: ["no_building_present"],
     existence_status: "absent",
     worship_use_status: "not_worship",
   },

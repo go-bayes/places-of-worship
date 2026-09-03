@@ -28,7 +28,8 @@
     // only an uncertain frequency leaves the year uncertain
     const INTERMITTENT_FREQUENCIES = new Set(["annual", "occasional"]);
     function useLevelFor(frequency) {
-        if (!frequency || IN_USE_FREQUENCIES.has(frequency)) return "regular";
+        if (!frequency) return undefined;
+        if (IN_USE_FREQUENCIES.has(frequency)) return "regular";
         if (INTERMITTENT_FREQUENCIES.has(frequency)) return "intermittent";
         return undefined;
     }
@@ -472,7 +473,7 @@
             if (s.useFrequency === "uncertain") {
                 return fire("intermittent_use", "uncertain");
             }
-            return { ...fire("inside_interval", "present"), use_level: useLevelFor(s.useFrequency), use_frequency: s.useFrequency || "regular" };
+            return { ...fire("inside_interval", "present"), use_level: useLevelFor(s.useFrequency), use_frequency: s.useFrequency || undefined };
         }
         if (b.startLower !== undefined && yEnd < b.startLower) {
             if (s.startBasis === "founding_stated") return fire("before_stated_founding", "absent");

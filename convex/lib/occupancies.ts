@@ -35,13 +35,15 @@ export type UseFrequency = "regular" | "monthly" | "several_times_a_year" | "ann
 // annual, occasional, and uncertain derive uncertain (rule 11)
 export const IN_USE_FREQUENCIES: ReadonlySet<UseFrequency> = new Set<UseFrequency>(["regular", "monthly", "several_times_a_year"]);
 // the level of use a present census year carries (r-f1'): regular from
-// regular, monthly, or several-times-a-year use (and from a period with no
-// stated frequency); intermittent from annual or occasional use; none from
-// an uncertain frequency, which derives an uncertain presence instead
+// regular, monthly, or several-times-a-year use; intermittent from annual
+// or occasional use; none when the frequency was not stated (an unstated
+// frequency asserts nothing — every pr-e and woodberry period is here) or
+// is uncertain (which derives an uncertain presence instead)
 export type UseLevel = "regular" | "intermittent";
 export const INTERMITTENT_FREQUENCIES: ReadonlySet<UseFrequency> = new Set<UseFrequency>(["annual", "occasional"]);
 export function useLevelFor(frequency: UseFrequency | undefined): UseLevel | undefined {
-  if (frequency === undefined || IN_USE_FREQUENCIES.has(frequency)) return "regular";
+  if (frequency === undefined) return undefined;
+  if (IN_USE_FREQUENCIES.has(frequency)) return "regular";
   if (INTERMITTENT_FREQUENCIES.has(frequency)) return "intermittent";
   return undefined;
 }

@@ -12,7 +12,7 @@ export type CurrentObservationBasis =
   | "other";
 
 export type DerivedCurrentObservation = {
-  action: "confirm_current_record" | "missing_current_site" | "closed_or_changed_use" | "needs_review";
+  action: "confirm_current_record" | "missing_current_site" | "closed_or_changed_use" | "no_building_present" | "needs_review";
   existence_status: "present" | "absent" | "uncertain";
   worship_use_status: "confirmed_worship" | "not_worship" | "uncertain";
 };
@@ -91,11 +91,12 @@ export function deriveCurrentObservation(
         existence_status: "present",
         worship_use_status: "not_worship",
       };
-    // jb 2026-09-03: the building or site is gone; the reviewer assesses
-    // when, and the periods carry any known dates
+    // jb 2026-09-03: the building or site is gone, which is the guided
+    // form's no_building_present finding, so reviewers see one action for
+    // one fact; the periods carry any known dates
     case "place_no_longer_exists":
       return {
-        action: "closed_or_changed_use",
+        action: "no_building_present",
         existence_status: "absent",
         worship_use_status: "not_worship",
       };

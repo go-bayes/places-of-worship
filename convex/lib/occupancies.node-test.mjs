@@ -279,7 +279,9 @@ test("rule 11 (r-f1'): annual use is present at the intermittent level; only an 
   assert.deepEqual(presenceForSegment({ ...annual, use_frequency: "occasional" }, 2018), { occupancy_id: "a", rule_id: "inside_interval", status: "present", use_level: "intermittent" });
   assert.deepEqual(presenceForSegment({ ...annual, use_frequency: "uncertain" }, 2018), { occupancy_id: "a", rule_id: "intermittent_use", status: "uncertain" });
   assert.deepEqual(presenceForSegment({ ...annual, use_frequency: "monthly" }, 2018), { occupancy_id: "a", rule_id: "inside_interval", status: "present", use_level: "regular" });
-  assert.equal(presenceForSegment({ ...annual, use_frequency: undefined }, 2018).use_level, "regular");
+  // an unstated frequency asserts no level (the woodberry and pr-e periods)
+  assert.deepEqual(presenceForSegment({ ...annual, use_frequency: undefined }, 2018), { occupancy_id: "a", rule_id: "inside_interval", status: "present", use_level: undefined });
+  assert.equal(derivePresence([{ ...annual, use_frequency: undefined }], [2018])[0].use_level, undefined);
   // a year covered by a regular and an intermittent period is regular
   const regular = { ...annual, occupancy_id: "b", use_frequency: "regular" };
   assert.equal(derivePresence([annual, regular], [2018])[0].use_level, "regular");
