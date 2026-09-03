@@ -835,7 +835,72 @@ function human(value) {
         return `<div>${escapeHtml(label)}: ${escapeHtml(where)} — <em>${escapeHtml(status)}</em>, ${escapeHtml(rule)}${escapeHtml(gap)}${escapeHtml(overridden)}</div>`;
     }
 
-    function derivedYearRowHtml(presence, locations, segments, taskPoint, observedStatus, isAuthor) {
+    // pr-f: the denomination line of a derived year, beside the presence
+    // line; its own confirm / override / reject act on the function row
+    function derivedFunctionHtml(fn, isAuthor) {
+        const occ = window.PowOccupancyReview;
+        if (!fn) return `<div class="muted">Denomination: none derived (no function chain recorded).</div>`;
+        const label = occ.effectiveLabel(fn);
+        const pill = occ.reviewStatePill(fn.review_state);
+        const rule = occ.FUNCTION_RULE_TEXT[fn.rule_id] || fn.rule_id;
+        const words = fn.derived_status === "stated"
+            ? `<strong>${escapeHtml(label || fn.label || "")}</strong>`
+            : `uncertain — ${escapeHtml((fn.candidate_labels || []).join(" or "))}`;
+        const overriddenFrom = fn.review_state === "reviewer_overridden" && fn.override_label
+            ? ` <span class="muted">(derived ${escapeHtml(fn.derived_status === "stated" ? fn.label : (fn.candidate_labels || []).join(" or "))})</span>`
+            : "";
+        const actions = isAuthor ? "" : `
+                <div class="review-actions derived-year-actions derived-function-actions">
+                    <button type="button" class="secondary" data-fn-action="confirm" ${fn.derived_status !== "stated" ? `disabled title="An uncertain denomination needs an override naming the label, or a rejection."` : ""}>Confirm denomination</button>
+                    <button type="button" class="secondary" data-fn-action="override">Override</button>
+                    <button type="button" class="secondary" data-fn-action="reject">Reject</button>
+                </div>
+                <div class="derived-function-form-host"></div>`;
+        return `
+            <div class="derived-year-function" data-fn-year="${fn.target_year}">
+                <div>Denomination: ${words} <span class="pill ${pill.cls}">${escapeHtml(pill.label)}</span>${overriddenFrom}</div>
+                <div class="muted">${escapeHtml(rule)}.</div>
+                ${actions}
+            </div>`;
+    }
+
+    function functionFormHtml(action, fn) {
+        return `
+            <form class="derived-year-form decision-form" data-fn-form="${action}">
+                ${action === "override" ? `
+                <div class="wide">
+                    <label>Denomination to write (as the source gives it)</label>
+                    <input name="label" type="text" maxlength="256" required value="${escapeHtml(fn.derived_status === "stated" ? fn.label || "" : "")}">
+                </div>` : ""}
+                <div class="wide">
+                    <label>Note (at least 8 characters)</label>
+                    <textarea name="note" required minlength="8" placeholder="${action === "override" ? "Why the derived label is wrong and what the source supports." : "Why this derived denomination should not be written."}"></textarea>
+                </div>
+                <div class="wide review-actions">
+                    <button type="submit">${action === "override" ? "Save override" : "Reject this denomination"}</button>
+                    <button type="button" class="secondary" data-fn-cancel>Cancel</button>
+                    <span class="muted" data-fn-form-status></span>
+                </div>
+            </form>`;
+    }
+
+    // the chain's claims, listed under the periods in chain order
+    function chainClaimsHtml(claims) {
+        const occ = window.PowOccupancyReview;
+        const chain = (claims || [])
+            .filter((claim) => claim.chain_id !== undefined && claim.claim_status === "submitted")
+            .sort((a, b) => (a.chain_index ?? 0) - (b.chain_index ?? 0));
+        if (chain.length === 0) return "";
+        return `
+            <div class="occupancy-chain">
+                <strong>What it was, and how that changed</strong>
+                <ol class="occupancy-chain-list">
+                    ${chain.map((claim) => `<li>${escapeHtml(claim.claim_text)} <span class="muted">(${escapeHtml(occ.CHAIN_CHANGE_TEXT[claim.chain_change] || claim.chain_change || "")})</span></li>`).join("")}
+                </ol>
+            </div>`;
+    }
+
+    function derivedYearRowHtml(presence, locations, segments, taskPoint, observedStatus, isAuthor, fn) {
         const occ = window.PowOccupancyReview;
         const status = occ.effectiveStatus(presence);
         const reviewPill = occ.reviewStatePill(presence.review_state);
@@ -879,13 +944,15 @@ function human(value) {
                 ${locationHtml}
                 ${conflict}
                 ${actions}
+                ${derivedFunctionHtml(fn, isAuthor)}
             </div>
         `;
     }
 
     function derivedEventLine(event) {
         const note = event.note ? ` — ${escapeHtml(event.note)}` : "";
-        return `<li><span class="derived-event-time">${escapeHtml(formatDateTime(event.created_at))}</span> ${event.target_year} ${escapeHtml(event.action)} · ${escapeHtml(event.actor_role || "")}${note}</li>`;
+        const kind = event.derivation === "function" ? " denomination" : "";
+        return `<li><span class="derived-event-time">${escapeHtml(formatDateTime(event.created_at))}</span> ${event.target_year}${kind} ${escapeHtml(event.action)} · ${escapeHtml(event.actor_role || "")}${note}</li>`;
     }
 
     function renderOccupancyPanel(task, message = "", messageKind = "ok") {
@@ -915,15 +982,23 @@ function human(value) {
                 .sort((a, b) => a.target_year - b.target_year);
             const locations = derived.locations
                 .filter((row) => row.parent_evidence_draft_id === parentId && row.review_state !== "superseded");
+            const functions = (derived.functions || [])
+                .filter((row) => row.parent_evidence_draft_id === parentId && row.review_state !== "superseded");
+            const parentClaims = (state.historicalClaims || []).filter((claim) => claim.parent_evidence_draft_id === parentId);
             const events = derived.events
                 .filter((row) => row.parent_evidence_draft_id === parentId)
                 .sort((a, b) => b.created_at - a.created_at);
             const eligible = isAuthor ? [] : occ.confirmAllEligibleYears(presence, locations);
+            const eligibleFunctions = isAuthor ? [] : occ.confirmAllEligibleFunctionYears(functions);
+            const eligibleWords = [
+                eligible.length ? `states ${eligible.join(", ")}` : "",
+                eligibleFunctions.length ? `denominations ${eligibleFunctions.join(", ")}` : "",
+            ].filter(Boolean).join("; ");
             const observed = parentDraft?.target_year_statuses || {};
             const periodLines = group.segments.map((segment) => `
                 <li>
                     <strong>Period ${segment.segment_index + 1}</strong>:
-                    ${escapeHtml(occ.describeStart(segment))}; ${escapeHtml(occ.describeEnd(segment))}; ${escapeHtml(occ.describeLocation(segment, taskPoint))}
+                    ${escapeHtml(occ.describeStart(segment))}; ${escapeHtml(occ.describeEnd(segment))}; ${escapeHtml(occ.describeLocation(segment, taskPoint))}${occ.describeFrequency(segment) ? `; ${escapeHtml(occ.describeFrequency(segment))}` : ""}
                     <span class="muted">(${escapeHtml(segment.confidence)} confidence, ${escapeHtml(human(segment.source_basis).toLowerCase())})</span>
                 </li>
             `).join("");
@@ -939,15 +1014,17 @@ function human(value) {
                     ${occupancyBarSvg(group.segments, targetYears, `${groupIndex}`)}
                     <div class="occupancy-key muted">Solid: certain core. Dashed: start or end uncertainty window. Fade with arrow: still active past the marked as-of date. Shaded bands: census years.</div>
                     <ul class="occupancy-periods">${periodLines}</ul>
+                    ${chainClaimsHtml(parentClaims)}
                     <div class="derived-year-list">
                         <div class="derived-year-toolbar">
                             <strong>Derived census years</strong>
-                            ${eligible.length > 0 ? `<button type="button" class="secondary" data-occ-confirm-all ${state.occupancyBusy ? "disabled" : ""}>Confirm all eligible (${eligible.join(", ")})</button>` : ""}
+                            ${eligible.length > 0 || eligibleFunctions.length > 0 ? `<button type="button" class="secondary" data-occ-confirm-all ${state.occupancyBusy ? "disabled" : ""}>Confirm all eligible (${eligibleWords})</button>` : ""}
                             ${isAuthor ? `<span class="muted">You submitted this evidence.</span>` : ""}
                         </div>
                         ${presence.length === 0
                             ? `<p class="muted">No census year was derived from these periods.</p>`
-                            : presence.map((row) => derivedYearRowHtml(row, locations, group.segments, taskPoint, observed[String(row.target_year)], isAuthor)).join("")}
+                            : presence.map((row) => derivedYearRowHtml(row, locations, group.segments, taskPoint, observed[String(row.target_year)], isAuthor, functions.find((fn) => fn.target_year === row.target_year) || null)).join("")}
+                        ${functions.filter((fn) => !presence.some((row) => row.target_year === fn.target_year)).map((fn) => `<div class="derived-year-row" data-year="${fn.target_year}"><div class="derived-year-head"><strong>${fn.target_year}</strong></div>${derivedFunctionHtml(fn, isAuthor)}</div>`).join("")}
                     </div>
                     <div class="derived-trail">
                         <strong>Event trail</strong>
@@ -1013,7 +1090,7 @@ function human(value) {
     }
 
     // one per-year decision against the server; the panel alone re-renders
-    async function decideOccupancyYear(task, parentId, year, action, note, override) {
+    async function decideOccupancyYear(task, parentId, year, action, note, override, derivation) {
         if (state.occupancyBusy) return;
         state.occupancyBusy = true;
         try {
@@ -1022,6 +1099,7 @@ function human(value) {
                 parentEvidenceDraftId: parentId,
                 targetYear: year,
                 action,
+                ...(derivation ? { derivation } : {}),
                 ...(note ? { note } : {}),
                 ...(override ? { override } : {}),
             });
@@ -1054,6 +1132,55 @@ function human(value) {
                     state.occupancyBusy = false;
                     await loadOccupancyPanel(task, error.message || "Confirm all failed.", "error");
                 }
+            });
+            parentEl.querySelectorAll(".derived-year-function").forEach((fnEl) => {
+                const year = Number(fnEl.dataset.fnYear);
+                const fn = (state.occupancy?.derived?.functions || []).find(
+                    (row) => row.parent_evidence_draft_id === parentId && row.target_year === year && row.review_state !== "superseded",
+                );
+                const formHost = fnEl.querySelector(".derived-function-form-host");
+                fnEl.querySelectorAll("[data-fn-action]").forEach((button) => {
+                    button.addEventListener("click", () => {
+                        const action = button.dataset.fnAction;
+                        if (action === "confirm") {
+                            fnEl.querySelectorAll("[data-fn-action]").forEach((b) => { b.disabled = true; });
+                            decideOccupancyYear(task, parentId, year, "confirm", undefined, undefined, "function");
+                            return;
+                        }
+                        if (!formHost || !fn) return;
+                        if (formHost.dataset.open === action) {
+                            formHost.innerHTML = "";
+                            delete formHost.dataset.open;
+                            return;
+                        }
+                        formHost.dataset.open = action;
+                        formHost.innerHTML = functionFormHtml(action, fn);
+                        const form = formHost.querySelector("form");
+                        form.querySelector("[data-fn-cancel]").addEventListener("click", () => {
+                            formHost.innerHTML = "";
+                            delete formHost.dataset.open;
+                        });
+                        form.addEventListener("submit", (event) => {
+                            event.preventDefault();
+                            const statusEl = form.querySelector("[data-fn-form-status]");
+                            const note = form.note.value.trim();
+                            if (note.length < 8) {
+                                statusEl.textContent = "Add a note of at least 8 characters.";
+                                return;
+                            }
+                            let override;
+                            if (action === "override") {
+                                const label = form.label.value.trim();
+                                if (label.length < 2) {
+                                    statusEl.textContent = "Name the denomination to write.";
+                                    return;
+                                }
+                                override = { label };
+                            }
+                            decideOccupancyYear(task, parentId, year, action, note, override, "function");
+                        });
+                    });
+                });
             });
             parentEl.querySelectorAll(".derived-year-row").forEach((rowEl) => {
                 const year = Number(rowEl.dataset.year);

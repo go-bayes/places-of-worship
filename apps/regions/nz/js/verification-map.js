@@ -759,7 +759,32 @@ const OCCUPANCY_END_REASON_OPTIONS = [
     ["relocated", "Relocated to another place"],
     ["demolished", "Demolished"],
     ["use_changed", "Use changed"],
+    ["desacralised", "Desacralised (deconsecrated)"],
     ["unknown", "Unknown"],
+];
+// pr-f (ruling r-f1): how often the place was used during the period
+const OCCUPANCY_USE_FREQUENCY_OPTIONS = [
+    ["regular", "Regular (weekly or more)"],
+    ["monthly", "Monthly"],
+    ["several_times_a_year", "Several times a year"],
+    ["annual", "Annual"],
+    ["occasional", "Occasional or irregular"],
+    ["uncertain", "Uncertain"],
+];
+// pr-f (ruling r-f3): the seven changes of the function chain
+const FUNCTION_CHAIN_CHANGE_OPTIONS = [
+    ["denomination_changed", "Denomination changed"],
+    ["shared_use_began", "Shared use began"],
+    ["shared_use_ended", "Shared use ended"],
+    ["building_rebuilt", "Building rebuilt"],
+    ["use_became_intermittent", "Use became intermittent"],
+    ["desacralised", "Desacralised"],
+    ["other", "Other change"],
+];
+const FUNCTION_CHAIN_DATE_MODE_OPTIONS = [
+    ["known", "Known date"],
+    ["between", "Between two dates"],
+    ["by", "By a date"],
 ];
 const READ_ONLY_ASSIGNMENT_STATUSES = new Set([
     "needs_review",
@@ -5955,6 +5980,7 @@ class NzVerificationMap {
             endBasis: "",
             endReason: "",
             stillActiveAsof: fromParent ? context.referenceDate : "",
+            useFrequency: "regular",
             sameAsPin: true,
             location: null,
             locationSummary: "",
@@ -6057,6 +6083,12 @@ class NzVerificationMap {
                         </label>
                     </div>
                 </div>
+                <div class="occupancy-block" data-block="use">
+                    <label>
+                        How often was it used for worship in this period?
+                        <select data-field="useFrequency">${selectOptionsHtml(OCCUPANCY_USE_FREQUENCY_OPTIONS, s.useFrequency || "regular")}</select>
+                    </label>
+                </div>
                 <div class="occupancy-block" data-block="location">
                     <div class="occupancy-block-title">Location</div>
                     <label class="checkbox-label">
@@ -6093,6 +6125,7 @@ class NzVerificationMap {
                     <button id="occupancyAddPeriodButton" type="button" class="secondary">Add another period</button>
                 </div>
                 ${this.periodsGapPromptHtml("pane")}
+                ${this.functionChainHtml("pane", draft.chain)}
                 ${this.periodsPreviewHtml("pane")}
                 ${this.occupancyProvenanceHtml(p)}
                 <div class="button-row">
@@ -6189,6 +6222,7 @@ class NzVerificationMap {
                 gapNote: state.gapNote,
                 sameSource: state.sameSource,
                 provenance: state.provenance,
+                chain: state.chain,
             }));
         } catch (error) {
             // private windows or blocked storage lose autosave only
@@ -6236,9 +6270,10 @@ class NzVerificationMap {
         if (!state) {
             const stored = this.readGuidedPeriodsStorage(taskId);
             const referenceDate = this.guidedReferenceDate();
+            const blankChain = () => (window.PowFunctionChain ? window.PowFunctionChain.blankChain() : null);
             state = stored
-                ? { submissionId: stored.submissionId || "", segments: stored.segments, gapAnswer: stored.gapAnswer || "", sameSource: stored.sameSource !== false, provenance: stored.provenance || this.occupancyBlankProvenance(), gapNote: stored.gapNote || "", referenceDate, loadedFrom: "" }
-                : { submissionId: "", segments: [this.occupancyBlankSegment({ referenceDate, referenceDateFromParent: true })], gapAnswer: "", sameSource: true, provenance: this.occupancyBlankProvenance(), gapNote: "", referenceDate, loadedFrom: "" };
+                ? { submissionId: stored.submissionId || "", segments: stored.segments, gapAnswer: stored.gapAnswer || "", sameSource: stored.sameSource !== false, provenance: stored.provenance || this.occupancyBlankProvenance(), gapNote: stored.gapNote || "", referenceDate, loadedFrom: "", chain: stored.chain || blankChain() }
+                : { submissionId: "", segments: [this.occupancyBlankSegment({ referenceDate, referenceDateFromParent: true })], gapAnswer: "", sameSource: true, provenance: this.occupancyBlankProvenance(), gapNote: "", referenceDate, loadedFrom: "", chain: blankChain() };
             this.guidedPeriodsByTaskId.set(taskId, state);
         }
         return state;
@@ -6249,16 +6284,18 @@ class NzVerificationMap {
     guidedPeriodsSnapshot(taskId) {
         const state = this.guidedPeriodsByTaskId.get(taskId);
         if (!state || !window.PowOccupancy?.cardsTouched(state.segments)) return [];
-        return state.segments.map(seg => ({ ...seg, _gapAnswer: state.gapAnswer, _gapNote: state.gapNote, _sameSource: state.sameSource, _provenance: state.provenance }));
+        const chain = state.chain && window.PowFunctionChain?.chainTouched(state.chain) ? state.chain : undefined;
+        return state.segments.map((seg, index) => ({ ...seg, _gapAnswer: state.gapAnswer, _gapNote: state.gapNote, _sameSource: state.sameSource, _provenance: state.provenance, ...(index === 0 && chain ? { _chain: chain } : {}) }));
     }
 
     adoptGuidedPeriods(taskId, cards, provenance, reason) {
         const state = this.guidedPeriodsState(taskId);
         const first = cards[0] || {};
         state.segments = cards.map(card => {
-            const { _gapAnswer, _gapNote, _sameSource, _provenance, ...values } = card;
+            const { _gapAnswer, _gapNote, _sameSource, _provenance, _chain, ...values } = card;
             return values;
         });
+        if (first._chain) state.chain = first._chain;
         state.gapAnswer = first._gapAnswer || state.gapAnswer;
         state.gapNote = first._gapNote || state.gapNote;
         state.sameSource = first._sameSource !== false;
@@ -6270,6 +6307,11 @@ class NzVerificationMap {
     guidedPeriodsTouched(taskId) {
         const state = this.guidedPeriodsByTaskId.get(taskId);
         return Boolean(state && window.PowOccupancy?.cardsTouched(state.segments));
+    }
+
+    guidedChainTouched(taskId) {
+        const state = this.guidedPeriodsByTaskId.get(taskId);
+        return Boolean(state?.chain && window.PowFunctionChain?.chainTouched(state.chain));
     }
 
     guidedPeriodsHtml(taskId) {
@@ -6286,6 +6328,7 @@ class NzVerificationMap {
                     <button id="guidedAddPeriodButton" class="secondary" type="button">Add another period</button>
                 </div>
                 ${this.periodsGapPromptHtml("guided")}
+                ${this.functionChainHtml("guided", state.chain)}
                 ${this.periodsPreviewHtml("guided")}
                 <label class="checkbox-label">
                     <input id="guidedPeriodsSameSource" type="checkbox"${state.sameSource ? " checked" : ""}>
@@ -6296,6 +6339,145 @@ class NzVerificationMap {
                 </div>
             </div>
         `;
+    }
+
+    // pr-f: the function chain under the period cards — "What was it, and
+    // did that change?" — shared by the guided form and the periods pane.
+    // one starting label, then ordered changes; a state ends when the next
+    // begins, so no state carries an end date
+    chainDateHtml(prefix, scope, d) {
+        const modeSel = selectOptionsHtml(FUNCTION_CHAIN_DATE_MODE_OPTIONS, d.dateMode || "known");
+        const input = (name, placeholder) => `<input data-chain-field="${name}" type="text" inputmode="numeric" maxlength="10" placeholder="${placeholder}" value="${escapeHtml(d[name] || "")}">`;
+        return `
+            <div class="field-grid chain-date" data-chain-scope="${scope}">
+                <label>When<select data-chain-field="dateMode">${modeSel}</select></label>
+                <label data-chain-show="known">Date${input("date", "1888 or 1888-03")}</label>
+                <label data-chain-show="between">Not earlier than${input("notEarlierThan", "1920")}</label>
+                <label data-chain-show="between by">Not later than${input("notLaterThan", "1929")}</label>
+                <label class="checkbox-label" data-chain-show="known"><input data-chain-field="around" type="checkbox"${d.around ? " checked" : ""}><span>Around this year</span></label>
+            </div>`;
+    }
+
+    functionChainHtml(prefix, chain) {
+        if (!window.PowFunctionChain) return "";
+        const c = chain || window.PowFunctionChain.blankChain();
+        const labelBasis = `<option value="">Label basis (choose one)...</option>${selectOptionsHtml(DENOMINATION_LABEL_BASIS_OPTIONS, c.start.labelBasis || "")}`;
+        const changeRows = (c.changes || []).map((change, index) => {
+            const words = FUNCTION_CHAIN_CHANGE_OPTIONS.find(([value]) => value === change.change)?.[1] || change.change;
+            const needsLabel = change.change === "denomination_changed" || change.change === "shared_use_began";
+            const labelPlaceholder = change.change === "shared_use_began" ? "Group that shared the place, as the source gives it" : "New denomination, as the source gives it";
+            return `
+                <fieldset class="chain-change" data-chain-index="${index}">
+                    <legend>Change ${index + 1}: ${escapeHtml(words)}</legend>
+                    ${needsLabel ? `<label>Label<input data-chain-field="label" type="text" maxlength="256" placeholder="${labelPlaceholder}" value="${escapeHtml(change.label || "")}"></label>` : ""}
+                    ${change.change === "use_became_intermittent" ? `<label>How often after the change?<select data-chain-field="frequency"><option value="">Choose one...</option>${selectOptionsHtml(OCCUPANCY_USE_FREQUENCY_OPTIONS.filter(([value]) => value !== "regular"), change.frequency || "")}</select></label>` : ""}
+                    ${change.change === "other" ? `<label>What changed? (at least 12 characters)<input data-chain-field="note" type="text" maxlength="2000" value="${escapeHtml(change.note || "")}"></label>` : ""}
+                    ${this.chainDateHtml(prefix, `change-${index}`, change)}
+                    <button type="button" class="tertiary" data-chain-action="remove" data-chain-index="${index}">Remove change ${index + 1}</button>
+                </fieldset>`;
+        }).join("");
+        return `
+            <div id="${prefix}FunctionChain" class="function-chain" data-chain-prefix="${prefix}">
+                <div class="occupancy-block-title">What was it, and did that change?</div>
+                <div class="copy-help">The tradition or denomination at the start, as the source gives it, then each change in order. A state ends when the next change begins. A desacralisation closes the period above; intermittent use splits it at that date.</div>
+                <fieldset class="chain-change chain-start" data-chain-index="start">
+                    <legend>At the start</legend>
+                    <div class="field-grid">
+                        <label>Tradition or denomination<input data-chain-field="label" type="text" maxlength="256" placeholder="e.g. Presbyterian" value="${escapeHtml(c.start.label || "")}"></label>
+                        <label>How the label is known<select data-chain-field="labelBasis">${labelBasis}</select></label>
+                    </div>
+                    ${this.chainDateHtml(prefix, "start", c.start)}
+                </fieldset>
+                <div id="${prefix}ChainChanges">${changeRows}</div>
+                <div class="button-row chain-add">
+                    <label>Add a change<select id="${prefix}ChainAddSelect">${selectOptionsHtml(FUNCTION_CHAIN_CHANGE_OPTIONS, "denomination_changed")}</select></label>
+                    <button type="button" class="secondary" data-chain-action="add">Add a change</button>
+                </div>
+                <div class="occupancy-bounds" data-role="chainSummary" aria-live="polite"></div>
+            </div>`;
+    }
+
+    // reads the chain block back into the state; the start's date defaults
+    // to the first period's start when the ra has not typed one
+    readFunctionChain(prefix, chain, segments) {
+        const block = document.getElementById(`${prefix}FunctionChain`);
+        if (!block || !chain) return;
+        const read = (scopeEl, target) => {
+            scopeEl.querySelectorAll("[data-chain-field]").forEach(field => {
+                if (field.closest("[data-chain-index]") !== scopeEl) return;
+                target[field.dataset.chainField] = field.type === "checkbox" ? field.checked : field.value;
+            });
+        };
+        const start = block.querySelector('[data-chain-index="start"]');
+        if (start) read(start, chain.start);
+        block.querySelectorAll('[data-chain-index]:not([data-chain-index="start"])').forEach(el => {
+            const change = chain.changes[Number(el.dataset.chainIndex)];
+            if (change) read(el, change);
+        });
+        const first = segments?.[0];
+        if (first && !chain.start.date && !chain.start.notEarlierThan && !chain.start.notLaterThan && (first.startDate || first.startNotLaterThan)) {
+            chain.start.dateMode = first.startMode === "known" ? "known" : first.startMode === "by" ? "by" : "between";
+            chain.start.date = first.startMode === "known" ? first.startDate : "";
+            chain.start.around = Boolean(first.startAround);
+            chain.start.notEarlierThan = first.startMode === "between" ? first.startNotEarlierThan : "";
+            chain.start.notLaterThan = first.startMode !== "known" ? first.startNotLaterThan : "";
+        }
+    }
+
+    // shows only the date fields each mode uses and restates the chain
+    updateFunctionChainBlock(prefix, chain) {
+        const block = document.getElementById(`${prefix}FunctionChain`);
+        if (!block || !chain || !window.PowFunctionChain) return;
+        block.querySelectorAll("[data-chain-index]").forEach(el => {
+            const target = el.dataset.chainIndex === "start" ? chain.start : chain.changes[Number(el.dataset.chainIndex)];
+            const mode = target?.dateMode || "known";
+            el.querySelectorAll("[data-chain-show]").forEach(element => {
+                if (element.closest("[data-chain-index]") !== el) return;
+                element.hidden = !element.dataset.chainShow.split(" ").includes(mode);
+            });
+        });
+        const summary = block.querySelector('[data-role="chainSummary"]');
+        if (summary) {
+            summary.textContent = window.PowFunctionChain.chainTouched(chain)
+                ? window.PowFunctionChain.describeChain(chain).join(" · ")
+                : "";
+        }
+    }
+
+    // wires the chain block: add / remove changes, and the chain's effect on
+    // the cards (a desacralisation closes the period, intermittent use
+    // splits it); returns true when the cards changed and need a repaint
+    handleFunctionChainClick(event, prefix, state, referenceDate) {
+        const button = event.target?.closest?.("button[data-chain-action]");
+        if (!button || !state.chain || !window.PowFunctionChain) return null;
+        if (button.dataset.chainAction === "add") {
+            const kind = document.getElementById(`${prefix}ChainAddSelect`)?.value || "denomination_changed";
+            state.chain.changes.push(window.PowFunctionChain.blankChange(kind));
+            return { cards: false, chain: true };
+        }
+        if (button.dataset.chainAction === "remove") {
+            state.chain.changes.splice(Number(button.dataset.chainIndex), 1);
+            return { cards: false, chain: true };
+        }
+        return null;
+    }
+
+    // applies a complete desacralisation or intermittent-use change to the
+    // cards; returns the words of what was done, or ""
+    applyChainToCards(state, referenceDate) {
+        if (!state.chain || !window.PowFunctionChain || !window.PowOccupancy) return "";
+        const complete = state.chain.changes.every(change => {
+            if (change.change !== "desacralised" && change.change !== "use_became_intermittent") return true;
+            const d = window.PowFunctionChain.normaliseDate(change);
+            const ok = value => window.PowOccupancy.isValidPartialDate(value);
+            const dated = d.dateMode === "known" ? ok(d.date) : d.dateMode === "between" ? ok(d.notEarlierThan) && ok(d.notLaterThan) : ok(d.notLaterThan);
+            return dated && (change.change !== "use_became_intermittent" || Boolean(change.frequency));
+        });
+        if (!complete) return "";
+        const applied = window.PowFunctionChain.applyToPeriods(state.chain, state.segments, referenceDate);
+        if (applied.notes.length === 0) return "";
+        state.segments.splice(0, state.segments.length, ...applied.segments);
+        return applied.notes.join(" ");
     }
 
     // the gap question and the derived preview, shared by the guided form
@@ -6360,9 +6542,18 @@ class NzVerificationMap {
         }
         const derived = window.PowOccupancy.derivePresence(state.segments, TARGET_YEARS.map(Number));
         const described = window.PowOccupancy.describePresence(derived, TARGET_YEARS, observed || {});
+        // pr-f: the denomination per year rides beside the presence when the
+        // chain is complete enough to derive from
+        let chainSentence = "";
+        if (state.chain && window.PowFunctionChain?.chainTouched(state.chain)) {
+            const problem = window.PowFunctionChain.validateChain(state.chain, state.referenceDate || "");
+            chainSentence = problem
+                ? ` Chain: ${problem}`
+                : ` ${window.PowFunctionChain.describeFunctions(window.PowFunctionChain.deriveFunctions(state.chain, TARGET_YEARS.map(Number)), TARGET_YEARS)}`;
+        }
         preview.textContent = described.conflicts.length
-            ? `${described.sentence} Conflict — ${described.conflicts.join("; ")}. Fix one of them before submitting.`
-            : `${described.sentence} A reviewer confirms each year.`;
+            ? `${described.sentence} Conflict — ${described.conflicts.join("; ")}. Fix one of them before submitting.${chainSentence}`
+            : `${described.sentence}${chainSentence} A reviewer confirms each year.`;
         preview.classList.toggle("periods-preview-conflict", described.conflicts.length > 0);
     }
 
@@ -6428,6 +6619,7 @@ class NzVerificationMap {
             });
         });
         state.sameSource = document.getElementById("guidedPeriodsSameSource")?.checked !== false;
+        this.readFunctionChain("guided", state.chain, state.segments);
         const value = id => document.getElementById(id)?.value || "";
         if (document.getElementById("occConfidence")) {
             state.provenance = {
@@ -6450,6 +6642,7 @@ class NzVerificationMap {
         if (!host) return;
         host.innerHTML = state.segments.map((segment, index) => this.occupancyCardHtml(segment, index, state.segments.length)).join("");
         host.querySelectorAll(".occupancy-card").forEach(card => this.updateOccupancyCard(card, state.segments[Number(card.dataset.index)]));
+        this.rerenderFunctionChain("guided", state.chain);
         this.updateGuidedGapPrompt(taskId);
         this.updateGuidedPeriodsPreview(taskId);
         if (Number.isInteger(focusIndex)) {
@@ -6457,6 +6650,14 @@ class NzVerificationMap {
             card?.scrollIntoView?.({ block: "start", behavior: "smooth" });
             card?.querySelector("select, input")?.focus({ preventScroll: true });
         }
+    }
+
+    // repaints the chain block in place (the block's own host survives)
+    rerenderFunctionChain(prefix, chain) {
+        const block = document.getElementById(`${prefix}FunctionChain`);
+        if (!block || !chain) return;
+        block.outerHTML = this.functionChainHtml(prefix, chain);
+        this.updateFunctionChainBlock(prefix, chain);
     }
 
     // a card's dates and bases are complete enough to derive from
@@ -6497,6 +6698,7 @@ class NzVerificationMap {
             this.persistGuidedPeriods(taskId);
             const card = event?.target?.closest?.(".occupancy-card");
             if (card) this.updateOccupancyCard(card, state.segments[Number(card.dataset.index)]);
+            if (event?.target?.closest?.(".function-chain")) this.updateFunctionChainBlock("guided", state.chain);
             this.updateGuidedGapPrompt(taskId);
             this.updateGuidedPeriodsPreview(taskId);
         };
@@ -6521,6 +6723,19 @@ class NzVerificationMap {
         block.addEventListener("change", event => {
             sync(event);
             const target = event.target;
+            // pr-f: a complete desacralisation or intermittent-use change
+            // writes the period it closes or splits, so the ra never types
+            // the date twice
+            if (target?.closest?.(".function-chain")) {
+                const done = this.applyChainToCards(state, state.referenceDate || this.guidedReferenceDate());
+                if (done) {
+                    this.persistGuidedPeriods(taskId);
+                    this.rerenderGuidedPeriods(taskId);
+                    const preview = document.getElementById("guidedPeriodsPreview");
+                    if (preview) preview.textContent = `${done} ${preview.textContent}`;
+                }
+                return;
+            }
             if (target?.id === "guidedPeriodsSameSource") {
                 const provenance = document.getElementById("guidedPeriodsProvenance");
                 if (provenance) provenance.hidden = target.checked;
@@ -6540,6 +6755,15 @@ class NzVerificationMap {
             document.getElementById(`status${year}`)?.addEventListener("change", () => this.updateGuidedPeriodsPreview(taskId));
         });
         block.addEventListener("click", event => {
+            const chainAction = this.handleFunctionChainClick(event, "guided", state, state.referenceDate);
+            if (chainAction) {
+                this.readGuidedPeriods(taskId);
+                this.markFormDirty(taskId);
+                this.persistGuidedPeriods(taskId);
+                this.rerenderFunctionChain("guided", state.chain);
+                this.updateGuidedPeriodsPreview(taskId);
+                return;
+            }
             const gap = event.target?.closest?.("button[data-gap]");
             if (gap) {
                 this.readGuidedPeriods(taskId);
@@ -6584,6 +6808,7 @@ class NzVerificationMap {
             this.rerenderGuidedPeriods(taskId, { focusIndex: state.segments.length - 1 });
         });
         block.querySelectorAll(".occupancy-card").forEach(card => this.updateOccupancyCard(card, state.segments[Number(card.dataset.index)]));
+        this.updateFunctionChainBlock("guided", state.chain);
         this.updateGuidedGapPrompt(taskId);
         this.updateGuidedPeriodsPreview(taskId);
     }
@@ -6599,6 +6824,10 @@ class NzVerificationMap {
         const set = mine.filter(row => row.parent_evidence_draft_id === latestParent).sort((a, b) => a.segment_index - b.segment_index);
         state.segments = set.map(row => window.PowOccupancy.segmentFromRow(row));
         state.provenance = window.PowOccupancy.provenanceFromRow(set[0]);
+        // pr-f: the chain recorded with that set comes back with it
+        const storedChain = this.latestDraftsByTaskId.get(taskId)?.function_chain
+            || (await this.backend.listTaskEvidence?.({ taskId }).catch(() => null))?.find?.(draft => draft.evidence_draft_id === latestParent)?.function_chain;
+        if (storedChain && window.PowFunctionChain) state.chain = window.PowFunctionChain.chainFromPayload(storedChain);
         state.sameSource = false;
         state.gapAnswer = state.segments.length > 1 ? "yes" : "no";
         state.loadedFrom = `Loaded the ${set.length} period${set.length === 1 ? "" : "s"} you recorded earlier for this place; submitting records them again against this evidence and replaces the earlier set.`;
@@ -6672,6 +6901,10 @@ class NzVerificationMap {
         const observed = values.targetYearStatuses || {};
         const described = window.PowOccupancy.describePresence(window.PowOccupancy.derivePresence(state.segments, TARGET_YEARS.map(Number)), TARGET_YEARS, observed);
         if (described.conflicts.length) return `Periods: ${described.conflicts[0]}. Fix one of them before submitting.`;
+        if (this.guidedChainTouched(taskId) && window.PowFunctionChain) {
+            const chainProblem = window.PowFunctionChain.validateChain(state.chain, reference);
+            if (chainProblem) return `Chain: ${chainProblem}`;
+        }
         if (gridAssessed && !(values.yearGridReason || "").trim()) {
             return "Say why the periods cannot express this case, or clear the hand-set census-year statuses.";
         }
@@ -6690,9 +6923,11 @@ class NzVerificationMap {
         if (!this.guidedPeriodsTouched(taskId)) return { clientSubmissionId: submissionId, segments: [] };
         const provenance = this.guidedPeriodsProvenance(taskId, values).provenance;
         const segments = state.segments.map((segment, index) => ({ ...segment, ...provenance, segmentIndex: index }));
+        const chain = this.guidedChainTouched(taskId) && window.PowFunctionChain ? window.PowFunctionChain.payload(state.chain) : undefined;
         return {
             clientSubmissionId: submissionId,
             segments: segments.map(segment => window.PowOccupancy.payload(segment)),
+            ...(chain ? { chain } : {}),
         };
     }
 
@@ -6710,9 +6945,12 @@ class NzVerificationMap {
                 provenance: this.occupancyBlankProvenance(),
                 gapAnswer: "",
                 gapNote: "",
+                chain: window.PowFunctionChain ? window.PowFunctionChain.blankChain() : null,
+                referenceDate: context.referenceDate || "",
             };
         }
         const draft = this.occupancyDraft;
+        if (!draft.chain && window.PowFunctionChain) draft.chain = window.PowFunctionChain.blankChain();
         const paneObserved = () => this.latestDraftForTask(context.taskId)?.target_year_statuses || {};
         const paneRefresh = () => {
             this.updateGapPrompt("pane", draft);
@@ -6737,12 +6975,18 @@ class NzVerificationMap {
             this.readOccupancyForm();
             const card = event.target?.closest?.(".occupancy-card");
             if (card) this.updateOccupancyCard(card);
+            if (event.target?.closest?.(".function-chain")) this.updateFunctionChainBlock("pane", draft.chain);
             paneRefresh();
         };
         form?.addEventListener("input", syncFrom);
         form?.addEventListener("change", event => {
             syncFrom(event);
             const target = event.target;
+            if (target?.closest?.(".function-chain")) {
+                const done = this.applyChainToCards(draft, context.referenceDate);
+                if (done) this.renderOccupancyEntry(context, { restore: true, markDirty: true, statusMessage: done });
+                return;
+            }
             const card = target?.closest?.(".occupancy-card");
             if (!card) return;
             const index = Number(card.dataset.index);
@@ -6753,6 +6997,12 @@ class NzVerificationMap {
             }
         });
         form?.addEventListener("click", event => {
+            const chainAction = this.handleFunctionChainClick(event, "pane", draft, context.referenceDate);
+            if (chainAction) {
+                this.readOccupancyForm();
+                this.renderOccupancyEntry(context, { restore: true, markDirty: true });
+                return;
+            }
             const gap = event.target?.closest?.("button[data-gap]");
             if (gap) {
                 this.readOccupancyForm();
@@ -6797,6 +7047,7 @@ class NzVerificationMap {
         });
         document.getElementById("occupancyDoneButton")?.addEventListener("click", () => this.finishOccupancyEntry(context));
         form?.querySelectorAll(".occupancy-card").forEach(card => this.updateOccupancyCard(card));
+        this.updateFunctionChainBlock("pane", draft.chain);
         paneRefresh();
         if (options.markDirty) this.markFormDirty(dirtyKey);
         if (Number.isInteger(options.focusIndex)) {
@@ -6820,6 +7071,7 @@ class NzVerificationMap {
                 segment[field.dataset.field] = field.type === "checkbox" ? field.checked : field.value;
             });
         });
+        this.readFunctionChain("pane", draft.chain, draft.segments);
         const value = id => document.getElementById(id)?.value || "";
         draft.provenance = {
             confidence: value("occConfidence"),
@@ -6974,6 +7226,14 @@ class NzVerificationMap {
             if (status) status.textContent = inputError;
             return;
         }
+        const chainTouched = draft.chain && window.PowFunctionChain?.chainTouched(draft.chain);
+        if (chainTouched) {
+            const chainProblem = window.PowFunctionChain.validateChain(draft.chain, context.referenceDate);
+            if (chainProblem) {
+                if (status) status.textContent = `Chain: ${chainProblem}`;
+                return;
+            }
+        }
         submitButton.disabled = true;
         if (status) status.textContent = "Recording these periods for review...";
         try {
@@ -6982,7 +7242,8 @@ class NzVerificationMap {
                 taskId: context.taskId,
                 parentEvidenceDraftId: context.parentEvidenceDraftId,
                 segments: segments.map(values => window.PowOccupancy.payload(values)),
-                clientContext: { portal_version: "occupancy-v1" },
+                ...(chainTouched ? { chain: window.PowFunctionChain.payload(draft.chain) } : {}),
+                clientContext: { portal_version: "occupancy-v2" },
             });
             this.clearFormDirty();
             this.taskHistoryByTaskId.delete(context.taskId);
@@ -8303,7 +8564,8 @@ class NzVerificationMap {
                     note: values.note || undefined,
                     clientSubmissionId: guidedSubmission.clientSubmissionId,
                     segments: guidedSubmission.segments,
-                    clientContext: { ...clientContext, portal_version: "assigned-periods-atomic-v1" },
+                    ...(guidedSubmission.chain ? { chain: guidedSubmission.chain } : {}),
+                    clientContext: { ...clientContext, portal_version: "assigned-periods-atomic-v2" },
                 });
                 periods = result.period_count > 0 ? { ok: true, result, count: result.period_count } : null;
                 this.clearGuidedPeriods(props.task_id);
