@@ -99,6 +99,7 @@ const confirmDefaults = fc.assessmentDefaultsForAction("confirm_current_record",
 check(confirmDefaults.existenceStatus === "present" && confirmDefaults.worshipUseStatus === "confirmed_worship", `No census years must not turn a confirmation uncertain: ${JSON.stringify(confirmDefaults)}`);
 // p3-7: no "the target year" leaks into copy
 check(fc.targetYearListText() === "" && fc.targetYearAndListText() === "", "Empty year lists must render as nothing, not as 'the target year'.");
+app.backendUser = { _id: "user_1" };
 // signed in, the popup offers revise; a dot across the border names its portal
 const signedInHtml = app.contextDotPopupHtml(suvaCathedral);
 check(signedInHtml.includes("Revise this place") && !signedInHtml.includes("Sign in to revise"), "Signed in, the popup must offer the revise entry.");

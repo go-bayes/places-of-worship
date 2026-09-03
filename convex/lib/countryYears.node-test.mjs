@@ -5,7 +5,7 @@ import test from "node:test";
 import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 
-import { DATE_FLOOR_YEARS, DEFAULT_DATE_FLOOR_YEAR, DEFAULT_TARGET_YEARS, dateFloorYear, targetYearsOrEmpty} from "./countryYears.ts";
+import { DATE_FLOOR_YEARS, DEFAULT_DATE_FLOOR_YEAR, DEFAULT_TARGET_YEARS, dateFloorYear, defaultTargetYears, targetYearsOrEmpty } from "./countryYears.ts";
 import { assertHistoricalClaim } from "./historicalClaims.ts";
 import { assertOccupancySegment } from "./occupancies.ts";
 
