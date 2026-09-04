@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Mongolia map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260712d" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the mongolia research map; every claim follows the
+    // committed area summary, its private manifest, or the source record.
+    window.OVERVIEW_CONFIG = {
+      countryCode: "MN",
+      countryName: "Mongolia",
+      mapHref: "./",
+      intro: "This map shows administrative register counts of temples and churches by aimag and the Capital, from the National Statistics Office of Mongolia statbank table DT_NSO_2003_001V1 (Temples and churches, by type of religion, aimags and the Capital, and by year), for every year 2004-2025. The counts describe registered buildings, never people. They do not measure religious affiliation, belief, or attendance. In the source's words, a religious organization refers to monasteries, temples, churches and their authorities which manage religious rituals and education for religious worshippers. Mongolia's 2010 and 2020 census religion product (population aged 15 and over) is a separate product held pending corrected NSO census volumes; these register counts answer a different question and must not be blended with the census shares.",
+      facts: {
+        waves: "22 annual register years, 2004–2025",
+        geographies: "Aimag and the Capital (22 units)",
+        metrics: "Temples and churches (count); counts by type of religion in the popup",
+        placeDots: "OpenStreetMap supplies the separate place dots"
+      },
+      reading: [
+        "Each unit's shading shows the statbank's count of registered temples and churches for the selected year, Total type of religion. The map uses no population denominator and offers no share-of-population metric. Darker shading means more registered buildings in that unit's register; it supports no claim about what people believe or how religious a population is.",
+        "The popup lists the published counts by type of religion: Buddhism, Christianity, Islam, and Other, with the source labels verbatim. The national series runs from 225 registered temples and churches in 2004 to 420 in 2025, with a peak of 453 in 2019. In 2025 the national count divides into 155 Buddhist, 226 Christian, 32 Islamic, and 7 other organisations; Ulaanbaatar holds 188 of the 420.",
+        "Some type-of-religion cells are unpublished in the statbank, returned with the mark '..' (no value): 467 of the 1,936 aimag-year type cells, almost all in 2004-2011 and 2013, and none in the Total type. The product carries those cells as absent, never as zero, and stars the affected rows in the popup. From 2012 and from 2014 onward the statbank prints explicit zeros instead.",
+        "For every year the 22 units sum exactly to the statbank's own national Total row for every type of religion, the four types sum exactly to the Total type for every region, and the economic-region subtotals equal their member aimags, over published cells. The reconciliation arithmetic for every year is recorded in the manifest.",
+        "The boundaries are geoBoundaries MNG ADM1 (22 units: 21 aimags and Ulaanbaatar, boundary year represented 2017), joined to the statbank rows by the statbank's own region codes. The 22 geoBoundaries names map one-to-one to the statbank labels by transliteration only (Hovsgel to Khuvsgul, Ömnögovi to Umnugovi, Övörkhangai to Uvurkhangai, Bayan-Ölgii to Bayan-Ulgii, Töv to Tuv, Sükhbaatar to Sukhbaatar); the statbank labels are the area names.",
+        "The census route is held, not abandoned. Mongolia's National Statistics Office asked religion of the population aged 15 and over in the 2010 and 2020 censuses and publishes the aimag-level breakdown in the 2020-round per-aimag consolidated report volumes, 2010 and 2020 side by side. Seven of the 22 volumes are mis-served on the NSO file library (wrong volume, no file, or a truncated file), and the census product waits on corrected volumes. The statbank holds no census person-religion table; its only religion tables are administrative counts of buildings, clergy, and students."
+      ],
+      sources: [
+        {
+          name: "National Statistics Office of Mongolia statbank, table DT_NSO_2003_001V1 (Temples and churches, by type of religion, aimags and the Capital, and by year)",
+          href: "https://data.1212.mn/",
+          construct: "Administrative register count of registered religious organisations (monasteries, temples, churches), by type of religion",
+          years: "2004–2025, annual",
+          licence: "CC BY 4.0 under the 1212.mn terms of use; attribution: Source: Mongolian Statistical Service"
+        },
+        {
+          name: "geoBoundaries gbOpen MNG ADM1",
+          href: "https://www.geoboundaries.org/api/current/gbOpen/MNG/ADM1/",
+          construct: "Boundary geometry for 21 aimags and Ulaanbaatar (22 units)",
+          years: "Boundary year represented 2017 (boundary ID MNG-ADM1-14279143)",
+          licence: "Open Data Commons Open Database License 1.0 (ODbL)"
+        }
+      ],
+      accessData: {
+        redistributionNote: "This project shows derived register counts with attribution. To obtain the data from the source of record:",
+        sourceOfRecord: "National Statistics Office of Mongolia statbank, <a href=\"https://data.1212.mn/\" target=\"_blank\" rel=\"noopener\">data.1212.mn</a>, PxWeb API <code>https://data.1212.mn/api/v1/en/NSO</code>, table <code>DT_NSO_2003_001V1.px</code> under Society, development › Monasteries, Temples and Churches (also listed under Regional development). Boundaries from <a href=\"https://www.geoboundaries.org/api/current/gbOpen/MNG/ADM1/\" target=\"_blank\" rel=\"noopener\">geoBoundaries MNG ADM1</a>.",
+        tables: "The builder fetches the table metadata (GET) and posts one query selecting every value of Type of religion, Region, and Year with a JSON-stat2 response; both responses are cached with SHA-256 digests. place_count carries the Total type of religion; the per-row composition carries the Buddhism, Christianity, Islam, and Other counts; the sibling statbank tables on monks and missionaries (DT_NSO_2003_002V1) and students in religious schools (DT_NSO_2003_003V1) are out of scope. Every population and percentage field is null because the product has no population denominator.",
+        licence: "Source: Mongolian Statistical Service (National Statistics Office of Mongolia), statbank table DT_NSO_2003_001V1, CC BY 4.0. The 1212.mn terms of use state that open data is made available under the Creative Commons Attribution 4.0 International (CC BY 4.0) license and require the citation (Source: Mongolian Statistical Service). The geoBoundaries MNG ADM1 boundary is ODbL 1.0. The project page and code are licensed under CC BY-NC-SA 4.0, subject to the source terms stated here.",
+        script: "pipeline/build_mn_area_summary.R",
+        manifests: [
+          { label: "mn-temples-churches-register-2004-2025.json" }
+        ],
+        note: "The manifest is named here for provenance and is not linked from this public page."
+      },
+      contribute: {
+        pendingNote: "The Mongolia map is a register-derived product with no evidence-submission portal yet. Place-of-worship geometry can still be corrected on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260713b"></script>
+</body>
+</html>

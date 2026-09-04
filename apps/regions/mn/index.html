@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Mongolia Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css?v=20260904a" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css?v=20260904a" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260904a" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // mongolia's product is the National Statistics Office statbank register
+    // of temples and churches (table DT_NSO_2003_001V1) by aimag and the
+    // Capital, annual 2004-2025; it counts registered buildings, never people.
+    window.REGION_CONFIG = {
+      countryCode: "MN",
+      title: "Places of Worship | Mongolia Research Map",
+      dataNoun: "Register",
+      // whole country (87.7-119.9E, 41.6-52.1N) framed at 1280px; the
+      // runtime has one initialZoom, so a 375px phone opens on the centre
+      // and reaches the west and east by panning
+      center: [103.8, 46.9],
+      initialZoom: 4.4,
+      censusLevels: {
+        adm1: {
+          label: "Aimag (22 units)",
+          boundaries: "data/mn_adm1_2017.geojson",
+          summary: "data/area_summary_adm1.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Register counts © National Statistics Office of Mongolia (Mongolian Statistical Service), statbank table DT_NSO_2003_001V1, CC BY 4.0 · Boundaries © geoBoundaries MNG ADM1, ODbL 1.0"
+        }
+      },
+      defaultLevel: "adm1",
+      defaultMetric: "place_count",
+      defaultYear: 2025,
+      metricsAvailable: ["place_count"],
+      metricLabels: {
+        place_count: {
+          label: "Temples and churches (count)",
+          note: "administrative count of registered religious organisations (monasteries, temples, churches) in the aimag or the Capital, from the National Statistics Office of Mongolia statbank table DT_NSO_2003_001V1, Total type of religion. The count describes registered buildings, never people. It does not measure religious affiliation, belief, or attendance. The popup lists the published counts by type of religion (Buddhism, Christianity, Islam, Other) for the selected year."
+        }
+      },
+      popupDenominatorNote: "The National Statistics Office publishes these administrative register counts from the statistical divisions of aimags and the Capital. In the source's words, a religious organization refers to monasteries, temples, churches and their authorities which manage religious rituals and education for religious worshippers. The counts describe registered buildings, never people, and use no population denominator; they are not the census affiliation of persons and must not be blended with census shares. Type-of-religion cells the statbank leaves unpublished ('..', mostly 2004-2011 and 2013) are absent from the composition, never shown as zero.",
+      cityPresets: [
+        { label: "Ulaanbaatar", coords: [106.9057, 47.9184], zoom: 10 },
+        { label: "Darkhan", coords: [105.9228, 49.4867], zoom: 11 },
+        { label: "Erdenet", coords: [104.0442, 49.0275], zoom: 11 }
+      ],
+      geocode: { country: "mn", biasLngLat: [103.8, 46.9] },
+      onboarding: {
+        title: "Mongolia research map",
+        intro: "Administrative register counts of temples and churches by aimag and the Capital, from the National Statistics Office of Mongolia statbank (table DT_NSO_2003_001V1), for every year 2004-2025. The map counts registered buildings, never people. It does not measure religious affiliation, belief, or attendance, and it is not the 2010 or 2020 census religion product, which is held pending corrected NSO census volumes.",
+        bullets: [
+          "The 21 aimags and Ulaanbaatar are shaded by the count of registered temples and churches in the selected year. Darker shading means more registered buildings in that unit's register, not greater population religiosity.",
+          "The popup lists the published counts by type of religion (Buddhism, Christianity, Islam, Other). For every year the 22 units sum exactly to the statbank's own national total, and the four types sum exactly to the total over published cells.",
+          "Some type-of-religion cells are unpublished ('..') in the statbank for 2004-2011 and 2013. Those cells are absent from the popup composition, never shown as zero; the total count is published for every unit in every year.",
+          "The counts are mapped on geoBoundaries MNG ADM1 (22 units, boundary year 2017); the statbank region codes are the join keys.",
+          "Open <strong>Show Register Data</strong> (top centre) for the year control."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Source: <a href="https://data.1212.mn/" target="_blank" rel="noopener">Mongolian Statistical Service (National Statistics Office of Mongolia)</a>, statbank table DT_NSO_2003_001V1, <a href="https://www.1212.mn/en/terms_of_use" target="_blank" rel="noopener">CC BY 4.0</a>. &middot; Boundaries &copy; <a href="https://www.geoboundaries.org/api/current/gbOpen/MNG/ADM1/" target="_blank" rel="noopener">geoBoundaries MNG ADM1</a>, ODbL 1.0.',
+      censusFlagNote: "* A starred register figure has at least one type-of-religion cell unpublished ('..') in the statbank for that year; the total is published and the unpublished cells are absent from the composition, never zero."
+    };
+  </script>
+  <script src="../../shared/region-resolve.js?v=20260904a"></script>
+  <script src="../_shared/region-map.js?v=20260904b"></script>
+  <script src="../../shared/datamaps-switcher.js?v=20260717d"></script>
+</body>
+</html>
