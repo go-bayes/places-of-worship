@@ -2647,13 +2647,12 @@ class NzVerificationMap {
             // then off; all/off only where no dated product exists
             // without a dated context layer the select would load nothing,
             // so it does not render: an inert control reads as broken
-            // "unvalidated" names the dots (jb 2026-09-03): nearly every
-            // place of worship is one at this stage. period only where the
-            // dated product supplies dates; the tiles know only today
+            // two states (jb 2026-09-04): on, every unreviewed place; off.
+            // the former "period" filtered the places by their osm date
+            // tags, which most lack, and history belongs to the occupancy
+            // slider driven by reviewed periods (occupancy plan section 8)
             const source = this.contextDotSource();
-            const modes = source === "dated"
-                ? [["period", "Unvalidated: period"], ["all", "Unvalidated: all"], ["off", "Unvalidated: off"]]
-                : [["all", "Unvalidated: all"], ["off", "Unvalidated: off"]];
+            const modes = [["all", "Unreviewed places: on"], ["off", "Unreviewed places: off"]];
             // the control is movable (jb 2026-09-04, phone walkthrough): on
             // a phone the bottom-left corner sits under the browser's own
             // toolbar, so the contributor drags it by the grip to wherever
@@ -2661,7 +2660,7 @@ class NzVerificationMap {
             div.innerHTML = `
                 <button type="button" class="legend-grip" aria-label="Move this panel: drag it">⠿ move</button>
                 ${source !== "none" ? `
-                <select id="portalPointsSelect" aria-label="Unvalidated places">
+                <select id="portalPointsSelect" aria-label="Unreviewed places">
                     ${modes.map(([value, label]) => `<option value="${value}"${value === this.pointsMode ? " selected" : ""}>${label}</option>`).join("")}
                 </select>
                 <div id="portalPointsNote" class="points-mode-note" hidden></div>` : ""}
@@ -2799,10 +2798,7 @@ class NzVerificationMap {
         const note = document.getElementById("portalPointsNote");
         if (!note) return;
         const year = this.targetYear;
-        if (this.pointsMode === "period") {
-            note.textContent = `amber: places whose OpenStreetMap date tags say they existed in ${year}, each an open case until reviewed`;
-            note.hidden = false;
-        } else if (this.pointsMode === "all") {
+        if (this.pointsMode === "all") {
             const tiles = this.tilesAvailable();
             note.textContent = `amber dots are today's OpenStreetMap places${TARGET_YEARS.length ? `, not ${year} places` : ""}, every one an open case until reviewed${tiles ? `; zoom in past ${TILE_DOTS_MIN_ZOOM} for all of them` : ""}. Click one to revise it.`;
             note.hidden = false;
@@ -2823,8 +2819,8 @@ class NzVerificationMap {
     setPointsMode(mode) {
         this.pointsMode = mode;
         this.updatePointsNote();
-        // all: every place of worship on the tiles, whatever the country;
-        // period: the dated product's subset for the target year; off: none
+        // on ("all"): every place of worship on the tiles, whatever the
+        // country, the dated product standing in without vectorgrid; off: none
         if (mode === "all" && this.tilesAvailable()) {
             this.contextDotLayer?.clearLayers();
             this.syncTileDots();
@@ -2967,17 +2963,10 @@ class NzVerificationMap {
         if (!this.contextDotLayer) return;
         this.contextDotLayer.clearLayers();
         if (this.pointsMode === "off" || !this.datedFeatures) return;
-        // in "all" the tiles carry every place; the dated dots draw in period
-        if (this.pointsMode === "all" && this.tilesAvailable()) return;
-        const year = Number(this.targetYear);
-        const show = this.pointsMode === "period"
-            ? this.datedFeatures.filter(feature => {
-                const props = feature.properties || {};
-                if (props.start_year === undefined || props.start_year === null) return false;
-                if (props.start_year > year) return false;
-                return props.end_year === undefined || props.end_year === null || props.end_year >= year;
-            })
-            : this.datedFeatures;
+        // with the tiles the dated product is not drawn; without them
+        // (no vectorgrid) every dated feature stands in
+        if (this.tilesAvailable()) return;
+        const show = this.datedFeatures;
         // r-d1' (jb 2026-09-04): a recorded place no reviewer has confirmed
         // is an open case on every basemap: a small amber disc with a white
         // halo, the halo doing the work on streets and on imagery alike
