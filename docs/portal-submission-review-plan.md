@@ -146,3 +146,12 @@ manifests. Optional GitHub exports may include:
 
 Do not store private contributor details, restricted sources, raw uploads, or
 unreviewed sensitive evidence in GitHub.
+
+## Open Design Tasks (logged 2026-09-04)
+
+Task list for the review lane, in JB's words where he gave them. Status: `[ ]` open, `[~]` in progress, `[x]` done.
+
+- `[ ]` **PI-only acceptance layer.** "Before accepting the design to the backend, only PIs (JB or JW) should be granted that authority." A reviewer's `accepted for export` decision stays a recommendation; a separate acceptance step, available only to the principal investigators, moves the case into the export bundle. To design: a `pi` role (or a named allow-list) in `convex/lib/auth.ts`, an `acceptance` event on the task with the PI's identity and the reviewed draft's id, the review portal's decision panel showing *Accept into the backend* only to PIs and otherwise "awaiting PI acceptance", the export path (`pow`) reading acceptance rather than the reviewer decision, and the audit mirror carrying both. Open questions for JB: whether a PI may accept their own submission, whether acceptance needs both PIs for contested cases, and how the layer reads on the public map's ring legend. *(design, large)*
+- `[ ]` **Country-switch layer.** "If I am hovering over e.g. India, and sign into the verification tasks, but move to e.g. NZ, the heading is still 'India verification tasks'." The portal's country is fixed by `?country=`; panning the map elsewhere leaves the heading, the batch, and the assignment sheet on the first country. To design: when the map centre leaves the country's registry bbox, a layer asks "Do you want India?" with the option to pick another country from the registry, the map shifting to it and the portal reloading with that `?country=`, keeping sign-in; the same prompt on sign-in when the map already sits over another country. *(UX, medium)*
+- `[x]` **Satellite is the default imagery; hybrid stays on offer.** JB (2026-09-04): "hybrid and satellite serve the same map (both are satellite). Satellite should be default, as it is most informative, but we should allow hybrid." Checked against MapTiler: over a bush tile at zoom 16 the two endpoints return byte-identical images (no labels to draw), while over Wellington's centre at zoom 14 the hybrid tile carries labels, so hybrid differs only where MapTiler has something to label at that zoom. Done in this sitting: the add flow, the pin, and the review map now switch to satellite, and the Hybrid button remains. *(basemap, small)*
+

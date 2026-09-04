@@ -60,6 +60,18 @@
         occupancyBusy: false,
     };
 
+    // the ra portal's map above the review cards (jb 2026-09-04); absent
+    // leaflet the page still reviews from the queue alone
+    const reviewMap = window.PowReviewMap
+        ? window.PowReviewMap.create({
+            containerId: "reviewMap",
+            countryCode: country.code,
+            onSelectTask: (taskId) => {
+                selectTask(taskId, { fromMap: true });
+            },
+        })
+        : null;
+
     const els = {
         authPanel: document.getElementById("authPanel"),
         authStatus: document.getElementById("authStatus"),
@@ -285,6 +297,7 @@ function human(value) {
             state.user = null;
             state.queue = [];
             state.selected = null;
+            reviewMap?.setQueue([], "");
             renderAuth();
             renderQueue();
             renderEmptyDetail("Signed out. Sign in again to review submitted evidence.");
@@ -305,6 +318,7 @@ function human(value) {
             });
             state.queue = rows || [];
             renderQueue();
+            reviewMap?.setQueue(state.queue, state.selected?.task?.task_id);
             setStatus(
                 els.queueStatusText,
                 state.queue.length === 0
@@ -315,6 +329,7 @@ function human(value) {
         } catch (error) {
             state.queue = [];
             renderQueue();
+            reviewMap?.setQueue([], "");
             setStatus(els.queueStatusText, error.message || "Could not load the review queue.", "error");
         } finally {
             state.busy = false;
@@ -383,10 +398,13 @@ function human(value) {
         });
     }
 
-    async function selectTask(taskId) {
+    async function selectTask(taskId, { fromMap = false } = {}) {
         const row = state.queue.find((entry) => entry.task.task_id === taskId);
         if (!row) return;
         state.selected = row;
+        // the map flies to a queue pick; a marker click already sits there
+        reviewMap?.select(taskId, { fly: !fromMap });
+        if (fromMap) els.detailPanel?.scrollIntoView({ block: "start", behavior: "smooth" });
         state.drafts = [];
         state.historicalClaims = [];
         state.events = [];
@@ -591,6 +609,7 @@ function human(value) {
 
                 <section class="panel">
                     <h3>Lifecycle</h3>
+                    <p class="muted">A lifecycle event is a dated moment in the place's life as the contributor recorded it: worship beginning, ending, or moving, or the building changing use or being demolished. These are provisional claims about opening, closure, and change dates; they stay distinct from the target-year statuses below, which state whether worship was present in each census year.</p>
                     ${draft ? renderFieldGrid([
                         ["Lifecycle event", draft.lifecycle_event],
                         ["Lifecycle date", draft.lifecycle_date],
