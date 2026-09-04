@@ -4,6 +4,7 @@ import type { Doc } from "./_generated/dataModel";
 import { exportFormat, exportBatchStatus } from "./model";
 import { chooseActorRole, requireUser } from "./lib/auth";
 import { appendTaskEvent } from "./lib/taskEvents";
+import { exportRefusalForTask } from "./lib/acceptance";
 import { isWideEvidenceExportEligible } from "./lib/exportEligibility";
 import { targetYearsOrEmpty } from "./lib/countryYears";
 import { readGeneratedWideRow, wideEvidenceFields, wideEvidenceRowValues } from "./lib/wideEvidenceFields";
@@ -265,11 +266,15 @@ export const createExportBatch = mutation({
       (
         await ctx.db
           .query("tasks")
-          .withIndex("by_country_status", (q) => q.eq("country_code", args.countryCode).eq("status", "reviewed"))
+          // the pi acceptance layer (jb 2026-09-04): a batch takes only
+          // tasks a principal investigator has accepted, never a
+          // reviewer's acceptance alone
+          .withIndex("by_country_status", (q) => q.eq("country_code", args.countryCode).eq("status", "pi_accepted"))
           .take(1000)
       ).map((task) => task.task_id);
 
-    // training tasks never enter an export bundle, even when named explicitly
+    // training tasks never enter an export bundle, even when named
+    // explicitly; a named task a pi has not accepted refuses the batch
     const taskIds: string[] = [];
     for (const taskId of requestedTaskIds) {
       const task = await ctx.db
@@ -279,16 +284,30 @@ export const createExportBatch = mutation({
       if (task?.source_context?.training?.exclude_from_exports === true) {
         continue;
       }
+      const refusal = exportRefusalForTask(taskId, task?.status);
+      if (refusal !== null) {
+        throw new Error(refusal);
+      }
       taskIds.push(taskId);
     }
 
     const reviewDecisionIds: string[] = [];
+    const acceptanceIds: string[] = [];
     for (const taskId of taskIds) {
       const decisions = await decisionsForTask(ctx, taskId);
       reviewDecisionIds.push(
         ...decisions
           .filter((decision) => decision.decision_status === "accepted_for_export")
           .map((decision) => decision.review_decision_id),
+      );
+      const acceptances = await ctx.db
+        .query("task_acceptances")
+        .withIndex("by_task", (q) => q.eq("task_id", taskId))
+        .collect();
+      acceptanceIds.push(
+        ...acceptances
+          .filter((row) => row.outcome === "accepted")
+          .map((row) => row.acceptance_id),
       );
     }
 
@@ -301,6 +320,7 @@ export const createExportBatch = mutation({
       created_at: now,
       included_task_ids: taskIds,
       included_review_decision_ids: reviewDecisionIds,
+      included_acceptance_ids: acceptanceIds,
       schema_version: "convex-task-layer.v0.1",
       export_format: args.exportFormat ?? "bundle",
       pow_validation_status: "not_run",

@@ -246,7 +246,7 @@ async function markDraftSubmitted(
   });
 }
 
-const closedTaskStatuses = new Set(["reviewed", "exported"]);
+const closedTaskStatuses = new Set(["reviewed", "pi_accepted", "exported"]);
 const finalDraftStatuses = new Set(["accepted_for_export", "rejected"]);
 
 async function upsertSpreadsheetBatch(

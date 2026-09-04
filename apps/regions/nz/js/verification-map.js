@@ -1033,7 +1033,9 @@ const LOCATION_CONFIDENCE_OPTIONS = [
 //                     current September census wave. UNDERIVABLE today — see
 //                     the guarded branch below — so this state never renders yet.
 function validationState(backendStatus, temporalStatus) {
-    if (backendStatus === "reviewed" || backendStatus === "exported") {
+    // pi_accepted (jb 2026-09-04) counts as validated; pr-p2 moves the
+    // ring reading so that reviewed alone reads as in review (r-p3)
+    if (backendStatus === "reviewed" || backendStatus === "pi_accepted" || backendStatus === "exported") {
         // stale_validation is UNREACHABLE today: distinguishing a
         // current-wave confirmation from a prior-wave one needs per-wave
         // re-confirmation data (which September census wave last confirmed
@@ -2343,7 +2345,7 @@ class NzVerificationMap {
             .concat(nominationChangesRequested);
         const needsMore = changesRequested.length;
         const skipped = items.filter(item => item.task?.status === "skipped").length;
-        const reviewed = items.filter(item => item.task?.status === "reviewed" || item.task?.status === "exported").length;
+        const reviewed = items.filter(item => ["reviewed", "pi_accepted", "exported"].includes(item.task?.status)).length;
         panel.innerHTML = `
             ${this.changesRequestedPanelHtml(changesRequested)}
             <details ${total > 0 ? "open" : ""}>

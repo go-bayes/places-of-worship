@@ -1,7 +1,7 @@
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 
-export type ProjectRole = "ra" | "reviewer" | "curator" | "admin" | "service";
+export type ProjectRole = "ra" | "reviewer" | "curator" | "admin" | "service" | "pi";
 
 export function normaliseEmail(email: string | undefined): string | undefined {
   const value = email?.trim().toLowerCase();
@@ -22,7 +22,8 @@ export function canReview(
   return userRoles.includes("reviewer")
     || userRoles.includes("curator")
     || userRoles.includes("admin")
-    || userRoles.includes("service");
+    || userRoles.includes("service")
+    || userRoles.includes("pi");
 }
 
 export async function requireUser(

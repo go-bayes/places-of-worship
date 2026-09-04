@@ -22,7 +22,7 @@
     // portal holds no target-year derivation, so a decided task wears the
     // validated-present ring whatever its recorded existence
     function validationState(status) {
-        if (status === "reviewed" || status === "exported") return "validated_present";
+        if (status === "reviewed" || status === "pi_accepted" || status === "exported") return "validated_present";
         if (status === "changes_requested" || status === "reopened") return "disputed";
         if (status === "needs_review" || status === "unresolved_note") return "in_review";
         return "unvalidated";

@@ -6,6 +6,9 @@ export const projectRole = v.union(
   v.literal("curator"),
   v.literal("admin"),
   v.literal("service"),
+  // principal investigator (jb, jw): the only role that accepts a reviewed
+  // case into the backend (jb ruling 2026-09-04)
+  v.literal("pi"),
 );
 
 export const userStatus = v.union(
@@ -26,6 +29,7 @@ export const taskStatusValues = [
   "unresolved_note",
   "changes_requested",
   "reviewed",
+  "pi_accepted",
   "exported",
   "reopened",
 ] as const;
@@ -39,7 +43,10 @@ export const taskStatus = v.union(
   v.literal("needs_review"),
   v.literal("unresolved_note"),
   v.literal("changes_requested"),
+  // a reviewer accepted; awaiting a principal investigator
   v.literal("reviewed"),
+  // a principal investigator accepted: the only status the export takes
+  v.literal("pi_accepted"),
   v.literal("exported"),
   v.literal("reopened"),
 );
@@ -102,6 +109,15 @@ export const taskEventType = v.union(
   v.literal("opinion_requested"),
   v.literal("comment_requested"),
   v.literal("comment_provided"),
+  v.literal("pi_accepted"),
+  v.literal("pi_returned"),
+);
+
+// the pi acceptance layer's two outcomes (r-p5: returned goes back to
+// the reviewers as needs_review)
+export const acceptanceOutcome = v.union(
+  v.literal("accepted"),
+  v.literal("returned"),
 );
 
 export const evidenceDraftStatus = v.union(
