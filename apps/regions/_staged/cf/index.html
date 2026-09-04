@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Central African Republic Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../../shared/map-shell.css?v=20260904a" rel="stylesheet">
+  <link href="../../../global/styles/maplibre-flat.css?v=20260904a" rel="stylesheet">
+  <link href="../../_shared/region-map.css?v=20260904a" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../../global/config.public.js"></script>
+  <script src="../../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <!-- DRAFT PAGE (staged 2026-09-04): not linked from the hub. -->
+  <!-- PI RULING PENDING: sensitivity note -->
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // The Central African Republic's product is ICASEES census religious
+    // affiliation by the seventeen préfectures (Bangui included) for a single
+    // wave, 2003 (RGPH 2003). The source, the thematic report Les
+    // caractéristiques socioculturelles de la population centrafricaine
+    // (DGSEES, Bangui, June 2005), Tableau soc 6.15 (p. 37), publishes
+    // one-decimal row percentages of each préfecture's resident population of
+    // ordinary households across six categories (Catholique, Protestant,
+    // Islam, Autre religion, Sans religion, Non déclaré) and prints no counts.
+    // population_total and every count field are null by design; no count is
+    // derived from a percentage. The six categories sum to 100 within a
+    // derived rounding bound of 0.30 percentage points; six rows print 99.9
+    // or 100.1 as published and are carried unaltered.
+    //
+    // religious_affiliation_percent is 100 minus Sans religion minus Non
+    // déclaré; no_religion_percent is the printed Sans religion share. Non
+    // déclaré stays in the denominator and outside both numerators. The six
+    // published shares ride in each row's composition and show in the popup.
+    //
+    // Subnational religion is published for 2003 only; RGPH-4 (2024-25)
+    // results are pending and its religion item is unconfirmed. No cross-wave
+    // change metric is offered.
+    //
+    // Licence accepted (conductor ruling 2026-09-04): ICASEES publishes its
+    // publications, documents and data under CC BY 4.0 (site footer; NADA
+    // entry "Licence : CC BY 4.0"), with the citation requirement "Source de
+    // données : ICASEES, RGPH 2003. RCA." Boundaries are geoBoundaries CAF
+    // ADM1 (CC BY 2.5), boundary year represented 2006, 17 units.
+    //
+    // PI RULING PENDING: sensitivity note. The sentence marked below is a
+    // DRAFT for the PI's ruling (Myanmar precedent); the page does not go
+    // live until it is ruled on.
+    window.REGION_CONFIG = {
+      countryCode: "CF",
+      title: "Places of Worship | Central African Republic Research Map",
+      // the country spans lon 14.4..27.5 by lat 2.2..11.0 across the seventeen
+      // préfectures; centre on the préfectures and open at a zoom that fits
+      // the full extent beside the census panels
+      center: [20.9, 6.6],
+      initialZoom: 5.5,
+      censusLevels: {
+        adm1: {
+          label: "Préfecture",
+          boundaries: "data/cf_adm1_2006.geojson",
+          summary: "data/area_summary_adm1.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © ICASEES, RGPH 2003, Tableau soc 6.15 (CC BY 4.0) · Boundaries © geoBoundaries CAF ADM1 (CC BY 2.5)"
+        }
+      },
+      defaultLevel: "adm1",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2003,
+      // the two census-question shares; place, density, and change metrics are
+      // omitted because no place layer is built and subnational religion is
+      // published for 2003 only
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share in the four affiliation categories (Catholique, Protestant, Islam, Autre religion): 100 minus the published Sans religion and Non déclaré shares in RGPH 2003 Tableau soc 6.15"
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the source's Sans religion category, from the same Tableau soc 6.15 one-decimal shares"
+        }
+      },
+      popupDenominatorNote: "Values are the source's published one-decimal percentage shares of each préfecture's resident population of ordinary households in RGPH 2003 Tableau soc 6.15. The source publishes no counts; population and every count field are null, and no count is derived from a percentage. The six source categories (Catholique, Protestant, Islam, Autre religion, Sans religion, Non déclaré) sum to 100 within a derived rounding bound of 0.30 percentage points; six rows print 99.9 or 100.1 as published and are carried unaltered. Non déclaré stays in the denominator and outside both shares. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+      cityPresets: [
+        { label: "Bangui", coords: [18.5582, 4.3947], zoom: 11 },
+        { label: "Berbérati", coords: [15.7917, 4.2611], zoom: 11 },
+        { label: "Bambari", coords: [20.6667, 5.7667], zoom: 11 }
+      ],
+      geocode: { country: "cf", biasLngLat: [20.9, 6.6] },
+      onboarding: {
+        title: "Central African Republic research map",
+        intro: "Census religious affiliation across the Central African Republic's seventeen préfectures (Bangui included), a single 2003 snapshot from the Institut Centrafricain des Statistiques et des Études Économiques et Sociales (ICASEES), RGPH 2003, Tableau soc 6.15 of the thematic report Les caractéristiques socioculturelles de la population centrafricaine. The source publishes one-decimal percentage shares only, with no counts and no change metric. The construct is census affiliation; it does not measure belief, practice, attendance, or registered membership.",
+        bullets: [
+          "Préfectures are shaded by the share reporting a religious affiliation (Catholique, Protestant, Islam, or Autre religion), or by the share in the source's <code>Sans religion</code> category, shown as No religion %. The popup lists all six published shares, including <code>Non déclaré</code>.",
+          "This is one census wave, 2003, at préfecture level, in percentages only. The source publishes no counts. Population and every count field are null, and no count is derived from a percentage. No change metric is offered.",
+          "Percentages are the source's published one-decimal shares. The six categories sum to 100 within a derived rounding bound of 0.30 percentage points; six rows print 99.9 or 100.1 as published and are carried unaltered.",
+          // PI RULING PENDING: sensitivity note (DRAFT sentence for the PI's ruling)
+          "Religion has been a fault line of armed conflict in the Central African Republic since 2013. This map renders the 2003 census record as published by ICASEES in Tableau soc 6.15 of the RGPH 2003 thematic report, and nothing else. The data predate the conflict by a decade: they describe the resident population of ordinary households at the 2003 enumeration, not the present distribution.",
+          "Open <strong>Show Census Data</strong> (top centre) for the metric controls."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "wordmark-global", label: "Global map", href: "../../../global/", title: "Open the global map" }
+      ],
+      censusSourceAttribution: 'Census religion © <a href="https://icasees.org" target="_blank" rel="noopener">Institut Centrafricain des Statistiques et des Études Économiques et Sociales (ICASEES)</a>, RGPH 2003 (Les caractéristiques socioculturelles de la population centrafricaine, Tableau soc 6.15). Source de données : ICASEES, RGPH 2003. RCA. — <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>. &middot; Boundaries © <a href="https://www.geoboundaries.org/api/current/gbOpen/CAF/ADM1/" target="_blank" rel="noopener">geoBoundaries</a> CAF ADM1 (Creative Commons Attribution 2.5 Generic, CC BY 2.5), boundary year represented 2006',
+      // PI RULING PENDING: sensitivity note (the last two sentences are the DRAFT for ruling)
+      censusFlagNote: "* Values are the source's published one-decimal percentage shares from RGPH 2003 Tableau soc 6.15; the source publishes no counts, and no count is derived from a percentage. The six source categories sum to 100 within a derived rounding bound of 0.30 percentage points; six rows print 99.9 or 100.1 as published. Single wave (2003), préfecture level, percentages only; no change metric. CC BY 4.0 (ICASEES). Religion has been a fault line of armed conflict in the Central African Republic since 2013; this map renders the 2003 census record as published by ICASEES and nothing else, and the data predate the conflict."
+    };
+  </script>
+  <script src="../../../shared/region-resolve.js?v=20260904a"></script>
+  <script src="../../_shared/region-map.js?v=20260904b"></script>
+  <script src="../../../shared/datamaps-switcher.js?v=20260717d"></script>
+</body>
+</html>
