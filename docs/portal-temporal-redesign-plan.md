@@ -207,7 +207,7 @@ Spec (either stack):
   year bounds, evaluate over the typed array, debounce redraw to animation
   frames; bucket into per-decade layer groups if needed.
 
-## 4. Bob Woodbury Bulk Historical Lane
+## 4. Bob Woodberry Bulk Historical Lane
 
 - Invite as `ra` + `reviewer` (pending invite, activates on first sign-in —
   the Guy precedent). Author-cannot-accept-own separation already holds.
