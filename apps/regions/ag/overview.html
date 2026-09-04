@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Antigua and Barbuda map overview</title>
+  <link href="../../shared/map-shell.css" rel="stylesheet">
+  <link href="../_shared/overview.css?v=20260712d" rel="stylesheet">
+</head>
+<body>
+  <div id="overview-root"></div>
+  <script>
+    // public record for the Antigua and Barbuda research map; the private
+    // research tier holds the route probe, builder, and provenance manifest
+    window.OVERVIEW_CONFIG = {
+      countryCode: "AG",
+      countryName: "Antigua and Barbuda",
+      mapHref: "./",
+      intro: "Census religious affiliation for Antigua and Barbuda in 1991, 2001, and 2011. The Statistics Division tabulates religion nationally only in every printed report. It publishes parish geography for other census variables, but no printed report crosses religion with parish. The map therefore shades one national polygon across the three waves.",
+      facts: {
+        waves: "Censuses 1991, 2001, 2011",
+        geographies: "National (one polygon; every printed report tabulates religion for the whole country only)",
+        metrics: "Religious affiliation %, no religion %, religious affiliation change"
+      },
+      reading: [
+        "The map shades a single national polygon, covering Antigua, Barbuda, and Redonda, by the share reporting a religious affiliation or no religion. No printed wave crosses religion with parish. The national polygon therefore represents the full published geographic detail under the small-country clause.",
+        "All three waves derive from printed category counts and each wave's printed religion-table total: 59,355 in 1991 (the tabulated population), 76,886 in 2001, and 84,816 in 2011 (the non-institutional population). Affiliation is the total less None and Not stated. No religion is the source None line. Not stated remains in the denominator and outside both headline numerators.",
+        "Two waves carry a documented arithmetic discrepancy in the source. The 2001 Table 14 lines sum to 76,889 against the printed total of 76,886 (+3). The 2011 Table 5.10 lines sum to 84,804 against the printed total of 84,816 (−12). The map carries the printed lines and the printed totals exactly as published and does not repair, rescale, or redistribute either deviation. The 2001 report's Table 15 prints a Both Sexes row that closes exactly to 76,886 but differs from Table 14 in fourteen of 21 lines; Table 14 remains the source of record.",
+        "The 1991 Summary Report is a scanned document with no text layer. Its eighteen lines were transcribed from the page image and verified by three column closures (Total 59,355; Male 28,612; Female 30,743) and eighteen row identities. The report distinguishes this tabulated population from the enumerated population of 62,929 and the resident population of 60,847.",
+        "The three category frames differ (18, 21, and 24 lines; Seventh Day Adventist becomes Adventist; the 2011 Not stated line prints as Don't know/Not stated). Every wave retains its printed frame; the religious-affiliation change series compares count-derived shares on the headline spine only.",
+        "The 2011 religion table covers the non-institutional population of 84,816; the total resident population is 85,567, a gap of 751 institutional persons. The 2011 census microdata cross religion with parish through the CELADE REDATAM engine, but the engine does not serve its result outside a live session. The parish layer is held pending the Statistics Division and will supersede this national view when supplied."
+      ],
+      sources: [
+        {
+          name: "Statistics Division, 1991 Population and Housing Census Summary Report, Table 13",
+          href: "https://statistics.gov.ag/wp-content/uploads/2017/12/1991-Population-and-Housing-Census.pdf",
+          construct: "National census religious affiliation by sex and total, 18 category lines (scanned document, transcribed from the page image)",
+          years: "1991",
+          licence: "No printed reuse terms; carried under the Statistics Division data-user permission and the build-then-ask standing ruling"
+        },
+        {
+          name: "Statistics Division, 2001 Census of Population and Housing Summary Volume I, Table 14",
+          href: "https://statistics.gov.ag/wp-content/uploads/2017/11/2001-Census-of-Population-and-Housing.pdf",
+          construct: "National census religious affiliation by sex and total, 21 category lines",
+          years: "2001",
+          licence: "No printed reuse terms; carried under the Statistics Division data-user permission and the build-then-ask standing ruling"
+        },
+        {
+          name: "Statistics Division, 2011 Population and Housing Census Book of Statistical Tables I, Table 5.10",
+          href: "https://statistics.gov.ag/wp-content/uploads/2017/10/Census-2011-Book-of-Statistical-Tables-I.pdf",
+          construct: "National census religious affiliation by five-year age group and sex, 24 category lines (non-institutional population)",
+          years: "2011",
+          licence: "Statistics Division data-user permission: processing with acknowledgement, no resale"
+        },
+        {
+          name: "geoBoundaries gbOpen ATG ADM1, dissolved to one national polygon",
+          href: "https://www.geoboundaries.org/",
+          construct: "Boundary geometry (six Antigua parishes, Barbuda, and Redonda dissolved to the national outline)",
+          years: "2009 vintage",
+          licence: "Public Domain (geoBoundaries tag as published; source Wikimedia Commons)"
+        }
+      ],
+      accessData: {
+        sourceOfRecord: "Statistics Division, Ministry of Finance, Antigua and Barbuda: the <a href=\"https://statistics.gov.ag/wp-content/uploads/2017/12/1991-Population-and-Housing-Census.pdf\" target=\"_blank\" rel=\"noopener\">1991 Summary Report</a> (Table 13), the <a href=\"https://statistics.gov.ag/wp-content/uploads/2017/11/2001-Census-of-Population-and-Housing.pdf\" target=\"_blank\" rel=\"noopener\">2001 Summary Volume I</a> (Table 14), and the <a href=\"https://statistics.gov.ag/wp-content/uploads/2017/10/Census-2011-Book-of-Statistical-Tables-I.pdf\" target=\"_blank\" rel=\"noopener\">2011 Book of Statistical Tables I</a> (Table 5.10). The boundary uses <a href=\"https://www.geoboundaries.org/\" target=\"_blank\" rel=\"noopener\">geoBoundaries</a> ATG ADM1, dissolved to one national polygon.",
+        tables: "Table 13, Population by Religion and Sex (1991), supplies the 1991 counts. Table 14, Population by Religion and Sex (2001), supplies the 2001 counts. Table 5.10, Population by Five-Year Age Groups by Religion by Sex (2011), supplies the 2011 counts from its Total rows. The builder verifies that the 1991 lines sum to the printed 59,355, that the 2001 lines sum to 76,889 against the printed 76,886, and that the 2011 lines sum to 84,804 against the printed 84,816, and stops on any other arithmetic.",
+        licence: "The 2011 Book of Statistical Tables I preface states: “Data users may apply or process the Census data, provided the Statistics Division is acknowledged as the original source of the data; that it is specified that the application and/or analysis is the result of the user's independent processing of the data; and that neither the basic data nor any reprocessed version or application thereof may be sold or offered for sale in any form whatsoever without prior permission from the Statistics Division”. This map is the result of the project's independent processing of the data and is offered free of charge. The required acknowledgement is: “Source: Statistics Division, Ministry of Finance, Antigua and Barbuda. Census data reproduced with acknowledgement of the Statistics Division; not for sale.” The 2001 and 1991 reports print no reuse terms. The geoBoundaries ATG ADM1 boundary is tagged Public Domain as published (source Wikimedia Commons).",
+        script: "pipeline/build_ag_area_summary.R",
+        manifests: [
+          { label: "ag-census-religion-1991-2011" }
+        ]
+      },
+      contribute: {
+        pendingNote: "The Antigua and Barbuda map is a census-derived product with no evidence-submission portal yet. You can still correct place-of-worship geometry on OpenStreetMap.",
+        osm: "https://github.com/go-bayes/places-of-worship?tab=readme-ov-file#how-can-i-add-or-correct-a-place-of-worship-on-the-map"
+      }
+    };
+  </script>
+  <script src="../_shared/overview.js?v=20260713a"></script>
+</body>
+</html>

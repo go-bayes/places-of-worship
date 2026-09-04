@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places of Worship | Antigua and Barbuda Research Map</title>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="../../shared/map-shell.css?v=20260904a" rel="stylesheet">
+  <link href="../../global/styles/maplibre-flat.css?v=20260904a" rel="stylesheet">
+  <link href="../_shared/region-map.css?v=20260904a" rel="stylesheet">
+</head>
+<body>
+  <div id="region-root"></div>
+  <script src="../../global/config.public.js"></script>
+  <script src="../../global/config.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    // country-specific config only; shared behaviour lives in the runtime.
+    // The national series derives from printed counts in all three waves. The
+    // Statistics Division tabulates religion nationally only in every printed
+    // report; the 2011 parish cross-tabulation is held pending the Division.
+    // The map shades one national polygon (Antigua, Barbuda, and Redonda).
+    window.REGION_CONFIG = {
+      countryCode: "AG",
+      title: "Places of Worship | Antigua and Barbuda Research Map",
+      // the centre and zoom hold Antigua and Barbuda within the initial view on
+      // desktop and mobile while leaving room for the top-centre census control
+      center: [-61.79, 17.32],
+      initialZoom: 8.8,
+      censusLevels: {
+        national: {
+          label: "National",
+          boundaries: "data/ag_adm0_2009.geojson",
+          summary: "data/area_summary_adm0.json",
+          codeProp: "area_code",
+          nameProp: "area_name",
+          credit: "Census religion © Statistics Division, Ministry of Finance, Antigua and Barbuda, reproduced with acknowledgement; not for sale · Boundaries © geoBoundaries ATG ADM1 (Public Domain, Wikimedia source), dissolved to one national polygon"
+        }
+      },
+      defaultLevel: "national",
+      defaultMetric: "religious_affiliation_percent",
+      defaultYear: 2011,
+      metricsAvailable: [
+        "religious_affiliation_percent",
+        "no_religion_percent",
+        "religious_change"
+      ],
+      metricLabels: {
+        religious_affiliation_percent: {
+          label: "Religious affiliation %",
+          note: "share reporting any religious affiliation after excluding None and Not stated from the numerator. Every wave derives from printed category counts and the wave's printed religion-table total (59,355 in 1991, 76,886 in 2001, 84,816 in 2011). Not stated remains in the denominator."
+        },
+        no_religion_percent: {
+          label: "No religion %",
+          note: "share in the source None category (None/no religion in 2011). None and Not stated are separate lines in every wave; the 2011 Not stated line prints as Don't know/Not stated."
+        },
+        religious_change: {
+          label: "Religious affiliation change",
+          note: "percentage-point change in the religious-affiliation share since the previous census (1991 → 2001 → 2011). All three waves use count-derived shares on their printed religion-table totals; the category frames differ across waves (18, 21, and 24 lines) and are not harmonised."
+        }
+      },
+      popupDenominatorNote: "Each wave's printed religion-table total is the denominator: 59,355 (the 1991 tabulated population), 76,886 (2001), and 84,816 (the 2011 non-institutional population). Affiliation is the total less None and Not stated. Not stated stays in the denominator and outside both headline numerators. The 2001 printed lines sum to 76,889 against the printed 76,886 (+3) and the 2011 printed lines sum to 84,804 against the printed 84,816 (−12); the map carries the printed lines and printed totals as published and records both discrepancies without repair. The 2011 total is the non-institutional population; the total resident population is 85,567. The Statistics Division tabulates religion nationally only in every printed report; the 2011 parish cross-tabulation is held pending the Division.",
+      cityPresets: [
+        { label: "St John's", coords: [-61.8456, 17.1175], zoom: 13 },
+        { label: "Codrington", coords: [-61.8286, 17.6364], zoom: 13 }
+      ],
+      geocode: { country: "ag", biasLngLat: [-61.79, 17.32] },
+      onboarding: {
+        title: "Antigua and Barbuda research map",
+        intro: "Census religious affiliation for Antigua and Barbuda in 1991, 2001, and 2011. The Statistics Division tabulates religion nationally only in every printed report; the map therefore shades one national polygon across the three waves.",
+        bullets: [
+          "The Statistics Division publishes parish geography for other census variables, but every printed report tabulates religion for the whole country only. The 2011 parish cross-tabulation is held pending the Division and will supersede this national view when supplied.",
+          "Open <strong>Show Census Data</strong> (top centre) to choose the metric and census year (1991, 2001, 2011).",
+          "All three waves derive from printed counts and each wave's printed religion-table total. The 1991 report is a scanned document; its eighteen lines were transcribed from the page image and sum exactly to the printed 59,355.",
+          "The 2001 printed lines sum to 76,889 against the printed total of 76,886 (+3), and the 2011 printed lines sum to 84,804 against the printed total of 84,816 (−12). The map records both discrepancies without repair.",
+          "Not stated remains in the denominator and outside both headline numerators. The 2011 total is the non-institutional population (84,816); the total resident population is 85,567."
+        ],
+        links: [
+          { label: "About this map", href: "overview.html" },
+          { label: "Global map", href: "../../global/" }
+        ]
+      },
+      wordmarkLinks: [
+        { id: "wordmark-global", label: "Global map", href: "../../global/", title: "Open the global map" }
+      ],
+      // the Statistics Division's data-user permission requires acknowledgement
+      // as the original source and prohibits sale; the boundary carries the
+      // geoBoundaries Public Domain tag as published
+      censusSourceAttribution: 'Source: Statistics Division, Ministry of Finance, Antigua and Barbuda. Census data reproduced with acknowledgement of the Statistics Division; not for sale. Census religion © <a href="https://statistics.gov.ag/" target="_blank" rel="noopener">Statistics Division, Antigua and Barbuda</a> &middot; Boundaries © <a href="https://www.geoboundaries.org/" target="_blank" rel="noopener">geoBoundaries</a> ATG ADM1 (Public Domain, Wikimedia source), dissolved to one national polygon',
+      censusFlagNote: "* The Statistics Division tabulates religion for the whole country only in every printed report; parish geography is published for other census variables, and the 2011 parish religion cross-tabulation is held pending the Division. All three waves use count-derived shares on their printed religion-table totals (59,355 in 1991, 76,886 in 2001, 84,816 in 2011). The 2001 printed lines sum to 76,889 against the printed 76,886 (+3) and the 2011 printed lines sum to 84,804 against the printed 84,816 (−12); both are recorded as published without repair. Not stated remains in the denominator and outside both headline numerators. The 2011 total is the non-institutional population; the total resident population is 85,567."
+    };
+  </script>
+  <script src="../../shared/region-resolve.js?v=20260904a"></script>
+  <script src="../_shared/region-map.js?v=20260904b"></script>
+  <script src="../../shared/datamaps-switcher.js?v=20260717d"></script>
+</body>
+</html>
