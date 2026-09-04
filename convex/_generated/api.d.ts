@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as acceptances from "../acceptances.js";
 import type * as attachments from "../attachments.js";
 import type * as batchImport from "../batchImport.js";
 import type * as claudeReviews from "../claudeReviews.js";
@@ -15,6 +16,7 @@ import type * as devSeed from "../devSeed.js";
 import type * as evidence from "../evidence.js";
 import type * as exports from "../exports.js";
 import type * as historicalClaims from "../historicalClaims.js";
+import type * as lib_acceptance from "../lib/acceptance.js";
 import type * as lib_assignedTaskPeriods from "../lib/assignedTaskPeriods.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_countryYears from "../lib/countryYears.js";
@@ -51,6 +53,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  acceptances: typeof acceptances;
   attachments: typeof attachments;
   batchImport: typeof batchImport;
   claudeReviews: typeof claudeReviews;
@@ -58,6 +61,7 @@ declare const fullApi: ApiFromModules<{
   evidence: typeof evidence;
   exports: typeof exports;
   historicalClaims: typeof historicalClaims;
+  "lib/acceptance": typeof lib_acceptance;
   "lib/assignedTaskPeriods": typeof lib_assignedTaskPeriods;
   "lib/auth": typeof lib_auth;
   "lib/countryYears": typeof lib_countryYears;
