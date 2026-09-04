@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://go-bayes.github.io/places-of-worship/schemas/indicator.schema.json",
   "title": "Indicator",
-  "description": "A measured quantity that can be observed for a site, area, country, or grid cell.",
+  "description": "One source's operationalisation of a construct: a measured quantity that can be observed for a site, area, country, or grid cell. unit is the measurement unit (how a value is scaled), distinct from the unit of analysis; a ratio indicator carries unit rate and names its denominator through denominator_indicator_id rather than folding it into the unit string. construct_id names the construct in the versioned construct vocabulary; two indicators of one construct stay separate indicators.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -24,8 +24,23 @@
       "type": "string"
     },
     "unit": {
-      "type": "string",
-      "examples": ["count", "percent", "places_per_10000_residents", "places_per_sq_km"]
+      "description": "Closed measurement-unit enum (ruled 2026-08-31; index and percent_point added 2026-09-05 under R-C2: index for unitless composite scores, percent_point for differences between two percentages, the unit the shipped Cambodia change metric already declares). Grows only by versioned vocabulary change; never reopened to a free string.",
+      "enum": ["count", "percent", "rate", "currency", "code", "year", "index", "percent_point"]
+    },
+    "construct_id": {
+      "description": "Construct this indicator operationalises, from the construct vocabulary (construct-vocabulary.v1). Null while an indicator predates the vocabulary.",
+      "type": ["string", "null"],
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "variable_kind": {
+      "description": "How values aggregate across units: intensive (rate, mean, index; weighted mean) or extensive (count; apportioned sum). code marks a categorical indicator that is never weighted.",
+      "type": ["string", "null"],
+      "enum": ["intensive", "extensive", "code", null]
+    },
+    "native_period_type": {
+      "description": "The source's own period concept for a value: a calendar year, a survey fieldwork span, a pooled multi-year estimate, or a single reference date.",
+      "type": ["string", "null"],
+      "enum": ["calendar_year", "fieldwork_span", "pooled", "reference_date", null]
     },
     "denominator_indicator_id": {
       "type": ["string", "null"],

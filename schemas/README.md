@@ -31,9 +31,13 @@ JSON Schemas that define the core data structures used across the project.
   indicator.schema.json leaves unit an open string whose examples
   (places_per_10000_residents) name a whole indicator rather than a unit;
   the correct decomposition uses the unit rate and declares the denominator
-  through denominator_indicator_id. Correct that schema to the closed enum
-  and this decomposition when it next gains a consumer (it is aspirational;
-  none exists yet). The enum grows only by versioned vocabulary change,
+  through denominator_indicator_id. CORRECTED 2026-09-05 under R-C2 of the
+  covariate ingestion design (pow-research, its first consumer): unit is now
+  the closed enum, with two additions for JB's nod: index for unitless
+  composite scores (HDI, Gini, V-Dem) and percent_point for differences
+  between percentages (the unit apps/regions/kh already declares on its
+  change metric); the schema gains construct_id, variable_kind and
+  native_period_type. The enum grows only by versioned vocabulary change,
   under the same discipline as denomination-taxonomy.json — publish a new
   version with supersession links; never reopen the string, and never edit
   values in place.
@@ -64,8 +68,10 @@ JSON Schemas that define the core data structures used across the project.
   schema). Change events pin its `taxonomy_version`; update it by publishing a
   new version with supersession links, never by editing codes in place.
 - geometry-history.schema.json: time-bounded site or structure geometry state.
-- indicator.schema.json: reusable indicator definitions (aspirational: no
-  consumer yet).
+- indicator.schema.json: reusable indicator definitions. First consumer is
+  the covariate ingestion layer in pow-research (2026-09-05): closed unit
+  enum, construct_id into the construct vocabulary, variable_kind,
+  native_period_type.
 - site.schema.json: place-of-worship site record.
 - source-dataset.schema.json: provenance for source datasets (aspirational:
   no consumer yet; manifests carry provenance under data-manifest.v2).
