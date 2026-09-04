@@ -43,7 +43,7 @@ Building historical datasets fit for scientific inference is remarkably difficul
 
 ## Project audiences
 
-Instructions are audience-addressed under [docs/people/](docs/people/): [JB](docs/people/jb/), [research assistants](docs/people/ra/), [JW](docs/people/jw/), and [Guy](docs/people/guy/). The public/private rule lives there too.
+Instructions are audience-addressed under [docs/people/](docs/people/): [JB](docs/people/jb/), [research assistants](docs/people/ra/), [JW](docs/people/jw/), [Guy](docs/people/guy/), and [RW](docs/people/rw/). The public/private rule lives there too.
 
 ## Ongoing Work
 
@@ -70,7 +70,7 @@ Source data retain their own licences, recorded per product in provenance manife
 
 ## Project Team
 
-The project team includes Professor Joseph Bulbulia (Victoria University of Wellington, New Zealand) and Dr Joseph Watts (University of Canterbury, New Zealand). We thank Nick Young at the University of Auckland Centre for eResearch for the initial inspiration.
+The project team includes Professor Joseph Bulbulia (Victoria University of Wellington, New Zealand), Dr Joseph Watts (University of Canterbury, New Zealand), and Professor Robert Woodberry (Baylor University, United States), who contributes the historical mission-station data and reviews it. We thank Nick Young at the University of Auckland Centre for eResearch for the initial inspiration.
 
 This work is supported by a Templeton Religion Trust subgrant (TRT-2022-30666).
 
