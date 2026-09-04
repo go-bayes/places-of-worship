@@ -643,7 +643,7 @@
         }
 
         .link-grid a,
-        .link-grid button.coord-copy {
+        .link-grid button {
             border: 1px solid var(--line);
             border-radius: var(--r-sm);
             padding: 10px 8px;
@@ -662,7 +662,7 @@
         }
 
         .link-grid a:hover,
-        .link-grid button.coord-copy:hover {
+        .link-grid button:hover {
             background: var(--action-soft);
         }
 
@@ -2685,6 +2685,10 @@
         .osm-history-events .osm-history-changes { grid-column: 2; }
         .osm-history code { font-size: var(--fs-xs); background: var(--panel-2); padding: 0 3px; border-radius: var(--r-sm); }
         .popup-osm-history-body { margin-top: 6px; max-height: 220px; overflow-y: auto; }
+        .popup-actions .popup-osm-history-body, .link-grid .popup-osm-history-body { grid-column: 1 / -1; }
+        /* the entry form's open source links (jb 2026-09-04) */
+        .source-links-block { margin: 10px 0; }
+        .source-links-block .label-help { display: block; margin-bottom: 6px; }
 </style>
 </head>
 <body>
@@ -2832,7 +2836,8 @@
     <script src="js/function-chain-contract.js?v=20260903a"></script>
     <script src="js/location-assertion-contract.js?v=20260902a"></script>
     <script src="js/osm-history.js?v=20260902c"></script>
+    <script src="js/source-links.js?v=20260904a"></script>
     <script src="js/unvalidated-places.js?v=20260904a"></script>
-    <script src="js/verification-map.js?v=20260904g"></script>
+    <script src="js/verification-map.js?v=20260904h"></script>
 </body>
 </html>
