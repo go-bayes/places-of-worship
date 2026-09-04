@@ -66,6 +66,7 @@
         ? window.PowReviewMap.create({
             containerId: "reviewMap",
             countryCode: country.code,
+            countryName: country.label,
             onSelectTask: (taskId) => {
                 selectTask(taskId, { fromMap: true });
             },
@@ -104,6 +105,28 @@
             .replaceAll(">", "&gt;")
             .replaceAll('"', "&quot;")
             .replaceAll("'", "&#039;");
+    }
+
+    // the eight open source links for a task (jb 2026-09-04), as a link
+    // grid; osm history links out here because its own card sits below
+    function sourceLinksHtml(task) {
+        if (!window.PowSourceLinks) return `<p class="muted">Source links are unavailable on this page.</p>`;
+        const coords = Array.isArray(task.geometry?.coordinates) ? task.geometry.coordinates : [];
+        const items = window.PowSourceLinks.itemsHtml({
+            lat: coords[1],
+            lng: coords[0],
+            osmType: task.osm_object_type,
+            osmId: task.matched_osm_id,
+            name: task.name,
+            locality: task.locality,
+            countryName,
+        }, {
+            className: "",
+            primaryClassName: "source-link-primary",
+            inlineHistory: false,
+            approximate: task.initial_location_assertion?.mode === "approximate_area",
+        });
+        return items ? `<div class="link-grid">${items}</div>` : `<p class="muted">No coordinates or OSM object on this task.</p>`;
     }
 
     // great-circle distance in metres between two [lng, lat] pairs
@@ -532,6 +555,11 @@ function human(value) {
                         ["Retained location wording", locationAssertion?.source_wording],
                     ])}
                 </section>
+                <section class="panel">
+                    <h3>Open source links</h3>
+                    <p class="muted">The same links the contributor had: check the place in Street View, Google Maps and OpenStreetMap. The OSM edit history has its own card below.</p>
+                    ${sourceLinksHtml(task)}
+                </section>
                 ${issueReport ? `
                     <section class="panel">
                         <h3>Issue report</h3>
@@ -699,6 +727,7 @@ function human(value) {
                     `).join("")}
             </section>
         `;
+        window.PowSourceLinks?.bind(els.detailPanel);
         // osm edit history for the matched object (jb 2026-09-02): fetched
         // on demand from the public osm api, cached per object per session
         if (task.osm_object_type && task.matched_osm_id && window.PowOsmHistory) {

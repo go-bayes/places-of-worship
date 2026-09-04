@@ -57,12 +57,14 @@
         });
     }
 
-    function streetViewUrl(lat, lng) {
-        return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`;
+    // the eight open source links (jb 2026-09-04) from js/source-links.js;
+    // without it the popups carry the task's actions alone
+    function sourceLinksHtml(place) {
+        return window.PowSourceLinks ? window.PowSourceLinks.itemsHtml(place, { className: "popup-link" }) : "";
     }
 
-    function osmUrl(lat, lng) {
-        return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=18/${lat}/${lng}`;
+    function bindSourceLinks(root) {
+        window.PowSourceLinks?.bind(root);
     }
 
     function create(options = {}) {
@@ -73,6 +75,7 @@
         const registry = ((window.POW_COUNTRY_REGISTRY || {}).countries || [])
             .find(entry => String(entry.code || "").toLowerCase() === String(options.countryCode || "").toLowerCase());
         const centre = options.centre || registry?.centre || [-41, 174];
+        const countryName = options.countryName || registry?.name || "";
         const zoom = options.zoom || registry?.zoom || 5;
         const minZoom = Math.min(5, Math.floor(zoom));
         const map = L.map(container, { preferCanvas: true }).setView(centre, zoom);
@@ -185,6 +188,7 @@
         const markerLayer = L.layerGroup().addTo(map);
         const contextLayer = L.layerGroup().addTo(map);
         const markersByTaskId = new Map();
+        const tasksByTaskId = new Map();
         let rows = [];
         let selectedTaskId = "";
 
@@ -193,14 +197,22 @@
             const lat = Number(coords[1]);
             const lng = Number(coords[0]);
             const draftStatus = task.status ? String(task.status).replaceAll("_", " ") : "";
+            const approximate = task.initial_location_assertion?.mode === "approximate_area";
             return `
                 <strong>${escapeHtml(task.name || "Unnamed place")}</strong><br>
                 <span>${escapeHtml(draftStatus)}${task.locality ? ` · ${escapeHtml(task.locality)}` : ""}</span><br>
                 <div class="popup-actions">
                     <button class="popup-report-issue popup-revise-primary" type="button" data-open-task-id="${escapeHtml(task.task_id)}">Open its review cards</button>
-                    ${Number.isFinite(lat) && Number.isFinite(lng) ? `
-                    <a class="popup-link" href="${escapeHtml(streetViewUrl(lat, lng))}" target="_blank" rel="noopener noreferrer">Street View</a>
-                    <a class="popup-link" href="${escapeHtml(osmUrl(lat, lng))}" target="_blank" rel="noopener noreferrer">Open OSM</a>` : ""}
+                    ${sourceLinksHtml({
+                        lat,
+                        lng,
+                        osmType: task.osm_object_type,
+                        osmId: task.matched_osm_id,
+                        name: task.name,
+                        locality: task.locality,
+                        countryName,
+                        approximate,
+                    })}
                 </div>
             `;
         }
@@ -208,6 +220,7 @@
         function rebuildMarkers() {
             markerLayer.clearLayers();
             markersByTaskId.clear();
+            tasksByTaskId.clear();
             rows.forEach(row => {
                 const task = row?.task;
                 const coords = task?.geometry?.coordinates || [];
@@ -220,14 +233,29 @@
                 });
                 marker.bindPopup(() => popupHtml(task), { maxWidth: 320 });
                 marker.on("popupopen", event => {
-                    event.popup.getElement()?.querySelector("[data-open-task-id]")?.addEventListener("click", () => {
+                    const el = event.popup.getElement();
+                    el?.querySelector("[data-open-task-id]")?.addEventListener("click", () => {
                         map.closePopup();
                         options.onSelectTask?.(task.task_id);
                     });
+                    bindSourceLinks(el);
                 });
                 marker.on("click", () => options.onSelectTask?.(task.task_id));
                 markersByTaskId.set(task.task_id, marker);
+                tasksByTaskId.set(task.task_id, task);
                 markerLayer.addLayer(marker);
+            });
+        }
+
+        // a selection change restyles the markers in place: rebuilding them
+        // removed the clicked marker under its own popup, so the popup with
+        // the source links closed the moment a marker was clicked
+        function restyleMarkers() {
+            markersByTaskId.forEach((marker, taskId) => {
+                const task = tasksByTaskId.get(taskId);
+                const selected = taskId === selectedTaskId;
+                marker.setIcon(markerIcon(L, task, selected));
+                marker.setZIndexOffset(selected ? 1000 : 0);
             });
         }
 
@@ -286,7 +314,7 @@
 
         function select(taskId, { fly = true } = {}) {
             selectedTaskId = taskId || "";
-            rebuildMarkers();
+            restyleMarkers();
             const row = rows.find(entry => entry?.task?.task_id === selectedTaskId);
             drawContext(row?.task || null);
             const marker = markersByTaskId.get(selectedTaskId);
@@ -320,8 +348,15 @@
                         ${matched
                             ? `<button class="popup-report-issue popup-revise-primary" type="button" data-open-task-id="${escapeHtml(matched.task.task_id)}">Open its review cards</button>`
                             : `<a class="popup-report-issue popup-revise-primary" href="${escapeHtml(raPortal)}">Revise it in the RA portal</a>`}
-                        <a class="popup-link" href="${escapeHtml(streetViewUrl(lat, lng))}" target="_blank" rel="noopener noreferrer">Street View</a>
-                        <a class="popup-link" href="${escapeHtml(osmUrl(lat, lng))}" target="_blank" rel="noopener noreferrer">Open OSM</a>
+                        ${sourceLinksHtml({
+                            lat,
+                            lng,
+                            osmType: props.osm_type || "node",
+                            osmId: props.osm_id,
+                            name: props.name,
+                            locality: matched?.task?.locality,
+                            countryName,
+                        })}
                     </div>
                 `;
                 const popup = L.popup({ maxWidth: 320 }).setLatLng(hit.latlng).setContent(html).openOn(map);
@@ -329,6 +364,7 @@
                     map.closePopup();
                     options.onSelectTask?.(matched.task.task_id);
                 });
+                bindSourceLinks(popup.getElement());
             });
         }
 

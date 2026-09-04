@@ -3100,14 +3100,16 @@ class NzVerificationMap {
             <div class="popup-actions">
                 ${issueButton}
                 ${armed ? `<button class="popup-link popup-add-here" type="button" data-add-here="${escapeHtml(coordStr)}">Add a new place here instead</button>` : ""}
-                ${hasCoords ? `
-                ${this.linkHtml("Street View", streetViewUrlForCoordinates(coords), "popup-link")}
-                <a class="popup-link" href="${escapeHtml(osmPointUrl(lat, lng))}" target="_blank" rel="noopener noreferrer">Open OSM</a>
-                <button class="popup-link popup-copy-coords" type="button" data-copy="${escapeHtml(coordStr)}">Copy coords</button>` : ""}
-                ${osmType && osmId ? `<button class="popup-link popup-osm-history" type="button" data-osm-history="${escapeHtml(`${osmType}/${osmId}`)}">OSM history</button>` : ""}
                 ${matchedTaskId && this.taskCanAddOccupancy(matchedTaskId) ? `<button class="popup-link popup-add-occupancy" type="button" data-occupancy-task-id="${escapeHtml(matchedTaskId)}">Add where and when</button>` : ""}
+                ${this.sourceLinksItemsHtml({
+                    lat: hasCoords ? lat : undefined,
+                    lng: hasCoords ? lng : undefined,
+                    osmType,
+                    osmId,
+                    name: props.name,
+                    locality: matched?.locality,
+                })}
             </div>
-            <div class="popup-osm-history-body" hidden></div>
         `;
     }
 
@@ -3115,6 +3117,7 @@ class NzVerificationMap {
         const el = popup.getElement();
         if (!el) return;
         this.bindCopyCoords(el);
+        this.bindSourceLinks(el);
         el.querySelector("[data-reopen-task-id]")?.addEventListener("click", (event) => {
             const taskId = event.currentTarget.dataset.reopenTaskId;
             if (!this.leavePinForRevise()) return;
@@ -3143,18 +3146,6 @@ class NzVerificationMap {
             const taskId = event.currentTarget.dataset.occupancyTaskId;
             const task = this.featureForTaskId(taskId)?.properties || this.matchContextTask(feature) || { task_id: taskId };
             this.openOccupancyFromRecord(task);
-        });
-        // osm edit history on demand (jb 2026-09-02): one fetch per object
-        // per session; the popup grows in place
-        el.querySelector("[data-osm-history]")?.addEventListener("click", async (event) => {
-            const [type, id] = String(event.currentTarget.dataset.osmHistory || "").split("/");
-            const body = el.querySelector(".popup-osm-history-body");
-            if (!body || !window.PowOsmHistory) return;
-            body.hidden = false;
-            event.currentTarget.disabled = true;
-            // no popup.update() afterwards: leaflet would re-render the
-            // stored content string and wipe the loaded timeline
-            await window.PowOsmHistory.loadInto(body, type, id);
         });
     }
 
@@ -3195,6 +3186,7 @@ class NzVerificationMap {
             longitude,
             siteId: undefined,
             osmId: props.osm_id !== undefined && props.osm_id !== null ? String(props.osm_id) : undefined,
+            osmType: window.PowOsmHistory ? window.PowOsmHistory.normaliseType(props.osm_type) : String(props.osm_type || ""),
         });
     }
 
@@ -3988,9 +3980,8 @@ class NzVerificationMap {
 
     popupHtml(props, lat, lng) {
         const temporal = deriveTargetYearStatus(props, this.targetYear);
-        // same action affordances as the public map popup row: Street View,
-        // Open OSM, Copy coords (lat/lng to 5 dp)
-        const coordStr = `${Number(lat).toFixed(5)},${Number(lng).toFixed(5)}`;
+        // the eight open source links (jb 2026-09-04), the same row as the
+        // review map and the detail's "1. Open source links"
         return `
             <strong>${escapeHtml(props.name || "Unnamed site")}</strong><br>
             <span>${escapeHtml(cap(props.religion))}${props.denomination ? ` | ${escapeHtml(cap(props.denomination))}` : ""}</span><br>
@@ -3999,18 +3990,40 @@ class NzVerificationMap {
             <span>Action: ${escapeHtml(actionLabel(props.automated_suggested_action))}</span><br>
             <div class="popup-actions">
                 <button class="popup-open-task primary" type="button" data-task-id="${escapeHtml(props.task_id)}">Open task</button>
-                ${this.linkHtml("Street View", props.street_view_url, "popup-link")}
-                <a class="popup-link" href="${escapeHtml(osmPointUrl(lat, lng))}" target="_blank" rel="noopener noreferrer">Open OSM</a>
-                <button class="popup-link popup-copy-coords" type="button" data-copy="${escapeHtml(coordStr)}">Copy coords</button>
                 ${this.taskCanAddOccupancy(props.task_id) ? `<button class="popup-link popup-add-occupancy" type="button" data-task-id="${escapeHtml(props.task_id)}">Add where and when</button>` : ""}
                 <button class="popup-report-issue" type="button" data-task-id="${escapeHtml(props.task_id)}">Report an issue</button>
+                ${this.sourceLinksItemsHtml({
+                    lat,
+                    lng,
+                    osmType: props.osm_type,
+                    osmId: props.osm_id,
+                    name: props.name,
+                    locality: props.locality,
+                    approximate: props.initial_location_assertion?.mode === "approximate_area",
+                })}
             </div>
         `;
+    }
+
+    // the shared open source links row (js/source-links.js), inside a
+    // .popup-actions or .link-grid container; the copy and history buttons
+    // are wired by bindSourceLinks on the container after it renders
+    sourceLinksItemsHtml(place, options = {}) {
+        if (!window.PowSourceLinks) return "";
+        return window.PowSourceLinks.itemsHtml(
+            { ...place, countryName: COUNTRY_CONFIG.countryName },
+            { className: "popup-link", ...options },
+        );
+    }
+
+    bindSourceLinks(rootEl) {
+        window.PowSourceLinks?.bind(rootEl);
     }
 
     bindPopupOpenTask(popup) {
         // mirror the public map's data-copy handler for the Copy coords button
         this.bindCopyCoords(popup.getElement());
+        this.bindSourceLinks(popup.getElement());
         const button = popup.getElement()?.querySelector(".popup-open-task");
         if (button) {
             button.addEventListener("click", () => {
@@ -5602,6 +5615,10 @@ class NzVerificationMap {
                         </select>
                     </label>
                 </div>
+                <div class="source-links-block" id="${prefix}SourceLinks" hidden>
+                    <span class="label-help">Check the place in the usual sources; the reviewer sees these same links:</span>
+                    <div class="link-grid" id="${prefix}SourceLinksGrid"></div>
+                </div>
                 <div class="source-quick-fill" id="${prefix}SourceQuickFill">
                     <span class="label-help">Checked a usual source? Fill it in one click:</span>
                     <button type="button" class="tertiary" id="${prefix}QuickFillOsm" title="Cite the OpenStreetMap record (or the map at this point) as your named source">OpenStreetMap record</button>
@@ -5890,18 +5907,47 @@ class NzVerificationMap {
     // osm record or street view at this point as the named public source,
     // switching the basis and filling title and reference. the ra still
     // owns the observation date (also the capture date) and the status
+    // the point an entry form works on: the task's own, else the confirmed
+    // pin, else the pin as it sits now
+    rapidFormCoordinates(prefix, options = {}) {
+        const props = options.props || {};
+        const taskPoint = props.geometry?.coordinates || this.featureForTaskId(props.task_id || "")?.geometry?.coordinates;
+        if (Array.isArray(taskPoint) && taskPoint.length >= 2) return taskPoint;
+        if (prefix === "pin" && this.pinConfirmed) return [this.pinConfirmed.longitude, this.pinConfirmed.latitude];
+        if (this.pinMarker?.getLatLng) {
+            const at = this.pinMarker.getLatLng();
+            return [at.lng, at.lat];
+        }
+        return null;
+    }
+
+    // the open source links row on an entry form (jb 2026-09-04: "we will
+    // need this evidence for review"): the same eight links the review
+    // portal shows, following the pin until it is confirmed
+    renderRapidSourceLinks(prefix, options = {}) {
+        const host = document.getElementById(`${prefix}SourceLinks`);
+        const grid = document.getElementById(`${prefix}SourceLinksGrid`);
+        if (!host || !grid || !window.PowSourceLinks) return;
+        const props = options.props || {};
+        const revise = prefix === "pin" ? this.reviseContext : null;
+        const coordinates = this.rapidFormCoordinates(prefix, options);
+        const items = this.sourceLinksItemsHtml({
+            lat: coordinates ? coordinates[1] : undefined,
+            lng: coordinates ? coordinates[0] : undefined,
+            osmType: props.osm_type || revise?.osmType || "",
+            osmId: props.osm_id || revise?.osmId || "",
+            name: props.name || revise?.name || document.getElementById("pinNameInput")?.value || "",
+            locality: props.locality || document.getElementById("pinLocalityInput")?.value || "",
+            approximate: prefix === "pin" && this.pinConfirmed?.locationMode === "approximate_area",
+        }, { className: "", primaryClassName: "source-link-primary" });
+        grid.innerHTML = items;
+        host.hidden = !items;
+        this.bindSourceLinks(grid);
+    }
+
     rapidQuickSources(prefix, options = {}) {
         const props = options.props || {};
-        let coordinates = null;
-        const taskPoint = props.geometry?.coordinates;
-        if (Array.isArray(taskPoint) && taskPoint.length >= 2) {
-            coordinates = taskPoint;
-        } else if (prefix === "pin" && this.pinConfirmed) {
-            coordinates = [this.pinConfirmed.longitude, this.pinConfirmed.latitude];
-        } else if (this.pinMarker?.getLatLng) {
-            const at = this.pinMarker.getLatLng();
-            coordinates = [at.lng, at.lat];
-        }
+        const coordinates = this.rapidFormCoordinates(prefix, options);
         const osmObject = props.osm_object_url || (props.osm_type && props.osm_id ? osmObjectUrl(props.osm_type, props.osm_id) : "");
         const osmPoint = coordinates ? osmPointUrl(coordinates[1], coordinates[0]) : "";
         const streetView = props.street_view_url || (coordinates ? streetViewUrlForCoordinates(coordinates) : "");
@@ -6090,6 +6136,8 @@ class NzVerificationMap {
             });
         });
         this.bindSourceTypeahead(prefix);
+        this.rapidFormOptions = { ...(this.rapidFormOptions || {}), [prefix]: options };
+        this.renderRapidSourceLinks(prefix, options);
         document.getElementById(`${prefix}QuickFillOsm`)?.addEventListener("click", () => {
             this.rapidQuickFill(prefix, options, "osm");
         });
@@ -10153,6 +10201,7 @@ class NzVerificationMap {
     updatePinConfirmCard() {
         if (!this.pinMarker) return;
         const position = this.pinMarker.getLatLng();
+        if (this.rapidFormOptions?.pin) this.renderRapidSourceLinks("pin", this.rapidFormOptions.pin);
         const latEl = document.getElementById("pinLat");
         const lngEl = document.getElementById("pinLng");
         if (latEl) latEl.textContent = position.lat.toFixed(5);
@@ -10234,6 +10283,7 @@ class NzVerificationMap {
                 sourceWording: rapidWording,
             } : {}),
         };
+        if (this.rapidFormOptions?.pin) this.renderRapidSourceLinks("pin", this.rapidFormOptions.pin);
         // the confirmed position is what gets recorded; freeze the pin
         this.pinMarker.dragging.disable();
         if (this._pinZoomHandler) {

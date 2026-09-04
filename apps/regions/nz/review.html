@@ -487,6 +487,44 @@
             padding: 8px 10px;
         }
 
+        .popup-actions .popup-osm-history-body { grid-column: 1 / -1; }
+
+        /* the open source links card (jb 2026-09-04): the ra portal's grid */
+        .link-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .link-grid a,
+        .link-grid button {
+            border: 1px solid var(--line);
+            border-radius: var(--r-sm);
+            padding: 10px 8px;
+            color: var(--action);
+            text-align: center;
+            text-decoration: none;
+            font-size: var(--fs-sm);
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            background: var(--panel);
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .link-grid a:hover,
+        .link-grid button:hover {
+            background: var(--action-soft);
+        }
+
+        .link-grid a.source-link-primary {
+            border-color: var(--action);
+            background: var(--action-soft);
+        }
+
         .basemap-toggle {
             display: inline-flex;
             background: rgba(255, 255, 255, 0.94);
@@ -912,13 +950,14 @@
     <script src="../../shared/data/country-registry.js?v=20260903a"></script>
     <script src="../../global/config.public.js"></script>
     <script src="js/unvalidated-places.js?v=20260904a"></script>
-    <script src="js/review-map.js?v=20260904c"></script>
+    <script src="js/source-links.js?v=20260904a"></script>
+    <script src="js/review-map.js?v=20260904d"></script>
     <script src="js/convex-config.js?v=20260523-vanuatu"></script>
     <script src="js/convex-task-client.js?v=20260904a"></script>
     <script src="js/claude-review-panel.js?v=20260825-ai-review"></script>
     <script src="js/location-assertion-contract.js?v=20260902a"></script>
     <script src="js/osm-history.js?v=20260902c"></script>
     <script src="js/occupancy-review.js?v=20260903a"></script>
-    <script src="js/review-portal.js?v=20260904b"></script>
+    <script src="js/review-portal.js?v=20260904c"></script>
 </body>
 </html>
