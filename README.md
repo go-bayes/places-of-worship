@@ -48,7 +48,7 @@ Instructions are audience-addressed under [docs/people/](docs/people/): [JB](doc
 ## Ongoing Work
 
 - **[RA assignment: New Zealand 50-case workpack](https://religionmap.org/apps/regions/nz/verification.html)**
-- **[Reviewer portal: New Zealand submitted evidence](https://religionmap.org/apps/regions/nz/review.html)**, currently authorised for JB and JW only.
+- **[Reviewer portal: New Zealand submitted evidence](https://religionmap.org/apps/regions/nz/review.html)**, currently authorised for investigators and RAs. 
 - **[Vanuatu source-first test portal](https://religionmap.org/apps/regions/vu/verification.html)**
 - **[Reviewer portal: Vanuatu submitted evidence](https://religionmap.org/apps/regions/vu/review.html)**, currently a prototype surface over the shared review layer.
 
