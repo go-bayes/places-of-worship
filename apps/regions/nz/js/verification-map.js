@@ -963,7 +963,9 @@ const SATELLITE_TILE_URL = MAPTILER_API_KEY
 const HYBRID_TILE_URL = MAPTILER_API_KEY
     ? `https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${encodeURIComponent(MAPTILER_API_KEY)}`
     : "";
-// add mode prefers imagery once streets stop showing individual buildings
+// add mode prefers imagery once streets stop showing individual buildings;
+// satellite is the default imagery (jb 2026-09-04: "most informative"),
+// hybrid stays on offer for its labels where maptiler draws them
 const PORTAL_AUTO_SATELLITE_ZOOM = 15;
 // signed-in portal activity, kept per country and batch for the tab's life
 const PORTAL_MODES = new Set(["assigned", "add"]);
@@ -1656,19 +1658,21 @@ function deriveTargetYearStatus(props, targetYear) {
     };
 }
 
-// r-d1 (jb 2026-09-04): the unvalidated dot is a small slate disc with a
-// white halo; amber is left to mean "needs attention" (uncertain, caution,
-// disputed). mirrors --marker-unvalidated and .legend-dot.context-dot-swatch
-const CONTEXT_DOT_COLOUR = "#64748b";
-const CONTEXT_DOT_HALO = "#ffffff";
+// r-d1' (jb 2026-09-04, afternoon, overriding the morning's slate r-d1):
+// every place of worship that no reviewer has confirmed is an open case
+// and wears amber: a small amber disc with a white halo, the halo doing
+// the work on streets and on imagery alike. the colours and both tile
+// tiers live in js/unvalidated-places.js so the review portal draws the
+// same map; the fallbacks here keep the dated dots drawn if that script
+// is missing. mirrors --marker-unvalidated and .legend-dot.context-dot-swatch
+const UNVALIDATED_PLACES = window.PowUnvalidatedPlaces || null;
+const CONTEXT_DOT_COLOUR = UNVALIDATED_PLACES ? UNVALIDATED_PLACES.COLOUR : "#f59e0b";
+const CONTEXT_DOT_HALO = UNVALIDATED_PLACES ? UNVALIDATED_PLACES.HALO : "#ffffff";
 // unvalidated places for a country without a dated product (jb 2026-09-03,
-// "all points"): the shop front's places tiles, drawn by leaflet.vectorgrid.
-// every tile feature carries osm_id, osm_type, name and country_code, so
-// the revise card opens from a tile dot exactly as from a dated one
-const PLACES_TILE_URL = "https://tiles.placemap.org/places/{z}/{x}/{y}";
-const PLACES_TILE_LAYER = "places";
-const PLACES_TILE_MAX_NATIVE_ZOOM = 18;
-const TILE_DOTS_MIN_ZOOM = 8;
+// "all points"): the shop front's places tiles, drawn by leaflet.vectorgrid,
+// with the public map's overview tier below zoom 8 so the whole country's
+// places show on arrival (jb 2026-09-04: australia showed only a subset)
+const TILE_DOTS_MIN_ZOOM = UNVALIDATED_PLACES ? UNVALIDATED_PLACES.PLACES_MIN_ZOOM : 8;
 
 function osmObjectUrl(osmType, osmId) {
     if (!osmType || !osmId) return "";
@@ -1848,6 +1852,8 @@ class NzVerificationMap {
         this.myWorkItems = [];
         this.myNominationItems = [];
         this.nominationFeatures = [];
+        // candidates cancelled on their confirmation screen this session
+        this.withdrawnNominationTaskIds = new Set();
         this.revisionDraftIdsByTaskId = new Map();
         // rapid tasks awaiting review that the observer has chosen to correct;
         // a correction is a new observation, so no server draft exists until
@@ -1906,7 +1912,7 @@ class NzVerificationMap {
         this.contextDotLayer = null;
         this.datedFeatures = null;
         this.datedLoadPromise = null;
-        this.tileDotLayer = null;
+        this.tileDotLayers = null;
         this.taskHistoryByTaskId = new Map();
         this.init();
     }
@@ -2614,7 +2620,7 @@ class NzVerificationMap {
             // unless the contributor has picked a basemap by hand
             this.map.on("zoomend", () => {
                 if (this.portalMode !== "add" || this.basemapUserChosen) return;
-                if (this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM) this.setBasemap("hybrid");
+                if (this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM) this.setBasemap("satellite");
             });
         }
 
@@ -2673,7 +2679,8 @@ class NzVerificationMap {
                     <span class="legend-row"><span class="legend-dot vm-validated-absent-swatch"></span>validated absent</span>
                     <span class="legend-row"><span class="legend-dot vm-disputed-swatch"></span>disputed</span>
                     <span class="legend-row"><span class="legend-dot vm-in-review-swatch"></span>in review</span>
-                    ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>unvalidated place, click to revise</span>` : ""}
+                    <span class="legend-row"><span class="legend-dot vm-unvalidated-swatch"></span>not yet reviewed (open case)</span>
+                    ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>unreviewed place (open case), click to revise</span>` : ""}
                 </div>
             `;
             // keep map gestures away from the control
@@ -2689,11 +2696,11 @@ class NzVerificationMap {
         // seed the per-mode note for the initial (default off) state
         this.updatePointsNote();
         // the unvalidated places show on arrival for everyone (r-h4:
-        // looking is free): dated countries in period mode, tile countries
-        // in all
+        // looking is free): every place, in amber, whatever the country
         const source = this.contextDotSource();
         if (source !== "none" && this.pointsMode === "off") {
-            const mode = source === "dated" ? "period" : "all";
+            // every unreviewed place shows on arrival (jb 2026-09-04)
+            const mode = "all";
             this.setPointsMode(mode);
             const pointsSelect = document.getElementById("portalPointsSelect");
             if (pointsSelect) pointsSelect.value = mode;
@@ -2793,14 +2800,11 @@ class NzVerificationMap {
         if (!note) return;
         const year = this.targetYear;
         if (this.pointsMode === "period") {
-            note.textContent = `showing places whose OpenStreetMap date tags say they existed in ${year}`;
+            note.textContent = `amber: places whose OpenStreetMap date tags say they existed in ${year}, each an open case until reviewed`;
             note.hidden = false;
         } else if (this.pointsMode === "all") {
-            note.textContent = TARGET_YEARS.length
-                ? `dots show today's OpenStreetMap places, not ${year} places`
-                : (this.contextDotSource() === "tiles"
-                    ? `dots show today's OpenStreetMap places from zoom ${TILE_DOTS_MIN_ZOOM}; click one to revise it`
-                    : "dots show today's OpenStreetMap places");
+            const tiles = this.tilesAvailable();
+            note.textContent = `amber dots are today's OpenStreetMap places${TARGET_YEARS.length ? `, not ${year} places` : ""}, every one an open case until reviewed${tiles ? `; zoom in past ${TILE_DOTS_MIN_ZOOM} for all of them` : ""}. Click one to revise it.`;
             note.hidden = false;
         } else {
             note.textContent = "";
@@ -2808,106 +2812,66 @@ class NzVerificationMap {
         }
     }
 
+    // whether "all" can draw every place from the tiles (jb 2026-09-04:
+    // australia showed only the dated subset, so most places had no dot
+    // and no revise entry); without leaflet.vectorgrid the dated product
+    // stands in
+    tilesAvailable() {
+        return Boolean(UNVALIDATED_PLACES) && typeof L !== "undefined" && Boolean(L.vectorGrid) && typeof L.vectorGrid.protobuf === "function";
+    }
+
     setPointsMode(mode) {
         this.pointsMode = mode;
         this.updatePointsNote();
-        if (this.contextDotSource() === "tiles") {
+        // all: every place of worship on the tiles, whatever the country;
+        // period: the dated product's subset for the target year; off: none
+        if (mode === "all" && this.tilesAvailable()) {
+            this.contextDotLayer?.clearLayers();
             this.syncTileDots();
             return;
         }
-        if (mode === "off") {
-            this.contextDotLayer.clearLayers();
+        if (UNVALIDATED_PLACES) UNVALIDATED_PLACES.removeFrom(this.map, this.tileDotLayers);
+        if (mode === "off" || !COUNTRY_CONFIG.datedPlaces) {
+            this.contextDotLayer?.clearLayers();
             return;
         }
         // lazy, cached load on the first non-off selection
         this.ensureDatedPlaces().then(() => this.syncContextDots());
     }
 
-    // the tile-backed unvalidated layer: built once, shown in "all", removed
-    // in "off". a click builds a geojson-shaped feature from the tile
-    // properties so the popup, the task match and the revise card are the
-    // ones the dated dots use. the click point stands in for the feature's
-    // own coordinate (the tile renderer does not hand it back); the pin
-    // flow lets the contributor settle the exact spot
+    // the tile-backed unvalidated layers: built once, shown in "all",
+    // removed in "off". a click builds a geojson-shaped feature from the
+    // tile properties so the popup, the task match and the revise card are
+    // the ones the dated dots use. the feature's exact coordinate comes
+    // back from the tile; the pin flow lets the contributor settle the spot
     syncTileDots() {
-        if (!this.map) return;
+        if (!this.map || !UNVALIDATED_PLACES) return;
         if (this.pointsMode === "off") {
-            if (this.tileDotLayer && this.map.hasLayer(this.tileDotLayer)) this.map.removeLayer(this.tileDotLayer);
+            UNVALIDATED_PLACES.removeFrom(this.map, this.tileDotLayers);
             return;
         }
-        if (!this.tileDotLayer) {
-            const style = {
-                radius: 5,
-                color: CONTEXT_DOT_HALO,
-                weight: 2,
-                fill: true,
-                fillColor: CONTEXT_DOT_COLOUR,
-                fillOpacity: 0.95,
-                opacity: 1,
-            };
-            this.tileDotLayer = L.vectorGrid.protobuf(PLACES_TILE_URL, {
-                vectorTileLayerStyles: { [PLACES_TILE_LAYER]: style },
-                // not interactive: an interactive path swallows the click
-                // before the map sees it; the map-level hit test below owns
-                // every click instead
-                interactive: false,
-                // the overlay pane sits above every basemap tile and below
-                // the task markers and popups, where the canvas dots live
-                pane: "overlayPane",
-                minZoom: TILE_DOTS_MIN_ZOOM,
-                maxNativeZoom: PLACES_TILE_MAX_NATIVE_ZOOM,
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                getFeatureId: props => `${props.osm_type || "node"}/${props.osm_id}`,
-            });
-            // vectorgrid 1.3.0's own hit-testing predates leaflet 1.8 and
-            // never fires here, so the map's click is hit-tested against the
-            // rendered dots instead: the nearest one within a finger's width
-            // opens. the feature's exact coordinate comes back from the tile
-            // (pixel offset within the tile at the tile's zoom)
+        if (!this.tileDotLayers) {
+            this.tileDotLayers = UNVALIDATED_PLACES.createLayers(L);
+            if (!this.tileDotLayers) return;
+            // vectorgrid's own hit-testing never fires here (see the module),
+            // so the map's click is hit-tested against the rendered dots
             this.map.on("click", event => this.handleTileDotClick(event));
         }
-        if (!this.map.hasLayer(this.tileDotLayer)) this.tileDotLayer.addTo(this.map);
+        UNVALIDATED_PLACES.addTo(this.map, this.tileDotLayers);
     }
 
     // the rendered tile dot nearest a container point, with its feature
     // rebuilt in geojson shape; null when none sits within `radiusPx`
     tileDotAt(containerPoint, radiusPx = 14) {
-        const layer = this.tileDotLayer;
-        if (!layer || !layer._vectorTiles) return null;
-        const tileSize = layer.getTileSize();
-        let best = null;
-        let bestDistance = radiusPx;
-        Object.values(layer._vectorTiles).forEach(renderer => {
-            const coord = renderer && renderer._tileCoord;
-            const symbols = renderer && renderer._layers ? Object.values(renderer._layers) : [];
-            symbols.forEach(symbol => {
-                if (!symbol || !symbol._point || !coord) return;
-                const projected = L.point(coord.x, coord.y).scaleBy(tileSize).add(symbol._point);
-                const latlng = this.map.unproject(projected, coord.z);
-                const onScreen = this.map.latLngToContainerPoint(latlng);
-                const distance = onScreen.distanceTo(containerPoint);
-                if (distance < bestDistance) {
-                    bestDistance = distance;
-                    best = { latlng, properties: symbol.properties || {} };
-                }
-            });
-        });
-        if (!best) return null;
-        const props = best.properties;
-        return {
-            latlng: best.latlng,
-            feature: {
-                type: "Feature",
-                properties: { ...props, osm_type: props.osm_type || "node", name: props.name || "" },
-                geometry: { type: "Point", coordinates: [best.latlng.lng, best.latlng.lat] },
-            },
-        };
+        if (!UNVALIDATED_PLACES || !this.tileDotLayers) return null;
+        return UNVALIDATED_PLACES.nearestDot(L, this.map, this.tileDotLayers, containerPoint, radiusPx);
     }
 
     handleTileDotClick(event) {
-        if (this.pointsMode === "off" || !this.tileDotLayer || !this.map.hasLayer(this.tileDotLayer)) return;
-        // placing a pin owns the click; a dot under the pin is not a target
-        if (this.pinMode) return;
+        if (this.pointsMode === "off" || !UNVALIDATED_PLACES || !UNVALIDATED_PLACES.isShown(this.map, this.tileDotLayers)) return;
+        // a placed pin owns the click (later clicks move it); before the
+        // pin lands, a dot under the click is offered for revision instead
+        if (this.pinMode && !this.pinArmedWithoutPin()) return;
         const hit = this.tileDotAt(event.containerPoint);
         if (!hit) return;
         this.openContextDot(hit.feature, hit.latlng);
@@ -2922,12 +2886,31 @@ class NzVerificationMap {
         popup.openOn(this.map);
         this.bindContextDotPopup(popup, feature);
         if (!this.backendUser) return;
+        // a new pin is armed but not yet placed: the popup alone offers the
+        // choice, revise this place or add a new one here
+        if (this.pinArmedWithoutPin()) return;
         const matched = this.matchContextTask(feature);
         if (matched?.task_id) {
             this.selectTaskById(matched.task_id, { focusDetail: true });
         } else {
             this.openContextIssueForm(feature, { keepPopup: true });
         }
+    }
+
+    // the add flow is armed (the contributor pressed Add a place) but no
+    // pin has landed yet: a click on an existing place then offers to
+    // revise it rather than silently dropping the pin on it (jb 2026-09-04:
+    // "i can add places but not revise them")
+    pinArmedWithoutPin() {
+        return Boolean(this.pinMode && !this.pinMarker && !this.reviseContext && !this.occupancyPinContext);
+    }
+
+    // a revise route taken from the popup while the add flow is open:
+    // leave the pin entry (asking first only when a pin or text would be
+    // lost), so the revise card takes the sidebar cleanly
+    leavePinForRevise() {
+        if (!this.pinMode || this.reviseContext || this.occupancyPinContext) return true;
+        return this.discardEntryAttempt({ confirmFirst: Boolean(this.pinMarker || this.formDirty) });
     }
 
     // r-h4: signed out, the place becomes the pending deep link, the
@@ -2984,6 +2967,8 @@ class NzVerificationMap {
         if (!this.contextDotLayer) return;
         this.contextDotLayer.clearLayers();
         if (this.pointsMode === "off" || !this.datedFeatures) return;
+        // in "all" the tiles carry every place; the dated dots draw in period
+        if (this.pointsMode === "all" && this.tilesAvailable()) return;
         const year = Number(this.targetYear);
         const show = this.pointsMode === "period"
             ? this.datedFeatures.filter(feature => {
@@ -2993,9 +2978,9 @@ class NzVerificationMap {
                 return props.end_year === undefined || props.end_year === null || props.end_year >= year;
             })
             : this.datedFeatures;
-        // r-d1 (jb 2026-09-04): a recorded place you can revise is one class
-        // on every basemap: a small slate disc with a white halo, the halo
-        // doing the work on streets and on imagery alike
+        // r-d1' (jb 2026-09-04): a recorded place no reviewer has confirmed
+        // is an open case on every basemap: a small amber disc with a white
+        // halo, the halo doing the work on streets and on imagery alike
         show.forEach(feature => {
             const coords = feature.geometry?.coordinates || [];
             if (coords.length < 2) return;
@@ -3027,6 +3012,9 @@ class NzVerificationMap {
             dot.on("click", () => {
                 // signed out: the bound popup alone, with its sign-in entry (r-h4)
                 if (!this.backendUser) return;
+                // an armed pin: the popup alone offers revise or add-here;
+                // a placed pin keeps the entry, the popup's buttons ask first
+                if (this.pinMode) return;
                 const matched = this.matchContextTask(feature);
                 if (matched?.task_id) {
                     this.selectTaskById(matched.task_id, { focusDetail: true });
@@ -3113,11 +3101,14 @@ class NzVerificationMap {
         } else {
             issueButton = `<button class="popup-report-issue popup-revise-primary" type="button" data-report-issue="1">Revise this place</button>`;
         }
+        const armed = this.pinArmedWithoutPin() && hasCoords;
         return `
             <strong>${escapeHtml(name)}</strong><br>
             ${foreignNote}<span>${escapeHtml(coordStr)}</span><br>
+            ${armed ? `<span class="popup-foreign-note">This place is already recorded. Revise it, or add a new place here instead.</span><br>` : ""}
             <div class="popup-actions">
                 ${issueButton}
+                ${armed ? `<button class="popup-link popup-add-here" type="button" data-add-here="${escapeHtml(coordStr)}">Add a new place here instead</button>` : ""}
                 ${hasCoords ? `
                 ${this.linkHtml("Street View", streetViewUrlForCoordinates(coords), "popup-link")}
                 <a class="popup-link" href="${escapeHtml(osmPointUrl(lat, lng))}" target="_blank" rel="noopener noreferrer">Open OSM</a>
@@ -3134,16 +3125,25 @@ class NzVerificationMap {
         if (!el) return;
         this.bindCopyCoords(el);
         el.querySelector("[data-reopen-task-id]")?.addEventListener("click", (event) => {
-            this.reopenIssueFromContext(event.currentTarget.dataset.reopenTaskId, feature);
+            const taskId = event.currentTarget.dataset.reopenTaskId;
+            if (!this.leavePinForRevise()) return;
+            this.reopenIssueFromContext(taskId, feature);
         });
         el.querySelector("[data-open-task-id]")?.addEventListener("click", (event) => {
             const taskId = event.currentTarget.dataset.openTaskId;
+            if (!this.leavePinForRevise()) return;
             this.issueFormOpenTaskId = taskId;
             this.map.closePopup();
             this.selectTaskById(taskId, { focusDetail: true });
         });
         el.querySelector("[data-report-issue]")?.addEventListener("click", () => {
+            if (!this.leavePinForRevise()) return;
             this.openContextIssueForm(feature);
+        });
+        el.querySelector("[data-add-here]")?.addEventListener("click", (event) => {
+            const [lat, lng] = String(event.currentTarget.dataset.addHere || "").split(",").map(Number);
+            this.map.closePopup();
+            if (this.pinArmedWithoutPin() && Number.isFinite(lat) && Number.isFinite(lng)) this.placePin(L.latLng(lat, lng));
         });
         el.querySelector("[data-sign-in-revise]")?.addEventListener("click", () => {
             this.requestSignInToRevise(feature);
@@ -3446,13 +3446,14 @@ class NzVerificationMap {
             // imagery is the working surface for placing a pin, once close
             // enough for buildings to show
             if (this.map && this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM && !this.basemapUserChosen) {
-                this.setBasemap("hybrid");
+                this.setBasemap("satellite");
             }
             // "revise" in the mode's name must be visible on arrival: show
             // the mapped places so their revise entry point exists on screen
             const source = this.contextDotSource();
             if (this.pointsMode === "off" && source !== "none") {
-                const mode = source === "dated" ? "period" : "all";
+                // every unreviewed place shows on arrival (jb 2026-09-04)
+            const mode = "all";
                 this.setPointsMode(mode);
                 const pointsSelect = document.getElementById("portalPointsSelect");
                 if (pointsSelect) pointsSelect.value = mode;
@@ -3477,7 +3478,7 @@ class NzVerificationMap {
         }
         this.portalMode = PORTAL_MODES.has(stored) ? stored : null;
         if (this.portalMode === "add" && this.map && this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM) {
-            this.setBasemap("hybrid");
+            this.setBasemap("satellite");
         }
     }
 
@@ -3698,8 +3699,13 @@ class NzVerificationMap {
             // assignment work and the ra's own nominations are separate
             // lists (jb 2026-08-31): my work covers the batch; nominations
             // live in their own panel in add mode
+            // a nomination whose only submission was withdrawn is no longer
+            // a case: it leaves the list and the map (jb 2026-09-04, cancel
+            // at stage two), though the audit history keeps it
+            const withdrawn = item => this.withdrawnNominationTaskIds.has(item?.task?.task_id)
+                || (isNominationProps(item?.task) && item?.latestDraft?.draft_status === "withdrawn");
             this.myWorkItems = myItems.filter(item => !isNominationProps(item?.task));
-            this.myNominationItems = myItems.filter(item => isNominationProps(item?.task));
+            this.myNominationItems = myItems.filter(item => isNominationProps(item?.task) && !withdrawn(item));
             // the nominations panel depends on this list and the selection
             // only, so it renders here and on selectTask, not per keystroke
             this.renderNominationList();
@@ -3712,8 +3718,9 @@ class NzVerificationMap {
                 // nominated candidates join the map and list whatever their
                 // status: their author needs a route back to them, and the
                 // pin-drop proximity check needs to see them
-                const nominatedTasks = [...manualBatchTasks];
+                const nominatedTasks = manualBatchTasks.filter(task => !this.withdrawnNominationTaskIds.has(task.task_id));
                 for (const [taskId, manualTask] of this.manualTasksById) {
+                    if (this.withdrawnNominationTaskIds.has(taskId)) continue;
                     if (!nominatedTasks.some(task => task.task_id === taskId)) {
                         nominatedTasks.push(manualTask);
                     }
@@ -3929,7 +3936,9 @@ class NzVerificationMap {
             in_review: " vm-in-review",
             disputed: " vm-disputed",
             stale_validation: " vm-stale",
-            unvalidated: "",
+            // every case no reviewer has confirmed is open and wears amber
+            // (jb 2026-09-04), the same amber as the unreviewed dots
+            unvalidated: " vm-unvalidated",
         }[verifState] || "";
         // two hollow treatments: in_review (white, dashed validation-blue
         // border, set in CSS) and not assessed (white, grey border), so a
@@ -4297,10 +4306,15 @@ class NzVerificationMap {
         hasEvidenceFiles = false,
         periodsRecorded = null,
         periodsError = "",
+        pendingFiles = null,
+        withdrawDraftId = "",
     } = {}) {
         const panel = document.getElementById("detailPanel");
         if (!panel) return;
         this.setEntryOpen(false);
+        // stage two can still cancel the candidate (jb 2026-09-04): the
+        // audited withdraw, offered only for the submission just made
+        const canWithdraw = Boolean(!skipped && nomination && withdrawDraftId && props.task_id);
         const periodYears = Array.isArray(periodsRecorded?.result?.derived_years) ? periodsRecorded.result.derived_years : [];
         const periodsLine = periodsRecorded
             ? `Recorded ${periodsRecorded.count} period${periodsRecorded.count === 1 ? "" : "s"}; ${periodYears.length} census-year proposal${periodYears.length === 1 ? "" : "s"}${periodYears.length ? ` (${periodYears.join(", ")})` : ""} await${periodYears.length === 1 ? "s" : ""} reviewer confirmation.`
@@ -4330,7 +4344,14 @@ class NzVerificationMap {
                     : `<button id="openNextTaskButton" class="${knownHistory ? "secondary" : "primary"}" type="button">Open next task</button>`}
                 ${skipped ? `<button id="undoSkipButton" class="secondary" type="button">Undo skip</button>` : ""}
                 ${!skipped && props.task_id ? `<button id="requestOpinionButton" class="secondary" type="button">Request a second opinion</button>` : ""}
+                ${canWithdraw ? `<button id="withdrawSubmissionButton" class="secondary" type="button">Cancel this ${revision ? "revision" : "candidate"}</button>` : ""}
             </div>
+            ${canWithdraw ? `
+            <div id="withdrawConfirmRow" class="button-row" hidden>
+                <span class="copy-help">Withdraw it from review? It stays in your history as withdrawn.</span>
+                <button id="withdrawConfirmButton" class="danger" type="button">Yes, withdraw</button>
+                <button id="withdrawKeepButton" class="secondary" type="button">Keep it</button>
+            </div>` : ""}
             <div id="confirmPaneStatus" class="copy-status" aria-live="polite"></div>
             <div class="pilot-note" role="note">
                 Pick another task from the map or list.${this.filterActiveHint()}
@@ -4366,7 +4387,71 @@ class NzVerificationMap {
             ? props.task_id
             : null;
         if (!skipped && props.task_id) {
-            this.initAttachmentsBlock(props, document.getElementById("confirmAttachmentsBlock"), { prominent: nomination });
+            const block = document.getElementById("confirmAttachmentsBlock");
+            const files = pendingFiles?.files || [];
+            // the files chosen in the form upload now, against the task the
+            // save just created, once the block has confirmed storage is on
+            this.initAttachmentsBlock(props, block, { prominent: nomination || files.length > 0 }).then(() => {
+                if (files.length && block && !block.hidden) {
+                    this.uploadFiles(props.task_id, block, files, pendingFiles.caption || "");
+                }
+            });
+        }
+        if (canWithdraw) {
+            const confirmRow = document.getElementById("withdrawConfirmRow");
+            document.getElementById("withdrawSubmissionButton")?.addEventListener("click", () => {
+                if (confirmRow) confirmRow.hidden = false;
+            });
+            document.getElementById("withdrawKeepButton")?.addEventListener("click", () => {
+                if (confirmRow) confirmRow.hidden = true;
+            });
+            document.getElementById("withdrawConfirmButton")?.addEventListener("click", () => {
+                this.withdrawFreshSubmission(props, { evidenceDraftId: withdrawDraftId, revision });
+            });
+        }
+    }
+
+    // cancels the candidate (or revision) just submitted: the audited
+    // withdraw marks its draft withdrawn and the task leaves review; the
+    // nomination then leaves the map, the list and the past-submissions
+    // count on this device, and the contributor is back on the add card
+    async withdrawFreshSubmission(props, { evidenceDraftId, revision = false } = {}) {
+        const statusEl = document.getElementById("confirmPaneStatus");
+        const buttons = ["withdrawConfirmButton", "withdrawKeepButton", "withdrawSubmissionButton"]
+            .map(id => document.getElementById(id)).filter(Boolean);
+        if (!evidenceDraftId || !this.backend?.configured || !this.backend.signedIn) return;
+        if (this.attachmentUploadInFlight) {
+            if (statusEl) statusEl.textContent = "Wait for the file upload to finish, then withdraw.";
+            return;
+        }
+        buttons.forEach(button => { button.disabled = true; });
+        if (statusEl) statusEl.textContent = "Withdrawing...";
+        try {
+            await this.backend.withdrawEvidenceDraft({
+                evidenceDraftId,
+                reason: `${revision ? "Revision" : "Candidate"} cancelled by its contributor on the confirmation screen.`,
+            });
+            const taskId = props.task_id;
+            this.withdrawnNominationTaskIds.add(taskId);
+            this.pendingEvidenceAttachTaskId = null;
+            this.manualTasksById.delete(taskId);
+            this.backendTasksById.delete(taskId);
+            this.latestDraftsByTaskId.delete(taskId);
+            this.taskHistoryByTaskId.delete(taskId);
+            this.selectedTask = null;
+            await this.refreshBackendTasks();
+            this.applyFilters();
+            this.renderInitialDetail();
+            const panel = document.getElementById("detailPanel");
+            const note = document.createElement("div");
+            note.className = "copy-status";
+            note.setAttribute("role", "status");
+            note.textContent = `${props.name || "The place"} was withdrawn from review. It stays in your history as withdrawn.`;
+            panel?.prepend(note);
+            this.focusDetailPanel();
+        } catch (error) {
+            buttons.forEach(button => { button.disabled = false; });
+            if (statusEl) statusEl.textContent = error.message || "Could not withdraw the submission.";
         }
     }
 
@@ -5557,10 +5642,12 @@ class NzVerificationMap {
                     <textarea id="${prefix}DiscussionNote" rows="2" maxlength="2000" placeholder="e.g. this place is recorded twice on the map; two denominations share the building"></textarea>
                 </label>
                 ${options.attachmentsHint ? `
-                    <label class="flag-discussion">
-                        <input type="checkbox" id="${prefix}HasEvidenceFiles"${pre.hasEvidenceFiles ? " checked" : ""}>
-                        <span><strong>I have photos or documents for this place</strong><small>You attach them right after saving, on the confirmation screen.</small></span>
-                    </label>
+                    <div class="attachments-block attachments-inline" id="${prefix}EvidenceFilesBlock">
+                        <strong>Photos &amp; documents (optional)</strong>
+                        <div class="copy-help">JPEG, PNG, WebP or PDF, under 10&nbsp;MB each. Choose them here; they upload as soon as the place is saved, and you can add more on the confirmation screen. Review-only — never public.</div>
+                        <input id="${prefix}EvidenceFiles" class="attachment-file-input" type="file" multiple accept="image/jpeg,image/png,image/webp,application/pdf">
+                        <input id="${prefix}EvidenceFilesCaption" class="attachment-caption-input" type="text" maxlength="500" placeholder="Caption — what do these show? (optional)">
+                    </div>
                 ` : ""}
                 ${options.beforeButtons || ""}
                 <div class="button-row">
@@ -5663,7 +5750,7 @@ class NzVerificationMap {
             privacyFlag: document.getElementById(`${prefix}PrivacyFlag`)?.value || "",
             flagForDiscussion: Boolean(document.getElementById(`${prefix}FlagForDiscussion`)?.checked),
             discussionNote: document.getElementById(`${prefix}DiscussionNote`)?.value || "",
-            hasEvidenceFiles: Boolean(document.getElementById(`${prefix}HasEvidenceFiles`)?.checked),
+            hasEvidenceFiles: this.pendingEvidenceFiles(prefix).files.length > 0,
         };
     }
 
@@ -5729,8 +5816,6 @@ class NzVerificationMap {
         setValue("DiscussionNote", values.discussionNote);
         const flag = document.getElementById(`${prefix}FlagForDiscussion`);
         if (flag && values.flagForDiscussion) flag.checked = true;
-        const evidenceFlag = document.getElementById(`${prefix}HasEvidenceFiles`);
-        if (evidenceFlag && values.hasEvidenceFiles) evidenceFlag.checked = true;
         this.updateRapidSourceFields(prefix);
         this.updateRapidDiscussionFields(prefix);
         this.updateRapidUncertaintyField(prefix);
@@ -6008,6 +6093,35 @@ class NzVerificationMap {
             event.preventDefault();
             this.submitRapidObservation(prefix, { ...options, draftKey });
         });
+        this.syncInlineEvidenceFiles(prefix);
+    }
+
+    // the files chosen in the form before saving (jb 2026-09-04: "what i
+    // cannot do when adding or revising a place is adding an image or
+    // pdf"); they upload against the task the save creates
+    pendingEvidenceFiles(prefix) {
+        const input = document.getElementById(`${prefix}EvidenceFiles`);
+        const caption = (document.getElementById(`${prefix}EvidenceFilesCaption`)?.value || "").trim();
+        return { files: [...(input?.files || [])], caption };
+    }
+
+    // a deployment without attachment storage hides the in-form picker,
+    // as the confirmation screen already does with its block
+    async syncInlineEvidenceFiles(prefix) {
+        const block = document.getElementById(`${prefix}EvidenceFilesBlock`);
+        if (!block) return;
+        if (!this.backend?.configured || !this.backendUser) {
+            block.hidden = true;
+            return;
+        }
+        if (this.attachmentsEnabledCache === undefined) {
+            try {
+                this.attachmentsEnabledCache = await this.backend.attachmentsEnabled();
+            } catch (error) {
+                this.attachmentsEnabledCache = false;
+            }
+        }
+        block.hidden = !this.attachmentsEnabledCache;
     }
 
     async submitRapidObservation(prefix, options = {}) {
@@ -6047,6 +6161,9 @@ class NzVerificationMap {
         }
         submitButton.disabled = true;
         if (status) status.textContent = values.flagForDiscussion ? "Flagging securely for discussion..." : "Submitting securely for review...";
+        // the form's chosen files travel to the confirmation screen, where
+        // they upload against the task the save creates
+        const pendingFiles = this.pendingEvidenceFiles(prefix);
         try {
             // an opted-in new source is registered first so this entry can
             // cite it; register failure falls back to the snapshot strings
@@ -6125,6 +6242,8 @@ class NzVerificationMap {
                     revision: true,
                     ...periodsOutcome,
                     hasEvidenceFiles: Boolean(values.hasEvidenceFiles),
+                    pendingFiles,
+                    withdrawDraftId: result.evidence_draft_id,
                     knownHistory: {
                         taskId: revision.task_id,
                         parentEvidenceDraftId: result.evidence_draft_id,
@@ -6179,6 +6298,8 @@ class NzVerificationMap {
                 deduped: Boolean(result.deduped),
                 nomination: true,
                 hasEvidenceFiles: Boolean(values.hasEvidenceFiles),
+                pendingFiles,
+                withdrawDraftId: result.evidence_draft_id,
                 knownHistory: {
                     taskId: result.task_id,
                     parentEvidenceDraftId: result.evidence_draft_id,
@@ -8950,13 +9071,23 @@ class NzVerificationMap {
     async uploadAttachment(taskId, block) {
         const input = block?.querySelector(".attachment-file-input");
         const status = block?.querySelector(".attachment-status");
-        const button = block?.querySelector(".attachment-upload-button");
         const files = [...(input?.files || [])];
         if (!files.length) {
             if (status) status.textContent = "Choose a file first.";
             return;
         }
         const caption = (block?.querySelector(".attachment-caption-input")?.value || "").trim();
+        await this.uploadFiles(taskId, block, files, caption);
+    }
+
+    // uploads the given files against a task, reporting into the block's
+    // status line; used by the block's own button and by the files chosen
+    // in the add / revise form before the save
+    async uploadFiles(taskId, block, files, caption) {
+        const input = block?.querySelector(".attachment-file-input");
+        const status = block?.querySelector(".attachment-status");
+        const button = block?.querySelector(".attachment-upload-button");
+        if (!files.length) return;
         if (button) button.disabled = true;
         this.attachmentUploadInFlight = true;
         let added = 0;
@@ -9743,7 +9874,7 @@ class NzVerificationMap {
             addPlaceButton.textContent = "Placing pin — click the building on the map · Esc cancels";
         }
         // structures must be visible so the pin lands on the actual building
-        this.setBasemap("hybrid");
+        this.setBasemap("satellite");
         const status = document.getElementById("pinStatus");
         if (status) status.textContent = "Click the building on the map to drop the pin, or use search or coordinates above. Press Escape to cancel.";
         // every map click while armed lands the same pending pin: the first
@@ -9751,6 +9882,9 @@ class NzVerificationMap {
         // promises; the handler stays bound until exitPinMode
         this._pinClickHandler = (event) => {
             if (this.pinConfirmed) return;
+            // an existing place under the first click: its popup offers
+            // revise or add-here (handleTileDotClick); no pin drops yet
+            if (this.pinArmedWithoutPin() && this.tileDotAt(event.containerPoint)) return;
             if (this.pinMarker) {
                 this.setPendingPin(event.latlng.lat, event.latlng.lng, { zoom: this.map.getZoom() });
             } else {

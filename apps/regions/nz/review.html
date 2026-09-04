@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Review submitted evidence | Places of Worship</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin="">
     <style>
         /* shared tokens (docs/development/ui-design-audit-2026-09-03.md, section 3) */
         :root {
@@ -32,7 +35,7 @@
             --not-assessed-soft: #e8f1fb;
             --entry: #0f766e;
             --entry-soft: #e6f4f1;
-            --marker-unvalidated: #64748b;
+            --marker-unvalidated: #f59e0b;  /* r-d1' (jb 2026-09-04): every unreviewed place is an open case, amber */
             --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             --fs-xs: 13px;
             --fs-sm: 14px;
@@ -417,6 +420,226 @@
             gap: 14px;
         }
 
+        /* the review map (jb 2026-09-04): the ra portal's map above the
+           review cards, so the reviewer sees the submission where it sits */
+        .review-map {
+            height: 440px;
+            min-height: 280px;
+            border: 1px solid var(--line);
+            border-radius: var(--r-md);
+            margin-bottom: 14px;
+            background: var(--panel-2);
+        }
+
+        .leaflet-container {
+            font-family: var(--font);
+            font-size: var(--fs-sm);
+        }
+
+        .leaflet-popup-content {
+            font-size: var(--fs-sm);
+            line-height: 1.45;
+        }
+
+        .leaflet-overlay-pane svg.leaflet-tile { opacity: 1 !important; }
+
+        .popup-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .popup-actions .popup-link {
+            min-height: 36px;
+            border: 1px solid var(--action);
+            border-radius: var(--r-sm);
+            padding: 8px 10px;
+            color: var(--action);
+            text-align: center;
+            text-decoration: none;
+            font-size: var(--fs-sm);
+            font-weight: 600;
+            font-family: inherit;
+            background: var(--panel);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .popup-actions .popup-revise-primary {
+            grid-column: 1 / -1;
+            min-height: 40px;
+            background: var(--action);
+            border: 1px solid var(--action);
+            border-radius: var(--r-sm);
+            color: var(--panel);
+            font-size: var(--fs-sm);
+            font-weight: 600;
+            font-family: inherit;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            width: auto;
+            padding: 8px 10px;
+        }
+
+        .basemap-toggle {
+            display: inline-flex;
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid var(--control-line);
+            border-radius: var(--r-sm);
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.25);
+            overflow: hidden;
+        }
+
+        .basemap-toggle button {
+            background: var(--panel);
+            color: var(--ink);
+            border: 0;
+            border-radius: 0;
+            font-size: var(--fs-sm);
+            font-weight: 600;
+            padding: 6px 10px;
+            min-height: 32px;
+            width: auto;
+            cursor: pointer;
+        }
+
+        .basemap-toggle button + button {
+            border-left: 1px solid var(--control-line);
+        }
+
+        .basemap-toggle button[aria-pressed="true"] {
+            background: var(--action);
+            color: var(--panel);
+        }
+
+        .points-legend-control {
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid var(--control-line);
+            border-radius: var(--r-sm);
+            padding: 8px 10px;
+            display: grid;
+            gap: 6px;
+            font-size: var(--fs-sm);
+            color: var(--ink);
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.25);
+            max-width: 260px;
+        }
+
+        .points-legend-control select {
+            font-size: var(--fs-sm);
+            padding: 3px 6px;
+            border: 1px solid var(--control-line);
+            border-radius: var(--r-sm);
+            background: var(--panel);
+            color: var(--ink);
+        }
+
+        .points-mode-note {
+            font-size: var(--fs-xs);
+            color: var(--muted);
+            line-height: 1.35;
+        }
+
+        .map-legend { display: grid; gap: 3px; }
+        .legend-row { display: inline-flex; align-items: center; gap: 6px; }
+        .legend-caption { font-weight: 600; color: var(--ink); margin-bottom: 1px; }
+        .legend-dot {
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            flex: none;
+            display: inline-block;
+        }
+        .legend-dot.vm-validated-present-swatch {
+            background: var(--muted);
+            box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3.5px var(--action);
+        }
+        .legend-dot.vm-in-review-swatch {
+            background: var(--panel);
+            border: 2.5px dashed var(--action);
+        }
+        .legend-dot.vm-unvalidated-swatch {
+            background: var(--muted);
+            box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3px var(--marker-unvalidated);
+        }
+        .legend-dot.vm-disputed-swatch {
+            background: var(--muted);
+            box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3px var(--caution-strong);
+        }
+        .legend-dot.vm-nomination-swatch {
+            background: var(--panel);
+            border: 2px dashed var(--entry);
+        }
+        .legend-dot.context-dot-swatch {
+            background: var(--marker-unvalidated);
+            border: 1.5px solid var(--panel);
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.45);
+            width: 10px;
+            height: 10px;
+        }
+
+        /* the ra portal's validation-ring markers, unchanged in meaning */
+        .verification-marker {
+            border: 2px solid var(--panel);
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.45);
+            background: var(--muted);
+        }
+        .verification-marker.vm-unknown {
+            background: var(--panel);
+            border-color: var(--muted);
+        }
+        .verification-marker.vm-selected {
+            outline: 3px solid var(--danger);
+            outline-offset: 2px;
+        }
+        .verification-marker.vm-validated-present {
+            box-shadow: 0 0 0 2px var(--panel), 0 0 0 5px var(--action), 0 0 5px rgba(0, 0, 0, 0.45);
+        }
+        .verification-marker.vm-validated-absent {
+            box-shadow: 0 0 0 2px var(--panel), 0 0 0 5px var(--ink), 0 0 5px rgba(0, 0, 0, 0.45);
+        }
+        .verification-marker.vm-in-review {
+            background: var(--panel);
+            border-width: 3px;
+            border-style: dashed;
+            border-color: var(--action);
+        }
+        .verification-marker.vm-unvalidated {
+            box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3.5px var(--marker-unvalidated), 0 0 5px rgba(0, 0, 0, 0.45);
+        }
+        .verification-marker.vm-disputed {
+            box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--caution-strong), 0 0 5px rgba(0, 0, 0, 0.45);
+        }
+        .verification-marker.vm-nomination {
+            background: var(--panel);
+            border-width: 3px;
+            border-style: dashed;
+            border-color: var(--entry);
+        }
+        .basemap-imagery .verification-marker {
+            box-shadow: 0 0 0 1px var(--ink), 0 0 6px rgba(0, 0, 0, 0.7);
+        }
+        .basemap-imagery .verification-marker.vm-validated-present {
+            box-shadow: 0 0 0 2px var(--panel), 0 0 0 5px var(--action), 0 0 0 7px var(--panel), 0 0 6px 7px rgba(0, 0, 0, 0.6);
+        }
+        .basemap-imagery .verification-marker.vm-unvalidated {
+            box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3.5px var(--marker-unvalidated), 0 0 0 5px var(--panel), 0 0 6px 5px rgba(0, 0, 0, 0.6);
+        }
+        .basemap-imagery .verification-marker.vm-disputed {
+            box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--caution-strong), 0 0 0 6px var(--panel), 0 0 6px 6px rgba(0, 0, 0, 0.6);
+        }
+        .basemap-imagery .verification-marker.vm-in-review,
+        .basemap-imagery .verification-marker.vm-nomination {
+            box-shadow: 0 0 0 2px var(--panel), 0 0 6px 2px rgba(0, 0, 0, 0.7);
+        }
+
         .field-grid {
             display: grid;
             grid-template-columns: minmax(150px, 210px) minmax(0, 1fr);
@@ -528,6 +751,10 @@
                 max-height: 420px;
             }
 
+            .review-map {
+                height: 300px;
+            }
+
             .decision-form .wide {
                 grid-column: auto;
             }
@@ -627,7 +854,7 @@
                 <summary><h2>Review boundary</h2></summary>
                 <p>Use <strong>accepted for export</strong> only when the evidence draft is ready for the governed export and <code>pow</code> validation path.</p>
                 <p>Use <strong>unresolved notes</strong> for useful but incomplete RA submissions. These are modelled on map-note workflows: keep the lead visible, then ask for more evidence, defer, reject, or accept after review.</p>
-                <p>Use <strong>needs more evidence</strong> when the RA should clarify a source, date, identity match, or lifecycle claim.</p>
+                <p>Use <strong>needs more evidence</strong> when the RA should clarify a source, date, identity match, or lifecycle claim (a dated event in the place's life: worship beginning, ending, moving, or the building changing use).</p>
             </details>
 
             <section class="panel">
@@ -667,20 +894,30 @@
             </section>
         </aside>
 
-        <section class="detail" id="detailPanel">
-            <div class="panel empty">
-                Select a submitted task after signing in.
-            </div>
-        </section>
+        <div class="detail">
+            <div id="reviewMap" class="review-map" role="region" aria-label="Map of the review queue and the unreviewed places"></div>
+            <section id="detailPanel">
+                <div class="panel empty">
+                    Select a submitted task after signing in.
+                </div>
+            </section>
+        </div>
     </main>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet.vectorgrid@1.3.0/dist/Leaflet.VectorGrid.bundled.js"></script>
     <script src="../../shared/data/country-registry.js?v=20260903a"></script>
+    <script src="../../global/config.public.js"></script>
+    <script src="js/unvalidated-places.js?v=20260904a"></script>
+    <script src="js/review-map.js?v=20260904a"></script>
     <script src="js/convex-config.js?v=20260523-vanuatu"></script>
     <script src="js/convex-task-client.js?v=20260902f"></script>
     <script src="js/claude-review-panel.js?v=20260825-ai-review"></script>
     <script src="js/location-assertion-contract.js?v=20260902a"></script>
     <script src="js/osm-history.js?v=20260902c"></script>
     <script src="js/occupancy-review.js?v=20260903a"></script>
-    <script src="js/review-portal.js?v=20260904a"></script>
+    <script src="js/review-portal.js?v=20260904b"></script>
 </body>
 </html>

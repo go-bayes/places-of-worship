@@ -45,7 +45,7 @@
             --entry: #0f766e;               /* nominations and pure entry, containers only */
             --entry-soft: #e6f4f1;
             --stale: #7d3c98;               /* reserved: stale_validation ring, unreachable today */
-            --marker-unvalidated: #64748b;  /* r-d1 (jb 2026-09-04): slate disc, white halo */
+            --marker-unvalidated: #f59e0b;  /* r-d1' (jb 2026-09-04): every unreviewed place is an open case, amber disc, white halo; js/unvalidated-places.js */
             --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             --fs-xs: 13px;
             --fs-sm: 14px;
@@ -418,6 +418,17 @@
         button.primary {
             background: var(--action);
             color: var(--panel);
+        }
+
+        /* the one filled red: a destructive confirm, never a first click */
+        button.danger {
+            background: var(--danger);
+            border: 1px solid var(--danger);
+            color: var(--panel);
+        }
+
+        button.danger:hover:not(:disabled) {
+            filter: brightness(0.9);
         }
 
         button.primary:hover {
@@ -1794,6 +1805,13 @@
             border-color: var(--action);
         }
 
+        /* unvalidated (jb 2026-09-04): no reviewer has confirmed the case, so
+           it is open and wears the same amber as the unreviewed dots, as a
+           thin single ring; the darker caution ring below is disputed */
+        .verification-marker.vm-unvalidated {
+            box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3.5px var(--marker-unvalidated), 0 0 5px rgba(0, 0, 0, 0.45);
+        }
+
         /* disputed: intermediate single amber ring — trust dropped back, one
            ring not two, in a caution hue distinct from validated blue */
         .verification-marker.vm-disputed {
@@ -1818,6 +1836,10 @@
 
         .basemap-imagery .verification-marker.vm-in-review {
             box-shadow: 0 0 0 2px var(--panel), 0 0 6px 2px rgba(0, 0, 0, 0.7);
+        }
+
+        .basemap-imagery .verification-marker.vm-unvalidated {
+            box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3.5px var(--marker-unvalidated), 0 0 0 5px var(--panel), 0 0 6px 5px rgba(0, 0, 0, 0.6);
         }
 
         .basemap-imagery .verification-marker.vm-disputed {
@@ -1998,6 +2020,11 @@
             border: 2.5px dashed var(--action);
         }
 
+        .legend-dot.vm-unvalidated-swatch {
+            background: var(--muted);
+            box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3px var(--marker-unvalidated);
+        }
+
         .legend-dot.vm-disputed-swatch {
             background: var(--muted);
             box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3px var(--caution-strong);
@@ -2008,7 +2035,7 @@
             box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3px var(--stale);
         }
 
-        /* r-d1: the unvalidated dot is a small slate disc with a white halo */
+        /* r-d1' (jb 2026-09-04): every unreviewed place is an open case: a small amber disc with a white halo */
         .legend-dot.context-dot-swatch {
             background: var(--marker-unvalidated);
             border: 1.5px solid var(--panel);
@@ -2805,6 +2832,7 @@
     <script src="js/function-chain-contract.js?v=20260903a"></script>
     <script src="js/location-assertion-contract.js?v=20260902a"></script>
     <script src="js/osm-history.js?v=20260902c"></script>
-    <script src="js/verification-map.js?v=20260904c"></script>
+    <script src="js/unvalidated-places.js?v=20260904a"></script>
+    <script src="js/verification-map.js?v=20260904d"></script>
 </body>
 </html>
