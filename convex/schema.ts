@@ -63,6 +63,7 @@ import {
   derivationKind,
   derivedUseLevel,
   targetYearUseLevelSet,
+  acceptanceOutcome,
 } from "./model";
 
 export default defineSchema({
@@ -161,6 +162,7 @@ export default defineSchema({
     evidence_draft_id: v.optional(v.string()),
     review_decision_id: v.optional(v.string()),
     export_batch_id: v.optional(v.string()),
+    acceptance_id: v.optional(v.string()),
     client_context: v.optional(v.any()),
   })
     .index("by_task_time", ["task_id", "occurred_at"])
@@ -465,6 +467,31 @@ export default defineSchema({
     .index("by_reviewer_time", ["reviewer_user_id", "created_at"])
     .index("by_decision_status", ["decision_status"]),
 
+  // the pi acceptance layer (jb rulings r-p1..r-p5, 2026-09-04): append-only
+  // ratifications of a reviewer's accepted-for-export decision by a
+  // principal investigator. `accepted` moves the task to pi_accepted, the
+  // only status the export takes; `returned` sends it back to needs_review.
+  // rows are never edited; a later row supersedes by order.
+  task_acceptances: defineTable({
+    acceptance_id: v.string(),
+    task_id: v.string(),
+    review_decision_id: v.string(),
+    evidence_draft_id: v.optional(v.string()),
+    pi_user_id: v.id("users"),
+    outcome: acceptanceOutcome,
+    note: v.string(),
+    // r-p1: the pi ratified a decision they recorded themselves
+    self_decided: v.boolean(),
+    // migration rows for tasks exported before the layer existed
+    legacy: v.optional(v.boolean()),
+    created_at: v.number(),
+    acceptance_hash: v.optional(v.string()),
+  })
+    .index("by_acceptance_id", ["acceptance_id"])
+    .index("by_task", ["task_id"])
+    .index("by_pi_time", ["pi_user_id", "created_at"])
+    .index("by_outcome_time", ["outcome", "created_at"]),
+
   // append-only AI review artifacts (docs/portal-claude-batch-review.md).
   // one row per (claim version, prompt version); re-reviews append with a
   // higher version, never overwrite. Advisory only: no function that
@@ -528,6 +555,8 @@ export default defineSchema({
     exported_at: v.optional(v.number()),
     included_task_ids: v.array(v.string()),
     included_review_decision_ids: v.array(v.string()),
+    // the pi acceptances the batch rests on (since 2026-09-04)
+    included_acceptance_ids: v.optional(v.array(v.string())),
     schema_version: v.string(),
     export_format: exportFormat,
     output_manifest: v.optional(v.any()),

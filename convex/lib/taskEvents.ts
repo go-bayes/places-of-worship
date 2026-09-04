@@ -13,6 +13,7 @@ export type TaskStatus =
   | "unresolved_note"
   | "changes_requested"
   | "reviewed"
+  | "pi_accepted"
   | "exported"
   | "reopened";
 
@@ -38,7 +39,9 @@ export type TaskEventType =
   | "review_released"
   | "opinion_requested"
   | "comment_requested"
-  | "comment_provided";
+  | "comment_provided"
+  | "pi_accepted"
+  | "pi_returned";
 
 export async function appendTaskEvent(
   ctx: MutationCtx,
@@ -53,6 +56,7 @@ export async function appendTaskEvent(
     evidenceDraftId?: string;
     reviewDecisionId?: string;
     exportBatchId?: string;
+    acceptanceId?: string;
     clientContext?: unknown;
   },
 ): Promise<void> {
@@ -73,6 +77,7 @@ export async function appendTaskEvent(
     evidence_draft_id: args.evidenceDraftId,
     review_decision_id: args.reviewDecisionId,
     export_batch_id: args.exportBatchId,
+    acceptance_id: args.acceptanceId,
     client_context: args.clientContext,
   });
 }

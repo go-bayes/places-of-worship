@@ -434,6 +434,20 @@
             return await this.request("mutation", "reviews:recordReviewDecision", args);
         }
 
+        // the pi acceptance layer (jb 2026-09-04): only a principal
+        // investigator ratifies a reviewer's acceptance into the backend
+        async recordAcceptance(args) {
+            return await this.request("mutation", "acceptances:recordAcceptance", args);
+        }
+
+        async listTaskAcceptances(args) {
+            return await this.request("query", "acceptances:listTaskAcceptances", args);
+        }
+
+        async listPrincipalInvestigators() {
+            return await this.request("query", "acceptances:listPrincipalInvestigators", {});
+        }
+
         async claimReviewTask(args) {
             return await this.request("mutation", "reviews:claimReviewTask", args);
         }

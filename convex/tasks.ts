@@ -260,6 +260,7 @@ export const listMyTasks = query({
       "changes_requested",
       "skipped",
       "reviewed",
+      "pi_accepted",
       "exported",
     ];
     const results: Doc<"tasks">[] = [];

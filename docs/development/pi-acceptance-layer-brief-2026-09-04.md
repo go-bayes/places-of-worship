@@ -1,6 +1,6 @@
 # PI acceptance layer — design brief (2026-09-04)
 
-Status: DRAFT for JB's rulings (section 5). Nothing built. Drafted at JB's request on 2026-09-04: "before accepting the design to the backend, only PIs (JB or JW) should be granted that authority. We will need to design that layer." Logged in `docs/portal-submission-review-plan.md` § Open Design Tasks.
+Status: RULED 2026-09-04 (R-P1–R-P5 all as recommended; PR #92). PR-P1 (backend) BUILT 2026-09-04 on `feat/pi-acceptance-backend-2026-09-04`: `convex/acceptances.ts`, `convex/lib/acceptance.ts` (+ node test), the `pi` role, `task_acceptances`, `pi_accepted`, the export change, the legacy backfill. PR-P2 (review portal panel, ring reading) and PR-P3 (guide, people pages) follow. Drafted at JB's request on 2026-09-04: "before accepting the design to the backend, only PIs (JB or JW) should be granted that authority. We will need to design that layer." Logged in `docs/portal-submission-review-plan.md` § Open Design Tasks.
 
 ## 1. The problem
 
