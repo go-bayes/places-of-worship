@@ -134,15 +134,22 @@
             });
         }
 
-        // the unreviewed places: on by default, switchable off
+        // the unreviewed places: off by default on the review page (jb
+        // 2026-09-04: the reviewer's work is the queue, and the overview
+        // tier costs a few hundred kilobytes per tile), switchable on
         let dotLayers = places ? places.createLayers(L) : null;
-        let pointsMode = "all";
+        let pointsMode = "off";
         function syncDots() {
             if (!places || !dotLayers) return;
             if (pointsMode === "off") places.removeFrom(map, dotLayers);
             else places.addTo(map, dotLayers);
+            const note = container.querySelector("#reviewPointsNote");
+            if (note) {
+                note.textContent = pointsMode === "off"
+                    ? "Unreviewed places are off; turn them on here to see every open case in amber."
+                    : "amber dots are today's OpenStreetMap places, every one an open case until reviewed";
+            }
         }
-        syncDots();
 
         const legend = L.control({ position: "bottomleft" });
         legend.onAdd = () => {
@@ -150,10 +157,10 @@
             div.innerHTML = `
                 ${dotLayers ? `
                 <select id="reviewPointsSelect" aria-label="Unreviewed places">
-                    <option value="all" selected>Unreviewed: all</option>
-                    <option value="off">Unreviewed: off</option>
+                    <option value="off" selected>Unreviewed places: off</option>
+                    <option value="all">Unreviewed places: on</option>
                 </select>
-                <div class="points-mode-note">amber dots are today's OpenStreetMap places, every one an open case until reviewed</div>` : ""}
+                <div id="reviewPointsNote" class="points-mode-note"></div>` : ""}
                 <div class="map-legend">
                     <span class="legend-caption">Submissions in this queue</span>
                     <span class="legend-row"><span class="legend-dot vm-nomination-swatch"></span>nomination awaiting review</span>
@@ -173,6 +180,7 @@
             return div;
         };
         legend.addTo(map);
+        syncDots();
 
         const markerLayer = L.layerGroup().addTo(map);
         const contextLayer = L.layerGroup().addTo(map);
