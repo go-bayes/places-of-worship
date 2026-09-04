@@ -1,5 +1,6 @@
 // tutorial media capture for the places-of-worship RA/PI guides.
-// serves nothing itself: expects the repo statically on localhost:5182.
+// serves nothing itself: expects the repo statically on localhost:8000 (the
+// origin the tile worker allows, so the unreviewed dots draw in the frames).
 // every visible datum is demo data (St Demo Church, task_demo_*); backend
 // calls are stubbed in-page or at the network layer, never live Convex.
 import { chromium } from "playwright";
@@ -8,7 +9,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const OUT = path.dirname(fileURLToPath(import.meta.url));
-const BASE = "http://localhost:5182/apps/regions/nz";
+const BASE = "http://localhost:8000/apps/regions/nz";
 const manifest = [];
 const flowErrors = {};
 
