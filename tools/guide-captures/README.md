@@ -3,7 +3,7 @@
 playwright walkthrough recorder behind apps/guides/. setup:
 
     cd tools/guide-captures && npm init -y && npm i playwright && npx playwright install chromium
-    python3 -m http.server 5182 --directory ../..   # repo root, port the script expects
+    python3 -m http.server 8000 --directory ../..   # repo root; 8000 is on the tile worker's cors list, so dots draw
     node capture.mjs [flow_id]                      # no arg = all ten flows
 
 outputs per-flow pngs + webm; convert mp4: ffmpeg h264 yuv420p faststart -crf 18.

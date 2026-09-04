@@ -3138,7 +3138,7 @@ class NzVerificationMap {
         });
         el.querySelector("[data-report-issue]")?.addEventListener("click", () => {
             if (!this.leavePinForRevise()) return;
-            this.openContextIssueForm(feature);
+            this.reviseFromFeature(feature);
         });
         el.querySelector("[data-add-here]")?.addEventListener("click", (event) => {
             const [lat, lng] = String(event.currentTarget.dataset.addHere || "").split(",").map(Number);
@@ -3171,7 +3171,44 @@ class NzVerificationMap {
     // standalone issue form, pre-filled with the place name and coordinates.
     // Reuses issueFormHtml/bindIssueForm, so signed-out degrades the same way
     // (disabled submit plus a sign-in prompt).
+    // the chooser (and assigned mode) hide the detail panel and the pin
+    // cards, so a revise taken from the map there went nowhere (jb
+    // 2026-09-04: "hit Revise this place, I am not directed to revising");
+    // the add activity holds the revise flow, so it takes over first
+    ensureAddModeForRevise() {
+        if (!ASSIGNMENT_MODE || !this.backendUser || this.portalMode === "add") return true;
+        this.setPortalMode("add");
+        return this.portalMode === "add";
+    }
+
+    // the map's revise entry for a recorded place: signed in with the rapid
+    // lane and a coordinate, straight into the pin flow on the record;
+    // otherwise the card with its flag-only issue form
+    reviseFromFeature(feature) {
+        const props = feature.properties || {};
+        const coords = feature.geometry?.coordinates || [];
+        const latitude = Number(coords[1]);
+        const longitude = Number(coords[0]);
+        const direct = RAPID_NOMINATION_ENTRY && Number.isFinite(latitude) && Number.isFinite(longitude)
+            && Boolean(this.backend?.configured && this.backend.signedIn);
+        if (!direct) {
+            this.openContextIssueForm(feature);
+            return;
+        }
+        if (!this.ensureAddModeForRevise()) return;
+        this.map?.closePopup();
+        this.enterReviseMode({
+            taskId: "",
+            name: props.name || "",
+            latitude,
+            longitude,
+            siteId: undefined,
+            osmId: props.osm_id !== undefined && props.osm_id !== null ? String(props.osm_id) : undefined,
+        });
+    }
+
     openContextIssueForm(feature, options = {}) {
+        if (this.backendUser && !this.ensureAddModeForRevise()) return;
         const props = feature.properties || {};
         const coords = feature.geometry?.coordinates || [];
         const context = {
@@ -3402,7 +3439,7 @@ class NzVerificationMap {
             </button>
             <button type="button" class="chooser-option" id="chooseAddButton">
                 <strong>Add or revise places</strong>
-                <span>Nominate a missing place, or click a grey dot on the map to revise a place already recorded.${(this.myNominationItems || []).length ? ` You have ${this.myNominationItems.length} under review.` : ""}</span>
+                <span>Nominate a missing place, or click an amber dot on the map to revise a place already recorded.${(this.myNominationItems || []).length ? ` You have ${this.myNominationItems.length} under review.` : ""}</span>
             </button>
         `;
         document.getElementById("chooseAssignedButton")?.addEventListener("click", () => this.setPortalMode("assigned"));
@@ -4241,7 +4278,7 @@ class NzVerificationMap {
                 <div class="${this.backend?.configured ? "pilot-note" : "demo-warning"}" role="${this.backend?.configured ? "note" : "alert"}">
                     ${this.backend?.configured
                         ? this.portalMode === "add"
-                            ? `Use <strong>＋ Add a missing place</strong> above, then find the building by searching a name or address, typing coordinates, or clicking the map. Drag the pin onto the building before confirming. To revise a place already recorded, click its grey dot and choose "Revise this place".`
+                            ? `Use <strong>＋ Add a missing place</strong> above, then find the building by searching a name or address, typing coordinates, or clicking the map. Drag the pin onto the building before confirming. To revise a place already recorded, click its amber dot and choose "Revise this place".`
                             : RAPID_ASSIGNED_ENTRY
                                 ? `Work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. For each place, choose one current-status answer, record how you know it, and use <em>Submit for review</em>.`
                                 : `Work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when useful evidence remains incomplete, and <em>Submit for review</em> when a case is ready for JB.`
@@ -9785,6 +9822,7 @@ class NzVerificationMap {
     enterReviseMode(context) {
         if (!this.map || !RAPID_NOMINATION_ENTRY) return;
         if (!Number.isFinite(context?.latitude) || !Number.isFinite(context?.longitude)) return;
+        if (!this.ensureAddModeForRevise()) return;
         if (this.pinMode) this.exitPinMode();
         this.reviseContext = { ...context };
         this.enterPinMode();
