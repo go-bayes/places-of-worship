@@ -94,10 +94,14 @@
         function setBasemap(name) {
             const next = layers[name] ? name : "streets";
             if (next !== basemap) {
+                // the incoming tiles go on before the outgoing come off: with
+                // only the country-scale dots layer left for a moment, leaflet
+                // takes its maxZoom (7) as the map's and snaps the view out to
+                // the whole country (guy, 2026-09-05)
+                if (!map.hasLayer(layers[next])) layers[next].addTo(map);
                 Object.entries(layers).forEach(([id, layer]) => {
                     if (id !== next && map.hasLayer(layer)) map.removeLayer(layer);
                 });
-                if (!map.hasLayer(layers[next])) layers[next].addTo(map);
                 layers[next].bringToBack();
                 basemap = next;
                 map.getContainer().classList.toggle("basemap-imagery", next !== "streets");
