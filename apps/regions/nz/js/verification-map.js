@@ -951,6 +951,15 @@ const SKIP_REASON_CHIPS = [
 // ordinary nominations may instead preserve an explicitly approximate area
 const PIN_MIN_PLACEMENT_ZOOM = 15;
 const PIN_MIN_APPROXIMATE_ZOOM = 8;
+// phone panes (jb 2026-09-05): the entry pane's share of the screen snaps
+// to one of three detents, and neither pane ever leaves the screen
+const PANE_DETENTS = [15, 50, 85];
+const PANE_SPLIT_KEY = "pow-pane-split";
+const PANE_PHONE_QUERY = "(max-width: 900px)";
+// the contributor's own position (jb 2026-09-05): one fix per request,
+// high accuracy, at most half a minute old, and the zoom it lands at
+const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 };
+const POSITION_ZOOM = 17;
 const PIN_PROXIMITY_METRES = 150;
 // satellite basemap: maptiler's paid plan (ruled 2026-08-29) so contributors
 // can steer the pin onto the actual building; absent key hides the option
@@ -2249,6 +2258,7 @@ class NzVerificationMap {
         this.setupMap();
         this.setupPageMode();
         this.setupFilters();
+        this.setupPaneDivider();
         // browser-level guard while typed evidence is unsaved
         window.addEventListener("beforeunload", event => {
             if (!this.formDirty) return;
@@ -2650,6 +2660,304 @@ class NzVerificationMap {
         this.markerLayer = L.layerGroup();
         this.map.addLayer(this.markerLayer);
         this.addPointsLegendControl();
+        this.addLocateControl();
+    }
+
+    // ---- phone panes (jb 2026-09-05) ----
+    // the entry pane and the map share a phone screen, split by a divider
+    // with three detents; the portal snaps it as the work changes (aiming a
+    // pin wants the map, typing wants the entry) and a drag by hand sets
+    // the resting split, remembered on the device
+
+    paneLayoutActive() {
+        return Boolean(window.matchMedia?.(PANE_PHONE_QUERY)?.matches && document.getElementById("paneDivider"));
+    }
+
+    paneEntryOnTop() {
+        return Boolean(document.body?.classList?.contains?.("assignment-mode"));
+    }
+
+    // the nearest detent to a share
+    paneDetentFor(share) {
+        const value = Number(share);
+        if (!Number.isFinite(value)) return PANE_DETENTS[1];
+        return PANE_DETENTS.reduce((best, detent) => (Math.abs(detent - value) < Math.abs(best - value) ? detent : best), PANE_DETENTS[0]);
+    }
+
+    // the entry share implied by a pointer at clientY over the shell,
+    // clamped to the outer detents
+    paneShareFromPointer(clientY, rect = this.paneShell?.getBoundingClientRect?.()) {
+        if (!rect || !(rect.height > 0)) return PANE_DETENTS[1];
+        const fromTop = ((clientY - rect.top) / rect.height) * 100;
+        const share = this.paneEntryOnTop() ? fromTop : 100 - fromTop;
+        return Math.min(PANE_DETENTS[PANE_DETENTS.length - 1], Math.max(PANE_DETENTS[0], share));
+    }
+
+    // the detent one step towards the top or the bottom of the screen
+    paneDetentTowards(direction) {
+        const index = Math.max(PANE_DETENTS.indexOf(this.paneShare), 0);
+        const step = this.paneEntryOnTop() ? direction : -direction;
+        return PANE_DETENTS[Math.min(PANE_DETENTS.length - 1, Math.max(0, index + step))];
+    }
+
+    // the share reaches the shell as a css variable; an animated change
+    // eases there over a few frames in script (a css transition on the
+    // calc() grid rows stalled in chrome), and leaflet re-measures at the end
+    applyPaneShare(share, { animate = true } = {}) {
+        const shell = this.paneShell;
+        if (!shell) return;
+        // the target is the state at once; the painted value catches up
+        const from = Number.isFinite(Number(this.panePainted)) ? Number(this.panePainted) : Number(this.paneShare);
+        this.paneShare = share;
+        const paint = (value) => {
+            this.panePainted = value;
+            shell.style.setProperty("--entry-share", String(value));
+        };
+        const settle = () => {
+            if (this.paneSettled === share && this.panePainted === share) return;
+            this.paneSettled = share;
+            shell.setAttribute?.("data-pane", share >= PANE_DETENTS[2] ? "entry" : share <= PANE_DETENTS[0] ? "map" : "half");
+            const divider = document.getElementById("paneDivider");
+            if (divider) divider.setAttribute("aria-valuenow", String(Math.round(share)));
+            paint(share);
+            this.map?.invalidateSize();
+        };
+        if (this.paneAnimation) window.cancelAnimationFrame?.(this.paneAnimation);
+        this.paneAnimation = 0;
+        window.clearTimeout(this.paneSettleTimer);
+        if (!animate || !window.requestAnimationFrame || !Number.isFinite(from) || from === share) {
+            settle();
+            return;
+        }
+        const duration = 180;
+        const start = performance.now();
+        const step = (now) => {
+            const t = Math.min(1, (now - start) / duration);
+            const eased = 1 - (1 - t) * (1 - t);
+            if (t < 1) {
+                paint(from + (share - from) * eased);
+                this.paneAnimation = window.requestAnimationFrame(step);
+            } else {
+                this.paneAnimation = 0;
+                settle();
+            }
+        };
+        this.paneAnimation = window.requestAnimationFrame(step);
+        // frames pause in a background tab; the split still settles
+        this.paneSettleTimer = window.setTimeout(() => {
+            if (this.paneAnimation) window.cancelAnimationFrame?.(this.paneAnimation);
+            this.paneAnimation = 0;
+            settle();
+        }, duration + 120);
+    }
+
+    // chosen: a drag or key by hand sets the resting split
+    setPaneSplit(share, { chosen = false } = {}) {
+        if (!this.paneLayoutActive()) return false;
+        const detent = this.paneDetentFor(share);
+        this.applyPaneShare(detent);
+        if (chosen) {
+            this.paneRestShare = detent;
+            try {
+                localStorage.setItem(PANE_SPLIT_KEY, String(detent));
+            } catch (error) {
+                // storage unavailable: the split lives for this page only
+            }
+        }
+        return true;
+    }
+
+    // map: aiming a pin; half: the pin and its confirm card together;
+    // entry: typing; rest: where the contributor last put the divider
+    paneSnap(kind) {
+        const share = kind === "map" ? PANE_DETENTS[0]
+            : kind === "entry" ? PANE_DETENTS[2]
+                : kind === "half" ? PANE_DETENTS[1]
+                    : (this.paneRestShare ?? PANE_DETENTS[1]);
+        return this.setPaneSplit(share);
+    }
+
+    setupPaneDivider() {
+        const divider = document.getElementById("paneDivider");
+        const shell = document.querySelector(".app-shell");
+        if (!divider || !shell) return;
+        this.paneShell = shell;
+        let rest = PANE_DETENTS[1];
+        try {
+            const saved = Number(localStorage.getItem(PANE_SPLIT_KEY));
+            if (PANE_DETENTS.includes(saved)) rest = saved;
+        } catch (error) {
+            // storage unavailable or unreadable: start at half
+        }
+        this.paneRestShare = rest;
+        this.paneShare = rest;
+        this.applyPaneShare(rest, { animate: false });
+        let drag = null;
+        divider.addEventListener("pointerdown", (event) => {
+            if (event.button !== undefined && event.button !== 0) return;
+            if (!this.paneLayoutActive()) return;
+            drag = { startY: event.clientY, moved: false };
+            divider.setPointerCapture?.(event.pointerId);
+            shell.classList.add("pane-dragging");
+            event.preventDefault();
+        });
+        divider.addEventListener("pointermove", (event) => {
+            if (!drag) return;
+            if (Math.abs(event.clientY - drag.startY) > 4) drag.moved = true;
+            if (drag.moved) this.applyPaneShare(this.paneShareFromPointer(event.clientY), { animate: false });
+        });
+        const end = (event) => {
+            if (!drag) return;
+            const moved = drag.moved;
+            drag = null;
+            divider.releasePointerCapture?.(event.pointerId);
+            shell.classList.remove("pane-dragging");
+            if (moved) this.setPaneSplit(this.paneShareFromPointer(event.clientY), { chosen: true });
+        };
+        divider.addEventListener("pointerup", end);
+        divider.addEventListener("pointercancel", end);
+        // a double tap on the bar returns it to half
+        divider.addEventListener("dblclick", () => this.setPaneSplit(PANE_DETENTS[1], { chosen: true }));
+        divider.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+                event.preventDefault();
+                this.setPaneSplit(this.paneDetentTowards(event.key === "ArrowUp" ? -1 : 1), { chosen: true });
+            } else if (event.key === "Home") {
+                event.preventDefault();
+                this.setPaneSplit(PANE_DETENTS[1], { chosen: true });
+            }
+        });
+        // typing needs the entry pane: a field taking focus snaps to it
+        document.querySelector(".sidebar")?.addEventListener("focusin", (event) => {
+            const target = event.target;
+            if (!target || !["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
+            if (target.type === "checkbox" || target.type === "radio") return;
+            this.paneSnap("entry");
+        });
+        window.matchMedia?.(PANE_PHONE_QUERY)?.addEventListener?.("change", () => {
+            this.applyPaneShare(this.paneShare, { animate: false });
+        });
+    }
+
+    // ---- the contributor's own position (jb 2026-09-05: "so the pin can
+    // drop near where the RA is standing") ----
+
+    geolocationAvailable() {
+        return Boolean(window.isSecureContext !== false && navigator.geolocation?.getCurrentPosition);
+    }
+
+    // one fix from the device; a failure carries the sentence for the status line
+    requestPosition() {
+        return new Promise((resolve, reject) => {
+            if (!this.geolocationAvailable()) {
+                reject(new Error("This browser offers no location here. Search, type coordinates, or tap the map instead."));
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (position) => resolve({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    accuracyM: Math.round(position.coords.accuracy || 0),
+                }),
+                (error) => {
+                    const messages = {
+                        1: "Location access was refused. Allow it for this site in the browser's settings, or search, type coordinates, or tap the map.",
+                        2: "Your position is not available right now. Try again outdoors, or search, type coordinates, or tap the map.",
+                        3: "Finding your position took too long. Try again, or search, type coordinates, or tap the map.",
+                    };
+                    reject(new Error(messages[error?.code] || "Could not find your position. Search, type coordinates, or tap the map."));
+                },
+                GEOLOCATION_OPTIONS,
+            );
+        });
+    }
+
+    // a blue dot inside its accuracy ring, replaced on each fix
+    showPositionOnMap(fix) {
+        if (!this.map || !window.L?.circle) return;
+        if (this.positionLayer) this.map.removeLayer(this.positionLayer);
+        const latlng = L.latLng(fix.latitude, fix.longitude);
+        this.positionLayer = L.layerGroup([
+            L.circle(latlng, { radius: Math.max(fix.accuracyM, 5), color: "#2563eb", weight: 1, fillColor: "#2563eb", fillOpacity: 0.12, interactive: false }),
+            L.circleMarker(latlng, { radius: 7, color: "#ffffff", weight: 2, fillColor: "#2563eb", fillOpacity: 1, interactive: false }),
+        ]).addTo(this.map);
+    }
+
+    // the map button: centre on the contributor, no pin
+    addLocateControl() {
+        if (!this.map || !this.geolocationAvailable()) return;
+        const control = L.control({ position: "topleft" });
+        control.onAdd = () => {
+            const div = L.DomUtil.create("div", "leaflet-bar locate-control");
+            div.innerHTML = `
+                <button type="button" id="locateMeButton" title="Centre the map on my location" aria-label="Centre the map on my location">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+                </button>
+                <span id="locateNote" class="locate-note" role="status" hidden></span>
+            `;
+            L.DomEvent.disableClickPropagation(div);
+            L.DomEvent.disableScrollPropagation(div);
+            div.querySelector("#locateMeButton").addEventListener("click", () => this.centreOnMyLocation());
+            return div;
+        };
+        control.addTo(this.map);
+    }
+
+    locateNote(text) {
+        const note = document.getElementById("locateNote");
+        if (!note) return;
+        window.clearTimeout(this.locateNoteTimer);
+        note.textContent = text || "";
+        note.hidden = !text;
+        if (text) this.locateNoteTimer = window.setTimeout(() => { note.hidden = true; }, 8000);
+    }
+
+    async centreOnMyLocation() {
+        const button = document.getElementById("locateMeButton");
+        if (button) button.disabled = true;
+        this.locateNote("Finding your position…");
+        try {
+            const fix = await this.requestPosition();
+            this.lastPositionFix = fix;
+            this.showPositionOnMap(fix);
+            this.map.setView([fix.latitude, fix.longitude], Math.max(this.map.getZoom(), POSITION_ZOOM));
+            this.locateNote(`You are inside the blue ring (about ${fix.accuracyM} m).`);
+        } catch (error) {
+            this.locateNote(error.message);
+        } finally {
+            if (button) button.disabled = false;
+        }
+    }
+
+    // the card button: the pending pin lands where the contributor stands
+    async dropPinAtMyLocation() {
+        if (!this.pinMode) return false;
+        const status = document.getElementById("pinSearchStatus") || document.getElementById("pinStatus");
+        const button = document.getElementById("pinLocateMeButton");
+        if (this.pinConfirmed) {
+            if (status) status.textContent = "The location is already confirmed. Discard this entry to place the pin again.";
+            return false;
+        }
+        if (button) button.disabled = true;
+        if (status) status.textContent = "Finding your position…";
+        try {
+            const fix = await this.requestPosition();
+            this.lastPositionFix = fix;
+            this.showPositionOnMap(fix);
+            this.setPendingPin(fix.latitude, fix.longitude, { zoom: POSITION_ZOOM });
+            if (status) status.textContent = "";
+            const pinStatus = document.getElementById("pinStatus");
+            if (pinStatus) {
+                pinStatus.textContent = `Pin dropped at your position, inside the blue ring (about ${fix.accuracyM} m). Drag it onto the building before confirming.`
+                    + (fix.accuracyM > 50 ? " The fix is rough here, so check the building on the imagery." : "");
+            }
+            return true;
+        } catch (error) {
+            if (status) status.textContent = error.message;
+            return false;
+        } finally {
+            if (button) button.disabled = false;
+        }
     }
 
     // corner control: the points-mode select plus the one marker legend
@@ -3396,6 +3704,7 @@ class NzVerificationMap {
     // decides what leaves
     setEntryOpen(open) {
         document.body?.classList?.toggle("entry-open", Boolean(open));
+        if (!open) this.paneSnap("rest");
     }
 
     syncPortalChrome() {
@@ -9807,6 +10116,12 @@ class NzVerificationMap {
                     <button id="pinSearchButton" type="button" class="secondary">Search</button>
                 </div>
                 <ul id="pinSearchResults" class="pin-search-results" hidden></ul>
+                ${this.geolocationAvailable() ? `
+                <div class="pin-locate-me">
+                    <button id="pinLocateMeButton" type="button" class="secondary">Use my location</button>
+                    <span class="copy-help">Drops the pin where you are standing.</span>
+                </div>
+                ` : ""}
                 <div id="pinSearchStatus" class="copy-status" aria-live="polite"></div>
                 <div class="pin-coord-row">
                     <label>
@@ -9919,6 +10234,7 @@ class NzVerificationMap {
             }
         });
         document.getElementById("pinCoordButton")?.addEventListener("click", () => this.applyTypedCoordinates());
+        document.getElementById("pinLocateMeButton")?.addEventListener("click", () => this.dropPinAtMyLocation());
         ["pinLatInput", "pinLngInput"].forEach(id => {
             document.getElementById(id)?.addEventListener("keydown", event => {
                 if (event.key === "Enter") {
@@ -10114,8 +10430,10 @@ class NzVerificationMap {
         }
         // structures must be visible so the pin lands on the actual building
         this.setBasemap("satellite");
+        // aiming wants the map: on a phone the map takes most of the screen
+        this.paneSnap("map");
         const status = document.getElementById("pinStatus");
-        if (status) status.textContent = "Click the building on the map to drop the pin, or use search or coordinates above. Press Escape to cancel.";
+        if (status) status.textContent = "Click the building on the map to drop the pin, or use search, coordinates, or your location above. Press Escape to cancel.";
         // every map click while armed lands the same pending pin: the first
         // click places it and later clicks move it, exactly as the sidebar
         // promises; the handler stays bound until exitPinMode
@@ -10173,6 +10491,16 @@ class NzVerificationMap {
             : "Choose what the pin represents, place it on the building or at the centre of the supported area, then confirm.";
         this.updatePinConfirmCard();
         this.revealPinHost();
+        // the pin and its confirm card together: half and half, with the
+        // pin brought back into view if the smaller map lost it
+        if (this.paneSnap("half")) {
+            window.setTimeout(() => {
+                if (!this.pinMarker || !this.map) return;
+                const position = this.pinMarker.getLatLng();
+                if (!this.map.getBounds().contains(position)) this.map.panTo(position);
+                this.updatePinConfirmCard();
+            }, 300);
+        }
     }
 
     // undo history for the pending pin: every placement, click-move, typed
@@ -10503,6 +10831,7 @@ class NzVerificationMap {
     }
 
     showPinProximity(rows) {
+        this.paneSnap("entry");
         const card = document.getElementById("pinProximityCard");
         if (!card) return;
         const shownRows = rows.slice(0, 20);
@@ -10537,6 +10866,7 @@ class NzVerificationMap {
     }
 
     showPinForm() {
+        this.paneSnap("entry");
         const card = document.getElementById("pinFormCard");
         if (card) card.hidden = false;
         const status = document.getElementById("pinStatus");
@@ -10674,6 +11004,7 @@ class NzVerificationMap {
             this.clearFormDirty();
         }
         this.dropRapidPinFromDevice();
+        this.paneSnap("rest");
         // a cancelled period placement returns to the pane with its cards
         const occupancyPin = this.occupancyPinContext;
         this.occupancyPinContext = null;

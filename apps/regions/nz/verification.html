@@ -933,6 +933,70 @@
 
         /* locate card: search, typed coordinates, or the map click all move
            the same pending pin */
+        /* phone panes (jb 2026-09-05): the divider between the entry pane and
+           the map, shown only in the stacked layout below */
+        .pane-divider {
+            display: none;
+        }
+
+        .pane-grip {
+            font-size: var(--fs-xs);
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: var(--muted);
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 2px 12px;
+            pointer-events: none;
+        }
+
+        /* the contributor's own position: a map button that centres on them */
+        .locate-control button {
+            width: 30px;
+            height: 30px;
+            display: grid;
+            place-items: center;
+            padding: 0;
+            border: 0;
+            background: var(--panel);
+            color: var(--ink);
+            cursor: pointer;
+        }
+
+        .locate-control button:disabled {
+            color: var(--muted);
+            cursor: progress;
+        }
+
+        .locate-control button svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .locate-note {
+            display: block;
+            max-width: 220px;
+            margin-top: 4px;
+            padding: 4px 8px;
+            font-size: var(--fs-xs);
+            color: var(--ink);
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: var(--r-sm);
+        }
+
+        .pin-locate-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 6px 0 8px;
+        }
+
+        .pin-locate-me .copy-help {
+            margin: 0;
+        }
+
         .pin-locate-row {
             display: grid;
             grid-template-columns: 1fr auto;
@@ -2616,20 +2680,64 @@
 
         @media (max-width: 900px) {
             .app-shell {
+                /* the entry pane's share of the shell drives the split; the
+                   divider between the panes drags it to a detent (15, 50, 85),
+                   and neither pane ever leaves the screen (jb 2026-09-05) */
+                --entry-share: 50;
+                --divider-h: 28px;
                 grid-template-columns: 1fr;
-                grid-template-rows: 48vh 52vh;
-                min-height: 100vh;
+                /* map above, divider, entry below (the demo/full layout) */
+                grid-template-rows: minmax(0, 1fr) var(--divider-h) minmax(0, calc((100% - var(--divider-h)) * var(--entry-share) / 100));
+                /* the dynamic viewport unit follows the browser toolbar where
+                   supported; the split itself animates in script, since a
+                   css transition on calc() grid rows stalled in chrome */
+                height: 100vh;
+                height: 100dvh;
+                min-height: 0;
+                max-height: none;
+            }
+
+            .pane-divider {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                grid-row: 2;
+                background: var(--panel-2);
+                border-top: 1px solid var(--line);
+                border-bottom: 1px solid var(--line);
+                cursor: row-resize;
+                touch-action: none;
+                user-select: none;
+                -webkit-user-select: none;
+            }
+
+            .pane-divider:focus-visible {
+                outline: 2px solid var(--action);
+                outline-offset: -2px;
+            }
+
+            .app-shell.pane-dragging .pane-divider,
+            .pane-divider:active {
+                background: var(--action-soft);
+            }
+
+            /* with the map reduced to a strip, the points control would
+               cover it; it returns with the map */
+            .app-shell[data-pane="entry"] .points-legend-control {
+                display: none;
             }
 
             .sidebar {
-                grid-row: 2;
+                grid-row: 3;
                 border-right: 0;
-                border-top: 1px solid var(--line);
+                border-top: 0;
+                min-height: 0;
+                overflow-y: auto;
             }
 
             #map {
                 grid-row: 1;
-                height: 48vh;
+                height: 100%;
                 min-height: 0;
             }
 
@@ -2639,12 +2747,9 @@
             }
 
             body.assignment-mode .app-shell {
-                /* cap the sidebar row so the map stays on screen: the sidebar
-                   scrolls within the upper half instead of pushing the map
-                   ~1,700px below the fold on a phone */
-                grid-template-rows: minmax(0, 50vh) 50vh;
-                min-height: 100vh;
-                max-height: 100vh;
+                /* entry above, divider, map below: the sidebar scrolls within
+                   its share instead of pushing the map below the fold */
+                grid-template-rows: minmax(0, calc((100% - var(--divider-h)) * var(--entry-share) / 100)) var(--divider-h) minmax(0, 1fr);
             }
 
             body.assignment-mode .sidebar {
@@ -2663,8 +2768,8 @@
             }
 
             body.assignment-mode #map {
-                grid-row: 2;
-                height: 50vh;
+                grid-row: 3;
+                height: 100%;
             }
 
             /* the validation-ring legend covers a third of a phone-height map;
@@ -2812,6 +2917,10 @@
             <section id="nominationsPanel" class="nominations-panel" aria-label="My past submissions"></section>
         </aside>
 
+        <div id="paneDivider" class="pane-divider" role="separator" aria-orientation="horizontal" aria-label="Resize the entry pane and the map" aria-valuemin="15" aria-valuemax="85" aria-valuenow="50" tabindex="0">
+            <span class="pane-grip">⠿ drag · entry ↕ map</span>
+        </div>
+
         <div id="map"></div>
     </main>
 
@@ -2838,6 +2947,6 @@
     <script src="js/osm-history.js?v=20260902c"></script>
     <script src="js/source-links.js?v=20260904a"></script>
     <script src="js/unvalidated-places.js?v=20260904a"></script>
-    <script src="js/verification-map.js?v=20260905a"></script>
+    <script src="js/verification-map.js?v=20260905b"></script>
 </body>
 </html>
