@@ -7,17 +7,25 @@
     };
     const AUTH_REFRESH_MARGIN_MS = 5 * 60 * 1000;
     const AUTH_REFRESH_TIMEOUT_MS = 30 * 1000;
+    // the sign-in token stays on the device between page loads (jb
+    // 2026-09-05, after guy's phone reloaded the tab each time he checked a
+    // photo): a bearer token of at most an hour, on the device that signed
+    // in, cleared by the sign-out button and by expiry
+    const AUTH_STORAGE_KEY = "powConvexAuth:v1";
+    const GSI_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
+    const scriptLoads = new Map();
 
     function normaliseConfig(config) {
         return { ...DEFAULT_CONFIG, ...(config || {}) };
     }
 
     function loadScriptOnce(src) {
+        if (scriptLoads.has(src)) return scriptLoads.get(src);
         const existing = document.querySelector(`script[src="${src}"]`);
         if (existing) {
             return Promise.resolve();
         }
-        return new Promise((resolve, reject) => {
+        const load = new Promise((resolve, reject) => {
             const script = document.createElement("script");
             script.src = src;
             script.async = true;
@@ -26,6 +34,30 @@
             script.onerror = () => reject(new Error(`Could not load ${src}`));
             document.head.appendChild(script);
         });
+        scriptLoads.set(src, load);
+        return load;
+    }
+
+    function readStoredAuthToken() {
+        try {
+            const raw = window.localStorage.getItem(AUTH_STORAGE_KEY);
+            const record = raw ? JSON.parse(raw) : null;
+            return typeof record?.token === "string" ? record.token : "";
+        } catch (error) {
+            return "";
+        }
+    }
+
+    function writeStoredAuthToken(token) {
+        try {
+            if (token) {
+                window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ token, saved_at: Date.now() }));
+            } else {
+                window.localStorage.removeItem(AUTH_STORAGE_KEY);
+            }
+        } catch (error) {
+            // private windows or blocked storage: the session lives in memory only
+        }
     }
 
     function compactObject(value) {
@@ -56,6 +88,16 @@
             this.credentialWaiters = [];
             this.signInOptions = {};
             this.user = null;
+            // a token kept from before a reload comes back with its refresh
+            // timer; restoreSession() then names the user again. a token
+            // inside its refresh margin is dropped rather than restored
+            // into a session that ends mid-entry
+            const stored = readStoredAuthToken();
+            if (stored && jwtExpiryMs(stored) - Date.now() > AUTH_REFRESH_MARGIN_MS) {
+                this.setAuthToken(stored);
+            } else if (stored) {
+                writeStoredAuthToken("");
+            }
         }
 
         get configured() {
@@ -66,14 +108,22 @@
             return Boolean(this.authToken && this.user);
         }
 
-        signOut() {
+        // deliberate: the sign-out button. google's auto-select cooldown is
+        // for a chosen sign-out only; an expiry must not make the next
+        // automatic re-selection less likely
+        signOut({ deliberate = false } = {}) {
+            this.clearAuth();
+            if (deliberate && window.google?.accounts?.id?.disableAutoSelect) {
+                window.google.accounts.id.disableAutoSelect();
+            }
+        }
+
+        clearAuth() {
             this.authToken = "";
             this.authExpiresAt = 0;
             this.user = null;
             this.clearAuthRefreshTimer();
-            if (window.google?.accounts?.id?.disableAutoSelect) {
-                window.google.accounts.id.disableAutoSelect();
-            }
+            writeStoredAuthToken("");
         }
 
         clearAuthRefreshTimer() {
@@ -86,6 +136,7 @@
         setAuthToken(token) {
             this.authToken = token || "";
             this.authExpiresAt = jwtExpiryMs(this.authToken);
+            writeStoredAuthToken(this.authToken);
             this.scheduleAuthRefresh();
         }
 
@@ -114,9 +165,7 @@
                     await options.onSignedIn(this.user);
                 }
             } catch (error) {
-                this.authToken = "";
-                this.authExpiresAt = 0;
-                this.user = null;
+                this.clearAuth();
                 this.rejectCredentialWaiters(error);
                 if (options.onError) {
                     options.onError(error);
@@ -186,18 +235,42 @@
             }
         }
 
-        async renderSignInButton(container, options = {}) {
-            if (!this.configured || !container) return;
-            await loadScriptOnce("https://accounts.google.com/gsi/client");
+        // google identity services loaded and pointed at this client; the
+        // hour-end refresh (prompt) needs this even when no button renders
+        async ensureGoogleInitialised() {
+            if (!this.configured) return false;
+            await loadScriptOnce(GSI_SCRIPT_SRC);
             if (!window.google?.accounts?.id) {
                 throw new Error("Google sign-in did not initialise.");
             }
-            this.signInOptions = options;
             window.google.accounts.id.initialize({
                 client_id: this.config.googleClientId,
                 auto_select: true,
                 callback: async (response) => this.handleCredentialResponse(response),
             });
+            return true;
+        }
+
+        // after a reload: the kept token names the user again, or is
+        // dropped so the sign-in card shows
+        async restoreSession() {
+            if (!this.configured || !this.authToken) return null;
+            if (this.user) return this.user;
+            try {
+                await this.ensureGoogleInitialised().catch(() => false);
+                this.user = (await this.me()) || null;
+                if (!this.user) this.clearAuth();
+                return this.user;
+            } catch (error) {
+                this.clearAuth();
+                return null;
+            }
+        }
+
+        async renderSignInButton(container, options = {}) {
+            if (!this.configured || !container) return;
+            this.signInOptions = options;
+            await this.ensureGoogleInitialised();
             window.google.accounts.id.renderButton(container, {
                 theme: "outline",
                 size: "large",

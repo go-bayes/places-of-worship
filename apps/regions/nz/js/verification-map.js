@@ -2099,20 +2099,7 @@ class NzVerificationMap {
             `;
             this.backend.renderSignInButton(document.getElementById("googleSignInButton"), {
                 initials: this.getRaInitials(),
-                onSignedIn: async user => {
-                    this.backendUser = user;
-                    await this.refreshBackendTasks();
-                    // a reload or an expired session lands back in the
-                    // activity the contributor had chosen, else the chooser
-                    this.restorePortalMode();
-                    this.renderBackendPanel();
-                    this.applyFilters();
-                    if (this.selectedTask) {
-                        // sign-in after an expired save must not wipe typed values
-                        this.renderDetailPreservingForm(this.selectedTask);
-                    }
-                    this.applyPendingDeepLink();
-                },
+                onSignedIn: user => this.onBackendSignedIn(user),
                 onError: error => {
                     this.backendLastError = error.message || "Could not sign in to the shared backend.";
                     this.renderBackendPanel();
@@ -2187,9 +2174,37 @@ class NzVerificationMap {
         }, 6000);
     }
 
+    // after the google button, after an expired session's re-sign-in, and
+    // after a reload with the sign-in kept on the device
+    async onBackendSignedIn(user, { refreshTasks = true } = {}) {
+        this.backendUser = user;
+        if (refreshTasks) await this.refreshBackendTasks();
+        // a reload or an expired session lands back in the
+        // activity the contributor had chosen, else the chooser
+        this.restorePortalMode();
+        this.renderBackendPanel();
+        this.applyFilters();
+        if (this.selectedTask) {
+            // sign-in after an expired save must not wipe typed values
+            this.renderDetailPreservingForm(this.selectedTask);
+        }
+        this.applyPendingDeepLink();
+        this.resumeRapidPinFromDevice();
+    }
+
+    // a sign-in kept on the device from before a reload (a phone discards
+    // the tab while the contributor is in the photo gallery, then reloads
+    // it) names the user again before the panel paints (jb 2026-09-05)
+    async restoreBackendSession() {
+        if (!this.backend?.configured || !this.backend.authToken || this.backendUser) return null;
+        const user = await this.backend.restoreSession();
+        if (user) this.backendUser = user;
+        return user;
+    }
+
     signOutBackend() {
         const signedOutUserId = this.backendUser?._id || this.backend?.user?._id || "";
-        this.backend?.signOut();
+        this.backend?.signOut({ deliberate: true });
         this.backendUser = null;
         // a deliberate sign-out forgets the chosen activity; an expired
         // session (backendUser cleared elsewhere) keeps it for the return
@@ -2208,7 +2223,7 @@ class NzVerificationMap {
         // sign-out discards the form with the panel; a lingering dirty flag
         // would fire beforeunload against a page showing no form at all
         this.clearFormDirty();
-        this.formSnapshotsByTaskId.clear();
+        this.clearFormSnapshots();
         // pr-e: period cards leave with the session; on a shared computer
         // the next user must not find them
         this.clearAllGuidedPeriods(signedOutUserId);
@@ -2242,12 +2257,14 @@ class NzVerificationMap {
         });
         // keyboard starts: cmd/ctrl+enter submits, plain "n" opens the next task
         document.addEventListener("keydown", event => this.handleGlobalKeydown(event));
+        const restoredUser = await this.restoreBackendSession();
         this.renderBackendPanel();
         await this.loadTasks();
         await this.refreshBackendTasks();
         this.applyFilters();
         this.renderSessionPanel();
         this.maybeOpenIssueDeepLink();
+        if (restoredUser) await this.onBackendSignedIn(restoredUser, { refreshTasks: false });
         if (DEMO_MODE && !ASSIGNMENT_MODE) {
             this.renderRaInitialsBadge();
             // Defer the initials prompt so the map paints first.
@@ -3485,6 +3502,8 @@ class NzVerificationMap {
         this.renderInitialDetail();
         this.renderBackendPanel();
         document.querySelector(".sidebar")?.scrollTo({ top: 0 });
+        // an entry left open by a reload resumes on its kept pin
+        if (next === "add") this.resumeRapidPinFromDevice();
     }
 
     restorePortalMode() {
@@ -3575,10 +3594,15 @@ class NzVerificationMap {
         if (next !== "streets") this.probeImagery();
         if (next !== this.basemap) {
             const incoming = layers[next];
+            // the incoming tiles go on before the outgoing come off: with only
+            // the country-scale dots layer left for a moment, leaflet takes
+            // its maxZoom (7) as the map's and snaps the view out to the whole
+            // country (guy, 2026-09-05: "zooms right out to the whole of
+            // Vanuatu" on Add a missing place, which forces satellite)
+            if (!this.map.hasLayer(incoming)) incoming.addTo(this.map);
             Object.entries(layers).forEach(([key, layer]) => {
                 if (layer && key !== next && this.map.hasLayer(layer)) this.map.removeLayer(layer);
             });
-            if (!this.map.hasLayer(incoming)) incoming.addTo(this.map);
             // tiles sit beneath the canvas dots and dom markers
             incoming.bringToBack();
             this.basemap = next;
@@ -4176,7 +4200,7 @@ class NzVerificationMap {
             if (!window.confirm("You have unsaved evidence on the current task. Discard it and open the other task?")) {
                 return;
             }
-            this.formSnapshotsByTaskId.delete(this.formDirtyTaskId);
+            this.deleteFormSnapshot(this.formDirtyTaskId);
             this.clearGuidedPeriods(this.formDirtyTaskId);
             this.clearFormDirty();
         }
@@ -5004,12 +5028,69 @@ class NzVerificationMap {
         this.formDirtyTaskId = null;
     }
 
+    // ---- typed-but-unsaved guided entries, kept on this device ----
+    // the in-memory map is the working copy; the device copy is what a
+    // reload mid-entry comes back to (jb 2026-09-05)
+
+    formSnapshotStorageKey(taskId) {
+        return `powFormSnapshot:${COUNTRY_CONFIG.countryCode}:${taskId}`;
+    }
+
+    setFormSnapshot(taskId, snapshot) {
+        this.formSnapshotsByTaskId.set(taskId, snapshot);
+        try {
+            window.localStorage.setItem(this.formSnapshotStorageKey(taskId), JSON.stringify({ saved_at: Date.now(), snapshot }));
+        } catch (error) {
+            // private windows or blocked storage keep the snapshot in memory only
+        }
+    }
+
+    getFormSnapshot(taskId) {
+        if (!taskId) return undefined;
+        if (this.formSnapshotsByTaskId.has(taskId)) return this.formSnapshotsByTaskId.get(taskId);
+        try {
+            const raw = window.localStorage.getItem(this.formSnapshotStorageKey(taskId));
+            const record = raw ? JSON.parse(raw) : null;
+            if (record?.snapshot && typeof record.snapshot === "object") {
+                this.formSnapshotsByTaskId.set(taskId, record.snapshot);
+                return record.snapshot;
+            }
+        } catch (error) {
+            // unreadable storage: nothing to restore
+        }
+        return undefined;
+    }
+
+    deleteFormSnapshot(taskId) {
+        this.formSnapshotsByTaskId.delete(taskId);
+        try {
+            window.localStorage.removeItem(this.formSnapshotStorageKey(taskId));
+        } catch (error) {
+            // nothing to clear when storage is unavailable
+        }
+    }
+
+    clearFormSnapshots() {
+        this.formSnapshotsByTaskId.clear();
+        try {
+            const prefix = this.formSnapshotStorageKey("");
+            const keys = [];
+            for (let index = 0; index < window.localStorage.length; index += 1) {
+                const key = window.localStorage.key(index);
+                if (key && key.startsWith(prefix)) keys.push(key);
+            }
+            keys.forEach(key => window.localStorage.removeItem(key));
+        } catch (error) {
+            // nothing to clear when storage is unavailable
+        }
+    }
+
     // snapshot the typed form as a draft-shaped object so applyDraftToForm
     // can reapply it after a programmatic rebuild
     snapshotFormForTask(taskId) {
         if (!taskId || !document.getElementById("raActionSelect")) return;
         const values = this.currentFormValues();
-        this.formSnapshotsByTaskId.set(taskId, {
+        this.setFormSnapshot(taskId, {
             observation_contract_version: this.observationContractVersionFor(values),
             action: values.action,
             target_year_statuses: values.targetYearStatuses,
@@ -5812,6 +5893,9 @@ class NzVerificationMap {
                 values: this.rapidObservationValues(prefix),
                 extra: extraValues,
             };
+            // the confirmed pin rides on the record while the entry is open
+            const previous = this.readRapidDraft(key);
+            if (previous?.pin) record.pin = previous.pin;
             window.localStorage.setItem(this.rapidDraftStorageKey(key), JSON.stringify(record));
         } catch (error) {
             // private windows or blocked storage lose autosave only
@@ -5825,6 +5909,77 @@ class NzVerificationMap {
         } catch (error) {
             return null;
         }
+    }
+
+    // the confirmed pin of a new place rides on the device draft while the
+    // entry is open, so a reload mid-entry returns to the same spot (guy,
+    // 2026-09-05); a revision or a period's location has its own record
+    keepRapidPinOnDevice() {
+        if (!RAPID_NOMINATION_ENTRY || this.reviseContext || this.occupancyPinContext || !this.pinConfirmed) return;
+        const record = this.readRapidDraft("rapid-pin") || { saved_at: Date.now() };
+        record.pin = { ...this.pinConfirmed };
+        try {
+            window.localStorage.setItem(this.rapidDraftStorageKey("rapid-pin"), JSON.stringify(record));
+        } catch (error) {
+            // storage unavailable: the pin lives in memory only
+        }
+    }
+
+    // leaving the pin flow by choice (back to map, cancel, submit, sign-out)
+    // ends the resume; the typed values stay as they always have
+    dropRapidPinFromDevice() {
+        const record = this.readRapidDraft("rapid-pin");
+        if (!record?.pin) return;
+        delete record.pin;
+        try {
+            window.localStorage.setItem(this.rapidDraftStorageKey("rapid-pin"), JSON.stringify(record));
+        } catch (error) {
+            // nothing to update when storage is unavailable
+        }
+    }
+
+    // after a reload mid-entry: the pin flow reopens on the kept pin and
+    // confirms it, and the form below restores its typed values as it
+    // always has; anything short of a confirmable pin is left alone
+    resumeRapidPinFromDevice() {
+        if (!RAPID_NOMINATION_ENTRY || this.portalMode !== "add" || this.pinMode || !this.map) return false;
+        const pin = this.readRapidDraft("rapid-pin")?.pin;
+        if (!pin || !Number.isFinite(pin.latitude) || !Number.isFinite(pin.longitude)) return false;
+        this.enterPinMode();
+        const approximate = pin.locationMode === "approximate_area";
+        const minZoom = approximate ? PIN_MIN_APPROXIMATE_ZOOM : PIN_MIN_PLACEMENT_ZOOM;
+        const zoom = Math.max(Number.isFinite(pin.zoom) ? pin.zoom : minZoom, minZoom);
+        this.map.setView([pin.latitude, pin.longitude], zoom, { animate: false });
+        this.placePin(L.latLng(pin.latitude, pin.longitude));
+        const setValue = (id, value) => {
+            const el = document.getElementById(id);
+            if (el && value !== undefined && value !== null && value !== "") el.value = String(value);
+        };
+        setValue("pinLocationMode", pin.locationMode);
+        if (approximate) {
+            const radius = Number(pin.uncertaintyRadiusM);
+            const presets = Array.from(document.getElementById("pinLocationRadius")?.options || []).map(option => option.value);
+            if (presets.includes(String(radius))) {
+                setValue("pinLocationRadius", radius);
+            } else {
+                setValue("pinLocationRadius", "custom");
+                setValue("pinLocationRadiusCustom", radius);
+            }
+            setValue("pinLocationBasis", pin.basis);
+            setValue("pinLocationWording", pin.sourceWording);
+        }
+        this.updatePinConfirmCard();
+        this.confirmPinLocation();
+        if (!this.pinConfirmed) {
+            // the kept pin could not be confirmed as it stood (for example a
+            // radius no longer accepted): the placement stays open for the
+            // contributor to finish, and the resume is spent
+            this.dropRapidPinFromDevice();
+            return false;
+        }
+        const status = document.getElementById("pinStatus");
+        if (status) status.textContent = "Your entry resumed where you left it.";
+        return true;
     }
 
     clearRapidDraft(key) {
@@ -6285,7 +6440,7 @@ class NzVerificationMap {
             if (options.props?.task_id) {
                 const taskId = options.props.task_id;
                 this.rapidCorrectionTaskIds.delete(taskId);
-                this.formSnapshotsByTaskId.delete(taskId);
+                this.deleteFormSnapshot(taskId);
                 this.latestDraftsByTaskId.delete(taskId);
                 this.taskHistoryByTaskId.delete(taskId);
                 await this.refreshBackendTasks();
@@ -8029,7 +8184,7 @@ class NzVerificationMap {
         }
         // collapsed optional blocks open when the saved draft or a pending
         // unsaved snapshot already carries values for them
-        const prefill = this.formSnapshotsByTaskId.get(taskId) || this.latestDraftForTask(taskId) || {};
+        const prefill = this.getFormSnapshot(taskId) || this.latestDraftForTask(taskId) || {};
         const addressOpen = Boolean(prefill.address_raw || prefill.locality_raw || prefill.address_change_note);
         const lifecycleOpen = Boolean(prefill.lifecycle_event || prefill.lifecycle_date || prefill.lifecycle_note);
         const relatedOpen = Boolean(prefill.related_ids_or_note);
@@ -8345,8 +8500,15 @@ class NzVerificationMap {
             this.updateClosureLifecycleHint();
             this.updateWorkflowSteps();
         };
-        // any user edit marks the form dirty so rebuilds and unloads guard it
-        const markDirty = () => this.markFormDirty(props.task_id);
+        // any user edit marks the form dirty so rebuilds and unloads guard
+        // it; the typed values reach the device shortly after, so a reload
+        // mid-entry keeps them for the task's next opening (jb 2026-09-05)
+        let snapshotTimer = 0;
+        const markDirty = () => {
+            this.markFormDirty(props.task_id);
+            window.clearTimeout(snapshotTimer);
+            snapshotTimer = window.setTimeout(() => this.snapshotFormForTask(props.task_id), 400);
+        };
         actionSelect?.addEventListener("change", () => {
             markDirty();
             applyDefaults();
@@ -8365,9 +8527,9 @@ class NzVerificationMap {
         }
         // typed-but-unsaved values snapshotted before a programmatic rebuild
         // win over the saved draft and stay marked unsaved
-        const snapshot = this.formSnapshotsByTaskId.get(props.task_id);
+        const snapshot = this.getFormSnapshot(props.task_id);
         if (snapshot) {
-            this.formSnapshotsByTaskId.delete(props.task_id);
+            this.deleteFormSnapshot(props.task_id);
             this.applyDraftToForm(snapshot);
             this.markFormDirty(props.task_id);
         }
@@ -10283,6 +10445,7 @@ class NzVerificationMap {
                 sourceWording: rapidWording,
             } : {}),
         };
+        this.keepRapidPinOnDevice();
         if (this.rapidFormOptions?.pin) this.renderRapidSourceLinks("pin", this.rapidFormOptions.pin);
         // the confirmed position is what gets recorded; freeze the pin
         this.pinMarker.dragging.disable();
@@ -10510,6 +10673,7 @@ class NzVerificationMap {
         if (this.formDirtyTaskId === "rapid-pin" || this.formDirtyTaskId === "location-pin") {
             this.clearFormDirty();
         }
+        this.dropRapidPinFromDevice();
         // a cancelled period placement returns to the pane with its cards
         const occupancyPin = this.occupancyPinContext;
         this.occupancyPinContext = null;
