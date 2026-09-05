@@ -316,7 +316,7 @@ function human(value) {
             <button id="signOut" class="tertiary" type="button">Sign out</button>
         `;
         document.getElementById("signOut").addEventListener("click", () => {
-            client.signOut();
+            client.signOut({ deliberate: true });
             state.user = null;
             state.queue = [];
             state.selected = null;
@@ -1665,9 +1665,13 @@ function human(value) {
         }
     }
 
-    function init() {
+    async function init() {
         setupPageLabel();
         setupBoundary();
+        // a sign-in kept on the device from before a reload (jb 2026-09-05)
+        if (client.authToken) {
+            state.user = await client.restoreSession().catch(() => null);
+        }
         els.refreshQueue.addEventListener("click", loadQueue);
         els.queueStatus.addEventListener("change", () => {
             state.selected = null;
@@ -1678,6 +1682,7 @@ function human(value) {
         els.queueClaimFilter?.addEventListener("change", () => renderQueue());
         renderAuth();
         renderQueue();
+        if (state.user) await loadQueue();
     }
 
     init();
