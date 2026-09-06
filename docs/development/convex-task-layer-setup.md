@@ -413,3 +413,7 @@ npx convex run tasks:adminUpsertTasksFromStaticMap "$(cat exports/convex-task-se
 The `.run.json` file is the payload with `actor_email` prepended. The mutation
 is idempotent on `batch_id` and `task_id`, so a corrected payload can be re-run.
 First use: `vu-port-vila-survey-2010-001` (93 tasks from Eriksen & Andrew 2010).
+Second use: `vu-vila-council-list-2026-001` (61 tasks from the Vanuatu Christian
+Council's September 2026 list of Port Vila churches; generator
+`scripts/build_vu_council_list_tasks.py`, reads the docx held off-Git in
+pow-research `data/raw/vu_council_list_2026/`).
