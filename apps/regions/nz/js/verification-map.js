@@ -961,6 +961,9 @@ const PANE_PHONE_QUERY = "(max-width: 900px)";
 const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 };
 const POSITION_ZOOM = 17;
 const PIN_PROXIMITY_METRES = 150;
+// nearby tasks one entry may link as probably the same place (backend
+// PROBABLE_SAME_AS_MAX)
+const PIN_LINK_MAX = 5;
 // satellite basemap: maptiler's paid plan (ruled 2026-08-29) so contributors
 // can steer the pin onto the actual building; absent key hides the option
 const MAPTILER_API_KEY = String(window.MAPTILER_API_KEY || "").trim();
@@ -1792,6 +1795,7 @@ function featureFromBackendTask(task) {
         osm_lifecycle_date_notes: context.osm_date_tags_by_year || "",
         source_context: context,
         initial_location_assertion: task.initial_location_assertion,
+        nearby_site_refs: task.nearby_site_refs || [],
         ...backendTargetYearFields(context),
     };
     return {
@@ -1898,6 +1902,9 @@ class NzVerificationMap {
         this.pinUncertaintyCircle = null;
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
+        // nearby tasks the contributor linked as probably this same place
+        // while keeping the new pin (guy, 2026-09-07)
+        this.pinLinkedRefs = [];
         this.pinSubmissionId = null;
         // occupancy lane: the period cards under entry, and the card whose
         // location the pin flow is currently placing
@@ -5600,6 +5607,9 @@ class NzVerificationMap {
         if (INTAKE_ENABLED) {
             this.bindRaActionForm(props);
         }
+        panel.querySelectorAll(".linked-task-open").forEach(button => {
+            button.addEventListener("click", () => this.selectTaskById(button.dataset.taskId, { focusDetail: true }));
+        });
         this.bindIssueForm(issueContext);
         this.bindCopyCoords(panel);
         this.bindTaskHistory(props.task_id);
@@ -5708,11 +5718,34 @@ class NzVerificationMap {
         `;
     }
 
+    // the probable-same-place links a task carries, each way (guy,
+    // 2026-09-07): the reviewer sees the merge question; a contributor can
+    // open the other record
+    taskLinksHtml(props) {
+        const refs = (props.nearby_site_refs || []).filter(ref => ref?.relation === "probable_same_place" && ref.task_id);
+        if (!refs.length) return "";
+        return `
+            <div class="task-links">
+                <strong>Probably the same place as</strong>
+                <ul>
+                    ${refs.map(ref => `
+                        <li>
+                            ${escapeHtml(ref.name || "Unnamed record")}${Number.isFinite(ref.distance_m) ? ` (${escapeHtml(String(ref.distance_m))} m away)` : ""}
+                            <button type="button" class="tertiary linked-task-open" data-task-id="${escapeHtml(ref.task_id)}">Open</button>
+                        </li>
+                    `).join("")}
+                </ul>
+                <small class="label-help">Linked by a contributor and kept as separate records; a reviewer decides whether to merge them.</small>
+            </div>
+        `;
+    }
+
     siteTaskBriefHtml(props) {
         if (this.taskUsesRapidForm(props) && !this.taskIsReadOnly(props.task_id)) {
             return `
                 <h3>Record current information</h3>
                 ${this.taskWhyHtml(props)}
+                ${this.taskLinksHtml(props)}
             `;
         }
         const checks = props.automated_checks || [];
@@ -5736,6 +5769,7 @@ class NzVerificationMap {
                     ${TARGET_YEARS.length ? `<span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))}</span>` : ""}
                 </div>
                 ${this.taskWhyHtml(props)}
+                ${this.taskLinksHtml(props)}
                 <p>${escapeHtml(briefText)}</p>
                 ${props.source_hints ? `<p><strong>Source hints:</strong> ${escapeHtml(props.source_hints)}</p>` : ""}
                 <ol>
@@ -6226,7 +6260,7 @@ class NzVerificationMap {
     keepRapidPinOnDevice() {
         if (!RAPID_NOMINATION_ENTRY || this.reviseContext || this.occupancyPinContext || !this.pinConfirmed) return;
         const record = this.readRapidDraft("rapid-pin") || { saved_at: Date.now() };
-        record.pin = { ...this.pinConfirmed };
+        record.pin = { ...this.pinConfirmed, linkedRefs: this.pinLinkedRefs || [] };
         try {
             window.localStorage.setItem(this.rapidDraftStorageKey("rapid-pin"), JSON.stringify(record));
         } catch (error) {
@@ -6260,6 +6294,8 @@ class NzVerificationMap {
         const zoom = Math.max(Number.isFinite(pin.zoom) ? pin.zoom : minZoom, minZoom);
         this.map.setView([pin.latitude, pin.longitude], zoom, { animate: false });
         this.placePin(L.latLng(pin.latitude, pin.longitude));
+        // links chosen before the reload stand; the nearby list is not re-asked
+        this.pinLinkedRefs = Array.isArray(pin.linkedRefs) ? pin.linkedRefs.filter(ref => ref?.task_id) : [];
         const setValue = (id, value) => {
             const el = document.getElementById(id);
             if (el && value !== undefined && value !== null && value !== "") el.value = String(value);
@@ -10179,6 +10215,7 @@ class NzVerificationMap {
             </div>
             <div id="pinProximityCard" class="pin-card" hidden></div>
             <div id="pinFormCard" class="pin-card" hidden>
+                <div id="pinLinkedCard" class="pin-linked" hidden></div>
                 ${revise ? `
                     <label>
                         What is wrong or new about this record?
@@ -10278,6 +10315,7 @@ class NzVerificationMap {
                         latitude: this.pinConfirmed.latitude,
                         longitude: this.pinConfirmed.longitude,
                         ...(locationAssertion ? { locationAssertion } : {}),
+                        ...(this.probableSameAsPayload() ? { probableSameAs: this.probableSameAsPayload() } : {}),
                     };
                 },
             });
@@ -10417,6 +10455,7 @@ class NzVerificationMap {
         this.reconcileRapidPeriodsPlace(this.rapidPinPlaceKey());
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
+        this.pinLinkedRefs = [];
         this.pinSubmissionId = RAPID_NOMINATION_ENTRY ? window.PowRapidEntry.secureSubmissionId() : null;
         this.mountPinCards();
         this.map.getContainer().classList.add("pin-placement");
@@ -10800,7 +10839,8 @@ class NzVerificationMap {
         }
         const nearby = this.nearbyTaskRows(position, this.pinConfirmed.uncertaintyRadiusM);
         this.pinNearbyCount = nearby.length;
-        if (nearby.length) {
+        // an entry resumed with its links already chosen goes straight on
+        if (nearby.length && !(this.pinLinkedRefs || []).length) {
             this.showPinProximity(nearby);
         } else {
             this.showPinForm();
@@ -10824,6 +10864,7 @@ class NzVerificationMap {
                     name: props.name || "Unnamed site",
                     distance: Math.round(distance),
                     status: backendStatus.replaceAll("_", " "),
+                    siteId: props.master_site_id || "",
                 };
             })
             .filter(Boolean)
@@ -10839,12 +10880,16 @@ class NzVerificationMap {
         card.innerHTML = `
             <div class="copy-help">
                 Existing tasks in or near the supported location — is one of these the same place?
+                <small class="label-help">Opening a task drops your pin. If the existing record is mislocated or unlocated, link it instead: your pin and details are kept as a separate entry and a reviewer decides whether to merge.</small>
             </div>
             ${rows.length > shownRows.length ? `<div class="pilot-note">Showing the nearest ${shownRows.length} of ${rows.length} tasks in this broad area. A reviewer must still assess duplicate risk.</div>` : ""}
             ${shownRows.map(row => `
                 <div class="pin-nearby-row">
                     <span>${escapeHtml(row.name)} — ${row.distance} m, ${escapeHtml(row.status)}</span>
-                    <button type="button" class="tertiary pin-nearby-open" data-task-id="${escapeHtml(row.taskId)}">This is it — open that task instead</button>
+                    <div class="pin-nearby-actions">
+                        <button type="button" class="tertiary pin-nearby-open" data-task-id="${escapeHtml(row.taskId)}">This is it — open that task instead</button>
+                        <button type="button" class="tertiary pin-nearby-link" data-task-id="${escapeHtml(row.taskId)}">Probably this one — link it and keep my pin</button>
+                    </div>
                 </div>
             `).join("")}
             <button id="pinProximityContinue" type="button" class="secondary">None of these — continue</button>
@@ -10856,6 +10901,14 @@ class NzVerificationMap {
                 this.selectTaskById(taskId, { focusDetail: true });
             });
         });
+        card.querySelectorAll(".pin-nearby-link").forEach(button => {
+            button.addEventListener("click", () => {
+                const row = rows.find(item => item.taskId === button.dataset.taskId);
+                if (row) this.linkNearbyTask(row);
+                card.hidden = true;
+                this.showPinForm();
+            });
+        });
         document.getElementById("pinProximityContinue")?.addEventListener("click", () => {
             card.hidden = true;
             this.showPinForm();
@@ -10865,10 +10918,68 @@ class NzVerificationMap {
         this.revealPinHost();
     }
 
+    // records a nearby task as probably this same place; the pin stays and
+    // the entry is submitted as its own task carrying the link
+    linkNearbyTask(row) {
+        const refs = (this.pinLinkedRefs || []).filter(ref => ref.task_id !== row.taskId);
+        if (refs.length >= PIN_LINK_MAX) return;
+        refs.push({
+            task_id: row.taskId,
+            name: row.name,
+            distance_m: Number.isFinite(row.distance) ? Math.round(row.distance) : undefined,
+            ...(row.siteId ? { site_id: row.siteId } : {}),
+        });
+        this.pinLinkedRefs = refs;
+        this.keepRapidPinOnDevice();
+        this.markFormDirty(RAPID_NOMINATION_ENTRY ? "rapid-pin" : "location-pin");
+    }
+
+    unlinkNearbyTask(taskId) {
+        this.pinLinkedRefs = (this.pinLinkedRefs || []).filter(ref => ref.task_id !== taskId);
+        this.keepRapidPinOnDevice();
+        this.renderPinLinkedCard();
+    }
+
+    // what the submission sends: absent when nothing is linked
+    probableSameAsPayload() {
+        const refs = (this.pinLinkedRefs || []).map(ref => ({
+            task_id: ref.task_id,
+            ...(ref.name ? { name: ref.name } : {}),
+            ...(Number.isFinite(ref.distance_m) ? { distance_m: ref.distance_m } : {}),
+        }));
+        return refs.length ? refs : undefined;
+    }
+
+    renderPinLinkedCard() {
+        const card = document.getElementById("pinLinkedCard");
+        if (!card) return;
+        const refs = this.pinLinkedRefs || [];
+        if (!refs.length) {
+            card.hidden = true;
+            card.innerHTML = "";
+            return;
+        }
+        card.hidden = false;
+        card.innerHTML = `
+            <strong>Linked as probably the same place</strong>
+            ${refs.map(ref => `
+                <div class="pin-linked-row">
+                    <span>${escapeHtml(ref.name || "Unnamed record")}${Number.isFinite(ref.distance_m) ? ` — ${ref.distance_m} m from your pin` : ""}</span>
+                    <button type="button" class="tertiary pin-linked-remove" data-task-id="${escapeHtml(ref.task_id)}">Unlink</button>
+                </div>
+            `).join("")}
+            <small class="label-help">This entry stays separate: your pin and details are recorded as they are, and the linked record is noted for the reviewer, who decides whether to merge.</small>
+        `;
+        card.querySelectorAll(".pin-linked-remove").forEach(button => {
+            button.addEventListener("click", () => this.unlinkNearbyTask(button.dataset.taskId));
+        });
+    }
+
     showPinForm() {
         this.paneSnap("entry");
         const card = document.getElementById("pinFormCard");
         if (card) card.hidden = false;
+        this.renderPinLinkedCard();
         const status = document.getElementById("pinStatus");
         if (status) status.textContent = "";
         this.revealPinHost();
@@ -10933,6 +11044,7 @@ class NzVerificationMap {
                 targetYears: COUNTRY_CONFIG.targetYears.map(Number),
                 sourceNote,
                 locationAssertion,
+                ...(this.probableSameAsPayload() ? { probableSameAs: this.probableSameAsPayload() } : {}),
                 clientContext: {
                     source: "portal_pin_drop",
                     country_code: COUNTRY_CONFIG.countryCode,
@@ -10940,6 +11052,7 @@ class NzVerificationMap {
                     placement_zoom: this.pinConfirmed.zoom,
                     proximity_checked: true,
                     nearby_count: this.pinNearbyCount,
+                    linked_task_ids: (this.pinLinkedRefs || []).map(ref => ref.task_id),
                     location_assertion_contract: "location_assertion_v1",
                     location_mode: locationAssertion.mode,
                 },
@@ -10963,6 +11076,7 @@ class NzVerificationMap {
                     coordinates: [this.pinConfirmed.longitude, this.pinConfirmed.latitude],
                 },
                 initial_location_assertion: locationAssertion,
+                nearby_site_refs: (this.pinLinkedRefs || []).map(ref => ({ ...ref, relation: "probable_same_place" })),
                 automated_checks: [{
                     check_id: "user_nomination",
                     severity: "info",
@@ -11013,6 +11127,7 @@ class NzVerificationMap {
         this.reviseContext = null;
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
+        this.pinLinkedRefs = [];
         this.pinSubmissionId = null;
         this.pinHistory = [];
         if (this._pinClickHandler) {

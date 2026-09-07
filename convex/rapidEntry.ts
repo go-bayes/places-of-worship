@@ -25,10 +25,12 @@ import {
   manualBatchId,
   sourceFieldsForObservationBasis,
 } from "./lib/rapidEntry";
+import { assertProbableSameAsInputs, probableSameAsCheck } from "./lib/probableSameAs";
+import { recordProbableSameAsReciprocals, resolveProbableSameAsRefs } from "./lib/probableSameAsRecords";
 import { resolveCitedSource } from "./lib/sources";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { assertAssertionMatchesTaskPoint, assertCountryAllowsAssertionMode } from "./lib/locationAssertions";
-import { locationAssertionInput, privacyFlag, rapidCurrentObservationInput, taskStatus } from "./model";
+import { locationAssertionInput, privacyFlag, probableSameAsInput, rapidCurrentObservationInput, taskStatus } from "./model";
 
 // the first release was vanuatu-only; an omitted country keeps the deployed
 // portal's behaviour exactly while newer clients name their country
@@ -58,6 +60,9 @@ const candidateInput = v.object({
   // building at the pin (the pre-2026-09-02 behaviour), otherwise the
   // same location_assertion_v1 the curator nomination path records
   locationAssertion: v.optional(locationAssertionInput),
+  // nearby tasks the observer judges to be probably this same place; the
+  // entry stays separate and both tasks carry the link (guy, 2026-09-07)
+  probableSameAs: v.optional(v.array(probableSameAsInput)),
 });
 
 const rapidClientContext = v.object({
@@ -189,6 +194,7 @@ export const submitCurrentObservation = mutation({
     assertMaxString("denomination or tradition label", args.observation.denomination_or_tradition_raw, MEDIUM_TEXT_MAX);
     assertMaxString("direct observation", args.observation.direct_observation, 2_000);
     assertMaxString("uncertainty or follow-up", args.observation.uncertainty_note, 2_000);
+    assertProbableSameAsInputs(args.candidate?.probableSameAs);
 
     const newCandidate = args.candidate !== undefined;
     const candidateLocation = args.candidate === undefined
@@ -340,6 +346,7 @@ export const submitCurrentObservation = mutation({
       if (taskIdCollision !== null) {
         throw new Error("The candidate identifier is already in use. Reload the form and try again.");
       }
+      const linked = await resolveProbableSameAsRefs(ctx, candidate.probableSameAs, intakeCountry, now);
       const taskRecord = {
         task_id: taskId,
         batch_id: rapidEntryBatch,
@@ -360,19 +367,23 @@ export const submitCurrentObservation = mutation({
           coordinates: [candidate.longitude, candidate.latitude],
         },
         ...(candidateLocation !== undefined ? { initial_location_assertion: candidateLocation } : {}),
-        nearby_site_refs: [],
-        automated_checks: [{
-          check_id: "rapid_current_nomination",
-          severity: "info",
-          message: `An invited RA submitted a current-place observation through the ${intake.name} rapid-entry path.`,
-          suggested_action: "review_identity_and_current_use",
-        }],
+        nearby_site_refs: linked.refs,
+        automated_checks: [
+          {
+            check_id: "rapid_current_nomination",
+            severity: "info",
+            message: `An invited RA submitted a current-place observation through the ${intake.name} rapid-entry path.`,
+            suggested_action: "review_identity_and_current_use",
+          },
+          ...(linked.refs.length > 0 ? [probableSameAsCheck(linked.refs)] : []),
+        ],
         task_brief: `Review this ${intake.name} current-place observation. Confirm site identity, present worship use, sensitivity, and whether an existing project or OSM record already represents the place before export.`,
         source_context: {
           intake_mode: "rapid_current_v1",
           proximity_checked: args.clientContext?.proximity_checked ?? false,
           nearby_count: args.clientContext?.nearby_count ?? 0,
           ...(candidateLocation !== undefined ? { location_mode: candidateLocation.mode } : {}),
+          ...(linked.refs.length > 0 ? { probable_same_as: linked.refs.map((ref) => ref.task_id) } : {}),
         },
         intake_submission_key: submissionKey,
         created_at: now,
@@ -392,6 +403,15 @@ export const submitCurrentObservation = mutation({
         actorRole,
         newStatus: "in_progress",
         reason: `${intake.name} current-place observation started.`,
+        clientContext: args.clientContext,
+      });
+      await recordProbableSameAsReciprocals(ctx, {
+        newTask: { task_id: taskId, name: taskRecord.name },
+        linkedTasks: linked.tasks,
+        refs: linked.refs,
+        actorUserId: user._id,
+        actorRole,
+        now,
         clientContext: args.clientContext,
       });
     }

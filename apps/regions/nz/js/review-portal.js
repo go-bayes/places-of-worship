@@ -216,6 +216,16 @@ function human(value) {
         return "Choose a decision before recording review.";
     }
 
+    // the contributor's probable-same-place links, each way (guy,
+    // 2026-09-07): the two records stay separate until a reviewer merges
+    function probableSameAsSummary(task) {
+        const refs = (task.nearby_site_refs || []).filter((ref) => ref?.relation === "probable_same_place" && ref.task_id);
+        if (refs.length === 0) return undefined;
+        return refs
+            .map((ref) => `${ref.name || "Unnamed record"} (task ${ref.task_id}${Number.isFinite(ref.distance_m) ? `, ${ref.distance_m} m away` : ""})`)
+            .join("; ");
+    }
+
     function renderFieldGrid(rows) {
         const visibleRows = rows.filter(([, value]) => value !== undefined && value !== null && value !== "");
         if (visibleRows.length === 0) {
@@ -553,6 +563,7 @@ function human(value) {
                         ["Location confidence", locationAssertion?.confidence],
                         ["Contributor confirmed", locationAssertion?.contributor_confirmed ? "yes" : undefined],
                         ["Retained location wording", locationAssertion?.source_wording],
+                        ["Probably the same place as", probableSameAsSummary(task)],
                     ])}
                 </section>
                 <section class="panel">
