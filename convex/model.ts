@@ -545,6 +545,18 @@ export const nearbySiteRef = v.object({
   task_id: v.optional(v.string()),
   name: v.optional(v.string()),
   distance_m: v.optional(v.number()),
+  // a contributor's judgement that the two records are probably one place
+  // (guy, 2026-09-07): both tasks carry the ref, each pointing at the
+  // other, and stay separate until a reviewer merges or rejects the link
+  relation: v.optional(v.literal("probable_same_place")),
+  linked_at: v.optional(v.number()),
+});
+
+// what the contributor sends when linking a new entry to a nearby task
+export const probableSameAsInput = v.object({
+  task_id: v.string(),
+  name: v.optional(v.string()),
+  distance_m: v.optional(v.number()),
 });
 
 export const taskBatchInput = v.object({

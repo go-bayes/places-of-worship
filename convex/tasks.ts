@@ -4,6 +4,7 @@ import type { Doc } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import {
   locationAssertionInput,
+  probableSameAsInput,
   projectRole,
   reviewDecisionStatus,
   taskBatchInput,
@@ -18,6 +19,8 @@ import { assertOwnsOrCanReview, canReview, chooseActorRole, requireUser } from "
 import { targetYearsOrEmpty } from "./lib/countryYears";
 import { assertAssertionMatchesTaskPoint, assertCountryAllowsAssertionMode } from "./lib/locationAssertions";
 import { issueBatchId, manualBatchId } from "./lib/rapidEntry";
+import { assertProbableSameAsInputs, probableSameAsCheck } from "./lib/probableSameAs";
+import { recordProbableSameAsReciprocals, resolveProbableSameAsRefs } from "./lib/probableSameAsRecords";
 import {
   MEDIUM_TEXT_MAX,
   SHORT_TEXT_MAX,
@@ -1011,6 +1014,9 @@ export const createManualCandidateTask = mutation({
     taskBrief: v.optional(v.string()),
     sourceNote: v.optional(v.string()),
     locationAssertion: v.optional(locationAssertionInput),
+    // nearby tasks the contributor judges to be probably this same place;
+    // the entry stays separate and both tasks carry the link
+    probableSameAs: v.optional(v.array(probableSameAsInput)),
     clientContext: v.optional(v.any()),
   },
   returns: v.object({
@@ -1021,6 +1027,7 @@ export const createManualCandidateTask = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     assertMaxString("nomination country code", args.countryCode, SHORT_TEXT_MAX);
+    assertProbableSameAsInputs(args.probableSameAs);
     assertMaxString("nomination name", args.name, TASK_NAME_MAX);
     assertMaxString("nomination address", args.address, MEDIUM_TEXT_MAX);
     assertMaxString("nomination locality", args.locality, MEDIUM_TEXT_MAX);
@@ -1047,6 +1054,7 @@ export const createManualCandidateTask = mutation({
     const taskBrief =
       args.taskBrief ??
       "Review this user-nominated place of worship candidate. Check whether it is already on the project map or in OSM before accepting it for export.";
+    const linked = await resolveProbableSameAsRefs(ctx, args.probableSameAs, args.countryCode, now);
 
     await ctx.db.insert("tasks", {
       task_id: taskId,
@@ -1068,7 +1076,7 @@ export const createManualCandidateTask = mutation({
         coordinates: [args.longitude, args.latitude],
       },
       initial_location_assertion: locationAssertion,
-      nearby_site_refs: [],
+      nearby_site_refs: linked.refs,
       automated_checks: [
         {
           check_id: "user_nomination",
@@ -1076,21 +1084,35 @@ export const createManualCandidateTask = mutation({
           message: args.sourceNote ?? "Candidate was nominated from the task map.",
           suggested_action: "review_identity",
         },
+        ...(linked.refs.length > 0 ? [probableSameAsCheck(linked.refs)] : []),
       ],
       task_brief: taskBrief,
+      ...(linked.refs.length > 0
+        ? { source_context: { probable_same_as: linked.refs.map((ref) => ref.task_id) } }
+        : {}),
       created_at: now,
       updated_at: now,
       last_event_at: now,
     });
 
+    const actorRole = chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]);
     await appendTaskEvent(ctx, {
       taskId,
       eventType: "opened",
       actorUserId: user._id,
-      actorRole: chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]),
+      actorRole,
       newStatus: "in_progress",
       reason: args.sourceNote,
       // pin-drop placement provenance (zoom, proximity result) rides here
+      clientContext: args.clientContext,
+    });
+    await recordProbableSameAsReciprocals(ctx, {
+      newTask: { task_id: taskId, name: args.name },
+      linkedTasks: linked.tasks,
+      refs: linked.refs,
+      actorUserId: user._id,
+      actorRole,
+      now,
       clientContext: args.clientContext,
     });
     return { task_id: taskId, candidate_site_id: candidateSiteId, status: "in_progress" as const };
