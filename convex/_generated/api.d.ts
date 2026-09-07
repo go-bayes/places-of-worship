@@ -27,6 +27,8 @@ import type * as lib_limits from "../lib/limits.js";
 import type * as lib_locationAssertions from "../lib/locationAssertions.js";
 import type * as lib_occupancies from "../lib/occupancies.js";
 import type * as lib_occupancyImport from "../lib/occupancyImport.js";
+import type * as lib_probableSameAs from "../lib/probableSameAs.js";
+import type * as lib_probableSameAsRecords from "../lib/probableSameAsRecords.js";
 import type * as lib_r2Presign from "../lib/r2Presign.js";
 import type * as lib_rapidEntry from "../lib/rapidEntry.js";
 import type * as lib_rateLimits from "../lib/rateLimits.js";
@@ -72,6 +74,8 @@ declare const fullApi: ApiFromModules<{
   "lib/locationAssertions": typeof lib_locationAssertions;
   "lib/occupancies": typeof lib_occupancies;
   "lib/occupancyImport": typeof lib_occupancyImport;
+  "lib/probableSameAs": typeof lib_probableSameAs;
+  "lib/probableSameAsRecords": typeof lib_probableSameAsRecords;
   "lib/r2Presign": typeof lib_r2Presign;
   "lib/rapidEntry": typeof lib_rapidEntry;
   "lib/rateLimits": typeof lib_rateLimits;

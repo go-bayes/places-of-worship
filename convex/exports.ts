@@ -7,6 +7,7 @@ import { appendTaskEvent } from "./lib/taskEvents";
 import { exportRefusalForTask } from "./lib/acceptance";
 import { isWideEvidenceExportEligible } from "./lib/exportEligibility";
 import { targetYearsOrEmpty } from "./lib/countryYears";
+import { locationOutcomeColumns } from "./lib/locationOutcome";
 import { readGeneratedWideRow, wideEvidenceFields, wideEvidenceRowValues } from "./lib/wideEvidenceFields";
 import {
   derivedStateEventDoc,
@@ -104,13 +105,26 @@ function overlayTargetYears(
   return out;
 }
 
+// the latest accepting decision for a draft: its location ruling is the
+// one the export reports
+function acceptingDecisionForDraft(
+  reviewDecisions: Doc<"review_decisions">[],
+  draftId: string,
+): Doc<"review_decisions"> | undefined {
+  return reviewDecisions
+    .filter((decision) => decision.evidence_draft_id === draftId && decision.decision_status === "accepted_for_export")
+    .sort((a, b) => b.created_at - a.created_at)[0];
+}
+
 function siteEvidenceWideCsv(
   countryCode: string,
   evidenceDrafts: Doc<"evidence_drafts">[],
   reviewDecisions: Doc<"review_decisions">[],
   derivedLocations: Doc<"derived_year_locations">[] = [],
+  tasks: Doc<"tasks">[] = [],
 ): { csv: string; rowCount: number; fieldCount: number; fieldMismatchCount: number } {
   const acceptedDraftIds = acceptedEvidenceDraftIds(reviewDecisions);
+  const tasksByTaskId = new Map(tasks.map((task) => [task.task_id, task]));
   // the header is the shared column list for the country's waves (pr-b0);
   // every row is placed by column name, so a draft saved under an earlier
   // or divergent field list loses nothing and shifts nothing
@@ -140,12 +154,17 @@ function siteEvidenceWideCsv(
     if (!sameFields) {
       fieldMismatchCount += 1;
     }
-    rows.push(overlayTargetYears(
-      generated.row,
-      draft,
-      targetYears,
-      derivedLocations.filter((l) => l.parent_evidence_draft_id === draft.evidence_draft_id),
-    ));
+    // the reviewer's ruling on a moved pin rides beside the row's own point
+    const ruling = acceptingDecisionForDraft(reviewDecisions, draft.evidence_draft_id);
+    rows.push({
+      ...overlayTargetYears(
+        generated.row,
+        draft,
+        targetYears,
+        derivedLocations.filter((l) => l.parent_evidence_draft_id === draft.evidence_draft_id),
+      ),
+      ...locationOutcomeColumns(tasksByTaskId.get(draft.task_id), ruling?.location_outcome),
+    });
   }
 
   if (rows.length === 0) {
@@ -181,7 +200,7 @@ function exportFiles(
   reviewDecisions: Doc<"review_decisions">[],
   occupancy: OccupancyBundle = { occupancies: [], derivedStates: [], derivedLocations: [], derivedFunctions: [], derivedEvents: [] },
 ) {
-  const wide = siteEvidenceWideCsv(String(manifest.country_code ?? ""), evidenceDrafts, reviewDecisions, occupancy.derivedLocations);
+  const wide = siteEvidenceWideCsv(String(manifest.country_code ?? ""), evidenceDrafts, reviewDecisions, occupancy.derivedLocations, tasks);
   const fileManifest = {
     ...manifest,
     files: [

@@ -534,6 +534,7 @@ function human(value) {
                 ${review ? `
                     <div class="status">
                         Last review decision: <strong>${escapeHtml(decisionLabel(review.decision_status))}</strong>
+                        ${review.location_outcome ? `<br>Location ruling: ${escapeHtml(locationOutcomeLabel(review.location_outcome))}` : ""}
                         ${review.decision_note ? `<br>${escapeHtml(review.decision_note)}` : ""}
                     </div>
                 ` : ""}
@@ -1421,6 +1422,7 @@ function human(value) {
     function setDecisionFormValues(form, values) {
         if (values.decisionStatus !== undefined) form.decisionStatus.value = values.decisionStatus;
         if (values.identityDecision !== undefined) form.identityDecision.value = values.identityDecision;
+        if (values.locationOutcome !== undefined && form.locationOutcome) form.locationOutcome.value = values.locationOutcome;
         if (values.acceptedAction !== undefined) form.acceptedAction.value = values.acceptedAction;
         if (values.requiredFollowUp !== undefined) form.requiredFollowUp.value = values.requiredFollowUp;
         if (values.decisionNote !== undefined) form.decisionNote.value = values.decisionNote;
@@ -1462,8 +1464,34 @@ function human(value) {
         });
     }
 
+    // the record's original point and the contributor's point, for the
+    // location ruling (jb 2026-09-07); a revision only
+    function originalPointOf(task) {
+        const point = task?.source_context?.issue_report?.original_point;
+        if (!Array.isArray(point) || point.length < 2) return null;
+        const lng = Number(point[0]);
+        const lat = Number(point[1]);
+        return Number.isFinite(lng) && Number.isFinite(lat) ? [lng, lat] : null;
+    }
+
+    function pinMovedOn(task) {
+        const original = originalPointOf(task);
+        const current = task?.geometry?.coordinates;
+        if (!original || !Array.isArray(current) || current.length < 2) return false;
+        return distanceMetres(original, current) >= 1;
+    }
+
+    function locationOutcomeLabel(value) {
+        if (value === "accept_moved_point") return "accept the moved point";
+        if (value === "keep_original_point") return "keep the record's original point";
+        if (value === "uncertain") return "location uncertain";
+        return "";
+    }
+
     function decisionForm(task, draft) {
         const defaultAction = draft?.action || "";
+        const hasOriginalPoint = Boolean(originalPointOf(task));
+        const moved = pinMovedOn(task);
         const canDecide = task.status === "needs_review"
             || task.status === "unresolved_note"
             || task.status === "changes_requested"
@@ -1516,6 +1544,20 @@ function human(value) {
                         <option value="uncertain">uncertain</option>
                     </select>
                 </div>
+                ${hasOriginalPoint ? `
+                    <div>
+                        <label for="locationOutcome">Location ruling</label>
+                        <select id="locationOutcome" name="locationOutcome" ${canDecide ? "" : "disabled"}>
+                            <option value="">${moved ? "choose which point stands..." : "not needed (pin not moved)"}</option>
+                            <option value="accept_moved_point">accept the moved point</option>
+                            <option value="keep_original_point">keep the record's original point</option>
+                            <option value="uncertain">location uncertain</option>
+                        </select>
+                        <small class="muted">${moved
+                            ? "The contributor moved the pin. Accepting for export needs this ruling; the export carries the point that stands."
+                            : "The contributor confirmed the record's point without moving it."}</small>
+                    </div>
+                ` : ""}
                 <div>
                     <label for="acceptedAction">Accepted action</label>
                     <input id="acceptedAction" name="acceptedAction" value="${escapeHtml(defaultAction)}" placeholder="Usually copied from the draft action" ${canDecide ? "" : "disabled"}>
@@ -1608,6 +1650,13 @@ function human(value) {
             statusText.className = "status error";
             return;
         }
+        const locationOutcome = form.locationOutcome?.value || undefined;
+        if (decisionStatus === "accepted_for_export" && pinMovedOn(state.selected.task) && !locationOutcome) {
+            statusText.textContent = "The contributor moved the pin: choose the location ruling before accepting.";
+            statusText.className = "status error";
+            form.locationOutcome?.focus();
+            return;
+        }
 
         const decision = {
             evidence_draft_id: draft?.evidence_draft_id,
@@ -1615,6 +1664,7 @@ function human(value) {
             decision_note: form.decisionNote.value.trim() || undefined,
             accepted_action: form.acceptedAction.value.trim() || undefined,
             identity_decision: form.identityDecision.value || undefined,
+            location_outcome: locationOutcome,
             target_year_affects: decisionStatus === "accepted_for_export"
                 ? targetYearAffectsFromDraft(draft)
                 : undefined,

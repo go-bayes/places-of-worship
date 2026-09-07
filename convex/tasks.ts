@@ -813,6 +813,10 @@ export const createIssueTask = mutation({
     originalLatitude: v.optional(v.number()),
     originalLongitude: v.optional(v.number()),
     assignToReporter: v.optional(v.boolean()),
+    // the task whose point is being revised, when the revision started
+    // from a task rather than a context dot (jb 2026-09-07): the issue
+    // task names it and the task gets a note pointing at the revision
+    sourceTaskId: v.optional(v.string()),
   },
   returns: v.union(
     v.object({
@@ -837,7 +841,20 @@ export const createIssueTask = mutation({
     assertMaxString("issue related site id", args.relatedSiteId, MEDIUM_TEXT_MAX);
     assertMaxString("issue source title", args.sourceTitle, MEDIUM_TEXT_MAX);
     assertMaxString("issue source URL", args.sourceUrl, MEDIUM_TEXT_MAX);
+    assertMaxString("issue source task id", args.sourceTaskId, SHORT_TEXT_MAX);
     assertClientContextLimit(args.clientContext);
+    const sourceTask = args.sourceTaskId === undefined
+      ? null
+      : await ctx.db
+        .query("tasks")
+        .withIndex("by_task_id", (q) => q.eq("task_id", args.sourceTaskId!))
+        .unique();
+    if (args.sourceTaskId !== undefined && sourceTask === null) {
+      throw new Error("The record being revised is no longer available. Refresh the portal and try again.");
+    }
+    if (sourceTask !== null && sourceTask.country_code !== args.countryCode) {
+      throw new Error("The record being revised is in a different country.");
+    }
 
     const cc = args.countryCode.toLowerCase();
     const batchId = issueBatchId(args.countryCode);
@@ -970,6 +987,7 @@ export const createIssueTask = mutation({
           ...(args.originalLatitude !== undefined && args.originalLongitude !== undefined
             ? { original_point: [args.originalLongitude, args.originalLatitude] }
             : {}),
+          ...(sourceTask !== null ? { source_task_id: sourceTask.task_id } : {}),
           ...(args.relatedSiteId !== undefined ? { related_site_id: args.relatedSiteId } : {}),
           ...(args.sourceTitle !== undefined ? { source_title: args.sourceTitle } : {}),
           ...(args.sourceUrl !== undefined ? { source_url: args.sourceUrl } : {}),
@@ -991,6 +1009,21 @@ export const createIssueTask = mutation({
       reason: args.note,
       clientContext: args.clientContext,
     });
+    if (sourceTask !== null) {
+      // the revised task's history names the revision, so its reviewer
+      // finds the moved point; the task itself is untouched
+      await appendTaskEvent(ctx, {
+        taskId: sourceTask.task_id,
+        eventType: "note_added",
+        actorUserId: user._id,
+        actorRole,
+        previousStatus: sourceTask.status,
+        newStatus: sourceTask.status,
+        reason: `A revision of this record's location was filed as task ${taskId} (${args.issueType.replaceAll("_", " ")}). ${args.note}`.slice(0, TASK_REASON_MAX),
+        clientContext: args.clientContext,
+      });
+      await ctx.db.patch(sourceTask._id, { last_event_at: now });
+    }
     return {
       task_id: taskId,
       batch_id: batchId,

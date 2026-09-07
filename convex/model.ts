@@ -720,12 +720,21 @@ export const agentReviewBatchStatus = v.union(
   v.literal("failed"),
 );
 
+// the reviewer's ruling on a moved pin (jb 2026-09-07): which of the
+// record's original point and the contributor's point stands
+export const locationOutcome = v.union(
+  v.literal("accept_moved_point"),
+  v.literal("keep_original_point"),
+  v.literal("uncertain"),
+);
+
 export const reviewDecisionInput = v.object({
   evidence_draft_id: v.optional(v.string()),
   decision_status: reviewDecisionStatus,
   decision_note: v.optional(v.string()),
   accepted_action: v.optional(v.string()),
   identity_decision: v.optional(identityDecision),
+  location_outcome: v.optional(locationOutcome),
   target_year_affects: v.optional(v.array(targetYearAffect)),
   required_follow_up: v.optional(v.string()),
   agent_review_id: v.optional(v.string()),

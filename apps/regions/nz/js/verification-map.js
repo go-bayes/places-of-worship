@@ -5532,6 +5532,7 @@ class NzVerificationMap {
                     ${locationIsApproximate ? `<div class="pilot-note">The marker is the centre of a supported area, not an accepted site point. The shaded radius and retained wording remain evidence for human review.</div>` : ""}
                 </div>
             ` : ""}
+            ${this.movePinHtml(props, issueContext)}
 
             <div class="detail-section">
                 <h3>1. Open source links</h3>
@@ -5610,6 +5611,7 @@ class NzVerificationMap {
         panel.querySelectorAll(".linked-task-open").forEach(button => {
             button.addEventListener("click", () => this.selectTaskById(button.dataset.taskId, { focusDetail: true }));
         });
+        panel.querySelector(".move-pin-button")?.addEventListener("click", () => this.movePinForTask(props, issueContext));
         this.bindIssueForm(issueContext);
         this.bindCopyCoords(panel);
         this.bindTaskHistory(props.task_id);
@@ -5716,6 +5718,44 @@ class NzVerificationMap {
                 </ul>
             </div>
         `;
+    }
+
+    // a mislocated record reached from its task (jb 2026-09-07: "what if
+    // i want to revise the map location of a place"): the revise flow
+    // opens on the task's point, the pin is dragged to the building, and
+    // the revision lands in the issue batch naming this task; the record
+    // itself moves only when a reviewer accepts the moved point
+    canMovePin(props, point) {
+        return RAPID_NOMINATION_ENTRY
+            && Boolean(this.backend?.configured && this.backend.signedIn)
+            && Number.isFinite(point?.latitude) && Number.isFinite(point?.longitude)
+            && !this.reviseContext
+            && !String(props.batch_id || "").startsWith("ra-issues-");
+    }
+
+    movePinHtml(props, point) {
+        if (!this.canMovePin(props, point)) return "";
+        return `
+            <div class="detail-section move-pin">
+                <button type="button" class="secondary move-pin-button">Move the pin — this record is mislocated</button>
+                <small class="label-help">Opens the pin on this record's point. Drag it to the building, then record what you see. The record keeps its point until a reviewer accepts the move.</small>
+            </div>
+        `;
+    }
+
+    movePinForTask(props, point) {
+        if (!this.canMovePin(props, point)) return;
+        this.enterReviseMode({
+            taskId: props.task_id || "",
+            name: props.name || "",
+            latitude: point.latitude,
+            longitude: point.longitude,
+            siteId: props.master_site_id || undefined,
+            osmId: props.osm_id !== undefined && props.osm_id !== null && props.osm_id !== "" ? String(props.osm_id) : undefined,
+            osmType: window.PowOsmHistory ? window.PowOsmHistory.normaliseType(props.osm_type) : String(props.osm_type || ""),
+        });
+        const issueType = document.getElementById("pinIssueType");
+        if (issueType) issueType.value = "geometry_check";
     }
 
     // the probable-same-place links a task carries, each way (guy,
@@ -10428,6 +10468,7 @@ class NzVerificationMap {
             originalLatitude: target.latitude,
             originalLongitude: target.longitude,
             ...(locationAssertion ? { locationAssertion } : {}),
+            ...(target.taskId ? { sourceTaskId: target.taskId } : {}),
             assignToReporter: true,
             targetYears: COUNTRY_CONFIG.targetYears.map(Number),
             clientContext: {
