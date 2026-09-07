@@ -13,6 +13,7 @@ import {
 } from "./lib/limits";
 import { canonicalJson, sha256 } from "./lib/sha256";
 import { appendTaskEvent } from "./lib/taskEvents";
+import { assertLocationOutcome } from "./lib/locationOutcome";
 
 async function getTaskOrThrow(ctx: any, taskId: string): Promise<Doc<"tasks">> {
   const task = await ctx.db
@@ -324,6 +325,9 @@ export const recordReviewDecision = mutation({
     if ((args.decision.decision_note ?? "").trim().length < 8) {
       throw new Error("Review decisions require a short decision note.");
     }
+    // a moved pin needs a ruling before acceptance; the ruling is refused
+    // where the task has no original point to rule between
+    assertLocationOutcome(task, args.decision);
     assertMaxString("review decision note", args.decision.decision_note, TASK_REASON_MAX);
     assertMaxString("accepted action", args.decision.accepted_action, MEDIUM_TEXT_MAX);
     assertMaxString("required follow-up", args.decision.required_follow_up, LONG_TEXT_MAX);
@@ -341,6 +345,7 @@ export const recordReviewDecision = mutation({
       decision_note: args.decision.decision_note,
       accepted_action: args.decision.accepted_action,
       identity_decision: args.decision.identity_decision,
+      location_outcome: args.decision.location_outcome,
       target_year_affects: args.decision.target_year_affects ?? [],
       required_follow_up: args.decision.required_follow_up,
       agent_review_id: args.decision.agent_review_id,
@@ -350,9 +355,11 @@ export const recordReviewDecision = mutation({
     };
     // hash covers review_decision_id, task_id, evidence_draft_id,
     // reviewer_user_id, decision_status, decision_note, accepted_action,
-    // identity_decision, target_year_affects, required_follow_up,
-    // agent_review_id, agent_review_agreement, created_at, and updated_at;
-    // recomputing the hash from the stored row must reproduce it
+    // identity_decision, location_outcome (absent keys are dropped, so
+    // rows before 2026-09-07 still reproduce), target_year_affects,
+    // required_follow_up, agent_review_id, agent_review_agreement,
+    // created_at, and updated_at; recomputing the hash from the stored
+    // row must reproduce it
     const hashInput = {
       review_decision_id: reviewDecisionRecord.review_decision_id,
       task_id: reviewDecisionRecord.task_id,
@@ -362,6 +369,7 @@ export const recordReviewDecision = mutation({
       decision_note: reviewDecisionRecord.decision_note,
       accepted_action: reviewDecisionRecord.accepted_action,
       identity_decision: reviewDecisionRecord.identity_decision,
+      location_outcome: reviewDecisionRecord.location_outcome,
       target_year_affects: reviewDecisionRecord.target_year_affects,
       required_follow_up: reviewDecisionRecord.required_follow_up,
       agent_review_id: reviewDecisionRecord.agent_review_id,

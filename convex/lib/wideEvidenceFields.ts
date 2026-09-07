@@ -58,6 +58,10 @@ export const WIDE_EVIDENCE_TRAILING_FIELDS: readonly string[] = Object.freeze([
   "quality_flag", "review_status",
   "privacy_flag", "licence_flag", "extracted_by", "extracted_at",
   "reviewed_by", "reviewed_at", "review_note", "exclusion_reason",
+  // the reviewer's ruling on a moved pin and the point that stands
+  // (jb 2026-09-07); blank on every row without a revision of a record
+  "location_outcome", "original_latitude", "original_longitude",
+  "accepted_latitude", "accepted_longitude",
 ]);
 
 export function targetYearFields(targetYears: readonly number[]): string[] {

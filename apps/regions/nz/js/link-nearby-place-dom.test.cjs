@@ -79,6 +79,7 @@ for (const file of ["occupancy-contract.js", "function-chain-contract.js", "veri
   vm.runInContext(fs.readFileSync(path.join(__dirname, file), "utf8"), context, { filename: file });
 }
 
+(async () => {
 const app = Object.create(window.NzVerificationMap.prototype);
 app.pinLinkedRefs = [];
 app.pinNearbyCount = 2;
@@ -162,4 +163,34 @@ if (!linksHtml.includes("Probably the same place as") || !linksHtml.includes("Fr
 }
 if (app.taskLinksHtml({ nearby_site_refs: [] }) !== "" || app.taskLinksHtml({}) !== "") throw new Error("A task without links still rendered the block.");
 
+// --- move the pin from a task (jb 2026-09-07): the revise flow opens on
+// the task's point and the revision names the task ------------------------
+app.backend = { configured: true, signedIn: true };
+app.reviseContext = null;
+const taskProps = { task_id: "vu-survey-12", name: "Presbyterian Church Fresh Wota", batch_id: "vu-port-vila-survey-2010-001", master_site_id: "", osm_id: "" };
+const point = { latitude: -17.74, longitude: 168.3 };
+if (!app.movePinHtml(taskProps, point).includes("move-pin-button")) throw new Error("A task's detail did not offer Move the pin.");
+if (app.movePinHtml({ ...taskProps, batch_id: "ra-issues-vu" }, point) !== "") throw new Error("A revision task offered Move the pin on itself.");
+app.backend = { configured: true, signedIn: false };
+if (app.movePinHtml(taskProps, point) !== "") throw new Error("Signed out still offered Move the pin.");
+app.backend = { configured: true, signedIn: true };
+let reviseContext = null;
+app.enterReviseMode = (context) => { reviseContext = context; };
+element("pinIssueType");
+app.movePinForTask(taskProps, point);
+if (!reviseContext || reviseContext.taskId !== "vu-survey-12" || reviseContext.latitude !== -17.74 || reviseContext.longitude !== 168.3) {
+  throw new Error(`Move the pin did not open the revise flow on the task's point: ${JSON.stringify(reviseContext)}`);
+}
+if (elements.get("pinIssueType").value !== "geometry_check") throw new Error("Move the pin did not preselect the wrong-location issue type.");
+
+let issueArgs = null;
+app.backend.createIssueTask = async (args) => { issueArgs = args; return { task_id: "vu-issue-1", deduped: false }; };
+app.pinConfirmed = { latitude: -17.7401, longitude: 168.3201, locationMode: "building_identified", zoom: 18 };
+const revision = await app.createRevisionTask({ ...reviseContext, siteId: undefined, osmId: undefined });
+if (revision.task_id !== "vu-issue-1" || issueArgs.sourceTaskId !== "vu-survey-12" || issueArgs.originalLatitude !== -17.74 || issueArgs.latitude !== -17.7401) {
+  throw new Error(`The revision did not name the source task with both points: ${JSON.stringify(issueArgs)}`);
+}
+if (!issueArgs.note.includes("moved from the record's point")) throw new Error("The revision note did not say the pin moved.");
+
 console.log("link-nearby-place dom test passed");
+})().catch(error => { console.error(error); process.exit(1); });
