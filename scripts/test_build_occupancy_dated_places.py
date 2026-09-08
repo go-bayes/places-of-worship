@@ -178,5 +178,129 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(once, (self.regions / "nz" / "data" / "dated_places.geojson").read_text(encoding="utf-8"))
 
 
+ORIGINAL = [174.7800, -41.2900]  # the record's point, where the source task's pin sits
+MOVED = [174.7900, -41.2800]     # the contributor's moved pin on the revision task
+DISTINCT = [174.6000, -41.4000]  # a period with its own asserted location, not on any pin
+
+
+class LocationRulingTests(unittest.TestCase):
+    """A reviewer's location ruling decides where a revised record's pin stands on the public map."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        root = Path(self.tmp.name)
+        self.regions = root / "regions"
+        (self.regions / "nz" / "data").mkdir(parents=True)
+        self.export = root / "export-2"
+        self.export.mkdir()
+        write_jsonl(self.export / "tasks.jsonl", [
+            {"task_id": "nz-src", "country_code": "NZ", "name": "St Ruled", "candidate_site_id": "site-nz-9",
+             "geometry": {"type": "Point", "coordinates": ORIGINAL}},
+            {"task_id": "nz-rev", "country_code": "NZ", "name": "St Ruled", "matched_current_site_id": "site-nz-9",
+             "geometry": {"type": "Point", "coordinates": MOVED},
+             "source_context": {"issue_report": {"issue_type": "geometry_check", "original_point": ORIGINAL, "source_task_id": "nz-src"}}},
+        ])
+        write_jsonl(self.export / "site_occupancies.jsonl", [
+            # the source task: one period on its pin, then a relocation to a period with its own point
+            {**BASE_ROW, "task_id": "nz-src", "parent_evidence_draft_id": "ed-src", "occupancy_id": "s1", "segment_index": 0,
+             "start_mode": "known", "start_date": "1900", "start_basis": "founding_stated", "end_mode": "known", "end_date": "1950",
+             "end_basis": "closure_stated", "end_reason": "relocated", "location_relation": "same_as_task_point",
+             "longitude": ORIGINAL[0], "latitude": ORIGINAL[1]},
+            {**BASE_ROW, "task_id": "nz-src", "parent_evidence_draft_id": "ed-src", "occupancy_id": "s2", "segment_index": 1,
+             "start_mode": "known", "start_date": "1951", "start_basis": "building_dedication", "end_mode": "still_active",
+             "end_basis": "unknown", "still_active_asof": "2026-01-01", "location_relation": "distinct",
+             "location_mode": "approximate_area", "location_basis": "address_or_locality",
+             "longitude": DISTINCT[0], "latitude": DISTINCT[1]},
+            # the revision task re-records the first period on the moved pin
+            {**BASE_ROW, "task_id": "nz-rev", "parent_evidence_draft_id": "ed-rev", "occupancy_id": "r1", "segment_index": 0,
+             "start_mode": "known", "start_date": "1900", "start_basis": "founding_stated", "end_mode": "known", "end_date": "1950",
+             "end_basis": "closure_stated", "location_relation": "same_as_task_point",
+             "longitude": MOVED[0], "latitude": MOVED[1]},
+        ])
+        write_jsonl(self.export / "derived_year_locations.jsonl", [
+            {"occupancy_id": "s1", "review_state": "reviewer_confirmed", "target_year": 1936},
+            {"occupancy_id": "s2", "review_state": "reviewer_confirmed", "target_year": 2013},
+            {"occupancy_id": "r1", "review_state": "reviewer_confirmed", "target_year": 1936},
+        ])
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def decide(self, *decisions: dict) -> None:
+        base = {"task_id": "nz-rev", "evidence_draft_id": "ed-rev", "decision_status": "accepted_for_export", "created_at": 100}
+        write_jsonl(self.export / "review_decisions.jsonl", [{**base, **d} for d in decisions])
+
+    def features(self) -> dict[str, dict]:
+        summary = builder.build_products([self.export], self.regions)
+        nz = json.loads((self.regions / "nz" / "data" / "dated_places.geojson").read_text(encoding="utf-8"))
+        by_id = {f["properties"].get("occupancy_id") or f["properties"].get("kind"): f for f in nz["features"]}
+        by_id["_summary"] = summary["countries"]["NZ"]
+        return by_id
+
+    def test_no_decisions_file_leaves_every_row_on_its_own_point(self):
+        f = self.features()
+        self.assertEqual(f["s1"]["geometry"]["coordinates"], ORIGINAL)
+        self.assertEqual(f["r1"]["geometry"]["coordinates"], MOVED)
+        self.assertNotIn("location_outcome", f["s1"]["properties"])
+        self.assertNotIn("location_uncertain_dropped", f["_summary"])
+
+    def test_accept_moved_point_moves_the_whole_site_to_the_new_pin(self):
+        self.decide({"location_outcome": "accept_moved_point"})
+        f = self.features()
+        # both rows that sat on the pin now stand at the moved point; the asserted period keeps its own
+        self.assertEqual(f["s1"]["geometry"]["coordinates"], MOVED)
+        self.assertEqual(f["r1"]["geometry"]["coordinates"], MOVED)
+        self.assertEqual(f["s2"]["geometry"]["coordinates"], DISTINCT)
+        self.assertEqual(f["s1"]["properties"]["location_outcome"], "accept_moved_point")
+        self.assertEqual(f["s1"]["properties"]["location_ruled_by_task_id"], "nz-rev")
+        self.assertNotIn("location_ruled_by_task_id", f["r1"]["properties"])
+        self.assertNotIn("location_outcome", f["s2"]["properties"])
+        # the relocation line now starts from the ruled point
+        self.assertEqual(f["transition"]["geometry"]["coordinates"], [MOVED, DISTINCT])
+
+    def test_keep_original_point_returns_the_revision_to_the_record(self):
+        self.decide({"location_outcome": "keep_original_point"})
+        f = self.features()
+        self.assertEqual(f["r1"]["geometry"]["coordinates"], ORIGINAL)
+        self.assertEqual(f["s1"]["geometry"]["coordinates"], ORIGINAL)
+        self.assertEqual(f["r1"]["properties"]["location_outcome"], "keep_original_point")
+
+    def test_uncertain_takes_the_pinned_rows_off_the_map(self):
+        self.decide({"location_outcome": "uncertain"})
+        f = self.features()
+        self.assertNotIn("s1", f)
+        self.assertNotIn("r1", f)
+        self.assertNotIn("transition", f)
+        self.assertEqual(f["s2"]["geometry"]["coordinates"], DISTINCT)
+        self.assertEqual(f["_summary"]["occupancy_features"], 1)
+        self.assertEqual(f["_summary"]["location_uncertain_dropped"], 2)
+
+    def test_latest_accepting_decision_rules(self):
+        self.decide({"location_outcome": "accept_moved_point", "created_at": 100},
+                    {"location_outcome": "keep_original_point", "created_at": 200})
+        f = self.features()
+        self.assertEqual(f["r1"]["geometry"]["coordinates"], ORIGINAL)
+
+    def test_decisions_without_a_ruling_or_not_accepted_are_ignored(self):
+        self.decide({"decision_status": "accepted_for_export"},
+                    {"location_outcome": "keep_original_point", "decision_status": "needs_more_evidence", "created_at": 300})
+        f = self.features()
+        self.assertEqual(f["r1"]["geometry"]["coordinates"], MOVED)
+        self.assertNotIn("location_outcome", f["r1"]["properties"])
+
+    def test_ruling_applies_only_to_rows_on_one_of_the_two_points(self):
+        ruling = {"outcome": "accept_moved_point", "original": tuple(ORIGINAL), "moved": tuple(MOVED),
+                  "accepted": tuple(MOVED), "task_id": "nz-rev", "created_at": 1}
+        on_pin = {"location_relation": "same_as_task_point", "longitude": ORIGINAL[0], "latitude": ORIGINAL[1]}
+        elsewhere = {"location_relation": "same_as_task_point", "longitude": 170.0, "latitude": -45.0}
+        asserted = {"location_relation": "distinct", "longitude": ORIGINAL[0], "latitude": ORIGINAL[1]}
+        self.assertTrue(builder.ruling_applies(on_pin, ruling))
+        self.assertFalse(builder.ruling_applies(elsewhere, ruling))
+        self.assertFalse(builder.ruling_applies(asserted, ruling))
+        self.assertFalse(builder.ruling_applies(on_pin, None))
+        self.assertEqual(builder.ruled_point(on_pin, ruling), tuple(MOVED))
+        self.assertEqual(builder.ruled_point(elsewhere, ruling), (170.0, -45.0))
+
+
 if __name__ == "__main__":
     unittest.main()

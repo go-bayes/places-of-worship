@@ -84,6 +84,8 @@ The reviewer's drawn interval (section 2.5 of the ruled plan) gains a second row
 
 On confirmation a location row becomes a `geometry-history` record in the master lane: `geometry_role` from the mode (site_location or approximate_point), `geometry_basis` from the assertion basis, `valid_interval` from the period bounds with `basis: reviewer_inference` for L4 rows and `source_statement` otherwise, `identity_rule_applied: same_site_geometry_update` for relocations within one identifier, `change_reason: fuzzy_historical_placement` for L3 and L4, and `uncertainty_radius_m` from section 2.1.
 
+A reviewer's location ruling on a moved pin (JB, 2026-09-07; `location_outcome` on the review decision, `convex/lib/locationOutcome.ts`) is read by the rebuild, never inferred from two points. The public-map builder (`scripts/build_occupancy_dated_places.py`, 2026-09-09) applies the latest accepting ruling to the whole site: occupancy rows on a task pin move to the accepted point under `accept_moved_point`, return to the record's point under `keep_original_point`, and leave the map under `uncertain`; rows with their own asserted location keep it. The master lane must apply the same rule when it is written.
+
 Exports: the wide CSV gains, per target year, `target_year_<Y>_latitude`, `_longitude`, `_uncertainty_radius_m`, and `_location_basis` beside the ruled `_basis` column; the bundle gains `site_occupancies.jsonl`, `derived_year_locations.jsonl`, and `derived_state_events.jsonl`. Unconfirmed rows never enter the CSV. A confirmed derived location that conflicts with an observed task point raises the automated check `occupancy_conflicts_task_point` to `needs_review`.
 
 ### 3.5 Time slider and public map

@@ -13,6 +13,14 @@ never touched.
 An occupancy is accepted when a reviewer has confirmed at least one derived census-year location
 that cites it (derived_year_locations.review_state == "reviewer_confirmed"). Overridden and
 unconfirmed derivations do not reach the public map.
+
+A reviewer's location ruling (JB, 2026-09-07; convex/lib/locationOutcome.ts) decides where a
+revised record's pin stands. The latest accepting decision that carries a `location_outcome` rules
+for the whole site: rows that sit on the task's pin (`location_relation == "same_as_task_point"`)
+move to the accepted point under `accept_moved_point`, return to the record's original point under
+`keep_original_point`, and leave the public map under `uncertain`, because no point stands. Rows
+with their own asserted location are untouched. The rebuild reads the ruling; it never infers one
+from two points.
 """
 
 from __future__ import annotations
@@ -29,6 +37,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_REGIONS_ROOT = REPO_ROOT / "apps" / "regions"
 SOURCE_TAG = "reviewed_occupancy"
 REQUIRED_FILES = ("tasks.jsonl", "site_occupancies.jsonl", "derived_year_locations.jsonl")
+LOCATION_OUTCOMES = ("accept_moved_point", "keep_original_point", "uncertain")
+# two points closer than this are the same pin (about a decimetre)
+SAME_POINT_DEGREES = 1e-6
 
 
 # Read newline-delimited JSON into a list of dicts; a missing file is an empty list.
@@ -109,6 +120,88 @@ def site_identifier(task: dict[str, Any]) -> str:
     return str(task.get("task_id") or "")
 
 
+# A [longitude, latitude] pair as floats; None for anything else.
+def point_of(value: Any) -> tuple[float, float] | None:
+    if not isinstance(value, (list, tuple)) or len(value) < 2:
+        return None
+    try:
+        longitude, latitude = float(value[0]), float(value[1])
+    except (TypeError, ValueError):
+        return None
+    if not (math.isfinite(longitude) and math.isfinite(latitude)):
+        return None
+    return (longitude, latitude)
+
+
+# The contributor's pin: the task geometry.
+def task_point(task: dict[str, Any]) -> tuple[float, float] | None:
+    geometry = task.get("geometry")
+    return point_of(geometry.get("coordinates")) if isinstance(geometry, dict) else None
+
+
+# The record's original point, present only on a revision filed from an existing record.
+def original_point(task: dict[str, Any]) -> tuple[float, float] | None:
+    context = task.get("source_context")
+    report = context.get("issue_report") if isinstance(context, dict) else None
+    return point_of(report.get("original_point")) if isinstance(report, dict) else None
+
+
+def same_point(a: tuple[float, float] | None, b: tuple[float, float] | None) -> bool:
+    if a is None or b is None:
+        return False
+    return abs(a[0] - b[0]) <= SAME_POINT_DEGREES and abs(a[1] - b[1]) <= SAME_POINT_DEGREES
+
+
+# The location ruling in force for each site: the latest accepting decision that carries a
+# location_outcome, from a revision task that holds the record's original point. Mirrors
+# acceptedPoint in convex/lib/locationOutcome.ts: the moved pin under accept_moved_point, the
+# original under keep_original_point, and no point at all under uncertain.
+def location_rulings(tasks: dict[str, dict[str, Any]], decisions: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    rulings: dict[str, dict[str, Any]] = {}
+    for decision in decisions:
+        outcome = decision.get("location_outcome")
+        if decision.get("decision_status") != "accepted_for_export" or outcome not in LOCATION_OUTCOMES:
+            continue
+        task = tasks.get(str(decision.get("task_id")))
+        if not task:
+            continue
+        original = original_point(task)
+        moved = task_point(task)
+        if original is None or moved is None:
+            continue
+        accepted = moved if outcome == "accept_moved_point" else original if outcome == "keep_original_point" else None
+        ruling = {
+            "outcome": outcome,
+            "original": original,
+            "moved": moved,
+            "accepted": accepted,
+            "task_id": task.get("task_id"),
+            "created_at": decision.get("created_at") or 0,
+        }
+        site_id = site_identifier(task)
+        current = rulings.get(site_id)
+        if current is None or ruling["created_at"] >= current["created_at"]:
+            rulings[site_id] = ruling
+    return rulings
+
+
+# Whether a ruling governs this row: the row sits on its task's pin and that pin is one of the two
+# points the ruling chose between. A row with its own asserted location keeps it.
+def ruling_applies(row: dict[str, Any], ruling: dict[str, Any] | None) -> bool:
+    if ruling is None or row.get("location_relation") != "same_as_task_point":
+        return False
+    here = point_of([row.get("longitude"), row.get("latitude")])
+    return same_point(here, ruling["original"]) or same_point(here, ruling["moved"])
+
+
+# The point a row is drawn at once the ruling is read: the row's own point when no ruling
+# governs it, the accepted point when one does, and None when the location is ruled uncertain.
+def ruled_point(row: dict[str, Any], ruling: dict[str, Any] | None) -> tuple[float, float] | None:
+    if not ruling_applies(row, ruling):
+        return point_of([row.get("longitude"), row.get("latitude")])
+    return ruling["accepted"]
+
+
 # Religion and denomination for colouring, borrowed from the OSM feature the task matched.
 def osm_attributes(task: dict[str, Any], osm_features: dict[str, dict[str, Any]]) -> dict[str, Any]:
     osm_id = task.get("matched_osm_id")
@@ -130,11 +223,12 @@ def occupancy_feature(
     task: dict[str, Any],
     export_batch_id: str,
     osm_features: dict[str, dict[str, Any]],
+    ruling: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
-    latitude = row.get("latitude")
-    longitude = row.get("longitude")
-    if not isinstance(latitude, (int, float)) or not isinstance(longitude, (int, float)):
+    point = ruled_point(row, ruling)
+    if point is None:
         return None
+    longitude, latitude = point
     bounds = occupancy_bounds(row)
     start_year, end_year = predicate_years(bounds)
     properties: dict[str, Any] = {
@@ -153,6 +247,10 @@ def occupancy_feature(
         "export_batch_id": export_batch_id,
     }
     properties.update(osm_attributes(task, osm_features))
+    if ruling_applies(row, ruling):
+        properties["location_outcome"] = ruling["outcome"]
+        if ruling["task_id"] != row.get("task_id"):
+            properties["location_ruled_by_task_id"] = ruling["task_id"]
     for key in ("start_lower", "start_upper", "end_lower", "end_upper"):
         if isinstance(bounds[key], int):
             properties[key] = bounds[key]
@@ -195,20 +293,22 @@ def transition_feature(
     second: dict[str, Any],
     task: dict[str, Any],
     export_batch_id: str,
+    ruling: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
     years = transition_years(occupancy_bounds(first), occupancy_bounds(second))
     if years is None:
         return None
-    for row in (first, second):
-        if not isinstance(row.get("latitude"), (int, float)) or not isinstance(row.get("longitude"), (int, float)):
-            return None
+    start = ruled_point(first, ruling)
+    end = ruled_point(second, ruling)
+    if start is None or end is None:
+        return None
     return {
         "type": "Feature",
         "geometry": {
             "type": "LineString",
             "coordinates": [
-                [round(float(first["longitude"]), 6), round(float(first["latitude"]), 6)],
-                [round(float(second["longitude"]), 6), round(float(second["latitude"]), 6)],
+                [round(start[0], 6), round(start[1], 6)],
+                [round(end[0], 6), round(end[1], 6)],
             ],
         },
         "properties": {
@@ -242,16 +342,25 @@ def load_export(export_dir: Path) -> dict[str, Any]:
         "tasks": {row["task_id"]: row for row in read_jsonl(export_dir / "tasks.jsonl") if row.get("task_id")},
         "occupancies": read_jsonl(export_dir / "site_occupancies.jsonl"),
         "derived_locations": read_jsonl(export_dir / "derived_year_locations.jsonl"),
+        # optional: an export made before location rulings existed carries no decisions file
+        "review_decisions": read_jsonl(export_dir / "review_decisions.jsonl"),
     }
 
 
 # Features per country from one export: accepted occupancy points and their transition lines.
-def features_from_export(export: dict[str, Any], osm_by_country: dict[str, dict[str, dict[str, Any]]]) -> dict[str, list[dict[str, Any]]]:
+# Rows whose location a reviewer ruled uncertain are counted under the country's "uncertain" key
+# in `dropped` rather than drawn.
+def features_from_export(
+    export: dict[str, Any],
+    osm_by_country: dict[str, dict[str, dict[str, Any]]],
+    dropped: dict[str, int] | None = None,
+) -> dict[str, list[dict[str, Any]]]:
     accepted = {
         row.get("occupancy_id")
         for row in export["derived_locations"]
         if row.get("review_state") == "reviewer_confirmed" and row.get("occupancy_id")
     }
+    rulings = location_rulings(export["tasks"], export.get("review_decisions", []))
     by_parent: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in export["occupancies"]:
         if row.get("claim_status") != "submitted" or row.get("occupancy_id") not in accepted:
@@ -267,14 +376,17 @@ def features_from_export(export: dict[str, Any], osm_by_country: dict[str, dict[
         if not country:
             continue
         osm_features = osm_by_country.get(country, {})
+        ruling = rulings.get(site_identifier(task))
         for row in rows:
-            feature = occupancy_feature(row, task, export["export_batch_id"], osm_features)
+            feature = occupancy_feature(row, task, export["export_batch_id"], osm_features, ruling)
             if feature:
                 out[country].append(feature)
+            elif dropped is not None and ruling_applies(row, ruling) and ruling["accepted"] is None:
+                dropped[country] = dropped.get(country, 0) + 1
         for first, second in zip(rows, rows[1:]):
             if first.get("end_reason") != "relocated":
                 continue
-            line = transition_feature(first, second, task, export["export_batch_id"])
+            line = transition_feature(first, second, task, export["export_batch_id"], ruling)
             if line:
                 out[country].append(line)
     return out
@@ -330,8 +442,9 @@ def build_products(export_dirs: list[Path], regions_root: Path, dry_run: bool = 
         collections[country] = load_country_file(path)
         osm_by_country[country] = osm_index(collections[country])
     reviewed: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    dropped_uncertain: dict[str, int] = {}
     for export in exports:
-        for country, features in features_from_export(export, osm_by_country).items():
+        for country, features in features_from_export(export, osm_by_country, dropped_uncertain).items():
             reviewed[country].extend(features)
     summary: dict[str, Any] = {"countries": {}, "dry_run": dry_run}
     for country in countries:
@@ -347,6 +460,8 @@ def build_products(export_dirs: list[Path], regions_root: Path, dry_run: bool = 
             "transition_features": lines,
             "total_features": len(after["features"]),
         }
+        if dropped_uncertain.get(country):
+            entry["location_uncertain_dropped"] = dropped_uncertain[country]
         # the wiring rule (docs/development/temporal-place-layer.md): a product that gains
         # its first feature must be wired in the region config and the portal together
         if not before.get("features") and after["features"]:
