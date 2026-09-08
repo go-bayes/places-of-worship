@@ -7623,9 +7623,10 @@ class NzVerificationMap {
             </div>`;
     }
 
-    // reads the chain block back into the state; the start's date defaults
-    // to the first period's start when the ra has not typed one
-    readFunctionChain(prefix, chain, segments) {
+    // reads the chain block back into the state, exactly as typed; the
+    // start-date default lives in chainWithDefaultStart, applied only once
+    // the chain counts as touched
+    readFunctionChain(prefix, chain) {
         const block = document.getElementById(`${prefix}FunctionChain`);
         if (!block || !chain) return;
         const read = (scopeEl, target) => {
@@ -7640,14 +7641,26 @@ class NzVerificationMap {
             const change = chain.changes[Number(el.dataset.chainIndex)];
             if (change) read(el, change);
         });
+    }
+
+    // the chain as validated, derived and sent: when the ra named a
+    // denomination but typed no start date, the first period's start rides
+    // in as the chain's start. this is a copy for the touched chain only;
+    // copying the date into the state at read time made a bare build year
+    // count as a half-filled chain and demanded a denomination the ra never
+    // set out to give (watts, st brigid's loburn, 2026-09-08)
+    chainWithDefaultStart(chain, segments) {
+        if (!chain) return chain;
+        const start = { ...chain.start };
         const first = segments?.[0];
-        if (first && !chain.start.date && !chain.start.notEarlierThan && !chain.start.notLaterThan && (first.startDate || first.startNotLaterThan)) {
-            chain.start.dateMode = first.startMode === "known" ? "known" : first.startMode === "by" ? "by" : "between";
-            chain.start.date = first.startMode === "known" ? first.startDate : "";
-            chain.start.around = Boolean(first.startAround);
-            chain.start.notEarlierThan = first.startMode === "between" ? first.startNotEarlierThan : "";
-            chain.start.notLaterThan = first.startMode !== "known" ? first.startNotLaterThan : "";
+        if (first && !start.date && !start.notEarlierThan && !start.notLaterThan && (first.startDate || first.startNotLaterThan)) {
+            start.dateMode = first.startMode === "known" ? "known" : first.startMode === "by" ? "by" : "between";
+            start.date = first.startMode === "known" ? first.startDate : "";
+            start.around = Boolean(first.startAround);
+            start.notEarlierThan = first.startMode === "between" ? first.startNotEarlierThan : "";
+            start.notLaterThan = first.startMode !== "known" ? first.startNotLaterThan : "";
         }
+        return { ...chain, start };
     }
 
     // shows only the date fields each mode uses and restates the chain
@@ -7718,7 +7731,7 @@ class NzVerificationMap {
                         <button type="button" class="secondary" data-gap="unsure">Not sure</button>
                     </div>
                     <div id="${prefix}GapUnsure" class="gap-unsure" hidden>
-                        <p>Give what you know; leave the rest blank. Bounds are recorded, never an invented date. For the stop, give the date, or both the earliest and latest it could have been.</p>
+                        <p>Give what you know; leave the rest blank. Bounds are recorded, never an invented date. For the stop, give the date, or both the earliest and latest it could have been. With no dates to give, leave the place as one period and the note records that a gap could not be established.</p>
                         <div class="field-grid field-pair">
                             <label>It stopped in (date)<input id="${prefix}GapStopDate" type="text" inputmode="numeric" maxlength="10" placeholder="2011 or 2011-02"></label>
                             <label>…or between<input id="${prefix}GapStopEarliest" type="text" inputmode="numeric" maxlength="10" placeholder="earliest, e.g. 2011"></label>
@@ -7730,6 +7743,7 @@ class NzVerificationMap {
                         </div>
                         <div class="button-row">
                             <button type="button" class="primary" data-gap="apply">Record as two periods with these bounds</button>
+                            <button type="button" class="secondary" data-gap="leave">Leave as one period</button>
                         </div>
                         <div id="${prefix}GapProblem" class="copy-status copy-status-error" aria-live="polite"></div>
                     </div>
@@ -7740,16 +7754,17 @@ class NzVerificationMap {
         return `<div id="${prefix}PeriodsPreview" class="periods-preview" aria-live="polite"></div>`;
     }
 
-    // shows the prompt while the state has one complete card and no answer
+    // shows the prompt while the state has one complete card and no settled
+    // answer; "not sure" is settled only once bounds or the one-period note
+    // are recorded, and its bounds panel stays open until then
     updateGapPrompt(prefix, state) {
         const prompt = document.getElementById(`${prefix}GapPrompt`);
         if (!state || !prompt) return;
-        const show = state.segments.length === 1 && !state.gapAnswer && this.guidedPeriodDatesComplete(state.segments[0]);
+        const unsettled = !state.gapAnswer || (state.gapAnswer === "unsure" && !state.gapNote);
+        const show = state.segments.length === 1 && unsettled && this.guidedPeriodDatesComplete(state.segments[0]);
         prompt.hidden = !show;
-        if (!show) {
-            const unsure = document.getElementById(`${prefix}GapUnsure`);
-            if (unsure) unsure.hidden = true;
-        }
+        const unsure = document.getElementById(`${prefix}GapUnsure`);
+        if (unsure) unsure.hidden = !(show && state.gapAnswer === "unsure");
     }
 
     updatePeriodsPreview(prefix, state, observed) {
@@ -7777,10 +7792,11 @@ class NzVerificationMap {
         // chain is complete enough to derive from
         let chainSentence = "";
         if (state.chain && window.PowFunctionChain?.chainTouched(state.chain)) {
-            const problem = window.PowFunctionChain.validateChain(state.chain, state.referenceDate || "");
+            const chain = this.chainWithDefaultStart(state.chain, state.segments);
+            const problem = window.PowFunctionChain.validateChain(chain, state.referenceDate || "");
             chainSentence = problem
                 ? ` Chain: ${problem}`
-                : ` ${window.PowFunctionChain.describeFunctions(window.PowFunctionChain.deriveFunctions(state.chain, TARGET_YEARS.map(Number)), TARGET_YEARS)}`;
+                : ` ${window.PowFunctionChain.describeFunctions(window.PowFunctionChain.deriveFunctions(chain, TARGET_YEARS.map(Number)), TARGET_YEARS)}`;
         }
         preview.textContent = described.conflicts.length
             ? `${described.sentence} Conflict — ${described.conflicts.join("; ")}. Fix one of them before submitting.${chainSentence}`
@@ -7789,9 +7805,11 @@ class NzVerificationMap {
     }
 
     // answers the gap question on any state: "yes" adds the later period,
-    // "unsure" takes bounds (finding 9: a latest-only stop is refused with a
-    // message rather than forged into a between). rerender(focusIndex)
-    // repaints the owner's cards
+    // "unsure" records the answer and opens the bounds panel, "apply" takes
+    // the bounds (finding 9: a latest-only stop is refused with a message
+    // rather than forged into a between), "leave" keeps one period with a
+    // note that no gap could be established. rerender(focusIndex) repaints
+    // the owner's cards
     answerGap(prefix, state, answer, appendPeriod, rerender) {
         if (answer === "yes") {
             state.gapAnswer = "yes";
@@ -7805,8 +7823,14 @@ class NzVerificationMap {
             return;
         }
         if (answer === "unsure") {
-            const unsure = document.getElementById(`${prefix}GapUnsure`);
-            if (unsure) unsure.hidden = false;
+            state.gapAnswer = "unsure";
+            this.updateGapPrompt(prefix, state);
+            return;
+        }
+        if (answer === "leave") {
+            state.gapAnswer = "unsure";
+            state.gapNote = "Gap not established: the contributor could not say whether worship ever stopped here, so the place is recorded as one period.";
+            rerender();
             return;
         }
         if (answer === "apply") {
@@ -7850,7 +7874,7 @@ class NzVerificationMap {
             });
         });
         state.sameSource = document.getElementById("guidedPeriodsSameSource")?.checked !== false;
-        this.readFunctionChain("guided", state.chain, state.segments);
+        this.readFunctionChain("guided", state.chain);
         const value = id => document.getElementById(id)?.value || "";
         if (document.getElementById("occConfidence")) {
             state.provenance = {
@@ -8134,7 +8158,7 @@ class NzVerificationMap {
         const described = window.PowOccupancy.describePresence(window.PowOccupancy.derivePresence(state.segments, TARGET_YEARS.map(Number)), TARGET_YEARS, observed);
         if (described.conflicts.length) return `Periods: ${described.conflicts[0]}. Fix one of them before submitting.`;
         if (this.guidedChainTouched(taskId) && window.PowFunctionChain) {
-            const chainProblem = window.PowFunctionChain.validateChain(state.chain, reference);
+            const chainProblem = window.PowFunctionChain.validateChain(this.chainWithDefaultStart(state.chain, state.segments), reference);
             if (chainProblem) return `Chain: ${chainProblem}`;
         }
         if (gridAssessed && !(values.yearGridReason || "").trim()) {
@@ -8155,7 +8179,7 @@ class NzVerificationMap {
         if (!this.guidedPeriodsTouched(taskId)) return { clientSubmissionId: submissionId, segments: [] };
         const provenance = this.guidedPeriodsProvenance(taskId, values).provenance;
         const segments = state.segments.map((segment, index) => ({ ...segment, ...provenance, segmentIndex: index }));
-        const chain = this.guidedChainTouched(taskId) && window.PowFunctionChain ? window.PowFunctionChain.payload(state.chain) : undefined;
+        const chain = this.guidedChainTouched(taskId) && window.PowFunctionChain ? window.PowFunctionChain.payload(this.chainWithDefaultStart(state.chain, state.segments)) : undefined;
         return {
             clientSubmissionId: submissionId,
             segments: segments.map(segment => window.PowOccupancy.payload(segment)),
@@ -8304,7 +8328,7 @@ class NzVerificationMap {
                 segment[field.dataset.field] = field.type === "checkbox" ? field.checked : field.value;
             });
         });
-        this.readFunctionChain("pane", draft.chain, draft.segments);
+        this.readFunctionChain("pane", draft.chain);
         const value = id => document.getElementById(id)?.value || "";
         draft.provenance = {
             confidence: value("occConfidence"),
@@ -8460,8 +8484,9 @@ class NzVerificationMap {
             return;
         }
         const chainTouched = draft.chain && window.PowFunctionChain?.chainTouched(draft.chain);
+        const chainToSend = chainTouched ? this.chainWithDefaultStart(draft.chain, draft.segments) : null;
         if (chainTouched) {
-            const chainProblem = window.PowFunctionChain.validateChain(draft.chain, context.referenceDate);
+            const chainProblem = window.PowFunctionChain.validateChain(chainToSend, context.referenceDate);
             if (chainProblem) {
                 if (status) status.textContent = `Chain: ${chainProblem}`;
                 return;
@@ -8475,7 +8500,7 @@ class NzVerificationMap {
                 taskId: context.taskId,
                 parentEvidenceDraftId: context.parentEvidenceDraftId,
                 segments: segments.map(values => window.PowOccupancy.payload(values)),
-                ...(chainTouched ? { chain: window.PowFunctionChain.payload(draft.chain) } : {}),
+                ...(chainTouched ? { chain: window.PowFunctionChain.payload(chainToSend) } : {}),
                 clientContext: { portal_version: "occupancy-v2" },
             });
             this.clearFormDirty();
@@ -9997,8 +10022,9 @@ class NzVerificationMap {
         const setError = window.PowOccupancy.validateSet(segments, referenceDate, this.occupancyTaskPoint(periodsKey));
         if (setError) return { problem: setError };
         const chainTouched = this.guidedChainTouched(periodsKey);
-        if (chainTouched && window.PowFunctionChain) {
-            const chainProblem = window.PowFunctionChain.validateChain(state.chain, referenceDate);
+        const chainToSend = chainTouched && window.PowFunctionChain ? this.chainWithDefaultStart(state.chain, state.segments) : null;
+        if (chainToSend) {
+            const chainProblem = window.PowFunctionChain.validateChain(chainToSend, referenceDate);
             if (chainProblem) return { problem: `Chain: ${chainProblem}` };
         }
         state.submissionId = state.submissionId || window.PowRapidEntry.secureSubmissionId();
@@ -10006,7 +10032,7 @@ class NzVerificationMap {
         return {
             submissionId: state.submissionId,
             segments,
-            chain: chainTouched && window.PowFunctionChain ? window.PowFunctionChain.payload(state.chain) : undefined,
+            chain: chainToSend ? window.PowFunctionChain.payload(chainToSend) : undefined,
             count: segments.length,
             state,
         };
