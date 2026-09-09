@@ -21,6 +21,12 @@ move to the accepted point under `accept_moved_point`, return to the record's or
 `keep_original_point`, and leave the public map under `uncertain`, because no point stands. Rows
 with their own asserted location are untouched. The rebuild reads the ruling; it never infers one
 from two points.
+
+A revision task made through "Move the pin" or "Revise this place" names the record it revises in
+`issue_report.source_task_id`. Once a reviewer accepts that revision for export and it holds at least
+one accepted occupancy, the source task's whole occupancy set leaves the map: the revision's set
+replaces it, as `supersedeEarlierOccupancySets` in convex/occupancies.ts retires an author's earlier
+set within one task. Replacement is set-level; the builder never matches rows across tasks.
 """
 
 from __future__ import annotations
@@ -185,6 +191,34 @@ def location_rulings(tasks: dict[str, dict[str, Any]], decisions: list[dict[str,
     return rulings
 
 
+# The revision task that names this task as its source in issue_report.source_task_id.
+def source_task_of(task: dict[str, Any]) -> str | None:
+    context = task.get("source_context")
+    report = context.get("issue_report") if isinstance(context, dict) else None
+    source = report.get("source_task_id") if isinstance(report, dict) else None
+    return str(source).strip() if isinstance(source, str) and source.strip() else None
+
+
+# Tasks whose occupancy set an accepted revision replaced, keyed by the superseded task id with the
+# revision that replaced it as value. A revision supersedes its source only when a reviewer has
+# accepted the revision for export and it contributes at least one accepted occupancy row
+# (`recording_task_ids`); a revision that recorded nothing leaves the source on the map. A chain of
+# revisions retires every earlier link, whether or not the middle links still draw.
+def superseded_tasks(
+    tasks: dict[str, dict[str, Any]],
+    decisions: list[dict[str, Any]],
+    recording_task_ids: set[str],
+) -> dict[str, str]:
+    accepted = {str(d.get("task_id")) for d in decisions if d.get("decision_status") == "accepted_for_export"}
+    out: dict[str, str] = {}
+    for task_id, task in tasks.items():
+        source = source_task_of(task)
+        if source is None or source == task_id or task_id not in accepted or task_id not in recording_task_ids:
+            continue
+        out[source] = task_id
+    return out
+
+
 # Whether a ruling governs this row: the row sits on its task's pin and that pin is one of the two
 # points the ruling chose between. A row with its own asserted location keeps it.
 def ruling_applies(row: dict[str, Any], ruling: dict[str, Any] | None) -> bool:
@@ -347,25 +381,36 @@ def load_export(export_dir: Path) -> dict[str, Any]:
     }
 
 
+# Add one to a per-reason, per-country count of rows that do not reach the map.
+def count_dropped(dropped: dict[str, dict[str, int]] | None, reason: str, country: str) -> None:
+    if dropped is None:
+        return
+    counts = dropped.setdefault(reason, {})
+    counts[country] = counts.get(country, 0) + 1
+
+
 # Features per country from one export: accepted occupancy points and their transition lines.
-# Rows whose location a reviewer ruled uncertain are counted under the country's "uncertain" key
-# in `dropped` rather than drawn.
+# Rows that do not reach the map are counted in `dropped` by reason: "uncertain" for rows whose
+# location a reviewer ruled uncertain, "superseded" for rows on a task an accepted revision replaced.
 def features_from_export(
     export: dict[str, Any],
     osm_by_country: dict[str, dict[str, dict[str, Any]]],
-    dropped: dict[str, int] | None = None,
+    dropped: dict[str, dict[str, int]] | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
     accepted = {
         row.get("occupancy_id")
         for row in export["derived_locations"]
         if row.get("review_state") == "reviewer_confirmed" and row.get("occupancy_id")
     }
-    rulings = location_rulings(export["tasks"], export.get("review_decisions", []))
+    decisions = export.get("review_decisions", [])
+    rulings = location_rulings(export["tasks"], decisions)
     by_parent: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in export["occupancies"]:
         if row.get("claim_status") != "submitted" or row.get("occupancy_id") not in accepted:
             continue
         by_parent[str(row.get("parent_evidence_draft_id"))].append(row)
+    recording = {str(rows[0].get("task_id")) for rows in by_parent.values()}
+    superseded = superseded_tasks(export["tasks"], decisions, recording)
     out: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for rows in by_parent.values():
         rows.sort(key=lambda r: (r.get("segment_index") or 0))
@@ -375,14 +420,18 @@ def features_from_export(
         country = str(task.get("country_code") or "").upper()
         if not country:
             continue
+        if str(task.get("task_id")) in superseded:
+            for _ in rows:
+                count_dropped(dropped, "superseded", country)
+            continue
         osm_features = osm_by_country.get(country, {})
         ruling = rulings.get(site_identifier(task))
         for row in rows:
             feature = occupancy_feature(row, task, export["export_batch_id"], osm_features, ruling)
             if feature:
                 out[country].append(feature)
-            elif dropped is not None and ruling_applies(row, ruling) and ruling["accepted"] is None:
-                dropped[country] = dropped.get(country, 0) + 1
+            elif ruling_applies(row, ruling) and ruling["accepted"] is None:
+                count_dropped(dropped, "uncertain", country)
         for first, second in zip(rows, rows[1:]):
             if first.get("end_reason") != "relocated":
                 continue
@@ -442,9 +491,9 @@ def build_products(export_dirs: list[Path], regions_root: Path, dry_run: bool = 
         collections[country] = load_country_file(path)
         osm_by_country[country] = osm_index(collections[country])
     reviewed: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    dropped_uncertain: dict[str, int] = {}
+    dropped: dict[str, dict[str, int]] = {}
     for export in exports:
-        for country, features in features_from_export(export, osm_by_country, dropped_uncertain).items():
+        for country, features in features_from_export(export, osm_by_country, dropped).items():
             reviewed[country].extend(features)
     summary: dict[str, Any] = {"countries": {}, "dry_run": dry_run}
     for country in countries:
@@ -460,8 +509,10 @@ def build_products(export_dirs: list[Path], regions_root: Path, dry_run: bool = 
             "transition_features": lines,
             "total_features": len(after["features"]),
         }
-        if dropped_uncertain.get(country):
-            entry["location_uncertain_dropped"] = dropped_uncertain[country]
+        if dropped.get("uncertain", {}).get(country):
+            entry["location_uncertain_dropped"] = dropped["uncertain"][country]
+        if dropped.get("superseded", {}).get(country):
+            entry["superseded_by_revision_dropped"] = dropped["superseded"][country]
         # the wiring rule (docs/development/temporal-place-layer.md): a product that gains
         # its first feature must be wired in the region config and the portal together
         if not before.get("features") and after["features"]:
