@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import copy
 import sys
 import tempfile
 import unittest
@@ -341,6 +342,43 @@ class LocationRulingTests(unittest.TestCase):
         self.assertEqual(builder.superseded_tasks(tasks, [{"task_id": "rev", "decision_status": "needs_more_evidence"}], {"rev"}), {})
         self.assertEqual(builder.superseded_tasks(tasks, accepted + [{"task_id": "self", "decision_status": "accepted_for_export"}], {"rev", "self"}), {"src": "rev"})
 
+    # a source set, an intermediate pin-only revision, and a recording revision of that revision
+    def recording_after_pin_only_revision(self, middle_accepted=True):
+        tasks = builder.read_jsonl(self.export / "tasks.jsonl")
+        tasks.append({"task_id": "nz-rev2", "country_code": "NZ", "name": "St Ruled",
+                      "geometry": {"type": "Point", "coordinates": MOVED},
+                      "source_context": {"issue_report": {"source_task_id": "nz-rev", "original_point": MOVED}}})
+        write_jsonl(self.export / "tasks.jsonl", tasks)
+        rows = builder.read_jsonl(self.export / "site_occupancies.jsonl")
+        replacement = {**next(row for row in rows if row["occupancy_id"] == "r1"),
+                       "task_id": "nz-rev2", "parent_evidence_draft_id": "ed-rev2", "occupancy_id": "q1"}
+        write_jsonl(self.export / "site_occupancies.jsonl", [row for row in rows if row["task_id"] == "nz-src"] + [replacement])
+        self.derived([
+            {"occupancy_id": "s1", "review_state": "reviewer_confirmed"},
+            {"occupancy_id": "s2", "review_state": "reviewer_confirmed"},
+            {"occupancy_id": "q1", "review_state": "reviewer_confirmed"},
+        ])
+        decisions = [{"task_id": "nz-rev2", "evidence_draft_id": "ed-rev2", "created_at": 200}]
+        if middle_accepted:
+            decisions.append({"location_outcome": "accept_moved_point"})
+        self.decide(*decisions)
+
+    def test_supersession_crosses_accepted_recording_free_links_and_batches(self):
+        self.recording_after_pin_only_revision()
+        features = self.features()
+        self.assertEqual(sorted(key for key in features if key != "_summary"), ["q1"])
+        self.assertEqual(features["_summary"]["superseded_by_revision_dropped"], 2)
+        expected = self.product_without_batches([self.export])
+        paths = self.split_exports()
+        self.assertEqual(self.product_without_batches(paths), expected)
+        self.assertEqual(self.product_without_batches(list(reversed(paths))), expected)
+
+    def test_unaccepted_intermediate_revision_does_not_retire_its_source(self):
+        self.recording_after_pin_only_revision(middle_accepted=False)
+        features = self.features()
+        self.assertEqual(sorted(key for key in features if key != "_summary"), ["q1", "s1", "s2", "transition"])
+        self.assertNotIn("superseded_by_revision_dropped", features["_summary"])
+
     def test_latest_accepting_decision_rules(self):
         self.decide({"location_outcome": "accept_moved_point", "created_at": 100},
                     {"location_outcome": "keep_original_point", "created_at": 200})
@@ -366,6 +404,118 @@ class LocationRulingTests(unittest.TestCase):
         self.assertFalse(builder.ruling_applies(on_pin, None))
         self.assertEqual(builder.ruled_point(on_pin, ruling), tuple(MOVED))
         self.assertEqual(builder.ruled_point(elsewhere, ruling), (170.0, -45.0))
+
+    # split the fixture by task while preserving each row's export batch
+    def split_exports(self):
+        data = builder.load_export(self.export)
+        paths = []
+        for task_id, task in data["tasks"].items():
+            path = self.export.parent / task_id
+            path.mkdir(exist_ok=True)
+            rows = [row for row in data["occupancies"] if row["task_id"] == task_id]
+            ids = {row["occupancy_id"] for row in rows}
+            write_jsonl(path / "tasks.jsonl", [task])
+            write_jsonl(path / "site_occupancies.jsonl", rows)
+            write_jsonl(path / "derived_year_locations.jsonl", [row for row in data["derived_locations"] if row["occupancy_id"] in ids])
+            write_jsonl(path / "review_decisions.jsonl", [row for row in data["review_decisions"] if row["task_id"] == task_id])
+            paths.append(path)
+        return paths
+
+    # public features with only the input batch label removed for partition comparisons
+    def product_without_batches(self, paths):
+        summary = builder.build_products(paths, self.regions)
+        product = json.loads((self.regions / "nz" / "data" / "dated_places.geojson").read_text())
+        for feature in product["features"]:
+            feature["properties"].pop("export_batch_id")
+        summary["countries"]["NZ"].pop("wiring_needed", None)
+        return product, summary["countries"]["NZ"]
+
+    def test_location_outcomes_do_not_depend_on_export_partition_or_order(self):
+        for outcome in builder.LOCATION_OUTCOMES:
+            with self.subTest(outcome=outcome):
+                self.decide({"location_outcome": outcome})
+                expected, expected_summary = self.product_without_batches([self.export])
+                paths = self.split_exports()
+                for ordered in (paths, list(reversed(paths))):
+                    actual, summary = self.product_without_batches(ordered)
+                    self.assertEqual(actual, expected)
+                    self.assertEqual(summary, expected_summary)
+
+    def test_split_exports_retain_feature_batch_ids(self):
+        self.decide({"location_outcome": "accept_moved_point"})
+        builder.build_products(self.split_exports(), self.regions)
+        product = json.loads((self.regions / "nz" / "data" / "dated_places.geojson").read_text())
+        for feature in product["features"]:
+            self.assertEqual(feature["properties"]["export_batch_id"], feature["properties"]["task_id"])
+
+    def test_location_only_revision_resolves_a_nomination_through_its_source(self):
+        tasks = builder.read_jsonl(self.export / "tasks.jsonl")
+        tasks[1].pop("matched_current_site_id")
+        write_jsonl(self.export / "tasks.jsonl", tasks)
+        write_jsonl(self.export / "site_occupancies.jsonl", [row for row in builder.read_jsonl(self.export / "site_occupancies.jsonl") if row["task_id"] == "nz-src"])
+        self.decide({"location_outcome": "accept_moved_point"})
+        features = self.features()
+        self.assertEqual(features["s1"]["geometry"]["coordinates"], MOVED)
+        self.assertEqual(features["s1"]["properties"]["location_ruled_by_task_id"], "nz-rev")
+        self.assertEqual(features["s2"]["geometry"]["coordinates"], DISTINCT)
+
+    def test_repeated_pin_only_revisions_apply_to_the_original_occupancy(self):
+        third = [174.8, -41.27]
+        tasks = builder.read_jsonl(self.export / "tasks.jsonl")
+        tasks.append({"task_id": "nz-rev2", "country_code": "NZ", "name": "St Ruled",
+                      "geometry": {"type": "Point", "coordinates": third},
+                      "source_context": {"issue_report": {"source_task_id": "nz-rev", "original_point": MOVED}}})
+        write_jsonl(self.export / "tasks.jsonl", tasks)
+        write_jsonl(self.export / "site_occupancies.jsonl", [row for row in builder.read_jsonl(self.export / "site_occupancies.jsonl") if row["task_id"] == "nz-src"])
+        for first_outcome in builder.LOCATION_OUTCOMES:
+            for outcome, expected in (("accept_moved_point", third), ("keep_original_point", MOVED), ("uncertain", None)):
+                with self.subTest(first=first_outcome, last=outcome):
+                    self.decide({"location_outcome": first_outcome},
+                                {"task_id": "nz-rev2", "location_outcome": outcome, "created_at": 200})
+                    features = self.features()
+                    if expected is None:
+                        self.assertNotIn("s1", features)
+                        self.assertNotIn("transition", features)
+                    else:
+                        self.assertEqual(features["s1"]["geometry"]["coordinates"], expected)
+                        self.assertEqual(features["transition"]["geometry"]["coordinates"], [expected, DISTINCT])
+                        self.assertEqual(features["s1"]["properties"]["location_ruled_by_task_id"], "nz-rev2")
+                    self.assertEqual(features["s2"]["geometry"]["coordinates"], DISTINCT)
+
+    def test_overlapping_exports_use_the_latest_task_snapshot_once(self):
+        self.decide({"location_outcome": "accept_moved_point"})
+        old = builder.load_export(self.export)
+        old.update(exported_at=100, export_batch_id="old")
+        new = copy.deepcopy(old)
+        new.update(exported_at=200, export_batch_id="new")
+        new["review_decisions"][0]["location_outcome"] = "uncertain"
+        for exports in ([old, new], [new, old], [old, new, new]):
+            combined = builder.combine_exports(exports)
+            self.assertEqual(len(combined["occupancies"]), len(new["occupancies"]))
+            features = builder.features_from_export(combined, {})["NZ"]
+            self.assertFalse(any(f["properties"].get("occupancy_id") in ("s1", "r1") for f in features))
+            self.assertTrue(all(f["properties"]["export_batch_id"] == "new" for f in features))
+
+    def test_conflicting_undated_exports_refuse_before_writing(self):
+        self.decide({"location_outcome": "accept_moved_point"})
+        self.features()
+        product = self.regions / "nz" / "data" / "dated_places.geojson"
+        before = product.read_bytes()
+        paths = self.split_exports()
+        write_jsonl(paths[1] / "review_decisions.jsonl", [{"task_id": "nz-rev", "decision_status": "accepted_for_export", "location_outcome": "uncertain"}])
+        with self.assertRaisesRegex(ValueError, "Conflicting export snapshots"):
+            builder.build_products([self.export, *paths], self.regions)
+        self.assertEqual(product.read_bytes(), before)
+
+    def test_invalid_revision_lineage_refuses_the_build(self):
+        data = builder.load_export(self.export)
+        data["tasks"]["nz-src"]["source_context"] = {"issue_report": {"source_task_id": "nz-rev"}}
+        with self.assertRaisesRegex(ValueError, "cycle"):
+            builder.combine_exports([data])
+        data["tasks"]["nz-src"].pop("source_context")
+        data["tasks"]["nz-src"]["country_code"] = "VU"
+        with self.assertRaisesRegex(ValueError, "different countries"):
+            builder.combine_exports([data])
 
 
 if __name__ == "__main__":
