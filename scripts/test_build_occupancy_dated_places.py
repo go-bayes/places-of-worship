@@ -212,20 +212,29 @@ class LocationRulingTests(unittest.TestCase):
              "end_basis": "unknown", "still_active_asof": "2026-01-01", "location_relation": "distinct",
              "location_mode": "approximate_area", "location_basis": "address_or_locality",
              "longitude": DISTINCT[0], "latitude": DISTINCT[1]},
-            # the revision task re-records the first period on the moved pin
+            # the revision task re-records both periods, the first on the moved pin
             {**BASE_ROW, "task_id": "nz-rev", "parent_evidence_draft_id": "ed-rev", "occupancy_id": "r1", "segment_index": 0,
              "start_mode": "known", "start_date": "1900", "start_basis": "founding_stated", "end_mode": "known", "end_date": "1950",
-             "end_basis": "closure_stated", "location_relation": "same_as_task_point",
+             "end_basis": "closure_stated", "end_reason": "relocated", "location_relation": "same_as_task_point",
              "longitude": MOVED[0], "latitude": MOVED[1]},
+            {**BASE_ROW, "task_id": "nz-rev", "parent_evidence_draft_id": "ed-rev", "occupancy_id": "r2", "segment_index": 1,
+             "start_mode": "known", "start_date": "1951", "start_basis": "building_dedication", "end_mode": "still_active",
+             "end_basis": "unknown", "still_active_asof": "2026-01-01", "location_relation": "distinct",
+             "location_mode": "approximate_area", "location_basis": "address_or_locality",
+             "longitude": DISTINCT[0], "latitude": DISTINCT[1]},
         ])
-        write_jsonl(self.export / "derived_year_locations.jsonl", [
+        self.derived([
             {"occupancy_id": "s1", "review_state": "reviewer_confirmed", "target_year": 1936},
             {"occupancy_id": "s2", "review_state": "reviewer_confirmed", "target_year": 2013},
             {"occupancy_id": "r1", "review_state": "reviewer_confirmed", "target_year": 1936},
+            {"occupancy_id": "r2", "review_state": "reviewer_confirmed", "target_year": 2013},
         ])
 
     def tearDown(self):
         self.tmp.cleanup()
+
+    def derived(self, rows: list[dict]) -> None:
+        write_jsonl(self.export / "derived_year_locations.jsonl", rows)
 
     def decide(self, *decisions: dict) -> None:
         base = {"task_id": "nz-rev", "evidence_draft_id": "ed-rev", "decision_status": "accepted_for_export", "created_at": 100}
@@ -240,31 +249,38 @@ class LocationRulingTests(unittest.TestCase):
 
     def test_no_decisions_file_leaves_every_row_on_its_own_point(self):
         f = self.features()
+        # an unreviewed revision supersedes nothing: source and revision both draw, each where placed
         self.assertEqual(f["s1"]["geometry"]["coordinates"], ORIGINAL)
         self.assertEqual(f["r1"]["geometry"]["coordinates"], MOVED)
+        self.assertEqual(f["_summary"]["occupancy_features"], 4)
         self.assertNotIn("location_outcome", f["s1"]["properties"])
         self.assertNotIn("location_uncertain_dropped", f["_summary"])
+        self.assertNotIn("superseded_by_revision_dropped", f["_summary"])
 
     def test_accept_moved_point_moves_the_whole_site_to_the_new_pin(self):
         self.decide({"location_outcome": "accept_moved_point"})
         f = self.features()
-        # both rows that sat on the pin now stand at the moved point; the asserted period keeps its own
-        self.assertEqual(f["s1"]["geometry"]["coordinates"], MOVED)
+        # the accepted revision replaces the source's set; its pinned row stands at the moved point
+        # and the asserted period keeps its own
+        self.assertNotIn("s1", f)
+        self.assertNotIn("s2", f)
         self.assertEqual(f["r1"]["geometry"]["coordinates"], MOVED)
-        self.assertEqual(f["s2"]["geometry"]["coordinates"], DISTINCT)
-        self.assertEqual(f["s1"]["properties"]["location_outcome"], "accept_moved_point")
-        self.assertEqual(f["s1"]["properties"]["location_ruled_by_task_id"], "nz-rev")
+        self.assertEqual(f["r2"]["geometry"]["coordinates"], DISTINCT)
+        self.assertEqual(f["r1"]["properties"]["location_outcome"], "accept_moved_point")
         self.assertNotIn("location_ruled_by_task_id", f["r1"]["properties"])
-        self.assertNotIn("location_outcome", f["s2"]["properties"])
-        # the relocation line now starts from the ruled point
+        self.assertNotIn("location_outcome", f["r2"]["properties"])
+        # the relocation line starts from the ruled point
         self.assertEqual(f["transition"]["geometry"]["coordinates"], [MOVED, DISTINCT])
+        self.assertEqual(f["_summary"]["occupancy_features"], 2)
+        self.assertEqual(f["_summary"]["superseded_by_revision_dropped"], 2)
 
     def test_keep_original_point_returns_the_revision_to_the_record(self):
         self.decide({"location_outcome": "keep_original_point"})
         f = self.features()
         self.assertEqual(f["r1"]["geometry"]["coordinates"], ORIGINAL)
-        self.assertEqual(f["s1"]["geometry"]["coordinates"], ORIGINAL)
         self.assertEqual(f["r1"]["properties"]["location_outcome"], "keep_original_point")
+        self.assertNotIn("s1", f)
+        self.assertEqual(f["transition"]["geometry"]["coordinates"], [ORIGINAL, DISTINCT])
 
     def test_uncertain_takes_the_pinned_rows_off_the_map(self):
         self.decide({"location_outcome": "uncertain"})
@@ -272,9 +288,96 @@ class LocationRulingTests(unittest.TestCase):
         self.assertNotIn("s1", f)
         self.assertNotIn("r1", f)
         self.assertNotIn("transition", f)
-        self.assertEqual(f["s2"]["geometry"]["coordinates"], DISTINCT)
+        self.assertEqual(f["r2"]["geometry"]["coordinates"], DISTINCT)
         self.assertEqual(f["_summary"]["occupancy_features"], 1)
-        self.assertEqual(f["_summary"]["location_uncertain_dropped"], 2)
+        self.assertEqual(f["_summary"]["location_uncertain_dropped"], 1)
+        self.assertEqual(f["_summary"]["superseded_by_revision_dropped"], 2)
+
+    def test_source_ruling_moves_the_source_rows_when_the_revision_recorded_nothing(self):
+        # the revision's rows were overridden, so it records nothing and supersedes nothing;
+        # its accepted ruling still moves the source's pinned row
+        self.derived([
+            {"occupancy_id": "s1", "review_state": "reviewer_confirmed", "target_year": 1936},
+            {"occupancy_id": "s2", "review_state": "reviewer_confirmed", "target_year": 2013},
+            {"occupancy_id": "r1", "review_state": "reviewer_overridden", "target_year": 1936},
+            {"occupancy_id": "r2", "review_state": "reviewer_overridden", "target_year": 2013},
+        ])
+        self.decide({"location_outcome": "accept_moved_point"})
+        f = self.features()
+        self.assertEqual(f["s1"]["geometry"]["coordinates"], MOVED)
+        self.assertEqual(f["s1"]["properties"]["location_ruled_by_task_id"], "nz-rev")
+        self.assertEqual(f["s2"]["geometry"]["coordinates"], DISTINCT)
+        self.assertNotIn("r1", f)
+        self.assertNotIn("superseded_by_revision_dropped", f["_summary"])
+
+    def test_a_revision_of_a_revision_retires_every_earlier_link(self):
+        tasks = builder.read_jsonl(self.export / "tasks.jsonl")
+        tasks.append({"task_id": "nz-rev2", "country_code": "NZ", "name": "St Ruled", "matched_current_site_id": "site-nz-9",
+                      "geometry": {"type": "Point", "coordinates": MOVED},
+                      "source_context": {"issue_report": {"issue_type": "verify_existing_site", "source_task_id": "nz-rev"}}})
+        write_jsonl(self.export / "tasks.jsonl", tasks)
+        rows = builder.read_jsonl(self.export / "site_occupancies.jsonl")
+        rows.append({**BASE_ROW, "task_id": "nz-rev2", "parent_evidence_draft_id": "ed-rev2", "occupancy_id": "q1", "segment_index": 0,
+                     "start_mode": "known", "start_date": "1900", "start_basis": "founding_stated", "end_mode": "still_active",
+                     "end_basis": "unknown", "still_active_asof": "2026-01-01", "location_relation": "same_as_task_point",
+                     "longitude": MOVED[0], "latitude": MOVED[1]})
+        write_jsonl(self.export / "site_occupancies.jsonl", rows)
+        self.derived(builder.read_jsonl(self.export / "derived_year_locations.jsonl")
+                     + [{"occupancy_id": "q1", "review_state": "reviewer_confirmed", "target_year": 2013}])
+        self.decide({"location_outcome": "accept_moved_point"},
+                    {"task_id": "nz-rev2", "evidence_draft_id": "ed-rev2", "created_at": 200})
+        f = self.features()
+        self.assertEqual(sorted(k for k in f if k != "_summary"), ["q1"])
+        self.assertEqual(f["_summary"]["superseded_by_revision_dropped"], 4)
+
+    def test_superseded_tasks_needs_an_accepted_recording_revision(self):
+        tasks = {
+            "src": {"task_id": "src"},
+            "rev": {"task_id": "rev", "source_context": {"issue_report": {"source_task_id": "src"}}},
+            "self": {"task_id": "self", "source_context": {"issue_report": {"source_task_id": "self"}}},
+        }
+        accepted = [{"task_id": "rev", "decision_status": "accepted_for_export"}]
+        self.assertEqual(builder.superseded_tasks(tasks, accepted, {"rev"}), {"src": "rev"})
+        self.assertEqual(builder.superseded_tasks(tasks, accepted, set()), {})
+        self.assertEqual(builder.superseded_tasks(tasks, [{"task_id": "rev", "decision_status": "needs_more_evidence"}], {"rev"}), {})
+        self.assertEqual(builder.superseded_tasks(tasks, accepted + [{"task_id": "self", "decision_status": "accepted_for_export"}], {"rev", "self"}), {"src": "rev"})
+
+    # a source set, an intermediate pin-only revision, and a recording revision of that revision
+    def recording_after_pin_only_revision(self, middle_accepted=True):
+        tasks = builder.read_jsonl(self.export / "tasks.jsonl")
+        tasks.append({"task_id": "nz-rev2", "country_code": "NZ", "name": "St Ruled",
+                      "geometry": {"type": "Point", "coordinates": MOVED},
+                      "source_context": {"issue_report": {"source_task_id": "nz-rev", "original_point": MOVED}}})
+        write_jsonl(self.export / "tasks.jsonl", tasks)
+        rows = builder.read_jsonl(self.export / "site_occupancies.jsonl")
+        replacement = {**next(row for row in rows if row["occupancy_id"] == "r1"),
+                       "task_id": "nz-rev2", "parent_evidence_draft_id": "ed-rev2", "occupancy_id": "q1"}
+        write_jsonl(self.export / "site_occupancies.jsonl", [row for row in rows if row["task_id"] == "nz-src"] + [replacement])
+        self.derived([
+            {"occupancy_id": "s1", "review_state": "reviewer_confirmed"},
+            {"occupancy_id": "s2", "review_state": "reviewer_confirmed"},
+            {"occupancy_id": "q1", "review_state": "reviewer_confirmed"},
+        ])
+        decisions = [{"task_id": "nz-rev2", "evidence_draft_id": "ed-rev2", "created_at": 200}]
+        if middle_accepted:
+            decisions.append({"location_outcome": "accept_moved_point"})
+        self.decide(*decisions)
+
+    def test_supersession_crosses_accepted_recording_free_links_and_batches(self):
+        self.recording_after_pin_only_revision()
+        features = self.features()
+        self.assertEqual(sorted(key for key in features if key != "_summary"), ["q1"])
+        self.assertEqual(features["_summary"]["superseded_by_revision_dropped"], 2)
+        expected = self.product_without_batches([self.export])
+        paths = self.split_exports()
+        self.assertEqual(self.product_without_batches(paths), expected)
+        self.assertEqual(self.product_without_batches(list(reversed(paths))), expected)
+
+    def test_unaccepted_intermediate_revision_does_not_retire_its_source(self):
+        self.recording_after_pin_only_revision(middle_accepted=False)
+        features = self.features()
+        self.assertEqual(sorted(key for key in features if key != "_summary"), ["q1", "s1", "s2", "transition"])
+        self.assertNotIn("superseded_by_revision_dropped", features["_summary"])
 
     def test_latest_accepting_decision_rules(self):
         self.decide({"location_outcome": "accept_moved_point", "created_at": 100},
