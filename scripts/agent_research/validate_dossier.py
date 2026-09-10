@@ -42,6 +42,7 @@ import lib  # noqa: E402
 USER_AGENT = "religionmap-agent-research-pilot/0.1 (+https://religionmap.org; research pilot, one request per second)"
 FETCH_TIMEOUT_S = 10
 MIN_INTERVAL_S = 1.0
+HOST_INTERVAL_S = 4.0
 MAX_BYTES = 2_000_000
 OSM_API = "https://api.openstreetmap.org/api/0.6"
 LOCATION_TOLERANCE_M = lib.LOCATION_TOLERANCE_M
@@ -75,18 +76,25 @@ class Fetcher:
     def __init__(self, enabled: bool = True):
         self.enabled = enabled
         self.last_request = 0.0
+        self.last_by_host: dict[str, float] = {}
         self.robots: dict[str, urllib.robotparser.RobotFileParser | None] = {}
         self.cache: dict[str, dict] = {}
         self.request_count = 0
 
-    def _wait(self):
+    def _wait(self, host: str):
         elapsed = time.time() - self.last_request
         if elapsed < MIN_INTERVAL_S:
             time.sleep(MIN_INTERVAL_S - elapsed)
+        # and a longer gap between requests to one host, which is what keeps a
+        # small site from serving its challenge page
+        since_host = time.time() - self.last_by_host.get(host, 0.0)
+        if since_host < HOST_INTERVAL_S:
+            time.sleep(HOST_INTERVAL_S - since_host)
         self.last_request = time.time()
+        self.last_by_host[host] = self.last_request
 
     def _raw_get(self, url: str) -> tuple[int, bytes, str]:
-        self._wait()
+        self._wait(urllib.parse.urlsplit(url).netloc.lower())
         self.request_count += 1
         request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml,application/xml,text/plain;q=0.9,*/*;q=0.5"})
         with urllib.request.urlopen(request, timeout=FETCH_TIMEOUT_S) as response:
@@ -139,14 +147,28 @@ class Fetcher:
             status, body, content_type = self._raw_get(url)
             result["status"] = status
             result["content_type"] = content_type
+            if "pdf" in content_type.lower() or body[:5] == b"%PDF-":
+                # no pdf text extraction in the standard library: the locator
+                # is reachable, the quotation is left for a human
+                result["outcome"] = "fetched_pdf"
+                self.cache[url] = result
+                return result
             text = body.decode("utf-8", "replace")
+            result["raw"] = text
+            if "xml" in content_type and "<osm" in text[:200]:
+                # osm api xml: fold k="key" v="value" pairs into key=value in the
+                # matching text so a quoted tag reads as the reader quoted it;
+                # the raw document stays for the xml parser
+                text = re.sub(r'k="([^"]+)"\s+v="([^"]*)"', r"\1=\2 ", text)
             result["text"] = lib.strip_html(text) if "html" in content_type or "<html" in text[:2000].lower() else text
             result["outcome"] = "fetched"
             # a bot-challenge page answers 200 with a script shell and no content
-            # (papers past sits behind incapsula); it needs a human, not a retry
-            if "_Incapsula_Resource" in text[:6000] or ("challenge" in text[:3000].lower() and len(result["text"]) < 400):
+            # (papers past sits behind incapsula; anglicanlife.org.nz serves a
+            # javascript challenge once a client has fetched a few pages); it
+            # needs a human, not a retry
+            if "_Incapsula_Resource" in text[:6000] or len(result["text"]) < 200:
                 result["outcome"] = "requires_human_access"
-                result["error"] = "bot challenge page"
+                result["error"] = "bot challenge or empty page"
         except urllib.error.HTTPError as exc:
             result["status"] = exc.code
             # 404 and 410 mean the locator points at nothing; 401, 403 and 429
@@ -187,7 +209,7 @@ def fetch_osm_object(fetcher: Fetcher, osm_type: str, osm_id: int) -> dict:
         out["error"] = f"current: {current['outcome']} {current.get('error') or current.get('status')}"
     else:
         try:
-            root = ET.fromstring(current["text"])
+            root = ET.fromstring(current.get("raw") or current["text"])
             nodes = {n.get("id"): (float(n.get("lat")), float(n.get("lon"))) for n in root.findall("node")}
             element = root.find(osm_type)
             if element is not None:
@@ -211,7 +233,7 @@ def fetch_osm_object(fetcher: Fetcher, osm_type: str, osm_id: int) -> dict:
     history = fetcher.get(f"{OSM_API}/{osm_type}/{osm_id}/history")
     if history["outcome"] == "fetched":
         try:
-            root = ET.fromstring(history["text"])
+            root = ET.fromstring(history.get("raw") or history["text"])
             for element in root.findall(osm_type):
                 out["history"].append({
                     "version": int(element.get("version")),
@@ -276,7 +298,11 @@ def check_claim(claim: dict, fetcher: Fetcher, osm: dict | None = None) -> dict:
         # is the same record, so the locator is verified through it
         versions = {h["version"] for h in osm.get("history", [])}
         wanted = int(page_match.group(5)) if page_match.group(5) else None
-        exists = bool(versions) and (wanted is None or wanted in versions)
+        if not versions:
+            row.update({"fetch": "not_fetched", "status": None, "support": "not_checked", "support_share": None,
+                        "error": "osm history unavailable, page not verified"})
+            return row
+        exists = wanted is None or wanted in versions
         row.update({"fetch": "verified_via_osm_api" if exists else "dead", "status": 200 if exists else 404,
                     "support": "not_checked", "support_share": None})
         return row
@@ -285,6 +311,10 @@ def check_claim(claim: dict, fetcher: Fetcher, osm: dict | None = None) -> dict:
     row["status"] = page["status"]
     if page["error"]:
         row["error"] = page["error"]
+    if page["outcome"] == "fetched_pdf":
+        row["support"] = "not_checked_pdf"
+        row["support_share"] = None
+        return row
     if page["outcome"] != "fetched":
         row["support"] = "not_checked"
         row["support_share"] = None
@@ -302,11 +332,12 @@ def check_claim(claim: dict, fetcher: Fetcher, osm: dict | None = None) -> dict:
 
 
 def internal_contradictions(dossier: dict) -> list[str]:
-    """two claims of one date type in one dossier more than a year apart"""
+    """two claims of one single-valued date type in one dossier more than a
+    year apart (dated observations such as renovations are not contradictions)"""
     notes = []
     by_type: dict[str, list[dict]] = {}
     for claim in dossier.get("claims", []):
-        if claim["claim_type"] in lib.DATE_TYPES:
+        if claim["claim_type"] in lib.DATE_TYPES and claim["claim_type"] in lib.SINGLE_VALUED_TYPES:
             by_type.setdefault(claim["claim_type"], []).append(claim)
     for ctype, claims in by_type.items():
         for i in range(len(claims)):
@@ -320,7 +351,7 @@ def internal_contradictions(dossier: dict) -> list[str]:
 def validate_one(dossier: dict, fetcher: Fetcher, osm: dict | None) -> dict:
     rows = [check_claim(c, fetcher, osm) for c in dossier.get("claims", [])]
     locators = [r for r in rows if r["fetch"] != "offline_source"]
-    reachable = [r for r in locators if r["fetch"] in ("fetched", "verified_via_osm_api")]
+    reachable = [r for r in locators if r["fetch"] in ("fetched", "fetched_pdf", "verified_via_osm_api")]
     quoted = [r for r in reachable if r["has_quote"] and r["fetch"] == "fetched"]
     supported = [r for r in quoted if r["support"] == "supported"]
     partial = [r for r in quoted if r["support"] == "partially_supported"]
@@ -328,7 +359,7 @@ def validate_one(dossier: dict, fetcher: Fetcher, osm: dict | None) -> dict:
     for r in locators:
         by_locator.setdefault(r["locator"], r["fetch"])
     distinct = set(by_locator)
-    distinct_reachable = {u for u, f in by_locator.items() if f in ("fetched", "verified_via_osm_api")}
+    distinct_reachable = {u for u, f in by_locator.items() if f in ("fetched", "fetched_pdf", "verified_via_osm_api")}
     distinct_dead = {u for u, f in by_locator.items() if f == "dead"}
     distinct_blocked = {u for u, f in by_locator.items() if f in ("requires_human_access", "robots_disallowed")}
     summary = {
