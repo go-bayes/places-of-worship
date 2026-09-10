@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Places of Worship | Immersive pilot (staged)</title>
+  <link href="https://cdn.jsdelivr.net/npm/maplibre-gl@6.9.0/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="immersive.css?v=20260910a" rel="stylesheet">
+</head>
+<body>
+  <!-- STAGED PILOT (2026-09-10): not linked from any navigation. Keyless by design.
+       Basemap: OpenStreetMap raster (JB ruling 2026-08-28). Terrain: Mapterhorn
+       terrain tiles (Terrarium encoding, CC BY 4.0, no key). Buildings: OpenFreeMap
+       vector tiles (no key). Points: the project tile server plus the NZ dated-places product.
+       See docs/development/immersive-exploration-options-2026-09-10.md. -->
+  <div id="map" role="application" aria-label="Three-dimensional map of places of worship in Canterbury"></div>
+
+  <header class="im-bar">
+    <a class="im-wordmark" href="../../nz/" title="Back to the NZ research map">religionmap.org</a>
+    <span class="im-tag">immersive pilot · staged</span>
+    <nav class="im-controls" aria-label="Map controls">
+      <button type="button" id="tourBtn" class="im-btn" aria-pressed="false">Tour</button>
+      <button type="button" id="yearBtn" class="im-btn" aria-pressed="false">Year</button>
+      <button type="button" id="globeBtn" class="im-btn" aria-pressed="true" title="Toggle globe projection">Globe</button>
+      <button type="button" id="shareBtn" class="im-btn" title="Copy a link to this view">Copy link</button>
+    </nav>
+  </header>
+
+  <section id="yearPanel" class="im-panel" hidden aria-label="Year filter">
+    <label for="yearRange">Dated places in <output id="yearOut">2026</output></label>
+    <input type="range" id="yearRange" min="1840" max="2026" step="1" value="2026">
+    <p class="im-note">Amber marks are OpenStreetMap features with a recorded start date; the slider hides those not yet built in the chosen year. Undated places stay in the coloured layer.</p>
+  </section>
+
+  <section id="tourCard" class="im-card" hidden aria-live="polite">
+    <div class="im-card-head">
+      <span id="tourStep" class="im-step"></span>
+      <button type="button" id="tourClose" class="im-icon" aria-label="End tour">×</button>
+    </div>
+    <h2 id="tourName"></h2>
+    <p id="tourMeta" class="im-meta"></p>
+    <p id="tourLinks" class="im-links"></p>
+    <div class="im-card-nav">
+      <button type="button" id="tourPrev" class="im-btn">‹ Prev</button>
+      <button type="button" id="tourPlay" class="im-btn" aria-pressed="false">Play</button>
+      <button type="button" id="tourNext" class="im-btn">Next ›</button>
+    </div>
+  </section>
+
+  <div id="toast" class="im-toast" role="status" hidden></div>
+
+  <script type="module" src="immersive.js?v=20260910a"></script>
+</body>
+</html>
