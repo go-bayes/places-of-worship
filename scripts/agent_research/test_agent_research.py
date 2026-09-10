@@ -240,6 +240,7 @@ class ValidatorOfflineTest(unittest.TestCase):
         rows_b = report["dossiers"][1]["claims"]
         self.assertEqual(rows_b[0]["support"], "not_found")
         self.assertEqual(report["dossiers"][0]["summary"]["locator_validity_rate"], 1.0)
+        self.assertEqual(report["dossiers"][0]["summary"]["locator_reachable_rate"], 1.0)
         self.assertEqual(report["dossiers"][0]["summary"]["quote_exact_rate"], 1.0)
         self.assertEqual(report["dossiers"][1]["summary"]["quote_support_rate"], 0.5)
         agreement = report["agreement"]
@@ -247,6 +248,7 @@ class ValidatorOfflineTest(unittest.TestCase):
         self.assertEqual(by_type["start_date"], "agree")  # 1891 vs 1892: within a year
         self.assertEqual(by_type["denomination"], "agree")
         self.assertEqual(by_type["current_status"], "disagree")
+        self.assertEqual(agreement["majority"], 0)
         self.assertEqual(by_type["candidate_location"], "agree")  # about 28 m apart
         self.assertIn("current_status", agreement["escalate_to_human"])
         self.assertEqual(agreement["claim_types_compared"], 4)
@@ -261,6 +263,8 @@ class ValidatorOfflineTest(unittest.TestCase):
         self.assertEqual(summary["dead"], 1)
         self.assertEqual(summary["distinct_locators"], 2)
         self.assertEqual(summary["locator_validity_rate"], 0.5)
+        self.assertEqual(summary["locator_reachable_rate"], 0.5)
+        self.assertEqual(summary["distinct_blocked"], 0)
         self.assertIn("note", report["agreement"])
 
     def test_location_disagreement_beyond_tolerance(self):

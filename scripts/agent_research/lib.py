@@ -322,29 +322,57 @@ def _status_group(value: str) -> str:
     return v
 
 
-def claims_agree(a: dict, b: dict) -> tuple[bool, str]:
-    """same claim type, do two readers' values agree within tolerance"""
+# claim types with one true value per place, on which readers can agree or
+# disagree; dated observations (worship active in 1924, in 2013, in 2026) are
+# each true and are reported per reader, not compared
+SINGLE_VALUED_TYPES = {"name", "address", "religion", "denomination", "start_date", "building_date", "worship_ended",
+                       "closure_event", "sale_or_disposal", "land_or_consecration", "location", "current_status"}
+
+_COORD = re.compile(r"(-?\d{1,2}\.\d{3,}),?\s+(-?\d{1,3}\.\d{3,})")
+
+
+def _coords(claim: dict) -> tuple[float, float] | None:
+    structured = claim.get("value_structured") or {}
+    try:
+        return float(structured["latitude"]), float(structured["longitude"])
+    except (KeyError, TypeError, ValueError):
+        pass
+    m = _COORD.search(str(claim.get("value") or ""))
+    if m:
+        lat, lon = float(m.group(1)), float(m.group(2))
+        if -90 <= lat <= 90 and -180 <= lon <= 180:
+            return lat, lon
+    return None
+
+
+def claims_agree(a: dict, b: dict) -> tuple[bool | None, str]:
+    """same claim type, do two readers' values agree within tolerance.
+    None means the pair cannot be compared (a value neither side parses)."""
     ctype = a["claim_type"]
+    if ctype == "current_status":
+        return _status_group(a["value"]) == _status_group(b["value"]), "status group"
     if ctype in DATE_TYPES:
         ya, yb = _years(a), _years(b)
         if ya and yb:
             agree = min(abs(x - y) for x in ya for y in yb) <= DATE_TOLERANCE_YEARS
             return agree, f"years {sorted(set(ya))} vs {sorted(set(yb))}"
-        return False, "no parseable year on one side"
+        return None, "no parseable year on one side"
     if ctype == "location":
-        sa, sb = a.get("value_structured") or {}, b.get("value_structured") or {}
-        try:
-            d = haversine_m(float(sa["latitude"]), float(sa["longitude"]), float(sb["latitude"]), float(sb["longitude"]))
-        except (KeyError, TypeError, ValueError):
-            return False, "coordinates missing on one side"
+        ca, cb = _coords(a), _coords(b)
+        if ca is None or cb is None:
+            return None, "coordinates missing on one side"
+        d = haversine_m(ca[0], ca[1], cb[0], cb[1])
         return d <= LOCATION_TOLERANCE_M, f"{d:.0f} m apart"
-    if ctype in ("worship_active_asof",):
-        return _status_group(a["value"]) == _status_group(b["value"]), "status group"
     ta, tb = set(tokens(a["value"])), set(tokens(b["value"]))
     if not ta or not tb:
-        return False, "empty value"
+        return None, "empty value"
     if ta == tb or a["value"].strip().lower() == b["value"].strip().lower():
         return True, "exact"
+    if len(ta) == 1 and len(tb) == 1:
+        # christian / christianity, anglican / anglicans: a shared stem counts
+        wa, wb = next(iter(ta)), next(iter(tb))
+        stem = min(len(wa), len(wb), 6)
+        return wa[:stem] == wb[:stem], "stem"
     jaccard = len(ta & tb) / len(ta | tb)
     contained = ta <= tb or tb <= ta
     return (jaccard >= 0.5 or contained), f"jaccard {jaccard:.2f}"
@@ -372,7 +400,7 @@ def compute_agreement(dossiers: list[dict]) -> dict:
         assessment = dossier.get("status_assessment", {})
         if assessment.get("current_status"):
             by_type.setdefault("current_status", []).append((reader, {
-                "claim_type": "worship_active_asof",
+                "claim_type": "current_status",
                 "value": assessment["current_status"],
             }))
         loc = dossier.get("candidate_location", {})
@@ -384,40 +412,55 @@ def compute_agreement(dossiers: list[dict]) -> dict:
             }))
 
     rows = []
-    agreed = disagreed = single = 0
+    agreed = majority = disagreed = single = not_comparable = 0
+    observations = []
     for ctype, entries in sorted(by_type.items()):
         values = [{"reader": r, "value": c.get("value")} for r, c in entries]
+        compare_type = "location" if ctype == "candidate_location" else ctype
+        if compare_type not in SINGLE_VALUED_TYPES:
+            # dated observations: reported per reader, never a disagreement
+            observations.append({"claim_type": ctype, "outcome": "observation", "values": values, "detail": "dated observations are complementary, not compared"})
+            continue
         if len(entries) < 2:
             single += 1
             rows.append({"claim_type": ctype, "outcome": "single_reader", "values": values, "detail": ""})
             continue
         notes = []
-        all_agree = True
+        verdicts = []
         for i in range(len(entries)):
             for j in range(i + 1, len(entries)):
                 ok, note = claims_agree(entries[i][1], entries[j][1])
                 notes.append(f"{entries[i][0]} vs {entries[j][0]}: {note}")
-                all_agree = all_agree and ok
-        if all_agree:
+                if ok is not None:
+                    verdicts.append(ok)
+        if not verdicts:
+            not_comparable += 1
+            outcome = "not_comparable"
+        elif all(verdicts):
             agreed += 1
+            outcome = "agree"
+        elif sum(verdicts) > len(verdicts) / 2:
+            # three or more readers, one out of step
+            majority += 1
+            outcome = "majority"
         else:
             disagreed += 1
-        rows.append({
-            "claim_type": ctype,
-            "outcome": "agree" if all_agree else "disagree",
-            "values": values,
-            "detail": "; ".join(notes),
-        })
-    compared = agreed + disagreed
+            outcome = "disagree"
+        rows.append({"claim_type": ctype, "outcome": outcome, "values": values, "detail": "; ".join(notes)})
+    compared = agreed + majority + disagreed
     return {
         "readers": readers,
         "claim_types_compared": compared,
         "agreed": agreed,
+        "majority": majority,
         "disagreed": disagreed,
         "single_reader": single,
+        "not_comparable": not_comparable,
+        # strict: every pair agreed; lenient: a majority of pairs agreed
         "agreement_rate": round(agreed / compared, 3) if compared else None,
-        "escalate_to_human": [r["claim_type"] for r in rows if r["outcome"] == "disagree"],
-        "rows": rows,
+        "majority_rate": round((agreed + majority) / compared, 3) if compared else None,
+        "escalate_to_human": [r["claim_type"] for r in rows if r["outcome"] in ("disagree", "majority")],
+        "rows": rows + observations,
     }
 
 

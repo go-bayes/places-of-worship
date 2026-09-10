@@ -55,6 +55,18 @@ flowchart LR
 
 Manifest tooling (`generate_manifest.py`, `validate_manifests.sh`) lives in the private research tier at `~/GIT/pow-research/pipeline/`.
 
+## Agent Research Pilot Scripts
+
+Pilot only (2026-09-10; brief `docs/development/agent-research-pipeline-brief-2026-09-10.md`). Every output is a lead file beside the editions, never a Convex row; nothing here writes to Convex or a live surface. Run with `uv run` from the repository root.
+
+| Script | Main entry point | Purpose | Inputs | Outputs | When to run |
+| --- | --- | --- | --- | --- | --- |
+| `scripts/agent_research/import_watts_xlsx.py` | `main()` | Convert a collaborator's one-place evidence workbook into an `agent-dossier.v1` file with personal details quarantined (hashes only with `--redact`). | The three-sheet workbook (Summary; Evidence Timeline; Notes); needs `--with openpyxl`. | A dossier JSON; the committed redacted fixture is `fixtures/watts-st-martins-loburn-2026-09-09.dossier.json`. | When a collaborator sends agent output as a spreadsheet. |
+| `scripts/agent_research/research_place.py` | `main()` | Run one independent reader (`claude`, `codex`, `openrouter`) over one place and write a dossier with full provenance. | Place reference, name, seed coordinate, country, seed tags; `prompts/researcher.v1.md`; `fixtures/allowlist-nz-v1.json`. | Unredacted dossier under `runs/` (git-ignored) and a redacted copy with `--redact-dir`. | JB-triggered pilot runs only. |
+| `scripts/agent_research/validate_dossier.py` | `main()` | Deterministic checks: fetch every locator (robots, one request per second), test the quoted support on the page, compare the candidate coordinate and version chain with the OSM API, compute agreement between readers. | One or more dossiers for one place. | A validation JSON with per-claim rows, per-dossier summaries and the agreement record. | After every reader run; `--no-fetch` for offline tests. |
+| `scripts/agent_research/run_pilot.py` | `main()` | Run the pilot set through the readers in parallel, validate, and write the markdown report. | `fixtures/pilot-set.json`. | `reports/<run id>.md`, redacted dossiers and validation files under `reports/<run id>/`. | JB-triggered; reuses completed dossiers by idempotency key unless `--force`. |
+| `scripts/agent_research/test_agent_research.py` | `unittest` | Import, schema, quote matching, quarantine, offline validator and agreement tests. | Fixtures in the directory. | Test results. | `uv run python -m unittest scripts/agent_research/test_agent_research.py`. |
+
 ## Supporting Map And Research Scripts
 
 These scripts are important to the wider pipeline, but they are one step away

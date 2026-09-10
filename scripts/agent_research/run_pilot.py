@@ -131,12 +131,12 @@ def write_report(run_id: str, backends: list[str], results: list[dict], report_p
     lines = [f"# Agent research pilot report: {run_id}", ""]
     lines.append(f"Run started {started_at}, finished {ended_at}. Readers per place: {', '.join(backends)}, plus the collaborator dossier where one exists. Prompt {PROMPT_VERSION}; allowlist nz-v1. Every number here is computed from the run's dossiers and the validator's fetches; nothing is estimated except the cost column where the tool reported none (marked est.).")
     lines.append("")
-    lines.append("Locator validity is the share of distinct locators that returned a page (HTTP 200); quote support is the share of claims with a verbatim quote whose quote was found on the fetched page, exactly or as at least 60 percent of its word bigrams; agreement is the share of claim types made by two or more readers on which every pair agreed within tolerance (a year for dates, 75 m for coordinates, token overlap for text).")
+    lines.append("Locator validity is the share of distinct locators that point at something (not HTTP 404 or 410); reachable is the share a polite automated reader could open (HTTP 200, or an OSM history page verified through the OSM API); blocked is the share that refused the automated reader (401, 403, 429 or robots) and needs a human to open. Quote support is the share of claims with a verbatim quote, on reachable pages, whose quote was found on the page, exactly or as at least 60 percent of its word bigrams. Agreement is the share of claim types made by two or more readers on which every pair agreed within tolerance (a year for dates, 75 m for coordinates, token overlap for text).")
     lines.append("")
     lines.append("## Per place and reader")
     lines.append("")
-    lines.append("| Place | Reader | Status | Claims | Locators | Validity | Quote support (exact) | Tokens in / out | Cost USD | Time s | Status assessment | OSM stale |")
-    lines.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
+    lines.append("| Place | Reader | Status | Claims | Locators | Valid | Reachable | Blocked | Quote support (exact) | Tokens in / out | Cost USD | Time s | Status assessment | OSM stale |")
+    lines.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
     totals: dict[str, dict] = {}
     for result in results:
         for dossier, validation in zip(result["dossiers"], result["validation"]["dossiers"]):
@@ -148,16 +148,19 @@ def write_report(run_id: str, backends: list[str], results: list[dict], report_p
             cost_label = fmt(cost, 3) + ("" if manifest.get("cost_usd_reported") is not None else " est." if cost is not None else "")
             lines.append(
                 f"| {result['place']['name']} | {backend} | {manifest['exit_status']} | {summary['claims']} | {summary['distinct_locators']} | "
-                f"{pct(summary['locator_validity_rate'])} | {pct(summary['quote_support_rate'])} ({pct(summary['quote_exact_rate'])}) | "
+                f"{pct(summary['locator_validity_rate'])} | {pct(summary['locator_reachable_rate'])} | {pct(summary['locator_blocked_rate'])} | "
+                f"{pct(summary['quote_support_rate'])} ({pct(summary['quote_exact_rate'])}) | "
                 f"{fmt(usage.get('input_tokens'))} / {fmt(usage.get('output_tokens'))} | {cost_label} | {fmt(manifest.get('duration_s'), 0)} | "
                 f"{dossier['status_assessment']['current_status']} | {dossier['status_assessment'].get('osm_stale')} |"
             )
-            t = totals.setdefault(backend, {"runs": 0, "completed": 0, "claims": 0, "locators": 0, "reachable": 0, "quoted": 0, "supported": 0, "exact": 0, "cost": 0.0, "cost_n": 0, "time": 0.0, "in": 0, "out": 0})
+            t = totals.setdefault(backend, {"runs": 0, "completed": 0, "claims": 0, "locators": 0, "reachable": 0, "dead": 0, "blocked": 0, "quoted": 0, "supported": 0, "exact": 0, "cost": 0.0, "cost_n": 0, "time": 0.0, "in": 0, "out": 0})
             t["runs"] += 1
             t["completed"] += manifest["exit_status"] == "completed"
             t["claims"] += summary["claims"]
             t["locators"] += summary["distinct_locators"]
             t["reachable"] += summary["distinct_reachable"]
+            t["dead"] += summary["distinct_dead"]
+            t["blocked"] += summary["distinct_blocked"]
             t["quoted"] += summary["quote_supported"] + summary["quote_partial"] + summary["quote_not_found"]
             t["supported"] += summary["quote_supported"] + summary["quote_partial"]
             t["exact"] += summary["quote_supported"]
@@ -170,27 +173,30 @@ def write_report(run_id: str, backends: list[str], results: list[dict], report_p
     lines.append("")
     lines.append("## Per reader totals")
     lines.append("")
-    lines.append("| Reader | Runs (completed) | Claims | Distinct locators | Validity | Quote support (exact) | Mean tokens in / out | Mean cost USD | Mean time s |")
-    lines.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- |")
+    lines.append("| Reader | Runs (completed) | Claims | Distinct locators | Valid | Reachable | Blocked | Quote support (exact) | Mean tokens in / out | Mean cost USD | Mean time s |")
+    lines.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
     for backend, t in totals.items():
         n = max(t["runs"], 1)
         lines.append(
-            f"| {backend} | {t['runs']} ({t['completed']}) | {t['claims']} | {t['locators']} | {pct(t['reachable'] / t['locators'] if t['locators'] else None)} | "
+            f"| {backend} | {t['runs']} ({t['completed']}) | {t['claims']} | {t['locators']} | {pct(1 - t['dead'] / t['locators'] if t['locators'] else None)} | "
+            f"{pct(t['reachable'] / t['locators'] if t['locators'] else None)} | {pct(t['blocked'] / t['locators'] if t['locators'] else None)} | "
             f"{pct(t['supported'] / t['quoted'] if t['quoted'] else None)} ({pct(t['exact'] / t['quoted'] if t['quoted'] else None)}) | "
             f"{t['in'] // n} / {t['out'] // n} | {fmt(t['cost'] / t['cost_n'], 3) if t['cost_n'] else '—'} | {fmt(t['time'] / n, 0)} |"
         )
     lines.append("")
     lines.append("## Agreement between readers")
     lines.append("")
-    lines.append("| Place | Readers | Claim types compared | Agreed | Disagreed | Rate | Escalate to human |")
-    lines.append("| --- | --- | --- | --- | --- | --- | --- |")
+    lines.append("Only single-valued claim types are compared (name, address, religion, denomination, start and building dates, closure, sale, land, location, current status). Dated observations (worship active at a date, service patterns, renovations, organisation links) are complementary across readers and are listed, not scored. Strict rate: every pair of readers agreed. Majority: three or more readers with one out of step, still escalated.")
+    lines.append("")
+    lines.append("| Place | Readers | Claim types compared | Agreed | Majority | Disagreed | Strict rate | Escalate to human |")
+    lines.append("| --- | --- | --- | --- | --- | --- | --- | --- |")
     for result in results:
         agreement = result["validation"]["agreement"]
         if "agreement_rate" not in agreement:
-            lines.append(f"| {result['place']['name']} | {len(result['dossiers'])} | — | — | — | — | {agreement.get('note', '')} |")
+            lines.append(f"| {result['place']['name']} | {len(result['dossiers'])} | — | — | — | — | — | {agreement.get('note', '')} |")
             continue
         lines.append(
-            f"| {result['place']['name']} | {len(agreement['readers'])} | {agreement['claim_types_compared']} | {agreement['agreed']} | "
+            f"| {result['place']['name']} | {len(agreement['readers'])} | {agreement['claim_types_compared']} | {agreement['agreed']} | {agreement['majority']} | "
             f"{agreement['disagreed']} | {pct(agreement['agreement_rate'])} | {', '.join(agreement['escalate_to_human']) or 'none'} |"
         )
     lines.append("")
@@ -214,7 +220,7 @@ def write_report(run_id: str, backends: list[str], results: list[dict], report_p
     lines.append("")
     for result in results:
         agreement = result["validation"]["agreement"]
-        rows = [r for r in agreement.get("rows", []) if r["outcome"] == "disagree"]
+        rows = [r for r in agreement.get("rows", []) if r["outcome"] in ("disagree", "majority")]
         if not rows:
             continue
         lines.append(f"### {result['place']['name']}")
@@ -235,10 +241,12 @@ def write_report(run_id: str, backends: list[str], results: list[dict], report_p
             for note in validation.get("internal_contradictions", []):
                 any_failure = True
                 lines.append(f"- {result['place']['name']} / {manifest['backend']}: internal contradiction {note}")
-            dead = [r for r in validation["claims"] if r["fetch"] in ("dead", "http_error", "unreachable", "robots_disallowed")]
-            for row in dead:
-                any_failure = True
-                lines.append(f"- {result['place']['name']} / {manifest['backend']}: {row['fetch']} {row.get('status') or ''} {row['locator']}")
+            seen = set()
+            for row in validation["claims"]:
+                if row["fetch"] in ("dead", "http_error", "unreachable", "robots_disallowed", "requires_human_access") and row["locator"] not in seen:
+                    seen.add(row["locator"])
+                    any_failure = True
+                    lines.append(f"- {result['place']['name']} / {manifest['backend']}: {row['fetch']} {row.get('status') or ''} {row['locator']}")
             not_found = [r for r in validation["claims"] if r.get("support") == "not_found"]
             for row in not_found:
                 any_failure = True
@@ -299,7 +307,7 @@ def main(argv: list[str] | None = None) -> int:
         lib.write_json(report_dir / f"{slug(place['place_ref'])}.validation.json", validation)
         for row in validation["dossiers"]:
             s = row["summary"]
-            print(f"  validated {row['reader']}: locators {s['distinct_locators']} validity {s['locator_validity_rate']} quote support {s['quote_support_rate']}")
+            print(f"  validated {row['reader']}: locators {s['distinct_locators']} valid {s['locator_validity_rate']} reachable {s['locator_reachable_rate']} quote support {s['quote_support_rate']}")
         if "agreement_rate" in validation["agreement"]:
             print(f"  agreement {validation['agreement']['agreement_rate']} escalate {validation['agreement']['escalate_to_human']}")
         results.append({"place": place, "dossiers": dossiers, "validation": validation})

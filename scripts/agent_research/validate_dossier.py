@@ -45,6 +45,13 @@ MIN_INTERVAL_S = 1.0
 MAX_BYTES = 2_000_000
 OSM_API = "https://api.openstreetmap.org/api/0.6"
 LOCATION_TOLERANCE_M = lib.LOCATION_TOLERANCE_M
+# the osm api is not a crawl target: its robots.txt redirects to the website's,
+# which disallows /api/, while the api usage policy governs api clients (a
+# valid user agent, at most two threads, bulk readers go to planet). the pilot
+# reads a handful of objects; at scale the check reads the project's own r2
+# edition (r-a5), not the live api.
+ROBOTS_EXEMPT_PREFIXES = (OSM_API + "/",)
+_OSM_HISTORY_PAGE = re.compile(r"^https?://(www\.)?openstreetmap\.org/(node|way|relation)/(\d+)/history(/(\d+))?/?$")
 
 
 def is_blocked_host(hostname: str) -> bool:
@@ -123,7 +130,7 @@ class Fetcher:
             result["outcome"] = "blocked_host"
             self.cache[url] = result
             return result
-        allowed = self.robots_allows(url)
+        allowed = True if url.startswith(ROBOTS_EXEMPT_PREFIXES) else self.robots_allows(url)
         if allowed is False:
             result["outcome"] = "robots_disallowed"
             self.cache[url] = result
@@ -135,9 +142,23 @@ class Fetcher:
             text = body.decode("utf-8", "replace")
             result["text"] = lib.strip_html(text) if "html" in content_type or "<html" in text[:2000].lower() else text
             result["outcome"] = "fetched"
+            # a bot-challenge page answers 200 with a script shell and no content
+            # (papers past sits behind incapsula); it needs a human, not a retry
+            if "_Incapsula_Resource" in text[:6000] or ("challenge" in text[:3000].lower() and len(result["text"]) < 400):
+                result["outcome"] = "requires_human_access"
+                result["error"] = "bot challenge page"
         except urllib.error.HTTPError as exc:
             result["status"] = exc.code
-            result["outcome"] = "dead" if exc.code in (404, 410) else "http_error"
+            # 404 and 410 mean the locator points at nothing; 401, 403 and 429
+            # mean the page refused a polite automated reader and a human must
+            # open it (the batch-review lane's requires_human_access); 5xx is
+            # transient
+            if exc.code in (404, 410):
+                result["outcome"] = "dead"
+            elif exc.code in (401, 403, 429):
+                result["outcome"] = "requires_human_access"
+            else:
+                result["outcome"] = "http_error"
             result["error"] = str(exc)
         except Exception as exc:  # noqa: BLE001 - timeouts, dns, tls all count as unreachable
             result["outcome"] = "unreachable"
@@ -238,7 +259,7 @@ def check_version_chain(chain: list[dict], history: list[dict]) -> dict:
 # claims
 
 
-def check_claim(claim: dict, fetcher: Fetcher) -> dict:
+def check_claim(claim: dict, fetcher: Fetcher, osm: dict | None = None) -> dict:
     locator = claim["source"]["locator"]
     row = {
         "claim_id": claim["claim_id"],
@@ -248,6 +269,16 @@ def check_claim(claim: dict, fetcher: Fetcher) -> dict:
     }
     if locator.startswith("archive:"):
         row.update({"fetch": "offline_source", "status": None, "support": "not_checked", "support_share": None})
+        return row
+    page_match = _OSM_HISTORY_PAGE.match(locator)
+    if page_match and osm is not None:
+        # the website's history pages are robots-disallowed; the api history
+        # is the same record, so the locator is verified through it
+        versions = {h["version"] for h in osm.get("history", [])}
+        wanted = int(page_match.group(5)) if page_match.group(5) else None
+        exists = bool(versions) and (wanted is None or wanted in versions)
+        row.update({"fetch": "verified_via_osm_api" if exists else "dead", "status": 200 if exists else 404,
+                    "support": "not_checked", "support_share": None})
         return row
     page = fetcher.get(locator)
     row["fetch"] = page["outcome"]
@@ -287,21 +318,29 @@ def internal_contradictions(dossier: dict) -> list[str]:
 
 
 def validate_one(dossier: dict, fetcher: Fetcher, osm: dict | None) -> dict:
-    rows = [check_claim(c, fetcher) for c in dossier.get("claims", [])]
+    rows = [check_claim(c, fetcher, osm) for c in dossier.get("claims", [])]
     locators = [r for r in rows if r["fetch"] != "offline_source"]
-    reachable = [r for r in locators if r["fetch"] == "fetched"]
-    quoted = [r for r in reachable if r["has_quote"]]
+    reachable = [r for r in locators if r["fetch"] in ("fetched", "verified_via_osm_api")]
+    quoted = [r for r in reachable if r["has_quote"] and r["fetch"] == "fetched"]
     supported = [r for r in quoted if r["support"] == "supported"]
     partial = [r for r in quoted if r["support"] == "partially_supported"]
-    distinct = {r["locator"] for r in locators}
-    distinct_reachable = {r["locator"] for r in reachable}
+    by_locator: dict[str, str] = {}
+    for r in locators:
+        by_locator.setdefault(r["locator"], r["fetch"])
+    distinct = set(by_locator)
+    distinct_reachable = {u for u, f in by_locator.items() if f in ("fetched", "verified_via_osm_api")}
+    distinct_dead = {u for u, f in by_locator.items() if f == "dead"}
+    distinct_blocked = {u for u, f in by_locator.items() if f in ("requires_human_access", "robots_disallowed")}
     summary = {
         "claims": len(rows),
         "locators": len(locators),
         "distinct_locators": len(distinct),
         "reachable": len(reachable),
         "distinct_reachable": len(distinct_reachable),
+        "distinct_dead": len(distinct_dead),
+        "distinct_blocked": len(distinct_blocked),
         "dead": sum(1 for r in locators if r["fetch"] == "dead"),
+        "requires_human_access": sum(1 for r in locators if r["fetch"] == "requires_human_access"),
         "http_error": sum(1 for r in locators if r["fetch"] == "http_error"),
         "unreachable": sum(1 for r in locators if r["fetch"] == "unreachable"),
         "robots_disallowed": sum(1 for r in locators if r["fetch"] == "robots_disallowed"),
@@ -310,7 +349,11 @@ def validate_one(dossier: dict, fetcher: Fetcher, osm: dict | None) -> dict:
         "quote_supported": len(supported),
         "quote_partial": len(partial),
         "quote_not_found": sum(1 for r in quoted if r["support"] == "not_found"),
-        "locator_validity_rate": round(len(distinct_reachable) / len(distinct), 3) if distinct else None,
+        # validity: the locator points at something (not 404/410); reachability:
+        # a polite automated reader got the page; blocked: a human must open it
+        "locator_validity_rate": round(1 - len(distinct_dead) / len(distinct), 3) if distinct else None,
+        "locator_reachable_rate": round(len(distinct_reachable) / len(distinct), 3) if distinct else None,
+        "locator_blocked_rate": round(len(distinct_blocked) / len(distinct), 3) if distinct else None,
         "quote_support_rate": round((len(supported) + len(partial)) / len(quoted), 3) if quoted else None,
         "quote_exact_rate": round(len(supported) / len(quoted), 3) if quoted else None,
     }
