@@ -253,3 +253,6 @@ tools/guide-captures/_run-report.json
 
 # local scratch folder (manuscript drafts, private notes)
 local/
+
+# agent research pilot: unredacted run directories stay local
+scripts/agent_research/runs/
