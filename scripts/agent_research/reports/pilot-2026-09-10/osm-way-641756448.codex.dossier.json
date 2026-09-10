@@ -1,0 +1,407 @@
+{
+  "schema_version": "agent-dossier.v1",
+  "dossier_id": "osm:way/641756448:codex:gpt-5.6-sol:researcher.v1:pilot-2026-09-10",
+  "place": {
+    "place_ref": "osm:way/641756448",
+    "name": "St Columba's Anglican Church - Hawarden",
+    "country_code": "NZ",
+    "seed_latitude": -42.88326044,
+    "seed_longitude": 172.6347767,
+    "seed_source": "nz_places.geojson (overpass extract 2025-08-20)",
+    "seed_tags": {
+      "amenity": "place_of_worship",
+      "religion": "christian",
+      "denomination": "anglican"
+    }
+  },
+  "candidate_location": {
+    "latitude": -42.88327,
+    "longitude": 172.634804,
+    "basis": "osm_object",
+    "basis_note": "Approximate centroid of the four-node OSM building polygon. The seeded coordinate lies within the same footprint.",
+    "uncertainty_radius_m": 8,
+    "address": "Corner of Horsley Down Road and Medbury Road; also tagged 952 Medbury Road, Hawarden, Hurunui 7385"
+  },
+  "claims": [
+    {
+      "claim_id": "osm:way/641756448:codex:c01",
+      "claim_type": "name",
+      "value": "St Columba's Anglican Church - Hawarden",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/641756448/history",
+        "source_name": "OpenStreetMap way history API",
+        "source_type": "osm",
+        "source_date": "2024-12-07",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "<tag k=\"name\" v=\"St Columba's Anglican Church - Hawarden\"/>",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The name remains unchanged in both readable OSM versions."
+    },
+    {
+      "claim_id": "osm:way/641756448:codex:c02",
+      "claim_type": "address",
+      "value": "Corner of Horsley Down Road and Medbury Road; also tagged 952 Medbury Road, Hawarden, Hurunui 7385",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/641756448/history",
+        "source_name": "OpenStreetMap way history API",
+        "source_type": "osm",
+        "source_date": "2024-12-07",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "<tag k=\"addr:city\" v=\"Hawarden\"/> <tag k=\"addr:district\" v=\"Hurunui\"/> <tag k=\"addr:postcode\" v=\"7385\"/> <tag k=\"addr:street\" v=\"Horsley Down Road &amp; Medbury Road\"/> <tag k=\"addr:street_1\" v=\"Medbury Road\"/>",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "OSM also supplies the secondary street number 952. Its unusual addr:housenumber=Corner structure warrants address review."
+    },
+    {
+      "claim_id": "osm:way/641756448:codex:c03",
+      "claim_type": "religion",
+      "value": "Christian",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/641756448/history",
+        "source_name": "OpenStreetMap way history API",
+        "source_type": "osm",
+        "source_date": "2024-12-07",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "<tag k=\"religion\" v=\"christian\"/>",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Consistent with the Anglican identification and historical church advertisement."
+    },
+    {
+      "claim_id": "osm:way/641756448:codex:c04",
+      "claim_type": "denomination",
+      "value": "Anglican",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/641756448/history",
+        "source_name": "OpenStreetMap way history API",
+        "source_type": "osm",
+        "source_date": "2024-12-07",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "<tag k=\"denomination\" v=\"anglican\"/>",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The denominational tag is unchanged across both OSM versions."
+    },
+    {
+      "claim_id": "osm:way/641756448:codex:c05",
+      "claim_type": "building_date",
+      "value": "1905",
+      "date_start": "1905",
+      "date_end": "1905",
+      "date_precision": "year",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/641756448/history",
+        "source_name": "OpenStreetMap way history API",
+        "source_type": "osm",
+        "source_date": "2024-12-07",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "<tag k=\"start_date\" v=\"1905\"/>",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "low",
+      "note": "OSM gives 1905 as start_date, but does not state whether this means construction, opening, or commencement of worship. No independent construction source was found."
+    },
+    {
+      "claim_id": "osm:way/641756448:codex:c06",
+      "claim_type": "location",
+      "value": "Approximate building centroid: latitude -42.883270, longitude 172.634804",
+      "date_start": "2018-11-07",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/641756448/full",
+        "source_name": "OpenStreetMap way full API",
+        "source_type": "osm",
+        "source_date": "2018-11-07",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "lat=\"-42.8832235\" lon=\"172.6346689\"; lat=\"-42.8831663\" lon=\"172.6347567\"; lat=\"-42.8833158\" lon=\"172.6349384\"; lat=\"-42.8833731\" lon=\"172.6348506\"",
+      "evidential_weight": "inferred",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Centroid inferred from the four polygon vertices; the geometry has not changed between the two way versions."
+    },
+    {
+      "claim_id": "osm:way/641756448:codex:c07",
+      "claim_type": "worship_active_asof",
+      "value": "St Columba at Horsley Downs appeared in a published church notice.",
+      "date_start": "1914-12-05",
+      "date_end": "1914-12-05",
+      "date_precision": "day",
+      "source": {
+        "locator": "https://paperspast.natlib.govt.nz/newspapers/SUNCH19141205.2.90.2",
+        "source_name": "Sun (Christchurch), page 15 advertisements",
+        "source_type": "newspaper",
+        "source_date": "1914-12-05",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "HORSLEY DOWNS—St. Columba",
+      "evidential_weight": "contemporary_report",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The surrounding advertisement lists churches and officiating clergy. The quoted excerpt omits the personal name in accordance with the dossier privacy rule."
+    },
+    {
+      "claim_id": "osm:way/641756448:codex:c08",
+      "claim_type": "sale_or_disposal",
+      "value": "The former St Columba church property was offered for sale and purchased in 2019.",
+      "date_start": "2019",
+      "date_end": "2019",
+      "date_precision": "year",
+      "source": {
+        "locator": "https://essencemagazine.co.nz/stories/changing-the-church-hawarden",
+        "source_name": "Essence Magazine, Changing the Church Hall",
+        "source_type": "other",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "It was 2019 when they spotted the old St Columba Church near Hawarden for sale. The church hall had rust on the roof, moss on the steps and ivy growing on it. But the couple saw through this to the beautiful rimu flooring, the soaring ceiling and the picturesque location – the deal was done.",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The account identifies the property as the old church and says the sale was completed, although it does not give the transaction date or vendor."
+    },
+    {
+      "claim_id": "osm:way/641756448:codex:c09",
+      "claim_type": "worship_ended",
+      "value": "Anglican worship at St Columba had ended by the property's sale in 2019.",
+      "date_start": null,
+      "date_end": "2019",
+      "date_precision": "year",
+      "source": {
+        "locator": "https://essencemagazine.co.nz/stories/changing-the-church-hawarden",
+        "source_name": "Essence Magazine, Changing the Church Hall",
+        "source_type": "other",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "It was 2019 when they spotted the old St Columba Church near Hawarden for sale.",
+      "evidential_weight": "inferred",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The end of worship is inferred from the description as the old church and its sale. No final-service, closure, or deconsecration notice was found."
+    },
+    {
+      "claim_id": "osm:way/641756448:codex:c10",
+      "claim_type": "renovation",
+      "value": "After the 2019 purchase, the associated church hall was adapted toward modern residential use.",
+      "date_start": "2019",
+      "date_end": null,
+      "date_precision": "approximate",
+      "source": {
+        "locator": "https://essencemagazine.co.nz/stories/changing-the-church-hawarden",
+        "source_name": "Essence Magazine, Changing the Church Hall",
+        "source_type": "other",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "The next stage was revamping the church hall, with a floorspace of just 70 square metres. The couple knew good design was vital in order to sympathetically transform the historic building into modern living space",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "This evidence concerns the associated hall, not necessarily the church building represented by the OSM polygon."
+    },
+    {
+      "claim_id": "osm:way/641756448:codex:c11",
+      "claim_type": "service_pattern",
+      "value": "Current Anglican provision described for Hawarden is a fourth-Sunday combined service with Presbyterians at St James, rather than at St Columba.",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.nextsteps.org.nz/listing-item/glenmark-and-waikari-anglican-church/",
+        "source_name": "Next Steps, Glenmark and Waikari Anglican Church",
+        "source_type": "directory",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Everyone welcome to our Sunday services at 10am 1st Sun. St. Aidan’s, Scargill 2nd Sun. Church of the Ascension, Waikari 3rd Sun. St.Paul’s, at Glenmark Domain Pavilion 4th Sun. Combined with Presbyterians St James, Hawarden",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The page gives no printed update date. It corroborates that present Hawarden worship is directed elsewhere."
+    },
+    {
+      "claim_id": "osm:way/641756448:codex:c12",
+      "claim_type": "organisation_link",
+      "value": "The Anglican ministry unit serving this area is Glenmark-Waikari Parish in the Anglican Diocese of Christchurch.",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/find-a-church/",
+        "source_name": "Anglican Life, Find a Church",
+        "source_type": "diocesan_publication",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Church of the Ascension, Waikari—Glenmark-Waikari Parish",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The diocesan directory identifies the present local Anglican parish but does not explicitly state that the former St Columba property belonged to it."
+    }
+  ],
+  "status_assessment": {
+    "current_status": "inactive",
+    "basis": "A secondary account says the old St Columba property was sold in 2019. The current diocesan North Canterbury directory lists three Glenmark-Waikari churches but not St Columba, while a current community directory directs fourth-Sunday Hawarden worship to the Presbyterian St James. No final-service or deconsecration record was located.",
+    "asof_date": "2026-09-10",
+    "supporting_claim_ids": [],
+    "osm_stale": true,
+    "osm_stale_basis": "OSM version 2 still tags the building as amenity=place_of_worship with Anglican and Christian tags. The 2019 sale of the old church and present worship arrangements elsewhere indicate that this current-use description is stale, although the name and historical denominational identity remain useful."
+  },
+  "osm_version_chain": [
+    {
+      "version": 1,
+      "changeset": 64251163,
+      "timestamp": "2018-11-07T04:14:57Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "Building and place_of_worship; Christian, Anglican; St Columba's name; Hawarden/Hurunui address; start_date 1905.",
+      "change_note": "Way created with four-node closed building geometry and the full worship, name, address, contact, and start-date tag set.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/641756448/history"
+    },
+    {
+      "version": 2,
+      "changeset": 160015648,
+      "timestamp": "2024-12-07T04:46:30Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "Same building, name, address, Christian/Anglican worship, and start_date tags as version 1.",
+      "change_note": "Only the formatting of a contact-number tag changed; geometry and all substantive place tags remained unchanged.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/641756448/history"
+    }
+  ],
+  "personal_details_quarantine": {
+    "redacted": true,
+    "item_count": 0,
+    "items": [],
+    "note": "personal details stripped before commit; hashes let a later run recognise recurrence"
+  },
+  "provenance": {
+    "producer": "agent_reader",
+    "ai_generated": true,
+    "produced_by": "codex:gpt-5.6-sol:researcher.v1",
+    "lane": "agent_autonomous"
+  },
+  "run_manifest": {
+    "run_id": "pilot-2026-09-10",
+    "backend": "codex",
+    "model_id_requested": "gpt-5.6-sol",
+    "model_id_reported": null,
+    "prompt_version": "researcher.v1",
+    "started_at": "2026-09-10T07:29:23+00:00",
+    "ended_at": "2026-09-10T07:35:04+00:00",
+    "duration_s": 341.2,
+    "usage": {
+      "input_tokens": 862637,
+      "cached_input_tokens": 765696,
+      "output_tokens": 7743,
+      "reasoning_tokens": 2944,
+      "web_search_requests": 12,
+      "web_fetch_requests": null
+    },
+    "cost_usd_reported": null,
+    "cost_basis": "subscription_unmetered",
+    "idempotency_key": "b41fa72e89ff1c5fef6c305b4e2b3df9960259977b97af50cdcee7fc70896cb3",
+    "allowlist_version": "nz-v1",
+    "tool_permissions": [
+      "web_search (live)",
+      "sandbox read-only, empty workdir"
+    ],
+    "exit_status": "completed",
+    "notes": "codex thread 01a08a38-a4e7-7011-b5af-6491b877ea17; reasoning effort medium; exit 0 | The OSM HTML history page could not be opened by the browsing interface, so its allowlisted public API equivalent supplied the complete two-version chain. Papers Past's embedded viewer redirected to an Imperva security-check page containing instructions addressed to the visitor; those instructions were ignored, and the locator is recorded as not permitted. No login, CAPTCHA completion, robots bypass, or paywall bypass was attempted. Searches also covered the allowlisted Anglican Life, Heritage New Zealand, Hurunui District Council, and Papers Past domains. Closure evidence was found within the fetch limit. No reliable evidence was found for an exact first service, consecration, final service, deconsecration, or the former property's explicit parish ownership. | sources_consulted (12): https://www.openstreetmap.org/way/641756448/history [unreachable]; https://api.openstreetmap.org/api/0.6/way/641756448/history [used]; https://api.openstreetmap.org/api/0.6/way/641756448/full [used]; https://paperspast.natlib.govt.nz/newspapers/SUNCH19141205.2.90.2 [used]; https://www.nextsteps.org.nz/listing-item/glenmark-and-waikari-anglican-church/ [used]; https://static1.squarespace.com/static/5e9fdc06bdee744a018b3623/t/63fbf9687e0c97167dce40c6/1677457816003/BOOK%2BNC_ES_FEBRUARY23_.pdf [unreachable]; https://www.anglicanlife.org.nz/churches/church-of-the-ascension-waikari/ [unreachable]; https://essencemagazine.co.nz/stories/changing-the-church-hawarden [used]; https://www.anglicanlife.org.nz/find-a-church/ [used]; https://www.anglicanlife.org.nz/?p=1154 [used]; https://www.anglicanlife.org.nz/wp-content/uploads/2025/07/Parish-Stats-for-year-ended-Dec-2024.pdf [no_relevant_content]; https://paperspast.natlib.govt.nz/_Incapsula_Resource [not_permitted]"
+  }
+}

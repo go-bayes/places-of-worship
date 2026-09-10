@@ -1,0 +1,599 @@
+{
+  "schema_version": "agent-dossier.v1",
+  "dossier_id": "osm:way/645131197:claude:opus:researcher.v1:pilot-2026-09-10",
+  "place": {
+    "place_ref": "osm:way/645131197",
+    "name": "St Paul's Anglican Church - Leithfield",
+    "country_code": "NZ",
+    "seed_latitude": -43.19150892307692,
+    "seed_longitude": 172.73911387692308,
+    "seed_source": "nz_places.geojson (overpass extract 2025-08-20)",
+    "seed_tags": {
+      "amenity": "place_of_worship",
+      "religion": "christian",
+      "denomination": "anglican"
+    }
+  },
+  "candidate_location": {
+    "latitude": -43.191509,
+    "longitude": 172.739114,
+    "basis": "osm_object",
+    "basis_note": "Seed coordinate for the OSM building polygon way/645131197 (13 node refs, building=yes). It is tagged with addr:housenumber=10 and addr:street=Leithfield Road, which agrees with the Heritage New Zealand List address '10 Leithfield Road and Brighton Road, LEITHFIELD'. I did not check node coordinates against imagery.",
+    "uncertainty_radius_m": 20,
+    "address": "10 Leithfield Road (corner of Brighton Road), Leithfield 7481, Hurunui District, Canterbury"
+  },
+  "claims": [
+    {
+      "claim_id": "osm:way/645131197:claude:c01",
+      "claim_type": "name",
+      "value": "St Paul's Church (Anglican)",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+        "source_name": "Heritage New Zealand Pouhere Taonga, New Zealand Heritage List entry 3067",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Paul's Church (Anglican)",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "This is the List entry name. The List is a statutory register."
+    },
+    {
+      "claim_id": "osm:way/645131197:claude:c02",
+      "claim_type": "name",
+      "value": "St Paul's Anglican Church - Leithfield",
+      "date_start": "2018-11-16",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/645131197",
+        "source_name": "OpenStreetMap way 645131197, version 6",
+        "source_type": "osm",
+        "source_date": "2026-05-04",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Paul's Anglican Church - Leithfield",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "OSM name tag, unchanged since version 1 (2018)."
+    },
+    {
+      "claim_id": "osm:way/645131197:claude:c03",
+      "claim_type": "address",
+      "value": "10 Leithfield Road and Brighton Road, Leithfield",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+        "source_name": "Heritage New Zealand Pouhere Taonga, New Zealand Heritage List entry 3067",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "10 Leithfield Road and Brighton Road, LEITHFIELD",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The legal description is given as 'Pt RS 1961 (RT CB398/123), Canterbury Land District'. OSM gives 10 Leithfield Road, postcode 7481, Hurunui district, and carries a LINZ address id."
+    },
+    {
+      "claim_id": "osm:way/645131197:claude:c04",
+      "claim_type": "religion",
+      "value": "christian",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/645131197",
+        "source_name": "OpenStreetMap way 645131197, version 6",
+        "source_type": "osm",
+        "source_date": "2026-05-04",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Religion: christian",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Quoted from the fetch tool's rendering of the OSM tags (religion=christian)."
+    },
+    {
+      "claim_id": "osm:way/645131197:claude:c05",
+      "claim_type": "denomination",
+      "value": "Anglican",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+        "source_name": "Heritage New Zealand Pouhere Taonga, New Zealand Heritage List entry 3067",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Paul's Church (Anglican)",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Matches OSM denomination=anglican."
+    },
+    {
+      "claim_id": "osm:way/645131197:claude:c06",
+      "claim_type": "start_date",
+      "value": "1864 (first St Paul's Church on the site completed; construction 1863–1864)",
+      "date_start": "1864",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+        "source_name": "Heritage New Zealand Pouhere Taonga, New Zealand Heritage List entry 3067",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "When completed in 1864, the original St Paul's Church was one of the earliest churches in North Canterbury.",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The date the first church was completed is used here as a proxy for the start of worship on the site. I found no opening or consecration date. A search-engine snippet attributed to the Cyclopedia of New Zealand (Canterbury, 1903) says the church was 'built about the year 1857', which conflicts with this. I could not open that page, so it is only a lead (see notes). The register's historical narrative is treated here as secondary history."
+    },
+    {
+      "claim_id": "osm:way/645131197:claude:c07",
+      "claim_type": "start_date",
+      "value": "1907 (OSM start_date tag)",
+      "date_start": "1907",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/645131197",
+        "source_name": "OpenStreetMap way 645131197, version 6",
+        "source_type": "osm",
+        "source_date": "2026-05-04",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Established: 1907",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "low",
+      "note": "The tag gives the year the current building was rebuilt and opened, not the start of worship on the site (Heritage NZ: first church completed 1864). As a start of worship it is probably wrong. As the building date it is consistent with the sources."
+    },
+    {
+      "claim_id": "osm:way/645131197:claude:c08",
+      "claim_type": "building_date",
+      "value": "Current church rebuilt in 1907 and officially opened November 1907, incorporating elements of the 1863–64 church",
+      "date_start": "1907-11",
+      "date_end": null,
+      "date_precision": "month",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+        "source_name": "Heritage New Zealand Pouhere Taonga, New Zealand Heritage List entry 3067",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "the building was constructed over the following months, before being officially opened in November 1907.",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The entry also says the building 'incorporates features from an earlier church on this site', including kauri floorboards and windows brought out by the Canterbury Association in 1850. I could not open a contemporary Papers Past report of the 1907 opening."
+    },
+    {
+      "claim_id": "osm:way/645131197:claude:c09",
+      "claim_type": "other",
+      "value": "Designed by the Christchurch architects England Brothers; built by D. Shaw and Son",
+      "date_start": "1907",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+        "source_name": "Heritage New Zealand Pouhere Taonga, New Zealand Heritage List entry 3067",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "designed by Christchurch Architects, Messrs England Brothers",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "These are historical firms, not living persons. The builder's name comes from the fetch tool's summary and was not quoted verbatim."
+    },
+    {
+      "claim_id": "osm:way/645131197:claude:c10",
+      "claim_type": "other",
+      "value": "The earlier church was damaged by floods in 1868 and by the Cheviot earthquakes of 1901 and 1902, which preceded the 1907 rebuild",
+      "date_start": "1868",
+      "date_end": "1902",
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+        "source_name": "Heritage New Zealand Pouhere Taonga, New Zealand Heritage List entry 3067",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "damaged in floods of 1868 and in the Cheviot earthquakes of 1901 and 1902",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "This gives the context for the 1907 reconstruction."
+    },
+    {
+      "claim_id": "osm:way/645131197:claude:c11",
+      "claim_type": "renovation",
+      "value": "Belfry moved from the western end of the main roof to the vestry roof some time after 1922",
+      "date_start": "1922",
+      "date_end": null,
+      "date_precision": "approximate",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+        "source_name": "Heritage New Zealand Pouhere Taonga, New Zealand Heritage List entry 3067",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Some time after 1922, the belfry was shifted from the western end of the main part of the church roof to the vestry's roof.",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": ""
+    },
+    {
+      "claim_id": "osm:way/645131197:claude:c12",
+      "claim_type": "renovation",
+      "value": "Corrugated iron roofing replaced with Decramastic tiles, c. 1970",
+      "date_start": "1970",
+      "date_end": null,
+      "date_precision": "approximate",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+        "source_name": "Heritage New Zealand Pouhere Taonga, New Zealand Heritage List entry 3067",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "In circa 1970 the corrugated iron roofing was replaced with Decramastic tiles.",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": ""
+    },
+    {
+      "claim_id": "osm:way/645131197:claude:c13",
+      "claim_type": "other",
+      "value": "Heritage New Zealand List entry 3067, Historic Place Category 2, entered 23 June 1983",
+      "date_start": "1983-06-23",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+        "source_name": "Heritage New Zealand Pouhere Taonga, New Zealand Heritage List entry 3067",
+        "source_type": "heritage_register",
+        "source_date": "1983-06-23",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Historic Place Category 2",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The list number and entry date come from the fetch tool's summary of the page. Only the category label was quoted. A community centre hall on the grounds is excluded from the listed extent."
+    },
+    {
+      "claim_id": "osm:way/645131197:claude:c14",
+      "claim_type": "organisation_link",
+      "value": "Anglican Parish of Amberley (which also has Holy Innocents Church, Amberley); the parish website speaks of St Paul's, Leithfield as its own church",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://amberleyanglican.com/weddings/",
+        "source_name": "AmberleyAnglican (Anglican Parish of Amberley website), Weddings page",
+        "source_type": "church_website",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Note about St Paul's, Leithfield – Currently we are not holding any church services (including weddings) at St Paul's.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The parish link is implied by the parish's first-person note ('we'). OSM's website tag also points to amberleyanglican.com. Search snippets of the Anglican Life (Diocese of Christchurch) church page call St Paul's 'the smaller of two churches belonging to the Anglican Parish of Amberley', but that page returned a bot-verification screen and could not be quoted. I assume the Diocese of Christchurch link from the parish's location; the diocesan page does not confirm it."
+    },
+    {
+      "claim_id": "osm:way/645131197:claude:c15",
+      "claim_type": "service_pattern",
+      "value": "Parish Sunday services are held at Holy Innocents Church, Amberley, not at St Paul's, Leithfield",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://amberleyanglican.com/",
+        "source_name": "AmberleyAnglican (Anglican Parish of Amberley website), home page",
+        "source_type": "church_website",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Services are held at Holy Innocents Church, Church Street, Amberley each Sunday (almost always at 9.30am)",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The home page does not mention St Paul's or Leithfield at all. The page is undated but was current when retrieved (2026-09-10)."
+    },
+    {
+      "claim_id": "osm:way/645131197:claude:c16",
+      "claim_type": "worship_ended",
+      "value": "Regular worship suspended: the parish is not currently holding any services, including weddings, at St Paul's",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://amberleyanglican.com/weddings/",
+        "source_name": "AmberleyAnglican (Anglican Parish of Amberley website), Weddings page",
+        "source_type": "church_website",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Note about St Paul's, Leithfield – Currently we are not holding any church services (including weddings) at St Paul's.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "This is a current, undated suspension notice with no reason given. I found no evidence of a final service, deconsecration, sale or disposal. Search snippets attributed to the Anglican Life diocesan page say 'St Paul's in Leithfield is not currently open for use', but I could not open that page to quote it. An undated Facebook post found in search (not opened) refers to St Paul's 'celebrating Christmas a little early on the 18th', so occasional use may continue."
+    },
+    {
+      "claim_id": "osm:way/645131197:claude:c17",
+      "claim_type": "location",
+      "value": "Building footprint is OSM way 645131197 at 10 Leithfield Road, Leithfield, near -43.191509, 172.739114",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/645131197",
+        "source_name": "OpenStreetMap way 645131197, version 6",
+        "source_type": "osm",
+        "source_date": "2026-05-04",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "House Number: 10",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The OSM address (10 Leithfield Road) matches the Heritage NZ address. The coordinate is the seed coordinate for the way. I did not independently verify the node coordinates."
+    },
+    {
+      "claim_id": "osm:way/645131197:claude:c18",
+      "claim_type": "osm_object_version",
+      "value": "Way 645131197 is at version 6 (changeset 182199907, 2026-05-04T11:18:45Z); still tagged amenity=place_of_worship, religion=christian, denomination=anglican, start_date=1907",
+      "date_start": "2026-05-04",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/645131197/history",
+        "source_name": "OpenStreetMap API way history",
+        "source_type": "osm",
+        "source_date": "2026-05-04",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Timestamp: 2026-05-04T11:18:45Z",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Every edit since 2018 has changed only address or contact tags. None has touched operational status."
+    }
+  ],
+  "status_assessment": {
+    "current_status": "likely_inactive",
+    "basis": "The Anglican Parish of Amberley's website says, in the present tense, 'Currently we are not holding any church services (including weddings) at St Paul's'. Its home page lists Sunday services only at Holy Innocents, Amberley. I found no closure notice, deconsecration, sale or disposal. Heritage NZ still records the use as church, and the parish still claims the building. The pattern is suspended regular worship in a building that has not been formally closed. An undated search snippet hints at occasional seasonal use (an early Christmas celebration), which I could not verify.",
+    "asof_date": "2026-09-10",
+    "supporting_claim_ids": [],
+    "osm_stale": null,
+    "osm_stale_basis": "OSM version 6 (2026-05-04) correctly gives the building, name, address and denomination, and these match Heritage NZ. It is still tagged amenity=place_of_worship with no note that services are suspended. The suspension is undated and there is no formal closure, so I cannot tell whether the tag is stale. By OSM convention it may still be valid for a church that is consecrated but not in use. Separately, start_date=1907 is the rebuild date, not the date worship began (1864 per Heritage NZ)."
+  },
+  "osm_version_chain": [
+    {
+      "version": 1,
+      "changeset": 64550101,
+      "timestamp": "2018-11-16T02:11:15Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "amenity=place_of_worship, building, religion=christian, denomination=anglican, name, addr:* (10 Leithfield Road, 7481, Hurunui, addr:city_1), start_date=1907, website, phone, email",
+      "change_note": "Way created with church tags, address, contact details and start_date 1907.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/645131197/history"
+    },
+    {
+      "version": 2,
+      "changeset": 117872255,
+      "timestamp": "2022-02-26T08:34:21Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "as v1 plus addr:hamlet=Leithfield and ref:linz:address_id",
+      "change_note": "Import merged a LINZ address node into the building. Added addr:hamlet and ref:linz:address_id.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/645131197/history"
+    },
+    {
+      "version": 3,
+      "changeset": 145232317,
+      "timestamp": "2023-12-17T23:36:44Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "as v2 with addr:hamlet removed and addr:suburb added",
+      "change_note": "Mass address-hierarchy update. Replaced addr:hamlet with addr:suburb.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/645131197/history"
+    },
+    {
+      "version": 4,
+      "changeset": 160014946,
+      "timestamp": "2024-12-07T03:49:49Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "same keys as v3; phone value reformatted",
+      "change_note": "Phone number format corrected (value omitted).",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/645131197/history"
+    },
+    {
+      "version": 5,
+      "changeset": 161736107,
+      "timestamp": "2025-01-25T07:04:18Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "phone key replaced by mobile; addr:city_1 removed; other tags unchanged",
+      "change_note": "Contact number moved from phone to mobile. Removed addr:city_1.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/645131197/history"
+    },
+    {
+      "version": 6,
+      "changeset": 182199907,
+      "timestamp": "2026-05-04T11:18:45Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "addr:city=Leithfield, addr:district=Hurunui, addr:housenumber=10, addr:street=Leithfield Road, addr:postcode=7481, addr:suburb=Leithfield, amenity=place_of_worship, building=yes, religion=christian, denomination=anglican, name, start_date=1907, website=amberleyanglican.com, email, mobile, ref:linz:address_id",
+      "change_note": "Mobile number reformatted (value omitted). Status tags unchanged.",
+      "locator": "https://www.openstreetmap.org/way/645131197/history"
+    }
+  ],
+  "personal_details_quarantine": {
+    "redacted": true,
+    "item_count": 0,
+    "items": [],
+    "note": "personal details stripped before commit; hashes let a later run recognise recurrence"
+  },
+  "provenance": {
+    "producer": "agent_reader",
+    "ai_generated": true,
+    "produced_by": "claude:opus:researcher.v1",
+    "lane": "agent_autonomous"
+  },
+  "run_manifest": {
+    "run_id": "pilot-2026-09-10",
+    "backend": "claude",
+    "model_id_requested": "opus",
+    "model_id_reported": "claude-opus-5",
+    "prompt_version": "researcher.v1",
+    "started_at": "2026-09-10T07:32:31+00:00",
+    "ended_at": "2026-09-10T07:36:47+00:00",
+    "duration_s": 255.9,
+    "usage": {
+      "input_tokens": 32,
+      "cached_input_tokens": 266108,
+      "output_tokens": 15899,
+      "reasoning_tokens": 4147,
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "cost_usd_reported": 0.9946499999999999,
+    "cost_basis": "tool_list_price",
+    "idempotency_key": "b645b48bc5c40ce6e06e46bd284f3c1f9eed593efe86128d32037910f13b8113",
+    "allowlist_version": "nz-v1",
+    "tool_permissions": [
+      "WebSearch",
+      "WebFetch"
+    ],
+    "exit_status": "completed",
+    "notes": "claude session aa75d983-57d4-4056-a3ad-abaf864a20e1; num_turns 27; permission_denials 0 | I stopped at the 15-fetch limit. Leads I could not verify, none of them cited as evidence: (1) Search-engine snippets say the Cyclopedia of New Zealand (Canterbury volume, NZETC) states 'St. Paul's Anglican Church, Leithfield, was built about the year 1857... a composite building of sun-dried bricks and wood... seating accommodation for eighty worshippers', with a Sunday school held in the church. The NZETC page redirected to a National Library web-archive copy that came back empty. The 1857 date conflicts with Heritage NZ's 1863–64 date for the first church. (2) Snippets of the Anglican Life (Diocese of Christchurch) church page say St Paul's is 'not currently open for use' and is 'the smaller of two churches belonging to the Anglican Parish of Amberley'. Both URL variants returned only a bot-verification screen. (3) An undated Facebook post by the Anglican Parish of Amberley (not opened; Facebook is outside the allowlist and may need a login) mentions St Paul's 'celebrating Christmas a little early on the 18th'. (4) The Press, 29 June 1907 (CHP19070629.2.74), may report on the 1907 rebuild, but the page returned no text. (5) Find a Grave lists a St Paul's Churchyard in Leithfield (not opened). Heritage NZ marks the site 'Private/No Public Access'. Research gaps: the date and reason for the suspension of services, whether any formal closure or deconsecration has occurred, the 1864 consecration or opening date, and dated service or event evidence after 1907. None of the fetched pages contained text addressed to me or instructions to follow. I have left out all mapper names and all contact numbers and emails from the OSM tags. | sources_consulted (13): https://www.openstreetmap.org/way/645131197/history [used]; https://api.openstreetmap.org/api/0.6/way/645131197/history [used]; https://api.openstreetmap.org/api/0.6/way/645131197 [used]; https://anglicanlife.org.nz/churches/st-paul-leithfield/ [unreachable]; https://www.anglicanlife.org.nz/churches/st-paul-leithfield/ [unreachable]; https://amberleyanglican.com/ [used]; https://amberleyanglican.com/weddings/ [used]; https://digitalnz.org/records/30063691 [unreachable]; https://en.wikipedia.org/wiki/Leithfield [no_relevant_content]; https://nzetc.victoria.ac.nz/tm/scholarly/tei-Cyc03Cycl-t1-body1-d4-d28.html [unreachable]; https://ndhadeliver.natlib.govt.nz/webarchive/20210104000423/http://nzetc.victoria.ac.nz/tm/scholarly/tei-Cyc03Cycl-t1-body1-d4-d28.html [unreachable]; https://www.heritage.org.nz/list-details/3067/Church+(Anglican) [used]; https://paperspast.natlib.govt.nz/newspapers/CHP19070629.2.74 [unreachable]"
+  }
+}

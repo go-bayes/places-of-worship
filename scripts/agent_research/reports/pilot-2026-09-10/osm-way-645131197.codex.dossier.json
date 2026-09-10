@@ -1,0 +1,469 @@
+{
+  "schema_version": "agent-dossier.v1",
+  "dossier_id": "osm:way/645131197:codex:gpt-5.6-sol:researcher.v1:pilot-2026-09-10",
+  "place": {
+    "place_ref": "osm:way/645131197",
+    "name": "St Paul's Anglican Church - Leithfield",
+    "country_code": "NZ",
+    "seed_latitude": -43.19150892307692,
+    "seed_longitude": 172.73911387692308,
+    "seed_source": "nz_places.geojson (overpass extract 2025-08-20)",
+    "seed_tags": {
+      "amenity": "place_of_worship",
+      "religion": "christian",
+      "denomination": "anglican"
+    }
+  },
+  "candidate_location": {
+    "latitude": -43.191509,
+    "longitude": 172.739114,
+    "basis": "osm_object",
+    "basis_note": "Approximate centre of the building footprint represented by OSM way 645131197; the API geometry surrounds the seed coordinate.",
+    "uncertainty_radius_m": 5,
+    "address": "10 Leithfield Road, Leithfield, Christchurch 7481, New Zealand"
+  },
+  "claims": [
+    {
+      "claim_id": "osm:way/645131197:codex:c01",
+      "claim_type": "name",
+      "value": "St Paul's Church (Anglican)",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/3067/Listing",
+        "source_name": "New Zealand Heritage List/Rārangi Kōrero, List No. 3067",
+        "source_type": "heritage_register",
+        "source_date": "2026-03-20",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Paul's Church (Anglican)",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Name used by the statutory heritage register."
+    },
+    {
+      "claim_id": "osm:way/645131197:codex:c02",
+      "claim_type": "address",
+      "value": "10 Leithfield Road, Leithfield, Christchurch 7481, New Zealand",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-pauls-church-leithfield-closed-parish-of-amberley/",
+        "source_name": "Anglican Life church directory",
+        "source_type": "diocesan_publication",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Address 10 Leithfield Road Leithfield CHRISTCHURCH 7481",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The heritage register additionally describes the church as being at the corner of Leithfield Road and Brighton Road."
+    },
+    {
+      "claim_id": "osm:way/645131197:codex:c03",
+      "claim_type": "religion",
+      "value": "Christian",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/645131197/history",
+        "source_name": "OpenStreetMap API way history",
+        "source_type": "osm",
+        "source_date": "2026-05-04",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "<tag k=\"religion\" v=\"christian\"/>",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Consistent with the diocesan identification of the building as an Anglican church."
+    },
+    {
+      "claim_id": "osm:way/645131197:codex:c04",
+      "claim_type": "denomination",
+      "value": "Anglican",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-pauls-church-leithfield-closed-parish-of-amberley/",
+        "source_name": "Anglican Life church directory",
+        "source_type": "diocesan_publication",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Paul’s Church, Leithfield (closed) —Parish of Amberley",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Anglican Life is the website of the Anglican Diocese of Christchurch."
+    },
+    {
+      "claim_id": "osm:way/645131197:codex:c05",
+      "claim_type": "start_date",
+      "value": "Worship at the site began by 1864, when the original St Paul's Church was completed.",
+      "date_start": "1864",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/3067/Listing",
+        "source_name": "New Zealand Heritage List/Rārangi Kōrero, List No. 3067",
+        "source_type": "heritage_register",
+        "source_date": "2026-03-20",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "When completed in 1864, the original St Paul’s Church was one of the earliest churches in North Canterbury.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "This is the site start date, not the construction date of the present building."
+    },
+    {
+      "claim_id": "osm:way/645131197:codex:c06",
+      "claim_type": "building_date",
+      "value": "The current church was constructed and officially opened in 1907.",
+      "date_start": "1907",
+      "date_end": "1907",
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/3067/Listing",
+        "source_name": "New Zealand Heritage List/Rārangi Kōrero, List No. 3067",
+        "source_type": "heritage_register",
+        "source_date": "2026-03-20",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "the building was constructed over the following months, before being officially opened in November 1907.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The present building reused elements from the 1863–1864 church."
+    },
+    {
+      "claim_id": "osm:way/645131197:codex:c07",
+      "claim_type": "worship_active_asof",
+      "value": "The current church was officially opened for use in November 1907.",
+      "date_start": "1907-11",
+      "date_end": "1907-11",
+      "date_precision": "month",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/3067/Listing",
+        "source_name": "New Zealand Heritage List/Rārangi Kōrero, List No. 3067",
+        "source_type": "heritage_register",
+        "source_date": "2026-03-20",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "the building was constructed over the following months, before being officially opened in November 1907.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The official opening is evidence of ecclesiastical use at that dated point."
+    },
+    {
+      "claim_id": "osm:way/645131197:codex:c08",
+      "claim_type": "renovation",
+      "value": "The belfry was moved from the western end of the main church roof to the vestry roof sometime after 1922.",
+      "date_start": "1922",
+      "date_end": null,
+      "date_precision": "approximate",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/3067/Listing",
+        "source_name": "New Zealand Heritage List/Rārangi Kōrero, List No. 3067",
+        "source_type": "heritage_register",
+        "source_date": "2026-03-20",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Some time after 1922, the belfry was shifted from the western end of the main part of the church roof to the vestry’s roof.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The register does not provide a more precise date."
+    },
+    {
+      "claim_id": "osm:way/645131197:codex:c09",
+      "claim_type": "renovation",
+      "value": "The corrugated-iron roof was replaced with Decramastic tiles circa 1970.",
+      "date_start": "1970",
+      "date_end": "1970",
+      "date_precision": "approximate",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/3067/Listing",
+        "source_name": "New Zealand Heritage List/Rārangi Kōrero, List No. 3067",
+        "source_type": "heritage_register",
+        "source_date": "2026-03-20",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "In circa 1970 the corrugated iron roofing was replaced with Decramastic tiles.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": ""
+    },
+    {
+      "claim_id": "osm:way/645131197:codex:c10",
+      "claim_type": "organisation_link",
+      "value": "Parish of Amberley, Anglican Diocese of Christchurch",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-pauls-church-leithfield-closed-parish-of-amberley/",
+        "source_name": "Anglican Life church directory",
+        "source_type": "diocesan_publication",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Paul’s Church, Leithfield (closed) —Parish of Amberley",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The page footer identifies Anglican Life as belonging to the Anglican Diocese of Christchurch."
+    },
+    {
+      "claim_id": "osm:way/645131197:codex:c11",
+      "claim_type": "closure_event",
+      "value": "The church is closed; the closure date is not stated.",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-pauls-church-leithfield-closed-parish-of-amberley/",
+        "source_name": "Anglican Life church directory",
+        "source_type": "diocesan_publication",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Paul’s is closed and no longer holding services.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "No final-service, sale, disposal, or deconsecration date was found in the sources opened."
+    },
+    {
+      "claim_id": "osm:way/645131197:codex:c12",
+      "claim_type": "worship_ended",
+      "value": "Regular worship services have ended; the end date is not stated.",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-pauls-church-leithfield-closed-parish-of-amberley/",
+        "source_name": "Anglican Life church directory",
+        "source_type": "diocesan_publication",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Paul’s is closed and no longer holding services.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The wording establishes cessation of services but not when the cessation occurred."
+    },
+    {
+      "claim_id": "osm:way/645131197:codex:c13",
+      "claim_type": "location",
+      "value": "Building footprint centred approximately at -43.191509, 172.739114.",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/645131197/full",
+        "source_name": "OpenStreetMap API full way geometry",
+        "source_type": "osm",
+        "source_date": "2026-05-04",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "lat=\"-43.1914640\" lon=\"172.7390222\"; lat=\"-43.1915598\" lon=\"172.7391799\"",
+      "evidential_weight": "inferred",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The stated coordinate is an approximate centre inferred from the OSM building polygon; uncertainty radius 5 metres."
+    }
+  ],
+  "status_assessment": {
+    "current_status": "inactive",
+    "basis": "The Anglican Diocese of Christchurch's current church directory explicitly labels St Paul's closed and states that it no longer holds services. No later evidence of resumed worship was found.",
+    "asof_date": "2026-09-10",
+    "supporting_claim_ids": [],
+    "osm_stale": true,
+    "osm_stale_basis": "OSM way version 6, dated 2026-05-04, still uses amenity=place_of_worship and retains Christian/Anglican and institutional contact/website tags, whereas the diocesan directory says the church is closed and no longer holding services."
+  },
+  "osm_version_chain": [
+    {
+      "version": 1,
+      "changeset": 64550101,
+      "timestamp": "2018-11-16T02:11:15Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "Created as a building and Anglican Christian place of worship named St Paul's Anglican Church - Leithfield, with 10 Leithfield Road address, 1907 start date, website, and contact tags.",
+      "change_note": "Initial creation of the building footprint and descriptive tags.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/645131197/history"
+    },
+    {
+      "version": 2,
+      "changeset": 117872255,
+      "timestamp": "2022-02-26T08:34:21Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "Retained church, address, denomination, religion, name, 1907 date, website, and contact tags; added hamlet and LINZ address-reference tags.",
+      "change_note": "Added addr:hamlet=Leithfield and ref:linz:address_id=282584; geometry was unchanged.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/645131197/history"
+    },
+    {
+      "version": 3,
+      "changeset": 145232317,
+      "timestamp": "2023-12-17T23:36:44Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "Retained church identity and function tags; replaced the hamlet address field with suburb=Leithfield.",
+      "change_note": "Removed addr:hamlet and added addr:suburb; geometry was unchanged.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/645131197/history"
+    },
+    {
+      "version": 4,
+      "changeset": 160014946,
+      "timestamp": "2024-12-07T03:49:49Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "Church, address, name, religion, denomination, website, and 1907 date remained unchanged.",
+      "change_note": "Reformatted a contact-number value; geometry and substantive place tags were unchanged.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/645131197/history"
+    },
+    {
+      "version": 5,
+      "changeset": 161736107,
+      "timestamp": "2025-01-25T07:04:18Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "Continued to describe an Anglican Christian place of worship at 10 Leithfield Road; retained name, website, and 1907 date.",
+      "change_note": "Removed the alternate city field and replaced the phone-key contact tag with a mobile-key tag; geometry was unchanged.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/645131197/history"
+    },
+    {
+      "version": 6,
+      "changeset": 182199907,
+      "timestamp": "2026-05-04T11:18:45Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "Still describes a building and Anglican Christian place of worship named St Paul's Anglican Church - Leithfield, at 10 Leithfield Road, with a 1907 date and website/contact tags.",
+      "change_note": "Reformatted the mobile contact value; geometry and substantive place tags were unchanged. Closure was not recorded.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/645131197/history"
+    }
+  ],
+  "personal_details_quarantine": {
+    "redacted": true,
+    "item_count": 0,
+    "items": [],
+    "note": "personal details stripped before commit; hashes let a later run recognise recurrence"
+  },
+  "provenance": {
+    "producer": "agent_reader",
+    "ai_generated": true,
+    "produced_by": "codex:gpt-5.6-sol:researcher.v1",
+    "lane": "agent_autonomous"
+  },
+  "run_manifest": {
+    "run_id": "pilot-2026-09-10",
+    "backend": "codex",
+    "model_id_requested": "gpt-5.6-sol",
+    "model_id_reported": null,
+    "prompt_version": "researcher.v1",
+    "started_at": "2026-09-10T07:32:54+00:00",
+    "ended_at": "2026-09-10T07:37:27+00:00",
+    "duration_s": 272.3,
+    "usage": {
+      "input_tokens": 639857,
+      "cached_input_tokens": 557312,
+      "output_tokens": 6505,
+      "reasoning_tokens": 2029,
+      "web_search_requests": 7,
+      "web_fetch_requests": null
+    },
+    "cost_usd_reported": null,
+    "cost_basis": "subscription_unmetered",
+    "idempotency_key": "e20cbbd3bf0f5dae93b235ca0ee437d685578e433ce0ac1baa5e957272a66e48",
+    "allowlist_version": "nz-v1",
+    "tool_permissions": [
+      "web_search (live)",
+      "sandbox read-only, empty workdir"
+    ],
+    "exit_status": "completed",
+    "notes": "codex thread 01a08a3b-e091-7cc3-80aa-ac45321c08ae; reasoning effort medium; exit 0 | Closure evidence was found in the diocesan directory, but it gives no closure date and no evidence of a final service, sale, disposal, or deconsecration. The statutory heritage entry calls the current usage religious/church but also records former religious/church usage; this internally ambiguous classification was not treated as evidence of active worship because the diocesan source expressly says services have ended. Personal names and all telephone and email details associated with potentially living people were omitted, including from OSM summaries and quotations. No web content addressing the reader or attempting to direct the research process was encountered. | sources_consulted (9): https://www.openstreetmap.org/way/645131197/history [used]; https://api.openstreetmap.org/api/0.6/way/645131197/history [used]; https://api.openstreetmap.org/api/0.6/way/645131197/full [used]; https://www.heritage.org.nz/list-details/3067/Listing [used]; https://www.anglicanlife.org.nz/find-a-church/ [used]; https://www.anglicanlife.org.nz/church/st-pauls-church-leithfield-closed-parish-of-amberley/ [used]; https://paperspast.natlib.govt.nz/imageserver-parliamentary/AJHR1950-I.2.3.2.44.pdf [no_relevant_content]; https://www.openstreetmap.org/ [no_relevant_content]; https://api.openstreetmap.org/ [no_relevant_content]"
+  }
+}

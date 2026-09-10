@@ -1,0 +1,480 @@
+{
+  "schema_version": "agent-dossier.v1",
+  "dossier_id": "osm:way/643590665:claude:opus:researcher.v1:pilot-2026-09-10",
+  "place": {
+    "place_ref": "osm:way/643590665",
+    "name": "St Martin's Anglican Church",
+    "country_code": "NZ",
+    "seed_latitude": -43.24923163636364,
+    "seed_longitude": 172.52855542727272,
+    "seed_source": "nz_places.geojson (overpass extract 2025-08-20)",
+    "seed_tags": {
+      "amenity": "place_of_worship",
+      "religion": "christian",
+      "denomination": "anglican",
+      "addr:street": "Hodgsons Road",
+      "addr:housenumber": "84",
+      "start_date": "1891"
+    }
+  },
+  "candidate_location": {
+    "latitude": -43.249232,
+    "longitude": 172.528555,
+    "basis": "osm_object",
+    "basis_note": "Seed coordinate for OSM way 643590665. The way is tagged building=yes and carries a LINZ address identifier (ref:linz:address_id=160796) for 84 Hodgsons Road, Loburn. The diocesan Anglican Life listing gives the same address. I did not independently check the footprint against imagery.",
+    "uncertainty_radius_m": 30,
+    "address": "84 Hodgsons Road, Loburn, Rangiora 7472"
+  },
+  "claims": [
+    {
+      "claim_id": "osm:way/643590665:claude:c01",
+      "claim_type": "name",
+      "value": "St Martin's – Loburn (Rangiora Parish)",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-martins-loburn-rangiora-parish/",
+        "source_name": "Anglican Life (Anglican Diocese of Christchurch) church directory",
+        "source_type": "diocesan_publication",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Martin's – Loburn – Rangiora Parish",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Diocesan directory entry. The page names a vicar, which is omitted here under the privacy rule."
+    },
+    {
+      "claim_id": "osm:way/643590665:claude:c02",
+      "claim_type": "name",
+      "value": "St Martin's Anglican Church",
+      "date_start": "2018-11-13",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/643590665/history",
+        "source_name": "OpenStreetMap way 643590665 history (API)",
+        "source_type": "osm",
+        "source_date": "2024-12-07",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "name=St Martin's Anglican Church",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The name has been the same in every OSM version, 1 to 4."
+    },
+    {
+      "claim_id": "osm:way/643590665:claude:c03",
+      "claim_type": "address",
+      "value": "84 Hodgsons Road, Loburn, Rangiora 7472",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-martins-loburn-rangiora-parish/",
+        "source_name": "Anglican Life (Anglican Diocese of Christchurch) church directory",
+        "source_type": "diocesan_publication",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "84 Hodgsons Road, Loburn, RANGIORA, 7472",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Matches the OSM addr:* tags and the seed tags."
+    },
+    {
+      "claim_id": "osm:way/643590665:claude:c04",
+      "claim_type": "denomination",
+      "value": "Anglican (Christian); parish church of the Anglican Diocese of Christchurch",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-martins-loburn-rangiora-parish/",
+        "source_name": "Anglican Life (Anglican Diocese of Christchurch) church directory",
+        "source_type": "diocesan_publication",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Martin's – Loburn – Rangiora Parish",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The Anglican denomination is inferred from the church being listed in the diocesan Anglican Life directory as part of Rangiora Parish. OSM also has denomination=anglican and religion=christian."
+    },
+    {
+      "claim_id": "osm:way/643590665:claude:c05",
+      "claim_type": "organisation_link",
+      "value": "Anglican Parish of Rangiora (Anglican Life Rangiora). St Martin's Loburn is listed as one of the parish's three centres, with St John's Rangiora and St Matthew's Fernside.",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://anglicanliferangiora.church/",
+        "source_name": "Anglican Life Rangiora parish website (home page)",
+        "source_type": "church_website",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The fetch tool summarised the three centres but gave no verbatim sentence to quote. The diocesan page corroborates the link to Rangiora Parish ('St Martin's – Loburn – Rangiora Parish')."
+    },
+    {
+      "claim_id": "osm:way/643590665:claude:c06",
+      "claim_type": "land_or_consecration",
+      "value": "Land for the church was bought in 1878",
+      "date_start": "1878",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/surrounding-areas/history-of-churches-of-ashley,-loburn-and-sefton",
+        "source_name": "Waimakariri Libraries, History of Churches of Ashley, Loburn and Sefton",
+        "source_type": "council_or_government",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "land that had been purchased in 1878",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "This is a local-history page from a council library, and waimakaririlibraries.com is not on the allowlist. I found no consecration date."
+    },
+    {
+      "claim_id": "osm:way/643590665:claude:c07",
+      "claim_type": "building_date",
+      "value": "Church built in 1891",
+      "date_start": "1891",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/surrounding-areas/history-of-churches-of-ashley,-loburn-and-sefton",
+        "source_name": "Waimakariri Libraries, History of Churches of Ashley, Loburn and Sefton",
+        "source_type": "council_or_government",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "built in 1891",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "Matches the OSM start_date=1891. The same page says the building is a one-room weatherboard church. Neither the building date nor the start of worship could be confirmed in contemporary newspapers, because the Papers Past search page returned no readable content."
+    },
+    {
+      "claim_id": "osm:way/643590665:claude:c08",
+      "claim_type": "building_date",
+      "value": "Church built in 1891 (a one-room weatherboard building)",
+      "date_start": "1891",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.flickr.com/photos/philbraithwaitenz/6155056273",
+        "source_name": "Flickr photo caption, 'Loburn: Church of St.Martin (c.1891) (1)'",
+        "source_type": "photograph_caption",
+        "source_date": "2011-09-17",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "The little St Martin's Anglican church was built in 1891. The one-room weatherboard structure is an extremely modest low-cost building.",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "low",
+      "note": "The caption wording appears to derive from the same secondary text as the Waimakariri Libraries page, so it is not independent corroboration."
+    },
+    {
+      "claim_id": "osm:way/643590665:claude:c09",
+      "claim_type": "renovation",
+      "value": "Renovated 1988–89",
+      "date_start": "1988",
+      "date_end": "1989",
+      "date_precision": "year",
+      "source": {
+        "locator": "https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/surrounding-areas/history-of-churches-of-ashley,-loburn-and-sefton",
+        "source_name": "Waimakariri Libraries, History of Churches of Ashley, Loburn and Sefton",
+        "source_type": "council_or_government",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Renovations were made during 1988-89",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The Flickr caption (2011) repeats this."
+    },
+    {
+      "claim_id": "osm:way/643590665:claude:c10",
+      "claim_type": "other",
+      "value": "The church building was standing and photographed on 2 September 2011",
+      "date_start": "2011-09-02",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://www.flickr.com/photos/philbraithwaitenz/6155056273",
+        "source_name": "Flickr photo, 'Loburn: Church of St.Martin (c.1891) (1)'",
+        "source_type": "photograph_caption",
+        "source_date": "2011-09-17",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Loburn: Church of St.Martin (c.1891) (1)",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The photo was taken on 2 September 2011 and uploaded on 17 September 2011, according to page metadata. It shows the building still standing after the 2010–11 Canterbury earthquakes. It is not evidence of worship."
+    },
+    {
+      "claim_id": "osm:way/643590665:claude:c11",
+      "claim_type": "service_pattern",
+      "value": "Services on the 1st, 3rd and 4th Sundays at 10 am, as recorded in OSM in 2018",
+      "date_start": "2018-11-13",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/643590665/history",
+        "source_name": "OpenStreetMap way 643590665 version 1",
+        "source_type": "osm",
+        "source_date": "2018-11-13",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "service_times=1st & 3rd & 4th Sundays 10 am",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "low",
+      "note": "OSM is user-contributed, and the tag may have been copied from an older directory. The tag was reformatted in 2019 to Su[1,3,4] 10:00 and is still present. A search-engine summary said the parish once advertised this pattern (Communion on the 1st and 3rd Sundays, a community service on the 4th), but I did not open a page carrying that text."
+    },
+    {
+      "claim_id": "osm:way/643590665:claude:c12",
+      "claim_type": "worship_ended",
+      "value": "The parish lists St Martin's Loburn as closed and says its congregation now meets at St John's Rangiora",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://anglicanliferangiora.church/services/st-martin-s-loburn/340",
+        "source_name": "Anglican Life Rangiora parish website, service page 'St. Martin's - Loburn'",
+        "source_type": "church_website",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Since the closing of St. Matthew's Loburn church, this lovely congregation continues to meet at St. John's Rangiora.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The page heading is 'St. Martin's - Loburn' and its status field reads 'Closed'. The body text says 'St. Matthew's Loburn', which is almost certainly a slip: St Matthew's is the parish's Fernside centre, which remains open. The page is undated, so no closure date can be given. I found no dated closure notice, final service, deconsecration or sale."
+    },
+    {
+      "claim_id": "osm:way/643590665:claude:c13",
+      "claim_type": "closure_event",
+      "value": "St Martin's Loburn has the status 'Closed' on the parish home page; no service times are given for it",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://anglicanliferangiora.church/",
+        "source_name": "Anglican Life Rangiora parish website (home page)",
+        "source_type": "church_website",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Closed",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "Services are listed only for St John's Rangiora and for St Matthew's & St Mary's Fernside. The closure date is unknown, and I found no record of the building's disposal. The diocesan Anglican Life directory still lists the church, but that entry is undated and gives no service times."
+    },
+    {
+      "claim_id": "osm:way/643590665:claude:c14",
+      "claim_type": "osm_object_version",
+      "value": "OSM way 643590665 v4 (2024-12-07): amenity=place_of_worship, building=yes, name=St Martin's Anglican Church, denomination=anglican, start_date=1891, service_times=Su[1,3,4] 10:00",
+      "date_start": "2024-12-07",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/643590665/history",
+        "source_name": "OpenStreetMap API way history",
+        "source_type": "osm",
+        "source_date": "2024-12-07",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "service_times=Su[1,3,4] 10:00, start_date=1891",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The current OSM version still describes an active church with regular services."
+    }
+  ],
+  "status_assessment": {
+    "current_status": "likely_inactive",
+    "basis": "The parish's own website (Anglican Life Rangiora) lists St Martin's Loburn as 'Closed' on its home page and service page, and says the congregation now meets at St John's Rangiora. No service times are given for Loburn. Neither page is dated, the service page confuses the name with St Matthew's, and I found no dated closure notice, final service, deconsecration or sale. So the church is assessed as likely inactive rather than confirmed inactive. The diocesan Anglican Life directory still lists the church, but the entry is undated and gives no services.",
+    "asof_date": "2026-09-10",
+    "supporting_claim_ids": [],
+    "osm_stale": true,
+    "osm_stale_basis": "The current OSM version (v4, 2024-12-07) still tags the way amenity=place_of_worship with service_times=Su[1,3,4] 10:00 and links a defunct generic website (anglicanweb.org). The parish says the church is closed. No OSM edit reflects the closure, for example a disused: or was: lifecycle prefix or the removal of service_times."
+  },
+  "osm_version_chain": [
+    {
+      "version": 1,
+      "changeset": 64426524,
+      "timestamp": "2018-11-13T02:17:57Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "amenity=place_of_worship; building=yes; name=St Martin's Anglican Church; religion=christian; denomination=anglican; addr 84 Hodgsons Road, Loburn 7472 (addr:district=Rangiora); start_date=1891; service_times=1st & 3rd & 4th Sundays 10 am; website=http://www.anglicanweb.org/; phone (omitted)",
+      "change_note": "Way created with building footprint and church tags.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/643590665/history"
+    },
+    {
+      "version": 2,
+      "changeset": 76365819,
+      "timestamp": "2019-10-29T21:43:19Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "As v1 but service_times=Su[1,3,4] 10:00",
+      "change_note": "service_times converted to opening_hours syntax (changeset comment: clean-up of opening_hours/collection_times/service_times in New Zealand).",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/643590665/history"
+    },
+    {
+      "version": 3,
+      "changeset": 117872255,
+      "timestamp": "2022-02-26T08:34:21Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "As v2 plus addr:hamlet=Loburn and ref:linz:address_id=160796",
+      "change_note": "LINZ address node merged into the building (changeset comment: merge address nodes and buildings, Christchurch part 2).",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/643590665/history"
+    },
+    {
+      "version": 4,
+      "changeset": 160014997,
+      "timestamp": "2024-12-07T03:54:49Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "As v3; phone reformatted (value omitted)",
+      "change_note": "Phone number reformatted only (changeset comment: fix phone number format). No change to status or service tags.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/643590665/history"
+    }
+  ],
+  "personal_details_quarantine": {
+    "redacted": true,
+    "item_count": 0,
+    "items": [],
+    "note": "personal details stripped before commit; hashes let a later run recognise recurrence"
+  },
+  "provenance": {
+    "producer": "agent_reader",
+    "ai_generated": true,
+    "produced_by": "claude:opus:researcher.v1",
+    "lane": "agent_autonomous"
+  },
+  "run_manifest": {
+    "run_id": "pilot-2026-09-10",
+    "backend": "claude",
+    "model_id_requested": "opus",
+    "model_id_reported": "claude-opus-5",
+    "prompt_version": "researcher.v1",
+    "started_at": "2026-09-10T07:29:23+00:00",
+    "ended_at": "2026-09-10T07:32:31+00:00",
+    "duration_s": 188.4,
+    "usage": {
+      "input_tokens": 22,
+      "cached_input_tokens": 152552,
+      "output_tokens": 11466,
+      "reasoning_tokens": 2040,
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "cost_usd_reported": 0.7358425,
+    "cost_basis": "tool_list_price",
+    "idempotency_key": "36d284943ff2beb92bef3220eaa1c5b01d095a157d1eb4987ed42f70c2438345",
+    "allowlist_version": "nz-v1",
+    "tool_permissions": [
+      "WebSearch",
+      "WebFetch"
+    ],
+    "exit_status": "completed",
+    "notes": "claude session 061c70a9-e585-48cd-add2-e12240ef5ad5; num_turns 22; permission_denials 0 | The strongest evidence of closure is the parish's own website, which is undated. Its service page for St Martin's - Loburn has the status 'Closed', but the body text says 'Since the closing of St. Matthew's Loburn church'. St Matthew's is the parish's Fernside centre, which is still listed with services, so the body text is probably a copy error. A reviewer should confirm the closure date, and whether the building has been deconsecrated or disposed of, with the parish or diocese, or from Anglican Life news items. I could not reach three sources: Papers Past search returned no readable content, DigitalNZ and the Canterbury Stories photo record returned 403, and the Waimakariri Heritage (recollect) record returned 403. As a result I found no contemporary 1891 newspaper report of the opening or consecration. The Waimakariri Libraries history page is not on the allowlist; it is a council library site and is treated here as secondary. Search-engine summaries mentioned an August 2024 'active' listing and a 1st/3rd/4th Sunday pattern with Communion, but I did not open pages carrying that text, and they are not cited. A vicar's name and a phone number on the diocesan and OSM records were deliberately left out. None of the fetched pages contained instructions addressed to the reader. | sources_consulted (12): https://www.openstreetmap.org/way/643590665/history [used]; https://api.openstreetmap.org/api/0.6/way/643590665/history [used]; https://www.anglicanlife.org.nz/church/st-martins-loburn-rangiora-parish/ [used]; https://www.canterburystories.nz/collections/community/simon-daisley-collection/ccl-cs-84918 [unreachable]; https://anglicanliferangiora.church/services/st-martin-s-loburn/340 [used]; https://waimakariri.recollect.co.nz/nodes/view/844 [unreachable]; https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/surrounding-areas/history-of-churches-of-ashley,-loburn-and-sefton [used]; https://anglicanliferangiora.church/ [used]; https://www.flickr.com/photos/philbraithwaitenz/6155056273 [used]; https://paperspast.natlib.govt.nz/newspapers?query=%22St+Martin%27s%22+Loburn&start_date=01-01-1890&end_date=31-12-1892 [unreachable]; https://digitalnz.org/records?text=St+Martin%27s+church+Loburn [unreachable]; https://anglicanlife.org.nz/regions/north-canterbury/page/2/ [unreachable]"
+  }
+}

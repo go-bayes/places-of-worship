@@ -1,0 +1,783 @@
+{
+  "schema_version": "agent-dossier.v1",
+  "dossier_id": "osm:way/101333590:claude:opus:researcher.v1:pilot-2026-09-10",
+  "place": {
+    "place_ref": "osm:way/101333590",
+    "name": "St Michael and All Angels Anglican Church",
+    "country_code": "NZ",
+    "seed_latitude": -43.534498836666664,
+    "seed_longitude": 172.63303641,
+    "seed_source": "nz_places.geojson (overpass extract 2025-08-20)",
+    "seed_tags": {
+      "amenity": "place_of_worship",
+      "religion": "christian",
+      "denomination": "anglican"
+    }
+  },
+  "candidate_location": {
+    "latitude": -43.534499,
+    "longitude": 172.633036,
+    "basis": "osm_object",
+    "basis_note": "Seed coordinate from OSM way 101333590, a building outline traced from Bing imagery and tagged amenity=place_of_worship, with LINZ address 84 Oxford Terrace. Heritage NZ gives the location as '84 Oxford Terrace and Durham Street South', which fits the corner position of the way. I did not check this independently against imagery.",
+    "uncertainty_radius_m": 25,
+    "address": "84 Oxford Terrace, Christchurch Central, Christchurch 8011 (Heritage NZ: 84 Oxford Terrace and Durham Street South; parish website: 86-90 Oxford Terrace)"
+  },
+  "claims": [
+    {
+      "claim_id": "osm:way/101333590:claude:c01",
+      "claim_type": "name",
+      "value": "Church of St Michael and All Angels (Anglican)",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/294/294",
+        "source_name": "Heritage New Zealand Pouhere Taonga, New Zealand Heritage List, List No. 294",
+        "source_type": "heritage_register",
+        "source_date": "1985-04-02",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Church of St Michael and All Angels (Anglican)",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The source date is the registration date printed on the list entry, not the date the page text was written. The OSM name is 'St Michael and All Angels Anglican Church'."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c02",
+      "claim_type": "name",
+      "value": "The Anglican Parish of St Michael and All Angels",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.stmichaelandallangels.nz/",
+        "source_name": "St Michael and All Angels parish website",
+        "source_type": "church_website",
+        "source_date": "2026-09-10",
+        "source_date_basis": "inferred",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "The Anglican Parish of St Michael and All Angels",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "This is the parish's name for itself. The source date is inferred from dated news items on the homepage."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c03",
+      "claim_type": "address",
+      "value": "84 Oxford Terrace and Durham Street South, Christchurch",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/294/294",
+        "source_name": "Heritage New Zealand List No. 294",
+        "source_type": "heritage_register",
+        "source_date": "1985-04-02",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "84 Oxford Terrace and Durham Street South, CHRISTCHURCH",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "This agrees with the OSM addr:housenumber=84 (LINZ address id 220238) and with Wikipedia."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c04",
+      "claim_type": "address",
+      "value": "86-90 Oxford Terrace, Christchurch 8011",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.stmichaelandallangels.nz/",
+        "source_name": "St Michael and All Angels parish website",
+        "source_type": "church_website",
+        "source_date": "2026-09-10",
+        "source_date_basis": "inferred",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "86-90 Oxford Terrace, Christchurch 8011, New Zealand",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The parish uses a range of street numbers that differs from the Heritage NZ and LINZ number (84). The range may cover the parish property as a whole (the church, the school and other buildings), not the church building alone. Anglican Life gives the same 86-90 address."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c05",
+      "claim_type": "religion",
+      "value": "Christian",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/294/294",
+        "source_name": "Heritage New Zealand List No. 294",
+        "source_type": "heritage_register",
+        "source_date": "1985-04-02",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Anglican services were first held in Christchurch in a V hut on this site in 1851.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Christian religion is inferred from the Anglican denomination."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c06",
+      "claim_type": "denomination",
+      "value": "Anglican (High Church / Anglo-Catholic tradition)",
+      "date_start": "1910",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/294/294",
+        "source_name": "Heritage New Zealand List No. 294",
+        "source_type": "heritage_register",
+        "source_date": "1985-04-02",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "From 1910 St. Michael's became renowned as a 'High' Anglican church and continues to be 'a centre of ritualism and Catholic spirituality, within the Anglican community'.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The church has been Anglican throughout. The 1910 date refers to its High Church character."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c07",
+      "claim_type": "start_date",
+      "value": "1851",
+      "date_start": "1851",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/294/294",
+        "source_name": "Heritage New Zealand List No. 294",
+        "source_type": "heritage_register",
+        "source_date": "1985-04-02",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Anglican services were first held in Christchurch in a V hut on this site in 1851.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Worship at the site began in 1851. The OSM start_date=1872 is the date of the current building, not the start of worship here."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c08",
+      "claim_type": "start_date",
+      "value": "July 1851: opening of the first (wooden) church on the site",
+      "date_start": "1851-07",
+      "date_end": null,
+      "date_precision": "month",
+      "source": {
+        "locator": "https://en.wikipedia.org/wiki/Church_of_St_Michael_and_All_Angels,_Christchurch",
+        "source_name": "Wikipedia, Church of St Michael and All Angels, Christchurch",
+        "source_type": "wikipedia",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Henry Jacobs preached the sermon and conducted the service at the opening of the church in July 1851.",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "Heritage NZ says that the V hut was replaced by a wooden church 'later the same year'. The month comes from Wikipedia only. I did not find a contemporary Papers Past report."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c09",
+      "claim_type": "building_date",
+      "value": "Current timber church: foundation stone 29 September 1870, opened 2 May 1872",
+      "date_start": "1870-09-29",
+      "date_end": "1872-05-02",
+      "date_precision": "day",
+      "source": {
+        "locator": "https://en.wikipedia.org/wiki/Church_of_St_Michael_and_All_Angels,_Christchurch",
+        "source_name": "Wikipedia, Church of St Michael and All Angels, Christchurch",
+        "source_type": "wikipedia",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "The cornerstone of the church was laid in a ceremony on the Feast of St Michael & All Angels, 29 September 1870. ... The church was opened on 2 May 1872.",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "Heritage NZ confirms opening in May 1872 at month precision. I did not open a contemporary newspaper report, so the exact days need checking against Papers Past."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c10",
+      "claim_type": "building_date",
+      "value": "Opened May 1872; construction 1870–1872; timber (mataī) Gothic Revival",
+      "date_start": "1870",
+      "date_end": "1872-05",
+      "date_precision": "month",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/294/294",
+        "source_name": "Heritage New Zealand List No. 294",
+        "source_type": "heritage_register",
+        "source_date": "1985-04-02",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "The church that was eventually opened in May 1872 ... Matai was the main timber used in the construction of St. Michael's, Christchurch, and it is one of the largest timber Gothic Revival churches in the Southern Hemisphere.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The building was designed by W. F. Crisp, and Frederick Strouts supervised from 1871. Christchurch City Libraries calls the present church 'the third on the site' and says it was 'consecrated in 1872'."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c11",
+      "claim_type": "building_date",
+      "value": "Belfry (separately listed, Heritage NZ No. 295) erected 1861, designed by B. W. Mountfort",
+      "date_start": "1861",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://my.christchurchcitylibraries.com/st-michaels-and-all-angels/",
+        "source_name": "Christchurch City Libraries, St Michael's and All Angels",
+        "source_type": "other",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "The St. Michael's belfry was designed by pre-eminent Gothic Revival architect, Benjamin Woolfield Mountfort. Erected in 1861, the tower houses a bell brought out with the Canterbury Association settlers on one of the first four ships.",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The belfry is a separate structure on the site and predates the current church. The list number 295 comes from Wikipedia and was not opened on Heritage NZ."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c12",
+      "claim_type": "renovation",
+      "value": "Survived the 2010–2011 Canterbury earthquakes almost unscathed; for a period the only habitable church in use in the central city",
+      "date_start": "2010",
+      "date_end": "2011",
+      "date_precision": "year",
+      "source": {
+        "locator": "https://my.christchurchcitylibraries.com/st-michaels-and-all-angels/",
+        "source_name": "Christchurch City Libraries, St Michael's and All Angels",
+        "source_type": "other",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "The historic wooden church survived the Canterbury earthquake sequence of 2010-2011 almost unscathed and was for a period the only habitable church in use in the central city.",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The building was not rebuilt. Wikipedia also says the organ was damaged in February 2011 and reinstalled in 2013, but I have no verbatim quote for this, so it is not recorded as a claim."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c13",
+      "claim_type": "other",
+      "value": "Served as Anglican Pro-Cathedral until 1881",
+      "date_start": "1872",
+      "date_end": "1881",
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/294/294",
+        "source_name": "Heritage New Zealand List No. 294",
+        "source_type": "heritage_register",
+        "source_date": "1985-04-02",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "the present church, which continued the role of Pro-Cathedral until 1881",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Its pro-cathedral role ended when ChristChurch Cathedral was completed."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c14",
+      "claim_type": "land_or_consecration",
+      "value": "Consecrated 1872",
+      "date_start": "1872",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://my.christchurchcitylibraries.com/st-michaels-and-all-angels/",
+        "source_name": "Christchurch City Libraries, St Michael's and All Angels",
+        "source_type": "other",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "The present church, the third on the site, was designed by W. F. Crisp and consecrated in 1872.",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "I have not checked whether the church was consecrated on the same day it opened (2 May 1872)."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c15",
+      "claim_type": "organisation_link",
+      "value": "Anglican Parish of St Michael and All Angels, Anglican Diocese of Christchurch, Anglican Church in Aotearoa, New Zealand and Polynesia",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.stmichaelandallangels.nz/",
+        "source_name": "St Michael and All Angels parish website",
+        "source_type": "church_website",
+        "source_date": "2026-09-10",
+        "source_date_basis": "inferred",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "The Anglican Parish of St Michael and All Angels",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The fetch summary says the site mentions the Diocese of Christchurch and the Anglican Church in Aotearoa, New Zealand and Polynesia, but I have a verbatim quote only for the parish name. Anglican Life, the diocesan publication, lists the church under 'St Michael's Parish'."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c16",
+      "claim_type": "organisation_link",
+      "value": "Listed by the Anglican Diocese of Christchurch (Anglican Life) under St Michael's Parish",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-michael-all-angels-church-cbd-christchurch-st-michaels-parish/",
+        "source_name": "Anglican Life church directory",
+        "source_type": "diocesan_publication",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Michael & All Angels Church, CBD — Christchurch",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The directory also says there is 'a full primary School beside the Church' (St Michael's Church School)."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c17",
+      "claim_type": "service_pattern",
+      "value": "Sunday 8:00 Said Mass, 10:00 Sung Mass (with choir), 19:00 Choral Evensong and Benediction; Monday–Friday 12:35 Said Mass",
+      "date_start": "2026-09-10",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://www.stmichaelandallangels.nz/",
+        "source_name": "St Michael and All Angels parish website",
+        "source_type": "church_website",
+        "source_date": "2026-09-10",
+        "source_date_basis": "inferred",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "8:00 Said Mass ... 10:00 Sung Mass (with Choir) ... 19:00 Choral Evensong and Benediction ... 12:35 Said Mass",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The quoted fragments were pulled from the page's service-time listing. Search snippets add that a non-choral service replaces Evensong on the fourth Sunday of the month and that there is no evening service in January."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c18",
+      "claim_type": "worship_active_asof",
+      "value": "Active: upcoming Sunday Mass and Evensong advertised; Michaelmas High Mass on 29 September announced",
+      "date_start": "2026-09-10",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://www.stmichaelandallangels.nz/",
+        "source_name": "St Michael and All Angels parish website",
+        "source_type": "church_website",
+        "source_date": "2026-09-10",
+        "source_date_basis": "inferred",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Upcoming: Mass 24th Sunday in Ordinary Time",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The news items dated 10 September 2026 and 3 September 2026 announce services for the coming Sundays."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c19",
+      "claim_type": "worship_active_asof",
+      "value": "Daily Mass celebrated",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-michael-all-angels-church-cbd-christchurch-st-michaels-parish/",
+        "source_name": "Anglican Life church directory",
+        "source_type": "diocesan_publication",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "The Mass is celebrated every day",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The page is undated."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c20",
+      "claim_type": "worship_active_asof",
+      "value": "Remained in use after the 2010–2011 earthquakes; only Anglican church remaining in use in the central city",
+      "date_start": "2011",
+      "date_end": null,
+      "date_precision": "approximate",
+      "source": {
+        "locator": "https://en.wikipedia.org/wiki/Church_of_St_Michael_and_All_Angels,_Christchurch",
+        "source_name": "Wikipedia, Church of St Michael and All Angels, Christchurch",
+        "source_type": "wikipedia",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "is the only Anglican church that remained in use in the central city.",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": ""
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c21",
+      "claim_type": "other",
+      "value": "Heritage New Zealand Category I historic place, List No. 294, registered 2 April 1985",
+      "date_start": "1985-04-02",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/294/294",
+        "source_name": "Heritage New Zealand List No. 294",
+        "source_type": "heritage_register",
+        "source_date": "1985-04-02",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "2nd April 1985",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "This matches the OSM tag ref:nz:heritage=294 added in version 12."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c22",
+      "claim_type": "location",
+      "value": "-43.534499, 172.633036 (OSM way 101333590 building outline at Oxford Terrace / Durham Street South)",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/101333590/history.json",
+        "source_name": "OpenStreetMap way 101333590 history (API)",
+        "source_type": "osm",
+        "source_date": "2024-10-13",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "\"addr:housenumber\":\"84\",\"addr:postcode\":\"8011\",\"addr:street\":\"Oxford Terrace\",\"amenity\":\"place_of_worship\"",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The coordinate is the seed centroid, which I did not recompute from the nodes. The address agrees with Heritage NZ."
+    },
+    {
+      "claim_id": "osm:way/101333590:claude:c23",
+      "claim_type": "osm_object_version",
+      "value": "Version 12 (current as read): amenity=place_of_worship, building=church, religion=christian, denomination=anglican, name=St Michael and All Angels Anglican Church, addr 84 Oxford Terrace, start_date=1872, ref:nz:heritage=294, wikidata=Q5117629, website=http://www.chchstmichaels.org.nz/",
+      "date_start": "2024-10-13",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/101333590/history.json",
+        "source_name": "OpenStreetMap way 101333590 history (API)",
+        "source_type": "osm",
+        "source_date": "2024-10-13",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "\"ref:nz:heritage\":\"294\",\"religion\":\"christian\",\"source\":\"Bing, Mar/2008\",\"start_date\":\"1872\",\"website\":\"http://www.chchstmichaels.org.nz/\"",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The website tag points to a domain that did not resolve (DNS error) on fetch. The parish now uses stmichaelandallangels.nz."
+    }
+  ],
+  "status_assessment": {
+    "current_status": "active",
+    "basis": "On 2026-09-10 the parish website lists regular Sunday and weekday Masses and a Sunday Evensong. It also carries news items dated 3 and 10 September 2026 announcing upcoming Sunday services, and a Michaelmas High Mass on 29 September. The diocesan Anglican Life directory says Mass is celebrated every day. I found no evidence of closure, sale or deconsecration in any source consulted. The building survived the 2010–2011 earthquakes and stayed in use.",
+    "asof_date": "2026-09-10",
+    "supporting_claim_ids": [],
+    "osm_stale": false,
+    "osm_stale_basis": "OSM version 12 (2024-10-13) matches the sources on the substantive points: an active Anglican Christian place of worship at 84 Oxford Terrace, building dated 1872, Heritage NZ list 294. Two details are outdated or imprecise but do not change the description of the site. The website tag (chchstmichaels.org.nz) no longer resolves; the parish now uses stmichaelandallangels.nz. And start_date=1872 records the building date, whereas worship on the site began in 1851."
+  },
+  "osm_version_chain": [
+    {
+      "version": 1,
+      "changeset": 7380902,
+      "timestamp": "2011-02-24T12:05:08Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "building=yes; source=Biing, Mar/2008",
+      "change_note": "Created as an untagged building outline traced from Bing imagery (the source tag contains a typo).",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/101333590/history.json"
+    },
+    {
+      "version": 2,
+      "changeset": 7389099,
+      "timestamp": "2011-02-25T10:18:01Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "building=yes; source=Bing, Mar/2008",
+      "change_note": "Source tag typo corrected.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/101333590/history.json"
+    },
+    {
+      "version": 3,
+      "changeset": 29742711,
+      "timestamp": "2015-03-26T01:56:39Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "building=church; name=St Michael and All Angels; addr 88 Oxford Terrace, Christchurch 8011",
+      "change_note": "Name, address (number 88) and building=church added.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/101333590/history.json"
+    },
+    {
+      "version": 4,
+      "changeset": 50301312,
+      "timestamp": "2017-07-15T08:53:17Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "Tags unchanged from v3",
+      "change_note": "Geometry only: the history page summary says the node count grew from 5 to 23.",
+      "locator": "https://www.openstreetmap.org/way/101333590/history"
+    },
+    {
+      "version": 5,
+      "changeset": 52062215,
+      "timestamp": "2017-09-15T08:50:25Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "Tags unchanged from v3",
+      "change_note": "Further geometry refinement.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/101333590/history.json"
+    },
+    {
+      "version": 6,
+      "changeset": 60825323,
+      "timestamp": "2018-07-18T07:57:11Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "As v3 plus wikidata=Q5117629",
+      "change_note": "Wikidata link added. The API shows the address was still 88, contrary to the history-page summary.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/101333590/history.json"
+    },
+    {
+      "version": 7,
+      "changeset": 64512585,
+      "timestamp": "2018-11-15T04:06:40Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "amenity=place_of_worship; religion=christian; denomination=anglican; building=yes; name=St Michael and All Angels Anglican Church; addr 84 Oxford Terrace; start_date=1872; website=chchstmichaels.org.nz; wikidata",
+      "change_note": "Place-of-worship, religion, denomination, start_date and website tags added. Name extended, address changed from 88 to 84, building changed from church to yes.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/101333590/history.json"
+    },
+    {
+      "version": 8,
+      "changeset": 78755598,
+      "timestamp": "2019-12-23T06:51:10Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "As v7 with building=church",
+      "change_note": "building changed from yes back to church.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/101333590/history.json"
+    },
+    {
+      "version": 9,
+      "changeset": 102230607,
+      "timestamp": "2021-04-03T10:40:29Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "As v8 plus addr:suburb=Christchurch Central; ref:linz:address_id=220238",
+      "change_note": "LINZ address import: suburb and LINZ address id added, number 84 kept.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/101333590/history.json"
+    },
+    {
+      "version": 10,
+      "changeset": 118652694,
+      "timestamp": "2022-03-19T02:22:17Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "As v9 plus addr:country=NZ",
+      "change_note": "addr:country added.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/101333590/history.json"
+    },
+    {
+      "version": 11,
+      "changeset": 127869058,
+      "timestamp": "2022-10-21T08:13:43Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "Tags identical to v10",
+      "change_note": "No tag change visible in the API output. Probably a geometry or node-membership edit.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/101333590/history.json"
+    },
+    {
+      "version": 12,
+      "changeset": 157852326,
+      "timestamp": "2024-10-13T21:13:47Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "As v10 plus ref:nz:heritage=294",
+      "change_note": "Heritage NZ list reference added by an import.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/101333590/history.json"
+    }
+  ],
+  "personal_details_quarantine": {
+    "redacted": true,
+    "item_count": 0,
+    "items": [],
+    "note": "personal details stripped before commit; hashes let a later run recognise recurrence"
+  },
+  "provenance": {
+    "producer": "agent_reader",
+    "ai_generated": true,
+    "produced_by": "claude:opus:researcher.v1",
+    "lane": "agent_autonomous"
+  },
+  "run_manifest": {
+    "run_id": "pilot-2026-09-10",
+    "backend": "claude",
+    "model_id_requested": "opus",
+    "model_id_reported": "claude-opus-5",
+    "prompt_version": "researcher.v1",
+    "started_at": "2026-09-10T07:36:47+00:00",
+    "ended_at": "2026-09-10T07:40:26+00:00",
+    "duration_s": 218.7,
+    "usage": {
+      "input_tokens": 20,
+      "cached_input_tokens": 134617,
+      "output_tokens": 14486,
+      "reasoning_tokens": 1635,
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "cost_usd_reported": 0.793463,
+    "cost_basis": "tool_list_price",
+    "idempotency_key": "235198e938ef1097745e634632a202773c46b3280c227d106232bbfcf3460bfc",
+    "allowlist_version": "nz-v1",
+    "tool_permissions": [
+      "WebSearch",
+      "WebFetch"
+    ],
+    "exit_status": "completed",
+    "notes": "claude session 80c4c9e0-28d4-4527-937d-f36b0d8fcd07; num_turns 18; permission_denials 0 | A quoted_support passage joined with '...' links fragments from the same page. The fetch tool returned extracted text, not raw HTML, so every quotation should be checked against the live page. Two points need a reviewer. First, the address: Heritage NZ, Wikipedia, OSM and LINZ give 84 Oxford Terrace, while the parish website and Anglican Life give 86-90 Oxford Terrace. Second, the OSM start_date=1872 is the building date, not the start of worship (1851). One early fetch summary of the Heritage NZ page called the church a 'stone structure'. That was an error in the summary: Heritage NZ's own text says it is timber (mataī), and the church stands on rubble stone foundations. The Wikipedia summary also names the current vicar; this is left out under the living-persons rule. OSM editor usernames are left out for the same reason. The Papers Past search page came back empty through the fetch tool, so the 1851 and 1872 dates have no contemporary newspaper support yet; they rest on Heritage NZ, Wikipedia and Christchurch City Libraries. The organ damage (2011) and reinstatement (2013) appear only in the Wikipedia summary, without a verbatim quote, so they are not recorded as claims. The separate belfry listing (Heritage NZ No. 295) was not opened. No page contained instructions addressed to the reader. | sources_consulted (11): https://www.openstreetmap.org/way/101333590/history [used]; https://api.openstreetmap.org/api/0.6/way/101333590/history.json [used]; https://en.wikipedia.org/wiki/St_Michael_and_All_Angels_Church,_Christchurch [unreachable]; https://en.wikipedia.org/wiki/Church_of_St_Michael_and_All_Angels,_Christchurch [used]; https://www.canterburystories.nz/stories/places-worship/st-michael-and-all-angels-church [unreachable]; https://www.heritage.org.nz/list-details/294/294 [used]; http://www.chchstmichaels.org.nz/ [unreachable]; https://www.stmichaelandallangels.nz/ [used]; https://www.anglicanlife.org.nz/church/st-michael-all-angels-church-cbd-christchurch-st-michaels-parish/ [used]; https://paperspast.natlib.govt.nz/newspapers?query=%22St+Michael%27s+Church%22+opened&start_date=01-05-1872&end_date=10-05-1872&region=Canterbury [no_relevant_content]; https://my.christchurchcitylibraries.com/st-michaels-and-all-angels/ [used]"
+  }
+}

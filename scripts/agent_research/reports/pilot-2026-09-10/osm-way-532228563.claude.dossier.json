@@ -1,0 +1,389 @@
+{
+  "schema_version": "agent-dossier.v1",
+  "dossier_id": "osm:way/532228563:claude:opus:researcher.v1:pilot-2026-09-10",
+  "place": {
+    "place_ref": "osm:way/532228563",
+    "name": "St Chad's Anglican Church - North Linwood",
+    "country_code": "NZ",
+    "seed_latitude": -43.52817655384615,
+    "seed_longitude": 172.67937441538464,
+    "seed_source": "nz_places.geojson (overpass extract 2025-08-20)",
+    "seed_tags": {
+      "amenity": "place_of_worship",
+      "religion": "christian",
+      "denomination": "anglican"
+    }
+  },
+  "candidate_location": {
+    "latitude": -43.528177,
+    "longitude": 172.679374,
+    "basis": "osm_object",
+    "basis_note": "Seed coordinate of OSM way 532228563, a building outline tagged amenity=place_of_worship with addr 1 Carnarvon Street. The Anglican Diocese of Christchurch listing gives the same address, 1 Carnarvon Street, Linwood, Christchurch 8062. I did not check imagery, and I did not geocode the address independently.",
+    "uncertainty_radius_m": 30,
+    "address": "1 Carnarvon Street, Linwood, Christchurch 8062, New Zealand"
+  },
+  "claims": [
+    {
+      "claim_id": "osm:way/532228563:claude:c01",
+      "claim_type": "name",
+      "value": "St Chad's Church—Linwood",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+        "source_name": "Anglican Life (Anglican Diocese of Christchurch), church directory entry",
+        "source_type": "diocesan_publication",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Chad's Church—Linwood",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "This is the page title and church name in the diocesan directory. The OSM name tag reads 'St Chad's Anglican Church - North Linwood'."
+    },
+    {
+      "claim_id": "osm:way/532228563:claude:c02",
+      "claim_type": "address",
+      "value": "1 Carnarvon Street, Linwood, Christchurch 8062, New Zealand",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+        "source_name": "Anglican Life (Anglican Diocese of Christchurch), church directory entry",
+        "source_type": "diocesan_publication",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "1 Carnarvon Street, Linwood, Christchurch, 8062, New Zealand",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "This matches the OSM addr tags (housenumber 1, Carnarvon Street, postcode 8062)."
+    },
+    {
+      "claim_id": "osm:way/532228563:claude:c03",
+      "claim_type": "organisation_link",
+      "value": "Linwood-Aranui Parish, Anglican Diocese of Christchurch",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+        "source_name": "Anglican Life (Anglican Diocese of Christchurch), church directory entry",
+        "source_type": "diocesan_publication",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Chad's Church—Linwood—Linwood-Aranui Parish",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The link to the diocese is inferred from the directory's host, Anglican Life, which is the diocesan publication. The parish website linked from the entry is linwood-aranuianglicanparish.com, but it returned 404 when I fetched it."
+    },
+    {
+      "claim_id": "osm:way/532228563:claude:c04",
+      "claim_type": "denomination",
+      "value": "Anglican",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+        "source_name": "Anglican Life (Anglican Diocese of Christchurch), church directory entry",
+        "source_type": "diocesan_publication",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Chad's Church—Linwood—Linwood-Aranui Parish",
+      "evidential_weight": "inferred",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Inferred from the church's listing as a parish church in the Anglican diocesan directory. OSM tags agree: religion=christian, denomination=anglican."
+    },
+    {
+      "claim_id": "osm:way/532228563:claude:c05",
+      "claim_type": "worship_active_asof",
+      "value": "Listed as a current church of the diocese, describing itself as having a strong worship base and weekly community activities",
+      "date_start": "2026-09-10",
+      "date_end": null,
+      "date_precision": "approximate",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+        "source_name": "Anglican Life (Anglican Diocese of Christchurch), church directory entry",
+        "source_type": "diocesan_publication",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "a welcoming, inclusive, growing and celebrating community with a strong worship base and active commitment to our local community",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The page has no date. The as-of date is when I retrieved it, not a date the source bears. The page gave no service times. A search-engine summary of other pages (not opened) mentioned Sunday 10am, Wednesday 10am and Friday 11am te reo services. Treat that only as a lead."
+    },
+    {
+      "claim_id": "osm:way/532228563:claude:c06",
+      "claim_type": "name",
+      "value": "St Chad's Anglican Church - North Linwood",
+      "date_start": "2018-11-07",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history",
+        "source_name": "OpenStreetMap API way history",
+        "source_type": "osm",
+        "source_date": "2026-03-21",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "name=St Chad's Anglican Church - North Linwood",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The name tag has carried this value since version 3 (2018-11-07). Versions 1–2 had name=St Chads."
+    },
+    {
+      "claim_id": "osm:way/532228563:claude:c07",
+      "claim_type": "start_date",
+      "value": "2007 (OSM start_date tag; probably an error for 1907)",
+      "date_start": "2007",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history",
+        "source_name": "OpenStreetMap API way history",
+        "source_type": "osm",
+        "source_date": "2026-03-21",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "start_date=2007",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "low",
+      "note": "Added in version 3 (2018). A search-engine summary of parish-related pages I could not open said the first St Chad's was opened by [person_name withheld] on 24 February 1907, with the first service on Easter Day 1907. It also said the building was moved to its present site in 1923, and that the parish separated from Avonside in 1919. If that is right, '2007' is probably a typo for 1907, and the building's date at this site would be 1923 (moved). None of this is verified from an opened page."
+    },
+    {
+      "claim_id": "osm:way/532228563:claude:c08",
+      "claim_type": "location",
+      "value": "OSM way 532228563 building outline at 1 Carnarvon Street, Linwood, centred about -43.528177, 172.679374",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history",
+        "source_name": "OpenStreetMap API way history",
+        "source_type": "osm",
+        "source_date": "2026-03-21",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "addr:housenumber=1, addr:street=Carnarvon Street, amenity=place_of_worship, building=yes",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The address agrees with the diocesan directory. The coordinate is the supplied seed centroid, and I did not check it against imagery."
+    },
+    {
+      "claim_id": "osm:way/532228563:claude:c09",
+      "claim_type": "osm_object_version",
+      "value": "Version 8, changeset 180196653, 2026-03-21T09:57:23Z; added addr:postcode=8062",
+      "date_start": "2026-03-21",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history",
+        "source_name": "OpenStreetMap API way history",
+        "source_type": "osm",
+        "source_date": "2026-03-21",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "addr:postcode=8062",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "This is the current version, and it is still visible."
+    }
+  ],
+  "status_assessment": {
+    "current_status": "likely_active",
+    "basis": "The Anglican Diocese of Christchurch's Anglican Life directory lists St Chad's Church—Linwood, 1 Carnarvon Street, as a church of the Linwood-Aranui Parish. It describes a 'strong worship base' and weekly activities. That page has no date. I found no closure, sale or deconsecration evidence in the sources I could open. The last OSM edit (2026-03-21) keeps the place-of-worship tagging. Search-engine summaries of parish pages I could not open also describe current weekly services and say the church stayed open after the 2010–2011 earthquakes. The status is not rated 'active' because no dated primary source confirms services in 2026.",
+    "asof_date": "2026-09-10",
+    "supporting_claim_ids": [],
+    "osm_stale": false,
+    "osm_stale_basis": "The current OSM tags (place_of_worship, christian, anglican, 1 Carnarvon Street, Linwood, 8062) match the diocesan listing. Two small issues remain. The name includes 'North Linwood' where the diocese says 'Linwood'. And start_date=2007 is probably a typo for 1907 (unverified lead). Neither changes whether the record describes an active Anglican church at this site."
+  },
+  "osm_version_chain": [
+    {
+      "version": 1,
+      "changeset": 52890728,
+      "timestamp": "2017-10-13T12:35:25Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "amenity=place_of_worship, building=yes, religion=christian, denomination=anglican, name=St Chads, addr 1 Carnarvon Street",
+      "change_note": "Created as part of a residential building mapping edit.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history"
+    },
+    {
+      "version": 2,
+      "changeset": 64185947,
+      "timestamp": "2018-11-05T05:45:28Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "as v1 plus addr:city=Christchurch",
+      "change_note": "Added addr:city.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history"
+    },
+    {
+      "version": 3,
+      "changeset": 64250983,
+      "timestamp": "2018-11-07T03:54:11Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "name=St Chad's Anglican Church - North Linwood, addr:suburb=North Linwood, phone (institutional, omitted), start_date=2007",
+      "change_note": "Renamed. Added suburb, phone and start_date=2007.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history"
+    },
+    {
+      "version": 4,
+      "changeset": 97876854,
+      "timestamp": "2021-01-21T05:54:30Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "tags identical to v3",
+      "change_note": "No tag change in the API data, so probably a geometry edit during residential mapping. The rendered history page's summary said the suburb changed here, but the API shows that change in v5.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history"
+    },
+    {
+      "version": 5,
+      "changeset": 103385196,
+      "timestamp": "2021-04-22T06:40:24Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "addr:suburb=Linwood, ref:linz:address_id=956517; otherwise as v4",
+      "change_note": "LINZ address import: suburb changed from North Linwood to Linwood and LINZ address id added.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history"
+    },
+    {
+      "version": 6,
+      "changeset": 127869621,
+      "timestamp": "2022-10-21T08:27:02Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "as v5 plus addr:country=NZ",
+      "change_note": "Added addr:country.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history"
+    },
+    {
+      "version": 7,
+      "changeset": 160013417,
+      "timestamp": "2024-12-07T01:35:11Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "as v6 with phone reformatted",
+      "change_note": "Phone number formatting normalised.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history"
+    },
+    {
+      "version": 8,
+      "changeset": 180196653,
+      "timestamp": "2026-03-21T09:57:23Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "as v7 plus addr:postcode=8062",
+      "change_note": "Added postcode.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history"
+    }
+  ],
+  "personal_details_quarantine": {
+    "redacted": true,
+    "item_count": 1,
+    "items": [
+      {
+        "kind": "person_name",
+        "context_claim_id": "osm:way/532228563:claude:c07",
+        "value_sha256": "86fa62170621c0d05c6afdd732a0b9e84b03fc089a94d3279799c32c588efb10"
+      }
+    ],
+    "note": "personal details stripped before commit; hashes let a later run recognise recurrence"
+  },
+  "provenance": {
+    "producer": "agent_reader",
+    "ai_generated": true,
+    "produced_by": "claude:opus:researcher.v1",
+    "lane": "agent_autonomous"
+  },
+  "run_manifest": {
+    "run_id": "pilot-2026-09-10",
+    "backend": "claude",
+    "model_id_requested": "opus",
+    "model_id_reported": "claude-opus-5",
+    "prompt_version": "researcher.v1",
+    "started_at": "2026-09-10T07:39:04+00:00",
+    "ended_at": "2026-09-10T07:42:16+00:00",
+    "duration_s": 191.3,
+    "usage": {
+      "input_tokens": 24,
+      "cached_input_tokens": 180965,
+      "output_tokens": 10963,
+      "reasoning_tokens": 1886,
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "cost_usd_reported": 0.7751524999999999,
+    "cost_basis": "tool_list_price",
+    "idempotency_key": "241ba10de96ec05c24cd0711d9acfd06d2fe3f8b3a04520e494c2e423b809ddd",
+    "allowlist_version": "nz-v1",
+    "tool_permissions": [
+      "WebSearch",
+      "WebFetch"
+    ],
+    "exit_status": "completed",
+    "notes": "claude session 296ae86b-a436-4c40-b029-94bef6bbc851; num_turns 22; permission_denials 0 | I used all fifteen fetches. Several key pages would not load: the parish website (404), its /about page (404), neighbourly.co.nz (406), CINCH (403), canterburystories.nz (403) and DigitalNZ (403). The Papers Past search pages came back with no readable content, and the Anglican Life church-names PDF could not be parsed. So I have no verified founding or building dates. Leads from search-engine result summaries only (pages not opened, so not cited as evidence): (a) the first St Chad's was opened by Bishop Julius on 24 February 1907, with the first service on Easter Day, 31 March 1907; (b) it was part of Avonside parish until 1919, when it became a parish in its own right; (c) in 1923 the church was moved across the paddocks to its present site at 1 Carnarvon Street; (d) the 2010–2011 earthquakes caused some damage but the buildings stayed open; (e) the St Ambrose (Aranui) congregation merged its finances with St Chad's, and the parish was renamed from Linwood to Linwood-Aranui. These leads suggest the OSM start_date=2007 is a typo for 1907. A reviewer should check them against Papers Past (for example, Press or Lyttelton Times reports from February–March 1907 and 1923), the Anglican Life church-names PDF, and the St Ambrose centennial publication (canterburystories.nz ccl-cs-116539). The rendered OSM history page and the API disagree on which version changed the suburb; I followed the API, which puts it in v5. I left out the OSM phone tag and the contact details found in search results, as instructed. None of the fetched pages contained text addressed to me. | sources_consulted (15): https://www.openstreetmap.org/way/532228563/history [used]; https://api.openstreetmap.org/api/0.6/way/532228563/history [used]; https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/ [used]; https://www.anglicanlife.org.nz/wp-content/uploads/2025/03/Church-Names-in-the-Diocese-of-Christchurch.pdf [unreachable]; https://www.linwood-aranuianglicanparish.com/ [unreachable]; https://paperspast.natlib.govt.nz/newspapers?query=%22St+Chad%27s%22+Linwood&start_date=01-01-1900&end_date=31-12-1989 [unreachable]; https://www.canterburystories.nz/collections/publications/ccl-cs-116539 [unreachable]; https://digitalnz.org/records?text=St+Chad%27s+Linwood [unreachable]; https://www.linwood-aranuianglicanparish.com/about [unreachable]; https://hail.to/anglican-diocese-of-christchurch/article/9kIDyXD [no_relevant_content]; https://www.neighbourly.co.nz/organisation/st-chads-and-st-ambrose-anglican-church-of-linwood-and-aranui/about [unreachable]; https://www.cinch.org.nz/categories/a-z/l/3358/entries/3335 [unreachable]; https://paperspast.natlib.govt.nz/newspapers?query=%22St+Chad%27s+Church%22+Linwood [unreachable]; https://christchurchcitylibraries.com/Heritage/Photos/Topics/Churches/ [no_relevant_content]; https://en.wikipedia.org/wiki/Linwood,_Christchurch [no_relevant_content]"
+  }
+}

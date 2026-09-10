@@ -1,0 +1,842 @@
+{
+  "place_ref": "osm:way/641097567",
+  "name": "St Bartholomew's Anglican Church - Kaiapoi",
+  "validated_at": "2026-09-10T07:58:27+00:00",
+  "osm": {
+    "centroid": [
+      -43.38149845,
+      172.6612559875
+    ],
+    "version": 3,
+    "amenity": "place_of_worship",
+    "history_versions": [
+      [
+        1,
+        64185252,
+        "2018-11-05T04:58:40Z"
+      ],
+      [
+        2,
+        142613437,
+        "2023-10-15T11:30:35Z"
+      ],
+      [
+        3,
+        177910750,
+        "2026-01-31T00:19:03Z"
+      ]
+    ],
+    "seed_to_osm_m": 1.2,
+    "error": null
+  },
+  "dossiers": [
+    {
+      "dossier_id": "osm:way/641097567:claude:opus:researcher.v1:pilot-2026-09-10",
+      "reader": "claude:claude:opus:researcher.v1",
+      "validated_at": "2026-09-10T07:58:05+00:00",
+      "validator_version": "validate_dossier.v1",
+      "summary": {
+        "claims": 23,
+        "locators": 23,
+        "distinct_locators": 10,
+        "reachable": 17,
+        "distinct_reachable": 6,
+        "distinct_dead": 0,
+        "distinct_blocked": 2,
+        "dead": 0,
+        "requires_human_access": 4,
+        "http_error": 2,
+        "unreachable": 0,
+        "robots_disallowed": 0,
+        "not_fetched": 0,
+        "with_quote": 21,
+        "quote_supported": 9,
+        "quote_partial": 3,
+        "quote_not_found": 1,
+        "locator_validity_rate": 1.0,
+        "locator_reachable_rate": 0.6,
+        "locator_blocked_rate": 0.2,
+        "quote_support_rate": 0.923,
+        "quote_exact_rate": 0.692
+      },
+      "location": {
+        "candidate_to_seed_m": 2.3,
+        "candidate_to_osm_m": 2.9,
+        "within_tolerance": true
+      },
+      "version_chain": {
+        "claimed_versions": 3,
+        "actual_versions": 3,
+        "confirmed": 3,
+        "contradicted": 0,
+        "rows": [
+          {
+            "version": 1,
+            "claimed_changeset": 64185252,
+            "claimed_timestamp": "2018-11-05T04:58:40Z",
+            "actual_changeset": 64185252,
+            "actual_timestamp": "2018-11-05T04:58:40Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 2,
+            "claimed_changeset": 142613437,
+            "claimed_timestamp": "2023-10-15T11:30:35Z",
+            "actual_changeset": 142613437,
+            "actual_timestamp": "2023-10-15T11:30:35Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 3,
+            "claimed_changeset": 177910750,
+            "claimed_timestamp": "2026-01-31T00:19:03Z",
+            "actual_changeset": 177910750,
+            "actual_timestamp": "2026-01-31T00:19:03Z",
+            "outcome": "confirmed"
+          }
+        ]
+      },
+      "stale_check": {
+        "osm_current_tags_say_place_of_worship": true,
+        "osm_current_version": 3,
+        "reader_osm_stale": false,
+        "reader_status": "active"
+      },
+      "internal_contradictions": [
+        "start_date: osm:way/641097567:claude:c08 vs osm:way/641097567:claude:c09 (years [1855] vs [1860])"
+      ],
+      "claims": [
+        {
+          "claim_id": "osm:way/641097567:claude:c01",
+          "claim_type": "name",
+          "locator": "https://www.heritage.org.nz/list-details/285/St%20Bartholomew's%20Church%20(Anglican)",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "partially_supported",
+          "support_share": 1.0,
+          "page_chars": 27412
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c02",
+          "claim_type": "name",
+          "locator": "https://www.openstreetmap.org/way/641097567/history",
+          "has_quote": true,
+          "fetch": "verified_via_osm_api",
+          "status": 200,
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c03",
+          "claim_type": "address",
+          "locator": "https://www.heritage.org.nz/list-details/285/St%20Bartholomew's%20Church%20(Anglican)",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 27412
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c04",
+          "claim_type": "address",
+          "locator": "https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/kaiapoi/history-of-the-churches-in-kaiapoi",
+          "has_quote": false,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "no_quote",
+          "support_share": 0.0,
+          "value_on_page": "supported",
+          "value_share": 1.0,
+          "page_chars": 16097
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c05",
+          "claim_type": "address",
+          "locator": "https://www.openstreetmap.org/way/641097567/history",
+          "has_quote": true,
+          "fetch": "verified_via_osm_api",
+          "status": 200,
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c06",
+          "claim_type": "religion",
+          "locator": "https://www.heritage.org.nz/list-details/285/St%20Bartholomew's%20Church%20(Anglican)",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 27412
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c07",
+          "claim_type": "denomination",
+          "locator": "https://www.heritage.org.nz/list-details/285/St%20Bartholomew's%20Church%20(Anglican)",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 27412
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c08",
+          "claim_type": "start_date",
+          "locator": "https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/kaiapoi/history-of-the-churches-in-kaiapoi",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "partially_supported",
+          "support_share": 0.87,
+          "page_chars": 16097
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c09",
+          "claim_type": "start_date",
+          "locator": "https://www.heritage.org.nz/list-details/285/St%20Bartholomew's%20Church%20(Anglican)",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 27412
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c10",
+          "claim_type": "building_date",
+          "locator": "https://www.heritage.org.nz/list-details/285/St%20Bartholomew's%20Church%20(Anglican)",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 27412
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c11",
+          "claim_type": "renovation",
+          "locator": "https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/kaiapoi/history-of-the-churches-in-kaiapoi",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 16097
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c12",
+          "claim_type": "renovation",
+          "locator": "https://dpaarchitects.co.nz/projects/st-bartholomews-church",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 1328
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c13",
+          "claim_type": "renovation",
+          "locator": "https://www.heritageawards.co.nz/entry/st-bartholomews-church-kaiapoi/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c14",
+          "claim_type": "worship_active_asof",
+          "locator": "https://www.stuff.co.nz/the-press/business/the-rebuild/95255504/bells-ring-in-more-than-150-church-restorations-as-kaiapois-st-bartholomews-church-reopens",
+          "has_quote": true,
+          "fetch": "http_error",
+          "status": 406,
+          "error": "HTTP Error 406: Not Acceptable",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c15",
+          "claim_type": "service_pattern",
+          "locator": "https://www.kaiapoianglican.nz/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 403,
+          "error": "HTTP Error 403: Forbidden",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c16",
+          "claim_type": "worship_active_asof",
+          "locator": "https://www.kaiapoianglican.nz/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 403,
+          "error": "HTTP Error 403: Forbidden",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c17",
+          "claim_type": "worship_active_asof",
+          "locator": "https://www.flickr.com/photos/philbraithwaitenz/39933617321",
+          "has_quote": false,
+          "fetch": "http_error",
+          "status": 502,
+          "error": "HTTP Error 502: Bad Gateway",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c18",
+          "claim_type": "organisation_link",
+          "locator": "https://www.kaiapoianglican.nz/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 403,
+          "error": "HTTP Error 403: Forbidden",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c19",
+          "claim_type": "organisation_link",
+          "locator": "https://dpaarchitects.co.nz/projects/st-bartholomews-church",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 1328
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c20",
+          "claim_type": "other",
+          "locator": "https://www.heritage.org.nz/list-details/285/St%20Bartholomew's%20Church%20(Anglican)",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 27412
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c21",
+          "claim_type": "location",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/641097567/full",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "not_found",
+          "support_share": 0.5,
+          "page_chars": 2600
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c22",
+          "claim_type": "location",
+          "locator": "https://www.wikidata.org/wiki/Q79304027",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "partially_supported",
+          "support_share": 0.778,
+          "page_chars": 2935
+        },
+        {
+          "claim_id": "osm:way/641097567:claude:c23",
+          "claim_type": "osm_object_version",
+          "locator": "https://www.openstreetmap.org/way/641097567/history",
+          "has_quote": true,
+          "fetch": "verified_via_osm_api",
+          "status": 200,
+          "support": "not_checked",
+          "support_share": null
+        }
+      ]
+    },
+    {
+      "dossier_id": "osm:way/641097567:codex:gpt-5.6-sol:researcher.v1:pilot-2026-09-10",
+      "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+      "validated_at": "2026-09-10T07:58:27+00:00",
+      "validator_version": "validate_dossier.v1",
+      "summary": {
+        "claims": 17,
+        "locators": 17,
+        "distinct_locators": 8,
+        "reachable": 10,
+        "distinct_reachable": 3,
+        "distinct_dead": 0,
+        "distinct_blocked": 5,
+        "dead": 0,
+        "requires_human_access": 7,
+        "http_error": 0,
+        "unreachable": 0,
+        "robots_disallowed": 0,
+        "not_fetched": 0,
+        "with_quote": 17,
+        "quote_supported": 9,
+        "quote_partial": 0,
+        "quote_not_found": 1,
+        "locator_validity_rate": 1.0,
+        "locator_reachable_rate": 0.375,
+        "locator_blocked_rate": 0.625,
+        "quote_support_rate": 0.9,
+        "quote_exact_rate": 0.9
+      },
+      "location": {
+        "candidate_to_seed_m": 1.2,
+        "candidate_to_osm_m": 0.1,
+        "within_tolerance": true
+      },
+      "version_chain": {
+        "claimed_versions": 3,
+        "actual_versions": 3,
+        "confirmed": 3,
+        "contradicted": 0,
+        "rows": [
+          {
+            "version": 1,
+            "claimed_changeset": 64185252,
+            "claimed_timestamp": "2018-11-05T04:58:40Z",
+            "actual_changeset": 64185252,
+            "actual_timestamp": "2018-11-05T04:58:40Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 2,
+            "claimed_changeset": 142613437,
+            "claimed_timestamp": "2023-10-15T11:30:35Z",
+            "actual_changeset": 142613437,
+            "actual_timestamp": "2023-10-15T11:30:35Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 3,
+            "claimed_changeset": 177910750,
+            "claimed_timestamp": "2026-01-31T00:19:03Z",
+            "actual_changeset": 177910750,
+            "actual_timestamp": "2026-01-31T00:19:03Z",
+            "outcome": "confirmed"
+          }
+        ]
+      },
+      "stale_check": {
+        "osm_current_tags_say_place_of_worship": true,
+        "osm_current_version": 3,
+        "reader_osm_stale": false,
+        "reader_status": "likely_active"
+      },
+      "internal_contradictions": [],
+      "claims": [
+        {
+          "claim_id": "osm:way/641097567:codex:c01",
+          "claim_type": "name",
+          "locator": "https://www.anglicanlife.org.nz/church/st-bartholomews-kaiapoi-kaiapoi-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641097567:codex:c02",
+          "claim_type": "address",
+          "locator": "https://www.anglicanlife.org.nz/church/st-bartholomews-kaiapoi-kaiapoi-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641097567:codex:c03",
+          "claim_type": "religion",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/641097567/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "not_found",
+          "support_share": 0.0,
+          "page_chars": 2899
+        },
+        {
+          "claim_id": "osm:way/641097567:codex:c04",
+          "claim_type": "denomination",
+          "locator": "https://www.heritage.org.nz/list-details/285/Listing",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 27412
+        },
+        {
+          "claim_id": "osm:way/641097567:codex:c05",
+          "claim_type": "start_date",
+          "locator": "https://www.heritage.org.nz/list-details/285/Listing",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 27412
+        },
+        {
+          "claim_id": "osm:way/641097567:codex:c06",
+          "claim_type": "building_date",
+          "locator": "https://www.heritage.org.nz/list-details/285/Listing",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 27412
+        },
+        {
+          "claim_id": "osm:way/641097567:codex:c07",
+          "claim_type": "worship_active_asof",
+          "locator": "https://www.heritage.org.nz/list-details/285/Listing",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 27412
+        },
+        {
+          "claim_id": "osm:way/641097567:codex:c08",
+          "claim_type": "renovation",
+          "locator": "https://www.heritage.org.nz/list-details/285/Listing",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 27412
+        },
+        {
+          "claim_id": "osm:way/641097567:codex:c09",
+          "claim_type": "renovation",
+          "locator": "https://www.heritage.org.nz/list-details/285/Listing",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 27412
+        },
+        {
+          "claim_id": "osm:way/641097567:codex:c10",
+          "claim_type": "renovation",
+          "locator": "https://www.heritage.org.nz/list-details/285/Listing",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 27412
+        },
+        {
+          "claim_id": "osm:way/641097567:codex:c11",
+          "claim_type": "renovation",
+          "locator": "https://www.heritage.org.nz/list-details/285/Listing",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 27412
+        },
+        {
+          "claim_id": "osm:way/641097567:codex:c12",
+          "claim_type": "organisation_link",
+          "locator": "https://www.anglicanlife.org.nz/church/st-bartholomews-kaiapoi-kaiapoi-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641097567:codex:c13",
+          "claim_type": "worship_active_asof",
+          "locator": "https://www.anglicanlife.org.nz/anglican-e-life-23-april-2025/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641097567:codex:c14",
+          "claim_type": "service_pattern",
+          "locator": "https://www.anglicanlife.org.nz/christmas-and-holiday-services-2025-jan-2026-2/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641097567:codex:c15",
+          "claim_type": "worship_active_asof",
+          "locator": "https://www.anglicanlife.org.nz/anglican-e-life/?query-0-page=2",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641097567:codex:c16",
+          "claim_type": "worship_active_asof",
+          "locator": "https://www.anglicanlife.org.nz/anglican-e-life-8-july-2026/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641097567:codex:c17",
+          "claim_type": "location",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/641097567/full",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 2600
+        }
+      ]
+    }
+  ],
+  "agreement": {
+    "readers": [
+      "claude:claude:opus:researcher.v1",
+      "codex:codex:gpt-5.6-sol:researcher.v1"
+    ],
+    "claim_types_compared": 9,
+    "agreed": 8,
+    "majority": 0,
+    "disagreed": 1,
+    "single_reader": 0,
+    "not_comparable": 0,
+    "agreement_rate": 0.889,
+    "majority_rate": 0.889,
+    "escalate_to_human": [
+      "start_date"
+    ],
+    "rows": [
+      {
+        "claim_type": "address",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "23 Cass Street, Kaiapoi"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "23 Cass Street, Kaiapoi 7630, New Zealand"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: jaccard 0.57"
+      },
+      {
+        "claim_type": "building_date",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "The current building is the 1855 nave designed by Benjamin Mountfort, relocated in 1859-60"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "The present church building was constructed in 1855 and completed by Christmas Day."
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: years [1855, 1859] vs [1855]"
+      },
+      {
+        "claim_type": "candidate_location",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "-43.3815,172.66122"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "-43.381498,172.661256"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: 3 m apart"
+      },
+      {
+        "claim_type": "current_status",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "active"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "likely_active"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: status group"
+      },
+      {
+        "claim_type": "denomination",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Anglican"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Anglican"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: exact"
+      },
+      {
+        "claim_type": "location",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "OSM footprint centroid about -43.38150, 172.66122 on Cass Street, Kaiapoi"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "-43.381498, 172.661256"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: 3 m apart"
+      },
+      {
+        "claim_type": "name",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "St Bartholomew's Church (Anglican)"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "St Bartholomew’s – Kaiapoi"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: jaccard 0.50"
+      },
+      {
+        "claim_type": "religion",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "christian"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Christian"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: exact"
+      },
+      {
+        "claim_type": "start_date",
+        "outcome": "disagree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Church first built in 1855 on a sandhill in Darnley Square, Kaiapoi (original site, not the current one)"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Anglican worship at the present Cass Street site began in 1860 when the relocated church reopened."
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: years [1855] vs [1860]"
+      },
+      {
+        "claim_type": "organisation_link",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Anglican Parish of Kaiapoi, which runs St Bartholomew's Kaiapoi, St Thomas' Eyreton and St Augustine's Clarkville"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Kaiapoi Parish"
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      },
+      {
+        "claim_type": "renovation",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Transepts, bell tower and chancel added in 1862, two years after the relocation"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "The church was relocated to Cass Street between 1859 and 1860 and reopened with a bell tower."
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      },
+      {
+        "claim_type": "service_pattern",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Every Sunday at 9:30 am: Holy Communion with morning tea afterwards"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Christmas worship and weekly 9:30 a.m. Sunday holiday services were advertised from 24 December 2025 through 25 January 2026."
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      },
+      {
+        "claim_type": "worship_active_asof",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "The church reopened after the post-earthquake restoration"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "The first service in the original building was held on Christmas Day 1855."
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      }
+    ]
+  },
+  "requests_made": 25
+}
