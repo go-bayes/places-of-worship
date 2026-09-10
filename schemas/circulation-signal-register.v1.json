@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://religionmap.org/schemas/circulation-signal-register.v1.json",
+  "title": "Circulation signal register v1",
+  "description": "Register of footfall, presence, movement and attention signals considered as evidence about the worship-function state of a place of worship. Each entry records what a source measures, where, at what resolution, on what terms, and how it was verified. A signal is evidence, never a validation state (ruling R-A1). Every price, term and availability claim carries a verification date and a URL; unverified fields say so.",
+  "type": "object",
+  "required": ["register_version", "compiled_on", "policy_reference", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "register_version": { "const": "circulation-signal-register.v1" },
+    "compiled_on": { "type": "string", "format": "date" },
+    "policy_reference": { "type": "string", "description": "path of the brief or ruling that governs use of these signals" },
+    "entries": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/entry" } }
+  },
+  "$defs": {
+    "verification": {
+      "type": "object",
+      "required": ["status", "checked_on"],
+      "additionalProperties": false,
+      "properties": {
+        "status": { "type": "string", "enum": ["verified", "partially_verified", "unverified"] },
+        "checked_on": { "type": "string", "format": "date" },
+        "urls": { "type": "array", "items": { "type": "string", "format": "uri" } },
+        "note": { "type": "string" }
+      }
+    },
+    "entry": {
+      "type": "object",
+      "required": [
+        "signal_id", "name", "provider", "signal_class", "geography", "covers_nz",
+        "spatial_unit", "temporal_resolution", "poi_basis", "access_route", "cost",
+        "terms", "privacy_model", "status", "site_level_calibration_fit", "verification"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "signal_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*$" },
+        "name": { "type": "string" },
+        "provider": { "type": "string" },
+        "signal_class": {
+          "type": "string",
+          "description": "what the source measures",
+          "enum": [
+            "telco_presence", "device_panel_visits", "device_panel_aggregate", "app_mobility_aggregate",
+            "activity_tracker", "attention_proxy", "poi_metadata", "satellite_imagery",
+            "on_site_counter", "congregation_records", "denominational_returns", "observer_checkin"
+          ]
+        },
+        "geography": { "type": "string", "description": "coverage as stated by the provider" },
+        "covers_nz": { "type": "string", "enum": ["yes", "no", "not_named", "unverified"] },
+        "spatial_unit": { "type": "string", "description": "poi polygon, point, grid cell size, statistical area, region, segment, doorway" },
+        "temporal_resolution": { "type": "string" },
+        "poi_basis": { "type": "string", "description": "whose place polygons or points define a visit; 'none' for area counts" },
+        "access_route": { "type": "string" },
+        "cost": { "type": "string", "description": "verified figure with currency and date, or 'unverified'" },
+        "terms": { "type": "string", "description": "restrictions that bear on academic use, publication, caching, display with a non-Google map, re-identification" },
+        "privacy_model": { "type": "string", "description": "aggregation, suppression threshold, rounding, differential privacy, panel consent, device-level" },
+        "status": { "type": "string", "enum": ["live", "discontinued", "disestablished", "not_available", "possible_not_built", "unverified"] },
+        "site_level_calibration_fit": {
+          "type": "string",
+          "description": "whether the signal can be joined to one site for the calibration design",
+          "enum": ["site", "parish_or_multi_site", "area_only", "none"]
+        },
+        "worship_confounders_noted": { "type": "array", "items": { "type": "string" } },
+        "literature": { "type": "array", "items": { "type": "string" }, "description": "citations with DOI or URL" },
+        "verification": { "$ref": "#/$defs/verification" },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}
