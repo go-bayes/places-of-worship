@@ -54,7 +54,7 @@ SEED_SOURCE_DEFAULT = "nz_places.geojson (overpass extract 2025-08-20)"
 # is what the tool says it ran. r-a9 (which models) is an open ruling.
 DEFAULT_MODELS = {
     "claude": "opus",
-    "codex": "gpt-5.6-sol",
+    "codex": "gpt-5.6-luna",  # jb ruling 2026-09-10: luna may be used, sol is too expensive
     "openrouter": "z-ai/glm-5.3-flash",
 }
 DEFAULT_TIMEOUT_S = 1200

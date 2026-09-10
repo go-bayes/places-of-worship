@@ -161,9 +161,14 @@ Ruled by existing rulings, and applied here without re-asking:
 - **The kastom gate.** Applied at the seed; the pilot is New Zealand only.
 - **Location rulings (2026-09-07, PR #105).** Unchanged; the pipeline supplies lines, the reviewer rules.
 
+Ruled by JB on 2026-09-10 (his words), after reading the pilot:
+
+- **R-R1 Reader model ids, part.** "gpt-5.6-luna may be used, sol is too expensive for this work." Applied: the `codex` backend now defaults to `gpt-5.6-luna` (confirmed to run on the ChatGPT plan on 2026-09-10); the pilot's Sol runs stand as the record of a strong-reader pair and are not repeated. Which model is the standing second family beside Luna remains open under R-R1.
+- **R-R2 The Sonnet tension.** "Sonnet might be usefully employed." Sonnet is admitted as a reader in this research lane; the batch-review lane's 2026-07-07 floor stands. What remains open is only which lane uses which model, recorded under R-R1.
+
 Open for JB:
 
-- **R-R1 Model ids for the readers** (extends R-A9). The pilot ran Opus 5 (`claude --model opus`, reported `claude-opus-5`) and GPT-5.6 Sol. Which two families are the standing strong readers, and is Luna or GLM-5.3-Flash the cheap first reader on the slice? Note the CLI on a ChatGPT plan refuses plain `gpt-5.6`, and JB's Codex default is now `gpt-6-astra`.
+- **R-R1 Model ids for the readers** (extends R-A9; Luna admitted and Sol excluded above). The pilot ran Opus 5 (`claude --model opus`, reported `claude-opus-5`) and GPT-5.6 Sol. Which two families are the standing strong readers, and is Luna or GLM-5.3-Flash the cheap first reader on the slice? Note the CLI on a ChatGPT plan refuses plain `gpt-5.6`, and JB's Codex default is now `gpt-6-astra`.
 - **R-R2 The Sonnet tension.** `convex/claudeReviews.ts` carries the 2026-07-07 rule "never Haiku, Sonnet is the floor" and runs `claude-sonnet-5` for source checks and synthesis; the 2026-09-04 ruling says "stay away from Sonnet" for the screening lane. Both stand today for different lanes. Does the batch-review lane keep Sonnet, move to Opus, or move to the Luna class? Not resolved here.
 - **R-R3 Reader count** (extends R-A13). Two readers with every disagreement escalated (the pilot), or three with majority on agreed claims and escalation only on three-way splits? Recommendation: two strong readers for tasks and the estimation sample, a cheap pair on the slice, and a third reader only where the pair disagrees.
 - **R-R4 Allowlist nz-v1.** The domains in `fixtures/allowlist-nz-v1.json`, the church-website rule, and the never list. Recommendation: adopt as v1; add a domain only with its licence line.
