@@ -645,11 +645,13 @@
             },
             "started_at": {
               "type": "string",
-              "maxLength": 8000
+              "maxLength": 40,
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|\\+00:00)$"
             },
             "ended_at": {
               "type": "string",
-              "maxLength": 8000
+              "maxLength": 40,
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|\\+00:00)$"
             },
             "duration_s": {
               "type": [

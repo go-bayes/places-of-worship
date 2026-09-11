@@ -21,6 +21,23 @@ def fixture():
 
 
 class IntakeTest(unittest.TestCase):
+    def test_shared_review_regressions(self):
+        cases = json.loads((HERE / 'fixtures/intake-regressions.json').read_text())
+        for case in cases:
+            with self.subTest(case=case['name']):
+                b = fixture()
+                for pointer, value in case['changes']:
+                    parts = pointer.strip('/').split('/')
+                    parent = b
+                    for key in parts[:-1]:
+                        parent = parent[int(key)] if isinstance(parent, list) else parent[key]
+                    parent[parts[-1]] = value
+                try:
+                    errors = intake.validate_bundle(intake.parse_json(json.dumps(b)))
+                except ValueError as exc:
+                    errors = [str(exc)]
+                self.assertEqual(not errors, case['valid'], errors)
+
     def test_complete_fixture(self):
         self.assertEqual(intake.validate_bundle(fixture()), [])
 

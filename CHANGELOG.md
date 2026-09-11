@@ -4,6 +4,8 @@
 
 ### 2026-09-11
 
+- Repaired draft-specific advisory review selection, shared batch-disposition rules, OSM task identifiers, and provisionally closed batch acceptance. Versioned snapshot-linked decision hashes and aligned intake validation across Python, TypeScript, and Rust with shared regression cases.
+
 - Added a bounded internal Claude/Codex research-and-review runner, strict JSON ingestion, provisional review receipts, and human batch review operations. Added hostile-input regression tests and a Rust validation entry point. The pilot preserves human evidence acceptance and governed export authority; see `docs/development/internal-agent-review.md`.
 
 - Added the agent research pilot with versioned dossiers, researcher adapters, and mechanical source and agreement checks. Corrected unresolved-locator accounting, event-date comparisons, competing-claim handling, and OSM identity verification. Validator HTTP requests pin public DNS addresses and recheck redirects. Preserved the original pilot outputs with a correction notice, aligned the proposed handoff with PI batch release, and added regression tests to CI. Model quality and production operation remain unevaluated.

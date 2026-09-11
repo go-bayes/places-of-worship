@@ -466,6 +466,7 @@ export default defineSchema({
     created_at: v.number(),
     updated_at: v.number(),
     decision_hash: v.optional(v.string()),
+    decision_hash_version: v.optional(v.literal(1)),
     review_snapshot_hash: v.optional(v.string()),
   })
     .index("by_review_decision_id", ["review_decision_id"])

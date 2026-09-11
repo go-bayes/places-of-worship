@@ -1,0 +1,141 @@
+[
+  {
+    "name": "unchanged bundle",
+    "valid": true,
+    "changes": []
+  },
+  {
+    "name": "empty URL userinfo",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://@example.org/history"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://@example.org/history"
+      ]
+    ]
+  },
+  {
+    "name": "NZ international phone",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "Contact the parish on +64 21 123 4567"
+      ]
+    ]
+  },
+  {
+    "name": "NZ domestic phone",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "Contact the parish on 021 123 4567"
+      ]
+    ]
+  },
+  {
+    "name": "historical years are not phones",
+    "valid": true,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "active 1900-1950 2013"
+      ]
+    ]
+  },
+  {
+    "name": "terminal escape in value",
+    "valid": false,
+    "changes": [
+      [
+        "/review/reasoning",
+        "hostile \u001b[2J"
+      ]
+    ]
+  },
+  {
+    "name": "terminal escape in key",
+    "valid": false,
+    "changes": [
+      [
+        "/\u001b[2J\u001b[H",
+        "hostile"
+      ]
+    ]
+  },
+  {
+    "name": "hash trailing newline",
+    "valid": false,
+    "changes": [
+      [
+        "/submission_key",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
+      ]
+    ]
+  },
+  {
+    "name": "place reference trailing newline",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/place/place_ref",
+        "osm:way/1\n"
+      ]
+    ]
+  },
+  {
+    "name": "source datetime",
+    "valid": true,
+    "changes": [
+      [
+        "/dossier/claims/0/source/source_date",
+        "2019-05-03T00:00:00Z"
+      ]
+    ]
+  },
+  {
+    "name": "source invalid day",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/source_date",
+        "2019-02-30T00:00:00Z"
+      ]
+    ]
+  },
+  {
+    "name": "manifest date without time",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/run_manifest/started_at",
+        "2026-09-09"
+      ]
+    ]
+  },
+  {
+    "name": "manifest reversed times",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/run_manifest/ended_at",
+        "2000-01-01T00:00:00Z"
+      ]
+    ]
+  },
+  {
+    "name": "manifest invalid calendar",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/run_manifest/started_at",
+        "2026-02-30T00:00:00Z"
+      ]
+    ]
+  }
+]

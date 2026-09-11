@@ -445,7 +445,7 @@ fn print_agent_validation_text(report: &AgentValidationReport) {
     } else {
         println!("pow validate-agent: invalid provisional bundle");
         for error in &report.errors {
-            println!("- {error}");
+            println!("- {}", terminal_safe(error));
         }
     }
 }
@@ -525,15 +525,12 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
                     claim_locators.insert(claim_id.to_owned(), locator.to_owned());
                 }
             }
-            validate_partial_date(
-                source.get("source_date"),
-                &format!("{path}/source/source_date"),
-                errors,
-            );
-            if let Some(retrieved_at) = source.get("retrieved_at").and_then(Value::as_str) {
-                let date = retrieved_at.split('T').next().unwrap_or(retrieved_at);
-                if parse_partial_date(date).is_none() {
-                    errors.push(format!("{path}/source/retrieved_at: invalid calendar date"));
+            for field in ["source_date", "retrieved_at"] {
+                if let Some(value) = source.get(field).and_then(Value::as_str)
+                    && !value.is_empty()
+                    && parse_partial_date(value.split('T').next().unwrap_or(value)).is_none()
+                {
+                    errors.push(format!("{path}/source/{field}: invalid calendar date"));
                 }
             }
         }
@@ -854,30 +851,13 @@ fn contains_email(text: &str) -> bool {
     })
 }
 
+// detect the same NZ phone forms as the Python and TypeScript intake gates.
 fn contains_nz_phone(text: &str) -> bool {
-    let characters: Vec<char> = text.chars().collect();
-    for (index, character) in characters.iter().enumerate() {
-        if *character != '0' && *character != '+' {
-            continue;
-        }
-        let mut digits = String::new();
-        let mut cursor = index;
-        while cursor < characters.len()
-            && (characters[cursor].is_ascii_digit()
-                || matches!(characters[cursor], '+' | ' ' | '-'))
-        {
-            if characters[cursor].is_ascii_digit() {
-                digits.push(characters[cursor]);
-            }
-            cursor += 1;
-        }
-        if (digits.starts_with("+64") || digits.starts_with('0'))
-            && (9..=11).contains(&digits.len())
-        {
-            return true;
-        }
-    }
-    false
+    static PHONE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+        regex::Regex::new(r"(?:\+64|\b0)[\s-]?[0-9]{1,2}[\s-]?[0-9]{3,4}[\s-]?[0-9]{3,5}\b")
+            .expect("valid phone expression")
+    });
+    PHONE.is_match(text)
 }
 
 fn contains_honorific_name(text: &str) -> bool {
@@ -1079,6 +1059,31 @@ fn parse_numeric_component(value: &str) -> Option<u32> {
     }
 }
 
+// reject decoded C0 controls in strings and keys, allowing JSON prose whitespace.
+fn reject_json_controls<E: de::Error>(value: &str) -> std::result::Result<(), E> {
+    if value
+        .chars()
+        .any(|c| c < ' ' && !matches!(c, '\n' | '\r' | '\t'))
+    {
+        return Err(E::custom("control character in JSON text"));
+    }
+    Ok(())
+}
+
+// escape control characters before emitting validation errors to an operator terminal.
+fn terminal_safe(value: &str) -> String {
+    value
+        .chars()
+        .flat_map(|c| {
+            if c.is_control() {
+                c.escape_default().collect::<Vec<_>>()
+            } else {
+                vec![c]
+            }
+        })
+        .collect()
+}
+
 struct StrictJsonSeed {
     depth: usize,
 }
@@ -1166,6 +1171,7 @@ impl<'de> Visitor<'de> for StrictJsonVisitor {
     where
         E: de::Error,
     {
+        reject_json_controls::<E>(value)?;
         Ok(Value::String(value.to_owned()))
     }
 
@@ -1173,6 +1179,7 @@ impl<'de> Visitor<'de> for StrictJsonVisitor {
     where
         E: de::Error,
     {
+        reject_json_controls::<E>(&value)?;
         Ok(Value::String(value))
     }
 
@@ -1209,6 +1216,7 @@ impl<'de> Visitor<'de> for StrictJsonVisitor {
     {
         let mut values = serde_json::Map::new();
         while let Some(key) = map.next_key::<String>()? {
+            reject_json_controls::<A::Error>(&key)?;
             if matches!(key.as_str(), "__proto__" | "prototype" | "constructor") {
                 return Err(de::Error::custom(format!(
                     "forbidden JSON object key {key:?}"
@@ -5028,6 +5036,49 @@ mod tests {
             nested.push(']');
         }
         assert!(parse_strict_json(nested.as_bytes()).is_err());
+    }
+
+    #[test]
+    fn shared_agent_review_regressions() {
+        let root = repo_root_path();
+        let fixtures = root.join("scripts/agent_research/fixtures");
+        let cases: Value =
+            serde_json::from_slice(&fs::read(fixtures.join("intake-regressions.json")).unwrap())
+                .unwrap();
+        for case in cases.as_array().unwrap() {
+            let mut bundle: Value = serde_json::from_slice(
+                &fs::read(fixtures.join("internal-review-bundle.json")).unwrap(),
+            )
+            .unwrap();
+            for change in case["changes"].as_array().unwrap() {
+                let pointer = change[0].as_str().unwrap();
+                if let Some(target) = bundle.pointer_mut(pointer) {
+                    *target = change[1].clone();
+                } else {
+                    bundle
+                        .as_object_mut()
+                        .unwrap()
+                        .insert(pointer[1..].to_owned(), change[1].clone());
+                }
+            }
+            let path = temp_db_path("agent-review-regression");
+            fs::write(&path, serde_json::to_vec(&bundle).unwrap()).unwrap();
+            let report = validate_agent(ValidateAgentArgs {
+                input: path.clone(),
+                schema: root.join("scripts/agent_research/schemas/agent-review-bundle.v1.json"),
+                report: ReportFormat::Json,
+            })
+            .unwrap();
+            fs::remove_file(path).unwrap();
+            assert_eq!(
+                report.valid,
+                case["valid"].as_bool().unwrap(),
+                "{}: {:?}",
+                case["name"],
+                report.errors
+            );
+        }
+        assert_eq!(terminal_safe("bad\u{1b}[2J\rnext"), r"bad\u{1b}[2J\rnext");
     }
 
     #[test]

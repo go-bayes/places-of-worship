@@ -1,8 +1,9 @@
 import { v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { requireUser } from "./lib/auth";
+import { applyReviewDecision } from "./reviews";
 import { appendTaskEvent } from "./lib/taskEvents";
-import { canonicalJson, sha256 } from "./lib/sha256";
+import { sha256 } from "./lib/sha256";
 import { assertNoDuplicateJsonKeys, validateAgentReviewBundle } from "./lib/agentIntake";
 
 declare const process: { env: Record<string, string | undefined> };
@@ -43,13 +44,14 @@ export const ingestBundle = internalMutation({
     const receiptId = `${taskId}:receipt`;
     const dossier = checked.bundle.dossier;
     const firstClaim = dossier.claims[0];
+    const osm = /^osm:(node|way|relation)\/([0-9]+)$/.exec(dossier.place.place_ref);
     const location = dossier.candidate_location;
     const latitude = location.latitude ?? dossier.place.seed_latitude;
     const longitude = location.longitude ?? dossier.place.seed_longitude;
     const summary = dossier.claims.map((claim: any) => `${claim.claim_type}: ${claim.value} [${claim.source.locator}]`).join("\n").slice(0, 8000);
     await ctx.db.insert("tasks", {
       task_id: taskId, batch_id: "internal-agent-research", country_code: "NZ", task_type: "other", priority: "medium", status: "needs_review", target_years: [2013, 2018, 2023], name: dossier.place.name,
-      source_record_id: dossier.place.place_ref, matched_osm_id: dossier.place.place_ref.startsWith("osm:") ? dossier.place.place_ref : undefined,
+      source_record_id: dossier.place.place_ref, matched_osm_id: osm?.[2], osm_object_type: osm?.[1] as "node" | "way" | "relation" | undefined,
       geometry: { type: "Point", coordinates: [longitude, latitude] }, task_brief: "Internal agent research dossier awaiting human review; provisional only.",
       source_context: { origin: "internal_agent_research", bundle_hash: args.bundleHash, submission_key: checked.bundle.submission_key }, intake_submission_key: checked.bundle.submission_key,
       created_at: now, updated_at: now, last_event_at: now,
@@ -110,7 +112,7 @@ export const batchDisposeReceipts = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["reviewer", "curator", "admin"]);
     if (args.items.length === 0 || args.items.length > 20) throw new Error("Batch must contain 1 to 20 receipts.");
-    if (args.note.trim().length === 0 || args.note.length > 2048) throw new Error("A bounded disposition note is required.");
+    if (args.note.trim().length < 8 || args.note.length > 2048) throw new Error("A bounded disposition note is required.");
     const seen = new Set<string>();
     const rows: Array<{ receipt: any; task: any; draft: any }> = [];
     for (const item of args.items) {
@@ -125,16 +127,12 @@ export const batchDisposeReceipts = mutation({
       if (draft.created_by === user._id) throw new Error("The intake service author cannot review its own draft.");
       rows.push({ receipt, task, draft });
     }
-    const now = Date.now(); const decisionStatus: "rejected" | "needs_more_evidence" = args.outcome === "reject" ? "rejected" : "needs_more_evidence";
     for (const row of rows) {
-      const decisionId = `${row.task.task_id}:review:${now}:${user._id}`;
-      const record = { review_decision_id: decisionId, task_id: row.task.task_id, evidence_draft_id: row.draft.evidence_draft_id, reviewer_user_id: user._id, decision_status: decisionStatus, decision_note: args.note.trim(), target_year_affects: [], created_at: now, updated_at: now };
-      const decisionHash = sha256(canonicalJson({ ...record, reviewer_user_id: String(user._id) }));
-      await ctx.db.insert("review_decisions", { ...record, decision_hash: decisionHash });
-      const newStatus = args.outcome === "reject" ? "reviewed" : "changes_requested";
-      await ctx.db.patch(row.task._id, { status: newStatus, updated_at: now, last_event_at: now });
-      await ctx.db.patch(row.draft._id, { draft_status: args.outcome === "reject" ? "rejected" : "submitted", updated_at: now });
-      await appendTaskEvent(ctx, { taskId: row.task.task_id, eventType: args.outcome === "reject" ? "review_decided" : "changes_requested", actorUserId: user._id, actorRole: user.roles.includes("admin") ? "admin" : user.roles.includes("curator") ? "curator" : "reviewer", previousStatus: "needs_review", newStatus, reason: args.note.trim(), evidenceDraftId: row.draft.evidence_draft_id, reviewDecisionId: decisionId });
+      await applyReviewDecision(ctx, { taskId: row.task.task_id, decision: {
+        evidence_draft_id: row.draft.evidence_draft_id,
+        decision_status: args.outcome === "reject" ? "rejected" : "needs_more_evidence",
+        decision_note: args.note.trim(),
+      } }, user);
     }
     return { count: rows.length };
   },

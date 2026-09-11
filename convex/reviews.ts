@@ -81,12 +81,12 @@ async function latestDraftForReview(ctx: any, taskId: string): Promise<Doc<"evid
     ?? null;
 }
 
-// newest Claude batch-review artifact for the task, if any: advisory
-// context for the reviewer, never a decision input the server acts on
-async function latestAgentReview(ctx: any, taskId: string): Promise<Doc<"agent_reviews"> | null> {
+// return the newest advisory review for the draft currently under review.
+async function latestAgentReview(ctx: any, draftId: string | undefined): Promise<Doc<"agent_reviews"> | null> {
+  if (draftId === undefined) return null;
   const artifacts = await ctx.db
     .query("agent_reviews")
-    .withIndex("by_task", (q: any) => q.eq("task_id", taskId))
+    .withIndex("by_draft", (q: any) => q.eq("evidence_draft_id", draftId))
     .order("desc")
     .take(1);
   return artifacts[0] ?? null;
@@ -157,7 +157,7 @@ export const listReviewQueue = query({
     for (const task of tasks) {
       const latestDraft = await latestDraftForReview(ctx, task.task_id);
       const latestReview = await latestReviewDecision(ctx, task.task_id);
-      const agentReview = await latestAgentReview(ctx, task.task_id);
+      const agentReview = await latestAgentReview(ctx, latestDraft?.evidence_draft_id);
       rows.push({
         task,
         latestDraft,
@@ -252,7 +252,8 @@ export const feedbackLoopMetrics = query({
   },
 });
 
-async function applyReviewDecision(ctx: MutationCtx, args: { taskId: string; decision: any; snapshotHash?: string }, user: Doc<"users">) {
+// apply shared human decision rules to an individual or batch item.
+export async function applyReviewDecision(ctx: MutationCtx, args: { taskId: string; decision: any; snapshotHash?: string }, user: Doc<"users">) {
     const task = await getTaskOrThrow(ctx, args.taskId);
     if (!REVIEW_OPEN_STATUSES.has(task.status)) throw new Error("Task is not open for review; reopen or return it through the workflow first.");
     const draft = await getDraft(ctx, args.decision.evidence_draft_id);
@@ -348,6 +349,7 @@ async function applyReviewDecision(ctx: MutationCtx, args: { taskId: string; dec
       agent_review_id: args.decision.agent_review_id,
       agent_review_agreement: args.decision.agent_review_agreement,
       review_snapshot_hash: args.snapshotHash,
+      decision_hash_version: args.snapshotHash === undefined ? undefined : 1 as const,
       created_at: now,
       updated_at: now,
     };
@@ -357,7 +359,8 @@ async function applyReviewDecision(ctx: MutationCtx, args: { taskId: string; dec
     // rows before 2026-09-07 still reproduce), target_year_affects,
     // required_follow_up, agent_review_id, agent_review_agreement,
     // created_at, and updated_at; recomputing the hash from the stored
-    // row must reproduce it
+    // row must reproduce it. Snapshot-linked decisions use the named v1
+    // envelope below; decisions without a snapshot retain version 0.
     const hashInput = {
       review_decision_id: reviewDecisionRecord.review_decision_id,
       task_id: reviewDecisionRecord.task_id,
@@ -372,11 +375,14 @@ async function applyReviewDecision(ctx: MutationCtx, args: { taskId: string; dec
       required_follow_up: reviewDecisionRecord.required_follow_up,
       agent_review_id: reviewDecisionRecord.agent_review_id,
       agent_review_agreement: reviewDecisionRecord.agent_review_agreement,
-      review_snapshot_hash: reviewDecisionRecord.review_snapshot_hash,
       created_at: reviewDecisionRecord.created_at,
       updated_at: reviewDecisionRecord.updated_at,
     };
-    const decisionHash = sha256(canonicalJson(hashInput));
+    const decisionHash = sha256(canonicalJson(args.snapshotHash === undefined ? hashInput : {
+      schema_version: "review-decision.v1",
+      decision: hashInput,
+      review_snapshot_hash: args.snapshotHash,
+    }));
 
     await ctx.db.insert("review_decisions", {
       ...reviewDecisionRecord,
@@ -480,7 +486,7 @@ export const batchRecordReviewDecisions = mutation({
       if (item.decision.evidence_draft_id !== item.evidence_draft_id) throw new Error("Decision draft does not match snapshot draft.");
       const row = await reviewSnapshot(ctx, item.task_id, item.evidence_draft_id);
       if (row.hash !== item.snapshot_hash) throw new Error(`Review snapshot is stale for ${item.task_id}.`);
-      if (row.task.status !== "needs_review" && row.task.status !== "unresolved_note" && row.task.status !== "changes_requested") throw new Error(`Task ${item.task_id} is not open for review.`);
+      if (!REVIEW_OPEN_STATUSES.has(row.task.status)) throw new Error(`Task ${item.task_id} is not open for review.`);
       if (row.draft.draft_status !== "submitted" && row.draft.draft_status !== "unresolved_note") throw new Error(`Draft ${item.evidence_draft_id} is not submitted.`);
       if (row.draft.agent_intake_only === true) throw new Error("Internal agent intake drafts require ordinary human evidence submission before acceptance for export.");
       const snapshotJson = canonicalJson(row.snapshot);

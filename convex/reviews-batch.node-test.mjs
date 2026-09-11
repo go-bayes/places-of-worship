@@ -94,3 +94,20 @@ test("individual decisions cannot bypass closed-task lifecycle gates", async () 
     assert.equal(ctx.task.status, status);
   }
 });
+
+const { canonicalJson, sha256 } = await import("./lib/sha256.ts");
+
+test("batch and individual decisions accept provisionally closed tasks with reproducible versioned hashes", async () => {
+  for (const batch of [false, true]) {
+    const ctx = context(); ctx.task.status = "provisionally_closed";
+    const snapshot = await getReviewSnapshot._handler(ctx, {taskId: "task_1", evidenceDraftId: "draft_1"});
+    if (batch) await batchRecordReviewDecisions._handler(ctx, {items: [item(snapshot.snapshot_hash)]});
+    else await recordReviewDecision._handler(ctx, {taskId: "task_1", decision: item(snapshot.snapshot_hash).decision});
+    const row = ctx.rows.review_decisions[0];
+    const {decision_hash, decision_hash_version, review_snapshot_hash, ...decision} = row;
+    const input = batch ? {schema_version: "review-decision.v1", decision, review_snapshot_hash} : decision;
+    assert.equal(decision_hash_version, batch ? 1 : undefined);
+    assert.equal(decision_hash, sha256(canonicalJson(input)));
+    assert.equal(ctx.task.status, "reviewed");
+  }
+});

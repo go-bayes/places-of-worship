@@ -77,3 +77,18 @@ test("duplicate-key scanner distinguishes array strings from keys", () => {
   assert.doesNotThrow(() => assertNoDuplicateJsonKeys('{"x":["same","same"],"y":{"x":"same"}}'));
   assert.throws(() => assertNoDuplicateJsonKeys('{"x":1,"\\u0078":2}'));
 });
+
+const regressions = JSON.parse(fs.readFileSync(new URL("../../scripts/agent_research/fixtures/intake-regressions.json", import.meta.url), "utf8"));
+for (const row of regressions) {
+  test(`shared review regression: ${row.name}`, () => {
+    const value = bundle();
+    for (const [pointer, replacement] of row.changes) {
+      const keys = pointer.slice(1).split("/");
+      const parent = keys.slice(0, -1).reduce((obj, key) => obj[key], value);
+      parent[keys.at(-1)] = replacement;
+    }
+    const validate = () => validateAgentReviewBundle(value, JSON.stringify(value));
+    if (row.valid) assert.doesNotThrow(validate);
+    else assert.throws(validate);
+  });
+}

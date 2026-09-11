@@ -93,6 +93,7 @@ function dateBounds(value: string): [string, string] {
 // intake never fetches URLs; reject credentials and non-public literal destinations.
 function publicUrl(value: string): void {
   if (/[\s\\\u007f]/.test(value)) throw new Error("invalid public HTTP(S) URL");
+  if (/^[^:]+:\/\/[^/?#]*@/.test(value)) throw new Error("invalid public HTTP(S) URL");
   let url: URL;
   try { url = new URL(value); } catch { throw new Error("invalid public HTTP(S) URL"); }
   const host = url.hostname.toLowerCase().replace(/\.$/, "");
@@ -120,6 +121,9 @@ export function validateAgentReviewBundle(value: unknown, bundleJson: string): {
     if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) throw new Error("invalid run timestamp");
   }
   if (d.run_manifest.backend !== bundle.research_run.backend || d.run_manifest.model_id_requested !== bundle.research_run.model_requested || d.run_manifest.exit_status !== "completed") throw new Error("inconsistent dossier run provenance");
+  dateBounds(d.run_manifest.started_at.split("T")[0]); dateBounds(d.run_manifest.ended_at.split("T")[0]);
+  const manifestStart = Date.parse(d.run_manifest.started_at), manifestEnd = Date.parse(d.run_manifest.ended_at);
+  if (!Number.isFinite(manifestStart) || !Number.isFinite(manifestEnd) || manifestEnd < manifestStart) throw new Error("invalid dossier run timestamp");
   const locators = new Map<string, string>();
   for (const claim of d.claims) {
     if (locators.has(claim.claim_id)) throw new Error("duplicate claim ID");

@@ -103,7 +103,7 @@ def schema_errors(value, schema, root=None, path='$'):
     if isinstance(value, str):
         if len(value) < schema.get('minLength', 0) or len(value) > schema.get('maxLength', MAX_BYTES):
             errors.append(f'{path}: invalid string length')
-        if 'pattern' in schema and re.search(schema['pattern'], value) is None:
+        if 'pattern' in schema and re.search(schema['pattern'].removesuffix('$') + (r'\Z' if schema['pattern'].endswith('$') else ''), value) is None:
             errors.append(f'{path}: invalid string pattern')
     if isinstance(value, (float, int)) and not isinstance(value, bool):
         if not math.isfinite(value) or value < schema.get('minimum', -math.inf) or value > schema.get('maximum', math.inf):
@@ -180,6 +180,11 @@ def validate_dossier(dossier):
         errors.append('unsupported researcher model')
     if run.get('exit_status') != 'completed':
         errors.append('research attempt was not completed')
+    try:
+        if datetime.fromisoformat(run['ended_at']) < datetime.fromisoformat(run['started_at']):
+            errors.append('dossier run timestamps are reversed')
+    except ValueError:
+        errors.append('invalid dossier run timestamp')
     ids = set()
     for claim in dossier['claims']:
         cid = claim['claim_id']
