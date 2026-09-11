@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-11
+
+- Defined the content-addressed review design with immutable submitted evidence, reviewer acceptance, a transparent export queue with return to review, and explicit PI batch release before governed `pow` processing. Frozen files retain their hashes; withdrawal and supersession retain the audit history. The design replaces per-item PI acceptance with batch release when implemented. Live workflow behaviour remains unchanged. See `docs/development/content-addressed-review.md`.
+
 ### 2026-09-09
 
 - Corrected occupancy supersession across export batches and accepted revision chains in `scripts/build_occupancy_dated_places.py`. An accepted revision with accepted occupancy rows replaces the source task’s whole accepted set, including inherited periods reached through accepted intermediate revisions that recorded no periods. An unaccepted intermediate revision stops traversal; a recording-free revision alone retires no set. The summary reports `superseded_by_revision_dropped` per country. Whole-set replacement can remove omitted periods and other contributors’ accepted rows, beyond the existing within-task replacement of an author’s own set. Regression tests cover both accepted and unaccepted intermediate links and partition-independent replacement.

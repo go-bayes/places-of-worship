@@ -6,11 +6,14 @@ Portal hub: `docs/portal-data-entry-plan.md`.
 
 Related designs:
 
+- `docs/development/content-addressed-review.md`
 - `docs/portal-database-storage-plan.md`
 - `docs/portal-submission-review-plan.md`
 - `docs/portal-auth-security-plan.md`
 - `docs/community-ingestion-api-plan.md`
 - `docs/master-verification-workflow-plan.md`
+
+The [content-addressed review contract](development/content-addressed-review.md) records the approved 2026-09-11 design: reviewer acceptance into a transparent export queue, return to review, and explicit PI batch release before governed `pow` processing. Implementation is pending; the live per-item PI acceptance gate remains in force.
 
 ## Purpose
 
