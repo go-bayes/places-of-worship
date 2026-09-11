@@ -1,0 +1,433 @@
+{
+  "schema_version": "agent-dossier.v1",
+  "dossier_id": "osm:way/641756448:claude:opus:researcher.v1:pilot-2026-09-10",
+  "place": {
+    "place_ref": "osm:way/641756448",
+    "name": "St Columba's Anglican Church - Hawarden",
+    "country_code": "NZ",
+    "seed_latitude": -42.88326044,
+    "seed_longitude": 172.6347767,
+    "seed_source": "nz_places.geojson (overpass extract 2025-08-20)",
+    "seed_tags": {
+      "amenity": "place_of_worship",
+      "religion": "christian",
+      "denomination": "anglican"
+    }
+  },
+  "candidate_location": {
+    "latitude": -42.88326,
+    "longitude": 172.634777,
+    "basis": "osm_object",
+    "basis_note": "Seed coordinate of OSM way 641756448, a closed four-node building footprint (nodes 6043146391–6043146394) tagged amenity=place_of_worship with an address at the corner of Horsley Down Road and Medbury Road (952 Medbury Road), Hawarden 7385. The architect's pages place the church and hall in the 'small township of Horsley Downs' and give the project location as 'Hawarden'. That fits the corner of Horsley Down Road and Medbury Road, north of Hawarden township. The site holds both the church and a 1955 hall. Without imagery I cannot confirm that the OSM footprint is the church rather than the hall, so the radius covers both buildings.",
+    "uncertainty_radius_m": 40,
+    "address": "Corner of Horsley Down Road and Medbury Road (952 Medbury Road), Horsley Down, Hawarden 7385, Hurunui District"
+  },
+  "claims": [
+    {
+      "claim_id": "osm:way/641756448:claude:c01",
+      "claim_type": "name",
+      "value": "St Columba's Anglican Church - Hawarden",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.openstreetmap.org/way/641756448/history",
+        "source_name": "OpenStreetMap way 641756448 history",
+        "source_type": "osm",
+        "source_date": "2024-12-07",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "name: St Columba's Anglican Church - Hawarden",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "This name has appeared in OSM since version 1 (2018). The architect's pages call the building 'St Columba's Church' and 'St Columba's Hall', which supports the dedication to St Columba."
+    },
+    {
+      "claim_id": "osm:way/641756448:claude:c02",
+      "claim_type": "name",
+      "value": "St Columba's Church (church); St Columba's Hall (parish hall on the same site)",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.barryconnordesign.co.nz/stcolumba-schurch",
+        "source_name": "Barry Connor Design, 'St Columba's Church Home' project page",
+        "source_type": "other",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "This upcoming project will see the original St Columba's Church carefully transformed into a unique three-bedroom family home.",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "This page does not give a location. I link it to Horsley Down/Hawarden through the companion hall page by the same firm, which names Horsley Downs and Hawarden and refers to 'the main church renovation'."
+    },
+    {
+      "claim_id": "osm:way/641756448:claude:c03",
+      "claim_type": "address",
+      "value": "Corner of Horsley Down Road and Medbury Road; 952 Medbury Road; Hawarden 7385; Hurunui District",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.openstreetmap.org/way/641756448/history",
+        "source_name": "OpenStreetMap way 641756448 history",
+        "source_type": "osm",
+        "source_date": "2024-12-07",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "addr:street: Horsley Down Road & Medbury Road",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "Other OSM tags: addr:housenumber=Corner, addr:housenumber_1=952, addr:street_1=Medbury Road, addr:city=Hawarden, addr:postcode=7385, addr:district=Hurunui. No non-OSM source I opened gives a street address."
+    },
+    {
+      "claim_id": "osm:way/641756448:claude:c04",
+      "claim_type": "location",
+      "value": "Church and hall stand in the rural township of Horsley Down(s), near Hawarden, North Canterbury",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.barryconnordesign.co.nz/st-columbas-hall",
+        "source_name": "Barry Connor Design, 'St Columba's Hall' project page",
+        "source_type": "other",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Nestled into a leafy rural garden plot in the small township of Horsley Downs",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The page's project location field reads 'Hawarden'. This agrees with the OSM address at Horsley Down Road / Medbury Road. The identity of this site with the OSM object is my own inference from name, denomination and locality."
+    },
+    {
+      "claim_id": "osm:way/641756448:claude:c05",
+      "claim_type": "religion",
+      "value": "christian",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.openstreetmap.org/way/641756448/history",
+        "source_name": "OpenStreetMap way 641756448 history",
+        "source_type": "osm",
+        "source_date": "2024-12-07",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "religion: christian",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": ""
+    },
+    {
+      "claim_id": "osm:way/641756448:claude:c06",
+      "claim_type": "denomination",
+      "value": "anglican",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.openstreetmap.org/way/641756448/history",
+        "source_name": "OpenStreetMap way 641756448 history",
+        "source_type": "osm",
+        "source_date": "2024-12-07",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "denomination: anglican",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The architect's hall page, in the form the fetch tool returned it, also calls the site 'the Anglican church and parish hall'. That wording reached me paraphrased, so I have not quoted it."
+    },
+    {
+      "claim_id": "osm:way/641756448:claude:c07",
+      "claim_type": "start_date",
+      "value": "1905",
+      "date_start": "1905",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.openstreetmap.org/way/641756448/history",
+        "source_name": "OpenStreetMap way 641756448 history",
+        "source_type": "osm",
+        "source_date": "2018-11-07",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "start_date: 1905",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "low",
+      "note": "The tag does not say whether 1905 marks the building, the opening or the start of worship. I found no corroboration: two Papers Past searches returned no readable results. Treat this as a lead for the church's building or opening date."
+    },
+    {
+      "claim_id": "osm:way/641756448:claude:c08",
+      "claim_type": "building_date",
+      "value": "Parish hall (St Columba's Hall) built 1955; this is not the church building",
+      "date_start": "1955",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.barryconnordesign.co.nz/st-columbas-hall",
+        "source_name": "Barry Connor Design, 'St Columba's Hall' project page",
+        "source_type": "other",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "constructed in 1955",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "According to the page, the hall served as a Sunday school room and local parish hall. I found no building date for the church itself; the OSM start_date of 1905 is the only lead."
+    },
+    {
+      "claim_id": "osm:way/641756448:claude:c09",
+      "claim_type": "land_or_consecration",
+      "value": "Church and hall deconsecrated in 2011",
+      "date_start": "2011",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.barryconnordesign.co.nz/st-columbas-hall",
+        "source_name": "Barry Connor Design, 'St Columba's Hall' project page",
+        "source_type": "other",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "The church and hall were deconsecrated in 2011",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "This comes from the private architectural firm that renovated the building, not from the Anglican Diocese of Christchurch. It needs diocesan or contemporary newspaper corroboration."
+    },
+    {
+      "claim_id": "osm:way/641756448:claude:c10",
+      "claim_type": "worship_ended",
+      "value": "Anglican worship ended by 2011, when the church was deconsecrated",
+      "date_start": null,
+      "date_end": "2011",
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.barryconnordesign.co.nz/st-columbas-hall",
+        "source_name": "Barry Connor Design, 'St Columba's Hall' project page",
+        "source_type": "other",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "The church and hall were deconsecrated in 2011",
+      "evidential_weight": "inferred",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "I infer that worship ended from the deconsecration. The date of the final service was not found; it may have been earlier than 2011."
+    },
+    {
+      "claim_id": "osm:way/641756448:claude:c11",
+      "claim_type": "sale_or_disposal",
+      "value": "Site bought by private owners in 2019",
+      "date_start": "2019",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.barryconnordesign.co.nz/st-columbas-hall",
+        "source_name": "Barry Connor Design, 'St Columba's Hall' project page",
+        "source_type": "other",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "The current owners purchased the site in 2019",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The owners are not named here, in line with the privacy rule. The page says they renovated the hall so that they could live on site while the main church was renovated."
+    },
+    {
+      "claim_id": "osm:way/641756448:claude:c12",
+      "claim_type": "renovation",
+      "value": "Hall converted to a residence; church planned to become a three-bedroom family home, with a mezzanine master suite above the former altar",
+      "date_start": "2019",
+      "date_end": null,
+      "date_precision": "approximate",
+      "source": {
+        "locator": "https://www.barryconnordesign.co.nz/stcolumba-schurch",
+        "source_name": "Barry Connor Design, 'St Columba's Church Home' project page",
+        "source_type": "other",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "One of the key features of the design is the new master suite, located on a mezzanine floor above the former altar.",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The church conversion is described as an 'upcoming project'. The page is undated, so I cannot tell whether the work has been done. The hall conversion (completed, with an ADNZ Highly Commended award) is on the companion page."
+    },
+    {
+      "claim_id": "osm:way/641756448:claude:c13",
+      "claim_type": "osm_object_version",
+      "value": "Version 2 of way 641756448 still tags the building amenity=place_of_worship, religion=christian, denomination=anglican, and keeps a contact phone tag",
+      "date_start": "2024-12-07",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/641756448/history",
+        "source_name": "OpenStreetMap API way history",
+        "source_type": "osm",
+        "source_date": "2024-12-07",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Read from the API XML (version 2, changeset 160015648, timestamp 2024-12-07T04:46:30Z). No verbatim quote because the fetch tool summarised the XML rather than reproducing it."
+    }
+  ],
+  "status_assessment": {
+    "current_status": "inactive",
+    "basis": "The architectural firm that renovated the site states that the church and hall were deconsecrated in 2011 and that the current owners bought the site in 2019. It says the hall has been converted to a residence and the church is to become a three-bedroom family home. No source I opened shows worship after 2011. This rests on one secondary source (the architect's project pages), which is internally consistent. Diocesan or newspaper confirmation of the deconsecration is still needed.",
+    "asof_date": "2026-09-10",
+    "supporting_claim_ids": [],
+    "osm_stale": true,
+    "osm_stale_basis": "The current OSM version (v2, 2024-12-07) still tags the way amenity=place_of_worship with religion and denomination, a contact phone number and a church name. The 2024 edit changed only the phone format. By the architect's account the site was deconsecrated in 2011 and has been in private residential ownership since 2019. The OSM record therefore no longer describes the site as the sources do; a disused or former-church tagging would fit better."
+  },
+  "osm_version_chain": [
+    {
+      "version": 1,
+      "changeset": 64251163,
+      "timestamp": "2018-11-07T04:14:57Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "amenity=place_of_worship; religion=christian; denomination=anglican; building=yes; name=St Columba's Anglican Church - Hawarden; addr: Corner / 952, Horsley Down Road & Medbury Road, Hawarden 7385, Hurunui; phone (institutional number, omitted); start_date=1905",
+      "change_note": "Way created with edit summary 'add St Columba's Anglican Church - Hawarden'. It is a four-node closed building footprint.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/641756448/history"
+    },
+    {
+      "version": 2,
+      "changeset": 160015648,
+      "timestamp": "2024-12-07T04:46:30Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "Same tags as v1: amenity=place_of_worship; religion=christian; denomination=anglican; building=yes; name; addr:*; phone (reformatted, omitted); start_date=1905",
+      "change_note": "Edit summary 'Fix phone number format'. Only the phone value's formatting changed; the place-of-worship status was not reviewed.",
+      "locator": "https://www.openstreetmap.org/way/641756448/history"
+    }
+  ],
+  "personal_details_quarantine": {
+    "redacted": true,
+    "item_count": 0,
+    "items": [],
+    "note": "personal details stripped before commit; hashes let a later run recognise recurrence"
+  },
+  "provenance": {
+    "producer": "agent_reader",
+    "ai_generated": true,
+    "produced_by": "claude:opus:researcher.v1",
+    "lane": "agent_autonomous"
+  },
+  "run_manifest": {
+    "run_id": "pilot-2026-09-10",
+    "backend": "claude",
+    "model_id_requested": "opus",
+    "model_id_reported": "claude-opus-5",
+    "prompt_version": "researcher.v1",
+    "started_at": "2026-09-10T07:29:23+00:00",
+    "ended_at": "2026-09-10T07:32:54+00:00",
+    "duration_s": 211.8,
+    "usage": {
+      "input_tokens": 30,
+      "cached_input_tokens": 248382,
+      "output_tokens": 11926,
+      "reasoning_tokens": 3090,
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "cost_usd_reported": 0.8656200000000002,
+    "cost_basis": "tool_list_price",
+    "idempotency_key": "d5b7b398d7294f64b5840011b7e7db9902eb4eab1587a27aa6afc00f874bb6bc",
+    "allowlist_version": "nz-v1",
+    "tool_permissions": [
+      "WebSearch",
+      "WebFetch"
+    ],
+    "exit_status": "completed",
+    "notes": "claude session 1392358a-2ff4-4e95-be56-c6dd56d3cd2f; num_turns 25; permission_denials 0 | The evidence for closure is the architect's own account of the renovation, not an institutional record. The firm is a private architectural practice (barryconnordesign.co.nz), outside the allowlist, and I weighted it as secondary. The next step is to confirm the 2011 deconsecration and the sale through the Anglican Diocese of Christchurch or Anglican Life, or a Press or Stuff report. The two Barry Connor pages are undated, and the church conversion is described as 'upcoming', so its present state is unknown. Several fetch-tool outputs of the hall page came back paraphrased rather than verbatim. I quoted only short fragments that the tool marked as direct quotations, and these should be checked against the live page. Heritage NZ list entry 2644, returned by search, is St Columba in Grey Lynn, Auckland, and is unrelated. The OSM start_date=1905 is uncorroborated; Papers Past search pages returned no readable content through the fetch tool, so it could not be checked there. The parish is probably the Anglican Parish of Hurunui (Diocese of Christchurch), but no opened source confirms this, so I have made no organisation_link claim. OSM editor usernames and the phone number are omitted under the privacy and institutional-contact rules. No page contained instructions addressed to the reader. | sources_consulted (12): https://www.openstreetmap.org/way/641756448/history [used]; https://api.openstreetmap.org/api/0.6/way/641756448/history [used]; https://www.heritage.org.nz/list-details/2644/2644 [no_relevant_content]; https://mapcarta.com/W641756448 [unreachable]; https://archello.com/project/st-columbas-hall [unreachable]; https://www.barryconnordesign.co.nz/st-columbas-hall [used]; https://www.barryconnordesign.co.nz/stcolumba-schurch [used]; https://paperspast.natlib.govt.nz/newspapers?query=%22St+Columba%27s%22+%22Horsley+Down%22 [no_relevant_content]; https://adnz.org.nz/PersonProfile?Action=View&PersonProfile_id=3957 [unreachable]; https://www.hurunui.govt.nz/community/about-the-district/our-towns/hawarden [unreachable]; https://digitalnz.org/records?text=St+Columba+Horsley+Down [unreachable]; https://paperspast.natlib.govt.nz/newspapers?query=horsley+down+st+columba&start_date=01-01-1903&end_date=31-12-1907 [no_relevant_content]"
+  }
+}

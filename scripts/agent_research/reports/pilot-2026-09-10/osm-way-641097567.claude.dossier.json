@@ -1,0 +1,708 @@
+{
+  "schema_version": "agent-dossier.v1",
+  "dossier_id": "osm:way/641097567:claude:opus:researcher.v1:pilot-2026-09-10",
+  "place": {
+    "place_ref": "osm:way/641097567",
+    "name": "St Bartholomew's Anglican Church - Kaiapoi",
+    "country_code": "NZ",
+    "seed_latitude": -43.38149042222222,
+    "seed_longitude": 172.66124577777776,
+    "seed_source": "nz_places.geojson (overpass extract 2025-08-20)",
+    "seed_tags": {
+      "amenity": "place_of_worship",
+      "religion": "christian",
+      "denomination": "anglican"
+    }
+  },
+  "candidate_location": {
+    "latitude": -43.3815,
+    "longitude": 172.66122,
+    "basis": "osm_object",
+    "basis_note": "Centroid I computed from the 8 nodes of OSM way 641097567 (API /way/641097567/full): lat range -43.3814073 to -43.3816142, lon range 172.6611062 to 172.6613741. The footprint is about 22 m long, which fits a small timber church with transepts. Wikidata Q79304027 gives 43°22'54.77\"S 172°39'41.76\"E (about -43.38188, 172.66160), about 50 m SE of the footprint. I treat the Wikidata point as a coarser address or parcel point. The OSM footprint was drawn in 2018, after the post-earthquake repairs.",
+    "uncertainty_radius_m": 20,
+    "address": "23 Cass Street, Kaiapoi (Heritage NZ); also given as 23B Cass Street (Waimakariri Libraries) and 23a Cass Street (OSM)"
+  },
+  "claims": [
+    {
+      "claim_id": "osm:way/641097567:claude:c01",
+      "claim_type": "name",
+      "value": "St Bartholomew's Church (Anglican)",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/285/St%20Bartholomew's%20Church%20(Anglican)",
+        "source_name": "Heritage New Zealand Pouhere Taonga, New Zealand Heritage List entry 285",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Bartholomew's Church (Anglican)",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "This is the list entry name. The parish website calls the church 'St Bartholomew's Kaiapoi'."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c02",
+      "claim_type": "name",
+      "value": "St Bartholomew's Anglican Church - Kaiapoi",
+      "date_start": "2018-11-05",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://www.openstreetmap.org/way/641097567/history",
+        "source_name": "OpenStreetMap way 641097567 history",
+        "source_type": "osm",
+        "source_date": "2026-01-31",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "name (St Bartholomew's Anglican Church - Kaiapoi)",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The OSM name has not changed since version 1."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c03",
+      "claim_type": "address",
+      "value": "23 Cass Street, Kaiapoi",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/285/St%20Bartholomew's%20Church%20(Anglican)",
+        "source_name": "Heritage New Zealand List entry 285",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "23 Cass Street, Kaiapoi",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The legal description is given as Lot 3 DP 26905 (RT CB10A/317), Canterbury Land District. Wikidata Q79304027 gives the same street address."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c04",
+      "claim_type": "address",
+      "value": "23B Cass Street, Kaiapoi",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/kaiapoi/history-of-the-churches-in-kaiapoi",
+        "source_name": "Waimakariri Libraries, History of the Churches in Kaiapoi",
+        "source_type": "other",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "low",
+      "note": "The fetch summary said the current address is 23B Cass Street, but it did not give a verbatim sentence. The Waimakariri District Council heritage PDF filename (HH003-ST-BARTHOLOMEWS-ANGLICAN-CHURCH-23B-KAIAPOI-CASS-STREET-KAIAPOI.pdf) also uses 23B, but I could not parse the PDF. OSM gives 23a. Unit suffixes differ between sources."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c05",
+      "claim_type": "address",
+      "value": "23a Cass Street, Kaiapoi 7630",
+      "date_start": "2018-11-05",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://www.openstreetmap.org/way/641097567/history",
+        "source_name": "OpenStreetMap way 641097567 history",
+        "source_type": "osm",
+        "source_date": "2026-01-31",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "addr:housenumber (23a), addr:postcode (7630), addr:street (Cass Street)",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "This conflicts with 23 (Heritage NZ) and 23B (Waimakariri Libraries and the council PDF filename)."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c06",
+      "claim_type": "religion",
+      "value": "christian",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/285/St%20Bartholomew's%20Church%20(Anglican)",
+        "source_name": "Heritage New Zealand List entry 285",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Spiritually it continues to be a place of Anglican worship.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Christian, inferred from the Anglican affiliation."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c07",
+      "claim_type": "denomination",
+      "value": "Anglican",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/285/St%20Bartholomew's%20Church%20(Anglican)",
+        "source_name": "Heritage New Zealand List entry 285",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Spiritually it continues to be a place of Anglican worship.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": ""
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c08",
+      "claim_type": "start_date",
+      "value": "Church first built in 1855 on a sandhill in Darnley Square, Kaiapoi (original site, not the current one)",
+      "date_start": "1855",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/kaiapoi/history-of-the-churches-in-kaiapoi",
+        "source_name": "Waimakariri Libraries, History of the Churches in Kaiapoi",
+        "source_type": "other",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Bartholomew's was built in 1855 on a sand hill in Darnley Square, using designs by Benjamin Mountfort and a [person_name withheld].",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Heritage NZ says the 1855 building was 'Completed by Christmas Day'. Web search snippets (not opened) put the first service on Christmas Day 1855. Worship began in 1855 at Darnley Square, not at the Cass Street site."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c09",
+      "claim_type": "start_date",
+      "value": "Worship at the present Cass Street site began after the church was moved there, a move completed by the end of May 1860",
+      "date_start": "1860-05",
+      "date_end": null,
+      "date_precision": "month",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/285/St%20Bartholomew's%20Church%20(Anglican)",
+        "source_name": "Heritage New Zealand List entry 285",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Around 1859 it was decided to move the church to its present site in Cass Street, as the sandhill on which it had been built was disappearing fast. The move was completed by the end of May 1860.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Search snippets (not opened) give a reopening date of 20 May 1860. OSM start_date=1960 conflicts with this and is probably a data error, perhaps a mistyping of 1860."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c10",
+      "claim_type": "building_date",
+      "value": "The current building is the 1855 nave designed by Benjamin Mountfort, relocated in 1859-60",
+      "date_start": "1855",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/285/St%20Bartholomew's%20Church%20(Anglican)",
+        "source_name": "Heritage New Zealand List entry 285",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Completed by Christmas Day",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Heritage NZ gives 1855 as the construction date and names Benjamin Woolfield Mountfort as architect. The Flickr caption calls it 'the oldest surviving church in Canterbury'."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c11",
+      "claim_type": "renovation",
+      "value": "Transepts, bell tower and chancel added in 1862, two years after the relocation",
+      "date_start": "1862",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/kaiapoi/history-of-the-churches-in-kaiapoi",
+        "source_name": "Waimakariri Libraries, History of the Churches in Kaiapoi",
+        "source_type": "other",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "In 1862 the transepts and chancel were added to the original nave of totara and kahikatea.",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Heritage NZ says: 'transepts, a bell tower and a chancel were added.'"
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c12",
+      "claim_type": "renovation",
+      "value": "Repair of damage from the Canterbury earthquakes (2010-2012): the church was lifted off its foundations, new foundations were built, bearers, buttresses and cladding were repaired, the roof was replaced, the belfry restored and the leadlight and stained glass rebuilt",
+      "date_start": "2010",
+      "date_end": "2017",
+      "date_precision": "approximate",
+      "source": {
+        "locator": "https://dpaarchitects.co.nz/projects/st-bartholomews-church",
+        "source_name": "DPA Architects, project page: St Bartholomew's Church, Kaiapoi",
+        "source_type": "other",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "repair damage caused by the Canterbury earthquakes in 2010-2012 and to remediate any deferred maintenance",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The page is on a non-allowlisted commercial site. The end date is inferred from the Stuff reopening headline (article id suggests about 2017). The Canterbury Heritage Awards 2018 entry says: 'St. Bartholomew's Kaiapoi suffered foundation damage in the Canterbury earthquake.'"
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c13",
+      "claim_type": "renovation",
+      "value": "Foundation damage from the Canterbury earthquake was repaired by lifting the church to build a new foundation; the work was Highly Commended in the Seismic Award category of the 2018 Canterbury Heritage Awards",
+      "date_start": "2018",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.heritageawards.co.nz/entry/st-bartholomews-church-kaiapoi/",
+        "source_name": "Canterbury Heritage Awards, entry: St Bartholomew's Church, Kaiapoi",
+        "source_type": "other",
+        "source_date": "2018",
+        "source_date_basis": "inferred",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St. Bartholomew's Kaiapoi suffered foundation damage in the Canterbury earthquake.",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The award year (2018) comes from the fetch summary."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c14",
+      "claim_type": "worship_active_asof",
+      "value": "The church reopened after the post-earthquake restoration",
+      "date_start": "2017",
+      "date_end": null,
+      "date_precision": "approximate",
+      "source": {
+        "locator": "https://www.stuff.co.nz/the-press/business/the-rebuild/95255504/bells-ring-in-more-than-150-church-restorations-as-kaiapois-st-bartholomews-church-reopens",
+        "source_name": "Stuff / The Press",
+        "source_type": "newspaper",
+        "source_date": "2017",
+        "source_date_basis": "inferred",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Bells ring in more than 150 church restorations as Kaiapoi's St Bartholomew's Church reopens",
+      "evidential_weight": "contemporary_report",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "Only the headline could be read. The year is inferred from the Stuff article id range (95xxxxxx, about mid-2017) and should be checked. The closure date before repairs is not established."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c15",
+      "claim_type": "service_pattern",
+      "value": "Every Sunday at 9:30 am: Holy Communion with morning tea afterwards",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.kaiapoianglican.nz/",
+        "source_name": "Anglican Parish of Kaiapoi website",
+        "source_type": "church_website",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Every Sunday: 9:30 am: Holy Communion Service with morning tea to follow.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The page is undated. It was read on 2026-09-10 and is shown as current."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c16",
+      "claim_type": "worship_active_asof",
+      "value": "Weekly Sunday worship is advertised as current by the parish",
+      "date_start": "2026-09-10",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://www.kaiapoianglican.nz/",
+        "source_name": "Anglican Parish of Kaiapoi website",
+        "source_type": "church_website",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Every Sunday: 9:30 am: Holy Communion Service with morning tea to follow.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "The date is the retrieval date, because the page carries none."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c17",
+      "claim_type": "worship_active_asof",
+      "value": "The building is in active use (photo caption, April 2015)",
+      "date_start": "2015-04-24",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://www.flickr.com/photos/philbraithwaitenz/39933617321",
+        "source_name": "Flickr photo: Kaiapoi: St Bartholomew's Anglican (c.1855) (1)",
+        "source_type": "photograph_caption",
+        "source_date": "2015-04-24",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "low",
+      "note": "The fetch tool paraphrased the caption as saying the building 'remains in active use today'. I have no verbatim quote. The caption largely repeats the Heritage NZ text, and the caption date may differ from the date the photo was taken."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c18",
+      "claim_type": "organisation_link",
+      "value": "Anglican Parish of Kaiapoi, which runs St Bartholomew's Kaiapoi, St Thomas' Eyreton and St Augustine's Clarkville",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.kaiapoianglican.nz/",
+        "source_name": "Anglican Parish of Kaiapoi website",
+        "source_type": "church_website",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Bartholomew's Kaiapoi, St Thomas' Eyreton and St Augustine's Clarkville.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The parish describes itself as 'Serving the District Since 1853'. The parish belongs to the Anglican Diocese of Christchurch. I infer this from the property trustees below; no page I fetched states the diocese."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c19",
+      "claim_type": "organisation_link",
+      "value": "Property held and restored by the Christchurch Anglican Church Property Trustees",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://dpaarchitects.co.nz/projects/st-bartholomews-church",
+        "source_name": "DPA Architects, project page",
+        "source_type": "other",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "the Christchurch Anglican Church Property Trustees",
+      "evidential_weight": "secondary",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "Named as the client for the earthquake repairs. The Canterbury Heritage Awards entry also refers to the Anglican Church Property Trustees."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c20",
+      "claim_type": "other",
+      "value": "Heritage New Zealand Historic Place Category 1, List number 285",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/285/St%20Bartholomew's%20Church%20(Anglican)",
+        "source_name": "Heritage New Zealand List entry 285",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Historic Place Category 1",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Wikidata Q79304027 gives 27 June 1985 as 'inception'. That is probably the registration date, not the building date."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c21",
+      "claim_type": "location",
+      "value": "OSM footprint centroid about -43.38150, 172.66122 on Cass Street, Kaiapoi",
+      "date_start": "2018-11-05",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/641097567/full",
+        "source_name": "OpenStreetMap API, way 641097567 full",
+        "source_type": "osm",
+        "source_date": "2026-01-31",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "6038366201 | -43.3814262 | 172.6611641",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "I computed the centroid myself from 8 node coordinates. The fetch tool's own centroid (172.66209) was arithmetically wrong."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c22",
+      "claim_type": "location",
+      "value": "Wikidata coordinate 43°22'54.77\"S 172°39'41.76\"E (about -43.38188, 172.66160)",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.wikidata.org/wiki/Q79304027",
+        "source_name": "Wikidata Q79304027 St Bartholomew's Church",
+        "source_type": "wikidata",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "43°22'54.77\"S, 172°39'41.76\"E",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "low",
+      "note": "About 50 m SE of the OSM footprint. It may be a parcel or address point. Imagery should be used to check it."
+    },
+    {
+      "claim_id": "osm:way/641097567:claude:c23",
+      "claim_type": "osm_object_version",
+      "value": "OSM start_date=1960 conflicts with the documented 1855 build and 1860 relocation",
+      "date_start": "2018-11-05",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://www.openstreetmap.org/way/641097567/history",
+        "source_name": "OpenStreetMap way 641097567 history",
+        "source_type": "osm",
+        "source_date": "2026-01-31",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "start_date (1960)",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "claude:opus:researcher.v1",
+        "backend": "claude",
+        "model_id": "claude-opus-5",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The tag has been present unchanged since version 1. It is probably a typo for 1860 (the relocation year)."
+    }
+  ],
+  "status_assessment": {
+    "current_status": "active",
+    "basis": "The parish website currently advertises Holy Communion every Sunday at 9:30 am at St Bartholomew's (undated page, read 2026-09-10). Heritage NZ says it 'continues to be a place of Anglican worship'. Stuff reported the church reopening after post-earthquake restoration (about 2017), and a 2018 heritage award recognised the repair. I found no closure, sale or deconsecration evidence.",
+    "asof_date": "2026-09-10",
+    "supporting_claim_ids": [],
+    "osm_stale": false,
+    "osm_stale_basis": "The current OSM version (v3, 2026-01-31) correctly describes an active Anglican place of worship with this name and parish website. Two attributes disagree with the sources and look like original entry errors rather than staleness: start_date=1960 (sources: built 1855, moved to this site 1860) and addr:housenumber=23a (Heritage NZ: 23; Waimakariri Libraries: 23B)."
+  },
+  "osm_version_chain": [
+    {
+      "version": 1,
+      "changeset": 64185252,
+      "timestamp": "2018-11-05T04:58:40Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "amenity=place_of_worship, building=yes, religion=christian, denomination=anglican, name=St Bartholomew's Anglican Church - Kaiapoi, addr 23a Cass Street Kaiapoi 7630 Waimakariri, start_date=1960, website http://www.kaiapoianglican.nz/, plus phone and email tags (values omitted)",
+      "change_note": "Created the building footprint (8 nodes, first node 6038366201) with full tags.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/641097567/history"
+    },
+    {
+      "version": 2,
+      "changeset": 142613437,
+      "timestamp": "2023-10-15T11:30:35Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "As v1, but website=https://www.kaiapoianglican.nz/",
+      "change_note": "Website changed from http to https; no other tag changes seen.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/641097567/history"
+    },
+    {
+      "version": 3,
+      "changeset": 177910750,
+      "timestamp": "2026-01-31T00:19:03Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "As v2, plus wikidata=Q79304027",
+      "change_note": "Added the Wikidata link; start_date=1960 and 23a are unchanged.",
+      "locator": "https://www.openstreetmap.org/way/641097567/history"
+    }
+  ],
+  "personal_details_quarantine": {
+    "redacted": true,
+    "item_count": 1,
+    "items": [
+      {
+        "kind": "person_name",
+        "context_claim_id": "osm:way/641097567:claude:c08",
+        "value_sha256": "2d8b6113077297156bc2d92c4f397e318a3c9b6b7f50f5908b735ec93a10ca4f"
+      }
+    ],
+    "note": "personal details stripped before commit; hashes let a later run recognise recurrence"
+  },
+  "provenance": {
+    "producer": "agent_reader",
+    "ai_generated": true,
+    "produced_by": "claude:opus:researcher.v1",
+    "lane": "agent_autonomous"
+  },
+  "run_manifest": {
+    "run_id": "pilot-2026-09-10",
+    "backend": "claude",
+    "model_id_requested": "opus",
+    "model_id_reported": "claude-opus-5",
+    "prompt_version": "researcher.v1",
+    "started_at": "2026-09-10T07:34:53+00:00",
+    "ended_at": "2026-09-10T07:39:04+00:00",
+    "duration_s": 251.0,
+    "usage": {
+      "input_tokens": 20,
+      "cached_input_tokens": 139582,
+      "output_tokens": 16663,
+      "reasoning_tokens": 4336,
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "cost_usd_reported": 0.9065349999999999,
+    "cost_basis": "tool_list_price",
+    "idempotency_key": "e87a4f194af0e811c6b4e984933683e150d27987927fd4d1b4fce2acef93385a",
+    "allowlist_version": "nz-v1",
+    "tool_permissions": [
+      "WebSearch",
+      "WebFetch"
+    ],
+    "exit_status": "completed",
+    "notes": "claude session c2f5a740-2140-4b56-9c14-7816b7287382; num_turns 21; permission_denials 0 | I stopped at the 15-fetch limit. Two pages returned errors: the Waimakariri Heritage (recollect) page gave HTTP 403 and the guessed Wikipedia URL gave 404. Two others gave no usable text: the Waimakariri District Council heritage PDF (HH003) came back as unparseable binary, and the Papers Past Press article of 3 April 1905 came back empty. That article was flagged by search as reporting harvest thanksgiving services at St Bartholomew's, but I could not read it, so I cite nothing from it. Only the Stuff reopening article's headline could be read; its date (about 2017) is inferred from the article id and needs checking. Two sources are outside the allowlist: DPA Architects and heritageawards.co.nz (both secondary). waimakaririlibraries.com is a council library site, but not the allowlisted waimakariri.govt.nz domain. The OSM record carries a parish office phone and email; I omitted their values under rule 5. Unresolved points for the reviewer: (1) the house number (23, 23a or 23B Cass Street); (2) OSM start_date=1960 against the 1855 build and 1860 move, probably a typo; (3) the date the church closed for earthquake repairs and the exact reopening date. Search snippets I did not open mention a first service on Christmas Day 1855 and a reopening on 20 May 1860 at Cass Street; these are not cited as evidence. No fetched page contained instructions addressed to the reader. | sources_consulted (15): https://www.openstreetmap.org/way/641097567/history [used]; https://api.openstreetmap.org/api/0.6/way/641097567/history [used]; https://api.openstreetmap.org/api/0.6/way/641097567/full [used]; https://www.heritage.org.nz/list-details/285/St%20Bartholomew's%20Church%20(Anglican) [used]; https://www.wikidata.org/wiki/Q79304027 [used]; https://www.kaiapoianglican.nz/ [used]; https://waimakariri.recollect.co.nz/nodes/view/1527 [unreachable]; https://en.wikipedia.org/wiki/St_Bartholomew%27s_Church,_Kaiapoi [unreachable]; https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/kaiapoi/history-of-the-churches-in-kaiapoi [used]; https://www.heritageawards.co.nz/entry/st-bartholomews-church-kaiapoi/ [used]; https://www.flickr.com/photos/philbraithwaitenz/39933617321 [used]; https://www.stuff.co.nz/the-press/business/the-rebuild/95255504/bells-ring-in-more-than-150-church-restorations-as-kaiapois-st-bartholomews-church-reopens [used]; https://www.waimakariri.govt.nz/__data/assets/pdf_file/0024/136338/HH003-ST-BARTHOLOMEWS-ANGLICAN-CHURCH-23B-KAIAPOI-CASS-STREET-KAIAPOI.pdf [no_relevant_content]; https://paperspast.natlib.govt.nz/newspapers/CHP19050403.2.21 [no_relevant_content]; https://dpaarchitects.co.nz/projects/st-bartholomews-church [used]"
+  }
+}

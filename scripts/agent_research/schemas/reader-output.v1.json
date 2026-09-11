@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Researcher reader output, version 1",
+  "description": "What one reader returns for one place. The runner wraps it into an agent-dossier.v1 file, adding claim ids, reader identity and the run manifest. Kept strict (every property required, no extras) so both CLIs can enforce it as structured output.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "candidate_location", "claims", "status_assessment", "osm_version_chain", "sources_consulted", "notes"],
+  "properties": {
+    "name": { "type": "string" },
+    "candidate_location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["latitude", "longitude", "basis", "basis_note", "uncertainty_radius_m", "address"],
+      "properties": {
+        "latitude": { "type": ["number", "null"] },
+        "longitude": { "type": ["number", "null"] },
+        "basis": { "type": "string", "enum": ["osm_object", "address_geocode", "source_map_or_photo", "imagery", "reader_inference", "not_assessed"] },
+        "basis_note": { "type": "string" },
+        "uncertainty_radius_m": { "type": ["number", "null"] },
+        "address": { "type": ["string", "null"] }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["claim_type", "value", "date_start", "date_end", "date_precision", "source", "quoted_support", "evidential_weight", "confidence", "note"],
+        "properties": {
+          "claim_type": {
+            "type": "string",
+            "enum": ["name", "address", "religion", "denomination", "start_date", "building_date", "renovation", "worship_active_asof", "worship_ended", "closure_event", "sale_or_disposal", "service_pattern", "organisation_link", "land_or_consecration", "location", "osm_object_version", "other"]
+          },
+          "value": { "type": "string" },
+          "date_start": { "type": ["string", "null"] },
+          "date_end": { "type": ["string", "null"] },
+          "date_precision": { "type": "string", "enum": ["day", "month", "year", "approximate", "unknown"] },
+          "source": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["locator", "source_name", "source_type", "source_date", "source_date_basis"],
+            "properties": {
+              "locator": { "type": "string" },
+              "source_name": { "type": "string" },
+              "source_type": {
+                "type": "string",
+                "enum": ["osm", "newspaper", "photograph_caption", "heritage_register", "church_website", "diocesan_publication", "directory", "archive_collection", "wikidata", "wikipedia", "charity_register", "council_or_government", "other"]
+              },
+              "source_date": { "type": ["string", "null"] },
+              "source_date_basis": { "type": "string", "enum": ["printed", "metadata", "inferred", "not_stated"] }
+            }
+          },
+          "quoted_support": { "type": "string" },
+          "evidential_weight": { "type": "string", "enum": ["primary_institutional", "contemporary_report", "secondary", "user_contributed", "inferred"] },
+          "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "status_assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["current_status", "basis", "asof_date", "osm_stale", "osm_stale_basis"],
+      "properties": {
+        "current_status": { "type": "string", "enum": ["active", "likely_active", "likely_inactive", "inactive", "unknown"] },
+        "basis": { "type": "string" },
+        "asof_date": { "type": "string" },
+        "osm_stale": { "type": ["boolean", "null"] },
+        "osm_stale_basis": { "type": "string" }
+      }
+    },
+    "osm_version_chain": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["version", "changeset", "timestamp", "timestamp_basis", "tags_summary", "change_note", "locator"],
+        "properties": {
+          "version": { "type": "integer" },
+          "changeset": { "type": ["integer", "null"] },
+          "timestamp": { "type": ["string", "null"] },
+          "timestamp_basis": { "type": "string", "enum": ["osm_api", "page_reading", "approximate", "unknown"] },
+          "tags_summary": { "type": "string" },
+          "change_note": { "type": "string" },
+          "locator": { "type": "string" }
+        }
+      }
+    },
+    "sources_consulted": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["locator", "outcome"],
+        "properties": {
+          "locator": { "type": "string" },
+          "outcome": { "type": "string", "enum": ["used", "no_relevant_content", "unreachable", "not_permitted"] }
+        }
+      }
+    },
+    "notes": { "type": "string" }
+  }
+}

@@ -1,0 +1,875 @@
+{
+  "place_ref": "osm:way/101333590",
+  "name": "St Michael and All Angels Anglican Church",
+  "validated_at": "2026-09-10T07:59:21+00:00",
+  "osm": {
+    "centroid": [
+      -43.534501600000006,
+      172.63304517931036
+    ],
+    "version": 12,
+    "amenity": "place_of_worship",
+    "history_versions": [
+      [
+        1,
+        7380902,
+        "2011-02-24T12:05:08Z"
+      ],
+      [
+        2,
+        7389099,
+        "2011-02-25T10:18:01Z"
+      ],
+      [
+        3,
+        29742711,
+        "2015-03-26T01:56:39Z"
+      ],
+      [
+        4,
+        50301312,
+        "2017-07-15T08:53:17Z"
+      ],
+      [
+        5,
+        52062215,
+        "2017-09-15T08:50:25Z"
+      ],
+      [
+        6,
+        60825323,
+        "2018-07-18T07:57:11Z"
+      ],
+      [
+        7,
+        64512585,
+        "2018-11-15T04:06:40Z"
+      ],
+      [
+        8,
+        78755598,
+        "2019-12-23T06:51:10Z"
+      ],
+      [
+        9,
+        102230607,
+        "2021-04-03T10:40:29Z"
+      ],
+      [
+        10,
+        118652694,
+        "2022-03-19T02:22:17Z"
+      ],
+      [
+        11,
+        127869058,
+        "2022-10-21T08:13:43Z"
+      ],
+      [
+        12,
+        157852326,
+        "2024-10-13T21:13:47Z"
+      ]
+    ],
+    "seed_to_osm_m": 0.8,
+    "error": null
+  },
+  "dossiers": [
+    {
+      "dossier_id": "osm:way/101333590:claude:opus:researcher.v1:pilot-2026-09-10",
+      "reader": "claude:claude:opus:researcher.v1",
+      "validated_at": "2026-09-10T07:59:03+00:00",
+      "validator_version": "validate_dossier.v1",
+      "summary": {
+        "claims": 23,
+        "locators": 23,
+        "distinct_locators": 6,
+        "reachable": 18,
+        "distinct_reachable": 4,
+        "distinct_dead": 0,
+        "distinct_blocked": 2,
+        "dead": 0,
+        "requires_human_access": 5,
+        "http_error": 0,
+        "unreachable": 0,
+        "robots_disallowed": 0,
+        "not_fetched": 0,
+        "with_quote": 23,
+        "quote_supported": 15,
+        "quote_partial": 3,
+        "quote_not_found": 0,
+        "locator_validity_rate": 1.0,
+        "locator_reachable_rate": 0.667,
+        "locator_blocked_rate": 0.333,
+        "quote_support_rate": 1.0,
+        "quote_exact_rate": 0.833
+      },
+      "location": {
+        "candidate_to_seed_m": 0.0,
+        "candidate_to_osm_m": 0.8,
+        "within_tolerance": true
+      },
+      "version_chain": {
+        "claimed_versions": 12,
+        "actual_versions": 12,
+        "confirmed": 12,
+        "contradicted": 0,
+        "rows": [
+          {
+            "version": 1,
+            "claimed_changeset": 7380902,
+            "claimed_timestamp": "2011-02-24T12:05:08Z",
+            "actual_changeset": 7380902,
+            "actual_timestamp": "2011-02-24T12:05:08Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 2,
+            "claimed_changeset": 7389099,
+            "claimed_timestamp": "2011-02-25T10:18:01Z",
+            "actual_changeset": 7389099,
+            "actual_timestamp": "2011-02-25T10:18:01Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 3,
+            "claimed_changeset": 29742711,
+            "claimed_timestamp": "2015-03-26T01:56:39Z",
+            "actual_changeset": 29742711,
+            "actual_timestamp": "2015-03-26T01:56:39Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 4,
+            "claimed_changeset": 50301312,
+            "claimed_timestamp": "2017-07-15T08:53:17Z",
+            "actual_changeset": 50301312,
+            "actual_timestamp": "2017-07-15T08:53:17Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 5,
+            "claimed_changeset": 52062215,
+            "claimed_timestamp": "2017-09-15T08:50:25Z",
+            "actual_changeset": 52062215,
+            "actual_timestamp": "2017-09-15T08:50:25Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 6,
+            "claimed_changeset": 60825323,
+            "claimed_timestamp": "2018-07-18T07:57:11Z",
+            "actual_changeset": 60825323,
+            "actual_timestamp": "2018-07-18T07:57:11Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 7,
+            "claimed_changeset": 64512585,
+            "claimed_timestamp": "2018-11-15T04:06:40Z",
+            "actual_changeset": 64512585,
+            "actual_timestamp": "2018-11-15T04:06:40Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 8,
+            "claimed_changeset": 78755598,
+            "claimed_timestamp": "2019-12-23T06:51:10Z",
+            "actual_changeset": 78755598,
+            "actual_timestamp": "2019-12-23T06:51:10Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 9,
+            "claimed_changeset": 102230607,
+            "claimed_timestamp": "2021-04-03T10:40:29Z",
+            "actual_changeset": 102230607,
+            "actual_timestamp": "2021-04-03T10:40:29Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 10,
+            "claimed_changeset": 118652694,
+            "claimed_timestamp": "2022-03-19T02:22:17Z",
+            "actual_changeset": 118652694,
+            "actual_timestamp": "2022-03-19T02:22:17Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 11,
+            "claimed_changeset": 127869058,
+            "claimed_timestamp": "2022-10-21T08:13:43Z",
+            "actual_changeset": 127869058,
+            "actual_timestamp": "2022-10-21T08:13:43Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 12,
+            "claimed_changeset": 157852326,
+            "claimed_timestamp": "2024-10-13T21:13:47Z",
+            "actual_changeset": 157852326,
+            "actual_timestamp": "2024-10-13T21:13:47Z",
+            "outcome": "confirmed"
+          }
+        ]
+      },
+      "stale_check": {
+        "osm_current_tags_say_place_of_worship": true,
+        "osm_current_version": 12,
+        "reader_osm_stale": false,
+        "reader_status": "active"
+      },
+      "internal_contradictions": [
+        "building_date: osm:way/101333590:claude:c09 vs osm:way/101333590:claude:c11 (years [1870, 1872] vs [1861])",
+        "building_date: osm:way/101333590:claude:c10 vs osm:way/101333590:claude:c11 (years [1870, 1872] vs [1861])"
+      ],
+      "claims": [
+        {
+          "claim_id": "osm:way/101333590:claude:c01",
+          "claim_type": "name",
+          "locator": "https://www.heritage.org.nz/list-details/294/294",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 34402
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c02",
+          "claim_type": "name",
+          "locator": "https://www.stmichaelandallangels.nz/",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 2995
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c03",
+          "claim_type": "address",
+          "locator": "https://www.heritage.org.nz/list-details/294/294",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 34402
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c04",
+          "claim_type": "address",
+          "locator": "https://www.stmichaelandallangels.nz/",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 2995
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c05",
+          "claim_type": "religion",
+          "locator": "https://www.heritage.org.nz/list-details/294/294",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 34402
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c06",
+          "claim_type": "denomination",
+          "locator": "https://www.heritage.org.nz/list-details/294/294",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 34402
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c07",
+          "claim_type": "start_date",
+          "locator": "https://www.heritage.org.nz/list-details/294/294",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 34402
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c08",
+          "claim_type": "start_date",
+          "locator": "https://en.wikipedia.org/wiki/Church_of_St_Michael_and_All_Angels,_Christchurch",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 19805
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c09",
+          "claim_type": "building_date",
+          "locator": "https://en.wikipedia.org/wiki/Church_of_St_Michael_and_All_Angels,_Christchurch",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "partially_supported",
+          "support_share": 0.964,
+          "page_chars": 19805
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c10",
+          "claim_type": "building_date",
+          "locator": "https://www.heritage.org.nz/list-details/294/294",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "partially_supported",
+          "support_share": 0.973,
+          "page_chars": 34402
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c11",
+          "claim_type": "building_date",
+          "locator": "https://my.christchurchcitylibraries.com/st-michaels-and-all-angels/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 403,
+          "error": "HTTP Error 403: Forbidden",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c12",
+          "claim_type": "renovation",
+          "locator": "https://my.christchurchcitylibraries.com/st-michaels-and-all-angels/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 403,
+          "error": "HTTP Error 403: Forbidden",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c13",
+          "claim_type": "other",
+          "locator": "https://www.heritage.org.nz/list-details/294/294",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 34402
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c14",
+          "claim_type": "land_or_consecration",
+          "locator": "https://my.christchurchcitylibraries.com/st-michaels-and-all-angels/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 403,
+          "error": "HTTP Error 403: Forbidden",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c15",
+          "claim_type": "organisation_link",
+          "locator": "https://www.stmichaelandallangels.nz/",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 2995
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c16",
+          "claim_type": "organisation_link",
+          "locator": "https://www.anglicanlife.org.nz/church/st-michael-all-angels-church-cbd-christchurch-st-michaels-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c17",
+          "claim_type": "service_pattern",
+          "locator": "https://www.stmichaelandallangels.nz/",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "partially_supported",
+          "support_share": 0.947,
+          "page_chars": 2995
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c18",
+          "claim_type": "worship_active_asof",
+          "locator": "https://www.stmichaelandallangels.nz/",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 2995
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c19",
+          "claim_type": "worship_active_asof",
+          "locator": "https://www.anglicanlife.org.nz/church/st-michael-all-angels-church-cbd-christchurch-st-michaels-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c20",
+          "claim_type": "worship_active_asof",
+          "locator": "https://en.wikipedia.org/wiki/Church_of_St_Michael_and_All_Angels,_Christchurch",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 19805
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c21",
+          "claim_type": "other",
+          "locator": "https://www.heritage.org.nz/list-details/294/294",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 34402
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c22",
+          "claim_type": "location",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/101333590/history.json",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 8656
+        },
+        {
+          "claim_id": "osm:way/101333590:claude:c23",
+          "claim_type": "osm_object_version",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/101333590/history.json",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 8656
+        }
+      ]
+    },
+    {
+      "dossier_id": "osm:way/101333590:codex:gpt-5.6-sol:researcher.v1:pilot-2026-09-10",
+      "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+      "validated_at": "2026-09-10T07:59:21+00:00",
+      "validator_version": "validate_dossier.v1",
+      "summary": {
+        "claims": 11,
+        "locators": 11,
+        "distinct_locators": 6,
+        "reachable": 7,
+        "distinct_reachable": 3,
+        "distinct_dead": 0,
+        "distinct_blocked": 3,
+        "dead": 0,
+        "requires_human_access": 4,
+        "http_error": 0,
+        "unreachable": 0,
+        "robots_disallowed": 0,
+        "not_fetched": 0,
+        "with_quote": 10,
+        "quote_supported": 3,
+        "quote_partial": 0,
+        "quote_not_found": 0,
+        "locator_validity_rate": 1.0,
+        "locator_reachable_rate": 0.5,
+        "locator_blocked_rate": 0.5,
+        "quote_support_rate": 1.0,
+        "quote_exact_rate": 1.0
+      },
+      "location": {
+        "candidate_to_seed_m": 0.0,
+        "candidate_to_osm_m": 0.8,
+        "within_tolerance": true
+      },
+      "version_chain": {
+        "claimed_versions": 0,
+        "actual_versions": 12,
+        "confirmed": 0,
+        "contradicted": 0,
+        "rows": []
+      },
+      "stale_check": {
+        "osm_current_tags_say_place_of_worship": true,
+        "osm_current_version": 12,
+        "reader_osm_stale": false,
+        "reader_status": "active"
+      },
+      "internal_contradictions": [],
+      "claims": [
+        {
+          "claim_id": "osm:way/101333590:codex:c01",
+          "claim_type": "name",
+          "locator": "https://www.heritage.org.nz/list-details/294/294",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 34402
+        },
+        {
+          "claim_id": "osm:way/101333590:codex:c02",
+          "claim_type": "address",
+          "locator": "https://www.heritage.org.nz/list-details/294/294",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 34402
+        },
+        {
+          "claim_id": "osm:way/101333590:codex:c03",
+          "claim_type": "religion",
+          "locator": "https://www.anglicanlife.org.nz/wp-content/uploads/2026/02/Anglican-Diocese-of-Christchurch-Diocesan-Handbook-February-2026.pdf",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/101333590:codex:c04",
+          "claim_type": "denomination",
+          "locator": "https://districtplan.ccc.govt.nz/Images/DistrictPlanImages/Statement%20of%20Significance/Central%20City/HID%20410.pdf",
+          "has_quote": true,
+          "fetch": "fetched_pdf",
+          "status": 200,
+          "support": "not_checked_pdf",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/101333590:codex:c05",
+          "claim_type": "start_date",
+          "locator": "https://districtplan.ccc.govt.nz/Images/DistrictPlanImages/Statement%20of%20Significance/Central%20City/HID%20410.pdf",
+          "has_quote": true,
+          "fetch": "fetched_pdf",
+          "status": 200,
+          "support": "not_checked_pdf",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/101333590:codex:c06",
+          "claim_type": "building_date",
+          "locator": "https://districtplan.ccc.govt.nz/Images/DistrictPlanImages/Statement%20of%20Significance/Central%20City/HID%20410.pdf",
+          "has_quote": true,
+          "fetch": "fetched_pdf",
+          "status": 200,
+          "support": "not_checked_pdf",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/101333590:codex:c07",
+          "claim_type": "renovation",
+          "locator": "https://www.heritage.org.nz/list-details/294/294",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 34402
+        },
+        {
+          "claim_id": "osm:way/101333590:codex:c08",
+          "claim_type": "organisation_link",
+          "locator": "https://www.anglicanlife.org.nz/wp-content/uploads/2026/02/Anglican-Diocese-of-Christchurch-Diocesan-Handbook-February-2026.pdf",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/101333590:codex:c09",
+          "claim_type": "service_pattern",
+          "locator": "https://www.anglicanlife.org.nz/holy-week-and-easter-services-4/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/101333590:codex:c10",
+          "claim_type": "worship_active_asof",
+          "locator": "https://www.anglicanlife.org.nz/anglican-e-life-2-september-2026/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/101333590:codex:c11",
+          "claim_type": "location",
+          "locator": "https://www.openstreetmap.org/way/101333590/history",
+          "has_quote": false,
+          "fetch": "verified_via_osm_api",
+          "status": 200,
+          "support": "not_checked",
+          "support_share": null
+        }
+      ]
+    }
+  ],
+  "agreement": {
+    "readers": [
+      "claude:claude:opus:researcher.v1",
+      "codex:codex:gpt-5.6-sol:researcher.v1"
+    ],
+    "claim_types_compared": 9,
+    "agreed": 9,
+    "majority": 0,
+    "disagreed": 0,
+    "single_reader": 1,
+    "not_comparable": 0,
+    "agreement_rate": 1.0,
+    "majority_rate": 1.0,
+    "escalate_to_human": [],
+    "rows": [
+      {
+        "claim_type": "address",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "84 Oxford Terrace and Durham Street South, Christchurch"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "84 Oxford Terrace and Durham Street South, Christchurch"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: exact"
+      },
+      {
+        "claim_type": "building_date",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Current timber church: foundation stone 29 September 1870, opened 2 May 1872"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "The first service in the present church building was held on 2 May 1872."
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: years [1870, 1872] vs [1872]"
+      },
+      {
+        "claim_type": "candidate_location",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "-43.534499,172.633036"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "-43.534499,172.633036"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: 0 m apart"
+      },
+      {
+        "claim_type": "current_status",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "active"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "active"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: status group"
+      },
+      {
+        "claim_type": "denomination",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Anglican (High Church / Anglo-Catholic tradition)"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Anglican"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: jaccard 0.17"
+      },
+      {
+        "claim_type": "land_or_consecration",
+        "outcome": "single_reader",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Consecrated 1872"
+          }
+        ],
+        "detail": ""
+      },
+      {
+        "claim_type": "location",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "-43.534499, 172.633036 (OSM way 101333590 building outline at Oxford Terrace / Durham Street South)"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "-43.534499, 172.633036"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: 0 m apart"
+      },
+      {
+        "claim_type": "name",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Church of St Michael and All Angels (Anglican)"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Church of St Michael and All Angels (Anglican)"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: exact"
+      },
+      {
+        "claim_type": "religion",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Christian"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Christian"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: exact"
+      },
+      {
+        "claim_type": "start_date",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "1851"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Worship at the site began with the first church, opened on 20 July 1851."
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: years [1851] vs [1851]"
+      },
+      {
+        "claim_type": "organisation_link",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Anglican Parish of St Michael and All Angels, Anglican Diocese of Christchurch, Anglican Church in Aotearoa, New Zealand and Polynesia"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Parish of St Michael and All Angels, Diocese of Christchurch, Anglican Church in Aotearoa, New Zealand and Polynesia"
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      },
+      {
+        "claim_type": "renovation",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Survived the 2010–2011 Canterbury earthquakes almost unscathed; for a period the only habitable church in use in the central city"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "The temporary chancel of the present church was replaced by a permanent chancel in 1874–1875."
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      },
+      {
+        "claim_type": "service_pattern",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Sunday 8:00 Said Mass, 10:00 Sung Mass (with choir), 19:00 Choral Evensong and Benediction; Monday–Friday 12:35 Said Mass"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "On Easter Sunday 2026 the church advertised Low Mass at 8am and High Mass at 10am."
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      },
+      {
+        "claim_type": "worship_active_asof",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Active: upcoming Sunday Mass and Evensong advertised; Michaelmas High Mass on 29 September announced"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "The diocese advertised an annual Michaelmas service at the church for 29 September 2026."
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      }
+    ]
+  },
+  "requests_made": 18
+}

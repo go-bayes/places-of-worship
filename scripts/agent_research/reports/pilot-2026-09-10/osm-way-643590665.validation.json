@@ -1,0 +1,1120 @@
+{
+  "place_ref": "osm:way/643590665",
+  "name": "St Martin's Anglican Church",
+  "validated_at": "2026-09-10T07:56:04+00:00",
+  "osm": {
+    "centroid": [
+      -43.24923789,
+      172.52855683
+    ],
+    "version": 4,
+    "amenity": "place_of_worship",
+    "history_versions": [
+      [
+        1,
+        64426524,
+        "2018-11-13T02:17:57Z"
+      ],
+      [
+        2,
+        76365819,
+        "2019-10-29T21:43:19Z"
+      ],
+      [
+        3,
+        117872255,
+        "2022-02-26T08:34:21Z"
+      ],
+      [
+        4,
+        160014997,
+        "2024-12-07T03:54:49Z"
+      ]
+    ],
+    "seed_to_osm_m": 0.7,
+    "error": null
+  },
+  "dossiers": [
+    {
+      "dossier_id": "osm:way/643590665:claude:opus:researcher.v1:pilot-2026-09-10",
+      "reader": "claude:claude:opus:researcher.v1",
+      "validated_at": "2026-09-10T07:55:43+00:00",
+      "validator_version": "validate_dossier.v1",
+      "summary": {
+        "claims": 14,
+        "locators": 14,
+        "distinct_locators": 6,
+        "reachable": 9,
+        "distinct_reachable": 4,
+        "distinct_dead": 0,
+        "distinct_blocked": 1,
+        "dead": 0,
+        "requires_human_access": 3,
+        "http_error": 2,
+        "unreachable": 0,
+        "robots_disallowed": 0,
+        "not_fetched": 0,
+        "with_quote": 13,
+        "quote_supported": 6,
+        "quote_partial": 2,
+        "quote_not_found": 0,
+        "locator_validity_rate": 1.0,
+        "locator_reachable_rate": 0.667,
+        "locator_blocked_rate": 0.167,
+        "quote_support_rate": 1.0,
+        "quote_exact_rate": 0.75
+      },
+      "location": {
+        "candidate_to_seed_m": 0.1,
+        "candidate_to_osm_m": 0.7,
+        "within_tolerance": true
+      },
+      "version_chain": {
+        "claimed_versions": 4,
+        "actual_versions": 4,
+        "confirmed": 4,
+        "contradicted": 0,
+        "rows": [
+          {
+            "version": 1,
+            "claimed_changeset": 64426524,
+            "claimed_timestamp": "2018-11-13T02:17:57Z",
+            "actual_changeset": 64426524,
+            "actual_timestamp": "2018-11-13T02:17:57Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 2,
+            "claimed_changeset": 76365819,
+            "claimed_timestamp": "2019-10-29T21:43:19Z",
+            "actual_changeset": 76365819,
+            "actual_timestamp": "2019-10-29T21:43:19Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 3,
+            "claimed_changeset": 117872255,
+            "claimed_timestamp": "2022-02-26T08:34:21Z",
+            "actual_changeset": 117872255,
+            "actual_timestamp": "2022-02-26T08:34:21Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 4,
+            "claimed_changeset": 160014997,
+            "claimed_timestamp": "2024-12-07T03:54:49Z",
+            "actual_changeset": 160014997,
+            "actual_timestamp": "2024-12-07T03:54:49Z",
+            "outcome": "confirmed"
+          }
+        ]
+      },
+      "stale_check": {
+        "osm_current_tags_say_place_of_worship": true,
+        "osm_current_version": 4,
+        "reader_osm_stale": true,
+        "reader_status": "likely_inactive"
+      },
+      "internal_contradictions": [],
+      "claims": [
+        {
+          "claim_id": "osm:way/643590665:claude:c01",
+          "claim_type": "name",
+          "locator": "https://www.anglicanlife.org.nz/church/st-martins-loburn-rangiora-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:claude:c02",
+          "claim_type": "name",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/643590665/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 3960
+        },
+        {
+          "claim_id": "osm:way/643590665:claude:c03",
+          "claim_type": "address",
+          "locator": "https://www.anglicanlife.org.nz/church/st-martins-loburn-rangiora-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:claude:c04",
+          "claim_type": "denomination",
+          "locator": "https://www.anglicanlife.org.nz/church/st-martins-loburn-rangiora-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:claude:c05",
+          "claim_type": "organisation_link",
+          "locator": "https://anglicanliferangiora.church/",
+          "has_quote": false,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "no_quote",
+          "support_share": 0.0,
+          "value_on_page": "not_found",
+          "value_share": 0.533,
+          "page_chars": 1847
+        },
+        {
+          "claim_id": "osm:way/643590665:claude:c06",
+          "claim_type": "land_or_consecration",
+          "locator": "https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/surrounding-areas/history-of-churches-of-ashley,-loburn-and-sefton",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 12713
+        },
+        {
+          "claim_id": "osm:way/643590665:claude:c07",
+          "claim_type": "building_date",
+          "locator": "https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/surrounding-areas/history-of-churches-of-ashley,-loburn-and-sefton",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 12713
+        },
+        {
+          "claim_id": "osm:way/643590665:claude:c08",
+          "claim_type": "building_date",
+          "locator": "https://www.flickr.com/photos/philbraithwaitenz/6155056273",
+          "has_quote": true,
+          "fetch": "http_error",
+          "status": 502,
+          "error": "HTTP Error 502: Bad Gateway",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:claude:c09",
+          "claim_type": "renovation",
+          "locator": "https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/surrounding-areas/history-of-churches-of-ashley,-loburn-and-sefton",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 12713
+        },
+        {
+          "claim_id": "osm:way/643590665:claude:c10",
+          "claim_type": "other",
+          "locator": "https://www.flickr.com/photos/philbraithwaitenz/6155056273",
+          "has_quote": true,
+          "fetch": "http_error",
+          "status": 502,
+          "error": "HTTP Error 502: Bad Gateway",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:claude:c11",
+          "claim_type": "service_pattern",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/643590665/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "partially_supported",
+          "support_share": 0.714,
+          "page_chars": 3960
+        },
+        {
+          "claim_id": "osm:way/643590665:claude:c12",
+          "claim_type": "worship_ended",
+          "locator": "https://anglicanliferangiora.church/services/st-martin-s-loburn/340",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 976
+        },
+        {
+          "claim_id": "osm:way/643590665:claude:c13",
+          "claim_type": "closure_event",
+          "locator": "https://anglicanliferangiora.church/",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 1847
+        },
+        {
+          "claim_id": "osm:way/643590665:claude:c14",
+          "claim_type": "osm_object_version",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/643590665/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "partially_supported",
+          "support_share": 0.9,
+          "page_chars": 3960
+        }
+      ]
+    },
+    {
+      "dossier_id": "osm:way/643590665:codex:gpt-5.6-sol:researcher.v1:pilot-2026-09-10",
+      "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+      "validated_at": "2026-09-10T07:55:49+00:00",
+      "validator_version": "validate_dossier.v1",
+      "summary": {
+        "claims": 16,
+        "locators": 16,
+        "distinct_locators": 6,
+        "reachable": 10,
+        "distinct_reachable": 3,
+        "distinct_dead": 0,
+        "distinct_blocked": 3,
+        "dead": 0,
+        "requires_human_access": 6,
+        "http_error": 0,
+        "unreachable": 0,
+        "robots_disallowed": 0,
+        "not_fetched": 0,
+        "with_quote": 15,
+        "quote_supported": 6,
+        "quote_partial": 2,
+        "quote_not_found": 1,
+        "locator_validity_rate": 1.0,
+        "locator_reachable_rate": 0.5,
+        "locator_blocked_rate": 0.5,
+        "quote_support_rate": 0.889,
+        "quote_exact_rate": 0.667
+      },
+      "location": {
+        "candidate_to_seed_m": 0.1,
+        "candidate_to_osm_m": 0.7,
+        "within_tolerance": true
+      },
+      "version_chain": {
+        "claimed_versions": 4,
+        "actual_versions": 4,
+        "confirmed": 4,
+        "contradicted": 0,
+        "rows": [
+          {
+            "version": 1,
+            "claimed_changeset": 64426524,
+            "claimed_timestamp": "2018-11-13T02:17:57Z",
+            "actual_changeset": 64426524,
+            "actual_timestamp": "2018-11-13T02:17:57Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 2,
+            "claimed_changeset": 76365819,
+            "claimed_timestamp": "2019-10-29T21:43:19Z",
+            "actual_changeset": 76365819,
+            "actual_timestamp": "2019-10-29T21:43:19Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 3,
+            "claimed_changeset": 117872255,
+            "claimed_timestamp": "2022-02-26T08:34:21Z",
+            "actual_changeset": 117872255,
+            "actual_timestamp": "2022-02-26T08:34:21Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 4,
+            "claimed_changeset": 160014997,
+            "claimed_timestamp": "2024-12-07T03:54:49Z",
+            "actual_changeset": 160014997,
+            "actual_timestamp": "2024-12-07T03:54:49Z",
+            "outcome": "confirmed"
+          }
+        ]
+      },
+      "stale_check": {
+        "osm_current_tags_say_place_of_worship": true,
+        "osm_current_version": 4,
+        "reader_osm_stale": true,
+        "reader_status": "inactive"
+      },
+      "internal_contradictions": [],
+      "claims": [
+        {
+          "claim_id": "osm:way/643590665:codex:c01",
+          "claim_type": "name",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/643590665/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "not_found",
+          "support_share": 0.5,
+          "page_chars": 3960
+        },
+        {
+          "claim_id": "osm:way/643590665:codex:c02",
+          "claim_type": "name",
+          "locator": "https://www.anglicanlife.org.nz/church/st-martins-loburn-rangiora-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:codex:c03",
+          "claim_type": "address",
+          "locator": "https://www.anglicanlife.org.nz/church/st-martins-loburn-rangiora-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:codex:c04",
+          "claim_type": "address",
+          "locator": "https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/surrounding-areas/history-of-churches-of-ashley,-loburn-and-sefton",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 12713
+        },
+        {
+          "claim_id": "osm:way/643590665:codex:c05",
+          "claim_type": "religion",
+          "locator": "https://anglicanliferangiora.church/",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 1847
+        },
+        {
+          "claim_id": "osm:way/643590665:codex:c06",
+          "claim_type": "denomination",
+          "locator": "https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/surrounding-areas/history-of-churches-of-ashley,-loburn-and-sefton",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 12713
+        },
+        {
+          "claim_id": "osm:way/643590665:codex:c07",
+          "claim_type": "start_date",
+          "locator": "https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/surrounding-areas/history-of-churches-of-ashley,-loburn-and-sefton",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 12713
+        },
+        {
+          "claim_id": "osm:way/643590665:codex:c08",
+          "claim_type": "building_date",
+          "locator": "https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/surrounding-areas/history-of-churches-of-ashley,-loburn-and-sefton",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "partially_supported",
+          "support_share": 0.967,
+          "page_chars": 12713
+        },
+        {
+          "claim_id": "osm:way/643590665:codex:c09",
+          "claim_type": "renovation",
+          "locator": "https://waimakaririlibraries.com/heritage/local-history/places-of-the-waimakariri/surrounding-areas/history-of-churches-of-ashley,-loburn-and-sefton",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 12713
+        },
+        {
+          "claim_id": "osm:way/643590665:codex:c10",
+          "claim_type": "organisation_link",
+          "locator": "https://www.anglicanlife.org.nz/church/st-martins-loburn-rangiora-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:codex:c11",
+          "claim_type": "service_pattern",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/643590665/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "partially_supported",
+          "support_share": 0.6,
+          "page_chars": 3960
+        },
+        {
+          "claim_id": "osm:way/643590665:codex:c12",
+          "claim_type": "worship_active_asof",
+          "locator": "https://www.anglicanlife.org.nz/holy-week-and-easter-services/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:codex:c13",
+          "claim_type": "closure_event",
+          "locator": "https://www.anglicanlife.org.nz/anglican-e-life/?query-0-page=2",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:codex:c14",
+          "claim_type": "worship_ended",
+          "locator": "https://anglicanliferangiora.church/",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 1847
+        },
+        {
+          "claim_id": "osm:way/643590665:codex:c15",
+          "claim_type": "sale_or_disposal",
+          "locator": "https://www.anglicanlife.org.nz/anglican-e-life/?query-0-page=2",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:codex:c16",
+          "claim_type": "location",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/643590665/history",
+          "has_quote": false,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "no_quote",
+          "support_share": 0.0,
+          "value_on_page": "not_found",
+          "value_share": 0.0,
+          "page_chars": 3960
+        }
+      ]
+    },
+    {
+      "dossier_id": "osm:way/643590665:collaborator:JW:2026-09-09",
+      "reader": "collaborator_import:JW",
+      "validated_at": "2026-09-10T07:56:04+00:00",
+      "validator_version": "validate_dossier.v1",
+      "summary": {
+        "claims": 18,
+        "locators": 18,
+        "distinct_locators": 12,
+        "reachable": 8,
+        "distinct_reachable": 6,
+        "distinct_dead": 0,
+        "distinct_blocked": 4,
+        "dead": 0,
+        "requires_human_access": 6,
+        "http_error": 4,
+        "unreachable": 0,
+        "robots_disallowed": 0,
+        "not_fetched": 0,
+        "with_quote": 7,
+        "quote_supported": 1,
+        "quote_partial": 0,
+        "quote_not_found": 0,
+        "locator_validity_rate": 1.0,
+        "locator_reachable_rate": 0.5,
+        "locator_blocked_rate": 0.333,
+        "quote_support_rate": 1.0,
+        "quote_exact_rate": 1.0
+      },
+      "location": {
+        "note": "no candidate coordinate"
+      },
+      "version_chain": {
+        "claimed_versions": 4,
+        "actual_versions": 4,
+        "confirmed": 4,
+        "contradicted": 0,
+        "rows": [
+          {
+            "version": 1,
+            "claimed_changeset": 64426524,
+            "claimed_timestamp": "2018",
+            "actual_changeset": 64426524,
+            "actual_timestamp": "2018-11-13T02:17:57Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 2,
+            "claimed_changeset": 76365819,
+            "claimed_timestamp": "2019",
+            "actual_changeset": 76365819,
+            "actual_timestamp": "2019-10-29T21:43:19Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 3,
+            "claimed_changeset": 117872255,
+            "claimed_timestamp": "2022",
+            "actual_changeset": 117872255,
+            "actual_timestamp": "2022-02-26T08:34:21Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 4,
+            "claimed_changeset": 160014997,
+            "claimed_timestamp": "2024",
+            "actual_changeset": 160014997,
+            "actual_timestamp": "2024-12-07T03:54:49Z",
+            "outcome": "confirmed"
+          }
+        ]
+      },
+      "stale_check": {
+        "osm_current_tags_say_place_of_worship": true,
+        "osm_current_version": 4,
+        "reader_osm_stale": true,
+        "reader_status": "likely_inactive"
+      },
+      "internal_contradictions": [],
+      "claims": [
+        {
+          "claim_id": "osm:way/643590665:c01",
+          "claim_type": "osm_object_version",
+          "locator": "https://www.openstreetmap.org/way/643590665/history/1",
+          "has_quote": true,
+          "fetch": "verified_via_osm_api",
+          "status": 200,
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:c02",
+          "claim_type": "osm_object_version",
+          "locator": "https://www.openstreetmap.org/way/643590665/history/2",
+          "has_quote": true,
+          "fetch": "verified_via_osm_api",
+          "status": 200,
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:c03",
+          "claim_type": "osm_object_version",
+          "locator": "https://www.openstreetmap.org/way/643590665/history/3",
+          "has_quote": true,
+          "fetch": "verified_via_osm_api",
+          "status": 200,
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:c04",
+          "claim_type": "osm_object_version",
+          "locator": "https://www.openstreetmap.org/way/643590665/history/4",
+          "has_quote": false,
+          "fetch": "verified_via_osm_api",
+          "status": 200,
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:c05",
+          "claim_type": "worship_active_asof",
+          "locator": "https://deaths.press.co.nz/nz/obituaries/the-press-nz/name/david-douglas-obituary?id=40246376",
+          "has_quote": false,
+          "fetch": "requires_human_access",
+          "status": 403,
+          "error": "HTTP Error 403: Forbidden",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:c06",
+          "claim_type": "building_date",
+          "locator": "https://www.flickr.com/photos/philbraithwaitenz/6155056273/",
+          "has_quote": false,
+          "fetch": "http_error",
+          "status": 502,
+          "error": "HTTP Error 502: Bad Gateway",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:c07",
+          "claim_type": "renovation",
+          "locator": "https://www.flickr.com/photos/philbraithwaitenz/6155056273/",
+          "has_quote": false,
+          "fetch": "http_error",
+          "status": 502,
+          "error": "HTTP Error 502: Bad Gateway",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:c08",
+          "claim_type": "building_date",
+          "locator": "https://www.flickr.com/photos/tags/loburn/",
+          "has_quote": false,
+          "fetch": "http_error",
+          "status": 502,
+          "error": "HTTP Error 502: Bad Gateway",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:c09",
+          "claim_type": "land_or_consecration",
+          "locator": "https://www.flickr.com/photos/tags/loburn/",
+          "has_quote": false,
+          "fetch": "http_error",
+          "status": 502,
+          "error": "HTTP Error 502: Bad Gateway",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:c10",
+          "claim_type": "address",
+          "locator": "https://www.canterburystories.nz/collections/community/simon-daisley-collection/ccl-cs-84919",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 403,
+          "error": "HTTP Error 403: Forbidden",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:c11",
+          "claim_type": "worship_active_asof",
+          "locator": "https://anglicanliferangiora.church/services/st-martin-s-loburn/340",
+          "has_quote": false,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "no_quote",
+          "support_share": 0.0,
+          "value_on_page": "not_found",
+          "value_share": 0.147,
+          "page_chars": 976
+        },
+        {
+          "claim_id": "osm:way/643590665:c12",
+          "claim_type": "service_pattern",
+          "locator": "https://anglicanliferangiora.church/services/st-martin-s-loburn/340",
+          "has_quote": false,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "no_quote",
+          "support_share": 0.0,
+          "value_on_page": "not_found",
+          "value_share": 0.147,
+          "page_chars": 976
+        },
+        {
+          "claim_id": "osm:way/643590665:c13",
+          "claim_type": "closure_event",
+          "locator": "https://anglicanliferangiora.church/services/st-martin-s-loburn/340",
+          "has_quote": false,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "no_quote",
+          "support_share": 0.0,
+          "value_on_page": "not_found",
+          "value_share": 0.147,
+          "page_chars": 976
+        },
+        {
+          "claim_id": "osm:way/643590665:c14",
+          "claim_type": "organisation_link",
+          "locator": "https://www.anglicanlife.org.nz/church/st-martins-loburn-rangiora-parish/",
+          "has_quote": false,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:c15",
+          "claim_type": "address",
+          "locator": "https://www.anglicanlife.org.nz/church/st-martins-loburn-rangiora-parish/",
+          "has_quote": false,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:c16",
+          "claim_type": "sale_or_disposal",
+          "locator": "https://www.anglicanlife.org.nz/anglican-e-life/?query-0-page=2",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:c17",
+          "claim_type": "worship_ended",
+          "locator": "https://www.anglicanlife.org.nz/anglican-e-life/?query-0-page=2",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/643590665:c18",
+          "claim_type": "closure_event",
+          "locator": "https://anglicanliferangiora.church/",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 1847
+        }
+      ]
+    }
+  ],
+  "agreement": {
+    "readers": [
+      "claude:claude:opus:researcher.v1",
+      "codex:codex:gpt-5.6-sol:researcher.v1",
+      "collaborator_import:JW"
+    ],
+    "claim_types_compared": 9,
+    "agreed": 7,
+    "majority": 0,
+    "disagreed": 2,
+    "single_reader": 3,
+    "not_comparable": 1,
+    "agreement_rate": 0.778,
+    "majority_rate": 0.778,
+    "escalate_to_human": [
+      "address",
+      "name"
+    ],
+    "rows": [
+      {
+        "claim_type": "address",
+        "outcome": "disagree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "84 Hodgsons Road, Loburn, Rangiora 7472"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "84 Hodgsons Road, Loburn, Rangiora 7472"
+          },
+          {
+            "reader": "collaborator_import:JW",
+            "value": "Canterbury Stories catalogues a colour photograph as “St Martin's Anglican Church (84 Hodgsons Road), Loburn”, under Anglican churches, Anglicanism and Christianity. Photographer/contributor: Simon Daisley; identifier CCL-DW-155391."
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: exact; claude:claude:opus:researcher.v1 vs collaborator_import:JW: jaccard 0.13; codex:codex:gpt-5.6-sol:researcher.v1 vs collaborator_import:JW: jaccard 0.13"
+      },
+      {
+        "claim_type": "building_date",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Church built in 1891"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Current one-room weatherboard church built in 1891"
+          },
+          {
+            "reader": "collaborator_import:JW",
+            "value": "Photograph identifies the building as the Church of St Martin, Loburn. Caption states that the one-room weatherboard Anglican church was built in 1891 and underwent renovations in 1988–89."
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: years [1891] vs [1891]; claude:claude:opus:researcher.v1 vs collaborator_import:JW: years [1891] vs [1891, 1988]; codex:codex:gpt-5.6-sol:researcher.v1 vs collaborator_import:JW: years [1891] vs [1891, 1988]"
+      },
+      {
+        "claim_type": "candidate_location",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "-43.249232,172.528555"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "-43.249232,172.528555"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: 0 m apart"
+      },
+      {
+        "claim_type": "closure_event",
+        "outcome": "not_comparable",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "St Martin's Loburn has the status 'Closed' on the parish home page; no service times are given for it"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "A Service of Thanksgiving and Praise for Ministry was held on 21 May 2026 as part of the church’s final services"
+          },
+          {
+            "reader": "collaborator_import:JW",
+            "value": "Rangiora parish page describes St Martin's as on Hodgsons Road and says services were held 10:00 am every Sunday except the 2nd and 5th Sundays, with Communion on the 1st and 3rd Sundays."
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: no parseable year on one side; claude:claude:opus:researcher.v1 vs collaborator_import:JW: no parseable year on one side; codex:codex:gpt-5.6-sol:researcher.v1 vs collaborator_import:JW: no parseable year on one side"
+      },
+      {
+        "claim_type": "current_status",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "likely_inactive"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "inactive"
+          },
+          {
+            "reader": "collaborator_import:JW",
+            "value": "likely_inactive"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: status group; claude:claude:opus:researcher.v1 vs collaborator_import:JW: status group; codex:codex:gpt-5.6-sol:researcher.v1 vs collaborator_import:JW: status group"
+      },
+      {
+        "claim_type": "denomination",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Anglican (Christian); parish church of the Anglican Diocese of Christchurch"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Anglican"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: jaccard 0.12"
+      },
+      {
+        "claim_type": "land_or_consecration",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Land for the church was bought in 1878"
+          },
+          {
+            "reader": "collaborator_import:JW",
+            "value": "A separate Loburn historical caption reports that the Anglican Diocese acquired land for a church in 1878, St Martin's was built in 1891, and the churchyard was consecrated in 1907 by [person_name withheld]."
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs collaborator_import:JW: years [1878] vs [1878, 1891, 1907]"
+      },
+      {
+        "claim_type": "location",
+        "outcome": "single_reader",
+        "values": [
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Approximate building centre: -43.249232, 172.528555"
+          }
+        ],
+        "detail": ""
+      },
+      {
+        "claim_type": "name",
+        "outcome": "disagree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "St Martin's – Loburn (Rangiora Parish)"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "St Martin's Anglican Church"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: jaccard 0.38"
+      },
+      {
+        "claim_type": "religion",
+        "outcome": "single_reader",
+        "values": [
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Christian"
+          }
+        ],
+        "detail": ""
+      },
+      {
+        "claim_type": "sale_or_disposal",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Approved for sale by May 2026"
+          },
+          {
+            "reader": "collaborator_import:JW",
+            "value": "Anglican e-Life announced a Service of Thanksgiving and Praise for Ministry at St Martin's on 21 May 2026 and stated that the church “has been approved for sale.”"
+          }
+        ],
+        "detail": "codex:codex:gpt-5.6-sol:researcher.v1 vs collaborator_import:JW: years [2026] vs [2026]"
+      },
+      {
+        "claim_type": "start_date",
+        "outcome": "single_reader",
+        "values": [
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "1891"
+          }
+        ],
+        "detail": ""
+      },
+      {
+        "claim_type": "worship_ended",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "The parish lists St Martin's Loburn as closed and says its congregation now meets at St John's Rangiora"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Closed by 10 September 2026"
+          },
+          {
+            "reader": "collaborator_import:JW",
+            "value": "The following Anglican e-Life issue reports attendance at the Thanksgiving and Praise service and describes it as part of “a sequence of final services for this church.”"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: no parseable year on one side; claude:claude:opus:researcher.v1 vs collaborator_import:JW: no parseable year on one side; codex:codex:gpt-5.6-sol:researcher.v1 vs collaborator_import:JW: years [2026] vs [2026]"
+      },
+      {
+        "claim_type": "organisation_link",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Anglican Parish of Rangiora (Anglican Life Rangiora). St Martin's Loburn is listed as one of the parish's three centres, with St John's Rangiora and St Matthew's Fernside."
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Rangiora Parish, Anglican Diocese of Christchurch"
+          },
+          {
+            "reader": "collaborator_import:JW",
+            "value": "Anglican Diocese directory identifies St Martin's – Loburn – Rangiora Parish at 84 Hodgsons Road, Loburn, Rangiora 7472. It lists the parish website, [person_name withheld] as vicar, mobile [phone withheld], and [email withheld]."
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      },
+      {
+        "claim_type": "renovation",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Renovated 1988–89"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Renovations in 1988–1989"
+          },
+          {
+            "reader": "collaborator_import:JW",
+            "value": "Photograph identifies the building as the Church of St Martin, Loburn. Caption states that the one-room weatherboard Anglican church was built in 1891 and underwent renovations in 1988–89."
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      },
+      {
+        "claim_type": "service_pattern",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Services on the 1st, 3rd and 4th Sundays at 10 am, as recorded in OSM in 2018"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "First, third and fourth Sundays at 10:00"
+          },
+          {
+            "reader": "collaborator_import:JW",
+            "value": "Rangiora parish page describes St Martin's as on Hodgsons Road and says services were held 10:00 am every Sunday except the 2nd and 5th Sundays, with Communion on the 1st and 3rd Sundays."
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      },
+      {
+        "claim_type": "worship_active_asof",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Easter Sunday Communion held at 10:00 on 20 April 2025"
+          },
+          {
+            "reader": "collaborator_import:JW",
+            "value": "The Press obituary for David Robinson Douglas states that his funeral service was to be held at St Martin's Anglican Church, Hodgsons Road, Loburn, on 17 April 2013."
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      }
+    ]
+  },
+  "requests_made": 19
+}

@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://religionmap.org/schemas/agent-dossier.v1.json",
+  "title": "Agent research dossier, version 1",
+  "description": "One place, one reader, one run. A dossier is a lead file: every claim carries a source locator and a quoted support so a deterministic validator and then a human can check it. Nothing in a dossier is a validation state (ruling R-A1, 2026-09-04). Personal details of living people are quarantined at capture and stripped before the file leaves the run directory.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "dossier_id",
+    "place",
+    "candidate_location",
+    "claims",
+    "status_assessment",
+    "osm_version_chain",
+    "personal_details_quarantine",
+    "provenance",
+    "run_manifest"
+  ],
+  "properties": {
+    "schema_version": { "const": "agent-dossier.v1" },
+    "dossier_id": {
+      "type": "string",
+      "description": "Stable id: <place ref>:<reader id>:<run id>.",
+      "minLength": 8
+    },
+    "place": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["place_ref", "name", "country_code", "seed_latitude", "seed_longitude", "seed_source"],
+      "properties": {
+        "place_ref": {
+          "type": "string",
+          "description": "osm:<type>/<id> for an OSM-seeded place, or new:<slug> for a place absent from OSM.",
+          "pattern": "^(osm:(node|way|relation)/[0-9]+|new:[a-z0-9-]+)$"
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "country_code": { "type": "string", "pattern": "^[A-Z]{2}$" },
+        "seed_latitude": { "type": "number", "minimum": -90, "maximum": 90 },
+        "seed_longitude": { "type": "number", "minimum": -180, "maximum": 180 },
+        "seed_source": {
+          "type": "string",
+          "description": "The edition the seed came from, e.g. nz_places.geojson extracted 2025-08-20, so the idempotency key names the edition."
+        },
+        "seed_tags": { "type": "object", "description": "OSM tags at seed time, as given." }
+      }
+    },
+    "candidate_location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["latitude", "longitude", "basis"],
+      "properties": {
+        "latitude": { "type": ["number", "null"], "minimum": -90, "maximum": 90 },
+        "longitude": { "type": ["number", "null"], "minimum": -180, "maximum": 180 },
+        "basis": {
+          "type": "string",
+          "enum": ["osm_object", "address_geocode", "source_map_or_photo", "imagery", "reader_inference", "not_assessed"]
+        },
+        "basis_note": { "type": "string" },
+        "uncertainty_radius_m": { "type": ["number", "null"], "minimum": 0 },
+        "address": { "type": ["string", "null"] }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/claim" }
+    },
+    "status_assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["current_status", "basis", "asof_date", "supporting_claim_ids", "osm_stale"],
+      "properties": {
+        "current_status": {
+          "type": "string",
+          "enum": ["active", "likely_active", "likely_inactive", "inactive", "unknown"]
+        },
+        "basis": { "type": "string", "minLength": 1 },
+        "asof_date": { "type": "string", "pattern": "^[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?$" },
+        "supporting_claim_ids": { "type": "array", "items": { "type": "string" } },
+        "osm_stale": {
+          "type": ["boolean", "null"],
+          "description": "True when the reader judges the current OSM object no longer describes the site; null when not assessed."
+        },
+        "osm_stale_basis": { "type": "string" }
+      }
+    },
+    "osm_version_chain": {
+      "type": "array",
+      "description": "The OSM object's versions as the reader found them. Timestamps are exact only when read from the OSM API; the validator fills exact values.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["version", "locator"],
+        "properties": {
+          "version": { "type": "integer", "minimum": 1 },
+          "changeset": { "type": ["integer", "null"] },
+          "timestamp": { "type": ["string", "null"] },
+          "timestamp_basis": { "type": "string", "enum": ["osm_api", "page_reading", "approximate", "unknown"] },
+          "tags_summary": { "type": "string" },
+          "change_note": { "type": "string" },
+          "locator": { "type": "string", "format": "uri" }
+        }
+      }
+    },
+    "personal_details_quarantine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["redacted", "item_count", "items"],
+      "properties": {
+        "redacted": {
+          "type": "boolean",
+          "description": "True once the quarantined values have been stripped; a committed dossier must be redacted."
+        },
+        "item_count": { "type": "integer", "minimum": 0 },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "context_claim_id"],
+            "properties": {
+              "kind": { "type": "string", "enum": ["person_name", "phone", "email", "other"] },
+              "context_claim_id": { "type": ["string", "null"] },
+              "value": { "type": "string", "description": "Present only before redaction; never committed." },
+              "value_sha256": { "type": "string", "description": "Hash of the stripped value so a later run can tell whether the same detail recurred." }
+            }
+          }
+        },
+        "note": { "type": "string" }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["producer", "ai_generated"],
+      "properties": {
+        "producer": { "type": "string", "enum": ["agent_reader", "collaborator_import", "human"] },
+        "ai_generated": { "type": "boolean" },
+        "produced_by": { "type": "string", "description": "Reader id, or the collaborator's initials for an import." },
+        "imported_from": { "type": "string", "description": "File name and sheet for an import." },
+        "lane": { "type": "string", "enum": ["agent_autonomous", "agent_assisted"] }
+      }
+    },
+    "run_manifest": { "$ref": "#/$defs/run_manifest" },
+    "validation": {
+      "type": "object",
+      "description": "Added by validate_dossier.py; absent on a fresh dossier.",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["claim_id", "claim_type", "value", "source", "quoted_support", "evidential_weight", "reader", "confidence"],
+      "properties": {
+        "claim_id": { "type": "string", "minLength": 1 },
+        "claim_type": {
+          "type": "string",
+          "enum": [
+            "name",
+            "address",
+            "religion",
+            "denomination",
+            "start_date",
+            "building_date",
+            "renovation",
+            "worship_active_asof",
+            "worship_ended",
+            "closure_event",
+            "sale_or_disposal",
+            "service_pattern",
+            "organisation_link",
+            "land_or_consecration",
+            "location",
+            "osm_object_version",
+            "other"
+          ]
+        },
+        "value": { "type": "string", "minLength": 1 },
+        "value_structured": { "type": "object" },
+        "date_start": { "type": ["string", "null"], "pattern": "^[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?$" },
+        "date_end": { "type": ["string", "null"], "pattern": "^[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?$" },
+        "date_precision": { "type": "string", "enum": ["day", "month", "year", "approximate", "unknown"] },
+        "source": { "$ref": "#/$defs/source" },
+        "quoted_support": {
+          "type": "string",
+          "maxLength": 600,
+          "description": "Verbatim text from the source page that supports the value. May be empty only when the source is not textual; an empty quote makes the claim a lead."
+        },
+        "evidential_weight": {
+          "type": "string",
+          "enum": ["primary_institutional", "contemporary_report", "secondary", "user_contributed", "inferred"]
+        },
+        "reader": { "$ref": "#/$defs/reader" },
+        "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+        "note": { "type": "string" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["locator", "source_name", "source_type", "retrieved_at"],
+      "properties": {
+        "locator": { "type": "string", "minLength": 1, "description": "A URL, or archive:<ref> for an offline source." },
+        "source_name": { "type": "string", "minLength": 1 },
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "osm",
+            "newspaper",
+            "photograph_caption",
+            "heritage_register",
+            "church_website",
+            "diocesan_publication",
+            "directory",
+            "archive_collection",
+            "wikidata",
+            "wikipedia",
+            "charity_register",
+            "council_or_government",
+            "other"
+          ]
+        },
+        "source_date": { "type": ["string", "null"], "description": "The date the source itself bears, as printed; distinct from retrieval." },
+        "source_date_basis": { "type": "string", "enum": ["printed", "metadata", "inferred", "not_stated"] },
+        "retrieved_at": { "type": "string", "description": "ISO date or datetime of retrieval." },
+        "licence_note": { "type": "string" }
+      }
+    },
+    "reader": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reader_id", "backend", "model_id", "prompt_version"],
+      "properties": {
+        "reader_id": { "type": "string", "minLength": 1 },
+        "backend": { "type": "string", "enum": ["claude", "codex", "openrouter", "collaborator_import", "human"] },
+        "model_id": { "type": "string", "minLength": 1 },
+        "prompt_version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "run_manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["run_id", "backend", "model_id_requested", "model_id_reported", "prompt_version", "started_at", "ended_at", "idempotency_key", "cost_basis"],
+      "properties": {
+        "run_id": { "type": "string", "minLength": 1 },
+        "backend": { "type": "string", "enum": ["claude", "codex", "openrouter", "collaborator_import", "human"] },
+        "model_id_requested": { "type": "string" },
+        "model_id_reported": { "type": ["string", "null"], "description": "The model id the tool reported, or null when the tool reported none." },
+        "prompt_version": { "type": "string" },
+        "started_at": { "type": "string" },
+        "ended_at": { "type": "string" },
+        "duration_s": { "type": ["number", "null"] },
+        "usage": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "input_tokens": { "type": ["integer", "null"] },
+            "cached_input_tokens": { "type": ["integer", "null"] },
+            "output_tokens": { "type": ["integer", "null"] },
+            "reasoning_tokens": { "type": ["integer", "null"] },
+            "web_search_requests": { "type": ["integer", "null"] },
+            "web_fetch_requests": { "type": ["integer", "null"] }
+          }
+        },
+        "cost_usd_reported": { "type": ["number", "null"] },
+        "cost_basis": {
+          "type": "string",
+          "enum": ["tool_list_price", "api_invoice", "subscription_unmetered", "collaborator_reported", "unknown"],
+          "description": "tool_list_price: the CLI's own list-price estimate; subscription_unmetered: covered by a plan, no per-run charge visible."
+        },
+        "idempotency_key": {
+          "type": "string",
+          "description": "sha256 of place_ref | prompt_version | model_id_requested | seed_source."
+        },
+        "allowlist_version": { "type": "string" },
+        "tool_permissions": { "type": "array", "items": { "type": "string" } },
+        "exit_status": { "type": "string", "enum": ["completed", "failed", "timed_out", "not_run"] },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}

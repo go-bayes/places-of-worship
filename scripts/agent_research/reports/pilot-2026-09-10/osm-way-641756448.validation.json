@@ -1,0 +1,678 @@
+{
+  "place_ref": "osm:way/641756448",
+  "name": "St Columba's Anglican Church - Hawarden",
+  "validated_at": "2026-09-10T07:56:42+00:00",
+  "osm": {
+    "centroid": [
+      -42.883269675,
+      172.63480365
+    ],
+    "version": 2,
+    "amenity": "place_of_worship",
+    "history_versions": [
+      [
+        1,
+        64251163,
+        "2018-11-07T04:14:57Z"
+      ],
+      [
+        2,
+        160015648,
+        "2024-12-07T04:46:30Z"
+      ]
+    ],
+    "seed_to_osm_m": 2.4,
+    "error": null
+  },
+  "dossiers": [
+    {
+      "dossier_id": "osm:way/641756448:claude:opus:researcher.v1:pilot-2026-09-10",
+      "reader": "claude:claude:opus:researcher.v1",
+      "validated_at": "2026-09-10T07:56:18+00:00",
+      "validator_version": "validate_dossier.v1",
+      "summary": {
+        "claims": 13,
+        "locators": 13,
+        "distinct_locators": 4,
+        "reachable": 6,
+        "distinct_reachable": 2,
+        "distinct_dead": 0,
+        "distinct_blocked": 2,
+        "dead": 0,
+        "requires_human_access": 7,
+        "http_error": 0,
+        "unreachable": 0,
+        "robots_disallowed": 0,
+        "not_fetched": 0,
+        "with_quote": 12,
+        "quote_supported": 0,
+        "quote_partial": 0,
+        "quote_not_found": 0,
+        "locator_validity_rate": 1.0,
+        "locator_reachable_rate": 0.5,
+        "locator_blocked_rate": 0.5,
+        "quote_support_rate": null,
+        "quote_exact_rate": null
+      },
+      "location": {
+        "candidate_to_seed_m": 0.1,
+        "candidate_to_osm_m": 2.4,
+        "within_tolerance": true
+      },
+      "version_chain": {
+        "claimed_versions": 2,
+        "actual_versions": 2,
+        "confirmed": 2,
+        "contradicted": 0,
+        "rows": [
+          {
+            "version": 1,
+            "claimed_changeset": 64251163,
+            "claimed_timestamp": "2018-11-07T04:14:57Z",
+            "actual_changeset": 64251163,
+            "actual_timestamp": "2018-11-07T04:14:57Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 2,
+            "claimed_changeset": 160015648,
+            "claimed_timestamp": "2024-12-07T04:46:30Z",
+            "actual_changeset": 160015648,
+            "actual_timestamp": "2024-12-07T04:46:30Z",
+            "outcome": "confirmed"
+          }
+        ]
+      },
+      "stale_check": {
+        "osm_current_tags_say_place_of_worship": true,
+        "osm_current_version": 2,
+        "reader_osm_stale": true,
+        "reader_status": "inactive"
+      },
+      "internal_contradictions": [],
+      "claims": [
+        {
+          "claim_id": "osm:way/641756448:claude:c01",
+          "claim_type": "name",
+          "locator": "https://www.openstreetmap.org/way/641756448/history",
+          "has_quote": true,
+          "fetch": "verified_via_osm_api",
+          "status": 200,
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641756448:claude:c02",
+          "claim_type": "name",
+          "locator": "https://www.barryconnordesign.co.nz/stcolumba-schurch",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 403,
+          "error": "HTTP Error 403: Forbidden",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641756448:claude:c03",
+          "claim_type": "address",
+          "locator": "https://www.openstreetmap.org/way/641756448/history",
+          "has_quote": true,
+          "fetch": "verified_via_osm_api",
+          "status": 200,
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641756448:claude:c04",
+          "claim_type": "location",
+          "locator": "https://www.barryconnordesign.co.nz/st-columbas-hall",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 403,
+          "error": "HTTP Error 403: Forbidden",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641756448:claude:c05",
+          "claim_type": "religion",
+          "locator": "https://www.openstreetmap.org/way/641756448/history",
+          "has_quote": true,
+          "fetch": "verified_via_osm_api",
+          "status": 200,
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641756448:claude:c06",
+          "claim_type": "denomination",
+          "locator": "https://www.openstreetmap.org/way/641756448/history",
+          "has_quote": true,
+          "fetch": "verified_via_osm_api",
+          "status": 200,
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641756448:claude:c07",
+          "claim_type": "start_date",
+          "locator": "https://www.openstreetmap.org/way/641756448/history",
+          "has_quote": true,
+          "fetch": "verified_via_osm_api",
+          "status": 200,
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641756448:claude:c08",
+          "claim_type": "building_date",
+          "locator": "https://www.barryconnordesign.co.nz/st-columbas-hall",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 403,
+          "error": "HTTP Error 403: Forbidden",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641756448:claude:c09",
+          "claim_type": "land_or_consecration",
+          "locator": "https://www.barryconnordesign.co.nz/st-columbas-hall",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 403,
+          "error": "HTTP Error 403: Forbidden",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641756448:claude:c10",
+          "claim_type": "worship_ended",
+          "locator": "https://www.barryconnordesign.co.nz/st-columbas-hall",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 403,
+          "error": "HTTP Error 403: Forbidden",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641756448:claude:c11",
+          "claim_type": "sale_or_disposal",
+          "locator": "https://www.barryconnordesign.co.nz/st-columbas-hall",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 403,
+          "error": "HTTP Error 403: Forbidden",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641756448:claude:c12",
+          "claim_type": "renovation",
+          "locator": "https://www.barryconnordesign.co.nz/stcolumba-schurch",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 403,
+          "error": "HTTP Error 403: Forbidden",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641756448:claude:c13",
+          "claim_type": "osm_object_version",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/641756448/history",
+          "has_quote": false,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "no_quote",
+          "support_share": 0.0,
+          "value_on_page": "not_found",
+          "value_share": 0.273,
+          "page_chars": 1802
+        }
+      ]
+    },
+    {
+      "dossier_id": "osm:way/641756448:codex:gpt-5.6-sol:researcher.v1:pilot-2026-09-10",
+      "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+      "validated_at": "2026-09-10T07:56:42+00:00",
+      "validator_version": "validate_dossier.v1",
+      "summary": {
+        "claims": 12,
+        "locators": 12,
+        "distinct_locators": 6,
+        "reachable": 10,
+        "distinct_reachable": 4,
+        "distinct_dead": 0,
+        "distinct_blocked": 2,
+        "dead": 0,
+        "requires_human_access": 2,
+        "http_error": 0,
+        "unreachable": 0,
+        "robots_disallowed": 0,
+        "not_fetched": 0,
+        "with_quote": 12,
+        "quote_supported": 4,
+        "quote_partial": 1,
+        "quote_not_found": 5,
+        "locator_validity_rate": 1.0,
+        "locator_reachable_rate": 0.667,
+        "locator_blocked_rate": 0.333,
+        "quote_support_rate": 0.5,
+        "quote_exact_rate": 0.4
+      },
+      "location": {
+        "candidate_to_seed_m": 2.5,
+        "candidate_to_osm_m": 0.0,
+        "within_tolerance": true
+      },
+      "version_chain": {
+        "claimed_versions": 2,
+        "actual_versions": 2,
+        "confirmed": 2,
+        "contradicted": 0,
+        "rows": [
+          {
+            "version": 1,
+            "claimed_changeset": 64251163,
+            "claimed_timestamp": "2018-11-07T04:14:57Z",
+            "actual_changeset": 64251163,
+            "actual_timestamp": "2018-11-07T04:14:57Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 2,
+            "claimed_changeset": 160015648,
+            "claimed_timestamp": "2024-12-07T04:46:30Z",
+            "actual_changeset": 160015648,
+            "actual_timestamp": "2024-12-07T04:46:30Z",
+            "outcome": "confirmed"
+          }
+        ]
+      },
+      "stale_check": {
+        "osm_current_tags_say_place_of_worship": true,
+        "osm_current_version": 2,
+        "reader_osm_stale": true,
+        "reader_status": "inactive"
+      },
+      "internal_contradictions": [],
+      "claims": [
+        {
+          "claim_id": "osm:way/641756448:codex:c01",
+          "claim_type": "name",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/641756448/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "not_found",
+          "support_share": 0.556,
+          "page_chars": 1802
+        },
+        {
+          "claim_id": "osm:way/641756448:codex:c02",
+          "claim_type": "address",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/641756448/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "not_found",
+          "support_share": 0.444,
+          "page_chars": 1802
+        },
+        {
+          "claim_id": "osm:way/641756448:codex:c03",
+          "claim_type": "religion",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/641756448/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "not_found",
+          "support_share": 0.0,
+          "page_chars": 1802
+        },
+        {
+          "claim_id": "osm:way/641756448:codex:c04",
+          "claim_type": "denomination",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/641756448/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "not_found",
+          "support_share": 0.0,
+          "page_chars": 1802
+        },
+        {
+          "claim_id": "osm:way/641756448:codex:c05",
+          "claim_type": "building_date",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/641756448/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "not_found",
+          "support_share": 0.2,
+          "page_chars": 1802
+        },
+        {
+          "claim_id": "osm:way/641756448:codex:c06",
+          "claim_type": "location",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/641756448/full",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "partially_supported",
+          "support_share": 0.87,
+          "page_chars": 1753
+        },
+        {
+          "claim_id": "osm:way/641756448:codex:c07",
+          "claim_type": "worship_active_asof",
+          "locator": "https://paperspast.natlib.govt.nz/newspapers/SUNCH19141205.2.90.2",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/641756448:codex:c08",
+          "claim_type": "sale_or_disposal",
+          "locator": "https://essencemagazine.co.nz/stories/changing-the-church-hawarden",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 5496
+        },
+        {
+          "claim_id": "osm:way/641756448:codex:c09",
+          "claim_type": "worship_ended",
+          "locator": "https://essencemagazine.co.nz/stories/changing-the-church-hawarden",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 5496
+        },
+        {
+          "claim_id": "osm:way/641756448:codex:c10",
+          "claim_type": "renovation",
+          "locator": "https://essencemagazine.co.nz/stories/changing-the-church-hawarden",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 5496
+        },
+        {
+          "claim_id": "osm:way/641756448:codex:c11",
+          "claim_type": "service_pattern",
+          "locator": "https://www.nextsteps.org.nz/listing-item/glenmark-and-waikari-anglican-church/",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 2105
+        },
+        {
+          "claim_id": "osm:way/641756448:codex:c12",
+          "claim_type": "organisation_link",
+          "locator": "https://www.anglicanlife.org.nz/find-a-church/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        }
+      ]
+    }
+  ],
+  "agreement": {
+    "readers": [
+      "claude:claude:opus:researcher.v1",
+      "codex:codex:gpt-5.6-sol:researcher.v1"
+    ],
+    "claim_types_compared": 9,
+    "agreed": 7,
+    "majority": 0,
+    "disagreed": 2,
+    "single_reader": 2,
+    "not_comparable": 1,
+    "agreement_rate": 0.778,
+    "majority_rate": 0.778,
+    "escalate_to_human": [
+      "building_date",
+      "worship_ended"
+    ],
+    "rows": [
+      {
+        "claim_type": "address",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Corner of Horsley Down Road and Medbury Road; 952 Medbury Road; Hawarden 7385; Hurunui District"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Corner of Horsley Down Road and Medbury Road; also tagged 952 Medbury Road, Hawarden, Hurunui 7385"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: jaccard 0.79"
+      },
+      {
+        "claim_type": "building_date",
+        "outcome": "disagree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Parish hall (St Columba's Hall) built 1955; this is not the church building"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "1905"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: years [1955] vs [1905]"
+      },
+      {
+        "claim_type": "candidate_location",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "-42.88326,172.634777"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "-42.88327,172.634804"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: 2 m apart"
+      },
+      {
+        "claim_type": "current_status",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "inactive"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "inactive"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: status group"
+      },
+      {
+        "claim_type": "denomination",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "anglican"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Anglican"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: exact"
+      },
+      {
+        "claim_type": "land_or_consecration",
+        "outcome": "single_reader",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Church and hall deconsecrated in 2011"
+          }
+        ],
+        "detail": ""
+      },
+      {
+        "claim_type": "location",
+        "outcome": "not_comparable",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Church and hall stand in the rural township of Horsley Down(s), near Hawarden, North Canterbury"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Approximate building centroid: latitude -42.883270, longitude 172.634804"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: coordinates missing on one side"
+      },
+      {
+        "claim_type": "name",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "St Columba's Anglican Church - Hawarden"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "St Columba's Anglican Church - Hawarden"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: exact"
+      },
+      {
+        "claim_type": "religion",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "christian"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Christian"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: exact"
+      },
+      {
+        "claim_type": "sale_or_disposal",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Site bought by private owners in 2019"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "The former St Columba church property was offered for sale and purchased in 2019."
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: years [2019] vs [2019]"
+      },
+      {
+        "claim_type": "start_date",
+        "outcome": "single_reader",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "1905"
+          }
+        ],
+        "detail": ""
+      },
+      {
+        "claim_type": "worship_ended",
+        "outcome": "disagree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Anglican worship ended by 2011, when the church was deconsecrated"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Anglican worship at St Columba had ended by the property's sale in 2019."
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: years [2011] vs [2019]"
+      },
+      {
+        "claim_type": "organisation_link",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "The Anglican ministry unit serving this area is Glenmark-Waikari Parish in the Anglican Diocese of Christchurch."
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      },
+      {
+        "claim_type": "renovation",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Hall converted to a residence; church planned to become a three-bedroom family home, with a mezzanine master suite above the former altar"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "After the 2019 purchase, the associated church hall was adapted toward modern residential use."
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      },
+      {
+        "claim_type": "service_pattern",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Current Anglican provision described for Hawarden is a fourth-Sunday combined service with Presbyterians at St James, rather than at St Columba."
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      },
+      {
+        "claim_type": "worship_active_asof",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "St Columba at Horsley Downs appeared in a published church notice."
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      }
+    ]
+  },
+  "requests_made": 13
+}

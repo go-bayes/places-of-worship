@@ -1,0 +1,539 @@
+{
+  "schema_version": "agent-dossier.v1",
+  "dossier_id": "osm:way/532228563:codex:gpt-5.6-sol:researcher.v1:pilot-2026-09-10",
+  "place": {
+    "place_ref": "osm:way/532228563",
+    "name": "St Chad's Anglican Church - North Linwood",
+    "country_code": "NZ",
+    "seed_latitude": -43.52817655384615,
+    "seed_longitude": 172.67937441538464,
+    "seed_source": "nz_places.geojson (overpass extract 2025-08-20)",
+    "seed_tags": {
+      "amenity": "place_of_worship",
+      "religion": "christian",
+      "denomination": "anglican"
+    }
+  },
+  "candidate_location": {
+    "latitude": -43.528177,
+    "longitude": 172.679374,
+    "basis": "osm_object",
+    "basis_note": "Seed coordinate for OSM way 532228563; the way is consistently identified as the church at 1 Carnarvon Street, but node coordinates were not independently extracted.",
+    "uncertainty_radius_m": 15,
+    "address": "1 Carnarvon Street, Linwood, Christchurch 8062, New Zealand"
+  },
+  "claims": [
+    {
+      "claim_id": "osm:way/532228563:codex:c01",
+      "claim_type": "name",
+      "value": "St Chad’s Church—Linwood",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+        "source_name": "Anglican Life church directory",
+        "source_type": "diocesan_publication",
+        "source_date": "2024",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Chad’s Church—Linwood—Linwood-Aranui Parish",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Institutional current-form name; the seeded OSM name adds “Anglican Church - North Linwood”."
+    },
+    {
+      "claim_id": "osm:way/532228563:codex:c02",
+      "claim_type": "address",
+      "value": "1 Carnarvon Street, Linwood, Christchurch 8062",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+        "source_name": "Anglican Life church directory",
+        "source_type": "diocesan_publication",
+        "source_date": "2024",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "1 Carnarvon Street, Linwood, Christchurch, New Zealand",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The directory separately prints postcode 8062."
+    },
+    {
+      "claim_id": "osm:way/532228563:codex:c03",
+      "claim_type": "address",
+      "value": "1 Carnarvon Street",
+      "date_start": "2023",
+      "date_end": null,
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.ccc.govt.nz/assets/Documents/The-Council/Plans-Strategies-Policies-Bylaws/Plans/district-plan/Proposed-changes/2023/PC14/Provisions/Plan-Change-14-HBC-NOTIFICATION-Sub-chapter-6.5-Scheduled-Activities.pdf",
+        "source_name": "Christchurch District Plan scheduled activities",
+        "source_type": "council_or_government",
+        "source_date": "2023",
+        "source_date_basis": "inferred",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Chads Church and Hall | 1 Carnarvon Street | Lot 2 DP 378215",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Council schedule independently associates the church and hall with this address and legal parcel."
+    },
+    {
+      "claim_id": "osm:way/532228563:codex:c04",
+      "claim_type": "religion",
+      "value": "Christian",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history",
+        "source_name": "OpenStreetMap way history API",
+        "source_type": "osm",
+        "source_date": "2026-03-21",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "<tag k=\"religion\" v=\"christian\"/>",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Consistent with the diocesan institutional listing."
+    },
+    {
+      "claim_id": "osm:way/532228563:codex:c05",
+      "claim_type": "denomination",
+      "value": "Anglican",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history",
+        "source_name": "OpenStreetMap way history API",
+        "source_type": "osm",
+        "source_date": "2026-03-21",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "<tag k=\"denomination\" v=\"anglican\"/>",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Corroborated by its listing on the Anglican Diocese of Christchurch website."
+    },
+    {
+      "claim_id": "osm:way/532228563:codex:c06",
+      "claim_type": "start_date",
+      "value": "Approximately 1907",
+      "date_start": "1907",
+      "date_end": "1907",
+      "date_precision": "approximate",
+      "source": {
+        "locator": "https://paperspast.natlib.govt.nz/newspapers?items_per_page=100&page=4&query=st+paul's+church&snippet=false&sort_by=byTY.rev",
+        "source_name": "Press photograph caption, 5 September 1959",
+        "source_type": "photograph_caption",
+        "source_date": "1959-09-05",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "The foundation stone was laid in February, 1957, when the jubilee of St. Chad’s was celebrated.",
+      "evidential_weight": "inferred",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "medium",
+      "note": "A 1957 jubilee implies a 1907 foundation or commencement, but the caption does not define precisely what anniversary was observed."
+    },
+    {
+      "claim_id": "osm:way/532228563:codex:c07",
+      "claim_type": "worship_active_asof",
+      "value": "A wedding was solemnised at St Chad's Church, Linwood",
+      "date_start": "1923-07-05",
+      "date_end": "1923-07-05",
+      "date_precision": "day",
+      "source": {
+        "locator": "https://paperspast.natlib.govt.nz/newspapers/CHP19230705.2.7?items_per_page=50&query=cargill+methodist&sort_by=byTI.rev",
+        "source_name": "Press, Women's Corner",
+        "source_type": "newspaper",
+        "source_date": "1923-07-05",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "A pretty wedding was solemnised at Stl Chad's Church, Linwood, recently",
+      "evidential_weight": "contemporary_report",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The event predates the present 1959 church building and establishes worship at St Chad's by 1923."
+    },
+    {
+      "claim_id": "osm:way/532228563:codex:c08",
+      "claim_type": "location",
+      "value": "Church schoolroom stood at Buckleys Road and Carnarvon Street by 1929",
+      "date_start": "1929-04-30",
+      "date_end": "1929-04-30",
+      "date_precision": "day",
+      "source": {
+        "locator": "https://paperspast.natlib.govt.nz/newspapers/TS19290430.2.45",
+        "source_name": "Star (Christchurch), Arrangements For To-morrow’s Elections",
+        "source_type": "newspaper",
+        "source_date": "1929-04-30",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Chad's Church Schoolroom, Buckley's fioad and Carnarvon Street.",
+      "evidential_weight": "contemporary_report",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "OCR renders “Road” as “fioad”; the junction corresponds to the current Carnarvon Street site."
+    },
+    {
+      "claim_id": "osm:way/532228563:codex:c09",
+      "claim_type": "land_or_consecration",
+      "value": "Foundation stone for the new church laid in February 1957",
+      "date_start": "1957-02",
+      "date_end": "1957-02",
+      "date_precision": "month",
+      "source": {
+        "locator": "https://paperspast.natlib.govt.nz/newspapers?items_per_page=100&page=4&query=st+paul's+church&snippet=false&sort_by=byTY.rev",
+        "source_name": "Press photograph caption, 5 September 1959",
+        "source_type": "photograph_caption",
+        "source_date": "1959-09-05",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "The foundation stone was laid in February, 1957, when the jubilee of St. Chad’s was celebrated.",
+      "evidential_weight": "contemporary_report",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "This concerns construction of the present church."
+    },
+    {
+      "claim_id": "osm:way/532228563:codex:c10",
+      "claim_type": "building_date",
+      "value": "Present church dedicated on 6 September 1959",
+      "date_start": "1959-09-06",
+      "date_end": "1959-09-06",
+      "date_precision": "day",
+      "source": {
+        "locator": "https://paperspast.natlib.govt.nz/newspapers?items_per_page=100&page=4&query=st+paul's+church&snippet=false&sort_by=byTY.rev",
+        "source_name": "Press photograph caption, 5 September 1959",
+        "source_type": "photograph_caption",
+        "source_date": "1959-09-05",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "NEW ANGLICAN PARISH CHURCH IN LINWOOD.—St. Chad’s Church, which will be dedicated by the Bishop of Christchurch … tomorrow afternoon.",
+      "evidential_weight": "contemporary_report",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The date is inferred as the day after the caption's printed date. The ellipsis omits a personal name and title details."
+    },
+    {
+      "claim_id": "osm:way/532228563:codex:c11",
+      "claim_type": "organisation_link",
+      "value": "Linwood-Aranui Parish",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+        "source_name": "Anglican Life church directory",
+        "source_type": "diocesan_publication",
+        "source_date": "2024",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Chad’s Church—Linwood—Linwood-Aranui Parish",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The diocesan directory identifies the parish association in the listing title."
+    },
+    {
+      "claim_id": "osm:way/532228563:codex:c12",
+      "claim_type": "organisation_link",
+      "value": "Anglican Diocese of Christchurch",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+        "source_name": "Anglican Life church directory",
+        "source_type": "diocesan_publication",
+        "source_date": "2024",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "©2024 Copyright Anglican Diocese of Christchurch All rights reserved",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The church is listed in the diocese's own directory."
+    },
+    {
+      "claim_id": "osm:way/532228563:codex:c13",
+      "claim_type": "worship_active_asof",
+      "value": "The parish described itself as having a strong worship base",
+      "date_start": "2024",
+      "date_end": "2024",
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+        "source_name": "Anglican Life church directory",
+        "source_type": "diocesan_publication",
+        "source_date": "2024",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "We are a welcoming, inclusive, growing and celebrating community with a strong worship base and active commitment to our local community.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The page remains in the live diocesan church directory, but no dated service timetable was found."
+    },
+    {
+      "claim_id": "osm:way/532228563:codex:c14",
+      "claim_type": "location",
+      "value": "-43.528177, 172.679374",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.openstreetmap.org/way/532228563/history",
+        "source_name": "OpenStreetMap way history page",
+        "source_type": "osm",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "",
+      "evidential_weight": "inferred",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "low",
+      "note": "Coordinate supplied with the seeded OSM identifier; the history webpage itself was unreachable through the reader, so coordinate support was not independently quoted."
+    },
+    {
+      "claim_id": "osm:way/532228563:codex:c15",
+      "claim_type": "osm_object_version",
+      "value": "Current OSM version 8 records start_date=2007",
+      "date_start": "2026-03-21",
+      "date_end": "2026-03-21",
+      "date_precision": "day",
+      "source": {
+        "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history",
+        "source_name": "OpenStreetMap way history API",
+        "source_type": "osm",
+        "source_date": "2026-03-21",
+        "source_date_basis": "metadata",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "<tag k=\"start_date\" v=\"2007\"/>",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "This tag conflicts with contemporary evidence for St Chad's at the site by 1929 and with the reported 1957 jubilee."
+    }
+  ],
+  "status_assessment": {
+    "current_status": "likely_active",
+    "basis": "The live Anglican Diocese of Christchurch directory still lists St Chad's under Linwood-Aranui Parish and describes a strong worship base. The current council schedule also identifies St Chads Church and Hall at 1 Carnarvon Street. No closure, final-service, sale, disposal, or deconsecration evidence was found in the searched allowlisted sources; however, no current dated service timetable was located.",
+    "asof_date": "2026-09-10",
+    "supporting_claim_ids": [],
+    "osm_stale": true,
+    "osm_stale_basis": "The current OSM object still correctly describes an Anglican Christian place of worship at the institutional address, but its start_date=2007 is contradicted by contemporary reports of the church at this site by 1929 and a 1957 jubilee implying approximately 1907. The record is therefore temporally stale rather than stale about present use."
+  },
+  "osm_version_chain": [
+    {
+      "version": 1,
+      "changeset": 52890728,
+      "timestamp": "2017-10-13T12:35:25Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "1 Carnarvon Street; building; Christian Anglican place of worship named St Chads.",
+      "change_note": "Way created with building, address, name, religion, and denomination tags.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history"
+    },
+    {
+      "version": 2,
+      "changeset": 64185947,
+      "timestamp": "2018-11-05T05:45:28Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "Previous tags retained; Christchurch city added.",
+      "change_note": "Added addr:city=Christchurch.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history"
+    },
+    {
+      "version": 3,
+      "changeset": 64250983,
+      "timestamp": "2018-11-07T03:54:11Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "Full seeded name; North Linwood suburb; Christian Anglican worship; start_date=2007.",
+      "change_note": "Expanded the name and added suburb, start_date, and contact metadata.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history"
+    },
+    {
+      "version": 4,
+      "changeset": 97876854,
+      "timestamp": "2021-01-21T05:54:30Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "Tags unchanged from version 3.",
+      "change_note": "Changed the building geometry by adding nodes.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history"
+    },
+    {
+      "version": 5,
+      "changeset": 103385196,
+      "timestamp": "2021-04-22T06:40:24Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "Suburb Linwood; LINZ address reference added; other core tags retained.",
+      "change_note": "Changed suburb from North Linwood to Linwood and added the LINZ address identifier.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history"
+    },
+    {
+      "version": 6,
+      "changeset": 127869621,
+      "timestamp": "2022-10-21T08:27:02Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "Full address includes country NZ; other tags unchanged.",
+      "change_note": "Added addr:country=NZ.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history"
+    },
+    {
+      "version": 7,
+      "changeset": 160013417,
+      "timestamp": "2024-12-07T01:35:11Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "Core identity, address, worship, and start-date tags unchanged.",
+      "change_note": "Normalised contact-number formatting; the number itself is omitted from this dossier.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history"
+    },
+    {
+      "version": 8,
+      "changeset": 180196653,
+      "timestamp": "2026-03-21T09:57:23Z",
+      "timestamp_basis": "osm_api",
+      "tags_summary": "1 Carnarvon Street, Linwood, Christchurch 8062, NZ; Christian Anglican place of worship; start_date=2007.",
+      "change_note": "Added addr:postcode=8062.",
+      "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history"
+    }
+  ],
+  "personal_details_quarantine": {
+    "redacted": true,
+    "item_count": 0,
+    "items": [],
+    "note": "personal details stripped before commit; hashes let a later run recognise recurrence"
+  },
+  "provenance": {
+    "producer": "agent_reader",
+    "ai_generated": true,
+    "produced_by": "codex:gpt-5.6-sol:researcher.v1",
+    "lane": "agent_autonomous"
+  },
+  "run_manifest": {
+    "run_id": "pilot-2026-09-10",
+    "backend": "codex",
+    "model_id_requested": "gpt-5.6-sol",
+    "model_id_reported": null,
+    "prompt_version": "researcher.v1",
+    "started_at": "2026-09-10T07:40:26+00:00",
+    "ended_at": "2026-09-10T07:45:02+00:00",
+    "duration_s": 276.2,
+    "usage": {
+      "input_tokens": 263223,
+      "cached_input_tokens": 200192,
+      "output_tokens": 7364,
+      "reasoning_tokens": 2638,
+      "web_search_requests": 4,
+      "web_fetch_requests": null
+    },
+    "cost_usd_reported": null,
+    "cost_basis": "subscription_unmetered",
+    "idempotency_key": "c155a0c268abe5766ab319ead0f672ba792b2c29655724b05a8aa70e88078db1",
+    "allowlist_version": "nz-v1",
+    "tool_permissions": [
+      "web_search (live)",
+      "sandbox read-only, empty workdir"
+    ],
+    "exit_status": "completed",
+    "notes": "codex thread 01a08a42-c417-7523-a9e0-8b0a7c9f9a73; reasoning effort medium; exit 0 | No closure, final-service, sale, disposal, or deconsecration evidence was found. Papers Past pages contained prompts inviting readers to log in or correct OCR; these were ignored, and no login page was fetched. The 1930 article establishes that an organisation called St Chad's Church, North Linwood existed then, but its quoted list of participants was not retained because the dossier excludes personal names. Institutional telephone numbers and email addresses appearing in sources and OSM were omitted as required. | sources_consulted (9): https://www.openstreetmap.org/way/532228563/history [unreachable]; https://api.openstreetmap.org/api/0.6/way/532228563/history [used]; https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/ [used]; https://www.ccc.govt.nz/assets/Documents/The-Council/Community-Boards/HagleyFerrymead201516AreaSnapshots.pdf [used]; https://www.ccc.govt.nz/assets/Documents/The-Council/Plans-Strategies-Policies-Bylaws/Plans/district-plan/Proposed-changes/2023/PC14/Provisions/Plan-Change-14-HBC-NOTIFICATION-Sub-chapter-6.5-Scheduled-Activities.pdf [used]; https://paperspast.natlib.govt.nz/newspapers/CHP19230705.2.7?items_per_page=50&query=cargill+methodist&sort_by=byTI.rev [used]; https://paperspast.natlib.govt.nz/newspapers/TS19290430.2.45 [used]; https://paperspast.natlib.govt.nz/newspapers/TS19301212.2.81 [used]; https://paperspast.natlib.govt.nz/newspapers?items_per_page=100&page=4&query=st+paul's+church&snippet=false&sort_by=byTY.rev [used]"
+  }
+}

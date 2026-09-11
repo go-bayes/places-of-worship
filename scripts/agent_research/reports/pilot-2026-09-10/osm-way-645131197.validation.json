@@ -1,0 +1,825 @@
+{
+  "place_ref": "osm:way/645131197",
+  "name": "St Paul's Anglican Church - Leithfield",
+  "validated_at": "2026-09-10T07:57:14+00:00",
+  "osm": {
+    "centroid": [
+      -43.19151266666666,
+      172.73912151666664
+    ],
+    "version": 6,
+    "amenity": "place_of_worship",
+    "history_versions": [
+      [
+        1,
+        64550101,
+        "2018-11-16T02:11:15Z"
+      ],
+      [
+        2,
+        117872255,
+        "2022-02-26T08:34:21Z"
+      ],
+      [
+        3,
+        145232317,
+        "2023-12-17T23:36:44Z"
+      ],
+      [
+        4,
+        160014946,
+        "2024-12-07T03:49:49Z"
+      ],
+      [
+        5,
+        161736107,
+        "2025-01-25T07:04:18Z"
+      ],
+      [
+        6,
+        182199907,
+        "2026-05-04T11:18:45Z"
+      ]
+    ],
+    "seed_to_osm_m": 0.7,
+    "error": null
+  },
+  "dossiers": [
+    {
+      "dossier_id": "osm:way/645131197:claude:opus:researcher.v1:pilot-2026-09-10",
+      "reader": "claude:claude:opus:researcher.v1",
+      "validated_at": "2026-09-10T07:57:05+00:00",
+      "validator_version": "validate_dossier.v1",
+      "summary": {
+        "claims": 18,
+        "locators": 18,
+        "distinct_locators": 5,
+        "reachable": 18,
+        "distinct_reachable": 5,
+        "distinct_dead": 0,
+        "distinct_blocked": 0,
+        "dead": 0,
+        "requires_human_access": 0,
+        "http_error": 0,
+        "unreachable": 0,
+        "robots_disallowed": 0,
+        "not_fetched": 0,
+        "with_quote": 18,
+        "quote_supported": 16,
+        "quote_partial": 0,
+        "quote_not_found": 2,
+        "locator_validity_rate": 1.0,
+        "locator_reachable_rate": 1.0,
+        "locator_blocked_rate": 0.0,
+        "quote_support_rate": 0.889,
+        "quote_exact_rate": 0.889
+      },
+      "location": {
+        "candidate_to_seed_m": 0.0,
+        "candidate_to_osm_m": 0.7,
+        "within_tolerance": true
+      },
+      "version_chain": {
+        "claimed_versions": 6,
+        "actual_versions": 6,
+        "confirmed": 6,
+        "contradicted": 0,
+        "rows": [
+          {
+            "version": 1,
+            "claimed_changeset": 64550101,
+            "claimed_timestamp": "2018-11-16T02:11:15Z",
+            "actual_changeset": 64550101,
+            "actual_timestamp": "2018-11-16T02:11:15Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 2,
+            "claimed_changeset": 117872255,
+            "claimed_timestamp": "2022-02-26T08:34:21Z",
+            "actual_changeset": 117872255,
+            "actual_timestamp": "2022-02-26T08:34:21Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 3,
+            "claimed_changeset": 145232317,
+            "claimed_timestamp": "2023-12-17T23:36:44Z",
+            "actual_changeset": 145232317,
+            "actual_timestamp": "2023-12-17T23:36:44Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 4,
+            "claimed_changeset": 160014946,
+            "claimed_timestamp": "2024-12-07T03:49:49Z",
+            "actual_changeset": 160014946,
+            "actual_timestamp": "2024-12-07T03:49:49Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 5,
+            "claimed_changeset": 161736107,
+            "claimed_timestamp": "2025-01-25T07:04:18Z",
+            "actual_changeset": 161736107,
+            "actual_timestamp": "2025-01-25T07:04:18Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 6,
+            "claimed_changeset": 182199907,
+            "claimed_timestamp": "2026-05-04T11:18:45Z",
+            "actual_changeset": 182199907,
+            "actual_timestamp": "2026-05-04T11:18:45Z",
+            "outcome": "confirmed"
+          }
+        ]
+      },
+      "stale_check": {
+        "osm_current_tags_say_place_of_worship": true,
+        "osm_current_version": 6,
+        "reader_osm_stale": null,
+        "reader_status": "likely_inactive"
+      },
+      "internal_contradictions": [
+        "start_date: osm:way/645131197:claude:c06 vs osm:way/645131197:claude:c07 (years [1863, 1864] vs [1907])"
+      ],
+      "claims": [
+        {
+          "claim_id": "osm:way/645131197:claude:c01",
+          "claim_type": "name",
+          "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 17676
+        },
+        {
+          "claim_id": "osm:way/645131197:claude:c02",
+          "claim_type": "name",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/645131197",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 1314
+        },
+        {
+          "claim_id": "osm:way/645131197:claude:c03",
+          "claim_type": "address",
+          "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 17676
+        },
+        {
+          "claim_id": "osm:way/645131197:claude:c04",
+          "claim_type": "religion",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/645131197",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 1314
+        },
+        {
+          "claim_id": "osm:way/645131197:claude:c05",
+          "claim_type": "denomination",
+          "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 17676
+        },
+        {
+          "claim_id": "osm:way/645131197:claude:c06",
+          "claim_type": "start_date",
+          "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 17676
+        },
+        {
+          "claim_id": "osm:way/645131197:claude:c07",
+          "claim_type": "start_date",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/645131197",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "not_found",
+          "support_share": 0.0,
+          "page_chars": 1314
+        },
+        {
+          "claim_id": "osm:way/645131197:claude:c08",
+          "claim_type": "building_date",
+          "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 17676
+        },
+        {
+          "claim_id": "osm:way/645131197:claude:c09",
+          "claim_type": "other",
+          "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 17676
+        },
+        {
+          "claim_id": "osm:way/645131197:claude:c10",
+          "claim_type": "other",
+          "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 17676
+        },
+        {
+          "claim_id": "osm:way/645131197:claude:c11",
+          "claim_type": "renovation",
+          "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 17676
+        },
+        {
+          "claim_id": "osm:way/645131197:claude:c12",
+          "claim_type": "renovation",
+          "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 17676
+        },
+        {
+          "claim_id": "osm:way/645131197:claude:c13",
+          "claim_type": "other",
+          "locator": "https://www.heritage.org.nz/list-details/3067/Church+(Anglican)",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 17676
+        },
+        {
+          "claim_id": "osm:way/645131197:claude:c14",
+          "claim_type": "organisation_link",
+          "locator": "https://amberleyanglican.com/weddings/",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 1924
+        },
+        {
+          "claim_id": "osm:way/645131197:claude:c15",
+          "claim_type": "service_pattern",
+          "locator": "https://amberleyanglican.com/",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 2805
+        },
+        {
+          "claim_id": "osm:way/645131197:claude:c16",
+          "claim_type": "worship_ended",
+          "locator": "https://amberleyanglican.com/weddings/",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 1924
+        },
+        {
+          "claim_id": "osm:way/645131197:claude:c17",
+          "claim_type": "location",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/645131197",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "not_found",
+          "support_share": 0.5,
+          "page_chars": 1314
+        },
+        {
+          "claim_id": "osm:way/645131197:claude:c18",
+          "claim_type": "osm_object_version",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/645131197/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 6474
+        }
+      ]
+    },
+    {
+      "dossier_id": "osm:way/645131197:codex:gpt-5.6-sol:researcher.v1:pilot-2026-09-10",
+      "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+      "validated_at": "2026-09-10T07:57:14+00:00",
+      "validator_version": "validate_dossier.v1",
+      "summary": {
+        "claims": 13,
+        "locators": 13,
+        "distinct_locators": 4,
+        "reachable": 8,
+        "distinct_reachable": 3,
+        "distinct_dead": 0,
+        "distinct_blocked": 1,
+        "dead": 0,
+        "requires_human_access": 5,
+        "http_error": 0,
+        "unreachable": 0,
+        "robots_disallowed": 0,
+        "not_fetched": 0,
+        "with_quote": 13,
+        "quote_supported": 6,
+        "quote_partial": 1,
+        "quote_not_found": 1,
+        "locator_validity_rate": 1.0,
+        "locator_reachable_rate": 0.75,
+        "locator_blocked_rate": 0.25,
+        "quote_support_rate": 0.875,
+        "quote_exact_rate": 0.75
+      },
+      "location": {
+        "candidate_to_seed_m": 0.0,
+        "candidate_to_osm_m": 0.7,
+        "within_tolerance": true
+      },
+      "version_chain": {
+        "claimed_versions": 6,
+        "actual_versions": 6,
+        "confirmed": 6,
+        "contradicted": 0,
+        "rows": [
+          {
+            "version": 1,
+            "claimed_changeset": 64550101,
+            "claimed_timestamp": "2018-11-16T02:11:15Z",
+            "actual_changeset": 64550101,
+            "actual_timestamp": "2018-11-16T02:11:15Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 2,
+            "claimed_changeset": 117872255,
+            "claimed_timestamp": "2022-02-26T08:34:21Z",
+            "actual_changeset": 117872255,
+            "actual_timestamp": "2022-02-26T08:34:21Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 3,
+            "claimed_changeset": 145232317,
+            "claimed_timestamp": "2023-12-17T23:36:44Z",
+            "actual_changeset": 145232317,
+            "actual_timestamp": "2023-12-17T23:36:44Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 4,
+            "claimed_changeset": 160014946,
+            "claimed_timestamp": "2024-12-07T03:49:49Z",
+            "actual_changeset": 160014946,
+            "actual_timestamp": "2024-12-07T03:49:49Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 5,
+            "claimed_changeset": 161736107,
+            "claimed_timestamp": "2025-01-25T07:04:18Z",
+            "actual_changeset": 161736107,
+            "actual_timestamp": "2025-01-25T07:04:18Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 6,
+            "claimed_changeset": 182199907,
+            "claimed_timestamp": "2026-05-04T11:18:45Z",
+            "actual_changeset": 182199907,
+            "actual_timestamp": "2026-05-04T11:18:45Z",
+            "outcome": "confirmed"
+          }
+        ]
+      },
+      "stale_check": {
+        "osm_current_tags_say_place_of_worship": true,
+        "osm_current_version": 6,
+        "reader_osm_stale": true,
+        "reader_status": "inactive"
+      },
+      "internal_contradictions": [],
+      "claims": [
+        {
+          "claim_id": "osm:way/645131197:codex:c01",
+          "claim_type": "name",
+          "locator": "https://www.heritage.org.nz/list-details/3067/Listing",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 17676
+        },
+        {
+          "claim_id": "osm:way/645131197:codex:c02",
+          "claim_type": "address",
+          "locator": "https://www.anglicanlife.org.nz/church/st-pauls-church-leithfield-closed-parish-of-amberley/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/645131197:codex:c03",
+          "claim_type": "religion",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/645131197/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "not_found",
+          "support_share": 0.0,
+          "page_chars": 6474
+        },
+        {
+          "claim_id": "osm:way/645131197:codex:c04",
+          "claim_type": "denomination",
+          "locator": "https://www.anglicanlife.org.nz/church/st-pauls-church-leithfield-closed-parish-of-amberley/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/645131197:codex:c05",
+          "claim_type": "start_date",
+          "locator": "https://www.heritage.org.nz/list-details/3067/Listing",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 17676
+        },
+        {
+          "claim_id": "osm:way/645131197:codex:c06",
+          "claim_type": "building_date",
+          "locator": "https://www.heritage.org.nz/list-details/3067/Listing",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 17676
+        },
+        {
+          "claim_id": "osm:way/645131197:codex:c07",
+          "claim_type": "worship_active_asof",
+          "locator": "https://www.heritage.org.nz/list-details/3067/Listing",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 17676
+        },
+        {
+          "claim_id": "osm:way/645131197:codex:c08",
+          "claim_type": "renovation",
+          "locator": "https://www.heritage.org.nz/list-details/3067/Listing",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 17676
+        },
+        {
+          "claim_id": "osm:way/645131197:codex:c09",
+          "claim_type": "renovation",
+          "locator": "https://www.heritage.org.nz/list-details/3067/Listing",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 17676
+        },
+        {
+          "claim_id": "osm:way/645131197:codex:c10",
+          "claim_type": "organisation_link",
+          "locator": "https://www.anglicanlife.org.nz/church/st-pauls-church-leithfield-closed-parish-of-amberley/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/645131197:codex:c11",
+          "claim_type": "closure_event",
+          "locator": "https://www.anglicanlife.org.nz/church/st-pauls-church-leithfield-closed-parish-of-amberley/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/645131197:codex:c12",
+          "claim_type": "worship_ended",
+          "locator": "https://www.anglicanlife.org.nz/church/st-pauls-church-leithfield-closed-parish-of-amberley/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/645131197:codex:c13",
+          "claim_type": "location",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/645131197/full",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "partially_supported",
+          "support_share": 0.909,
+          "page_chars": 3438
+        }
+      ]
+    }
+  ],
+  "agreement": {
+    "readers": [
+      "claude:claude:opus:researcher.v1",
+      "codex:codex:gpt-5.6-sol:researcher.v1"
+    ],
+    "claim_types_compared": 9,
+    "agreed": 8,
+    "majority": 0,
+    "disagreed": 1,
+    "single_reader": 1,
+    "not_comparable": 1,
+    "agreement_rate": 0.889,
+    "majority_rate": 0.889,
+    "escalate_to_human": [
+      "address"
+    ],
+    "rows": [
+      {
+        "claim_type": "address",
+        "outcome": "disagree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "10 Leithfield Road and Brighton Road, Leithfield"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "10 Leithfield Road, Leithfield, Christchurch 7481, New Zealand"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: jaccard 0.33"
+      },
+      {
+        "claim_type": "building_date",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Current church rebuilt in 1907 and officially opened November 1907, incorporating elements of the 1863–64 church"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "The current church was constructed and officially opened in 1907."
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: years [1863, 1907] vs [1907]"
+      },
+      {
+        "claim_type": "candidate_location",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "-43.191509,172.739114"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "-43.191509,172.739114"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: 0 m apart"
+      },
+      {
+        "claim_type": "closure_event",
+        "outcome": "single_reader",
+        "values": [
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "The church is closed; the closure date is not stated."
+          }
+        ],
+        "detail": ""
+      },
+      {
+        "claim_type": "current_status",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "likely_inactive"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "inactive"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: status group"
+      },
+      {
+        "claim_type": "denomination",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Anglican"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Anglican"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: exact"
+      },
+      {
+        "claim_type": "location",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Building footprint is OSM way 645131197 at 10 Leithfield Road, Leithfield, near -43.191509, 172.739114"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Building footprint centred approximately at -43.191509, 172.739114."
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: 0 m apart"
+      },
+      {
+        "claim_type": "name",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "St Paul's Church (Anglican)"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "St Paul's Church (Anglican)"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: exact"
+      },
+      {
+        "claim_type": "religion",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "christian"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Christian"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: exact"
+      },
+      {
+        "claim_type": "start_date",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "1864 (first St Paul's Church on the site completed; construction 1863–1864)"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Worship at the site began by 1864, when the original St Paul's Church was completed."
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: years [1863, 1864] vs [1864]"
+      },
+      {
+        "claim_type": "worship_ended",
+        "outcome": "not_comparable",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Regular worship suspended: the parish is not currently holding any services, including weddings, at St Paul's"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Regular worship services have ended; the end date is not stated."
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: no parseable year on one side"
+      },
+      {
+        "claim_type": "organisation_link",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Anglican Parish of Amberley (which also has Holy Innocents Church, Amberley); the parish website speaks of St Paul's, Leithfield as its own church"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Parish of Amberley, Anglican Diocese of Christchurch"
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      },
+      {
+        "claim_type": "renovation",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Belfry moved from the western end of the main roof to the vestry roof some time after 1922"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "The belfry was moved from the western end of the main church roof to the vestry roof sometime after 1922."
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      },
+      {
+        "claim_type": "service_pattern",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Parish Sunday services are held at Holy Innocents Church, Amberley, not at St Paul's, Leithfield"
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      },
+      {
+        "claim_type": "worship_active_asof",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "The current church was officially opened for use in November 1907."
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      }
+    ]
+  },
+  "requests_made": 11
+}
