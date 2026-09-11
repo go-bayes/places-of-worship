@@ -108,7 +108,7 @@
       "type": "array",
       "minItems": 1,
       "items": {
-        "$ref": "indicator.schema.json"
+        "$ref": "indicator.v2.schema.json"
       }
     },
     "visual_layers": {

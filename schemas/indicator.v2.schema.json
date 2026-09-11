@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://go-bayes.github.io/places-of-worship/schemas/indicator.v2.schema.json",
+  "title": "Indicator v2",
+  "description": "A source-specific operationalisation of a construct: a measured quantity observed for a site, area, country, or grid cell. unit describes the measurement scale and is distinct from the unit of analysis. A ratio indicator uses unit rate and identifies its denominator through denominator_indicator_id. construct_id identifies the construct in the consuming product's vocabulary; indicators of the same construct retain their separate identities.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "indicator_id",
+    "label",
+    "description",
+    "unit",
+    "method"
+  ],
+  "properties": {
+    "indicator_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "label": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "unit": {
+      "description": "Measurement unit. index denotes an index score whose scale and construction are documented in method; percent_point denotes a difference between percentages. These additions were approved 2026-09-11. Changes to this vocabulary require a new versioned schema.",
+      "enum": [
+        "count",
+        "percent",
+        "rate",
+        "currency",
+        "code",
+        "year",
+        "index",
+        "percent_point"
+      ]
+    },
+    "construct_id": {
+      "description": "Construct this indicator operationalises, identified in the consuming product's construct vocabulary. Omit or use null for legacy indicators awaiting a construct assignment; validation against the vocabulary is a consumer responsibility.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "variable_kind": {
+      "description": "Classification of the measure: intensive for quantities such as rates, means, and indices; extensive for additive quantities such as counts over disjoint units; code for categorical values. Valid aggregation depends on the indicator-specific method, denominator, weights, and target units. A weighted mean or apportioned sum requires justification for that indicator and intended aggregation. Categorical codes identify categories.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "intensive",
+        "extensive",
+        "code",
+        null
+      ]
+    },
+    "native_period_type": {
+      "description": "The source's own period concept for a value: a calendar year, a survey fieldwork span, a pooled multi-year estimate, or a single reference date.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "calendar_year",
+        "fieldwork_span",
+        "pooled",
+        "reference_date",
+        null
+      ]
+    },
+    "denominator_indicator_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "method": {
+      "type": "string",
+      "description": "How the value was derived or transcribed. Document the scale, denominator, and any aggregation method and weights needed to interpret or combine values."
+    },
+    "temporal_coverage": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "spatial_coverage": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "quality_notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "$comment": "Supersedes indicator.schema.json for consumers that opt into the closed measurement-unit contract. The original unversioned schema remains available unchanged for legacy consumers. Adopted 2026-09-11; see schemas/README.md for migration and supersession rules."
+}

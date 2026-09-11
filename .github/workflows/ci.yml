@@ -49,6 +49,8 @@ jobs:
       - name: country registry tests
         run: python3 -m unittest scripts/test_build_country_registry.py
       - uses: astral-sh/setup-uv@v5
+      - name: indicator schema tests
+        run: uv run scripts/test_indicator_schema.py
       - name: validate area summaries
         run: bash scripts/validate_area_summaries.sh
 
