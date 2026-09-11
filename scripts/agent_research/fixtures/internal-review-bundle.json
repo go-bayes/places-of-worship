@@ -1,0 +1,187 @@
+{
+  "schema_version": "agent-review-bundle.v1",
+  "submission_key": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "dossier": {
+    "schema_version": "agent-dossier.v1",
+    "dossier_id": "osm:way/1:codex:model-x:researcher.v1:test-run",
+    "place": {
+      "place_ref": "osm:way/1",
+      "name": "St Test's",
+      "country_code": "NZ",
+      "seed_latitude": -43.0,
+      "seed_longitude": 172.0,
+      "seed_source": "test edition",
+      "seed_tags": {}
+    },
+    "candidate_location": {
+      "latitude": -43,
+      "longitude": 172,
+      "basis": "osm_object",
+      "basis_note": "",
+      "uncertainty_radius_m": 20,
+      "address": null
+    },
+    "claims": [
+      {
+        "claim_id": "osm:way/1:codex:c01",
+        "claim_type": "start_date",
+        "value": "opened 1891",
+        "date_start": "1891",
+        "date_end": null,
+        "date_precision": "year",
+        "source": {
+          "locator": "https://example.org/history",
+          "source_name": "History",
+          "source_type": "archive_collection",
+          "source_date": null,
+          "source_date_basis": "not_stated",
+          "retrieved_at": "2026-09-10"
+        },
+        "quoted_support": "built in 1891",
+        "evidential_weight": "secondary",
+        "reader": {
+          "reader_id": "codex:model-x:researcher.v1",
+          "backend": "codex",
+          "model_id": "gpt-5.6-luna",
+          "prompt_version": "researcher.v1"
+        },
+        "confidence": "medium",
+        "note": ""
+      },
+      {
+        "claim_id": "osm:way/1:codex:c02",
+        "claim_type": "denomination",
+        "value": "Anglican",
+        "date_start": null,
+        "date_end": null,
+        "date_precision": "unknown",
+        "source": {
+          "locator": "https://example.org/history",
+          "source_name": "History",
+          "source_type": "archive_collection",
+          "source_date": null,
+          "source_date_basis": "not_stated",
+          "retrieved_at": "2026-09-10"
+        },
+        "quoted_support": "an Anglican church",
+        "evidential_weight": "secondary",
+        "reader": {
+          "reader_id": "codex:model-x:researcher.v1",
+          "backend": "codex",
+          "model_id": "gpt-5.6-luna",
+          "prompt_version": "researcher.v1"
+        },
+        "confidence": "high",
+        "note": ""
+      }
+    ],
+    "status_assessment": {
+      "current_status": "unknown",
+      "basis": "test",
+      "asof_date": "2026-09-10",
+      "supporting_claim_ids": [],
+      "osm_stale": null,
+      "osm_stale_basis": ""
+    },
+    "osm_version_chain": [
+      {
+        "version": 1,
+        "changeset": 111,
+        "timestamp": "2018",
+        "timestamp_basis": "approximate",
+        "tags_summary": "",
+        "change_note": "",
+        "locator": "https://www.openstreetmap.org/way/1/history/1"
+      }
+    ],
+    "personal_details_quarantine": {
+      "redacted": false,
+      "item_count": 0,
+      "items": [],
+      "note": "values held in the run directory only; redact_quarantine strips them before commit"
+    },
+    "provenance": {
+      "producer": "agent_reader",
+      "ai_generated": true,
+      "produced_by": "codex:model-x:researcher.v1",
+      "lane": "agent_autonomous"
+    },
+    "run_manifest": {
+      "run_id": "test-run",
+      "backend": "codex",
+      "model_id_requested": "gpt-5.6-luna",
+      "model_id_reported": "gpt-5.6-luna",
+      "prompt_version": "researcher.v1",
+      "started_at": "2026-09-10T00:00:00+00:00",
+      "ended_at": "2026-09-10T00:01:00+00:00",
+      "duration_s": 60.0,
+      "usage": {
+        "input_tokens": 10,
+        "output_tokens": 5
+      },
+      "cost_usd_reported": 0.01,
+      "cost_basis": "tool_list_price",
+      "idempotency_key": "42faf40c9d778c93f5a3dd6cdadec24b24a4d3ee8f7521a0c6a634c77cb6609e",
+      "allowlist_version": "nz-v1",
+      "tool_permissions": [],
+      "exit_status": "completed",
+      "notes": ""
+    }
+  },
+  "review": {
+    "schema_version": "agent-review.v1",
+    "recommendation": "revise",
+    "reasoning": "Synthetic fixture; never evidence.",
+    "claim_checks": [
+      {
+        "claim_id": "osm:way/1:codex:c01",
+        "outcome": "unclear",
+        "source_url": "https://example.org/history",
+        "note": "Synthetic fixture.",
+        "access_method": "not_checked"
+      },
+      {
+        "claim_id": "osm:way/1:codex:c02",
+        "outcome": "unclear",
+        "source_url": "https://example.org/history",
+        "note": "Synthetic fixture.",
+        "access_method": "not_checked"
+      }
+    ],
+    "cultural_sensitivity": {
+      "flagged": false,
+      "basis": "Synthetic fixture."
+    },
+    "limitations": [
+      "Invented test material."
+    ]
+  },
+  "research_run": {
+    "backend": "codex",
+    "model_requested": "gpt-5.6-luna",
+    "model_id_reported": null,
+    "started_at": "2026-09-11T00:00:00Z",
+    "ended_at": "2026-09-11T00:00:01Z",
+    "duration_seconds": 1,
+    "usage": null,
+    "raw_trace_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "prompt_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "cli_version": "synthetic-test",
+    "exit_code": 0,
+    "tool_policy_version": "public-web-only.v1"
+  },
+  "review_run": {
+    "backend": "claude",
+    "model_requested": "sonnet",
+    "model_id_reported": null,
+    "started_at": "2026-09-11T00:00:00Z",
+    "ended_at": "2026-09-11T00:00:01Z",
+    "duration_seconds": 1,
+    "usage": null,
+    "raw_trace_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "prompt_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "cli_version": "synthetic-test",
+    "exit_code": 0,
+    "tool_policy_version": "public-web-only.v1"
+  }
+}

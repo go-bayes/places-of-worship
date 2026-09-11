@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://religionmap.org/schemas/agent-review.v1.json",
+  "title": "Independent advisory review of an agent dossier",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "recommendation",
+    "reasoning",
+    "claim_checks",
+    "cultural_sensitivity",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "agent-review.v1"
+    },
+    "recommendation": {
+      "type": "string",
+      "enum": [
+        "accept",
+        "revise",
+        "reject",
+        "defer_cultural"
+      ]
+    },
+    "reasoning": {
+      "type": "string",
+      "maxLength": 8000,
+      "minLength": 1
+    },
+    "claim_checks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 40,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claim_id",
+          "outcome",
+          "source_url",
+          "note",
+          "access_method"
+        ],
+        "properties": {
+          "claim_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "supported",
+              "not_supported",
+              "unclear",
+              "unreachable",
+              "requires_human_access"
+            ]
+          },
+          "source_url": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 1
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "access_method": {
+            "type": "string",
+            "enum": [
+              "opened",
+              "search_snippet",
+              "not_checked"
+            ]
+          }
+        }
+      }
+    },
+    "cultural_sensitivity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "flagged",
+        "basis"
+      ],
+      "properties": {
+        "flagged": {
+          "type": "boolean"
+        },
+        "basis": {
+          "type": "string",
+          "maxLength": 1000
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "maxLength": 1000
+      }
+    }
+  }
+}
