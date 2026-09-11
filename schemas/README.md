@@ -28,15 +28,7 @@ JSON Schemas that define the core data structures used across the project.
   measurement unit — how a value is scaled (count, percent, rate, currency,
   code, year) — and is distinct from the unit of analysis, which the
   2026-08-29 ruling establishes as the place of worship.
-  indicator.schema.json leaves unit an open string whose examples
-  (places_per_10000_residents) name a whole indicator rather than a unit;
-  the correct decomposition uses the unit rate and declares the denominator
-  through denominator_indicator_id. Correct that schema to the closed enum
-  and this decomposition when it next gains a consumer (it is aspirational;
-  none exists yet). The enum grows only by versioned vocabulary change,
-  under the same discipline as denomination-taxonomy.json — publish a new
-  version with supersession links; never reopen the string, and never edit
-  values in place.
+  The migration from the open indicator unit string to the closed vocabulary is recorded under Indicator v2 below. The original `indicator.schema.json` remains the legacy contract; `indicator.v2.schema.json` carries the revised vocabulary and metadata. The collection.v1 vocabulary remains pinned to its existing values. Future vocabulary changes require a new version and explicit consumer migration.
   person_names_public governs publication, not retention: false means names
   must not be rendered on any public surface, while a private or
   access-controlled feed may still carry name for audit. The schema permits
@@ -64,8 +56,8 @@ JSON Schemas that define the core data structures used across the project.
   schema). Change events pin its `taxonomy_version`; update it by publishing a
   new version with supersession links, never by editing codes in place.
 - geometry-history.schema.json: time-bounded site or structure geometry state.
-- indicator.schema.json: reusable indicator definitions (aspirational: no
-  consumer yet).
+- `indicator.schema.json`: preserved legacy indicator contract with an open unit string, used by the base area-summary schema.
+- `indicator.v2.schema.json`: versioned successor with a closed measurement-unit enum and optional construct, variable-kind, and native-period metadata. The area-summary.v2 schema explicitly references this version.
 - site.schema.json: place-of-worship site record.
 - source-dataset.schema.json: provenance for source datasets (aspirational:
   no consumer yet; manifests carry provenance under data-manifest.v2).
@@ -77,6 +69,18 @@ Keep these schemas versioned and update them before changing any dataset shape
 that depends on them. Schemas marked aspirational (audit of 2026-08-25) have no
 validator or builder reading them; either wire a consumer or retire them when
 the relevant lane next opens.
+
+## Indicator v2 (2026-09-11)
+
+[`indicator.v2.schema.json`](indicator.v2.schema.json) supersedes [`indicator.schema.json`](indicator.schema.json) for consumers adopting the revised indicator contract. The predecessor remains unchanged at its original path and identifier. New consumers should pin the versioned schema explicitly. Future vocabulary changes require a successor schema with its own identifier, a link to its predecessor, and a documented migration.
+
+The closed measurement-unit vocabulary is `count`, `percent`, `rate`, `currency`, `code`, `year`, `index`, and `percent_point`. The project lead approved `index` and `percent_point` on 2026-09-11. An index score needs its scale and construction documented in `method`; a percentage-point value expresses a difference between percentages. A rate identifies its denominator through `denominator_indicator_id`, with scaling and derivation documented in `method`.
+
+The optional fields `construct_id`, `variable_kind`, and `native_period_type` permit omission or null while legacy indicators gain metadata. The consuming product checks construct identifiers against its vocabulary. `variable_kind` classifies a measure as intensive, extensive, or categorical (`code`). Valid aggregation depends on the particular indicator, denominator, weights, and target units. A weighted mean or apportioned sum requires justification for that indicator and intended aggregation. Categorical codes identify categories.
+
+The migration explicitly changes the indicator reference in `area-summary.v2.schema.json` to `indicator.v2.schema.json`. Existing area-summary.v2 products retain their data and declared product version; their indicator declarations must pass the stricter dependency. The base `area-summary.schema.json` continues to reference the preserved legacy schema. Therefore, legacy validation remains unchanged. The collection.v1 schema also retains its existing unit vocabulary. The covariate ingestion consumer should explicitly pin indicator v2 when implemented.
+
+Validation uses `scripts/validate_area_summaries.sh` for shipped products and `uv run scripts/test_indicator_schema.py` for the contract regression cases. Schema validation checks declarations and allowed values; indicator-specific aggregation requires its own substantive assessment.
 
 ## data-manifest.v2 (2026-07-11)
 

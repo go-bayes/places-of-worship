@@ -4,6 +4,8 @@
 
 ### 2026-09-11
 
+- Added `indicator.v2.schema.json` with the approved `index` and `percent_point` units, a closed measurement-unit vocabulary, and optional construct, variable-kind, and native-period metadata. Preserved the original open-unit schema for legacy consumers and explicitly pinned area-summary.v2 to the successor. Clarified that aggregation methods depend on each indicator, denominator, and weighting scheme. Added schema regression checks to CI.
+
 - Defined the content-addressed review design with immutable submitted evidence, reviewer acceptance, a transparent export queue with return to review, and explicit PI batch release before governed `pow` processing. Frozen files retain their hashes; withdrawal and supersession retain the audit history. The design replaces per-item PI acceptance with batch release when implemented. Live workflow behaviour remains unchanged. See `docs/development/content-addressed-review.md`.
 
 ### 2026-09-09
