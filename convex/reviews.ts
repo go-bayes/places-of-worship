@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
+import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { reviewDecisionInput, taskStatus } from "./model";
 import { canReview, chooseActorRole, requireUser } from "./lib/auth";
 import {
@@ -251,19 +252,9 @@ export const feedbackLoopMetrics = query({
   },
 });
 
-export const recordReviewDecision = mutation({
-  args: {
-    taskId: v.string(),
-    decision: reviewDecisionInput,
-  },
-  returns: v.object({
-    task_id: v.string(),
-    review_decision_id: v.string(),
-    task_status: taskStatus,
-  }),
-  handler: async (ctx, args) => {
-    const user = await requireUser(ctx, ["reviewer", "curator", "admin"]);
+async function applyReviewDecision(ctx: MutationCtx, args: { taskId: string; decision: any; snapshotHash?: string }, user: Doc<"users">) {
     const task = await getTaskOrThrow(ctx, args.taskId);
+    if (!REVIEW_OPEN_STATUSES.has(task.status)) throw new Error("Task is not open for review; reopen or return it through the workflow first.");
     const draft = await getDraft(ctx, args.decision.evidence_draft_id);
     if (args.decision.evidence_draft_id !== undefined && draft === null) {
       throw new Error(`Evidence draft not found: ${args.decision.evidence_draft_id}`);
@@ -273,6 +264,9 @@ export const recordReviewDecision = mutation({
     }
     if (args.decision.decision_status === "accepted_for_export" && draft === null) {
       throw new Error("Accepted-for-export decisions require an evidence draft.");
+    }
+    if (args.decision.decision_status === "accepted_for_export" && draft?.agent_intake_only === true) {
+      throw new Error("Internal agent intake drafts require ordinary human evidence submission before acceptance for export.");
     }
     // jb ruling 2026-09-01: the submission's author may not judge it; only
     // the author is excluded, any other qualified reviewer may decide
@@ -313,13 +307,16 @@ export const recordReviewDecision = mutation({
     if (args.decision.agent_review_id !== undefined) {
       const artifact = await ctx.db
         .query("agent_reviews")
-        .withIndex("by_agent_review_id", (q) => q.eq("agent_review_id", args.decision.agent_review_id!))
+        .withIndex("by_agent_review_id", (q: any) => q.eq("agent_review_id", args.decision.agent_review_id!))
         .unique();
       if (artifact === null) {
         throw new Error(`Agent review not found: ${args.decision.agent_review_id}`);
       }
       if (artifact.task_id !== args.taskId) {
         throw new Error("Agent review belongs to a different task.");
+      }
+      if (judgedDraft !== null && artifact.evidence_draft_id !== judgedDraft.evidence_draft_id) {
+        throw new Error("Agent review belongs to a different evidence draft.");
       }
     }
     if ((args.decision.decision_note ?? "").trim().length < 8) {
@@ -350,6 +347,7 @@ export const recordReviewDecision = mutation({
       required_follow_up: args.decision.required_follow_up,
       agent_review_id: args.decision.agent_review_id,
       agent_review_agreement: args.decision.agent_review_agreement,
+      review_snapshot_hash: args.snapshotHash,
       created_at: now,
       updated_at: now,
     };
@@ -374,6 +372,7 @@ export const recordReviewDecision = mutation({
       required_follow_up: reviewDecisionRecord.required_follow_up,
       agent_review_id: reviewDecisionRecord.agent_review_id,
       agent_review_agreement: reviewDecisionRecord.agent_review_agreement,
+      review_snapshot_hash: reviewDecisionRecord.review_snapshot_hash,
       created_at: reviewDecisionRecord.created_at,
       updated_at: reviewDecisionRecord.updated_at,
     };
@@ -409,6 +408,7 @@ export const recordReviewDecision = mutation({
       reason: args.decision.decision_note,
       evidenceDraftId: args.decision.evidence_draft_id,
       reviewDecisionId,
+      clientContext: args.snapshotHash === undefined ? undefined : { review_snapshot_hash: args.snapshotHash },
     });
 
     return {
@@ -416,6 +416,88 @@ export const recordReviewDecision = mutation({
       review_decision_id: reviewDecisionId,
       task_status: newTaskStatus,
     };
+}
+
+export const recordReviewDecision = mutation({
+  args: { taskId: v.string(), decision: reviewDecisionInput },
+  returns: v.object({ task_id: v.string(), review_decision_id: v.string(), task_status: taskStatus }),
+  handler: async (ctx, args) => applyReviewDecision(ctx, args, await requireUser(ctx, ["reviewer", "curator", "admin"])),
+});
+
+async function reviewSnapshot(ctx: MutationCtx | QueryCtx, taskId: string, evidenceDraftId: string) {
+  const task = await getTaskOrThrow(ctx, taskId);
+  const draft = await getDraft(ctx, evidenceDraftId);
+  if (draft === null || draft.task_id !== taskId) throw new Error("Evidence draft not found for task.");
+  const decisions = await ctx.db.query("review_decisions").withIndex("by_task", (q: any) => q.eq("task_id", taskId)).collect();
+  const taskEvents = await ctx.db.query("task_events").withIndex("by_task_time", (q: any) => q.eq("task_id", taskId)).collect();
+  const agentReviews = await ctx.db.query("agent_reviews").withIndex("by_task", (q: any) => q.eq("task_id", taskId)).collect();
+  const historicalClaims = await ctx.db.query("historical_claims").withIndex("by_task_and_created_at", (q: any) => q.eq("task_id", taskId)).collect();
+  const occupancies = await ctx.db.query("site_occupancies").withIndex("by_task_and_created_at", (q: any) => q.eq("task_id", taskId)).collect();
+  const targetYearStates = await ctx.db.query("derived_target_year_states").withIndex("by_task", (q: any) => q.eq("task_id", taskId)).collect();
+  const yearLocations = await ctx.db.query("derived_year_locations").withIndex("by_task", (q: any) => q.eq("task_id", taskId)).collect();
+  const targetYearFunctions = await ctx.db.query("derived_target_year_functions").withIndex("by_task", (q: any) => q.eq("task_id", taskId)).collect();
+  const derivedEvents = await ctx.db.query("derived_state_events").withIndex("by_task_and_created_at", (q: any) => q.eq("task_id", taskId)).collect();
+  const snapshot = { task, draft, review_decisions: decisions, task_events: taskEvents, agent_reviews: agentReviews, historical_claims: historicalClaims, site_occupancies: occupancies, derived_target_year_states: targetYearStates, derived_year_locations: yearLocations, derived_target_year_functions: targetYearFunctions, derived_state_events: derivedEvents };
+  return { task, draft, snapshot, hash: sha256(canonicalJson(snapshot)) };
+}
+
+export const getReviewSnapshot = query({
+  args: { taskId: v.string(), evidenceDraftId: v.string() },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    await requireUser(ctx, ["reviewer", "curator", "admin"]);
+    const row = await reviewSnapshot(ctx, args.taskId, args.evidenceDraftId);
+    return { task_id: args.taskId, evidence_draft_id: args.evidenceDraftId, snapshot_hash: row.hash, summary: { task_status: row.task.status, draft_status: row.draft.draft_status, review_decisions: row.snapshot.review_decisions.length, task_events: row.snapshot.task_events.length, agent_reviews: row.snapshot.agent_reviews.length, historical_claims: row.snapshot.historical_claims.length, site_occupancies: row.snapshot.site_occupancies.length, derived_states: row.snapshot.derived_target_year_states.length, derived_locations: row.snapshot.derived_year_locations.length, derived_functions: row.snapshot.derived_target_year_functions.length }, snapshot: row.snapshot };
+  },
+});
+
+export const getRecordedReviewSnapshot = query({
+  args: { snapshotHash: v.string() },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    await requireUser(ctx, ["reviewer", "curator", "admin"]);
+    const row = await ctx.db.query("review_snapshots").withIndex("by_hash", (q) => q.eq("snapshot_hash", args.snapshotHash)).unique();
+    if (row === null) throw new Error("Recorded review snapshot not found.");
+    return row;
+  },
+});
+
+export const batchRecordReviewDecisions = mutation({
+  args: {
+    items: v.array(v.object({ task_id: v.string(), evidence_draft_id: v.string(), snapshot_hash: v.string(), decision: reviewDecisionInput })),
+  },
+  returns: v.object({ count: v.number() }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["reviewer", "curator", "admin"]);
+    if (args.items.length === 0 || args.items.length > 20) throw new Error("A review batch must contain 1 to 20 items.");
+    const seen = new Set<string>();
+    const checked: Array<{ item: typeof args.items[number]; row: Awaited<ReturnType<typeof reviewSnapshot>>; snapshotJson: string }> = [];
+    let aggregateBytes = 0;
+    for (const item of args.items) {
+      if (seen.has(item.task_id) || !/^[0-9a-f]{64}$/.test(item.snapshot_hash)) throw new Error("Batch contains duplicate task or invalid snapshot hash.");
+      seen.add(item.task_id);
+      if (item.decision.decision_status !== "accepted_for_export") throw new Error("This batch endpoint is for accepted-for-export decisions only.");
+      if (item.decision.evidence_draft_id !== item.evidence_draft_id) throw new Error("Decision draft does not match snapshot draft.");
+      const row = await reviewSnapshot(ctx, item.task_id, item.evidence_draft_id);
+      if (row.hash !== item.snapshot_hash) throw new Error(`Review snapshot is stale for ${item.task_id}.`);
+      if (row.task.status !== "needs_review" && row.task.status !== "unresolved_note" && row.task.status !== "changes_requested") throw new Error(`Task ${item.task_id} is not open for review.`);
+      if (row.draft.draft_status !== "submitted" && row.draft.draft_status !== "unresolved_note") throw new Error(`Draft ${item.evidence_draft_id} is not submitted.`);
+      if (row.draft.agent_intake_only === true) throw new Error("Internal agent intake drafts require ordinary human evidence submission before acceptance for export.");
+      const snapshotJson = canonicalJson(row.snapshot);
+      const snapshotBytes = new TextEncoder().encode(snapshotJson).length;
+      if (snapshotBytes > 128 * 1024) throw new Error(`Review snapshot for ${item.task_id} exceeds 128 KiB.`);
+      aggregateBytes += snapshotBytes;
+      if (aggregateBytes > 512 * 1024) throw new Error("Review batch snapshots exceed 512 KiB.");
+      checked.push({ item, row, snapshotJson });
+    }
+    // Convex mutations are transactional: if any shared decision validation or
+    // write fails, all earlier decisions in this batch roll back.
+    for (const entry of checked) {
+      const recorded = await ctx.db.query("review_snapshots").withIndex("by_hash", (q) => q.eq("snapshot_hash", entry.item.snapshot_hash)).unique();
+      if (recorded === null) await ctx.db.insert("review_snapshots", { snapshot_hash: entry.item.snapshot_hash, snapshot_json: entry.snapshotJson, created_at: Date.now(), reviewer_user_id: user._id });
+      await applyReviewDecision(ctx, { taskId: entry.item.task_id, decision: entry.item.decision, snapshotHash: entry.item.snapshot_hash }, user);
+    }
+    return { count: checked.length };
   },
 });
 

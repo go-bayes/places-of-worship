@@ -132,14 +132,14 @@ def public_url(url):
     try:
         parsed = parse_public_url(url)
         host = parsed.hostname or ''
-        if '\\' in url or '%' in host:
+        if '\\' in url or '%' in host or any(c.isspace() for c in url):
             return False
         import ipaddress
         try:
             ipaddress.ip_address(host)
             return False
         except ValueError:
-            if re.fullmatch(r'[0-9.]+|0x[0-9a-f]+', host, re.I):
+            if re.fullmatch(r'(?:[0-9]+|0x[0-9a-f]+)(?:\.(?:[0-9]+|0x[0-9a-f]+))*', host, re.I):
                 return False
         return bool(host)
     except (ValueError, TypeError, UnsafeURL):
