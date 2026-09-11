@@ -49,6 +49,8 @@ jobs:
       - name: country registry tests
         run: python3 -m unittest scripts/test_build_country_registry.py
       - uses: astral-sh/setup-uv@v5
+      - name: agent research pilot tests
+        run: python3 -m unittest discover -s scripts/agent_research -p "test_*.py"
       - name: indicator schema tests
         run: uv run scripts/test_indicator_schema.py
       - name: validate area summaries

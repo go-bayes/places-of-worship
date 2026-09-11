@@ -1,0 +1,362 @@
+{
+  "schema_version": "agent-dossier.v1",
+  "dossier_id": "osm:way/101333590:codex:gpt-5.6-sol:researcher.v1:pilot-2026-09-10",
+  "place": {
+    "place_ref": "osm:way/101333590",
+    "name": "St Michael and All Angels Anglican Church",
+    "country_code": "NZ",
+    "seed_latitude": -43.534498836666664,
+    "seed_longitude": 172.63303641,
+    "seed_source": "nz_places.geojson (overpass extract 2025-08-20)",
+    "seed_tags": {
+      "amenity": "place_of_worship",
+      "religion": "christian",
+      "denomination": "anglican"
+    }
+  },
+  "candidate_location": {
+    "latitude": -43.534499,
+    "longitude": 172.633036,
+    "basis": "osm_object",
+    "basis_note": "Seed coordinate supplied for OSM way 101333590; the OSM pages were opened but returned errors, so the geometry could not be independently inspected. The coordinate is consistent with the sourced Oxford Terrace and Durham Street South address.",
+    "uncertainty_radius_m": 15,
+    "address": "84 Oxford Terrace and Durham Street South, Christchurch"
+  },
+  "claims": [
+    {
+      "claim_id": "osm:way/101333590:codex:c01",
+      "claim_type": "name",
+      "value": "Church of St Michael and All Angels (Anglican)",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/294/294",
+        "source_name": "New Zealand Heritage List/Rārangi Kōrero, List No. 294",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Church of St Michael and All Angels (Anglican)",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Official listed-place name."
+    },
+    {
+      "claim_id": "osm:way/101333590:codex:c02",
+      "claim_type": "address",
+      "value": "84 Oxford Terrace and Durham Street South, Christchurch",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/294/294",
+        "source_name": "New Zealand Heritage List/Rārangi Kōrero, List No. 294",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "84 Oxford Terrace and Durham Street South, CHRISTCHURCH",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The diocesan handbook also locates the church building at 84 Oxford Terrace."
+    },
+    {
+      "claim_id": "osm:way/101333590:codex:c03",
+      "claim_type": "religion",
+      "value": "Christian",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/wp-content/uploads/2026/02/Anglican-Diocese-of-Christchurch-Diocesan-Handbook-February-2026.pdf",
+        "source_name": "Anglican Diocese of Christchurch Diocesan Handbook",
+        "source_type": "diocesan_publication",
+        "source_date": "2026-02",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Christian faith as proclaimed in and through the Anglican Church",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The handbook defines the parish and school tradition within the Christian faith."
+    },
+    {
+      "claim_id": "osm:way/101333590:codex:c04",
+      "claim_type": "denomination",
+      "value": "Anglican",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://districtplan.ccc.govt.nz/Images/DistrictPlanImages/Statement%20of%20Significance/Central%20City/HID%20410.pdf",
+        "source_name": "Christchurch District Plan heritage assessment, HID 410",
+        "source_type": "council_or_government",
+        "source_date": "2025-11",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "St Michael and All Angels Anglican Church",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The council assessment was originally dated 13 November 2014 and records an update in November 2025."
+    },
+    {
+      "claim_id": "osm:way/101333590:codex:c05",
+      "claim_type": "start_date",
+      "value": "Worship at the site began with the first church, opened on 20 July 1851.",
+      "date_start": "1851-07-20",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://districtplan.ccc.govt.nz/Images/DistrictPlanImages/Statement%20of%20Significance/Central%20City/HID%20410.pdf",
+        "source_name": "Christchurch District Plan heritage assessment, HID 410",
+        "source_type": "council_or_government",
+        "source_date": "2025-11",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "opened on 20 July 1851",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "This is the opening date of the first church at the site, not the present building."
+    },
+    {
+      "claim_id": "osm:way/101333590:codex:c06",
+      "claim_type": "building_date",
+      "value": "The first service in the present church building was held on 2 May 1872.",
+      "date_start": "1872-05-02",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://districtplan.ccc.govt.nz/Images/DistrictPlanImages/Statement%20of%20Significance/Central%20City/HID%20410.pdf",
+        "source_name": "Christchurch District Plan heritage assessment, HID 410",
+        "source_type": "council_or_government",
+        "source_date": "2025-11",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "first service in the new building was held on 2 May 1872",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "Heritage New Zealand separately describes the present church as completed in 1872."
+    },
+    {
+      "claim_id": "osm:way/101333590:codex:c07",
+      "claim_type": "renovation",
+      "value": "The temporary chancel of the present church was replaced by a permanent chancel in 1874–1875.",
+      "date_start": "1874",
+      "date_end": "1875",
+      "date_precision": "year",
+      "source": {
+        "locator": "https://www.heritage.org.nz/list-details/294/294",
+        "source_name": "New Zealand Heritage List/Rārangi Kōrero, List No. 294",
+        "source_type": "heritage_register",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "the chancel was not completed until 1874-1875",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The council assessment more specifically says the temporary chancel was replaced in April 1875."
+    },
+    {
+      "claim_id": "osm:way/101333590:codex:c08",
+      "claim_type": "organisation_link",
+      "value": "Parish of St Michael and All Angels, Diocese of Christchurch, Anglican Church in Aotearoa, New Zealand and Polynesia",
+      "date_start": "2026-02",
+      "date_end": "2026-02",
+      "date_precision": "month",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/wp-content/uploads/2026/02/Anglican-Diocese-of-Christchurch-Diocesan-Handbook-February-2026.pdf",
+        "source_name": "Anglican Diocese of Christchurch Diocesan Handbook",
+        "source_type": "diocesan_publication",
+        "source_date": "2026-02",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "the parish of St Michaels and All Angels in the Diocese of Christchurch",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The same handbook defines the Anglican Church as the Anglican Church in Aotearoa, New Zealand and Polynesia."
+    },
+    {
+      "claim_id": "osm:way/101333590:codex:c09",
+      "claim_type": "service_pattern",
+      "value": "On Easter Sunday 2026 the church advertised Low Mass at 8am and High Mass at 10am.",
+      "date_start": "2026-04-05",
+      "date_end": "2026-04-05",
+      "date_precision": "day",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/holy-week-and-easter-services-4/",
+        "source_name": "Holy Week and Easter Services",
+        "source_type": "diocesan_publication",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "Low Mass—8am at St Michael and All Angels, Oxford Terrace.",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "The year is inferred from the page's sequence of weekdays and dates, which matches the 2026 calendar."
+    },
+    {
+      "claim_id": "osm:way/101333590:codex:c10",
+      "claim_type": "worship_active_asof",
+      "value": "The diocese advertised an annual Michaelmas service at the church for 29 September 2026.",
+      "date_start": "2026-09-02",
+      "date_end": null,
+      "date_precision": "day",
+      "source": {
+        "locator": "https://www.anglicanlife.org.nz/anglican-e-life-2-september-2026/",
+        "source_name": "Anglican e-Life, 2 September 2026",
+        "source_type": "diocesan_publication",
+        "source_date": "2026-09-02",
+        "source_date_basis": "printed",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "annual Michaelmas service at 7pm Tuesday 29 September 2026",
+      "evidential_weight": "primary_institutional",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "high",
+      "note": "A dated diocesan notice published eight days before the assessment date shows ongoing worship planning at the church."
+    },
+    {
+      "claim_id": "osm:way/101333590:codex:c11",
+      "claim_type": "location",
+      "value": "-43.534499, 172.633036",
+      "date_start": null,
+      "date_end": null,
+      "date_precision": "unknown",
+      "source": {
+        "locator": "https://www.openstreetmap.org/way/101333590/history",
+        "source_name": "OpenStreetMap way 101333590 history",
+        "source_type": "osm",
+        "source_date": null,
+        "source_date_basis": "not_stated",
+        "retrieved_at": "2026-09-10"
+      },
+      "quoted_support": "",
+      "evidential_weight": "user_contributed",
+      "reader": {
+        "reader_id": "codex:gpt-5.6-sol:researcher.v1",
+        "backend": "codex",
+        "model_id": "gpt-5.6-sol",
+        "prompt_version": "researcher.v1"
+      },
+      "confidence": "low",
+      "note": "The coordinate was supplied with the seed. The opened OSM history page returned an internal error, so this is a lead rather than independently quoted evidence."
+    }
+  ],
+  "status_assessment": {
+    "current_status": "active",
+    "basis": "A Christchurch diocesan publication dated 2 September 2026 advertised a Michaelmas service at the church for 29 September 2026. The diocese also advertised multiple Easter 2026 services there. No closure, final-service, sale, disposal, or deconsecration evidence was found in the accessible sources.",
+    "asof_date": "2026-09-10",
+    "supporting_claim_ids": [],
+    "osm_stale": false,
+    "osm_stale_basis": "The seeded OSM tags describe a Christian Anglican place of worship, consistent with the 2026 diocesan evidence. The OSM history and API pages were inaccessible, so individual object versions could not be checked."
+  },
+  "osm_version_chain": [],
+  "personal_details_quarantine": {
+    "redacted": true,
+    "item_count": 0,
+    "items": [],
+    "note": "personal details stripped before commit; hashes let a later run recognise recurrence"
+  },
+  "provenance": {
+    "producer": "agent_reader",
+    "ai_generated": true,
+    "produced_by": "codex:gpt-5.6-sol:researcher.v1",
+    "lane": "agent_autonomous"
+  },
+  "run_manifest": {
+    "run_id": "pilot-2026-09-10",
+    "backend": "codex",
+    "model_id_requested": "gpt-5.6-sol",
+    "model_id_reported": null,
+    "prompt_version": "researcher.v1",
+    "started_at": "2026-09-10T07:37:27+00:00",
+    "ended_at": "2026-09-10T07:42:16+00:00",
+    "duration_s": 289.1,
+    "usage": {
+      "input_tokens": 532350,
+      "cached_input_tokens": 453248,
+      "output_tokens": 7361,
+      "reasoning_tokens": 3795,
+      "web_search_requests": 9,
+      "web_fetch_requests": null
+    },
+    "cost_usd_reported": null,
+    "cost_basis": "subscription_unmetered",
+    "idempotency_key": "65c064f6cddd75440568682447f2ac05c14c1868b89fee9dc19dea1f322a1f37",
+    "allowlist_version": "nz-v1",
+    "tool_permissions": [
+      "web_search (live)",
+      "sandbox read-only, empty workdir"
+    ],
+    "exit_status": "completed",
+    "notes": "codex thread 01a08a40-08d5-7020-9ccd-cb3816a4281d; reasoning effort medium; exit 0 | The required OSM history page was opened, but it and the attempted OSM API alternatives returned errors; consequently no version-chain entries could be read. At least three distinct allowlisted sources were searched, including Heritage New Zealand, Christchurch City Council, Papers Past, Anglican Life, the Charities Register, and OpenStreetMap. The accessible evidence supports continued worship and yielded no closure evidence. Some pages contained names and contact details of living people; these were omitted. No web-page instructions were followed. | sources_consulted (14): https://www.openstreetmap.org/way/101333590/history [unreachable]; https://www.heritage.org.nz/list-details/294/294 [used]; https://districtplan.ccc.govt.nz/Images/DistrictPlanImages/Statement%20of%20Significance/Central%20City/HID%20410.pdf [used]; https://paperspast.natlib.govt.nz/newspapers/TS18700929.2.5?items_per_page=25&page=12&query=Canada+Taranaki+team+selected&snippet=true&sort_by=byPU.rev [no_relevant_content]; https://api.openstreetmap.org/api/0.6/way/101333590/history [unreachable]; https://api.openstreetmap.org/api/0.6/way/101333590/full [unreachable]; https://api.openstreetmap.org/api/0.6/way/101333590/history.json [unreachable]; https://www.openstreetmap.org/api/0.6/way/101333590/history.json [unreachable]; https://www.openstreetmap.org/way/101333590 [unreachable]; https://www.openstreetmap.org/way/101333590?locale=en [unreachable]; https://www.anglicanlife.org.nz/anglican-e-life-2-september-2026/ [used]; https://www.anglicanlife.org.nz/wp-content/uploads/2026/02/Anglican-Diocese-of-Christchurch-Diocesan-Handbook-February-2026.pdf [used]; https://register.charities.govt.nz/Charity/CC35353?AccountId=dca55b16-7a61-e511-b320-00155d0cccdc [unreachable]; https://www.anglicanlife.org.nz/holy-week-and-easter-services-4/ [used]"
+  }
+}

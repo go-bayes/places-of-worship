@@ -1,0 +1,41 @@
+{
+  "allowlist_version": "nz-v1",
+  "country_code": "NZ",
+  "note": "Domains a reader is told to prefer and a validator will fetch without a per-run ruling. Licence and robots notes are in docs/development/agent-research-pipeline-brief-2026-09-10.md section 6. Proposed, not ruled.",
+  "domains": [
+    "openstreetmap.org",
+    "api.openstreetmap.org",
+    "paperspast.natlib.govt.nz",
+    "digitalnz.org",
+    "natlib.govt.nz",
+    "heritage.org.nz",
+    "wikidata.org",
+    "en.wikipedia.org",
+    "register.charities.govt.nz",
+    "nzhistory.govt.nz",
+    "teara.govt.nz",
+    "anglicanlife.org.nz",
+    "anglican.org.nz",
+    "anglicantaonga.org.nz",
+    "canterburystories.nz",
+    "christchurchcitylibraries.com",
+    "ccc.govt.nz",
+    "waimakariri.govt.nz",
+    "hurunui.govt.nz",
+    "ashburtondc.govt.nz",
+    "stuff.co.nz",
+    "thepress.co.nz",
+    "deaths.press.co.nz",
+    "odt.co.nz",
+    "rnz.co.nz",
+    "flickr.com"
+  ],
+  "church_website_rule": "a parish's or congregation's own domain counts as allowlisted for that place once the reader has identified it from an allowlisted directory",
+  "never": [
+    "facebook.com",
+    "instagram.com",
+    "linkedin.com",
+    "x.com",
+    "twitter.com"
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "pilot_set_version": "canterbury-anglican-2026-09-10",
+  "note": "Six places: the Joseph Watts case (St Martin's, Loburn) and five Anglican churches drawn from data/nz_places.geojson (denomination anglican, Canterbury bounding box, seed 20260910), chosen for a mix of rural and urban settings. St Brigid's, Loburn, the other place Watts mentioned, is Catholic (osm:way/642466990) and is listed here as an optional seventh place, not run in the first pilot. Coordinates are the geojson centroids.",
+  "places": [
+    {
+      "place_ref": "osm:way/643590665",
+      "name": "St Martin's Anglican Church",
+      "country_code": "NZ",
+      "seed_latitude": -43.24923163636364,
+      "seed_longitude": 172.52855542727272,
+      "seed_source": "nz_places.geojson (overpass extract 2025-08-20)",
+      "seed_tags": {"amenity": "place_of_worship", "religion": "christian", "denomination": "anglican", "addr:street": "Hodgsons Road", "addr:housenumber": "84", "start_date": "1891"},
+      "setting": "rural",
+      "note": "the Watts case; collaborator dossier fixture watts-st-martins-loburn-2026-09-09.dossier.json joins as a third reader"
+    },
+    {
+      "place_ref": "osm:way/641756448",
+      "name": "St Columba's Anglican Church - Hawarden",
+      "country_code": "NZ",
+      "seed_latitude": -42.88326044,
+      "seed_longitude": 172.6347767,
+      "seed_source": "nz_places.geojson (overpass extract 2025-08-20)",
+      "seed_tags": {"amenity": "place_of_worship", "religion": "christian", "denomination": "anglican"},
+      "setting": "rural"
+    },
+    {
+      "place_ref": "osm:way/645131197",
+      "name": "St Paul's Anglican Church - Leithfield",
+      "country_code": "NZ",
+      "seed_latitude": -43.19150892307692,
+      "seed_longitude": 172.73911387692308,
+      "seed_source": "nz_places.geojson (overpass extract 2025-08-20)",
+      "seed_tags": {"amenity": "place_of_worship", "religion": "christian", "denomination": "anglican"},
+      "setting": "rural"
+    },
+    {
+      "place_ref": "osm:way/641097567",
+      "name": "St Bartholomew's Anglican Church - Kaiapoi",
+      "country_code": "NZ",
+      "seed_latitude": -43.38149042222222,
+      "seed_longitude": 172.66124577777776,
+      "seed_source": "nz_places.geojson (overpass extract 2025-08-20)",
+      "seed_tags": {"amenity": "place_of_worship", "religion": "christian", "denomination": "anglican"},
+      "setting": "town"
+    },
+    {
+      "place_ref": "osm:way/101333590",
+      "name": "St Michael and All Angels Anglican Church",
+      "country_code": "NZ",
+      "seed_latitude": -43.534498836666664,
+      "seed_longitude": 172.63303641,
+      "seed_source": "nz_places.geojson (overpass extract 2025-08-20)",
+      "seed_tags": {"amenity": "place_of_worship", "religion": "christian", "denomination": "anglican"},
+      "setting": "urban"
+    },
+    {
+      "place_ref": "osm:way/532228563",
+      "name": "St Chad's Anglican Church - North Linwood",
+      "country_code": "NZ",
+      "seed_latitude": -43.52817655384615,
+      "seed_longitude": 172.67937441538464,
+      "seed_source": "nz_places.geojson (overpass extract 2025-08-20)",
+      "seed_tags": {"amenity": "place_of_worship", "religion": "christian", "denomination": "anglican"},
+      "setting": "urban"
+    }
+  ],
+  "optional": [
+    {
+      "place_ref": "osm:way/642466990",
+      "name": "St Brigid's Parish - Loburn",
+      "country_code": "NZ",
+      "seed_latitude": null,
+      "seed_longitude": null,
+      "seed_source": "nz_places.geojson (overpass extract 2025-08-20)",
+      "seed_tags": {"amenity": "place_of_worship", "religion": "christian", "denomination": "catholic", "addr:street": "Loburn Whiterock Road", "addr:housenumber": "237", "start_date": "1875"},
+      "setting": "rural",
+      "note": "catholic; the place Watts entered by hand on 2026-09-08; coordinates to be read from the geojson when run"
+    }
+  ]
+}

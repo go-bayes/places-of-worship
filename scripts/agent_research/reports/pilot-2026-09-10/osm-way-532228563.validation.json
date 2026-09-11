@@ -1,0 +1,739 @@
+{
+  "place_ref": "osm:way/532228563",
+  "name": "St Chad's Anglican Church - North Linwood",
+  "validated_at": "2026-09-10T07:59:51+00:00",
+  "osm": {
+    "centroid": [
+      -43.528165075000004,
+      172.67937785
+    ],
+    "version": 8,
+    "amenity": "place_of_worship",
+    "history_versions": [
+      [
+        1,
+        52890728,
+        "2017-10-13T12:35:25Z"
+      ],
+      [
+        2,
+        64185947,
+        "2018-11-05T05:45:28Z"
+      ],
+      [
+        3,
+        64250983,
+        "2018-11-07T03:54:11Z"
+      ],
+      [
+        4,
+        97876854,
+        "2021-01-21T05:54:30Z"
+      ],
+      [
+        5,
+        103385196,
+        "2021-04-22T06:40:24Z"
+      ],
+      [
+        6,
+        127869621,
+        "2022-10-21T08:27:02Z"
+      ],
+      [
+        7,
+        160013417,
+        "2024-12-07T01:35:11Z"
+      ],
+      [
+        8,
+        180196653,
+        "2026-03-21T09:57:23Z"
+      ]
+    ],
+    "seed_to_osm_m": 1.3,
+    "error": null
+  },
+  "dossiers": [
+    {
+      "dossier_id": "osm:way/532228563:claude:opus:researcher.v1:pilot-2026-09-10",
+      "reader": "claude:claude:opus:researcher.v1",
+      "validated_at": "2026-09-10T07:59:32+00:00",
+      "validator_version": "validate_dossier.v1",
+      "summary": {
+        "claims": 9,
+        "locators": 9,
+        "distinct_locators": 2,
+        "reachable": 4,
+        "distinct_reachable": 1,
+        "distinct_dead": 0,
+        "distinct_blocked": 1,
+        "dead": 0,
+        "requires_human_access": 5,
+        "http_error": 0,
+        "unreachable": 0,
+        "robots_disallowed": 0,
+        "not_fetched": 0,
+        "with_quote": 9,
+        "quote_supported": 3,
+        "quote_partial": 1,
+        "quote_not_found": 0,
+        "locator_validity_rate": 1.0,
+        "locator_reachable_rate": 0.5,
+        "locator_blocked_rate": 0.5,
+        "quote_support_rate": 1.0,
+        "quote_exact_rate": 0.75
+      },
+      "location": {
+        "candidate_to_seed_m": 0.1,
+        "candidate_to_osm_m": 1.4,
+        "within_tolerance": true
+      },
+      "version_chain": {
+        "claimed_versions": 8,
+        "actual_versions": 8,
+        "confirmed": 8,
+        "contradicted": 0,
+        "rows": [
+          {
+            "version": 1,
+            "claimed_changeset": 52890728,
+            "claimed_timestamp": "2017-10-13T12:35:25Z",
+            "actual_changeset": 52890728,
+            "actual_timestamp": "2017-10-13T12:35:25Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 2,
+            "claimed_changeset": 64185947,
+            "claimed_timestamp": "2018-11-05T05:45:28Z",
+            "actual_changeset": 64185947,
+            "actual_timestamp": "2018-11-05T05:45:28Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 3,
+            "claimed_changeset": 64250983,
+            "claimed_timestamp": "2018-11-07T03:54:11Z",
+            "actual_changeset": 64250983,
+            "actual_timestamp": "2018-11-07T03:54:11Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 4,
+            "claimed_changeset": 97876854,
+            "claimed_timestamp": "2021-01-21T05:54:30Z",
+            "actual_changeset": 97876854,
+            "actual_timestamp": "2021-01-21T05:54:30Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 5,
+            "claimed_changeset": 103385196,
+            "claimed_timestamp": "2021-04-22T06:40:24Z",
+            "actual_changeset": 103385196,
+            "actual_timestamp": "2021-04-22T06:40:24Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 6,
+            "claimed_changeset": 127869621,
+            "claimed_timestamp": "2022-10-21T08:27:02Z",
+            "actual_changeset": 127869621,
+            "actual_timestamp": "2022-10-21T08:27:02Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 7,
+            "claimed_changeset": 160013417,
+            "claimed_timestamp": "2024-12-07T01:35:11Z",
+            "actual_changeset": 160013417,
+            "actual_timestamp": "2024-12-07T01:35:11Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 8,
+            "claimed_changeset": 180196653,
+            "claimed_timestamp": "2026-03-21T09:57:23Z",
+            "actual_changeset": 180196653,
+            "actual_timestamp": "2026-03-21T09:57:23Z",
+            "outcome": "confirmed"
+          }
+        ]
+      },
+      "stale_check": {
+        "osm_current_tags_say_place_of_worship": true,
+        "osm_current_version": 8,
+        "reader_osm_stale": false,
+        "reader_status": "likely_active"
+      },
+      "internal_contradictions": [],
+      "claims": [
+        {
+          "claim_id": "osm:way/532228563:claude:c01",
+          "claim_type": "name",
+          "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/532228563:claude:c02",
+          "claim_type": "address",
+          "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/532228563:claude:c03",
+          "claim_type": "organisation_link",
+          "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/532228563:claude:c04",
+          "claim_type": "denomination",
+          "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/532228563:claude:c05",
+          "claim_type": "worship_active_asof",
+          "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/532228563:claude:c06",
+          "claim_type": "name",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 6657
+        },
+        {
+          "claim_id": "osm:way/532228563:claude:c07",
+          "claim_type": "start_date",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 6657
+        },
+        {
+          "claim_id": "osm:way/532228563:claude:c08",
+          "claim_type": "location",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "partially_supported",
+          "support_share": 0.75,
+          "page_chars": 6657
+        },
+        {
+          "claim_id": "osm:way/532228563:claude:c09",
+          "claim_type": "osm_object_version",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "supported",
+          "support_share": 1.0,
+          "page_chars": 6657
+        }
+      ]
+    },
+    {
+      "dossier_id": "osm:way/532228563:codex:gpt-5.6-sol:researcher.v1:pilot-2026-09-10",
+      "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+      "validated_at": "2026-09-10T07:59:51+00:00",
+      "validator_version": "validate_dossier.v1",
+      "summary": {
+        "claims": 15,
+        "locators": 15,
+        "distinct_locators": 7,
+        "reachable": 5,
+        "distinct_reachable": 3,
+        "distinct_dead": 0,
+        "distinct_blocked": 4,
+        "dead": 0,
+        "requires_human_access": 10,
+        "http_error": 0,
+        "unreachable": 0,
+        "robots_disallowed": 0,
+        "not_fetched": 0,
+        "with_quote": 14,
+        "quote_supported": 0,
+        "quote_partial": 0,
+        "quote_not_found": 3,
+        "locator_validity_rate": 1.0,
+        "locator_reachable_rate": 0.429,
+        "locator_blocked_rate": 0.571,
+        "quote_support_rate": 0.0,
+        "quote_exact_rate": 0.0
+      },
+      "location": {
+        "candidate_to_seed_m": 0.1,
+        "candidate_to_osm_m": 1.4,
+        "within_tolerance": true
+      },
+      "version_chain": {
+        "claimed_versions": 8,
+        "actual_versions": 8,
+        "confirmed": 8,
+        "contradicted": 0,
+        "rows": [
+          {
+            "version": 1,
+            "claimed_changeset": 52890728,
+            "claimed_timestamp": "2017-10-13T12:35:25Z",
+            "actual_changeset": 52890728,
+            "actual_timestamp": "2017-10-13T12:35:25Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 2,
+            "claimed_changeset": 64185947,
+            "claimed_timestamp": "2018-11-05T05:45:28Z",
+            "actual_changeset": 64185947,
+            "actual_timestamp": "2018-11-05T05:45:28Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 3,
+            "claimed_changeset": 64250983,
+            "claimed_timestamp": "2018-11-07T03:54:11Z",
+            "actual_changeset": 64250983,
+            "actual_timestamp": "2018-11-07T03:54:11Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 4,
+            "claimed_changeset": 97876854,
+            "claimed_timestamp": "2021-01-21T05:54:30Z",
+            "actual_changeset": 97876854,
+            "actual_timestamp": "2021-01-21T05:54:30Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 5,
+            "claimed_changeset": 103385196,
+            "claimed_timestamp": "2021-04-22T06:40:24Z",
+            "actual_changeset": 103385196,
+            "actual_timestamp": "2021-04-22T06:40:24Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 6,
+            "claimed_changeset": 127869621,
+            "claimed_timestamp": "2022-10-21T08:27:02Z",
+            "actual_changeset": 127869621,
+            "actual_timestamp": "2022-10-21T08:27:02Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 7,
+            "claimed_changeset": 160013417,
+            "claimed_timestamp": "2024-12-07T01:35:11Z",
+            "actual_changeset": 160013417,
+            "actual_timestamp": "2024-12-07T01:35:11Z",
+            "outcome": "confirmed"
+          },
+          {
+            "version": 8,
+            "claimed_changeset": 180196653,
+            "claimed_timestamp": "2026-03-21T09:57:23Z",
+            "actual_changeset": 180196653,
+            "actual_timestamp": "2026-03-21T09:57:23Z",
+            "outcome": "confirmed"
+          }
+        ]
+      },
+      "stale_check": {
+        "osm_current_tags_say_place_of_worship": true,
+        "osm_current_version": 8,
+        "reader_osm_stale": true,
+        "reader_status": "likely_active"
+      },
+      "internal_contradictions": [],
+      "claims": [
+        {
+          "claim_id": "osm:way/532228563:codex:c01",
+          "claim_type": "name",
+          "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/532228563:codex:c02",
+          "claim_type": "address",
+          "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/532228563:codex:c03",
+          "claim_type": "address",
+          "locator": "https://www.ccc.govt.nz/assets/Documents/The-Council/Plans-Strategies-Policies-Bylaws/Plans/district-plan/Proposed-changes/2023/PC14/Provisions/Plan-Change-14-HBC-NOTIFICATION-Sub-chapter-6.5-Scheduled-Activities.pdf",
+          "has_quote": true,
+          "fetch": "fetched_pdf",
+          "status": 200,
+          "support": "not_checked_pdf",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/532228563:codex:c04",
+          "claim_type": "religion",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "not_found",
+          "support_share": 0.0,
+          "page_chars": 6657
+        },
+        {
+          "claim_id": "osm:way/532228563:codex:c05",
+          "claim_type": "denomination",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "not_found",
+          "support_share": 0.0,
+          "page_chars": 6657
+        },
+        {
+          "claim_id": "osm:way/532228563:codex:c06",
+          "claim_type": "start_date",
+          "locator": "https://paperspast.natlib.govt.nz/newspapers?items_per_page=100&page=4&query=st+paul's+church&snippet=false&sort_by=byTY.rev",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/532228563:codex:c07",
+          "claim_type": "worship_active_asof",
+          "locator": "https://paperspast.natlib.govt.nz/newspapers/CHP19230705.2.7?items_per_page=50&query=cargill+methodist&sort_by=byTI.rev",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/532228563:codex:c08",
+          "claim_type": "location",
+          "locator": "https://paperspast.natlib.govt.nz/newspapers/TS19290430.2.45",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/532228563:codex:c09",
+          "claim_type": "land_or_consecration",
+          "locator": "https://paperspast.natlib.govt.nz/newspapers?items_per_page=100&page=4&query=st+paul's+church&snippet=false&sort_by=byTY.rev",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/532228563:codex:c10",
+          "claim_type": "building_date",
+          "locator": "https://paperspast.natlib.govt.nz/newspapers?items_per_page=100&page=4&query=st+paul's+church&snippet=false&sort_by=byTY.rev",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/532228563:codex:c11",
+          "claim_type": "organisation_link",
+          "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/532228563:codex:c12",
+          "claim_type": "organisation_link",
+          "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/532228563:codex:c13",
+          "claim_type": "worship_active_asof",
+          "locator": "https://www.anglicanlife.org.nz/church/st-chads-church-linwood-linwood-aranui-parish/",
+          "has_quote": true,
+          "fetch": "requires_human_access",
+          "status": 200,
+          "error": "bot challenge or empty page",
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/532228563:codex:c14",
+          "claim_type": "location",
+          "locator": "https://www.openstreetmap.org/way/532228563/history",
+          "has_quote": false,
+          "fetch": "verified_via_osm_api",
+          "status": 200,
+          "support": "not_checked",
+          "support_share": null
+        },
+        {
+          "claim_id": "osm:way/532228563:codex:c15",
+          "claim_type": "osm_object_version",
+          "locator": "https://api.openstreetmap.org/api/0.6/way/532228563/history",
+          "has_quote": true,
+          "fetch": "fetched",
+          "status": 200,
+          "support": "not_found",
+          "support_share": 0.2,
+          "page_chars": 6657
+        }
+      ]
+    }
+  ],
+  "agreement": {
+    "readers": [
+      "claude:claude:opus:researcher.v1",
+      "codex:codex:gpt-5.6-sol:researcher.v1"
+    ],
+    "claim_types_compared": 6,
+    "agreed": 6,
+    "majority": 0,
+    "disagreed": 0,
+    "single_reader": 3,
+    "not_comparable": 1,
+    "agreement_rate": 1.0,
+    "majority_rate": 1.0,
+    "escalate_to_human": [],
+    "rows": [
+      {
+        "claim_type": "address",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "1 Carnarvon Street, Linwood, Christchurch 8062, New Zealand"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "1 Carnarvon Street, Linwood, Christchurch 8062"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: jaccard 0.75"
+      },
+      {
+        "claim_type": "building_date",
+        "outcome": "single_reader",
+        "values": [
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Present church dedicated on 6 September 1959"
+          }
+        ],
+        "detail": ""
+      },
+      {
+        "claim_type": "candidate_location",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "-43.528177,172.679374"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "-43.528177,172.679374"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: 0 m apart"
+      },
+      {
+        "claim_type": "current_status",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "likely_active"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "likely_active"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: status group"
+      },
+      {
+        "claim_type": "denomination",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Anglican"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Anglican"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: exact"
+      },
+      {
+        "claim_type": "land_or_consecration",
+        "outcome": "single_reader",
+        "values": [
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Foundation stone for the new church laid in February 1957"
+          }
+        ],
+        "detail": ""
+      },
+      {
+        "claim_type": "location",
+        "outcome": "not_comparable",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "OSM way 532228563 building outline at 1 Carnarvon Street, Linwood, centred about -43.528177, 172.679374"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Church schoolroom stood at Buckleys Road and Carnarvon Street by 1929"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: coordinates missing on one side"
+      },
+      {
+        "claim_type": "name",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "St Chad's Church—Linwood"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "St Chad’s Church—Linwood"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: exact"
+      },
+      {
+        "claim_type": "religion",
+        "outcome": "single_reader",
+        "values": [
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Christian"
+          }
+        ],
+        "detail": ""
+      },
+      {
+        "claim_type": "start_date",
+        "outcome": "agree",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "2007 (OSM start_date tag; probably an error for 1907)"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Approximately 1907"
+          }
+        ],
+        "detail": "claude:claude:opus:researcher.v1 vs codex:codex:gpt-5.6-sol:researcher.v1: years [1907, 2007] vs [1907]"
+      },
+      {
+        "claim_type": "organisation_link",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Linwood-Aranui Parish, Anglican Diocese of Christchurch"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "Linwood-Aranui Parish"
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      },
+      {
+        "claim_type": "worship_active_asof",
+        "outcome": "observation",
+        "values": [
+          {
+            "reader": "claude:claude:opus:researcher.v1",
+            "value": "Listed as a current church of the diocese, describing itself as having a strong worship base and weekly community activities"
+          },
+          {
+            "reader": "codex:codex:gpt-5.6-sol:researcher.v1",
+            "value": "A wedding was solemnised at St Chad's Church, Linwood"
+          }
+        ],
+        "detail": "dated observations are complementary, not compared"
+      }
+    ]
+  },
+  "requests_made": 10
+}
