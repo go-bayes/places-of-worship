@@ -1,6 +1,6 @@
 # Content-Addressed Review Contract
 
-**Status:** Design contract prepared for merge, revised 2026-09-11. The project lead approved the workflow below on 2026-09-11. Implementation follows in separate changes; live schemas, mutations, exports, and `pow` commands remain unchanged.
+**Status:** Design contract prepared for merge, revised 2026-09-11. The project lead approved the workflow below on 2026-09-11. Implementation follows in separate changes. The first two steps, the canonicalisation contract and immutable evidence versions, are implemented and documented in [evidence-versions.md](evidence-versions.md); proposal pinning, the export queue, frozen exports, PI batch release, and `pow` release verification remain unimplemented and the live per-item PI acceptance stays in force.
 
 ## Decision In Brief
 
@@ -167,9 +167,9 @@ Task-linked questions, agent recommendations, and generated review maps should i
 
 ## Implementation Sequence
 
-The first implementation step is the canonicalisation contract and a small set of golden fixtures shared by TypeScript and Rust. The fixtures should cover nested objects, Unicode, coordinates, timestamps, nulls, ordered arrays, set-like arrays, and omitted optional fields.
+The first implementation step is the canonicalisation contract and a small set of golden fixtures shared by TypeScript and Rust. The fixtures should cover nested objects, Unicode, coordinates, timestamps, nulls, ordered arrays, set-like arrays, and omitted optional fields. Implemented 2026-09-11 as `pow-canonical-json.v1`; see [evidence-versions.md](evidence-versions.md).
 
-The second implementation step is immutable evidence versions. Submission should create the version on the server, compute its hash, and prevent later patches to the submitted content. Corrections should create linked child versions.
+The second implementation step is immutable evidence versions. Submission should create the version on the server, compute its hash, and prevent later patches to the submitted content. Corrections should create linked child versions. Implemented 2026-09-11 as `evidence-version.v1`: every write onto submitted content records an attributed child version rather than patching silently, and the draft row stays a locator.
 
 The third implementation step is proposal and decision pinning. A proposal should record its accepted base-state hash, evidence-version hashes, proposed-event hashes, and parent proposal. Review decisions should require the proposal hash and reject stale writes.
 

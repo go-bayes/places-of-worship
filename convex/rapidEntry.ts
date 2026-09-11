@@ -29,6 +29,7 @@ import { assertProbableSameAsInputs, probableSameAsCheck } from "./lib/probableS
 import { recordProbableSameAsReciprocals, resolveProbableSameAsRefs } from "./lib/probableSameAsRecords";
 import { resolveCitedSource } from "./lib/sources";
 import { appendTaskEvent } from "./lib/taskEvents";
+import { recordEvidenceVersion } from "./evidenceVersions";
 import { assertAssertionMatchesTaskPoint, assertCountryAllowsAssertionMode } from "./lib/locationAssertions";
 import { locationAssertionInput, privacyFlag, probableSameAsInput, rapidCurrentObservationInput, taskStatus } from "./model";
 
@@ -156,6 +157,7 @@ export const submitCurrentObservation = mutation({
     task_status: taskStatus,
     deduped: v.boolean(),
     corrected: v.boolean(),
+    evidence_version_hash: v.optional(v.string()),
     superseded_evidence_draft_id: v.optional(v.string()),
   }),
   handler: async (ctx, args) => {
@@ -465,11 +467,23 @@ export const submitCurrentObservation = mutation({
         historical_target_years_assessed: false,
       },
       intake_submission_key: submissionKey,
+      // a correction joins the version family of the observation it
+      // supersedes (evidence-version.v1)
+      ...(correctedDraft !== null
+        ? { revision_of_evidence_draft_id: correctedDraft.evidence_draft_id, revision_intent: "correction" as const }
+        : {}),
     };
     const landedStatus = flagged ? ("unresolved_note" as const) : ("needs_review" as const);
     assertEvidenceDraftLimits(draftRecord);
     assertEvidenceDraftSubmission(draftRecord, flagged);
-    await ctx.db.insert("evidence_drafts", draftRecord);
+    const draftRowId = await ctx.db.insert("evidence_drafts", draftRecord);
+    const version = await recordEvidenceVersion(ctx, {
+      draftRowId,
+      actor: user,
+      kind: "rapid_current_observation",
+      now,
+      idempotencyKey: submissionKey,
+    });
     await supersedeEarlierSubmissions(ctx, task.task_id, user._id, draftId, now);
     await ctx.db.patch(task._id, {
       assigned_to: task.assigned_to ?? user._id,
@@ -487,6 +501,7 @@ export const submitCurrentObservation = mutation({
       previousStatus: task.status,
       newStatus: landedStatus,
       evidenceDraftId: draftId,
+      evidenceVersionHash: version.object_hash,
       reason: flagged
         ? `${intake.name} partial current observation flagged for discussion.`
         : correctedDraft !== null
@@ -505,6 +520,7 @@ export const submitCurrentObservation = mutation({
       task_status: landedStatus,
       deduped: false,
       corrected: correctedDraft !== null,
+      evidence_version_hash: version.object_hash,
       ...(correctedDraft !== null ? { superseded_evidence_draft_id: correctedDraft.evidence_draft_id } : {}),
     };
   },

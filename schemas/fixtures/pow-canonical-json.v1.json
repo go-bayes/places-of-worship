@@ -1,0 +1,281 @@
+{
+  "contract": "pow-canonical-json.v1",
+  "scheme": "RFC 8785",
+  "hash_contract": "pow-object.v1",
+  "hash_algorithm": "sha256 over utf-8 canonical bytes, written as sha256:<lowercase hex>",
+  "cases": [
+    {
+      "name": "empty_object",
+      "json_text": "{}",
+      "canonical": "{}",
+      "object_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "name": "empty_array",
+      "json_text": "[]",
+      "canonical": "[]",
+      "object_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "null",
+      "json_text": "null",
+      "canonical": "null",
+      "object_hash": "sha256:74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+    },
+    {
+      "name": "booleans",
+      "json_text": "[true,false]",
+      "canonical": "[true,false]",
+      "object_hash": "sha256:153c9dbcc7025ecd7e50ce6d83f1995233dfc636bc869098e3a8d84288fd938a"
+    },
+    {
+      "name": "empty_string",
+      "json_text": "\"\"",
+      "canonical": "\"\"",
+      "object_hash": "sha256:12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+    },
+    {
+      "name": "integer",
+      "json_text": "42",
+      "canonical": "42",
+      "object_hash": "sha256:73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049"
+    },
+    {
+      "name": "negative_integer",
+      "json_text": "-7",
+      "canonical": "-7",
+      "object_hash": "sha256:a770d3270c9dcdedf12ed9fd70444f7c8a95c26cae3cae9bd867499090a2f14b"
+    },
+    {
+      "name": "zero",
+      "json_text": "0",
+      "canonical": "0",
+      "object_hash": "sha256:5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "name": "negative_zero_prints_as_zero",
+      "json_text": "-0",
+      "canonical": "0",
+      "object_hash": "sha256:5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "name": "float_with_trailing_zero",
+      "json_text": "1.0",
+      "canonical": "1",
+      "object_hash": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "name": "decimal_fraction",
+      "json_text": "0.1",
+      "canonical": "0.1",
+      "object_hash": "sha256:14be4b45f18e0d8c67b4f719b5144eee88497e413709d11d85b096d8e2346310"
+    },
+    {
+      "name": "exponent_uppercase_input",
+      "json_text": "1E+2",
+      "canonical": "100",
+      "object_hash": "sha256:ad57366865126e55649ecb23ae1d48887544976efea46a48eb5d85a6eeb4d306"
+    },
+    {
+      "name": "large_exponent_boundary_21",
+      "json_text": "1e21",
+      "canonical": "1e+21",
+      "object_hash": "sha256:241c4643fa70b1dcde1205b71be4e3bebb17e9f880c8e1a33d0ead6c27271d3c"
+    },
+    {
+      "name": "just_below_exponent_boundary",
+      "json_text": "100000000000000000000",
+      "canonical": "100000000000000000000",
+      "object_hash": "sha256:c344e9487bfbd5c4e03c9fb90d62a5dde5e00b54d55c46e9f4a803aea162b80c"
+    },
+    {
+      "name": "small_exponent_boundary",
+      "json_text": "0.000001",
+      "canonical": "0.000001",
+      "object_hash": "sha256:159fb29a827ad04b260aa6c8ab6d8637f8f2b38af5c4f3cb49d6a21205e040f8"
+    },
+    {
+      "name": "just_below_small_boundary",
+      "json_text": "1e-7",
+      "canonical": "1e-7",
+      "object_hash": "sha256:5b33e02f2c5103a05d32f6ba9cb058294452bfbf393967f68bb30c1bdcbbab22"
+    },
+    {
+      "name": "negative_small_exponent",
+      "json_text": "-1.5e-10",
+      "canonical": "-1.5e-10",
+      "object_hash": "sha256:19ca303844b8cb9af4ec4dbd2d619c3be9c7c3cfa82c4e90c2b04821ad4f07f9"
+    },
+    {
+      "name": "min_subnormal",
+      "json_text": "5e-324",
+      "canonical": "5e-324",
+      "object_hash": "sha256:c46e7ca1be4c8734f373a56530787288fa2058d73d07855e9247e949f811a42a"
+    },
+    {
+      "name": "max_double",
+      "json_text": "1.7976931348623157e308",
+      "canonical": "1.7976931348623157e+308",
+      "object_hash": "sha256:c2784e1abd6317452708f3fbf9641c16b959561bc621a1d408c23a20aa2cb585"
+    },
+    {
+      "name": "integer_beyond_safe_range_rounds_to_double",
+      "json_text": "9007199254740993",
+      "canonical": "9007199254740992",
+      "object_hash": "sha256:c681da39d7273a6a24c15c9cac3a75526ff2ecf8ba4ee60346a0c70c8163bdb2"
+    },
+    {
+      "name": "max_safe_integer",
+      "json_text": "9007199254740991",
+      "canonical": "9007199254740991",
+      "object_hash": "sha256:f40b423c2dd95ff2b2f027e22208f438cf7242862e5e746860e697308c9add26"
+    },
+    {
+      "name": "coordinates_wellington",
+      "json_text": "{\"latitude\":-41.28664,\"longitude\":174.77557}",
+      "canonical": "{\"latitude\":-41.28664,\"longitude\":174.77557}",
+      "object_hash": "sha256:f229ec8bd476509e79766fb4c0d3da8a119970eb4d714424088531d5328a66fa"
+    },
+    {
+      "name": "coordinates_point_geojson",
+      "json_text": "{\"type\":\"Point\",\"coordinates\":[172.6362,-43.5321]}",
+      "canonical": "{\"coordinates\":[172.6362,-43.5321],\"type\":\"Point\"}",
+      "object_hash": "sha256:00250ade7211582fb8ebf3ce81e7a9b1de238fc7774e4c49767bf3527df596ba"
+    },
+    {
+      "name": "coordinates_with_radius",
+      "json_text": "{\"uncertainty_radius_m\":75,\"latitude\":-43.532054,\"longitude\":172.636225}",
+      "canonical": "{\"latitude\":-43.532054,\"longitude\":172.636225,\"uncertainty_radius_m\":75}",
+      "object_hash": "sha256:1dd3eb969d239dce373dbef68d0b9f8e9add8b2611b296cf7e795c88645a5dce"
+    },
+    {
+      "name": "timestamp_strings",
+      "json_text": "{\"recorded_at\":\"2026-09-11T04:30:00.000Z\",\"source_date\":\"1864-05\"}",
+      "canonical": "{\"recorded_at\":\"2026-09-11T04:30:00.000Z\",\"source_date\":\"1864-05\"}",
+      "object_hash": "sha256:9e1a11706f24adc4c14d837484f63ee425f28966749f31027ddf1584ee47feb8"
+    },
+    {
+      "name": "unicode_macron",
+      "json_text": "{\"name\":\"Ōtautahi\",\"tradition\":\"Māori\"}",
+      "canonical": "{\"name\":\"Ōtautahi\",\"tradition\":\"Māori\"}",
+      "object_hash": "sha256:dbf18ed834b1833023588d2390577057645956abb4a8ef4510e0712a06e2c663"
+    },
+    {
+      "name": "unicode_astral_emoji",
+      "json_text": "\"🕌 mosque\"",
+      "canonical": "\"🕌 mosque\"",
+      "object_hash": "sha256:959ad07300f693079467dbcaf65f26c760448ade6472603326530bfed7406557"
+    },
+    {
+      "name": "unicode_combining",
+      "json_text": "\"Ma\\u0304ori\"",
+      "canonical": "\"Māori\"",
+      "object_hash": "sha256:624d078b4edbb7ae7bf9bc8e462f0cfc229ee6a23ebd2ded8551fccfd526f1ff"
+    },
+    {
+      "name": "string_escapes",
+      "json_text": "\"quote \\\" backslash \\\\ slash / tab \\t newline \\n cr \\r bs \\b ff \\f\"",
+      "canonical": "\"quote \\\" backslash \\\\ slash / tab \\t newline \\n cr \\r bs \\b ff \\f\"",
+      "object_hash": "sha256:6ce0ae3b17c8385924f20dc3d5c92c04a99d76ac8a5ebcc18c52dc85f568e989"
+    },
+    {
+      "name": "control_characters_lowercase_hex",
+      "json_text": "\"\\u0000\\u001f\\u007f\"",
+      "canonical": "\"\\u0000\\u001f\"",
+      "object_hash": "sha256:dc5086a147ac8c34ce6ba78fdf00f33f1c891a8ded595a7cfd188483d64d6068"
+    },
+    {
+      "name": "line_separators_not_escaped",
+      "json_text": "\"\\u2028\\u2029\"",
+      "canonical": "\"  \"",
+      "object_hash": "sha256:e3a0e2262ac7790f4df36b522a8fbdd4ee3370d568eb15dc25c5f1775f14ed6c"
+    },
+    {
+      "name": "key_order_utf16_not_utf8",
+      "json_text": "{\"b\":1,\"a\":2,\"aa\":3,\"A\":4,\"\":5,\"\\u00e9\":6,\"\\ud83d\\ude00\":7,\"\\uff5e\":8,\"z\":9,\"_\":10,\"10\":11,\"2\":12}",
+      "canonical": "{\"\":5,\"10\":11,\"2\":12,\"A\":4,\"_\":10,\"a\":2,\"aa\":3,\"b\":1,\"z\":9,\"é\":6,\"😀\":7,\"～\":8}",
+      "object_hash": "sha256:46ab0e0d3f021d951e449275b56e3739503eddce040a012b52cc85ca6b805995"
+    },
+    {
+      "name": "key_order_nested",
+      "json_text": "{\"z\":{\"b\":1,\"a\":[{\"y\":1,\"x\":2}]},\"a\":{\"d\":null,\"c\":true}}",
+      "canonical": "{\"a\":{\"c\":true,\"d\":null},\"z\":{\"a\":[{\"x\":2,\"y\":1}],\"b\":1}}",
+      "object_hash": "sha256:5ca0ffae55d93eeba0bacf8a560780038f1b58527c5e8db3f9aa7a5825a591e9"
+    },
+    {
+      "name": "nulls_and_optional_absent",
+      "json_text": "{\"note\":null,\"uncertainty\":null,\"source\":\"directory\"}",
+      "canonical": "{\"note\":null,\"source\":\"directory\",\"uncertainty\":null}",
+      "object_hash": "sha256:d7ba03ad231d7507fe0b2af02b1b7f5d6f50dd63fc70ce20c6263bd904ba670a"
+    },
+    {
+      "name": "ordered_array_retains_order",
+      "json_text": "{\"segments\":[{\"segment_index\":1},{\"segment_index\":0}]}",
+      "canonical": "{\"segments\":[{\"segment_index\":1},{\"segment_index\":0}]}",
+      "object_hash": "sha256:660c9f93c5a0711bc47c24f8b33a56884580d0e7a5608b1bab46bbae2caf2e3b"
+    },
+    {
+      "name": "set_like_array_presorted_by_builder",
+      "json_text": "{\"parent_object_hashes\":[\"sha256:0a\",\"sha256:0b\"]}",
+      "canonical": "{\"parent_object_hashes\":[\"sha256:0a\",\"sha256:0b\"]}",
+      "object_hash": "sha256:000f81994d6327f226ab0c354a8875ae7157d72db43fc06deea42fef4d160d64"
+    },
+    {
+      "name": "mixed_array",
+      "json_text": "[1,\"two\",null,true,{\"k\":[]},[]]",
+      "canonical": "[1,\"two\",null,true,{\"k\":[]},[]]",
+      "object_hash": "sha256:ade3a2073646b4c31943ae1b5809dc0a91d3561e794aac1f60c4ecc2a00323fc"
+    },
+    {
+      "name": "deep_nesting",
+      "json_text": "{\"a\":{\"b\":{\"c\":{\"d\":{\"e\":{\"f\":[[[[1]]]]}}}}}}",
+      "canonical": "{\"a\":{\"b\":{\"c\":{\"d\":{\"e\":{\"f\":[[[[1]]]]}}}}}}",
+      "object_hash": "sha256:c0f8edc30693255ce8ec8d7d03716fcfc50aee410045ecf0d4edf494ef23b1c4"
+    },
+    {
+      "name": "rfc8785_example_numbers",
+      "json_text": "{\"numbers\":[333333333.33333329,1E30,4.50,2e-3,0.000000000000000000000000001]}",
+      "canonical": "{\"numbers\":[333333333.3333333,1e+30,4.5,0.002,1e-27]}",
+      "object_hash": "sha256:7c892d3452ad85ad65857a43e8dcac93b79475d2334fc3e85bac5c599142c158"
+    },
+    {
+      "name": "rfc8785_example_literals",
+      "json_text": "{\"literals\":[null,true,false]}",
+      "canonical": "{\"literals\":[null,true,false]}",
+      "object_hash": "sha256:f4e3f047101e0191aeb3ebf17ee457cbf687f209bd983dade6ac183f86d93797"
+    },
+    {
+      "name": "evidence_like_record",
+      "json_text": "{\"observation_contract_version\":\"guided_observation_v1\",\"source_type\":\"denominational_directory\",\"source_title\":\"Directory 2016\",\"source_date_or_capture_date\":\"2016-07\",\"target_year_statuses\":{\"2018\":\"present\",\"2013\":\"not_assessed\",\"2023\":\"present\"},\"privacy_flag\":\"clear\",\"licence_flag\":\"needs_review\",\"evidence_note\":\"The directory records this place as active in July 2016.\"}",
+      "canonical": "{\"evidence_note\":\"The directory records this place as active in July 2016.\",\"licence_flag\":\"needs_review\",\"observation_contract_version\":\"guided_observation_v1\",\"privacy_flag\":\"clear\",\"source_date_or_capture_date\":\"2016-07\",\"source_title\":\"Directory 2016\",\"source_type\":\"denominational_directory\",\"target_year_statuses\":{\"2013\":\"not_assessed\",\"2018\":\"present\",\"2023\":\"present\"}}",
+      "object_hash": "sha256:876841c116511931a072b2e5e76d14b1781d00fd5147d08c5c6bff72833c3846"
+    }
+  ],
+  "rejected": [
+    {
+      "name": "nan_literal",
+      "json_text": "NaN",
+      "reason": "non-finite number"
+    },
+    {
+      "name": "infinity_literal",
+      "json_text": "Infinity",
+      "reason": "non-finite number"
+    },
+    {
+      "name": "duplicate_member_names",
+      "json_text": "{\"a\":1,\"a\":2}",
+      "reason": "duplicate member name"
+    },
+    {
+      "name": "lone_surrogate",
+      "json_text": "\"\\ud800\"",
+      "reason": "lone surrogate"
+    },
+    {
+      "name": "trailing_data",
+      "json_text": "{} {}",
+      "reason": "trailing data"
+    }
+  ]
+}

@@ -46,6 +46,7 @@ import {
 import { intakeRateLimiter } from "./lib/rateLimits";
 import { assertRapidSubmissionId } from "./lib/rapidEntry";
 import { appendTaskEvent } from "./lib/taskEvents";
+import { recordEvidenceVersion } from "./evidenceVersions";
 import {
   derivedStateEventDoc,
   derivedTargetYearFunctionDoc,
@@ -928,6 +929,26 @@ export const submitOccupancies = mutation({
       });
       functionYears = recorded.derivedYears;
     }
+    // periods recorded against submitted evidence change what was
+    // submitted: the parent takes a child version naming the new set
+    const version = await recordEvidenceVersion(ctx, {
+      draftRowId: parent._id,
+      actor: user,
+      kind: "occupancy_set_recorded",
+      now,
+      idempotencyKey: submissionKey,
+    });
+    await appendTaskEvent(ctx, {
+      taskId: task.task_id,
+      eventType: "note_added",
+      actorUserId: user._id,
+      actorRole,
+      previousStatus: task.status,
+      newStatus: task.status,
+      evidenceDraftId: parent.evidence_draft_id,
+      evidenceVersionHash: version.object_hash,
+      reason: `Recorded ${args.segments.length} period${args.segments.length === 1 ? "" : "s"} as evidence version ${version.object_hash.slice(0, 19)}.`,
+    });
     return {
       occupancy_ids: occupancyIds,
       derived_years: derived.years,
@@ -1146,6 +1167,9 @@ export const decideDerivedYear = mutation({
       }
       const now = Date.now();
       const written = await applyFunctionDecision(ctx, user, task, parent, row, args.action, note, args.override?.label, now);
+      const version = args.action === "reject"
+        ? { created: false, object_hash: parent.evidence_version_hash ?? "" }
+        : await recordEvidenceVersion(ctx, { draftRowId: parent._id, actor: user, kind: "reviewer_derivation_decision", now });
       await appendTaskEvent(ctx, {
         taskId: task.task_id,
         eventType: "note_added",
@@ -1153,6 +1177,7 @@ export const decideDerivedYear = mutation({
         actorRole: chooseActorRole(user, ["reviewer", "curator", "admin"]),
         previousStatus: task.status,
         newStatus: task.status,
+        evidenceVersionHash: version.created ? version.object_hash : undefined,
         reason: `Derived ${args.targetYear} denomination ${args.action === "confirm" ? "confirmed" : args.action === "override" ? "overridden" : "rejected"}${written ? ` as ${written}` : ""}.`,
         evidenceDraftId: parent.evidence_draft_id,
       });
@@ -1167,6 +1192,12 @@ export const decideDerivedYear = mutation({
     }
     const now = Date.now();
     const written = await applyYearDecision(ctx, user, task, parent, presence, args.action, note, args.override, now);
+    // a confirmation or override writes onto the submitted row, so the
+    // reviewer's write is a child version of the contributor's submission;
+    // a rejection leaves the row unchanged and records no version
+    const version = args.action === "reject"
+      ? { created: false, object_hash: parent.evidence_version_hash ?? "" }
+      : await recordEvidenceVersion(ctx, { draftRowId: parent._id, actor: user, kind: "reviewer_derivation_decision", now });
     await appendTaskEvent(ctx, {
       taskId: task.task_id,
       eventType: "note_added",
@@ -1174,6 +1205,7 @@ export const decideDerivedYear = mutation({
       actorRole: chooseActorRole(user, ["reviewer", "curator", "admin"]),
       previousStatus: task.status,
       newStatus: task.status,
+      evidenceVersionHash: version.created ? version.object_hash : undefined,
       reason: `Derived ${args.targetYear} state ${args.action === "confirm" ? "confirmed" : args.action === "override" ? "overridden" : "rejected"}${written ? ` as ${written}` : ""}.`,
       evidenceDraftId: parent.evidence_draft_id,
     });
@@ -1240,6 +1272,7 @@ export const confirmAllDerived = mutation({
       confirmedFunctions.push(row.target_year);
     }
     if (confirmed.length > 0 || confirmedFunctions.length > 0) {
+      const version = await recordEvidenceVersion(ctx, { draftRowId: parent._id, actor: user, kind: "reviewer_derivation_decision", now });
       await appendTaskEvent(ctx, {
         taskId: task.task_id,
         eventType: "note_added",
@@ -1247,6 +1280,7 @@ export const confirmAllDerived = mutation({
         actorRole: chooseActorRole(user, ["reviewer", "curator", "admin"]),
         previousStatus: task.status,
         newStatus: task.status,
+        evidenceVersionHash: version.created ? version.object_hash : undefined,
         reason: [
           confirmed.length > 0 ? `Confirmed derived states for ${confirmed.join(", ")}.` : "",
           confirmedFunctions.length > 0 ? `Confirmed derived denominations for ${confirmedFunctions.join(", ")}.` : "",

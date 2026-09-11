@@ -23,6 +23,8 @@ Implementation notes:
 - `tasks.ts` imports static tasks, claims/releases work, records skips,
   provisionally closes tasks, and creates manual candidate tasks.
 - `evidence.ts` saves and submits RA evidence drafts.
+- `evidenceVersions.ts` records the immutable evidence version each submission
+  creates and serves version retrieval and audit (`docs/development/evidence-versions.md`).
 - `reviews.ts` records reviewer decisions.
 - `exports.ts` creates frozen export bundles for curator handoff.
 

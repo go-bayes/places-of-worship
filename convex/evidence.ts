@@ -25,6 +25,8 @@ import { assertWideEvidenceRowFields } from "./lib/wideEvidenceFields";
 import { resolveCitedSource } from "./lib/sources";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { evidenceDraftDoc } from "./lib/validators";
+import { recordEvidenceVersion } from "./evidenceVersions";
+import { revisionIntent } from "./model";
 
 
 // the waves a task's wide row must carry: the task's own, else the
@@ -225,7 +227,8 @@ async function markDraftSubmitted(
   now: number,
   note: string | undefined,
   clientContext?: unknown,
-): Promise<void> {
+  evidenceVersionHash?: string,
+) {
   await ctx.db.patch(draft._id, { draft_status: "submitted", updated_at: now });
   await supersedeOtherActiveDrafts(ctx, draft, now);
   await ctx.db.patch(task._id, {
@@ -233,7 +236,7 @@ async function markDraftSubmitted(
     updated_at: now,
     last_event_at: now,
   });
-  await appendTaskEvent(ctx, {
+  return await appendTaskEvent(ctx, {
     taskId: draft.task_id,
     eventType: "submitted_for_review",
     actorUserId: user._id,
@@ -243,6 +246,7 @@ async function markDraftSubmitted(
     evidenceDraftId: draft.evidence_draft_id,
     reason: note,
     clientContext,
+    evidenceVersionHash,
   });
 }
 
@@ -380,11 +384,16 @@ async function importSubmittedSpreadsheetDraft(
     ...item.draft,
   };
 
+  let draftRowId: Doc<"evidence_drafts">["_id"];
   if (existing === null) {
-    await ctx.db.insert("evidence_drafts", draftRecord);
+    draftRowId = await ctx.db.insert("evidence_drafts", draftRecord);
   } else {
     await ctx.db.patch(existing._id, draftRecord);
+    draftRowId = existing._id;
   }
+  // a re-import with changed content becomes a child version of the
+  // earlier import; unchanged content returns the existing version
+  const version = await recordEvidenceVersion(ctx, { draftRowId, actor: user, kind: "spreadsheet_import", now });
 
   const nextTaskStatus = closedTaskStatuses.has(task.status) ? task.status : "needs_review";
   await ctx.db.patch(task._id, {
@@ -401,6 +410,7 @@ async function importSubmittedSpreadsheetDraft(
     newStatus: nextTaskStatus,
     evidenceDraftId: draftId,
     reason: item.submit_note ?? "Imported from a spreadsheet submission.",
+    evidenceVersionHash: version.object_hash,
     clientContext: {
       source: "spreadsheet_submission_import",
       submitter_email: item.submitter_email,
@@ -474,6 +484,25 @@ export const saveEvidenceDraft = mutation({
         draft_status: existing.draft_status === "submitted" ? "submitted" : "draft",
         updated_at: now,
       });
+      // only a review role reaches a submitted row here; the edit stays
+      // possible but is recorded as an attributed child version of the
+      // contributor's submission rather than a silent patch
+      if (existing.draft_status === "submitted") {
+        const version = await recordEvidenceVersion(ctx, { draftRowId: existing._id, actor: user, kind: "reviewer_edit", now });
+        if (version.created) {
+          await appendTaskEvent(ctx, {
+            taskId: args.taskId,
+            eventType: "note_added",
+            actorUserId: user._id,
+            actorRole: chooseActorRole(user, ["reviewer", "curator", "admin"]),
+            previousStatus: task.status,
+            newStatus: task.status,
+            evidenceDraftId: draftId,
+            evidenceVersionHash: version.object_hash,
+            reason: "Submitted evidence edited by a reviewer; recorded as a new evidence version.",
+          });
+        }
+      }
     }
 
     const newTaskStatus = task.status === "needs_review" || task.status === "reviewed" ? task.status : ("draft_saved" as const);
@@ -559,6 +588,9 @@ const revisionTransitions = {
 export const reviseEvidenceDraft = mutation({
   args: {
     taskId: v.string(),
+    // evidence-version.v1: a correction joins the submission's version
+    // family; a new dated observation starts a family that follows it
+    intent: v.optional(revisionIntent),
   },
   returns: v.object({
     task_id: v.string(),
@@ -646,6 +678,12 @@ export const reviseEvidenceDraft = mutation({
         claim_hash: _sourceClaimHash,
         import_batch_id: _sourceImportBatchId,
         guided_submission_key: _sourceGuidedSubmissionKey,
+        // the clone is a new record in the version graph: it links to the
+        // source by locator and receives its own version when submitted
+        evidence_version_hash: _sourceVersionHash,
+        evidence_family_id: _sourceFamilyId,
+        revision_of_evidence_draft_id: _sourceRevisionOf,
+        revision_intent: _sourceRevisionIntent,
         ...draftContent
       } = sourceDraft;
 
@@ -655,6 +693,14 @@ export const reviseEvidenceDraft = mutation({
         draft_status: "draft",
         created_at: now,
         updated_at: now,
+        revision_of_evidence_draft_id: sourceDraft.evidence_draft_id,
+        revision_intent: args.intent ?? "correction",
+      });
+    }
+    if (existingRevision !== null && existingRevision.revision_of_evidence_draft_id === undefined) {
+      await ctx.db.patch(existingRevision._id, {
+        revision_of_evidence_draft_id: sourceDraft.evidence_draft_id,
+        revision_intent: args.intent ?? "correction",
       });
     }
     await ctx.db.patch(task._id, {
@@ -692,15 +738,22 @@ export const submitEvidenceDraft = mutation({
   args: {
     evidenceDraftId: v.string(),
     note: v.optional(v.string()),
+    // optional idempotency token; without it a retry of unchanged content
+    // still returns the existing version because the version is content-
+    // addressed (evidence-version.v1)
+    clientSubmissionId: v.optional(v.string()),
   },
   returns: v.object({
     task_id: v.string(),
     evidence_draft_id: v.string(),
     task_status: v.literal("needs_review"),
+    evidence_version_hash: v.string(),
+    deduped: v.boolean(),
   }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     assertTaskReasonLimit("submission note", args.note);
+    if (args.clientSubmissionId !== undefined) assertRapidSubmissionId(args.clientSubmissionId);
     const draft = await getDraftOrThrow(ctx, args.evidenceDraftId);
     if (draft.created_by !== user._id && !canReview(user.roles)) {
       throw new Error("Evidence draft belongs to another user.");
@@ -717,8 +770,21 @@ export const submitEvidenceDraft = mutation({
       throw new Error("Assigned guided tasks must submit evidence and periods together. Reload the portal and try again.");
     }
     const now = Date.now();
-    await markDraftSubmitted(ctx, draft, task, user, now, args.note);
-    return { task_id: draft.task_id, evidence_draft_id: args.evidenceDraftId, task_status: "needs_review" as const };
+    // the version captures the row's content, which the status change
+    // below does not touch; an unchanged resubmission returns the existing
+    // version and leaves the task and its events alone
+    const version = await recordEvidenceVersion(ctx, {
+      draftRowId: draft._id,
+      actor: user,
+      kind: "submitted",
+      now,
+      idempotencyKey: args.clientSubmissionId === undefined ? undefined : `${user._id}:${args.clientSubmissionId}`,
+    });
+    if (!version.created && draft.draft_status === "submitted") {
+      return { task_id: draft.task_id, evidence_draft_id: args.evidenceDraftId, task_status: "needs_review" as const, evidence_version_hash: version.object_hash, deduped: true };
+    }
+    await markDraftSubmitted(ctx, draft, task, user, now, args.note, undefined, version.object_hash);
+    return { task_id: draft.task_id, evidence_draft_id: args.evidenceDraftId, task_status: "needs_review" as const, evidence_version_hash: version.object_hash, deduped: false };
   },
 });
 
@@ -755,6 +821,7 @@ export const submitEvidenceDraftWithOccupancies = mutation({
     derived_function_years: v.optional(v.array(v.number())),
     period_count: v.number(),
     deduped: v.boolean(),
+    evidence_version_hash: v.optional(v.string()),
   }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
@@ -795,6 +862,7 @@ export const submitEvidenceDraftWithOccupancies = mutation({
         conflict_years: [],
         period_count: submittedForDraft.length,
         deduped: true,
+        evidence_version_hash: draft.evidence_version_hash,
       };
     }
     if (draft.draft_status !== "draft") {
@@ -835,7 +903,7 @@ export const submitEvidenceDraftWithOccupancies = mutation({
       assertChainAgreesWithPeriods(args.chain, args.segments);
     }
     const actorRole = chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]);
-    await markDraftSubmitted(ctx, draft, task, user, now, args.note, args.clientContext);
+    const submittedEventId = await markDraftSubmitted(ctx, draft, task, user, now, args.note, args.clientContext);
     await ctx.db.patch(draft._id, { guided_submission_key: submissionKey, updated_at: now });
     const { occupancyIds, derived } = await recordOccupancySet(ctx, {
       task,
@@ -866,6 +934,16 @@ export const submitEvidenceDraftWithOccupancies = mutation({
       });
       functionYears = recorded.derivedYears;
     }
+    // the version is taken last so it captures the row with its periods and
+    // chain as committed; the submission event then names it
+    const version = await recordEvidenceVersion(ctx, {
+      draftRowId: draft._id,
+      actor: user,
+      kind: "guided_submission",
+      now,
+      idempotencyKey: submissionKey,
+    });
+    await ctx.db.patch(submittedEventId, { evidence_version_hash: version.object_hash });
     return {
       task_id: draft.task_id,
       evidence_draft_id: draft.evidence_draft_id,
@@ -876,6 +954,7 @@ export const submitEvidenceDraftWithOccupancies = mutation({
       derived_function_years: functionYears,
       period_count: args.segments.length,
       deduped: false,
+      evidence_version_hash: version.object_hash,
     };
   },
 });
@@ -889,6 +968,7 @@ export const submitUnresolvedNote = mutation({
     task_id: v.string(),
     evidence_draft_id: v.string(),
     task_status: v.literal("unresolved_note"),
+    evidence_version_hash: v.string(),
   }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
@@ -905,6 +985,7 @@ export const submitUnresolvedNote = mutation({
     const task = await getTaskOrThrow(ctx, draft.task_id);
     const now = Date.now();
 
+    const version = await recordEvidenceVersion(ctx, { draftRowId: draft._id, actor: user, kind: "unresolved_note", now });
     await ctx.db.patch(draft._id, {
       draft_status: "unresolved_note",
       updated_at: now,
@@ -924,7 +1005,8 @@ export const submitUnresolvedNote = mutation({
       newStatus: "unresolved_note",
       evidenceDraftId: args.evidenceDraftId,
       reason: args.note,
+      evidenceVersionHash: version.object_hash,
     });
-    return { task_id: draft.task_id, evidence_draft_id: args.evidenceDraftId, task_status: "unresolved_note" as const };
+    return { task_id: draft.task_id, evidence_draft_id: args.evidenceDraftId, task_status: "unresolved_note" as const, evidence_version_hash: version.object_hash };
   },
 });

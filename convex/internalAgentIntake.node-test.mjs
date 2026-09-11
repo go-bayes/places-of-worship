@@ -12,7 +12,7 @@ const bundleJson = fs.readFileSync(fixtureUrl, "utf8");
 const bundle = JSON.parse(bundleJson);
 
 function context() {
-  const rows = { users: [], agent_intake_receipts: [], tasks: [], evidence_drafts: [], agent_reviews: [], task_events: [], review_decisions: [] };
+  const rows = { users: [], agent_intake_receipts: [], tasks: [], evidence_drafts: [], evidence_versions: [], site_occupancies: [], agent_reviews: [], task_events: [], review_decisions: [] };
   const db = {
     query(table) {
       let filters = [];

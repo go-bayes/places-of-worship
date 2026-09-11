@@ -18,6 +18,8 @@ use serde::de::{self, DeserializeSeed, MapAccess, SeqAccess, Visitor};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 
+mod canonical;
+
 const PROPOSE_VERSION: &str = "pow-propose.v1";
 const AGENT_REVIEW_SCHEMA_VERSION: &str = "agent-review-bundle.v1";
 const AGENT_REVIEW_MAX_BYTES: usize = 64 * 1024;
@@ -43,6 +45,42 @@ enum Commands {
     Propose(ProposeArgs),
     /// Render a reviewer report for a batch of staged or proposed change events.
     Diff(DiffArgs),
+    /// Hash or verify a content-addressed review object.
+    Object(ObjectArgs),
+}
+
+#[derive(Parser, Debug)]
+struct ObjectArgs {
+    #[command(subcommand)]
+    action: ObjectAction,
+}
+
+#[derive(Subcommand, Debug)]
+enum ObjectAction {
+    /// Print the pow-object.v1 hash of a JSON document.
+    Hash(ObjectHashArgs),
+    /// Check a content-addressed envelope against the hash contract.
+    Verify(ObjectVerifyArgs),
+}
+
+#[derive(Parser, Debug)]
+struct ObjectHashArgs {
+    /// JSON document to hash.
+    input: PathBuf,
+
+    /// Report format.
+    #[arg(long, value_enum, default_value_t = ReportFormat::Text)]
+    report: ReportFormat,
+}
+
+#[derive(Parser, Debug)]
+struct ObjectVerifyArgs {
+    /// Content-addressed envelope to verify.
+    input: PathBuf,
+
+    /// Report format.
+    #[arg(long, value_enum, default_value_t = ReportFormat::Text)]
+    report: ReportFormat,
 }
 
 #[derive(Parser, Debug)]
@@ -354,6 +392,7 @@ fn run(cli: Cli) -> Result<bool> {
             }
             Ok(false)
         }
+        Commands::Object(args) => canonical::run_object(args),
     }
 }
 

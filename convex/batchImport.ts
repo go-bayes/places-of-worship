@@ -18,6 +18,7 @@ import { assertLocationAssertion } from "./lib/locationAssertions";
 import { assertOccupancySet, type OccupancySegmentInput } from "./lib/occupancies";
 import { groupImportRows, rowHasOccupancy, segmentFromImportRow } from "./lib/occupancyImport";
 import { appendTaskEvent } from "./lib/taskEvents";
+import { recordEvidenceVersion } from "./evidenceVersions";
 import { recordOccupancySet } from "./occupancies";
 
 // Convex mirror of the curator batch import
@@ -578,8 +579,7 @@ export const adminImportOccupancyBatch = internalMutation({
       };
       assertEvidenceDraftLimits(draftRecord);
       assertEvidenceDraftSubmission(draftRecord, false);
-      await ctx.db.insert("evidence_drafts", draftRecord);
-
+      const draftRowId = await ctx.db.insert("evidence_drafts", draftRecord);
       await appendTaskEvent(ctx, {
         taskId,
         eventType: "imported",
@@ -619,6 +619,14 @@ export const adminImportOccupancyBatch = internalMutation({
         segments,
         now,
         clientContext: { source: "occupancy_import", import_batch_id: args.batchId },
+      });
+      // the version captures the imported row with its recorded periods
+      await recordEvidenceVersion(ctx, {
+        draftRowId,
+        actor: user,
+        kind: "occupancy_import",
+        now,
+        idempotencyKey: `import:${args.batchId}:${locator}`,
       });
 
       imported += 1;

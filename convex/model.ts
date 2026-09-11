@@ -113,6 +113,35 @@ export const taskEventType = v.union(
   v.literal("pi_returned"),
 );
 
+// evidence-version.v1: how an immutable evidence version came to exist.
+// submission kinds record the contributor's act; the reviewer kinds record
+// a review-side write onto submitted content, attributed to the reviewer
+// and linked to the contributor's version as its parent
+export const evidenceVersionKindValues = [
+  "submitted",
+  "unresolved_note",
+  "guided_submission",
+  "rapid_current_observation",
+  "spreadsheet_import",
+  "occupancy_import",
+  "agent_intake",
+  "occupancy_set_recorded",
+  "reviewer_edit",
+  "reviewer_derivation_decision",
+  "migration_copy",
+] as const;
+export const evidenceVersionKind = v.union(
+  ...evidenceVersionKindValues.map((kind) => v.literal(kind)),
+);
+
+// what a revision clone means for the evidence graph: a correction of the
+// earlier claim (child version in the same family) or a new dated
+// observation that follows it (a new family that references the earlier one)
+export const revisionIntent = v.union(
+  v.literal("correction"),
+  v.literal("new_observation"),
+);
+
 // the pi acceptance layer's two outcomes (r-p5: returned goes back to
 // the reviewers as needs_review)
 export const acceptanceOutcome = v.union(

@@ -4,6 +4,8 @@
 
 ### 2026-09-11
 
+- Implemented the first two steps of the content-addressed review contract: the `pow-canonical-json.v1` canonicalisation contract (RFC 8785, TypeScript reference plus a pinned `serde_jcs` Rust implementation, 41 shared golden cases and 5 rejections) and server-created immutable evidence versions (`evidence-version.v1`). Every submission and every write onto submitted evidence now records a version with server attribution, recorded time, content and version hashes, and lineage; retries and unchanged resubmissions return the existing version; corrections link to the version they supersede and new dated observations start a family that references the earlier one. Added `pow object hash` and `pow object verify`, retrieval and audit queries, a migration mutation for pre-contract rows (not run), and regression tests. Existing hashes keep their contracts; the portal is unchanged. See `docs/development/evidence-versions.md`.
+
 - Repaired draft-specific advisory review selection, shared batch-disposition rules, OSM task identifiers, and provisionally closed batch acceptance. Versioned snapshot-linked decision hashes and aligned intake validation across Python, TypeScript, and Rust with shared regression cases.
 
 - Added a bounded internal Claude/Codex research-and-review runner, strict JSON ingestion, provisional review receipts, and human batch review operations. Added hostile-input regression tests and a Rust validation entry point. The pilot preserves human evidence acceptance and governed export authority; see `docs/development/internal-agent-review.md`.

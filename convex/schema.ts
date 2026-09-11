@@ -65,6 +65,8 @@ import {
   derivedUseLevel,
   targetYearUseLevelSet,
   acceptanceOutcome,
+  evidenceVersionKind,
+  revisionIntent,
 } from "./model";
 
 export default defineSchema({
@@ -164,6 +166,8 @@ export default defineSchema({
     review_decision_id: v.optional(v.string()),
     export_batch_id: v.optional(v.string()),
     acceptance_id: v.optional(v.string()),
+    // the immutable evidence version a submission or correction recorded
+    evidence_version_hash: v.optional(v.string()),
     client_context: v.optional(v.any()),
   })
     .index("by_task_time", ["task_id", "occurred_at"])
@@ -244,6 +248,15 @@ export default defineSchema({
     // provisional internal agent-research intake; never exportable by itself
     agent_intake_only: v.optional(v.boolean()),
     agent_intake_hash: v.optional(v.string()),
+    // content-addressed review (evidence-version.v1): the hash of the
+    // immutable version recorded at this row's latest submission, the
+    // family that version belongs to, and the lineage a revision clone
+    // carries from the submission it corrects or follows. absent on rows
+    // submitted before the contract; a migration record may add one later
+    evidence_version_hash: v.optional(v.string()),
+    evidence_family_id: v.optional(v.string()),
+    revision_of_evidence_draft_id: v.optional(v.string()),
+    revision_intent: v.optional(revisionIntent),
   })
     .index("by_evidence_draft_id", ["evidence_draft_id"])
     .index("by_task_status", ["task_id", "draft_status"])
@@ -567,6 +580,40 @@ export default defineSchema({
     .index("by_submission_key", ["submission_key"])
     .index("by_bundle_hash", ["bundle_hash"])
     .index("by_receipt_id", ["receipt_id"]),
+
+  // immutable evidence versions (docs/development/content-addressed-review.md,
+  // evidence-version.v1): one row per submission or correction of an
+  // evidence record, written once by the server and never patched. the
+  // envelope_json holds the canonical hash envelope; object_hash is the
+  // sha256 object hash recomputable from it with the pow object command.
+  // draft rows stay the mutable locator; a version is the scientific record
+  evidence_versions: defineTable({
+    object_hash: v.string(),
+    hash_contract: v.literal("pow-object.v1"),
+    object_type: v.literal("evidence_version"),
+    schema_version: v.literal("evidence-version.v1"),
+    logical_id: v.string(),
+    task_id: v.string(),
+    evidence_draft_id: v.string(),
+    evidence_family_id: v.string(),
+    version_index: v.number(),
+    parent_object_hash: v.optional(v.string()),
+    version_kind: evidenceVersionKind,
+    // identity of the submitted content alone (evidence fields and period
+    // set; no version position, actor, time, or lineage): an unchanged
+    // resubmission has the same content hash
+    content_hash: v.string(),
+    // server-scoped idempotency key of the submission that created it
+    idempotency_key: v.optional(v.string()),
+    created_by: v.id("users"),
+    recorded_at: v.number(),
+    envelope_json: v.string(),
+  })
+    .index("by_object_hash", ["object_hash"])
+    .index("by_draft_version", ["evidence_draft_id", "version_index"])
+    .index("by_family_version", ["evidence_family_id", "version_index"])
+    .index("by_task", ["task_id"])
+    .index("by_idempotency_key", ["idempotency_key"]),
 
   // Immutable context captured when a batch reviewer inspected a version.
   review_snapshots: defineTable({
