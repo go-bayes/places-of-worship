@@ -5065,12 +5065,13 @@ mod tests {
             .insert("unknown".to_owned(), json!("ignored"));
         bundle["review_run"]["model_requested"] = json!("evil");
         bundle["review"]["claim_checks"][0]["source_url"] =
-            json!("https://user:password@127.0.0.1/?q=$(touch /tmp/pow)");
+            json!("https://user:password@127.0.0.1/?q=$(touch%20/tmp/pow)");
         let mut errors = Vec::new();
         validate_agent_semantics(&bundle, &mut errors);
         assert!(errors.iter().any(|error| error.contains("backend/model")));
         assert!(errors.iter().any(|error| error.contains("credentials")));
         assert!(errors.iter().all(|error| !error.contains("touch")));
+        assert!(validate_source_locator("https://example.org/a b").is_err());
     }
 
     #[test]
