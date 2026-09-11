@@ -65,6 +65,9 @@ import {
   derivedUseLevel,
   targetYearUseLevelSet,
   acceptanceOutcome,
+  evidenceVersionKind,
+  evidenceHeadChangeKind,
+  revisionIntent,
 } from "./model";
 
 export default defineSchema({
@@ -164,6 +167,8 @@ export default defineSchema({
     review_decision_id: v.optional(v.string()),
     export_batch_id: v.optional(v.string()),
     acceptance_id: v.optional(v.string()),
+    // the immutable evidence version a submission or correction recorded
+    evidence_version_hash: v.optional(v.string()),
     client_context: v.optional(v.any()),
   })
     .index("by_task_time", ["task_id", "occurred_at"])
@@ -244,6 +249,21 @@ export default defineSchema({
     // provisional internal agent-research intake; never exportable by itself
     agent_intake_only: v.optional(v.boolean()),
     agent_intake_hash: v.optional(v.string()),
+    // content-addressed review (evidence-version.v1): the hash of the
+    // immutable version recorded at this row's latest submission, the
+    // family that version belongs to, and the lineage a revision clone
+    // carries from the submission it corrects or follows. absent on rows
+    // submitted before the contract; a migration record may add one later
+    evidence_version_hash: v.optional(v.string()),
+    evidence_family_id: v.optional(v.string()),
+    revision_of_evidence_draft_id: v.optional(v.string()),
+    // the source's version hash pinned when the revision was opened, so the
+    // correction's parent is the version the contributor cloned even if the
+    // source takes later versions before the correction is submitted.
+    // absent with revision_of_evidence_draft_id set means the source had no
+    // version when the revision opened (a pre-contract submission)
+    revision_of_version_hash: v.optional(v.string()),
+    revision_intent: v.optional(revisionIntent),
   })
     .index("by_evidence_draft_id", ["evidence_draft_id"])
     .index("by_task_status", ["task_id", "draft_status"])
@@ -468,6 +488,10 @@ export default defineSchema({
     decision_hash: v.optional(v.string()),
     decision_hash_version: v.optional(v.literal(1)),
     review_snapshot_hash: v.optional(v.string()),
+    // the evidence version this decision refers to (outside decision_hash,
+    // versions 0 and 1): pins acceptance to the exact content reviewed, so
+    // retirement, restoration, or a later write never silently transfers it
+    evidence_version_hash: v.optional(v.string()),
   })
     .index("by_review_decision_id", ["review_decision_id"])
     .index("by_task", ["task_id"])
@@ -567,6 +591,91 @@ export default defineSchema({
     .index("by_submission_key", ["submission_key"])
     .index("by_bundle_hash", ["bundle_hash"])
     .index("by_receipt_id", ["receipt_id"]),
+
+  // immutable evidence versions (docs/development/content-addressed-review.md,
+  // evidence-version.v1): one row per submission or correction of an
+  // evidence record, written once by the server and never patched. the
+  // envelope_json holds the canonical hash envelope; object_hash is the
+  // sha256 object hash recomputable from it with the pow object command.
+  // draft rows stay the mutable locator; a version is the scientific record
+  evidence_versions: defineTable({
+    object_hash: v.string(),
+    hash_contract: v.literal("pow-object.v1"),
+    object_type: v.literal("evidence_version"),
+    schema_version: v.literal("evidence-version.v1"),
+    logical_id: v.string(),
+    task_id: v.string(),
+    evidence_draft_id: v.string(),
+    evidence_family_id: v.string(),
+    version_index: v.number(),
+    parent_object_hash: v.optional(v.string()),
+    version_kind: evidenceVersionKind,
+    // identity of the submitted content alone (evidence fields and period
+    // set; no version position, actor, time, or lineage): an unchanged
+    // resubmission has the same content hash
+    content_hash: v.string(),
+    // server-scoped idempotency key of the submission that created it, kept
+    // on the version for the record; retries are answered from
+    // evidence_submission_receipts, which also covers a token whose
+    // submission received an existing version by content
+    idempotency_key: v.optional(v.string()),
+    created_by: v.id("users"),
+    recorded_at: v.number(),
+    envelope_json: v.string(),
+  })
+    .index("by_object_hash", ["object_hash"])
+    .index("by_draft_version", ["evidence_draft_id", "version_index"])
+    .index("by_family_version", ["evidence_family_id", "version_index"])
+    .index("by_task", ["task_id"]),
+
+  // one caller's receipt for one submission token: which version the token
+  // returned, to whom, for which row. written on every keyed call to
+  // recordEvidenceVersion whether the version was created or an existing
+  // one was returned, so a retry after later versions still answers with
+  // the version the original submission received. separate from the
+  // version rows, which are never patched
+  evidence_submission_receipts: defineTable({
+    // route-namespaced idempotency key (submit:, guided:, periods:, rapid:, ...)
+    submission_key: v.string(),
+    route: v.string(),
+    task_id: v.string(),
+    evidence_draft_id: v.string(),
+    object_hash: v.string(),
+    content_hash: v.string(),
+    // whether this call created the version or received an existing one
+    version_created: v.boolean(),
+    created_by: v.id("users"),
+    recorded_at: v.number(),
+  })
+    .index("by_submission_key", ["submission_key"])
+    .index("by_draft", ["evidence_draft_id"]),
+
+  // append-only ledger of changes to a draft row's current version or
+  // activity status (docs/development/evidence-versions.md, retirement and
+  // restoration): a version_recorded row is written beside every
+  // evidence_versions insert; superseded, withdrawn, and restored rows track
+  // draft_status transitions that carry no new version. retired evidence
+  // stays visible and restorable; this ledger is the record of who moved a
+  // draft between active and retired, and why
+  evidence_head_changes: defineTable({
+    task_id: v.string(),
+    evidence_draft_id: v.string(),
+    change_kind: evidenceHeadChangeKind,
+    // set for version_recorded: which kind of version this change recorded
+    version_kind: v.optional(evidenceVersionKind),
+    // the current version before and after the change; undefined either
+    // side means a pre-contract row with no version at that point
+    previous_object_hash: v.optional(v.string()),
+    object_hash: v.optional(v.string()),
+    // draft statuses either side of the change; set for status changes
+    previous_status: v.optional(v.string()),
+    new_status: v.optional(v.string()),
+    changed_by: v.id("users"),
+    reason: v.string(),
+    recorded_at: v.number(),
+  })
+    .index("by_draft_time", ["evidence_draft_id", "recorded_at"])
+    .index("by_task", ["task_id"]),
 
   // Immutable context captured when a batch reviewer inspected a version.
   review_snapshots: defineTable({

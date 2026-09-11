@@ -1,0 +1,165 @@
+# Evidence Versions And The Canonical Hash Contract
+
+**Status:** Implemented 2026-09-11 as the first two steps of the [content-addressed review contract](content-addressed-review.md): the canonicalisation contract with shared fixtures, and server-created immutable evidence versions. Proposal pinning, the export queue, frozen exports, PI batch release, and `pow` verification of releases remain later steps. Live Convex behaviour changes only where this document says it does.
+
+## Canonicalisation Contract `pow-canonical-json.v1`
+
+The hash envelope of every content-addressed object is serialised with [RFC 8785, the JSON Canonicalization Scheme](https://www.rfc-editor.org/rfc/rfc8785), over the I-JSON domain. RFC 8785 is an informational RFC, not a standards-track document; the project adopts it because its rules are exact, it defers to ECMAScript for number and string serialisation, and maintained implementations exist in both project languages. The contract is named so that a later change in scheme requires a new contract name.
+
+The rules the project relies on are these:
+
+- Object members are sorted by the UTF-16 code units of their names. This differs from UTF-8 byte order for characters outside the Basic Multilingual Plane; the fixture `key_order_utf16_not_utf8` separates the two.
+- Numbers are IEEE 754 doubles and print as ECMAScript `Number::toString` prints them: `1e21` becomes `1e+21`, `1.0` becomes `1`, `-0` becomes `0`, `9007199254740993` becomes `9007199254740992`. NaN and Infinity are refused.
+- Strings escape only `"`, `\`, and U+0000 to U+001F, with `\b \t \n \f \r` for their five characters and lowercase `\u00xx` otherwise. The solidus, U+007F, and U+2028 and U+2029 are not escaped. Lone surrogates are refused.
+- No whitespace is emitted. Duplicate member names and trailing data are refused at parse time.
+- `undefined` is not a JSON value. The TypeScript builder removes unset optional members with `withoutUndefined` before hashing, so an omitted optional field and an absent field hash identically; `undefined` inside an array is refused because position carries meaning.
+- A member named `__proto__` is an ordinary member. The TypeScript cleanup and content builders copy members as own properties (`Object.fromEntries`) rather than by assignment into a fresh object, because assignment invokes the inherited prototype setter and silently drops the member, which would let two different documents share a hash. The fixture `member_named_proto_is_kept` and the envelope fixture `payload_keeps_member_named_proto` pin this in both languages.
+- A sparse array (an array with a hole) is not a JSON value and is refused by canonicalisation and by cleanup, rather than serialised with the hole skipped or printed as an empty slot.
+
+The object hash is `sha256:` followed by the lowercase hexadecimal SHA-256 digest of the UTF-8 canonical bytes. The hash contract name `pow-object.v1` covers the envelope shape and this digest rule.
+
+Implementations and pinned versions:
+
+| Language | Implementation | Pinned dependencies |
+| --- | --- | --- |
+| TypeScript | `convex/lib/canonicalJson.ts` (`canonicalJsonStrict`, `objectHash`, `withoutUndefined`) | none: relies on `JSON.stringify` for number and string serialisation, which is what RFC 8785 specifies |
+| Rust | `crates/pow-cli/src/canonical.rs` (`canonical_json`, `object_hash`, `parse_canonical_input`, `verify_envelope`) | `serde_jcs = "=0.2.0"` with its `ryu-js 0.2.2` number formatter, recorded in `Cargo.lock` |
+
+Both implementations are checked against the same golden files:
+
+- `schemas/fixtures/pow-canonical-json.v1.json`: 42 accepted cases (empty containers, literals, integer and exponent boundaries, subnormal and maximum doubles, integers beyond the safe range, coordinates, timestamps, macrons, astral and combining characters, escapes, member ordering, nested objects, nulls, ordered and pre-sorted arrays, the RFC's own number examples, a member named `__proto__`, and an evidence-like record) and 5 rejected texts (NaN, Infinity, duplicate member names, a lone surrogate, trailing data). Regenerate with `node scripts/canonical_json_fixtures.mjs --write` after adding cases; `--check` confirms the file is current.
+- `schemas/fixtures/evidence-version.v1.json`: 8 valid envelopes and 9 tampered envelopes for the evidence-version object below. Regenerate with `node scripts/evidence_version_fixtures.mjs --write`.
+
+The suites that read them are `convex/lib/canonicalJson.node-test.mjs`, `convex/lib/evidenceVersions.node-test.mjs`, and the `tests` module of `crates/pow-cli/src/canonical.rs`. The Rust command line exposes the same code:
+
+```sh
+cargo run -p pow-cli -- object hash path/to/document.json
+cargo run -p pow-cli -- object verify path/to/evidence-version.json --report json
+```
+
+`object hash` prints the object hash of any document inside the domain. `object verify` recomputes an envelope's hash with its `object_hash` member removed, checks the envelope fields, and applies the set-like ordering rules for the object type; it lists every failure and exits non-zero on any.
+
+### Ordered and set-like arrays
+
+Canonicalisation preserves array order as data. Where a contract field is a set, the builder sorts it by a stated stable field before hashing and the verifier refuses an unsorted array. In `evidence-version.v1`, `parent_object_hashes` is sorted by hash text and `payload.occupancies` by `segment_index` then `occupancy_id`. Every other array, including `target_year_affects`, `segment_rules`, and function-chain events, is ordered data.
+
+## Evidence Version `evidence-version.v1`
+
+An evidence version is the immutable record of what one actor submitted, or wrote onto submitted evidence, for one evidence record. Draft rows in `evidence_drafts` remain the mutable locator; the version table `evidence_versions` holds the scientific record, written once by the server inside the submitting transaction and never patched.
+
+Envelope:
+
+```json
+{
+  "hash_contract": "pow-object.v1",
+  "object_type": "evidence_version",
+  "schema_version": "evidence-version.v1",
+  "logical_id": "evidence:<task_id>:<evidence_family_id>",
+  "parent_object_hashes": ["sha256:..."],
+  "created_by": "actor:<project user id>",
+  "recorded_at": "2026-09-11T04:30:00.000Z",
+  "payload": {
+    "task_id": "...",
+    "evidence_draft_id": "...",
+    "version_kind": "guided_submission",
+    "version_index": 1,
+    "evidence": { "...content fields of the draft row..." },
+    "occupancies": [ { "...content fields of each active period row..." } ]
+  },
+  "object_hash": "sha256:..."
+}
+```
+
+The server sets `created_by` from the authenticated user and `recorded_at` from its clock. The actor identifier is the project user identifier that review decisions and PI acceptances already hash; a storage-independent user identifier would need a new schema version. The stored `envelope_json` includes `object_hash`; verification removes that member and recompares.
+
+`payload.evidence` carries every field of the draft row except locators, storage metadata, mutable coordination state, and bookkeeping: `_id`, `_creationTime`, `evidence_draft_id`, `task_id`, `draft_status`, `created_by`, `created_at`, `updated_at`, `guided_submission_key`, `intake_submission_key`, `import_batch_id`, `source_claim_key`, `claim_hash`, `agent_intake_hash`, the version and revision fields themselves (`evidence_version_hash`, `evidence_family_id`, `revision_of_evidence_draft_id`, `revision_of_version_hash`, `revision_intent`), `pending_occupancy_cards` (cards become period rows at submission), and `validation_summary` (server checks, not evidence). `payload.occupancies` carries the parent's active `site_occupancies` rows without `_id`, `_creationTime`, `task_id`, `parent_evidence_draft_id`, `claim_status`, `submission_key`, `created_by`, `created_at`, and `updated_at`. The function chain is on the draft row and so inside `evidence`. Free-standing historical claims recorded with `historicalClaims:submitHistoricalClaim` are separate submitted objects and are not inside the evidence version; see the interfaces below.
+
+Two hashes are stored for each version. `object_hash` identifies the version, including its position, kind, actor, time, and lineage. `content_hash` is the object hash of `{ evidence, occupancies }` alone; it is the server-computed content identity that the design names as a later replacement for the client-supplied `claim_hash`, and it is what makes an unchanged resubmission the same version.
+
+### Lineage: correction versus new dated observation
+
+A version's `parent_object_hashes` names the version it supersedes. The builder resolves lineage from the draft row:
+
+| Situation | Family | Parent | Payload note |
+| --- | --- | --- | --- |
+| First submission of a draft | the draft's own id | none | |
+| Any later write onto a row that already has a version (reviewer edit, reviewer derivation decision, recorded occupancy set, spreadsheet re-import) | the row's family | the row's current version | |
+| A revision clone with `revision_intent: "correction"` (the default) whose source had a version when the revision was opened | that version's family | the version pinned on the clone as `revision_of_version_hash` | |
+| A revision clone whose source had no version when the revision was opened (a pre-contract submission) | the clone's own id | none | `revises_evidence_draft_id`, `parent_version_unavailable: "pre_contract"` |
+| A revision clone with `revision_intent: "new_observation"` | the clone's own id | none | `follows_evidence_draft_id`, `follows_object_hash` = the pinned version when the source had one |
+| A rapid correction (`rapidEntry:submitCurrentObservation` on a task in a correction status) | the corrected observation's family | the corrected observation's version, pinned in the same transaction | |
+
+`reviseEvidenceDraft` stamps `revision_of_evidence_draft_id`, `revision_intent`, and `revision_of_version_hash` (the source's `evidence_version_hash` at that moment) on the clone; a reused open clone keeps the intent it was opened with, and a call asking for a different intent is refused rather than ignored. The parent of the correction is the pinned version, never the source row's current hash at submission time. Between opening and submitting a revision the source may take later versions that the contributor never saw: a reviewer edit, a reviewer derivation decision, or the `superseded_by_later_set` bookkeeping version that the correction's own guided submission records when it retires the source's period set. Those versions and the correction are siblings under the pinned parent; the family branches there. A source that had no version when the revision opened and receives a migration copy afterwards still yields a `pre_contract` correction, because the migration copy is not what the contributor corrected. `revision_of_version_hash` is a locator and is outside the payload. The portal sends no intent today, so every portal revision is a correction; the `new_observation` intent is available to clients now and needs a portal control and RA-guide sentence before contributors can choose it.
+
+`version_index` is a family-wide sequence starting at 1, not an ancestry depth. A family may branch: two revisions opened from the same submission by different actors, or a reviewer edit beside a contributor's correction, both take the same parent and consecutive indices. `parent_object_hashes` carries the graph; `listEvidenceVersions` presents the family in index order. Whether a family should be constrained to a chain is a record-keeping choice not taken here.
+
+### Idempotency And Submission Receipts
+
+`recordEvidenceVersion` returns an existing version, and writes no version, in two cases: the caller's idempotency key already holds a receipt, or the row's current version has the same `content_hash` as the content being recorded, whoever the actor is. The guided, rapid, occupancy, import, and intake paths pass their existing submission keys, which are scoped by user id so two contributors cannot collide; `evidence:submitEvidenceDraft` accepts an optional `clientSubmissionId`, and without one an unchanged resubmission still returns the existing version with `deduped: true` and records no second event. A review action that writes nothing onto the row (a rejected derived year, a re-save of identical text) records no version. The content rule also means a reviewer whose confirmation writes exactly the values the contributor already recorded leaves no version of their own; the reviewer's act is still recorded in `derived_state_events` and the task events. Idempotency keys are namespaced by route (`submit:`, `guided:`, `periods:`, `rapid:`, `import:`, `agent-intake:`, `migration:`) so a client token reused across routes cannot return the wrong version.
+
+Every keyed call leaves a row in `evidence_submission_receipts` (`submission_key`, `route`, `task_id`, `evidence_draft_id`, `object_hash`, `content_hash`, `version_created`, `created_by`, `recorded_at`), whether the call created the version or received an existing one by content. A retry under the same key is answered from that receipt, so a token stays bound to the version its own submission received even after the row takes later versions. A key held by another actor, or reused by the same actor against another draft, is refused before any write. An unchanged submission may dedupe across actors to the one version; each caller still holds their own receipt, so every submission remains attributable. Version rows are never patched to carry receipts; the `idempotency_key` kept on a version row records only which key created it. A submission recorded before the contract has no receipt and no version: a guided retry then omits `evidence_version_hash`, and a rapid retry returns `evidence_version_unavailable: "pre_contract"` rather than a hash the row acquired later (for instance from a migration copy).
+
+## Mutation Inventory
+
+Every server path that creates submitted evidence, or changes the content of submitted evidence, records a version at the end of its transaction. The version therefore captures the committed row and its active period rows.
+
+| Path | Version kind | Idempotency key | Event carrying the hash |
+| --- | --- | --- | --- |
+| `evidence:submitEvidenceDraft` | `submitted` | `submit:<user>:<clientSubmissionId>` when given, else content identity | `submitted_for_review` |
+| `evidence:submitEvidenceDraftWithOccupancies` | `guided_submission` (taken after periods and chain are recorded; a retry returns the version this key's receipt names, not a later one) | `guided:` + the guided submission key | `submitted_for_review` |
+| `evidence:submitUnresolvedNote` | `unresolved_note` | content identity | `submitted_unresolved_note` |
+| `evidence:saveEvidenceDraft` on a `submitted` or `unresolved_note` row, which keeps its status (review roles only; an author is refused; an `accepted_for_export`, `rejected`, `superseded`, or `withdrawn` row is refused for everyone and stays on record) | `reviewer_edit` | content identity | `note_added` |
+| `evidence:importSubmittedEvidenceDrafts` (spreadsheet import; a re-import with changed content becomes a child version; a re-import over an `accepted_for_export`, `rejected`, `superseded`, or `withdrawn` row is skipped as `skipped_final`) | `spreadsheet_import` | content identity | `submitted_for_review` |
+| `rapidEntry:submitCurrentObservation` (a retry returns the version its receipt names, or `evidence_version_unavailable: "pre_contract"` for an observation recorded before the contract) | `rapid_current_observation` | `rapid:` + the rapid submission key | `submitted_for_review` or `submitted_unresolved_note` |
+| `occupancies:submitOccupancies` (periods recorded against a submitted parent) | `occupancy_set_recorded` | `periods:` + the occupancy submission key | `note_added` |
+| `recordOccupancySet` retiring an earlier parent's active set or function chain (`supersedeEarlierOccupancySets`, `supersedeEarlierFunctionChains`, reached from the guided submission, `submitOccupancies`, and the occupancy import): each affected earlier parent that already has a version takes a child version whose occupancy set is now empty and whose chain is gone | `superseded_by_later_set` | content identity | `note_added` on the earlier parent, but only when that parent is already decided (`accepted_for_export` or `rejected`); undecided parents get no event of their own, since the later set's own event names the new version |
+| `occupancies:decideDerivedYear`, `occupancies:confirmAllDerived` (confirm or override writes census-year statuses, use levels, or denominations onto the parent; reject writes nothing and records no version; every action is refused unless the parent is `submitted` or `unresolved_note`, see the lifecycle rule below) | `reviewer_derivation_decision` | content identity | `note_added` |
+| `batchImport` occupancy import (submitted rows with periods) | `occupancy_import` | `import:<batch>:<locator>` | none beyond the existing import events |
+| `internalAgentIntake:ingestBundle` | `agent_intake` | `agent-intake:<submission key>` | `imported` |
+| `evidenceVersions:recordMigrationVersion` | `migration_copy` | `migration:<run>:<draft>` | `note_added` |
+
+Paths that change status only, and record no version because content is untouched: `withdrawEvidenceDraft`, `supersedeOtherActiveDrafts` and the rapid supersession, `evidence:restoreEvidenceDraft`, `reviews:recordReviewDecision` and the batch decision (they set `accepted_for_export` or `rejected`), the task-level claim, release, opinion, comment, skip, close, and reopen mutations. The batch import path that lands drafts as editable `draft` rows records no version; those rows are versioned when a person submits them. Withdrawal, supersession, and restoration each write an `evidence_head_changes` ledger row alongside the status change (see "Lifecycle: Retirement, Restoration, And Approval" below); a decision to `accepted_for_export` or `rejected` writes no ledger row, since `version_recorded`/`superseded`/`withdrawn`/`restored` are the ledger's only kinds: a decision instead pins the version it ratifies onto the decision row itself, described in the same section.
+
+`historicalClaims:submitHistoricalClaim` attaches a new claim row to a submitted parent. That adds a submitted object beside the evidence version rather than changing it. The claim's own version object belongs to the proposal step.
+
+### Lifecycle: Retirement, Restoration, And Approval
+
+Once an evidence record is decided (`accepted_for_export` or `rejected`), superseded by a later submission, or withdrawn, no route writes scientific content onto its row. The refusal covers exactly these routes: `evidence:saveEvidenceDraft` for every role; `occupancies:decideDerivedYear` and `occupancies:confirmAllDerived` for all three actions, because the record is no longer the one under review, so a derivation decision against it has no standing (a rejection is refused with the rest even though it writes nothing onto the row); `occupancies:submitOccupancies` and `historicalClaims:submitHistoricalClaim`, which already required a `submitted` or `unresolved_note` parent; and the spreadsheet re-import in `evidence:importSubmittedEvidenceDrafts`, which skips such rows as `skipped_final` instead of resurrecting them as active content. Correction of a retired record goes through the authorised workflow: reopen the task, start a revision (a clone pinned to the version being corrected), submit it.
+
+A retired row is not a discarded one. `evidence:listTaskEvidence`, `evidenceVersions:listEvidenceVersions`, and `evidenceVersions:getEvidenceVersion` keep showing a `superseded` or `withdrawn` row and every version ever recorded on it, exactly as they show an active row; nothing in this contract hides retired evidence from a reader who is otherwise entitled to see it. A retired row can also be reconsidered directly, without opening a revision, through `evidence:restoreEvidenceDraft({ evidenceDraftId, reason })`. A review role may restore any row; a non-review user may restore only their own. The reason must trim to at least 8 characters and obeys the task reason limit. The row must be `superseded` or `withdrawn`; a decided row (`accepted_for_export` or `rejected`) is refused with "A decided record is reconsidered through the review workflow: reopen the task and record a new decision.", because restoration moves a row between active and retired and must never appear to reopen a ratified decision. The task must not be `reviewed`, `pi_accepted`, or `exported`; a closed task is reopened first, exactly as a correction is. The status restored to is read from the `evidence_head_changes` ledger: the latest entry whose `new_status` matches the row's current retired status supplies the `previous_status` it recorded (`submitted` or `unresolved_note`), so a restored unresolved note comes back as an unresolved note rather than defaulting to submitted; a superseded row with no such entry restores to `submitted`, since only an active row is ever superseded. A withdrawn row is restorable only when that ledger entry shows it was `submitted` or `unresolved_note` at withdrawal: a row withdrawn while still an editable draft, or a withdrawn row from before the ledger, is refused ("withdrawn before it was submitted"), because restoring it to `submitted` would bypass submission validation and the version contract; the author edits and submits it instead. Restoration supersedes the author's other active drafts on the task exactly as an ordinary submission does, so restoring an earlier record again leaves one active submission per author. Restoration writes no content and records no new version: the row's evidence, and any periods or function chain recorded against it, are exactly as they were when the row was retired; a set of periods retired by a later submission (below) is not reinstated by restoring the parent, only the parent's own `draft_status` moves. The task returns to `needs_review`, and a `draft_restored` task event carries the reason and the row's `evidence_version_hash`.
+
+Every change to a draft row's current version or activity status is recorded in `evidence_head_changes`, an append-only ledger separate from the version table. A row holds `task_id`, `evidence_draft_id`, `change_kind` (`version_recorded`, `superseded`, `withdrawn`, or `restored`), `version_kind` (set on `version_recorded`, naming which of the `evidence-version.v1` kinds the version is), `previous_object_hash` and `object_hash` (the row's current version either side of the change; undefined either side means a pre-contract row with no version at that point), `previous_status` and `new_status` (draft statuses, set on a status change), `changed_by`, `reason`, and `recorded_at`. `evidenceVersions:recordHeadChange` is the one writer; `recordEvidenceVersion` calls it with `version_recorded` beside every version it inserts, using the caller's `reason` or a short per-kind default when none is given (`"Submitted for review."`, `"Guided submission with periods recorded."`, and so on); `supersedeOtherActiveDrafts`, the rapid-entry supersession, `withdrawEvidenceDraft`, and `restoreEvidenceDraft` call it directly for `superseded`, `withdrawn`, and `restored`. `evidenceVersions:listEvidenceHeadChanges({ evidenceDraftId })` returns a row's ledger in `recorded_at` order, under the same visibility as `listEvidenceVersions` (review roles, or the row's own author).
+
+Acceptance now pins the exact version it ratifies. `review_decisions.evidence_version_hash` records the accepting or ratifying draft's `evidence_version_hash` at the moment `reviews:applyReviewDecision` decides it, outside `decision_hash` (versions 0 and 1 of that hash are unchanged; a version-2 contract naming this field is the interface for later steps, below); the `review_decided` and `changes_requested` task events carry the same hash. A pre-contract draft with no version pins none, exactly as its decision hash stays on version 0. `acceptances:recordAcceptance` refuses to ratify a decision whose pinned hash no longer matches the draft's current `evidence_version_hash`, and `exports:createExportBatch` refuses, for every included accepted decision, to build a batch where the two differ: both fail closed with a message naming the pinned and the current hash, rather than silently accepting or exporting content the decision never referred to. A decision recorded before this change, or one whose draft was never versioned, pins nothing and is never checked.
+
+One write onto a retired record remains, and it is bookkeeping rather than an edit: when an author records a later period set (a guided submission, `submitOccupancies`, or the occupancy import), `recordOccupancySet` retires the author's active periods and function chain on the task's earlier parents, whatever their status, so that one author holds one active set per task. That retirement changes only the affected parent's active period set and `function_chain`, is recorded on that parent as a `superseded_by_later_set` child version with a reason naming the later parent, and is never made silently. When the affected earlier parent is already decided (`accepted_for_export` or `rejected`), the retirement is loud rather than merely recorded: a `note_added` task event names the earlier version and the current one and states in words that the review decision refers to the earlier version and does not extend to the current one. The decision itself is untouched: `review_decisions.evidence_version_hash` still names the earlier version, so acceptance and export still refuse it, per the paragraph above, until a reviewer records a new decision on the current version. Status-only transitions (withdrawal, supersession, restoration, review decisions, task claims and releases) stay outside the content-write rule because they change no content.
+
+The audit for this inventory is `evidenceVersions:verifyDraftAgainstVersion`. It rebuilds the payload from the current draft row and its active periods and reports `consistent: false` when the row no longer says what its current version says. A divergence means a write reached submitted content without a version, which the inventory above is meant to make impossible.
+
+## Retrieval
+
+- `evidenceVersions:getEvidenceVersion({ objectHash })` returns the version summary, the parsed envelope, the stored canonical `envelope_json`, and a fresh verification of that envelope. Authors read their own versions; review roles read all.
+- `evidenceVersions:listEvidenceVersions({ evidenceDraftId })` or `({ evidenceFamilyId })` lists a row's or a family's versions in `version_index` order.
+- Task events, `evidence:submitEvidenceDraft`, `submitEvidenceDraftWithOccupancies`, `submitUnresolvedNote`, and `rapidEntry:submitCurrentObservation` return or carry `evidence_version_hash`. Retries return the hash the submission's receipt names; a rapid retry of a pre-contract observation returns `evidence_version_unavailable: "pre_contract"` instead.
+- `reviews:getReviewSnapshot` includes the draft row, which now carries `evidence_version_hash`; a snapshot-linked batch decision therefore covers the version hash the reviewer saw. Every decision now pins that hash explicitly, as `review_decisions.evidence_version_hash` ("Lifecycle: Retirement, Restoration, And Approval", above); pinning it inside the proposal step's own `evidence_version_hashes` set is a further, separate step.
+
+## Existing Records
+
+Rows submitted before this contract have no version. Nothing here rewrites them, and no historical hash is inferred. When a legacy row is revised, its correction starts a family with `parent_version_unavailable: "pre_contract"` and the locator of the row it corrects. An administrator or service actor can run `evidenceVersions:recordMigrationVersion({ evidenceDraftId, migrationRunId })` on a submitted, superseded, accepted, or rejected legacy row; the resulting `migration_copy` version names the migration run and copy time, keeps the row's own actor and times inside `payload.migration`, and is attributed in its envelope to the migrating actor. Retrying with the same run identifier returns the existing version. No migration run is scheduled by this change; running one is a separate operational decision.
+
+Existing `decision_hash` (version 0 and the snapshot-linked version 1), `acceptance_hash`, `claim_hash`, `agent_intake_hash`, and `snapshot_hash` values keep their current contracts. They use the older `canonicalJson` helper, which the strict contract does not replace, so no stored hash changes meaning.
+
+## Interfaces For Later Steps
+
+- Proposal pinning reads `evidence_versions.object_hash` for each evidence record in a proposal, records them as `evidence_version_hashes`, and rejects a decision whose pinned hashes are no longer the current versions of their draft rows (`evidence_drafts.evidence_version_hash`).
+- `review_decisions.evidence_version_hash` is stored outside `decision_hash`, so a decision hash version 2 envelope naming the field explicitly, rather than leaving it a plain stored column, is a later step; the version-0 and version-1 contracts stay as they are.
+- Frozen exports can include an `evidence_versions.jsonl` file of stored envelopes; `pow object verify` already checks each envelope, and a manifest can list their hashes; exports reading the accepted version's stored envelope, rather than the draft row's current (mutable) fields, is the export-side counterpart of the acceptance pin above.
+- Historical claim versions follow the same envelope with `object_type: "historical_claim_version"` and the claim row's content, once the proposal step needs them.
+- The batch-review screen can show `version_index`, the short hash prefix, and the parent-to-current difference from two stored envelopes.
+- `content_hash` is the content identity that batch import can adopt in place of the client-supplied `claim_hash`.
+- Restoration today moves a row's `draft_status` back to active without touching its content. Version-level content restoration: bringing back a specific earlier version's evidence or periods as new, attributed content, rather than only its `draft_status`: is a later step and would record its own version rather than reuse `restoreEvidenceDraft`.
+- The portal has no control for `restoreEvidenceDraft` yet; a reviewer wanting to reconsider a retired row calls it outside the portal today. A restore control on the retired-evidence view, and an RA-guide sentence on when to restore versus start a revision, are portal work.
+
+## Open Governance Question
+
+Review roles can still edit a submitted draft in place through `saveEvidenceDraft`. The change here records that edit as an attributed child version rather than removing the ability. Whether reviewer in-place edits should be retired in favour of return-for-correction is a workflow choice for the project lead; the version graph supports either answer.

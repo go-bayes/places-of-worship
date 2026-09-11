@@ -5,6 +5,7 @@ import { applyReviewDecision } from "./reviews";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { sha256 } from "./lib/sha256";
 import { assertNoDuplicateJsonKeys, validateAgentReviewBundle } from "./lib/agentIntake";
+import { recordEvidenceVersion } from "./evidenceVersions";
 
 declare const process: { env: Record<string, string | undefined> };
 
@@ -56,7 +57,7 @@ export const ingestBundle = internalMutation({
       source_context: { origin: "internal_agent_research", bundle_hash: args.bundleHash, submission_key: checked.bundle.submission_key }, intake_submission_key: checked.bundle.submission_key,
       created_at: now, updated_at: now, last_event_at: now,
     });
-    await ctx.db.insert("evidence_drafts", {
+    const draftRowId = await ctx.db.insert("evidence_drafts", {
       evidence_draft_id: draftId, task_id: taskId, draft_status: "submitted", created_by: service._id, created_at: now, updated_at: now,
       source_type: firstClaim.source.source_type, source_title: firstClaim.source.source_name, source_url_or_file: firstClaim.source.locator, source_locator: firstClaim.source.locator,
       evidence_note: summary, privacy_flag: checked.bundle.review.cultural_sensitivity.flagged ? "needs_review" : "clear", licence_flag: "needs_review",
@@ -72,7 +73,10 @@ export const ingestBundle = internalMutation({
       prompt_version: "agent-review-bundle.v1", actor_user_id: service._id, ai_generated: true, created_at: now,
     });
     await ctx.db.insert("agent_intake_receipts", { receipt_id: receiptId, submission_key: checked.bundle.submission_key, bundle_hash: args.bundleHash, bundle_json: args.bundleJson, task_id: taskId, evidence_draft_id: draftId, agent_review_id: reviewId, created_at: now });
-    await appendTaskEvent(ctx, { taskId, eventType: "imported", actorUserId: service._id, actorRole: "service", newStatus: "needs_review", reason: "Internal agent research bundle received; provisional review only.", evidenceDraftId: draftId });
+    // the intake-only row is versioned like any submission; the version
+    // grants no acceptance and the receipt remains the bundle's record
+    const version = await recordEvidenceVersion(ctx, { draftRowId, actor: service, kind: "agent_intake", now, idempotencyKey: `agent-intake:${checked.bundle.submission_key}` });
+    await appendTaskEvent(ctx, { taskId, eventType: "imported", actorUserId: service._id, actorRole: "service", newStatus: "needs_review", reason: "Internal agent research bundle received; provisional review only.", evidenceDraftId: draftId, evidenceVersionHash: version.object_hash });
     return { receipt_id: receiptId, task_id: taskId, evidence_draft_id: draftId, agent_review_id: reviewId, created: true };
   },
 });

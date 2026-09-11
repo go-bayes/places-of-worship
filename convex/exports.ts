@@ -314,11 +314,24 @@ export const createExportBatch = mutation({
     const acceptanceIds: string[] = [];
     for (const taskId of taskIds) {
       const decisions = await decisionsForTask(ctx, taskId);
-      reviewDecisionIds.push(
-        ...decisions
-          .filter((decision) => decision.decision_status === "accepted_for_export")
-          .map((decision) => decision.review_decision_id),
-      );
+      const accepted = decisions.filter((decision) => decision.decision_status === "accepted_for_export");
+      // no silent transfer: an accepted decision that pinned a version is
+      // checked against the draft's current version before it enters a
+      // batch; export fails closed rather than releasing content the
+      // decision never referred to
+      for (const decision of accepted) {
+        if (decision.evidence_version_hash === undefined || decision.evidence_draft_id === undefined) continue;
+        const decisionDraft = await ctx.db
+          .query("evidence_drafts")
+          .withIndex("by_evidence_draft_id", (q: any) => q.eq("evidence_draft_id", decision.evidence_draft_id!))
+          .unique();
+        if (decisionDraft !== null && decisionDraft.evidence_version_hash !== decision.evidence_version_hash) {
+          throw new Error(
+            `Task ${taskId}: accepted decision ${decision.review_decision_id} refers to evidence version ${decision.evidence_version_hash} but ${decision.evidence_draft_id} is now at ${decisionDraft.evidence_version_hash}; re-review before export.`,
+          );
+        }
+      }
+      reviewDecisionIds.push(...accepted.map((decision) => decision.review_decision_id));
       const acceptances = await ctx.db
         .query("task_acceptances")
         .withIndex("by_task", (q) => q.eq("task_id", taskId))

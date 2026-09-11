@@ -46,6 +46,7 @@ import {
 import { intakeRateLimiter } from "./lib/rateLimits";
 import { assertRapidSubmissionId } from "./lib/rapidEntry";
 import { appendTaskEvent } from "./lib/taskEvents";
+import { recordEvidenceVersion, recordHeadChange } from "./evidenceVersions";
 import {
   derivedStateEventDoc,
   derivedTargetYearFunctionDoc,
@@ -478,7 +479,7 @@ async function supersedeEarlierFunctionChains(
   user: Doc<"users">,
   actorRole: ProjectRole,
   now: number,
-): Promise<void> {
+): Promise<Set<string>> {
   const earlier = await ctx.db
     .query("historical_claims")
     .withIndex("by_task_creator_and_created_at", (q) => q.eq("task_id", task.task_id).eq("created_by", user._id))
@@ -506,6 +507,8 @@ async function supersedeEarlierFunctionChains(
     }
     await rederiveFunctions(ctx, task, affected, undefined, "", user._id, actorRole, now);
   }
+  affectedParents.delete(parent.evidence_draft_id);
+  return affectedParents;
 }
 
 // the claim ledger's bound columns for a chain date: a by-date has no
@@ -647,7 +650,7 @@ async function supersedeEarlierOccupancySets(
   user: Doc<"users">,
   actorRole: ProjectRole,
   now: number,
-): Promise<void> {
+): Promise<Set<string>> {
   const rows = await ctx.db
     .query("site_occupancies")
     .withIndex("by_task_creator_status_and_created_at", (q) =>
@@ -670,6 +673,7 @@ async function supersedeEarlierOccupancySets(
       .unique();
     if (earlierParent !== null) await rederive(ctx, task, earlierParent, user._id, actorRole, now);
   }
+  return earlierParents;
 }
 
 // the one write route for a set of periods: supersedes the author's earlier
@@ -704,9 +708,44 @@ export async function recordOccupancySet(
   // replaces the author's set on the task's earlier parents, so one author
   // holds one active set per task. those parents' derived proposals are
   // rederived to nothing, which marks them superseded with an event each
-  await supersedeEarlierOccupancySets(ctx, task, parent, user, actorRole, now);
+  const retiredSetParents = await supersedeEarlierOccupancySets(ctx, task, parent, user, actorRole, now);
   // pr-f: the author's earlier function chains go the same way, chain or no chain
-  await supersedeEarlierFunctionChains(ctx, task, parent, user, actorRole, now);
+  const retiredChainParents = await supersedeEarlierFunctionChains(ctx, task, parent, user, actorRole, now);
+  // retiring an earlier parent's active set or chain changes what that
+  // submitted record says, so each affected earlier parent takes a child
+  // version recording the retirement (evidence-version.v1 inventory). when
+  // the earlier parent is already decided, the retirement is loud: a
+  // note_added event names both versions, so the trail shows the decision
+  // still refers to the earlier one
+  for (const earlierParentId of new Set([...retiredSetParents, ...retiredChainParents])) {
+    const earlierParent = await ctx.db
+      .query("evidence_drafts")
+      .withIndex("by_evidence_draft_id", (q) => q.eq("evidence_draft_id", earlierParentId))
+      .unique();
+    if (earlierParent === null || earlierParent.evidence_version_hash === undefined) continue;
+    const previousHash = earlierParent.evidence_version_hash;
+    const wasDecided = earlierParent.draft_status === "accepted_for_export" || earlierParent.draft_status === "rejected";
+    const recorded = await recordEvidenceVersion(ctx, {
+      draftRowId: earlierParent._id,
+      actor: user,
+      kind: "superseded_by_later_set",
+      now,
+      reason: `Active periods and function chain retired by the author's later set on ${parent.evidence_draft_id}.`,
+    });
+    if (recorded.created && wasDecided) {
+      await appendTaskEvent(ctx, {
+        taskId: task.task_id,
+        eventType: "note_added",
+        actorUserId: user._id,
+        actorRole,
+        previousStatus: task.status,
+        newStatus: task.status,
+        evidenceDraftId: earlierParentId,
+        evidenceVersionHash: recorded.object_hash,
+        reason: `Active periods on decided evidence ${earlierParentId} were retired by a later set on ${parent.evidence_draft_id}. The review decision refers to version ${previousHash} and does not extend to the current version ${recorded.object_hash}.`,
+      });
+    }
+  }
   // the cards saved with the draft are now rows
   if (parent.pending_occupancy_cards !== undefined) {
     await ctx.db.patch(parent._id, { pending_occupancy_cards: undefined, updated_at: now });
@@ -928,6 +967,26 @@ export const submitOccupancies = mutation({
       });
       functionYears = recorded.derivedYears;
     }
+    // periods recorded against submitted evidence change what was
+    // submitted: the parent takes a child version naming the new set
+    const version = await recordEvidenceVersion(ctx, {
+      draftRowId: parent._id,
+      actor: user,
+      kind: "occupancy_set_recorded",
+      now,
+      idempotencyKey: `periods:${submissionKey}`,
+    });
+    await appendTaskEvent(ctx, {
+      taskId: task.task_id,
+      eventType: "note_added",
+      actorUserId: user._id,
+      actorRole,
+      previousStatus: task.status,
+      newStatus: task.status,
+      evidenceDraftId: parent.evidence_draft_id,
+      evidenceVersionHash: version.object_hash,
+      reason: `Recorded ${args.segments.length} period${args.segments.length === 1 ? "" : "s"} as evidence version ${version.object_hash.slice(0, 19)}.`,
+    });
     return {
       occupancy_ids: occupancyIds,
       derived_years: derived.years,
@@ -968,11 +1027,15 @@ async function applyYearDecision(
       await ctx.db.patch(row._id, { review_state: "reviewer_confirmed", updated_at: now });
     }
     written = presence.derived_status;
+    // merge into the row as it stands now: a batch confirmation decides
+    // several years against one parent doc, and each write must keep the
+    // earlier years' statuses
+    const latest = (await ctx.db.get(parent._id)) ?? parent;
     await ctx.db.patch(parent._id, {
-      target_year_statuses: { ...((parent.target_year_statuses ?? {}) as Record<string, "present" | "absent" | "uncertain" | "not_assessed">), [String(year)]: presence.derived_status },
-      target_year_basis: { ...((parent.target_year_basis ?? {}) as Record<string, "source_observation" | "reviewer_confirmed_derivation" | "reviewer_override">), [String(year)]: "reviewer_confirmed_derivation" },
+      target_year_statuses: { ...((latest.target_year_statuses ?? {}) as Record<string, "present" | "absent" | "uncertain" | "not_assessed">), [String(year)]: presence.derived_status },
+      target_year_basis: { ...((latest.target_year_basis ?? {}) as Record<string, "source_observation" | "reviewer_confirmed_derivation" | "reviewer_override">), [String(year)]: "reviewer_confirmed_derivation" },
       // r-f1': the level of use is confirmed with the presence
-      target_year_use_levels: useLevelsAfter(parent, year, presence.derived_status === "present" ? presence.use_level : undefined),
+      target_year_use_levels: useLevelsAfter(latest, year, presence.derived_status === "present" ? presence.use_level : undefined),
       updated_at: now,
     });
   } else if (action === "override") {
@@ -993,12 +1056,13 @@ async function applyYearDecision(
       });
     }
     written = status;
+    const latest = (await ctx.db.get(parent._id)) ?? parent;
     await ctx.db.patch(parent._id, {
-      target_year_statuses: { ...((parent.target_year_statuses ?? {}) as Record<string, "present" | "absent" | "uncertain" | "not_assessed">), [String(year)]: status },
-      target_year_basis: { ...((parent.target_year_basis ?? {}) as Record<string, "source_observation" | "reviewer_confirmed_derivation" | "reviewer_override">), [String(year)]: "reviewer_override" },
+      target_year_statuses: { ...((latest.target_year_statuses ?? {}) as Record<string, "present" | "absent" | "uncertain" | "not_assessed">), [String(year)]: status },
+      target_year_basis: { ...((latest.target_year_basis ?? {}) as Record<string, "source_observation" | "reviewer_confirmed_derivation" | "reviewer_override">), [String(year)]: "reviewer_override" },
       // an overriding present carries the reviewer's level of use, else
       // the derived one; any other status carries none
-      target_year_use_levels: useLevelsAfter(parent, year, status === "present" ? (override.use_level ?? presence.use_level) : undefined),
+      target_year_use_levels: useLevelsAfter(latest, year, status === "present" ? (override.use_level ?? presence.use_level) : undefined),
       updated_at: now,
     });
   } else {
@@ -1040,6 +1104,14 @@ async function reviewerAndParent(
   // author-cannot-accept-own holds for derived years as for decisions
   if (parent.created_by === user._id) {
     throw new Error("You submitted this evidence; another team member must confirm its derived years.");
+  }
+  // a derivation decision writes census-year statuses, use levels, or
+  // denominations onto the parent row, so it is a content write and obeys
+  // the lifecycle rule: only a record awaiting review takes one. a decided
+  // record is what its decision refers to; a superseded or withdrawn one is
+  // retired. reopen the task and correct through a revision instead
+  if (parent.draft_status !== "submitted" && parent.draft_status !== "unresolved_note") {
+    throw new Error("This evidence record is decided, superseded, or withdrawn and stays on record. Reopen the task and decide the derived years on the current submission instead.");
   }
   return { user, task, parent };
 }
@@ -1146,6 +1218,9 @@ export const decideDerivedYear = mutation({
       }
       const now = Date.now();
       const written = await applyFunctionDecision(ctx, user, task, parent, row, args.action, note, args.override?.label, now);
+      const version = args.action === "reject"
+        ? { created: false, object_hash: parent.evidence_version_hash ?? "" }
+        : await recordEvidenceVersion(ctx, { draftRowId: parent._id, actor: user, kind: "reviewer_derivation_decision", now });
       await appendTaskEvent(ctx, {
         taskId: task.task_id,
         eventType: "note_added",
@@ -1153,6 +1228,7 @@ export const decideDerivedYear = mutation({
         actorRole: chooseActorRole(user, ["reviewer", "curator", "admin"]),
         previousStatus: task.status,
         newStatus: task.status,
+        evidenceVersionHash: version.created ? version.object_hash : undefined,
         reason: `Derived ${args.targetYear} denomination ${args.action === "confirm" ? "confirmed" : args.action === "override" ? "overridden" : "rejected"}${written ? ` as ${written}` : ""}.`,
         evidenceDraftId: parent.evidence_draft_id,
       });
@@ -1167,6 +1243,12 @@ export const decideDerivedYear = mutation({
     }
     const now = Date.now();
     const written = await applyYearDecision(ctx, user, task, parent, presence, args.action, note, args.override, now);
+    // a confirmation or override writes onto the submitted row, so the
+    // reviewer's write is a child version of the contributor's submission;
+    // a rejection leaves the row unchanged and records no version
+    const version = args.action === "reject"
+      ? { created: false, object_hash: parent.evidence_version_hash ?? "" }
+      : await recordEvidenceVersion(ctx, { draftRowId: parent._id, actor: user, kind: "reviewer_derivation_decision", now });
     await appendTaskEvent(ctx, {
       taskId: task.task_id,
       eventType: "note_added",
@@ -1174,6 +1256,7 @@ export const decideDerivedYear = mutation({
       actorRole: chooseActorRole(user, ["reviewer", "curator", "admin"]),
       previousStatus: task.status,
       newStatus: task.status,
+      evidenceVersionHash: version.created ? version.object_hash : undefined,
       reason: `Derived ${args.targetYear} state ${args.action === "confirm" ? "confirmed" : args.action === "override" ? "overridden" : "rejected"}${written ? ` as ${written}` : ""}.`,
       evidenceDraftId: parent.evidence_draft_id,
     });
@@ -1240,6 +1323,7 @@ export const confirmAllDerived = mutation({
       confirmedFunctions.push(row.target_year);
     }
     if (confirmed.length > 0 || confirmedFunctions.length > 0) {
+      const version = await recordEvidenceVersion(ctx, { draftRowId: parent._id, actor: user, kind: "reviewer_derivation_decision", now });
       await appendTaskEvent(ctx, {
         taskId: task.task_id,
         eventType: "note_added",
@@ -1247,6 +1331,7 @@ export const confirmAllDerived = mutation({
         actorRole: chooseActorRole(user, ["reviewer", "curator", "admin"]),
         previousStatus: task.status,
         newStatus: task.status,
+        evidenceVersionHash: version.created ? version.object_hash : undefined,
         reason: [
           confirmed.length > 0 ? `Confirmed derived states for ${confirmed.join(", ")}.` : "",
           confirmedFunctions.length > 0 ? `Confirmed derived denominations for ${confirmedFunctions.join(", ")}.` : "",

@@ -29,6 +29,7 @@ import { assertProbableSameAsInputs, probableSameAsCheck } from "./lib/probableS
 import { recordProbableSameAsReciprocals, resolveProbableSameAsRefs } from "./lib/probableSameAsRecords";
 import { resolveCitedSource } from "./lib/sources";
 import { appendTaskEvent } from "./lib/taskEvents";
+import { recordEvidenceVersion, recordHeadChange, submissionReceipt } from "./evidenceVersions";
 import { assertAssertionMatchesTaskPoint, assertCountryAllowsAssertionMode } from "./lib/locationAssertions";
 import { locationAssertionInput, privacyFlag, probableSameAsInput, rapidCurrentObservationInput, taskStatus } from "./model";
 
@@ -117,14 +118,14 @@ async function activeRapidObservationBy(
 async function supersedeEarlierSubmissions(
   ctx: MutationCtx,
   taskId: string,
-  actorId: Doc<"users">["_id"],
+  user: Doc<"users">,
   newDraftId: string,
   now: number,
 ): Promise<void> {
   for (const status of ["submitted", "unresolved_note"] as const) {
     const drafts = await ctx.db
       .query("evidence_drafts")
-      .withIndex("by_task_creator_status", (q) => q.eq("task_id", taskId).eq("created_by", actorId).eq("draft_status", status))
+      .withIndex("by_task_creator_status", (q) => q.eq("task_id", taskId).eq("created_by", user._id).eq("draft_status", status))
       .take(11);
     if (drafts.length > 10) {
       throw new Error("This task has too many active submissions to supersede safely. Ask JB to review its history.");
@@ -132,6 +133,17 @@ async function supersedeEarlierSubmissions(
     for (const draft of drafts) {
       if (draft.evidence_draft_id !== newDraftId) {
         await ctx.db.patch(draft._id, { draft_status: "superseded", updated_at: now });
+        await recordHeadChange(ctx, {
+          taskId: draft.task_id,
+          evidenceDraftId: draft.evidence_draft_id,
+          changeKind: "superseded",
+          previousStatus: status,
+          newStatus: "superseded",
+          objectHash: draft.evidence_version_hash,
+          actor: user,
+          reason: `Superseded by the corrected observation ${newDraftId}.`,
+          now,
+        });
       }
     }
   }
@@ -156,6 +168,10 @@ export const submitCurrentObservation = mutation({
     task_status: taskStatus,
     deduped: v.boolean(),
     corrected: v.boolean(),
+    evidence_version_hash: v.optional(v.string()),
+    // a retry of an observation recorded before the version contract has
+    // no version to return; the reason is stated rather than a hash invented
+    evidence_version_unavailable: v.optional(v.literal("pre_contract")),
     superseded_evidence_draft_id: v.optional(v.string()),
   }),
   handler: async (ctx, args) => {
@@ -176,6 +192,11 @@ export const submitCurrentObservation = mutation({
         throw new Error("The submission identifier is already in use.");
       }
       const existingTask = await getTaskOrThrow(ctx, existingDraft.task_id);
+      // the version this submission received, from its own receipt: the
+      // row's current hash may since have moved (periods recorded, a
+      // migration copy), and a pre-contract observation has no version
+      const receipt = await submissionReceipt(ctx, `rapid:${submissionKey}`);
+      const corrected = existingDraft.revision_of_evidence_draft_id !== undefined;
       return {
         task_id: existingTask.task_id,
         evidence_draft_id: existingDraft.evidence_draft_id,
@@ -184,7 +205,11 @@ export const submitCurrentObservation = mutation({
           : {}),
         task_status: existingTask.status,
         deduped: true,
-        corrected: false,
+        corrected,
+        ...(receipt !== null
+          ? { evidence_version_hash: receipt.object_hash }
+          : { evidence_version_unavailable: "pre_contract" as const }),
+        ...(corrected ? { superseded_evidence_draft_id: existingDraft.revision_of_evidence_draft_id } : {}),
       };
     }
 
@@ -465,12 +490,30 @@ export const submitCurrentObservation = mutation({
         historical_target_years_assessed: false,
       },
       intake_submission_key: submissionKey,
+      // a correction joins the version family of the observation it
+      // supersedes (evidence-version.v1)
+      ...(correctedDraft !== null
+        ? {
+            revision_of_evidence_draft_id: correctedDraft.evidence_draft_id,
+            // pinned in the same transaction, so the parent is the version
+            // the observer corrected; absent for a pre-contract observation
+            revision_of_version_hash: correctedDraft.evidence_version_hash,
+            revision_intent: "correction" as const,
+          }
+        : {}),
     };
     const landedStatus = flagged ? ("unresolved_note" as const) : ("needs_review" as const);
     assertEvidenceDraftLimits(draftRecord);
     assertEvidenceDraftSubmission(draftRecord, flagged);
-    await ctx.db.insert("evidence_drafts", draftRecord);
-    await supersedeEarlierSubmissions(ctx, task.task_id, user._id, draftId, now);
+    const draftRowId = await ctx.db.insert("evidence_drafts", draftRecord);
+    const version = await recordEvidenceVersion(ctx, {
+      draftRowId,
+      actor: user,
+      kind: "rapid_current_observation",
+      now,
+      idempotencyKey: `rapid:${submissionKey}`,
+    });
+    await supersedeEarlierSubmissions(ctx, task.task_id, user, draftId, now);
     await ctx.db.patch(task._id, {
       assigned_to: task.assigned_to ?? user._id,
       claimed_by: task.claimed_by ?? user._id,
@@ -487,6 +530,7 @@ export const submitCurrentObservation = mutation({
       previousStatus: task.status,
       newStatus: landedStatus,
       evidenceDraftId: draftId,
+      evidenceVersionHash: version.object_hash,
       reason: flagged
         ? `${intake.name} partial current observation flagged for discussion.`
         : correctedDraft !== null
@@ -505,6 +549,7 @@ export const submitCurrentObservation = mutation({
       task_status: landedStatus,
       deduped: false,
       corrected: correctedDraft !== null,
+      evidence_version_hash: version.object_hash,
       ...(correctedDraft !== null ? { superseded_evidence_draft_id: correctedDraft.evidence_draft_id } : {}),
     };
   },

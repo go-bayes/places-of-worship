@@ -18,5 +18,6 @@ jsonschema = { version = "0.46.4", default-features = false, features = ["resolv
 regex = "1"
 rusqlite = { version = "0.39.0", features = ["bundled"] }
 serde = { version = "1.0.228", features = ["derive"] }
+serde_jcs = "=0.2.0"
 serde_json = "1.0.145"
 sha2 = "0.11.0"

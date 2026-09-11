@@ -111,6 +111,49 @@ export const taskEventType = v.union(
   v.literal("comment_provided"),
   v.literal("pi_accepted"),
   v.literal("pi_returned"),
+  // a retired (superseded or withdrawn) draft returned to active review
+  v.literal("draft_restored"),
+);
+
+// evidence-version.v1: how an immutable evidence version came to exist.
+// submission kinds record the contributor's act; the reviewer kinds record
+// a review-side write onto submitted content, attributed to the reviewer
+// and linked to the contributor's version as its parent
+export const evidenceVersionKindValues = [
+  "submitted",
+  "unresolved_note",
+  "guided_submission",
+  "rapid_current_observation",
+  "spreadsheet_import",
+  "occupancy_import",
+  "agent_intake",
+  "occupancy_set_recorded",
+  "superseded_by_later_set",
+  "reviewer_edit",
+  "reviewer_derivation_decision",
+  "migration_copy",
+] as const;
+export const evidenceVersionKind = v.union(
+  ...evidenceVersionKindValues.map((kind) => v.literal(kind)),
+);
+
+// evidence_head_changes: the append-only ledger of changes to a draft row's
+// current version or activity status. a version_recorded row tracks the
+// same moment as an evidence_versions insert; superseded, withdrawn, and
+// restored rows track draft_status transitions that carry no new version
+export const evidenceHeadChangeKind = v.union(
+  v.literal("version_recorded"),
+  v.literal("superseded"),
+  v.literal("withdrawn"),
+  v.literal("restored"),
+);
+
+// what a revision clone means for the evidence graph: a correction of the
+// earlier claim (child version in the same family) or a new dated
+// observation that follows it (a new family that references the earlier one)
+export const revisionIntent = v.union(
+  v.literal("correction"),
+  v.literal("new_observation"),
 );
 
 // the pi acceptance layer's two outcomes (r-p5: returned goes back to

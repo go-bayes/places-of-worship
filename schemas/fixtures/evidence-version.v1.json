@@ -1,0 +1,1507 @@
+{
+  "contract": "evidence-version.v1",
+  "hash_contract": "pow-object.v1",
+  "cases": [
+    {
+      "name": "first_guided_submission_with_sorted_occupancies",
+      "envelope": {
+        "hash_contract": "pow-object.v1",
+        "object_type": "evidence_version",
+        "schema_version": "evidence-version.v1",
+        "logical_id": "evidence:nz-temporal-001:nz-temporal-001:user_ra:draft",
+        "parent_object_hashes": [],
+        "created_by": "actor:user_ra",
+        "recorded_at": "2026-09-11T04:30:00.000Z",
+        "payload": {
+          "task_id": "nz-temporal-001",
+          "evidence_draft_id": "nz-temporal-001:user_ra:draft",
+          "version_kind": "guided_submission",
+          "version_index": 1,
+          "evidence": {
+            "observation_contract_version": "guided_observation_v1",
+            "source_type": "denominational_directory",
+            "source_title": "Diocesan directory 2016",
+            "source_url_or_file": "https://example.org/directory/2016",
+            "source_date_or_capture_date": "2016-07",
+            "action": "confirm_current_record",
+            "change_class": "no_change",
+            "target_year_statuses": {
+              "2013": "present",
+              "2018": "present",
+              "2023": "not_assessed"
+            },
+            "denomination_or_tradition_raw": "Anglican (Te Hāhi Mihinare)",
+            "denomination_label_basis": "source_stated",
+            "denomination_relation": "same",
+            "evidence_note": "The directory lists regular Sunday services at Ōtautahi.",
+            "privacy_flag": "clear",
+            "licence_flag": "needs_review",
+            "function_chain": {
+              "contract_version": "function_chain_v1",
+              "start": {
+                "denomination": "Anglican",
+                "date": {
+                  "kind": "year",
+                  "value": "1864"
+                }
+              },
+              "events": []
+            }
+          },
+          "occupancies": [
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "date",
+              "end_precision": "year",
+              "end_basis": "source_stated",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0001:0",
+              "segment_index": 0,
+              "start_date": "1864",
+              "end_date": "1949",
+              "end_reason": "relocated"
+            },
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "ongoing",
+              "end_precision": "unknown",
+              "end_basis": "not_applicable",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0001:1",
+              "segment_index": 1,
+              "start_date": "1950",
+              "still_active_asof": "2016-07"
+            }
+          ]
+        },
+        "object_hash": "sha256:33bb2d61ac0e960e35f75b6261d1e590cf70ed33407932550433766adca630ec"
+      },
+      "content_hash": "sha256:282a6e5787f8ccb4bc9841b4d7a7b3cae9f899c45619c273d28ae39b8871169e"
+    },
+    {
+      "name": "child_correction_in_same_family",
+      "envelope": {
+        "hash_contract": "pow-object.v1",
+        "object_type": "evidence_version",
+        "schema_version": "evidence-version.v1",
+        "logical_id": "evidence:nz-temporal-001:nz-temporal-001:user_ra:draft",
+        "parent_object_hashes": [
+          "sha256:33bb2d61ac0e960e35f75b6261d1e590cf70ed33407932550433766adca630ec"
+        ],
+        "created_by": "actor:user_ra",
+        "recorded_at": "2026-09-11T05:30:00.000Z",
+        "payload": {
+          "task_id": "nz-temporal-001",
+          "evidence_draft_id": "nz-temporal-001:user_ra:revision:1789000005000",
+          "version_kind": "guided_submission",
+          "version_index": 2,
+          "evidence": {
+            "observation_contract_version": "guided_observation_v1",
+            "source_type": "denominational_directory",
+            "source_title": "Diocesan directory 2016",
+            "source_url_or_file": "https://example.org/directory/2016",
+            "source_date_or_capture_date": "2016-07",
+            "action": "confirm_current_record",
+            "change_class": "no_change",
+            "target_year_statuses": {
+              "2013": "uncertain",
+              "2018": "present",
+              "2023": "not_assessed"
+            },
+            "denomination_or_tradition_raw": "Anglican (Te Hāhi Mihinare)",
+            "denomination_label_basis": "source_stated",
+            "denomination_relation": "same",
+            "evidence_note": "The directory lists regular Sunday services at Ōtautahi; the 2013 entry was a misprint.",
+            "privacy_flag": "clear",
+            "licence_flag": "needs_review",
+            "function_chain": {
+              "contract_version": "function_chain_v1",
+              "start": {
+                "denomination": "Anglican",
+                "date": {
+                  "kind": "year",
+                  "value": "1864"
+                }
+              },
+              "events": []
+            }
+          },
+          "occupancies": [
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "date",
+              "end_precision": "year",
+              "end_basis": "source_stated",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0002:0",
+              "segment_index": 0,
+              "start_date": "1864",
+              "end_date": "1949",
+              "end_reason": "relocated"
+            },
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "ongoing",
+              "end_precision": "unknown",
+              "end_basis": "not_applicable",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0002:1",
+              "segment_index": 1,
+              "start_date": "1950",
+              "still_active_asof": "2016-07"
+            }
+          ]
+        },
+        "object_hash": "sha256:0f292f1989b0b32923f38e05ed0fd290ebbbdf2ae6216efc35e4415136572d50"
+      },
+      "content_hash": "sha256:c78179e8a68493119701dcb045ea27e32868bb04ca4231a98e50a1e5adb0053a"
+    },
+    {
+      "name": "reviewer_derivation_decision_child",
+      "envelope": {
+        "hash_contract": "pow-object.v1",
+        "object_type": "evidence_version",
+        "schema_version": "evidence-version.v1",
+        "logical_id": "evidence:nz-temporal-001:nz-temporal-001:user_ra:draft",
+        "parent_object_hashes": [
+          "sha256:0f292f1989b0b32923f38e05ed0fd290ebbbdf2ae6216efc35e4415136572d50"
+        ],
+        "created_by": "actor:user_reviewer",
+        "recorded_at": "2026-09-11T06:30:00.000Z",
+        "payload": {
+          "task_id": "nz-temporal-001",
+          "evidence_draft_id": "nz-temporal-001:user_ra:revision:1789000005000",
+          "version_kind": "reviewer_derivation_decision",
+          "version_index": 3,
+          "evidence": {
+            "observation_contract_version": "guided_observation_v1",
+            "source_type": "denominational_directory",
+            "source_title": "Diocesan directory 2016",
+            "source_url_or_file": "https://example.org/directory/2016",
+            "source_date_or_capture_date": "2016-07",
+            "action": "confirm_current_record",
+            "change_class": "no_change",
+            "target_year_statuses": {
+              "2013": "uncertain",
+              "2018": "present",
+              "2023": "present"
+            },
+            "denomination_or_tradition_raw": "Anglican (Te Hāhi Mihinare)",
+            "denomination_label_basis": "source_stated",
+            "denomination_relation": "same",
+            "evidence_note": "The directory lists regular Sunday services at Ōtautahi; the 2013 entry was a misprint.",
+            "privacy_flag": "clear",
+            "licence_flag": "needs_review",
+            "function_chain": {
+              "contract_version": "function_chain_v1",
+              "start": {
+                "denomination": "Anglican",
+                "date": {
+                  "kind": "year",
+                  "value": "1864"
+                }
+              },
+              "events": []
+            },
+            "target_year_basis": {
+              "2023": "reviewer_confirmed_derivation"
+            }
+          },
+          "occupancies": [
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "date",
+              "end_precision": "year",
+              "end_basis": "source_stated",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0001:0",
+              "segment_index": 0,
+              "start_date": "1864",
+              "end_date": "1949",
+              "end_reason": "relocated"
+            },
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "ongoing",
+              "end_precision": "unknown",
+              "end_basis": "not_applicable",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0001:1",
+              "segment_index": 1,
+              "start_date": "1950",
+              "still_active_asof": "2016-07"
+            }
+          ]
+        },
+        "object_hash": "sha256:04aee39240e2a725425b3e8a8e6f9463ac7a764da361be4651472e25da81bb00"
+      },
+      "content_hash": "sha256:2f7939a46129b0583ec6be4da526e3b963ea803dbb1c2ce0637890297a4f3de4"
+    },
+    {
+      "name": "revision_of_pre_contract_submission_without_invented_parent",
+      "envelope": {
+        "hash_contract": "pow-object.v1",
+        "object_type": "evidence_version",
+        "schema_version": "evidence-version.v1",
+        "logical_id": "evidence:nz-temporal-002:nz-temporal-002:user_ra:revision:1789000009000",
+        "parent_object_hashes": [],
+        "created_by": "actor:user_ra",
+        "recorded_at": "2026-09-11T04:30:00.000Z",
+        "payload": {
+          "task_id": "nz-temporal-002",
+          "evidence_draft_id": "nz-temporal-002:user_ra:revision:1789000009000",
+          "version_kind": "submitted",
+          "version_index": 1,
+          "evidence": {
+            "observation_contract_version": "guided_observation_v1",
+            "source_type": "denominational_directory",
+            "source_title": "Diocesan directory 2016",
+            "source_url_or_file": "https://example.org/directory/2016",
+            "source_date_or_capture_date": "2016-07",
+            "action": "confirm_current_record",
+            "change_class": "no_change",
+            "target_year_statuses": {
+              "2013": "present",
+              "2018": "present",
+              "2023": "not_assessed"
+            },
+            "denomination_or_tradition_raw": "Anglican (Te Hāhi Mihinare)",
+            "denomination_label_basis": "source_stated",
+            "denomination_relation": "same",
+            "evidence_note": "The directory lists regular Sunday services at Ōtautahi.",
+            "privacy_flag": "clear",
+            "licence_flag": "needs_review"
+          },
+          "occupancies": [],
+          "revises_evidence_draft_id": "nz-temporal-002:user_ra:draft",
+          "parent_version_unavailable": "pre_contract"
+        },
+        "object_hash": "sha256:888f75e77ac82388c5f338494f90bb2ebe3839969348d1a65c9b80965c54de61"
+      },
+      "content_hash": "sha256:c433736e0db301b1c5dba0ead7b6f7da1d74f2c26312b9e9baeb1ccde5ed9b59"
+    },
+    {
+      "name": "new_dated_observation_follows_earlier_family",
+      "envelope": {
+        "hash_contract": "pow-object.v1",
+        "object_type": "evidence_version",
+        "schema_version": "evidence-version.v1",
+        "logical_id": "evidence:nz-temporal-001:nz-temporal-001:user_ra:revision:1789000012000",
+        "parent_object_hashes": [],
+        "created_by": "actor:user_ra",
+        "recorded_at": "2026-09-12T04:30:00.000Z",
+        "payload": {
+          "task_id": "nz-temporal-001",
+          "evidence_draft_id": "nz-temporal-001:user_ra:revision:1789000012000",
+          "version_kind": "submitted",
+          "version_index": 1,
+          "evidence": {
+            "observation_contract_version": "guided_observation_v1",
+            "source_type": "field_observation",
+            "source_title": "Site visit",
+            "source_url_or_file": "https://example.org/directory/2016",
+            "source_date_or_capture_date": "2026-09-10",
+            "action": "confirm_current_record",
+            "change_class": "no_change",
+            "target_year_statuses": {
+              "2013": "present",
+              "2018": "present",
+              "2023": "not_assessed"
+            },
+            "denomination_or_tradition_raw": "Anglican (Te Hāhi Mihinare)",
+            "denomination_label_basis": "source_stated",
+            "denomination_relation": "same",
+            "evidence_note": "The directory lists regular Sunday services at Ōtautahi.",
+            "privacy_flag": "clear",
+            "licence_flag": "needs_review",
+            "function_chain": {
+              "contract_version": "function_chain_v1",
+              "start": {
+                "denomination": "Anglican",
+                "date": {
+                  "kind": "year",
+                  "value": "1864"
+                }
+              },
+              "events": []
+            }
+          },
+          "occupancies": [],
+          "follows_evidence_draft_id": "nz-temporal-001:user_ra:draft",
+          "follows_object_hash": "sha256:33bb2d61ac0e960e35f75b6261d1e590cf70ed33407932550433766adca630ec"
+        },
+        "object_hash": "sha256:6182bb40184833f47bb58d12f7b1a25f5ce2aa1d861e96eeb25b078bb0db57fd"
+      },
+      "content_hash": "sha256:1ff6feccd7f486da5756d2816ba92a8c69804460fb10dc209e905952b23f2d45"
+    },
+    {
+      "name": "rapid_current_observation",
+      "envelope": {
+        "hash_contract": "pow-object.v1",
+        "object_type": "evidence_version",
+        "schema_version": "evidence-version.v1",
+        "logical_id": "evidence:vu-port-vila-004:vu-port-vila-004:user_ra:rapid:rapid-0007",
+        "parent_object_hashes": [],
+        "created_by": "actor:user_ra",
+        "recorded_at": "2026-09-11T04:30:00.000Z",
+        "payload": {
+          "task_id": "vu-port-vila-004",
+          "evidence_draft_id": "vu-port-vila-004:user_ra:rapid:rapid-0007",
+          "version_kind": "rapid_current_observation",
+          "version_index": 1,
+          "evidence": {
+            "observation_contract_version": "rapid_current_v1",
+            "provider": "Project RA",
+            "source_date_or_capture_date": "2026-09-01",
+            "action": "confirm_current_record",
+            "change_class": "uncertain",
+            "target_year_statuses": {
+              "2020": "present"
+            },
+            "existence_status": "exists",
+            "worship_use_status": "in_use",
+            "denomination_label_basis": "unknown",
+            "denomination_relation": "uncertain",
+            "current_observation_status": "active_worship",
+            "current_observation_basis": "direct_observation",
+            "privacy_flag": "clear",
+            "licence_flag": "needs_review"
+          },
+          "occupancies": []
+        },
+        "object_hash": "sha256:5bcd9e32246b8eaae93ee5c06735b8a0301709885dbf50c5c2028495bfc1e207"
+      },
+      "content_hash": "sha256:81380ede4b45d72364c2c0f0c7b701b64de21c44eb6cf568cb94edf5b155d27d"
+    },
+    {
+      "name": "migration_copy_records_run_and_copy_time",
+      "envelope": {
+        "hash_contract": "pow-object.v1",
+        "object_type": "evidence_version",
+        "schema_version": "evidence-version.v1",
+        "logical_id": "evidence:nz-temporal-003:nz-temporal-003:user_ra:draft",
+        "parent_object_hashes": [],
+        "created_by": "actor:user_admin",
+        "recorded_at": "2026-09-13T04:30:00.000Z",
+        "payload": {
+          "task_id": "nz-temporal-003",
+          "evidence_draft_id": "nz-temporal-003:user_ra:draft",
+          "version_kind": "migration_copy",
+          "version_index": 1,
+          "evidence": {
+            "observation_contract_version": "guided_observation_v1",
+            "source_type": "denominational_directory",
+            "source_title": "Diocesan directory 2016",
+            "source_url_or_file": "https://example.org/directory/2016",
+            "source_date_or_capture_date": "2016-07",
+            "action": "confirm_current_record",
+            "change_class": "no_change",
+            "target_year_statuses": {
+              "2013": "present",
+              "2018": "present",
+              "2023": "not_assessed"
+            },
+            "denomination_or_tradition_raw": "Anglican (Te Hāhi Mihinare)",
+            "denomination_label_basis": "source_stated",
+            "denomination_relation": "same",
+            "evidence_note": "The directory lists regular Sunday services at Ōtautahi.",
+            "privacy_flag": "clear",
+            "licence_flag": "needs_review",
+            "function_chain": {
+              "contract_version": "function_chain_v1",
+              "start": {
+                "denomination": "Anglican",
+                "date": {
+                  "kind": "year",
+                  "value": "1864"
+                }
+              },
+              "events": []
+            }
+          },
+          "occupancies": [],
+          "migration": {
+            "run_id": "evidence-version-migration-2026-09",
+            "copied_at": "2026-09-13T04:30:00.000Z",
+            "source_created_by": "actor:user_ra",
+            "source_created_at": "2026-09-10T00:26:40.000Z",
+            "source_updated_at": "2026-09-10T00:26:41.000Z"
+          }
+        },
+        "object_hash": "sha256:77ae8c3b470a3df243e53c0353ea2d466b60d025bc7cc4ce942bf19ff562d675"
+      },
+      "content_hash": "sha256:1f430651418a00e8f1061e323a0bce8ec39970762ff2642f6fef0e25cfa3bb65"
+    },
+    {
+      "name": "payload_keeps_member_named_proto",
+      "envelope": {
+        "hash_contract": "pow-object.v1",
+        "object_type": "evidence_version",
+        "schema_version": "evidence-version.v1",
+        "logical_id": "evidence:nz-temporal-004:nz-temporal-004:user_ra:draft",
+        "parent_object_hashes": [],
+        "created_by": "actor:user_ra",
+        "recorded_at": "2026-09-11T04:30:00.000Z",
+        "payload": {
+          "task_id": "nz-temporal-004",
+          "evidence_draft_id": "nz-temporal-004:user_ra:draft",
+          "version_kind": "submitted",
+          "version_index": 1,
+          "evidence": {
+            "observation_contract_version": "guided_observation_v1",
+            "source_type": "denominational_directory",
+            "source_title": "Diocesan directory 2016",
+            "source_url_or_file": "https://example.org/directory/2016",
+            "source_date_or_capture_date": "2016-07",
+            "action": "confirm_current_record",
+            "change_class": "no_change",
+            "target_year_statuses": {
+              "2013": "present",
+              "2018": "present",
+              "2023": "not_assessed"
+            },
+            "denomination_or_tradition_raw": "Anglican (Te Hāhi Mihinare)",
+            "denomination_label_basis": "source_stated",
+            "denomination_relation": "same",
+            "evidence_note": "The directory lists regular Sunday services at Ōtautahi.",
+            "privacy_flag": "clear",
+            "licence_flag": "needs_review",
+            "generated_wide_row": {
+              "__proto__": 1,
+              "note": "same"
+            }
+          },
+          "occupancies": []
+        },
+        "object_hash": "sha256:d7fb890bb617045002764276a9ea89bb3f40a83a326f0dbc01952829d3c03ea9"
+      },
+      "content_hash": "sha256:f90c7d0e8f7a863735bc06d3d48f857daeb93b9e8125467bf78ce1d43f478974"
+    }
+  ],
+  "tampered": [
+    {
+      "name": "changed_note_without_recomputed_hash",
+      "reason": "object_hash mismatch",
+      "envelope": {
+        "hash_contract": "pow-object.v1",
+        "object_type": "evidence_version",
+        "schema_version": "evidence-version.v1",
+        "logical_id": "evidence:nz-temporal-001:nz-temporal-001:user_ra:draft",
+        "parent_object_hashes": [],
+        "created_by": "actor:user_ra",
+        "recorded_at": "2026-09-11T04:30:00.000Z",
+        "payload": {
+          "task_id": "nz-temporal-001",
+          "evidence_draft_id": "nz-temporal-001:user_ra:draft",
+          "version_kind": "guided_submission",
+          "version_index": 1,
+          "evidence": {
+            "observation_contract_version": "guided_observation_v1",
+            "source_type": "denominational_directory",
+            "source_title": "Diocesan directory 2016",
+            "source_url_or_file": "https://example.org/directory/2016",
+            "source_date_or_capture_date": "2016-07",
+            "action": "confirm_current_record",
+            "change_class": "no_change",
+            "target_year_statuses": {
+              "2013": "present",
+              "2018": "present",
+              "2023": "not_assessed"
+            },
+            "denomination_or_tradition_raw": "Anglican (Te Hāhi Mihinare)",
+            "denomination_label_basis": "source_stated",
+            "denomination_relation": "same",
+            "evidence_note": "edited after submission",
+            "privacy_flag": "clear",
+            "licence_flag": "needs_review",
+            "function_chain": {
+              "contract_version": "function_chain_v1",
+              "start": {
+                "denomination": "Anglican",
+                "date": {
+                  "kind": "year",
+                  "value": "1864"
+                }
+              },
+              "events": []
+            }
+          },
+          "occupancies": [
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "date",
+              "end_precision": "year",
+              "end_basis": "source_stated",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0001:0",
+              "segment_index": 0,
+              "start_date": "1864",
+              "end_date": "1949",
+              "end_reason": "relocated"
+            },
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "ongoing",
+              "end_precision": "unknown",
+              "end_basis": "not_applicable",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0001:1",
+              "segment_index": 1,
+              "start_date": "1950",
+              "still_active_asof": "2016-07"
+            }
+          ]
+        },
+        "object_hash": "sha256:33bb2d61ac0e960e35f75b6261d1e590cf70ed33407932550433766adca630ec"
+      }
+    },
+    {
+      "name": "reordered_occupancies",
+      "reason": "payload.occupancies unsorted",
+      "envelope": {
+        "hash_contract": "pow-object.v1",
+        "object_type": "evidence_version",
+        "schema_version": "evidence-version.v1",
+        "logical_id": "evidence:nz-temporal-001:nz-temporal-001:user_ra:draft",
+        "parent_object_hashes": [],
+        "created_by": "actor:user_ra",
+        "recorded_at": "2026-09-11T04:30:00.000Z",
+        "payload": {
+          "task_id": "nz-temporal-001",
+          "evidence_draft_id": "nz-temporal-001:user_ra:draft",
+          "version_kind": "guided_submission",
+          "version_index": 1,
+          "evidence": {
+            "observation_contract_version": "guided_observation_v1",
+            "source_type": "denominational_directory",
+            "source_title": "Diocesan directory 2016",
+            "source_url_or_file": "https://example.org/directory/2016",
+            "source_date_or_capture_date": "2016-07",
+            "action": "confirm_current_record",
+            "change_class": "no_change",
+            "target_year_statuses": {
+              "2013": "present",
+              "2018": "present",
+              "2023": "not_assessed"
+            },
+            "denomination_or_tradition_raw": "Anglican (Te Hāhi Mihinare)",
+            "denomination_label_basis": "source_stated",
+            "denomination_relation": "same",
+            "evidence_note": "The directory lists regular Sunday services at Ōtautahi.",
+            "privacy_flag": "clear",
+            "licence_flag": "needs_review",
+            "function_chain": {
+              "contract_version": "function_chain_v1",
+              "start": {
+                "denomination": "Anglican",
+                "date": {
+                  "kind": "year",
+                  "value": "1864"
+                }
+              },
+              "events": []
+            }
+          },
+          "occupancies": [
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "ongoing",
+              "end_precision": "unknown",
+              "end_basis": "not_applicable",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0001:1",
+              "segment_index": 1,
+              "start_date": "1950",
+              "still_active_asof": "2016-07"
+            },
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "date",
+              "end_precision": "year",
+              "end_basis": "source_stated",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0001:0",
+              "segment_index": 0,
+              "start_date": "1864",
+              "end_date": "1949",
+              "end_reason": "relocated"
+            }
+          ]
+        },
+        "object_hash": "sha256:7e6eb2f3303de2e2faa34869c7e5d6ee6c0052640ef11340f90d3c277470bd01"
+      }
+    },
+    {
+      "name": "duplicate_occupancy_id",
+      "reason": "duplicate occupancy_id",
+      "envelope": {
+        "hash_contract": "pow-object.v1",
+        "object_type": "evidence_version",
+        "schema_version": "evidence-version.v1",
+        "logical_id": "evidence:nz-temporal-001:nz-temporal-001:user_ra:draft",
+        "parent_object_hashes": [],
+        "created_by": "actor:user_ra",
+        "recorded_at": "2026-09-11T04:30:00.000Z",
+        "payload": {
+          "task_id": "nz-temporal-001",
+          "evidence_draft_id": "nz-temporal-001:user_ra:draft",
+          "version_kind": "guided_submission",
+          "version_index": 1,
+          "evidence": {
+            "observation_contract_version": "guided_observation_v1",
+            "source_type": "denominational_directory",
+            "source_title": "Diocesan directory 2016",
+            "source_url_or_file": "https://example.org/directory/2016",
+            "source_date_or_capture_date": "2016-07",
+            "action": "confirm_current_record",
+            "change_class": "no_change",
+            "target_year_statuses": {
+              "2013": "present",
+              "2018": "present",
+              "2023": "not_assessed"
+            },
+            "denomination_or_tradition_raw": "Anglican (Te Hāhi Mihinare)",
+            "denomination_label_basis": "source_stated",
+            "denomination_relation": "same",
+            "evidence_note": "The directory lists regular Sunday services at Ōtautahi.",
+            "privacy_flag": "clear",
+            "licence_flag": "needs_review",
+            "function_chain": {
+              "contract_version": "function_chain_v1",
+              "start": {
+                "denomination": "Anglican",
+                "date": {
+                  "kind": "year",
+                  "value": "1864"
+                }
+              },
+              "events": []
+            }
+          },
+          "occupancies": [
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "date",
+              "end_precision": "year",
+              "end_basis": "source_stated",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0001:0",
+              "segment_index": 0,
+              "start_date": "1864",
+              "end_date": "1949",
+              "end_reason": "relocated"
+            },
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "ongoing",
+              "end_precision": "unknown",
+              "end_basis": "not_applicable",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0001:0",
+              "segment_index": 0,
+              "start_date": "1950",
+              "still_active_asof": "2016-07"
+            }
+          ]
+        },
+        "object_hash": "sha256:410e3f87be3e38803276a3069d09735c39fa6a751ef5824ff2abd5aabe29ede7"
+      }
+    },
+    {
+      "name": "unsorted_parent_hashes",
+      "reason": "parent_object_hashes unsorted",
+      "envelope": {
+        "hash_contract": "pow-object.v1",
+        "object_type": "evidence_version",
+        "schema_version": "evidence-version.v1",
+        "logical_id": "evidence:nz-temporal-001:nz-temporal-001:user_ra:draft",
+        "parent_object_hashes": [
+          "sha256:33bb2d61ac0e960e35f75b6261d1e590cf70ed33407932550433766adca630ec",
+          "sha256:04aee39240e2a725425b3e8a8e6f9463ac7a764da361be4651472e25da81bb00"
+        ],
+        "created_by": "actor:user_ra",
+        "recorded_at": "2026-09-11T05:30:00.000Z",
+        "payload": {
+          "task_id": "nz-temporal-001",
+          "evidence_draft_id": "nz-temporal-001:user_ra:revision:1789000005000",
+          "version_kind": "guided_submission",
+          "version_index": 2,
+          "evidence": {
+            "observation_contract_version": "guided_observation_v1",
+            "source_type": "denominational_directory",
+            "source_title": "Diocesan directory 2016",
+            "source_url_or_file": "https://example.org/directory/2016",
+            "source_date_or_capture_date": "2016-07",
+            "action": "confirm_current_record",
+            "change_class": "no_change",
+            "target_year_statuses": {
+              "2013": "uncertain",
+              "2018": "present",
+              "2023": "not_assessed"
+            },
+            "denomination_or_tradition_raw": "Anglican (Te Hāhi Mihinare)",
+            "denomination_label_basis": "source_stated",
+            "denomination_relation": "same",
+            "evidence_note": "The directory lists regular Sunday services at Ōtautahi; the 2013 entry was a misprint.",
+            "privacy_flag": "clear",
+            "licence_flag": "needs_review",
+            "function_chain": {
+              "contract_version": "function_chain_v1",
+              "start": {
+                "denomination": "Anglican",
+                "date": {
+                  "kind": "year",
+                  "value": "1864"
+                }
+              },
+              "events": []
+            }
+          },
+          "occupancies": [
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "date",
+              "end_precision": "year",
+              "end_basis": "source_stated",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0002:0",
+              "segment_index": 0,
+              "start_date": "1864",
+              "end_date": "1949",
+              "end_reason": "relocated"
+            },
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "ongoing",
+              "end_precision": "unknown",
+              "end_basis": "not_applicable",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0002:1",
+              "segment_index": 1,
+              "start_date": "1950",
+              "still_active_asof": "2016-07"
+            }
+          ]
+        },
+        "object_hash": "sha256:00d93f9484d053eb719108b25b6b7378ac1473b7203de25c4bf62924a3fd3e6c"
+      }
+    },
+    {
+      "name": "wrong_hash_contract",
+      "reason": "hash_contract",
+      "envelope": {
+        "hash_contract": "pow-object.v0",
+        "object_type": "evidence_version",
+        "schema_version": "evidence-version.v1",
+        "logical_id": "evidence:nz-temporal-001:nz-temporal-001:user_ra:draft",
+        "parent_object_hashes": [],
+        "created_by": "actor:user_ra",
+        "recorded_at": "2026-09-11T04:30:00.000Z",
+        "payload": {
+          "task_id": "nz-temporal-001",
+          "evidence_draft_id": "nz-temporal-001:user_ra:draft",
+          "version_kind": "guided_submission",
+          "version_index": 1,
+          "evidence": {
+            "observation_contract_version": "guided_observation_v1",
+            "source_type": "denominational_directory",
+            "source_title": "Diocesan directory 2016",
+            "source_url_or_file": "https://example.org/directory/2016",
+            "source_date_or_capture_date": "2016-07",
+            "action": "confirm_current_record",
+            "change_class": "no_change",
+            "target_year_statuses": {
+              "2013": "present",
+              "2018": "present",
+              "2023": "not_assessed"
+            },
+            "denomination_or_tradition_raw": "Anglican (Te Hāhi Mihinare)",
+            "denomination_label_basis": "source_stated",
+            "denomination_relation": "same",
+            "evidence_note": "The directory lists regular Sunday services at Ōtautahi.",
+            "privacy_flag": "clear",
+            "licence_flag": "needs_review",
+            "function_chain": {
+              "contract_version": "function_chain_v1",
+              "start": {
+                "denomination": "Anglican",
+                "date": {
+                  "kind": "year",
+                  "value": "1864"
+                }
+              },
+              "events": []
+            }
+          },
+          "occupancies": [
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "date",
+              "end_precision": "year",
+              "end_basis": "source_stated",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0001:0",
+              "segment_index": 0,
+              "start_date": "1864",
+              "end_date": "1949",
+              "end_reason": "relocated"
+            },
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "ongoing",
+              "end_precision": "unknown",
+              "end_basis": "not_applicable",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0001:1",
+              "segment_index": 1,
+              "start_date": "1950",
+              "still_active_asof": "2016-07"
+            }
+          ]
+        },
+        "object_hash": "sha256:79889784a542a92207b11227187895c95263b335a9f6fab9656e8d2f2888b6f7"
+      }
+    },
+    {
+      "name": "wrong_schema_version",
+      "reason": "schema_version",
+      "envelope": {
+        "hash_contract": "pow-object.v1",
+        "object_type": "evidence_version",
+        "schema_version": "evidence-version.v2",
+        "logical_id": "evidence:nz-temporal-001:nz-temporal-001:user_ra:draft",
+        "parent_object_hashes": [],
+        "created_by": "actor:user_ra",
+        "recorded_at": "2026-09-11T04:30:00.000Z",
+        "payload": {
+          "task_id": "nz-temporal-001",
+          "evidence_draft_id": "nz-temporal-001:user_ra:draft",
+          "version_kind": "guided_submission",
+          "version_index": 1,
+          "evidence": {
+            "observation_contract_version": "guided_observation_v1",
+            "source_type": "denominational_directory",
+            "source_title": "Diocesan directory 2016",
+            "source_url_or_file": "https://example.org/directory/2016",
+            "source_date_or_capture_date": "2016-07",
+            "action": "confirm_current_record",
+            "change_class": "no_change",
+            "target_year_statuses": {
+              "2013": "present",
+              "2018": "present",
+              "2023": "not_assessed"
+            },
+            "denomination_or_tradition_raw": "Anglican (Te Hāhi Mihinare)",
+            "denomination_label_basis": "source_stated",
+            "denomination_relation": "same",
+            "evidence_note": "The directory lists regular Sunday services at Ōtautahi.",
+            "privacy_flag": "clear",
+            "licence_flag": "needs_review",
+            "function_chain": {
+              "contract_version": "function_chain_v1",
+              "start": {
+                "denomination": "Anglican",
+                "date": {
+                  "kind": "year",
+                  "value": "1864"
+                }
+              },
+              "events": []
+            }
+          },
+          "occupancies": [
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "date",
+              "end_precision": "year",
+              "end_basis": "source_stated",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0001:0",
+              "segment_index": 0,
+              "start_date": "1864",
+              "end_date": "1949",
+              "end_reason": "relocated"
+            },
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "ongoing",
+              "end_precision": "unknown",
+              "end_basis": "not_applicable",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0001:1",
+              "segment_index": 1,
+              "start_date": "1950",
+              "still_active_asof": "2016-07"
+            }
+          ]
+        },
+        "object_hash": "sha256:1feb76b2cd40b476a316f0f3c3dfcd70eafeafb6e31f2565e3b68b279a508b7a"
+      }
+    },
+    {
+      "name": "recorded_at_without_milliseconds",
+      "reason": "recorded_at format",
+      "envelope": {
+        "hash_contract": "pow-object.v1",
+        "object_type": "evidence_version",
+        "schema_version": "evidence-version.v1",
+        "logical_id": "evidence:nz-temporal-001:nz-temporal-001:user_ra:draft",
+        "parent_object_hashes": [],
+        "created_by": "actor:user_ra",
+        "recorded_at": "2026-09-11T04:30:00Z",
+        "payload": {
+          "task_id": "nz-temporal-001",
+          "evidence_draft_id": "nz-temporal-001:user_ra:draft",
+          "version_kind": "guided_submission",
+          "version_index": 1,
+          "evidence": {
+            "observation_contract_version": "guided_observation_v1",
+            "source_type": "denominational_directory",
+            "source_title": "Diocesan directory 2016",
+            "source_url_or_file": "https://example.org/directory/2016",
+            "source_date_or_capture_date": "2016-07",
+            "action": "confirm_current_record",
+            "change_class": "no_change",
+            "target_year_statuses": {
+              "2013": "present",
+              "2018": "present",
+              "2023": "not_assessed"
+            },
+            "denomination_or_tradition_raw": "Anglican (Te Hāhi Mihinare)",
+            "denomination_label_basis": "source_stated",
+            "denomination_relation": "same",
+            "evidence_note": "The directory lists regular Sunday services at Ōtautahi.",
+            "privacy_flag": "clear",
+            "licence_flag": "needs_review",
+            "function_chain": {
+              "contract_version": "function_chain_v1",
+              "start": {
+                "denomination": "Anglican",
+                "date": {
+                  "kind": "year",
+                  "value": "1864"
+                }
+              },
+              "events": []
+            }
+          },
+          "occupancies": [
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "date",
+              "end_precision": "year",
+              "end_basis": "source_stated",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0001:0",
+              "segment_index": 0,
+              "start_date": "1864",
+              "end_date": "1949",
+              "end_reason": "relocated"
+            },
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "ongoing",
+              "end_precision": "unknown",
+              "end_basis": "not_applicable",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0001:1",
+              "segment_index": 1,
+              "start_date": "1950",
+              "still_active_asof": "2016-07"
+            }
+          ]
+        },
+        "object_hash": "sha256:a5f4b8dceb98034258278d9fa785918379cb6c1504e735a0fec68ddb225e005e"
+      }
+    },
+    {
+      "name": "malformed_parent_hash",
+      "reason": "parent hash format",
+      "envelope": {
+        "hash_contract": "pow-object.v1",
+        "object_type": "evidence_version",
+        "schema_version": "evidence-version.v1",
+        "logical_id": "evidence:nz-temporal-001:nz-temporal-001:user_ra:draft",
+        "parent_object_hashes": [
+          "sha256:notahash"
+        ],
+        "created_by": "actor:user_ra",
+        "recorded_at": "2026-09-11T05:30:00.000Z",
+        "payload": {
+          "task_id": "nz-temporal-001",
+          "evidence_draft_id": "nz-temporal-001:user_ra:revision:1789000005000",
+          "version_kind": "guided_submission",
+          "version_index": 2,
+          "evidence": {
+            "observation_contract_version": "guided_observation_v1",
+            "source_type": "denominational_directory",
+            "source_title": "Diocesan directory 2016",
+            "source_url_or_file": "https://example.org/directory/2016",
+            "source_date_or_capture_date": "2016-07",
+            "action": "confirm_current_record",
+            "change_class": "no_change",
+            "target_year_statuses": {
+              "2013": "uncertain",
+              "2018": "present",
+              "2023": "not_assessed"
+            },
+            "denomination_or_tradition_raw": "Anglican (Te Hāhi Mihinare)",
+            "denomination_label_basis": "source_stated",
+            "denomination_relation": "same",
+            "evidence_note": "The directory lists regular Sunday services at Ōtautahi; the 2013 entry was a misprint.",
+            "privacy_flag": "clear",
+            "licence_flag": "needs_review",
+            "function_chain": {
+              "contract_version": "function_chain_v1",
+              "start": {
+                "denomination": "Anglican",
+                "date": {
+                  "kind": "year",
+                  "value": "1864"
+                }
+              },
+              "events": []
+            }
+          },
+          "occupancies": [
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "date",
+              "end_precision": "year",
+              "end_basis": "source_stated",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0002:0",
+              "segment_index": 0,
+              "start_date": "1864",
+              "end_date": "1949",
+              "end_reason": "relocated"
+            },
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "ongoing",
+              "end_precision": "unknown",
+              "end_basis": "not_applicable",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0002:1",
+              "segment_index": 1,
+              "start_date": "1950",
+              "still_active_asof": "2016-07"
+            }
+          ]
+        },
+        "object_hash": "sha256:dffe5ea6364490cfd7ae0f6ff2fe20c47934355231eda62eddde38dc05cb2fc0"
+      }
+    },
+    {
+      "name": "object_hash_missing",
+      "reason": "object_hash absent",
+      "envelope": {
+        "hash_contract": "pow-object.v1",
+        "object_type": "evidence_version",
+        "schema_version": "evidence-version.v1",
+        "logical_id": "evidence:nz-temporal-001:nz-temporal-001:user_ra:draft",
+        "parent_object_hashes": [],
+        "created_by": "actor:user_ra",
+        "recorded_at": "2026-09-11T04:30:00.000Z",
+        "payload": {
+          "task_id": "nz-temporal-001",
+          "evidence_draft_id": "nz-temporal-001:user_ra:draft",
+          "version_kind": "guided_submission",
+          "version_index": 1,
+          "evidence": {
+            "observation_contract_version": "guided_observation_v1",
+            "source_type": "denominational_directory",
+            "source_title": "Diocesan directory 2016",
+            "source_url_or_file": "https://example.org/directory/2016",
+            "source_date_or_capture_date": "2016-07",
+            "action": "confirm_current_record",
+            "change_class": "no_change",
+            "target_year_statuses": {
+              "2013": "present",
+              "2018": "present",
+              "2023": "not_assessed"
+            },
+            "denomination_or_tradition_raw": "Anglican (Te Hāhi Mihinare)",
+            "denomination_label_basis": "source_stated",
+            "denomination_relation": "same",
+            "evidence_note": "The directory lists regular Sunday services at Ōtautahi.",
+            "privacy_flag": "clear",
+            "licence_flag": "needs_review",
+            "function_chain": {
+              "contract_version": "function_chain_v1",
+              "start": {
+                "denomination": "Anglican",
+                "date": {
+                  "kind": "year",
+                  "value": "1864"
+                }
+              },
+              "events": []
+            }
+          },
+          "occupancies": [
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "date",
+              "end_precision": "year",
+              "end_basis": "source_stated",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0001:0",
+              "segment_index": 0,
+              "start_date": "1864",
+              "end_date": "1949",
+              "end_reason": "relocated"
+            },
+            {
+              "contract_version": "occupancy_v1",
+              "start_mode": "date",
+              "start_precision": "year",
+              "start_basis": "source_stated",
+              "end_mode": "ongoing",
+              "end_precision": "unknown",
+              "end_basis": "not_applicable",
+              "location_relation": "same_as_task_point",
+              "latitude": -43.532054,
+              "longitude": 172.636225,
+              "location_mode": "building_identified",
+              "location_basis": "map_placement",
+              "location_confidence": "high",
+              "confidence": "high",
+              "confidence_basis": "Directory entry with street address.",
+              "source_basis": "documentary",
+              "source_title": "Diocesan directory 2016",
+              "source_account": "Listed as a parish church with weekly services.",
+              "privacy_flag": "clear",
+              "occupancy_id": "nz-temporal-001:user_ra:occupancy:sub-0001:1",
+              "segment_index": 1,
+              "start_date": "1950",
+              "still_active_asof": "2016-07"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -41,7 +41,8 @@ export type TaskEventType =
   | "comment_requested"
   | "comment_provided"
   | "pi_accepted"
-  | "pi_returned";
+  | "pi_returned"
+  | "draft_restored";
 
 export async function appendTaskEvent(
   ctx: MutationCtx,
@@ -57,14 +58,15 @@ export async function appendTaskEvent(
     reviewDecisionId?: string;
     exportBatchId?: string;
     acceptanceId?: string;
+    evidenceVersionHash?: string;
     clientContext?: unknown;
   },
-): Promise<void> {
+): Promise<Id<"task_events">> {
   assertTaskReasonLimit("task event reason", args.reason);
   assertClientContextLimit(args.clientContext);
 
   const now = Date.now();
-  await ctx.db.insert("task_events", {
+  return await ctx.db.insert("task_events", {
     event_id: `${args.taskId}:${args.eventType}:${now}:${args.actorUserId}`,
     task_id: args.taskId,
     event_type: args.eventType,
@@ -78,6 +80,7 @@ export async function appendTaskEvent(
     review_decision_id: args.reviewDecisionId,
     export_batch_id: args.exportBatchId,
     acceptance_id: args.acceptanceId,
+    evidence_version_hash: args.evidenceVersionHash,
     client_context: args.clientContext,
   });
 }
