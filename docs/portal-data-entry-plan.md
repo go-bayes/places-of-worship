@@ -4,6 +4,7 @@ Public direction: `ROADMAP.md`. Detailed active planning and governance records 
 
 Related designs:
 
+- `docs/development/content-addressed-review.md`
 - `docs/community-ingestion-api-plan.md`
 - `docs/convex-task-layer-spec.md`
 - `docs/master-verification-workflow-plan.md`
@@ -18,6 +19,8 @@ This document is the hub for the future contribution portal. It covers the
 authenticated website path that will eventually replace the current "fix errors
 in OSM" route for project data corrections, nominations, and source-backed
 modifications.
+
+The [content-addressed review contract](development/content-addressed-review.md) records the approved 2026-09-11 design: reviewer acceptance into a transparent export queue, return to review, and explicit PI batch release before governed `pow` processing. Implementation is pending; the live per-item PI acceptance gate remains in force.
 
 ## First Milestone
 

@@ -112,7 +112,7 @@ Evidence And Governance:
   denomination sets, multi-denomination, multi-purpose use, organisation-site
   links, and target-year appeared/disappeared states.
 - `[ ]` Reviewer decision events and accept/reject/defer/revise semantics.
-- `[ ]` Deterministic payload hashing and accepted-event replay checks.
+- `[ ]` [Content-addressed review versions](docs/development/content-addressed-review.md), including deterministic payload hashing and accepted-event replay checks.
 - `[ ]` Hash-backed accepted diff manifests with event ids, input manifests,
   target years, country/area partitions, output hashes, and replay command.
 - `[~]` OSM date-tag list: places with OSM opening or closure date tags, parsed

@@ -4,6 +4,12 @@ This FAQ explains current operating rules for the New Zealand pilot and the
 planned staged data workflow. The authoritative contracts remain in schemas and
 planning documents; this page is a readable guide.
 
+## Can accepted evidence return to review before export processing?
+
+The approved design provides a transparent export queue after reviewer acceptance. A principal investigator can return queued evidence to review or explicitly release a batch for governed `pow` processing. A return suspends export eligibility while preserving the submitted evidence and decision history. Frozen files retain their original hashes; withdrawal or supersession records identify exports that are no longer eligible. Changes already accepted by `pow` require a governed correction.
+
+This batch-release design is awaiting implementation. The live backend still requires per-item PI acceptance before export. See the [content-addressed review contract](docs/development/content-addressed-review.md) for the version, return, and release rules.
+
 ## What is the project doing right now?
 
 The New Zealand pilot is using a Convex-backed web assignment rather than a
