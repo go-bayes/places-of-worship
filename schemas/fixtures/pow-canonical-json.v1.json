@@ -245,6 +245,12 @@
       "object_hash": "sha256:f4e3f047101e0191aeb3ebf17ee457cbf687f209bd983dade6ac183f86d93797"
     },
     {
+      "name": "member_named_proto_is_kept",
+      "json_text": "{\"__proto__\":1,\"note\":\"same\"}",
+      "canonical": "{\"__proto__\":1,\"note\":\"same\"}",
+      "object_hash": "sha256:80e2e02124cd09ca435886c5f243082724dfc2ed418b1a52e25328ec80facb6d"
+    },
+    {
       "name": "evidence_like_record",
       "json_text": "{\"observation_contract_version\":\"guided_observation_v1\",\"source_type\":\"denominational_directory\",\"source_title\":\"Directory 2016\",\"source_date_or_capture_date\":\"2016-07\",\"target_year_statuses\":{\"2018\":\"present\",\"2013\":\"not_assessed\",\"2023\":\"present\"},\"privacy_flag\":\"clear\",\"licence_flag\":\"needs_review\",\"evidence_note\":\"The directory records this place as active in July 2016.\"}",
       "canonical": "{\"evidence_note\":\"The directory records this place as active in July 2016.\",\"licence_flag\":\"needs_review\",\"observation_contract_version\":\"guided_observation_v1\",\"privacy_flag\":\"clear\",\"source_date_or_capture_date\":\"2016-07\",\"source_title\":\"Directory 2016\",\"source_type\":\"denominational_directory\",\"target_year_statuses\":{\"2013\":\"not_assessed\",\"2018\":\"present\",\"2023\":\"present\"}}",

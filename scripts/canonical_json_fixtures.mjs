@@ -71,6 +71,10 @@ const cases = [
   ["deep_nesting", '{"a":{"b":{"c":{"d":{"e":{"f":[[[[1]]]]}}}}}}'],
   ["rfc8785_example_numbers", '{"numbers":[333333333.33333329,1E30,4.50,2e-3,0.000000000000000000000000001]}'],
   ["rfc8785_example_literals", '{"literals":[null,true,false]}'],
+  // a member named __proto__ is ordinary json; an implementation that copies
+  // members by assignment into a fresh object would drop it (finding of the
+  // 2026-09-11 review) and hash two different documents identically
+  ["member_named_proto_is_kept", '{"__proto__":1,"note":"same"}'],
   ["evidence_like_record", '{"observation_contract_version":"guided_observation_v1","source_type":"denominational_directory","source_title":"Directory 2016","source_date_or_capture_date":"2016-07","target_year_statuses":{"2018":"present","2013":"not_assessed","2023":"present"},"privacy_flag":"clear","licence_flag":"needs_review","evidence_note":"The directory records this place as active in July 2016."}'],
 ];
 

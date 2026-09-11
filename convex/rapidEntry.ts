@@ -29,7 +29,7 @@ import { assertProbableSameAsInputs, probableSameAsCheck } from "./lib/probableS
 import { recordProbableSameAsReciprocals, resolveProbableSameAsRefs } from "./lib/probableSameAsRecords";
 import { resolveCitedSource } from "./lib/sources";
 import { appendTaskEvent } from "./lib/taskEvents";
-import { recordEvidenceVersion } from "./evidenceVersions";
+import { recordEvidenceVersion, submissionReceipt } from "./evidenceVersions";
 import { assertAssertionMatchesTaskPoint, assertCountryAllowsAssertionMode } from "./lib/locationAssertions";
 import { locationAssertionInput, privacyFlag, probableSameAsInput, rapidCurrentObservationInput, taskStatus } from "./model";
 
@@ -158,6 +158,9 @@ export const submitCurrentObservation = mutation({
     deduped: v.boolean(),
     corrected: v.boolean(),
     evidence_version_hash: v.optional(v.string()),
+    // a retry of an observation recorded before the version contract has
+    // no version to return; the reason is stated rather than a hash invented
+    evidence_version_unavailable: v.optional(v.literal("pre_contract")),
     superseded_evidence_draft_id: v.optional(v.string()),
   }),
   handler: async (ctx, args) => {
@@ -178,6 +181,11 @@ export const submitCurrentObservation = mutation({
         throw new Error("The submission identifier is already in use.");
       }
       const existingTask = await getTaskOrThrow(ctx, existingDraft.task_id);
+      // the version this submission received, from its own receipt: the
+      // row's current hash may since have moved (periods recorded, a
+      // migration copy), and a pre-contract observation has no version
+      const receipt = await submissionReceipt(ctx, `rapid:${submissionKey}`);
+      const corrected = existingDraft.revision_of_evidence_draft_id !== undefined;
       return {
         task_id: existingTask.task_id,
         evidence_draft_id: existingDraft.evidence_draft_id,
@@ -186,7 +194,11 @@ export const submitCurrentObservation = mutation({
           : {}),
         task_status: existingTask.status,
         deduped: true,
-        corrected: false,
+        corrected,
+        ...(receipt !== null
+          ? { evidence_version_hash: receipt.object_hash }
+          : { evidence_version_unavailable: "pre_contract" as const }),
+        ...(corrected ? { superseded_evidence_draft_id: existingDraft.revision_of_evidence_draft_id } : {}),
       };
     }
 
@@ -470,7 +482,13 @@ export const submitCurrentObservation = mutation({
       // a correction joins the version family of the observation it
       // supersedes (evidence-version.v1)
       ...(correctedDraft !== null
-        ? { revision_of_evidence_draft_id: correctedDraft.evidence_draft_id, revision_intent: "correction" as const }
+        ? {
+            revision_of_evidence_draft_id: correctedDraft.evidence_draft_id,
+            // pinned in the same transaction, so the parent is the version
+            // the observer corrected; absent for a pre-contract observation
+            revision_of_version_hash: correctedDraft.evidence_version_hash,
+            revision_intent: "correction" as const,
+          }
         : {}),
     };
     const landedStatus = flagged ? ("unresolved_note" as const) : ("needs_review" as const);

@@ -256,6 +256,12 @@ export default defineSchema({
     evidence_version_hash: v.optional(v.string()),
     evidence_family_id: v.optional(v.string()),
     revision_of_evidence_draft_id: v.optional(v.string()),
+    // the source's version hash pinned when the revision was opened, so the
+    // correction's parent is the version the contributor cloned even if the
+    // source takes later versions before the correction is submitted.
+    // absent with revision_of_evidence_draft_id set means the source had no
+    // version when the revision opened (a pre-contract submission)
+    revision_of_version_hash: v.optional(v.string()),
     revision_intent: v.optional(revisionIntent),
   })
     .index("by_evidence_draft_id", ["evidence_draft_id"])
@@ -603,7 +609,10 @@ export default defineSchema({
     // set; no version position, actor, time, or lineage): an unchanged
     // resubmission has the same content hash
     content_hash: v.string(),
-    // server-scoped idempotency key of the submission that created it
+    // server-scoped idempotency key of the submission that created it, kept
+    // on the version for the record; retries are answered from
+    // evidence_submission_receipts, which also covers a token whose
+    // submission received an existing version by content
     idempotency_key: v.optional(v.string()),
     created_by: v.id("users"),
     recorded_at: v.number(),
@@ -612,8 +621,29 @@ export default defineSchema({
     .index("by_object_hash", ["object_hash"])
     .index("by_draft_version", ["evidence_draft_id", "version_index"])
     .index("by_family_version", ["evidence_family_id", "version_index"])
-    .index("by_task", ["task_id"])
-    .index("by_idempotency_key", ["idempotency_key"]),
+    .index("by_task", ["task_id"]),
+
+  // one caller's receipt for one submission token: which version the token
+  // returned, to whom, for which row. written on every keyed call to
+  // recordEvidenceVersion whether the version was created or an existing
+  // one was returned, so a retry after later versions still answers with
+  // the version the original submission received. separate from the
+  // version rows, which are never patched
+  evidence_submission_receipts: defineTable({
+    // route-namespaced idempotency key (submit:, guided:, periods:, rapid:, ...)
+    submission_key: v.string(),
+    route: v.string(),
+    task_id: v.string(),
+    evidence_draft_id: v.string(),
+    object_hash: v.string(),
+    content_hash: v.string(),
+    // whether this call created the version or received an existing one
+    version_created: v.boolean(),
+    created_by: v.id("users"),
+    recorded_at: v.number(),
+  })
+    .index("by_submission_key", ["submission_key"])
+    .index("by_draft", ["evidence_draft_id"]),
 
   // Immutable context captured when a batch reviewer inspected a version.
   review_snapshots: defineTable({

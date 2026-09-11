@@ -101,3 +101,31 @@ test("withoutUndefined omits unset optional members at every depth and refuses u
   assert.equal(objectHash(cleaned), objectHash({ b: { d: 1 }, e: [{ g: 2 }] }));
   assert.throws(() => withoutUndefined([1, undefined]), /Undefined array element/);
 });
+
+// finding (2026-09-11 review): assignment into {} invoked the inherited
+// __proto__ setter, so cleanup silently dropped that member and two
+// different documents hashed the same
+test("a member named __proto__ survives cleanup and moves the hash", () => {
+  const one = JSON.parse('{"__proto__":1,"note":"same"}');
+  const two = JSON.parse('{"__proto__":2,"note":"same"}');
+  assert.equal(canonicalJsonStrict(withoutUndefined(one)), '{"__proto__":1,"note":"same"}');
+  assert.equal(canonicalJsonStrict(withoutUndefined(one)), canonicalJsonStrict(one));
+  assert.notEqual(objectHash(withoutUndefined(one)), objectHash(withoutUndefined(two)));
+  // nested, and beside an undefined member that is dropped
+  const nested = withoutUndefined({ outer: JSON.parse('{"__proto__":{"x":1},"gone":null}'), gone: undefined });
+  assert.deepEqual(Object.keys(nested), ["outer"]);
+  assert.deepEqual(Object.keys(nested.outer), ["__proto__", "gone"]);
+  assert.equal(Object.getPrototypeOf(nested.outer), Object.prototype);
+  assert.equal(canonicalJsonStrict(nested), '{"outer":{"__proto__":{"x":1},"gone":null}}');
+});
+
+test("sparse arrays are refused by canonicalisation and by cleanup", () => {
+  assert.throws(() => canonicalJsonStrict(Array(1)), /Sparse array element at \$\[0\]/);
+  assert.throws(() => canonicalJsonStrict(Array(2)), /Sparse array element/);
+  assert.throws(() => canonicalJsonStrict({ a: [1, , 3] }), /Sparse array element at \$\.a\[1\]/);
+  assert.throws(() => withoutUndefined(Array(1)), /Sparse array element/);
+  assert.throws(() => withoutUndefined({ a: [1, , 3] }), /Sparse array element at \$\.a\[1\]/);
+  // dense arrays of the same length are unaffected
+  assert.equal(canonicalJsonStrict([null]), "[null]");
+  assert.deepEqual(withoutUndefined([1, [2]]), [1, [2]]);
+});

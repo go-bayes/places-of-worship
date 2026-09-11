@@ -25,7 +25,7 @@ import { assertWideEvidenceRowFields } from "./lib/wideEvidenceFields";
 import { resolveCitedSource } from "./lib/sources";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { evidenceDraftDoc } from "./lib/validators";
-import { recordEvidenceVersion } from "./evidenceVersions";
+import { recordEvidenceVersion, submissionReceipt } from "./evidenceVersions";
 import { revisionIntent } from "./model";
 
 
@@ -251,7 +251,11 @@ async function markDraftSubmitted(
 }
 
 const closedTaskStatuses = new Set(["reviewed", "pi_accepted", "exported"]);
-const finalDraftStatuses = new Set(["accepted_for_export", "rejected"]);
+// rows a re-import must never rewrite: decided rows are what a decision
+// refers to, and a superseded or withdrawn row was retired by its author or
+// by a later submission; re-importing over any of them would resurrect it
+// as active content (docs/development/evidence-versions.md, lifecycle)
+const finalDraftStatuses = new Set(["accepted_for_export", "rejected", "superseded", "withdrawn"]);
 
 async function upsertSpreadsheetBatch(
   ctx: any,
@@ -701,6 +705,7 @@ export const reviseEvidenceDraft = mutation({
         evidence_version_hash: _sourceVersionHash,
         evidence_family_id: _sourceFamilyId,
         revision_of_evidence_draft_id: _sourceRevisionOf,
+        revision_of_version_hash: _sourceRevisionOfVersion,
         revision_intent: _sourceRevisionIntent,
         ...draftContent
       } = sourceDraft;
@@ -712,12 +717,16 @@ export const reviseEvidenceDraft = mutation({
         created_at: now,
         updated_at: now,
         revision_of_evidence_draft_id: sourceDraft.evidence_draft_id,
+        // the version the contributor is correcting is pinned now; the
+        // source may take later versions before this clone is submitted
+        revision_of_version_hash: sourceDraft.evidence_version_hash,
         revision_intent: args.intent ?? "correction",
       });
     }
     if (existingRevision !== null && existingRevision.revision_of_evidence_draft_id === undefined) {
       await ctx.db.patch(existingRevision._id, {
         revision_of_evidence_draft_id: sourceDraft.evidence_draft_id,
+        revision_of_version_hash: sourceDraft.evidence_version_hash,
         revision_intent: args.intent ?? "correction",
       });
     }
@@ -871,12 +880,11 @@ export const submitEvidenceDraftWithOccupancies = mutation({
       const submittedForDraft = existing.filter(
         (row) => row.parent_evidence_draft_id === draft.evidence_draft_id,
       );
-      // the version this submission recorded, not whatever the row carries
-      // now (a reviewer may have written a later version since)
-      const recordedVersion = await ctx.db
-        .query("evidence_versions")
-        .withIndex("by_idempotency_key", (q) => q.eq("idempotency_key", `guided:${submissionKey}`))
-        .unique();
+      // the version this submission's receipt names, not whatever the row
+      // carries now (a reviewer may have written a later version since). a
+      // guided submission recorded before the contract has no receipt and
+      // no version, and none is invented for it
+      const receipt = await submissionReceipt(ctx, `guided:${submissionKey}`);
       return {
         task_id: draft.task_id,
         evidence_draft_id: draft.evidence_draft_id,
@@ -886,7 +894,7 @@ export const submitEvidenceDraftWithOccupancies = mutation({
         conflict_years: [],
         period_count: submittedForDraft.length,
         deduped: true,
-        evidence_version_hash: recordedVersion?.object_hash ?? draft.evidence_version_hash,
+        ...(receipt !== null ? { evidence_version_hash: receipt.object_hash } : {}),
       };
     }
     if (draft.draft_status !== "draft") {

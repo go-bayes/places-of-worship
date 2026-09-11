@@ -59,7 +59,14 @@ export function canonicalJsonStrict(value: unknown, path = "$"): string {
       return JSON.stringify(value);
     case "object": {
       if (Array.isArray(value)) {
-        return `[${value.map((item, index) => canonicalJsonStrict(item, `${path}[${index}]`)).join(",")}]`;
+        const items: string[] = [];
+        for (let index = 0; index < value.length; index += 1) {
+          // a hole is not a json value; map() would skip it and join()
+          // would print it as an empty slot, so a sparse array is refused
+          if (!(index in value)) throw new TypeError(`Sparse array element at ${path}[${index}].`);
+          items.push(canonicalJsonStrict(value[index], `${path}[${index}]`));
+        }
+        return `[${items.join(",")}]`;
       }
       const prototype = Object.getPrototypeOf(value);
       if (prototype !== Object.prototype && prototype !== null) {
@@ -85,10 +92,14 @@ export function canonicalJsonStrict(value: unknown, path = "$"): string {
 export function withoutUndefined<T>(value: T, path = "$"): T {
   if (value === null || typeof value !== "object") return value;
   if (Array.isArray(value)) {
-    return value.map((item, index) => {
+    const items: unknown[] = [];
+    for (let index = 0; index < value.length; index += 1) {
+      if (!(index in value)) throw new TypeError(`Sparse array element at ${path}[${index}].`);
+      const item: unknown = value[index];
       if (item === undefined) throw new TypeError(`Undefined array element at ${path}[${index}].`);
-      return withoutUndefined(item, `${path}[${index}]`);
-    }) as T;
+      items.push(withoutUndefined(item, `${path}[${index}]`));
+    }
+    return items as T;
   }
   // the same domain rule as canonicalJsonStrict: a byte buffer, date, or
   // class instance must fail here rather than collapse to an empty object
@@ -97,11 +108,19 @@ export function withoutUndefined<T>(value: T, path = "$"): T {
     throw new TypeError(`Non-plain object at ${path}.`);
   }
   const record = value as Record<string, unknown>;
-  const cleaned: Record<string, unknown> = {};
+  const kept: [string, unknown][] = [];
   for (const key of Object.keys(record)) {
-    if (record[key] !== undefined) cleaned[key] = withoutUndefined(record[key], `${path}.${key}`);
+    if (record[key] !== undefined) kept.push([key, withoutUndefined(record[key], `${path}.${key}`)]);
   }
-  return cleaned as T;
+  return plainObjectFromEntries(kept) as T;
+}
+
+// copies members as own data properties. an ordinary assignment into {}
+// invokes the inherited setter for a member named "__proto__" and drops it,
+// so two documents differing only in that member would hash the same;
+// Object.fromEntries defines own properties and keeps every supported member
+export function plainObjectFromEntries(entries: Iterable<readonly [string, unknown]>): Record<string, unknown> {
+  return Object.fromEntries(entries);
 }
 
 // the object hash of the contract: sha256 over the utf-8 canonical bytes,

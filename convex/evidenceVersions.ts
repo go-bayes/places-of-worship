@@ -67,7 +67,11 @@ async function familyHeadIndex(ctx: QueryCtx | MutationCtx, familyId: string): P
 // submission it corrects, or starts a new family that references the
 // earlier one when the contributor recorded a new dated observation; a
 // correction of a pre-contract submission keeps the locator and invents no
-// historical hash
+// historical hash. the source version is the one pinned on the clone when
+// the revision was opened (revision_of_version_hash), never the source
+// row's current hash: a reviewer edit, a derivation decision, or the
+// retirement of the source's period set by this very submission may have
+// given the source a later version the contributor never saw
 async function resolveLineage(
   ctx: QueryCtx | MutationCtx,
   row: Doc<"evidence_drafts">,
@@ -78,23 +82,22 @@ async function resolveLineage(
     return { familyId: current.evidence_family_id, lineage: { relation: "child", parent_object_hash: current.object_hash }, current };
   }
   if (row.revision_of_evidence_draft_id !== undefined) {
-    const source = await ctx.db
-      .query("evidence_drafts")
-      .withIndex("by_evidence_draft_id", (q) => q.eq("evidence_draft_id", row.revision_of_evidence_draft_id!))
-      .unique();
-    const sourceHash = source?.evidence_version_hash;
+    const pinnedHash = row.revision_of_version_hash;
     if (row.revision_intent === "new_observation") {
       return {
         familyId: row.evidence_draft_id,
-        lineage: { relation: "follows", follows_evidence_draft_id: row.revision_of_evidence_draft_id, follows_object_hash: sourceHash },
+        lineage: { relation: "follows", follows_evidence_draft_id: row.revision_of_evidence_draft_id, follows_object_hash: pinnedHash },
         current: null,
       };
     }
-    if (source !== null && sourceHash !== undefined) {
-      const parent = await versionByHash(ctx, sourceHash);
-      if (parent === null) throw new Error(`Evidence version ${sourceHash} is missing for ${source.evidence_draft_id}.`);
+    if (pinnedHash !== undefined) {
+      const parent = await versionByHash(ctx, pinnedHash);
+      if (parent === null) throw new Error(`Evidence version ${pinnedHash} is missing for ${row.revision_of_evidence_draft_id}.`);
       return { familyId: parent.evidence_family_id, lineage: { relation: "child", parent_object_hash: parent.object_hash }, current: null };
     }
+    // no pinned version: the source had none when the revision opened. a
+    // migration copy recorded on the source since then is not the version
+    // the contributor corrected, so no parent is inferred from it
     return {
       familyId: row.evidence_draft_id,
       lineage: { relation: "revises_pre_contract", revises_evidence_draft_id: row.revision_of_evidence_draft_id },
@@ -102,6 +105,19 @@ async function resolveLineage(
     };
   }
   return { familyId: row.evidence_draft_id, lineage: { relation: "first" }, current: null };
+}
+
+// the receipt a submission token holds: written by recordEvidenceVersion
+// on every keyed call, so a retry finds the version its own submission
+// received rather than whatever the row carries now
+export async function submissionReceipt(
+  ctx: QueryCtx | MutationCtx,
+  submissionKey: string,
+): Promise<Doc<"evidence_submission_receipts"> | null> {
+  return await ctx.db
+    .query("evidence_submission_receipts")
+    .withIndex("by_submission_key", (q) => q.eq("submission_key", submissionKey))
+    .unique();
 }
 
 export type RecordedEvidenceVersion = {
@@ -115,7 +131,10 @@ export type RecordedEvidenceVersion = {
 // records the immutable version of a draft row as it stands at the end of
 // the calling transaction. idempotent on the caller's submission key and on
 // unchanged content: retrying the same submission, or re-saving submitted
-// content unchanged, returns the existing version and writes nothing
+// content unchanged, returns the existing version and writes no version.
+// a keyed call always leaves a receipt naming the version it returned, so
+// the token stays bound to that version for the caller whether the call
+// created it or received an existing one by content
 export async function recordEvidenceVersion(
   ctx: MutationCtx,
   args: {
@@ -130,23 +149,50 @@ export async function recordEvidenceVersion(
   const row = await ctx.db.get(args.draftRowId);
   if (row === null) throw new Error("Evidence draft row not found.");
   if (args.idempotencyKey !== undefined) {
-    const existing = await ctx.db
-      .query("evidence_versions")
-      .withIndex("by_idempotency_key", (q) => q.eq("idempotency_key", args.idempotencyKey))
-      .unique();
-    if (existing !== null) {
-      if (existing.created_by !== args.actor._id || existing.evidence_draft_id !== row.evidence_draft_id) {
+    const receipt = await submissionReceipt(ctx, args.idempotencyKey);
+    if (receipt !== null) {
+      if (receipt.created_by !== args.actor._id || receipt.evidence_draft_id !== row.evidence_draft_id) {
         throw new Error("The submission identifier is already in use.");
       }
+      const received = await versionByHash(ctx, receipt.object_hash);
+      if (received === null) throw new Error(`Evidence version ${receipt.object_hash} named by a submission receipt is missing.`);
       return {
-        object_hash: existing.object_hash,
-        content_hash: existing.content_hash,
-        evidence_family_id: existing.evidence_family_id,
-        version_index: existing.version_index,
+        object_hash: received.object_hash,
+        content_hash: received.content_hash,
+        evidence_family_id: received.evidence_family_id,
+        version_index: received.version_index,
         created: false,
       };
     }
   }
+  const recorded = await recordVersionRow(ctx, row, args);
+  if (args.idempotencyKey !== undefined) {
+    await ctx.db.insert("evidence_submission_receipts", {
+      submission_key: args.idempotencyKey,
+      route: args.idempotencyKey.slice(0, Math.max(args.idempotencyKey.indexOf(":"), 0)),
+      task_id: row.task_id,
+      evidence_draft_id: row.evidence_draft_id,
+      object_hash: recorded.object_hash,
+      content_hash: recorded.content_hash,
+      version_created: recorded.created,
+      created_by: args.actor._id,
+      recorded_at: args.now,
+    });
+  }
+  return recorded;
+}
+
+async function recordVersionRow(
+  ctx: MutationCtx,
+  row: Doc<"evidence_drafts">,
+  args: {
+    actor: Doc<"users">;
+    kind: EvidenceVersionKind;
+    now: number;
+    idempotencyKey?: string;
+    migration?: { runId: string };
+  },
+): Promise<RecordedEvidenceVersion> {
   const { familyId, lineage, current } = await resolveLineage(ctx, row);
   const occupancyRows = await activeOccupancyRows(ctx, row.evidence_draft_id);
   const versionIndex = (await familyHeadIndex(ctx, familyId)) + 1;

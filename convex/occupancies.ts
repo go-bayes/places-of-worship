@@ -1081,6 +1081,14 @@ async function reviewerAndParent(
   if (parent.created_by === user._id) {
     throw new Error("You submitted this evidence; another team member must confirm its derived years.");
   }
+  // a derivation decision writes census-year statuses, use levels, or
+  // denominations onto the parent row, so it is a content write and obeys
+  // the lifecycle rule: only a record awaiting review takes one. a decided
+  // record is what its decision refers to; a superseded or withdrawn one is
+  // retired. reopen the task and correct through a revision instead
+  if (parent.draft_status !== "submitted" && parent.draft_status !== "unresolved_note") {
+    throw new Error("This evidence record is decided, superseded, or withdrawn and stays on record. Reopen the task and decide the derived years on the current submission instead.");
+  }
   return { user, task, parent };
 }
 

@@ -1,4 +1,4 @@
-import { HASH_CONTRACT, canonicalJsonStrict, isObjectHash, objectHash, withoutUndefined } from "./canonicalJson";
+import { HASH_CONTRACT, canonicalJsonStrict, isObjectHash, objectHash, plainObjectFromEntries, withoutUndefined } from "./canonicalJson";
 import type { JsonValue } from "./canonicalJson";
 
 // evidence-version.v1: the immutable record of what a contributor (or a
@@ -44,6 +44,7 @@ export const EVIDENCE_ROW_EXCLUDED_FIELDS: ReadonlySet<string> = new Set([
   "evidence_version_hash",
   "evidence_family_id",
   "revision_of_evidence_draft_id",
+  "revision_of_version_hash",
   "revision_intent",
   // cards typed before submission become occupancy rows; the server
   // validation summary describes checks, not evidence
@@ -64,20 +65,22 @@ export const OCCUPANCY_ROW_EXCLUDED_FIELDS: ReadonlySet<string> = new Set([
   "updated_at",
 ]);
 
-export function evidenceContentFromRow(row: Record<string, unknown>): Record<string, JsonValue> {
-  const content: Record<string, unknown> = {};
+// the row's content members copied as own properties (never by assignment,
+// which would drop a member named "__proto__"; see plainObjectFromEntries)
+function contentMembers(row: Record<string, unknown>, excluded: ReadonlySet<string>): Record<string, JsonValue> {
+  const kept: [string, unknown][] = [];
   for (const key of Object.keys(row)) {
-    if (!EVIDENCE_ROW_EXCLUDED_FIELDS.has(key)) content[key] = row[key];
+    if (!excluded.has(key)) kept.push([key, row[key]]);
   }
-  return withoutUndefined(content) as Record<string, JsonValue>;
+  return withoutUndefined(plainObjectFromEntries(kept)) as Record<string, JsonValue>;
+}
+
+export function evidenceContentFromRow(row: Record<string, unknown>): Record<string, JsonValue> {
+  return contentMembers(row, EVIDENCE_ROW_EXCLUDED_FIELDS);
 }
 
 export function occupancyContentFromRow(row: Record<string, unknown>): Record<string, JsonValue> {
-  const content: Record<string, unknown> = {};
-  for (const key of Object.keys(row)) {
-    if (!OCCUPANCY_ROW_EXCLUDED_FIELDS.has(key)) content[key] = row[key];
-  }
-  return withoutUndefined(content) as Record<string, JsonValue>;
+  return contentMembers(row, OCCUPANCY_ROW_EXCLUDED_FIELDS);
 }
 
 function compareUtf16(left: string, right: string): number {

@@ -24,7 +24,8 @@ Implementation notes:
   provisionally closes tasks, and creates manual candidate tasks.
 - `evidence.ts` saves and submits RA evidence drafts.
 - `evidenceVersions.ts` records the immutable evidence version each submission
-  creates and serves version retrieval and audit (`docs/development/evidence-versions.md`).
+  creates, the receipt that binds a submission token to the version it received,
+  and serves version retrieval and audit (`docs/development/evidence-versions.md`).
 - `reviews.ts` records reviewer decisions.
 - `exports.ts` creates frozen export bundles for curator handoff.
 

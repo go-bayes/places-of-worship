@@ -515,6 +515,51 @@
         "object_hash": "sha256:77ae8c3b470a3df243e53c0353ea2d466b60d025bc7cc4ce942bf19ff562d675"
       },
       "content_hash": "sha256:1f430651418a00e8f1061e323a0bce8ec39970762ff2642f6fef0e25cfa3bb65"
+    },
+    {
+      "name": "payload_keeps_member_named_proto",
+      "envelope": {
+        "hash_contract": "pow-object.v1",
+        "object_type": "evidence_version",
+        "schema_version": "evidence-version.v1",
+        "logical_id": "evidence:nz-temporal-004:nz-temporal-004:user_ra:draft",
+        "parent_object_hashes": [],
+        "created_by": "actor:user_ra",
+        "recorded_at": "2026-09-11T04:30:00.000Z",
+        "payload": {
+          "task_id": "nz-temporal-004",
+          "evidence_draft_id": "nz-temporal-004:user_ra:draft",
+          "version_kind": "submitted",
+          "version_index": 1,
+          "evidence": {
+            "observation_contract_version": "guided_observation_v1",
+            "source_type": "denominational_directory",
+            "source_title": "Diocesan directory 2016",
+            "source_url_or_file": "https://example.org/directory/2016",
+            "source_date_or_capture_date": "2016-07",
+            "action": "confirm_current_record",
+            "change_class": "no_change",
+            "target_year_statuses": {
+              "2013": "present",
+              "2018": "present",
+              "2023": "not_assessed"
+            },
+            "denomination_or_tradition_raw": "Anglican (Te Hāhi Mihinare)",
+            "denomination_label_basis": "source_stated",
+            "denomination_relation": "same",
+            "evidence_note": "The directory lists regular Sunday services at Ōtautahi.",
+            "privacy_flag": "clear",
+            "licence_flag": "needs_review",
+            "generated_wide_row": {
+              "__proto__": 1,
+              "note": "same"
+            }
+          },
+          "occupancies": []
+        },
+        "object_hash": "sha256:d7fb890bb617045002764276a9ea89bb3f40a83a326f0dbc01952829d3c03ea9"
+      },
+      "content_hash": "sha256:f90c7d0e8f7a863735bc06d3d48f857daeb93b9e8125467bf78ce1d43f478974"
     }
   ],
   "tampered": [

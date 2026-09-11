@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 // rather than a parallel copy of the rules.
 registerHooks({ resolve(specifier, context, nextResolve) { if (specifier.startsWith(".") && !/\.[a-z]+$/i.test(specifier)) { for (const ext of [".js", ".ts"]) { const candidate = new URL(`${specifier}${ext}`, context.parentURL); if (fs.existsSync(fileURLToPath(candidate))) return nextResolve(candidate.href, context); } } return nextResolve(specifier, context); } });
 
-const { saveEvidenceDraft, submitEvidenceDraft, submitEvidenceDraftWithOccupancies, submitUnresolvedNote, reviseEvidenceDraft } = await import("./evidence.ts");
+const { saveEvidenceDraft, submitEvidenceDraft, submitEvidenceDraftWithOccupancies, submitUnresolvedNote, reviseEvidenceDraft, importSubmittedEvidenceDrafts } = await import("./evidence.ts");
 const { getEvidenceVersion, listEvidenceVersions, recordMigrationVersion, verifyDraftAgainstVersion } = await import("./evidenceVersions.ts");
 const { submitCurrentObservation } = await import("./rapidEntry.ts");
 const { submitOccupancies, decideDerivedYear, confirmAllDerived } = await import("./occupancies.ts");
@@ -34,7 +34,7 @@ const submissionId = (n) => `11111111-1111-4111-8111-${String(n).padStart(12, "0
 // and the insert/get/patch semantics the handlers rely on
 function world() {
   const rows = {
-    users: [], tasks: [], task_events: [], evidence_drafts: [], evidence_versions: [],
+    users: [], tasks: [], task_events: [], evidence_drafts: [], evidence_versions: [], evidence_submission_receipts: [],
     site_occupancies: [], historical_claims: [], derived_target_year_states: [],
     derived_year_locations: [], derived_target_year_functions: [], derived_state_events: [],
     review_decisions: [], agent_reviews: [], sources: [], task_batches: [],
@@ -859,6 +859,10 @@ test("retiring an earlier parent's period set records a version on that parent",
   const retired = w.rows.evidence_versions.filter((row) => row.version_kind === "superseded_by_later_set");
   assert.equal(retired.length, 1);
   assert.equal(retired[0].evidence_draft_id, "task_1:draft_a");
+  // the earlier parent is already superseded when its set is retired: this
+  // bookkeeping is the one write onto a retired record the lifecycle rule
+  // allows, and it is recorded as a version rather than made silently
+  assert.equal(w.draft.draft_status, "superseded");
   assert.equal(retired[0].parent_object_hash, version(w, 1).object_hash);
   assert.deepEqual(envelopeOf(retired[0]).payload.occupancies, []);
   assert.equal(w.draft.evidence_version_hash, retired[0].object_hash);
@@ -924,4 +928,385 @@ test("confirming several derived years keeps every year and records one version 
   assert.deepEqual(envelopeOf(child).payload.evidence.target_year_statuses, { "2013": "present", "2018": "present" });
   const audit = await verifyDraftAgainstVersion._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:draft_a" });
   assert.equal(audit.consistent, true);
+});
+
+// finding (2026-09-11 review, lineage): resolveLineage read the source row's
+// current hash at submission, so a reviewer edit made after the contributor
+// opened a revision became the correction's parent
+test("a correction's parent is the version the contributor cloned, not a reviewer edit made after the revision opened", async () => {
+  const w = await scene({ country: "VU" });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  const cloned = version(w);
+
+  const revision = await reviseEvidenceDraft._handler(w.as(w.ra), { taskId: "task_1" });
+  const clone = w.row("evidence_drafts", "evidence_draft_id", revision.evidence_draft_id);
+  assert.equal(clone.revision_of_evidence_draft_id, "task_1:draft_a");
+  assert.equal(clone.revision_of_version_hash, cloned.object_hash);
+
+  await saveEvidenceDraft._handler(w.as(w.reviewer), {
+    taskId: "task_1",
+    evidenceDraftId: "task_1:draft_a",
+    draft: draftContent({ evidence_note: "Reviewer updated after the contributor cloned the original." }),
+  });
+  const reviewerVersion = version(w, 1);
+  assert.equal(reviewerVersion.version_kind, "reviewer_edit");
+  assert.equal(w.draft.evidence_version_hash, reviewerVersion.object_hash);
+
+  await saveEvidenceDraft._handler(w.as(w.ra), {
+    taskId: "task_1",
+    evidenceDraftId: revision.evidence_draft_id,
+    draft: draftContent({ evidence_note: "Corrected by the contributor from the version they cloned." }),
+  });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: revision.evidence_draft_id });
+
+  const correction = version(w, 2);
+  assert.equal(correction.parent_object_hash, cloned.object_hash);
+  assert.notEqual(correction.parent_object_hash, reviewerVersion.object_hash);
+  assert.equal(correction.evidence_family_id, cloned.evidence_family_id);
+  assert.equal(correction.version_index, 3);
+  assert.deepEqual(envelopeOf(correction).parent_object_hashes, [cloned.object_hash]);
+  // the family branches at the cloned version: the reviewer's edit and the
+  // contributor's correction are siblings, and the reviewer's version stays
+  assert.equal(reviewerVersion.parent_object_hash, cloned.object_hash);
+  const family = await listEvidenceVersions._handler(w.as(w.reviewer), { evidenceFamilyId: cloned.evidence_family_id });
+  assert.deepEqual(family.map((row) => row.version_index), [1, 2, 3]);
+  // the pinned hash is a locator, not content: it is outside the payload
+  assert.equal(envelopeOf(correction).payload.evidence.revision_of_version_hash, undefined);
+});
+
+test("a guided correction's parent is the pinned version although its own submission retires the source's period set", async () => {
+  const w = await scene();
+  await w.db.patch(w.task._id, { assigned_to: w.ra._id });
+  const first = await submitEvidenceDraftWithOccupancies._handler(w.as(w.ra), {
+    evidenceDraftId: "task_1:draft_a",
+    clientSubmissionId: submissionId(41),
+    segments: [segment(0)],
+  });
+  const a1 = version(w);
+  assert.equal(a1.version_kind, "guided_submission");
+  assert.equal(first.evidence_version_hash, a1.object_hash);
+  assert.equal(envelopeOf(a1).payload.occupancies.length, 1);
+
+  const revision = await reviseEvidenceDraft._handler(w.as(w.ra), { taskId: "task_1" });
+  assert.equal(w.row("evidence_drafts", "evidence_draft_id", revision.evidence_draft_id).revision_of_version_hash, a1.object_hash);
+  await saveEvidenceDraft._handler(w.as(w.ra), {
+    taskId: "task_1",
+    evidenceDraftId: revision.evidence_draft_id,
+    draft: draftContent({ evidence_note: "The founding year was misread; corrected from the directory." }),
+  });
+  const correctionArgs = {
+    evidenceDraftId: revision.evidence_draft_id,
+    clientSubmissionId: submissionId(42),
+    segments: [segment(0, { start_date: "1906" })],
+  };
+  const second = await submitEvidenceDraftWithOccupancies._handler(w.as(w.ra), correctionArgs);
+
+  // in the same transaction, the source's set was retired and the source
+  // took a bookkeeping version after the one the contributor cloned
+  const retired = w.rows.evidence_versions.filter((row) => row.version_kind === "superseded_by_later_set");
+  assert.equal(retired.length, 1);
+  assert.equal(retired[0].evidence_draft_id, "task_1:draft_a");
+  assert.equal(retired[0].parent_object_hash, a1.object_hash);
+  assert.equal(w.draft.evidence_version_hash, retired[0].object_hash);
+  assert.equal(w.draft.draft_status, "superseded");
+
+  const correction = w.row("evidence_versions", "object_hash", second.evidence_version_hash);
+  assert.equal(correction.version_kind, "guided_submission");
+  assert.equal(correction.parent_object_hash, a1.object_hash);
+  assert.notEqual(correction.parent_object_hash, retired[0].object_hash);
+  assert.equal(correction.evidence_family_id, a1.evidence_family_id);
+  assert.equal(envelopeOf(correction).payload.occupancies.length, 1);
+
+  // the retry answers with the correction's own version, from its receipt
+  const retry = await submitEvidenceDraftWithOccupancies._handler(w.as(w.ra), correctionArgs);
+  assert.equal(retry.deduped, true);
+  assert.equal(retry.evidence_version_hash, second.evidence_version_hash);
+  assert.equal(w.rows.evidence_versions.length, 3);
+  for (const id of ["task_1:draft_a", revision.evidence_draft_id]) {
+    const audit = await verifyDraftAgainstVersion._handler(w.as(w.reviewer), { evidenceDraftId: id });
+    assert.equal(audit.consistent, true, audit.errors.join("; "));
+  }
+});
+
+test("a new dated observation follows the version pinned when it was opened", async () => {
+  const w = await scene({ country: "VU" });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  const first = version(w);
+  const revision = await reviseEvidenceDraft._handler(w.as(w.ra), { taskId: "task_1", intent: "new_observation" });
+  await saveEvidenceDraft._handler(w.as(w.reviewer), {
+    taskId: "task_1",
+    evidenceDraftId: "task_1:draft_a",
+    draft: draftContent({ evidence_note: "Reviewer clarified the earlier observation." }),
+  });
+  const reviewerVersion = version(w, 1);
+  await saveEvidenceDraft._handler(w.as(w.ra), {
+    taskId: "task_1",
+    evidenceDraftId: revision.evidence_draft_id,
+    draft: draftContent({ source_type: "field_observation", source_title: "Site visit", source_date_or_capture_date: "2026-09-10", evidence_note: "Services observed on the visit." }),
+  });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: revision.evidence_draft_id });
+  const started = version(w, 2);
+  assert.equal(started.parent_object_hash, undefined);
+  assert.equal(started.evidence_family_id, revision.evidence_draft_id);
+  assert.equal(started.version_index, 1);
+  const payload = envelopeOf(started).payload;
+  assert.equal(payload.follows_evidence_draft_id, "task_1:draft_a");
+  assert.equal(payload.follows_object_hash, first.object_hash);
+  assert.notEqual(payload.follows_object_hash, reviewerVersion.object_hash);
+});
+
+test("a correction of a pre-contract submission stays parentless even when the source is migrated before the correction is submitted", async () => {
+  const w = await scene({ country: "VU", taskStatus: "needs_review", draft: { draft_status: "submitted" } });
+  const revision = await reviseEvidenceDraft._handler(w.as(w.ra), { taskId: "task_1" });
+  const clone = w.row("evidence_drafts", "evidence_draft_id", revision.evidence_draft_id);
+  assert.equal(clone.revision_of_evidence_draft_id, "task_1:draft_a");
+  assert.equal(clone.revision_of_version_hash, undefined);
+
+  const migrated = await recordMigrationVersion._handler(w.as(w.admin), { evidenceDraftId: "task_1:draft_a", migrationRunId: "evidence-version-migration-2026-09" });
+  assert.equal(w.draft.evidence_version_hash, migrated.object_hash);
+
+  await saveEvidenceDraft._handler(w.as(w.ra), {
+    taskId: "task_1",
+    evidenceDraftId: revision.evidence_draft_id,
+    draft: draftContent({ evidence_note: "Corrected after the legacy submission." }),
+  });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: revision.evidence_draft_id });
+  const correction = w.rows.evidence_versions.find((row) => row.evidence_draft_id === revision.evidence_draft_id);
+  assert.equal(correction.parent_object_hash, undefined);
+  assert.equal(correction.evidence_family_id, revision.evidence_draft_id);
+  assert.equal(correction.version_index, 1);
+  const payload = envelopeOf(correction).payload;
+  assert.equal(payload.revises_evidence_draft_id, "task_1:draft_a");
+  assert.equal(payload.parent_version_unavailable, "pre_contract");
+  assert.deepEqual(envelopeOf(correction).parent_object_hashes, []);
+});
+
+test("a rapid correction pins the version it corrects, and a pre-contract observation is corrected without an invented parent", async () => {
+  const w = world();
+  const ra = await w.addUser("ra-subject", ["ra"]);
+  await w.addTask({ task_id: "vu_task", batch_id: "manual-vu", country_code: "VU", status: "in_progress", assigned_to: ra._id, target_years: [] });
+  const first = await submitCurrentObservation._handler(w.as(ra), { clientSubmissionId: submissionId(71), taskId: "vu_task", observation: rapidObservation() });
+  const corrected = await submitCurrentObservation._handler(w.as(ra), {
+    clientSubmissionId: submissionId(72),
+    taskId: "vu_task",
+    observation: rapidObservation({ current_status: "place_exists_worship_uncertain", direct_observation: "The building stands, but no service was in progress and no notice board was visible." }),
+  });
+  const correctedRow = w.row("evidence_drafts", "evidence_draft_id", corrected.evidence_draft_id);
+  assert.equal(correctedRow.revision_of_evidence_draft_id, first.evidence_draft_id);
+  assert.equal(correctedRow.revision_of_version_hash, first.evidence_version_hash);
+  assert.equal(version(w, 1).parent_object_hash, first.evidence_version_hash);
+
+  // a legacy rapid observation awaiting review, recorded before the contract
+  const legacy = world();
+  const observer = await legacy.addUser("observer-subject", ["ra"]);
+  await legacy.addTask({ task_id: "vu_legacy", batch_id: "manual-vu", country_code: "VU", status: "needs_review", assigned_to: observer._id, target_years: [] });
+  const now = Date.now();
+  await legacy.db.insert("evidence_drafts", {
+    evidence_draft_id: `vu_legacy:${observer._id}:rapid:legacy`,
+    task_id: "vu_legacy",
+    draft_status: "submitted",
+    created_by: observer._id,
+    created_at: now,
+    updated_at: now,
+    observation_contract_version: "rapid_current_v1",
+    intake_submission_key: `${observer._id}:legacy`,
+    source_date_or_capture_date: "2026-08-01",
+    privacy_flag: "clear",
+    licence_flag: "needs_review",
+  });
+  const legacyCorrection = await submitCurrentObservation._handler(legacy.as(observer), { clientSubmissionId: submissionId(73), taskId: "vu_legacy", observation: rapidObservation() });
+  assert.equal(legacyCorrection.corrected, true);
+  const only = version(legacy);
+  assert.equal(only.parent_object_hash, undefined);
+  assert.equal(only.evidence_family_id, legacyCorrection.evidence_draft_id);
+  assert.equal(envelopeOf(only).payload.parent_version_unavailable, "pre_contract");
+  assert.equal(envelopeOf(only).payload.revises_evidence_draft_id, `vu_legacy:${observer._id}:rapid:legacy`);
+});
+
+// finding (2026-09-11 review, receipts): the content-dedupe branch returned
+// the existing version without recording the token, so after a reviewer
+// edit the same token answered with a different hash
+test("a submission token stays bound to the version it received even when the content was deduped", async () => {
+  const w = await scene({ country: "VU" });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  const first = version(w);
+  const retryArgs = { evidenceDraftId: "task_1:draft_a", clientSubmissionId: submissionId(99) };
+  const tokened = await submitEvidenceDraft._handler(w.as(w.ra), retryArgs);
+  assert.equal(tokened.deduped, true);
+  assert.equal(tokened.evidence_version_hash, first.object_hash);
+  assert.equal(w.rows.evidence_versions.length, 1);
+  const receipts = w.rows.evidence_submission_receipts;
+  assert.equal(receipts.length, 1);
+  assert.equal(receipts[0].submission_key, `submit:${w.ra._id}:${submissionId(99)}`);
+  assert.equal(receipts[0].route, "submit");
+  assert.equal(receipts[0].evidence_draft_id, "task_1:draft_a");
+  assert.equal(receipts[0].object_hash, first.object_hash);
+  assert.equal(receipts[0].version_created, false);
+  assert.equal(receipts[0].created_by, w.ra._id);
+  // the version row was not patched to hold the token
+  assert.equal(first.idempotency_key, undefined);
+  const firstEnvelopeJson = first.envelope_json;
+
+  await saveEvidenceDraft._handler(w.as(w.reviewer), {
+    taskId: "task_1",
+    evidenceDraftId: "task_1:draft_a",
+    draft: draftContent({ evidence_note: "A changed evidence note from the reviewer." }),
+  });
+  assert.equal(w.rows.evidence_versions.length, 2);
+  assert.equal(w.draft.evidence_version_hash, version(w, 1).object_hash);
+
+  const again = await submitEvidenceDraft._handler(w.as(w.ra), retryArgs);
+  assert.equal(again.deduped, true);
+  assert.equal(again.evidence_version_hash, first.object_hash);
+  assert.equal(w.rows.evidence_versions.length, 2);
+  assert.equal(w.rows.evidence_submission_receipts.length, 1);
+  assert.equal(first.envelope_json, firstEnvelopeJson);
+
+  // the token cannot be spent on another draft
+  await w.addDraft({ evidence_draft_id: "task_1:draft_b", task_id: "task_1", created_by: w.ra._id });
+  await assert.rejects(
+    submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_b", clientSubmissionId: submissionId(99) }),
+    /submission identifier is already in use/,
+  );
+  assert.equal(w.row("evidence_drafts", "evidence_draft_id", "task_1:draft_b").draft_status, "draft");
+  assert.equal(w.rows.evidence_submission_receipts.length, 1);
+});
+
+test("an unchanged submission by another actor dedupes to the same version under that actor's own receipt", async () => {
+  const w = await scene({ country: "VU" });
+  const mine = await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a", clientSubmissionId: submissionId(51) });
+  const theirs = await submitEvidenceDraft._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:draft_a", clientSubmissionId: submissionId(52) });
+  assert.equal(theirs.deduped, true);
+  assert.equal(theirs.evidence_version_hash, mine.evidence_version_hash);
+  assert.equal(w.rows.evidence_versions.length, 1);
+  assert.equal(version(w).created_by, w.ra._id);
+  const receipts = w.rows.evidence_submission_receipts;
+  assert.deepEqual(
+    receipts.map((row) => [row.created_by, row.version_created, row.object_hash]),
+    [[w.ra._id, true, mine.evidence_version_hash], [w.reviewer._id, false, mine.evidence_version_hash]],
+  );
+  // each caller's later retry is answered from their own receipt
+  const theirRetry = await submitEvidenceDraft._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:draft_a", clientSubmissionId: submissionId(52) });
+  assert.equal(theirRetry.evidence_version_hash, mine.evidence_version_hash);
+  assert.equal(w.rows.evidence_submission_receipts.length, 2);
+});
+
+// finding (2026-09-11 review, rapid retry): the existingDraft branch omitted
+// evidence_version_hash
+test("a rapid retry returns the version its submission received, after later versions too", async () => {
+  const w = world();
+  const ra = await w.addUser("ra-subject", ["ra"]);
+  await w.addTask({ task_id: "vu_task", batch_id: "manual-vu", country_code: "VU", status: "in_progress", assigned_to: ra._id, target_years: [] });
+  const args = { clientSubmissionId: submissionId(61), taskId: "vu_task", observation: rapidObservation() };
+  const first = await submitCurrentObservation._handler(w.as(ra), args);
+  assert.ok(first.evidence_version_hash);
+  const retry = await submitCurrentObservation._handler(w.as(ra), args);
+  assert.equal(retry.deduped, true);
+  assert.equal(retry.evidence_version_hash, first.evidence_version_hash);
+  assert.equal(retry.evidence_version_unavailable, undefined);
+  assert.equal(retry.corrected, false);
+
+  // periods recorded on the observation move the row to a later version
+  await submitOccupancies._handler(w.as(ra), {
+    clientSubmissionId: submissionId(62),
+    taskId: "vu_task",
+    parentEvidenceDraftId: first.evidence_draft_id,
+    segments: [segment(0)],
+  });
+  const row = w.row("evidence_drafts", "evidence_draft_id", first.evidence_draft_id);
+  assert.notEqual(row.evidence_version_hash, first.evidence_version_hash);
+  const later = await submitCurrentObservation._handler(w.as(ra), args);
+  assert.equal(later.deduped, true);
+  assert.equal(later.evidence_version_hash, first.evidence_version_hash);
+  assert.equal(w.rows.evidence_versions.length, 2);
+
+  // a retried correction reports what it corrected
+  const correctionArgs = {
+    clientSubmissionId: submissionId(63),
+    taskId: "vu_task",
+    observation: rapidObservation({ current_status: "place_exists_worship_uncertain", direct_observation: "The building stands, but no service was in progress and no notice board was visible." }),
+  };
+  const corrected = await submitCurrentObservation._handler(w.as(ra), correctionArgs);
+  const correctedRetry = await submitCurrentObservation._handler(w.as(ra), correctionArgs);
+  assert.equal(correctedRetry.deduped, true);
+  assert.equal(correctedRetry.corrected, true);
+  assert.equal(correctedRetry.superseded_evidence_draft_id, first.evidence_draft_id);
+  assert.equal(correctedRetry.evidence_version_hash, corrected.evidence_version_hash);
+});
+
+test("a rapid retry of a pre-contract observation states that no version exists rather than inventing one", async () => {
+  const w = world();
+  const ra = await w.addUser("ra-subject", ["ra"]);
+  await w.addTask({ task_id: "vu_task", batch_id: "manual-vu", country_code: "VU", status: "needs_review", assigned_to: ra._id, target_years: [] });
+  const now = Date.now();
+  await w.db.insert("evidence_drafts", {
+    evidence_draft_id: `vu_task:${ra._id}:rapid:${submissionId(64)}`,
+    task_id: "vu_task",
+    draft_status: "submitted",
+    created_by: ra._id,
+    created_at: now,
+    updated_at: now,
+    observation_contract_version: "rapid_current_v1",
+    intake_submission_key: `${ra._id}:${submissionId(64)}`,
+    privacy_flag: "clear",
+    licence_flag: "needs_review",
+  });
+  const retry = await submitCurrentObservation._handler(w.as(ra), { clientSubmissionId: submissionId(64), taskId: "vu_task", observation: rapidObservation() });
+  assert.equal(retry.deduped, true);
+  assert.equal(retry.evidence_version_hash, undefined);
+  assert.equal(retry.evidence_version_unavailable, "pre_contract");
+  assert.equal(w.rows.evidence_versions.length, 0);
+  assert.equal(w.rows.evidence_submission_receipts.length, 0);
+});
+
+// finding (2026-09-11 review, lifecycle): decideDerivedYear changed an
+// accepted_for_export row; the saveEvidenceDraft guard did not cover it
+test("derivation decisions are refused on decided, superseded, or withdrawn evidence and leave it untouched", async () => {
+  for (const status of ["accepted_for_export", "rejected", "superseded", "withdrawn"]) {
+    const w = await derivedScene();
+    const envelopeJson = version(w).envelope_json;
+    await w.db.patch(w.draft._id, { draft_status: status });
+    const base = { taskId: "task_1", parentEvidenceDraftId: "task_1:draft_a" };
+    await assert.rejects(decideDerivedYear._handler(w.as(w.reviewer), { ...base, targetYear: 2013, action: "confirm" }), /stays on record/);
+    await assert.rejects(
+      decideDerivedYear._handler(w.as(w.reviewer), { ...base, targetYear: 2013, action: "override", note: "Override attempted on a decided record.", override: { status: "absent" } }),
+      /stays on record/,
+    );
+    await assert.rejects(decideDerivedYear._handler(w.as(w.reviewer), { ...base, targetYear: 2018, action: "reject", note: "Rejection attempted on a decided record." }), /stays on record/);
+    await assert.rejects(confirmAllDerived._handler(w.as(w.reviewer), base), /stays on record/);
+    assert.equal(w.draft.draft_status, status, status);
+    assert.equal(w.draft.target_year_statuses, undefined, status);
+    assert.equal(w.draft.target_year_basis, undefined, status);
+    assert.equal(w.rows.evidence_versions.length, 1, status);
+    assert.equal(version(w).envelope_json, envelopeJson, status);
+    assert.equal(w.rows.derived_state_events.length, 0, status);
+    assert.deepEqual(w.rows.derived_target_year_states.map((row) => row.review_state), ["derived_unconfirmed", "derived_unconfirmed"], status);
+    const audit = await verifyDraftAgainstVersion._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:draft_a" });
+    assert.equal(audit.consistent, true, status);
+  }
+  // an unresolved note awaiting review still takes a decision
+  const w = await derivedScene();
+  await w.db.patch(w.draft._id, { draft_status: "unresolved_note" });
+  const decision = await decideDerivedYear._handler(w.as(w.reviewer), { taskId: "task_1", parentEvidenceDraftId: "task_1:draft_a", targetYear: 2013, action: "confirm" });
+  assert.equal(decision.written_status, "present");
+  assert.equal(w.rows.evidence_versions.length, 2);
+});
+
+test("a spreadsheet re-import never rewrites a decided, superseded, or withdrawn row", async () => {
+  for (const status of ["accepted_for_export", "rejected", "superseded", "withdrawn"]) {
+    const w = await scene({ taskStatus: "needs_review" });
+    await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+    const envelopeJson = version(w).envelope_json;
+    await w.db.patch(w.draft._id, { draft_status: status });
+    const result = await importSubmittedEvidenceDrafts._handler(w.as(w.admin), {
+      batch: { batch_id: "test-batch", country_code: "NZ", source_kind: "spreadsheet", target_years: [2013, 2018, 2023] },
+      tasks: [],
+      drafts: [{ task_id: "task_1", evidence_draft_id: "task_1:draft_a", draft: draftContent({ evidence_note: "Re-imported over a retired row." }) }],
+    });
+    assert.deepEqual(result.drafts, { inserted: 0, updated: 0, skipped_final: 1 }, status);
+    assert.equal(w.draft.draft_status, status, status);
+    assert.equal(w.draft.evidence_note, draftContent().evidence_note, status);
+    assert.equal(w.rows.evidence_versions.length, 1, status);
+    assert.equal(version(w).envelope_json, envelopeJson, status);
+  }
 });

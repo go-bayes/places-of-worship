@@ -317,3 +317,35 @@ test("the verifier refuses an impossible calendar date and an occupancy without 
   delete missingSegment.payload.occupancies[0].segment_index;
   assert.match(verifyEvidenceVersionEnvelope(restamp(missingSegment)).errors.join("; "), /numeric segment_index/);
 });
+
+// finding (2026-09-11 review): the content builders copied row members by
+// assignment, so a generated wide row differing only in a member named
+// __proto__ produced identical content and object hashes
+test("a member named __proto__ in submitted content distinguishes versions", () => {
+  const one = build({ evidence_row: { ...guidedRow, generated_wide_row: JSON.parse('{"__proto__":1,"note":"same"}') } });
+  const two = build({ evidence_row: { ...guidedRow, generated_wide_row: JSON.parse('{"__proto__":2,"note":"same"}') } });
+  assert.notEqual(one.content_hash, two.content_hash);
+  assert.notEqual(one.object_hash, two.object_hash);
+  assert.equal(one.envelope.payload.evidence.generated_wide_row.__proto__, 1);
+  assert.match(one.envelope_json, /"generated_wide_row":\{"__proto__":1,"note":"same"\}/);
+  assert.deepEqual(verifyEvidenceVersionEnvelope(one.envelope).errors, []);
+
+  // a row whose own member is named __proto__ is kept too
+  const rowLevel = evidenceContentFromRow(JSON.parse('{"__proto__":"kept","evidence_note":"x"}'));
+  assert.deepEqual(Object.keys(rowLevel).sort(), ["__proto__", "evidence_note"]);
+  assert.equal(rowLevel.__proto__, "kept");
+  const occupancyLevel = occupancyContentFromRow(JSON.parse('{"__proto__":"kept","occupancy_id":"occ:a","segment_index":0}'));
+  assert.equal(occupancyLevel.__proto__, "kept");
+  // (an object literal with a __proto__ key sets the prototype instead, so
+  // the member is parsed from json as a submitted row would be)
+  const withOccupancy = build({ occupancy_rows: [occupancy("occ:a", 0, JSON.parse('{"__proto__":"kept"}'))] });
+  assert.notEqual(withOccupancy.content_hash, build({ occupancy_rows: [occupancy("occ:a", 0)] }).content_hash);
+});
+
+test("the pinned source version hash is bookkeeping outside the payload", () => {
+  const baseline = build();
+  const pinned = build({ evidence_row: { ...guidedRow, revision_of_version_hash: `sha256:${"d".repeat(64)}` } });
+  assert.equal(pinned.content_hash, baseline.content_hash);
+  assert.equal(pinned.object_hash, baseline.object_hash);
+  assert.equal(pinned.envelope.payload.evidence.revision_of_version_hash, undefined);
+});

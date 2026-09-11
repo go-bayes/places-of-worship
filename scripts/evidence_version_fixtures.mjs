@@ -232,6 +232,21 @@ const migration = buildEvidenceVersion({
   },
 });
 
+// a generated wide row carrying a member named __proto__: the payload must
+// keep it, so this envelope differs from one whose member reads 2
+const protoMember = buildEvidenceVersion({
+  task_id: "nz-temporal-004",
+  evidence_draft_id: "nz-temporal-004:user_ra:draft",
+  evidence_family_id: "nz-temporal-004:user_ra:draft",
+  version_index: 1,
+  version_kind: "submitted",
+  lineage: { relation: "first" },
+  actor_user_id: "user_ra",
+  recorded_at_ms: recordedAt,
+  evidence_row: { ...guidedRow, task_id: "nz-temporal-004", evidence_draft_id: "nz-temporal-004:user_ra:draft", function_chain: undefined, generated_wide_row: JSON.parse('{"__proto__":1,"note":"same"}') },
+  occupancy_rows: [],
+});
+
 const cases = [
   ["first_guided_submission_with_sorted_occupancies", first],
   ["child_correction_in_same_family", correction],
@@ -240,6 +255,7 @@ const cases = [
   ["new_dated_observation_follows_earlier_family", newObservation],
   ["rapid_current_observation", rapid],
   ["migration_copy_records_run_and_copy_time", migration],
+  ["payload_keeps_member_named_proto", protoMember],
 ].map(([name, built]) => ({ name, envelope: built.envelope, content_hash: built.content_hash }));
 
 function restamped(envelope, mutate) {
