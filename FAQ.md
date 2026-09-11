@@ -387,3 +387,7 @@ call them, what they write, and how they fit into the workflow.
 The workflow script catalogue is `docs/api/workflow-scripts.md`. It lists the
 scripts that generate OSM temporal leads, curated RA workpacks, Convex seed
 payloads, and export bundles for the `pow` handoff.
+
+## Can humans review agent research in batches?
+
+Yes. Internal intake supports batch return or rejection of provisional agent dossiers. Once claims have been prepared as ordinary evidence, the batch acceptance API applies the same rules as individual human review and records the inspected version hashes. A changed item makes the batch stale. PI acceptance and governed `pow` processing remain later gates. The initial implementation exposes backend operations; see [internal agent review](docs/development/internal-agent-review.md) for the current limits and the planned interface.

@@ -36,7 +36,7 @@ export const ingestBundle = internalMutation({
       const id = await ctx.db.insert("users", { email: SERVICE_EMAIL, display_name: "Internal agent intake", initials: "AI", roles: ["service"], status: "active", created_at: now, updated_at: now });
       service = await ctx.db.get(id);
     }
-    if (service === null) throw new Error("Could not create intake service user");
+    if (service === null || service.status !== "active" || !service.roles.includes("service")) throw new Error("Intake identity must be an active service user");
     const taskId = `agent-research:${checked.bundle.submission_key}`;
     const draftId = `${taskId}:draft:1`;
     const reviewId = `${taskId}:review:1`;
@@ -88,13 +88,13 @@ export const getReceipt = query({
 });
 
 export const listReceipts = query({
-  args: { limit: v.optional(v.number()) },
-  returns: v.array(v.any()),
+  args: { limit: v.optional(v.number()), cursor: v.optional(v.string()) },
+  returns: v.any(),
   handler: async (ctx, args) => {
     await requireUser(ctx, ["reviewer", "curator", "admin"]);
     const limit = args.limit ?? 20;
     if (!Number.isInteger(limit) || limit < 1 || limit > 20) throw new Error("Limit must be an integer from 1 to 20.");
-    return await ctx.db.query("agent_intake_receipts").withIndex("by_receipt_id").order("desc").take(limit);
+    return await ctx.db.query("agent_intake_receipts").withIndex("by_receipt_id").order("desc").paginate({ numItems: limit, cursor: args.cursor ?? null });
   },
 });
 

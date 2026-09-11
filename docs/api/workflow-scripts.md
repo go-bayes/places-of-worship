@@ -98,3 +98,7 @@ When adding or materially changing a workflow script:
 4. Update this catalogue if the script is part of the RA, review, export, or
    rebuild path.
 5. Update `CHANGELOG.md` for collaborator-visible workflow changes.
+
+## Internal agent research pilot
+
+`internal_runner.py` runs public-web research and independent advisory review with Claude Sonnet and Codex Luna. `intake.py validate` checks the resulting bounded JSON bundle; `intake.py submit --deployment dev` sends it to an explicitly enabled development intake route. `pow validate-agent` provides Rust contract validation without staging. See [internal agent review](../development/internal-agent-review.md) for commands, human batch review, authority, and evaluation limits.

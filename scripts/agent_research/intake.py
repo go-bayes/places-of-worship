@@ -324,7 +324,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('command', choices=['validate', 'submit'])
     parser.add_argument('bundle', type=Path)
-    parser.add_argument('--deployment', help='explicit dev:<deployment-name>; required for submit')
+    parser.add_argument('--deployment', help='explicit dev or local selector; required for submit')
     args = parser.parse_args(argv)
     try:
         with args.bundle.open('rb') as stream:
@@ -334,9 +334,9 @@ def main(argv=None):
         if errors:
             raise ValueError('; '.join(errors[:12]))
         if args.command == 'submit':
-            if not args.deployment or not re.fullmatch(r'dev:[a-z0-9][a-z0-9-]{1,100}', args.deployment):
-                raise ValueError('submit requires explicit dev:<deployment-name>')
-            command = ['npx', '--no-install', 'convex', 'run', '--deployment-name', args.deployment[4:],
+            if args.deployment not in {'dev', 'local'}:
+                raise ValueError('submit requires explicit dev or local deployment')
+            command = ['npx', '--no-install', 'convex', 'run', '--deployment', args.deployment, '--codegen', 'disable',
                        'internalAgentIntake:ingestBundle', json.dumps({'bundleJson': raw.decode('utf-8'), 'bundleHash': hashlib.sha256(raw).hexdigest()})]
             # the controller invokes the API; no model sees this process or its credentials.
             subprocess.run(command, check=True)

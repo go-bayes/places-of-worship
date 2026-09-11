@@ -4,6 +4,8 @@
 
 ### 2026-09-11
 
+- Added a bounded internal Claude/Codex research-and-review runner, strict JSON ingestion, provisional review receipts, and human batch review operations. Added hostile-input regression tests and a Rust validation entry point. The pilot preserves human evidence acceptance and governed export authority; see `docs/development/internal-agent-review.md`.
+
 - Added the agent research pilot with versioned dossiers, researcher adapters, and mechanical source and agreement checks. Corrected unresolved-locator accounting, event-date comparisons, competing-claim handling, and OSM identity verification. Validator HTTP requests pin public DNS addresses and recheck redirects. Preserved the original pilot outputs with a correction notice, aligned the proposed handoff with PI batch release, and added regression tests to CI. Model quality and production operation remain unevaluated.
 
 - Added `indicator.v2.schema.json` with the approved `index` and `percent_point` units, a closed measurement-unit vocabulary, and optional construct, variable-kind, and native-period metadata. Preserved the original open-unit schema for legacy consumers and explicitly pinned area-summary.v2 to the successor. Clarified that aggregation methods depend on each indicator, denominator, and weighting scheme. Added schema regression checks to CI.

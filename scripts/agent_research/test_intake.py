@@ -67,11 +67,14 @@ class IntakeTest(unittest.TestCase):
     def test_submit_requires_dev_and_passes_exact_digest(self):
         path = HERE / 'fixtures/internal-review-bundle.json'
         with patch('intake.subprocess.run') as run, contextlib.redirect_stdout(io.StringIO()):
-            self.assertEqual(intake.main(['submit', str(path), '--deployment', 'prod:example']), 1)
+            for selector in ['prod', 'prod:example', 'dev:example', 'named-deployment']:
+                self.assertEqual(intake.main(['submit', str(path), '--deployment', selector]), 1)
             run.assert_not_called()
-            self.assertEqual(intake.main(['submit', str(path), '--deployment', 'dev:example']), 0)
+            self.assertEqual(intake.main(['submit', str(path), '--deployment', 'dev']), 0)
             args = run.call_args.args[0]
             self.assertIn('internalAgentIntake:ingestBundle', args)
+            self.assertEqual(args[args.index('--deployment') + 1], 'dev')
+            self.assertEqual(args[args.index('--codegen') + 1], 'disable')
             payload = json.loads(args[-1])
             self.assertEqual(payload['bundleHash'], hashlib.sha256(path.read_bytes()).hexdigest())
             self.assertNotIn('shell', run.call_args.kwargs)
