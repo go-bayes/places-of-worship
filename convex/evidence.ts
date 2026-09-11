@@ -14,6 +14,7 @@ import {
   assertTaskReasonLimit,
 } from "./lib/limits";
 import { assertNotRapidContract, isRapidCurrentDraft } from "./lib/rapidEntry";
+import { evidenceIntakeRefusal } from "./lib/intakeGate";
 import { dateFloorYear, targetYearsOrEmpty } from "./lib/countryYears";
 import { assignedTaskPeriodProblem } from "./lib/assignedTaskPeriods";
 import { assertOccupancySet, occupancyReferenceDate } from "./lib/occupancies";
@@ -604,6 +605,10 @@ export const saveEvidenceDraft = mutation({
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
     assertOwnsOrCanReview(user._id, user.roles, task.assigned_to);
+    const gateRefusal = evidenceIntakeRefusal(task.status);
+    if (gateRefusal !== null) {
+      throw new Error(gateRefusal);
+    }
     assertNotRapidContract(args.draft, "the general draft route");
     assertEvidenceDraftLimits(args.draft);
     assertWideEvidenceRowFields(args.draft.generated_wide_row, taskTargetYears(task));
@@ -951,6 +956,21 @@ export const submitEvidenceDraft = mutation({
     assertNotRapidContract(draft, "the general submission route");
     assertEvidenceDraftSubmission(draft, false);
     const task = await getTaskOrThrow(ctx, draft.task_id);
+    const gateRefusal = evidenceIntakeRefusal(task.status);
+    if (gateRefusal !== null) {
+      // a receipt-backed retry of a submission already recorded before the
+      // task closed proceeds to recordEvidenceVersion below, which answers
+      // from the receipt and writes nothing; any other call is refused
+      const receipt = args.clientSubmissionId === undefined
+        ? null
+        : await submissionReceipt(ctx, `submit:${user._id}:${args.clientSubmissionId}`);
+      const isReceiptedRetry = receipt !== null
+        && receipt.created_by === user._id
+        && receipt.evidence_draft_id === draft.evidence_draft_id;
+      if (!isReceiptedRetry) {
+        throw new Error(gateRefusal);
+      }
+    }
     assertWideEvidenceRowFields(draft.generated_wide_row, taskTargetYears(task));
     if (
       task.country_code === "NZ"
@@ -1059,6 +1079,10 @@ export const submitEvidenceDraftWithOccupancies = mutation({
         deduped: true,
         ...(receipt !== null ? { evidence_version_hash: receipt.object_hash } : {}),
       };
+    }
+    const gateRefusal = evidenceIntakeRefusal(task.status);
+    if (gateRefusal !== null) {
+      throw new Error(gateRefusal);
     }
     if (draft.draft_status !== "draft") {
       throw new Error("Submit periods against the current editable draft, not an earlier submitted version.");
@@ -1178,6 +1202,10 @@ export const submitUnresolvedNote = mutation({
     assertNotRapidContract(draft, "the unresolved-note route");
     assertEvidenceDraftSubmission(draft, true);
     const task = await getTaskOrThrow(ctx, draft.task_id);
+    const gateRefusal = evidenceIntakeRefusal(task.status);
+    if (gateRefusal !== null) {
+      throw new Error(gateRefusal);
+    }
     const now = Date.now();
 
     const version = await recordEvidenceVersion(ctx, { draftRowId: draft._id, actor: user, kind: "unresolved_note", now });

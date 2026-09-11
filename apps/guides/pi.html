@@ -127,6 +127,7 @@
   <li><strong>Exports.</strong> Data leaves the system only in frozen export batches: a batch lists exactly which tasks and decisions it contains, and freezing it stamps the tasks exported and writes the event to the append-only task log.</li>
 </ol>
 <p>Alongside the hashes, the task event log records every transition — imported, claimed, drafted, submitted, decided, exported — with actor, role, time, and reason. RAs see this history anonymised (what happened and when, by role); reviewers and the PI see full attribution.</p>
+<p>Since September 2026, a review decision to accept for export must carry the snapshot the reviewer inspected, and a PI acceptance checks it again before ratifying. Acceptance is refused if the evidence, or its reviewer-confirmed derived locations, changed after the review decision was recorded, or if the decision was recorded before snapshot-linked review existed and so carries no snapshot at all. Either refusal is resolved the same way: reopen the task and record a fresh, snapshot-linked review decision, then accept again.</p>
 </section>
 
 <section class="guide-section prose-section" id="change-class">

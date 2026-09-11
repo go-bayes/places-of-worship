@@ -13,9 +13,10 @@ const { saveEvidenceDraft, submitEvidenceDraft, submitEvidenceDraftWithOccupanci
 const { getEvidenceVersion, listEvidenceVersions, listEvidenceHeadChanges, recordMigrationVersion, verifyDraftAgainstVersion } = await import("./evidenceVersions.ts");
 const { submitCurrentObservation } = await import("./rapidEntry.ts");
 const { submitOccupancies, decideDerivedYear, confirmAllDerived } = await import("./occupancies.ts");
-const { recordReviewDecision } = await import("./reviews.ts");
+const { recordReviewDecision, getReviewSnapshot } = await import("./reviews.ts");
 const { recordAcceptance } = await import("./acceptances.ts");
 const { createExportBatch } = await import("./exports.ts");
+const { reopenTask } = await import("./tasks.ts");
 const { objectHash } = await import("./lib/canonicalJson.ts");
 const { verifyEvidenceVersionEnvelope } = await import("./lib/evidenceVersions.ts");
 const { intakeRateLimiter } = await import("./lib/rateLimits.ts");
@@ -1540,9 +1541,11 @@ test("recordReviewDecision pins the version on the decision and its event; a pre
   const w = await scene({ country: "VU" });
   await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
   const v1 = version(w);
+  const snapshot = await getReviewSnapshot._handler(w.as(w.reviewer), { taskId: "task_1", evidenceDraftId: "task_1:draft_a" });
   const decisionResult = await recordReviewDecision._handler(w.as(w.reviewer), {
     taskId: "task_1",
     decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the directory and the address." },
+    snapshotHash: snapshot.snapshot_hash,
   });
   const decisionRow = w.row("review_decisions", "review_decision_id", decisionResult.review_decision_id);
   assert.equal(decisionRow.evidence_version_hash, v1.object_hash);
@@ -1550,12 +1553,46 @@ test("recordReviewDecision pins the version on the decision and its event; a pre
   assert.equal(decidedEvent.evidence_version_hash, v1.object_hash);
 
   const w2 = await scene({ country: "VU", taskStatus: "needs_review", draft: { draft_status: "submitted" } });
+  const snapshot2 = await getReviewSnapshot._handler(w2.as(w2.reviewer), { taskId: "task_1", evidenceDraftId: "task_1:draft_a" });
   const decisionResult2 = await recordReviewDecision._handler(w2.as(w2.reviewer), {
     taskId: "task_1",
     decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the pre-contract record thoroughly." },
+    snapshotHash: snapshot2.snapshot_hash,
   });
   const decisionRow2 = w2.row("review_decisions", "review_decision_id", decisionResult2.review_decision_id);
   assert.equal(decisionRow2.evidence_version_hash, undefined);
+});
+
+test("recordReviewDecision refuses accepted_for_export without a snapshot hash, and refuses a stale one, before any write", async () => {
+  const w = await scene({ country: "VU" });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  await assert.rejects(
+    recordReviewDecision._handler(w.as(w.reviewer), {
+      taskId: "task_1",
+      decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the directory and the address." },
+    }),
+    /requires the review snapshot you inspected/,
+  );
+  assert.equal(w.rows.review_decisions.length, 0);
+  await assert.rejects(
+    recordReviewDecision._handler(w.as(w.reviewer), {
+      taskId: "task_1",
+      decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the directory and the address." },
+      snapshotHash: "0".repeat(64),
+    }),
+    /Review snapshot is stale/,
+  );
+  assert.equal(w.rows.review_decisions.length, 0);
+  assert.equal(w.rows.review_snapshots.length, 0);
+
+  // a rejected decision needs no snapshot at all and stays on version 0
+  const rejected = await recordReviewDecision._handler(w.as(w.reviewer), {
+    taskId: "task_1",
+    decision: { evidence_draft_id: "task_1:draft_a", decision_status: "rejected", decision_note: "The directory entry does not support this record." },
+  });
+  const rejectedRow = w.row("review_decisions", "review_decision_id", rejected.review_decision_id);
+  assert.equal(rejectedRow.decision_hash_version, undefined);
+  assert.equal(rejectedRow.review_snapshot_hash, undefined);
 });
 
 test("no silent transfer: a decided evidence record's periods retired by a later submission keep the decision pinned to the version it named", async () => {
@@ -1570,9 +1607,11 @@ test("no silent transfer: a decided evidence record's periods retired by a later
   const a1 = version(w, 1);
   assert.equal(a1.version_kind, "occupancy_set_recorded");
 
+  const snapshot301 = await getReviewSnapshot._handler(w.as(w.reviewer), { taskId: "task_1", evidenceDraftId: "task_1:draft_a" });
   const decisionResult = await recordReviewDecision._handler(w.as(w.reviewer), {
     taskId: "task_1",
     decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the dated directory entry and its periods." },
+    snapshotHash: snapshot301.snapshot_hash,
   });
   const decision = w.row("review_decisions", "review_decision_id", decisionResult.review_decision_id);
   assert.equal(decision.evidence_version_hash, a1.object_hash);
@@ -1580,7 +1619,10 @@ test("no silent transfer: a decided evidence record's periods retired by a later
   const draftARow = w.row("evidence_drafts", "evidence_draft_id", "task_1:draft_a");
   assert.equal(draftARow.draft_status, "accepted_for_export");
 
-  // the author submits a second, independent evidence record on the task
+  // pi ruling 2026-09-11: new evidence on a reviewed task needs an explicit
+  // reopen; the author reopens it before submitting a second, independent
+  // evidence record
+  await reopenTask._handler(w.as(w.ra), { taskId: "task_1", reason: "Reopening to add a second, independent record." });
   await saveEvidenceDraft._handler(w.as(w.ra), {
     taskId: "task_1",
     evidenceDraftId: "task_1:draft_b",
@@ -1643,11 +1685,14 @@ test("PI acceptance and export batch refuse an accepted decision whose version h
     segments: [segment(0)],
   });
   const a1 = version(w, 1);
+  const snapshot311 = await getReviewSnapshot._handler(w.as(w.reviewer), { taskId: "task_1", evidenceDraftId: "task_1:draft_a" });
   await recordReviewDecision._handler(w.as(w.reviewer), {
     taskId: "task_1",
     decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the dated directory entry and its periods." },
+    snapshotHash: snapshot311.snapshot_hash,
   });
 
+  await reopenTask._handler(w.as(w.ra), { taskId: "task_1", reason: "Reopening to add a second, independent record." });
   await saveEvidenceDraft._handler(w.as(w.ra), {
     taskId: "task_1",
     evidenceDraftId: "task_1:draft_b",
@@ -1681,9 +1726,11 @@ test("PI acceptance and export batch refuse an accepted decision whose version h
   // a decision whose version has not moved is ratified normally
   const untouched = await scene({ country: "VU" });
   await submitEvidenceDraft._handler(untouched.as(untouched.ra), { evidenceDraftId: "task_1:draft_a" });
+  const untouchedSnapshot = await getReviewSnapshot._handler(untouched.as(untouched.reviewer), { taskId: "task_1", evidenceDraftId: "task_1:draft_a" });
   await recordReviewDecision._handler(untouched.as(untouched.reviewer), {
     taskId: "task_1",
     decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the untouched record thoroughly." },
+    snapshotHash: untouchedSnapshot.snapshot_hash,
   });
   const untouchedPi = await untouched.addUser("pi-subject-2", ["pi"]);
   const accepted = await recordAcceptance._handler(untouched.as(untouchedPi), { taskId: "task_1", outcome: "accepted", note: "Ratifying the reviewer's decision." });
@@ -1709,4 +1756,344 @@ test("a draft withdrawn before it was ever submitted cannot be restored to submi
     restoreEvidenceDraft._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:legacy", reason: "Restore attempted on a pre-ledger row." }),
     /withdrawn before it was submitted/,
   );
+});
+
+// the intake gate (pi ruling 2026-09-11): once a task is reviewed,
+// pi-accepted, or exported, no route may add or replace its evidence
+// without an explicit reopen. every gated route refuses with the same
+// message and writes nothing; a reopen restores it.
+
+test("the intake gate refuses evidence on a reviewed, pi-accepted, or exported task and writes nothing; reopening restores each route", async () => {
+  for (const status of ["reviewed", "pi_accepted", "exported"]) {
+    // saveEvidenceDraft: today's bug is a save flipping the task to
+    // draft_saved; the gate must fire before that write
+    {
+      const w = await scene({ taskStatus: status });
+      await assert.rejects(
+        saveEvidenceDraft._handler(w.as(w.ra), { taskId: "task_1", evidenceDraftId: "task_1:draft_a", draft: draftContent() }),
+        /reviewed, accepted, or exported/,
+        status,
+      );
+      assert.equal(w.task.status, status, status);
+      assert.equal(w.draft.draft_status, "draft", status);
+      assert.equal(w.rows.evidence_versions.length, 0, status);
+      assert.equal(w.rows.task_events.length, 0, status);
+      await reopenTask._handler(w.as(w.reviewer), { taskId: "task_1", reason: "Reopening to save evidence." });
+      const saved = await saveEvidenceDraft._handler(w.as(w.ra), { taskId: "task_1", evidenceDraftId: "task_1:draft_a", draft: draftContent() });
+      assert.equal(saved.evidence_draft_id, "task_1:draft_a", status);
+    }
+    // submitEvidenceDraft
+    {
+      const w = await scene({ taskStatus: status });
+      await assert.rejects(
+        submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" }),
+        /reviewed, accepted, or exported/,
+        status,
+      );
+      assert.equal(w.task.status, status, status);
+      assert.equal(w.draft.draft_status, "draft", status);
+      assert.equal(w.rows.evidence_versions.length, 0, status);
+      assert.equal(w.rows.task_events.length, 0, status);
+      await reopenTask._handler(w.as(w.reviewer), { taskId: "task_1", reason: "Reopening to submit evidence." });
+      const submitted = await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+      assert.equal(submitted.task_status, "needs_review", status);
+    }
+    // submitEvidenceDraftWithOccupancies, an NZ assigned guided task
+    {
+      const w = await scene({ taskStatus: status });
+      await w.db.patch(w.task._id, { assigned_to: w.ra._id });
+      const guidedArgs = { evidenceDraftId: "task_1:draft_a", clientSubmissionId: submissionId(501), segments: [segment(0)] };
+      await assert.rejects(
+        submitEvidenceDraftWithOccupancies._handler(w.as(w.ra), guidedArgs),
+        /reviewed, accepted, or exported/,
+        status,
+      );
+      assert.equal(w.task.status, status, status);
+      assert.equal(w.draft.draft_status, "draft", status);
+      assert.equal(w.rows.evidence_versions.length, 0, status);
+      assert.equal(w.rows.site_occupancies.length, 0, status);
+      assert.equal(w.rows.task_events.length, 0, status);
+      await reopenTask._handler(w.as(w.reviewer), { taskId: "task_1", reason: "Reopening to submit evidence and periods." });
+      const submitted = await submitEvidenceDraftWithOccupancies._handler(w.as(w.ra), guidedArgs);
+      assert.equal(submitted.task_status, "needs_review", status);
+      assert.equal(submitted.deduped, false, status);
+    }
+    // submitUnresolvedNote
+    {
+      const w = await scene({ taskStatus: status });
+      await assert.rejects(
+        submitUnresolvedNote._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a", note: "Ambiguous evidence pending discussion." }),
+        /reviewed, accepted, or exported/,
+        status,
+      );
+      assert.equal(w.task.status, status, status);
+      assert.equal(w.draft.draft_status, "draft", status);
+      assert.equal(w.rows.evidence_versions.length, 0, status);
+      assert.equal(w.rows.task_events.length, 0, status);
+      await reopenTask._handler(w.as(w.reviewer), { taskId: "task_1", reason: "Reopening to submit an unresolved note." });
+      const noted = await submitUnresolvedNote._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a", note: "Ambiguous evidence pending discussion." });
+      assert.equal(noted.task_status, "unresolved_note", status);
+    }
+  }
+});
+
+test("a receipt-backed retry of a submission recorded before the task closed passes the intake gate without repeating writes", async () => {
+  const w = await scene();
+  const first = await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a", clientSubmissionId: submissionId(600) });
+  const eventsAfterFirst = w.rows.task_events.length;
+  await w.db.patch(w.task._id, { status: "reviewed" });
+  const retry = await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a", clientSubmissionId: submissionId(600) });
+  assert.equal(retry.deduped, true);
+  assert.equal(retry.evidence_version_hash, first.evidence_version_hash);
+  assert.equal(w.rows.evidence_versions.length, 1);
+  assert.equal(w.rows.task_events.length, eventsAfterFirst);
+  assert.equal(w.task.status, "reviewed");
+
+  // a call with no receipt (no token, or a different draft) is still refused
+  await assert.rejects(
+    submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" }),
+    /reviewed, accepted, or exported/,
+  );
+  assert.equal(w.rows.evidence_versions.length, 1);
+
+  // a guided retry likewise returns from its receipt after the task closed:
+  // the existing guided_submission_key branch answers before the gate runs
+  const w2 = await scene();
+  await w2.db.patch(w2.task._id, { assigned_to: w2.ra._id });
+  const guidedArgs = { evidenceDraftId: "task_1:draft_a", clientSubmissionId: submissionId(601), segments: [segment(0)] };
+  const guidedFirst = await submitEvidenceDraftWithOccupancies._handler(w2.as(w2.ra), guidedArgs);
+  const guidedEventsAfterFirst = w2.rows.task_events.length;
+  await w2.db.patch(w2.task._id, { status: "pi_accepted" });
+  const guidedRetry = await submitEvidenceDraftWithOccupancies._handler(w2.as(w2.ra), guidedArgs);
+  assert.equal(guidedRetry.deduped, true);
+  assert.equal(guidedRetry.evidence_version_hash, guidedFirst.evidence_version_hash);
+  assert.equal(w2.rows.evidence_versions.length, 1);
+  assert.equal(w2.rows.task_events.length, guidedEventsAfterFirst);
+});
+
+// snapshot-linked acceptance (pi ruling 2026-09-11): recordReviewDecision
+// records the review_snapshots row and the v1 decision hash on success.
+
+test("recordReviewDecision records the review_snapshots row and the v1 decision hash on success", async () => {
+  const w = await scene({ country: "VU" });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  const snapshot = await getReviewSnapshot._handler(w.as(w.reviewer), { taskId: "task_1", evidenceDraftId: "task_1:draft_a" });
+  const result = await recordReviewDecision._handler(w.as(w.reviewer), {
+    taskId: "task_1",
+    decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the directory entry in full." },
+    snapshotHash: snapshot.snapshot_hash,
+  });
+  const decisionRow = w.row("review_decisions", "review_decision_id", result.review_decision_id);
+  assert.equal(decisionRow.review_snapshot_hash, snapshot.snapshot_hash);
+  assert.equal(decisionRow.decision_hash_version, 1);
+  assert.equal(decisionRow.evidence_version_hash, w.draft.evidence_version_hash);
+  assert.equal(w.rows.review_snapshots.length, 1);
+  assert.equal(w.rows.review_snapshots[0].snapshot_hash, snapshot.snapshot_hash);
+
+  // a rejected decision with a snapshot is v1 too (the earlier test in this
+  // file covers a rejected decision without one, which stays v0)
+  const w2 = await scene({ country: "VU" });
+  await submitEvidenceDraft._handler(w2.as(w2.ra), { evidenceDraftId: "task_1:draft_a" });
+  const snapshot2 = await getReviewSnapshot._handler(w2.as(w2.reviewer), { taskId: "task_1", evidenceDraftId: "task_1:draft_a" });
+  const rejected = await recordReviewDecision._handler(w2.as(w2.reviewer), {
+    taskId: "task_1",
+    decision: { evidence_draft_id: "task_1:draft_a", decision_status: "rejected", decision_note: "The directory entry does not support this record." },
+    snapshotHash: snapshot2.snapshot_hash,
+  });
+  const rejectedRow = w2.row("review_decisions", "review_decision_id", rejected.review_decision_id);
+  assert.equal(rejectedRow.decision_hash_version, 1);
+  assert.equal(rejectedRow.review_snapshot_hash, snapshot2.snapshot_hash);
+});
+
+// snapshot consistency at acceptance (pi ruling 2026-09-11): recordAcceptance
+// calls assertDecisionSnapshotConsistent (convex/reviews.ts) for every
+// ratified decision.
+
+test("recordAcceptance refuses a decision that is not snapshot-linked, one whose snapshot row is missing, and one whose stored snapshot was altered", async () => {
+  // a legacy (v0) accepted decision predates snapshot-linked review; since
+  // recordReviewDecision can no longer produce one for accepted_for_export,
+  // this reproduces a row recorded before the ruling
+  {
+    const w = await scene({ country: "VU" });
+    const pi = await w.addUser("pi-subject", ["pi"]);
+    await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+    const v1 = version(w);
+    await w.db.insert("review_decisions", {
+      review_decision_id: "task_1:review:legacy",
+      task_id: "task_1",
+      evidence_draft_id: "task_1:draft_a",
+      reviewer_user_id: w.reviewer._id,
+      decision_status: "accepted_for_export",
+      decision_note: "Legacy decision recorded before snapshot-linked review.",
+      created_at: Date.now(),
+      updated_at: Date.now(),
+      evidence_version_hash: v1.object_hash,
+      decision_hash: "legacy",
+    });
+    await w.db.patch(w.draft._id, { draft_status: "accepted_for_export" });
+    await w.db.patch(w.task._id, { status: "reviewed" });
+    await assert.rejects(
+      recordAcceptance._handler(w.as(pi), { taskId: "task_1", outcome: "accepted", note: "Ratifying the legacy decision." }),
+      /is not snapshot-linked/,
+    );
+    assert.equal(w.task.status, "reviewed");
+    assert.equal(w.rows.task_acceptances.length, 0);
+  }
+  // a linked decision whose review_snapshots row is missing
+  {
+    const w = await scene({ country: "VU" });
+    const pi = await w.addUser("pi-subject", ["pi"]);
+    await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+    const snapshot = await getReviewSnapshot._handler(w.as(w.reviewer), { taskId: "task_1", evidenceDraftId: "task_1:draft_a" });
+    await recordReviewDecision._handler(w.as(w.reviewer), {
+      taskId: "task_1",
+      decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the directory entry in full." },
+      snapshotHash: snapshot.snapshot_hash,
+    });
+    w.rows.review_snapshots.length = 0;
+    await assert.rejects(
+      recordAcceptance._handler(w.as(pi), { taskId: "task_1", outcome: "accepted", note: "Ratifying the reviewer's decision." }),
+      /is not recorded/,
+    );
+    assert.equal(w.rows.task_acceptances.length, 0);
+  }
+  // a linked decision whose stored snapshot_json was altered after the fact
+  {
+    const w = await scene({ country: "VU" });
+    const pi = await w.addUser("pi-subject", ["pi"]);
+    await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+    const snapshot = await getReviewSnapshot._handler(w.as(w.reviewer), { taskId: "task_1", evidenceDraftId: "task_1:draft_a" });
+    await recordReviewDecision._handler(w.as(w.reviewer), {
+      taskId: "task_1",
+      decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the directory entry in full." },
+      snapshotHash: snapshot.snapshot_hash,
+    });
+    const recordedSnapshot = w.rows.review_snapshots.find((row) => row.snapshot_hash === snapshot.snapshot_hash);
+    const tampered = JSON.parse(recordedSnapshot.snapshot_json);
+    tampered.draft.evidence_note = "Tampered after the reviewer decided.";
+    recordedSnapshot.snapshot_json = JSON.stringify(tampered);
+    await assert.rejects(
+      recordAcceptance._handler(w.as(pi), { taskId: "task_1", outcome: "accepted", note: "Ratifying the reviewer's decision." }),
+      /does not reproduce its hash/,
+    );
+    assert.equal(w.rows.task_acceptances.length, 0);
+  }
+});
+
+test("recordAcceptance refuses a snapshot-linked decision whose confirmed locations changed since it was recorded", async () => {
+  const w = await scene({ country: "NZ", draft: { source_date_or_capture_date: "2024-01" } });
+  const pi = await w.addUser("pi-subject", ["pi"]);
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  await submitOccupancies._handler(w.as(w.ra), {
+    clientSubmissionId: submissionId(701),
+    taskId: "task_1",
+    parentEvidenceDraftId: "task_1:draft_a",
+    segments: [segment(0, { start_date: "2005", start_basis: "founding_stated", end_mode: "known", end_date: "2020-06", end_basis: "closure_stated", end_reason: "closed" })],
+  });
+  const confirmed = await decideDerivedYear._handler(w.as(w.reviewer), { taskId: "task_1", parentEvidenceDraftId: "task_1:draft_a", targetYear: 2018, action: "confirm" });
+  assert.equal(confirmed.written_status, "present");
+  const confirmedLocation = w.rows.derived_year_locations.find(
+    (row) => row.parent_evidence_draft_id === "task_1:draft_a" && row.target_year === 2018 && row.review_state === "reviewer_confirmed",
+  );
+  assert.ok(confirmedLocation, "expected a confirmed derived location for 2018");
+
+  const snapshot = await getReviewSnapshot._handler(w.as(w.reviewer), { taskId: "task_1", evidenceDraftId: "task_1:draft_a" });
+  await recordReviewDecision._handler(w.as(w.reviewer), {
+    taskId: "task_1",
+    decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the directory entry and the confirmed 2018 location." },
+    snapshotHash: snapshot.snapshot_hash,
+  });
+  assert.equal(w.task.status, "reviewed");
+
+  await w.db.patch(confirmedLocation._id, { review_state: "superseded" });
+  await assert.rejects(
+    recordAcceptance._handler(w.as(pi), { taskId: "task_1", outcome: "accepted", note: "Ratifying the reviewer's decision." }),
+    /Confirmed locations for task_1:draft_a changed/,
+  );
+  assert.equal(w.rows.task_acceptances.length, 0);
+});
+
+// snapshot consistency at export (pi ruling 2026-09-11): createExportBatch
+// calls assertDecisionSnapshotConsistent for each included accepted
+// decision that carries a review_snapshot_hash, and includes a v0 decision
+// unchanged when the task already carries an accepted acceptance.
+
+test("createExportBatch checks snapshot consistency for linked decisions and includes a historical v0 decision unchanged", async () => {
+  // a consistent linked decision creates a batch
+  {
+    const w = await scene({ country: "VU" });
+    const pi = await w.addUser("pi-subject", ["pi"]);
+    const admin2 = await w.addUser("admin-subject-2", ["admin"]);
+    await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+    const snapshot = await getReviewSnapshot._handler(w.as(w.reviewer), { taskId: "task_1", evidenceDraftId: "task_1:draft_a" });
+    await recordReviewDecision._handler(w.as(w.reviewer), {
+      taskId: "task_1",
+      decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the directory entry in full." },
+      snapshotHash: snapshot.snapshot_hash,
+    });
+    await recordAcceptance._handler(w.as(pi), { taskId: "task_1", outcome: "accepted", note: "Ratifying the reviewer's decision." });
+    const batch = await createExportBatch._handler(w.as(admin2), { countryCode: "VU", taskIds: ["task_1"] });
+    assert.equal(batch.included_task_count, 1);
+    assert.equal(batch.included_review_decision_count, 1);
+  }
+  // an altered snapshot row is refused at export, not only at acceptance
+  {
+    const w = await scene({ country: "VU" });
+    const pi = await w.addUser("pi-subject", ["pi"]);
+    const admin2 = await w.addUser("admin-subject-2", ["admin"]);
+    await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+    const snapshot = await getReviewSnapshot._handler(w.as(w.reviewer), { taskId: "task_1", evidenceDraftId: "task_1:draft_a" });
+    await recordReviewDecision._handler(w.as(w.reviewer), {
+      taskId: "task_1",
+      decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the directory entry in full." },
+      snapshotHash: snapshot.snapshot_hash,
+    });
+    await recordAcceptance._handler(w.as(pi), { taskId: "task_1", outcome: "accepted", note: "Ratifying the reviewer's decision." });
+    const recordedSnapshot = w.rows.review_snapshots.find((row) => row.snapshot_hash === snapshot.snapshot_hash);
+    const tampered = JSON.parse(recordedSnapshot.snapshot_json);
+    tampered.draft.evidence_note = "Tampered after acceptance.";
+    recordedSnapshot.snapshot_json = JSON.stringify(tampered);
+    await assert.rejects(
+      createExportBatch._handler(w.as(admin2), { countryCode: "VU", taskIds: ["task_1"] }),
+      /does not reproduce its hash/,
+    );
+  }
+  // a v0 decision carrying an accepted acceptance row is a historical
+  // record and is included unchanged (the export PR will recheck these at
+  // freeze time, convex/exports.ts)
+  {
+    const w = await scene({ country: "VU" });
+    const admin2 = await w.addUser("admin-subject-2", ["admin"]);
+    await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+    const v1 = version(w);
+    await w.db.insert("review_decisions", {
+      review_decision_id: "task_1:review:legacy",
+      task_id: "task_1",
+      evidence_draft_id: "task_1:draft_a",
+      reviewer_user_id: w.reviewer._id,
+      decision_status: "accepted_for_export",
+      decision_note: "Legacy decision recorded before snapshot-linked review.",
+      created_at: Date.now(),
+      updated_at: Date.now(),
+      evidence_version_hash: v1.object_hash,
+      decision_hash: "legacy",
+    });
+    await w.db.insert("task_acceptances", {
+      acceptance_id: "task_1:acceptance:legacy",
+      task_id: "task_1",
+      review_decision_id: "task_1:review:legacy",
+      evidence_draft_id: "task_1:draft_a",
+      pi_user_id: w.admin._id,
+      outcome: "accepted",
+      note: "legacy: exported before snapshot-linked review",
+      self_decided: false,
+      legacy: true,
+      created_at: Date.now(),
+      acceptance_hash: "legacy",
+    });
+    await w.db.patch(w.task._id, { status: "pi_accepted" });
+    const batch = await createExportBatch._handler(w.as(admin2), { countryCode: "VU", taskIds: ["task_1"] });
+    assert.equal(batch.included_task_count, 1);
+    assert.equal(batch.included_review_decision_count, 1);
+  }
 });

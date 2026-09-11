@@ -12,6 +12,7 @@ import {
   isSelfDecided,
   taskStatusForAcceptance,
 } from "./lib/acceptance";
+import { assertDecisionSnapshotConsistent } from "./reviews";
 
 // the pi acceptance layer (jb rulings r-p1..r-p5, 2026-09-04; brief
 // docs/development/pi-acceptance-layer-brief-2026-09-04.md): a reviewer's
@@ -108,6 +109,11 @@ export const recordAcceptance = mutation({
         `The review decision refers to evidence version ${ratified.evidence_version_hash} but the evidence is now at ${draft.evidence_version_hash}. Record a new review decision on the current version before accepting.`,
       );
     }
+    // pi ruling 2026-09-11: every new acceptance rests on a snapshot-linked
+    // decision whose recorded snapshot still matches the current evidence
+    // and its confirmed locations; a version-0 (unlinked) decision needs a
+    // fresh snapshot-linked review before it can be ratified
+    await assertDecisionSnapshotConsistent(ctx, ratified);
     const now = Date.now();
     const acceptanceId = `${args.taskId}:acceptance:${now}:${user._id}`;
     const selfDecided = isSelfDecided({

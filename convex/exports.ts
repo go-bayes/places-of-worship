@@ -5,6 +5,7 @@ import { exportFormat, exportBatchStatus } from "./model";
 import { chooseActorRole, requireUser } from "./lib/auth";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { exportRefusalForTask } from "./lib/acceptance";
+import { assertDecisionSnapshotConsistent } from "./reviews";
 import { isWideEvidenceExportEligible } from "./lib/exportEligibility";
 import { targetYearsOrEmpty } from "./lib/countryYears";
 import { locationOutcomeColumns } from "./lib/locationOutcome";
@@ -320,15 +321,26 @@ export const createExportBatch = mutation({
       // batch; export fails closed rather than releasing content the
       // decision never referred to
       for (const decision of accepted) {
-        if (decision.evidence_version_hash === undefined || decision.evidence_draft_id === undefined) continue;
-        const decisionDraft = await ctx.db
-          .query("evidence_drafts")
-          .withIndex("by_evidence_draft_id", (q: any) => q.eq("evidence_draft_id", decision.evidence_draft_id!))
-          .unique();
-        if (decisionDraft !== null && decisionDraft.evidence_version_hash !== decision.evidence_version_hash) {
-          throw new Error(
-            `Task ${taskId}: accepted decision ${decision.review_decision_id} refers to evidence version ${decision.evidence_version_hash} but ${decision.evidence_draft_id} is now at ${decisionDraft.evidence_version_hash}; re-review before export.`,
-          );
+        if (decision.evidence_version_hash !== undefined && decision.evidence_draft_id !== undefined) {
+          const decisionDraft = await ctx.db
+            .query("evidence_drafts")
+            .withIndex("by_evidence_draft_id", (q: any) => q.eq("evidence_draft_id", decision.evidence_draft_id!))
+            .unique();
+          if (decisionDraft !== null && decisionDraft.evidence_version_hash !== decision.evidence_version_hash) {
+            throw new Error(
+              `Task ${taskId}: accepted decision ${decision.review_decision_id} refers to evidence version ${decision.evidence_version_hash} but ${decision.evidence_draft_id} is now at ${decisionDraft.evidence_version_hash}; re-review before export.`,
+            );
+          }
+        }
+        // pi ruling 2026-09-11: a snapshot-linked decision's recorded
+        // snapshot must still match the current evidence and its confirmed
+        // locations before it enters a batch. a decision with no snapshot
+        // (version 0) is a historical record and is included unchanged when
+        // the task already carries an accepted acceptance; the export PR
+        // (frozen exports, docs/development/evidence-versions.md, "later
+        // steps") will recheck consistency for those at freeze time.
+        if (decision.review_snapshot_hash !== undefined) {
+          await assertDecisionSnapshotConsistent(ctx, decision);
         }
       }
       reviewDecisionIds.push(...accepted.map((decision) => decision.review_decision_id));
