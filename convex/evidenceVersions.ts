@@ -2,9 +2,9 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
-import { evidenceVersionKind } from "./model";
+import { evidenceHeadChangeKind, evidenceVersionKind } from "./model";
 import { canReview, requireUser } from "./lib/auth";
-import { MEDIUM_TEXT_MAX, assertMaxString } from "./lib/limits";
+import { MEDIUM_TEXT_MAX, TASK_REASON_MAX, assertMaxString } from "./lib/limits";
 import { isObjectHash } from "./lib/canonicalJson";
 import {
   actorId,
@@ -120,6 +120,79 @@ export async function submissionReceipt(
     .unique();
 }
 
+export type EvidenceHeadChangeKind = "version_recorded" | "superseded" | "withdrawn" | "restored";
+
+// the short sentence a version_recorded ledger row carries when the caller
+// gives no reason of its own: enough to read the trail without opening the
+// envelope, one clause per version kind
+function defaultReasonFor(kind: EvidenceVersionKind): string {
+  switch (kind) {
+    case "submitted":
+      return "Submitted for review.";
+    case "unresolved_note":
+      return "Submitted as an unresolved note.";
+    case "guided_submission":
+      return "Guided submission with periods recorded.";
+    case "rapid_current_observation":
+      return "Rapid current observation submitted.";
+    case "spreadsheet_import":
+      return "Imported from a spreadsheet submission.";
+    case "occupancy_import":
+      return "Imported with occupancy periods.";
+    case "agent_intake":
+      return "Recorded from an internal agent intake bundle.";
+    case "occupancy_set_recorded":
+      return "Periods recorded against submitted evidence.";
+    case "superseded_by_later_set":
+      return "Active periods or function chain retired by the author's later set.";
+    case "reviewer_edit":
+      return "Reviewer edited submitted content.";
+    case "reviewer_derivation_decision":
+      return "Reviewer derivation decision written onto the row.";
+    case "migration_copy":
+      return "Migration copy of a pre-contract submission.";
+    default:
+      return "Evidence version recorded.";
+  }
+}
+
+// the append-only ledger of a change to a draft row's current version or
+// activity status (evidence_head_changes): written beside every version
+// recorded, and beside every supersession, withdrawal, or restoration, so
+// the record of which version is current, by whom, and why is never lost
+// when a row is retired or brought back
+export async function recordHeadChange(
+  ctx: MutationCtx,
+  args: {
+    taskId: string;
+    evidenceDraftId: string;
+    changeKind: EvidenceHeadChangeKind;
+    versionKind?: EvidenceVersionKind;
+    previousObjectHash?: string;
+    objectHash?: string;
+    previousStatus?: string;
+    newStatus?: string;
+    actor: Doc<"users">;
+    reason: string;
+    now: number;
+  },
+): Promise<void> {
+  assertMaxString("head change reason", args.reason, TASK_REASON_MAX);
+  await ctx.db.insert("evidence_head_changes", {
+    task_id: args.taskId,
+    evidence_draft_id: args.evidenceDraftId,
+    change_kind: args.changeKind,
+    version_kind: args.versionKind,
+    previous_object_hash: args.previousObjectHash,
+    object_hash: args.objectHash,
+    previous_status: args.previousStatus,
+    new_status: args.newStatus,
+    changed_by: args.actor._id,
+    reason: args.reason,
+    recorded_at: args.now,
+  });
+}
+
 export type RecordedEvidenceVersion = {
   object_hash: string;
   content_hash: string;
@@ -143,6 +216,8 @@ export async function recordEvidenceVersion(
     kind: EvidenceVersionKind;
     now: number;
     idempotencyKey?: string;
+    // overrides the version_recorded ledger row's default reason
+    reason?: string;
     migration?: { runId: string };
   },
 ): Promise<RecordedEvidenceVersion> {
@@ -190,6 +265,7 @@ async function recordVersionRow(
     kind: EvidenceVersionKind;
     now: number;
     idempotencyKey?: string;
+    reason?: string;
     migration?: { runId: string };
   },
 ): Promise<RecordedEvidenceVersion> {
@@ -232,6 +308,9 @@ async function recordVersionRow(
   if ((await versionByHash(ctx, built.object_hash)) !== null) {
     throw new Error("An evidence version with this hash already exists; retry the submission.");
   }
+  // captured before the patch below, which is the row's only content write
+  // in this function; the ledger records the hash the row held before it
+  const previousObjectHash = row.evidence_version_hash;
   await ctx.db.insert("evidence_versions", {
     object_hash: built.object_hash,
     hash_contract: "pow-object.v1",
@@ -253,6 +332,17 @@ async function recordVersionRow(
   await ctx.db.patch(row._id, {
     evidence_version_hash: built.object_hash,
     evidence_family_id: familyId,
+  });
+  await recordHeadChange(ctx, {
+    taskId: row.task_id,
+    evidenceDraftId: row.evidence_draft_id,
+    changeKind: "version_recorded",
+    versionKind: args.kind,
+    previousObjectHash,
+    objectHash: built.object_hash,
+    actor: args.actor,
+    reason: args.reason ?? defaultReasonFor(args.kind),
+    now: args.now,
   });
   return {
     object_hash: built.object_hash,
@@ -347,6 +437,41 @@ export const listEvidenceVersions = query({
         .take(200);
     const visible = canReview(user.roles) ? rows : rows.filter((row) => row.created_by === user._id);
     return visible.sort((left, right) => left.version_index - right.version_index).map(summarise);
+  },
+});
+
+const headChangeRow = v.object({
+  _id: v.id("evidence_head_changes"),
+  _creationTime: v.number(),
+  task_id: v.string(),
+  evidence_draft_id: v.string(),
+  change_kind: evidenceHeadChangeKind,
+  version_kind: v.optional(evidenceVersionKind),
+  previous_object_hash: v.optional(v.string()),
+  object_hash: v.optional(v.string()),
+  previous_status: v.optional(v.string()),
+  new_status: v.optional(v.string()),
+  changed_by: v.id("users"),
+  reason: v.string(),
+  recorded_at: v.number(),
+});
+
+// the ledger for one draft row, in recorded_at order: who moved it between
+// active and retired (or recorded a version onto it) and why. same
+// visibility as listEvidenceVersions — review roles and the row's own author
+export const listEvidenceHeadChanges = query({
+  args: { evidenceDraftId: v.string() },
+  returns: v.array(headChangeRow),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin", "pi", "service"]);
+    const draft = await draftByIdOrThrow(ctx, args.evidenceDraftId);
+    if (!canReview(user.roles) && draft.created_by !== user._id) {
+      throw new Error("Evidence draft belongs to another user.");
+    }
+    return await ctx.db
+      .query("evidence_head_changes")
+      .withIndex("by_draft_time", (q) => q.eq("evidence_draft_id", args.evidenceDraftId))
+      .take(200);
   },
 });
 

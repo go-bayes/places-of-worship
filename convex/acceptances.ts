@@ -95,6 +95,19 @@ export const recordAcceptance = mutation({
       throw new Error(refusal);
     }
     const ratified = decision!;
+    // no silent transfer: the decision names the exact version the
+    // reviewer saw; if the draft has since moved on (a retirement, a
+    // restoration, or a further write), acceptance is refused rather than
+    // ratifying content the decision never referred to
+    if (
+      ratified.evidence_version_hash !== undefined
+      && draft !== null
+      && draft.evidence_version_hash !== ratified.evidence_version_hash
+    ) {
+      throw new Error(
+        `The review decision refers to evidence version ${ratified.evidence_version_hash} but the evidence is now at ${draft.evidence_version_hash}. Record a new review decision on the current version before accepting.`,
+      );
+    }
     const now = Date.now();
     const acceptanceId = `${args.taskId}:acceptance:${now}:${user._id}`;
     const selfDecided = isSelfDecided({

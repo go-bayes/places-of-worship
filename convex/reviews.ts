@@ -350,6 +350,11 @@ export async function applyReviewDecision(ctx: MutationCtx, args: { taskId: stri
       agent_review_agreement: args.decision.agent_review_agreement,
       review_snapshot_hash: args.snapshotHash,
       decision_hash_version: args.snapshotHash === undefined ? undefined : 1 as const,
+      // the exact version this decision refers to, outside the decision
+      // hash below (versions 0 and 1 stay unchanged): pins acceptance to
+      // this content so a later retirement, restoration, or content write
+      // never silently transfers the decision to another version
+      evidence_version_hash: draft?.evidence_version_hash,
       created_at: now,
       updated_at: now,
     };
@@ -413,6 +418,7 @@ export async function applyReviewDecision(ctx: MutationCtx, args: { taskId: stri
       newStatus: newTaskStatus,
       reason: args.decision.decision_note,
       evidenceDraftId: args.decision.evidence_draft_id,
+      evidenceVersionHash: draft?.evidence_version_hash,
       reviewDecisionId,
       clientContext: args.snapshotHash === undefined ? undefined : { review_snapshot_hash: args.snapshotHash },
     });

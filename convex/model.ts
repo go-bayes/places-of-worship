@@ -111,6 +111,8 @@ export const taskEventType = v.union(
   v.literal("comment_provided"),
   v.literal("pi_accepted"),
   v.literal("pi_returned"),
+  // a retired (superseded or withdrawn) draft returned to active review
+  v.literal("draft_restored"),
 );
 
 // evidence-version.v1: how an immutable evidence version came to exist.
@@ -133,6 +135,17 @@ export const evidenceVersionKindValues = [
 ] as const;
 export const evidenceVersionKind = v.union(
   ...evidenceVersionKindValues.map((kind) => v.literal(kind)),
+);
+
+// evidence_head_changes: the append-only ledger of changes to a draft row's
+// current version or activity status. a version_recorded row tracks the
+// same moment as an evidence_versions insert; superseded, withdrawn, and
+// restored rows track draft_status transitions that carry no new version
+export const evidenceHeadChangeKind = v.union(
+  v.literal("version_recorded"),
+  v.literal("superseded"),
+  v.literal("withdrawn"),
+  v.literal("restored"),
 );
 
 // what a revision clone means for the evidence graph: a correction of the

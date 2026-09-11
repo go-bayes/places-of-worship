@@ -46,7 +46,7 @@ import {
 import { intakeRateLimiter } from "./lib/rateLimits";
 import { assertRapidSubmissionId } from "./lib/rapidEntry";
 import { appendTaskEvent } from "./lib/taskEvents";
-import { recordEvidenceVersion } from "./evidenceVersions";
+import { recordEvidenceVersion, recordHeadChange } from "./evidenceVersions";
 import {
   derivedStateEventDoc,
   derivedTargetYearFunctionDoc,
@@ -713,14 +713,38 @@ export async function recordOccupancySet(
   const retiredChainParents = await supersedeEarlierFunctionChains(ctx, task, parent, user, actorRole, now);
   // retiring an earlier parent's active set or chain changes what that
   // submitted record says, so each affected earlier parent takes a child
-  // version recording the retirement (evidence-version.v1 inventory)
+  // version recording the retirement (evidence-version.v1 inventory). when
+  // the earlier parent is already decided, the retirement is loud: a
+  // note_added event names both versions, so the trail shows the decision
+  // still refers to the earlier one
   for (const earlierParentId of new Set([...retiredSetParents, ...retiredChainParents])) {
     const earlierParent = await ctx.db
       .query("evidence_drafts")
       .withIndex("by_evidence_draft_id", (q) => q.eq("evidence_draft_id", earlierParentId))
       .unique();
     if (earlierParent === null || earlierParent.evidence_version_hash === undefined) continue;
-    await recordEvidenceVersion(ctx, { draftRowId: earlierParent._id, actor: user, kind: "superseded_by_later_set", now });
+    const previousHash = earlierParent.evidence_version_hash;
+    const wasDecided = earlierParent.draft_status === "accepted_for_export" || earlierParent.draft_status === "rejected";
+    const recorded = await recordEvidenceVersion(ctx, {
+      draftRowId: earlierParent._id,
+      actor: user,
+      kind: "superseded_by_later_set",
+      now,
+      reason: `Active periods and function chain retired by the author's later set on ${parent.evidence_draft_id}.`,
+    });
+    if (recorded.created && wasDecided) {
+      await appendTaskEvent(ctx, {
+        taskId: task.task_id,
+        eventType: "note_added",
+        actorUserId: user._id,
+        actorRole,
+        previousStatus: task.status,
+        newStatus: task.status,
+        evidenceDraftId: earlierParentId,
+        evidenceVersionHash: recorded.object_hash,
+        reason: `Active periods on decided evidence ${earlierParentId} were retired by a later set on ${parent.evidence_draft_id}. The review decision refers to version ${previousHash} and does not extend to the current version ${recorded.object_hash}.`,
+      });
+    }
   }
   // the cards saved with the draft are now rows
   if (parent.pending_occupancy_cards !== undefined) {

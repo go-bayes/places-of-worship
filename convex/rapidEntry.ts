@@ -29,7 +29,7 @@ import { assertProbableSameAsInputs, probableSameAsCheck } from "./lib/probableS
 import { recordProbableSameAsReciprocals, resolveProbableSameAsRefs } from "./lib/probableSameAsRecords";
 import { resolveCitedSource } from "./lib/sources";
 import { appendTaskEvent } from "./lib/taskEvents";
-import { recordEvidenceVersion, submissionReceipt } from "./evidenceVersions";
+import { recordEvidenceVersion, recordHeadChange, submissionReceipt } from "./evidenceVersions";
 import { assertAssertionMatchesTaskPoint, assertCountryAllowsAssertionMode } from "./lib/locationAssertions";
 import { locationAssertionInput, privacyFlag, probableSameAsInput, rapidCurrentObservationInput, taskStatus } from "./model";
 
@@ -118,14 +118,14 @@ async function activeRapidObservationBy(
 async function supersedeEarlierSubmissions(
   ctx: MutationCtx,
   taskId: string,
-  actorId: Doc<"users">["_id"],
+  user: Doc<"users">,
   newDraftId: string,
   now: number,
 ): Promise<void> {
   for (const status of ["submitted", "unresolved_note"] as const) {
     const drafts = await ctx.db
       .query("evidence_drafts")
-      .withIndex("by_task_creator_status", (q) => q.eq("task_id", taskId).eq("created_by", actorId).eq("draft_status", status))
+      .withIndex("by_task_creator_status", (q) => q.eq("task_id", taskId).eq("created_by", user._id).eq("draft_status", status))
       .take(11);
     if (drafts.length > 10) {
       throw new Error("This task has too many active submissions to supersede safely. Ask JB to review its history.");
@@ -133,6 +133,17 @@ async function supersedeEarlierSubmissions(
     for (const draft of drafts) {
       if (draft.evidence_draft_id !== newDraftId) {
         await ctx.db.patch(draft._id, { draft_status: "superseded", updated_at: now });
+        await recordHeadChange(ctx, {
+          taskId: draft.task_id,
+          evidenceDraftId: draft.evidence_draft_id,
+          changeKind: "superseded",
+          previousStatus: status,
+          newStatus: "superseded",
+          objectHash: draft.evidence_version_hash,
+          actor: user,
+          reason: `Superseded by the corrected observation ${newDraftId}.`,
+          now,
+        });
       }
     }
   }
@@ -502,7 +513,7 @@ export const submitCurrentObservation = mutation({
       now,
       idempotencyKey: `rapid:${submissionKey}`,
     });
-    await supersedeEarlierSubmissions(ctx, task.task_id, user._id, draftId, now);
+    await supersedeEarlierSubmissions(ctx, task.task_id, user, draftId, now);
     await ctx.db.patch(task._id, {
       assigned_to: task.assigned_to ?? user._id,
       claimed_by: task.claimed_by ?? user._id,

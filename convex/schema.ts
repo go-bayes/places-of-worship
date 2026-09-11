@@ -66,6 +66,7 @@ import {
   targetYearUseLevelSet,
   acceptanceOutcome,
   evidenceVersionKind,
+  evidenceHeadChangeKind,
   revisionIntent,
 } from "./model";
 
@@ -487,6 +488,10 @@ export default defineSchema({
     decision_hash: v.optional(v.string()),
     decision_hash_version: v.optional(v.literal(1)),
     review_snapshot_hash: v.optional(v.string()),
+    // the evidence version this decision refers to (outside decision_hash,
+    // versions 0 and 1): pins acceptance to the exact content reviewed, so
+    // retirement, restoration, or a later write never silently transfers it
+    evidence_version_hash: v.optional(v.string()),
   })
     .index("by_review_decision_id", ["review_decision_id"])
     .index("by_task", ["task_id"])
@@ -644,6 +649,33 @@ export default defineSchema({
   })
     .index("by_submission_key", ["submission_key"])
     .index("by_draft", ["evidence_draft_id"]),
+
+  // append-only ledger of changes to a draft row's current version or
+  // activity status (docs/development/evidence-versions.md, retirement and
+  // restoration): a version_recorded row is written beside every
+  // evidence_versions insert; superseded, withdrawn, and restored rows track
+  // draft_status transitions that carry no new version. retired evidence
+  // stays visible and restorable; this ledger is the record of who moved a
+  // draft between active and retired, and why
+  evidence_head_changes: defineTable({
+    task_id: v.string(),
+    evidence_draft_id: v.string(),
+    change_kind: evidenceHeadChangeKind,
+    // set for version_recorded: which kind of version this change recorded
+    version_kind: v.optional(evidenceVersionKind),
+    // the current version before and after the change; undefined either
+    // side means a pre-contract row with no version at that point
+    previous_object_hash: v.optional(v.string()),
+    object_hash: v.optional(v.string()),
+    // draft statuses either side of the change; set for status changes
+    previous_status: v.optional(v.string()),
+    new_status: v.optional(v.string()),
+    changed_by: v.id("users"),
+    reason: v.string(),
+    recorded_at: v.number(),
+  })
+    .index("by_draft_time", ["evidence_draft_id", "recorded_at"])
+    .index("by_task", ["task_id"]),
 
   // Immutable context captured when a batch reviewer inspected a version.
   review_snapshots: defineTable({

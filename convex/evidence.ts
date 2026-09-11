@@ -25,7 +25,7 @@ import { assertWideEvidenceRowFields } from "./lib/wideEvidenceFields";
 import { resolveCitedSource } from "./lib/sources";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { evidenceDraftDoc } from "./lib/validators";
-import { recordEvidenceVersion, submissionReceipt } from "./evidenceVersions";
+import { recordEvidenceVersion, recordHeadChange, submissionReceipt } from "./evidenceVersions";
 import { revisionIntent } from "./model";
 
 
@@ -146,7 +146,20 @@ export const withdrawEvidenceDraft = mutation({
       throw new Error("A decided draft stays on record. Ask a reviewer to reopen the task instead.");
     }
     const now = Date.now();
+    const previousDraftStatus = draft.draft_status;
     await ctx.db.patch(draft._id, { draft_status: "withdrawn", updated_at: now });
+    const withdrawReason = args.reason?.trim() || "Draft withdrawn by its author.";
+    await recordHeadChange(ctx, {
+      taskId: draft.task_id,
+      evidenceDraftId: draft.evidence_draft_id,
+      changeKind: "withdrawn",
+      previousStatus: previousDraftStatus,
+      newStatus: "withdrawn",
+      objectHash: draft.evidence_version_hash,
+      actor: user,
+      reason: withdrawReason,
+      now,
+    });
     const remainingActive = (
       await Promise.all(
         (["submitted", "unresolved_note"] as const).map((activeStatus) =>
@@ -177,9 +190,147 @@ export const withdrawEvidenceDraft = mutation({
       previousStatus: task.status,
       newStatus: newTaskStatus,
       evidenceDraftId: draft.evidence_draft_id,
-      reason: args.reason?.trim() || "Draft withdrawn by its author.",
+      reason: withdrawReason,
     });
     return { evidence_draft_id: draft.evidence_draft_id, task_id: draft.task_id, task_status: newTaskStatus };
+  },
+});
+
+// brings a retired (superseded or withdrawn) draft back to active review. no
+// content changes and no new version is recorded: restoration moves the row
+// between draft_status values only, on the ledger exactly as a supersession
+// or a withdrawal does. a decided record (accepted_for_export or rejected)
+// is reconsidered through the review workflow instead: reopen the task and
+// record a new decision, never restore over a decision that stands
+export const restoreEvidenceDraft = mutation({
+  args: {
+    evidenceDraftId: v.string(),
+    reason: v.string(),
+  },
+  returns: v.object({
+    evidence_draft_id: v.string(),
+    task_id: v.string(),
+    task_status: v.literal("needs_review"),
+    draft_status: v.union(v.literal("submitted"), v.literal("unresolved_note")),
+    evidence_version_hash: v.optional(v.string()),
+  }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
+    const reason = args.reason.trim();
+    if (reason.length < 8) {
+      throw new Error("Restoring evidence needs a reason of at least 8 characters.");
+    }
+    assertTaskReasonLimit("restore reason", reason);
+    const draft = await getDraftOrThrow(ctx, args.evidenceDraftId);
+    if (draft.created_by !== user._id && !canReviewEvidence(user)) {
+      throw new Error("Evidence draft belongs to another user.");
+    }
+    if (draft.draft_status === "accepted_for_export" || draft.draft_status === "rejected") {
+      throw new Error(
+        "A decided record is reconsidered through the review workflow: reopen the task and record a new decision.",
+      );
+    }
+    if (draft.draft_status !== "superseded" && draft.draft_status !== "withdrawn") {
+      throw new Error("Only a superseded or withdrawn record can be restored.");
+    }
+    const task = await getTaskOrThrow(ctx, draft.task_id);
+    if (["reviewed", "pi_accepted", "exported"].includes(task.status)) {
+      throw new Error("Reopen the task before restoring evidence on it.");
+    }
+
+    // the status to restore to: the status this row held immediately before
+    // the retirement that put it in its current draft_status, read from the
+    // ledger; a row with no such entry (or one whose previous status was
+    // never submitted or unresolved_note) restores to submitted
+    const retiredStatus = draft.draft_status;
+    const headChanges = await ctx.db
+      .query("evidence_head_changes")
+      .withIndex("by_draft_time", (q) => q.eq("evidence_draft_id", draft.evidence_draft_id))
+      .order("desc")
+      .take(200);
+    const latestRetirement = headChanges.find((row) => row.new_status === retiredStatus);
+    const wasActive =
+      latestRetirement?.previous_status === "submitted" || latestRetirement?.previous_status === "unresolved_note";
+    // a row withdrawn while still an editable draft was never submitted:
+    // restoring it to submitted would bypass submission validation and the
+    // version contract. a superseded row was active by definition
+    if (retiredStatus === "withdrawn" && !wasActive) {
+      throw new Error("This draft was withdrawn before it was submitted; edit and submit it instead of restoring it.");
+    }
+    const restoredStatus: "submitted" | "unresolved_note" =
+      wasActive && latestRetirement?.previous_status === "unresolved_note" ? "unresolved_note" : "submitted";
+
+    const now = Date.now();
+    // the author's other active drafts on the task are superseded exactly as
+    // an ordinary submission does, whatever their version contract
+    for (const status of ["submitted", "unresolved_note"] as const) {
+      const others = await ctx.db
+        .query("evidence_drafts")
+        .withIndex("by_task_creator_status", (q) =>
+          q.eq("task_id", draft.task_id).eq("created_by", draft.created_by).eq("draft_status", status),
+        )
+        .take(21);
+      if (others.length > 20) {
+        throw new Error("This contributor has more than 20 active drafts for the task. Ask JB to repair the duplicate active set before continuing.");
+      }
+      for (const other of others) {
+        if (other._id === draft._id) continue;
+        await ctx.db.patch(other._id, { draft_status: "superseded", updated_at: now });
+        await recordHeadChange(ctx, {
+          taskId: other.task_id,
+          evidenceDraftId: other.evidence_draft_id,
+          changeKind: "superseded",
+          previousStatus: status,
+          newStatus: "superseded",
+          objectHash: other.evidence_version_hash,
+          actor: user,
+          reason: `Superseded by the restoration of ${args.evidenceDraftId}.`,
+          now,
+        });
+      }
+    }
+
+    await ctx.db.patch(draft._id, { draft_status: restoredStatus, updated_at: now });
+    await recordHeadChange(ctx, {
+      taskId: draft.task_id,
+      evidenceDraftId: draft.evidence_draft_id,
+      changeKind: "restored",
+      previousStatus: retiredStatus,
+      newStatus: restoredStatus,
+      objectHash: draft.evidence_version_hash,
+      actor: user,
+      reason,
+      now,
+    });
+
+    const previousTaskStatus = task.status;
+    await ctx.db.patch(task._id, {
+      status: "needs_review",
+      assigned_to: task.assigned_to ?? draft.created_by,
+      claimed_by: task.claimed_by ?? draft.created_by,
+      claimed_at: task.claimed_at ?? now,
+      updated_at: now,
+      last_event_at: now,
+    });
+    await appendTaskEvent(ctx, {
+      taskId: draft.task_id,
+      eventType: "draft_restored",
+      actorUserId: user._id,
+      actorRole: chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]),
+      previousStatus: previousTaskStatus,
+      newStatus: "needs_review",
+      evidenceDraftId: draft.evidence_draft_id,
+      evidenceVersionHash: draft.evidence_version_hash,
+      reason,
+    });
+
+    return {
+      evidence_draft_id: draft.evidence_draft_id,
+      task_id: draft.task_id,
+      task_status: "needs_review" as const,
+      draft_status: restoredStatus,
+      evidence_version_hash: draft.evidence_version_hash,
+    };
   },
 });
 
@@ -189,6 +340,7 @@ export const withdrawEvidenceDraft = mutation({
 async function supersedeOtherActiveDrafts(
   ctx: MutationCtx,
   draft: Doc<"evidence_drafts">,
+  user: Doc<"users">,
   now: number,
 ): Promise<void> {
   for (const status of ["submitted", "unresolved_note"] as const) {
@@ -214,6 +366,17 @@ async function supersedeOtherActiveDrafts(
           draft_status: "superseded",
           updated_at: now,
         });
+        await recordHeadChange(ctx, {
+          taskId: otherDraft.task_id,
+          evidenceDraftId: otherDraft.evidence_draft_id,
+          changeKind: "superseded",
+          previousStatus: status,
+          newStatus: "superseded",
+          objectHash: otherDraft.evidence_version_hash,
+          actor: user,
+          reason: `Superseded by the author's later submission ${draft.evidence_draft_id}.`,
+          now,
+        });
       }
     }
   }
@@ -230,7 +393,7 @@ async function markDraftSubmitted(
   evidenceVersionHash?: string,
 ) {
   await ctx.db.patch(draft._id, { draft_status: "submitted", updated_at: now });
-  await supersedeOtherActiveDrafts(ctx, draft, now);
+  await supersedeOtherActiveDrafts(ctx, draft, user, now);
   await ctx.db.patch(task._id, {
     status: "needs_review",
     updated_at: now,
@@ -1022,7 +1185,7 @@ export const submitUnresolvedNote = mutation({
       draft_status: "unresolved_note",
       updated_at: now,
     });
-    await supersedeOtherActiveDrafts(ctx, draft, now);
+    await supersedeOtherActiveDrafts(ctx, draft, user, now);
     await ctx.db.patch(task._id, {
       status: "unresolved_note",
       updated_at: now,

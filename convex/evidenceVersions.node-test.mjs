@@ -9,10 +9,13 @@ import { fileURLToPath } from "node:url";
 // rather than a parallel copy of the rules.
 registerHooks({ resolve(specifier, context, nextResolve) { if (specifier.startsWith(".") && !/\.[a-z]+$/i.test(specifier)) { for (const ext of [".js", ".ts"]) { const candidate = new URL(`${specifier}${ext}`, context.parentURL); if (fs.existsSync(fileURLToPath(candidate))) return nextResolve(candidate.href, context); } } return nextResolve(specifier, context); } });
 
-const { saveEvidenceDraft, submitEvidenceDraft, submitEvidenceDraftWithOccupancies, submitUnresolvedNote, reviseEvidenceDraft, importSubmittedEvidenceDrafts } = await import("./evidence.ts");
-const { getEvidenceVersion, listEvidenceVersions, recordMigrationVersion, verifyDraftAgainstVersion } = await import("./evidenceVersions.ts");
+const { saveEvidenceDraft, submitEvidenceDraft, submitEvidenceDraftWithOccupancies, submitUnresolvedNote, reviseEvidenceDraft, importSubmittedEvidenceDrafts, withdrawEvidenceDraft, restoreEvidenceDraft } = await import("./evidence.ts");
+const { getEvidenceVersion, listEvidenceVersions, listEvidenceHeadChanges, recordMigrationVersion, verifyDraftAgainstVersion } = await import("./evidenceVersions.ts");
 const { submitCurrentObservation } = await import("./rapidEntry.ts");
 const { submitOccupancies, decideDerivedYear, confirmAllDerived } = await import("./occupancies.ts");
+const { recordReviewDecision } = await import("./reviews.ts");
+const { recordAcceptance } = await import("./acceptances.ts");
+const { createExportBatch } = await import("./exports.ts");
 const { objectHash } = await import("./lib/canonicalJson.ts");
 const { verifyEvidenceVersionEnvelope } = await import("./lib/evidenceVersions.ts");
 const { intakeRateLimiter } = await import("./lib/rateLimits.ts");
@@ -35,9 +38,11 @@ const submissionId = (n) => `11111111-1111-4111-8111-${String(n).padStart(12, "0
 function world() {
   const rows = {
     users: [], tasks: [], task_events: [], evidence_drafts: [], evidence_versions: [], evidence_submission_receipts: [],
+    evidence_head_changes: [],
     site_occupancies: [], historical_claims: [], derived_target_year_states: [],
     derived_year_locations: [], derived_target_year_functions: [], derived_state_events: [],
     review_decisions: [], agent_reviews: [], sources: [], task_batches: [],
+    task_acceptances: [], export_batches: [], review_snapshots: [],
   };
   const counters = {};
   let creationTime = 1_780_000_000_000;
@@ -1309,4 +1314,399 @@ test("a spreadsheet re-import never rewrites a decided, superseded, or withdrawn
     assert.equal(w.rows.evidence_versions.length, 1, status);
     assert.equal(version(w).envelope_json, envelopeJson, status);
   }
+});
+
+// retirement, restoration, and approval (docs/development/evidence-versions.md,
+// "Lifecycle: Retirement, Restoration, And Approval"): retired evidence stays
+// visible and restorable, every retirement or restoration writes an
+// evidence_head_changes ledger row, and acceptance pins the exact version it
+// refers to so a later retirement, restoration, or write never transfers it.
+
+test("the ledger records a version, a supersession naming the later draft, and a withdrawal with its reason", async () => {
+  const w = await scene({ country: "VU" });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  const firstVersion = version(w);
+
+  const afterSubmit = await listEvidenceHeadChanges._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  assert.equal(afterSubmit.length, 1);
+  assert.equal(afterSubmit[0].change_kind, "version_recorded");
+  assert.equal(afterSubmit[0].version_kind, "submitted");
+  assert.equal(afterSubmit[0].object_hash, firstVersion.object_hash);
+  assert.equal(afterSubmit[0].previous_object_hash, undefined);
+  assert.equal(afterSubmit[0].reason, "Submitted for review.");
+  assert.equal(afterSubmit[0].changed_by, w.ra._id);
+
+  // a later submission by the same author supersedes the first
+  await w.addDraft({
+    evidence_draft_id: "task_1:draft_b",
+    task_id: "task_1",
+    created_by: w.ra._id,
+    ...draftContent({ evidence_note: "A second reading of the same directory, entered afresh." }),
+  });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_b" });
+
+  const afterSupersede = await listEvidenceHeadChanges._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  assert.equal(afterSupersede.length, 2);
+  assert.equal(afterSupersede[1].change_kind, "superseded");
+  assert.equal(afterSupersede[1].previous_status, "submitted");
+  assert.equal(afterSupersede[1].new_status, "superseded");
+  assert.equal(afterSupersede[1].object_hash, firstVersion.object_hash);
+  assert.match(afterSupersede[1].reason, /task_1:draft_b/);
+
+  // withdrawal writes its own ledger entry, naming the given reason
+  await withdrawEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_b", reason: "Wrong location entirely." });
+  const draftBChanges = await listEvidenceHeadChanges._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_b" });
+  const withdrawn = draftBChanges.at(-1);
+  assert.equal(withdrawn.change_kind, "withdrawn");
+  assert.equal(withdrawn.previous_status, "submitted");
+  assert.equal(withdrawn.new_status, "withdrawn");
+  assert.equal(withdrawn.reason, "Wrong location entirely.");
+
+  // the ledger follows the same visibility as the version list
+  await assert.rejects(
+    listEvidenceHeadChanges._handler(w.as(w.otherRa), { evidenceDraftId: "task_1:draft_a" }),
+    /belongs to another user/,
+  );
+});
+
+test("retiring an earlier parent's period set by a later submission records a version_recorded ledger entry naming the later parent", async () => {
+  const w = await scene({ country: "VU" });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  await submitOccupancies._handler(w.as(w.ra), {
+    clientSubmissionId: submissionId(201),
+    taskId: "task_1",
+    parentEvidenceDraftId: "task_1:draft_a",
+    segments: [segment(0)],
+  });
+
+  const revision = await reviseEvidenceDraft._handler(w.as(w.ra), { taskId: "task_1" });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: revision.evidence_draft_id });
+  await submitOccupancies._handler(w.as(w.ra), {
+    clientSubmissionId: submissionId(202),
+    taskId: "task_1",
+    parentEvidenceDraftId: revision.evidence_draft_id,
+    segments: [segment(0, { start_date: "1906" })],
+  });
+
+  const changes = await listEvidenceHeadChanges._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:draft_a" });
+  const retirement = changes.at(-1);
+  assert.equal(retirement.change_kind, "version_recorded");
+  assert.equal(retirement.version_kind, "superseded_by_later_set");
+  assert.match(retirement.reason, new RegExp(revision.evidence_draft_id));
+});
+
+test("a reviewer restores a superseded draft: status returns, the later active draft is superseded, and one draft_restored event is recorded", async () => {
+  const w = await scene({ country: "VU" });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  const firstVersion = version(w);
+  const firstEnvelopeJson = firstVersion.envelope_json;
+
+  await w.addDraft({
+    evidence_draft_id: "task_1:draft_b",
+    task_id: "task_1",
+    created_by: w.ra._id,
+    ...draftContent({ evidence_note: "A second reading of the same directory, entered afresh." }),
+  });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_b" });
+  assert.equal(w.draft.draft_status, "superseded");
+
+  const restored = await restoreEvidenceDraft._handler(w.as(w.reviewer), {
+    evidenceDraftId: "task_1:draft_a",
+    reason: "The later reading was a misprint; restoring the original.",
+  });
+  assert.equal(restored.draft_status, "submitted");
+  assert.equal(restored.task_status, "needs_review");
+  assert.equal(restored.evidence_version_hash, firstVersion.object_hash);
+  assert.equal(w.draft.draft_status, "submitted");
+  assert.equal(w.task.status, "needs_review");
+
+  const laterDraft = w.row("evidence_drafts", "evidence_draft_id", "task_1:draft_b");
+  assert.equal(laterDraft.draft_status, "superseded");
+
+  const restoreEvents = w.events("draft_restored");
+  assert.equal(restoreEvents.length, 1);
+  assert.equal(restoreEvents[0].evidence_version_hash, firstVersion.object_hash);
+  assert.equal(restoreEvents[0].reason, "The later reading was a misprint; restoring the original.");
+
+  const changes = await listEvidenceHeadChanges._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:draft_a" });
+  const restoredEntry = changes.at(-1);
+  assert.equal(restoredEntry.change_kind, "restored");
+  assert.equal(restoredEntry.previous_status, "superseded");
+  assert.equal(restoredEntry.new_status, "submitted");
+  assert.equal(restoredEntry.reason, "The later reading was a misprint; restoring the original.");
+
+  const draftBChanges = await listEvidenceHeadChanges._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:draft_b" });
+  const supersededByRestore = draftBChanges.at(-1);
+  assert.equal(supersededByRestore.change_kind, "superseded");
+  assert.match(supersededByRestore.reason, /restoration of task_1:draft_a/);
+
+  // no content change and no new version: periods are not reinstated by
+  // this route (there were none here), the version count is unchanged, and
+  // the stored envelope is byte-identical
+  assert.equal(w.rows.evidence_versions.length, 2);
+  assert.equal(firstVersion.envelope_json, firstEnvelopeJson);
+  const check = await verifyDraftAgainstVersion._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:draft_a" });
+  assert.equal(check.consistent, true, check.errors.join("; "));
+});
+
+test("the author may restore their own withdrawn draft", async () => {
+  const w = await scene({ country: "VU" });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  await withdrawEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a", reason: "Submitted the wrong file by mistake." });
+  assert.equal(w.draft.draft_status, "withdrawn");
+  assert.equal(w.task.status, "in_progress");
+
+  const restored = await restoreEvidenceDraft._handler(w.as(w.ra), {
+    evidenceDraftId: "task_1:draft_a",
+    reason: "The file was in fact correct; restoring it.",
+  });
+  assert.equal(restored.draft_status, "submitted");
+  assert.equal(w.draft.draft_status, "submitted");
+  assert.equal(w.task.status, "needs_review");
+});
+
+test("a withdrawn unresolved note is restored to unresolved_note", async () => {
+  const w = await scene({ country: "VU" });
+  await submitUnresolvedNote._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a", note: "Ambiguous evidence; flagging for discussion." });
+  assert.equal(w.draft.draft_status, "unresolved_note");
+  await withdrawEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a", reason: "Withdrawing the note for now." });
+  assert.equal(w.draft.draft_status, "withdrawn");
+
+  const restored = await restoreEvidenceDraft._handler(w.as(w.ra), {
+    evidenceDraftId: "task_1:draft_a",
+    reason: "Reopening this for discussion again.",
+  });
+  assert.equal(restored.draft_status, "unresolved_note");
+  assert.equal(w.draft.draft_status, "unresolved_note");
+});
+
+test("restoration is refused for a decided row, another RA, a short reason, or a closed task, and a refused restore changes nothing", async () => {
+  {
+    const w = await scene({ country: "VU" });
+    await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+    await w.db.patch(w.draft._id, { draft_status: "accepted_for_export" });
+    await assert.rejects(
+      restoreEvidenceDraft._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:draft_a", reason: "Reconsidering this decision." }),
+      /reconsidered through the review workflow/,
+    );
+    assert.equal(w.draft.draft_status, "accepted_for_export");
+  }
+  {
+    const w = await scene({ country: "VU" });
+    await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+    await w.db.patch(w.draft._id, { draft_status: "rejected" });
+    await assert.rejects(
+      restoreEvidenceDraft._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:draft_a", reason: "Reconsidering this decision." }),
+      /reconsidered through the review workflow/,
+    );
+    assert.equal(w.draft.draft_status, "rejected");
+  }
+  {
+    const w = await scene({ country: "VU" });
+    await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+    await w.db.patch(w.draft._id, { draft_status: "superseded" });
+    await assert.rejects(
+      restoreEvidenceDraft._handler(w.as(w.otherRa), { evidenceDraftId: "task_1:draft_a", reason: "Restoring this on their behalf." }),
+      /belongs to another user/,
+    );
+    assert.equal(w.draft.draft_status, "superseded");
+  }
+  {
+    const w = await scene({ country: "VU" });
+    await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+    await w.db.patch(w.draft._id, { draft_status: "superseded" });
+    await assert.rejects(
+      restoreEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a", reason: "short" }),
+      /at least 8 characters/,
+    );
+    assert.equal(w.draft.draft_status, "superseded");
+  }
+  for (const status of ["reviewed", "pi_accepted", "exported"]) {
+    const w = await scene({ country: "VU" });
+    await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+    await w.db.patch(w.draft._id, { draft_status: "superseded" });
+    await w.db.patch(w.task._id, { status });
+    await assert.rejects(
+      restoreEvidenceDraft._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:draft_a", reason: "Reopen and restore this evidence." }),
+      /Reopen the task before restoring/,
+      status,
+    );
+    assert.equal(w.draft.draft_status, "superseded", status);
+    assert.equal(w.rows.evidence_head_changes.filter((row) => row.change_kind === "restored").length, 0, status);
+  }
+});
+
+test("recordReviewDecision pins the version on the decision and its event; a pre-contract draft pins none", async () => {
+  const w = await scene({ country: "VU" });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  const v1 = version(w);
+  const decisionResult = await recordReviewDecision._handler(w.as(w.reviewer), {
+    taskId: "task_1",
+    decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the directory and the address." },
+  });
+  const decisionRow = w.row("review_decisions", "review_decision_id", decisionResult.review_decision_id);
+  assert.equal(decisionRow.evidence_version_hash, v1.object_hash);
+  const decidedEvent = w.events("review_decided").at(-1);
+  assert.equal(decidedEvent.evidence_version_hash, v1.object_hash);
+
+  const w2 = await scene({ country: "VU", taskStatus: "needs_review", draft: { draft_status: "submitted" } });
+  const decisionResult2 = await recordReviewDecision._handler(w2.as(w2.reviewer), {
+    taskId: "task_1",
+    decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the pre-contract record thoroughly." },
+  });
+  const decisionRow2 = w2.row("review_decisions", "review_decision_id", decisionResult2.review_decision_id);
+  assert.equal(decisionRow2.evidence_version_hash, undefined);
+});
+
+test("no silent transfer: a decided evidence record's periods retired by a later submission keep the decision pinned to the version it named", async () => {
+  const w = await scene({ country: "VU" });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  await submitOccupancies._handler(w.as(w.ra), {
+    clientSubmissionId: submissionId(301),
+    taskId: "task_1",
+    parentEvidenceDraftId: "task_1:draft_a",
+    segments: [segment(0)],
+  });
+  const a1 = version(w, 1);
+  assert.equal(a1.version_kind, "occupancy_set_recorded");
+
+  const decisionResult = await recordReviewDecision._handler(w.as(w.reviewer), {
+    taskId: "task_1",
+    decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the dated directory entry and its periods." },
+  });
+  const decision = w.row("review_decisions", "review_decision_id", decisionResult.review_decision_id);
+  assert.equal(decision.evidence_version_hash, a1.object_hash);
+  assert.equal(w.task.status, "reviewed");
+  const draftARow = w.row("evidence_drafts", "evidence_draft_id", "task_1:draft_a");
+  assert.equal(draftARow.draft_status, "accepted_for_export");
+
+  // the author submits a second, independent evidence record on the task
+  await saveEvidenceDraft._handler(w.as(w.ra), {
+    taskId: "task_1",
+    evidenceDraftId: "task_1:draft_b",
+    draft: draftContent({ evidence_note: "A later reading of a different directory entry." }),
+  });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_b" });
+  assert.equal(w.task.status, "needs_review");
+  assert.equal(draftARow.draft_status, "accepted_for_export", "B's submission alone does not disturb A's decision");
+
+  // periods recorded on B retire A's earlier active set
+  await submitOccupancies._handler(w.as(w.ra), {
+    clientSubmissionId: submissionId(302),
+    taskId: "task_1",
+    parentEvidenceDraftId: "task_1:draft_b",
+    segments: [segment(0, { start_date: "1911" })],
+  });
+  const a2 = w.rows.evidence_versions.find(
+    (row) => row.evidence_draft_id === "task_1:draft_a" && row.version_kind === "superseded_by_later_set",
+  );
+  assert.ok(a2, "expected a superseded_by_later_set version on A");
+  assert.equal(draftARow.evidence_version_hash, a2.object_hash);
+  assert.notEqual(a2.object_hash, a1.object_hash);
+  assert.equal(draftARow.draft_status, "accepted_for_export", "the decided status is untouched by the retirement");
+
+  // the decision still refers to the version the reviewer saw
+  assert.equal(decision.evidence_version_hash, a1.object_hash);
+
+  // the retirement of a decided parent's periods is loud: one note_added
+  // event names the earlier and current versions (alongside the ordinary
+  // "periods recorded" events from A's own earlier submission)
+  const retirementNote = w.events("note_added").find(
+    (event) => event.evidence_draft_id === "task_1:draft_a" && /decided evidence/.test(event.reason ?? ""),
+  );
+  assert.ok(retirementNote, "expected a note_added event naming the decided parent's retirement");
+  assert.match(retirementNote.reason, /task_1:draft_a/);
+  assert.match(retirementNote.reason, /task_1:draft_b/);
+  assert.ok(retirementNote.reason.includes(a1.object_hash), "names the earlier version");
+  assert.ok(retirementNote.reason.includes(a2.object_hash), "names the current version");
+  assert.equal(retirementNote.evidence_version_hash, a2.object_hash);
+
+  // the ledger entry for the retirement names the later parent
+  const headChanges = await listEvidenceHeadChanges._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:draft_a" });
+  const retirement = headChanges.at(-1);
+  assert.equal(retirement.change_kind, "version_recorded");
+  assert.match(retirement.reason, /task_1:draft_b/);
+
+  // the version the decision refers to is still valid and retrievable
+  const retrieved = await getEvidenceVersion._handler(w.as(w.reviewer), { objectHash: a1.object_hash });
+  assert.equal(retrieved.verification.valid, true);
+});
+
+test("PI acceptance and export batch refuse an accepted decision whose version has moved, and accept one that has not", async () => {
+  const w = await scene({ country: "VU" });
+  const pi = await w.addUser("pi-subject", ["pi"]);
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  await submitOccupancies._handler(w.as(w.ra), {
+    clientSubmissionId: submissionId(311),
+    taskId: "task_1",
+    parentEvidenceDraftId: "task_1:draft_a",
+    segments: [segment(0)],
+  });
+  const a1 = version(w, 1);
+  await recordReviewDecision._handler(w.as(w.reviewer), {
+    taskId: "task_1",
+    decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the dated directory entry and its periods." },
+  });
+
+  await saveEvidenceDraft._handler(w.as(w.ra), {
+    taskId: "task_1",
+    evidenceDraftId: "task_1:draft_b",
+    draft: draftContent({ evidence_note: "A later, distinct directory reading." }),
+  });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_b" });
+  await submitOccupancies._handler(w.as(w.ra), {
+    clientSubmissionId: submissionId(312),
+    taskId: "task_1",
+    parentEvidenceDraftId: "task_1:draft_b",
+    segments: [segment(0, { start_date: "1912" })],
+  });
+  const draftARow = w.row("evidence_drafts", "evidence_draft_id", "task_1:draft_a");
+  assert.notEqual(draftARow.evidence_version_hash, a1.object_hash);
+
+  // exercise the version guard directly: the task is set to the status
+  // recordAcceptance itself requires (convex/lib/acceptance.ts), isolating
+  // the version check from the ordinary task-status gate
+  await w.db.patch(w.task._id, { status: "reviewed" });
+  await assert.rejects(
+    recordAcceptance._handler(w.as(pi), { taskId: "task_1", outcome: "accepted", note: "Ratifying the reviewer's decision." }),
+    /The review decision refers to evidence version/,
+  );
+
+  await w.db.patch(w.task._id, { status: "pi_accepted" });
+  await assert.rejects(
+    createExportBatch._handler(w.as(w.admin), { countryCode: "VU", taskIds: ["task_1"] }),
+    /re-review before export/,
+  );
+
+  // a decision whose version has not moved is ratified normally
+  const untouched = await scene({ country: "VU" });
+  await submitEvidenceDraft._handler(untouched.as(untouched.ra), { evidenceDraftId: "task_1:draft_a" });
+  await recordReviewDecision._handler(untouched.as(untouched.reviewer), {
+    taskId: "task_1",
+    decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the untouched record thoroughly." },
+  });
+  const untouchedPi = await untouched.addUser("pi-subject-2", ["pi"]);
+  const accepted = await recordAcceptance._handler(untouched.as(untouchedPi), { taskId: "task_1", outcome: "accepted", note: "Ratifying the reviewer's decision." });
+  assert.equal(accepted.task_status, "pi_accepted");
+});
+
+test("a draft withdrawn before it was ever submitted cannot be restored to submitted", async () => {
+  const w = await scene({ country: "VU" });
+  await withdrawEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a", reason: "Started on the wrong task." });
+  assert.equal(w.draft.draft_status, "withdrawn");
+  assert.equal(w.rows.evidence_versions.length, 0);
+  await assert.rejects(
+    restoreEvidenceDraft._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:draft_a", reason: "Restore attempted on an unsubmitted draft." }),
+    /withdrawn before it was submitted/,
+  );
+  assert.equal(w.draft.draft_status, "withdrawn");
+  assert.equal(w.rows.evidence_versions.length, 0);
+  assert.equal(w.rows.evidence_head_changes.filter((row) => row.change_kind === "restored").length, 0);
+  assert.equal(w.events("draft_restored").length, 0);
+  // a pre-ledger withdrawn row, with no ledger entry to show it was active, is refused the same way
+  await w.addDraft({ evidence_draft_id: "task_1:legacy", task_id: "task_1", created_by: w.ra._id, draft_status: "withdrawn" });
+  await assert.rejects(
+    restoreEvidenceDraft._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:legacy", reason: "Restore attempted on a pre-ledger row." }),
+    /withdrawn before it was submitted/,
+  );
 });

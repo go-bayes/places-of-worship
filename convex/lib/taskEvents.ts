@@ -41,7 +41,8 @@ export type TaskEventType =
   | "comment_requested"
   | "comment_provided"
   | "pi_accepted"
-  | "pi_returned";
+  | "pi_returned"
+  | "draft_restored";
 
 export async function appendTaskEvent(
   ctx: MutationCtx,
