@@ -1,6 +1,8 @@
 use std::collections::{BTreeMap, BTreeSet};
+use std::fmt;
 use std::fs::{self, File};
 use std::io::{BufRead, BufReader};
+use std::net::IpAddr;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -10,11 +12,16 @@ use chrono::{DateTime, Days, NaiveDate, Utc};
 use clap::{Parser, Subcommand, ValueEnum};
 use jsonschema::{Registry, Validator};
 use rusqlite::{Connection, params};
+use serde::Deserializer;
 use serde::Serialize;
+use serde::de::{self, DeserializeSeed, MapAccess, SeqAccess, Visitor};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 
 const PROPOSE_VERSION: &str = "pow-propose.v1";
+const AGENT_REVIEW_SCHEMA_VERSION: &str = "agent-review-bundle.v1";
+const AGENT_REVIEW_MAX_BYTES: usize = 64 * 1024;
+const AGENT_REVIEW_MAX_DEPTH: usize = 32;
 
 #[derive(Parser, Debug)]
 #[command(name = "pow")]
@@ -28,12 +35,31 @@ struct Cli {
 enum Commands {
     /// Validate RA evidence CSVs or revision JSON/JSONL files.
     Validate(ValidateArgs),
+    /// Validate an untrusted, provisional internal agent review bundle.
+    ValidateAgent(ValidateAgentArgs),
     /// Validate and write a batch into the local staging database.
     Stage(StageArgs),
     /// Emit draft change-event JSONL from a staged RA evidence batch.
     Propose(ProposeArgs),
     /// Render a reviewer report for a batch of staged or proposed change events.
     Diff(DiffArgs),
+}
+
+#[derive(Parser, Debug)]
+struct ValidateAgentArgs {
+    /// Internal agent review bundle to validate.
+    input: PathBuf,
+
+    /// Self-contained JSON Schema for the bundle.
+    #[arg(
+        long,
+        default_value = "scripts/agent_research/schemas/agent-review-bundle.v1.json"
+    )]
+    schema: PathBuf,
+
+    /// Report format.
+    #[arg(long, value_enum, default_value_t = ReportFormat::Text)]
+    report: ReportFormat,
 }
 
 #[derive(Parser, Debug)]
@@ -273,6 +299,15 @@ fn run(cli: Cli) -> Result<bool> {
             }
             Ok(!summary.errors.is_empty())
         }
+        Commands::ValidateAgent(args) => {
+            let report_format = args.report;
+            let report = validate_agent(args)?;
+            match report_format {
+                ReportFormat::Text => print_agent_validation_text(&report),
+                ReportFormat::Json => println!("{}", serde_json::to_string(&report)?),
+            }
+            Ok(!report.valid)
+        }
         Commands::Stage(args) => {
             let report = args.report;
             let outcome = stage(args)?;
@@ -336,6 +371,880 @@ fn validate(args: ValidateArgs) -> Result<ValidationSummary> {
         &args.template_dir,
         mode,
     )
+}
+
+#[derive(Debug, Serialize)]
+struct AgentValidationReport {
+    valid: bool,
+    errors: Vec<String>,
+    input_sha256: String,
+    schema_version: &'static str,
+    provisional: bool,
+}
+
+fn validate_agent(args: ValidateAgentArgs) -> Result<AgentValidationReport> {
+    let bytes = fs::read(&args.input)
+        .with_context(|| format!("failed to read agent bundle {}", args.input.display()))?;
+    let input_sha256 = sha256_hex(&bytes);
+    let mut report = AgentValidationReport {
+        valid: false,
+        errors: Vec::new(),
+        input_sha256,
+        schema_version: AGENT_REVIEW_SCHEMA_VERSION,
+        provisional: true,
+    };
+
+    if bytes.len() > AGENT_REVIEW_MAX_BYTES {
+        report.errors.push(format!(
+            "input is {} bytes; maximum is {} bytes",
+            bytes.len(),
+            AGENT_REVIEW_MAX_BYTES
+        ));
+        return Ok(report);
+    }
+
+    let value = match parse_strict_json(&bytes) {
+        Ok(value) => value,
+        Err(error) => {
+            report.errors.push(format!("invalid JSON: {error}"));
+            return Ok(report);
+        }
+    };
+
+    let schema = read_json(args.schema.clone())?;
+    let mut schema_errors = Vec::new();
+    collect_external_schema_refs(&schema, "", &mut schema_errors);
+    if !schema_errors.is_empty() {
+        report.errors.extend(schema_errors);
+        return Ok(report);
+    }
+    let validator = match jsonschema::options()
+        .should_validate_formats(true)
+        .build(&schema)
+    {
+        Ok(validator) => validator,
+        Err(error) => {
+            report.errors.push(format!("invalid local schema: {error}"));
+            return Ok(report);
+        }
+    };
+
+    report.errors.extend(
+        validator
+            .iter_errors(&value)
+            .map(|error| format!("schema {}: {}", error.instance_path(), error)),
+    );
+    validate_agent_semantics(&value, &mut report.errors);
+    report.valid = report.errors.is_empty();
+    Ok(report)
+}
+
+fn print_agent_validation_text(report: &AgentValidationReport) {
+    if report.valid {
+        println!("pow validate-agent: valid provisional bundle");
+    } else {
+        println!("pow validate-agent: invalid provisional bundle");
+        for error in &report.errors {
+            println!("- {}", terminal_safe(error));
+        }
+    }
+}
+
+fn collect_external_schema_refs(value: &Value, path: &str, errors: &mut Vec<String>) {
+    match value {
+        Value::Object(object) => {
+            if let Some(reference) = object.get("$ref").and_then(Value::as_str)
+                && !reference.starts_with('#')
+            {
+                errors.push(format!(
+                    "schema {path}: external $ref {reference:?} is not allowed"
+                ));
+            }
+            for (key, child) in object {
+                let child_path = if path.is_empty() {
+                    format!("/{key}")
+                } else {
+                    format!("{path}/{key}")
+                };
+                collect_external_schema_refs(child, &child_path, errors);
+            }
+        }
+        Value::Array(array) => {
+            for (index, child) in array.iter().enumerate() {
+                collect_external_schema_refs(child, &format!("{path}/{index}"), errors);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
+    let Some(root) = value.as_object() else {
+        return;
+    };
+    let Some(dossier) = root.get("dossier").and_then(Value::as_object) else {
+        return;
+    };
+    let Some(review) = root.get("review").and_then(Value::as_object) else {
+        return;
+    };
+
+    if dossier
+        .get("place")
+        .and_then(Value::as_object)
+        .and_then(|place| place.get("country_code"))
+        .and_then(Value::as_str)
+        != Some("NZ")
+    {
+        errors.push("/dossier/place/country_code: only NZ bundles are accepted".to_owned());
+    }
+
+    let claims = dossier
+        .get("claims")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    let mut claim_ids = BTreeSet::new();
+    let mut claim_locators = BTreeMap::new();
+    for (index, claim) in claims.iter().enumerate() {
+        let path = format!("/dossier/claims/{index}");
+        let Some(claim_object) = claim.as_object() else {
+            continue;
+        };
+        if let Some(claim_id) = claim_object.get("claim_id").and_then(Value::as_str)
+            && !claim_ids.insert(claim_id.to_owned())
+        {
+            errors.push(format!("{path}/claim_id: duplicate claim id {claim_id:?}"));
+        }
+        if let Some(source) = claim_object.get("source").and_then(Value::as_object) {
+            if let Some(locator) = source.get("locator").and_then(Value::as_str) {
+                if let Err(reason) = validate_source_locator(locator) {
+                    errors.push(format!("{path}/source/locator: {reason}"));
+                }
+                if let Some(claim_id) = claim_object.get("claim_id").and_then(Value::as_str) {
+                    claim_locators.insert(claim_id.to_owned(), locator.to_owned());
+                }
+            }
+            for field in ["source_date", "retrieved_at"] {
+                if let Some(value) = source.get(field).and_then(Value::as_str)
+                    && !value.is_empty()
+                    && parse_partial_date(value.split('T').next().unwrap_or(value)).is_none()
+                {
+                    errors.push(format!("{path}/source/{field}: invalid calendar date"));
+                }
+            }
+        }
+        validate_claim_dates(claim_object, &path, errors);
+        for field in ["value", "quoted_support", "note"] {
+            if claim_object
+                .get(field)
+                .and_then(Value::as_str)
+                .is_some_and(contains_personal_details)
+            {
+                errors.push(format!(
+                    "{path}/{field}: potential personal details require human handling"
+                ));
+            }
+        }
+    }
+
+    let research_manifest = dossier.get("run_manifest").and_then(Value::as_object);
+    let research_backend = research_manifest
+        .and_then(|manifest| manifest.get("backend"))
+        .and_then(Value::as_str);
+    let research_model = research_manifest
+        .and_then(|manifest| manifest.get("model_id_requested"))
+        .and_then(Value::as_str);
+    for (index, claim) in claims.iter().enumerate() {
+        let Some(reader) = claim.get("reader").and_then(Value::as_object) else {
+            continue;
+        };
+        if reader.get("backend").and_then(Value::as_str) != research_backend {
+            errors.push(format!(
+                "/dossier/claims/{index}/reader/backend: inconsistent researcher provenance"
+            ));
+        }
+        let reader_model = reader.get("model_id").and_then(Value::as_str);
+        let reported_model = research_manifest
+            .and_then(|manifest| manifest.get("model_id_reported"))
+            .and_then(Value::as_str);
+        if reader_model != research_model
+            && Some(reader_model.unwrap_or_default()) != reported_model
+        {
+            errors.push(format!(
+                "/dossier/claims/{index}/reader/model_id: inconsistent researcher provenance"
+            ));
+        }
+    }
+    if let Some(status) = dossier.get("status_assessment").and_then(Value::as_object) {
+        let claim_ids: BTreeSet<_> = claims
+            .iter()
+            .filter_map(|claim| claim.get("claim_id").and_then(Value::as_str))
+            .collect();
+        if let Some(supporting) = status.get("supporting_claim_ids").and_then(Value::as_array) {
+            for claim_id in supporting.iter().filter_map(Value::as_str) {
+                if !claim_ids.contains(claim_id) {
+                    errors.push(format!(
+                        "/dossier/status_assessment/supporting_claim_ids: unknown claim {claim_id:?}"
+                    ));
+                }
+            }
+        }
+        validate_partial_date(
+            status.get("asof_date"),
+            "/dossier/status_assessment/asof_date",
+            errors,
+        );
+    }
+    if let Some(version_chain) = dossier.get("osm_version_chain").and_then(Value::as_array) {
+        for (index, entry) in version_chain.iter().enumerate() {
+            if let Some(locator) = entry
+                .as_object()
+                .and_then(|entry| entry.get("locator"))
+                .and_then(Value::as_str)
+                && let Err(reason) = validate_source_locator(locator)
+            {
+                errors.push(format!(
+                    "/dossier/osm_version_chain/{index}/locator: {reason}"
+                ));
+            }
+        }
+    }
+
+    let checks = review
+        .get("claim_checks")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    let mut checked_ids = BTreeSet::new();
+    for (index, check) in checks.iter().enumerate() {
+        let path = format!("/review/claim_checks/{index}");
+        let Some(check_object) = check.as_object() else {
+            continue;
+        };
+        let Some(claim_id) = check_object.get("claim_id").and_then(Value::as_str) else {
+            continue;
+        };
+        if !claim_ids.contains(claim_id) {
+            errors.push(format!(
+                "{path}/claim_id: no dossier claim with id {claim_id:?}"
+            ));
+        }
+        if !checked_ids.insert(claim_id.to_owned()) {
+            errors.push(format!("{path}/claim_id: duplicate review claim check"));
+        }
+        if let Some(source_url) = check_object.get("source_url").and_then(Value::as_str) {
+            if let Err(reason) = validate_source_locator(source_url) {
+                errors.push(format!("{path}/source_url: {reason}"));
+            }
+            if claim_locators.get(claim_id).map(String::as_str) != Some(source_url) {
+                errors.push(format!(
+                    "{path}/source_url: does not exactly equal /dossier/claims source.locator for {claim_id:?}"
+                ));
+            }
+        }
+        let outcome = check_object.get("outcome").and_then(Value::as_str);
+        let access_method = check_object.get("access_method").and_then(Value::as_str);
+        if outcome == Some("supported") && access_method == Some("not_checked") {
+            errors.push(format!("{path}: unchecked source cannot be supported"));
+        }
+    }
+    for claim_id in &claim_ids {
+        if !checked_ids.contains(claim_id) {
+            errors.push(format!(
+                "/review/claim_checks: dossier claim {claim_id:?} is not covered"
+            ));
+        }
+    }
+    let recommendation = review.get("recommendation").and_then(Value::as_str);
+    let cultural_flagged = review
+        .get("cultural_sensitivity")
+        .and_then(Value::as_object)
+        .and_then(|value| value.get("flagged"))
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    if cultural_flagged && recommendation != Some("defer_cultural") {
+        errors.push(
+            "/review/cultural_sensitivity: flagged review must defer to human judgement".to_owned(),
+        );
+    }
+    if recommendation == Some("accept")
+        && checks.iter().any(|check| {
+            check.get("outcome").and_then(Value::as_str) != Some("supported")
+                || check.get("access_method").and_then(Value::as_str) != Some("opened")
+        })
+    {
+        errors.push(
+            "/review/recommendation: accept requires opened, supported checks for every claim"
+                .to_owned(),
+        );
+    }
+
+    if dossier
+        .get("personal_details_quarantine")
+        .and_then(Value::as_object)
+        .and_then(|quarantine| quarantine.get("items"))
+        .and_then(Value::as_array)
+        .is_some_and(|items| !items.is_empty())
+    {
+        errors.push(
+            "/dossier/personal_details_quarantine/items: must be empty in a review bundle"
+                .to_owned(),
+        );
+    }
+
+    validate_agent_runs(root, dossier, errors);
+}
+
+fn validate_agent_runs(
+    root: &serde_json::Map<String, Value>,
+    dossier: &serde_json::Map<String, Value>,
+    errors: &mut Vec<String>,
+) {
+    let research = root.get("research_run").and_then(Value::as_object);
+    let review = root.get("review_run").and_then(Value::as_object);
+    let Some(research) = research else { return };
+    let Some(review) = review else { return };
+    let research_backend = research.get("backend").and_then(Value::as_str);
+    let review_backend = review.get("backend").and_then(Value::as_str);
+    let research_model = research.get("model_requested").and_then(Value::as_str);
+    let review_model = review.get("model_requested").and_then(Value::as_str);
+
+    if research_backend == review_backend {
+        errors.push("/research_run/backend and /review_run/backend must differ".to_owned());
+    }
+    if !agent_run_model_allowed(research_backend, research_model) {
+        errors.push(
+            "/research_run: backend/model must be claude/sonnet or codex/gpt-5.6-luna".to_owned(),
+        );
+    }
+    if !agent_run_model_allowed(review_backend, review_model) {
+        errors.push(
+            "/review_run: backend/model must be claude/sonnet or codex/gpt-5.6-luna".to_owned(),
+        );
+    }
+    validate_run_times(research, "/research_run", errors);
+    validate_run_times(review, "/review_run", errors);
+
+    if let Some(manifest) = dossier.get("run_manifest").and_then(Value::as_object) {
+        if manifest.get("backend").and_then(Value::as_str) != research_backend {
+            errors
+                .push("/dossier/run_manifest/backend: must match /research_run/backend".to_owned());
+        }
+        let manifest_model = manifest
+            .get("model_id_requested")
+            .and_then(Value::as_str)
+            .unwrap_or_default();
+        if Some(manifest_model) != research_model {
+            errors.push(
+                "/dossier/run_manifest/model_id_requested: must match the research run model"
+                    .to_owned(),
+            );
+        }
+        if manifest.get("exit_status").and_then(Value::as_str) != Some("completed") {
+            errors.push(
+                "/dossier/run_manifest/exit_status: research attempt was not completed".to_owned(),
+            );
+        }
+        validate_run_times(manifest, "/dossier/run_manifest", errors);
+    }
+}
+
+fn agent_run_model_allowed(backend: Option<&str>, model: Option<&str>) -> bool {
+    matches!(
+        (backend, model),
+        (Some("claude"), Some("sonnet")) | (Some("codex"), Some("gpt-5.6-luna"))
+    )
+}
+
+fn validate_run_times(run: &serde_json::Map<String, Value>, path: &str, errors: &mut Vec<String>) {
+    let start = run.get("started_at").and_then(Value::as_str);
+    let end = run.get("ended_at").and_then(Value::as_str);
+    let (Some(start), Some(end)) = (start, end) else {
+        return;
+    };
+    let start_time = match DateTime::parse_from_rfc3339(start) {
+        Ok(value) => value,
+        Err(_) => {
+            errors.push(format!("{path}/started_at: must be an ISO-8601 timestamp"));
+            return;
+        }
+    };
+    let end_time = match DateTime::parse_from_rfc3339(end) {
+        Ok(value) => value,
+        Err(_) => {
+            errors.push(format!("{path}/ended_at: must be an ISO-8601 timestamp"));
+            return;
+        }
+    };
+    if end_time < start_time {
+        errors.push(format!("{path}: ended_at precedes started_at"));
+    }
+}
+
+fn validate_claim_dates(
+    claim: &serde_json::Map<String, Value>,
+    path: &str,
+    errors: &mut Vec<String>,
+) {
+    let start = claim.get("date_start");
+    let end = claim.get("date_end");
+    validate_partial_date(start, &format!("{path}/date_start"), errors);
+    validate_partial_date(end, &format!("{path}/date_end"), errors);
+    let precision = claim.get("date_precision").and_then(Value::as_str);
+    if let Some(precision) = precision {
+        for (field, date) in [("date_start", start), ("date_end", end)] {
+            let Some(date) = date.and_then(Value::as_str) else {
+                continue;
+            };
+            let expected = match date.len() {
+                4 => "year",
+                7 => "month",
+                10 => "day",
+                _ => continue,
+            };
+            if matches!(precision, "year" | "month" | "day") && precision != expected {
+                errors.push(format!(
+                    "{path}/{field}: precision {precision:?} does not match {date:?}"
+                ));
+            }
+        }
+    }
+    if let (Some(start), Some(end)) = (start.and_then(Value::as_str), end.and_then(Value::as_str))
+        && let (Some(start), Some(end)) = (parse_partial_date(start), parse_partial_date(end))
+        && start.lower > end.upper
+    {
+        errors.push(format!("{path}: date_start is after date_end"));
+    }
+    if end.and_then(Value::as_str).is_some() && start.and_then(Value::as_str).is_none() {
+        errors.push(format!("{path}/date_end: end bound requires date_start"));
+    }
+}
+
+fn validate_partial_date(value: Option<&Value>, path: &str, errors: &mut Vec<String>) {
+    let Some(value) = value else { return };
+    let Some(value) = value.as_str() else { return };
+    if parse_partial_date(value).is_none() {
+        errors.push(format!("{path}: invalid calendar partial date {value:?}"));
+    }
+}
+
+fn contains_personal_details(text: &str) -> bool {
+    contains_email(text) || contains_nz_phone(text) || contains_honorific_name(text)
+}
+
+fn contains_email(text: &str) -> bool {
+    text.split_whitespace().any(|token| {
+        let token = token.trim_matches(|character: char| {
+            !character.is_ascii_alphanumeric() && !"._%+-@".contains(character)
+        });
+        let Some((local, domain)) = token.split_once('@') else {
+            return false;
+        };
+        !local.is_empty()
+            && domain.rsplit_once('.').is_some_and(|(_, suffix)| {
+                suffix.len() >= 2
+                    && suffix
+                        .chars()
+                        .all(|character| character.is_ascii_alphabetic())
+            })
+    })
+}
+
+// detect the same NZ phone forms as the Python and TypeScript intake gates.
+fn contains_nz_phone(text: &str) -> bool {
+    static PHONE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+        regex::Regex::new(r"(?:\+64|\b0)[\s-]?[0-9]{1,2}[\s-]?[0-9]{3,4}[\s-]?[0-9]{3,5}\b")
+            .expect("valid phone expression")
+    });
+    PHONE.is_match(text)
+}
+
+fn contains_honorific_name(text: &str) -> bool {
+    let words: Vec<&str> = text.split_whitespace().collect();
+    words.windows(2).any(|window| {
+        let title = window[0].trim_matches(|character: char| !character.is_ascii_alphabetic());
+        let name = window[1].trim_matches(|character: char| !character.is_ascii_alphabetic());
+        matches!(
+            title,
+            "Rev"
+                | "Revd"
+                | "Reverend"
+                | "Fr"
+                | "Father"
+                | "Pastor"
+                | "Vicar"
+                | "Archdeacon"
+                | "Bishop"
+                | "Canon"
+                | "Dean"
+                | "Mr"
+                | "Mrs"
+                | "Ms"
+                | "Dr"
+        ) && name.chars().next().is_some_and(char::is_uppercase)
+    })
+}
+
+#[derive(Clone, Copy)]
+struct ParsedPartialDate {
+    lower: NaiveDate,
+    upper: NaiveDate,
+}
+
+fn parse_partial_date(value: &str) -> Option<ParsedPartialDate> {
+    let parts: Vec<_> = value.split('-').collect();
+    if !matches!(parts.len(), 1..=3) || parts.iter().any(|part| part.is_empty()) {
+        return None;
+    }
+    if parts[0].len() != 4 || !parts[0].chars().all(|character| character.is_ascii_digit()) {
+        return None;
+    }
+    let year = parts[0].parse::<i32>().ok()?;
+    if year < 1 {
+        return None;
+    }
+    let month = match parts.get(1) {
+        None => None,
+        Some(part) if part.len() == 2 && part.chars().all(|c| c.is_ascii_digit()) => {
+            Some(part.parse::<u32>().ok()?)
+        }
+        Some(_) => return None,
+    };
+    let day = match parts.get(2) {
+        None => None,
+        Some(part) if part.len() == 2 && part.chars().all(|c| c.is_ascii_digit()) => {
+            Some(part.parse::<u32>().ok()?)
+        }
+        Some(_) => return None,
+    };
+    let month = month.unwrap_or(1);
+    let lower = NaiveDate::from_ymd_opt(year, month, day.unwrap_or(1))?;
+    let upper = match (day, parts.len()) {
+        (Some(_), _) => lower,
+        (None, 2) => {
+            let next = if month == 12 {
+                NaiveDate::from_ymd_opt(year.checked_add(1)?, 1, 1)?
+            } else {
+                NaiveDate::from_ymd_opt(year, month + 1, 1)?
+            };
+            next.pred_opt()?
+        }
+        (None, 1) => NaiveDate::from_ymd_opt(year, 12, 31)?,
+        _ => return None,
+    };
+    Some(ParsedPartialDate { lower, upper })
+}
+
+fn validate_source_locator(locator: &str) -> std::result::Result<(), String> {
+    if locator
+        .chars()
+        .any(|character| character.is_control() || character.is_whitespace() || character == '\\')
+    {
+        return Err("URL contains a control character or backslash".to_owned());
+    }
+    let lower = locator.to_ascii_lowercase();
+    let (scheme, rest) = if let Some(rest) = lower.strip_prefix("http://") {
+        ("http", rest)
+    } else if let Some(rest) = lower.strip_prefix("https://") {
+        ("https", rest)
+    } else {
+        return Err("source locator must be a public http(s) URL".to_owned());
+    };
+    let _ = scheme;
+    let authority_end = rest.find(['/', '?', '#']).unwrap_or(rest.len());
+    let authority = &locator[scheme.len() + 3..scheme.len() + 3 + authority_end];
+    if authority.is_empty() || authority.contains('@') || authority.contains('%') {
+        return Err("URL authority must have no credentials or percent-encoded host".to_owned());
+    }
+    if authority
+        .chars()
+        .any(|character| character.is_whitespace() || character == '\\')
+    {
+        return Err("URL authority contains invalid whitespace or backslash".to_owned());
+    }
+    let host = if authority.starts_with('[') {
+        let close = authority
+            .find(']')
+            .ok_or_else(|| "invalid bracketed IPv6 host".to_owned())?;
+        if !authority[close + 1..].is_empty() {
+            let port = authority[close + 1..]
+                .strip_prefix(':')
+                .ok_or_else(|| "invalid IPv6 port".to_owned())?;
+            validate_port(port)?;
+        }
+        return Err("IP literal hosts are not allowed; use a DNS hostname".to_owned());
+    } else {
+        if authority.matches(':').count() > 1 {
+            return Err("IPv6 hosts must be bracketed".to_owned());
+        }
+        let host = authority.split_once(':').map_or(authority, |(host, port)| {
+            if validate_port(port).is_err() {
+                ""
+            } else {
+                host
+            }
+        });
+        if host.is_empty() {
+            return Err("invalid host or port".to_owned());
+        }
+        let host_lower = host.to_ascii_lowercase();
+        let host_check = host_lower.trim_end_matches('.');
+        if host_check == "localhost"
+            || host_check.ends_with(".localhost")
+            || host_check.ends_with(".local")
+            || host_check.ends_with(".internal")
+        {
+            return Err("private or loopback host is not allowed".to_owned());
+        }
+        if host_check.parse::<IpAddr>().is_ok() || parse_numeric_ipv4(host_check) {
+            return Err("IP literal hosts are not allowed; use a DNS hostname".to_owned());
+        }
+        host.to_owned()
+    };
+    if host.is_empty() {
+        return Err("empty host".to_owned());
+    }
+    Ok(())
+}
+
+fn validate_port(port: &str) -> std::result::Result<(), String> {
+    let number = port.parse::<u16>().map_err(|_| "invalid port".to_owned())?;
+    if number == 0 {
+        return Err("port zero is not allowed".to_owned());
+    }
+    Ok(())
+}
+
+fn parse_numeric_ipv4(host: &str) -> bool {
+    let parts: Vec<_> = host.split('.').collect();
+    if parts.len() == 1 && (host.chars().all(|c| c.is_ascii_digit()) || host.starts_with("0x")) {
+        return parse_numeric_component(host).is_some();
+    }
+    if !(1..=4).contains(&parts.len()) || parts.iter().any(|part| part.is_empty()) {
+        return false;
+    }
+    let values: Vec<u32> = parts
+        .iter()
+        .map(|part| parse_numeric_component(part))
+        .collect::<Option<_>>()
+        .unwrap_or_default();
+    if values.len() != parts.len() {
+        return false;
+    }
+    let valid_parts = match values.len() {
+        1 => true,
+        2 => values[0] <= u8::MAX as u32 && values[1] <= 0x00ff_ffff,
+        3 => {
+            values[0] <= u8::MAX as u32
+                && values[1] <= u8::MAX as u32
+                && values[2] <= u16::MAX as u32
+        }
+        4 => values.iter().all(|value| *value <= u8::MAX as u32),
+        _ => false,
+    };
+    if !valid_parts {
+        return false;
+    }
+    true
+}
+
+fn parse_numeric_component(value: &str) -> Option<u32> {
+    if let Some(value) = value.strip_prefix("0x") {
+        u32::from_str_radix(value, 16).ok()
+    } else if value.starts_with('0') && value.len() > 1 {
+        u32::from_str_radix(&value[1..], 8).ok()
+    } else {
+        value.parse::<u32>().ok()
+    }
+}
+
+// reject decoded C0 controls in strings and keys, allowing JSON prose whitespace.
+fn reject_json_controls<E: de::Error>(value: &str) -> std::result::Result<(), E> {
+    if value
+        .chars()
+        .any(|c| c < ' ' && !matches!(c, '\n' | '\r' | '\t'))
+    {
+        return Err(E::custom("control character in JSON text"));
+    }
+    Ok(())
+}
+
+// escape control characters before emitting validation errors to an operator terminal.
+fn terminal_safe(value: &str) -> String {
+    value
+        .chars()
+        .flat_map(|c| {
+            if c.is_control() {
+                c.escape_default().collect::<Vec<_>>()
+            } else {
+                vec![c]
+            }
+        })
+        .collect()
+}
+
+struct StrictJsonSeed {
+    depth: usize,
+}
+
+impl<'de> DeserializeSeed<'de> for StrictJsonSeed {
+    type Value = Value;
+
+    fn deserialize<D>(self, deserializer: D) -> std::result::Result<Self::Value, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        if self.depth > AGENT_REVIEW_MAX_DEPTH {
+            return Err(de::Error::custom(format!(
+                "JSON nesting exceeds depth {}",
+                AGENT_REVIEW_MAX_DEPTH
+            )));
+        }
+        deserializer.deserialize_any(StrictJsonVisitor { depth: self.depth })
+    }
+}
+
+struct StrictJsonVisitor {
+    depth: usize,
+}
+
+impl<'de> Visitor<'de> for StrictJsonVisitor {
+    type Value = Value;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("a JSON value")
+    }
+
+    fn visit_bool<E>(self, value: bool) -> std::result::Result<Self::Value, E>
+    where
+        E: de::Error,
+    {
+        Ok(Value::Bool(value))
+    }
+
+    fn visit_i64<E>(self, value: i64) -> std::result::Result<Self::Value, E>
+    where
+        E: de::Error,
+    {
+        Ok(Value::Number(value.into()))
+    }
+
+    fn visit_u64<E>(self, value: u64) -> std::result::Result<Self::Value, E>
+    where
+        E: de::Error,
+    {
+        Ok(Value::Number(value.into()))
+    }
+
+    fn visit_f64<E>(self, value: f64) -> std::result::Result<Self::Value, E>
+    where
+        E: de::Error,
+    {
+        if !value.is_finite() {
+            return Err(de::Error::custom("non-finite JSON number is not allowed"));
+        }
+        let number = serde_json::Number::from_f64(value)
+            .ok_or_else(|| de::Error::custom("invalid JSON number"))?;
+        Ok(Value::Number(number))
+    }
+
+    fn visit_i128<E>(self, value: i128) -> std::result::Result<Self::Value, E>
+    where
+        E: de::Error,
+    {
+        let number = serde_json::Number::from_i128(value)
+            .ok_or_else(|| de::Error::custom("JSON integer is out of range"))?;
+        Ok(Value::Number(number))
+    }
+
+    fn visit_u128<E>(self, value: u128) -> std::result::Result<Self::Value, E>
+    where
+        E: de::Error,
+    {
+        let number = serde_json::Number::from_u128(value)
+            .ok_or_else(|| de::Error::custom("JSON integer is out of range"))?;
+        Ok(Value::Number(number))
+    }
+
+    fn visit_str<E>(self, value: &str) -> std::result::Result<Self::Value, E>
+    where
+        E: de::Error,
+    {
+        reject_json_controls::<E>(value)?;
+        Ok(Value::String(value.to_owned()))
+    }
+
+    fn visit_string<E>(self, value: String) -> std::result::Result<Self::Value, E>
+    where
+        E: de::Error,
+    {
+        reject_json_controls::<E>(&value)?;
+        Ok(Value::String(value))
+    }
+
+    fn visit_none<E>(self) -> std::result::Result<Self::Value, E>
+    where
+        E: de::Error,
+    {
+        Ok(Value::Null)
+    }
+
+    fn visit_unit<E>(self) -> std::result::Result<Self::Value, E>
+    where
+        E: de::Error,
+    {
+        Ok(Value::Null)
+    }
+
+    fn visit_seq<A>(self, mut sequence: A) -> std::result::Result<Self::Value, A::Error>
+    where
+        A: SeqAccess<'de>,
+    {
+        let mut values = Vec::new();
+        while let Some(value) = sequence.next_element_seed(StrictJsonSeed {
+            depth: self.depth + 1,
+        })? {
+            values.push(value);
+        }
+        Ok(Value::Array(values))
+    }
+
+    fn visit_map<A>(self, mut map: A) -> std::result::Result<Self::Value, A::Error>
+    where
+        A: MapAccess<'de>,
+    {
+        let mut values = serde_json::Map::new();
+        while let Some(key) = map.next_key::<String>()? {
+            reject_json_controls::<A::Error>(&key)?;
+            if matches!(key.as_str(), "__proto__" | "prototype" | "constructor") {
+                return Err(de::Error::custom(format!(
+                    "forbidden JSON object key {key:?}"
+                )));
+            }
+            if values.contains_key(&key) {
+                return Err(de::Error::custom(format!(
+                    "duplicate JSON object key {key:?}"
+                )));
+            }
+            let value = map.next_value_seed(StrictJsonSeed {
+                depth: self.depth + 1,
+            })?;
+            values.insert(key, value);
+        }
+        Ok(Value::Object(values))
+    }
+}
+
+fn parse_strict_json(bytes: &[u8]) -> std::result::Result<Value, String> {
+    let mut deserializer = serde_json::Deserializer::from_slice(bytes);
+    let value = StrictJsonSeed { depth: 0 }
+        .deserialize(&mut deserializer)
+        .map_err(|error| error.to_string())?;
+    deserializer
+        .end()
+        .map_err(|error| format!("trailing JSON data: {error}"))?;
+    Ok(value)
 }
 
 fn validate_input(
@@ -4013,6 +4922,252 @@ mod tests {
             .expect("clock")
             .as_nanos();
         std::env::temp_dir().join(format!("pow-{label}-{nanos}.sqlite"))
+    }
+
+    fn valid_agent_bundle() -> Value {
+        let fixture = repo_root_path().join(
+            "scripts/agent_research/fixtures/watts-st-martins-loburn-2026-09-09.dossier.json",
+        );
+        let mut dossier: Value =
+            serde_json::from_reader(File::open(fixture).expect("open dossier fixture"))
+                .expect("parse dossier fixture");
+        let dossier_object = dossier.as_object_mut().expect("dossier object");
+        dossier_object.insert(
+            "personal_details_quarantine".to_owned(),
+            json!({"redacted": true, "item_count": 0, "items": []}),
+        );
+        dossier_object.insert(
+            "provenance".to_owned(),
+            json!({"producer": "agent_reader", "ai_generated": true}),
+        );
+        {
+            let claims = dossier_object
+                .get_mut("claims")
+                .and_then(Value::as_array_mut)
+                .expect("claims array");
+            for claim in claims.iter_mut() {
+                let claim_object = claim.as_object_mut().expect("claim object");
+                claim_object.remove("value_structured");
+                claim_object["reader"]["backend"] = json!("codex");
+                claim_object["reader"]["model_id"] = json!("gpt-5.6-luna");
+            }
+        }
+        {
+            let manifest = dossier_object
+                .get_mut("run_manifest")
+                .and_then(Value::as_object_mut)
+                .expect("run manifest");
+            manifest.insert("backend".to_owned(), json!("codex"));
+            manifest.insert("model_id_requested".to_owned(), json!("gpt-5.6-luna"));
+            manifest.insert("started_at".to_owned(), json!("2026-09-11T01:00:00Z"));
+            manifest.insert("ended_at".to_owned(), json!("2026-09-11T01:01:00Z"));
+            manifest.insert("exit_status".to_owned(), json!("completed"));
+        }
+
+        let claims = dossier_object
+            .get("claims")
+            .and_then(Value::as_array)
+            .expect("claims array");
+        let claim_checks: Vec<Value> = claims
+            .iter()
+            .map(|claim| {
+                let claim_object = claim.as_object().expect("claim object");
+                json!({
+                    "claim_id": claim_object["claim_id"],
+                    "outcome": "supported",
+                    "source_url": claim_object["source"]["locator"],
+                    "note": "checked",
+                    "access_method": "opened"
+                })
+            })
+            .collect();
+        json!({
+            "schema_version": "agent-review-bundle.v1",
+            "submission_key": "a".repeat(64),
+            "dossier": dossier,
+            "review": {
+                "schema_version": "agent-review.v1",
+                "recommendation": "revise",
+                "reasoning": "Advisory review.",
+                "claim_checks": claim_checks,
+                "cultural_sensitivity": {"flagged": false, "basis": "none"},
+                "limitations": []
+            },
+            "research_run": {
+                "backend": "codex",
+                "model_requested": "gpt-5.6-luna",
+                "model_id_reported": "gpt-5.6-luna",
+                "started_at": "2026-09-11T01:00:00Z",
+                "ended_at": "2026-09-11T01:01:00Z",
+                "duration_seconds": 60,
+                "usage": null,
+                "raw_trace_sha256": "b".repeat(64),
+                "prompt_sha256": "c".repeat(64),
+                "cli_version": "test",
+                "exit_code": 0,
+                "tool_policy_version": "public-web-only.v1"
+            },
+            "review_run": {
+                "backend": "claude",
+                "model_requested": "sonnet",
+                "model_id_reported": "claude-sonnet-5",
+                "started_at": "2026-09-11T02:00:00Z",
+                "ended_at": "2026-09-11T02:01:00Z",
+                "duration_seconds": 60,
+                "usage": null,
+                "raw_trace_sha256": "d".repeat(64),
+                "prompt_sha256": "e".repeat(64),
+                "cli_version": "test",
+                "exit_code": 0,
+                "tool_policy_version": "public-web-only.v1"
+            }
+        })
+    }
+
+    #[test]
+    fn strict_agent_json_rejects_duplicate_keys_and_deep_values() {
+        assert!(parse_strict_json(br#"{"a": 1, "a": 2}"#).is_err());
+        let mut nested = String::new();
+        for _ in 0..=AGENT_REVIEW_MAX_DEPTH {
+            nested.push('[');
+        }
+        nested.push('0');
+        for _ in 0..=AGENT_REVIEW_MAX_DEPTH {
+            nested.push(']');
+        }
+        assert!(parse_strict_json(nested.as_bytes()).is_err());
+    }
+
+    #[test]
+    fn shared_agent_review_regressions() {
+        let root = repo_root_path();
+        let fixtures = root.join("scripts/agent_research/fixtures");
+        let cases: Value =
+            serde_json::from_slice(&fs::read(fixtures.join("intake-regressions.json")).unwrap())
+                .unwrap();
+        for case in cases.as_array().unwrap() {
+            let mut bundle: Value = serde_json::from_slice(
+                &fs::read(fixtures.join("internal-review-bundle.json")).unwrap(),
+            )
+            .unwrap();
+            for change in case["changes"].as_array().unwrap() {
+                let pointer = change[0].as_str().unwrap();
+                if let Some(target) = bundle.pointer_mut(pointer) {
+                    *target = change[1].clone();
+                } else {
+                    bundle
+                        .as_object_mut()
+                        .unwrap()
+                        .insert(pointer[1..].to_owned(), change[1].clone());
+                }
+            }
+            let path = temp_db_path("agent-review-regression");
+            fs::write(&path, serde_json::to_vec(&bundle).unwrap()).unwrap();
+            let report = validate_agent(ValidateAgentArgs {
+                input: path.clone(),
+                schema: root.join("scripts/agent_research/schemas/agent-review-bundle.v1.json"),
+                report: ReportFormat::Json,
+            })
+            .unwrap();
+            fs::remove_file(path).unwrap();
+            assert_eq!(
+                report.valid,
+                case["valid"].as_bool().unwrap(),
+                "{}: {:?}",
+                case["name"],
+                report.errors
+            );
+        }
+        assert_eq!(terminal_safe("bad\u{1b}[2J\rnext"), r"bad\u{1b}[2J\rnext");
+    }
+
+    #[test]
+    fn agent_bundle_schema_and_semantics_accept_valid_bundle() {
+        let path = std::env::temp_dir().join(format!(
+            "pow-agent-valid-{}.json",
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .expect("clock")
+                .as_nanos()
+        ));
+        fs::write(
+            &path,
+            serde_json::to_vec(&valid_agent_bundle()).expect("serialise bundle"),
+        )
+        .expect("write bundle");
+        let report = validate_agent(ValidateAgentArgs {
+            input: path.clone(),
+            schema: repo_root_path()
+                .join("scripts/agent_research/schemas/agent-review-bundle.v1.json"),
+            report: ReportFormat::Json,
+        })
+        .expect("validate bundle");
+        assert!(report.valid, "{:#?}", report.errors);
+        assert!(report.provisional);
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn agent_bundle_rejects_unknown_fields_provider_mismatch_and_source_injection() {
+        let mut bundle = valid_agent_bundle();
+        bundle
+            .as_object_mut()
+            .expect("bundle object")
+            .insert("unknown".to_owned(), json!("ignored"));
+        bundle["review_run"]["model_requested"] = json!("evil");
+        bundle["review"]["claim_checks"][0]["source_url"] =
+            json!("https://user:password@127.0.0.1/?q=$(touch%20/tmp/pow)");
+        let mut errors = Vec::new();
+        validate_agent_semantics(&bundle, &mut errors);
+        assert!(errors.iter().any(|error| error.contains("backend/model")));
+        assert!(errors.iter().any(|error| error.contains("credentials")));
+        assert!(errors.iter().all(|error| !error.contains("touch")));
+        assert!(validate_source_locator("https://example.org/a b").is_err());
+    }
+
+    #[test]
+    fn agent_bundle_rejects_invalid_dates_and_external_schema_refs() {
+        let mut bundle = valid_agent_bundle();
+        bundle["dossier"]["claims"][0]["date_start"] = json!("2024-02-30");
+        bundle["dossier"]["claims"][0]["date_end"] = json!("2023");
+        bundle["dossier"]["claims"][0]["date_precision"] = json!("day");
+        let mut errors = Vec::new();
+        validate_agent_semantics(&bundle, &mut errors);
+        assert!(
+            errors
+                .iter()
+                .any(|error| error.contains("invalid calendar"))
+        );
+        bundle["dossier"]["claims"][0]["date_start"] = json!("2024-02-28");
+        errors.clear();
+        validate_agent_semantics(&bundle, &mut errors);
+        assert!(errors.iter().any(|error| error.contains("after date_end")));
+
+        let schema = json!({"$ref": "https://example.com/schema.json"});
+        let mut schema_errors = Vec::new();
+        collect_external_schema_refs(&schema, "", &mut schema_errors);
+        assert_eq!(schema_errors.len(), 1);
+    }
+
+    #[test]
+    fn agent_bundle_rejects_oversize_input_before_schema_read() {
+        let path = std::env::temp_dir().join(format!(
+            "pow-agent-large-{}.json",
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .expect("clock")
+                .as_nanos()
+        ));
+        fs::write(&path, vec![b' '; AGENT_REVIEW_MAX_BYTES + 1]).expect("write large input");
+        let report = validate_agent(ValidateAgentArgs {
+            input: path.clone(),
+            schema: PathBuf::from("missing-schema.json"),
+            report: ReportFormat::Json,
+        })
+        .expect("validate oversized bundle");
+        assert!(!report.valid);
+        assert!(report.errors[0].contains("maximum"));
+        let _ = fs::remove_file(path);
     }
 
     fn insert_proposed_events(

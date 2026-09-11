@@ -241,6 +241,9 @@ export default defineSchema({
     source_claim_key: v.optional(v.string()),
     claim_hash: v.optional(v.string()),
     import_batch_id: v.optional(v.string()),
+    // provisional internal agent-research intake; never exportable by itself
+    agent_intake_only: v.optional(v.boolean()),
+    agent_intake_hash: v.optional(v.string()),
   })
     .index("by_evidence_draft_id", ["evidence_draft_id"])
     .index("by_task_status", ["task_id", "draft_status"])
@@ -463,6 +466,8 @@ export default defineSchema({
     created_at: v.number(),
     updated_at: v.number(),
     decision_hash: v.optional(v.string()),
+    decision_hash_version: v.optional(v.literal(1)),
+    review_snapshot_hash: v.optional(v.string()),
   })
     .index("by_review_decision_id", ["review_decision_id"])
     .index("by_task", ["task_id"])
@@ -546,6 +551,31 @@ export default defineSchema({
   })
     .index("by_batch_id", ["batch_id"])
     .index("by_started", ["started_at"]),
+
+  // Immutable, private copy of an internal research bundle. The bundle is a
+  // receipt for human review, not an accepted evidence record.
+  agent_intake_receipts: defineTable({
+    receipt_id: v.string(),
+    submission_key: v.string(),
+    bundle_hash: v.string(),
+    bundle_json: v.string(),
+    task_id: v.string(),
+    evidence_draft_id: v.string(),
+    agent_review_id: v.string(),
+    created_at: v.number(),
+  })
+    .index("by_submission_key", ["submission_key"])
+    .index("by_bundle_hash", ["bundle_hash"])
+    .index("by_receipt_id", ["receipt_id"]),
+
+  // Immutable context captured when a batch reviewer inspected a version.
+  review_snapshots: defineTable({
+    snapshot_hash: v.string(),
+    snapshot_json: v.string(),
+    created_at: v.number(),
+    reviewer_user_id: v.id("users"),
+  })
+    .index("by_hash", ["snapshot_hash"]),
 
   export_batches: defineTable({
     export_batch_id: v.string(),

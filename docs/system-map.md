@@ -32,6 +32,8 @@ flowchart LR
 
 The [content-addressed review contract](development/content-addressed-review.md) records the approved 2026-09-11 design: reviewer acceptance into a transparent export queue, return to review, and explicit PI batch release before governed `pow` processing. Implementation is pending; the live per-item PI acceptance gate remains in force.
 
+The [internal agent review pilot](development/internal-agent-review.md) adds public-web research, independent advisory review, validated provisional intake, and human batch review APIs. It joins Evidence Intake and Authenticated Review; governed processing retains its existing authority.
+
 ## Module Table
 
 | Module | Owns | Does not own | Main interface |

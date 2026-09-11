@@ -87,7 +87,7 @@ def validate(instance, schema: dict, root: dict | None = None, path: str = "$") 
             errors.append(f"{path}: expected type {types}, got {type(instance).__name__}")
             return errors
     if isinstance(instance, str):
-        if "pattern" in schema and re.search(schema["pattern"], instance) is None:
+        if "pattern" in schema and re.search(schema["pattern"].removesuffix("$") + (r"\Z" if schema["pattern"].endswith("$") else ""), instance) is None:
             errors.append(f"{path}: {instance!r} does not match {schema['pattern']}")
         if "minLength" in schema and len(instance) < schema["minLength"]:
             errors.append(f"{path}: shorter than {schema['minLength']}")

@@ -183,7 +183,7 @@ Each step should land as a focused pull request after the active portal branch h
 
 Existing per-item PI acceptance records retain their original meaning and hashes. Migration preserves those records as historical approvals; a batch release requires an explicit PI action against its exact manifest. The replacement must cover the queue, return path, release permission, export checks, and `pow` processing guard before retiring the live `pi_accepted` gate. Portal labels and the RA guide must change with that implementation.
 
-Existing `decision_hash` values retain their current contract as version 0. New decision hashes use a named version 1 envelope. A change in hash semantics requires an explicit contract version.
+Existing `decision_hash` values retain their current contract as version 0. New decision hashes use a named version 1 envelope. A change in hash semantics requires an explicit contract version. The [internal batch-review implementation](internal-agent-review.md) introduces `decision_hash_version: 1` for snapshot-linked decisions using the `review-decision.v1` envelope documented there. Ordinary decisions without a snapshot retain version 0. This implements decision-to-snapshot hashing; the storage-independent evidence graph and PI batch release described above remain further implementation steps.
 
 Existing submitted rows can enter the new graph through migration records that identify the source row, the migration run, and the time when migration copied the row. Stored historical actor and creation fields may be retained when present. The migration record should avoid implying that the version hash existed when the original submission occurred.
 

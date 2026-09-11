@@ -1,0 +1,946 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://religionmap.org/schemas/agent-review-bundle.v1.json",
+  "title": "Internal provisional agent research and review bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "submission_key",
+    "dossier",
+    "review",
+    "research_run",
+    "review_run"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "agent-review-bundle.v1"
+    },
+    "submission_key": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "dossier": {
+      "$ref": "#/$defs/dossier"
+    },
+    "review": {
+      "$ref": "#/$defs/review"
+    },
+    "research_run": {
+      "$ref": "#/$defs/run"
+    },
+    "review_run": {
+      "$ref": "#/$defs/run"
+    }
+  },
+  "$defs": {
+    "dossier": {
+      "title": "Agent research dossier, version 1",
+      "description": "One place, one reader, one run. A dossier is a lead file: every claim carries a source locator and a quoted support so a deterministic validator and then a human can check it. Nothing in a dossier is a validation state (ruling R-A1, 2026-09-04). Personal details of living people are quarantined at capture and stripped before the file leaves the run directory.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "dossier_id",
+        "place",
+        "candidate_location",
+        "claims",
+        "status_assessment",
+        "osm_version_chain",
+        "personal_details_quarantine",
+        "provenance",
+        "run_manifest"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "agent-dossier.v1"
+        },
+        "dossier_id": {
+          "type": "string",
+          "description": "Stable id: <place ref>:<reader id>:<run id>.",
+          "minLength": 8,
+          "maxLength": 8000
+        },
+        "place": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "place_ref",
+            "name",
+            "country_code",
+            "seed_latitude",
+            "seed_longitude",
+            "seed_source"
+          ],
+          "properties": {
+            "place_ref": {
+              "type": "string",
+              "description": "osm:<type>/<id> for an OSM-seeded place, or new:<slug> for a place absent from OSM.",
+              "pattern": "^(osm:(node|way|relation)/[0-9]+|new:[a-z0-9-]+)$",
+              "maxLength": 8000
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8000
+            },
+            "country_code": {
+              "type": "string",
+              "pattern": "^[A-Z]{2}$",
+              "maxLength": 8000
+            },
+            "seed_latitude": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "seed_longitude": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            },
+            "seed_source": {
+              "type": "string",
+              "description": "The edition the seed came from, e.g. nz_places.geojson extracted 2025-08-20, so the idempotency key names the edition.",
+              "maxLength": 8000
+            },
+            "seed_tags": {
+              "type": "object",
+              "description": "OSM tags at seed time, as given."
+            }
+          }
+        },
+        "candidate_location": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "latitude",
+            "longitude",
+            "basis"
+          ],
+          "properties": {
+            "latitude": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": -90,
+              "maximum": 90
+            },
+            "longitude": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": -180,
+              "maximum": 180
+            },
+            "basis": {
+              "type": "string",
+              "enum": [
+                "osm_object",
+                "address_geocode",
+                "source_map_or_photo",
+                "imagery",
+                "reader_inference",
+                "not_assessed"
+              ],
+              "maxLength": 8000
+            },
+            "basis_note": {
+              "type": "string",
+              "maxLength": 8000
+            },
+            "uncertainty_radius_m": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "address": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "claims": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dossier/$defs/claim"
+          },
+          "maxItems": 20,
+          "minItems": 1
+        },
+        "status_assessment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "current_status",
+            "basis",
+            "asof_date",
+            "supporting_claim_ids",
+            "osm_stale"
+          ],
+          "properties": {
+            "current_status": {
+              "type": "string",
+              "enum": [
+                "active",
+                "likely_active",
+                "likely_inactive",
+                "inactive",
+                "unknown"
+              ],
+              "maxLength": 8000
+            },
+            "basis": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8000
+            },
+            "asof_date": {
+              "type": "string",
+              "pattern": "^[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?$",
+              "maxLength": 8000
+            },
+            "supporting_claim_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 8000
+              },
+              "maxItems": 40
+            },
+            "osm_stale": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "description": "True when the reader judges the current OSM object no longer describes the site; null when not assessed."
+            },
+            "osm_stale_basis": {
+              "type": "string",
+              "maxLength": 8000
+            }
+          }
+        },
+        "osm_version_chain": {
+          "type": "array",
+          "description": "The OSM object's versions as the reader found them. Timestamps are exact only when read from the OSM API; the validator fills exact values.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "version",
+              "locator"
+            ],
+            "properties": {
+              "version": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "changeset": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "timestamp": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "timestamp_basis": {
+                "type": "string",
+                "enum": [
+                  "osm_api",
+                  "page_reading",
+                  "approximate",
+                  "unknown"
+                ],
+                "maxLength": 8000
+              },
+              "tags_summary": {
+                "type": "string",
+                "maxLength": 8000
+              },
+              "change_note": {
+                "type": "string",
+                "maxLength": 8000
+              },
+              "locator": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 8000
+              }
+            }
+          },
+          "maxItems": 40
+        },
+        "personal_details_quarantine": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "redacted",
+            "item_count",
+            "items"
+          ],
+          "properties": {
+            "redacted": {
+              "type": "boolean",
+              "description": "True once the quarantined values have been stripped; a committed dossier must be redacted."
+            },
+            "item_count": {
+              "const": 0
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "kind",
+                  "context_claim_id"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "person_name",
+                      "phone",
+                      "email",
+                      "other"
+                    ],
+                    "maxLength": 8000
+                  },
+                  "context_claim_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "description": "Present only before redaction; never committed.",
+                    "maxLength": 8000
+                  },
+                  "value_sha256": {
+                    "type": "string",
+                    "description": "Hash of the stripped value so a later run can tell whether the same detail recurred.",
+                    "maxLength": 8000
+                  }
+                }
+              },
+              "maxItems": 0
+            },
+            "note": {
+              "type": "string",
+              "maxLength": 8000
+            }
+          }
+        },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "producer",
+            "ai_generated"
+          ],
+          "properties": {
+            "producer": {
+              "const": "agent_reader"
+            },
+            "ai_generated": {
+              "const": true
+            },
+            "produced_by": {
+              "type": "string",
+              "description": "Reader id, or the collaborator's initials for an import.",
+              "maxLength": 8000
+            },
+            "imported_from": {
+              "type": "string",
+              "description": "File name and sheet for an import.",
+              "maxLength": 8000
+            },
+            "lane": {
+              "type": "string",
+              "enum": [
+                "agent_autonomous",
+                "agent_assisted"
+              ],
+              "maxLength": 8000
+            }
+          }
+        },
+        "run_manifest": {
+          "$ref": "#/$defs/dossier/$defs/run_manifest"
+        }
+      },
+      "$defs": {
+        "claim": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "claim_id",
+            "claim_type",
+            "value",
+            "source",
+            "quoted_support",
+            "evidential_weight",
+            "reader",
+            "confidence"
+          ],
+          "properties": {
+            "claim_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8000
+            },
+            "claim_type": {
+              "type": "string",
+              "enum": [
+                "name",
+                "address",
+                "religion",
+                "denomination",
+                "start_date",
+                "building_date",
+                "renovation",
+                "worship_active_asof",
+                "worship_ended",
+                "closure_event",
+                "sale_or_disposal",
+                "service_pattern",
+                "organisation_link",
+                "land_or_consecration",
+                "location",
+                "osm_object_version",
+                "other"
+              ],
+              "maxLength": 8000
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8000
+            },
+            "date_start": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?$"
+            },
+            "date_end": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?$"
+            },
+            "date_precision": {
+              "type": "string",
+              "enum": [
+                "day",
+                "month",
+                "year",
+                "approximate",
+                "unknown"
+              ],
+              "maxLength": 8000
+            },
+            "source": {
+              "$ref": "#/$defs/dossier/$defs/source"
+            },
+            "quoted_support": {
+              "type": "string",
+              "maxLength": 600,
+              "description": "Verbatim text from the source page that supports the value. May be empty only when the source is not textual; an empty quote makes the claim a lead."
+            },
+            "evidential_weight": {
+              "type": "string",
+              "enum": [
+                "primary_institutional",
+                "contemporary_report",
+                "secondary",
+                "user_contributed",
+                "inferred"
+              ],
+              "maxLength": 8000
+            },
+            "reader": {
+              "$ref": "#/$defs/dossier/$defs/reader"
+            },
+            "confidence": {
+              "type": "string",
+              "enum": [
+                "high",
+                "medium",
+                "low"
+              ],
+              "maxLength": 8000
+            },
+            "note": {
+              "type": "string",
+              "maxLength": 8000
+            }
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "locator",
+            "source_name",
+            "source_type",
+            "retrieved_at"
+          ],
+          "properties": {
+            "locator": {
+              "type": "string",
+              "minLength": 1,
+              "description": "A URL, or archive:<ref> for an offline source.",
+              "maxLength": 2048
+            },
+            "source_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8000
+            },
+            "source_type": {
+              "type": "string",
+              "enum": [
+                "osm",
+                "newspaper",
+                "photograph_caption",
+                "heritage_register",
+                "church_website",
+                "diocesan_publication",
+                "directory",
+                "archive_collection",
+                "wikidata",
+                "wikipedia",
+                "charity_register",
+                "council_or_government",
+                "other"
+              ],
+              "maxLength": 8000
+            },
+            "source_date": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The date the source itself bears, as printed; distinct from retrieval."
+            },
+            "source_date_basis": {
+              "type": "string",
+              "enum": [
+                "printed",
+                "metadata",
+                "inferred",
+                "not_stated"
+              ],
+              "maxLength": 8000
+            },
+            "retrieved_at": {
+              "type": "string",
+              "description": "ISO date or datetime of retrieval.",
+              "maxLength": 8000
+            },
+            "licence_note": {
+              "type": "string",
+              "maxLength": 8000
+            }
+          }
+        },
+        "reader": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "reader_id",
+            "backend",
+            "model_id",
+            "prompt_version"
+          ],
+          "properties": {
+            "reader_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8000
+            },
+            "backend": {
+              "type": "string",
+              "enum": [
+                "claude",
+                "codex",
+                "openrouter",
+                "collaborator_import",
+                "human"
+              ],
+              "maxLength": 8000
+            },
+            "model_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8000
+            },
+            "prompt_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8000
+            }
+          }
+        },
+        "run_manifest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "run_id",
+            "backend",
+            "model_id_requested",
+            "model_id_reported",
+            "prompt_version",
+            "started_at",
+            "ended_at",
+            "idempotency_key",
+            "cost_basis"
+          ],
+          "properties": {
+            "run_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8000
+            },
+            "backend": {
+              "type": "string",
+              "enum": [
+                "claude",
+                "codex",
+                "openrouter",
+                "collaborator_import",
+                "human"
+              ],
+              "maxLength": 8000
+            },
+            "model_id_requested": {
+              "type": "string",
+              "maxLength": 8000
+            },
+            "model_id_reported": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The model id the tool reported, or null when the tool reported none."
+            },
+            "prompt_version": {
+              "type": "string",
+              "maxLength": 8000
+            },
+            "started_at": {
+              "type": "string",
+              "maxLength": 40,
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|\\+00:00)$"
+            },
+            "ended_at": {
+              "type": "string",
+              "maxLength": 40,
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|\\+00:00)$"
+            },
+            "duration_s": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "usage": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "input_tokens": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "cached_input_tokens": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "output_tokens": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "reasoning_tokens": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "web_search_requests": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "web_fetch_requests": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "cost_usd_reported": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "cost_basis": {
+              "type": "string",
+              "enum": [
+                "tool_list_price",
+                "api_invoice",
+                "subscription_unmetered",
+                "collaborator_reported",
+                "unknown"
+              ],
+              "description": "tool_list_price: the CLI's own list-price estimate; subscription_unmetered: covered by a plan, no per-run charge visible.",
+              "maxLength": 8000
+            },
+            "idempotency_key": {
+              "type": "string",
+              "description": "sha256 of place_ref | prompt_version | model_id_requested | seed_source.",
+              "maxLength": 8000
+            },
+            "allowlist_version": {
+              "type": "string",
+              "maxLength": 8000
+            },
+            "tool_permissions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 8000
+              },
+              "maxItems": 40
+            },
+            "exit_status": {
+              "type": "string",
+              "enum": [
+                "completed",
+                "failed",
+                "timed_out",
+                "not_run"
+              ],
+              "maxLength": 8000
+            },
+            "notes": {
+              "type": "string",
+              "maxLength": 8000
+            }
+          }
+        }
+      }
+    },
+    "review": {
+      "title": "Independent advisory review of an agent dossier",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "recommendation",
+        "reasoning",
+        "claim_checks",
+        "cultural_sensitivity",
+        "limitations"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "agent-review.v1"
+        },
+        "recommendation": {
+          "type": "string",
+          "enum": [
+            "accept",
+            "revise",
+            "reject",
+            "defer_cultural"
+          ]
+        },
+        "reasoning": {
+          "type": "string",
+          "maxLength": 8000,
+          "minLength": 1
+        },
+        "claim_checks": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 40,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "claim_id",
+              "outcome",
+              "source_url",
+              "note",
+              "access_method"
+            ],
+            "properties": {
+              "claim_id": {
+                "type": "string",
+                "maxLength": 512,
+                "minLength": 1
+              },
+              "outcome": {
+                "type": "string",
+                "enum": [
+                  "supported",
+                  "not_supported",
+                  "unclear",
+                  "unreachable",
+                  "requires_human_access"
+                ]
+              },
+              "source_url": {
+                "type": "string",
+                "maxLength": 2048,
+                "minLength": 1
+              },
+              "note": {
+                "type": "string",
+                "maxLength": 1000
+              },
+              "access_method": {
+                "type": "string",
+                "enum": [
+                  "opened",
+                  "search_snippet",
+                  "not_checked"
+                ]
+              }
+            }
+          }
+        },
+        "cultural_sensitivity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "flagged",
+            "basis"
+          ],
+          "properties": {
+            "flagged": {
+              "type": "boolean"
+            },
+            "basis": {
+              "type": "string",
+              "maxLength": 1000
+            }
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        }
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "backend",
+        "model_requested",
+        "model_id_reported",
+        "started_at",
+        "ended_at",
+        "duration_seconds",
+        "usage",
+        "raw_trace_sha256",
+        "prompt_sha256",
+        "cli_version",
+        "exit_code",
+        "tool_policy_version"
+      ],
+      "properties": {
+        "backend": {
+          "type": "string",
+          "enum": [
+            "claude",
+            "codex"
+          ]
+        },
+        "model_requested": {
+          "type": "string",
+          "enum": [
+            "sonnet",
+            "gpt-5.6-luna"
+          ]
+        },
+        "model_id_reported": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 256
+        },
+        "started_at": {
+          "type": "string",
+          "maxLength": 40,
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|\\+00:00)$"
+        },
+        "ended_at": {
+          "type": "string",
+          "maxLength": 40,
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|\\+00:00)$"
+        },
+        "duration_seconds": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3600
+        },
+        "usage": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "raw_trace_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "prompt_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "cli_version": {
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 1
+        },
+        "exit_code": {
+          "const": 0
+        },
+        "tool_policy_version": {
+          "const": "public-web-only.v1"
+        }
+      }
+    }
+  }
+}
