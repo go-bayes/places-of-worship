@@ -126,6 +126,7 @@ export const evidenceVersionKindValues = [
   "occupancy_import",
   "agent_intake",
   "occupancy_set_recorded",
+  "superseded_by_later_set",
   "reviewer_edit",
   "reviewer_derivation_decision",
   "migration_copy",

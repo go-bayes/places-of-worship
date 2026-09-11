@@ -12,7 +12,7 @@ registerHooks({ resolve(specifier, context, nextResolve) { if (specifier.startsW
 const { saveEvidenceDraft, submitEvidenceDraft, submitEvidenceDraftWithOccupancies, submitUnresolvedNote, reviseEvidenceDraft } = await import("./evidence.ts");
 const { getEvidenceVersion, listEvidenceVersions, recordMigrationVersion, verifyDraftAgainstVersion } = await import("./evidenceVersions.ts");
 const { submitCurrentObservation } = await import("./rapidEntry.ts");
-const { submitOccupancies, decideDerivedYear } = await import("./occupancies.ts");
+const { submitOccupancies, decideDerivedYear, confirmAllDerived } = await import("./occupancies.ts");
 const { objectHash } = await import("./lib/canonicalJson.ts");
 const { verifyEvidenceVersionEnvelope } = await import("./lib/evidenceVersions.ts");
 const { intakeRateLimiter } = await import("./lib/rateLimits.ts");
@@ -237,17 +237,6 @@ test("a retried submission returns the existing version and writes nothing furth
   assert.equal(w.task.status, "needs_review");
 });
 
-// defect: evidenceVersions.recordEvidenceVersion dedupes unchanged content by
-// comparing current.content_hash with the payload hash it has just built, but
-// buildEvidenceVersion puts version_index inside the payload and the new
-// candidate is always built at current.version_index + 1. The two hashes can
-// therefore never be equal, so the "unchanged content re-recorded by the same
-// actor is the same version" branch is unreachable and every no-op write
-// records another version. The fix is to compare content rather than the
-// payload hash of a different index, for example by rebuilding the candidate
-// with current.version_index and current.version_kind for the comparison (or
-// by storing a content hash over payload.evidence and payload.occupancies
-// alone). Three tests below fail on this one defect.
 test("an unchanged resubmission without an idempotency token is deduped by content", async () => {
   const w = await scene();
   const first = await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
@@ -290,8 +279,8 @@ test("a submission identifier already spent on another draft is refused before a
 });
 
 test("the idempotency keyspace is scoped per contributor, so two people may hold one client token", async () => {
-  // the server key is `${user}:${clientSubmissionId}`, so a second person
-  // reusing the same browser-side token collides with nothing
+  // the server key is `submit:${user}:${clientSubmissionId}`, so a second
+  // person reusing the same browser-side token collides with nothing
   const w = await scene();
   await w.addDraft({ evidence_draft_id: "task_1:draft_other", task_id: "task_1", created_by: w.otherRa._id });
   const mine = await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a", clientSubmissionId: submissionId(1) });
@@ -299,8 +288,8 @@ test("the idempotency keyspace is scoped per contributor, so two people may hold
 
   assert.notEqual(mine.evidence_version_hash, theirs.evidence_version_hash);
   assert.equal(w.rows.evidence_versions.length, 2);
-  assert.equal(version(w, 0).idempotency_key, `${w.ra._id}:${submissionId(1)}`);
-  assert.equal(version(w, 1).idempotency_key, `${w.otherRa._id}:${submissionId(1)}`);
+  assert.equal(version(w, 0).idempotency_key, `submit:${w.ra._id}:${submissionId(1)}`);
+  assert.equal(version(w, 1).idempotency_key, `submit:${w.otherRa._id}:${submissionId(1)}`);
 });
 
 test("a reviewer edit of submitted evidence becomes an attributed child version", async () => {
@@ -771,16 +760,6 @@ test("a reviewer's confirmation of a derived year writes the status and a child 
   assert.equal(noted.length, 1);
 });
 
-// defect: occupancies.decideDerivedYear states that "a rejection leaves the row
-// unchanged and records no version", and stamps the task event only when
-// version.created is true. It reaches recordEvidenceVersion unconditionally,
-// where the unchanged-content branch is unreachable (see above) and, even once
-// that is repaired, requires current.created_by to be the actor — which a
-// reviewer acting on a contributor's submission never is. So a rejection
-// writes a second version row holding the contributor's content under the
-// reviewer's name and moves the draft row's hash to it. Either skip
-// recordEvidenceVersion for the reject action, or let the dedupe compare
-// content across actors.
 test("a rejected derived year records no evidence version", async () => {
   const w = await derivedScene();
   const parentEnvelopeJson = version(w).envelope_json;
@@ -848,4 +827,101 @@ test("versions are listed by draft and by family under the caller's visibility",
     getEvidenceVersion._handler(w.as(w.reviewer), { objectHash: "not-a-hash" }),
     /objectHash must be a pow-object\.v1 hash/,
   );
+});
+
+test("retiring an earlier parent's period set records a version on that parent", async () => {
+  // the ordinary revise-and-resubmit flow: the author's later set on the
+  // revision clone supersedes the set on the earlier submission, which must
+  // then say so in its own version rather than diverge silently
+  const w = await scene({ country: "VU" });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  await submitOccupancies._handler(w.as(w.ra), {
+    clientSubmissionId: submissionId(31),
+    taskId: "task_1",
+    parentEvidenceDraftId: "task_1:draft_a",
+    segments: [segment(0)],
+  });
+  const before = await verifyDraftAgainstVersion._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:draft_a" });
+  assert.equal(before.consistent, true);
+  assert.equal(envelopeOf(version(w, 1)).payload.occupancies.length, 1);
+
+  const revision = await reviseEvidenceDraft._handler(w.as(w.ra), { taskId: "task_1" });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: revision.evidence_draft_id });
+  await submitOccupancies._handler(w.as(w.ra), {
+    clientSubmissionId: submissionId(32),
+    taskId: "task_1",
+    parentEvidenceDraftId: revision.evidence_draft_id,
+    segments: [segment(0, { start_date: "1906" })],
+  });
+
+  const earlierRows = w.rows.site_occupancies.filter((row) => row.parent_evidence_draft_id === "task_1:draft_a");
+  assert.deepEqual(earlierRows.map((row) => row.claim_status), ["superseded"]);
+  const retired = w.rows.evidence_versions.filter((row) => row.version_kind === "superseded_by_later_set");
+  assert.equal(retired.length, 1);
+  assert.equal(retired[0].evidence_draft_id, "task_1:draft_a");
+  assert.equal(retired[0].parent_object_hash, version(w, 1).object_hash);
+  assert.deepEqual(envelopeOf(retired[0]).payload.occupancies, []);
+  assert.equal(w.draft.evidence_version_hash, retired[0].object_hash);
+  const after = await verifyDraftAgainstVersion._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:draft_a" });
+  assert.equal(after.consistent, true, after.errors.join("; "));
+  const clone = await verifyDraftAgainstVersion._handler(w.as(w.reviewer), { evidenceDraftId: revision.evidence_draft_id });
+  assert.equal(clone.consistent, true, clone.errors.join("; "));
+});
+
+test("a decided or superseded record cannot be rewritten in place by anyone", async () => {
+  const w = await scene();
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  const envelopeJson = version(w).envelope_json;
+  for (const status of ["accepted_for_export", "rejected", "superseded", "withdrawn"]) {
+    await w.db.patch(w.draft._id, { draft_status: status });
+    await assert.rejects(
+      saveEvidenceDraft._handler(w.as(w.reviewer), { taskId: "task_1", evidenceDraftId: "task_1:draft_a", draft: draftContent({ evidence_note: "rewritten" }) }),
+      /stays on record/,
+    );
+    assert.equal(w.draft.draft_status, status);
+    assert.equal(w.draft.evidence_note, draftContent().evidence_note);
+  }
+  assert.equal(w.rows.evidence_versions.length, 1);
+  assert.equal(version(w).envelope_json, envelopeJson);
+});
+
+test("a reviewer edit of an unresolved note keeps its status and records a child version", async () => {
+  const w = await scene();
+  await submitUnresolvedNote._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a", note: "Partial evidence for discussion." });
+  const first = version(w);
+  await saveEvidenceDraft._handler(w.as(w.reviewer), { taskId: "task_1", evidenceDraftId: "task_1:draft_a", draft: draftContent({ evidence_note: "Reviewer clarified the note." }) });
+  assert.equal(w.draft.draft_status, "unresolved_note");
+  assert.equal(w.rows.evidence_versions.length, 2);
+  const child = version(w, 1);
+  assert.equal(child.version_kind, "reviewer_edit");
+  assert.equal(child.parent_object_hash, first.object_hash);
+  assert.equal(child.created_by, w.reviewer._id);
+  const audit = await verifyDraftAgainstVersion._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:draft_a" });
+  assert.equal(audit.consistent, true);
+});
+
+test("a reused open revision refuses a different intent instead of ignoring it", async () => {
+  const w = await scene({ country: "VU" });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  const opened = await reviseEvidenceDraft._handler(w.as(w.ra), { taskId: "task_1" });
+  await assert.rejects(
+    reviseEvidenceDraft._handler(w.as(w.ra), { taskId: "task_1", intent: "new_observation" }),
+    /started as a correction/,
+  );
+  const again = await reviseEvidenceDraft._handler(w.as(w.ra), { taskId: "task_1", intent: "correction" });
+  assert.equal(again.evidence_draft_id, opened.evidence_draft_id);
+  const clone = w.row("evidence_drafts", "evidence_draft_id", opened.evidence_draft_id);
+  assert.equal(clone.revision_intent, "correction");
+});
+
+test("confirming several derived years keeps every year and records one version holding them all", async () => {
+  const w = await derivedScene();
+  const result = await confirmAllDerived._handler(w.as(w.reviewer), { taskId: "task_1", parentEvidenceDraftId: "task_1:draft_a" });
+  assert.deepEqual(result.confirmed, [2013, 2018]);
+  assert.deepEqual(w.draft.target_year_statuses, { "2013": "present", "2018": "present" });
+  assert.equal(w.rows.evidence_versions.length, 2);
+  const child = version(w, 1);
+  assert.deepEqual(envelopeOf(child).payload.evidence.target_year_statuses, { "2013": "present", "2018": "present" });
+  const audit = await verifyDraftAgainstVersion._handler(w.as(w.reviewer), { evidenceDraftId: "task_1:draft_a" });
+  assert.equal(audit.consistent, true);
 });

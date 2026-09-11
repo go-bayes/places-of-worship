@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url";
 // same rule is supplied here so the tests load the real builder and verifier.
 registerHooks({ resolve(specifier, context, nextResolve) { if (specifier.startsWith(".") && !/\.[a-z]+$/i.test(specifier)) { for (const ext of [".js", ".ts"]) { const candidate = new URL(`${specifier}${ext}`, context.parentURL); if (fs.existsSync(fileURLToPath(candidate))) return nextResolve(candidate.href, context); } } return nextResolve(specifier, context); } });
 
+const libModule = await import("./evidenceVersions.ts");
+const canonicalModule = await import("./canonicalJson.ts");
 const {
   buildEvidenceVersion,
   evidenceContentFromRow,
@@ -15,8 +17,8 @@ const {
   sortOccupancyContent,
   verifyEvidenceVersionEnvelope,
   EVIDENCE_VERSION_SCHEMA,
-} = await import("./evidenceVersions.ts");
-const { HASH_CONTRACT, objectHash } = await import("./canonicalJson.ts");
+} = libModule;
+const { HASH_CONTRACT, objectHash } = canonicalModule;
 
 const fixtures = JSON.parse(
   fs.readFileSync(new URL("../../schemas/fixtures/evidence-version.v1.json", import.meta.url), "utf8"),
@@ -292,4 +294,26 @@ test("the verifier refuses values that are not evidence-version envelopes at all
   const built = build();
   const withoutPayload = { ...built.envelope, payload: "not an object" };
   assert.equal(verifyEvidenceVersionEnvelope(withoutPayload).valid, false);
+});
+
+test("non-plain objects are refused before they can collapse to an empty member", () => {
+  const { buildEvidenceVersion } = libModule;
+  const base = { task_id: "t", evidence_draft_id: "d", evidence_family_id: "d", version_index: 1, version_kind: "submitted", lineage: { relation: "first" }, actor_user_id: "u", recorded_at_ms: 0, occupancy_rows: [] };
+  assert.throws(() => buildEvidenceVersion({ ...base, evidence_row: { generated_wide_row: { bytes: new ArrayBuffer(4) } } }), /Non-plain object/);
+  assert.throws(() => buildEvidenceVersion({ ...base, evidence_row: { source_date: new Date(0) } }), /Non-plain object/);
+  const left = buildEvidenceVersion({ ...base, evidence_row: { generated_wide_row: { row: { a: 1 } } } });
+  const right = buildEvidenceVersion({ ...base, evidence_row: { generated_wide_row: { row: { a: 2 } } } });
+  assert.notEqual(left.content_hash, right.content_hash);
+});
+
+test("the verifier refuses an impossible calendar date and an occupancy without its ordering fields", () => {
+  const { verifyEvidenceVersionEnvelope } = libModule;
+  const { objectHash } = canonicalModule;
+  const restamp = (envelope) => { const { object_hash: _h, ...rest } = envelope; return { ...rest, object_hash: objectHash(rest) }; };
+  const valid = structuredClone(fixtures.cases[0].envelope);
+  const badDate = restamp({ ...valid, recorded_at: "2026-13-45T25:61:61.000Z" });
+  assert.match(verifyEvidenceVersionEnvelope(badDate).errors.join("; "), /recorded_at/);
+  const missingSegment = structuredClone(valid);
+  delete missingSegment.payload.occupancies[0].segment_index;
+  assert.match(verifyEvidenceVersionEnvelope(restamp(missingSegment)).errors.join("; "), /numeric segment_index/);
 });

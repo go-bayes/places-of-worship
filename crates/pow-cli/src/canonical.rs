@@ -348,14 +348,17 @@ fn check_evidence_version(
         }
     }
 
+    let mut seen = std::collections::BTreeSet::new();
+    for (_, occupancy_id) in &keys {
+        if !seen.insert(*occupancy_id) {
+            errors.push(format!(
+                "payload.occupancies contains the duplicate occupancy_id {occupancy_id:?}"
+            ));
+        }
+    }
     for window in keys.windows(2) {
         let (left_segment, left_id) = window[0];
         let (right_segment, right_id) = window[1];
-        if left_id == right_id {
-            errors.push(format!(
-                "payload.occupancies contains the duplicate occupancy_id {left_id:?}"
-            ));
-        }
         let ordered = left_segment < right_segment
             || (left_segment == right_segment
                 && compare_utf16(left_id, right_id) == Ordering::Less);

@@ -90,6 +90,12 @@ export function withoutUndefined<T>(value: T, path = "$"): T {
       return withoutUndefined(item, `${path}[${index}]`);
     }) as T;
   }
+  // the same domain rule as canonicalJsonStrict: a byte buffer, date, or
+  // class instance must fail here rather than collapse to an empty object
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null) {
+    throw new TypeError(`Non-plain object at ${path}.`);
+  }
   const record = value as Record<string, unknown>;
   const cleaned: Record<string, unknown> = {};
   for (const key of Object.keys(record)) {

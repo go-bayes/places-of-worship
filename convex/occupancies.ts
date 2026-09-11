@@ -479,7 +479,7 @@ async function supersedeEarlierFunctionChains(
   user: Doc<"users">,
   actorRole: ProjectRole,
   now: number,
-): Promise<void> {
+): Promise<Set<string>> {
   const earlier = await ctx.db
     .query("historical_claims")
     .withIndex("by_task_creator_and_created_at", (q) => q.eq("task_id", task.task_id).eq("created_by", user._id))
@@ -507,6 +507,8 @@ async function supersedeEarlierFunctionChains(
     }
     await rederiveFunctions(ctx, task, affected, undefined, "", user._id, actorRole, now);
   }
+  affectedParents.delete(parent.evidence_draft_id);
+  return affectedParents;
 }
 
 // the claim ledger's bound columns for a chain date: a by-date has no
@@ -648,7 +650,7 @@ async function supersedeEarlierOccupancySets(
   user: Doc<"users">,
   actorRole: ProjectRole,
   now: number,
-): Promise<void> {
+): Promise<Set<string>> {
   const rows = await ctx.db
     .query("site_occupancies")
     .withIndex("by_task_creator_status_and_created_at", (q) =>
@@ -671,6 +673,7 @@ async function supersedeEarlierOccupancySets(
       .unique();
     if (earlierParent !== null) await rederive(ctx, task, earlierParent, user._id, actorRole, now);
   }
+  return earlierParents;
 }
 
 // the one write route for a set of periods: supersedes the author's earlier
@@ -705,9 +708,20 @@ export async function recordOccupancySet(
   // replaces the author's set on the task's earlier parents, so one author
   // holds one active set per task. those parents' derived proposals are
   // rederived to nothing, which marks them superseded with an event each
-  await supersedeEarlierOccupancySets(ctx, task, parent, user, actorRole, now);
+  const retiredSetParents = await supersedeEarlierOccupancySets(ctx, task, parent, user, actorRole, now);
   // pr-f: the author's earlier function chains go the same way, chain or no chain
-  await supersedeEarlierFunctionChains(ctx, task, parent, user, actorRole, now);
+  const retiredChainParents = await supersedeEarlierFunctionChains(ctx, task, parent, user, actorRole, now);
+  // retiring an earlier parent's active set or chain changes what that
+  // submitted record says, so each affected earlier parent takes a child
+  // version recording the retirement (evidence-version.v1 inventory)
+  for (const earlierParentId of new Set([...retiredSetParents, ...retiredChainParents])) {
+    const earlierParent = await ctx.db
+      .query("evidence_drafts")
+      .withIndex("by_evidence_draft_id", (q) => q.eq("evidence_draft_id", earlierParentId))
+      .unique();
+    if (earlierParent === null || earlierParent.evidence_version_hash === undefined) continue;
+    await recordEvidenceVersion(ctx, { draftRowId: earlierParent._id, actor: user, kind: "superseded_by_later_set", now });
+  }
   // the cards saved with the draft are now rows
   if (parent.pending_occupancy_cards !== undefined) {
     await ctx.db.patch(parent._id, { pending_occupancy_cards: undefined, updated_at: now });
@@ -936,7 +950,7 @@ export const submitOccupancies = mutation({
       actor: user,
       kind: "occupancy_set_recorded",
       now,
-      idempotencyKey: submissionKey,
+      idempotencyKey: `periods:${submissionKey}`,
     });
     await appendTaskEvent(ctx, {
       taskId: task.task_id,
@@ -989,11 +1003,15 @@ async function applyYearDecision(
       await ctx.db.patch(row._id, { review_state: "reviewer_confirmed", updated_at: now });
     }
     written = presence.derived_status;
+    // merge into the row as it stands now: a batch confirmation decides
+    // several years against one parent doc, and each write must keep the
+    // earlier years' statuses
+    const latest = (await ctx.db.get(parent._id)) ?? parent;
     await ctx.db.patch(parent._id, {
-      target_year_statuses: { ...((parent.target_year_statuses ?? {}) as Record<string, "present" | "absent" | "uncertain" | "not_assessed">), [String(year)]: presence.derived_status },
-      target_year_basis: { ...((parent.target_year_basis ?? {}) as Record<string, "source_observation" | "reviewer_confirmed_derivation" | "reviewer_override">), [String(year)]: "reviewer_confirmed_derivation" },
+      target_year_statuses: { ...((latest.target_year_statuses ?? {}) as Record<string, "present" | "absent" | "uncertain" | "not_assessed">), [String(year)]: presence.derived_status },
+      target_year_basis: { ...((latest.target_year_basis ?? {}) as Record<string, "source_observation" | "reviewer_confirmed_derivation" | "reviewer_override">), [String(year)]: "reviewer_confirmed_derivation" },
       // r-f1': the level of use is confirmed with the presence
-      target_year_use_levels: useLevelsAfter(parent, year, presence.derived_status === "present" ? presence.use_level : undefined),
+      target_year_use_levels: useLevelsAfter(latest, year, presence.derived_status === "present" ? presence.use_level : undefined),
       updated_at: now,
     });
   } else if (action === "override") {
@@ -1014,12 +1032,13 @@ async function applyYearDecision(
       });
     }
     written = status;
+    const latest = (await ctx.db.get(parent._id)) ?? parent;
     await ctx.db.patch(parent._id, {
-      target_year_statuses: { ...((parent.target_year_statuses ?? {}) as Record<string, "present" | "absent" | "uncertain" | "not_assessed">), [String(year)]: status },
-      target_year_basis: { ...((parent.target_year_basis ?? {}) as Record<string, "source_observation" | "reviewer_confirmed_derivation" | "reviewer_override">), [String(year)]: "reviewer_override" },
+      target_year_statuses: { ...((latest.target_year_statuses ?? {}) as Record<string, "present" | "absent" | "uncertain" | "not_assessed">), [String(year)]: status },
+      target_year_basis: { ...((latest.target_year_basis ?? {}) as Record<string, "source_observation" | "reviewer_confirmed_derivation" | "reviewer_override">), [String(year)]: "reviewer_override" },
       // an overriding present carries the reviewer's level of use, else
       // the derived one; any other status carries none
-      target_year_use_levels: useLevelsAfter(parent, year, status === "present" ? (override.use_level ?? presence.use_level) : undefined),
+      target_year_use_levels: useLevelsAfter(latest, year, status === "present" ? (override.use_level ?? presence.use_level) : undefined),
       updated_at: now,
     });
   } else {

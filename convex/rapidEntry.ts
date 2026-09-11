@@ -482,7 +482,7 @@ export const submitCurrentObservation = mutation({
       actor: user,
       kind: "rapid_current_observation",
       now,
-      idempotencyKey: submissionKey,
+      idempotencyKey: `rapid:${submissionKey}`,
     });
     await supersedeEarlierSubmissions(ctx, task.task_id, user._id, draftId, now);
     await ctx.db.patch(task._id, {

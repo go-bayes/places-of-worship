@@ -18,6 +18,7 @@ export type EvidenceVersionKind =
   | "occupancy_import"
   | "agent_intake"
   | "occupancy_set_recorded"
+  | "superseded_by_later_set"
   | "reviewer_edit"
   | "reviewer_derivation_decision"
   | "migration_copy";
@@ -86,6 +87,11 @@ function compareUtf16(left: string, right: string): number {
 // the set-like ordering rule for the occupancy set: by segment index, then
 // by the stable occupancy identifier. the rust verifier enforces the same rule
 export function sortOccupancyContent<T extends { segment_index: unknown; occupancy_id: unknown }>(rows: T[]): T[] {
+  for (const row of rows) {
+    if (typeof row.segment_index !== "number" || !Number.isFinite(row.segment_index) || typeof row.occupancy_id !== "string") {
+      throw new TypeError("Every occupancy needs a numeric segment_index and a string occupancy_id.");
+    }
+  }
   return [...rows].sort((left, right) => {
     const bySegment = Number(left.segment_index) - Number(right.segment_index);
     if (bySegment !== 0) return bySegment;
@@ -231,7 +237,12 @@ export function verifyEvidenceVersionEnvelope(value: unknown): { valid: boolean;
   if (envelope.schema_version !== EVIDENCE_VERSION_SCHEMA) errors.push(`schema_version must be ${EVIDENCE_VERSION_SCHEMA}`);
   if (typeof envelope.logical_id !== "string" || !envelope.logical_id.startsWith("evidence:")) errors.push("logical_id must be an evidence: identifier");
   if (typeof envelope.created_by !== "string" || !envelope.created_by.startsWith("actor:")) errors.push("created_by must be an actor: identifier");
-  if (typeof envelope.recorded_at !== "string" || !RFC3339_MS_UTC.test(envelope.recorded_at)) errors.push("recorded_at must be an rfc 3339 utc time with milliseconds");
+  if (
+    typeof envelope.recorded_at !== "string"
+    || !RFC3339_MS_UTC.test(envelope.recorded_at)
+    || Number.isNaN(Date.parse(envelope.recorded_at))
+    || new Date(envelope.recorded_at).toISOString() !== envelope.recorded_at
+  ) errors.push("recorded_at must be an rfc 3339 utc time with milliseconds");
   const parents = envelope.parent_object_hashes;
   if (!Array.isArray(parents)) {
     errors.push("parent_object_hashes must be an array");
@@ -257,7 +268,15 @@ export function verifyEvidenceVersionEnvelope(value: unknown): { valid: boolean;
             errors.push(`payload.occupancies[${index}] must be an object`);
             continue;
           }
-          const id = String(row.occupancy_id);
+          if (typeof row.segment_index !== "number" || !Number.isFinite(row.segment_index)) {
+            errors.push(`payload.occupancies[${index}] requires a numeric segment_index`);
+            continue;
+          }
+          if (typeof row.occupancy_id !== "string") {
+            errors.push(`payload.occupancies[${index}] requires a string occupancy_id`);
+            continue;
+          }
+          const id = row.occupancy_id;
           if (ids.has(id)) errors.push(`payload.occupancies has duplicate occupancy_id ${id}`);
           ids.add(id);
           if (index > 0) {

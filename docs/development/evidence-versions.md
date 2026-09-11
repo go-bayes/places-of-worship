@@ -87,11 +87,13 @@ A version's `parent_object_hashes` names the version it supersedes. The builder 
 | A revision clone with `revision_intent: "new_observation"` | the clone's own id | none | `follows_evidence_draft_id`, `follows_object_hash` when the source has one |
 | A rapid correction (`rapidEntry:submitCurrentObservation` on a task in a correction status) | the corrected observation's family | its current version | |
 
-`reviseEvidenceDraft` stamps `revision_of_evidence_draft_id` and `revision_intent` on the clone. The portal sends no intent today, so every portal revision is a correction; the `new_observation` intent is available to clients now and needs a portal control and RA-guide sentence before contributors can choose it. `version_index` is the position inside the family, starting at 1.
+`reviseEvidenceDraft` stamps `revision_of_evidence_draft_id` and `revision_intent` on the clone; a reused open clone keeps the intent it was opened with, and a call asking for a different intent is refused rather than ignored. The portal sends no intent today, so every portal revision is a correction; the `new_observation` intent is available to clients now and needs a portal control and RA-guide sentence before contributors can choose it.
+
+`version_index` is a family-wide sequence starting at 1, not an ancestry depth. A family may branch: two revisions opened from the same submission by different actors, or a reviewer edit beside a contributor's correction, both take the same parent and consecutive indices. `parent_object_hashes` carries the graph; `listEvidenceVersions` presents the family in index order. Whether a family should be constrained to a chain is a record-keeping choice not taken here.
 
 ### Idempotency
 
-`recordEvidenceVersion` returns the existing version, and writes nothing, in two cases: the caller's idempotency key already names a version for the same actor and draft, or the row's current version has the same `content_hash` as the content being recorded, whoever the actor is. The guided, rapid, occupancy, import, and intake paths pass their existing submission keys, which are scoped by user id so two contributors cannot collide; `evidence:submitEvidenceDraft` accepts an optional `clientSubmissionId`, and without one an unchanged resubmission still returns the existing version with `deduped: true` and records no second event. A key reused by the same user against another draft is refused. A review action that writes nothing onto the row (a rejected derived year, a re-save of identical text) records no version.
+`recordEvidenceVersion` returns the existing version, and writes nothing, in two cases: the caller's idempotency key already names a version for the same actor and draft, or the row's current version has the same `content_hash` as the content being recorded, whoever the actor is. The guided, rapid, occupancy, import, and intake paths pass their existing submission keys, which are scoped by user id so two contributors cannot collide; `evidence:submitEvidenceDraft` accepts an optional `clientSubmissionId`, and without one an unchanged resubmission still returns the existing version with `deduped: true` and records no second event. A key reused by the same user against another draft is refused. A review action that writes nothing onto the row (a rejected derived year, a re-save of identical text) records no version. The content rule also means a reviewer whose confirmation writes exactly the values the contributor already recorded leaves no version of their own; the reviewer's act is still recorded in `derived_state_events` and the task events. Idempotency keys are namespaced by route (`submit:`, `guided:`, `periods:`, `rapid:`, `import:`, `agent-intake:`, `migration:`) so a client token reused across routes cannot return the wrong version.
 
 ## Mutation Inventory
 
@@ -99,13 +101,14 @@ Every server path that creates submitted evidence, or changes the content of sub
 
 | Path | Version kind | Idempotency key | Event carrying the hash |
 | --- | --- | --- | --- |
-| `evidence:submitEvidenceDraft` | `submitted` | `<user>:<clientSubmissionId>` when given, else content identity | `submitted_for_review` |
-| `evidence:submitEvidenceDraftWithOccupancies` | `guided_submission` (taken after periods and chain are recorded) | the guided submission key | `submitted_for_review` |
+| `evidence:submitEvidenceDraft` | `submitted` | `submit:<user>:<clientSubmissionId>` when given, else content identity | `submitted_for_review` |
+| `evidence:submitEvidenceDraftWithOccupancies` | `guided_submission` (taken after periods and chain are recorded; a retry returns the version this key recorded, not a later one) | `guided:` + the guided submission key | `submitted_for_review` |
 | `evidence:submitUnresolvedNote` | `unresolved_note` | content identity | `submitted_unresolved_note` |
-| `evidence:saveEvidenceDraft` on a row that stays `submitted` (review roles only; an author is refused) | `reviewer_edit` | content identity | `note_added` |
+| `evidence:saveEvidenceDraft` on a `submitted` or `unresolved_note` row, which keeps its status (review roles only; an author is refused; an `accepted_for_export`, `rejected`, `superseded`, or `withdrawn` row is refused for everyone and stays on record) | `reviewer_edit` | content identity | `note_added` |
 | `evidence:importSubmittedEvidenceDrafts` (spreadsheet import; a re-import with changed content becomes a child version) | `spreadsheet_import` | content identity | `submitted_for_review` |
-| `rapidEntry:submitCurrentObservation` | `rapid_current_observation` | the rapid submission key | `submitted_for_review` or `submitted_unresolved_note` |
-| `occupancies:submitOccupancies` (periods recorded against a submitted parent) | `occupancy_set_recorded` | the occupancy submission key | `note_added` |
+| `rapidEntry:submitCurrentObservation` | `rapid_current_observation` | `rapid:` + the rapid submission key | `submitted_for_review` or `submitted_unresolved_note` |
+| `occupancies:submitOccupancies` (periods recorded against a submitted parent) | `occupancy_set_recorded` | `periods:` + the occupancy submission key | `note_added` |
+| `recordOccupancySet` retiring an earlier parent's active set or function chain (`supersedeEarlierOccupancySets`, `supersedeEarlierFunctionChains`, reached from the guided submission, `submitOccupancies`, and the occupancy import): each affected earlier parent that already has a version takes a child version whose occupancy set is now empty and whose chain is gone | `superseded_by_later_set` | content identity | none; the later set's own event names the new version |
 | `occupancies:decideDerivedYear`, `occupancies:confirmAllDerived` (confirm or override writes census-year statuses, use levels, or denominations onto the parent; reject writes nothing and records no version) | `reviewer_derivation_decision` | content identity | `note_added` |
 | `batchImport` occupancy import (submitted rows with periods) | `occupancy_import` | `import:<batch>:<locator>` | none beyond the existing import events |
 | `internalAgentIntake:ingestBundle` | `agent_intake` | `agent-intake:<submission key>` | `imported` |

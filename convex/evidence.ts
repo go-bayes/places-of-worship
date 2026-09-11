@@ -476,18 +476,24 @@ export const saveEvidenceDraft = mutation({
       ) {
         throw new Error("Submitted evidence cannot be edited directly. Start a revision instead.");
       }
+      // a decided or superseded record stays on record for everyone: its
+      // content is what a decision or a later version refers to
+      if (["accepted_for_export", "rejected", "superseded", "withdrawn"].includes(existing.draft_status)) {
+        throw new Error("A decided, superseded, or withdrawn record stays on record. Start a revision instead.");
+      }
+      const staysSubmitted = existing.draft_status === "submitted" || existing.draft_status === "unresolved_note";
       await ctx.db.patch(existing._id, {
         ...args.draft,
         observation_contract_version: args.draft.observation_contract_version ?? existing.observation_contract_version,
         privacy_flag: args.draft.privacy_flag ?? existing.privacy_flag,
         licence_flag: args.draft.licence_flag ?? existing.licence_flag,
-        draft_status: existing.draft_status === "submitted" ? "submitted" : "draft",
+        draft_status: staysSubmitted ? existing.draft_status : "draft",
         updated_at: now,
       });
       // only a review role reaches a submitted row here; the edit stays
       // possible but is recorded as an attributed child version of the
       // contributor's submission rather than a silent patch
-      if (existing.draft_status === "submitted") {
+      if (staysSubmitted) {
         const version = await recordEvidenceVersion(ctx, { draftRowId: existing._id, actor: user, kind: "reviewer_edit", now });
         if (version.created) {
           await appendTaskEvent(ctx, {
@@ -649,6 +655,18 @@ export const reviseEvidenceDraft = mutation({
       latestEditable !== null && latestEditable.created_by === sourceDraft.created_by
         ? latestEditable
         : null;
+    // a reused clone keeps the lineage it was opened with; asking for a
+    // different intent is refused rather than silently ignored
+    if (
+      existingRevision !== null
+      && args.intent !== undefined
+      && existingRevision.revision_intent !== undefined
+      && existingRevision.revision_intent !== args.intent
+    ) {
+      throw new Error(
+        `An open revision of this evidence was started as a ${existingRevision.revision_intent === "correction" ? "correction" : "new observation"}; withdraw it before starting a ${args.intent === "correction" ? "correction" : "new observation"}.`,
+      );
+    }
     if (existingRevision !== null && task.status === nextStatus) {
       // no status transition pending and an editable draft already exists;
       // return it without a duplicate task event
@@ -778,7 +796,7 @@ export const submitEvidenceDraft = mutation({
       actor: user,
       kind: "submitted",
       now,
-      idempotencyKey: args.clientSubmissionId === undefined ? undefined : `${user._id}:${args.clientSubmissionId}`,
+      idempotencyKey: args.clientSubmissionId === undefined ? undefined : `submit:${user._id}:${args.clientSubmissionId}`,
     });
     if (!version.created && draft.draft_status === "submitted") {
       return { task_id: draft.task_id, evidence_draft_id: args.evidenceDraftId, task_status: "needs_review" as const, evidence_version_hash: version.object_hash, deduped: true };
@@ -853,6 +871,12 @@ export const submitEvidenceDraftWithOccupancies = mutation({
       const submittedForDraft = existing.filter(
         (row) => row.parent_evidence_draft_id === draft.evidence_draft_id,
       );
+      // the version this submission recorded, not whatever the row carries
+      // now (a reviewer may have written a later version since)
+      const recordedVersion = await ctx.db
+        .query("evidence_versions")
+        .withIndex("by_idempotency_key", (q) => q.eq("idempotency_key", `guided:${submissionKey}`))
+        .unique();
       return {
         task_id: draft.task_id,
         evidence_draft_id: draft.evidence_draft_id,
@@ -862,7 +886,7 @@ export const submitEvidenceDraftWithOccupancies = mutation({
         conflict_years: [],
         period_count: submittedForDraft.length,
         deduped: true,
-        evidence_version_hash: draft.evidence_version_hash,
+        evidence_version_hash: recordedVersion?.object_hash ?? draft.evidence_version_hash,
       };
     }
     if (draft.draft_status !== "draft") {
@@ -941,7 +965,7 @@ export const submitEvidenceDraftWithOccupancies = mutation({
       actor: user,
       kind: "guided_submission",
       now,
-      idempotencyKey: submissionKey,
+      idempotencyKey: `guided:${submissionKey}`,
     });
     await ctx.db.patch(submittedEventId, { evidence_version_hash: version.object_hash });
     return {
