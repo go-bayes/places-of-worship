@@ -131,7 +131,7 @@ def schema_errors(value, schema, root=None, path='$'):
 def public_url(url):
     try:
         parsed = parse_public_url(url)
-        host = parsed.hostname or ''
+        host = (parsed.hostname or '').rstrip('.')
         if '\\' in url or '%' in host or any(c.isspace() for c in url):
             return False
         import ipaddress

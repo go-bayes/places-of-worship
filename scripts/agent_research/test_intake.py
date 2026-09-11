@@ -30,7 +30,7 @@ class IntakeTest(unittest.TestCase):
                 intake.parse_json(raw)
 
     def test_public_url_syntax(self):
-        for url in ['file:///etc/passwd', 'https://localhost/a', 'https://127.0.0.1/', 'https://169.254.169.254/', 'https://2130706433/', 'https://0x7f000001/', 'https://example.org\\@8.8.8.8/a', 'https://user:pass@example.org/']:
+        for url in ['file:///etc/passwd', 'https://localhost/a', 'https://127.0.0.1/', 'https://169.254.169.254/', 'https://2130706433/', 'https://1.2.3.4./x', 'https://0x7f000001/', 'https://example.org\\@8.8.8.8/a', 'https://user:pass@example.org/']:
             with self.subTest(url=url):
                 self.assertFalse(intake.public_url(url))
         self.assertTrue(intake.public_url('https://example.org/history'))

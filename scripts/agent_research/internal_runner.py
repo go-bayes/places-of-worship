@@ -524,11 +524,15 @@ def _audit_trace(value: Any) -> dict:
 def _parse_codex(stdout: str, last_message: Path) -> tuple[dict, dict]:
     events = []
     for line in stdout.splitlines():
-        if line.lstrip().startswith("{"):
-            try:
-                events.append(_codex_event_loads(line))
-            except json.JSONDecodeError:
-                continue
+        if not line.strip():
+            continue
+        try:
+            event = _codex_event_loads(line)
+        except (ValueError, TypeError) as exc:
+            raise RunnerError("Codex trace contains malformed JSON") from exc
+        if not isinstance(event, dict):
+            raise RunnerError("Codex trace event must be an object")
+        events.append(event)
     errors = [event for event in events if event.get("type") in ("error", "turn.failed")]
     if errors:
         raise RunnerError("Codex reported an error or refusal")
@@ -546,8 +550,20 @@ def _parse_codex(stdout: str, last_message: Path) -> tuple[dict, dict]:
     if len(final_bytes) > MAX_OUTPUT_BYTES:
         raise RunnerError("Codex final message exceeded output limit")
     output = _extract_json(final_bytes.decode("utf-8", errors="strict"))
-    completed = next((event for event in events if event.get("type") == "turn.completed"), {})
-    thread = next((event for event in events if event.get("type") == "thread.started"), {})
+    completed = [event for event in events if event.get("type") == "turn.completed"]
+    threads = [event for event in events if event.get("type") == "thread.started"]
+    if (len(completed) != 1 or len(threads) != 1
+            or not isinstance(threads[0].get("thread_id"), str)
+            or not threads[0]["thread_id"].strip()
+            or events[0] is not threads[0] or events[-1] is not completed[0]):
+        raise RunnerError("Codex trace requires one completed thread")
+    messages = [event["item"].get("text") for event in events
+                if event.get("type") == "item.completed"
+                and isinstance(event.get("item"), dict)
+                and event["item"].get("type") == "agent_message"]
+    if not messages or not isinstance(messages[-1], str) or _extract_json(messages[-1]) != output:
+        raise RunnerError("Codex final message does not match its trace")
+    completed, thread = completed[0], threads[0]
     return output, {"events": events, "usage": completed.get("usage"), "usage_full": completed.get("usage"),
                     "model_id_reported": thread.get("model"), "tool_audit": tool_audit}
 
@@ -615,8 +631,6 @@ def _manifest(stage: str, provider: str, model: str, start: str, end: str, resul
     }
     if isinstance((fields or {}).get("usage_full"), dict):
         manifest["usage"]["provider_usage"] = (fields or {})["usage_full"]
-    if fields and "events" in fields:
-        manifest["events"] = fields["events"]
     if isinstance(raw_usage, dict) and raw_usage != manifest["usage"]:
         manifest["usage_raw"] = raw_usage
     if fields and "tool_audit" in fields:

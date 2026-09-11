@@ -141,10 +141,42 @@ class ValidationAndAuditTest(unittest.TestCase):
             final = Path(tmp) / "last.json"
             final.write_text("{}", encoding="utf-8")
             trace = '{"type":"item.completed","item":{"type":"web_search","id":"item-1","id":"exec-1"}}'
+            trace = '\n'.join([json.dumps({"type": "thread.started", "thread_id": "test"}), trace,
+                                json.dumps({"type": "item.completed", "item": {"type": "agent_message", "text": "{}"}}),
+                                json.dumps({"type": "turn.completed", "usage": {}})])
             output, fields = runner._parse_codex(trace, final)
             self.assertEqual(output, {})
-            self.assertEqual(fields["events"][0]["item"]["_duplicate_id_warning"]["values"], ["item-1", "exec-1"])
+            self.assertEqual(fields["events"][1]["item"]["_duplicate_id_warning"]["values"], ["item-1", "exec-1"])
             self.assertEqual(len(fields["tool_audit"]["duplicate_id_warnings"]), 1)
+
+    def test_codex_requires_complete_trace_bound_to_final_message(self):
+        events = [{"type": "thread.started", "thread_id": "test"},
+                  {"type": "item.completed", "item": {"type": "agent_message", "text": "{}"}},
+                  {"type": "turn.completed", "usage": {}}]
+        with tempfile.TemporaryDirectory() as tmp:
+            final = Path(tmp) / "last.json"
+            final.write_text("{}", encoding="utf-8")
+            valid = "\n".join(map(json.dumps, events))
+            self.assertEqual(runner._parse_codex(valid, final)[0], {})
+            for trace in ["", "\n".join(map(json.dumps, events[1:])),
+                          "\n".join(map(json.dumps, events[:-1])),
+                          valid + "\nnot json", valid + "\n{", valid.replace('"test"', '""')]:
+                with self.subTest(trace=trace), self.assertRaises(runner.RunnerError):
+                    runner._parse_codex(trace, final)
+            final.write_text('{"changed": true}', encoding="utf-8")
+            with self.assertRaisesRegex(runner.RunnerError, "does not match"):
+                runner._parse_codex(valid, final)
+
+    def test_manifest_does_not_duplicate_unredacted_trace_events(self):
+        secret = "test-secret-value"
+        result = runner.ProcessResult(0, secret.encode(), b"", False, False)
+        with patch.object(runner, "_redact_secrets", return_value="[REDACTED]"):
+            manifest = runner._manifest("research", "codex", "gpt-5.6-luna",
+                "2026-09-11T00:00:00+00:00", "2026-09-11T00:00:01+00:00",
+                result, {"events": [{"text": secret}]}, "prompt", {"version": "test"},
+                exit_status="completed")
+        self.assertNotIn("events", manifest)
+        self.assertNotIn(secret, json.dumps(manifest))
 
     def test_output_limit_refuses_before_structured_parse(self):
         result = runner.ProcessResult(0, b"{}", b"", False, True)
