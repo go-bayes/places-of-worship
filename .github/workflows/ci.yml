@@ -54,6 +54,8 @@ jobs:
         run: python3 -m unittest scripts/test_build_vu_woodberry_import.py
       - name: country registry tests
         run: python3 -m unittest scripts/test_build_country_registry.py
+      - name: export materialiser tests
+        run: python3 -m unittest scripts/test_materialise_convex_export.py
       - uses: astral-sh/setup-uv@v5
       - name: agent research pilot tests
         run: python3 -m unittest discover -s scripts/agent_research -p "test_*.py"

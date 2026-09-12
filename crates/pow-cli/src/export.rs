@@ -1597,4 +1597,52 @@ mod tests {
             report.errors
         );
     }
+
+    /// The supported curator path end to end: the fixture folded back into
+    /// the shape `exports:getExportBundle` returns, written out by
+    /// scripts/materialise_convex_export.py, then verified here. Review of
+    /// PR #112 (2026-09-12) found the materialiser dropping a declared file,
+    /// which only this path catches.
+    #[test]
+    fn a_bundle_materialised_by_the_python_script_verifies() {
+        let repo = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let fixture = repo.join("schemas/fixtures/pow-export-bundle.v1");
+        let manifest_text =
+            fs::read_to_string(fixture.join("export_manifest.json")).expect("read manifest");
+        let manifest: Value = serde_json::from_str(&manifest_text).expect("parse manifest");
+
+        // one `files.<key>` string per declared file, key = filename with
+        // dots as underscores (convex/exports.ts FILE_KEYS), manifest verbatim
+        let mut files = Map::new();
+        files.insert("export_manifest_json".to_owned(), Value::String(manifest_text));
+        for entry in manifest["files"].as_array().expect("files[]") {
+            let filename = entry["filename"].as_str().expect("filename");
+            let text = fs::read_to_string(fixture.join(filename)).expect("read fixture file");
+            files.insert(filename.replace('.', "_"), Value::String(text));
+        }
+        let bundle = json!({ "export_manifest": manifest, "files": files });
+
+        let dir = unique_temp_dir("materialised");
+        let bundle_path = dir.join("bundle.json");
+        fs::write(&bundle_path, serde_json::to_vec(&bundle).expect("encode bundle"))
+            .expect("write bundle");
+        let out = dir.join("out");
+        let status = std::process::Command::new("python3")
+            .arg(repo.join("scripts/materialise_convex_export.py"))
+            .arg(&bundle_path)
+            .arg("--output-dir")
+            .arg(&out)
+            .stdout(std::process::Stdio::null())
+            .status()
+            .expect("python3 must be on PATH to run the materialiser");
+        assert!(status.success(), "materialiser exited with {status}");
+
+        let report = verify_bundle(&out).expect("verify");
+        assert!(
+            report.valid,
+            "expected the materialised bundle to verify, got errors: {:#?}",
+            report.errors
+        );
+        fs::remove_dir_all(&dir).ok();
+    }
 }

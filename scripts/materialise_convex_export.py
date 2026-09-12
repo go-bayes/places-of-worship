@@ -29,6 +29,7 @@ OPTIONAL_FILE_KEYS = {
     "site_occupancies_jsonl": "site_occupancies.jsonl",
     "derived_target_year_states_jsonl": "derived_target_year_states.jsonl",
     "derived_year_locations_jsonl": "derived_year_locations.jsonl",
+    "derived_target_year_functions_jsonl": "derived_target_year_functions.jsonl",
     "derived_state_events_jsonl": "derived_state_events.jsonl",
     "evidence_versions_jsonl": "evidence_versions.jsonl",
     "evidence_head_changes_jsonl": "evidence_head_changes.jsonl",
@@ -138,6 +139,16 @@ def verify_against_manifest(manifest: dict[str, Any], file_entries: list[dict[st
         for entry in manifest.get("files", [])
         if isinstance(entry, dict) and isinstance(entry.get("filename"), str)
     }
+    # every file the frozen manifest declares must have been materialised;
+    # a file the bundle carried under a key this script does not map (the
+    # derived_target_year_functions.jsonl omission found in review, 2026-09-12)
+    # must fail here, not later in `pow export verify`
+    materialised = {entry["filename"] for entry in file_entries}
+    missing = sorted(filename for filename in declared if filename != "export_manifest.json" and filename not in materialised)
+    if missing:
+        raise ValueError(
+            "the frozen manifest declares files this materialisation did not write: " + ", ".join(missing),
+        )
     for entry in file_entries:
         expected = declared.get(entry["filename"])
         if expected is None:
