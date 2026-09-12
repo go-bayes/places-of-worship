@@ -431,3 +431,242 @@ test("membership drift: a batch whose stored decision ids no longer match the he
   assert.ok(batchRow.last_freeze_failure);
   assert.equal(storage._blobCount(), 0);
 });
+
+// a second pi_accepted task in an existing scene, for membership rules
+async function acceptSecondTask(w) {
+  await w.addTask({ task_id: "task_2", country_code: "VU", status: "in_progress" });
+  await w.addDraft({ evidence_draft_id: "task_2:draft_a", task_id: "task_2", created_by: w.ra._id });
+  await reviewAndAccept(w, { taskId: "task_2", evidenceDraftId: "task_2:draft_a", pi: w.pi });
+}
+
+// reopens, re-reviews, and re-accepts a task with a corrected record, so it
+// is pi_accepted again and can enter a superseding batch
+async function reacceptTask(w, taskId, draftId) {
+  await reopenTask._handler(w.as(w.reviewer), { taskId, reason: "Reopening to add a corrected record." });
+  await w.addDraft({
+    evidence_draft_id: draftId,
+    task_id: taskId,
+    created_by: w.ra._id,
+    ...draftContent({ evidence_note: "A corrected directory reading." }),
+  });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: draftId });
+  const snapshot = await getReviewSnapshot._handler(w.as(w.reviewer), { taskId, evidenceDraftId: draftId });
+  await recordReviewDecision._handler(w.as(w.reviewer), {
+    taskId,
+    decision: { evidence_draft_id: draftId, decision_status: "accepted_for_export", decision_note: "Checked the corrected record." },
+    snapshotHash: snapshot.snapshot_hash,
+  });
+  await recordAcceptance._handler(w.as(w.pi), { taskId, outcome: "accepted", note: "Ratifying the corrected record." });
+}
+
+// review of PR #112 (2026-09-12), finding 2: a completion whose response is
+// lost after the transaction committed must not have its blobs deleted
+test("a lost response after completeFreeze committed keeps every blob, leaves the batch frozen, and the action returns the committed result", async () => {
+  const w = await freezableScene();
+  const storage = fakeStorage();
+  const ctx = actionCtx(w, storage);
+  const dispatch = ctx.runMutation.bind(ctx);
+  let completions = 0;
+  ctx.runMutation = async (ref, args) => {
+    const result = await dispatch(ref, args);
+    if (args.storedFiles !== undefined) {
+      completions += 1;
+      throw new Error("socket hang up");
+    }
+    return result;
+  };
+
+  const result = await freezeExportBatch._handler(ctx, { exportBatchId: w.batch.export_batch_id });
+  assert.equal(completions, 1);
+  assert.equal(result.status, "frozen");
+  assert.equal(result.file_count, 16);
+
+  const batchRow = w.row("export_batches", "export_batch_id", w.batch.export_batch_id);
+  assert.equal(batchRow.status, "frozen");
+  assert.equal(batchRow.last_freeze_failure, undefined);
+  assert.equal(batchRow.frozen_files.length, 16);
+  assert.equal(storage._blobCount(), 16);
+  assert.equal(result.manifest_hash, batchRow.manifest_hash);
+
+  // the stored bytes still serve and verify
+  const bundle = await getExportBundle._handler(actionCtx(w, storage), { exportBatchId: w.batch.export_batch_id });
+  assert.equal(bundle.disposition.verified, true);
+  assert.equal(bundle.disposition.processing_allowed, true);
+});
+
+test("when the outcome of a failed completion cannot be established, every blob is kept and the error says so", async () => {
+  const w = await freezableScene();
+  const storage = fakeStorage();
+  const ctx = actionCtx(w, storage);
+  const dispatchMutation = ctx.runMutation.bind(ctx);
+  const dispatchQuery = ctx.runQuery.bind(ctx);
+  ctx.runMutation = async (ref, args) => {
+    const result = await dispatchMutation(ref, args);
+    if (args.storedFiles !== undefined) throw new Error("socket hang up");
+    return result;
+  };
+  ctx.runQuery = async (ref, args) => {
+    if (args.attemptId !== undefined) throw new Error("backend unreachable");
+    return dispatchQuery(ref, args);
+  };
+
+  await assert.rejects(
+    freezeExportBatch._handler(ctx, { exportBatchId: w.batch.export_batch_id }),
+    /outcome could not be established .*16 stored blobs were kept/,
+  );
+  assert.equal(storage._blobCount(), 16);
+  assert.equal(w.row("export_batches", "export_batch_id", w.batch.export_batch_id).status, "frozen");
+});
+
+test("a rejected completion (not a lost response) still deletes the blobs; a retry of a committed attempt is idempotent", async () => {
+  const w = await freezableScene();
+  const prepared = await prepareFreeze._handler(w.as(w.admin2), {
+    exportBatchId: w.batch.export_batch_id,
+    userId: w.admin2._id,
+    attemptId: "attempt-x",
+  });
+  const storedFiles = prepared.files.map((file) => ({
+    filename: file.filename,
+    storageId: `x-${file.filename}`,
+    sha256: sha256(file.text),
+    byteLength: utf8Length(file.text),
+    contentType: file.content_type,
+  }));
+  const first = await completeFreeze._handler(w.as(w.admin2), {
+    exportBatchId: w.batch.export_batch_id,
+    attemptId: "attempt-x",
+    userId: w.admin2._id,
+    storedFiles,
+  });
+  const again = await completeFreeze._handler(w.as(w.admin2), {
+    exportBatchId: w.batch.export_batch_id,
+    attemptId: "attempt-x",
+    userId: w.admin2._id,
+    storedFiles,
+  });
+  assert.deepEqual(again, first);
+  assert.equal(w.events("exported").length, 1);
+  // a different attempt against the now-frozen batch is still refused
+  await assert.rejects(
+    completeFreeze._handler(w.as(w.admin2), {
+      exportBatchId: w.batch.export_batch_id,
+      attemptId: "attempt-y",
+      userId: w.admin2._id,
+      storedFiles,
+    }),
+    /no longer current/,
+  );
+});
+
+// review of PR #112 (2026-09-12), finding 3: supersession must check the
+// predecessor's country and the replacement's membership
+test("supersession refuses another country's batch and an empty or partial replacement at creation", async () => {
+  const w = await freezableScene();
+  const storage = fakeStorage();
+  await freezeExportBatch._handler(actionCtx(w, storage), { exportBatchId: w.batch.export_batch_id });
+
+  await assert.rejects(
+    createExportBatch._handler(w.as(w.admin2), {
+      countryCode: "NZ",
+      taskIds: [],
+      supersedesExportBatchId: w.batch.export_batch_id,
+    }),
+    /is a VU batch and cannot be superseded by a NZ batch/,
+  );
+  await assert.rejects(
+    createExportBatch._handler(w.as(w.admin2), {
+      countryCode: "VU",
+      taskIds: [],
+      supersedesExportBatchId: w.batch.export_batch_id,
+    }),
+    /must include at least one task/,
+  );
+
+  // a replacement naming only a different task does not cover task_1
+  await acceptSecondTask(w);
+  await assert.rejects(
+    createExportBatch._handler(w.as(w.admin2), {
+      countryCode: "VU",
+      taskIds: ["task_2"],
+      supersedesExportBatchId: w.batch.export_batch_id,
+    }),
+    /must include every task it exported; missing task_1/,
+  );
+  assert.equal(w.row("export_batches", "export_batch_id", w.batch.export_batch_id).status, "frozen");
+
+  // covering the predecessor and adding a task is accepted
+  await reacceptTask(w, "task_1", "task_1:draft_b");
+  const second = await createExportBatch._handler(w.as(w.admin2), {
+    countryCode: "VU",
+    taskIds: ["task_1", "task_2"],
+    supersedesExportBatchId: w.batch.export_batch_id,
+  });
+  assert.equal(second.included_task_count, 2);
+});
+
+test("a predecessor withdrawn or superseded after the replacement was created refuses the replacement's completion", async () => {
+  const w = await freezableScene();
+  const storage = fakeStorage();
+  await freezeExportBatch._handler(actionCtx(w, storage), { exportBatchId: w.batch.export_batch_id });
+  await reacceptTask(w, "task_1", "task_1:draft_b");
+  const second = await createExportBatch._handler(w.as(w.admin2), {
+    countryCode: "VU",
+    taskIds: ["task_1"],
+    supersedesExportBatchId: w.batch.export_batch_id,
+  });
+  await withdrawExportBatch._handler(w.as(w.admin2), {
+    exportBatchId: w.batch.export_batch_id,
+    reason: "Withdrawn while a replacement was still draft.",
+  });
+
+  const blobsBefore = storage._blobCount();
+  await assert.rejects(
+    freezeExportBatch._handler(actionCtx(w, storage), { exportBatchId: second.export_batch_id }),
+    /is now withdrawn and can no longer be superseded/,
+  );
+  const secondRow = w.row("export_batches", "export_batch_id", second.export_batch_id);
+  assert.equal(secondRow.status, "draft");
+  assert.match(secondRow.last_freeze_failure.reason, /can no longer be superseded/);
+  assert.equal(storage._blobCount(), blobsBefore);
+  const firstRow = w.row("export_batches", "export_batch_id", w.batch.export_batch_id);
+  assert.equal(firstRow.status, "withdrawn");
+  assert.equal(firstRow.superseded_by_export_batch_id, undefined);
+  assert.equal(w.task.status, "pi_accepted");
+});
+
+// the interim scale gate (review of PR #112, 2026-09-12)
+test("automatic selection refuses a country with more accepted tasks than one freeze can hold, naming the limit", async () => {
+  const w = await scene({ country: "VU" });
+  const admin2 = await w.addUser("admin-subject-2", ["admin"]);
+  for (let index = 0; index < 101; index += 1) {
+    await w.addTask({ task_id: `bulk_${index}`, country_code: "VU", status: "pi_accepted" });
+  }
+  await assert.rejects(
+    createExportBatch._handler(w.as(admin2), { countryCode: "VU" }),
+    /more than 100 pi_accepted tasks.*Name up to 100 tasks explicitly/,
+  );
+});
+
+test("a bundle over the byte budget is refused at capture: no blob stored, the batch stays draft with the reason", async () => {
+  const w = await freezableScene();
+  const storage = fakeStorage();
+  await appendTaskEvent(w.ctx, {
+    taskId: "task_1",
+    eventType: "note_added",
+    actorUserId: w.admin2._id,
+    actorRole: "admin",
+    reason: "A note whose stored row is enlarged below.",
+  });
+  const note = w.events("note_added").at(-1);
+  await w.ctx.db.patch(note._id, { reason: "x".repeat(7 * 1024 * 1024) });
+
+  await assert.rejects(
+    freezeExportBatch._handler(actionCtx(w, storage), { exportBatchId: w.batch.export_batch_id }),
+    /above the 6291456-byte freeze budget; create smaller batches/,
+  );
+  assert.equal(storage._blobCount(), 0);
+  const batchRow = w.row("export_batches", "export_batch_id", w.batch.export_batch_id);
+  assert.equal(batchRow.status, "draft");
+  assert.equal(batchRow.pending_freeze, undefined);
+  assert.match(batchRow.last_freeze_failure.reason, /freeze budget/);
+});

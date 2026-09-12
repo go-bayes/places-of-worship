@@ -724,6 +724,10 @@ export default defineSchema({
       }),
     ),
     freeze_completed_at: v.optional(v.number()),
+    // the attempt whose completeFreeze committed the batch, so a retry of
+    // that attempt (or the action's outcome probe after a lost response)
+    // recognises its own commit instead of deleting the stored bytes
+    frozen_by_attempt_id: v.optional(v.string()),
     bundle_contract: v.optional(v.string()),
     manifest_hash: v.optional(v.string()),
     // the stored, verified bytes of a frozen bundle: one entry per file,

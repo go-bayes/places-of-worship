@@ -253,6 +253,17 @@ const FILE_KEYS: Record<string, string> = {
   "review_snapshots.jsonl": "review_snapshots_jsonl",
 };
 
+// interim scale gate (review of PR #112, 2026-09-12; lifted by the budgeted
+// composer in the lean-storage brief): prepareFreeze reads and builds a whole
+// batch in one transaction and returns every file's text in one result, so a
+// batch is bounded by the Convex per-call and transaction-read caps (16 MiB).
+// Automatic selection is capped at a small count and refuses, naming the
+// count, when a country holds more accepted tasks than that, so a curator
+// names bounded lists explicitly; and every freeze refuses at capture when
+// the built bundle exceeds the byte budget, before any blob is stored.
+export const AUTOMATIC_BATCH_TASK_LIMIT = 100;
+export const EXPORT_BATCH_BYTE_BUDGET = 6 * 1024 * 1024;
+
 type BuiltFile = { text: string; content_type: string; sha256: string; byte_length: number };
 
 function flattenFiles(filesByFilename: Record<string, BuiltFile>): Record<string, string> {
@@ -588,6 +599,27 @@ export const listExportBatches = query({
   },
 });
 
+// the replacement-membership rule for supersession (review of PR #112,
+// 2026-09-12): a superseding batch must include every task its predecessor
+// exported, and may add more. A batch that drops a predecessor task cannot
+// supersede it, because the dropped task would lose its only processable
+// frozen record; the curator withdraws the earlier batch instead. Until
+// ruling 11 of the lean-storage brief lets a superseding batch carry an
+// unchanged `exported` task forward, this means every predecessor task
+// must have been reopened, re-reviewed, and re-accepted.
+function assertReplacementCovers(earlier: Doc<"export_batches">, taskIds: string[], earlierId: string): void {
+  if (taskIds.length === 0) {
+    throw new Error(`A batch superseding ${earlierId} must include at least one task; an empty batch cannot replace it.`);
+  }
+  const replacement = new Set(taskIds);
+  const missing = earlier.included_task_ids.filter((taskId) => !replacement.has(taskId));
+  if (missing.length > 0) {
+    throw new Error(
+      `A batch superseding ${earlierId} must include every task it exported; missing ${missing.slice(0, 5).join(", ")}${missing.length > 5 ? ` and ${missing.length - 5} more` : ""}. Withdraw the earlier batch instead if those tasks are not being re-exported.`,
+    );
+  }
+}
+
 export const createExportBatch = mutation({
   args: {
     countryCode: v.string(),
@@ -619,19 +651,31 @@ export const createExportBatch = mutation({
           `Export batch ${args.supersedesExportBatchId} must be a frozen batch with stored bytes to be superseded.`,
         );
       }
+      if (earlier.country_code !== args.countryCode) {
+        throw new Error(
+          `Export batch ${args.supersedesExportBatchId} is a ${earlier.country_code} batch and cannot be superseded by a ${args.countryCode} batch.`,
+        );
+      }
     }
 
-    const requestedTaskIds =
-      args.taskIds ??
-      (
-        await ctx.db
-          .query("tasks")
-          // the pi acceptance layer (jb 2026-09-04): a batch takes only
-          // tasks a principal investigator has accepted, never a
-          // reviewer's acceptance alone
-          .withIndex("by_country_status", (q) => q.eq("country_code", args.countryCode).eq("status", "pi_accepted"))
-          .take(1000)
-      ).map((task) => task.task_id);
+    let requestedTaskIds: string[];
+    if (args.taskIds !== undefined) {
+      requestedTaskIds = args.taskIds;
+    } else {
+      const accepted = await ctx.db
+        .query("tasks")
+        // the pi acceptance layer (jb 2026-09-04): a batch takes only
+        // tasks a principal investigator has accepted, never a
+        // reviewer's acceptance alone
+        .withIndex("by_country_status", (q) => q.eq("country_code", args.countryCode).eq("status", "pi_accepted"))
+        .take(AUTOMATIC_BATCH_TASK_LIMIT + 1);
+      if (accepted.length > AUTOMATIC_BATCH_TASK_LIMIT) {
+        throw new Error(
+          `${args.countryCode} has more than ${AUTOMATIC_BATCH_TASK_LIMIT} pi_accepted tasks; automatic selection would exceed one freeze's transaction budget. Name up to ${AUTOMATIC_BATCH_TASK_LIMIT} tasks explicitly in taskIds per batch until the budgeted batch composer lands.`,
+        );
+      }
+      requestedTaskIds = accepted.map((task) => task.task_id);
+    }
 
     // training tasks never enter an export bundle, even when named
     // explicitly; a named task a pi has not accepted refuses the batch
@@ -660,6 +704,13 @@ export const createExportBatch = mutation({
       const authority = await assertTaskExportAuthority(ctx, taskId);
       reviewDecisionIds.push(...authority.reviewDecisionIds);
       acceptanceIds.push(...authority.acceptanceIds);
+    }
+
+    if (args.supersedesExportBatchId !== undefined) {
+      const earlier = await batchByExportBatchId(ctx, args.supersedesExportBatchId);
+      if (earlier !== null) {
+        assertReplacementCovers(earlier, taskIds, args.supersedesExportBatchId);
+      }
     }
 
     const exportBatchId = `${args.countryCode.toLowerCase()}-convex-export-${now}`;
@@ -734,6 +785,12 @@ export const prepareFreeze = internalMutation({
 
     const frozenAt = Date.now();
     const built = await buildBundle(ctx, batch, frozenAt, true);
+    const bundleBytes = Object.values(built.filesByFilename).reduce((total, file) => total + file.byte_length, 0);
+    if (bundleBytes > EXPORT_BATCH_BYTE_BUDGET) {
+      throw new Error(
+        `Export batch ${args.exportBatchId}: the bundle is ${bundleBytes} bytes over ${batch.included_task_ids.length} tasks, above the ${EXPORT_BATCH_BYTE_BUDGET}-byte freeze budget; create smaller batches (name fewer tasks in taskIds).`,
+      );
+    }
     await ctx.db.patch(batch._id, {
       pending_freeze: {
         attempt_id: args.attemptId,
@@ -758,6 +815,58 @@ export const prepareFreeze = internalMutation({
 // longer matches what prepareFreeze captured, i.e. a row changed while the
 // action was storing blobs. On success, commits the frozen batch, moves
 // every included task to exported, and marks a superseded predecessor.
+// the result completeFreeze returned when `attemptId` committed the batch,
+// or null when that attempt did not (or has not yet) committed. Read by the
+// idempotent path in completeFreeze and by freezeAttemptOutcome.
+function committedFreezeResult(
+  batch: Doc<"export_batches">,
+  attemptId: string,
+): { export_batch_id: string; status: "frozen"; manifest_hash: string; frozen_at: number; file_count: number } | null {
+  if (
+    batch.frozen_by_attempt_id !== attemptId
+    || batch.frozen_files === undefined
+    || batch.manifest_hash === undefined
+    || batch.frozen_at === undefined
+  ) {
+    return null;
+  }
+  return {
+    export_batch_id: batch.export_batch_id,
+    status: "frozen" as const,
+    manifest_hash: batch.manifest_hash,
+    frozen_at: batch.frozen_at,
+    file_count: batch.frozen_files.length,
+  };
+}
+
+// whether a freeze attempt committed: the action asks this before deleting
+// the blobs an attempt stored, because a failed completeFreeze call has an
+// ambiguous outcome (a rejected transaction, or a committed one whose
+// response was lost), and the bytes of a committed freeze must never be
+// deleted. Withdrawal and supersession keep `frozen_by_attempt_id`, so a
+// batch that commits and is then withdrawn still answers committed.
+export const freezeAttemptOutcome = internalQuery({
+  args: { exportBatchId: v.string(), attemptId: v.string() },
+  returns: v.union(
+    v.null(),
+    v.object({
+      export_batch_id: v.string(),
+      status: v.literal("frozen"),
+      manifest_hash: v.string(),
+      frozen_at: v.number(),
+      file_count: v.number(),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    await requireUser(ctx, ["curator", "admin"]);
+    const batch = await batchByExportBatchId(ctx, args.exportBatchId);
+    if (batch === null) {
+      return null;
+    }
+    return committedFreezeResult(batch, args.attemptId);
+  },
+});
+
 export const completeFreeze = internalMutation({
   args: {
     exportBatchId: v.string(),
@@ -786,6 +895,14 @@ export const completeFreeze = internalMutation({
     if (batch === null) {
       throw new Error(`Export batch not found: ${args.exportBatchId}`);
     }
+    // idempotent completion: a retry of an attempt that already committed
+    // (the action lost the response of its first call) returns the same
+    // result rather than refusing, so the action can settle without deleting
+    // the bytes that attempt stored
+    const committed = committedFreezeResult(batch, args.attemptId);
+    if (committed !== null) {
+      return committed;
+    }
     if (batch.status !== "draft" || batch.pending_freeze === undefined || batch.pending_freeze.attempt_id !== args.attemptId) {
       throw new Error(
         `Export batch ${args.exportBatchId}: this freeze attempt is no longer current (a later attempt, or a status change, superseded it).`,
@@ -813,12 +930,37 @@ export const completeFreeze = internalMutation({
       throw new Error(`Export batch ${args.exportBatchId}: the export manifest changed between freeze capture and completion.`);
     }
 
+    // the predecessor is rechecked in this transaction, before any write:
+    // it must still be the frozen, stored, same-country batch this one
+    // covers, and nothing else may have withdrawn or superseded it since
+    // creation. A refusal here leaves this batch draft, exactly like any
+    // other completion refusal.
+    let earlier: Doc<"export_batches"> | null = null;
+    if (batch.supersedes_export_batch_id !== undefined) {
+      earlier = await batchByExportBatchId(ctx, batch.supersedes_export_batch_id);
+      if (earlier === null) {
+        throw new Error(`Export batch ${args.exportBatchId}: the batch it supersedes, ${batch.supersedes_export_batch_id}, no longer exists.`);
+      }
+      if (earlier.status !== "frozen" || earlier.frozen_files === undefined || earlier.superseded_by_export_batch_id !== undefined) {
+        throw new Error(
+          `Export batch ${args.exportBatchId}: the batch it supersedes, ${batch.supersedes_export_batch_id}, is now ${earlier.status}${earlier.superseded_by_export_batch_id !== undefined ? ` (by ${earlier.superseded_by_export_batch_id})` : ""} and can no longer be superseded; create a new batch without supersedesExportBatchId.`,
+        );
+      }
+      if (earlier.country_code !== batch.country_code) {
+        throw new Error(
+          `Export batch ${args.exportBatchId}: the batch it supersedes, ${batch.supersedes_export_batch_id}, is a ${earlier.country_code} batch.`,
+        );
+      }
+      assertReplacementCovers(earlier, batch.included_task_ids, batch.supersedes_export_batch_id);
+    }
+
     const now = Date.now();
     const actorRole = chooseActorRole(user, ["curator", "admin"]);
     await ctx.db.patch(batch._id, {
       status: "frozen",
       frozen_at: frozenAt,
       freeze_completed_at: now,
+      frozen_by_attempt_id: args.attemptId,
       bundle_contract: "pow-export-bundle.v1",
       manifest_hash: pendingManifest.manifest_hash as string,
       frozen_files: args.storedFiles.map((file) => ({
@@ -852,15 +994,12 @@ export const completeFreeze = internalMutation({
       });
     }
 
-    if (batch.supersedes_export_batch_id !== undefined) {
-      const earlier = await batchByExportBatchId(ctx, batch.supersedes_export_batch_id);
-      if (earlier !== null) {
-        await ctx.db.patch(earlier._id, {
-          status: "superseded",
-          superseded_by_export_batch_id: args.exportBatchId,
-          superseded_at: now,
-        });
-      }
+    if (earlier !== null) {
+      await ctx.db.patch(earlier._id, {
+        status: "superseded",
+        superseded_by_export_batch_id: args.exportBatchId,
+        superseded_at: now,
+      });
     }
 
     return {
@@ -904,6 +1043,8 @@ export const recordFreezeFailure = internalMutation({
 // every file, reads each back, verifies its bytes, and only then commits
 // the freeze; any failure at any step deletes the blobs it stored and
 // records why, leaving the batch exactly as it was.
+type FreezeResult = { export_batch_id: string; status: "frozen"; manifest_hash: string; frozen_at: number; file_count: number };
+
 export const freezeExportBatch = action({
   args: { exportBatchId: v.string() },
   returns: v.object({
@@ -913,7 +1054,9 @@ export const freezeExportBatch = action({
     frozen_at: v.number(),
     file_count: v.number(),
   }),
-  handler: async (ctx, args) => {
+  // an explicit return type, as on getExportBundle: the handler's own
+  // return expressions reach `internal.exports`, which includes this action
+  handler: async (ctx, args): Promise<FreezeResult> => {
     // an action has no ctx.db, so the role check runs through an internal
     // query that shares the caller's ctx.auth; every internal mutation this
     // action drives re-checks the role itself too (defence in depth)
@@ -980,13 +1123,7 @@ export const freezeExportBatch = action({
     }
 
     try {
-      const completed: {
-        export_batch_id: string;
-        status: "frozen";
-        manifest_hash: string;
-        frozen_at: number;
-        file_count: number;
-      } = await ctx.runMutation(internal.exports.completeFreeze, {
+      const completed: FreezeResult = await ctx.runMutation(internal.exports.completeFreeze, {
         exportBatchId: args.exportBatchId,
         attemptId,
         userId: user._id,
@@ -994,6 +1131,22 @@ export const freezeExportBatch = action({
       });
       return completed;
     } catch (error) {
+      // a failed call is ambiguous: the transaction may have been rejected,
+      // or it may have committed and only its response been lost. Only a
+      // batch that answers "not committed by this attempt" has its blobs
+      // deleted; a committed one returns its result, and an outcome that
+      // cannot be established keeps every blob and says so.
+      let outcome: FreezeResult | null;
+      try {
+        outcome = await ctx.runQuery(internal.exports.freezeAttemptOutcome, { exportBatchId: args.exportBatchId, attemptId });
+      } catch (probeError) {
+        throw new Error(
+          `Export batch ${args.exportBatchId}: freeze completion failed (${errorMessage(error)}) and its outcome could not be established (${errorMessage(probeError)}); the ${storedFiles.length} stored blobs were kept (${storedFiles.map((stored) => stored.storageId).join(", ")}). Reconcile the batch before retrying.`,
+        );
+      }
+      if (outcome !== null) {
+        return outcome;
+      }
       for (const stored of storedFiles) {
         await ctx.storage.delete(stored.storageId);
       }

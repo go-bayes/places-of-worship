@@ -26,7 +26,7 @@ import { getFunctionName } from "convex/server";
 // consumer of this module resolves correctly.
 registerHooks({ resolve(specifier, context, nextResolve) { if (specifier.startsWith(".") && !/\.[a-z]+$/i.test(specifier)) { for (const ext of [".js", ".ts"]) { const candidate = new URL(`${specifier}${ext}`, context.parentURL); if (fs.existsSync(fileURLToPath(candidate))) return nextResolve(candidate.href, context); } } return nextResolve(specifier, context); } });
 
-const { prepareFreeze, completeFreeze, recordFreezeFailure, getExportBatchRow, buildDraftBundle, requireActingUser } =
+const { prepareFreeze, completeFreeze, recordFreezeFailure, freezeAttemptOutcome, getExportBatchRow, buildDraftBundle, requireActingUser } =
   await import("../exports.ts");
 
 // a fixed clock that advances one millisecond per read, so recorded times
@@ -235,6 +235,7 @@ const EXPORTS_HANDLERS = {
   prepareFreeze,
   completeFreeze,
   recordFreezeFailure,
+  freezeAttemptOutcome,
   getExportBatchRow,
   buildDraftBundle,
   requireActingUser,
