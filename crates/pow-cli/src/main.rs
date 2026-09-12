@@ -19,6 +19,7 @@ use serde_json::Value;
 use sha2::{Digest, Sha256};
 
 mod canonical;
+mod export;
 
 const PROPOSE_VERSION: &str = "pow-propose.v1";
 const AGENT_REVIEW_SCHEMA_VERSION: &str = "agent-review-bundle.v1";
@@ -47,6 +48,8 @@ enum Commands {
     Diff(DiffArgs),
     /// Hash or verify a content-addressed review object.
     Object(ObjectArgs),
+    /// Verify a materialised frozen export bundle.
+    Export(ExportArgs),
 }
 
 #[derive(Parser, Debug)]
@@ -77,6 +80,28 @@ struct ObjectHashArgs {
 struct ObjectVerifyArgs {
     /// Content-addressed envelope to verify.
     input: PathBuf,
+
+    /// Report format.
+    #[arg(long, value_enum, default_value_t = ReportFormat::Text)]
+    report: ReportFormat,
+}
+
+#[derive(Parser, Debug)]
+struct ExportArgs {
+    #[command(subcommand)]
+    action: ExportAction,
+}
+
+#[derive(Subcommand, Debug)]
+enum ExportAction {
+    /// Check a materialised export bundle directory against its frozen manifest.
+    Verify(ExportVerifyArgs),
+}
+
+#[derive(Parser, Debug)]
+struct ExportVerifyArgs {
+    /// Materialised bundle directory (the output of scripts/materialise_convex_export.py).
+    dir: PathBuf,
 
     /// Report format.
     #[arg(long, value_enum, default_value_t = ReportFormat::Text)]
@@ -393,6 +418,7 @@ fn run(cli: Cli) -> Result<bool> {
             Ok(false)
         }
         Commands::Object(args) => canonical::run_object(args),
+        Commands::Export(args) => export::run_export(args),
     }
 }
 

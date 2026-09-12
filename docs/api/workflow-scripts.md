@@ -30,7 +30,7 @@ flowchart LR
   H --> I["RA assignment and review portal"]
   I --> J["Convex export bundle"]
   J --> K["materialise_convex_export.py"]
-  K --> L["pow validate, stage, propose, diff"]
+  K --> L["pow validate, stage, propose, diff, export verify"]
   S["RA spreadsheet CSV"] --> T["build_convex_spreadsheet_submission_seed.py"]
   T --> U["importSubmittedEvidenceDrafts"]
   U --> I
@@ -51,7 +51,7 @@ flowchart LR
 
 | Script | Main entry point | Purpose | Inputs | Outputs | When to run |
 | --- | --- | --- | --- | --- | --- |
-| `scripts/materialise_convex_export.py` | `main()` | Materialise a JSON bundle returned by `exports:getExportBundle` into local files for `pow`. | JSON copied from the Convex `getExportBundle` query. | Ignored export directory under `exports/convex-roundtrip/<export_batch_id>/`, including `tasks.jsonl`, `task_events.jsonl`, `evidence_drafts.jsonl`, `historical_claims.jsonl`, `review_decisions.jsonl`, `site_evidence_wide.csv`, `export_manifest.json`, and `SHA256SUMS`. | After a curator creates and freezes a Convex export batch for a reviewed set of tasks. |
+| `scripts/materialise_convex_export.py` | `main()` | Materialise a JSON bundle returned by `exports:getExportBundle` into local files for `pow`. For a frozen `pow-export-bundle.v1` bundle, `export_manifest.json` is written verbatim from `files.export_manifest_json` and every other file's bytes are checked against the manifest's `files[]` before `SHA256SUMS` is written, failing closed and naming the file on any mismatch; the printed summary carries `disposition` when the bundle returned one. | JSON copied from the Convex `getExportBundle` action or query. | Ignored export directory under `exports/convex-roundtrip/<export_batch_id>/`, including `tasks.jsonl`, `task_events.jsonl`, `evidence_drafts.jsonl`, `historical_claims.jsonl`, `review_decisions.jsonl`, `site_evidence_wide.csv`, `export_manifest.json`, `SHA256SUMS`, and, for a bundle carrying them, `evidence_versions.jsonl`, `evidence_head_changes.jsonl`, `task_acceptances.jsonl`, and `review_snapshots.jsonl`. | After a curator creates and freezes a Convex export batch for a reviewed set of tasks. Follow with `pow export verify <output dir>` to check the materialised bundle against its frozen manifest. |
 
 Manifest tooling (`generate_manifest.py`, `validate_manifests.sh`) lives in the private research tier at `~/GIT/pow-research/pipeline/`.
 

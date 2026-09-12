@@ -21,13 +21,19 @@ FILE_KEYS = {
     "review_decisions_jsonl": "review_decisions.jsonl",
     "site_evidence_wide_csv": "site_evidence_wide.csv",
 }
-# the occupancy lane's files (PR-B′, 2026-09-02); bundles frozen before it
-# lack them, so their absence is reported rather than fatal
+# the occupancy lane's files (PR-B′, 2026-09-02) and the content-addressed
+# review lane's files (byte-level freezing, 2026-09-12); bundles frozen
+# before the relevant lane existed lack them, so their absence is reported
+# rather than fatal
 OPTIONAL_FILE_KEYS = {
     "site_occupancies_jsonl": "site_occupancies.jsonl",
     "derived_target_year_states_jsonl": "derived_target_year_states.jsonl",
     "derived_year_locations_jsonl": "derived_year_locations.jsonl",
     "derived_state_events_jsonl": "derived_state_events.jsonl",
+    "evidence_versions_jsonl": "evidence_versions.jsonl",
+    "evidence_head_changes_jsonl": "evidence_head_changes.jsonl",
+    "task_acceptances_jsonl": "task_acceptances.jsonl",
+    "review_snapshots_jsonl": "review_snapshots.jsonl",
 }
 
 
@@ -83,7 +89,8 @@ def contents_keys(bundle: dict[str, Any]) -> set[str]:
     return set(files.keys()) if isinstance(files, dict) else set()
 
 
-# Build a manifest with local hashes for every materialised file.
+# Build a manifest with local hashes for every materialised file (pre-freeze
+# bundle shape: no export_manifest_json, so there is nothing frozen to echo).
 def local_manifest(bundle: dict[str, Any], file_entries: list[dict[str, Any]]) -> dict[str, Any]:
     manifest = bundle.get("export_manifest")
     if not isinstance(manifest, dict):
@@ -94,6 +101,57 @@ def local_manifest(bundle: dict[str, Any], file_entries: list[dict[str, Any]]) -
         "materialised_by": "scripts/materialise_convex_export.py",
         "output_files": file_entries,
     }
+
+
+# Choose the export_manifest.json bytes to write: the frozen manifest's own
+# bytes verbatim when the action returned them (their hash must reproduce
+# the frozen manifest_hash, so they must not be re-serialised or annotated),
+# otherwise the pre-frozen-bundle rebuild with local materialisation notes.
+def manifest_payload(
+    bundle: dict[str, Any],
+    file_entries: list[dict[str, Any]],
+    missing_optional: list[str],
+) -> tuple[bytes, dict[str, Any]]:
+    files = bundle.get("files")
+    verbatim = files.get("export_manifest_json") if isinstance(files, dict) else None
+    if isinstance(verbatim, str):
+        manifest = json.loads(verbatim)
+        if not isinstance(manifest, dict):
+            raise ValueError("files.export_manifest_json is not a JSON object.")
+        return verbatim.encode("utf-8"), manifest
+
+    manifest = local_manifest(bundle, file_entries)
+    if missing_optional:
+        manifest["optional_files_absent"] = missing_optional
+    payload = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    return payload, manifest
+
+
+# A frozen manifest's files[] entries are the authority on what a curator
+# received; refuse to write SHA256SUMS over materialised bytes that drifted
+# from them (naming the file that failed, so the curator knows what to redo).
+def verify_against_manifest(manifest: dict[str, Any], file_entries: list[dict[str, Any]]) -> None:
+    if not manifest.get("manifest_hash"):
+        return
+    declared = {
+        entry["filename"]: entry
+        for entry in manifest.get("files", [])
+        if isinstance(entry, dict) and isinstance(entry.get("filename"), str)
+    }
+    for entry in file_entries:
+        expected = declared.get(entry["filename"])
+        if expected is None:
+            continue
+        if expected.get("sha256") != entry["sha256"]:
+            raise ValueError(
+                f"materialised file {entry['filename']} does not match the frozen manifest: "
+                f"sha256 {entry['sha256']!r} != manifest {expected.get('sha256')!r}",
+            )
+        if expected.get("byte_length") != entry["bytes"]:
+            raise ValueError(
+                f"materialised file {entry['filename']} does not match the frozen manifest: "
+                f"byte length {entry['bytes']!r} != manifest {expected.get('byte_length')!r}",
+            )
 
 
 # Write export files, then add an audited manifest and SHA256SUMS file.
@@ -117,26 +175,29 @@ def materialise(bundle: dict[str, Any], destination: Path) -> dict[str, Any]:
     missing_optional = [
         filename for key, filename in OPTIONAL_FILE_KEYS.items() if key not in contents_keys(bundle)
     ]
-    manifest = local_manifest(bundle, file_entries)
-    if missing_optional:
-        manifest["optional_files_absent"] = missing_optional
-    manifest_payload = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    manifest_bytes, manifest = manifest_payload(bundle, file_entries, missing_optional)
+    verify_against_manifest(manifest, file_entries)
+
     manifest_path = destination / "export_manifest.json"
-    manifest_path.write_bytes(manifest_payload)
+    manifest_path.write_bytes(manifest_bytes)
     file_entries.append(
         {
             "filename": "export_manifest.json",
-            "bytes": len(manifest_payload),
-            "sha256": sha256_bytes(manifest_payload),
+            "bytes": len(manifest_bytes),
+            "sha256": sha256_bytes(manifest_bytes),
         },
     )
 
     sums = "".join(f"{entry['sha256']}  {entry['filename']}\n" for entry in file_entries)
     (destination / "SHA256SUMS").write_text(sums, encoding="utf-8")
-    return {
+    summary: dict[str, Any] = {
         "output_dir": str(destination),
         "files": file_entries,
     }
+    disposition = bundle.get("disposition")
+    if disposition is not None:
+        summary["disposition"] = disposition
+    return summary
 
 
 # Parse command-line arguments for curator export materialisation.
