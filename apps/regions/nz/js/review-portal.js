@@ -62,6 +62,13 @@
         // { snapshot_hash, summary, snapshot: { draft, ... } } from
         // reviews:getReviewSnapshot, or null while loading or without a draft
         reviewSnapshot: null,
+        // the server's message when that fetch failed, else ""
+        reviewSnapshotError: "",
+        // what the panels render (review finding 2026-09-12): the task,
+        // draft, events, claims, and latest decision taken from the snapshot
+        // above, so the reviewer decides on exactly what the hash covers;
+        // PowReviewSnapshotContent.contentFromSnapshot, or null while loading
+        content: null,
     };
 
     // the ra portal's map above the review cards (jb 2026-09-04); absent
@@ -450,6 +457,8 @@ function human(value) {
         state.agentAgreementChoice = null;
         state.occupancy = null;
         state.reviewSnapshot = null;
+        state.reviewSnapshotError = "";
+        state.content = null;
         renderQueue();
         renderDetail(true);
         try {
@@ -460,14 +469,33 @@ function human(value) {
                 // deployments without a bucket simply show no files section
                 client.listTaskAttachments({ taskId }).catch(() => []),
             ]);
-            state.drafts = drafts || [];
-            state.historicalClaims = historicalClaims || [];
-            state.events = events || [];
+            // the reviewer may have moved on while the fetch was in flight
+            if (state.selected !== row) return;
+            const fetched = { drafts: drafts || [], historicalClaims: historicalClaims || [], events: events || [] };
             state.attachments = attachments || [];
+            // the snapshot the decision form will submit, fetched for the
+            // task's current draft; the panels then render from it (review
+            // finding 2026-09-12), never from the queue row cached at queue
+            // load or from the rows fetched above, which may already differ
+            const snapshotDraft = fetched.drafts[0] || row.latestDraft || null;
+            if (snapshotDraft) {
+                try {
+                    state.reviewSnapshot = await client.getReviewSnapshot({ taskId, evidenceDraftId: snapshotDraft.evidence_draft_id });
+                } catch (error) {
+                    state.reviewSnapshot = null;
+                    state.reviewSnapshotError = error.message || "unknown error";
+                }
+                if (state.selected !== row) return;
+            }
+            const content = window.PowReviewSnapshotContent.contentFromSnapshot({ snapshot: state.reviewSnapshot, queueRow: row, fetched });
+            state.content = content;
+            state.drafts = content.drafts;
+            state.historicalClaims = content.historicalClaims;
+            state.events = content.events;
             state.sharedSource = null;
             // a draft citing the shared register shows the register row and
             // how many other entries cite it (visible to all collaborators)
-            const draftWithSource = state.selected?.latestDraft || state.drafts[0] || null;
+            const draftWithSource = content.draft;
             if (draftWithSource?.source_id) {
                 try {
                     const [register, citing] = await Promise.all([
@@ -487,12 +515,26 @@ function human(value) {
         }
     }
 
+    // the panels' inputs (review finding 2026-09-12): from the snapshot
+    // content once loaded; before that, from the queue row, under the
+    // loading banner, with acceptance blocked until the snapshot is held
+    function currentTask() {
+        return state.content?.task || state.selected?.task || null;
+    }
+
     function currentDraft() {
+        if (state.content) return state.content.draft;
         return state.selected?.latestDraft || state.drafts[0] || null;
     }
 
     function currentReview() {
+        if (state.content) return state.content.latestReview;
         return state.selected?.latestReview || null;
+    }
+
+    function currentAgentReview() {
+        if (state.content) return state.content.latestAgentReview;
+        return state.selected?.latestAgentReview || null;
     }
 
     function renderEmptyDetail(message) {
@@ -516,10 +558,10 @@ function human(value) {
             return;
         }
 
-        const { task } = row;
+        const task = currentTask();
         const draft = currentDraft();
         const review = currentReview();
-        const agentReview = row.latestAgentReview || null;
+        const agentReview = currentAgentReview();
         const locationAssertion = task.initial_location_assertion || null;
         // revise-with-evidence lane: the reporter's framing and the record's
         // own point travel on the task, beside the observation they filed
@@ -755,9 +797,10 @@ function human(value) {
         // detail is settled; the panel stays empty for tasks without periods
         if (!loading) {
             loadOccupancyPanel(task);
-            // the snapshot the decision form will submit (pi ruling 2026-09-11)
-            loadReviewSnapshot(task, draft);
         }
+        // the snapshot the decision form will submit (pi ruling 2026-09-11),
+        // already fetched by selectTask and the source of the panels above
+        renderSnapshotHost(draft, loading);
         const form = document.getElementById("reviewDecisionForm");
         if (form) {
             wireDecisionForm(form);
@@ -783,29 +826,25 @@ function human(value) {
     }
 
     // the snapshot the decision form shows and submits (pi ruling
-    // 2026-09-11): the portal shows the snapshot that will be sent and the
-    // server refuses a stale one. fetched once the detail is settled, held
-    // in state.reviewSnapshot, and re-fetched after a "stale" server refusal.
-    async function loadReviewSnapshot(task, draft) {
+    // 2026-09-11): selectTask fetches it with the task and the panels render
+    // from it; the server refuses a stale one, after which the whole task is
+    // reloaded (reloadSelectedTask below)
+    function renderSnapshotHost(draft, loading) {
         const host = document.getElementById("reviewSnapshotHost");
         if (!host) return;
+        if (loading) {
+            host.innerHTML = `<p class="muted">Loading review snapshot...</p>`;
+            return;
+        }
+        if (state.reviewSnapshot) {
+            renderReviewSnapshot(state.reviewSnapshot);
+            return;
+        }
         if (!draft) {
-            state.reviewSnapshot = null;
             host.innerHTML = `<p class="muted">No evidence draft on this task; a decision here carries no review snapshot.</p>`;
             return;
         }
-        host.innerHTML = `<p class="muted">Loading review snapshot...</p>`;
-        try {
-            const snapshot = await client.getReviewSnapshot({ taskId: task.task_id, evidenceDraftId: draft.evidence_draft_id });
-            // the reviewer may have moved on while the fetch was in flight
-            if (state.selected?.task?.task_id !== task.task_id) return;
-            state.reviewSnapshot = snapshot;
-            renderReviewSnapshot(snapshot);
-        } catch (error) {
-            if (state.selected?.task?.task_id !== task.task_id) return;
-            state.reviewSnapshot = null;
-            host.innerHTML = `<p class="status error">Could not load the review snapshot: ${escapeHtml(error.message || "unknown error")}.</p>`;
-        }
+        host.innerHTML = `<p class="status error">Could not load the review snapshot: ${escapeHtml(state.reviewSnapshotError || "unknown error")}. The panels show the evidence as fetched separately; reload the task before accepting for export.</p>`;
     }
 
     // after a stale-snapshot refusal the selected task is re-read in full
@@ -848,7 +887,8 @@ function human(value) {
                 · evidence version ${versionText}
                 · decisions ${s.review_decisions ?? 0}, events ${s.task_events ?? 0}, agent reviews ${s.agent_reviews ?? 0},
                 claims ${s.historical_claims ?? 0}, periods ${s.site_occupancies ?? 0},
-                derived states ${s.derived_states ?? 0}, locations ${s.derived_locations ?? 0}, functions ${s.derived_functions ?? 0}
+                derived states ${s.derived_states ?? 0}, locations ${s.derived_locations ?? 0}, functions ${s.derived_functions ?? 0}.
+                The task, evidence, events, and claims on this page are rendered from this snapshot.
             </p>
         `;
     }
@@ -1737,7 +1777,7 @@ function human(value) {
             return;
         }
         const locationOutcome = form.locationOutcome?.value || undefined;
-        if (decisionStatus === "accepted_for_export" && pinMovedOn(state.selected.task) && !locationOutcome) {
+        if (decisionStatus === "accepted_for_export" && pinMovedOn(currentTask()) && !locationOutcome) {
             statusText.textContent = "The contributor moved the pin: choose the location ruling before accepting.";
             statusText.className = "status error";
             form.locationOutcome?.focus();
@@ -1759,7 +1799,7 @@ function human(value) {
         // provenance: which AI recommendation was on screen and whether the
         // human followed it — explicit button choice wins, otherwise derived
         // from the decision so the record never overstates agreement
-        const agentReview = state.selected.latestAgentReview;
+        const agentReview = currentAgentReview();
         if (agentReview && window.PowAgentReviewPanel) {
             decision.agent_review_id = agentReview.agent_review_id;
             decision.agent_review_agreement = window.PowAgentReviewPanel.deriveAgreement(
