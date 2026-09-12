@@ -808,6 +808,29 @@ function human(value) {
         }
     }
 
+    // after a stale-snapshot refusal the selected task is re-read in full
+    // (review finding 2026-09-12): refetching the snapshot line alone left
+    // the evidence, claims, and review panels showing the content the
+    // refused decision was made on, while the next click would have sent
+    // the refetched hash. the queue is reloaded first so the row's latest
+    // draft and review are current, then the task is selected again, which
+    // re-renders every panel and fetches the snapshot; the server's message
+    // is repeated on the fresh form
+    async function reloadSelectedTask(taskId, notice) {
+        await loadQueue();
+        if (!state.queue.some((entry) => entry.task.task_id === taskId)) {
+            state.selected = null;
+            renderEmptyDetail(`${notice} The task is no longer in this queue; change the queue status to find it.`);
+            return;
+        }
+        await selectTask(taskId);
+        const statusText = document.getElementById("decisionStatusText");
+        if (statusText && state.selected?.task?.task_id === taskId) {
+            statusText.textContent = `${notice} The task has been reloaded; check the evidence again before deciding.`;
+            statusText.className = "status error";
+        }
+    }
+
     function renderReviewSnapshot(snapshot) {
         const host = document.getElementById("reviewSnapshotHost");
         if (!host || !snapshot) return;
@@ -1772,13 +1795,12 @@ function human(value) {
             const message = error.message || "Could not record the review decision.";
             statusText.textContent = message;
             statusText.className = "status error";
-            // pi ruling 2026-09-11: a stale snapshot is refetched and
-            // re-rendered so the reviewer sees the current state before
+            // pi ruling 2026-09-11: a stale snapshot means the task is
+            // re-read in full so the reviewer sees the current state before
             // deciding again; the failed decision is never auto-resubmitted
             if (/stale/i.test(message)) {
-                await loadReviewSnapshot(selectedTask, draft);
-                statusText.textContent = message;
-                statusText.className = "status error";
+                state.busy = false;
+                await reloadSelectedTask(selectedTask.task_id, message);
             }
         } finally {
             state.busy = false;

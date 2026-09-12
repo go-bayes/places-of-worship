@@ -538,6 +538,15 @@ async function importSubmittedSpreadsheetDraft(
   if (existing !== null && finalDraftStatuses.has(existing.draft_status)) {
     return "skipped_final";
   }
+  // the task-level intake gate (pi ruling 2026-09-11) covers the import
+  // route too: a decided draft is skipped above, but a new draft id must
+  // not land fresh evidence on a reviewed, pi-accepted, or exported task
+  // (review finding 2026-09-12). the refusal fails the whole batch, as
+  // every other gated route fails its call; reopen the task and rerun
+  const gateRefusal = evidenceIntakeRefusal(task.status);
+  if (gateRefusal !== null) {
+    throw new Error(`Task ${item.task_id}: ${gateRefusal}`);
+  }
   assertNotRapidContract(existing, "spreadsheet import");
 
   const draftRecord = {
@@ -956,20 +965,23 @@ export const submitEvidenceDraft = mutation({
     assertNotRapidContract(draft, "the general submission route");
     assertEvidenceDraftSubmission(draft, false);
     const task = await getTaskOrThrow(ctx, draft.task_id);
+    // a receipt-backed retry answers from its receipt before the gate and
+    // before any status write (review finding 2026-09-12: the draft and task
+    // may have moved on since the receipted submission, and a retry that
+    // fell through to markDraftSubmitted undid a review or a pi acceptance).
+    // a token already bound to another caller or draft is refused as reuse
+    if (args.clientSubmissionId !== undefined) {
+      const receipt = await submissionReceipt(ctx, `submit:${user._id}:${args.clientSubmissionId}`);
+      if (receipt !== null) {
+        if (receipt.created_by !== user._id || receipt.evidence_draft_id !== draft.evidence_draft_id) {
+          throw new Error("The submission identifier is already in use.");
+        }
+        return { task_id: draft.task_id, evidence_draft_id: args.evidenceDraftId, task_status: "needs_review" as const, evidence_version_hash: receipt.object_hash, deduped: true };
+      }
+    }
     const gateRefusal = evidenceIntakeRefusal(task.status);
     if (gateRefusal !== null) {
-      // a receipt-backed retry of a submission already recorded before the
-      // task closed proceeds to recordEvidenceVersion below, which answers
-      // from the receipt and writes nothing; any other call is refused
-      const receipt = args.clientSubmissionId === undefined
-        ? null
-        : await submissionReceipt(ctx, `submit:${user._id}:${args.clientSubmissionId}`);
-      const isReceiptedRetry = receipt !== null
-        && receipt.created_by === user._id
-        && receipt.evidence_draft_id === draft.evidence_draft_id;
-      if (!isReceiptedRetry) {
-        throw new Error(gateRefusal);
-      }
+      throw new Error(gateRefusal);
     }
     assertWideEvidenceRowFields(draft.generated_wide_row, taskTargetYears(task));
     if (

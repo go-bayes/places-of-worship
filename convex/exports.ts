@@ -316,19 +316,43 @@ export const createExportBatch = mutation({
     for (const taskId of taskIds) {
       const decisions = await decisionsForTask(ctx, taskId);
       const accepted = decisions.filter((decision) => decision.decision_status === "accepted_for_export");
-      // no silent transfer: an accepted decision that pinned a version is
-      // checked against the draft's current version before it enters a
-      // batch; export fails closed rather than releasing content the
-      // decision never referred to
-      for (const decision of accepted) {
-        if (decision.evidence_version_hash !== undefined && decision.evidence_draft_id !== undefined) {
+      const acceptances = await ctx.db
+        .query("task_acceptances")
+        .withIndex("by_task", (q) => q.eq("task_id", taskId))
+        .collect();
+      const acceptedAcceptances = acceptances
+        .filter((row) => row.outcome === "accepted")
+        .sort((a, b) => b.created_at - a.created_at);
+      // the decision that carries the task's current export authority is
+      // the one its latest accepted acceptance names. earlier accepted
+      // decisions on the task are retained history: a pi return, a fresh
+      // snapshot-linked review, and a new acceptance supersede them, and
+      // their content may since have changed without bearing on what is
+      // exported now (review finding 2026-09-12). only the authoritative
+      // decision is checked; a task with no acceptance row (pre-layer) falls
+      // back to the newest accepted decision
+      const authorityId = acceptedAcceptances[0]?.review_decision_id;
+      const authority = authorityId !== undefined
+        ? accepted.find((decision) => decision.review_decision_id === authorityId) ?? null
+        : [...accepted].sort((a, b) => b.created_at - a.created_at)[0] ?? null;
+      if (authorityId !== undefined && authority === null) {
+        throw new Error(
+          `Task ${taskId}: the accepted acceptance names decision ${authorityId}, which is not an accepted-for-export decision on this task.`,
+        );
+      }
+      if (authority !== null) {
+        // no silent transfer: an accepted decision that pinned a version is
+        // checked against the draft's current version before it enters a
+        // batch; export fails closed rather than releasing content the
+        // decision never referred to
+        if (authority.evidence_version_hash !== undefined && authority.evidence_draft_id !== undefined) {
           const decisionDraft = await ctx.db
             .query("evidence_drafts")
-            .withIndex("by_evidence_draft_id", (q: any) => q.eq("evidence_draft_id", decision.evidence_draft_id!))
+            .withIndex("by_evidence_draft_id", (q: any) => q.eq("evidence_draft_id", authority.evidence_draft_id!))
             .unique();
-          if (decisionDraft !== null && decisionDraft.evidence_version_hash !== decision.evidence_version_hash) {
+          if (decisionDraft !== null && decisionDraft.evidence_version_hash !== authority.evidence_version_hash) {
             throw new Error(
-              `Task ${taskId}: accepted decision ${decision.review_decision_id} refers to evidence version ${decision.evidence_version_hash} but ${decision.evidence_draft_id} is now at ${decisionDraft.evidence_version_hash}; re-review before export.`,
+              `Task ${taskId}: accepted decision ${authority.review_decision_id} refers to evidence version ${authority.evidence_version_hash} but ${authority.evidence_draft_id} is now at ${decisionDraft.evidence_version_hash}; re-review before export.`,
             );
           }
         }
@@ -339,20 +363,12 @@ export const createExportBatch = mutation({
         // the task already carries an accepted acceptance; the export PR
         // (frozen exports, docs/development/evidence-versions.md, "later
         // steps") will recheck consistency for those at freeze time.
-        if (decision.review_snapshot_hash !== undefined) {
-          await assertDecisionSnapshotConsistent(ctx, decision);
+        if (authority.review_snapshot_hash !== undefined) {
+          await assertDecisionSnapshotConsistent(ctx, authority);
         }
       }
       reviewDecisionIds.push(...accepted.map((decision) => decision.review_decision_id));
-      const acceptances = await ctx.db
-        .query("task_acceptances")
-        .withIndex("by_task", (q) => q.eq("task_id", taskId))
-        .collect();
-      acceptanceIds.push(
-        ...acceptances
-          .filter((row) => row.outcome === "accepted")
-          .map((row) => row.acceptance_id),
-      );
+      acceptanceIds.push(...acceptedAcceptances.map((row) => row.acceptance_id));
     }
 
     const exportBatchId = `${args.countryCode.toLowerCase()}-convex-export-${now}`;
