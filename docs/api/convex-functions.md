@@ -204,28 +204,25 @@ The PI acceptance layer (rulings R-P1–R-P5, 2026-09-04): a reviewer's `accepte
 | Function | Kind | Roles | Purpose | Writes |
 | --- | --- | --- | --- | --- |
 | `listExportBatches` | query | `curator`, `admin` | List export batches, optionally by country and status. | None |
-| `createExportBatch` | mutation | `curator`, `admin` | Create a draft export batch from `pi_accepted` tasks or explicit task ids (a named task not yet PI-accepted is refused). The wide CSV header is the shared column list for the country's waves (`convex/lib/wideEvidenceFields.ts`); rows are placed by column name and the manifest reports `field_list_mismatch_count` (PR-B0, 2026-09-02). No-silent-transfer, fail closed, on the decision that carries the task's current export authority: the one named by the task's latest `accepted` acceptance row (a task with no acceptance row falls back to its newest `accepted_for_export` decision; an acceptance naming a decision that is not an accepted decision on the task is refused). If that decision pinned a version, the draft's current `evidence_version_hash` must still match it, or the batch is refused naming the task, the decision, and both hashes; since the PI ruling of 2026-09-11, it also passes `reviews:assertDecisionSnapshotConsistent` when it carries a `review_snapshot_hash`, and is included unchanged when it carries none (a historical record from before snapshot-linked review), which frozen exports will recheck. Earlier `accepted_for_export` decisions on the task, superseded by a PI return and a fresh review, are listed in the batch as retained history and not checked. | `export_batches` |
-| `freezeExportBatch` | mutation | `curator`, `admin` | Freeze a draft export batch and mark included tasks exported. | `export_batches`, `tasks`, `task_events` |
-| `getExportBundle` | query | `curator`, `admin` | Return raw task records plus file contents for materialising the export bundle. | None |
+| `createExportBatch` | mutation | `curator`, `admin` | Create a draft export batch from `pi_accepted` tasks or explicit task ids (a named task not yet PI-accepted, or training-excluded, is refused or silently dropped as before). The wide CSV header is the shared column list for the country's waves (`convex/lib/wideEvidenceFields.ts`); rows are placed by column name and the manifest reports `field_list_mismatch_count` (PR-B0, 2026-09-02). No-silent-transfer, fail closed, on the decision that carries the task's current export authority (the shared `assertTaskExportAuthority` helper, also called by `prepareFreeze` below): the one named by the task's latest `accepted` acceptance row (a task with no acceptance row falls back to its newest `accepted_for_export` decision; an acceptance naming a decision that is not an accepted decision on the task is refused). If that decision pinned a version, the draft's current `evidence_version_hash` must still match it, or the batch is refused naming the task, the decision, and both hashes; it also passes `reviews:assertDecisionSnapshotConsistent` when it carries a `review_snapshot_hash`, and is included unchanged when it carries none (a historical record from before snapshot-linked review). Earlier `accepted_for_export` decisions on the task, superseded by a PI return and a fresh review, are listed in the batch as retained history and not checked. Optionally takes `supersedesExportBatchId`, naming an earlier `frozen` batch with stored bytes to be superseded once this batch's freeze completes ([frozen-exports.md](../development/frozen-exports.md)). | `export_batches` |
+| `freezeExportBatch` | **action** | `curator`, `admin` | Re-checks every included task's export authority against the batch's stored membership, builds the complete `pow-export-bundle.v1` bundle, stores and verifies every file's bytes, and only then marks the batch `frozen` and every included task `exported`. Orchestrates three internal mutations (below); any failure at any step deletes the blobs it stored, records `last_freeze_failure`, and leaves the batch `draft`. When the batch carries `supersedes_export_batch_id`, the earlier batch is marked `superseded` on completion. See [frozen-exports.md](../development/frozen-exports.md). | `export_batches`, `tasks`, `task_events`, file storage |
+| `getExportBundle` | **action** | `curator`, `admin` | Return the manifest, all sixteen bundle files as text, and a `disposition`. A batch with stored bytes (`frozen`, `withdrawn`, or `superseded`) is read from storage and verified byte-for-byte against `frozen_files` and its own `manifest_hash`, never rebuilt from rows. A `draft` batch, or a batch frozen before this change (no stored bytes), is served as a live, unverified preview. | None |
+| `withdrawExportBatch` | mutation | `curator`, `admin` | Mark a `frozen` batch (with stored bytes) `withdrawn`; bytes, `frozen_files`, and `manifest_hash` stay, task statuses are unchanged, and each included task gets a `note_added` event naming the batch and the reason (trimmed to at least 8 characters). Refuses a draft, already-withdrawn, or superseded batch. | `export_batches`, `task_events` |
+| `prepareFreeze` | internal mutation | n/a (invoked by `freezeExportBatch`) | Step 1 of freezing: rechecks membership, builds the bundle at this attempt's `frozen_at`, and records `pending_freeze` on the batch. Its only write, so a refusal above it leaves the batch untouched. | `export_batches` |
+| `completeFreeze` | internal mutation | n/a (invoked by `freezeExportBatch`) | Step 3 of freezing: requires the attempt still current, rebuilds the bundle from current rows and compares every file to `pending_freeze.manifest`, and on success commits the frozen batch, exports the included tasks, and supersedes the named predecessor. | `export_batches`, `tasks`, `task_events` |
+| `recordFreezeFailure` | internal mutation | n/a (invoked by `freezeExportBatch`) | Step 4 of freezing: clears `pending_freeze` and records `last_freeze_failure`, unless a later attempt has already taken over. | `export_batches` |
+| `getExportBatchRow` | internal query | n/a (invoked by `getExportBundle`) | Returns the batch row itself, since an action has no `ctx.db` of its own. | None |
+| `buildDraftBundle` | internal query | n/a (invoked by `getExportBundle`) | Builds the live, unverified preview for a draft batch or a batch frozen before this change. | None |
+| `requireActingUser` | internal query | n/a (invoked by `freezeExportBatch`, `getExportBundle`) | Runs the `curator`/`admin` role check on the caller's identity for an action, which has no `ctx.db` of its own to run `requireUser` directly. | None |
 
-`getExportBundle` currently returns:
-
-- `export_manifest`,
-- `tasks`,
-- `task_events`,
-- `evidence_drafts`,
-- `historical_claims`,
-- `review_decisions`,
-- `files.export_manifest_json`,
-- `files.tasks_jsonl`,
-- `files.task_events_jsonl`,
-- `files.evidence_drafts_jsonl`,
-- `files.historical_claims_jsonl`,
-- `files.review_decisions_jsonl`,
-- `files.site_evidence_wide_csv`.
+`getExportBundle`'s `files` keys: `export_manifest_json`, `tasks_jsonl`, `task_events_jsonl`, `evidence_drafts_jsonl`, `historical_claims_jsonl`, `review_decisions_jsonl`, `site_occupancies_jsonl`, `derived_target_year_states_jsonl`, `derived_year_locations_jsonl`, `derived_target_year_functions_jsonl`, `derived_state_events_jsonl`, `site_evidence_wide_csv`, `evidence_versions_jsonl`, `evidence_head_changes_jsonl`, `task_acceptances_jsonl`, `review_snapshots_jsonl`.
 
 The local script `scripts/materialise_convex_export.py` writes this bundle to
-ignored local files, adds SHA-256 hashes, and prepares the handoff for `pow`.
+ignored local files, verifies the stored hashes when the manifest carries
+`manifest_hash`, and prepares the handoff for `pow` (`pow export verify`).
+See [frozen-exports.md](../development/frozen-exports.md) for the full
+bundle contract, freeze orchestration, retrieval, and withdrawal/supersession
+rules.
 
 ## `devSeed.ts`
 

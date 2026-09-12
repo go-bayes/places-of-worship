@@ -1,6 +1,6 @@
 # Evidence Versions And The Canonical Hash Contract
 
-**Status:** Implemented 2026-09-11 as the first two steps of the [content-addressed review contract](content-addressed-review.md): the canonicalisation contract with shared fixtures, and server-created immutable evidence versions. Proposal pinning, the export queue, frozen exports, PI batch release, and `pow` verification of releases remain later steps. Live Convex behaviour changes only where this document says it does.
+**Status:** Implemented 2026-09-11 as the first two steps of the [content-addressed review contract](content-addressed-review.md): the canonicalisation contract with shared fixtures, and server-created immutable evidence versions. Frozen exports (byte-level freezing and bundle verification, D20 step two) are now also implemented; see [frozen-exports.md](frozen-exports.md). Proposal pinning, the export queue, PI batch release, and `pow` verification of releases remain later steps. Live Convex behaviour changes only where this document says it does.
 
 ## Canonicalisation Contract `pow-canonical-json.v1`
 
@@ -165,7 +165,7 @@ Existing `decision_hash` (version 0 and the snapshot-linked version 1), `accepta
 
 - Proposal pinning reads `evidence_versions.object_hash` for each evidence record in a proposal, records them as `evidence_version_hashes`, and rejects a decision whose pinned hashes are no longer the current versions of their draft rows (`evidence_drafts.evidence_version_hash`).
 - `review_decisions.evidence_version_hash` is stored outside `decision_hash`, so a decision hash version 2 envelope naming the field explicitly, rather than leaving it a plain stored column, is a later step; the version-0 and version-1 contracts stay as they are.
-- Frozen exports can include an `evidence_versions.jsonl` file of stored envelopes; `pow object verify` already checks each envelope, and a manifest can list their hashes; exports reading the accepted version's stored envelope, rather than the draft row's current (mutable) fields, is the export-side counterpart of the acceptance pin above.
+- Frozen exports now include an `evidence_versions.jsonl` file of stored envelopes, and the manifest lists their hashes ([frozen-exports.md](frozen-exports.md)); `pow object verify` checks each envelope. Exports reading the accepted version's stored envelope, rather than the draft row's current (mutable) fields, for `site_evidence_wide.csv` specifically, remains a later step: the export-side counterpart of the acceptance pin above.
 - Historical claim versions follow the same envelope with `object_type: "historical_claim_version"` and the claim row's content, once the proposal step needs them.
 - The batch-review screen can show `version_index`, the short hash prefix, and the parent-to-current difference from two stored envelopes.
 - `content_hash` is the content identity that batch import can adopt in place of the client-supplied `claim_hash`.

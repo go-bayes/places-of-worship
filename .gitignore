@@ -240,6 +240,10 @@ test_datasets/
 *.v1
 *.v2
 *.version_*
+# the committed pow-export-bundle.v1 fixture is a small, deterministic
+# contract fixture (schemas/fixtures/), not a versioned data dump
+!schemas/fixtures/pow-export-bundle.v1/
+!schemas/fixtures/pow-export-bundle.v1/**
 
 # the global gitignore excludes *.csv; source extracts in archive are project records
 !archive/statsnz-2023-census-totals-sa2/*.csv

@@ -524,6 +524,12 @@ export const exportBatchStatus = v.union(
   v.literal("validated"),
   v.literal("failed"),
   v.literal("archived"),
+  // frozen exports (docs/development/frozen-exports.md): a frozen batch
+  // withdrawn after the fact, or superseded by a later frozen batch. bytes
+  // and manifest_hash stay; only the status (and, for supersession, the
+  // back-reference) changes.
+  v.literal("withdrawn"),
+  v.literal("superseded"),
 );
 
 export const exportFormat = v.union(

@@ -703,6 +703,52 @@ export default defineSchema({
     output_manifest: v.optional(v.any()),
     pow_validation_status: v.optional(v.union(v.literal("not_run"), v.literal("passed"), v.literal("failed"))),
     notes: v.optional(v.string()),
+    // frozen exports (docs/development/frozen-exports.md, D20 step two): an
+    // in-flight freeze attempt, recorded so a second overlapping attempt or
+    // a change mid-freeze is detected rather than silently overwritten
+    pending_freeze: v.optional(
+      v.object({
+        attempt_id: v.string(),
+        started_at: v.number(),
+        started_by: v.id("users"),
+        manifest: v.any(),
+      }),
+    ),
+    // the most recent failed attempt, kept for operator visibility; cleared
+    // by the next successful prepareFreeze that reaches the same batch
+    last_freeze_failure: v.optional(
+      v.object({
+        attempt_id: v.string(),
+        at: v.number(),
+        reason: v.string(),
+      }),
+    ),
+    freeze_completed_at: v.optional(v.number()),
+    bundle_contract: v.optional(v.string()),
+    manifest_hash: v.optional(v.string()),
+    // the stored, verified bytes of a frozen bundle: one entry per file,
+    // including export_manifest.json. Present only once freezing completes;
+    // stays on a withdrawn or superseded batch
+    frozen_files: v.optional(
+      v.array(
+        v.object({
+          filename: v.string(),
+          storage_id: v.id("_storage"),
+          sha256: v.string(),
+          byte_length: v.number(),
+          content_type: v.string(),
+        }),
+      ),
+    ),
+    withdrawn_at: v.optional(v.number()),
+    withdrawn_by: v.optional(v.id("users")),
+    withdrawal_reason: v.optional(v.string()),
+    // the earlier frozen batch this one replaces (set at creation; the
+    // earlier batch is marked superseded only once this one's freeze
+    // completes) and, on the earlier batch itself, the back-reference
+    supersedes_export_batch_id: v.optional(v.string()),
+    superseded_by_export_batch_id: v.optional(v.string()),
+    superseded_at: v.optional(v.number()),
   })
     .index("by_export_batch_id", ["export_batch_id"])
     .index("by_country_status", ["country_code", "status"])

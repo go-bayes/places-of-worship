@@ -20,6 +20,11 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           npx tsc --noEmit
+      - name: check committed fixtures are current
+        run: |
+          node scripts/canonical_json_fixtures.mjs --check
+          node scripts/evidence_version_fixtures.mjs --check
+          node scripts/export_bundle_fixture.mjs --check
       - name: test evidence submission contract
         run: node --test convex/lib/*.node-test.mjs convex/*.node-test.mjs
       - name: typecheck workbench

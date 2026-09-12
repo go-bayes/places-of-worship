@@ -25,7 +25,12 @@ Implementation notes:
 - `evidence.ts` saves and submits RA evidence drafts.
 - `evidenceVersions.ts` records the immutable evidence version each submission creates, the receipt that binds a submission token to the version it received, the append-only `evidence_head_changes` ledger of every version, supersession, withdrawal, and restoration on a draft row, and serves version, ledger, and audit retrieval (`docs/development/evidence-versions.md`).
 - `reviews.ts` records reviewer decisions.
-- `exports.ts` creates frozen export bundles for curator handoff.
+- `exports.ts` creates export batches and, since the byte-level freeze
+  (`docs/development/frozen-exports.md`), freezes them by storing and
+  verifying the complete `pow-export-bundle.v1` bundle before marking a
+  batch frozen; retrieval of a frozen batch reads and re-verifies those
+  stored bytes rather than rebuilding from the current rows, and a frozen
+  batch can be withdrawn or superseded without losing its bytes.
 
 See `docs/development/convex-task-layer-setup.md` for local setup and seed
 instructions.

@@ -1,0 +1,141 @@
+{
+  "bundle_contract": "pow-export-bundle.v1",
+  "hash_contract": "pow-object.v1",
+  "export_batch_id": "vu-convex-export-1789182000015",
+  "country_code": "VU",
+  "schema_version": "convex-task-layer.v0.1",
+  "export_format": "bundle",
+  "created_at": 1789182000015,
+  "frozen_at": 1789182000016,
+  "included_task_ids": [
+    "task_1"
+  ],
+  "included_review_decision_ids": [
+    "task_1:review:1789182000011:users_2"
+  ],
+  "included_acceptance_ids": [
+    "task_1:acceptance:1789182000013:users_3"
+  ],
+  "included_task_count": 1,
+  "included_evidence_count": 1,
+  "included_historical_claim_count": 0,
+  "included_review_decision_count": 1,
+  "evidence_version_hashes": [
+    "sha256:46814b992f7f0bce057913731c2e07b2a85918a4a50a528d3a95290f894bc837",
+    "sha256:6697661d241d4ec1ef4400988e3ca84f9d42d8d351f5c9cec96c6beee36b8504",
+    "sha256:aaf1606db2eba8ced2974ce68398fd983d45fa38886136147d4b21639b328bc5"
+  ],
+  "review_snapshot_hashes": [
+    "d6de77b0394a5b284676130891ff5401c310e8d748edff0962e41d9a35b37f0f"
+  ],
+  "files": [
+    {
+      "filename": "derived_state_events.jsonl",
+      "content_type": "application/x-ndjson",
+      "record_count": 5,
+      "sha256": "1fe41b5e985faf73bf4042341510bff3857db41fe0f757d56b8be0f6a6574cb1",
+      "byte_length": 4278
+    },
+    {
+      "filename": "derived_target_year_functions.jsonl",
+      "content_type": "application/x-ndjson",
+      "record_count": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "byte_length": 0
+    },
+    {
+      "filename": "derived_target_year_states.jsonl",
+      "content_type": "application/x-ndjson",
+      "record_count": 4,
+      "sha256": "b3f7510a69e9efbe78b7a38e6f7a91ab499aff4e66e5ae666702cf4370b10dbc",
+      "byte_length": 2619
+    },
+    {
+      "filename": "derived_year_locations.jsonl",
+      "content_type": "application/x-ndjson",
+      "record_count": 4,
+      "sha256": "eecff05c48be197498f6dcdb71b01e07ded73bbcdfedc793036cbe914c5cb138",
+      "byte_length": 2949
+    },
+    {
+      "filename": "evidence_drafts.jsonl",
+      "content_type": "application/x-ndjson",
+      "record_count": 1,
+      "sha256": "4db3cd271f3bc8dbe12dc90a483f1937772ec2042dcb5a6b4f8dd8921a57cd64",
+      "byte_length": 892
+    },
+    {
+      "filename": "evidence_head_changes.jsonl",
+      "content_type": "application/x-ndjson",
+      "record_count": 3,
+      "sha256": "6a9380b6302dbd33e198b7aef1ab9c97eaaa3ab5848609ccec2e40e07a883f69",
+      "byte_length": 1334
+    },
+    {
+      "filename": "evidence_versions.jsonl",
+      "content_type": "application/x-ndjson",
+      "record_count": 3,
+      "sha256": "b92cdbf5397462c78517fd03362bd6c1e6ac10ac470481f50e660f5d8deb1393",
+      "byte_length": 7155
+    },
+    {
+      "filename": "historical_claims.jsonl",
+      "content_type": "application/x-ndjson",
+      "record_count": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "byte_length": 0
+    },
+    {
+      "filename": "review_decisions.jsonl",
+      "content_type": "application/x-ndjson",
+      "record_count": 1,
+      "sha256": "c9ae6089d32272e19bbb444a4e4d4f8f946b17d666f65314b696f8a9894a4870",
+      "byte_length": 721
+    },
+    {
+      "filename": "review_snapshots.jsonl",
+      "content_type": "application/x-ndjson",
+      "record_count": 1,
+      "sha256": "1ab9d4bf141deaa1a3a0a1562b89926a371523908a271548b6f6b7a0a4e5c2f3",
+      "byte_length": 15975
+    },
+    {
+      "filename": "site_evidence_wide.csv",
+      "content_type": "text/csv",
+      "record_count": 0,
+      "field_count": 0,
+      "field_list_mismatch_count": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "byte_length": 0
+    },
+    {
+      "filename": "site_occupancies.jsonl",
+      "content_type": "application/x-ndjson",
+      "record_count": 1,
+      "sha256": "c2165f9eb7d3e27e7ac20bc2bcc3b14aa8ed254470575231fc3f7e4881e87670",
+      "byte_length": 1126
+    },
+    {
+      "filename": "task_acceptances.jsonl",
+      "content_type": "application/x-ndjson",
+      "record_count": 1,
+      "sha256": "ccd40006fa7aa67bed357e190258904e53e36d341403e635a6dce853d00501dc",
+      "byte_length": 476
+    },
+    {
+      "filename": "task_events.jsonl",
+      "content_type": "application/x-ndjson",
+      "record_count": 6,
+      "sha256": "20a6a339cc105d6103d3a6c7cb1924b626dbce4030810a12be346c58c3406c1c",
+      "byte_length": 3031
+    },
+    {
+      "filename": "tasks.jsonl",
+      "content_type": "application/x-ndjson",
+      "record_count": 1,
+      "sha256": "dd657cf0ea1a4654458864ab2ccbecb4dbc2a98c2d63752cfacb10fad75bbe78",
+      "byte_length": 448
+    }
+  ],
+  "manifest_hash": "sha256:2049357269d1401587ea80f7bb630362060a5cd475762cab480238a181acb1df"
+}
