@@ -7,7 +7,7 @@ const vm = require("node:vm");
 // the module attaches itself to window, as in the portal page
 const window = {};
 vm.runInNewContext(fs.readFileSync(path.join(__dirname, "review-snapshot-content.js"), "utf8"), { window });
-const { contentFromSnapshot } = window.PowReviewSnapshotContent;
+const { contentFromSnapshot, loadSelection } = window.PowReviewSnapshotContent;
 
 // review finding 2026-09-12: the panels must render the content whose hash
 // the decision submits, not the queue row cached at queue load
@@ -83,4 +83,105 @@ test("a snapshot response without a draft falls back like no snapshot", () => {
     const content = contentFromSnapshot({ snapshot: { snapshot: { task: {}, draft: null } }, queueRow, fetched });
     assert.equal(content.source, "fetched");
     assert.equal(content.draft.evidence_note, "fetched separately");
+});
+
+// overlapping selection loads (review finding 2026-09-12): a slow response
+// for an earlier selection must never replace the displayed task's snapshot
+function deferred() {
+    let resolve; let reject;
+    const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
+    return { promise, resolve, reject };
+}
+
+function harness() {
+    const state = { token: 0, selectedTaskId: null, applied: [] };
+    const pending = { rows: new Map(), snapshots: new Map() };
+    const calls = { snapshots: [] };
+    function select(taskId) {
+        state.selectedTaskId = taskId;
+        const token = ++state.token;
+        const isCurrent = () => state.token === token && state.selectedTaskId === taskId;
+        const rows = deferred(); pending.rows.set(taskId, rows);
+        return loadSelection({
+            taskId,
+            queueRow: { task: { task_id: taskId }, latestDraft: { evidence_draft_id: `${taskId}:d`, evidence_note: "cached" } },
+            isCurrent,
+            fetchRows: () => rows.promise,
+            fetchSnapshot: (id, draftId) => { calls.snapshots.push(draftId); const s = deferred(); pending.snapshots.set(id, s); return s.promise; },
+        }).then((loaded) => { if (loaded !== null) state.applied.push({ taskId, hash: loaded.snapshot?.snapshot_hash, error: loaded.snapshotError }); return loaded; });
+    }
+    const snapshotFor = (taskId) => ({ snapshot_hash: `hash-${taskId}`, snapshot: { task: { task_id: taskId }, draft: { evidence_draft_id: `${taskId}:d`, evidence_note: `from snapshot ${taskId}` } } });
+    return { state, pending, calls, select, snapshotFor };
+}
+
+test("a load superseded before its rows arrive resolves to null and never fetches its snapshot", async () => {
+    const h = harness();
+    const loadA = h.select("A");
+    const loadB = h.select("B");
+    h.pending.rows.get("B").resolve({ drafts: [{ evidence_draft_id: "B:d" }] });
+    await new Promise((r) => setImmediate(r));
+    h.pending.snapshots.get("B").resolve(h.snapshotFor("B"));
+    const b = await loadB;
+    assert.equal(b.snapshot.snapshot_hash, "hash-B");
+    assert.equal(b.content.draft.evidence_note, "from snapshot B");
+    // A's rows arrive late: nothing further is fetched and nothing is applied
+    h.pending.rows.get("A").resolve({ drafts: [{ evidence_draft_id: "A:d" }] });
+    const a = await loadA;
+    assert.equal(a, null);
+    assert.deepEqual(h.calls.snapshots, ["B:d"]);
+    assert.deepEqual(h.state.applied.map((row) => row.hash), ["hash-B"]);
+});
+
+test("a load superseded while its snapshot is in flight resolves to null, whether the snapshot resolves or fails", async () => {
+    // resolves late
+    {
+        const h = harness();
+        const loadA = h.select("A");
+        h.pending.rows.get("A").resolve({ drafts: [{ evidence_draft_id: "A:d" }] });
+        await new Promise((r) => setImmediate(r));
+        const loadB = h.select("B");
+        h.pending.rows.get("B").resolve({ drafts: [{ evidence_draft_id: "B:d" }] });
+        await new Promise((r) => setImmediate(r));
+        h.pending.snapshots.get("B").resolve(h.snapshotFor("B"));
+        await loadB;
+        h.pending.snapshots.get("A").resolve(h.snapshotFor("A"));
+        assert.equal(await loadA, null);
+        assert.deepEqual(h.state.applied.map((row) => row.hash), ["hash-B"]);
+    }
+    // fails late: the failure is not reported against the displayed task either
+    {
+        const h = harness();
+        const loadA = h.select("A");
+        h.pending.rows.get("A").resolve({ drafts: [{ evidence_draft_id: "A:d" }] });
+        await new Promise((r) => setImmediate(r));
+        const loadB = h.select("B");
+        h.pending.rows.get("B").resolve({ drafts: [{ evidence_draft_id: "B:d" }] });
+        await new Promise((r) => setImmediate(r));
+        h.pending.snapshots.get("B").resolve(h.snapshotFor("B"));
+        await loadB;
+        h.pending.snapshots.get("A").reject(new Error("late outage"));
+        assert.equal(await loadA, null);
+        assert.deepEqual(h.state.applied, [{ taskId: "B", hash: "hash-B", error: "" }]);
+    }
+});
+
+test("a current load whose snapshot fails still applies, carrying the error and the fetched rows", async () => {
+    const h = harness();
+    const loadA = h.select("A");
+    h.pending.rows.get("A").resolve({ drafts: [{ evidence_draft_id: "A:d", evidence_note: "fetched A" }], attachments: [{ id: "f1" }] });
+    await new Promise((r) => setImmediate(r));
+    h.pending.snapshots.get("A").reject(new Error("outage"));
+    const a = await loadA;
+    assert.equal(a.snapshot, null);
+    assert.equal(a.snapshotError, "outage");
+    assert.equal(a.content.source, "fetched");
+    assert.equal(a.content.draft.evidence_note, "fetched A");
+    assert.deepEqual(a.attachments, [{ id: "f1" }]);
+    // a task with no draft anywhere skips the snapshot fetch
+    const h2 = harness();
+    const noDraft = loadSelection({ taskId: "Z", queueRow: { task: { task_id: "Z" } }, isCurrent: () => true, fetchRows: async () => ({ drafts: [] }), fetchSnapshot: () => { throw new Error("must not be called"); } });
+    const z = await noDraft;
+    assert.equal(z.snapshot, null);
+    assert.equal(z.content.draft, null);
+    assert.equal(h2.calls.snapshots.length, 0);
 });

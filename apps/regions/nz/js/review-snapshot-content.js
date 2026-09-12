@@ -57,7 +57,43 @@
         };
     }
 
-    const api = { contentFromSnapshot };
+    // the selection load with a supersession guard (review finding
+    // 2026-09-12): the rows, then the snapshot for the task's current
+    // draft, each awaited and each followed by an isCurrent() check before
+    // anything is returned. a load the reviewer has moved on from resolves
+    // to null, and the caller writes nothing, so a slow response for an
+    // earlier selection can never replace the displayed task's snapshot
+    // (which would have sent that task's hash with a decision on this one).
+    // fetchRows(taskId) -> { drafts, historicalClaims, events, attachments };
+    // fetchSnapshot(taskId, evidenceDraftId) -> getReviewSnapshot result
+    async function loadSelection({ taskId, queueRow, isCurrent, fetchRows, fetchSnapshot }) {
+        const rows = await fetchRows(taskId);
+        if (!isCurrent()) return null;
+        const fetched = {
+            drafts: rows?.drafts || [],
+            historicalClaims: rows?.historicalClaims || [],
+            events: rows?.events || [],
+        };
+        const snapshotDraft = fetched.drafts[0] || queueRow?.latestDraft || null;
+        let snapshot = null;
+        let snapshotError = "";
+        if (snapshotDraft) {
+            try {
+                snapshot = await fetchSnapshot(taskId, snapshotDraft.evidence_draft_id);
+            } catch (error) {
+                snapshotError = (error && error.message) || "unknown error";
+            }
+            if (!isCurrent()) return null;
+        }
+        return {
+            content: contentFromSnapshot({ snapshot, queueRow, fetched }),
+            snapshot,
+            snapshotError,
+            attachments: rows?.attachments || [],
+        };
+    }
+
+    const api = { contentFromSnapshot, loadSelection };
     if (typeof window !== "undefined") window.PowReviewSnapshotContent = api;
     if (typeof module !== "undefined" && module.exports) module.exports = api;
 })();

@@ -69,6 +69,9 @@
         // above, so the reviewer decides on exactly what the hash covers;
         // PowReviewSnapshotContent.contentFromSnapshot, or null while loading
         content: null,
+        // incremented by every selectTask; a load compares its own token
+        // after each await so a superseded load writes nothing
+        selectionToken: 0,
     };
 
     // the ra portal's map above the review cards (jb 2026-09-04); absent
@@ -446,6 +449,8 @@ function human(value) {
         const row = state.queue.find((entry) => entry.task.task_id === taskId);
         if (!row) return;
         state.selected = row;
+        const token = ++state.selectionToken;
+        const isCurrent = () => state.selectionToken === token && state.selected === row;
         // the map flies to a queue pick; a marker click already sits there
         reviewMap?.select(taskId, { fly: !fromMap });
         if (fromMap) els.detailPanel?.scrollIntoView({ block: "start", behavior: "smooth" });
@@ -462,32 +467,33 @@ function human(value) {
         renderQueue();
         renderDetail(true);
         try {
-            const [drafts, historicalClaims, events, attachments] = await Promise.all([
-                client.listTaskEvidence({ taskId, limit: 20 }),
-                client.listTaskHistoricalClaims({ taskId, limit: 100 }),
-                client.getTaskEvents({ taskId, limit: 50 }),
-                // deployments without a bucket simply show no files section
-                client.listTaskAttachments({ taskId }).catch(() => []),
-            ]);
-            // the reviewer may have moved on while the fetch was in flight
-            if (state.selected !== row) return;
-            const fetched = { drafts: drafts || [], historicalClaims: historicalClaims || [], events: events || [] };
-            state.attachments = attachments || [];
-            // the snapshot the decision form will submit, fetched for the
-            // task's current draft; the panels then render from it (review
-            // finding 2026-09-12), never from the queue row cached at queue
-            // load or from the rows fetched above, which may already differ
-            const snapshotDraft = fetched.drafts[0] || row.latestDraft || null;
-            if (snapshotDraft) {
-                try {
-                    state.reviewSnapshot = await client.getReviewSnapshot({ taskId, evidenceDraftId: snapshotDraft.evidence_draft_id });
-                } catch (error) {
-                    state.reviewSnapshot = null;
-                    state.reviewSnapshotError = error.message || "unknown error";
-                }
-                if (state.selected !== row) return;
-            }
-            const content = window.PowReviewSnapshotContent.contentFromSnapshot({ snapshot: state.reviewSnapshot, queueRow: row, fetched });
+            // the rows, then the snapshot the decision form will submit for
+            // the task's current draft; the panels render from that snapshot
+            // (review finding 2026-09-12), never from the queue row cached at
+            // queue load or from rows that may already differ. every await
+            // is guarded: a load the reviewer has moved on from resolves to
+            // null and writes nothing (PowReviewSnapshotContent.loadSelection)
+            const loaded = await window.PowReviewSnapshotContent.loadSelection({
+                taskId,
+                queueRow: row,
+                isCurrent,
+                fetchRows: async (id) => {
+                    const [drafts, historicalClaims, events, attachments] = await Promise.all([
+                        client.listTaskEvidence({ taskId: id, limit: 20 }),
+                        client.listTaskHistoricalClaims({ taskId: id, limit: 100 }),
+                        client.getTaskEvents({ taskId: id, limit: 50 }),
+                        // deployments without a bucket simply show no files section
+                        client.listTaskAttachments({ taskId: id }).catch(() => []),
+                    ]);
+                    return { drafts, historicalClaims, events, attachments };
+                },
+                fetchSnapshot: (id, evidenceDraftId) => client.getReviewSnapshot({ taskId: id, evidenceDraftId }),
+            });
+            if (loaded === null) return;
+            const content = loaded.content;
+            state.reviewSnapshot = loaded.snapshot;
+            state.reviewSnapshotError = loaded.snapshotError;
+            state.attachments = loaded.attachments;
             state.content = content;
             state.drafts = content.drafts;
             state.historicalClaims = content.historicalClaims;
@@ -502,15 +508,18 @@ function human(value) {
                         client.getSource({ sourceId: draftWithSource.source_id }),
                         client.listDraftsCitingSource({ sourceId: draftWithSource.source_id }),
                     ]);
+                    if (!isCurrent()) return;
                     state.sharedSource = register
                         ? { ...register, cited_by: (citing || []).length }
                         : null;
                 } catch (error) {
+                    if (!isCurrent()) return;
                     state.sharedSource = null;
                 }
             }
             renderDetail(false);
         } catch (error) {
+            if (!isCurrent()) return;
             renderDetail(false, error.message || "Could not load task details.");
         }
     }
