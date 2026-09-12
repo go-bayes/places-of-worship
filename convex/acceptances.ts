@@ -12,6 +12,7 @@ import {
   isSelfDecided,
   taskStatusForAcceptance,
 } from "./lib/acceptance";
+import { assertDecisionSnapshotConsistent } from "./reviews";
 
 // the pi acceptance layer (jb rulings r-p1..r-p5, 2026-09-04; brief
 // docs/development/pi-acceptance-layer-brief-2026-09-04.md): a reviewer's
@@ -95,18 +96,29 @@ export const recordAcceptance = mutation({
       throw new Error(refusal);
     }
     const ratified = decision!;
-    // no silent transfer: the decision names the exact version the
-    // reviewer saw; if the draft has since moved on (a retirement, a
-    // restoration, or a further write), acceptance is refused rather than
-    // ratifying content the decision never referred to
-    if (
-      ratified.evidence_version_hash !== undefined
-      && draft !== null
-      && draft.evidence_version_hash !== ratified.evidence_version_hash
-    ) {
-      throw new Error(
-        `The review decision refers to evidence version ${ratified.evidence_version_hash} but the evidence is now at ${draft.evidence_version_hash}. Record a new review decision on the current version before accepting.`,
-      );
+    // both consistency checks guard ratification only. a return records the
+    // pi's reason and sends the task back for the fresh review those checks
+    // demand, so it must go through on a legacy (unlinked) decision or a
+    // moved version (review finding 2026-09-12)
+    if (args.outcome === "accepted") {
+      // no silent transfer: the decision names the exact version the
+      // reviewer saw; if the draft has since moved on (a retirement, a
+      // restoration, or a further write), acceptance is refused rather than
+      // ratifying content the decision never referred to
+      if (
+        ratified.evidence_version_hash !== undefined
+        && draft !== null
+        && draft.evidence_version_hash !== ratified.evidence_version_hash
+      ) {
+        throw new Error(
+          `The review decision refers to evidence version ${ratified.evidence_version_hash} but the evidence is now at ${draft.evidence_version_hash}. Record a new review decision on the current version before accepting.`,
+        );
+      }
+      // pi ruling 2026-09-11: every new acceptance rests on a snapshot-linked
+      // decision whose recorded snapshot still matches the current evidence
+      // and its confirmed locations; a version-0 (unlinked) decision needs a
+      // fresh snapshot-linked review before it can be ratified
+      await assertDecisionSnapshotConsistent(ctx, ratified);
     }
     const now = Date.now();
     const acceptanceId = `${args.taskId}:acceptance:${now}:${user._id}`;

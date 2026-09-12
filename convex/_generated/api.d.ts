@@ -28,6 +28,7 @@ import type * as lib_evidenceVersions from "../lib/evidenceVersions.js";
 import type * as lib_exportEligibility from "../lib/exportEligibility.js";
 import type * as lib_functionChain from "../lib/functionChain.js";
 import type * as lib_historicalClaims from "../lib/historicalClaims.js";
+import type * as lib_intakeGate from "../lib/intakeGate.js";
 import type * as lib_limits from "../lib/limits.js";
 import type * as lib_locationAssertions from "../lib/locationAssertions.js";
 import type * as lib_locationOutcome from "../lib/locationOutcome.js";
@@ -81,6 +82,7 @@ declare const fullApi: ApiFromModules<{
   "lib/exportEligibility": typeof lib_exportEligibility;
   "lib/functionChain": typeof lib_functionChain;
   "lib/historicalClaims": typeof lib_historicalClaims;
+  "lib/intakeGate": typeof lib_intakeGate;
   "lib/limits": typeof lib_limits;
   "lib/locationAssertions": typeof lib_locationAssertions;
   "lib/locationOutcome": typeof lib_locationOutcome;

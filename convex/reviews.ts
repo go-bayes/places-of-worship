@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import type { Doc } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { reviewDecisionInput, taskStatus } from "./model";
 import { canReview, chooseActorRole, requireUser } from "./lib/auth";
@@ -431,9 +431,27 @@ export async function applyReviewDecision(ctx: MutationCtx, args: { taskId: stri
 }
 
 export const recordReviewDecision = mutation({
-  args: { taskId: v.string(), decision: reviewDecisionInput },
+  args: { taskId: v.string(), decision: reviewDecisionInput, snapshotHash: v.optional(v.string()) },
   returns: v.object({ task_id: v.string(), review_decision_id: v.string(), task_status: taskStatus }),
-  handler: async (ctx, args) => applyReviewDecision(ctx, args, await requireUser(ctx, ["reviewer", "curator", "admin"])),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["reviewer", "curator", "admin"]);
+    // pi ruling 2026-09-11: acceptance for export must rest on the snapshot
+    // the reviewer inspected; a decision without one is refused outright,
+    // before any read of the task or draft
+    if (args.decision.decision_status === "accepted_for_export" && args.snapshotHash === undefined) {
+      throw new Error(
+        "Acceptance for export requires the review snapshot you inspected. Reload the task and decide from its current snapshot.",
+      );
+    }
+    if (args.snapshotHash !== undefined) {
+      if (args.decision.evidence_draft_id === undefined) {
+        throw new Error("A snapshot-linked decision requires its evidence draft.");
+      }
+      const { snapshotJson } = await verifySnapshot(ctx, args.taskId, args.decision.evidence_draft_id, args.snapshotHash);
+      await recordSnapshot(ctx, args.snapshotHash, snapshotJson, user._id);
+    }
+    return applyReviewDecision(ctx, { taskId: args.taskId, decision: args.decision, snapshotHash: args.snapshotHash }, user);
+  },
 });
 
 async function reviewSnapshot(ctx: MutationCtx | QueryCtx, taskId: string, evidenceDraftId: string) {
@@ -474,6 +492,47 @@ export const getRecordedReviewSnapshot = query({
   },
 });
 
+// shared snapshot-hash verification: the hash must be well-formed, must
+// reproduce the review snapshot the caller inspected, and the snapshot must
+// fit inside the single-item bound. Used by both recordReviewDecision and
+// batchRecordReviewDecisions so the two routes cannot drift apart.
+async function verifySnapshot(
+  ctx: MutationCtx | QueryCtx,
+  taskId: string,
+  evidenceDraftId: string,
+  snapshotHash: string,
+): Promise<{ row: Awaited<ReturnType<typeof reviewSnapshot>>; snapshotJson: string }> {
+  if (!/^[0-9a-f]{64}$/.test(snapshotHash)) {
+    throw new Error("Invalid review snapshot hash.");
+  }
+  const row = await reviewSnapshot(ctx, taskId, evidenceDraftId);
+  if (row.hash !== snapshotHash) {
+    throw new Error(
+      "Review snapshot is stale: the task or its evidence changed since you loaded it. Reload and review the changes before deciding.",
+    );
+  }
+  const snapshotJson = canonicalJson(row.snapshot);
+  const snapshotBytes = new TextEncoder().encode(snapshotJson).length;
+  if (snapshotBytes > 128 * 1024) {
+    throw new Error(`Review snapshot for ${taskId} exceeds 128 KiB.`);
+  }
+  return { row, snapshotJson };
+}
+
+// records the review_snapshots row for a verified hash, if it is not
+// already stored; shared by the same two routes.
+async function recordSnapshot(
+  ctx: MutationCtx,
+  snapshotHash: string,
+  snapshotJson: string,
+  reviewerId: Id<"users">,
+): Promise<void> {
+  const recorded = await ctx.db.query("review_snapshots").withIndex("by_hash", (q) => q.eq("snapshot_hash", snapshotHash)).unique();
+  if (recorded === null) {
+    await ctx.db.insert("review_snapshots", { snapshot_hash: snapshotHash, snapshot_json: snapshotJson, created_at: Date.now(), reviewer_user_id: reviewerId });
+  }
+}
+
 export const batchRecordReviewDecisions = mutation({
   args: {
     items: v.array(v.object({ task_id: v.string(), evidence_draft_id: v.string(), snapshot_hash: v.string(), decision: reviewDecisionInput })),
@@ -486,18 +545,15 @@ export const batchRecordReviewDecisions = mutation({
     const checked: Array<{ item: typeof args.items[number]; row: Awaited<ReturnType<typeof reviewSnapshot>>; snapshotJson: string }> = [];
     let aggregateBytes = 0;
     for (const item of args.items) {
-      if (seen.has(item.task_id) || !/^[0-9a-f]{64}$/.test(item.snapshot_hash)) throw new Error("Batch contains duplicate task or invalid snapshot hash.");
+      if (seen.has(item.task_id)) throw new Error("Batch contains a duplicate task.");
       seen.add(item.task_id);
       if (item.decision.decision_status !== "accepted_for_export") throw new Error("This batch endpoint is for accepted-for-export decisions only.");
       if (item.decision.evidence_draft_id !== item.evidence_draft_id) throw new Error("Decision draft does not match snapshot draft.");
-      const row = await reviewSnapshot(ctx, item.task_id, item.evidence_draft_id);
-      if (row.hash !== item.snapshot_hash) throw new Error(`Review snapshot is stale for ${item.task_id}.`);
+      const { row, snapshotJson } = await verifySnapshot(ctx, item.task_id, item.evidence_draft_id, item.snapshot_hash);
       if (!REVIEW_OPEN_STATUSES.has(row.task.status)) throw new Error(`Task ${item.task_id} is not open for review.`);
       if (row.draft.draft_status !== "submitted" && row.draft.draft_status !== "unresolved_note") throw new Error(`Draft ${item.evidence_draft_id} is not submitted.`);
       if (row.draft.agent_intake_only === true) throw new Error("Internal agent intake drafts require ordinary human evidence submission before acceptance for export.");
-      const snapshotJson = canonicalJson(row.snapshot);
       const snapshotBytes = new TextEncoder().encode(snapshotJson).length;
-      if (snapshotBytes > 128 * 1024) throw new Error(`Review snapshot for ${item.task_id} exceeds 128 KiB.`);
       aggregateBytes += snapshotBytes;
       if (aggregateBytes > 512 * 1024) throw new Error("Review batch snapshots exceed 512 KiB.");
       checked.push({ item, row, snapshotJson });
@@ -505,8 +561,7 @@ export const batchRecordReviewDecisions = mutation({
     // Convex mutations are transactional: if any shared decision validation or
     // write fails, all earlier decisions in this batch roll back.
     for (const entry of checked) {
-      const recorded = await ctx.db.query("review_snapshots").withIndex("by_hash", (q) => q.eq("snapshot_hash", entry.item.snapshot_hash)).unique();
-      if (recorded === null) await ctx.db.insert("review_snapshots", { snapshot_hash: entry.item.snapshot_hash, snapshot_json: entry.snapshotJson, created_at: Date.now(), reviewer_user_id: user._id });
+      await recordSnapshot(ctx, entry.item.snapshot_hash, entry.snapshotJson, user._id);
       await applyReviewDecision(ctx, { taskId: entry.item.task_id, decision: entry.item.decision, snapshotHash: entry.item.snapshot_hash }, user);
     }
     return { count: checked.length };
@@ -688,3 +743,110 @@ export const requestContributorComment = mutation({
     return { task_id: args.taskId, task_status: "changes_requested" };
   },
 });
+
+// the derived-location review states a confirmed decision's snapshot must
+// still match; a superseded row is retired and so is never part of "what
+// the reviewer confirmed"
+const CONFIRMED_LOCATION_STATES = new Set(["reviewer_confirmed", "reviewer_overridden"]);
+
+// a stable key for one confirmed or overridden derived-year location row,
+// covering exactly the fields the ruling names: a change to any of them
+// means the reviewer confirmed a location that no longer holds
+function confirmedLocationKey(row: {
+  derived_location_id: string;
+  review_state: string;
+  latitude: number;
+  longitude: number;
+  override_latitude?: number;
+  override_longitude?: number;
+  uncertainty_radius_m?: number;
+  override_uncertainty_radius_m?: number;
+}): string {
+  return JSON.stringify({
+    derived_location_id: row.derived_location_id,
+    review_state: row.review_state,
+    latitude: row.latitude,
+    longitude: row.longitude,
+    override_latitude: row.override_latitude ?? null,
+    override_longitude: row.override_longitude ?? null,
+    uncertainty_radius_m: row.uncertainty_radius_m ?? null,
+    override_uncertainty_radius_m: row.override_uncertainty_radius_m ?? null,
+  });
+}
+
+// verifies that a snapshot-linked review decision's recorded snapshot still
+// says what it said when the reviewer decided: the snapshot reproduces its
+// own hash, it pins the same evidence version the decision pins, and the
+// confirmed or overridden derived locations it recorded are unchanged.
+// acceptance and export call this before ratifying or including a decision;
+// a decision recorded before snapshot-linked review (version 0) is refused
+// outright by the caller deciding to call this at all (pi ruling
+// 2026-09-11: a legacy decision needs a fresh review, never a retroactive
+// snapshot attachment)
+export async function assertDecisionSnapshotConsistent(
+  ctx: MutationCtx | QueryCtx,
+  decision: Doc<"review_decisions">,
+): Promise<void> {
+  if (decision.review_snapshot_hash === undefined) {
+    throw new Error(
+      `Decision ${decision.review_decision_id} is not snapshot-linked. Record a fresh snapshot-linked review decision before accepting.`,
+    );
+  }
+  const hash = decision.review_snapshot_hash;
+  const snapshot = await ctx.db.query("review_snapshots").withIndex("by_hash", (q) => q.eq("snapshot_hash", hash)).unique();
+  if (snapshot === null) {
+    throw new Error(`The review snapshot ${hash} for decision ${decision.review_decision_id} is not recorded.`);
+  }
+  const parsed = JSON.parse(snapshot.snapshot_json) as { draft?: { evidence_draft_id?: string; evidence_version_hash?: string } };
+  const recomputedHash = sha256(canonicalJson(parsed));
+  if (recomputedHash !== hash) {
+    throw new Error(`Recorded review snapshot ${hash} does not reproduce its hash.`);
+  }
+  const snapshotDraft = parsed.draft;
+  if (
+    snapshotDraft?.evidence_draft_id !== decision.evidence_draft_id
+    || (snapshotDraft?.evidence_version_hash ?? undefined) !== (decision.evidence_version_hash ?? undefined)
+  ) {
+    throw new Error(
+      `Decision ${decision.review_decision_id} pins evidence version ${decision.evidence_version_hash ?? "none"} but its snapshot recorded ${snapshotDraft?.evidence_version_hash ?? "none"}.`,
+    );
+  }
+  if (decision.evidence_draft_id === undefined) {
+    return;
+  }
+  const draftId = decision.evidence_draft_id;
+  const snapshotLocations = (
+    (parsed as { derived_year_locations?: Array<Record<string, unknown>> }).derived_year_locations ?? []
+  ) as Array<{
+    derived_location_id: string;
+    parent_evidence_draft_id: string;
+    review_state: string;
+    latitude: number;
+    longitude: number;
+    override_latitude?: number;
+    override_longitude?: number;
+    uncertainty_radius_m?: number;
+    override_uncertainty_radius_m?: number;
+  }>;
+  const snapshotConfirmed = new Set(
+    snapshotLocations
+      .filter((row) => row.parent_evidence_draft_id === draftId && CONFIRMED_LOCATION_STATES.has(row.review_state))
+      .map(confirmedLocationKey),
+  );
+  const currentLocations = await ctx.db
+    .query("derived_year_locations")
+    .withIndex("by_parent_evidence_draft_id", (q) => q.eq("parent_evidence_draft_id", draftId))
+    .collect();
+  const currentConfirmed = new Set(
+    currentLocations
+      .filter((row) => CONFIRMED_LOCATION_STATES.has(row.review_state))
+      .map(confirmedLocationKey),
+  );
+  const unchanged = snapshotConfirmed.size === currentConfirmed.size
+    && [...snapshotConfirmed].every((key) => currentConfirmed.has(key));
+  if (!unchanged) {
+    throw new Error(
+      `Confirmed locations for ${draftId} changed since decision ${decision.review_decision_id} was recorded; re-review before accepting.`,
+    );
+  }
+}

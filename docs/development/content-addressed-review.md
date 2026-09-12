@@ -1,6 +1,6 @@
 # Content-Addressed Review Contract
 
-**Status:** Design contract prepared for merge, revised 2026-09-11. The project lead approved the workflow below on 2026-09-11. Implementation follows in separate changes. The first two steps, the canonicalisation contract and immutable evidence versions, are implemented and documented in [evidence-versions.md](evidence-versions.md); proposal pinning, the export queue, frozen exports, PI batch release, and `pow` release verification remain unimplemented and the live per-item PI acceptance stays in force.
+**Status:** Design contract prepared for merge, revised 2026-09-11. The project lead approved the workflow below on 2026-09-11. Implementation follows in separate changes. The first two steps, the canonicalisation contract and immutable evidence versions, are implemented and documented in [evidence-versions.md](evidence-versions.md); a PI ruling of 2026-09-11 also implemented, ahead of proposal pinning, an intake gate on decided tasks and a requirement that acceptance for export rest on a snapshot-linked review decision whose recorded snapshot is re-verified at acceptance and export (also documented there); proposal pinning itself, the export queue, frozen exports, PI batch release, and `pow` release verification remain unimplemented and the live per-item PI acceptance stays in force.
 
 ## Decision In Brief
 

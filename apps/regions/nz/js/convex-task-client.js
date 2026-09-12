@@ -503,6 +503,14 @@
             return await this.request("mutation", "occupancies:confirmAllDerived", args);
         }
 
+        // the snapshot the decision form shows and submits (pi ruling
+        // 2026-09-11): args are { taskId, evidenceDraftId }
+        async getReviewSnapshot(args) {
+            return await this.request("query", "reviews:getReviewSnapshot", args);
+        }
+
+        // args may carry snapshotHash; the request forwards every field, so
+        // the snapshot pin reaches the server exactly as the form set it
         async recordReviewDecision(args) {
             return await this.request("mutation", "reviews:recordReviewDecision", args);
         }

@@ -14,6 +14,7 @@ import {
   assertTaskReasonLimit,
 } from "./lib/limits";
 import { assertNotRapidContract, isRapidCurrentDraft } from "./lib/rapidEntry";
+import { evidenceIntakeRefusal } from "./lib/intakeGate";
 import { dateFloorYear, targetYearsOrEmpty } from "./lib/countryYears";
 import { assignedTaskPeriodProblem } from "./lib/assignedTaskPeriods";
 import { assertOccupancySet, occupancyReferenceDate } from "./lib/occupancies";
@@ -537,6 +538,15 @@ async function importSubmittedSpreadsheetDraft(
   if (existing !== null && finalDraftStatuses.has(existing.draft_status)) {
     return "skipped_final";
   }
+  // the task-level intake gate (pi ruling 2026-09-11) covers the import
+  // route too: a decided draft is skipped above, but a new draft id must
+  // not land fresh evidence on a reviewed, pi-accepted, or exported task
+  // (review finding 2026-09-12). the refusal fails the whole batch, as
+  // every other gated route fails its call; reopen the task and rerun
+  const gateRefusal = evidenceIntakeRefusal(task.status);
+  if (gateRefusal !== null) {
+    throw new Error(`Task ${item.task_id}: ${gateRefusal}`);
+  }
   assertNotRapidContract(existing, "spreadsheet import");
 
   const draftRecord = {
@@ -604,6 +614,10 @@ export const saveEvidenceDraft = mutation({
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
     assertOwnsOrCanReview(user._id, user.roles, task.assigned_to);
+    const gateRefusal = evidenceIntakeRefusal(task.status);
+    if (gateRefusal !== null) {
+      throw new Error(gateRefusal);
+    }
     assertNotRapidContract(args.draft, "the general draft route");
     assertEvidenceDraftLimits(args.draft);
     assertWideEvidenceRowFields(args.draft.generated_wide_row, taskTargetYears(task));
@@ -951,6 +965,24 @@ export const submitEvidenceDraft = mutation({
     assertNotRapidContract(draft, "the general submission route");
     assertEvidenceDraftSubmission(draft, false);
     const task = await getTaskOrThrow(ctx, draft.task_id);
+    // a receipt-backed retry answers from its receipt before the gate and
+    // before any status write (review finding 2026-09-12: the draft and task
+    // may have moved on since the receipted submission, and a retry that
+    // fell through to markDraftSubmitted undid a review or a pi acceptance).
+    // a token already bound to another caller or draft is refused as reuse
+    if (args.clientSubmissionId !== undefined) {
+      const receipt = await submissionReceipt(ctx, `submit:${user._id}:${args.clientSubmissionId}`);
+      if (receipt !== null) {
+        if (receipt.created_by !== user._id || receipt.evidence_draft_id !== draft.evidence_draft_id) {
+          throw new Error("The submission identifier is already in use.");
+        }
+        return { task_id: draft.task_id, evidence_draft_id: args.evidenceDraftId, task_status: "needs_review" as const, evidence_version_hash: receipt.object_hash, deduped: true };
+      }
+    }
+    const gateRefusal = evidenceIntakeRefusal(task.status);
+    if (gateRefusal !== null) {
+      throw new Error(gateRefusal);
+    }
     assertWideEvidenceRowFields(draft.generated_wide_row, taskTargetYears(task));
     if (
       task.country_code === "NZ"
@@ -1059,6 +1091,10 @@ export const submitEvidenceDraftWithOccupancies = mutation({
         deduped: true,
         ...(receipt !== null ? { evidence_version_hash: receipt.object_hash } : {}),
       };
+    }
+    const gateRefusal = evidenceIntakeRefusal(task.status);
+    if (gateRefusal !== null) {
+      throw new Error(gateRefusal);
     }
     if (draft.draft_status !== "draft") {
       throw new Error("Submit periods against the current editable draft, not an earlier submitted version.");
@@ -1178,6 +1214,10 @@ export const submitUnresolvedNote = mutation({
     assertNotRapidContract(draft, "the unresolved-note route");
     assertEvidenceDraftSubmission(draft, true);
     const task = await getTaskOrThrow(ctx, draft.task_id);
+    const gateRefusal = evidenceIntakeRefusal(task.status);
+    if (gateRefusal !== null) {
+      throw new Error(gateRefusal);
+    }
     const now = Date.now();
 
     const version = await recordEvidenceVersion(ctx, { draftRowId: draft._id, actor: user, kind: "unresolved_note", now });

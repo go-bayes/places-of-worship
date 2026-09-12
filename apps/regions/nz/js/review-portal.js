@@ -58,6 +58,20 @@
         // on their own after each per-year decision
         occupancy: null,
         occupancyBusy: false,
+        // the snapshot the decision form will submit (pi ruling 2026-09-11):
+        // { snapshot_hash, summary, snapshot: { draft, ... } } from
+        // reviews:getReviewSnapshot, or null while loading or without a draft
+        reviewSnapshot: null,
+        // the server's message when that fetch failed, else ""
+        reviewSnapshotError: "",
+        // what the panels render (review finding 2026-09-12): the task,
+        // draft, events, claims, and latest decision taken from the snapshot
+        // above, so the reviewer decides on exactly what the hash covers;
+        // PowReviewSnapshotContent.contentFromSnapshot, or null while loading
+        content: null,
+        // incremented by every selectTask; a load compares its own token
+        // after each await so a superseded load writes nothing
+        selectionToken: 0,
     };
 
     // the ra portal's map above the review cards (jb 2026-09-04); absent
@@ -435,6 +449,8 @@ function human(value) {
         const row = state.queue.find((entry) => entry.task.task_id === taskId);
         if (!row) return;
         state.selected = row;
+        const token = ++state.selectionToken;
+        const isCurrent = () => state.selectionToken === token && state.selected === row;
         // the map flies to a queue pick; a marker click already sits there
         reviewMap?.select(taskId, { fly: !fromMap });
         if (fromMap) els.detailPanel?.scrollIntoView({ block: "start", behavior: "smooth" });
@@ -445,49 +461,89 @@ function human(value) {
         state.sharedSource = null;
         state.agentAgreementChoice = null;
         state.occupancy = null;
+        state.reviewSnapshot = null;
+        state.reviewSnapshotError = "";
+        state.content = null;
         renderQueue();
         renderDetail(true);
         try {
-            const [drafts, historicalClaims, events, attachments] = await Promise.all([
-                client.listTaskEvidence({ taskId, limit: 20 }),
-                client.listTaskHistoricalClaims({ taskId, limit: 100 }),
-                client.getTaskEvents({ taskId, limit: 50 }),
-                // deployments without a bucket simply show no files section
-                client.listTaskAttachments({ taskId }).catch(() => []),
-            ]);
-            state.drafts = drafts || [];
-            state.historicalClaims = historicalClaims || [];
-            state.events = events || [];
-            state.attachments = attachments || [];
+            // the rows, then the snapshot the decision form will submit for
+            // the task's current draft; the panels render from that snapshot
+            // (review finding 2026-09-12), never from the queue row cached at
+            // queue load or from rows that may already differ. every await
+            // is guarded: a load the reviewer has moved on from resolves to
+            // null and writes nothing (PowReviewSnapshotContent.loadSelection)
+            const loaded = await window.PowReviewSnapshotContent.loadSelection({
+                taskId,
+                queueRow: row,
+                isCurrent,
+                fetchRows: async (id) => {
+                    const [drafts, historicalClaims, events, attachments] = await Promise.all([
+                        client.listTaskEvidence({ taskId: id, limit: 20 }),
+                        client.listTaskHistoricalClaims({ taskId: id, limit: 100 }),
+                        client.getTaskEvents({ taskId: id, limit: 50 }),
+                        // deployments without a bucket simply show no files section
+                        client.listTaskAttachments({ taskId: id }).catch(() => []),
+                    ]);
+                    return { drafts, historicalClaims, events, attachments };
+                },
+                fetchSnapshot: (id, evidenceDraftId) => client.getReviewSnapshot({ taskId: id, evidenceDraftId }),
+            });
+            if (loaded === null) return;
+            const content = loaded.content;
+            state.reviewSnapshot = loaded.snapshot;
+            state.reviewSnapshotError = loaded.snapshotError;
+            state.attachments = loaded.attachments;
+            state.content = content;
+            state.drafts = content.drafts;
+            state.historicalClaims = content.historicalClaims;
+            state.events = content.events;
             state.sharedSource = null;
             // a draft citing the shared register shows the register row and
             // how many other entries cite it (visible to all collaborators)
-            const draftWithSource = state.selected?.latestDraft || state.drafts[0] || null;
+            const draftWithSource = content.draft;
             if (draftWithSource?.source_id) {
                 try {
                     const [register, citing] = await Promise.all([
                         client.getSource({ sourceId: draftWithSource.source_id }),
                         client.listDraftsCitingSource({ sourceId: draftWithSource.source_id }),
                     ]);
+                    if (!isCurrent()) return;
                     state.sharedSource = register
                         ? { ...register, cited_by: (citing || []).length }
                         : null;
                 } catch (error) {
+                    if (!isCurrent()) return;
                     state.sharedSource = null;
                 }
             }
             renderDetail(false);
         } catch (error) {
+            if (!isCurrent()) return;
             renderDetail(false, error.message || "Could not load task details.");
         }
     }
 
+    // the panels' inputs (review finding 2026-09-12): from the snapshot
+    // content once loaded; before that, from the queue row, under the
+    // loading banner, with acceptance blocked until the snapshot is held
+    function currentTask() {
+        return state.content?.task || state.selected?.task || null;
+    }
+
     function currentDraft() {
+        if (state.content) return state.content.draft;
         return state.selected?.latestDraft || state.drafts[0] || null;
     }
 
     function currentReview() {
+        if (state.content) return state.content.latestReview;
         return state.selected?.latestReview || null;
+    }
+
+    function currentAgentReview() {
+        if (state.content) return state.content.latestAgentReview;
+        return state.selected?.latestAgentReview || null;
     }
 
     function renderEmptyDetail(message) {
@@ -511,10 +567,10 @@ function human(value) {
             return;
         }
 
-        const { task } = row;
+        const task = currentTask();
         const draft = currentDraft();
         const review = currentReview();
-        const agentReview = row.latestAgentReview || null;
+        const agentReview = currentAgentReview();
         const locationAssertion = task.initial_location_assertion || null;
         // revise-with-evidence lane: the reporter's framing and the record's
         // own point travel on the task, beside the observation they filed
@@ -716,6 +772,7 @@ function human(value) {
 
             <section class="panel decision-panel">
                 <h3>Review decision</h3>
+                <div id="reviewSnapshotHost"><p class="muted">Loading review snapshot...</p></div>
                 ${decisionForm(task, draft)}
             </section>
 
@@ -750,6 +807,9 @@ function human(value) {
         if (!loading) {
             loadOccupancyPanel(task);
         }
+        // the snapshot the decision form will submit (pi ruling 2026-09-11),
+        // already fetched by selectTask and the source of the panels above
+        renderSnapshotHost(draft, loading);
         const form = document.getElementById("reviewDecisionForm");
         if (form) {
             wireDecisionForm(form);
@@ -772,6 +832,74 @@ function human(value) {
                 }
             });
         });
+    }
+
+    // the snapshot the decision form shows and submits (pi ruling
+    // 2026-09-11): selectTask fetches it with the task and the panels render
+    // from it; the server refuses a stale one, after which the whole task is
+    // reloaded (reloadSelectedTask below)
+    function renderSnapshotHost(draft, loading) {
+        const host = document.getElementById("reviewSnapshotHost");
+        if (!host) return;
+        if (loading) {
+            host.innerHTML = `<p class="muted">Loading review snapshot...</p>`;
+            return;
+        }
+        if (state.reviewSnapshot) {
+            renderReviewSnapshot(state.reviewSnapshot);
+            return;
+        }
+        if (!draft) {
+            host.innerHTML = `<p class="muted">No evidence draft on this task; a decision here carries no review snapshot.</p>`;
+            return;
+        }
+        host.innerHTML = `<p class="status error">Could not load the review snapshot: ${escapeHtml(state.reviewSnapshotError || "unknown error")}. The panels show the evidence as fetched separately; reload the task before accepting for export.</p>`;
+    }
+
+    // after a stale-snapshot refusal the selected task is re-read in full
+    // (review finding 2026-09-12): refetching the snapshot line alone left
+    // the evidence, claims, and review panels showing the content the
+    // refused decision was made on, while the next click would have sent
+    // the refetched hash. the queue is reloaded first so the row's latest
+    // draft and review are current, then the task is selected again, which
+    // re-renders every panel and fetches the snapshot; the server's message
+    // is repeated on the fresh form
+    async function reloadSelectedTask(taskId, notice) {
+        await loadQueue();
+        if (!state.queue.some((entry) => entry.task.task_id === taskId)) {
+            state.selected = null;
+            renderEmptyDetail(`${notice} The task is no longer in this queue; change the queue status to find it.`);
+            return;
+        }
+        await selectTask(taskId);
+        const statusText = document.getElementById("decisionStatusText");
+        if (statusText && state.selected?.task?.task_id === taskId) {
+            statusText.textContent = `${notice} The task has been reloaded; check the evidence again before deciding.`;
+            statusText.className = "status error";
+        }
+    }
+
+    function renderReviewSnapshot(snapshot) {
+        const host = document.getElementById("reviewSnapshotHost");
+        if (!host || !snapshot) return;
+        const hashPrefix = String(snapshot.snapshot_hash || "").slice(0, 12);
+        const versionHash = snapshot.snapshot?.draft?.evidence_version_hash;
+        const versionText = versionHash
+            ? `<span title="${escapeHtml(versionHash)}">${escapeHtml(versionHash.slice(0, 12))}</span>`
+            : "no version (pre-contract)";
+        const s = snapshot.summary || {};
+        host.innerHTML = `
+            <p class="muted">
+                <strong>Review snapshot</strong>
+                <span title="${escapeHtml(snapshot.snapshot_hash || "")}">${escapeHtml(hashPrefix)}</span>
+                · draft ${escapeHtml(s.draft_status || "")}
+                · evidence version ${versionText}
+                · decisions ${s.review_decisions ?? 0}, events ${s.task_events ?? 0}, agent reviews ${s.agent_reviews ?? 0},
+                claims ${s.historical_claims ?? 0}, periods ${s.site_occupancies ?? 0},
+                derived states ${s.derived_states ?? 0}, locations ${s.derived_locations ?? 0}, functions ${s.derived_functions ?? 0}.
+                The task, evidence, events, and claims on this page are rendered from this snapshot.
+            </p>
+        `;
     }
 
     // occupancy panel (jb 2026-09-02, docs/development/occupancy-build-brief-2026-09-02.md
@@ -1650,8 +1778,15 @@ function human(value) {
             statusText.className = "status error";
             return;
         }
+        // pi ruling 2026-09-11: acceptance for export must carry the
+        // snapshot the reviewer inspected; without it the server refuses
+        if (decisionStatus === "accepted_for_export" && !state.reviewSnapshot) {
+            statusText.textContent = "The review snapshot has not finished loading. Wait for it, or reload the task, before accepting for export.";
+            statusText.className = "status error";
+            return;
+        }
         const locationOutcome = form.locationOutcome?.value || undefined;
-        if (decisionStatus === "accepted_for_export" && pinMovedOn(state.selected.task) && !locationOutcome) {
+        if (decisionStatus === "accepted_for_export" && pinMovedOn(currentTask()) && !locationOutcome) {
             statusText.textContent = "The contributor moved the pin: choose the location ruling before accepting.";
             statusText.className = "status error";
             form.locationOutcome?.focus();
@@ -1673,7 +1808,7 @@ function human(value) {
         // provenance: which AI recommendation was on screen and whether the
         // human followed it — explicit button choice wins, otherwise derived
         // from the decision so the record never overstates agreement
-        const agentReview = state.selected.latestAgentReview;
+        const agentReview = currentAgentReview();
         if (agentReview && window.PowAgentReviewPanel) {
             decision.agent_review_id = agentReview.agent_review_id;
             decision.agent_review_agreement = window.PowAgentReviewPanel.deriveAgreement(
@@ -1688,22 +1823,34 @@ function human(value) {
         if (submitButton) submitButton.disabled = true;
         statusText.textContent = "Recording review decision...";
         statusText.className = "muted";
+        const selectedTask = state.selected.task;
         try {
             const result = await client.recordReviewDecision({
-                taskId: state.selected.task.task_id,
+                taskId: selectedTask.task_id,
                 decision,
+                // sent whenever a snapshot is held, whatever the decision
+                // status; the server requires it only for accepted_for_export
+                snapshotHash: state.reviewSnapshot ? state.reviewSnapshot.snapshot_hash : undefined,
             });
             statusText.textContent = `Recorded. Task status is now ${result.task_status}.`;
             statusText.className = "status ok";
             // keep the pre-reload order so "next" follows the reviewed row
-            const decidedTaskId = state.selected.task.task_id;
+            const decidedTaskId = selectedTask.task_id;
             const previousIds = state.queue.map((entry) => entry.task.task_id);
             state.selected = null;
             await loadQueue();
             renderDecisionRecorded(result.task_status, previousIds, decidedTaskId);
         } catch (error) {
-            statusText.textContent = error.message || "Could not record the review decision.";
+            const message = error.message || "Could not record the review decision.";
+            statusText.textContent = message;
             statusText.className = "status error";
+            // pi ruling 2026-09-11: a stale snapshot means the task is
+            // re-read in full so the reviewer sees the current state before
+            // deciding again; the failed decision is never auto-resubmitted
+            if (/stale/i.test(message)) {
+                state.busy = false;
+                await reloadSelectedTask(selectedTask.task_id, message);
+            }
         } finally {
             state.busy = false;
             if (submitButton) submitButton.disabled = false;

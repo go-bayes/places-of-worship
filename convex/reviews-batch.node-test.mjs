@@ -89,7 +89,9 @@ test("batch size is bounded before any reads or writes", async () => {
 test("individual decisions cannot bypass closed-task lifecycle gates", async () => {
   for (const status of ["reviewed", "pi_accepted", "exported"]) {
     const ctx = context(); ctx.task.status = status;
-    await assert.rejects(recordReviewDecision._handler(ctx, {taskId: "task_1", decision: item("0".repeat(64)).decision}), /not open for review/);
+    // a decision that needs no snapshot (rejected) isolates the closed-task
+    // gate from the separate accepted_for_export snapshot requirement
+    await assert.rejects(recordReviewDecision._handler(ctx, {taskId: "task_1", decision: item("0".repeat(64), "rejected").decision}), /not open for review/);
     assert.equal(ctx.rows.review_decisions.length, 0);
     assert.equal(ctx.task.status, status);
   }
@@ -102,11 +104,13 @@ test("batch and individual decisions accept provisionally closed tasks with repr
     const ctx = context(); ctx.task.status = "provisionally_closed";
     const snapshot = await getReviewSnapshot._handler(ctx, {taskId: "task_1", evidenceDraftId: "draft_1"});
     if (batch) await batchRecordReviewDecisions._handler(ctx, {items: [item(snapshot.snapshot_hash)]});
-    else await recordReviewDecision._handler(ctx, {taskId: "task_1", decision: item(snapshot.snapshot_hash).decision});
+    else await recordReviewDecision._handler(ctx, {taskId: "task_1", decision: item(snapshot.snapshot_hash).decision, snapshotHash: snapshot.snapshot_hash});
     const row = ctx.rows.review_decisions[0];
     const {decision_hash, decision_hash_version, review_snapshot_hash, ...decision} = row;
-    const input = batch ? {schema_version: "review-decision.v1", decision, review_snapshot_hash} : decision;
-    assert.equal(decision_hash_version, batch ? 1 : undefined);
+    const input = {schema_version: "review-decision.v1", decision, review_snapshot_hash};
+    // every accepted_for_export decision is snapshot-linked now, individual
+    // or batch, so both take the v1 decision-hash envelope
+    assert.equal(decision_hash_version, 1);
     assert.equal(decision_hash, sha256(canonicalJson(input)));
     assert.equal(ctx.task.status, "reviewed");
   }
