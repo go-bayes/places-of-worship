@@ -223,6 +223,19 @@
 - Do not mix implementation and review on the same files at the same time
   unless the user asks for that coordination explicitly.
 
+## Pull Request Closure
+
+An assigned pull request is carried to closure by one agent, so no merged change waits on a backend deployment nobody owns (Joseph, 2026-09-13). The closure owner is the agent that authored the pull request unless Joseph assigns another; a reviewing agent stays read-only.
+
+- Closure authority is given per pull request, in writing: Joseph says "carry to closure" in the session or on the pull request, or adds the `closure-authorised` label. Record the instruction and its date in the private handover. Without it, carry the pull request to a mergeable state and stop.
+- Babysit the pull request until it merges. Keep it rebased on current `origin/main`; keep the description's test plan current; answer every review thread from Codex, Greptile, or a person by verifying the finding against the code first, then repairing it, or replying with the reason it does not hold.
+- Merge only when every condition holds: CI is green on the final head; every review thread is answered; no finding the closure owner assesses as blocking remains open; closure authority is recorded. Integrate by the fast-forward procedure above.
+- Pages publishes the static site when `main` advances, so backend changes go live first. When the pull request changes anything under `convex/`, classify the change before merging. An additive change (new tables, new optional fields, new functions, widened validators) is deployed from the reviewed head with `npx convex dev --once`, which pushes to `dev:pastel-goshawk-398`, the deployment the live portals use. Read the deployed function list and schema back and compare them with the head before fast-forwarding `main`. A non-additive change (removed or renamed fields or functions, narrowed validators, anything requiring a data migration) stops closure; Joseph runs it or rules the sequence.
+- If Joseph merges the pull request himself, the closure owner still owes the deployment and its record in the same sitting. When a sitting ends before closure, the private task page carries the item as "closure owed" until the deployment record exists, and the next session takes it up first.
+- Record every closure in the private handover: pull request, merged hash, deployment name, time, and how the deployment was verified. Update the task page in the same commit.
+- Halt and hand over on any surprise: CI red after a rebase, a new blocking finding, a deployment error, or a mismatch between the deployed functions and the head. A halted closure is recorded, never retried silently.
+- Closure never includes data mutations (migration versions, acceptances, freezes, imports), secrets or environment variables, `npx convex deploy` to the production deployment, Pages or tile configuration, or outward messages. Each of those needs its own instruction.
+
 ## Useful Commands
 
 - Rust checks: `cargo fmt --all`, `cargo test`, `cargo clippy --all-targets -- -D warnings`.
