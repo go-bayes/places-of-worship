@@ -14,9 +14,14 @@ Outputs:
 
 Each row's point is one of: a named OSM place of worship whose name matches the entry
 (osm_name_match), the OSM centroid of the locality the phrase names (described_locality, the
-same centroids as the 2010 survey batch), or the Port Vila centroid when the phrase gives no
-locality (regional_only). The location table below records that reading; the verbatim phrase
-travels with the task as location_as_given.
+same centroids as the 2010 survey batch), a contributor's own portal record when the phrase names
+a building a contributor has already pinned (manual_match), or the Port Vila centroid when the
+phrase gives no locality (regional_only). The location table below records that reading; the
+verbatim phrase travels with the task as location_as_given.
+
+Rulings from Guy (email of 2026-09-14): "(VCC)" means the council's conference building, which he
+pinned on 2026-08-31 at plus code 78F8+XWH; and the list is to be credited as a personal
+communication of the council, not as an official publication or internal report.
 
 Run: python3 scripts/build_vu_council_list_tasks.py [path/to/docx]
 Then, as the seeding service user (docs/development/convex-task-layer-setup.md):
@@ -48,11 +53,30 @@ TAXONOMY_VERSION = "2026-06-12.1"
 # the council attests 2026 only, earlier years stay not_assessed unless the RA learns more
 TARGET_YEARS = [1989, 1999, 2009, 2020]
 SOURCE_CITATION = (
-    "Vanuatu Christian Council (2026). Churches in Port Vila and their locations. List of churches "
-    "operating in Port Vila, brainstormed by council staff for Guy Lavender Forsyth, September 2026; "
-    "transcribed verbatim by Guy (email to J. Bulbulia, 2026-09-04)."
+    "Vanuatu Christian Council (2026). Churches in Port Vila and their locations. Personal communication "
+    "to Guy Lavender Forsyth, September 2026: a list of churches operating in Port Vila brainstormed by "
+    "council staff, not an official council publication or internal report; transcribed verbatim by Guy "
+    "(email to J. Bulbulia, 2026-09-04). Attribution form ruled by Guy, 2026-09-14."
 )
 PORT_VILA_CENTROID = (-17.7415, 168.3150)
+
+# portal records contributors had already pinned that the council's location phrases refer to.
+# points are the contributor's own geometry on the live task (manual_match basis).
+CONTRIBUTOR_RECORDS = {
+    "vcc_conference_room": {
+        "task_id": "vu-candidate-92dcd846-787e-4c8e-960c-db259315e77a",
+        "name": "Vanuatu Christian Council Conference Room",
+        "label": "Vanuatu Christian Council conference room",
+        "lat": -17.724933,
+        "lng": 168.317207,
+        "plus_code": "78F8+XWH",
+        "contributor": "Guy Lavender Forsyth",
+        "observed": "2026-08-31",
+        # guy's field note on that record: the sda english congregation uses the building on
+        # saturdays, a tongan congregation on sundays, and a chinese christian group a second
+        # room at the same time on sunday
+    },
+}
 NEARBY_RADIUS_M = 400
 
 # locality centroids: OSM neighbourhood/village nodes via Nominatim 2026-09-06, or the same
@@ -88,8 +112,8 @@ LOCALITIES = {
 # None, geocoding basis, location confidence, matched OSM object, transcription note.
 # codes: "" = body named but not in the taxonomy; "christian" = name states no affiliation.
 E = {}
-def _e(n, religion, code, locality, basis, confidence, osm=None, note=""):
-    E[n] = dict(religion=religion, code=code, locality=locality, basis=basis, confidence=confidence, osm=osm, note=note)
+def _e(n, religion, code, locality, basis, confidence, osm=None, note="", record=None):
+    E[n] = dict(religion=religion, code=code, locality=locality, basis=basis, confidence=confidence, osm=osm, note=note, record=record)
 
 _e(1, "Apostolic", "", "Freswota 3", "described_locality", "low")
 _e(2, "United Pentecostal Church", "christian.pentecostal", None, "osm_name_match", "medium", "node/5349063832",
@@ -126,12 +150,12 @@ _e(25, "Church of Christ", "christian.church_of_christ", "Vila Central Hospital,
    note="Point is Vila Central Hospital (OSM); the church is described as opposite it.")
 _e(26, "Presbyterian Reformed", "christian.reformed", "Freswota 5", "described_locality", "low")
 _e(27, "Assemblies of God", "christian.pentecostal", "Freswota 5", "described_locality", "low")
-_e(28, "Christian (affiliation not stated)", "christian", None, "regional_only", "low",
-   note="Location given only as '(VCC)'; possibly meets at Vanuatu Christian Council premises. Ask the council.")
-_e(29, "Seventh-day Adventist", "christian.seventh_day_adventist", None, "regional_only", "low",
-   note="Location given only as '(VCC)'; possibly meets at Vanuatu Christian Council premises. Ask the council.")
-_e(30, "Christian (affiliation not stated)", "christian", None, "regional_only", "low",
-   note="Location given only as '(VCC)'; possibly meets at Vanuatu Christian Council premises. Ask the council.")
+_e(28, "Christian (affiliation not stated)", "christian", None, "manual_match", "medium", record="vcc_conference_room",
+   note="'(VCC)' is the Vanuatu Christian Council conference building (Guy, 2026-09-14). Guy's field note of 2026-08-31 records a Chinese Christian group worshipping in its second room on Sundays.")
+_e(29, "Seventh-day Adventist", "christian.seventh_day_adventist", None, "manual_match", "medium", record="vcc_conference_room",
+   note="'(VCC)' is the Vanuatu Christian Council conference building (Guy, 2026-09-14). Guy's field note of 2026-08-31 records the SDA English congregation worshipping there on Saturdays.")
+_e(30, "Christian (affiliation not stated)", "christian", None, "manual_match", "low", record="vcc_conference_room",
+   note="'(VCC)' is the Vanuatu Christian Council conference building (Guy, 2026-09-14). Guy's field note of 2026-08-31 names a Tongan congregation on Sundays but not Christ Embassy; confirm whether they are the same group.")
 _e(31, "Presbyterian", "christian.presbyterian", "Beverly Hills", "described_locality", "low")
 _e(32, "Assemblies of God", "christian.pentecostal", "Beverly Hills", "described_locality", "low")
 _e(33, "Presbyterian", "christian.presbyterian", "Beverly Hills", "described_locality", "low")
@@ -253,6 +277,9 @@ def build_csv(docx: Path, osm_by_id: dict[str, dict]) -> list[dict]:
         elif e["basis"] == "described_locality":
             lat, lng = LOCALITIES[e["locality"]]
             locality = e["locality"]
+        elif e["basis"] == "manual_match":
+            rec = CONTRIBUTOR_RECORDS[e["record"]]
+            lat, lng, locality = rec["lat"], rec["lng"], rec["label"]
         else:
             lat, lng, locality = "", "", ""
         rows.append({
@@ -315,6 +342,12 @@ def priority_for(row: dict) -> str:
     return "medium"
 
 
+def contributor_record_for(row: dict) -> dict | None:
+    if row["geocoding_basis"] != "manual_match":
+        return None
+    return next(r for r in CONTRIBUTOR_RECORDS.values() if r["label"] == row["locality"])
+
+
 def checks_for(row: dict, nearby: list[dict], survey_hits: list[str]) -> list[dict]:
     checks = [{
         "check_id": "council_list_lead",
@@ -327,6 +360,17 @@ def checks_for(row: dict, nearby: list[dict], survey_hits: list[str]) -> list[di
             "check_id": "location_from_osm_name_match",
             "severity": "info" if row["location_confidence"] == "high" else "warning",
             "message": f"Point is OSM {row['matched_osm_id']}, whose name matches the council entry ({row['location_confidence']} confidence). Confirm it is the same site.",
+            "suggested_action": "review_location",
+        })
+    elif row["geocoding_basis"] == "manual_match":
+        rec = contributor_record_for(row)
+        checks.append({
+            "check_id": "location_from_contributor_record",
+            "severity": "info" if row["location_confidence"] == "medium" else "warning",
+            "message": (
+                f"Point is {rec['contributor']}'s portal record '{rec['name']}' ({rec['plus_code']}, {rec['observed']}), "
+                f"read from the council's phrase '{row['location_as_given']}'. Confirm this congregation meets there and on which day."
+            ),
             "suggested_action": "review_location",
         })
     elif row["geocoding_basis"] == "described_locality":
@@ -412,6 +456,14 @@ def build(docx: Path) -> dict:
                 label = f"{p['name'] or 'unnamed place of worship'} (OSM {p['osm_id']})"
                 nearby.append({"name": label, "distance_m": round(d)})
         nearby.sort(key=lambda n: n["distance_m"])
+        rec = contributor_record_for(row)
+        if rec:
+            # the contributor's own record of the building comes first so the reviewer sees it
+            nearby.insert(0, {
+                "task_id": rec["task_id"],
+                "name": f"{rec['name']} (contributor record, {rec['contributor']}, {rec['observed']})",
+                "distance_m": 0,
+            })
         survey_hits = survey_matches(row, lat, lng, survey)
         checks = checks_for(row, nearby, survey_hits)
         digest = hashlib.sha256(f"{row['source_locator']}|{row['name']}".encode("utf-8")).hexdigest()[:12]

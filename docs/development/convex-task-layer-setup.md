@@ -416,4 +416,6 @@ First use: `vu-port-vila-survey-2010-001` (93 tasks from Eriksen & Andrew 2010).
 Second use: `vu-vila-council-list-2026-001` (61 tasks from the Vanuatu Christian
 Council's September 2026 list of Port Vila churches; generator
 `scripts/build_vu_council_list_tasks.py`, reads the docx held off-Git in
-pow-research `data/raw/vu_council_list_2026/`).
+pow-research `data/raw/vu_council_list_2026/`). Re-run on 2026-09-14 after Guy's
+rulings: the three "(VCC)" entries take the point of his own conference-room record,
+and the citation credits the list as a personal communication of the council.
