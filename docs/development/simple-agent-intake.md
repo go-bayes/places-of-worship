@@ -12,9 +12,9 @@ The reference [poo.co.nz](https://poo.co.nz/) was inspected on 2026-09-18. Its m
 
 ## RA assistance
 
-The RA workspace places **Ask an agent** beside the current evidence. An RA can type a question or select a suggestion about sources, dates, or duplicates. The `@research` tag is a visible shorthand for the research service; the button also works with an ordinary question. The selected place and evidence version accompany the request automatically.
+The RA workspace places **Ask an agent** beside the current evidence. An RA can type a question or select a suggestion about sources, dates, or duplicates. The `@research` tag is a shorthand for the research service; the button also works with an ordinary question. The selected place and evidence version automatically accompany the request.
 
-The prototype uses an invented chapel and an explicit demonstration evidence version. An example source dates a building, leaving worship commencement unresolved. The research-record view retains the source quotation, qualification, attribution, and follow-up question beside the claim. The example agent response is labelled illustrative because the prototype does not run a model.
+The prototype uses an invented chapel and an explicit demonstration evidence version. An example source dates a building, leaving worship commencement unresolved. The research-record view retains the source quotation, qualification, attribution, and follow-up question beside the claim. The example agent response is an authored illustration.
 
 An agent answer should propose additions to the RA's evidence. The live implementation must preserve the original note, display each proposed change, and require explicit confirmation before creating an ordinary evidence revision. A changed evidence version makes an earlier answer stale for application; the answer remains available as research history. The RA can continue other work while a request is pending.
 
@@ -30,15 +30,15 @@ An agent answer should propose additions to the RA's evidence. The live implemen
 | Apply a suggestion | Proposed evidence changes | Recheck the evidence hash and require human confirmation |
 | Review | Submitted evidence version and decision | Use the existing review, PI authority, and governed export contracts |
 
-The prototype implements local draft restoration, missing-field feedback, HTTP(S) link-scheme validation, duplicate request previews, question history, and focus transfer to the local receipt. Request previews explicitly say that they have not been sent. Browser storage failures produce a warning and retain the current form in memory. The drawing beside the form is illustrative; it is not an interactive map or a geolocation result.
+The prototype implements local draft restoration, missing-field feedback, HTTP(S) link-scheme validation, duplicate request previews, question history, and focus transfer to the local receipt. Request previews explicitly say that they have not been sent. Browser storage failures produce a warning and retain the current form in memory. The drawing beside the form is an illustration. Live mapping and geolocation remain implementation steps.
 
 ## Backend integration
 
-The first backend increment should support signed-in RA assistance. Add an assistance-request table with requester, task identifier, evidence-version hash, question, request idempotency key, creation time, disposition, and controller receipt. Validate the requester's task access server-side. A request grants research authority only within the configured assignment policy; a tag in user text does not grant tools or data access.
+The first backend increment should support signed-in RA assistance. Add an assistance-request table with requester, task identifier, evidence-version hash, question, request idempotency key, creation time, disposition, and controller receipt. Validate the requester's task access server-side. The configured assignment policy determines tool and data access for every request, including tagged questions.
 
-The request transaction should create an outbox event atomically. A deterministic dispatcher claims the event under a lease, selects the approved model and source policy, and dispatches a bounded attempt. A completion transaction verifies the active lease and records an immutable first-pass reference. Model output can update research status and propose evidence; acceptance and release remain human operations.
+The request transaction should atomically create an outbox event. A deterministic dispatcher claims the event under a lease, selects the approved model and source policy, and dispatches a bounded attempt. A completion transaction verifies the active lease and records an immutable first-pass reference. Model output can update research status and propose evidence; acceptance and release remain human operations.
 
-Public intake requires a separate, restricted ingress before anonymous access is enabled. Limit request size and submission rate, issue unguessable private receipts, avoid revealing nearby private evidence, and quarantine attachments. Duplicate suggestions should use public records and allow the contributor to explain a distinct worship use at a shared place. Public submissions cannot select arbitrary worker tools, budgets, deployment names, or private source scopes.
+Public intake requires a separate, restricted ingress before anonymous access is enabled. Limit request size and submission rate, issue unguessable private receipts, avoid revealing nearby private evidence, and quarantine attachments. Duplicate suggestions should use public records and allow the contributor to explain a distinct worship use at a shared place. The controller selects worker tools, budgets, deployment, and source scope from the approved policy.
 
 Attachment support should follow the quarantined storage path. A phone camera or file picker can reduce effort, but upload, scanning, restricted metadata, licence handling, and isolated extraction must exist before that control promises submission. The prototype therefore concentrates on text and public links. Source fetching, mapping, and uploads remain implementation steps.
 
@@ -59,4 +59,4 @@ npm run dev -- --host 127.0.0.1 --port 5174
 npm run build
 ```
 
-The existing workbench opens normally without the concept parameter. The prototype uses the existing React and TypeScript stack and adds no runtime dependency. The production build remains ignored under the existing workbench publication policy. Publishing or connecting the prototype is a separate reviewed change.
+The existing workbench opens normally without the concept parameter. The prototype uses the existing React and TypeScript dependencies. The production build remains ignored under the existing workbench publication policy. Publishing or connecting the prototype is a separate reviewed change.
