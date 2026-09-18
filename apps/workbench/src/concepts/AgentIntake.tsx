@@ -46,6 +46,13 @@ export function AgentIntake() {
   const [exampleAnswer, setExampleAnswer] = useState(false);
   const receiptHeading = useRef<HTMLHeadingElement>(null);
   const questionInput = useRef<HTMLTextAreaElement>(null);
+  const focusQuestion = useRef(false);
+  useEffect(() => {
+    if (focusQuestion.current && questionInput.current) {
+      questionInput.current.focus();
+      focusQuestion.current = false;
+    }
+  });
   useEffect(() => {
     try { sessionStorage.setItem(storageKey, JSON.stringify(saved)); setStorageProblem(false); }
     catch { setStorageProblem(true); }
@@ -76,7 +83,7 @@ export function AgentIntake() {
     if (!saved.question.replace(/@research\b/g, "").trim()) { setProblem("Add the question you would like the agent to investigate."); return; }
     saveRequest("assistance", "Example Chapel", saved.question.trim(), exampleContext);
   };
-  const chooseQuestion = (question: string) => { setSaved(current => ({ ...current, question: `@research ${question}` })); setProblem(""); questionInput.current?.focus(); };
+  const chooseQuestion = (question: string) => { focusQuestion.current = true; setSaved(current => ({ ...current, question: `@research ${question}` })); setProblem(""); questionInput.current?.focus(); };
 
   return <div className="ai-concept">
     <header className="ai-header"><a className="ai-brand" href="?concept=agent"><span className="ai-brand-icon" aria-hidden="true">⌖</span> Places of Worship</a><span className="ai-prototype">INTERACTION PROTOTYPE</span></header>
