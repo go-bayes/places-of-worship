@@ -23,19 +23,7 @@ generation.
   - Tilesets: `places`, `places-overview`, `buildings`, `nz-polygons`.
   - Local copies of the archives are kept outside the repo; the worker
     README records the upload and rebuild procedure.
-- Site domain: `religionmap.org` is served by GitHub Pages (`CNAME` at the
-  repo root) with DNS on Cloudflare. The apex A/AAAA records and the `www`
-  CNAME must stay **DNS only** (grey cloud), never proxied. GitHub Pages
-  issues and renews the site's Let's Encrypt certificate only while the
-  domain's A records resolve to GitHub's addresses; proxying breaks renewal
-  (`https_certificate.state = bad_authz` in the Pages API) and, once the last
-  certificate expires, Cloudflare returns a 526 error for every visitor. If
-  that happens: set the records to DNS only, remove and re-add the custom
-  domain under Settings → Pages to restart issuance, wait for the state to
-  read `approved`, then re-tick Enforce HTTPS. Check with
-  `gh api repos/go-bayes/places-of-worship/pages --jq .https_certificate`.
-  The redirect domains (`placesmap.org`, `powmap.org`) and the tiles host are
-  Worker custom domains on their own zones and are not affected.
+- Site domain: `religionmap.org` is served by GitHub Pages (`CNAME` at the repo root) with DNS on Cloudflare. Keep the apex A/AAAA records and the `www` CNAME **DNS only** (grey cloud) for this configuration. Proxying these records interrupted GitHub Pages certificate renewal (`https_certificate.state = bad_authz`). An expired origin certificate can produce Cloudflare error 526 when strict origin-certificate validation is enabled. To recover, set the records to DNS only, remove and re-add the custom domain under Settings → Pages to restart issuance, wait for the state to read `approved`, then enable Enforce HTTPS. Inspect the certificate with `gh api repos/go-bayes/places-of-worship/pages --jq .https_certificate`. The repair completed on 2026-09-18: the replacement certificate is approved until 2026-12-17, HTTPS enforcement is enabled, and the HTTPS apex returns 200. The redirect domains (`placesmap.org`, `powmap.org`) and the tiles host are Worker custom domains on separate zones and remain unchanged.
 
 ### Repository (tracked)
 - Regional app data (served directly by GitHub Pages):
@@ -56,20 +44,16 @@ generation.
 1) Raw data downloads land in `data/raw/`.
 2) Processing scripts read from `data/raw/` and `data/global/`.
 3) Regional app data is emitted to `apps/regions/<iso2>/data/`.
-4) Custom tiles are generated locally (`.mbtiles`/`.pmtiles`), uploaded to GCS,
-   and synced to `/srv/tiles` on the VM for Martin to serve.
+4) Custom tiles are generated locally as PMTiles archives, uploaded to Cloudflare R2, and served by the tile Worker.
 5) The frontend consumes tiles and regional JSON/GeoJSON from GitHub Pages.
 
 ## Gaps / Uncertainties to Confirm
-- GCS bucket name and sync command (keep in `ops/private-ops-notes.md`).
-- Whether any automated sync exists (cron/systemd).
+- Archive rebuild and upload automation beyond the procedure in `tools/tiles-r2/README.md`.
 - Whether any global data should move off-repo to object storage.
 
 ## Planning Source of Truth
 
-Data tracking and diff strategy decisions live in `PLANNING.md`. The active
-storage workflow lives in `docs/data-storage-pipeline.md`. This document is an
-inventory reference only.
+Data tracking and diff strategy decisions live in the private `pow-research/PLANNING.md`. The active storage workflow lives in `docs/data-storage-pipeline.md`. This document is an inventory reference.
 
 Related templates:
 - `docs/data-manifest-template.snapshot.json`
