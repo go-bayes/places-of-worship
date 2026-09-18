@@ -3,6 +3,7 @@ import copy
 import json
 import tempfile
 import unittest
+from unittest.mock import patch
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -65,6 +66,15 @@ class FirstPassTests(unittest.TestCase):
         self.record['place_ref'] = 'osm:way/2'
         with self.assertRaisesRegex(ValueError, 'another place'):
             fp.archive(self.store, self.record)
+
+    def test_graph_limit_refuses_before_publishing(self):
+        first = fp.archive(self.store, self.record)
+        self.record['parents'] = [first]
+        self.record['stop_reason'] = 'Second attempt.'
+        with patch.object(fp, 'MAX_CHAIN', 1):
+            with self.assertRaisesRegex(ValueError, 'verification limit'):
+                fp.archive(self.store, self.record)
+        self.assertEqual(len(list(self.store.rglob('*.json'))), 1)
 
     def test_claim_annotations_must_resolve(self):
         self.record['annotations'] = [{'claim_id':'invented','kind':'qualification','note':'Unsupported.'}]

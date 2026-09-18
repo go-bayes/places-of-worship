@@ -141,8 +141,12 @@ def put_bytes(store: Path, raw: bytes):
 
 def archive(store: Path, record):
     record = validate(record)
+    ancestors = set()
     for parent in record['parents']:
         history = verify(store, parent)
+        ancestors.update(history)
+        if len(ancestors) >= MAX_CHAIN:
+            raise ValueError('parent graph exceeds verification limit')
         if history[parent][1]['place_ref'] != record['place_ref']:
             raise ValueError('parent belongs to another place')
     raw = encode(record)
