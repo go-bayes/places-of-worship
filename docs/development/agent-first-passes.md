@@ -4,7 +4,7 @@ Status: implementation proposal with a working local archive. The archive preser
 
 ## A useful first pass
 
-A first pass answers a bounded question as far as the permitted evidence allows. The record retains supported claims, qualifications, disagreements, attempted searches, reasons for stopping, and questions for a later attempt. An inaccessible source or unresolved date is a useful recorded result. Research completion and evidence acceptance are different states.
+A first pass answers a bounded question as far as the permitted evidence allows. The record retains supported claims, qualifications, disagreements, attempted searches, reasons for stopping, and questions for a later attempt. Each search has explicit source-name, attempt-date, retrieval-date, licence, and access fields. Unknown names and dates remain null; the access note explains the gap. An inaccessible source or unresolved date is a useful recorded result. Research completion and evidence acceptance are different states.
 
 The first-pass record wraps the existing [agent dossier](../../scripts/agent_research/schemas/agent-dossier.v1.json). Each dossier claim retains its source locator, quoted support, date scope, uncertainty, and reader attribution. Annotations identify claims by `claim_id`. A later pass names the hashes of its parent records and creates a new object; the earlier evidence remains recoverable. Multiple investigators can independently revisit the same record.
 

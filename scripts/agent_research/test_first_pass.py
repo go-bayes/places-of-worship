@@ -127,6 +127,36 @@ class FirstPassTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             fp.intake.parse_json('{"question":"a","question":"b"}')
 
+    def test_blocked_source_metadata_survives_without_a_dossier(self):
+        search = self.record['searches'][0]
+        search.update(outcome='blocked', locator='https://example.org/archive',
+                      source_name='Example archive', attempted_at='2026-09-18T05:50:00Z',
+                      retrieved_at=None, licence_note='Access terms not assessed.',
+                      access_note='The archive requires human access.')
+        digest = fp.archive(self.store, self.record)
+        _, recovered = fp.read_object(self.store, digest)
+        self.assertEqual(recovered['searches'], self.record['searches'])
+        self.assertIsNone(recovered['dossier'])
+        del search['licence_note']
+        with self.assertRaisesRegex(ValueError, 'licence_note'):
+            fp.validate(self.record)
+
+    def test_search_dates_are_valid_and_scope_matches_access(self):
+        search = self.record['searches'][0]
+        search.update(outcome='opened', locator='https://example.org/history',
+                      attempted_at='2026-09-18T05:50:00Z', retrieved_at='2026-09-18T05:51:00Z')
+        fp.validate(self.record)
+        for date in ('2026-02-30T05:51:00Z', '2026-09-18T05:49:00Z'):
+            search['retrieved_at'] = date
+            with self.assertRaises(ValueError):
+                fp.validate(self.record)
+        search.update(outcome='blocked', retrieved_at='2026-09-18T05:51:00Z')
+        with self.assertRaisesRegex(ValueError, 'unsuccessful'):
+            fp.validate(self.record)
+        search.update(outcome='not_attempted', retrieved_at=None)
+        with self.assertRaisesRegex(ValueError, 'unattempted'):
+            fp.validate(self.record)
+
     def test_source_access_outcomes_require_safe_locators(self):
         self.record['searches'][0]['outcome'] = 'opened'
         with self.assertRaisesRegex(ValueError, 'requires a locator'):

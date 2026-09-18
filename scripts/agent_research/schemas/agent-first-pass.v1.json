@@ -204,7 +204,12 @@
           "query",
           "locator",
           "outcome",
-          "note"
+          "note",
+          "source_name",
+          "attempted_at",
+          "retrieved_at",
+          "licence_note",
+          "access_note"
         ],
         "properties": {
           "query": {
@@ -229,6 +234,40 @@
             ]
           },
           "note": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "source_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "attempted_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 40,
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|\\+00:00)$"
+          },
+          "retrieved_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 40,
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|\\+00:00)$"
+          },
+          "licence_note": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "access_note": {
             "type": "string",
             "minLength": 1,
             "maxLength": 2000

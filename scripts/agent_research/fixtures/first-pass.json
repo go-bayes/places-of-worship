@@ -30,7 +30,12 @@
       "query": "invented place worship commencement",
       "locator": null,
       "outcome": "not_attempted",
-      "note": "Synthetic example of a bounded attempt record."
+      "note": "Synthetic example of a bounded attempt record.",
+      "source_name": null,
+      "attempted_at": null,
+      "retrieved_at": null,
+      "licence_note": "Not assessed; synthetic fixture.",
+      "access_note": "A source was not retrieved for this synthetic example."
     }
   ],
   "next_questions": [

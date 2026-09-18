@@ -62,6 +62,19 @@ def validate(record):
         if annotation['claim_id'] not in ids:
             raise ValueError('annotation references an unknown claim')
     for search in record['searches']:
+        dates = {}
+        for field in ('attempted_at', 'retrieved_at'):
+            if search[field] is not None:
+                try:
+                    dates[field] = datetime.fromisoformat(search[field])
+                except ValueError as exc:
+                    raise ValueError(f'invalid search {field}') from exc
+        if len(dates) == 2 and dates['retrieved_at'] < dates['attempted_at']:
+            raise ValueError('search retrieval precedes its attempt')
+        if search['outcome'] == 'not_attempted' and dates:
+            raise ValueError('unattempted search cannot have access timestamps')
+        if search['outcome'] in {'blocked', 'no_results'} and search['retrieved_at'] is not None:
+            raise ValueError('unsuccessful search cannot report retrieved content')
         if search['locator'] is not None and not intake.public_url(search['locator']):
             raise ValueError('search locator must be a public HTTP(S) URL')
         if search['outcome'] in {'opened', 'snippet_only', 'blocked'} and search['locator'] is None:
