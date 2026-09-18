@@ -90,3 +90,7 @@ The intake route accepts JSON only. Source URLs may still identify PDFs, and a p
 Evaluate public discovery against what public sources could establish. Hold privately supplied observations out of research prompts. A model should preserve uncertainty about undocumented worship rather than infer absence from a sale, denominational closure, or deconsecration. Measure source support, scope errors, disagreements, human review time, rejected or deferred cases, usage, and latency separately. Small internal runs establish whether this pipeline works; they do not estimate quality or cost across the global inventory.
 
 Client configuration follows the installed command-line help, with [Codex security guidance](https://developers.openai.com/codex/security) and the [Claude CLI reference](https://code.claude.com/docs/en/cli-reference) as supporting documentation. Recheck the controls when upgrading either client.
+
+## Revisitable first passes
+
+The [first-pass archive](agent-first-passes.md) preserves provisional partial or blocked research alongside validated dossiers. The local tool records annotations and parent hashes and verifies recovery copies. It is an independent staging tool; the runner and Convex intake continue to use their existing contracts.

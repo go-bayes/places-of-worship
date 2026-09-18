@@ -1,0 +1,249 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://religionmap.org/schemas/agent-first-pass.v1.json",
+  "title": "Provisional revisitable agent research attempt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "disposition",
+    "place_ref",
+    "country_code",
+    "question",
+    "outcome",
+    "stop_reason",
+    "created_at",
+    "parents",
+    "attribution",
+    "usage",
+    "dossier",
+    "annotations",
+    "searches",
+    "next_questions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "agent-first-pass.v1"
+    },
+    "disposition": {
+      "const": "provisional"
+    },
+    "place_ref": {
+      "type": "string",
+      "pattern": "^(osm:(node|way|relation)/[0-9]+|new:[a-z0-9-]+)$",
+      "maxLength": 512
+    },
+    "country_code": {
+      "const": "NZ"
+    },
+    "question": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "outcome": {
+      "enum": [
+        "partial",
+        "blocked",
+        "researched"
+      ]
+    },
+    "stop_reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "created_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|\\+00:00)$"
+    },
+    "parents": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      }
+    },
+    "attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "responsible_human_ref",
+        "agent_run_id",
+        "model_requested",
+        "model_reported",
+        "model_unreported_reason",
+        "code_revision",
+        "instruction_sha256",
+        "definition_sha256"
+      ],
+      "properties": {
+        "responsible_human_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "agent_run_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "model_requested": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "model_reported": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "model_unreported_reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "code_revision": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "instruction_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "definition_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "usage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cost_usd",
+        "cost_basis",
+        "note"
+      ],
+      "properties": {
+        "cost_usd": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "cost_basis": {
+          "enum": [
+            "tool_list_price",
+            "api_invoice",
+            "subscription_unmetered",
+            "unknown"
+          ]
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    "dossier": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "When present, must pass intake.validate_dossier, including the existing agent-dossier.v1 schema and semantic checks."
+    },
+    "annotations": {
+      "type": "array",
+      "maxItems": 40,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claim_id",
+          "kind",
+          "note"
+        ],
+        "properties": {
+          "claim_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "kind": {
+            "enum": [
+              "qualification",
+              "disagreement",
+              "follow_up"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        }
+      }
+    },
+    "searches": {
+      "type": "array",
+      "maxItems": 30,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "query",
+          "locator",
+          "outcome",
+          "note"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "locator": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2048
+          },
+          "outcome": {
+            "enum": [
+              "opened",
+              "snippet_only",
+              "blocked",
+              "no_results",
+              "not_attempted"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        }
+      }
+    },
+    "next_questions": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2000
+      }
+    }
+  }
+}

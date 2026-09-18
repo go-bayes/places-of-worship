@@ -1,0 +1,39 @@
+{
+  "schema_version": "agent-first-pass.v1",
+  "disposition": "provisional",
+  "place_ref": "osm:way/1",
+  "country_code": "NZ",
+  "question": "When did worship begin at this site?",
+  "outcome": "partial",
+  "stop_reason": "The available source dates the building; worship commencement remains unresolved.",
+  "created_at": "2026-09-18T06:00:00Z",
+  "parents": [],
+  "attribution": {
+    "responsible_human_ref": "fixture:commissioner",
+    "agent_run_id": "fixture:first-pass",
+    "model_requested": "gpt-5.6-luna",
+    "model_reported": null,
+    "model_unreported_reason": "Synthetic fixture; a provider was not invoked.",
+    "code_revision": "0000000000000000000000000000000000000000",
+    "instruction_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+    "definition_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+  },
+  "usage": {
+    "cost_usd": null,
+    "cost_basis": "unknown",
+    "note": "Synthetic fixture; a provider was not invoked."
+  },
+  "dossier": null,
+  "annotations": [],
+  "searches": [
+    {
+      "query": "invented place worship commencement",
+      "locator": null,
+      "outcome": "not_attempted",
+      "note": "Synthetic example of a bounded attempt record."
+    }
+  ],
+  "next_questions": [
+    "Locate a dated account of the first worship service at this site."
+  ]
+}
