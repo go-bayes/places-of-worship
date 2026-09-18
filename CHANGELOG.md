@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-18 (domain certificate)
+
+- religionmap.org's apex and www records must stay **DNS only** in Cloudflare, never proxied. On 2026-09-18 the sibling site reliefmap.info (same GitHub Pages + Cloudflare setup) went down with a Cloudflare 526 error: GitHub Pages renews a custom domain's Let's Encrypt certificate only while the domain's A records resolve to GitHub's own addresses, so once the records were proxied (orange cloud) the renewal failed (`https_certificate.state = bad_authz` in the Pages API) and, when the last good certificate expired, Cloudflare's strict origin check refused the site. religionmap.org's records were found proxied on the same day with the same `bad_authz` state; its current certificate expires 2026-10-15, after which the site fails the same way. The proxy flip of 2026-07-17 (recorded in the private handover as an optional enhancement) is therefore withdrawn as a standing rule: it breaks certificate renewal and buys nothing the site needs. Repair: set the apex A/AAAA records and the www CNAME to DNS only, then remove and re-add the custom domain under Settings → Pages so GitHub restarts issuance, and re-tick Enforce HTTPS once the state reads approved (reliefmap.info recovered in about six minutes). Worker custom domains on other zones (`tiles.placemap.org`, `placesmap.org`, `powmap.org`) are Cloudflare-owned records and are unaffected. Files: `docs/data-storage.md`.
+
 ### 2026-09-14 (council list)
 
 - Located the three Vanuatu Christian Council list entries whose only location was "(VCC)" (PR #115). Guy Lavender Forsyth ruled on 2026-09-14 that the phrase means the council's conference building, which he had already pinned on the portal on 2026-08-31 (plus code 78F8+XWH). Entries 28 to 30 of `vu_port_vila_council_list_2026.csv` now take that record's point on a `manual_match` basis, the seeded tasks reference his record first among nearby sites, and the regional-only blocker on them is replaced by an info check. Christ Embassy keeps low confidence with a warning until Guy confirms which Sunday congregation it is.

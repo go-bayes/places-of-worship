@@ -16,11 +16,26 @@ generation.
 - Street View: Google Maps JS API (key in `apps/global/config.public.js`).
 - Custom tiles hosting: a Cloudflare Worker (`tools/tiles-r2/`) serving
   `z/x/y` vector tiles from PMTiles archives in a Cloudflare R2 bucket at
-  `tiles.religionmap.org` (cutover 2026-07-22; the earlier Martin-on-GCP VM
-  was deleted at the same time).
+  `tiles.placemap.org` (cutover 2026-07-22; the earlier Martin-on-GCP VM
+  was deleted at the same time). The hostname is a Worker custom domain on
+  the separate `placemap.org` zone, matching `tools/tiles-r2/worker/wrangler.jsonc`
+  and the tile URLs in `apps/regions/_shared/region-map.js`.
   - Tilesets: `places`, `places-overview`, `buildings`, `nz-polygons`.
   - Local copies of the archives are kept outside the repo; the worker
     README records the upload and rebuild procedure.
+- Site domain: `religionmap.org` is served by GitHub Pages (`CNAME` at the
+  repo root) with DNS on Cloudflare. The apex A/AAAA records and the `www`
+  CNAME must stay **DNS only** (grey cloud), never proxied. GitHub Pages
+  issues and renews the site's Let's Encrypt certificate only while the
+  domain's A records resolve to GitHub's addresses; proxying breaks renewal
+  (`https_certificate.state = bad_authz` in the Pages API) and, once the last
+  certificate expires, Cloudflare returns a 526 error for every visitor. If
+  that happens: set the records to DNS only, remove and re-add the custom
+  domain under Settings → Pages to restart issuance, wait for the state to
+  read `approved`, then re-tick Enforce HTTPS. Check with
+  `gh api repos/go-bayes/places-of-worship/pages --jq .https_certificate`.
+  The redirect domains (`placesmap.org`, `powmap.org`) and the tiles host are
+  Worker custom domains on their own zones and are not affected.
 
 ### Repository (tracked)
 - Regional app data (served directly by GitHub Pages):
