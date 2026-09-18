@@ -46,3 +46,7 @@ by accident. Connecting `ConvexProvider` to the hosted deployment is a
 separate deliberate step with its own review. The prepared step-by-step
 plan for both, with the JB decision checklist, is
 [docs/development/workbench-publication-plan.md](../../docs/development/workbench-publication-plan.md).
+
+## Agent-assisted contribution prototype
+
+Open `?concept=agent` on the local workbench to review the proposed simple nomination form, RA assistance request, and annotated research record. Drafts and request previews stay in the current tab; the prototype does not contact a backend or start agents. The [interaction and integration design](../../docs/development/simple-agent-intake.md) explains the planned connection to the existing review workflow.

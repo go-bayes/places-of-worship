@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-18 (contribution prototype)
+
+- Added an opt-in workbench prototype for simple public nominations, RA agent-help requests, and annotated research records. The prototype preserves local drafts and clearly labels unsent requests and illustrative answers. The live portal is unchanged; the design document specifies the backend and review integration.
+
 ### 2026-09-18 (domain certificate)
 
 - Restored certificate renewal for `religionmap.org` on 2026-09-18. The apex A/AAAA records and `www` CNAME now use Cloudflare DNS only. GitHub Pages reports an approved replacement certificate expiring on 2026-12-17, HTTPS enforcement is enabled, and the HTTPS apex returns 200. The earlier proxied configuration produced `bad_authz`; an expired origin certificate can produce Cloudflare error 526 when strict origin-certificate validation is enabled. Keep these GitHub Pages records DNS only. The separate Worker domains remain unchanged. Corrected the documented tile hostname to `tiles.placemap.org`. See `docs/data-storage.md`.
