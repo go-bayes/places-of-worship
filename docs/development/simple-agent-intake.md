@@ -57,6 +57,7 @@ npm ci
 npm run dev -- --host 127.0.0.1 --port 5174
 # Open http://127.0.0.1:5174/?concept=agent
 npm run build
+npm run test:concept
 ```
 
 The existing workbench opens normally without the concept parameter. The prototype uses the existing React and TypeScript dependencies. The production build remains ignored under the existing workbench publication policy. Publishing or connecting the prototype is a separate reviewed change.

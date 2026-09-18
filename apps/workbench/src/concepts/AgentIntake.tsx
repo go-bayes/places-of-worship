@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import "./agent-intake.css";
+import { savePreview, type Request } from "./requestPreview";
 
 type View = "nominate" | "assist" | "record";
 type Lead = { name: string; location: string; note: string; link: string; approximate: boolean };
-type Request = { id: string; kind: "nomination" | "assistance"; label: string; question: string; context: string; createdAt: string };
 type Saved = { lead: Lead; question: string; requests: Request[] };
 const emptyLead: Lead = { name: "", location: "", note: "", link: "", approximate: false };
 const storageKey = "pow-agent-concept.v1";
@@ -65,11 +65,14 @@ export function AgentIntake() {
   };
   const changeView = (next: View) => { setView(next); setReceipt(null); setProblem(""); };
   const saveRequest = (kind: Request["kind"], label: string, question: string, context: string) => {
-    if (saved.requests.length >= 100) { setProblem("This demo has reached its local request limit. Start a new tab to continue."); return; }
-    const prior = saved.requests.find(r => r.kind === kind && r.label === label && r.question === question && r.context === context);
-    const request: Request = prior ?? { id: crypto.randomUUID(), kind, label, question, context, createdAt: new Date().toISOString() };
-    if (!prior) setSaved(current => ({ ...current, requests: [request, ...current.requests] }));
-    setReceipt(request);
+    try {
+      const result = savePreview(saved.requests, { kind, label, question, context });
+      setSaved(current => ({ ...current, requests: result.requests }));
+      setProblem("");
+      setReceipt(result.request);
+    } catch (error) {
+      setProblem(error instanceof Error ? error.message : "The preview could not be saved. Your form is still here.");
+    }
   };
   const nominate = (event: React.FormEvent) => {
     event.preventDefault();
