@@ -4,7 +4,7 @@
 
 ### 2026-09-18 (agent first passes)
 
-- Added a provisional first-pass record with claim annotations, search outcomes, explicit uncertainty, and parent hashes for revisits. Added a local immutable archive, history verification, and recovery-copy command with regression tests. The accompanying design separates research progress, durable storage, and evidence acceptance; hosted scheduling and portal integration remain proposals.
+- Added a provisional-record schema and local immutable archive with revision links, validation, and a recovery-copy command. Regression tests cover concurrent writes, corrupted files, revision history, and recovery.
 
 ### 2026-09-18 (domain certificate)
 
