@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-19 (movable first screen)
+
+- The floating sign-in card drags by a grip in its header and the device remembers the spot (JB, 2026-09-19: "with the panes movable"); on a phone it is a strip above the map instead, so the zoom buttons and basemap pill are never covered. The map data legend reads in two columns, fills beside rings, so the open panel no longer rises under the card on a short screen, and its body scrolls rather than outgrowing the screen.
+
 ### 2026-09-19 (first screen)
 
 - The RA portal's signed-out card now carries the Google button, a `Contact to join` button and the folded `Wrong account showing?` help, nothing else (JB, 2026-09-19: fewer words), and it floats with the header over a full-screen map instead of heading an empty sidebar (JB: "float it"); the sidebar returns after sign-in. The map lands on `Hybrid` wherever imagery is configured and returns there when an activity ends; a basemap the contributor picks stands, and pin placement lifts only a streets map to hybrid. The map data panel (unreviewed places on or off, the marker legend) keeps its drag grip and gains a `Map data` fold button, both remembered on the device; its note reads in one line. New test `portal-first-screen.test.cjs` in CI.

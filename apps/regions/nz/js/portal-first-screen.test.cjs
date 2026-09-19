@@ -170,4 +170,23 @@ const fresh = () => Object.create(window.NzVerificationMap.prototype);
   assert.equal(fresh().setMapDataFolded(true), false, "no panel, nothing to fold");
 }
 
+// 4. the floating sign-in panel drags by its header grip, bound once
+{
+  const app = fresh();
+  const calls = [];
+  const panel = { classList: classList() };
+  const grip = { addEventListener() {} };
+  document.querySelector = (selector) => (selector === ".app-shell > .sidebar" ? panel : null);
+  element("signInPanelGrip", grip);
+  app.makeControlMovable = (div, handle, key) => { calls.push({ div, handle, key }); };
+  assert.equal(fresh().makeSignInPanelMovable(), false, "no map, nothing to bind");
+  app.map = { on() {}, getContainer() { return { getBoundingClientRect() { return { left: 0, top: 0, right: 1440, bottom: 900 }; } }; } };
+  assert.equal(app.makeSignInPanelMovable(), true);
+  assert.equal(app.makeSignInPanelMovable(), false, "bound once");
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].div, panel);
+  assert.equal(calls[0].key, "pow-signin-panel-offset", "the panel keeps its own spot, apart from the map data panel");
+  document.querySelector = () => null;
+}
+
 console.log("portal first screen ok");
