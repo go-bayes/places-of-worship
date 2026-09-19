@@ -1,0 +1,241 @@
+/* state presentation shared by the ra portal and the review portal
+   (jb ruling 2026-09-19, docs/ui-style-guide.md "Review And Assignment
+   States"). the classes take their colours from the page's own tokens, so
+   each page declares the same triads in its :root and this file adds no
+   colour of its own.
+
+   colour rule: colour is reserved for act now (amber, the open-case colour),
+   in motion (blue, the action colour) and broken (red). resting and done
+   states are uncoloured. the transport dot is the other axis and never
+   shares a pill with a task state. */
+
+/* one pill per row: label only, never a sentence */
+.state-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 24px;
+    padding: 2px 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-pill, 999px);
+    background: transparent;
+    color: var(--muted);
+    font-size: var(--fs-sm, 14px);
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+.state-pill::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.55;
+    flex: none;
+}
+.state-pill.tone-act {
+    border-color: var(--caution-strong);
+    background: var(--caution-soft);
+    color: var(--caution);
+}
+.state-pill.tone-act::before { opacity: 1; background: var(--caution-strong); }
+.state-pill.tone-motion {
+    border-color: var(--action);
+    background: var(--action-soft);
+    color: var(--action);
+}
+.state-pill.tone-motion::before { opacity: 1; }
+.state-pill.tone-broken {
+    border-color: var(--danger);
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+.state-pill.tone-broken::before { opacity: 1; }
+.state-pill.tone-rest { color: var(--muted); }
+.state-pill.tone-done { color: var(--muted); border-style: dashed; }
+.state-pill.tone-done::before {
+    content: "\2713";
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background: none;
+    opacity: 1;
+    font-size: 12px;
+    line-height: 1;
+}
+
+/* a pill that is itself the next action: same shape, pointer, focus ring */
+button.state-pill {
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--fs-sm, 14px);
+    font-weight: 600;
+    min-height: 32px;
+}
+button.state-pill:hover { filter: brightness(0.96); }
+button.state-pill:focus-visible { outline: 2px solid var(--action); outline-offset: 2px; }
+
+/* one-line rollup for a batch or a queue: the count sits in the pill,
+   the noun follows in muted prose */
+.state-rollup {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    color: var(--muted);
+    font-size: var(--fs-sm, 14px);
+}
+
+/* transport dot: whether the page can talk to the backend, shown by the
+   account name and never as a task state */
+.transport-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+    font-size: var(--fs-sm, 14px);
+}
+.transport-dot::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--control-line);
+    flex: none;
+}
+.transport-dot.tone-motion::before { background: var(--action); animation: transport-pulse 1.2s ease-in-out infinite; }
+.transport-dot.tone-done::before { background: var(--present); }
+.transport-dot.tone-broken::before { background: var(--danger); }
+.transport-dot.tone-rest::before { background: var(--control-line); }
+@keyframes transport-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .transport-dot.tone-motion::before { animation: none; }
+}
+
+/* a banner that carries a reason and one control: stale snapshot, a load
+   that failed for an unknown reason, a refusal the user can retry */
+.state-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-left-width: 4px;
+    border-radius: var(--r-md, 8px);
+    background: var(--panel-2);
+    color: var(--ink);
+    font-size: var(--fs-sm, 14px);
+    line-height: 1.4;
+}
+.state-banner.tone-act { border-color: var(--caution-strong); background: var(--caution-soft); color: var(--caution); }
+.state-banner.tone-broken { border-color: var(--danger); background: var(--danger-soft); color: var(--danger); }
+.state-banner.tone-motion { border-color: var(--action); background: var(--action-soft); color: var(--action); }
+.state-banner.tone-done { border-color: var(--present); background: var(--present-soft); color: var(--present); }
+.state-banner > span { flex: 1 1 240px; }
+.state-banner button {
+    flex: none;
+    min-height: 36px;
+    padding: 6px 14px;
+    border: 1px solid currentColor;
+    border-radius: var(--r-pill, 999px);
+    background: var(--panel);
+    color: inherit;
+    font: inherit;
+    font-size: var(--fs-sm, 14px);
+    font-weight: 600;
+    cursor: pointer;
+}
+.state-banner button:hover { filter: brightness(0.97); }
+.state-banner button:focus-visible { outline: 2px solid var(--action); outline-offset: 2px; }
+
+/* an empty state is one line and one action, never two paragraphs */
+.state-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 16px 14px;
+    border: 1px dashed var(--line);
+    border-radius: var(--r-md, 8px);
+    color: var(--muted);
+    font-size: var(--fs-base, 16px);
+    line-height: 1.4;
+}
+.state-empty strong { color: var(--ink); font-weight: 600; }
+.state-empty button {
+    min-height: 36px;
+    padding: 6px 14px;
+    border: 1px solid var(--control-line);
+    border-radius: var(--r-pill, 999px);
+    background: var(--panel);
+    color: var(--ink);
+    font: inherit;
+    font-size: var(--fs-sm, 14px);
+    font-weight: 600;
+    cursor: pointer;
+}
+.state-empty button:hover { border-color: var(--action); color: var(--action); }
+.state-empty button:focus-visible { outline: 2px solid var(--action); outline-offset: 2px; }
+
+/* a decision chooser: the two primary outcomes stand as buttons, the rest
+   sit behind one "More" disclosure */
+.decision-choice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+.decision-choice button[aria-pressed="true"] {
+    box-shadow: inset 0 0 0 2px var(--action);
+}
+.decision-choice details { position: relative; }
+.decision-choice summary {
+    list-style: none;
+    cursor: pointer;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 14px;
+    border: 1px solid var(--control-line);
+    border-radius: var(--r-md, 8px);
+    background: var(--panel);
+    color: var(--ink);
+    font-weight: 600;
+}
+.decision-choice summary::-webkit-details-marker { display: none; }
+.decision-choice details[open] summary { border-color: var(--action); color: var(--action); }
+.decision-choice .decision-more {
+    position: absolute;
+    z-index: 5;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 220px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md, 8px);
+    background: var(--panel);
+    box-shadow: 0 8px 24px rgba(23, 32, 42, 0.14);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.decision-choice .decision-more button {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+    min-height: 40px;
+    border: 0;
+    border-radius: var(--r-sm, 6px);
+    background: transparent;
+    color: var(--ink);
+    font-weight: 500;
+}
+.decision-choice .decision-more button:hover { background: var(--panel-2); }
+.decision-choice .decision-more button.is-danger { color: var(--danger); }
