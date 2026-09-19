@@ -178,7 +178,11 @@
   screenshots and walkthrough captures, `renders/` for figures and PDFs,
   `exports/` for bulk data with its manifest, `incoming/` for collaborator
   files. Name files by pull request or lane. Give Joseph the full absolute
-  path. `.private/` stays for credentials and per-person material.
+  path. The heap is the hand-over copy Joseph reads; a workflow that names
+  its own place (`.private/`, synced to GCS, or a git-ignored `local/review/`
+  render folder) keeps that place as the working copy, and the heap gets a
+  copy of what Joseph is asked to look at. `.private/` stays for
+  credentials and per-person material.
 - Treat ignored local data as cache only. Before using generated data for RA
   tasks, analysis, public products, or publication, make sure it has durable
   project-controlled storage and a tracked manifest as described in
