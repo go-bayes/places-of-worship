@@ -181,6 +181,60 @@ const fresh = () => Object.create(window.NzVerificationMap.prototype);
   localStorage.removeItem("pow-pane-split-cols");
 }
 
+// 2b. the window resize listener itself: registered by setupPaneDivider,
+// debounced, and re-clamping the painted width without touching the memory
+{
+  const app = fresh();
+  const styles = {};
+  const shellAttrs = {};
+  let shellWidth = 1440;
+  const shell = {
+    style: { setProperty(name, value) { styles[name] = value; } },
+    classList: classList(),
+    getBoundingClientRect() { return { left: 0, top: 0, width: shellWidth, height: 900 }; },
+    setAttribute(name, value) { shellAttrs[name] = value; },
+    removeAttribute(name) { delete shellAttrs[name]; },
+    getAttribute(name) { return shellAttrs[name] ?? null; },
+  };
+  const listeners = {};
+  window.addEventListener = (name, fn) => { listeners[name] = fn; };
+  document.querySelector = (selector) => (selector === ".app-shell" ? shell : null);
+  const divider = element("paneDivider");
+  divider.querySelector = () => null;
+  app.map = { invalidated: 0, invalidateSize() { app.map.invalidated += 1; } };
+  phone = false;
+  localStorage.setItem("pow-pane-split-cols", "560");
+  app.setupPaneDivider();
+  assert.equal(typeof listeners.resize, "function", "setup registers a window resize listener");
+  assert.equal(styles["--sidebar-w"], "560px", "the remembered width is restored on setup");
+  const settle = () => new Promise((resolve) => setTimeout(resolve, 120));
+  (async () => {
+    shellWidth = 800;
+    listeners.resize();
+    listeners.resize();
+    assert.equal(styles["--sidebar-w"], "560px", "nothing changes before the debounce settles");
+    await settle();
+    assert.equal(styles["--sidebar-w"], "480px", "the resize listener re-clamps to six tenths of an 800px window");
+    assert.equal(divider.attrs["aria-valuenow"], "480");
+    assert.equal(divider.attrs["aria-valuemax"], "480");
+    assert.equal(localStorage.getItem("pow-pane-split-cols"), "560", "the remembered width is untouched");
+    shellWidth = 1440;
+    listeners.resize();
+    await settle();
+    assert.equal(styles["--sidebar-w"], "560px", "and the remembered width returns when the window widens");
+    phone = true;
+    shellWidth = 600;
+    listeners.resize();
+    await settle();
+    assert.equal(styles["--sidebar-w"], "560px", "stacked layouts leave the sidebar width alone");
+    phone = false;
+    localStorage.removeItem("pow-pane-split-cols");
+    window.addEventListener = undefined;
+    document.querySelector = () => null;
+    console.log("window resize re-clamp ok");
+  })().catch((error) => { console.error(error); process.exit(1); });
+}
+
 // 3. use my location: the fix lands the pending pin, failures explain themselves
 {
   const app = fresh();
