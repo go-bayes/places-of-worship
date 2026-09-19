@@ -951,11 +951,23 @@ const SKIP_REASON_CHIPS = [
 // ordinary nominations may instead preserve an explicitly approximate area
 const PIN_MIN_PLACEMENT_ZOOM = 15;
 const PIN_MIN_APPROXIMATE_ZOOM = 8;
-// phone panes (jb 2026-09-05): the entry pane's share of the screen snaps
-// to one of three detents, and neither pane ever leaves the screen
+// stacked panes (jb 2026-09-05 phones; jb 2026-09-19 any portrait screen):
+// the entry pane's share of the screen snaps to one of three detents, and
+// neither pane ever leaves the screen. the query must match the stacked
+// block in verification.html
 const PANE_DETENTS = [15, 50, 85];
 const PANE_SPLIT_KEY = "pow-pane-split";
-const PANE_PHONE_QUERY = "(max-width: 900px)";
+const PANE_PHONE_QUERY = "(max-width: 900px), (orientation: portrait)";
+// which pane is on top in the stacked layout, when the user has chosen
+const PANE_STACK_KEY = "pow-pane-stack";
+// side by side (jb 2026-09-19, the map's size should be adjustable): the
+// sidebar width in px, dragged on the same divider and remembered apart
+// from the stacked split
+const PANE_COLS_KEY = "pow-pane-split-cols";
+const SIDEBAR_W_DEFAULT = 420;
+const SIDEBAR_W_MIN = 320;
+const SIDEBAR_W_MAX_SHARE = 0.6;
+const SIDEBAR_W_STEP = 40;
 // the contributor's own position (jb 2026-09-05): one fix per request,
 // high accuracy, at most half a minute old, and the zoom it lands at
 const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 };
@@ -2680,8 +2692,103 @@ class NzVerificationMap {
         return Boolean(window.matchMedia?.(PANE_PHONE_QUERY)?.matches && document.getElementById("paneDivider"));
     }
 
+    // side by side: the same divider drags the sidebar width instead
+    paneColumnsActive() {
+        return Boolean(document.getElementById("paneDivider") && !window.matchMedia?.(PANE_PHONE_QUERY)?.matches);
+    }
+
+    // the user's stacking choice wins; the mode default stands otherwise
     paneEntryOnTop() {
+        const chosen = this.paneStack ?? this.paneShell?.getAttribute?.("data-stack");
+        if (chosen === "map-top") return false;
+        if (chosen === "entry-top") return true;
         return Boolean(document.body?.classList?.contains?.("assignment-mode"));
+    }
+
+    // chosen: a tap on the swap button; the device remembers it
+    setPaneStack(order, { chosen = false } = {}) {
+        const valid = order === "map-top" || order === "entry-top" ? order : null;
+        this.paneStack = valid;
+        const shell = this.paneShell ?? document.querySelector?.(".app-shell");
+        if (shell) {
+            if (valid) shell.setAttribute?.("data-stack", valid);
+            else shell.removeAttribute?.("data-stack");
+        }
+        if (chosen) {
+            try {
+                if (valid) localStorage.setItem(PANE_STACK_KEY, valid);
+                else localStorage.removeItem(PANE_STACK_KEY);
+            } catch (error) {
+                // storage unavailable: the order lives for this page only
+            }
+        }
+        this.refreshPaneAxis();
+        this.applyPaneShare(this.paneShare ?? PANE_DETENTS[1], { animate: false });
+        return valid;
+    }
+
+    // the sidebar width implied by a pointer at clientX over the shell,
+    // clamped so neither pane can be dragged away
+    sidebarWidthFromPointer(clientX, rect = this.paneShell?.getBoundingClientRect?.()) {
+        if (!rect || !(rect.width > 0)) return SIDEBAR_W_DEFAULT;
+        return this.clampSidebarWidth(clientX - rect.left, rect.width);
+    }
+
+    // the widest the sidebar may be: six tenths of the shell, never under the floor
+    sidebarWidthMax(shellWidth) {
+        return Number.isFinite(shellWidth) && shellWidth > 0 ? Math.max(SIDEBAR_W_MIN, Math.floor(shellWidth * SIDEBAR_W_MAX_SHARE)) : Infinity;
+    }
+
+    clampSidebarWidth(width, shellWidth) {
+        const value = Number(width);
+        if (!Number.isFinite(value)) return SIDEBAR_W_DEFAULT;
+        return Math.round(Math.min(this.sidebarWidthMax(shellWidth), Math.max(SIDEBAR_W_MIN, value)));
+    }
+
+    // the width reaches the shell as a css variable and leaflet re-measures;
+    // a chosen width is remembered on the device apart from the stacked split
+    applySidebarWidth(width, { chosen = false } = {}) {
+        const shell = this.paneShell;
+        if (!shell) return false;
+        const value = this.clampSidebarWidth(width, shell.getBoundingClientRect?.()?.width);
+        this.sidebarWidth = value;
+        shell.style.setProperty("--sidebar-w", `${value}px`);
+        const divider = document.getElementById("paneDivider");
+        if (divider && this.paneColumnsActive()) divider.setAttribute("aria-valuenow", String(value));
+        if (chosen) {
+            try {
+                localStorage.setItem(PANE_COLS_KEY, String(value));
+            } catch (error) {
+                // storage unavailable: the width lives for this page only
+            }
+        }
+        this.map?.invalidateSize();
+        return true;
+    }
+
+    // the divider describes the axis it drags: the split between stacked
+    // panes, or the sidebar width beside the map
+    refreshPaneAxis() {
+        const divider = document.getElementById("paneDivider");
+        if (!divider) return;
+        const grip = divider.querySelector?.(".pane-grip");
+        if (this.paneLayoutActive()) {
+            divider.setAttribute("aria-orientation", "horizontal");
+            divider.setAttribute("aria-label", "Resize the entry pane and the map");
+            divider.setAttribute("aria-valuemin", String(PANE_DETENTS[0]));
+            divider.setAttribute("aria-valuemax", String(PANE_DETENTS[PANE_DETENTS.length - 1]));
+            divider.setAttribute("aria-valuenow", String(Math.round(this.paneShare ?? PANE_DETENTS[1])));
+            if (grip) grip.textContent = this.paneEntryOnTop() ? "⠿ drag · entry ↕ map" : "⠿ drag · map ↕ entry";
+        } else {
+            divider.setAttribute("aria-orientation", "vertical");
+            divider.setAttribute("aria-label", "Resize the sidebar and the map");
+            divider.setAttribute("aria-valuemin", String(SIDEBAR_W_MIN));
+            const shellWidth = this.paneShell?.getBoundingClientRect?.()?.width;
+            const max = this.sidebarWidthMax(shellWidth);
+            divider.setAttribute("aria-valuemax", String(Number.isFinite(max) ? max : SIDEBAR_W_DEFAULT));
+            divider.setAttribute("aria-valuenow", String(this.sidebarWidth ?? SIDEBAR_W_DEFAULT));
+            if (grip) grip.textContent = "⠿ drag · sidebar ↔ map";
+        }
     }
 
     // the nearest detent to a share
@@ -2725,7 +2832,7 @@ class NzVerificationMap {
             this.paneSettled = share;
             shell.setAttribute?.("data-pane", share >= PANE_DETENTS[2] ? "entry" : share <= PANE_DETENTS[0] ? "map" : "half");
             const divider = document.getElementById("paneDivider");
-            if (divider) divider.setAttribute("aria-valuenow", String(Math.round(share)));
+            if (divider && this.paneLayoutActive()) divider.setAttribute("aria-valuenow", String(Math.round(share)));
             paint(share);
             this.map?.invalidateSize();
         };
@@ -2798,40 +2905,84 @@ class NzVerificationMap {
         }
         this.paneRestShare = rest;
         this.paneShare = rest;
+        // the stacking order and the sidebar width the device remembers
+        let stack = null;
+        let width = SIDEBAR_W_DEFAULT;
+        try {
+            const savedStack = localStorage.getItem(PANE_STACK_KEY);
+            if (savedStack === "map-top" || savedStack === "entry-top") stack = savedStack;
+            const savedWidth = Number(localStorage.getItem(PANE_COLS_KEY));
+            if (Number.isFinite(savedWidth) && savedWidth > 0) width = savedWidth;
+        } catch (error) {
+            // storage unavailable or unreadable: mode default and default width
+        }
+        this.paneStack = stack;
+        if (stack) shell.setAttribute?.("data-stack", stack);
+        this.applySidebarWidth(width);
         this.applyPaneShare(rest, { animate: false });
+        this.refreshPaneAxis();
+        const swap = document.getElementById("paneSwapButton");
+        if (swap) {
+            // the button sits on the drag bar; its taps are not drags
+            swap.addEventListener("pointerdown", (event) => event.stopPropagation());
+            swap.addEventListener("click", (event) => {
+                event.stopPropagation();
+                this.setPaneStack(this.paneEntryOnTop() ? "map-top" : "entry-top", { chosen: true });
+            });
+        }
         let drag = null;
         divider.addEventListener("pointerdown", (event) => {
             if (event.button !== undefined && event.button !== 0) return;
-            if (!this.paneLayoutActive()) return;
-            drag = { startY: event.clientY, moved: false };
+            const axis = this.paneLayoutActive() ? "rows" : this.paneColumnsActive() ? "cols" : null;
+            if (!axis) return;
+            drag = { axis, startX: event.clientX, startY: event.clientY, moved: false };
             divider.setPointerCapture?.(event.pointerId);
             shell.classList.add("pane-dragging");
             event.preventDefault();
         });
         divider.addEventListener("pointermove", (event) => {
             if (!drag) return;
-            if (Math.abs(event.clientY - drag.startY) > 4) drag.moved = true;
-            if (drag.moved) this.applyPaneShare(this.paneShareFromPointer(event.clientY), { animate: false });
+            const travel = drag.axis === "rows" ? Math.abs(event.clientY - drag.startY) : Math.abs(event.clientX - drag.startX);
+            if (travel > 4) drag.moved = true;
+            if (!drag.moved) return;
+            if (drag.axis === "rows") this.applyPaneShare(this.paneShareFromPointer(event.clientY), { animate: false });
+            else this.applySidebarWidth(this.sidebarWidthFromPointer(event.clientX));
         });
         const end = (event) => {
             if (!drag) return;
-            const moved = drag.moved;
+            const { axis, moved } = drag;
             drag = null;
             divider.releasePointerCapture?.(event.pointerId);
             shell.classList.remove("pane-dragging");
-            if (moved) this.setPaneSplit(this.paneShareFromPointer(event.clientY), { chosen: true });
+            if (!moved) return;
+            if (axis === "rows") this.setPaneSplit(this.paneShareFromPointer(event.clientY), { chosen: true });
+            else this.applySidebarWidth(this.sidebarWidthFromPointer(event.clientX), { chosen: true });
         };
         divider.addEventListener("pointerup", end);
         divider.addEventListener("pointercancel", end);
-        // a double tap on the bar returns it to half
-        divider.addEventListener("dblclick", () => this.setPaneSplit(PANE_DETENTS[1], { chosen: true }));
+        // a double tap on the bar returns it to half, or to the default width
+        divider.addEventListener("dblclick", () => {
+            if (this.paneLayoutActive()) this.setPaneSplit(PANE_DETENTS[1], { chosen: true });
+            else this.applySidebarWidth(SIDEBAR_W_DEFAULT, { chosen: true });
+        });
         divider.addEventListener("keydown", (event) => {
-            if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-                event.preventDefault();
-                this.setPaneSplit(this.paneDetentTowards(event.key === "ArrowUp" ? -1 : 1), { chosen: true });
-            } else if (event.key === "Home") {
-                event.preventDefault();
-                this.setPaneSplit(PANE_DETENTS[1], { chosen: true });
+            if (this.paneLayoutActive()) {
+                if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+                    event.preventDefault();
+                    this.setPaneSplit(this.paneDetentTowards(event.key === "ArrowUp" ? -1 : 1), { chosen: true });
+                } else if (event.key === "Home") {
+                    event.preventDefault();
+                    this.setPaneSplit(PANE_DETENTS[1], { chosen: true });
+                }
+            } else if (this.paneColumnsActive()) {
+                if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+                    event.preventDefault();
+                    const step = event.key === "ArrowLeft" ? -SIDEBAR_W_STEP : SIDEBAR_W_STEP;
+                    this.applySidebarWidth((this.sidebarWidth ?? SIDEBAR_W_DEFAULT) + step, { chosen: true });
+                } else if (event.key === "Home") {
+                    event.preventDefault();
+                    this.applySidebarWidth(SIDEBAR_W_DEFAULT, { chosen: true });
+                }
             }
         });
         // typing needs the entry pane: a field taking focus snaps to it
@@ -2841,7 +2992,10 @@ class NzVerificationMap {
             if (target.type === "checkbox" || target.type === "radio") return;
             this.paneSnap("entry");
         });
+        // a rotation or a resize across the stacked boundary changes the axis
         window.matchMedia?.(PANE_PHONE_QUERY)?.addEventListener?.("change", () => {
+            this.refreshPaneAxis();
+            this.applySidebarWidth(this.sidebarWidth ?? SIDEBAR_W_DEFAULT);
             this.applyPaneShare(this.paneShare, { animate: false });
         });
     }

@@ -773,7 +773,9 @@
             padding: 28px 16px;
         }
 
-        @media (max-width: 900px) {
+        /* one column on a narrow screen or any portrait one (jb 2026-09-19):
+           the queue above the detail rather than a thin column beside it */
+        @media (max-width: 900px), (orientation: portrait) {
             .layout,
             .detail-grid,
             .decision-form {
@@ -783,14 +785,6 @@
             .sidebar {
                 border-right: 0;
                 border-bottom: 1px solid var(--line);
-            }
-
-            .queue {
-                max-height: 420px;
-            }
-
-            .review-map {
-                height: 300px;
             }
 
             .decision-form .wide {
@@ -804,6 +798,17 @@
                 max-height: none;
                 overflow: visible;
                 box-shadow: none;
+            }
+        }
+
+        /* phone height only: a portrait monitor keeps the full queue and map */
+        @media (max-width: 900px) {
+            .queue {
+                max-height: 420px;
+            }
+
+            .review-map {
+                height: 300px;
             }
         }
         .osm-history-host { margin: 8px 0; }

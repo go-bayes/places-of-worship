@@ -115,6 +115,64 @@ const fresh = () => Object.create(window.NzVerificationMap.prototype);
   assert.equal(styles["--entry-share"], "85");
 }
 
+// 4. side by side (jb 2026-09-19): the same divider drags the sidebar width,
+//    remembered apart from the stacked split; the stacking order is the user's
+{
+  const app = fresh();
+  const styles = {};
+  const shellAttrs = {};
+  app.paneShell = {
+    style: { setProperty(name, value) { styles[name] = value; } },
+    classList: classList(),
+    getBoundingClientRect() { return { left: 0, top: 0, width: 1440, height: 900 }; },
+    setAttribute(name, value) { shellAttrs[name] = value; },
+    removeAttribute(name) { delete shellAttrs[name]; },
+    getAttribute(name) { return shellAttrs[name] ?? null; },
+  };
+  app.map = { invalidated: 0, invalidateSize() { app.map.invalidated += 1; } };
+  const divider = element("paneDivider");
+  divider.querySelector = () => null;
+  phone = false;
+  assert.equal(app.paneColumnsActive(), true);
+  assert.equal(app.clampSidebarWidth(100, 1440), 320, "the sidebar never drops below 320px");
+  assert.equal(app.clampSidebarWidth(2000, 1440), 864, "nor above six tenths of the shell");
+  assert.equal(app.clampSidebarWidth("x", 1440), 420, "nonsense is the default");
+  assert.equal(app.sidebarWidthFromPointer(500), 500, "a pointer over the shell is the sidebar width");
+  assert.equal(app.applySidebarWidth(500), true);
+  assert.equal(styles["--sidebar-w"], "500px");
+  assert.equal(app.map.invalidated, 1, "leaflet re-measures when the width changes");
+  assert.equal(localStorage.getItem("pow-pane-split-cols"), null, "an automatic width is not remembered");
+  app.applySidebarWidth(560, { chosen: true });
+  assert.equal(localStorage.getItem("pow-pane-split-cols"), "560", "a drag by hand is remembered on the device");
+  assert.equal(divider.attrs["aria-valuenow"], "560");
+  app.refreshPaneAxis();
+  assert.equal(divider.attrs["aria-orientation"], "vertical");
+  assert.equal(divider.attrs["aria-valuemax"], "864");
+  assert.equal(app.paneSnap("map"), false, "the stacked snaps stay inert side by side");
+  // stacked again: the axis flips and the stacking order is the user's
+  phone = true;
+  app.paneShare = 50;
+  app.refreshPaneAxis();
+  assert.equal(divider.attrs["aria-orientation"], "horizontal");
+  assert.equal(divider.attrs["aria-valuemax"], "85");
+  document.body.classList.add("assignment-mode");
+  assert.equal(app.paneEntryOnTop(), true, "assignment mode puts the entry on top by default");
+  assert.equal(app.setPaneStack("map-top", { chosen: true }), "map-top");
+  assert.equal(shellAttrs["data-stack"], "map-top");
+  assert.equal(app.paneEntryOnTop(), false, "the user's order wins over the mode default");
+  assert.equal(localStorage.getItem("pow-pane-stack"), "map-top");
+  const rect = { top: 0, height: 1000 };
+  assert.equal(app.paneShareFromPointer(200, rect), 80, "the pointer mapping follows the chosen order");
+  document.body.classList.remove("assignment-mode");
+  app.setPaneStack("entry-top", { chosen: true });
+  assert.equal(app.paneEntryOnTop(), true);
+  assert.equal(app.setPaneStack("sideways"), null, "an unknown order clears the choice");
+  assert.equal(shellAttrs["data-stack"], undefined);
+  assert.equal(app.paneEntryOnTop(), false, "back to the mode default");
+  localStorage.removeItem("pow-pane-stack");
+  localStorage.removeItem("pow-pane-split-cols");
+}
+
 // 3. use my location: the fix lands the pending pin, failures explain themselves
 {
   const app = fresh();
