@@ -3296,6 +3296,7 @@ class NzVerificationMap {
                 </select>
                 <div id="portalPointsNote" class="points-mode-note" hidden></div>` : ""}
                 <div class="map-legend">
+                    <div class="legend-group">
                     ${TARGET_YEARS.length ? `
                     <span class="legend-caption">Fill: status in the target year</span>
                     <span class="legend-row"><span class="legend-dot fill-present-swatch"></span>present</span>
@@ -3304,13 +3305,16 @@ class NzVerificationMap {
                     <span class="legend-row"><span class="legend-dot fill-not-assessed-swatch"></span>not assessed</span>` : `
                     <span class="legend-caption">Fill</span>`}
                     <span class="legend-row"><span class="legend-dot vm-nomination-swatch"></span>your nomination</span>
+                    </div>
+                    <div class="legend-group">
                     <span class="legend-caption">Ring: validation</span>
                     <span class="legend-row"><span class="legend-dot vm-validated-present-swatch"></span>validated</span>
                     <span class="legend-row"><span class="legend-dot vm-validated-absent-swatch"></span>validated absent</span>
                     <span class="legend-row"><span class="legend-dot vm-disputed-swatch"></span>disputed</span>
                     <span class="legend-row"><span class="legend-dot vm-in-review-swatch"></span>in review</span>
                     <span class="legend-row"><span class="legend-dot vm-unvalidated-swatch"></span>not yet reviewed (open case)</span>
-                    ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>unreviewed place (open case), click to revise</span>` : ""}
+                    ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>unreviewed place, click to revise</span>` : ""}
+                    </div>
                 </div>
                 </div>
             `;
@@ -3341,6 +3345,23 @@ class NzVerificationMap {
             const pointsSelect = document.getElementById("portalPointsSelect");
             if (pointsSelect) pointsSelect.value = mode;
         }
+    }
+
+    // the floating sign-in panel drags by the grip in its header (jb
+    // 2026-09-19: "with the panes movable"); the spot is kept per device.
+    // bound once; the grip only shows while the panel floats
+    makeSignInPanelMovable() {
+        if (this.signInPanelMovable || !this.map) return false;
+        const panel = document.querySelector(".app-shell > .sidebar");
+        const grip = document.getElementById("signInPanelGrip");
+        if (!panel || !grip) return false;
+        this.signInPanelMovable = true;
+        // the offset paints only while the panel floats; signed in, the
+        // same element is the work sidebar in its grid column
+        this.makeControlMovable(panel, grip, "pow-signin-panel-offset", {
+            active: () => Boolean(document.body?.classList?.contains?.("portal-signed-out")),
+        });
+        return true;
     }
 
     // the map data panel folds to its bar; the choice is kept per device
@@ -3378,9 +3399,11 @@ class NzVerificationMap {
     // a transform, clamped so it never leaves the map. the offset is kept
     // per device so the panel stays where the contributor put it; a map
     // resize (rotation, keyboard) re-clamps it into view
-    makeControlMovable(div, grip) {
+    // `active` says when the offset applies: a panel that floats only in
+    // one state (the sign-in card) paints no offset outside it, and a
+    // resize outside it neither clamps nor rewrites the remembered spot
+    makeControlMovable(div, grip, key = "pow-points-control-offset", { active = () => true } = {}) {
         if (!div || !grip || !this.map) return;
-        const key = "pow-points-control-offset";
         let offset = { x: 0, y: 0 };
         try {
             const saved = JSON.parse(localStorage.getItem(key) || "null");
@@ -3389,11 +3412,14 @@ class NzVerificationMap {
             // storage unavailable or unreadable: start in the corner
         }
         const apply = () => {
-            div.style.transform = offset.x || offset.y ? `translate(${offset.x}px, ${offset.y}px)` : "";
-            div.classList.toggle("moved", Boolean(offset.x || offset.y));
+            const on = active() && Boolean(offset.x || offset.y);
+            div.style.transform = on ? `translate(${offset.x}px, ${offset.y}px)` : "";
+            div.classList.toggle("moved", on);
         };
         // keep the whole control inside the map container
         const clamp = () => {
+            // inactive: paint nothing and leave the remembered spot alone
+            if (!active()) { apply(); return; }
             const mapRect = this.map.getContainer().getBoundingClientRect();
             div.style.transform = "";
             const rest = div.getBoundingClientRect();
@@ -4060,8 +4086,12 @@ class NzVerificationMap {
         // leaflet re-measures when that changes either way
         if (this.portalSignedOutPainted !== signedOut) {
             this.portalSignedOutPainted = signedOut;
+            // the floating card's drag offset never follows it into the
+            // work sidebar; the map's resize restores it when signed out again
+            if (!signedOut) document.querySelector(".app-shell > .sidebar")?.style?.removeProperty?.("transform");
             if (this.map) window.setTimeout?.(() => this.map?.invalidateSize(), 0);
         }
+        if (signedOut) this.makeSignInPanelMovable();
         document.body.classList.toggle("portal-chooser", mode === "chooser");
         document.body.classList.toggle("portal-assigned", mode === "assigned");
         document.body.classList.toggle("portal-add", mode === "add");

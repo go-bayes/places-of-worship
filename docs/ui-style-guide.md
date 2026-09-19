@@ -44,8 +44,12 @@ The contributor portal (assignment mode) gates its sidebar behind sign-in
 (ruled 2026-08-29). Signed out, the header and the sign-in card float over
 the map as one panel at the top left, and the map fills the screen for
 read-only browsing (ruled 2026-09-19: "float it"); the zoom and locate
-buttons step aside, to the panel's right, or under the basemap pill on a
-phone. After sign-in the sidebar returns with the work. The sign-in card
+buttons step aside to the panel's right; the panel drags by the grip in
+its header and the device remembers the spot. On a phone (700 px and
+under) the card is a strip above the map instead, so nothing covers the
+map's own controls. After sign-in the sidebar returns with the work. The
+marker legend reads in two columns, fills beside rings, so the map data
+panel stays clear of the floating card. The sign-in card
 carries the Google button, a `Contact to join` button and the folded `Wrong
 account showing?` help, nothing else (ruled 2026-09-19: fewer words); the
 batch id lives in the header, and the invited address shows only when the
@@ -157,7 +161,7 @@ Dates should use one of:
 - `YYYY-MM`,
 - `YYYY-MM-DD`.
 
-Unknown dates should be blank, with uncertainty explained in the evidence note.
+Unknown dates should be blank, with uncertainty explained in the evidence note. A bare year is an acceptable entry (Joseph, 2026-09-19).
 
 ## Review And Assignment States
 
@@ -197,3 +201,5 @@ Confirmed by Joseph on 2026-09-19.
   system architecture unless they affect the task the RA is doing.
 - Test desktop and mobile after changing sidebar, sign-in, task-list, form, or
   map layout.
+
+These rules were confirmed by Joseph on 2026-09-19.
