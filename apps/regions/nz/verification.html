@@ -84,8 +84,13 @@
         }
 
         .app-shell {
+            /* side by side: the sidebar width is the user's (jb 2026-09-19, the
+               map's size should be adjustable); the divider between the panes
+               drags it and the device remembers it */
+            --sidebar-w: 420px;
+            --divider-w: 14px;
             display: grid;
-            grid-template-columns: minmax(360px, 440px) 1fr;
+            grid-template-columns: var(--sidebar-w) var(--divider-w) minmax(0, 1fr);
             height: 100vh;
             min-height: 680px;
         }
@@ -933,10 +938,32 @@
 
         /* locate card: search, typed coordinates, or the map click all move
            the same pending pin */
-        /* phone panes (jb 2026-09-05): the divider between the entry pane and
-           the map, shown only in the stacked layout below */
+        /* the divider between the entry pane and the map (jb 2026-09-05 phones,
+           jb 2026-09-19 every screen): side by side it drags the sidebar width;
+           stacked it drags the split between the panes */
         .pane-divider {
-            display: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            grid-column: 2;
+            background: var(--panel-2);
+            border-left: 1px solid var(--line);
+            border-right: 1px solid var(--line);
+            cursor: col-resize;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .pane-divider:focus-visible {
+            outline: 2px solid var(--action);
+            outline-offset: -2px;
+        }
+
+        .app-shell.pane-dragging .pane-divider,
+        .pane-divider:active {
+            background: var(--action-soft);
         }
 
         .pane-grip {
@@ -949,6 +976,30 @@
             border-radius: 999px;
             padding: 2px 12px;
             pointer-events: none;
+            /* the pill keeps its one line beside the swap button */
+            white-space: nowrap;
+            flex: none;
+        }
+
+        /* side by side the grip reads down the bar */
+        .pane-divider[aria-orientation="vertical"] .pane-grip {
+            writing-mode: vertical-rl;
+            padding: 12px 2px;
+        }
+
+        /* which pane sits on top is the user's in the stacked layout; the
+           button lives in the divider and only there */
+        .pane-swap {
+            display: none;
+            /* the page's buttons fill their column; this one sits in a bar */
+            width: auto;
+            flex: none;
+            min-height: 24px;
+            padding: 0 10px;
+            font-size: var(--fs-xs);
+            font-weight: 600;
+            border-radius: 999px;
+            touch-action: manipulation;
         }
 
         /* the contributor's own position: a map button that centres on them */
@@ -1607,9 +1658,41 @@
             align-items: center;
         }
 
+        /* the one other way in: a quiet outline the height of the google
+           button, so the card reads as two choices and nothing else */
+        .join-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 8px 12px;
+            border: 1px solid var(--action);
+            border-radius: var(--r-sm);
+            background: var(--panel);
+            color: var(--action);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .join-button:hover,
+        .join-button:focus-visible {
+            background: var(--action-soft);
+        }
+
+        .backend-card strong.inline {
+            display: inline;
+            font-size: inherit;
+        }
+
         .backend-help {
-            color: var(--ink);
+            color: var(--muted);
+            font-size: var(--fs-sm);
             line-height: 1.45;
+        }
+
+        .backend-help summary {
+            cursor: pointer;
+            color: var(--action);
         }
 
         .backend-card.disabled {
@@ -1979,15 +2062,20 @@
             box-shadow: 0 1px 4px rgba(15, 23, 42, 0.25);
         }
 
-        /* the grip: a small bar the contributor drags to move the panel
-           (touch or mouse); touch-action none keeps the browser from
-           scrolling instead */
-        .legend-grip {
-            justify-self: stretch;
-            width: auto;
-            min-height: 24px;
+        /* one bar: the grip (drag to move) and the fold button (name the
+           panel, open or close it); touch-action none on the grip keeps
+           the browser from scrolling instead of dragging */
+        .legend-bar {
+            display: flex;
+            gap: 4px;
             margin: -2px 0 0;
-            padding: 2px 6px;
+        }
+
+        .legend-grip,
+        .legend-fold {
+            width: auto;
+            min-height: 28px;
+            padding: 2px 8px;
             border: 0;
             border-radius: var(--r-sm);
             background: var(--panel-2);
@@ -1995,11 +2083,36 @@
             font-size: var(--fs-xs);
             font-weight: 600;
             letter-spacing: 0.02em;
-            text-align: center;
-            cursor: grab;
-            touch-action: none;
             user-select: none;
             -webkit-user-select: none;
+        }
+
+        .legend-grip {
+            cursor: grab;
+            touch-action: none;
+        }
+
+        .legend-fold {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            color: var(--ink);
+            cursor: pointer;
+        }
+
+        .legend-body {
+            display: grid;
+            gap: 6px;
+        }
+
+        .legend-body[hidden] {
+            display: none;
+        }
+
+        .points-legend-control.folded {
+            padding: 6px 8px;
         }
 
         .points-legend-control.dragging {
@@ -2687,7 +2800,7 @@
            the map fills its column and never scrolls away, the sidebar scrolls
            independently. Scoped to desktop so the mobile stacked/page-scroll
            layout in the max-width:900px block is untouched. */
-        @media (min-width: 901px) {
+        @media (min-width: 901px) and (orientation: landscape) {
             .app-shell {
                 /* cap the single row to the shell height; minmax(0,...) lets
                    the children shrink below content so they can scroll */
@@ -2720,7 +2833,10 @@
             }
         }
 
-        @media (max-width: 900px) {
+        /* stacked: a narrow screen or any portrait one, so a portrait monitor
+           gets the entry pane above or below a map it can resize (jb 2026-09-19)
+           rather than a thin column beside a tall map */
+        @media (max-width: 900px), (orientation: portrait) {
             .app-shell {
                 /* the entry pane's share of the shell drives the split; the
                    divider between the panes drags it to a detent (15, 50, 85),
@@ -2740,27 +2856,23 @@
             }
 
             .pane-divider {
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                grid-column: 1;
                 grid-row: 2;
-                background: var(--panel-2);
+                border-left: 0;
+                border-right: 0;
                 border-top: 1px solid var(--line);
                 border-bottom: 1px solid var(--line);
                 cursor: row-resize;
-                touch-action: none;
-                user-select: none;
-                -webkit-user-select: none;
             }
 
-            .pane-divider:focus-visible {
-                outline: 2px solid var(--action);
-                outline-offset: -2px;
+            .pane-divider .pane-grip {
+                writing-mode: horizontal-tb;
+                padding: 2px 12px;
             }
 
-            .app-shell.pane-dragging .pane-divider,
-            .pane-divider:active {
-                background: var(--action-soft);
+            .pane-swap {
+                display: inline-flex;
+                align-items: center;
             }
 
             /* with the map reduced to a strip, the points control would
@@ -2783,10 +2895,6 @@
                 min-height: 0;
             }
 
-            .field-grid,
-            .button-row {
-                grid-template-columns: 1fr;
-            }
 
             body.assignment-mode .app-shell {
                 /* entry above, divider, map below: the sidebar scrolls within
@@ -2814,8 +2922,53 @@
                 height: 100%;
             }
 
-            /* the validation-ring legend covers a third of a phone-height map;
-               keep the Points control and drop the static key on small screens */
+            /* the user's choice of which pane is on top overrides the mode
+               default (jb 2026-09-19): map-top puts the map first even in
+               assignment mode, entry-top puts the entry first even on the
+               full map */
+            .app-shell[data-stack="map-top"] {
+                grid-template-rows: minmax(0, 1fr) var(--divider-h) minmax(0, calc((100% - var(--divider-h)) * var(--entry-share) / 100));
+            }
+
+            .app-shell[data-stack="map-top"] .sidebar {
+                grid-row: 3;
+            }
+
+            .app-shell[data-stack="map-top"] #map {
+                grid-row: 1;
+            }
+
+            .app-shell[data-stack="entry-top"] {
+                grid-template-rows: minmax(0, calc((100% - var(--divider-h)) * var(--entry-share) / 100)) var(--divider-h) minmax(0, 1fr);
+            }
+
+            .app-shell[data-stack="entry-top"] .sidebar {
+                grid-row: 1;
+                display: block;
+                min-height: 0;
+                overflow-y: auto;
+            }
+
+            .app-shell[data-stack="entry-top"] .detail-panel {
+                flex: none;
+                overflow: visible;
+            }
+
+            .app-shell[data-stack="entry-top"] #map {
+                grid-row: 3;
+                height: 100%;
+            }
+        }
+
+        /* phone width only: one-column forms, and the validation-ring legend
+           that would cover a third of a phone-height map leaves; the Points
+           control stays. a portrait monitor keeps both */
+        @media (max-width: 700px) {
+            .field-grid,
+            .button-row {
+                grid-template-columns: 1fr;
+            }
+
             .map-legend {
                 display: none;
             }
@@ -2836,6 +2989,70 @@
         /* the entry form's open source links (jb 2026-09-04) */
         .source-links-block { margin: 10px 0; }
         .source-links-block .label-help { display: block; margin-bottom: 6px; }
+
+        /* signed out, the map is the screen (jb 2026-09-19: "float it"):
+           the header and the sign-in card float over the map as one panel
+           and the sidebar column, the divider and the stacked rows go.
+           after sign-in the sidebar returns with the work. the selectors
+           outrank every layout rule above, portrait and phone included */
+        body.assignment-mode.portal-signed-out .app-shell {
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-rows: minmax(0, 1fr);
+            min-height: 0;
+        }
+
+        body.assignment-mode.portal-signed-out .pane-divider {
+            display: none;
+        }
+
+        body.assignment-mode.portal-signed-out .app-shell > #map {
+            grid-column: 1;
+            grid-row: 1;
+            height: 100%;
+            min-height: 0;
+        }
+
+        body.assignment-mode.portal-signed-out .app-shell > .sidebar {
+            grid-column: 1;
+            grid-row: 1;
+            align-self: start;
+            justify-self: start;
+            z-index: 1100;
+            width: min(360px, calc(100% - 24px));
+            max-height: calc(100% - 24px);
+            margin: 12px;
+            overflow-y: auto;
+            border: 1px solid var(--line);
+            border-radius: var(--r-md, 10px);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.28);
+            background: var(--panel);
+        }
+
+        body.assignment-mode.portal-signed-out .sidebar-header {
+            padding: 14px 16px 10px;
+        }
+
+        body.assignment-mode.portal-signed-out .backend-panel {
+            padding: 12px;
+        }
+
+        body.assignment-mode.portal-signed-out .backend-card.auth-required {
+            box-shadow: none;
+        }
+
+        /* the zoom and locate buttons step aside for the floating panel:
+           to its right, or under the basemap pill on a phone */
+        body.assignment-mode.portal-signed-out .leaflet-top.leaflet-left {
+            left: 384px;
+        }
+
+        @media (max-width: 700px) {
+            body.assignment-mode.portal-signed-out .leaflet-top.leaflet-left {
+                left: auto;
+                right: 0;
+                top: 52px;
+            }
+        }
 </style>
 </head>
 <body>
@@ -2961,6 +3178,7 @@
 
         <div id="paneDivider" class="pane-divider" role="separator" aria-orientation="horizontal" aria-label="Resize the entry pane and the map" aria-valuemin="15" aria-valuemax="85" aria-valuenow="50" tabindex="0">
             <span class="pane-grip">⠿ drag · entry ↕ map</span>
+            <button id="paneSwapButton" class="pane-swap" type="button" title="Put the other pane on top" aria-label="Swap the entry pane and the map">⇅ Swap</button>
         </div>
 
         <div id="map"></div>

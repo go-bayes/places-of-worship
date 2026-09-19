@@ -65,6 +65,15 @@ filter, prompt and model versions, caps, per-outcome counts
 truncated error notes, and start/completion times. This is the run
 manifest the ratified bulk-lane controls require.
 
+### `agent_judgments` — the same review at claim grain
+
+Since 2026-09-19 `recordArtifact` also writes one `recommendation`
+judgment and one `claim_support` judgment per source check to the
+append-only `agent_judgments` table, in the same transaction. The
+artifact remains the reviewer-facing summary; the judgments are the
+queryable record at claim grain. See
+`docs/development/agent-judgments.md`.
+
 ### `review_decisions` additions
 
 Two optional fields record what the human saw and what they did with

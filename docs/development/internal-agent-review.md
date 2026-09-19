@@ -77,6 +77,8 @@ The shared [intake regression cases](../../scripts/agent_research/fixtures/intak
 
 The runner's `raw_trace_sha256` hashes process stdout bytes, a newline byte, and process stderr bytes in that order. It differs from the hash of the enclosing JSONL attempt file. Stored stdout and stderr undergo credential redaction and output limits. Therefore, reproduction from retained text is possible only when those transformations preserve the bytes. Verify and record that equality when preserving a run. `prompt_sha256` hashes the combined system and user text with the runner's separator. Claude's flat usage fields describe the primary model; helper usage and total reported cost remain in `provider_usage.modelUsage`. Codex's flat usage fields describe the process. Comparisons must account for those scopes and the providers' cache-accounting conventions.
 
+Intake also records the advisory reviewer's per-claim checks with their real access method, its recommendation on the intake evidence version, and the researcher's status assessment as rows in the append-only `agent_judgments` table ([agent judgments](agent-judgments.md)). The `sources_checked` summary on the `agent_reviews` row now says `not_checked` where the reviewer did not check the source and `model_assessment` otherwise.
+
 These are backend operations for internal runs; the existing RA interface is unaffected. A batch-review screen and automatic conversion of agent claims into ordinary evidence remain follow-up work.
 
 ## Hostile input and evaluation limits

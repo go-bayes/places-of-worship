@@ -41,8 +41,15 @@ The map interface has two primary regions:
 - `#map`: the map and spatial task markers.
 
 The contributor portal (assignment mode) gates its sidebar behind sign-in
-(ruled 2026-08-29). Signed out, the sidebar shows only the header and the
-sign-in card; the map stays visible for read-only browsing. After sign-in a
+(ruled 2026-08-29). Signed out, the header and the sign-in card float over
+the map as one panel at the top left, and the map fills the screen for
+read-only browsing (ruled 2026-09-19: "float it"); the zoom and locate
+buttons step aside, to the panel's right, or under the basemap pill on a
+phone. After sign-in the sidebar returns with the work. The sign-in card
+carries the Google button, a `Contact to join` button and the folded `Wrong
+account showing?` help, nothing else (ruled 2026-09-19: fewer words); the
+batch id lives in the header, and the invited address shows only when the
+link carries it. After sign-in a
 chooser offers two activities — `Assigned tasks` and `Add places` — and the
 sidebar then shows only the chosen activity's sections. A `← Change activity`
 link returns to the chooser; the choice persists for the tab
@@ -50,11 +57,14 @@ link returns to the chooser; the choice persists for the tab
 
 The map offers `Streets` (OSM standard tiles), `Hybrid` (MapTiler imagery
 with street and place labels), and `Satellite` (bare MapTiler imagery)
-basemaps through a small pill control. Add-places mode prefers hybrid once
-buildings are resolvable and switches to it when pin placement starts, so
-contributors can guide the pin onto the actual building without losing
-street-name orientation; a manual toggle choice wins for the rest of the
-session. The imagery options hide when no MapTiler key is configured, and
+basemaps through a small pill control. The map lands on `Hybrid` wherever
+imagery is configured (ruled 2026-09-19) and returns there when an activity
+ends; pin placement lifts a streets map to hybrid so the pin can be guided
+onto the actual building without losing street-name orientation; a manual
+toggle choice wins for the rest of the session. The map data panel (the
+unreviewed-places switch and the marker legend) keeps its drag grip and
+folds to its `Map data` bar; both the spot and the fold are remembered on
+the device. The imagery options hide when no MapTiler key is configured, and
 the portal falls back to streets (disabling the imagery buttons) when the
 key is refused or exhausted.
 
@@ -66,6 +76,8 @@ below the card (ruled 2026-09-04: the selected work holds the sidebar; past
 work is a card button away, never a list at the top). Nominations always stay on the map — as dashed teal rings while
 healthy, keeping their validation-state ring once disputed or validated —
 so the duplicate check and the route back to them survive the separation.
+
+The split between sidebar and map is the user's (ruled 2026-09-19: the map's size should be adjustable, and a portrait monitor must work). Side by side, the bar between the panes drags the sidebar width from 320 px to six tenths of the window; a double click returns it to 420 px, Left and Right arrows step it, Home resets it, and the device remembers the width. On a narrow screen or any portrait screen the panes stack: the same bar drags the split to one of three positions (mostly map, half, mostly entry), a `⇅ Swap` button on the bar puts the other pane on top, and the device remembers both. The stacked layout keeps two-column forms and the map legend on a portrait monitor; only a phone width (700 px and under) collapses them.
 
 Keep the sidebar dense but readable. This is a workbench, not a landing page.
 Avoid hero copy, decorative cards, and explanatory blocks that push the task

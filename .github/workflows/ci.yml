@@ -44,6 +44,9 @@ jobs:
           node apps/regions/nz/js/assigned-periods-dom.test.cjs
           node apps/regions/nz/js/portal-walkthrough-dom.test.cjs
           node apps/regions/nz/js/occupancy-review.test.cjs
+          node apps/regions/nz/js/pane-divider.test.cjs
+          node apps/regions/nz/js/phone-walkthrough-dom.test.cjs
+          node apps/regions/nz/js/portal-first-screen.test.cjs
           node apps/regions/nz/js/osm-history.test.cjs
           node apps/regions/nz/js/deep-link-context.test.cjs
           node apps/regions/nz/js/country-config.test.cjs

@@ -168,6 +168,21 @@
   Named credit in manifests/changelog is public by design.
 - Keep large, restricted, raw, or private data out of Git unless the repo
   already tracks that class of artefact and the licence permits it.
+- Images, screenshots, renders and other large files handed to Joseph go to
+  the project heap in his Dropbox (Joseph, 2026-09-19):
+  `/Users/joseph/v-project Dropbox/Joseph Bulbulia/HEAP/places-of-worship`
+  (the Dropbox client's own sync root, from `~/.dropbox/info.json`; the
+  `~/Library/CloudStorage/Dropbox-v-project` mount is stale and does not
+  carry it).
+  Its `README.md` sets the layout: `screens/<date>-<topic>/` for
+  screenshots and walkthrough captures, `renders/` for figures and PDFs,
+  `exports/` for bulk data with its manifest, `incoming/` for collaborator
+  files. Name files by pull request or lane. Give Joseph the full absolute
+  path. The heap is the hand-over copy Joseph reads; a workflow that names
+  its own place (`.private/`, synced to GCS, or a git-ignored `local/review/`
+  render folder) keeps that place as the working copy, and the heap gets a
+  copy of what Joseph is asked to look at. `.private/` stays for
+  credentials and per-person material.
 - Treat ignored local data as cache only. Before using generated data for RA
   tasks, analysis, public products, or publication, make sure it has durable
   project-controlled storage and a tracked manifest as described in
@@ -222,6 +237,10 @@
   drafts an implementation PR; another performs a read-only review.
 - Do not mix implementation and review on the same files at the same time
   unless the user asks for that coordination explicitly.
+
+## Agent Signature On Pull Requests
+
+Several agents and people collaborate on this repository, so every pull request body, review, and comment an agent writes ends with the agent's model identity (Joseph, 2026-09-19). Sign with the model name and version as the provider reports it, for example `— Claude Fable 5.1` or `— gpt-6-astra`; a generic product name is not enough. Commits stay unsigned and carry no AI attribution. The signature lets the team see which model produced a review or a claim when reading a thread later.
 
 ## Pull Request Closure
 

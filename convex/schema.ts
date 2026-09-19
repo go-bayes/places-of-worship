@@ -69,6 +69,16 @@ import {
   evidenceHeadChangeKind,
   revisionIntent,
 } from "./model";
+import {
+  judgmentAccessMethod,
+  judgmentConfidence,
+  judgmentContext,
+  judgmentDisposition,
+  judgmentJudge,
+  judgmentKind,
+  judgmentRun,
+  judgmentSubjectKind,
+} from "./lib/agentJudgments";
 
 export default defineSchema({
   users: defineTable({
@@ -575,6 +585,56 @@ export default defineSchema({
   })
     .index("by_batch_id", ["batch_id"])
     .index("by_started", ["started_at"]),
+
+  // append-only ai judgments at claim grain (docs/development/agent-judgments.md,
+  // jb rulings r-j1 to r-j7, 2026-09-19). every ai lane writes here through
+  // lib/agentJudgments.recordJudgments; the id is the sha256 of the hash
+  // envelope, so a retried write collapses and a re-judgment appends with
+  // parents. advisory only: no writer here may change a task, draft, or
+  // review decision.
+  agent_judgments: defineTable({
+    judgment_id: v.string(),
+    schema_version: v.literal("agent-judgment.v1"),
+    subject_kind: judgmentSubjectKind,
+    subject_ref: v.string(),
+    judgment_kind: judgmentKind,
+    // vocabulary fixed per judgment_kind by lib/agentJudgments.OUTCOMES_BY_KIND
+    outcome: v.string(),
+    facet: v.optional(v.string()),
+    confidence: v.optional(judgmentConfidence),
+    access_method: v.optional(judgmentAccessMethod),
+    source_locator: v.optional(v.string()),
+    basis_note: v.optional(v.string()),
+    judge: judgmentJudge,
+    run: judgmentRun,
+    context: judgmentContext,
+    parents: v.array(v.string()),
+    actor_user_id: v.id("users"),
+    ai_generated: v.literal(true),
+    created_at: v.number(),
+  })
+    .index("by_judgment_id", ["judgment_id"])
+    // time follows the equality prefix so a bounded read can take the newest
+    .index("by_subject", ["subject_ref", "created_at"])
+    .index("by_task", ["context.task_id", "created_at"])
+    .index("by_batch", ["run.batch_id", "created_at"])
+    .index("by_prompt_version", ["judge.prompt_version", "created_at"]),
+
+  // what a person did with one judgment (r-j3): append-only, at claim grain.
+  // review_decisions keeps its draft-level agent_review_id link and its hash
+  // contracts untouched.
+  judgment_dispositions: defineTable({
+    disposition_id: v.string(),
+    judgment_id: v.string(),
+    reviewer_user_id: v.id("users"),
+    disposition: judgmentDisposition,
+    note: v.optional(v.string()),
+    review_decision_id: v.optional(v.string()),
+    created_at: v.number(),
+  })
+    .index("by_disposition_id", ["disposition_id"])
+    .index("by_judgment", ["judgment_id", "created_at"])
+    .index("by_reviewer_time", ["reviewer_user_id", "created_at"]),
 
   // Immutable, private copy of an internal research bundle. The bundle is a
   // receipt for human review, not an accepted evidence record.
