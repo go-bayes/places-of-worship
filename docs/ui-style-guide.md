@@ -161,7 +161,7 @@ Dates should use one of:
 - `YYYY-MM`,
 - `YYYY-MM-DD`.
 
-Unknown dates should be blank, with uncertainty explained in the evidence note.
+Unknown dates should be blank, with uncertainty explained in the evidence note. A bare year is an acceptable entry (Joseph, 2026-09-19).
 
 ## Review And Assignment States
 
@@ -179,6 +179,7 @@ The task list should make these states visible:
 
 Assignment batches should appear as filters over one shared task list. The UI
 should not imply that each workpack is a separate database or spreadsheet.
+Confirmed by Joseph on 2026-09-19.
 
 ## CSS Maintenance Rules
 
@@ -192,3 +193,5 @@ should not imply that each workpack is a separate database or spreadsheet.
   system architecture unless they affect the task the RA is doing.
 - Test desktop and mobile after changing sidebar, sign-in, task-list, form, or
   map layout.
+
+These rules were confirmed by Joseph on 2026-09-19.
