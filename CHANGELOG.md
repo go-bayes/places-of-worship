@@ -6,6 +6,10 @@
 
 - The floating sign-in card drags by a grip in its header and the device remembers the spot (JB, 2026-09-19: "with the panes movable"); on a phone it is a strip above the map instead, so the zoom buttons and basemap pill are never covered. The map data legend reads in two columns, fills beside rings, so the open panel no longer rises under the card on a short screen, and its body scrolls rather than outgrowing the screen.
 
+### 2026-09-18 (agent first passes)
+
+- Added a provisional-record schema and local immutable archive with revision links, validation, and a recovery-copy command. Regression tests cover concurrent writes, corrupted files, revision history, and recovery.
+
 ### 2026-09-19 (first screen)
 
 - The RA portal's signed-out card now carries the Google button, a `Contact to join` button and the folded `Wrong account showing?` help, nothing else (JB, 2026-09-19: fewer words), and it floats with the header over a full-screen map instead of heading an empty sidebar (JB: "float it"); the sidebar returns after sign-in. The map lands on `Hybrid` wherever imagery is configured and returns there when an activity ends; a basemap the contributor picks stands, and pin placement lifts only a streets map to hybrid. The map data panel (unreviewed places on or off, the marker legend) keeps its drag grip and gains a `Map data` fold button, both remembered on the device; its note reads in one line. New test `portal-first-screen.test.cjs` in CI.
@@ -17,6 +21,10 @@
 ### 2026-09-19 (adjustable layout)
 
 - The RA portal's sidebar-to-map split is now the user's on every screen. Side by side, the bar between the panes drags the sidebar width (320 px to six tenths of the window; double-click, arrow keys and Home also work) and the device remembers it. Portrait screens of any width now use the stacked layout with the existing three-position divider, and a `⇅ Swap` button on the bar chooses which pane is on top; phone-only concessions (one-column forms, hidden legend) now apply at phone width only. The review portal stacks its queue above the detail in portrait as well. The RA guide and `docs/ui-style-guide.md` describe the controls. CI now runs the pane-divider and phone-walkthrough tests.
+
+### 2026-09-18 (contribution prototype)
+
+- Added an opt-in workbench prototype for simple public nominations, RA agent-help requests, and annotated research records. The prototype preserves local drafts and clearly labels unsent requests and illustrative answers. The live portal is unchanged; the design document specifies the backend and review integration.
 
 ### 2026-09-18 (domain certificate)
 
