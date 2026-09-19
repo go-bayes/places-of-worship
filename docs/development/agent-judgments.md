@@ -27,7 +27,7 @@ One row per judgment, written once, never patched. `judgment_id` is the SHA-256 
 | `parents` | The lane's earlier judgments of the same kind, facet and source on the same subject, newest first, at most ten. |
 | `actor_user_id`, `ai_generated: true`, `created_at` | As in `agent_reviews`. |
 
-Indexes: by judgment id, by subject, by task, by batch, and by prompt version and time.
+Indexes: by judgment id, and by subject, task, batch and prompt version, each followed by `created_at` so a bounded read walks newest first and a cap drops the oldest rows.
 
 ## The `judgment_dispositions` table
 
@@ -43,7 +43,7 @@ The internal bundle intake (`internalAgentIntake.ingestBundle`) writes one `clai
 
 ## Reads and the human disposition
 
-`agentJudgments.listJudgmentsForTask`, `listJudgmentsForSubject` and `listDispositionsForJudgment` return newest first to reviewers, curators, administrators and the PI. `agentJudgments.recordJudgmentDisposition` appends one disposition; it refuses an unknown judgment, an unknown review decision, and a disagreement or correction without a note of at least eight characters.
+`agentJudgments.listJudgmentsForTask`, `listJudgmentsForSubject` and `listDispositionsForJudgment` return newest first to reviewers, curators, administrators and the PI. `agentJudgments.recordJudgmentDisposition` appends one disposition; it refuses an unknown judgment, an unknown review decision, a decision about a different task or evidence draft from the judgment, and a disagreement or correction without a note of at least eight characters.
 
 ## Deployment
 

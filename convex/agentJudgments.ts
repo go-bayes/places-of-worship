@@ -9,6 +9,7 @@ import { judgmentDisposition } from "./lib/agentJudgments";
 // recommends. a disposition records what a person did with a judgment and
 // changes nothing else.
 
+// bounded reads walk each index newest first, so the cap drops the oldest
 const LIST_MAX = 200;
 
 export const listJudgmentsForTask = query({
@@ -19,8 +20,9 @@ export const listJudgmentsForTask = query({
     const rows = await ctx.db
       .query("agent_judgments")
       .withIndex("by_task", (q) => q.eq("context.task_id", args.taskId))
+      .order("desc")
       .take(LIST_MAX);
-    return rows.sort((left, right) => right.created_at - left.created_at);
+    return rows;
   },
 });
 
@@ -32,8 +34,9 @@ export const listJudgmentsForSubject = query({
     const rows = await ctx.db
       .query("agent_judgments")
       .withIndex("by_subject", (q) => q.eq("subject_ref", args.subjectRef))
+      .order("desc")
       .take(LIST_MAX);
-    return rows.sort((left, right) => right.created_at - left.created_at);
+    return rows;
   },
 });
 
@@ -45,8 +48,9 @@ export const listDispositionsForJudgment = query({
     const rows = await ctx.db
       .query("judgment_dispositions")
       .withIndex("by_judgment", (q) => q.eq("judgment_id", args.judgmentId))
+      .order("desc")
       .take(LIST_MAX);
-    return rows.sort((left, right) => right.created_at - left.created_at);
+    return rows;
   },
 });
 
@@ -80,6 +84,15 @@ export const recordJudgmentDisposition = mutation({
         .unique();
       if (decision === null) {
         throw new Error("Review decision not found.");
+      }
+      // the decision must be about the same work as the judgment: same task,
+      // and the same draft when both name one
+      if (judgment.context.task_id === undefined || decision.task_id !== judgment.context.task_id) {
+        throw new Error("Review decision belongs to a different task from the judgment.");
+      }
+      if (judgment.context.evidence_draft_id !== undefined && decision.evidence_draft_id !== undefined
+        && decision.evidence_draft_id !== judgment.context.evidence_draft_id) {
+        throw new Error("Review decision belongs to a different evidence draft from the judgment.");
       }
     }
     const prior = await ctx.db

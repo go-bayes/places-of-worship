@@ -614,9 +614,10 @@ export default defineSchema({
     created_at: v.number(),
   })
     .index("by_judgment_id", ["judgment_id"])
-    .index("by_subject", ["subject_ref"])
-    .index("by_task", ["context.task_id"])
-    .index("by_batch", ["run.batch_id"])
+    // time follows the equality prefix so a bounded read can take the newest
+    .index("by_subject", ["subject_ref", "created_at"])
+    .index("by_task", ["context.task_id", "created_at"])
+    .index("by_batch", ["run.batch_id", "created_at"])
     .index("by_prompt_version", ["judge.prompt_version", "created_at"]),
 
   // what a person did with one judgment (r-j3): append-only, at claim grain.
@@ -632,7 +633,7 @@ export default defineSchema({
     created_at: v.number(),
   })
     .index("by_disposition_id", ["disposition_id"])
-    .index("by_judgment", ["judgment_id"])
+    .index("by_judgment", ["judgment_id", "created_at"])
     .index("by_reviewer_time", ["reviewer_user_id", "created_at"]),
 
   // Immutable, private copy of an internal research bundle. The bundle is a
