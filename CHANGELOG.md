@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-19 (movable first screen)
+
+- The floating sign-in card drags by a grip in its header and the device remembers the spot (JB, 2026-09-19: "with the panes movable"); on a phone it is a strip above the map instead, so the zoom buttons and basemap pill are never covered. The map data legend reads in two columns, fills beside rings, so the open panel no longer rises under the card on a short screen, and its body scrolls rather than outgrowing the screen.
+
 ### 2026-09-18 (agent first passes)
 
 - Added a provisional-record schema and local immutable archive with revision links, validation, and a recovery-copy command. Regression tests cover concurrent writes, corrupted files, revision history, and recovery.

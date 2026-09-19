@@ -170,4 +170,56 @@ const fresh = () => Object.create(window.NzVerificationMap.prototype);
   assert.equal(fresh().setMapDataFolded(true), false, "no panel, nothing to fold");
 }
 
+// 4. the floating sign-in panel drags by its header grip, bound once
+{
+  const app = fresh();
+  const calls = [];
+  const panel = { classList: classList() };
+  const grip = { addEventListener() {} };
+  document.querySelector = (selector) => (selector === ".app-shell > .sidebar" ? panel : null);
+  element("signInPanelGrip", grip);
+  app.makeControlMovable = (div, handle, key, options) => { calls.push({ div, handle, key, options }); };
+  assert.equal(fresh().makeSignInPanelMovable(), false, "no map, nothing to bind");
+  app.map = { on() {}, getContainer() { return { getBoundingClientRect() { return { left: 0, top: 0, right: 1440, bottom: 900 }; } }; } };
+  assert.equal(app.makeSignInPanelMovable(), true);
+  assert.equal(app.makeSignInPanelMovable(), false, "bound once");
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].div, panel);
+  assert.equal(calls[0].key, "pow-signin-panel-offset", "the panel keeps its own spot, apart from the map data panel");
+  // the offset applies only while the page is signed out
+  document.body.classList.add("portal-signed-out");
+  assert.equal(calls[0].options.active(), true);
+  document.body.classList.remove("portal-signed-out");
+  assert.equal(calls[0].options.active(), false, "signed in, the work sidebar carries no offset");
+  document.querySelector = () => null;
+}
+
+// 5. the real drag helper paints no offset and skips the clamp while inactive
+{
+  const app = fresh();
+  let on = true;
+  const style = {};
+  const div = { style, classList: classList(), getBoundingClientRect() { return { left: 0, top: 0, right: 100, bottom: 100 }; } };
+  const handlers = {};
+  const grip = { addEventListener(name, fn) { handlers[name] = fn; }, setPointerCapture() {}, releasePointerCapture() {} };
+  let resize = null;
+  app.map = { on(name, fn) { if (name === "resize") resize = fn; }, getContainer() { return { getBoundingClientRect() { return { left: 0, top: 0, right: 1440, bottom: 900 }; } }; } };
+  localStorage.setItem("pow-test-offset", JSON.stringify({ x: 40, y: 30 }));
+  app.makeControlMovable(div, grip, "pow-test-offset", { active: () => on });
+  // the first paint waits for layout (a clamp on a zero timeout)
+  (async () => {
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    assert.equal(style.transform, "translate(40px, 30px)", "the remembered spot paints while active");
+    on = false;
+    resize();
+    assert.equal(style.transform, "", "inactive, a resize paints nothing and leaves the spot alone");
+    assert.equal(localStorage.getItem("pow-test-offset"), JSON.stringify({ x: 40, y: 30 }));
+    on = true;
+    resize();
+    assert.equal(style.transform, "translate(40px, 30px)", "active again, the spot returns");
+    localStorage.removeItem("pow-test-offset");
+    console.log("drag helper gating ok");
+  })().catch((error) => { console.error(error); process.exit(1); });
+}
+
 console.log("portal first screen ok");
