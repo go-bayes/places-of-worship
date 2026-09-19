@@ -31,7 +31,7 @@ function load(search) {
   });
   const registry = path.join(__dirname, "..", "..", "..", "shared", "data", "country-registry.js");
   vm.runInContext(fs.readFileSync(registry, "utf8"), context, { filename: "country-registry.js" });
-  for (const file of ["occupancy-contract.js", "function-chain-contract.js", "verification-map.js"]) {
+  for (const file of ["occupancy-contract.js", "function-chain-contract.js", "task-presentation.js", "verification-map.js"]) {
     vm.runInContext(fs.readFileSync(path.join(__dirname, file), "utf8"), context, { filename: file });
   }
   // top-level consts of a classic script are not properties of the vm
