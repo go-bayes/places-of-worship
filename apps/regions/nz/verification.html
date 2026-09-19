@@ -976,6 +976,9 @@
             border-radius: 999px;
             padding: 2px 12px;
             pointer-events: none;
+            /* the pill keeps its one line beside the swap button */
+            white-space: nowrap;
+            flex: none;
         }
 
         /* side by side the grip reads down the bar */
@@ -988,6 +991,9 @@
            button lives in the divider and only there */
         .pane-swap {
             display: none;
+            /* the page's buttons fill their column; this one sits in a bar */
+            width: auto;
+            flex: none;
             min-height: 24px;
             padding: 0 10px;
             font-size: var(--fs-xs);
