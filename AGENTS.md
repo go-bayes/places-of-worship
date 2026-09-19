@@ -170,7 +170,10 @@
   already tracks that class of artefact and the licence permits it.
 - Images, screenshots, renders and other large files handed to Joseph go to
   the project heap in his Dropbox (Joseph, 2026-09-19):
-  `/Users/joseph/Library/CloudStorage/Dropbox-v-project/Joseph Bulbulia/HEAP/places-of-worship`.
+  `/Users/joseph/v-project Dropbox/Joseph Bulbulia/HEAP/places-of-worship`
+  (the Dropbox client's own sync root, from `~/.dropbox/info.json`; the
+  `~/Library/CloudStorage/Dropbox-v-project` mount is stale and does not
+  carry it).
   Its `README.md` sets the layout: `screens/<date>-<topic>/` for
   screenshots and walkthrough captures, `renders/` for figures and PDFs,
   `exports/` for bulk data with its manifest, `incoming/` for collaborator
