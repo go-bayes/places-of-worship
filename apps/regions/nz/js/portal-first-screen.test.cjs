@@ -110,8 +110,12 @@ const fresh = () => Object.create(window.NzVerificationMap.prototype);
   app.basemapUserChosen = false;
   app.probeImagery = () => Promise.resolve();
   app.syncContextDots = () => {};
-  const quiet = ["renderInitialDetail", "renderBackendPanel", "setPastSubmissionsOpen", "resumeRapidPinFromDevice", "syncPortalChrome"];
+  const quiet = ["renderInitialDetail", "renderBackendPanel", "setPastSubmissionsOpen", "resumeRapidPinFromDevice", "syncPortalChrome", "clearFormDirty"];
   quiet.forEach((name) => { app[name] = () => {}; });
+  // setPortalMode acts only for a signed-in contributor with no open entry
+  app.backendUser = { _id: "user_1" };
+  app.formDirty = false;
+  app.pinMode = false;
   app.selectedTask = null;
   // an activity ending brings an automatic basemap home to hybrid
   app.portalMode = "add";
