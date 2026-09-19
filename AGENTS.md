@@ -223,6 +223,10 @@
 - Do not mix implementation and review on the same files at the same time
   unless the user asks for that coordination explicitly.
 
+## Agent Signature On Pull Requests
+
+Several agents and people collaborate on this repository, so every pull request body, review, and comment an agent writes ends with the agent's model identity (Joseph, 2026-09-19). Sign with the model name and version as the provider reports it, for example `— Claude Fable 5.1` or `— gpt-6-astra`; a generic product name is not enough. Commits stay unsigned and carry no AI attribution. The signature lets the team see which model produced a review or a claim when reading a thread later.
+
 ## Pull Request Closure
 
 An assigned pull request is carried to closure by one agent, so no merged change waits on a backend deployment nobody owns (Joseph, 2026-09-13). The closure owner is the agent that authored the pull request unless Joseph assigns another; a reviewing agent stays read-only.
