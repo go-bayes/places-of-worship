@@ -149,6 +149,14 @@ const fresh = () => Object.create(window.NzVerificationMap.prototype);
   assert.equal(divider.attrs["aria-orientation"], "vertical");
   assert.equal(divider.attrs["aria-valuemax"], "864");
   assert.equal(app.paneSnap("map"), false, "the stacked snaps stay inert side by side");
+  // a narrower window re-clamps the painted width; the remembered width stands
+  app.paneShell.getBoundingClientRect = () => ({ left: 0, top: 0, width: 800, height: 600 });
+  app.applySidebarWidth(Number(localStorage.getItem("pow-pane-split-cols")));
+  assert.equal(styles["--sidebar-w"], "480px", "six tenths of an 800px window");
+  assert.equal(localStorage.getItem("pow-pane-split-cols"), "560", "the device still remembers the chosen width");
+  app.paneShell.getBoundingClientRect = () => ({ left: 0, top: 0, width: 1440, height: 900 });
+  app.applySidebarWidth(Number(localStorage.getItem("pow-pane-split-cols")));
+  assert.equal(styles["--sidebar-w"], "560px", "and it returns when the window widens");
   // stacked again: the axis flips and the stacking order is the user's
   phone = true;
   app.paneShare = 50;

@@ -2998,6 +2998,24 @@ class NzVerificationMap {
             this.applySidebarWidth(this.sidebarWidth ?? SIDEBAR_W_DEFAULT);
             this.applyPaneShare(this.paneShare, { animate: false });
         });
+        // a narrower window inside the same layout re-clamps the width, so a
+        // wide sidebar cannot leave the map a sliver; the remembered width is
+        // untouched and returns when the window widens
+        window.addEventListener?.("resize", () => {
+            window.clearTimeout(this.sidebarResizeTimer);
+            this.sidebarResizeTimer = window.setTimeout(() => {
+                if (!this.paneColumnsActive()) return;
+                let remembered = this.sidebarWidth ?? SIDEBAR_W_DEFAULT;
+                try {
+                    const saved = Number(localStorage.getItem(PANE_COLS_KEY));
+                    if (Number.isFinite(saved) && saved > 0) remembered = saved;
+                } catch (error) {
+                    // storage unavailable: the current width is the memory
+                }
+                this.applySidebarWidth(remembered);
+                this.refreshPaneAxis();
+            }, 80);
+        });
     }
 
     // ---- the contributor's own position (jb 2026-09-05: "so the pin can
