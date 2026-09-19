@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-18 (agent first passes)
+
+- Added a provisional-record schema and local immutable archive with revision links, validation, and a recovery-copy command. Regression tests cover concurrent writes, corrupted files, revision history, and recovery.
+
 ### 2026-09-19 (first screen)
 
 - The RA portal's signed-out card now carries the Google button, a `Contact to join` button and the folded `Wrong account showing?` help, nothing else (JB, 2026-09-19: fewer words), and it floats with the header over a full-screen map instead of heading an empty sidebar (JB: "float it"); the sidebar returns after sign-in. The map lands on `Hybrid` wherever imagery is configured and returns there when an activity ends; a basemap the contributor picks stands, and pin placement lifts only a streets map to hybrid. The map data panel (unreviewed places on or off, the marker legend) keeps its drag grip and gains a `Map data` fold button, both remembered on the device; its note reads in one line. New test `portal-first-screen.test.cjs` in CI.
