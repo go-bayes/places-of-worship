@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-19 (first screen)
+
+- The RA portal's signed-out card now carries the Google button, a `Contact to join` button and the folded `Wrong account showing?` help, nothing else (JB, 2026-09-19: fewer words). The map lands on `Hybrid` wherever imagery is configured and returns there when an activity ends; a basemap the contributor picks stands, and pin placement lifts only a streets map to hybrid. The map data panel (unreviewed places on or off, the marker legend) keeps its drag grip and gains a `Map data` fold button, both remembered on the device; its note reads in one line. New test `portal-first-screen.test.cjs` in CI.
+
 ### 2026-09-19 (agent judgments)
 
 - Added the append-only `agent_judgments` and `judgment_dispositions` tables and the `recordJudgments` write path. The Claude batch-review lane and the internal bundle intake now record every AI recommendation and per-claim source check as a judgment with its judge, model, prompt version, access method, cost basis, and revision parents. The intake's source-level summary records `not_checked` where the reviewer did not check the source. Reviewers can list judgments per task or subject and record a per-judgment disposition. Additive schema change; no task, draft, or decision behaviour changes. See `docs/development/agent-judgments.md`.

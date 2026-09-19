@@ -1658,9 +1658,41 @@
             align-items: center;
         }
 
+        /* the one other way in: a quiet outline the height of the google
+           button, so the card reads as two choices and nothing else */
+        .join-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 8px 12px;
+            border: 1px solid var(--action);
+            border-radius: var(--r-sm);
+            background: var(--panel);
+            color: var(--action);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .join-button:hover,
+        .join-button:focus-visible {
+            background: var(--action-soft);
+        }
+
+        .backend-card strong.inline {
+            display: inline;
+            font-size: inherit;
+        }
+
         .backend-help {
-            color: var(--ink);
+            color: var(--muted);
+            font-size: var(--fs-sm);
             line-height: 1.45;
+        }
+
+        .backend-help summary {
+            cursor: pointer;
+            color: var(--action);
         }
 
         .backend-card.disabled {
@@ -2030,15 +2062,20 @@
             box-shadow: 0 1px 4px rgba(15, 23, 42, 0.25);
         }
 
-        /* the grip: a small bar the contributor drags to move the panel
-           (touch or mouse); touch-action none keeps the browser from
-           scrolling instead */
-        .legend-grip {
-            justify-self: stretch;
-            width: auto;
-            min-height: 24px;
+        /* one bar: the grip (drag to move) and the fold button (name the
+           panel, open or close it); touch-action none on the grip keeps
+           the browser from scrolling instead of dragging */
+        .legend-bar {
+            display: flex;
+            gap: 4px;
             margin: -2px 0 0;
-            padding: 2px 6px;
+        }
+
+        .legend-grip,
+        .legend-fold {
+            width: auto;
+            min-height: 28px;
+            padding: 2px 8px;
             border: 0;
             border-radius: var(--r-sm);
             background: var(--panel-2);
@@ -2046,11 +2083,36 @@
             font-size: var(--fs-xs);
             font-weight: 600;
             letter-spacing: 0.02em;
-            text-align: center;
-            cursor: grab;
-            touch-action: none;
             user-select: none;
             -webkit-user-select: none;
+        }
+
+        .legend-grip {
+            cursor: grab;
+            touch-action: none;
+        }
+
+        .legend-fold {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            color: var(--ink);
+            cursor: pointer;
+        }
+
+        .legend-body {
+            display: grid;
+            gap: 6px;
+        }
+
+        .legend-body[hidden] {
+            display: none;
+        }
+
+        .points-legend-control.folded {
+            padding: 6px 8px;
         }
 
         .points-legend-control.dragging {

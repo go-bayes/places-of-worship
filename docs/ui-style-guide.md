@@ -42,7 +42,11 @@ The map interface has two primary regions:
 
 The contributor portal (assignment mode) gates its sidebar behind sign-in
 (ruled 2026-08-29). Signed out, the sidebar shows only the header and the
-sign-in card; the map stays visible for read-only browsing. After sign-in a
+sign-in card; the map stays visible for read-only browsing. The sign-in card
+carries the Google button, a `Contact to join` button and the folded `Wrong
+account showing?` help, nothing else (ruled 2026-09-19: fewer words); the
+batch id lives in the header, and the invited address shows only when the
+link carries it. After sign-in a
 chooser offers two activities — `Assigned tasks` and `Add places` — and the
 sidebar then shows only the chosen activity's sections. A `← Change activity`
 link returns to the chooser; the choice persists for the tab
@@ -50,11 +54,14 @@ link returns to the chooser; the choice persists for the tab
 
 The map offers `Streets` (OSM standard tiles), `Hybrid` (MapTiler imagery
 with street and place labels), and `Satellite` (bare MapTiler imagery)
-basemaps through a small pill control. Add-places mode prefers hybrid once
-buildings are resolvable and switches to it when pin placement starts, so
-contributors can guide the pin onto the actual building without losing
-street-name orientation; a manual toggle choice wins for the rest of the
-session. The imagery options hide when no MapTiler key is configured, and
+basemaps through a small pill control. The map lands on `Hybrid` wherever
+imagery is configured (ruled 2026-09-19) and returns there when an activity
+ends; pin placement lifts a streets map to hybrid so the pin can be guided
+onto the actual building without losing street-name orientation; a manual
+toggle choice wins for the rest of the session. The map data panel (the
+unreviewed-places switch and the marker legend) keeps its drag grip and
+folds to its `Map data` bar; both the spot and the fold are remembered on
+the device. The imagery options hide when no MapTiler key is configured, and
 the portal falls back to streets (disabling the imagery buttons) when the
 key is refused or exhausted.
 

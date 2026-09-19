@@ -964,6 +964,8 @@ const PANE_STACK_KEY = "pow-pane-stack";
 // sidebar width in px, dragged on the same divider and remembered apart
 // from the stacked split
 const PANE_COLS_KEY = "pow-pane-split-cols";
+// whether the map data panel is folded to its bar (per device)
+const MAP_DATA_FOLD_KEY = "pow-map-data-folded";
 const SIDEBAR_W_DEFAULT = 420;
 const SIDEBAR_W_MIN = 320;
 const SIDEBAR_W_MAX_SHARE = 0.6;
@@ -987,10 +989,10 @@ const SATELLITE_TILE_URL = MAPTILER_API_KEY
 const HYBRID_TILE_URL = MAPTILER_API_KEY
     ? `https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${encodeURIComponent(MAPTILER_API_KEY)}`
     : "";
-// add mode prefers imagery once streets stop showing individual buildings;
-// satellite is the default imagery (jb 2026-09-04: "most informative"),
-// hybrid stays on offer for its labels where maptiler draws them
-const PORTAL_AUTO_SATELLITE_ZOOM = 15;
+// the map lands on hybrid (jb 2026-09-19): imagery for the buildings with
+// street and place labels for orientation; streets is the fallback when no
+// key ships or the key is refused. satellite stays on offer for a bare look
+const DEFAULT_BASEMAP = HYBRID_TILE_URL ? "hybrid" : "streets";
 // signed-in portal activity, kept per country and batch for the tab's life
 const PORTAL_MODES = new Set(["assigned", "add"]);
 const PORTAL_MODE_KEY = `pow_portal_mode_v1:${COUNTRY_CONFIG.countryCode.toLowerCase()}${ASSIGNMENT_SESSION_SEGMENT}`;
@@ -2109,19 +2111,18 @@ class NzVerificationMap {
         }
 
         if (!this.backendUser) {
+            // fewer words (jb 2026-09-19): the google button, one line to
+            // ask for access, and the account help folded away. the batch
+            // id already sits in the header; the invited address shows only
+            // when the link carries it
             panel.innerHTML = `
                 <div class="backend-card auth-required">
-                    <strong>${ASSIGNMENT_MODE ? "1. Sign in to start" : "Shared task backend"}</strong>
-                    ${assignmentLabel}
+                    <strong>${ASSIGNMENT_MODE ? "1. Sign in to start" : "Sign in"}</strong>
                     ${this.pendingDeepLink ? `<span role="note">Sign in to revise <em>${escapeHtml(this.pendingDeepLink.name || "a place on the map")}</em>; it opens here after sign-in.</span>` : ""}
-                    <span>${ASSIGNMENT_MODE
-                        ? `${INVITED_EMAIL_HINT
-                            ? `Use ${escapeHtml(INVITED_EMAIL_HINT)}, the Google account JB invited.`
-                            : "Use the Google account JB invited (check the invitation email if you're not sure which one)."} After sign-in, ${COUNTRY_CONFIG.assignmentsOffered === false ? "add missing places or revise places already on the map" : "choose between your assigned tasks and adding missing places"}; saved work goes straight to the shared review queue.`
-                        : "Sign in with Google to load assigned tasks and save evidence directly for review."}</span>
+                    ${INVITED_EMAIL_HINT ? `<span>Use <strong class="inline">${escapeHtml(INVITED_EMAIL_HINT)}</strong>.</span>` : ""}
                     <div id="googleSignInButton" class="google-sign-in-host"></div>
-                    <span class="copy-help">Not a project member yet? Access is by invitation from the project team; the <a href="https://github.com/go-bayes/places-of-worship" target="_blank" rel="noopener">project page</a> says how to get in touch.</span>
-                    <details class="backend-help"><summary>Wrong account showing?</summary>The Google button shows accounts already signed into this browser. If the wrong name appears, choose another Google account or use a browser profile signed into the invited account.</details>
+                    <a class="join-button" href="https://github.com/go-bayes/places-of-worship" target="_blank" rel="noopener">Contact to join</a>
+                    <details class="backend-help"><summary>Wrong account showing?</summary>The button lists accounts already signed in to this browser. Pick another, or open a browser profile signed in to the invited account.</details>
                     ${this.backendLastError ? `<span class="copy-status">${escapeHtml(this.backendLastError)}</span>` : ""}
                 </div>
             `;
@@ -2664,12 +2665,8 @@ class NzVerificationMap {
             this.watchImageryLayer(this.satelliteLayer);
             this.watchImageryLayer(this.hybridLayer);
             this.addBasemapControl();
-            // add mode: imagery takes over once buildings are resolvable,
-            // unless the contributor has picked a basemap by hand
-            this.map.on("zoomend", () => {
-                if (this.portalMode !== "add" || this.basemapUserChosen) return;
-                if (this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM) this.setBasemap("satellite");
-            });
+            // land on hybrid; a refused key drops the map back to streets
+            this.setBasemap(DEFAULT_BASEMAP);
         }
 
         // context dots ride the canvas (preferCanvas), so they always paint
@@ -3163,8 +3160,14 @@ class NzVerificationMap {
             // a phone the bottom-left corner sits under the browser's own
             // toolbar, so the contributor drags it by the grip to wherever
             // the map is clear; the spot is kept on this device
+            // one bar: the grip moves the panel, the "Map data" button folds
+            // it to the bar alone (jb 2026-09-19), both kept on this device
             div.innerHTML = `
-                <button type="button" class="legend-grip" aria-label="Move this panel: drag it">⠿ move</button>
+                <div class="legend-bar">
+                    <button type="button" class="legend-grip" aria-label="Move this panel: drag it">⠿</button>
+                    <button type="button" class="legend-fold" aria-expanded="true" aria-controls="portalMapData">Map data <span class="legend-caret" aria-hidden="true">▾</span></button>
+                </div>
+                <div id="portalMapData" class="legend-body">
                 ${source !== "none" ? `
                 <select id="portalPointsSelect" aria-label="Unreviewed places">
                     ${modes.map(([value, label]) => `<option value="${value}"${value === this.pointsMode ? " selected" : ""}>${label}</option>`).join("")}
@@ -3187,6 +3190,7 @@ class NzVerificationMap {
                     <span class="legend-row"><span class="legend-dot vm-unvalidated-swatch"></span>not yet reviewed (open case)</span>
                     ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>unreviewed place (open case), click to revise</span>` : ""}
                 </div>
+                </div>
             `;
             // keep map gestures away from the control
             L.DomEvent.disableClickPropagation(div);
@@ -3195,6 +3199,11 @@ class NzVerificationMap {
                 this.setPointsMode(event.target.value);
             });
             this.makeControlMovable(div, div.querySelector(".legend-grip"));
+            this.mapDataPanel = div;
+            div.querySelector(".legend-fold")?.addEventListener("click", () => {
+                this.setMapDataFolded(!div.classList.contains("folded"), { chosen: true });
+            });
+            this.setMapDataFolded(this.mapDataFoldedOnDevice());
             return div;
         };
         control.addTo(this.map);
@@ -3210,6 +3219,36 @@ class NzVerificationMap {
             const pointsSelect = document.getElementById("portalPointsSelect");
             if (pointsSelect) pointsSelect.value = mode;
         }
+    }
+
+    // the map data panel folds to its bar; the choice is kept per device
+    mapDataFoldedOnDevice() {
+        try {
+            return localStorage.getItem(MAP_DATA_FOLD_KEY) === "1";
+        } catch (error) {
+            return false;
+        }
+    }
+
+    setMapDataFolded(folded, { chosen = false } = {}) {
+        const div = this.mapDataPanel;
+        if (!div) return false;
+        const on = Boolean(folded);
+        div.classList.toggle("folded", on);
+        const button = div.querySelector(".legend-fold");
+        if (button) button.setAttribute("aria-expanded", on ? "false" : "true");
+        const caret = div.querySelector(".legend-caret");
+        if (caret) caret.textContent = on ? "▸" : "▾";
+        const body = div.querySelector(".legend-body");
+        if (body) body.hidden = on;
+        if (chosen) {
+            try {
+                localStorage.setItem(MAP_DATA_FOLD_KEY, on ? "1" : "0");
+            } catch (error) {
+                // storage unavailable: the fold lives for this page only
+            }
+        }
+        return on;
     }
 
     // drags a leaflet control by its grip (pointer events, so touch and
@@ -3306,7 +3345,7 @@ class NzVerificationMap {
         const year = this.targetYear;
         if (this.pointsMode === "all") {
             const tiles = this.tilesAvailable();
-            note.textContent = `amber dots are today's OpenStreetMap places${TARGET_YEARS.length ? `, not ${year} places` : ""}, every one an open case until reviewed${tiles ? `; zoom in past ${TILE_DOTS_MIN_ZOOM} for all of them` : ""}. Click one to revise it.`;
+            note.textContent = `Amber dots: today's OpenStreetMap places${TARGET_YEARS.length ? `, not ${year} places` : ""}, unreviewed${tiles ? `; zoom past ${TILE_DOTS_MIN_ZOOM} for all` : ""}. Click one to revise.`;
             note.hidden = false;
         } else {
             note.textContent = "";
@@ -3968,11 +4007,6 @@ class NzVerificationMap {
             // storage unavailable: the choice lives in memory only
         }
         if (next === "add") {
-            // imagery is the working surface for placing a pin, once close
-            // enough for buildings to show
-            if (this.map && this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM && !this.basemapUserChosen) {
-                this.setBasemap("satellite");
-            }
             // "revise" in the mode's name must be visible on arrival: show
             // the mapped places so their revise entry point exists on screen
             const source = this.contextDotSource();
@@ -3983,8 +4017,8 @@ class NzVerificationMap {
                 const pointsSelect = document.getElementById("portalPointsSelect");
                 if (pointsSelect) pointsSelect.value = mode;
             }
-        } else if (this.basemap !== "streets" && !this.basemapUserChosen) {
-            this.setBasemap("streets");
+        } else if (this.basemap !== DEFAULT_BASEMAP && !this.basemapUserChosen) {
+            this.setBasemap(DEFAULT_BASEMAP);
         }
         this.selectedTask = null;
         this.renderInitialDetail();
@@ -4004,9 +4038,6 @@ class NzVerificationMap {
             stored = "";
         }
         this.portalMode = PORTAL_MODES.has(stored) ? stored : null;
-        if (this.portalMode === "add" && this.map && this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM) {
-            this.setBasemap("satellite");
-        }
     }
 
     // --- basemap: streets (osm) or satellite (maptiler) ---
@@ -4018,8 +4049,8 @@ class NzVerificationMap {
             div.setAttribute("role", "group");
             div.setAttribute("aria-label", "Basemap");
             div.innerHTML = `
-                <button type="button" data-basemap="streets" aria-pressed="true">Streets</button>
-                <button type="button" data-basemap="hybrid" aria-pressed="false">Hybrid</button>
+                <button type="button" data-basemap="streets" aria-pressed="false">Streets</button>
+                <button type="button" data-basemap="hybrid" aria-pressed="true">Hybrid</button>
                 <button type="button" data-basemap="satellite" aria-pressed="false">Satellite</button>
             `;
             L.DomEvent.disableClickPropagation(div);
@@ -10706,8 +10737,9 @@ class NzVerificationMap {
             addPlaceButton.classList.add("placing");
             addPlaceButton.textContent = "Placing pin — click the building on the map · Esc cancels";
         }
-        // structures must be visible so the pin lands on the actual building
-        this.setBasemap("satellite");
+        // structures must be visible so the pin lands on the actual building:
+        // a streets map lifts to hybrid; imagery the contributor chose stands
+        if (this.basemap === "streets") this.setBasemap(DEFAULT_BASEMAP);
         // aiming wants the map: on a phone the map takes most of the screen
         this.paneSnap("map");
         const status = document.getElementById("pinStatus");
