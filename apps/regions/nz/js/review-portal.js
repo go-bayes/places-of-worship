@@ -183,25 +183,48 @@ function human(value) {
         return [task.locality, task.address].filter(Boolean).join(" | ") || task.task_id;
     }
 
-    function taskPills(task, draft, agentReview) {
+    // one state per row (jb ruling 2026-09-19): the shared presentation
+    // contract turns the task's status and its latest decision into the
+    // label, the tone and the precedence a reviewer sees; the raw status
+    // string, the draft status and the "unresolved note" pill it used to
+    // repeat are gone. type and priority stay as uncoloured meta pills.
+    const presentation = window.PowTaskPresentation;
+
+    function presentRow(task, latestReview) {
+        if (!presentation) return { label: human(task?.status), tone: "rest", hint: "", priority: 1 };
+        return presentation.present(
+            { status: task?.status, latest_decision_status: latestReview?.decision_status },
+            { viewer: "reviewer" },
+        );
+    }
+
+    function statePillHtml(row) {
+        return `<span class="state-pill tone-${escapeHtml(row.tone)}"${row.hint ? ` title="${escapeHtml(row.hint)}"` : ""}>${escapeHtml(row.label)}</span>`;
+    }
+
+    function taskPills(task, draft, agentReview, latestReview) {
         const pills = [
-            `<span class="pill">${escapeHtml(task.status)}</span>`,
-            `<span class="pill">${escapeHtml(task.task_type)}</span>`,
-            `<span class="pill">${escapeHtml(task.priority)}</span>`,
+            statePillHtml(presentRow(task, latestReview)),
+            `<span class="pill">${escapeHtml(human(task.task_type))}</span>`,
+            `<span class="pill">${escapeHtml(human(task.priority))} priority</span>`,
         ];
         if (agentReview && window.PowAgentReviewPanel) {
             pills.push(window.PowAgentReviewPanel.queuePillHtml(agentReview));
         }
-        if (draft?.draft_status) {
-            pills.push(`<span class="pill green">${escapeHtml(draft.draft_status)}</span>`);
-        }
         if (task.candidate_site_id) {
-            pills.push(`<span class="pill amber">Nominate missing PoW</span>`);
-        }
-        if (task.status === "unresolved_note" || draft?.draft_status === "unresolved_note") {
-            pills.push(`<span class="pill amber">unresolved note</span>`);
+            pills.push(`<span class="pill">Nominated place</span>`);
         }
         return pills.join("");
+    }
+
+    // transport is the other axis: whether this page can talk to the
+    // backend, shown as a dot by the account name and never as a task state
+    function setTransport(name) {
+        const dot = document.getElementById("transportDot");
+        if (!dot || !presentation) return;
+        const row = presentation.transport(name);
+        dot.className = `transport-dot tone-${row.tone}`;
+        dot.textContent = row.label;
     }
 
     function decisionLabel(value) {
@@ -333,11 +356,14 @@ function human(value) {
         }
 
         els.signInButton.innerHTML = "";
-        els.authStatus.className = "status ok";
+        els.authStatus.className = "status";
         els.authStatus.innerHTML = `
             Signed in as <strong>${escapeHtml(userLabel(state.user))}</strong>
             <div class="muted">${escapeHtml(rolesLabel(state.user))}</div>
-            <button id="signOut" class="tertiary" type="button">Sign out</button>
+            <div class="auth-row">
+                <span id="transportDot" class="transport-dot tone-done" aria-live="polite">Connected</span>
+                <button id="signOut" class="tertiary" type="button">Sign out</button>
+            </div>
         `;
         document.getElementById("signOut").addEventListener("click", () => {
             client.signOut({ deliberate: true });
@@ -357,6 +383,7 @@ function human(value) {
         state.busy = true;
         els.refreshQueue.disabled = true;
         setStatus(els.queueStatusText, "Loading review queue...");
+        setTransport("loading");
         try {
             const rows = await client.listReviewQueue({
                 countryCode,
@@ -366,22 +393,35 @@ function human(value) {
             state.queue = rows || [];
             renderQueue();
             reviewMap?.setQueue(state.queue, state.selected?.task?.task_id);
-            setStatus(
-                els.queueStatusText,
-                state.queue.length === 0
-                    ? "No tasks found for this status."
-                    : `${state.queue.length} task${state.queue.length === 1 ? "" : "s"} loaded.`,
-                state.queue.length === 0 ? "" : "ok",
-            );
+            renderQueueRollup();
+            setTransport("ready");
         } catch (error) {
             state.queue = [];
             renderQueue();
             reviewMap?.setQueue([], "");
             setStatus(els.queueStatusText, error.message || "Could not load the review queue.", "error");
+            setTransport("error");
         } finally {
             state.busy = false;
             els.refreshQueue.disabled = false;
         }
+    }
+
+    // the queue line is a rollup, never a count of everything: the most
+    // urgent tone wins and the number counts only the rows in that tone
+    function renderQueueRollup() {
+        if (!presentation || state.queue.length === 0) {
+            els.queueStatusText.className = "";
+            els.queueStatusText.textContent = "";
+            return;
+        }
+        const roll = presentation.rollup(
+            state.queue.map((row) => ({ status: row.task.status, latest_decision_status: row.latestReview?.decision_status })),
+            { viewer: "reviewer" },
+        );
+        const countInLabel = Number.parseInt(roll.label, 10);
+        els.queueStatusText.className = "state-rollup";
+        els.queueStatusText.innerHTML = `<span class="state-pill tone-${escapeHtml(roll.tone)}">${escapeHtml(roll.label)}</span>${countInLabel === roll.total ? "" : `<span>of ${roll.total} loaded</span>`}`;
     }
 
     function renderQueue() {
@@ -397,7 +437,16 @@ function human(value) {
             return true;
         });
         if (visibleQueue.length === 0) {
-            els.queueList.innerHTML = `<div class="empty">No tasks in this queue${claimFilter ? " for this filter" : ""}.</div>`;
+            // one line and one action: the filter case clears the filter,
+            // the empty queue refreshes it
+            els.queueList.innerHTML = claimFilter
+                ? `<div class="state-empty"><strong>No tasks in this queue for this filter.</strong><button type="button" id="queueShowAll">Show all tasks</button></div>`
+                : `<div class="state-empty"><strong>Nothing in this queue.</strong><button type="button" id="queueRefreshEmpty">Refresh</button></div>`;
+            document.getElementById("queueShowAll")?.addEventListener("click", () => {
+                if (els.queueClaimFilter) els.queueClaimFilter.value = "";
+                renderQueue();
+            });
+            document.getElementById("queueRefreshEmpty")?.addEventListener("click", () => loadQueue());
             return;
         }
         const taskButton = (row) => {
@@ -409,11 +458,10 @@ function human(value) {
                 data-task-id="${escapeHtml(task.task_id)}">
                 <strong>${escapeHtml(task.name)}</strong>
                 <span class="muted">${escapeHtml(taskSubtitle(task))}</span>
-                <span class="pill-row">${taskPills(task, latestDraft, latestAgentReview)}</span>
+                <span class="pill-row">${taskPills(task, latestDraft, latestAgentReview, latestReview)}</span>
                 ${row.review_claimant_label ? `<span class="muted">Claimed by ${row.review_claimed_by_me ? "you" : escapeHtml(row.review_claimant_label)}</span>` : ""}
                 ${row.submitted_by_me ? `<span class="muted">Your submission — another reviewer must decide</span>` : ""}
                 ${opinions ? `<span class="muted">Second opinion requested (${opinions})</span>` : ""}
-                ${latestReview?.decision_status ? `<span class="muted">Last decision: ${escapeHtml(decisionLabel(latestReview.decision_status))}</span>` : ""}
             </button>
         `;
         };
@@ -547,7 +595,7 @@ function human(value) {
     }
 
     function renderEmptyDetail(message) {
-        els.detailPanel.innerHTML = `<div class="panel empty">${escapeHtml(message)}</div>`;
+        els.detailPanel.innerHTML = `<div class="panel"><div class="state-empty"><strong>${escapeHtml(message)}</strong></div></div>`;
     }
 
     // "no building here now" is one action for one fact (a rapid "used to
@@ -563,7 +611,7 @@ function human(value) {
     function renderDetail(loading = false, errorMessage = "") {
         const row = state.selected;
         if (!row) {
-            renderEmptyDetail("Select a submitted task after signing in.");
+            renderEmptyDetail(state.user ? "Select a task from the queue." : "Sign in, then select a task from the queue.");
             return;
         }
 
@@ -584,7 +632,7 @@ function human(value) {
             <section class="panel">
                 <h2>${escapeHtml(task.name)}</h2>
                 <p class="muted">${escapeHtml(task.task_brief || "")}</p>
-                <div class="pill-row">${taskPills(task, draft, agentReview)}</div>
+                <div class="pill-row">${taskPills(task, draft, agentReview, review)}</div>
                 ${loading ? `<div class="status">Loading evidence and task history...</div>` : ""}
                 ${errorMessage ? `<div class="status error">${escapeHtml(errorMessage)}</div>` : ""}
                 ${review ? `
@@ -853,7 +901,13 @@ function human(value) {
             host.innerHTML = `<p class="muted">No evidence draft on this task; a decision here carries no review snapshot.</p>`;
             return;
         }
-        host.innerHTML = `<p class="status error">Could not load the review snapshot: ${escapeHtml(state.reviewSnapshotError || "unknown error")}. The panels show the evidence as fetched separately; reload the task before accepting for export.</p>`;
+        // a failure of unknown cause stays open with a retry, never a dead
+        // end: the retry re-reads the task in full
+        host.innerHTML = `<div class="state-banner tone-broken"><span>Could not load the review snapshot: ${escapeHtml(state.reviewSnapshotError || "unknown error")}. The panels show the evidence as fetched separately; the snapshot is needed before accepting for export.</span><button type="button" id="retrySnapshot">Retry</button></div>`;
+        document.getElementById("retrySnapshot")?.addEventListener("click", () => {
+            const id = state.selected?.task?.task_id;
+            if (id) selectTask(id);
+        });
     }
 
     // after a stale-snapshot refusal the selected task is re-read in full
@@ -874,8 +928,11 @@ function human(value) {
         await selectTask(taskId);
         const statusText = document.getElementById("decisionStatusText");
         if (statusText && state.selected?.task?.task_id === taskId) {
-            statusText.textContent = `${notice} The task has been reloaded; check the evidence again before deciding.`;
-            statusText.className = "status error";
+            // the banner carries the reason and one control; the reload has
+            // already happened, so the control re-reads once more on demand
+            statusText.className = "state-banner tone-act";
+            statusText.innerHTML = `<span>Reloaded after a stale snapshot: ${escapeHtml(notice)} Check the evidence again before deciding.</span><button type="button" id="reloadTaskAgain">Reload again</button>`;
+            document.getElementById("reloadTaskAgain")?.addEventListener("click", () => selectTask(taskId));
         }
     }
 
@@ -1543,7 +1600,7 @@ function human(value) {
             if (statusLine) {
                 statusLine.textContent = "Your disagreement will be recorded with the decision. Choose your own decision below.";
             }
-            form.decisionStatus.focus();
+            form.querySelector("[data-decision]")?.focus();
         });
     }
 
@@ -1559,12 +1616,48 @@ function human(value) {
 
     function updateDecisionHelp(form) {
         const help = document.getElementById("decisionHelp");
-        if (!help) return;
-        help.textContent = decisionHint(form.decisionStatus.value);
+        if (help) help.textContent = decisionHint(form.decisionStatus.value);
+        reflectDecisionChoice(form);
+    }
+
+    // the chosen outcome shows on the pressed button, on a pill beside the
+    // chooser and on the record button's label, so the reviewer never has
+    // to reopen the menu to see what will be recorded
+    const DECISION_TONES = {
+        accepted_for_export: "done",
+        needs_more_evidence: "act",
+        rejected: "broken",
+        duplicate_task: "rest",
+        deferred: "rest",
+    };
+
+    function reflectDecisionChoice(form) {
+        const value = form.decisionStatus.value;
+        form.querySelectorAll("[data-decision]").forEach((button) => {
+            if (button.hasAttribute("aria-pressed")) button.setAttribute("aria-pressed", String(Boolean(value) && button.dataset.decision === value));
+        });
+        const chosen = document.getElementById("decisionChosen");
+        if (chosen) {
+            const inPrimary = value === "accepted_for_export" || value === "needs_more_evidence";
+            chosen.hidden = !value || inPrimary;
+            chosen.className = `state-pill tone-${DECISION_TONES[value] || "rest"}`;
+            chosen.textContent = value ? human(decisionLabel(value)) : "";
+        }
+        const record = document.getElementById("recordDecisionButton");
+        if (record) record.textContent = value ? `Record: ${human(decisionLabel(value))}` : "Record decision";
+        const more = document.getElementById("decisionMore");
+        if (more) more.open = false;
     }
 
     function wireDecisionForm(form) {
         form.decisionStatus?.addEventListener("change", () => updateDecisionHelp(form));
+        form.querySelectorAll("[data-decision]").forEach((button) => {
+            if (button.id === "markSystemTest" || button.id === "requestMoreEvidence") return;
+            button.addEventListener("click", () => {
+                setDecisionFormValues(form, { decisionStatus: button.dataset.decision });
+                form.decisionNote?.focus();
+            });
+        });
         // cmd/ctrl+enter from anywhere in the decision form records the
         // decision without a mouse trip, matching the ra portal's scope;
         // submitDecision keeps the busy guard and validation messages
@@ -1648,9 +1741,9 @@ function human(value) {
         return `
             ${claimBar}
             <form id="reviewDecisionForm" class="decision-form">
-                <div>
-                    <label for="decisionStatus">Decision</label>
-                    <select id="decisionStatus" name="decisionStatus" required ${canDecide ? "" : "disabled"}>
+                <div class="wide">
+                    <label id="decisionChoiceLabel">Decision</label>
+                    <select id="decisionStatus" name="decisionStatus" required hidden tabindex="-1" aria-hidden="true" ${canDecide ? "" : "disabled"}>
                         <option value="">choose decision...</option>
                         <option value="accepted_for_export">accepted for export</option>
                         <option value="needs_more_evidence">needs more evidence</option>
@@ -1658,6 +1751,22 @@ function human(value) {
                         <option value="duplicate_task">duplicate task</option>
                         <option value="deferred">deferred</option>
                     </select>
+                    <div class="decision-choice" role="group" aria-labelledby="decisionChoiceLabel">
+                        <button type="button" data-decision="accepted_for_export" aria-pressed="false" ${canDecide ? "" : "disabled"}>Accept for export</button>
+                        <button type="button" class="secondary" id="requestMoreEvidence" data-decision="needs_more_evidence" aria-pressed="false" ${canDecide ? "" : "disabled"}>Request changes</button>
+                        ${canDecide ? `
+                            <details id="decisionMore">
+                                <summary>More outcomes</summary>
+                                <div class="decision-more">
+                                    <button type="button" data-decision="duplicate_task">Duplicate task</button>
+                                    <button type="button" data-decision="deferred">Defer</button>
+                                    <button type="button" class="is-danger" data-decision="rejected">Reject</button>
+                                    <button type="button" class="is-danger" id="markSystemTest" data-decision="rejected">Exclude as system test</button>
+                                </div>
+                            </details>
+                        ` : ""}
+                        <span id="decisionChosen" class="state-pill tone-rest" hidden></span>
+                    </div>
                 </div>
                 <div>
                     <label for="identityDecision">Identity decision</label>
@@ -1700,13 +1809,7 @@ function human(value) {
                 </div>
                 <div class="wide">
                     <div id="decisionHelp" class="review-warning">${escapeHtml(canDecide ? decisionHint("") : "This task is already reviewed or exported. Change the queue status to inspect other work, or reopen from the maintainer workflow if new evidence requires action.")}</div>
-                    ${canDecide ? `
-                        <div class="review-actions">
-                            <button type="button" class="secondary" id="markSystemTest">Exclude as system test</button>
-                            <button type="button" class="secondary" id="requestMoreEvidence">Needs more evidence</button>
-                        </div>
-                    ` : ""}
-                    <button type="submit" ${state.busy || !canDecide || ownSubmission ? "disabled" : ""}>Record review decision</button>
+                    <button type="submit" id="recordDecisionButton" ${state.busy || !canDecide || ownSubmission ? "disabled" : ""}>Record decision</button>
                     <span id="decisionStatusText" class="muted">${draft ? `Draft: ${escapeHtml(draft.evidence_draft_id)}` : "Accepted-for-export requires an evidence draft."}</span>
                 </div>
                 <input type="hidden" name="taskId" value="${escapeHtml(task.task_id)}">
@@ -1734,7 +1837,7 @@ function human(value) {
         els.detailPanel.innerHTML = `
             <div class="panel">
                 <h2>Decision recorded</h2>
-                <div class="status ok">Task status is now ${escapeHtml(taskStatus)}.</div>
+                <div class="state-banner tone-done"><span>Task is now ${escapeHtml(presentRow({ status: taskStatus }).label.toLowerCase())}.</span></div>
                 <div class="review-actions">
                     <button id="openNextInQueue" type="button" ${queueEmpty ? "disabled" : ""}>Open next in queue</button>
                 </div>
@@ -1765,30 +1868,30 @@ function human(value) {
         const decisionStatus = form.decisionStatus.value;
         if (!decisionStatus) {
             statusText.textContent = "Choose a review decision.";
-            statusText.className = "status error";
+            statusText.className = "state-banner tone-broken";
             return;
         }
         if (form.decisionNote.value.trim().length < 8) {
             statusText.textContent = "Add a short decision note.";
-            statusText.className = "status error";
+            statusText.className = "state-banner tone-broken";
             return;
         }
         if (decisionStatus === "accepted_for_export" && !draft) {
             statusText.textContent = "Accepted-for-export decisions require an evidence draft.";
-            statusText.className = "status error";
+            statusText.className = "state-banner tone-broken";
             return;
         }
         // pi ruling 2026-09-11: acceptance for export must carry the
         // snapshot the reviewer inspected; without it the server refuses
         if (decisionStatus === "accepted_for_export" && !state.reviewSnapshot) {
             statusText.textContent = "The review snapshot has not finished loading. Wait for it, or reload the task, before accepting for export.";
-            statusText.className = "status error";
+            statusText.className = "state-banner tone-broken";
             return;
         }
         const locationOutcome = form.locationOutcome?.value || undefined;
         if (decisionStatus === "accepted_for_export" && pinMovedOn(currentTask()) && !locationOutcome) {
             statusText.textContent = "The contributor moved the pin: choose the location ruling before accepting.";
-            statusText.className = "status error";
+            statusText.className = "state-banner tone-broken";
             form.locationOutcome?.focus();
             return;
         }
@@ -1823,6 +1926,7 @@ function human(value) {
         if (submitButton) submitButton.disabled = true;
         statusText.textContent = "Recording review decision...";
         statusText.className = "muted";
+        setTransport("saving");
         const selectedTask = state.selected.task;
         try {
             const result = await client.recordReviewDecision({
@@ -1832,8 +1936,9 @@ function human(value) {
                 // status; the server requires it only for accepted_for_export
                 snapshotHash: state.reviewSnapshot ? state.reviewSnapshot.snapshot_hash : undefined,
             });
-            statusText.textContent = `Recorded. Task status is now ${result.task_status}.`;
-            statusText.className = "status ok";
+            statusText.textContent = `Recorded. Task is now ${presentRow({ status: result.task_status }).label.toLowerCase()}.`;
+            statusText.className = "state-banner tone-done";
+            setTransport("ready");
             // keep the pre-reload order so "next" follows the reviewed row
             const decidedTaskId = selectedTask.task_id;
             const previousIds = state.queue.map((entry) => entry.task.task_id);
@@ -1842,8 +1947,11 @@ function human(value) {
             renderDecisionRecorded(result.task_status, previousIds, decidedTaskId);
         } catch (error) {
             const message = error.message || "Could not record the review decision.";
-            statusText.textContent = message;
-            statusText.className = "status error";
+            // the server answered, so transport is fine; the refusal stays
+            // on screen and the record button is the retry
+            statusText.textContent = /stale/i.test(message) ? message : `${message} Check the form and record again.`;
+            statusText.className = "state-banner tone-broken";
+            setTransport("ready");
             // pi ruling 2026-09-11: a stale snapshot means the task is
             // re-read in full so the reviewer sees the current state before
             // deciding again; the failed decision is never auto-resubmitted
@@ -1893,5 +2001,11 @@ function human(value) {
         if (state.user) await loadQueue();
     }
 
-    init();
+    // the dom tests load this file with the flag set and drive the pure-ish
+    // renderers directly; the page itself boots as before
+    if (window.__POW_TEST_NO_BOOTSTRAP__) {
+        window.__PowReviewPortalTest = { state, els, renderQueue, renderQueueRollup, renderDetail, renderEmptyDetail, decisionForm, wireDecisionForm, setDecisionFormValues, setTransport, renderAuth };
+    } else {
+        init();
+    }
 })();

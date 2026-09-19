@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
           crossorigin="">
+    <link rel="stylesheet" href="../_shared/state.css?v=20260919a">
     <style>
         /* shared tokens (docs/development/ui-design-audit-2026-09-03.md, section 3) */
         :root {
@@ -383,6 +384,15 @@
         .status.ok {
             background: var(--present-soft);
             color: var(--present);
+        }
+
+        /* the transport dot and sign-out share one line under the name */
+        .auth-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 6px;
         }
 
         .review-warning {
@@ -941,9 +951,7 @@
         <div class="detail">
             <div id="reviewMap" class="review-map" role="region" aria-label="Map of the review queue and the unreviewed places"></div>
             <section id="detailPanel">
-                <div class="panel empty">
-                    Select a submitted task after signing in.
-                </div>
+                <div class="panel"><div class="state-empty"><strong>Sign in, then select a task from the queue.</strong></div></div>
             </section>
         </div>
     </main>
@@ -964,6 +972,7 @@
     <script src="js/osm-history.js?v=20260902c"></script>
     <script src="js/occupancy-review.js?v=20260903a"></script>
     <script src="js/review-snapshot-content.js?v=20260912b"></script>
-    <script src="js/review-portal.js?v=20260912c"></script>
+    <script src="js/task-presentation.js?v=20260919a"></script>
+    <script src="js/review-portal.js?v=20260919a"></script>
 </body>
 </html>

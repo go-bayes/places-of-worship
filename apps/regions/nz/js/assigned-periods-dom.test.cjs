@@ -69,7 +69,7 @@ const context = vm.createContext({
   clearTimeout,
 });
 
-for (const file of ["occupancy-contract.js", "function-chain-contract.js", "verification-map.js"]) {
+for (const file of ["occupancy-contract.js", "function-chain-contract.js", "task-presentation.js", "verification-map.js"]) {
   const source = fs.readFileSync(path.join(__dirname, file), "utf8");
   vm.runInContext(source, context, { filename: file });
 }

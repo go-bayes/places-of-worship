@@ -41,7 +41,7 @@ const context = vm.createContext({
   setTimeout,
   clearTimeout,
 });
-for (const file of ["occupancy-contract.js", "verification-map.js"]) {
+for (const file of ["occupancy-contract.js", "task-presentation.js", "verification-map.js"]) {
   vm.runInContext(fs.readFileSync(path.join(__dirname, file), "utf8"), context, { filename: file });
 }
 const parse = window.NzVerificationMap.deepLinkContextFromParams;

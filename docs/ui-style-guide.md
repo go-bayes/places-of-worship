@@ -113,9 +113,9 @@ If these colours change, update both the CSS and this table. Since PR-H3 (2026-0
 
 Use pill or badge components for short machine states:
 
+- `.state-pill` with a `tone-*` class: the task's state for the current viewer, from `PowTaskPresentation.present()` (one per row, first in the row).
 - `.status-pill`: target-year status such as `present`, `absent`, `uncertain`,
   or `not assessed`.
-- `.backend-badge`: shared backend task state.
 - `.skip-badge`: skipped task.
 - `.closed-badge`: local tentative closure or completion cue.
 - `.ra-initials`: RA initials or session count.
@@ -165,17 +165,25 @@ Unknown dates should be blank, with uncertainty explained in the evidence note. 
 
 ## Review And Assignment States
 
-The task list should make these states visible:
+One pure function decides how a task's state is shown (Joseph, 2026-09-19, after the T3 Code survey): `apps/regions/nz/js/task-presentation.js`, `PowTaskPresentation.present(task, { viewer })`, returns the label, the tone, the precedence and the next action for the RA portal, the review portal and any batch rollup. The status values stay the server contract in `convex/model.ts`; the presentation never changes a transition.
 
-- open,
-- in progress,
-- draft saved,
-- needs review,
-- changes requested,
-- reviewed,
-- exported,
-- skipped,
-- reopened.
+Colour is reserved for three meanings, and every other state is uncoloured:
+
+| Tone | Meaning | Class | Colours |
+| --- | --- | --- | --- |
+| act | the viewer must do something now | `.state-pill.tone-act` | the amber triad (`--caution*`), the open-case colour |
+| motion | the viewer's own work is in hand | `.state-pill.tone-motion` | the action blue (`--action`, `--action-soft`) |
+| broken | refused, rejected, or failed | `.state-pill.tone-broken` | the danger pair (`--danger*`) |
+| rest | nothing for this viewer to do now | `.state-pill.tone-rest` | muted ink on transparent, `--line` border |
+| done | a terminal state | `.state-pill.tone-done` | as rest, dashed border and a check; `pi_accepted` and `exported` are absorbing, so a later stale read never moves a task back out of them |
+
+Labels per viewer, in precedence order (highest first). The RA sees: Changes requested (act), Reopened (act), Revision draft saved / In progress / Draft saved (motion), Open (rest), Awaiting review / Note awaiting review (rest), Provisionally closed / Skipped (rest), Reviewed or the decision's own word, Rejected (broken), Duplicate, Deferred, Accepted by reviewer (done), Accepted, Exported (done). The reviewer sees: Needs review / Note to resolve (act), Provisionally closed (act), With the contributor / In hand (rest), Skipped (rest), Reviewed / Awaiting PI / Rejected / Duplicate / Deferred, Accepted, Exported (done). A rollup for a batch or a queue takes the most urgent tone and counts only the rows in that tone: "2 need your action", "3 in hand", "1 awaiting review", "All done", "Nothing here".
+
+The actionable state is the control: where `present()` returns an action, the pill is a `button.state-pill` that opens the task (RA list, My work). On the review portal the two primary outcomes, Accept for export and Request changes, stand as buttons; Duplicate, Defer, Reject and Exclude as system test sit behind one "More outcomes" disclosure. A stale-snapshot refusal, a snapshot that failed to load, or a refusal of unknown cause is a `.state-banner` that carries the reason and one control (Reload again, Retry); it never closes the case silently.
+
+Transport is the other axis: whether the page can talk to the backend. It is shown as `.transport-dot` by the account name (Connected, Loading, Saving, Signed out, Offline, Connection problem) and never as a task pill.
+
+Empty states are one line and at most one action, in `.state-empty`: "No tasks match your filters" with Clear filters; "Nothing in this queue" with Refresh; "Select a task from the queue" with none.
 
 Assignment batches should appear as filters over one shared task list. The UI
 should not imply that each workpack is a separate database or spreadsheet.
