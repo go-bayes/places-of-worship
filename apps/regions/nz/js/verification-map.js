@@ -3934,6 +3934,12 @@ class NzVerificationMap {
         const mode = signedOut ? null : (PORTAL_MODES.has(this.portalMode) ? this.portalMode : "chooser");
         this.renderModeNotice();
         document.body.classList.toggle("portal-signed-out", signedOut);
+        // signed out the map fills the screen and the sign-in floats on it;
+        // leaflet re-measures when that changes either way
+        if (this.portalSignedOutPainted !== signedOut) {
+            this.portalSignedOutPainted = signedOut;
+            if (this.map) window.setTimeout?.(() => this.map?.invalidateSize(), 0);
+        }
         document.body.classList.toggle("portal-chooser", mode === "chooser");
         document.body.classList.toggle("portal-assigned", mode === "assigned");
         document.body.classList.toggle("portal-add", mode === "add");

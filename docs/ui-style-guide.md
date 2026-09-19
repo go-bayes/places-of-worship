@@ -41,8 +41,11 @@ The map interface has two primary regions:
 - `#map`: the map and spatial task markers.
 
 The contributor portal (assignment mode) gates its sidebar behind sign-in
-(ruled 2026-08-29). Signed out, the sidebar shows only the header and the
-sign-in card; the map stays visible for read-only browsing. The sign-in card
+(ruled 2026-08-29). Signed out, the header and the sign-in card float over
+the map as one panel at the top left, and the map fills the screen for
+read-only browsing (ruled 2026-09-19: "float it"); the zoom and locate
+buttons step aside, to the panel's right, or under the basemap pill on a
+phone. After sign-in the sidebar returns with the work. The sign-in card
 carries the Google button, a `Contact to join` button and the folded `Wrong
 account showing?` help, nothing else (ruled 2026-09-19: fewer words); the
 batch id lives in the header, and the invited address shows only when the

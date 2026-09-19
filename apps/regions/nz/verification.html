@@ -2989,6 +2989,70 @@
         /* the entry form's open source links (jb 2026-09-04) */
         .source-links-block { margin: 10px 0; }
         .source-links-block .label-help { display: block; margin-bottom: 6px; }
+
+        /* signed out, the map is the screen (jb 2026-09-19: "float it"):
+           the header and the sign-in card float over the map as one panel
+           and the sidebar column, the divider and the stacked rows go.
+           after sign-in the sidebar returns with the work. the selectors
+           outrank every layout rule above, portrait and phone included */
+        body.assignment-mode.portal-signed-out .app-shell {
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-rows: minmax(0, 1fr);
+            min-height: 0;
+        }
+
+        body.assignment-mode.portal-signed-out .pane-divider {
+            display: none;
+        }
+
+        body.assignment-mode.portal-signed-out .app-shell > #map {
+            grid-column: 1;
+            grid-row: 1;
+            height: 100%;
+            min-height: 0;
+        }
+
+        body.assignment-mode.portal-signed-out .app-shell > .sidebar {
+            grid-column: 1;
+            grid-row: 1;
+            align-self: start;
+            justify-self: start;
+            z-index: 1100;
+            width: min(360px, calc(100% - 24px));
+            max-height: calc(100% - 24px);
+            margin: 12px;
+            overflow-y: auto;
+            border: 1px solid var(--line);
+            border-radius: var(--r-md, 10px);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.28);
+            background: var(--panel);
+        }
+
+        body.assignment-mode.portal-signed-out .sidebar-header {
+            padding: 14px 16px 10px;
+        }
+
+        body.assignment-mode.portal-signed-out .backend-panel {
+            padding: 12px;
+        }
+
+        body.assignment-mode.portal-signed-out .backend-card.auth-required {
+            box-shadow: none;
+        }
+
+        /* the zoom and locate buttons step aside for the floating panel:
+           to its right, or under the basemap pill on a phone */
+        body.assignment-mode.portal-signed-out .leaflet-top.leaflet-left {
+            left: 384px;
+        }
+
+        @media (max-width: 700px) {
+            body.assignment-mode.portal-signed-out .leaflet-top.leaflet-left {
+                left: auto;
+                right: 0;
+                top: 52px;
+            }
+        }
 </style>
 </head>
 <body>
