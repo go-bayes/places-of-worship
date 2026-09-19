@@ -88,6 +88,44 @@ class FirstPassTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'another place'):
             fp.validate(self.record)
 
+    def test_optional_context_links_the_portal_record(self):
+        # no context: the record stands as before
+        fp.validate(self.record)
+        self.record['context'] = {
+            'task_id': 'task_01',
+            'evidence_draft_id': 'draft_01',
+            'evidence_version_hash': '0' * 64,
+            'assistance_request_id': 'assist_01',
+        }
+        restored = fp.validate(self.record)
+        self.assertEqual(restored['context']['evidence_version_hash'], '0' * 64)
+        digest = fp.archive(self.store, self.record)
+        _, archived = fp.read_object(self.store, digest)
+        self.assertEqual(archived['context'], self.record['context'])
+        # every field is optional; the block may name only the task
+        self.record['context'] = {'task_id': 'task_01'}
+        fp.validate(self.record)
+        # an empty block is allowed and means nothing was linked
+        self.record['context'] = {}
+        fp.validate(self.record)
+
+    def test_context_rejects_unknown_fields_and_bad_hashes(self):
+        self.record['context'] = {'task_id': 'task_01', 'reviewer': 'someone'}
+        with self.assertRaisesRegex(ValueError, 'unexpected field reviewer'):
+            fp.validate(self.record)
+        self.record['context'] = {'evidence_version_hash': 'not-a-hash'}
+        with self.assertRaisesRegex(ValueError, 'invalid string pattern'):
+            fp.validate(self.record)
+        self.record['context'] = {'evidence_version_hash': 'A' * 64}
+        with self.assertRaisesRegex(ValueError, 'invalid string pattern'):
+            fp.validate(self.record)
+        self.record['context'] = {'task_id': ''}
+        with self.assertRaisesRegex(ValueError, 'invalid string length'):
+            fp.validate(self.record)
+        self.record['context'] = 'task_01'
+        with self.assertRaisesRegex(ValueError, 'invalid type'):
+            fp.validate(self.record)
+
     def test_unknown_cost_cannot_be_zero(self):
         self.record['usage']['cost_usd'] = 0
         with self.assertRaisesRegex(ValueError, 'remain null'):

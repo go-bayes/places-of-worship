@@ -283,6 +283,36 @@
         "minLength": 1,
         "maxLength": 2000
       }
+    },
+    "context": {
+      "type": "object",
+      "description": "Optional link from this first pass to the portal record it served (JB rulings R-J1 to R-J7, 2026-09-19): the task, the evidence draft, the exact evidence version judged, and the assistance request that asked for the pass. Each field is optional; an absent block means the pass was not run against a portal record.",
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Portal task id the pass was run for."
+        },
+        "evidence_draft_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Evidence draft id the pass read or informed."
+        },
+        "evidence_version_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "SHA-256 of the immutable evidence version the pass judged, so a later reading knows exactly what it saw."
+        },
+        "assistance_request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Assistance request that asked for this pass, when one did."
+        }
+      }
     }
   }
 }
