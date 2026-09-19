@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-19 (agent judgments)
+
+- Added the append-only `agent_judgments` and `judgment_dispositions` tables and the `recordJudgments` write path. The Claude batch-review lane and the internal bundle intake now record every AI recommendation and per-claim source check as a judgment with its judge, model, prompt version, access method, cost basis, and revision parents. The intake's source-level summary records `not_checked` where the reviewer did not check the source. Reviewers can list judgments per task or subject and record a per-judgment disposition. Additive schema change; no task, draft, or decision behaviour changes. See `docs/development/agent-judgments.md`.
+
 ### 2026-09-19 (adjustable layout)
 
 - The RA portal's sidebar-to-map split is now the user's on every screen. Side by side, the bar between the panes drags the sidebar width (320 px to six tenths of the window; double-click, arrow keys and Home also work) and the device remembers it. Portrait screens of any width now use the stacked layout with the existing three-position divider, and a `⇅ Swap` button on the bar chooses which pane is on top; phone-only concessions (one-column forms, hidden legend) now apply at phone width only. The review portal stacks its queue above the detail in portrait as well. The RA guide and `docs/ui-style-guide.md` describe the controls. CI now runs the pane-divider and phone-walkthrough tests.

@@ -6,6 +6,7 @@ import { appendTaskEvent } from "./lib/taskEvents";
 import { sha256 } from "./lib/sha256";
 import { assertNoDuplicateJsonKeys, validateAgentReviewBundle } from "./lib/agentIntake";
 import { recordEvidenceVersion } from "./evidenceVersions";
+import { costBasisOf, recordJudgments, type JudgmentInput } from "./lib/agentJudgments";
 
 declare const process: { env: Record<string, string | undefined> };
 
@@ -64,7 +65,19 @@ export const ingestBundle = internalMutation({
       validation_summary: { status: "internal_agent_intake", bundle_hash: args.bundleHash }, source_claim_key: checked.bundle.submission_key, claim_hash: args.bundleHash,
       agent_intake_only: true, agent_intake_hash: args.bundleHash,
     });
-    const sourcesChecked = checked.bundle.review.claim_checks.map((check) => ({ source_title: check.claim_id, url_or_file: check.source_url, check: "existence" as const, method: "model_assessment" as const, outcome: check.outcome, note: check.note }));
+    // r-j7: the source-level summary says what was done. a claim the reviewer
+    // did not check is recorded as not_checked; an opened or snippet-read
+    // source was a model assessment. the claim-grain record with the real
+    // access method is the agent_judgments write below.
+    const claimsById = new Map<string, any>(dossier.claims.map((claim: any) => [claim.claim_id, claim]));
+    const sourcesChecked = checked.bundle.review.claim_checks.map((check) => ({
+      source_title: claimsById.get(check.claim_id)?.source?.source_name ?? check.claim_id,
+      url_or_file: check.source_url,
+      check: "existence" as const,
+      method: check.access_method === "not_checked" ? ("not_checked" as const) : ("model_assessment" as const),
+      outcome: check.outcome,
+      note: `${check.access_method}: ${check.note}`.slice(0, 1_000),
+    }));
     await ctx.db.insert("agent_reviews", {
       agent_review_id: reviewId, task_id: taskId, evidence_draft_id: draftId, batch_id: `internal-agent:${checked.bundle.submission_key}`, version: 1,
       recommendation: checked.bundle.review.recommendation, reasoning: checked.bundle.review.reasoning, sources_checked: sourcesChecked,
@@ -76,7 +89,65 @@ export const ingestBundle = internalMutation({
     // the intake-only row is versioned like any submission; the version
     // grants no acceptance and the receipt remains the bundle's record
     const version = await recordEvidenceVersion(ctx, { draftRowId, actor: service, kind: "agent_intake", now, idempotencyKey: `agent-intake:${checked.bundle.submission_key}` });
-    await appendTaskEvent(ctx, { taskId, eventType: "imported", actorUserId: service._id, actorRole: "service", newStatus: "needs_review", reason: "Internal agent research bundle received; provisional review only.", evidenceDraftId: draftId, evidenceVersionHash: version.object_hash });
+    // judgments at claim grain (r-j1, r-j2): the advisory reviewer's per-claim
+    // checks with their real access method, its recommendation on the intake
+    // version, and the researcher's status assessment of the place.
+    const context = { task_id: taskId, evidence_draft_id: draftId, evidence_version_hash: version.object_hash, place_ref: dossier.place.place_ref, country_code: dossier.place.country_code ?? "NZ" };
+    const runJudge = (run: typeof checked.bundle.review_run, role: string, promptVersion: string) => ({
+      agent_name: `${run.backend}-${role}-internal`,
+      model_provider: run.backend,
+      model_requested: run.model_requested,
+      model_reported: run.model_id_reported ?? undefined,
+      model_unreported_reason: run.model_id_reported === null ? "The client did not report a model id for this run." : undefined,
+      prompt_version: promptVersion,
+      instruction_sha256: run.prompt_sha256,
+    });
+    const reviewJudge = runJudge(checked.bundle.review_run, "advisory-reviewer", "agent-review.v1");
+    const reviewRun = { agent_run_id: `${checked.bundle.submission_key}:review`, attempt: 1, cost_basis: "unknown" as const };
+    const manifest = dossier.run_manifest ?? {};
+    // a metered basis needs its value; without one the cost is unknown, never zero
+    let researchBasis = costBasisOf(manifest.cost_basis);
+    let researchCost: number | undefined = undefined;
+    if (researchBasis === "unknown" || researchBasis === "subscription_unmetered") researchCost = undefined;
+    else if (typeof manifest.cost_usd_reported === "number" && Number.isFinite(manifest.cost_usd_reported) && manifest.cost_usd_reported >= 0) researchCost = manifest.cost_usd_reported;
+    else researchBasis = "unknown";
+    const researchRun = { agent_run_id: typeof manifest.run_id === "string" ? manifest.run_id : `${checked.bundle.submission_key}:research`, attempt: 1, cost_usd: researchCost, cost_basis: researchBasis };
+    const judgments: JudgmentInput[] = [
+      ...checked.bundle.review.claim_checks.map((check): JudgmentInput => ({
+        subject: { kind: "claim", ref: `${args.bundleHash}#${check.claim_id}` },
+        judgment_kind: "claim_support",
+        outcome: check.outcome,
+        access_method: check.access_method,
+        source_locator: check.source_url,
+        basis_note: check.note.slice(0, 2_000),
+        judge: reviewJudge,
+        run: reviewRun,
+        context,
+      })),
+      {
+        subject: { kind: "evidence_version", ref: version.object_hash },
+        judgment_kind: "recommendation",
+        outcome: checked.bundle.review.recommendation,
+        basis_note: checked.bundle.review.reasoning.slice(0, 2_000),
+        judge: reviewJudge,
+        run: reviewRun,
+        context,
+      },
+    ];
+    const status = dossier.status_assessment;
+    if (status && typeof status.current_status === "string") {
+      judgments.push({
+        subject: { kind: "place", ref: dossier.place.place_ref },
+        judgment_kind: "status_assessment",
+        outcome: status.current_status,
+        basis_note: `${typeof status.basis === "string" ? status.basis : ""}${typeof status.asof_date === "string" ? ` (as of ${status.asof_date})` : ""}`.trim().slice(0, 2_000) || undefined,
+        judge: runJudge(checked.bundle.research_run, "researcher", typeof manifest.prompt_version === "string" ? manifest.prompt_version : "agent-dossier.v1"),
+        run: researchRun,
+        context,
+      });
+    }
+    const recorded = await recordJudgments(ctx, { actorUserId: service._id, judgments, now });
+    await appendTaskEvent(ctx, { taskId, eventType: "imported", actorUserId: service._id, actorRole: "service", newStatus: "needs_review", reason: "Internal agent research bundle received; provisional review only.", evidenceDraftId: draftId, evidenceVersionHash: version.object_hash, clientContext: { judgment_ids: recorded.map((row) => row.judgment_id) } });
     return { receipt_id: receiptId, task_id: taskId, evidence_draft_id: draftId, agent_review_id: reviewId, created: true };
   },
 });
