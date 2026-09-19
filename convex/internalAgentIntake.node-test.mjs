@@ -12,7 +12,7 @@ const bundleJson = fs.readFileSync(fixtureUrl, "utf8");
 const bundle = JSON.parse(bundleJson);
 
 function context() {
-  const rows = { users: [], agent_intake_receipts: [], tasks: [], evidence_drafts: [], evidence_versions: [], evidence_submission_receipts: [], evidence_head_changes: [], site_occupancies: [], agent_reviews: [], task_events: [], review_decisions: [] };
+  const rows = { users: [], agent_intake_receipts: [], tasks: [], evidence_drafts: [], evidence_versions: [], evidence_submission_receipts: [], evidence_head_changes: [], site_occupancies: [], agent_reviews: [], agent_judgments: [], task_events: [], review_decisions: [] };
   const db = {
     query(table) {
       let filters = [];
@@ -51,6 +51,46 @@ test("enabled intake writes one provisional receipt and is idempotent", async ()
   assert.equal(first.created, true); assert.equal(ctx.rows.tasks.length, 1); assert.equal(ctx.rows.agent_intake_receipts.length, 1);
   const second = await ingestBundle._handler(ctx, { bundleJson, bundleHash });
   assert.equal(second.created, false); assert.equal(second.receipt_id, first.receipt_id); assert.equal(ctx.rows.tasks.length, 1);
+});
+
+test("intake records claim-grain judgments with the real access method (r-j7)", async () => {
+  process.env.POW_INTERNAL_AGENT_INGEST_ENABLED = "true";
+  const ctx = context(); const bundleHash = sha256(bundleJson);
+  await ingestBundle._handler(ctx, { bundleJson, bundleHash });
+  const judgments = ctx.rows.agent_judgments;
+  // two claim checks, one recommendation, one status assessment
+  assert.equal(judgments.length, 4);
+  const supports = judgments.filter(j => j.judgment_kind === "claim_support");
+  assert.equal(supports.length, bundle.review.claim_checks.length);
+  for (const [index, check] of bundle.review.claim_checks.entries()) {
+    assert.equal(supports[index].subject_kind, "claim");
+    assert.equal(supports[index].subject_ref, `${bundleHash}#${check.claim_id}`);
+    assert.equal(supports[index].access_method, check.access_method);
+    assert.equal(supports[index].outcome, check.outcome);
+    assert.equal(supports[index].judge.agent_name, "claude-advisory-reviewer-internal");
+    assert.equal(supports[index].judge.instruction_sha256, bundle.review_run.prompt_sha256);
+    assert.equal(supports[index].judge.model_reported, undefined);
+    assert.ok(supports[index].judge.model_unreported_reason);
+  }
+  const recommendation = judgments.find(j => j.judgment_kind === "recommendation");
+  assert.equal(recommendation.outcome, bundle.review.recommendation);
+  assert.equal(recommendation.subject_kind, "evidence_version");
+  assert.equal(recommendation.subject_ref, ctx.rows.evidence_versions[0].object_hash);
+  assert.equal(recommendation.context.task_id, ctx.rows.tasks[0].task_id);
+  const status = judgments.find(j => j.judgment_kind === "status_assessment");
+  assert.equal(status.subject_kind, "place"); assert.equal(status.subject_ref, bundle.dossier.place.place_ref);
+  assert.equal(status.outcome, bundle.dossier.status_assessment.current_status);
+  assert.equal(status.judge.agent_name, "codex-researcher-internal");
+  assert.equal(status.judge.prompt_version, bundle.dossier.run_manifest.prompt_version);
+  assert.equal(status.run.cost_basis, bundle.dossier.run_manifest.cost_basis);
+  assert.equal(status.run.cost_usd, bundle.dossier.run_manifest.cost_usd_reported);
+  // the source-level summary no longer asserts a check that did not run
+  const summary = ctx.rows.agent_reviews[0].sources_checked;
+  assert.ok(summary.every(s => s.method === "not_checked"), "fixture checks were not_checked");
+  assert.equal(summary[0].source_title, bundle.dossier.claims[0].source.source_name);
+  // an identical retry writes nothing more
+  await ingestBundle._handler(ctx, { bundleJson, bundleHash });
+  assert.equal(ctx.rows.agent_judgments.length, 4);
 });
 
 

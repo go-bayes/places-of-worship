@@ -12,6 +12,7 @@ import {
 } from "./lib/limits";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { evidenceSensitivityFor, isExternalAiReviewEligible } from "./lib/sensitivity";
+import { recordJudgments, type JudgmentInput } from "./lib/agentJudgments";
 
 // Claude batch-review lane (docs/portal-claude-batch-review.md).
 // Boundary: humans decide; Claude recommends. Nothing in this module
@@ -290,6 +291,64 @@ export const recordArtifact = internalMutation({
       created_at: now,
     });
 
+    // judgments at claim grain (r-j1, r-j2): the draft-level recommendation
+    // and one claim_support judgment per recorded source check, in the same
+    // transaction as the artifact. the subject is the draft's newest
+    // evidence version when one exists, else the draft itself.
+    const task = await ctx.db
+      .query("tasks")
+      .withIndex("by_task_id", (q) => q.eq("task_id", args.taskId))
+      .unique();
+    const versions = await ctx.db
+      .query("evidence_versions")
+      .withIndex("by_draft_version", (q) => q.eq("evidence_draft_id", args.evidenceDraftId))
+      .collect();
+    const newest = versions.sort((left, right) => right.version_index - left.version_index)[0];
+    const subject = newest === undefined
+      ? { kind: "evidence_draft" as const, ref: args.evidenceDraftId }
+      : { kind: "evidence_version" as const, ref: newest.object_hash };
+    const context = {
+      task_id: args.taskId,
+      evidence_draft_id: args.evidenceDraftId,
+      evidence_version_hash: newest?.object_hash,
+      place_ref: task?.source_record_id ?? args.taskId,
+      country_code: task?.country_code ?? "unknown",
+    };
+    const judge = (model: string) => ({
+      agent_name: args.agentName ?? AGENT_NAME,
+      model_provider: args.modelProvider ?? MODEL_PROVIDER,
+      model_requested: model,
+      // the messages api reports its model id per response; this lane does
+      // not yet carry it through, so the gap is recorded rather than filled
+      model_unreported_reason: "The batch lane records the requested model; the response model id is not captured.",
+      prompt_version: PROMPT_VERSION,
+    });
+    const run = { batch_id: args.batchId, attempt: 1, cost_basis: "unknown" as const };
+    const judgments: JudgmentInput[] = [
+      {
+        subject,
+        judgment_kind: "recommendation",
+        outcome: args.recommendation,
+        basis_note: args.reasoning.slice(0, 2_000),
+        judge: judge(args.modelName ?? SYNTHESIS_MODEL),
+        run,
+        context,
+      },
+      ...args.sourcesChecked.map((check): JudgmentInput => ({
+        subject,
+        judgment_kind: "claim_support",
+        outcome: check.outcome,
+        facet: check.check,
+        access_method: check.method,
+        source_locator: check.url_or_file,
+        basis_note: (check.note ?? "No note recorded.").slice(0, 2_000),
+        judge: judge(args.sourceCheckModel ?? SOURCE_CHECK_MODEL),
+        run,
+        context,
+      })),
+    ];
+    const recorded = await recordJudgments(ctx, { actorUserId: args.serviceUserId, judgments, now });
+
     // audit trail only: the task status is deliberately not touched
     await appendTaskEvent(ctx, {
       taskId: args.taskId,
@@ -298,7 +357,11 @@ export const recordArtifact = internalMutation({
       actorRole: "service",
       reason: `Claude batch review recorded recommendation: ${args.recommendation}.`,
       evidenceDraftId: args.evidenceDraftId,
-      clientContext: { agent_review_id: agentReviewId, batch_id: args.batchId },
+      clientContext: {
+        agent_review_id: agentReviewId,
+        batch_id: args.batchId,
+        judgment_ids: recorded.map((row) => row.judgment_id),
+      },
     });
 
     return agentReviewId;

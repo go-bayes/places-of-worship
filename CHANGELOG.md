@@ -6,6 +6,18 @@
 
 - Added a provisional-record schema and local immutable archive with revision links, validation, and a recovery-copy command. Regression tests cover concurrent writes, corrupted files, revision history, and recovery.
 
+### 2026-09-19 (first screen)
+
+- The RA portal's signed-out card now carries the Google button, a `Contact to join` button and the folded `Wrong account showing?` help, nothing else (JB, 2026-09-19: fewer words), and it floats with the header over a full-screen map instead of heading an empty sidebar (JB: "float it"); the sidebar returns after sign-in. The map lands on `Hybrid` wherever imagery is configured and returns there when an activity ends; a basemap the contributor picks stands, and pin placement lifts only a streets map to hybrid. The map data panel (unreviewed places on or off, the marker legend) keeps its drag grip and gains a `Map data` fold button, both remembered on the device; its note reads in one line. New test `portal-first-screen.test.cjs` in CI.
+
+### 2026-09-19 (agent judgments)
+
+- Added the append-only `agent_judgments` and `judgment_dispositions` tables and the `recordJudgments` write path. The Claude batch-review lane and the internal bundle intake now record every AI recommendation and per-claim source check as a judgment with its judge, model, prompt version, access method, cost basis, and revision parents. The intake's source-level summary records `not_checked` where the reviewer did not check the source. Reviewers can list judgments per task or subject and record a per-judgment disposition. Additive schema change; no task, draft, or decision behaviour changes. See `docs/development/agent-judgments.md`.
+
+### 2026-09-19 (adjustable layout)
+
+- The RA portal's sidebar-to-map split is now the user's on every screen. Side by side, the bar between the panes drags the sidebar width (320 px to six tenths of the window; double-click, arrow keys and Home also work) and the device remembers it. Portrait screens of any width now use the stacked layout with the existing three-position divider, and a `⇅ Swap` button on the bar chooses which pane is on top; phone-only concessions (one-column forms, hidden legend) now apply at phone width only. The review portal stacks its queue above the detail in portrait as well. The RA guide and `docs/ui-style-guide.md` describe the controls. CI now runs the pane-divider and phone-walkthrough tests.
+
 ### 2026-09-18 (domain certificate)
 
 - Restored certificate renewal for `religionmap.org` on 2026-09-18. The apex A/AAAA records and `www` CNAME now use Cloudflare DNS only. GitHub Pages reports an approved replacement certificate expiring on 2026-12-17, HTTPS enforcement is enabled, and the HTTPS apex returns 200. The earlier proxied configuration produced `bad_authz`; an expired origin certificate can produce Cloudflare error 526 when strict origin-certificate validation is enabled. Keep these GitHub Pages records DNS only. The separate Worker domains remain unchanged. Corrected the documented tile hostname to `tiles.placemap.org`. See `docs/data-storage.md`.

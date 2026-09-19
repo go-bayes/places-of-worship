@@ -951,11 +951,25 @@ const SKIP_REASON_CHIPS = [
 // ordinary nominations may instead preserve an explicitly approximate area
 const PIN_MIN_PLACEMENT_ZOOM = 15;
 const PIN_MIN_APPROXIMATE_ZOOM = 8;
-// phone panes (jb 2026-09-05): the entry pane's share of the screen snaps
-// to one of three detents, and neither pane ever leaves the screen
+// stacked panes (jb 2026-09-05 phones; jb 2026-09-19 any portrait screen):
+// the entry pane's share of the screen snaps to one of three detents, and
+// neither pane ever leaves the screen. the query must match the stacked
+// block in verification.html
 const PANE_DETENTS = [15, 50, 85];
 const PANE_SPLIT_KEY = "pow-pane-split";
-const PANE_PHONE_QUERY = "(max-width: 900px)";
+const PANE_PHONE_QUERY = "(max-width: 900px), (orientation: portrait)";
+// which pane is on top in the stacked layout, when the user has chosen
+const PANE_STACK_KEY = "pow-pane-stack";
+// side by side (jb 2026-09-19, the map's size should be adjustable): the
+// sidebar width in px, dragged on the same divider and remembered apart
+// from the stacked split
+const PANE_COLS_KEY = "pow-pane-split-cols";
+// whether the map data panel is folded to its bar (per device)
+const MAP_DATA_FOLD_KEY = "pow-map-data-folded";
+const SIDEBAR_W_DEFAULT = 420;
+const SIDEBAR_W_MIN = 320;
+const SIDEBAR_W_MAX_SHARE = 0.6;
+const SIDEBAR_W_STEP = 40;
 // the contributor's own position (jb 2026-09-05): one fix per request,
 // high accuracy, at most half a minute old, and the zoom it lands at
 const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 };
@@ -975,10 +989,10 @@ const SATELLITE_TILE_URL = MAPTILER_API_KEY
 const HYBRID_TILE_URL = MAPTILER_API_KEY
     ? `https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${encodeURIComponent(MAPTILER_API_KEY)}`
     : "";
-// add mode prefers imagery once streets stop showing individual buildings;
-// satellite is the default imagery (jb 2026-09-04: "most informative"),
-// hybrid stays on offer for its labels where maptiler draws them
-const PORTAL_AUTO_SATELLITE_ZOOM = 15;
+// the map lands on hybrid (jb 2026-09-19): imagery for the buildings with
+// street and place labels for orientation; streets is the fallback when no
+// key ships or the key is refused. satellite stays on offer for a bare look
+const DEFAULT_BASEMAP = HYBRID_TILE_URL ? "hybrid" : "streets";
 // signed-in portal activity, kept per country and batch for the tab's life
 const PORTAL_MODES = new Set(["assigned", "add"]);
 const PORTAL_MODE_KEY = `pow_portal_mode_v1:${COUNTRY_CONFIG.countryCode.toLowerCase()}${ASSIGNMENT_SESSION_SEGMENT}`;
@@ -2097,19 +2111,18 @@ class NzVerificationMap {
         }
 
         if (!this.backendUser) {
+            // fewer words (jb 2026-09-19): the google button, one line to
+            // ask for access, and the account help folded away. the batch
+            // id already sits in the header; the invited address shows only
+            // when the link carries it
             panel.innerHTML = `
                 <div class="backend-card auth-required">
-                    <strong>${ASSIGNMENT_MODE ? "1. Sign in to start" : "Shared task backend"}</strong>
-                    ${assignmentLabel}
+                    <strong>${ASSIGNMENT_MODE ? "1. Sign in to start" : "Sign in"}</strong>
                     ${this.pendingDeepLink ? `<span role="note">Sign in to revise <em>${escapeHtml(this.pendingDeepLink.name || "a place on the map")}</em>; it opens here after sign-in.</span>` : ""}
-                    <span>${ASSIGNMENT_MODE
-                        ? `${INVITED_EMAIL_HINT
-                            ? `Use ${escapeHtml(INVITED_EMAIL_HINT)}, the Google account JB invited.`
-                            : "Use the Google account JB invited (check the invitation email if you're not sure which one)."} After sign-in, ${COUNTRY_CONFIG.assignmentsOffered === false ? "add missing places or revise places already on the map" : "choose between your assigned tasks and adding missing places"}; saved work goes straight to the shared review queue.`
-                        : "Sign in with Google to load assigned tasks and save evidence directly for review."}</span>
+                    ${INVITED_EMAIL_HINT ? `<span>Use <strong class="inline">${escapeHtml(INVITED_EMAIL_HINT)}</strong>.</span>` : ""}
                     <div id="googleSignInButton" class="google-sign-in-host"></div>
-                    <span class="copy-help">Not a project member yet? Access is by invitation from the project team; the <a href="https://github.com/go-bayes/places-of-worship" target="_blank" rel="noopener">project page</a> says how to get in touch.</span>
-                    <details class="backend-help"><summary>Wrong account showing?</summary>The Google button shows accounts already signed into this browser. If the wrong name appears, choose another Google account or use a browser profile signed into the invited account.</details>
+                    <a class="join-button" href="https://github.com/go-bayes/places-of-worship" target="_blank" rel="noopener">Contact to join</a>
+                    <details class="backend-help"><summary>Wrong account showing?</summary>The button lists accounts already signed in to this browser. Pick another, or open a browser profile signed in to the invited account.</details>
                     ${this.backendLastError ? `<span class="copy-status">${escapeHtml(this.backendLastError)}</span>` : ""}
                 </div>
             `;
@@ -2652,12 +2665,8 @@ class NzVerificationMap {
             this.watchImageryLayer(this.satelliteLayer);
             this.watchImageryLayer(this.hybridLayer);
             this.addBasemapControl();
-            // add mode: imagery takes over once buildings are resolvable,
-            // unless the contributor has picked a basemap by hand
-            this.map.on("zoomend", () => {
-                if (this.portalMode !== "add" || this.basemapUserChosen) return;
-                if (this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM) this.setBasemap("satellite");
-            });
+            // land on hybrid; a refused key drops the map back to streets
+            this.setBasemap(DEFAULT_BASEMAP);
         }
 
         // context dots ride the canvas (preferCanvas), so they always paint
@@ -2680,8 +2689,103 @@ class NzVerificationMap {
         return Boolean(window.matchMedia?.(PANE_PHONE_QUERY)?.matches && document.getElementById("paneDivider"));
     }
 
+    // side by side: the same divider drags the sidebar width instead
+    paneColumnsActive() {
+        return Boolean(document.getElementById("paneDivider") && !window.matchMedia?.(PANE_PHONE_QUERY)?.matches);
+    }
+
+    // the user's stacking choice wins; the mode default stands otherwise
     paneEntryOnTop() {
+        const chosen = this.paneStack ?? this.paneShell?.getAttribute?.("data-stack");
+        if (chosen === "map-top") return false;
+        if (chosen === "entry-top") return true;
         return Boolean(document.body?.classList?.contains?.("assignment-mode"));
+    }
+
+    // chosen: a tap on the swap button; the device remembers it
+    setPaneStack(order, { chosen = false } = {}) {
+        const valid = order === "map-top" || order === "entry-top" ? order : null;
+        this.paneStack = valid;
+        const shell = this.paneShell ?? document.querySelector?.(".app-shell");
+        if (shell) {
+            if (valid) shell.setAttribute?.("data-stack", valid);
+            else shell.removeAttribute?.("data-stack");
+        }
+        if (chosen) {
+            try {
+                if (valid) localStorage.setItem(PANE_STACK_KEY, valid);
+                else localStorage.removeItem(PANE_STACK_KEY);
+            } catch (error) {
+                // storage unavailable: the order lives for this page only
+            }
+        }
+        this.refreshPaneAxis();
+        this.applyPaneShare(this.paneShare ?? PANE_DETENTS[1], { animate: false });
+        return valid;
+    }
+
+    // the sidebar width implied by a pointer at clientX over the shell,
+    // clamped so neither pane can be dragged away
+    sidebarWidthFromPointer(clientX, rect = this.paneShell?.getBoundingClientRect?.()) {
+        if (!rect || !(rect.width > 0)) return SIDEBAR_W_DEFAULT;
+        return this.clampSidebarWidth(clientX - rect.left, rect.width);
+    }
+
+    // the widest the sidebar may be: six tenths of the shell, never under the floor
+    sidebarWidthMax(shellWidth) {
+        return Number.isFinite(shellWidth) && shellWidth > 0 ? Math.max(SIDEBAR_W_MIN, Math.floor(shellWidth * SIDEBAR_W_MAX_SHARE)) : Infinity;
+    }
+
+    clampSidebarWidth(width, shellWidth) {
+        const value = Number(width);
+        if (!Number.isFinite(value)) return SIDEBAR_W_DEFAULT;
+        return Math.round(Math.min(this.sidebarWidthMax(shellWidth), Math.max(SIDEBAR_W_MIN, value)));
+    }
+
+    // the width reaches the shell as a css variable and leaflet re-measures;
+    // a chosen width is remembered on the device apart from the stacked split
+    applySidebarWidth(width, { chosen = false } = {}) {
+        const shell = this.paneShell;
+        if (!shell) return false;
+        const value = this.clampSidebarWidth(width, shell.getBoundingClientRect?.()?.width);
+        this.sidebarWidth = value;
+        shell.style.setProperty("--sidebar-w", `${value}px`);
+        const divider = document.getElementById("paneDivider");
+        if (divider && this.paneColumnsActive()) divider.setAttribute("aria-valuenow", String(value));
+        if (chosen) {
+            try {
+                localStorage.setItem(PANE_COLS_KEY, String(value));
+            } catch (error) {
+                // storage unavailable: the width lives for this page only
+            }
+        }
+        this.map?.invalidateSize();
+        return true;
+    }
+
+    // the divider describes the axis it drags: the split between stacked
+    // panes, or the sidebar width beside the map
+    refreshPaneAxis() {
+        const divider = document.getElementById("paneDivider");
+        if (!divider) return;
+        const grip = divider.querySelector?.(".pane-grip");
+        if (this.paneLayoutActive()) {
+            divider.setAttribute("aria-orientation", "horizontal");
+            divider.setAttribute("aria-label", "Resize the entry pane and the map");
+            divider.setAttribute("aria-valuemin", String(PANE_DETENTS[0]));
+            divider.setAttribute("aria-valuemax", String(PANE_DETENTS[PANE_DETENTS.length - 1]));
+            divider.setAttribute("aria-valuenow", String(Math.round(this.paneShare ?? PANE_DETENTS[1])));
+            if (grip) grip.textContent = this.paneEntryOnTop() ? "⠿ drag · entry ↕ map" : "⠿ drag · map ↕ entry";
+        } else {
+            divider.setAttribute("aria-orientation", "vertical");
+            divider.setAttribute("aria-label", "Resize the sidebar and the map");
+            divider.setAttribute("aria-valuemin", String(SIDEBAR_W_MIN));
+            const shellWidth = this.paneShell?.getBoundingClientRect?.()?.width;
+            const max = this.sidebarWidthMax(shellWidth);
+            divider.setAttribute("aria-valuemax", String(Number.isFinite(max) ? max : SIDEBAR_W_DEFAULT));
+            divider.setAttribute("aria-valuenow", String(this.sidebarWidth ?? SIDEBAR_W_DEFAULT));
+            if (grip) grip.textContent = "⠿ drag · sidebar ↔ map";
+        }
     }
 
     // the nearest detent to a share
@@ -2725,7 +2829,7 @@ class NzVerificationMap {
             this.paneSettled = share;
             shell.setAttribute?.("data-pane", share >= PANE_DETENTS[2] ? "entry" : share <= PANE_DETENTS[0] ? "map" : "half");
             const divider = document.getElementById("paneDivider");
-            if (divider) divider.setAttribute("aria-valuenow", String(Math.round(share)));
+            if (divider && this.paneLayoutActive()) divider.setAttribute("aria-valuenow", String(Math.round(share)));
             paint(share);
             this.map?.invalidateSize();
         };
@@ -2798,40 +2902,84 @@ class NzVerificationMap {
         }
         this.paneRestShare = rest;
         this.paneShare = rest;
+        // the stacking order and the sidebar width the device remembers
+        let stack = null;
+        let width = SIDEBAR_W_DEFAULT;
+        try {
+            const savedStack = localStorage.getItem(PANE_STACK_KEY);
+            if (savedStack === "map-top" || savedStack === "entry-top") stack = savedStack;
+            const savedWidth = Number(localStorage.getItem(PANE_COLS_KEY));
+            if (Number.isFinite(savedWidth) && savedWidth > 0) width = savedWidth;
+        } catch (error) {
+            // storage unavailable or unreadable: mode default and default width
+        }
+        this.paneStack = stack;
+        if (stack) shell.setAttribute?.("data-stack", stack);
+        this.applySidebarWidth(width);
         this.applyPaneShare(rest, { animate: false });
+        this.refreshPaneAxis();
+        const swap = document.getElementById("paneSwapButton");
+        if (swap) {
+            // the button sits on the drag bar; its taps are not drags
+            swap.addEventListener("pointerdown", (event) => event.stopPropagation());
+            swap.addEventListener("click", (event) => {
+                event.stopPropagation();
+                this.setPaneStack(this.paneEntryOnTop() ? "map-top" : "entry-top", { chosen: true });
+            });
+        }
         let drag = null;
         divider.addEventListener("pointerdown", (event) => {
             if (event.button !== undefined && event.button !== 0) return;
-            if (!this.paneLayoutActive()) return;
-            drag = { startY: event.clientY, moved: false };
+            const axis = this.paneLayoutActive() ? "rows" : this.paneColumnsActive() ? "cols" : null;
+            if (!axis) return;
+            drag = { axis, startX: event.clientX, startY: event.clientY, moved: false };
             divider.setPointerCapture?.(event.pointerId);
             shell.classList.add("pane-dragging");
             event.preventDefault();
         });
         divider.addEventListener("pointermove", (event) => {
             if (!drag) return;
-            if (Math.abs(event.clientY - drag.startY) > 4) drag.moved = true;
-            if (drag.moved) this.applyPaneShare(this.paneShareFromPointer(event.clientY), { animate: false });
+            const travel = drag.axis === "rows" ? Math.abs(event.clientY - drag.startY) : Math.abs(event.clientX - drag.startX);
+            if (travel > 4) drag.moved = true;
+            if (!drag.moved) return;
+            if (drag.axis === "rows") this.applyPaneShare(this.paneShareFromPointer(event.clientY), { animate: false });
+            else this.applySidebarWidth(this.sidebarWidthFromPointer(event.clientX));
         });
         const end = (event) => {
             if (!drag) return;
-            const moved = drag.moved;
+            const { axis, moved } = drag;
             drag = null;
             divider.releasePointerCapture?.(event.pointerId);
             shell.classList.remove("pane-dragging");
-            if (moved) this.setPaneSplit(this.paneShareFromPointer(event.clientY), { chosen: true });
+            if (!moved) return;
+            if (axis === "rows") this.setPaneSplit(this.paneShareFromPointer(event.clientY), { chosen: true });
+            else this.applySidebarWidth(this.sidebarWidthFromPointer(event.clientX), { chosen: true });
         };
         divider.addEventListener("pointerup", end);
         divider.addEventListener("pointercancel", end);
-        // a double tap on the bar returns it to half
-        divider.addEventListener("dblclick", () => this.setPaneSplit(PANE_DETENTS[1], { chosen: true }));
+        // a double tap on the bar returns it to half, or to the default width
+        divider.addEventListener("dblclick", () => {
+            if (this.paneLayoutActive()) this.setPaneSplit(PANE_DETENTS[1], { chosen: true });
+            else this.applySidebarWidth(SIDEBAR_W_DEFAULT, { chosen: true });
+        });
         divider.addEventListener("keydown", (event) => {
-            if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-                event.preventDefault();
-                this.setPaneSplit(this.paneDetentTowards(event.key === "ArrowUp" ? -1 : 1), { chosen: true });
-            } else if (event.key === "Home") {
-                event.preventDefault();
-                this.setPaneSplit(PANE_DETENTS[1], { chosen: true });
+            if (this.paneLayoutActive()) {
+                if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+                    event.preventDefault();
+                    this.setPaneSplit(this.paneDetentTowards(event.key === "ArrowUp" ? -1 : 1), { chosen: true });
+                } else if (event.key === "Home") {
+                    event.preventDefault();
+                    this.setPaneSplit(PANE_DETENTS[1], { chosen: true });
+                }
+            } else if (this.paneColumnsActive()) {
+                if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+                    event.preventDefault();
+                    const step = event.key === "ArrowLeft" ? -SIDEBAR_W_STEP : SIDEBAR_W_STEP;
+                    this.applySidebarWidth((this.sidebarWidth ?? SIDEBAR_W_DEFAULT) + step, { chosen: true });
+                } else if (event.key === "Home") {
+                    event.preventDefault();
+                    this.applySidebarWidth(SIDEBAR_W_DEFAULT, { chosen: true });
+                }
             }
         });
         // typing needs the entry pane: a field taking focus snaps to it
@@ -2841,8 +2989,29 @@ class NzVerificationMap {
             if (target.type === "checkbox" || target.type === "radio") return;
             this.paneSnap("entry");
         });
+        // a rotation or a resize across the stacked boundary changes the axis
         window.matchMedia?.(PANE_PHONE_QUERY)?.addEventListener?.("change", () => {
+            this.refreshPaneAxis();
+            this.applySidebarWidth(this.sidebarWidth ?? SIDEBAR_W_DEFAULT);
             this.applyPaneShare(this.paneShare, { animate: false });
+        });
+        // a narrower window inside the same layout re-clamps the width, so a
+        // wide sidebar cannot leave the map a sliver; the remembered width is
+        // untouched and returns when the window widens
+        window.addEventListener?.("resize", () => {
+            window.clearTimeout(this.sidebarResizeTimer);
+            this.sidebarResizeTimer = window.setTimeout(() => {
+                if (!this.paneColumnsActive()) return;
+                let remembered = this.sidebarWidth ?? SIDEBAR_W_DEFAULT;
+                try {
+                    const saved = Number(localStorage.getItem(PANE_COLS_KEY));
+                    if (Number.isFinite(saved) && saved > 0) remembered = saved;
+                } catch (error) {
+                    // storage unavailable: the current width is the memory
+                }
+                this.applySidebarWidth(remembered);
+                this.refreshPaneAxis();
+            }, 80);
         });
     }
 
@@ -2991,8 +3160,14 @@ class NzVerificationMap {
             // a phone the bottom-left corner sits under the browser's own
             // toolbar, so the contributor drags it by the grip to wherever
             // the map is clear; the spot is kept on this device
+            // one bar: the grip moves the panel, the "Map data" button folds
+            // it to the bar alone (jb 2026-09-19), both kept on this device
             div.innerHTML = `
-                <button type="button" class="legend-grip" aria-label="Move this panel: drag it">⠿ move</button>
+                <div class="legend-bar">
+                    <button type="button" class="legend-grip" aria-label="Move this panel: drag it">⠿</button>
+                    <button type="button" class="legend-fold" aria-expanded="true" aria-controls="portalMapData">Map data <span class="legend-caret" aria-hidden="true">▾</span></button>
+                </div>
+                <div id="portalMapData" class="legend-body">
                 ${source !== "none" ? `
                 <select id="portalPointsSelect" aria-label="Unreviewed places">
                     ${modes.map(([value, label]) => `<option value="${value}"${value === this.pointsMode ? " selected" : ""}>${label}</option>`).join("")}
@@ -3015,6 +3190,7 @@ class NzVerificationMap {
                     <span class="legend-row"><span class="legend-dot vm-unvalidated-swatch"></span>not yet reviewed (open case)</span>
                     ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>unreviewed place (open case), click to revise</span>` : ""}
                 </div>
+                </div>
             `;
             // keep map gestures away from the control
             L.DomEvent.disableClickPropagation(div);
@@ -3023,6 +3199,11 @@ class NzVerificationMap {
                 this.setPointsMode(event.target.value);
             });
             this.makeControlMovable(div, div.querySelector(".legend-grip"));
+            this.mapDataPanel = div;
+            div.querySelector(".legend-fold")?.addEventListener("click", () => {
+                this.setMapDataFolded(!div.classList.contains("folded"), { chosen: true });
+            });
+            this.setMapDataFolded(this.mapDataFoldedOnDevice());
             return div;
         };
         control.addTo(this.map);
@@ -3038,6 +3219,36 @@ class NzVerificationMap {
             const pointsSelect = document.getElementById("portalPointsSelect");
             if (pointsSelect) pointsSelect.value = mode;
         }
+    }
+
+    // the map data panel folds to its bar; the choice is kept per device
+    mapDataFoldedOnDevice() {
+        try {
+            return localStorage.getItem(MAP_DATA_FOLD_KEY) === "1";
+        } catch (error) {
+            return false;
+        }
+    }
+
+    setMapDataFolded(folded, { chosen = false } = {}) {
+        const div = this.mapDataPanel;
+        if (!div) return false;
+        const on = Boolean(folded);
+        div.classList.toggle("folded", on);
+        const button = div.querySelector(".legend-fold");
+        if (button) button.setAttribute("aria-expanded", on ? "false" : "true");
+        const caret = div.querySelector(".legend-caret");
+        if (caret) caret.textContent = on ? "▸" : "▾";
+        const body = div.querySelector(".legend-body");
+        if (body) body.hidden = on;
+        if (chosen) {
+            try {
+                localStorage.setItem(MAP_DATA_FOLD_KEY, on ? "1" : "0");
+            } catch (error) {
+                // storage unavailable: the fold lives for this page only
+            }
+        }
+        return on;
     }
 
     // drags a leaflet control by its grip (pointer events, so touch and
@@ -3134,7 +3345,7 @@ class NzVerificationMap {
         const year = this.targetYear;
         if (this.pointsMode === "all") {
             const tiles = this.tilesAvailable();
-            note.textContent = `amber dots are today's OpenStreetMap places${TARGET_YEARS.length ? `, not ${year} places` : ""}, every one an open case until reviewed${tiles ? `; zoom in past ${TILE_DOTS_MIN_ZOOM} for all of them` : ""}. Click one to revise it.`;
+            note.textContent = `Amber dots: today's OpenStreetMap places${TARGET_YEARS.length ? `, not ${year} places` : ""}, unreviewed${tiles ? `; zoom past ${TILE_DOTS_MIN_ZOOM} for all` : ""}. Click one to revise.`;
             note.hidden = false;
         } else {
             note.textContent = "";
@@ -3723,6 +3934,12 @@ class NzVerificationMap {
         const mode = signedOut ? null : (PORTAL_MODES.has(this.portalMode) ? this.portalMode : "chooser");
         this.renderModeNotice();
         document.body.classList.toggle("portal-signed-out", signedOut);
+        // signed out the map fills the screen and the sign-in floats on it;
+        // leaflet re-measures when that changes either way
+        if (this.portalSignedOutPainted !== signedOut) {
+            this.portalSignedOutPainted = signedOut;
+            if (this.map) window.setTimeout?.(() => this.map?.invalidateSize(), 0);
+        }
         document.body.classList.toggle("portal-chooser", mode === "chooser");
         document.body.classList.toggle("portal-assigned", mode === "assigned");
         document.body.classList.toggle("portal-add", mode === "add");
@@ -3796,11 +4013,6 @@ class NzVerificationMap {
             // storage unavailable: the choice lives in memory only
         }
         if (next === "add") {
-            // imagery is the working surface for placing a pin, once close
-            // enough for buildings to show
-            if (this.map && this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM && !this.basemapUserChosen) {
-                this.setBasemap("satellite");
-            }
             // "revise" in the mode's name must be visible on arrival: show
             // the mapped places so their revise entry point exists on screen
             const source = this.contextDotSource();
@@ -3811,8 +4023,8 @@ class NzVerificationMap {
                 const pointsSelect = document.getElementById("portalPointsSelect");
                 if (pointsSelect) pointsSelect.value = mode;
             }
-        } else if (this.basemap !== "streets" && !this.basemapUserChosen) {
-            this.setBasemap("streets");
+        } else if (this.basemap !== DEFAULT_BASEMAP && !this.basemapUserChosen) {
+            this.setBasemap(DEFAULT_BASEMAP);
         }
         this.selectedTask = null;
         this.renderInitialDetail();
@@ -3832,9 +4044,15 @@ class NzVerificationMap {
             stored = "";
         }
         this.portalMode = PORTAL_MODES.has(stored) ? stored : null;
-        if (this.portalMode === "add" && this.map && this.map.getZoom() >= PORTAL_AUTO_SATELLITE_ZOOM) {
-            this.setBasemap("satellite");
-        }
+    }
+
+    // structures must be visible so the pin lands on the actual building: an
+    // automatic streets map lifts to hybrid; streets the contributor chose by
+    // hand stands, since a chosen basemap holds for the session
+    liftBasemapForPin() {
+        if (this.basemap !== "streets" || this.basemapUserChosen) return false;
+        this.setBasemap(DEFAULT_BASEMAP);
+        return true;
     }
 
     // --- basemap: streets (osm) or satellite (maptiler) ---
@@ -3846,8 +4064,8 @@ class NzVerificationMap {
             div.setAttribute("role", "group");
             div.setAttribute("aria-label", "Basemap");
             div.innerHTML = `
-                <button type="button" data-basemap="streets" aria-pressed="true">Streets</button>
-                <button type="button" data-basemap="hybrid" aria-pressed="false">Hybrid</button>
+                <button type="button" data-basemap="streets" aria-pressed="false">Streets</button>
+                <button type="button" data-basemap="hybrid" aria-pressed="true">Hybrid</button>
                 <button type="button" data-basemap="satellite" aria-pressed="false">Satellite</button>
             `;
             L.DomEvent.disableClickPropagation(div);
@@ -10534,8 +10752,7 @@ class NzVerificationMap {
             addPlaceButton.classList.add("placing");
             addPlaceButton.textContent = "Placing pin — click the building on the map · Esc cancels";
         }
-        // structures must be visible so the pin lands on the actual building
-        this.setBasemap("satellite");
+        this.liftBasemapForPin();
         // aiming wants the map: on a phone the map takes most of the screen
         this.paneSnap("map");
         const status = document.getElementById("pinStatus");
