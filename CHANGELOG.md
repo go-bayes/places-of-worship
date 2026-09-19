@@ -14,6 +14,10 @@
 
 - The RA portal's sidebar-to-map split is now the user's on every screen. Side by side, the bar between the panes drags the sidebar width (320 px to six tenths of the window; double-click, arrow keys and Home also work) and the device remembers it. Portrait screens of any width now use the stacked layout with the existing three-position divider, and a `⇅ Swap` button on the bar chooses which pane is on top; phone-only concessions (one-column forms, hidden legend) now apply at phone width only. The review portal stacks its queue above the detail in portrait as well. The RA guide and `docs/ui-style-guide.md` describe the controls. CI now runs the pane-divider and phone-walkthrough tests.
 
+### 2026-09-18 (contribution prototype)
+
+- Added an opt-in workbench prototype for simple public nominations, RA agent-help requests, and annotated research records. The prototype preserves local drafts and clearly labels unsent requests and illustrative answers. The live portal is unchanged; the design document specifies the backend and review integration.
+
 ### 2026-09-18 (domain certificate)
 
 - Restored certificate renewal for `religionmap.org` on 2026-09-18. The apex A/AAAA records and `www` CNAME now use Cloudflare DNS only. GitHub Pages reports an approved replacement certificate expiring on 2026-12-17, HTTPS enforcement is enabled, and the HTTPS apex returns 200. The earlier proxied configuration produced `bad_authz`; an expired origin certificate can produce Cloudflare error 526 when strict origin-certificate validation is enabled. Keep these GitHub Pages records DNS only. The separate Worker domains remain unchanged. Corrected the documented tile hostname to `tiles.placemap.org`. See `docs/data-storage.md`.

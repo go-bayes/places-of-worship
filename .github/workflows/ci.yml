@@ -32,6 +32,7 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           npm run typecheck
+          npm run test:concept
       - name: portal unit tests
         run: |
           node apps/regions/nz/js/claude-review-panel.test.cjs
