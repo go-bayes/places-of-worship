@@ -4046,6 +4046,15 @@ class NzVerificationMap {
         this.portalMode = PORTAL_MODES.has(stored) ? stored : null;
     }
 
+    // structures must be visible so the pin lands on the actual building: an
+    // automatic streets map lifts to hybrid; streets the contributor chose by
+    // hand stands, since a chosen basemap holds for the session
+    liftBasemapForPin() {
+        if (this.basemap !== "streets" || this.basemapUserChosen) return false;
+        this.setBasemap(DEFAULT_BASEMAP);
+        return true;
+    }
+
     // --- basemap: streets (osm) or satellite (maptiler) ---
 
     addBasemapControl() {
@@ -10743,9 +10752,7 @@ class NzVerificationMap {
             addPlaceButton.classList.add("placing");
             addPlaceButton.textContent = "Placing pin — click the building on the map · Esc cancels";
         }
-        // structures must be visible so the pin lands on the actual building:
-        // a streets map lifts to hybrid; imagery the contributor chose stands
-        if (this.basemap === "streets") this.setBasemap(DEFAULT_BASEMAP);
+        this.liftBasemapForPin();
         // aiming wants the map: on a phone the map takes most of the screen
         this.paneSnap("map");
         const status = document.getElementById("pinStatus");

@@ -47,6 +47,9 @@ const window = {
   setTimeout, clearTimeout,
   matchMedia: () => ({ matches: phone }),
   isSecureContext: true,
+  // a maptiler key, so the hybrid and satellite layers exist and the
+  // landing basemap is hybrid, as on the live portal
+  MAPTILER_API_KEY: "test-key",
 };
 const navigator = { geolocation: null };
 const context = vm.createContext({
@@ -90,7 +93,7 @@ const fresh = () => Object.create(window.NzVerificationMap.prototype);
 {
   const app = fresh();
   const events = [];
-  const layer = (name) => ({ name, addTo() { events.push(`add:${name}`); return this; }, bringToBack() {} });
+  const layer = (name) => ({ name, addTo() { events.push(`add:${name}`); layers.add(name); return this; }, bringToBack() {} });
   const layers = new Set();
   app.map = {
     hasLayer(l) { return layers.has(l.name); },
@@ -107,28 +110,31 @@ const fresh = () => Object.create(window.NzVerificationMap.prototype);
   app.basemapUserChosen = false;
   app.probeImagery = () => Promise.resolve();
   app.syncContextDots = () => {};
-  // the landing choice is hybrid whenever imagery is configured
-  const hasKey = Boolean(window.NzVerificationMap && context.HYBRID_TILE_URL);
-  app.setBasemap(hasKey ? "hybrid" : "streets");
-  if (hasKey) assert.equal(app.basemap, "hybrid");
-  // a mode ending brings an automatic basemap home; a chosen one stands
-  app.basemap = "satellite";
-  app.basemapUserChosen = true;
+  const quiet = ["renderInitialDetail", "renderBackendPanel", "setPastSubmissionsOpen", "resumeRapidPinFromDevice", "syncPortalChrome"];
+  quiet.forEach((name) => { app[name] = () => {}; });
   app.selectedTask = null;
-  app.renderInitialDetail = () => {};
-  app.renderBackendPanel = () => {};
-  app.setPastSubmissionsOpen = () => {};
-  app.resumeRapidPinFromDevice = () => {};
+  // an activity ending brings an automatic basemap home to hybrid
   app.portalMode = "add";
   app.setPortalMode(null);
-  assert.equal(app.basemap, "satellite", "a basemap the contributor chose is not overridden");
-  // pin placement lifts streets to imagery only when the map is on streets
-  app.basemapUserChosen = false;
-  app.basemap = "streets";
-  layers.clear(); layers.add("streets");
+  assert.equal(app.basemap, "hybrid", "the landing basemap is hybrid when imagery is configured");
+  assert.deepEqual(events, ["add:hybrid", "remove:streets"], "hybrid goes on before streets comes off");
+  // a basemap the contributor chose stands
   events.length = 0;
-  app.setBasemap(hasKey ? "hybrid" : "streets");
-  if (hasKey) assert.deepEqual(events, ["add:hybrid", "remove:streets"], "hybrid goes on before streets comes off");
+  app.basemap = "satellite";
+  app.basemapUserChosen = true;
+  app.portalMode = "add";
+  app.setPortalMode(null);
+  assert.equal(app.basemap, "satellite", "a chosen basemap is not overridden");
+  assert.deepEqual(events, []);
+  // pin placement lifts an automatic streets map to hybrid, never a chosen one
+  app.basemap = "streets";
+  app.basemapUserChosen = true;
+  assert.equal(app.liftBasemapForPin(), false);
+  assert.equal(app.basemap, "streets", "streets chosen by hand stays through pin placement");
+  app.basemapUserChosen = false;
+  assert.equal(app.liftBasemapForPin(), true);
+  assert.equal(app.basemap, "hybrid", "an automatic streets map lifts to hybrid for aiming");
+  assert.equal(app.liftBasemapForPin(), false, "nothing to lift once on imagery");
 }
 
 // 3. the map data panel folds to its bar and remembers on the device
