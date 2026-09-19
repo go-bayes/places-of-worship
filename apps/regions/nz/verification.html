@@ -13,6 +13,7 @@
     <!-- shared tokens, type stack, and hidden-attribute guard; this page
          stays a light workspace and keeps its own colours below -->
     <link rel="stylesheet" href="../../shared/map-shell.css">
+    <link rel="stylesheet" href="../_shared/state.css?v=20260919a">
 
     <style>
         :root {
@@ -552,6 +553,32 @@
         .task-row-meta {
             color: var(--muted);
             font-size: var(--fs-sm);
+        }
+
+        /* the one task-state pill (../_shared/state.css): after the name in
+           a list row, under the heading in the detail, beside the id in my work */
+        .task-row-title .state-pill {
+            margin-left: 6px;
+        }
+
+        .detail-state {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: var(--sp-2);
+        }
+
+        .detail-state .muted {
+            color: var(--muted);
+            font-size: var(--fs-sm);
+        }
+
+        .entry-state {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .status-pill {
@@ -1257,6 +1284,11 @@
             font-weight: 600;
             color: var(--present);
             line-height: 1.45;
+        }
+
+        /* a refusal or a failed save reads in red, never in the success green */
+        .copy-status.error {
+            color: var(--danger);
         }
 
         .copy-help {
@@ -3281,6 +3313,7 @@
     <script src="js/osm-history.js?v=20260902c"></script>
     <script src="js/source-links.js?v=20260904a"></script>
     <script src="js/unvalidated-places.js?v=20260904a"></script>
-    <script src="js/verification-map.js?v=20260909a"></script>
+    <script src="js/task-presentation.js?v=20260919a"></script>
+    <script src="js/verification-map.js?v=20260919a"></script>
 </body>
 </html>

@@ -1760,6 +1760,23 @@ function isNominationProps(props) {
     return batchId.startsWith("manual-") || batchId.startsWith("ra-issues-");
 }
 
+// the shared task presentation (js/task-presentation.js, jb ruling
+// 2026-09-19): this page is always the ra viewer
+// read defensively like the other shared mirrors: a page without the
+// script still renders, with a plain humanised status and no rollup
+function presentTask(input) {
+    if (!window.PowTaskPresentation) {
+        const status = input?.status || "";
+        return { status, label: status.replaceAll("_", " ").replace(/^\w/, c => c.toUpperCase()), tone: "rest", priority: 1, action: null, secondary: [], hint: "" };
+    }
+    return window.PowTaskPresentation.present(input, { viewer: "ra" });
+}
+
+function rollupTasks(inputs) {
+    if (!window.PowTaskPresentation) return { label: "", tone: "rest", total: inputs.length };
+    return window.PowTaskPresentation.rollup(inputs, { viewer: "ra" });
+}
+
 function featureFromBackendTask(task) {
     const context = task.source_context || {};
     const survey = context.survey || {};
@@ -1889,6 +1906,10 @@ class NzVerificationMap {
         // it is submitted and the set is cleared
         this.rapidCorrectionTaskIds = new Set();
         this.backendLastError = "";
+        // transport axis: "signing_in" or "saving" while a flight is up,
+        // else derived from the sign-in and error state (transportState)
+        this.transportBusy = "";
+        this.signedOutDeliberately = false;
         // unsaved-entry protection: dirty flag for the evidence form plus
         // per-task snapshots reapplied after programmatic rebuilds
         this.formDirty = false;
@@ -2123,7 +2144,8 @@ class NzVerificationMap {
                     <div id="googleSignInButton" class="google-sign-in-host"></div>
                     <a class="join-button" href="https://github.com/go-bayes/places-of-worship" target="_blank" rel="noopener">Contact to join</a>
                     <details class="backend-help"><summary>Wrong account showing?</summary>The button lists accounts already signed in to this browser. Pick another, or open a browser profile signed in to the invited account.</details>
-                    ${this.backendLastError ? `<span class="copy-status">${escapeHtml(this.backendLastError)}</span>` : ""}
+                    ${this.transportDotHtml()}
+                    ${this.backendLastError ? `<span class="copy-status${this.signedOutDeliberately ? "" : " error"}">${escapeHtml(this.backendLastError)}</span>` : ""}
                 </div>
             `;
             this.backend.renderSignInButton(document.getElementById("googleSignInButton"), {
@@ -2142,13 +2164,17 @@ class NzVerificationMap {
         }
 
         const label = this.backendUser.initials || this.backendUser.email || "signed in";
-        const assignedAvailable = this.tasks.filter(feature => !isNominationProps(feature.properties)).length;
         const pastSubmissions = (this.myNominationItems || []).length;
         const assignmentStatusText = !ASSIGNMENT_MODE
             ? "Saves and submissions go to Convex for reviewer follow-up."
             : this.portalMode === "add"
                 ? `${pastSubmissions} past submission${pastSubmissions === 1 ? "" : "s"}.`
-                : `${assignedAvailable} available task${assignedAvailable === 1 ? "" : "s"}; ${this.myWorkItems.length} item${this.myWorkItems.length === 1 ? "" : "s"} in My work.`;
+                : "";
+        // one rollup for the batch: the available tasks and my work, each
+        // task once, the most urgent tone first
+        const batchRollup = ASSIGNMENT_MODE && this.portalMode !== "add"
+            ? this.stateRollupHtml(this.batchPresentationInputs())
+            : "";
         const signedInHeading = !ASSIGNMENT_MODE
             ? "Shared task backend"
             : this.portalMode === "assigned"
@@ -2160,7 +2186,8 @@ class NzVerificationMap {
             <div class="backend-card signed-in">
                 <strong class="entry-hide">${signedInHeading}</strong>
                 <span class="entry-hide">${assignmentLabel}</span>
-                <span>Signed in as ${escapeHtml(label)}.<span class="entry-hide"> ${escapeHtml(assignmentStatusText)}</span><span class="entry-only"> <button type="button" class="link-button" id="showTaskListButton">Show task list</button></span></span>
+                <span>Signed in as ${escapeHtml(label)}. ${this.transportDotHtml()}<span class="entry-hide"> ${escapeHtml(assignmentStatusText)}</span><span class="entry-only"> <button type="button" class="link-button" id="showTaskListButton">Show task list</button></span></span>
+                ${batchRollup ? `<span class="entry-hide">${batchRollup}</span>` : ""}
                 <span id="backendRefreshStatus" class="copy-status entry-hide" aria-live="polite">${escapeHtml(this.backendTransientStatus || "")}</span>
                 <div class="backend-actions entry-hide">
                     <button type="button" class="secondary" id="refreshBackendTasksButton">Refresh task list</button>
@@ -2184,17 +2211,111 @@ class NzVerificationMap {
             }
             this.setBackendTransientStatus(this.backendLastError
                 ? this.backendLastError
-                : `Task list refreshed — ${this.tasks.filter(feature => !isNominationProps(feature.properties)).length} available, ${this.myWorkItems.length} in My work.`);
+                : `Task list refreshed — ${this.tasks.filter(feature => !isNominationProps(feature.properties)).length} available, ${this.myWorkItems.length} in My work.`,
+            { error: Boolean(this.backendLastError) });
         });
         document.getElementById("signOutButton")?.addEventListener("click", () => this.signOutBackend());
     }
 
+    // transport is the other axis (jb ruling 2026-09-19): whether the page
+    // can talk to the backend, never what a task is doing. shown as a dot by
+    // the account name; a deliberate sign-out is not an error
+    transportState() {
+        if (!this.backend?.configured) return "unconfigured";
+        if (this.transportBusy) return this.transportBusy;
+        if (this.backendLastError && !this.signedOutDeliberately) return "error";
+        return this.backendUser ? "ready" : "signed_out";
+    }
+
+    transportDotHtml() {
+        const state = window.PowTaskPresentation.transport(this.transportState());
+        return `<span class="transport-dot tone-${state.tone}" id="transportDot" aria-live="polite" data-state="${escapeHtml(state.state)}">${escapeHtml(state.label)}</span>`;
+    }
+
+    // mark a flight ("signing_in", "saving") or clear it, updating the dot
+    // in place so the card need not re-render mid-flight
+    setTransportBusy(state) {
+        this.transportBusy = state || "";
+        const dot = document.getElementById("transportDot");
+        if (!dot) return;
+        const next = window.PowTaskPresentation.transport(this.transportState());
+        dot.className = `transport-dot tone-${next.tone}`;
+        dot.textContent = next.label;
+        dot.setAttribute?.("data-state", next.state);
+    }
+
+    // the one presentation input for a task wherever the page shows it: the
+    // server status, the latest review decision the my-work row carries,
+    // and whether a revision draft rides alongside. a task known only from
+    // this browser's session log maps its outcome to the matching status
+    taskPresentationInput(taskId, item) {
+        const workItem = item || (this.myWorkItems || []).find(entry => entry?.task?.task_id === taskId) || null;
+        const backendTask = this.backendTasksById?.get(taskId);
+        let status = backendTask?.status ?? workItem?.task?.status;
+        if (!status && Array.isArray(this.sessionEntries)) {
+            const outcome = this.sessionTaskOutcome(taskId);
+            if (outcome) status = outcome.type === "skipped" ? "skipped" : "provisionally_closed";
+        }
+        const queued = status === "needs_review" || status === "unresolved_note";
+        return {
+            status,
+            task_name: backendTask?.name || workItem?.task?.name || "",
+            latest_decision_status: workItem?.latestReview?.decision_status,
+            revision_draft_saved: Boolean(this.revisionDraftIdsByTaskId?.has(taskId))
+                || (queued && workItem?.latestDraft?.draft_status === "draft"),
+        };
+    }
+
+    // one pill per row from present(): a span, or a button carrying the
+    // task id when the status is itself the next action; className binds
+    // the button to the row's open handler and never lands on a span
+    statePillHtml(presented, { button = false, taskId = "", className = "" } = {}) {
+        if (!presented?.label) return "";
+        const title = presented.hint ? ` title="${escapeHtml(presented.hint)}"` : "";
+        if (button && presented.action) {
+            const classes = `state-pill tone-${presented.tone}${className ? ` ${className}` : ""}`;
+            return `<button type="button" class="${classes}" data-task-id="${escapeHtml(taskId)}" data-action="${escapeHtml(presented.action.id)}"${title}>${escapeHtml(presented.label)}</button>`;
+        }
+        return `<span class="state-pill tone-${presented.tone}"${title}>${escapeHtml(presented.label)}</span>`;
+    }
+
+    // one line for a batch or a queue; "of N" only when the pill counts a
+    // subset of the rows
+    stateRollupHtml(inputs) {
+        const rolled = rollupTasks(inputs);
+        const counted = Number.parseInt(rolled.label, 10);
+        const ofTotal = Number.isFinite(counted) && counted !== rolled.total
+            ? `<span>of ${rolled.total}</span>`
+            : "";
+        return `<span class="state-rollup"><span class="state-pill tone-${rolled.tone}">${escapeHtml(rolled.label)}</span>${ofTotal}</span>`;
+    }
+
+    // the assignment batch as the ra sees it: available tasks and my work,
+    // each task once
+    batchPresentationInputs() {
+        const seen = new Set();
+        const inputs = [];
+        const add = (taskId, item) => {
+            if (!taskId || seen.has(taskId)) return;
+            seen.add(taskId);
+            inputs.push(this.taskPresentationInput(taskId, item));
+        };
+        this.tasks
+            .filter(feature => !isNominationProps(feature.properties))
+            .forEach(feature => add(feature.properties?.task_id));
+        (this.myWorkItems || []).forEach(item => add(item?.task?.task_id, item));
+        return inputs;
+    }
+
     // transient status line on the signed-in card; clears itself so stale
-    // refresh feedback never lingers
-    setBackendTransientStatus(text) {
+    // refresh feedback never lingers. a failed refresh reads in red
+    setBackendTransientStatus(text, { error = false } = {}) {
         this.backendTransientStatus = text;
         const statusEl = document.getElementById("backendRefreshStatus");
-        if (statusEl) statusEl.textContent = text;
+        if (statusEl) {
+            statusEl.textContent = text;
+            statusEl.classList?.toggle("error", Boolean(error));
+        }
         clearTimeout(this._backendStatusTimer);
         this._backendStatusTimer = setTimeout(() => {
             this.backendTransientStatus = "";
@@ -2207,7 +2328,15 @@ class NzVerificationMap {
     // after a reload with the sign-in kept on the device
     async onBackendSignedIn(user, { refreshTasks = true } = {}) {
         this.backendUser = user;
-        if (refreshTasks) await this.refreshBackendTasks();
+        this.signedOutDeliberately = false;
+        if (refreshTasks) {
+            this.setTransportBusy("signing_in");
+            try {
+                await this.refreshBackendTasks();
+            } finally {
+                this.setTransportBusy("");
+            }
+        }
         // a reload or an expired session lands back in the
         // activity the contributor had chosen, else the chooser
         this.restorePortalMode();
@@ -2226,15 +2355,21 @@ class NzVerificationMap {
     // it) names the user again before the panel paints (jb 2026-09-05)
     async restoreBackendSession() {
         if (!this.backend?.configured || !this.backend.authToken || this.backendUser) return null;
-        const user = await this.backend.restoreSession();
-        if (user) this.backendUser = user;
-        return user;
+        this.setTransportBusy("signing_in");
+        try {
+            const user = await this.backend.restoreSession();
+            if (user) this.backendUser = user;
+            return user;
+        } finally {
+            this.setTransportBusy("");
+        }
     }
 
     signOutBackend() {
         const signedOutUserId = this.backendUser?._id || this.backend?.user?._id || "";
         this.backend?.signOut({ deliberate: true });
         this.backendUser = null;
+        this.signedOutDeliberately = true;
         // a deliberate sign-out forgets the chosen activity; an expired
         // session (backendUser cleared elsewhere) keeps it for the return
         if (this.pinMode) this.exitPinMode();
@@ -2380,27 +2515,18 @@ class NzVerificationMap {
         }
         // a task awaiting review with an editable draft alongside is a
         // revision in progress; count it as a draft, not as submitted work
-        const isRevisionItem = item =>
-            (item.task?.status === "needs_review" || item.task?.status === "unresolved_note")
-            && item.latestDraft?.draft_status === "draft";
-        const revisionDrafts = items.filter(isRevisionItem).length;
-        const submitted = items.filter(item => item.task?.status === "needs_review" && !isRevisionItem(item)).length;
-        const unresolved = items.filter(item => item.task?.status === "unresolved_note" && !isRevisionItem(item)).length;
-        const drafts = items.filter(item => item.task?.status === "draft_saved").length + revisionDrafts;
         const changesRequested = items
             .filter(item => item.task?.status === "changes_requested")
             .concat(nominationChangesRequested);
         const needsMore = changesRequested.length;
-        const skipped = items.filter(item => item.task?.status === "skipped").length;
-        const reviewed = items.filter(item => ["reviewed", "pi_accepted", "exported"].includes(item.task?.status)).length;
         panel.innerHTML = `
             ${this.changesRequestedPanelHtml(changesRequested)}
             <details ${total > 0 ? "open" : ""}>
                 <summary>My work
-                    <span class="ra-initials">${escapeHtml(`${total} item${total === 1 ? "" : "s"} · ${needsMore + unresolved} need${needsMore + unresolved === 1 ? "s" : ""} attention`)}</span>
+                    ${this.stateRollupHtml(items.map(item => this.taskPresentationInput(item?.task?.task_id, item)))}
                 </summary>
                 ${total === 0 ? `
-                    <div class="session-empty">No saved, submitted, skipped, or reviewed tasks yet.</div>
+                    <div class="state-empty">Nothing saved or submitted yet.</div>
                 ` : `
                     <div class="session-entries" role="list">
                         ${(this.myWorkShowAll ? items : items.slice(0, SESSION_RECENT_LIMIT)).map(item => this.myWorkEntryHtml(item)).join("")}
@@ -2554,16 +2680,10 @@ class NzVerificationMap {
         const task = item.task || {};
         const draft = item.latestDraft || {};
         const review = item.latestReview || {};
-        const status = task.status || "unknown";
-        const label = (status === "needs_review" || status === "unresolved_note") && draft.draft_status === "draft"
-            ? "revision draft saved"
-            : status === "needs_review"
-            ? "submitted, waiting for review"
-            : status === "unresolved_note"
-                ? "unresolved note submitted"
-            : status === "changes_requested"
-                ? "needs more evidence"
-                : status.replaceAll("_", " ");
+        // the status pill is the control when the status carries an action
+        // (jb ruling 2026-09-19); it opens the task like the row's view button
+        const presented = presentTask(this.taskPresentationInput(task.task_id, item));
+        const statePill = this.statePillHtml(presented, { button: true, taskId: task.task_id || "", className: "my-work-open" });
         const reviewNote = review.decision_note
             ? `<div class="entry-meta">Review note: ${escapeHtml(review.decision_note)}</div>`
             : "";
@@ -2573,12 +2693,14 @@ class NzVerificationMap {
         return `
             <div class="session-entry" role="listitem">
                 <span class="entry-title">${escapeHtml(task.name || "Unnamed site")}</span>
-                <span class="entry-meta">${escapeHtml(label)} · ${escapeHtml(task.task_id || "")}</span>
+                <span class="entry-state">${statePill}<span class="entry-meta">${escapeHtml(task.task_id || "")}</span></span>
                 ${draftAction}
                 ${reviewNote}
-                <div class="entry-actions">
-                    <button type="button" class="tertiary my-work-open" data-task-id="${escapeHtml(task.task_id || "")}">View</button>
-                </div>
+                ${presented.action ? "" : `
+                    <div class="entry-actions">
+                        <button type="button" class="tertiary my-work-open" data-task-id="${escapeHtml(task.task_id || "")}">View</button>
+                    </div>
+                `}
             </div>
         `;
     }
@@ -4180,6 +4302,17 @@ class NzVerificationMap {
         });
     }
 
+    // reset the sidebar filters to their defaults and re-run them
+    clearFilters() {
+        const search = document.getElementById("searchInput");
+        if (search) search.value = "";
+        ["priorityFilter", "actionFilter", "statusFilter"].forEach(id => {
+            const select = document.getElementById(id);
+            if (select) select.value = "all";
+        });
+        this.applyFilters();
+    }
+
     setupFilters() {
         ["searchInput", "priorityFilter", "actionFilter", "statusFilter"].forEach(id => {
             const element = document.getElementById(id);
@@ -4406,6 +4539,13 @@ class NzVerificationMap {
             } else if (matchesFilters(feature)) {
                 this.filteredTasks.push(feature);
             }
+        }
+        // the most urgent row first, then by name; the backend list has no
+        // order of its own (per-status index reads), and the static demo
+        // snapshot keeps its file order
+        if (this.backendTasksById.size > 0) {
+            const inputs = new Map(this.filteredTasks.map(feature => [feature, this.taskPresentationInput(feature.properties?.task_id)]));
+            this.filteredTasks.sort((left, right) => window.PowTaskPresentation.compare(inputs.get(left), inputs.get(right), { viewer: "ra" }));
         }
 
         this.renderMarkers();
@@ -4666,15 +4806,24 @@ class NzVerificationMap {
 
         const visible = this.filteredTasks.slice(0, this.visibleLimit);
         if (visible.length === 0) {
+            // one line and one action (jb ruling 2026-09-19); the sign-in
+            // control is already on screen, so that case has no button
+            const signedIn = Boolean(this.backend?.configured && this.backendUser);
+            const filtersActive = Boolean(this.filterActiveHint());
+            const empty = ASSIGNMENT_MODE && !signedIn
+                ? { text: "Sign in to load this workpack." }
+                : filtersActive
+                    ? { text: "No tasks match your filters.", button: "Clear filters", act: () => this.clearFilters() }
+                    : ASSIGNMENT_MODE
+                        ? { text: "Nothing assigned in this batch yet.", button: "Refresh", act: () => this.refreshTaskListFromEmpty() }
+                        : { text: "No tasks in this snapshot." };
             taskList.innerHTML = `
-                <div class="disabled-panel">
-                    ${ASSIGNMENT_MODE
-                        ? (this.backend?.configured && this.backendUser
-                            ? "No assigned tasks are currently visible. Refresh the task list or clear filters."
-                            : "Sign in with Google to load this assigned workpack.")
-                        : "No tasks match the current filters."}
+                <div class="state-empty">
+                    <span>${escapeHtml(empty.text)}</span>
+                    ${empty.button ? `<button type="button" id="taskListEmptyAction">${escapeHtml(empty.button)}</button>` : ""}
                 </div>
             `;
+            if (empty.act) document.getElementById("taskListEmptyAction")?.addEventListener("click", empty.act);
             return;
         }
         taskList.innerHTML = visible.map(feature => {
@@ -4682,15 +4831,9 @@ class NzVerificationMap {
             const temporal = deriveTargetYearStatus(props, this.targetYear);
             const activeClass = this.selectedTask?.properties?.task_id === props.task_id ? " active" : "";
             const backendTask = this.backendTasksById.get(props.task_id);
-            const backendBadge = backendTask
-                ? `<span class="backend-badge">${escapeHtml(backendTask.status.replaceAll("_", " "))}</span>`
-                : "";
-            const outcome = this.sessionTaskOutcome(props.task_id);
-            const outcomeBadge = backendBadge || (outcome
-                ? (outcome.type === "skipped"
-                    ? `<span class="skip-badge">skipped</span>`
-                    : `<span class="closed-badge">tentatively closed</span>`)
-                : "");
+            // one state pill per row (jb ruling 2026-09-19); a row known
+            // only from this browser's session log presents its outcome
+            const statePill = this.statePillHtml(presentTask(this.taskPresentationInput(props.task_id)));
             // subtle state dot mirroring the map's validation ring
             const verifState = validationState(backendTask?.status, temporal.status);
             const stateSwatch = {
@@ -4706,7 +4849,7 @@ class NzVerificationMap {
             return `
                 <button class="task-row${activeClass}" type="button" data-task-id="${escapeHtml(props.task_id)}">
                     <span class="task-row-title">
-                        ${stateDot}${escapeHtml(props.name || "Unnamed site")}${outcomeBadge}
+                        ${stateDot}${escapeHtml(props.name || "Unnamed site")}${statePill}
                     </span>
                     ${TARGET_YEARS.length ? `<span class="status-pill ${statusClass(temporal.status)}">${escapeHtml(this.targetYear)}: ${escapeHtml(statusLabel(temporal.status))}</span>` : ""}
                     <span class="task-row-meta">Priority: ${escapeHtml(props.verification_priority || "unknown")} | ${escapeHtml(cap(props.religion)) || "Unknown"} | ${escapeHtml(props.master_site_id || props.source_record_id || "")}</span>
@@ -4730,6 +4873,17 @@ class NzVerificationMap {
             });
             taskList.appendChild(more);
         }
+    }
+
+    // the empty list's refresh goes through the card's button so the lock
+    // and the status line behave as one handler
+    refreshTaskListFromEmpty() {
+        const button = document.getElementById("refreshBackendTasksButton");
+        if (button && typeof button.click === "function") {
+            button.click();
+            return;
+        }
+        this.refreshBackendTasks().then(() => this.applyFilters());
     }
 
     updateStats() {
@@ -5561,6 +5715,14 @@ class NzVerificationMap {
         }
     }
 
+    // the selected task's state under its heading, from the same input as
+    // its list row; the hint follows in muted prose
+    detailStateHtml(taskId) {
+        const presented = presentTask(this.taskPresentationInput(taskId));
+        if (!presented.label) return "";
+        return `<div class="detail-state">${this.statePillHtml(presented)}${presented.hint ? `<span class="muted">${escapeHtml(presented.hint)}</span>` : ""}</div>`;
+    }
+
     backendStatusHtml(props) {
         if (!this.backend?.configured) return "";
         const backendTask = this.backendTaskForProps(props);
@@ -5759,6 +5921,7 @@ class NzVerificationMap {
 
         panel.innerHTML = `
             <h2>${escapeHtml(props.name || "Unnamed site")}</h2>
+            ${this.detailStateHtml(props.task_id)}
             ${this.backendStatusHtml(props)}
             ${INTAKE_ENABLED ? this.workflowStepsHtml("inspect") : ""}
 
@@ -9069,7 +9232,7 @@ class NzVerificationMap {
                             </div>
                         ` : `
                             <div class="disabled-panel">
-                                Status: ${escapeHtml((backendTask?.status || "closed").replaceAll("_", " "))}. Ask JB to reopen this task if new evidence changes the answer.
+                                Status: ${escapeHtml(presentTask(this.taskPresentationInput(taskId)).label || "Closed")}. Ask JB to reopen this task if new evidence changes the answer.
                             </div>
                         `}
                     ` : `
@@ -10030,16 +10193,23 @@ class NzVerificationMap {
         const submit = Boolean(options.submit);
         const inputError = this.evidenceInputError(values, unresolved ? { unresolved: true } : { submit })
             || (submit && !unresolved ? this.guidedPeriodsError(props.task_id, values) : "");
+        // a refusal reads in red; the class clears on the next attempt
+        const refuse = text => {
+            if (!status) return;
+            status.textContent = text;
+            status.classList.add("error");
+        };
+        status?.classList.remove("error");
         if (inputError) {
-            if (status) status.textContent = `${inputError} Nothing was saved.`;
+            refuse(`${inputError} Nothing was saved.`);
             return;
         }
         if (!this.backend?.configured || !this.backend.signedIn) {
-            if (status) status.textContent = "Sign in to the shared backend before saving evidence.";
+            refuse("Sign in to the shared backend before saving evidence.");
             return;
         }
         if (!this.backendTasksById.has(props.task_id)) {
-            if (status) status.textContent = "This task is not seeded in Convex yet. Ask JB to seed the current batch.";
+            refuse("This task is not seeded in Convex yet. Ask JB to seed the current batch.");
             return;
         }
 
@@ -10060,6 +10230,7 @@ class NzVerificationMap {
             .map(id => document.getElementById(id))
             .filter(Boolean);
         writeButtons.forEach(button => { button.disabled = true; });
+        this.setTransportBusy("saving");
         try {
             if (status) {
                 status.textContent = unresolved
@@ -10157,8 +10328,9 @@ class NzVerificationMap {
                 this.backendLastError = error.message;
                 this.renderBackendPanel();
             }
-            if (status) status.textContent = `${error.message || "Backend save failed."} Your entries remain in the form; any completed draft save remains editable. Correct the problem and try again.`;
+            refuse(`${error.message || "Backend save failed."} Your entries remain in the form; any completed draft save remains editable. Correct the problem and try again.`);
         } finally {
+            this.setTransportBusy("");
             writeButtons.forEach(button => { button.disabled = false; });
         }
     }
