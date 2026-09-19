@@ -3234,7 +3234,11 @@ class NzVerificationMap {
         const grip = document.getElementById("signInPanelGrip");
         if (!panel || !grip) return false;
         this.signInPanelMovable = true;
-        this.makeControlMovable(panel, grip, "pow-signin-panel-offset");
+        // the offset paints only while the panel floats; signed in, the
+        // same element is the work sidebar in its grid column
+        this.makeControlMovable(panel, grip, "pow-signin-panel-offset", {
+            active: () => Boolean(document.body?.classList?.contains?.("portal-signed-out")),
+        });
         return true;
     }
 
@@ -3273,7 +3277,10 @@ class NzVerificationMap {
     // a transform, clamped so it never leaves the map. the offset is kept
     // per device so the panel stays where the contributor put it; a map
     // resize (rotation, keyboard) re-clamps it into view
-    makeControlMovable(div, grip, key = "pow-points-control-offset") {
+    // `active` says when the offset applies: a panel that floats only in
+    // one state (the sign-in card) paints no offset outside it, and a
+    // resize outside it neither clamps nor rewrites the remembered spot
+    makeControlMovable(div, grip, key = "pow-points-control-offset", { active = () => true } = {}) {
         if (!div || !grip || !this.map) return;
         let offset = { x: 0, y: 0 };
         try {
@@ -3283,11 +3290,14 @@ class NzVerificationMap {
             // storage unavailable or unreadable: start in the corner
         }
         const apply = () => {
-            div.style.transform = offset.x || offset.y ? `translate(${offset.x}px, ${offset.y}px)` : "";
-            div.classList.toggle("moved", Boolean(offset.x || offset.y));
+            const on = active() && Boolean(offset.x || offset.y);
+            div.style.transform = on ? `translate(${offset.x}px, ${offset.y}px)` : "";
+            div.classList.toggle("moved", on);
         };
         // keep the whole control inside the map container
         const clamp = () => {
+            // inactive: paint nothing and leave the remembered spot alone
+            if (!active()) { apply(); return; }
             const mapRect = this.map.getContainer().getBoundingClientRect();
             div.style.transform = "";
             const rest = div.getBoundingClientRect();
@@ -3954,6 +3964,9 @@ class NzVerificationMap {
         // leaflet re-measures when that changes either way
         if (this.portalSignedOutPainted !== signedOut) {
             this.portalSignedOutPainted = signedOut;
+            // the floating card's drag offset never follows it into the
+            // work sidebar; the map's resize restores it when signed out again
+            if (!signedOut) document.querySelector(".app-shell > .sidebar")?.style?.removeProperty?.("transform");
             if (this.map) window.setTimeout?.(() => this.map?.invalidateSize(), 0);
         }
         if (signedOut) this.makeSignInPanelMovable();
