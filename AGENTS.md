@@ -168,6 +168,14 @@
   Named credit in manifests/changelog is public by design.
 - Keep large, restricted, raw, or private data out of Git unless the repo
   already tracks that class of artefact and the licence permits it.
+- Images, screenshots, renders and other large files handed to Joseph go to
+  the project heap in his Dropbox (Joseph, 2026-09-19):
+  `/Users/joseph/Library/CloudStorage/Dropbox-v-project/Joseph Bulbulia/HEAP/places-of-worship`.
+  Its `README.md` sets the layout: `screens/<date>-<topic>/` for
+  screenshots and walkthrough captures, `renders/` for figures and PDFs,
+  `exports/` for bulk data with its manifest, `incoming/` for collaborator
+  files. Name files by pull request or lane. Give Joseph the full absolute
+  path. `.private/` stays for credentials and per-person material.
 - Treat ignored local data as cache only. Before using generated data for RA
   tasks, analysis, public products, or publication, make sure it has durable
   project-controlled storage and a tracked manifest as described in
