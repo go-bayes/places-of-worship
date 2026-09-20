@@ -123,17 +123,35 @@
             line-height: 1.45;
         }
 
+        /* the portal's header carries no batch line (jb 2026-09-20: words
+           to cut); the demo map keeps its snapshot line */
+        body.assignment-mode .sidebar-header p {
+            display: none;
+        }
+
+        /* exit and guide are the two links every contributor uses, so they
+           read at body size on a full-height tap target (jb 2026-09-20) */
         .nav-links {
             display: flex;
-            gap: 12px;
-            margin-top: 12px;
+            gap: 10px;
+            margin-top: 10px;
         }
 
         .nav-links a {
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 0 16px;
+            border: 1px solid var(--action);
+            border-radius: var(--r-sm);
             color: var(--action);
-            font-size: var(--fs-sm);
+            font-size: var(--fs-md);
             text-decoration: none;
             font-weight: 600;
+        }
+
+        .nav-links a:hover {
+            background: var(--action-soft);
         }
 
         /* the one dominant action in the sidebar: adding a missing place.
@@ -382,11 +400,31 @@
             background: var(--action);
             color: var(--panel);
             font-weight: 600;
-            font-size: var(--fs-md);
-            min-height: 48px;
+            /* one size for Add / Revise, Cancel and Assigned tasks (jb
+               2026-09-20: "Add / Revise should be as large as Cancel") */
+            font-size: var(--fs-lg);
+            min-height: 56px;
             border-radius: var(--r-sm);
             cursor: pointer;
             box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+        }
+
+        /* the assigned-task sheet's button: the same size, outlined, and
+           present only while the batch holds work for this contributor */
+        .primary-action.secondary-action {
+            margin-top: 10px;
+            background: var(--panel);
+            color: var(--action);
+            box-shadow: none;
+        }
+
+        .primary-action.secondary-action:hover {
+            background: var(--action-soft);
+            border-color: var(--action);
+        }
+
+        .primary-action.secondary-action[hidden] {
+            display: none;
         }
 
         .primary-action:hover {
@@ -989,9 +1027,53 @@
 
         .pin-host-title {
             margin: 0;
-            font-size: var(--fs-sm);
+            font-size: var(--fs-xl);
             font-weight: 600;
+            line-height: 1.2;
             color: var(--entry);
+        }
+
+        /* the three ways to land the pin, each a full-width button (jb
+           2026-09-20); the search and coordinate boxes fold under the third */
+        .pin-locate-options {
+            display: grid;
+            gap: 8px;
+        }
+
+        .pin-locate-options .locate-option {
+            width: 100%;
+            min-height: 52px;
+            padding: 0 14px;
+            border: 1px solid var(--entry);
+            border-radius: var(--r-sm);
+            background: var(--panel);
+            color: var(--entry);
+            font-size: var(--fs-md);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .pin-locate-options .locate-option:hover {
+            background: var(--entry-soft);
+        }
+
+        .pin-locate-options .locate-option[aria-expanded="true"] {
+            background: var(--entry-soft);
+        }
+
+        .pin-locate-options .locate-option:disabled {
+            color: var(--muted);
+            border-color: var(--line);
+            cursor: progress;
+        }
+
+        .pin-search-block {
+            display: grid;
+            gap: 8px;
+        }
+
+        .pin-search-block[hidden] {
+            display: none;
         }
 
         .nomination-panel summary {
@@ -1141,16 +1223,9 @@
 
         .pin-coord-row {
             display: grid;
-            grid-template-columns: 1fr 1fr auto;
+            grid-template-columns: 1fr 1fr;
             gap: 6px;
             align-items: end;
-        }
-
-        .pin-coord-row button {
-            min-height: 40px;
-            width: auto;
-            padding: 0 12px;
-            font-size: var(--fs-sm);
         }
 
         .pin-search-results {
@@ -3269,6 +3344,9 @@
             <div class="sidebar-actions">
                 <button type="button" id="addPlaceButton" class="primary-action">Add / Revise</button>
                 <p id="addReviseHint" class="sidebar-actions-help">Drops a pin for a new place. Tap a dot first to revise that place.</p>
+                <!-- the specialist sheet, one button of the same size, shown
+                     only while the batch holds work for this contributor -->
+                <button type="button" id="assignedTasksButton" class="primary-action secondary-action" hidden>Assigned tasks</button>
             </div>
 
             <!-- the transient pin cards (address search, coordinates, confirm,
@@ -3377,6 +3455,6 @@
     <script src="js/source-links.js?v=20260904a"></script>
     <script src="js/unvalidated-places.js?v=20260904a"></script>
     <script src="js/task-presentation.js?v=20260919a"></script>
-    <script src="js/verification-map.js?v=20260919a"></script>
+    <script src="js/verification-map.js?v=20260920a"></script>
 </body>
 </html>

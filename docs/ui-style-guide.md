@@ -59,14 +59,24 @@ marker legend reads in two columns, fills beside rings, so the map data
 panel stays clear of the floating card. The sign-in card
 carries the Google button, a `Contact to join` button and the folded `Wrong
 account showing?` help, nothing else (ruled 2026-09-19: fewer words); the
-batch id lives in the header, and the invited address shows only when the
-link carries it. After sign-in the
+header carries only the title and the `Exit` and `Guide` buttons, at body
+size on a 44 px target, with no batch line (ruled 2026-09-20: words to cut);
+the invited address shows only when the link carries it. After sign-in the
 portal lands in `Add / Revise` on every screen, with the task list, filters
 and counts absent (ruled 2026-09-20: the task list is specialist assignment
-work, most of which goes to agents or through the review portal). The mode
-bar offers `Assigned tasks →`, which shows that sheet, and `← Add / Revise`
-returns; the choice persists for the tab (`sessionStorage`), so a reload
-lands where the contributor was. The chooser no longer renders.
+work, most of which goes to agents or through the review portal).
+`Add / Revise`, `Cancel` and `Assigned tasks` share one size (56 px, `--fs-lg`);
+`Assigned tasks` appears under the control only while the batch holds work
+for the contributor (tasks open to them or work of theirs in progress) and
+opens that sheet, whose bar offers `← Add / Revise`; the choice persists for
+the tab (`sessionStorage`), so a reload lands where the contributor was. The
+chooser no longer renders. The pin card heads with `Add a place` (or
+`Revise …`) at `--fs-xl` and three full-width options: `Drop pin at my
+location`, `Drop pin on map`, `Search and drop` (which folds open the
+address search and the coordinate boxes); a pin already down reads `Move
+pin`. Typed coordinates apply on change and the pin drags on the map, so
+there is no move button. The `Flag for discussion` checkbox carries its
+label alone; the field that opens takes the description.
 
 The map offers `Streets` (OSM standard tiles), `Hybrid` (MapTiler imagery
 with street and place labels), and `Satellite` (bare MapTiler imagery)

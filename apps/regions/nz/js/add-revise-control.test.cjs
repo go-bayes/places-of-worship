@@ -167,4 +167,96 @@ const dot = { type: "Feature", properties: { name: "St Mary's", osm_id: "1", osm
   assert.match(html, /\.primary-action\.cancelling/);
 }
 
-console.log("add-revise-control: 6 checks passed");
+// 7. the assigned-tasks button shows under the control only while the batch
+//    holds work for this contributor, never while an entry is open
+{
+  const app = fresh();
+  element("addPlaceButton");
+  element("addReviseHint");
+  const assigned = element("assignedTasksButton");
+  app.portalMode = "add";
+  app.assignedAvailableCount = 0;
+  app.myWorkItems = [];
+  app.renderAddReviseControl();
+  assert.equal(assigned.hidden, true);
+  app.assignedAvailableCount = 3;
+  app.renderAddReviseControl();
+  assert.equal(assigned.hidden, false);
+  assert.equal(assigned.textContent, "Assigned tasks (3)");
+  // work in progress counts even with nothing left to claim
+  app.assignedAvailableCount = 0;
+  app.myWorkItems = [{ task: { task_id: "t1" } }];
+  app.renderAddReviseControl();
+  assert.equal(assigned.hidden, false);
+  assert.equal(assigned.textContent, "Assigned tasks (1)");
+  // an open entry: the control is Cancel and the sheet's button leaves
+  app.pinMode = true;
+  app.renderAddReviseControl();
+  assert.equal(assigned.hidden, true);
+}
+
+// 8. the locate card: three large options, the search and coordinates folded
+//    under the third, and no move button (typed coordinates apply on change)
+{
+  const app = fresh();
+  app.reviseContext = null;
+  app.occupancyPinContext = null;
+  app.pinPlaceholderExample = () => ({ place: "St Paul's, Wellington", lat: "-41.28", lng: "174.77" });
+  app.pinCardCarriesBasis = () => false;
+  app.rapidEntryFormHtml = () => "";
+  app.geolocationAvailable = () => true;
+  let html;
+  try {
+    html = app.pinCardsHtml();
+  } catch (error) {
+    html = null;
+  }
+  const source = fs.readFileSync(path.join(__dirname, "verification-map.js"), "utf8");
+  if (html) {
+    assert.match(html, /id="pinLocateMeButton"[^>]*>Drop pin at my location</);
+    assert.match(html, /id="pinDropOnMapButton"[^>]*>Drop pin on map</);
+    assert.match(html, /id="pinSearchToggleButton"[^>]*>Search and drop</);
+    assert.match(html, /id="pinSearchBlock"[^>]*hidden/);
+    assert.equal(/pinCoordButton|>Move pin</.test(html), false);
+  }
+  assert.equal(/id="pinCoordButton"/.test(source), false);
+  assert.match(source, /\$\{verb\} at my location/);
+  // a search result names the action by whether the pin is down
+  assert.match(source, /this\.pinMarker \? "Move pin here" : "Drop pin here"/);
+  // the search fold opens and closes on the toggle
+  const block = element("pinSearchBlock", { hidden: true });
+  const toggle = element("pinSearchToggleButton");
+  element("pinSearchInput", { focus() { this.focused = true; } });
+  app.pinMode = true;
+  app.paneSnap = () => false;
+  app.togglePinSearch();
+  assert.equal(block.hidden, false);
+  assert.equal(toggle.attrs["aria-expanded"], "true");
+  app.togglePinSearch();
+  assert.equal(block.hidden, true);
+  // typed coordinates: the change event waits for both boxes, then moves
+  const lat = element("pinLatInput", { value: "-41.3" });
+  const lng = element("pinLngInput", { value: "" });
+  element("pinSearchStatus");
+  const moves = [];
+  app.setPendingPin = (a, b) => moves.push([a, b]);
+  app.applyTypedCoordinates({ quiet: true });
+  assert.equal(moves.length, 0);
+  lng.value = "174.8";
+  app.applyTypedCoordinates({ quiet: true });
+  assert.deepEqual(moves, [[-41.3, 174.8]]);
+  lat.value = "";
+}
+
+// 9. the header carries no batch line on the portal, and the flag label stands alone
+{
+  const source = fs.readFileSync(path.join(__dirname, "verification-map.js"), "utf8");
+  const html = fs.readFileSync(path.join(__dirname, "..", "verification.html"), "utf8");
+  assert.match(html, /body\.assignment-mode \.sidebar-header p \{\s*display: none;/);
+  assert.match(html, /id="assignedTasksButton" class="primary-action secondary-action" hidden/);
+  assert.match(source, /<span><strong>Flag for discussion<\/strong><\/span>/);
+  assert.equal(/Record a partial entry/.test(source), false);
+  assert.equal(/Assigned tasks →/.test(source), false);
+}
+
+console.log("add-revise-control: 9 checks passed");
