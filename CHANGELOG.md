@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-21 (dark is the one theme)
+
+- Dark is the only theme on both portals (JB, 2026-09-21: "the dark theme is beautiful. can we simply make that default with no options?"). The `Auto` / `Light` / `Dark` control from #130 is gone from both headers, `theme.js` marks `<html>` dark before paint and its API answers `dark` throughout, and `theme.css` carries the dark set as `:root` with no light set and no device query; the light values stay in the style guide's Theme table as the record. The RA guide's header sentence returns to `Exit` and `Guide` and nothing else. Stamps `theme.js?v=20260921a`, `theme.css?v=20260921a`.
+
 ### 2026-09-21 (street view at the pin, the area circle in view)
 
 - Once a pin is down the confirm card offers `Check Street View at the pin` (JB, 2026-09-21: "once a pin is placed, the user should be able to check street view (phone/desktop)"): Google Street View at the pin's coordinates in a new tab, kept on the pin as it moves; a phone may hand it to the Maps app. The form's own source links after confirmation are unchanged.

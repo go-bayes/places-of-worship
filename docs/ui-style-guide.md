@@ -123,25 +123,25 @@ viewport.
 
 Do not reuse these colours for unrelated meanings.
 
-| Meaning | Current class | Current colours |
+| Meaning | Current class | Current colours (the dark set; light values in the Theme table) |
 | --- | --- | --- |
-| Primary action, focus, links, and the validated ring | `button.primary`, `.workflow-step.active`, links, focus outlines | the one blue `--action` `#1f618d`, hover `#17527a`, soft `#e8f1fb` (PR-H3: headings are ink, not blue) |
-| Present target-year state | `.status-present`, `.workflow-step.done`, `.closed-badge` | green, `--present` `#145a32` on `--present-soft` `#dff3e6` |
-| Absent target-year state | `.status-absent` | neutral grey, currently around `#e5e7eb`, `#374151` |
-| Uncertain, caution, or disputed | `.status-uncertain`, `.skip-badge`, `.skip-form button.skip-confirm`, the disputed ring | the one amber pair `--caution` `#6b4e00` on `--caution-soft` `#fff4dc`, `--caution-strong` `#9a6700` for borders and the disputed ring (PR-H3, 2026-09-04) |
-| Not assessed | `.status-not-assessed`; the map marker is hollow white with a `--muted` border (PR-H3) | `--not-assessed` `#1f4e79` on `--not-assessed-soft` `#e8f1fb` |
+| Primary action, focus, links, and the validated ring | `button.primary`, `.workflow-step.active`, links, focus outlines | the one blue `--action` `#7fb3e6`, hover `#93c1ec`, soft `#1b3550` (PR-H3: headings are ink, not blue) |
+| Present target-year state | `.status-present`, `.workflow-step.done`, `.closed-badge` | green, `--present` `#6fcf97` on `--present-soft` `#163a26` |
+| Absent target-year state | `.status-absent` | neutral grey, `--absent` `#b8c2d0` on `--absent-soft` `#2c3a48` |
+| Uncertain, caution, or disputed | `.status-uncertain`, `.skip-badge`, `.skip-form button.skip-confirm`, the disputed ring | the one amber pair `--caution` `#f2c14e` on `--caution-soft` `#3f3110`, `--caution-strong` `#e0a800` for borders and the disputed ring (PR-H3, 2026-09-04) |
+| Not assessed | `.status-not-assessed`; the map marker is hollow white with a `--muted` border (PR-H3) | `--not-assessed` `#8fb8e0` on `--not-assessed-soft` `#1b3550` |
 | Warning or demo-only message | `.demo-warning` | amber warning |
 | Disabled or unavailable state | `.disabled-panel`, `.backend-card.disabled` | light grey |
 | Unreviewed place on the map (an open case an RA can revise) — marks only, never a status pill | `.legend-dot.context-dot-swatch`, `--marker-unvalidated`, the `vm-unvalidated` ring on task markers, `COLOUR` and `HALO` in `js/unvalidated-places.js` (shared by the RA and review portals) | amber disc `#f59e0b` with a white halo, on every basemap (JB ruling R-D1′, 2026-09-04 afternoon: "any PoW that has not been reviewed should be in amber; all cases are open", overriding the morning's slate R-D1). Every place no reviewer has confirmed is an open case and wears this amber; the darker `--caution-strong` stays for uncertain, caution, and the disputed ring. |
-| Pure data entry (nominations, walk-up records) — containers only, never the action button | `.portal-mode-bar.mode-add`, `.nominations-panel`, `.entry-badge`, `.task-row.entry-card`, `.pin-card-host`, `.verification-marker.vm-nomination`, `.legend-dot.vm-nomination-swatch`, `.chooser-option#chooseAddButton strong` | teal, `--entry` `#0f766e` on `--entry-soft` `#e6f4f1` (JB separation ruling, 2026-08-31) |
+| Pure data entry (nominations, walk-up records) — containers only, never the action button | `.portal-mode-bar.mode-add`, `.nominations-panel`, `.entry-badge`, `.task-row.entry-card`, `.pin-card-host`, `.verification-marker.vm-nomination`, `.legend-dot.vm-nomination-swatch`, `.chooser-option#chooseAddButton strong` | teal, `--entry` `#5fd3c4` on `--entry-soft` `#123a36` (JB separation ruling, 2026-08-31) |
 
 If these colours change, update both the CSS and this table. Since PR-H3 (2026-09-04) the three surfaces share one token system, the block in section 3 of `docs/development/ui-design-audit-2026-09-03.md`: `verification.html` and `review.html` each declare it in their `:root` (`--bg`, `--panel`, `--panel-2`, `--ink`, `--muted`, `--line`, `--control-line`, `--action*`, `--danger*`, `--caution*`, `--present*`, `--absent*`, `--not-assessed*`, `--entry*`, `--marker-unvalidated`, `--font`, `--fs-*`, `--sp-*`, `--r-*`), and the public map shell scopes its dark variant under `.map-chrome` in `apps/shared/map-shell.css`. Change a meaning by changing its variable, then update this table. Type: base 16 px in the working tools, meta and pills 14 px, nothing under 13 px; labels 600, prose 400; the system font stack everywhere, declared once. Buttons: one filled primary per row, the outline as the secondary idiom, disabled controls keep readable text (grey face, muted ink, never opacity).
 
 ## Theme
 
-Both portals share one token sheet, `apps/regions/_shared/theme.css`, with a light set and a dark set (R-U2 to R-U4, confirmed 2026-09-19). The meanings are ruled; the dark values below are provisional until Joseph B's colour session, and every value change goes through this table. `apps/regions/_shared/theme.js` runs in `<head>` before the stylesheets: it reads the device's stored choice (`localStorage["pow-theme"]`: `light` or `dark`; absent means auto), sets `data-theme` (the choice, absent for auto) and `data-theme-effective` (`light` or `dark`, what paints) on `<html>`, follows a change in the device preference while auto is chosen, and fires `pow-theme-change` on every change. The control is three buttons, `Auto`, `Light`, `Dark`, in each portal's header (`.theme-control`, 44 px targets), wired by `PowTheme.bind`. In dark mode the Streets basemap is MapTiler's `streets-v2-dark` raster where a key ships and the OpenStreetMap tiles under a CSS filter otherwise (`.streets-tiles-filtered`); Hybrid and Satellite are never darkened (R-U3: darkened imagery misreads buildings). Marker halos use `--marker-halo` (white on every surface, both themes), never `--panel`. Shadows and veils are tokens too (`--shade-*`, `--veil`, `--action-glow`, `--present-glow`); no `rgba()` literal remains in either page.
+Both portals share one token sheet, `apps/regions/_shared/theme.css`, and dark is the one theme (JB, 2026-09-21: "the dark theme is beautiful. can we simply make that default with no options?"). This supersedes the three-state control of R-U2 (2026-09-19): there is no Auto, Light or Dark button, no stored choice, and no light set in the sheet; the light values stay in the table below as the record of what the pages carried. The meanings are ruled; the dark values are provisional until Joseph B's colour session, and every value change goes through this table. `apps/regions/_shared/theme.js` runs in `<head>` before the stylesheets and marks `<html>` with `data-theme="dark"` and `data-theme-effective="dark"` before paint; `PowTheme.get()`, `effective()` and `set()` all answer `dark`, so callers keep their shape. The Streets basemap is MapTiler's `streets-v2-dark` raster where a key ships and the OpenStreetMap tiles under a CSS filter otherwise (`.streets-tiles-filtered`); Hybrid and Satellite are never darkened (R-U3: darkened imagery misreads buildings). Marker halos use `--marker-halo` (white on every surface), never `--panel`. Shadows and veils are tokens too (`--shade-*`, `--veil`, `--action-glow`, `--present-glow`); no `rgba()` literal remains in either page.
 
-| Token | Light | Dark (provisional) |
+| Token | Light (retired 2026-09-21, record only) | Dark (current, provisional values) |
 | --- | --- | --- |
 | `--bg` | `#f4f6f8` | `#0f1620` |
 | `--panel` | `#ffffff` | `#17202a` |
@@ -178,7 +178,7 @@ Both portals share one token sheet, `apps/regions/_shared/theme.css`, with a lig
 | `--action-glow` | `rgba(31, 97, 141, 0.18)` | `rgba(127, 179, 230, 0.25)` |
 | `--present-glow` | `rgba(22, 101, 52, 0.16)` | `rgba(111, 207, 151, 0.2)` |
 
-Contrast (WCAG relative luminance) on the pairs the pages actually draw. Body text needs 4.5:1, large or bold text and control boundaries 3:1.
+Contrast (WCAG relative luminance) on the pairs the pages actually draw; the Dark column is the live one. Body text needs 4.5:1, large or bold text and control boundaries 3:1.
 
 | Pair (foreground on surface) | Light | Dark |
 | --- | --- | --- |
