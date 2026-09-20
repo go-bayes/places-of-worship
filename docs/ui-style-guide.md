@@ -76,7 +76,11 @@ location`, `Drop pin on map`, `Search and drop` (which folds open the
 address search and the coordinate boxes); a pin already down reads `Move
 pin`. Typed coordinates apply on change and the pin drags on the map, so
 there is no move button. The `Flag for discussion` checkbox carries its
-label alone; the field that opens takes the description.
+label alone; the field that opens takes the description. The Map data panel
+offers one toggle, `Hide points` / `Show points` (ruled 2026-09-20: the
+on/off select and the note about the target year were artefacts); today's
+places show by default and the legend names them `place on today's map,
+tap to revise`.
 
 The map offers `Streets` (OSM standard tiles), `Hybrid` (MapTiler imagery
 with street and place labels), and `Satellite` (bare MapTiler imagery)

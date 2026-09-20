@@ -3093,6 +3093,13 @@ class NzVerificationMap {
         };
         divider.addEventListener("pointerup", end);
         divider.addEventListener("pointercancel", end);
+        // ios safari (jb 2026-09-20, iphone): the bar took the touch and
+        // turned blue, then safari scrolled the page under the finger with
+        // the map on top. touch-action: none is not enough there; the
+        // touchmove itself is refused while a drag is live
+        divider.addEventListener("touchmove", (event) => {
+            if (drag && event.cancelable) event.preventDefault();
+        }, { passive: false });
         // a double tap on the bar returns it to half, or to the default width
         divider.addEventListener("dblclick", () => {
             if (this.paneLayoutActive()) this.setPaneSplit(PANE_DETENTS[1], { chosen: true });
@@ -3322,7 +3329,6 @@ class NzVerificationMap {
             // tags, which most lack, and history belongs to the occupancy
             // slider driven by reviewed periods (occupancy plan section 8)
             const source = this.contextDotSource();
-            const modes = [["all", "Unreviewed places: on"], ["off", "Unreviewed places: off"]];
             // the control is movable (jb 2026-09-04, phone walkthrough): on
             // a phone the bottom-left corner sits under the browser's own
             // toolbar, so the contributor drags it by the grip to wherever
@@ -3336,10 +3342,7 @@ class NzVerificationMap {
                 </div>
                 <div id="portalMapData" class="legend-body">
                 ${source !== "none" ? `
-                <select id="portalPointsSelect" aria-label="Unreviewed places">
-                    ${modes.map(([value, label]) => `<option value="${value}"${value === this.pointsMode ? " selected" : ""}>${label}</option>`).join("")}
-                </select>
-                <div id="portalPointsNote" class="points-mode-note" hidden></div>` : ""}
+                <button type="button" id="portalPointsToggle" class="points-toggle" aria-pressed="${this.pointsMode === "off" ? "false" : "true"}">${this.pointsMode === "off" ? "Show points" : "Hide points"}</button>` : ""}
                 <div class="map-legend">
                     <div class="legend-group">
                     ${TARGET_YEARS.length ? `
@@ -3358,7 +3361,7 @@ class NzVerificationMap {
                     <span class="legend-row"><span class="legend-dot vm-disputed-swatch"></span>disputed</span>
                     <span class="legend-row"><span class="legend-dot vm-in-review-swatch"></span>in review</span>
                     <span class="legend-row"><span class="legend-dot vm-unvalidated-swatch"></span>not yet reviewed (open case)</span>
-                    ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>unreviewed place, click to revise</span>` : ""}
+                    ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>place on today's map, tap to revise</span>` : ""}
                     </div>
                 </div>
                 </div>
@@ -3366,8 +3369,10 @@ class NzVerificationMap {
             // keep map gestures away from the control
             L.DomEvent.disableClickPropagation(div);
             L.DomEvent.disableScrollPropagation(div);
-            div.querySelector("#portalPointsSelect")?.addEventListener("change", (event) => {
-                this.setPointsMode(event.target.value);
+            // one toggle (jb 2026-09-20: the on/off select and the note
+            // about the target year were artefacts): points show by default
+            div.querySelector("#portalPointsToggle")?.addEventListener("click", () => {
+                this.setPointsMode(this.pointsMode === "off" ? "all" : "off");
             });
             this.makeControlMovable(div, div.querySelector(".legend-grip"));
             this.mapDataPanel = div;
@@ -3378,18 +3383,22 @@ class NzVerificationMap {
             return div;
         };
         control.addTo(this.map);
-        // seed the per-mode note for the initial (default off) state
-        this.updatePointsNote();
         // the unvalidated places show on arrival for everyone (r-h4:
         // looking is free): every place, in amber, whatever the country
         const source = this.contextDotSource();
         if (source !== "none" && this.pointsMode === "off") {
             // every unreviewed place shows on arrival (jb 2026-09-04)
-            const mode = "all";
-            this.setPointsMode(mode);
-            const pointsSelect = document.getElementById("portalPointsSelect");
-            if (pointsSelect) pointsSelect.value = mode;
+            this.setPointsMode("all");
         }
+    }
+
+    // the toggle's label and pressed state follow the mode
+    syncPointsToggle() {
+        const toggle = document.getElementById("portalPointsToggle");
+        if (!toggle) return;
+        const on = this.pointsMode !== "off";
+        toggle.textContent = on ? "Hide points" : "Show points";
+        toggle.setAttribute?.("aria-pressed", on ? "true" : "false");
     }
 
     // the floating sign-in panel drags by the grip in its header (jb
@@ -3532,20 +3541,6 @@ class NzVerificationMap {
     // the historical-points standard: period names the date filter, all warns
     // the dots are today's snapshot, off hides the note. Updates on both mode
     // change and target-year change (the year appears in the copy).
-    updatePointsNote() {
-        const note = document.getElementById("portalPointsNote");
-        if (!note) return;
-        const year = this.targetYear;
-        if (this.pointsMode === "all") {
-            const tiles = this.tilesAvailable();
-            note.textContent = `Amber dots: today's OpenStreetMap places${TARGET_YEARS.length ? `, not ${year} places` : ""}, unreviewed${tiles ? `; zoom past ${TILE_DOTS_MIN_ZOOM} for all` : ""}. Click one to revise.`;
-            note.hidden = false;
-        } else {
-            note.textContent = "";
-            note.hidden = true;
-        }
-    }
-
     // whether "all" can draw every place from the tiles (jb 2026-09-04:
     // australia showed only the dated subset, so most places had no dot
     // and no revise entry); without leaflet.vectorgrid the dated product
@@ -3556,7 +3551,7 @@ class NzVerificationMap {
 
     setPointsMode(mode) {
         this.pointsMode = mode;
-        this.updatePointsNote();
+        this.syncPointsToggle();
         // on ("all"): every place of worship on the tiles, whatever the
         // country, the dated product standing in without vectorgrid; off: none
         if (mode === "all" && this.tilesAvailable()) {
@@ -4289,10 +4284,7 @@ class NzVerificationMap {
             const source = this.contextDotSource();
             if (this.pointsMode === "off" && source !== "none") {
                 // every unreviewed place shows on arrival (jb 2026-09-04)
-            const mode = "all";
-                this.setPointsMode(mode);
-                const pointsSelect = document.getElementById("portalPointsSelect");
-                if (pointsSelect) pointsSelect.value = mode;
+                this.setPointsMode("all");
             }
         } else if (this.basemap !== DEFAULT_BASEMAP && !this.basemapUserChosen) {
             this.setBasemap(DEFAULT_BASEMAP);
@@ -4458,7 +4450,6 @@ class NzVerificationMap {
                 // period-mode context dots key off the same year select
                 this.syncContextDots();
                 // the note copy carries the year, so refresh it too
-                this.updatePointsNote();
                 if (this.selectedTask) {
                     // same-task rebuild: carry typed values across the re-render
                     this.renderDetailPreservingForm(this.selectedTask);
@@ -11094,8 +11085,6 @@ class NzVerificationMap {
         // a pin never lands on one without the offer to revise it instead
         if (this.pointsMode === "off" && this.contextDotSource() !== "none") {
             this.setPointsMode("all");
-            const pointsSelect = document.getElementById("portalPointsSelect");
-            if (pointsSelect) pointsSelect.value = "all";
         }
         // aiming wants the map: on a phone the map takes most of the screen
         this.paneSnap("map");

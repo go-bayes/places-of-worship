@@ -1111,6 +1111,9 @@
             border-right: 1px solid var(--line);
             cursor: col-resize;
             touch-action: none;
+            /* a drag on the bar must not become a page or pane scroll on
+               ios (jb 2026-09-20) */
+            overscroll-behavior: none;
             user-select: none;
             -webkit-user-select: none;
         }
@@ -2312,15 +2315,22 @@
             color: var(--caution);
             font-size: var(--fs-sm);
         }
-        .points-mode-note {
-            font-size: var(--fs-xs);
-            line-height: 1.35;
-            color: var(--muted);
-            max-width: 210px;
+        /* one toggle for the points (jb 2026-09-20): shown by default */
+        .points-toggle {
+            width: auto;
+            min-height: 36px;
+            padding: 0 14px;
+            border: 1px solid var(--action);
+            border-radius: var(--r-sm);
+            background: var(--panel);
+            color: var(--action);
+            font-size: var(--fs-sm);
+            font-weight: 600;
+            cursor: pointer;
         }
 
-        .points-mode-note[hidden] {
-            display: none;
+        .points-toggle:hover {
+            background: var(--action-soft);
         }
 
         .map-legend {
@@ -3455,6 +3465,6 @@
     <script src="js/source-links.js?v=20260904a"></script>
     <script src="js/unvalidated-places.js?v=20260904a"></script>
     <script src="js/task-presentation.js?v=20260919a"></script>
-    <script src="js/verification-map.js?v=20260920a"></script>
+    <script src="js/verification-map.js?v=20260920b"></script>
 </body>
 </html>

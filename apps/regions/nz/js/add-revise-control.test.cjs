@@ -259,4 +259,23 @@ const dot = { type: "Feature", properties: { name: "St Mary's", osm_id: "1", osm
   assert.equal(/Assigned tasks →/.test(source), false);
 }
 
-console.log("add-revise-control: 9 checks passed");
+// 10. the map data panel: one points toggle, no select and no target-year note;
+//     the divider refuses touchmove while dragging (ios safari)
+{
+  const source = fs.readFileSync(path.join(__dirname, "verification-map.js"), "utf8");
+  assert.equal(/portalPointsSelect|portalPointsNote|updatePointsNote/.test(source), false);
+  assert.match(source, /id="portalPointsToggle"/);
+  assert.match(source, /"touchmove", \(event\) => \{\s*if \(drag && event\.cancelable\) event\.preventDefault\(\);\s*\}, \{ passive: false \}/);
+  const app = fresh();
+  const toggle = element("portalPointsToggle");
+  app.pointsMode = "off";
+  app.syncPointsToggle();
+  assert.equal(toggle.textContent, "Show points");
+  assert.equal(toggle.attrs["aria-pressed"], "false");
+  app.pointsMode = "all";
+  app.syncPointsToggle();
+  assert.equal(toggle.textContent, "Hide points");
+  assert.equal(toggle.attrs["aria-pressed"], "true");
+}
+
+console.log("add-revise-control: 10 checks passed");
