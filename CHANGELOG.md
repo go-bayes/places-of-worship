@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-21 (style guide approved)
+
+- Joseph B approved `docs/ui-style-guide.md` as it stands ("approve the style guide", 2026-09-21): dark as the one theme and the Theme table's values are no longer provisional. The guide records the approval under its opening; later changes are dated rulings in place.
+
 ### 2026-09-21 (dark is the one theme)
 
 - Dark is the only theme on both portals (JB, 2026-09-21: "the dark theme is beautiful. can we simply make that default with no options?"). The `Auto` / `Light` / `Dark` control from #130 is gone from both headers, `theme.js` marks `<html>` dark before paint and its API answers `dark` throughout, and `theme.css` carries the dark set as `:root` with no light set and no device query; the light values stay in the style guide's Theme table as the record. The RA guide's header sentence returns to `Exit` and `Guide` and nothing else. Stamps `theme.js?v=20260921a`, `theme.css?v=20260921a`.

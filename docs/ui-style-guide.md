@@ -8,6 +8,11 @@ different visual or wording conventions.
 The live reference today is `apps/regions/nz/verification.html` and
 `apps/regions/nz/js/verification-map.js`.
 
+Approved by Joseph B on 2026-09-21 ("approve the style guide"), with dark as
+the one theme and the token values in the Theme table as they stand. A change
+to a ruled meaning, a value or a wording rule after this date is a new ruling
+and is dated in place.
+
 ## Product Wording
 
 - Use `Add / Revise` for the one intake control on the contributor portal
@@ -139,9 +144,9 @@ If these colours change, update both the CSS and this table. Since PR-H3 (2026-0
 
 ## Theme
 
-Both portals share one token sheet, `apps/regions/_shared/theme.css`, and dark is the one theme (JB, 2026-09-21: "the dark theme is beautiful. can we simply make that default with no options?"). This supersedes the three-state control of R-U2 (2026-09-19): there is no Auto, Light or Dark button, no stored choice, and no light set in the sheet; the light values stay in the table below as the record of what the pages carried. The meanings are ruled; the dark values are provisional until Joseph B's colour session, and every value change goes through this table. `apps/regions/_shared/theme.js` runs in `<head>` before the stylesheets and marks `<html>` with `data-theme="dark"` and `data-theme-effective="dark"` before paint; `PowTheme.get()`, `effective()` and `set()` all answer `dark`, so callers keep their shape. The Streets basemap is MapTiler's `streets-v2-dark` raster where a key ships and the OpenStreetMap tiles under a CSS filter otherwise (`.streets-tiles-filtered`); Hybrid and Satellite are never darkened (R-U3: darkened imagery misreads buildings). Marker halos use `--marker-halo` (white on every surface), never `--panel`. Shadows and veils are tokens too (`--shade-*`, `--veil`, `--action-glow`, `--present-glow`); no `rgba()` literal remains in either page.
+Both portals share one token sheet, `apps/regions/_shared/theme.css`, and dark is the one theme (JB, 2026-09-21: "the dark theme is beautiful. can we simply make that default with no options?"). This supersedes the three-state control of R-U2 (2026-09-19): there is no Auto, Light or Dark button, no stored choice, and no light set in the sheet; the light values stay in the table below as the record of what the pages carried. The meanings are ruled and the dark values are approved (JB, 2026-09-21); every later value change goes through this table as a dated ruling. `apps/regions/_shared/theme.js` runs in `<head>` before the stylesheets and marks `<html>` with `data-theme="dark"` and `data-theme-effective="dark"` before paint; `PowTheme.get()`, `effective()` and `set()` all answer `dark`, so callers keep their shape. The Streets basemap is MapTiler's `streets-v2-dark` raster where a key ships and the OpenStreetMap tiles under a CSS filter otherwise (`.streets-tiles-filtered`); Hybrid and Satellite are never darkened (R-U3: darkened imagery misreads buildings). Marker halos use `--marker-halo` (white on every surface), never `--panel`. Shadows and veils are tokens too (`--shade-*`, `--veil`, `--action-glow`, `--present-glow`); no `rgba()` literal remains in either page.
 
-| Token | Light (retired 2026-09-21, record only) | Dark (current, provisional values) |
+| Token | Light (retired 2026-09-21, record only) | Dark (approved 2026-09-21) |
 | --- | --- | --- |
 | `--bg` | `#f4f6f8` | `#0f1620` |
 | `--panel` | `#ffffff` | `#17202a` |
