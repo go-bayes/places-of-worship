@@ -2186,20 +2186,23 @@ class NzVerificationMap {
             ? "Shared task backend"
             : this.portalMode === "assigned"
                 ? "Signed in. Choose a task below."
-                : this.portalMode === "add"
-                    ? "Signed in. Add missing places."
-                    : "Signed in. Choose an activity below.";
+                : "Signed in.";
+        // add / revise keeps the card to one line (jb 2026-09-20: one
+        // button on the phone): the account, the transport dot, the past
+        // submissions and a sign-out link; the heading, the batch label and
+        // the task-list refresh belong to the assignment sheet
+        const addMode = ASSIGNMENT_MODE && this.portalMode === "add";
         panel.innerHTML = `
             <div class="backend-card signed-in">
-                <strong class="entry-hide">${signedInHeading}</strong>
-                <span class="entry-hide">${assignmentLabel}</span>
-                <span>Signed in as ${escapeHtml(label)}. ${this.transportDotHtml()}<span class="entry-hide"> ${escapeHtml(assignmentStatusText)}</span><span class="entry-only"> <button type="button" class="link-button" id="showTaskListButton">Show task list</button></span></span>
+                ${addMode ? "" : `<strong class="entry-hide">${signedInHeading}</strong>
+                <span class="entry-hide">${assignmentLabel}</span>`}
+                <span>Signed in as ${escapeHtml(label)}. ${this.transportDotHtml()}<span class="entry-hide"> ${escapeHtml(assignmentStatusText)}</span><span class="entry-only"> <button type="button" class="link-button" id="showTaskListButton">Show task list</button></span>${addMode ? ` <button type="button" class="link-button entry-hide" id="signOutButton">Sign out</button>` : ""}</span>
                 ${batchRollup ? `<span class="entry-hide">${batchRollup}</span>` : ""}
                 <span id="backendRefreshStatus" class="copy-status entry-hide" aria-live="polite">${escapeHtml(this.backendTransientStatus || "")}</span>
-                <div class="backend-actions entry-hide">
+                ${addMode ? "" : `<div class="backend-actions entry-hide">
                     <button type="button" class="secondary" id="refreshBackendTasksButton">Refresh task list</button>
                     <button type="button" class="tertiary" id="signOutButton">Sign out</button>
-                </div>
+                </div>`}
             </div>
         `;
         this.syncPortalChrome();
@@ -2352,6 +2355,10 @@ class NzVerificationMap {
         if (this.selectedTask) {
             // sign-in after an expired save must not wipe typed values
             this.renderDetailPreservingForm(this.selectedTask);
+        } else {
+            // the resting card was painted signed out, before the mode was
+            // known; a restored mode must not keep the other mode's intro
+            this.renderInitialDetail();
         }
         this.applyPendingDeepLink();
         this.resumeRapidPinFromDevice();
@@ -2403,6 +2410,7 @@ class NzVerificationMap {
             this.tasks = [];
             this.filteredTasks = [];
             this.selectedTask = null;
+            this.assignedAvailableCount = 0;
             this.markerLayer?.clearLayers();
             const snapshotEl = document.getElementById("snapshotId");
             if (snapshotEl) {
@@ -2429,6 +2437,8 @@ class NzVerificationMap {
         });
         // keyboard starts: cmd/ctrl+enter submits, plain "n" opens the next task
         document.addEventListener("keydown", event => this.handleGlobalKeydown(event));
+        // the file button hides the native input, so the chosen count is shown beside it
+        document.addEventListener("change", event => this.syncFilePickCount(event.target));
         const restoredUser = await this.restoreBackendSession();
         this.renderBackendPanel();
         await this.loadTasks();
@@ -2767,6 +2777,10 @@ class NzVerificationMap {
 
     setupMap() {
         this.map = L.map("map", { preferCanvas: true }).setView(COUNTRY_CONFIG.mapCentre, COUNTRY_CONFIG.mapZoom);
+        // the dot whose popup is open is the revise target of the one add /
+        // revise control (jb 2026-09-20); closing it returns the control to
+        // dropping a pin
+        this.map.on("popupclose", () => this.setSelectedContextFeature(null));
         // openstreetmap standard tiles: no key to ship, and building
         // footprints render unwatermarked at the zooms pin placement needs
         // keep the zoom-out floor at 5 for compact countries, but let
@@ -3089,6 +3103,13 @@ class NzVerificationMap {
         };
         divider.addEventListener("pointerup", end);
         divider.addEventListener("pointercancel", end);
+        // ios safari (jb 2026-09-20, iphone): the bar took the touch and
+        // turned blue, then safari scrolled the page under the finger with
+        // the map on top. touch-action: none is not enough there; the
+        // touchmove itself is refused while a drag is live
+        divider.addEventListener("touchmove", (event) => {
+            if (drag && event.cancelable) event.preventDefault();
+        }, { passive: false });
         // a double tap on the bar returns it to half, or to the default width
         divider.addEventListener("dblclick", () => {
             if (this.paneLayoutActive()) this.setPaneSplit(PANE_DETENTS[1], { chosen: true });
@@ -3301,6 +3322,37 @@ class NzVerificationMap {
         }
     }
 
+    // "drop pin on map": the map takes the screen and the status says to
+    // tap; the click handler armed with the entry lands or moves the pin
+    aimPinOnMap() {
+        if (!this.pinMode) return;
+        this.setPinSearchOpen(false);
+        const status = document.getElementById("pinStatus");
+        if (status) status.textContent = this.pinConfirmed
+            ? "The location is already confirmed. Discard this entry to place the pin again."
+            : (this.pinMarker ? "Tap the map to move the pin, or drag it." : "Tap the building on the map to drop the pin.");
+        this.paneSnap("map");
+    }
+
+    // "search and drop": the address search and the coordinate boxes fold
+    // open under the options and the search box takes focus
+    togglePinSearch() {
+        if (!this.pinMode) return;
+        const block = document.getElementById("pinSearchBlock");
+        const open = Boolean(block?.hidden);
+        this.setPinSearchOpen(open);
+        if (open) {
+            this.paneSnap("half");
+            document.getElementById("pinSearchInput")?.focus?.({ preventScroll: true });
+        }
+    }
+
+    setPinSearchOpen(open) {
+        const block = document.getElementById("pinSearchBlock");
+        if (block) block.hidden = !open;
+        document.getElementById("pinSearchToggleButton")?.setAttribute?.("aria-expanded", open ? "true" : "false");
+    }
+
     // corner control: the points-mode select plus the one marker legend
     // (fills, then rings, then the unvalidated dot, in the status pills'
     // own words); period is offered only where the country
@@ -3320,7 +3372,6 @@ class NzVerificationMap {
             // tags, which most lack, and history belongs to the occupancy
             // slider driven by reviewed periods (occupancy plan section 8)
             const source = this.contextDotSource();
-            const modes = [["all", "Unreviewed places: on"], ["off", "Unreviewed places: off"]];
             // the control is movable (jb 2026-09-04, phone walkthrough): on
             // a phone the bottom-left corner sits under the browser's own
             // toolbar, so the contributor drags it by the grip to wherever
@@ -3334,10 +3385,7 @@ class NzVerificationMap {
                 </div>
                 <div id="portalMapData" class="legend-body">
                 ${source !== "none" ? `
-                <select id="portalPointsSelect" aria-label="Unreviewed places">
-                    ${modes.map(([value, label]) => `<option value="${value}"${value === this.pointsMode ? " selected" : ""}>${label}</option>`).join("")}
-                </select>
-                <div id="portalPointsNote" class="points-mode-note" hidden></div>` : ""}
+                <button type="button" id="portalPointsToggle" class="points-toggle" aria-pressed="${this.pointsMode === "off" ? "false" : "true"}">${this.pointsMode === "off" ? "Show points" : "Hide points"}</button>` : ""}
                 <div class="map-legend">
                     <div class="legend-group">
                     ${TARGET_YEARS.length ? `
@@ -3356,7 +3404,7 @@ class NzVerificationMap {
                     <span class="legend-row"><span class="legend-dot vm-disputed-swatch"></span>disputed</span>
                     <span class="legend-row"><span class="legend-dot vm-in-review-swatch"></span>in review</span>
                     <span class="legend-row"><span class="legend-dot vm-unvalidated-swatch"></span>not yet reviewed (open case)</span>
-                    ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>unreviewed place, click to revise</span>` : ""}
+                    ${source !== "none" ? `<span class="legend-row"><span class="legend-dot context-dot-swatch"></span>place on today's map, tap to revise</span>` : ""}
                     </div>
                 </div>
                 </div>
@@ -3364,8 +3412,10 @@ class NzVerificationMap {
             // keep map gestures away from the control
             L.DomEvent.disableClickPropagation(div);
             L.DomEvent.disableScrollPropagation(div);
-            div.querySelector("#portalPointsSelect")?.addEventListener("change", (event) => {
-                this.setPointsMode(event.target.value);
+            // one toggle (jb 2026-09-20: the on/off select and the note
+            // about the target year were artefacts): points show by default
+            div.querySelector("#portalPointsToggle")?.addEventListener("click", () => {
+                this.setPointsMode(this.pointsMode === "off" ? "all" : "off");
             });
             this.makeControlMovable(div, div.querySelector(".legend-grip"));
             this.mapDataPanel = div;
@@ -3376,18 +3426,22 @@ class NzVerificationMap {
             return div;
         };
         control.addTo(this.map);
-        // seed the per-mode note for the initial (default off) state
-        this.updatePointsNote();
         // the unvalidated places show on arrival for everyone (r-h4:
         // looking is free): every place, in amber, whatever the country
         const source = this.contextDotSource();
         if (source !== "none" && this.pointsMode === "off") {
             // every unreviewed place shows on arrival (jb 2026-09-04)
-            const mode = "all";
-            this.setPointsMode(mode);
-            const pointsSelect = document.getElementById("portalPointsSelect");
-            if (pointsSelect) pointsSelect.value = mode;
+            this.setPointsMode("all");
         }
+    }
+
+    // the toggle's label and pressed state follow the mode
+    syncPointsToggle() {
+        const toggle = document.getElementById("portalPointsToggle");
+        if (!toggle) return;
+        const on = this.pointsMode !== "off";
+        toggle.textContent = on ? "Hide points" : "Show points";
+        toggle.setAttribute?.("aria-pressed", on ? "true" : "false");
     }
 
     // the floating sign-in panel drags by the grip in its header (jb
@@ -3530,20 +3584,6 @@ class NzVerificationMap {
     // the historical-points standard: period names the date filter, all warns
     // the dots are today's snapshot, off hides the note. Updates on both mode
     // change and target-year change (the year appears in the copy).
-    updatePointsNote() {
-        const note = document.getElementById("portalPointsNote");
-        if (!note) return;
-        const year = this.targetYear;
-        if (this.pointsMode === "all") {
-            const tiles = this.tilesAvailable();
-            note.textContent = `Amber dots: today's OpenStreetMap places${TARGET_YEARS.length ? `, not ${year} places` : ""}, unreviewed${tiles ? `; zoom past ${TILE_DOTS_MIN_ZOOM} for all` : ""}. Click one to revise.`;
-            note.hidden = false;
-        } else {
-            note.textContent = "";
-            note.hidden = true;
-        }
-    }
-
     // whether "all" can draw every place from the tiles (jb 2026-09-04:
     // australia showed only the dated subset, so most places had no dot
     // and no revise entry); without leaflet.vectorgrid the dated product
@@ -3554,7 +3594,7 @@ class NzVerificationMap {
 
     setPointsMode(mode) {
         this.pointsMode = mode;
-        this.updatePointsNote();
+        this.syncPointsToggle();
         // on ("all"): every place of worship on the tiles, whatever the
         // country, the dated product standing in without vectorgrid; off: none
         if (mode === "all" && this.tilesAvailable()) {
@@ -3627,6 +3667,94 @@ class NzVerificationMap {
         } else {
             this.openContextIssueForm(feature, { keepPopup: true });
         }
+    }
+
+    // one control for add and revise (jb 2026-09-20: "ADD/REVISE the only
+    // button on the phone"): with a dot selected on the map it revises that
+    // place, otherwise it drops a pin; while an entry is open the same
+    // button is the way out, since a phone has no Escape key
+    handleAddReviseClick() {
+        if (this.pinMode) {
+            // a period placement returns to its periods pane with nothing
+            // lost; an add or revise entry is discarded, asking first only
+            // when a pin or text would go
+            if (this.occupancyPinContext) this.exitPinMode();
+            else this.discardEntryAttempt();
+            return;
+        }
+        const feature = this.selectedContextFeature;
+        if (feature) {
+            if (!this.backendUser && this.backend?.configured) {
+                this.requestSignInToRevise(feature);
+                return;
+            }
+            this.reviseFromFeature(feature);
+            return;
+        }
+        this.enterPinMode();
+    }
+
+    setSelectedContextFeature(feature) {
+        this.selectedContextFeature = feature || null;
+        this.renderAddReviseControl();
+    }
+
+    // the control's label and its one-line hint follow the state: Cancel
+    // while an entry is open, otherwise Add / Revise with the hint naming
+    // what a press does now
+    renderAddReviseControl() {
+        const button = document.getElementById("addPlaceButton");
+        const hint = document.getElementById("addReviseHint");
+        if (!button) return;
+        button.disabled = false;
+        button.removeAttribute?.("disabled");
+        if (this.pinMode) {
+            button.textContent = "Cancel";
+            button.classList.add("cancelling");
+            if (hint) hint.textContent = "";
+            // the sheet's button leaves with the hint while an entry is open
+            this.renderAssignedTasksButton();
+            return;
+        }
+        button.classList.remove("cancelling");
+        button.textContent = "Add / Revise";
+        const selected = this.selectedContextFeature;
+        const name = String(selected?.properties?.name || "").trim();
+        if (hint) {
+            hint.textContent = selected
+                ? `Revises ${name || "the selected place"}.`
+                : "Drops a pin for a new place. Tap a dot first to revise that place.";
+        }
+        this.renderAssignedTasksButton();
+    }
+
+    // the specialist sheet's button sits under the control at the same
+    // size, and only while the batch holds work for this contributor:
+    // tasks open to them, or work of theirs in progress (jb 2026-09-20:
+    // "reveal a third large button only if relevant")
+    assignedTaskCount() {
+        if (!ASSIGNMENT_MODE || COUNTRY_CONFIG.assignmentsOffered === false) return 0;
+        const available = Number(this.assignedAvailableCount) || 0;
+        const mine = Array.isArray(this.myWorkItems) ? this.myWorkItems.length : 0;
+        return Math.max(available, mine);
+    }
+
+    renderAssignedTasksButton() {
+        const assigned = document.getElementById("assignedTasksButton");
+        if (!assigned) return;
+        const count = this.assignedTaskCount();
+        const show = Boolean(count) && !this.pinMode && this.portalMode === "add";
+        assigned.hidden = !show;
+        assigned.textContent = show ? `Assigned tasks (${count})` : "Assigned tasks";
+    }
+
+    // the count beside the file button, since the native input is hidden
+    syncFilePickCount(input) {
+        if (!input?.classList?.contains?.("attachment-file-input")) return;
+        const count = input.closest?.(".file-pick")?.querySelector?.(".file-pick-count");
+        if (!count) return;
+        const n = input.files?.length || 0;
+        count.textContent = n ? `${n} chosen` : "";
     }
 
     // the add flow is armed (the contributor pressed Add a place) but no
@@ -3848,6 +3976,7 @@ class NzVerificationMap {
     }
 
     bindContextDotPopup(popup, feature) {
+        this.setSelectedContextFeature(feature);
         const el = popup.getElement();
         if (!el) return;
         this.bindCopyCoords(el);
@@ -4072,7 +4201,8 @@ class NzVerificationMap {
             if (ASSIGNMENT_MODE) {
                 // one label serves every country (rapid entry included);
                 // the transient cards render into #pinCardHost on demand
-                document.getElementById("addPlaceButton")?.addEventListener("click", () => this.enterPinMode());
+                document.getElementById("addPlaceButton")?.addEventListener("click", () => this.handleAddReviseClick());
+                document.getElementById("assignedTasksButton")?.addEventListener("click", () => this.setPortalMode("assigned"));
             }
         }
 
@@ -4140,50 +4270,34 @@ class NzVerificationMap {
         document.body.classList.toggle("portal-add", mode === "add");
         const chooser = document.getElementById("portalChooser");
         if (chooser) chooser.hidden = mode !== "chooser";
+        // the bar heads the assigned sheet only; in add / revise the sheet
+        // is a button under the control, present when the batch holds work
         const bar = document.getElementById("portalModeBar");
-        if (bar) bar.hidden = !(mode === "assigned" || mode === "add");
+        if (bar) bar.hidden = mode !== "assigned";
         if (mode === "chooser") this.renderPortalChooser();
-        if (mode === "assigned" || mode === "add") this.renderPortalModeBar();
+        if (mode === "assigned") this.renderPortalModeBar();
+        this.renderAddReviseControl();
     }
 
+    // the portal lands in add / revise (jb 2026-09-20: the task list is
+    // specialist assignment work, one link away on the mode bar); the
+    // chooser no longer renders
     renderPortalChooser() {
-        const chooser = document.getElementById("portalChooser");
-        if (!chooser || !ASSIGNMENT_MODE) return;
-        // no assigned work in a registry country (r-h1): straight to add or
-        // revise, nothing to choose between
-        if (COUNTRY_CONFIG.assignmentsOffered === false) {
-            this.setPortalMode("add");
-            return;
-        }
-        const available = this.tasks.filter(feature => (feature.properties?.batch_id || ASSIGNMENT_BATCH_ID) === ASSIGNMENT_BATCH_ID).length;
-        const assignedSummary = available
-            ? `${available} task${available === 1 ? "" : "s"} available in ${ASSIGNMENT_BATCH_ID}${this.myWorkItems.length ? `; ${this.myWorkItems.length} in My work` : ""}.`
-            : `No tasks are assigned to you in ${ASSIGNMENT_BATCH_ID} right now. You can still add or revise places.`;
-        chooser.innerHTML = `
-            <h2>What would you like to do?</h2>
-            <button type="button" class="chooser-option" id="chooseAssignedButton">
-                <strong>Assigned tasks</strong>
-                <span>${escapeHtml(assignedSummary)}</span>
-            </button>
-            <button type="button" class="chooser-option" id="chooseAddButton">
-                <strong>Add or revise places</strong>
-                <span>Nominate a missing place, or click an amber dot on the map to revise a place already recorded.${(this.myNominationItems || []).length ? ` You have ${this.myNominationItems.length} under review.` : ""}</span>
-            </button>
-        `;
-        document.getElementById("chooseAssignedButton")?.addEventListener("click", () => this.setPortalMode("assigned"));
-        document.getElementById("chooseAddButton")?.addEventListener("click", () => this.setPortalMode("add"));
+        if (!ASSIGNMENT_MODE) return;
+        this.setPortalMode("add");
     }
 
     renderPortalModeBar() {
         const bar = document.getElementById("portalModeBar");
         if (!bar || !ASSIGNMENT_MODE) return;
-        const label = this.portalMode === "add" ? "Add or revise places" : "Assigned tasks";
-        bar.classList.toggle("mode-add", this.portalMode === "add");
+        bar.classList.remove("mode-add");
+        // the way back from the specialist sheet; add / revise itself
+        // carries no bar (jb 2026-09-20: words to cut)
         bar.innerHTML = `
-            <span>${label}</span>
-            ${COUNTRY_CONFIG.assignmentsOffered === false ? "" : `<button type="button" class="link-button" id="changeActivityButton">← Change activity</button>`}
+            <span>Assigned tasks</span>
+            <button type="button" class="link-button" id="changeActivityButton">← Add / Revise</button>
         `;
-        document.getElementById("changeActivityButton")?.addEventListener("click", () => this.setPortalMode(null));
+        document.getElementById("changeActivityButton")?.addEventListener("click", () => this.setPortalMode("add"));
     }
 
     // switches activity in place (no reload); null returns to the chooser.
@@ -4213,10 +4327,7 @@ class NzVerificationMap {
             const source = this.contextDotSource();
             if (this.pointsMode === "off" && source !== "none") {
                 // every unreviewed place shows on arrival (jb 2026-09-04)
-            const mode = "all";
-                this.setPointsMode(mode);
-                const pointsSelect = document.getElementById("portalPointsSelect");
-                if (pointsSelect) pointsSelect.value = mode;
+                this.setPointsMode("all");
             }
         } else if (this.basemap !== DEFAULT_BASEMAP && !this.basemapUserChosen) {
             this.setBasemap(DEFAULT_BASEMAP);
@@ -4382,7 +4493,6 @@ class NzVerificationMap {
                 // period-mode context dots key off the same year select
                 this.syncContextDots();
                 // the note copy carries the year, so refresh it too
-                this.updatePointsNote();
                 if (this.selectedTask) {
                     // same-task rebuild: carry typed values across the re-render
                     this.renderDetailPreservingForm(this.selectedTask);
@@ -4430,8 +4540,37 @@ class NzVerificationMap {
         }
     }
 
+    // a refresh that lands after a newer one must not move a task back
+    // (greptile on #127: nothing sequenced the reads). two guards: a
+    // whole response superseded by a later refresh is dropped, and each
+    // row is merged against the copy held, so a copy stamped older than
+    // the held one is a stale read and stays out. with no stamps to
+    // compare, a terminal status absorbs the read (task-presentation
+    // absorb). a curator's reopen of an exported task carries a newer
+    // stamp, so it still lands
+    mergeTaskRead(previous, incoming) {
+        if (!previous) return incoming;
+        if (!incoming) return previous;
+        const heldAt = Number(previous.updated_at);
+        const readAt = Number(incoming.updated_at);
+        if (Number.isFinite(heldAt) && Number.isFinite(readAt)) return readAt < heldAt ? previous : incoming;
+        const absorb = window.PowTaskPresentation?.absorb;
+        return typeof absorb === "function" ? absorb(previous, incoming) : incoming;
+    }
+
+    mergeTaskReads(previousById, rows) {
+        const merged = new Map();
+        for (const task of rows || []) {
+            if (!task?.task_id) continue;
+            merged.set(task.task_id, this.mergeTaskRead(previousById?.get?.(task.task_id), task));
+        }
+        return merged;
+    }
+
     async refreshBackendTasks() {
         if (!this.backend?.configured || !this.backend.signedIn) return;
+        const generation = (this.refreshGeneration || 0) + 1;
+        this.refreshGeneration = generation;
         try {
             const query = {
                 countryCode: COUNTRY_CONFIG.countryCode,
@@ -4455,9 +4594,13 @@ class NzVerificationMap {
                     limit: 1000,
                 })) || [];
             }
-            this.backendTasksById = new Map(allTasks.map(task => [task.task_id, task]));
-            for (const task of manualBatchTasks) {
-                this.backendTasksById.set(task.task_id, task);
+            // a later refresh finished first: its rows are newer, so this
+            // response is dropped whole
+            if (generation !== this.refreshGeneration) return;
+            const held = this.backendTasksById;
+            this.backendTasksById = this.mergeTaskReads(held, allTasks);
+            for (const [taskId, task] of this.mergeTaskReads(held, manualBatchTasks)) {
+                this.backendTasksById.set(taskId, task);
             }
             // re-merge local copies so the ra stays landed in a task
             // created moments ago that the queries have not indexed yet
@@ -4510,6 +4653,8 @@ class NzVerificationMap {
                     }
                 }
                 const availableTasks = allTasks.filter(task => this.assignmentTaskIsAvailable(task));
+                // the assigned-tasks button under Add / Revise reads this
+                this.assignedAvailableCount = availableTasks.length;
                 this.tasks = availableTasks
                     .concat(nominatedTasks)
                     .map(featureFromBackendTask);
@@ -4530,6 +4675,7 @@ class NzVerificationMap {
             this.backendLastError = "";
             this.renderBackendPanel();
             this.renderSessionPanel();
+            this.renderAddReviseControl();
         } catch (error) {
             this.backendLastError = error.message || "Could not refresh shared task state.";
             this.renderBackendPanel();
@@ -5063,11 +5209,11 @@ class NzVerificationMap {
         if (!panel) return;
         if (ASSIGNMENT_MODE) {
             panel.innerHTML = `
-                <h2>${this.portalMode === "add" ? "Add places" : "Assigned web workpack"}</h2>
+                <h2>${this.portalMode === "add" ? "Add / Revise" : "Assigned web workpack"}</h2>
                 <div class="${this.backend?.configured ? "pilot-note" : "demo-warning"}" role="${this.backend?.configured ? "note" : "alert"}">
                     ${this.backend?.configured
                         ? this.portalMode === "add"
-                            ? `Use <strong>＋ Add a missing place</strong> above, then find the building by searching a name or address, typing coordinates, or clicking the map. Drag the pin onto the building before confirming. To revise a place already recorded, click its amber dot and choose "Revise this place".`
+                            ? `<strong>Add / Revise</strong> drops a pin for a new place, or revises the dot you tapped. Drag the pin onto the building, then confirm.`
                             : RAPID_ASSIGNED_ENTRY
                                 ? `Work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. For each place, choose one current-status answer, record how you know it, and use <em>Submit for review</em>.`
                                 : `Work through <strong>${escapeHtml(ASSIGNMENT_BATCH_ID)}</strong>. Use <em>Save draft</em> while working, <em>Submit unresolved note</em> when useful evidence remains incomplete, and <em>Submit for review</em> when a case is ready for JB.`
@@ -6598,7 +6744,7 @@ class NzVerificationMap {
                 </div>
                 <label class="flag-discussion">
                     <input type="checkbox" id="${prefix}FlagForDiscussion">
-                    <span><strong>Flag for discussion</strong><small>Record a partial entry — for example a duplicate on the map, shared denominations, or a case the form does not fit — and bring it to the team.</small></span>
+                    <span><strong>Flag for discussion</strong></span>
                 </label>
                 <label id="${prefix}DiscussionField" hidden>
                     What needs discussion? <span class="req-chip">required when flagged</span>
@@ -6607,8 +6753,12 @@ class NzVerificationMap {
                 ${options.attachmentsHint ? `
                     <div class="attachments-block attachments-inline" id="${prefix}EvidenceFilesBlock">
                         <strong>Photos &amp; documents (optional)</strong>
-                        <div class="copy-help">JPEG, PNG, WebP or PDF, under 10&nbsp;MB each. Choose them here; they upload as soon as the place is saved, and you can add more on the confirmation screen. Review-only — never public.</div>
-                        <input id="${prefix}EvidenceFiles" class="attachment-file-input" type="file" multiple accept="image/jpeg,image/png,image/webp,application/pdf">
+                        <div class="copy-help">Photos or PDFs, under 10&nbsp;MB each. They upload when you save. Review-only, never public.</div>
+                        <label class="file-pick">
+                            <input id="${prefix}EvidenceFiles" class="attachment-file-input" type="file" multiple accept="image/jpeg,image/png,image/webp,application/pdf">
+                            <span class="file-pick-button">Take photo or add files</span>
+                            <span class="file-pick-count" aria-live="polite"></span>
+                        </label>
                         <input id="${prefix}EvidenceFilesCaption" class="attachment-caption-input" type="text" maxlength="500" placeholder="Caption — what do these show? (optional)">
                     </div>
                 ` : ""}
@@ -8838,7 +8988,7 @@ class NzVerificationMap {
         }
         const status = document.getElementById("pinStatus");
         if (status) {
-            status.textContent = `Period ${index + 1}: drag the pin, or click the map, to where the place stood then; choose an area if you only know the vicinity; then confirm. Escape returns to the periods.`;
+            status.textContent = `Period ${index + 1}: drag the pin, or click the map, to where the place stood then; choose an area if you only know the vicinity; then confirm. Cancel returns to the periods.`;
         }
     }
 
@@ -10107,8 +10257,12 @@ class NzVerificationMap {
             ${prominent
                 ? `<h3>Step 2 of 2 — attach photos &amp; documents</h3>`
                 : `<strong>Photos &amp; documents (optional)</strong>`}
-            <div class="copy-help">JPEG, PNG, WebP or PDF, under 10&nbsp;MB each. Choose several at once if useful. Review-only — never public.</div>
-            <input class="attachment-file-input" type="file" multiple accept="image/jpeg,image/png,image/webp,application/pdf">
+            <div class="copy-help">Photos or PDFs, under 10&nbsp;MB each. Review-only, never public.</div>
+            <label class="file-pick">
+                <input class="attachment-file-input" type="file" multiple accept="image/jpeg,image/png,image/webp,application/pdf">
+                <span class="file-pick-button">Take photo or add files</span>
+                <span class="file-pick-count" aria-live="polite"></span>
+            </label>
             <input class="attachment-caption-input" type="text" maxlength="500" placeholder="Caption — what do these show? (optional)">
             <div class="button-row">
                 <button class="attachment-upload-button secondary" type="button">Add file(s)</button>
@@ -10212,7 +10366,10 @@ class NzVerificationMap {
                 added += 1;
             }
             if (status) status.textContent = added === 1 ? "File added." : `${added} files added.`;
-            if (input) input.value = "";
+            if (input) {
+                input.value = "";
+                this.syncFilePickCount(input);
+            }
             const captionInput = block?.querySelector(".attachment-caption-input");
             if (captionInput) captionInput.value = "";
         } catch (error) {
@@ -10661,45 +10818,47 @@ class NzVerificationMap {
         const pinExample = this.pinPlaceholderExample();
         const hostTitle = occupancyPin
             ? `Place period ${occupancyPin.index + 1} on the map`
-            : revise ? `Revise ${escapeHtml(revise.name || "this place")}` : "Add a missing place";
+            : revise ? `Revise ${escapeHtml(revise.name || "this place")}` : "Add a place";
+        // a revise or period pin is already down, so the options move it;
+        // a new place drops it. the pin drags on the map either way
+        const pinDown = Boolean(revise || occupancyPin);
+        const verb = pinDown ? "Move pin" : "Drop pin";
         const locateHelp = occupancyPin
-            ? "The pin starts on the task's point. Drag it, or click the map, to where the place stood in this period; choose an area if you only know the vicinity."
+            ? "The pin starts on the task's point. Drag it to where the place stood in this period; choose an area if you only know the vicinity."
             : revise
-                ? "The pin marks the current record. Drag it onto the right building if the record is misplaced, or confirm it as it stands."
-                : "Search, type coordinates, or click the map. Drag the pin onto the building.";
+                ? "The pin sits on the current record. Drag it if the record is misplaced, or confirm it as it stands."
+                : "Once the pin is down, drag it onto the building.";
         return `
             <h2 class="pin-host-title">${hostTitle}</h2>
             <div id="pinLocateCard" class="pin-card">
-                <div class="copy-help">
-                    ${locateHelp}
+                <div class="pin-locate-options">
+                    ${this.geolocationAvailable() ? `<button id="pinLocateMeButton" type="button" class="locate-option">${verb} at my location</button>` : ""}
+                    <button id="pinDropOnMapButton" type="button" class="locate-option">${verb} on map</button>
+                    <button id="pinSearchToggleButton" type="button" class="locate-option" aria-expanded="false" aria-controls="pinSearchBlock">Search and ${pinDown ? "move" : "drop"}</button>
                 </div>
-                <div class="pin-locate-row">
-                    <label>
-                        Address or place name
-                        <input id="pinSearchInput" type="search" placeholder="e.g. ${escapeHtml(pinExample.place)}" autocomplete="off">
-                    </label>
-                    <button id="pinSearchButton" type="button" class="secondary">Search</button>
+                <div class="copy-help">${locateHelp}</div>
+                <div id="pinSearchBlock" class="pin-search-block" hidden>
+                    <div class="pin-locate-row">
+                        <label>
+                            Address or place name
+                            <input id="pinSearchInput" type="search" placeholder="e.g. ${escapeHtml(pinExample.place)}" autocomplete="off">
+                        </label>
+                        <button id="pinSearchButton" type="button" class="secondary">Search</button>
+                    </div>
+                    <ul id="pinSearchResults" class="pin-search-results" hidden></ul>
+                    <div class="pin-coord-row">
+                        <label>
+                            Latitude
+                            <input id="pinLatInput" type="text" inputmode="decimal" placeholder="${escapeHtml(pinExample.lat)}" autocomplete="off">
+                        </label>
+                        <label>
+                            Longitude
+                            <input id="pinLngInput" type="text" inputmode="decimal" placeholder="${escapeHtml(pinExample.lng)}" autocomplete="off">
+                        </label>
+                    </div>
+                    <div class="copy-help">Coordinates move the pin as you leave the box. Search results by Nominatim &copy; OpenStreetMap contributors.</div>
                 </div>
-                <ul id="pinSearchResults" class="pin-search-results" hidden></ul>
-                ${this.geolocationAvailable() ? `
-                <div class="pin-locate-me">
-                    <button id="pinLocateMeButton" type="button" class="secondary">Use my location</button>
-                    <span class="copy-help">Drops the pin where you are standing.</span>
-                </div>
-                ` : ""}
                 <div id="pinSearchStatus" class="copy-status" aria-live="polite"></div>
-                <div class="pin-coord-row">
-                    <label>
-                        Latitude
-                        <input id="pinLatInput" type="text" inputmode="decimal" placeholder="${escapeHtml(pinExample.lat)}" autocomplete="off">
-                    </label>
-                    <label>
-                        Longitude
-                        <input id="pinLngInput" type="text" inputmode="decimal" placeholder="${escapeHtml(pinExample.lng)}" autocomplete="off">
-                    </label>
-                    <button id="pinCoordButton" type="button" class="secondary">Move pin</button>
-                </div>
-                <div class="copy-help">Search results by Nominatim &copy; OpenStreetMap contributors.</div>
             </div>
             <div id="pinConfirmCard" class="pin-card" hidden>
                 <div class="pin-coords">Pin: <span id="pinLat"></span>, <span id="pinLng"></span></div>
@@ -10799,10 +10958,16 @@ class NzVerificationMap {
                 this.submitPinSearch();
             }
         });
-        document.getElementById("pinCoordButton")?.addEventListener("click", () => this.applyTypedCoordinates());
         document.getElementById("pinLocateMeButton")?.addEventListener("click", () => this.dropPinAtMyLocation());
+        document.getElementById("pinDropOnMapButton")?.addEventListener("click", () => this.aimPinOnMap());
+        document.getElementById("pinSearchToggleButton")?.addEventListener("click", () => this.togglePinSearch());
+        // typed coordinates move the pin as the box is left or on enter;
+        // there is no move button (jb 2026-09-20: "move pin should be
+        // automatic")
         ["pinLatInput", "pinLngInput"].forEach(id => {
-            document.getElementById(id)?.addEventListener("keydown", event => {
+            const box = document.getElementById(id);
+            box?.addEventListener("change", () => this.applyTypedCoordinates({ quiet: true }));
+            box?.addEventListener("keydown", event => {
                 if (event.key === "Enter") {
                     event.preventDefault();
                     this.applyTypedCoordinates();
@@ -10989,19 +11154,18 @@ class NzVerificationMap {
         this.pinSubmissionId = RAPID_NOMINATION_ENTRY ? window.PowRapidEntry.secureSubmissionId() : null;
         this.mountPinCards();
         this.map.getContainer().classList.add("pin-placement");
-        // the button itself carries the in-progress instruction, so the
-        // click never reads as a dead control
-        const addPlaceButton = document.getElementById("addPlaceButton");
-        if (addPlaceButton) {
-            addPlaceButton.setAttribute("disabled", "true");
-            addPlaceButton.classList.add("placing");
-            addPlaceButton.textContent = "Placing pin — click the building on the map · Esc cancels";
-        }
+        // the one control becomes the way out while the entry is open
+        this.renderAddReviseControl();
         this.liftBasemapForPin();
+        // recorded places stay on the map while aiming (jb 2026-09-20), so
+        // a pin never lands on one without the offer to revise it instead
+        if (this.pointsMode === "off" && this.contextDotSource() !== "none") {
+            this.setPointsMode("all");
+        }
         // aiming wants the map: on a phone the map takes most of the screen
         this.paneSnap("map");
         const status = document.getElementById("pinStatus");
-        if (status) status.textContent = "Click the building on the map to drop the pin, or use search, coordinates, or your location above. Press Escape to cancel.";
+        if (status) status.textContent = "Tap the building on the map to drop the pin, or choose an option above.";
         // every map click while armed lands the same pending pin: the first
         // click places it and later clicks move it, exactly as the sidebar
         // promises; the handler stays bound until exitPinMode
@@ -11175,7 +11339,7 @@ class NzVerificationMap {
             if (resultsEl) {
                 resultsEl.hidden = false;
                 resultsEl.innerHTML = rows.map((row, index) => `
-                    <li><button type="button" data-result-index="${index}">Move pin here: ${escapeHtml(row.display_name || "Unnamed result")}</button></li>
+                    <li><button type="button" data-result-index="${index}">${this.pinMarker ? "Move pin here" : "Drop pin here"}: ${escapeHtml(row.display_name || "Unnamed result")}</button></li>
                 `).join("");
                 resultsEl.querySelectorAll("button").forEach(resultButton => {
                     resultButton.addEventListener("click", () => {
@@ -11195,13 +11359,16 @@ class NzVerificationMap {
         }
     }
 
-    // "move pin" takes typed coordinates, or, when both boxes are empty,
-    // the first search result still on screen (jb 2026-09-03: searching an
-    // address and pressing move pin did nothing)
-    applyTypedCoordinates() {
+    // typed coordinates move the pin, or, when both boxes are empty and
+    // enter is pressed, the first search result still on screen (jb
+    // 2026-09-03: searching an address and asking for a move did nothing).
+    // quiet is the change event: it waits in silence until both boxes hold
+    // a value, since the contributor is still typing the other
+    applyTypedCoordinates({ quiet = false } = {}) {
         const status = document.getElementById("pinSearchStatus");
         const latText = (document.getElementById("pinLatInput")?.value || "").trim();
         const lngText = (document.getElementById("pinLngInput")?.value || "").trim();
+        if (quiet && (!latText || !lngText)) return;
         if (!latText && !lngText) {
             const first = Array.isArray(this.pinSearchRows) ? this.pinSearchRows[0] : null;
             const rlat = Number(first?.lat);
@@ -11213,7 +11380,7 @@ class NzVerificationMap {
                 this.setPendingPin(rlat, rlng);
                 return;
             }
-            if (status) status.textContent = "Type coordinates, or search an address and choose a result, before pressing Move pin.";
+            if (status) status.textContent = "Type both coordinates, or search an address and choose a result.";
             return;
         }
         const lat = Number.parseFloat(latText);
@@ -11688,12 +11855,7 @@ class NzVerificationMap {
             host.innerHTML = "";
             host.hidden = true;
         }
-        const addPlaceButton = document.getElementById("addPlaceButton");
-        if (addPlaceButton) {
-            addPlaceButton.removeAttribute("disabled");
-            addPlaceButton.classList.remove("placing");
-            addPlaceButton.textContent = "＋ Add a missing place";
-        }
+        this.renderAddReviseControl();
         if (occupancyPin && this.occupancyDraft) {
             this.renderOccupancyEntry(occupancyPin.context, { restore: true, focusIndex: occupancyPin.index, markDirty: true });
         } else if (wasRevision) {

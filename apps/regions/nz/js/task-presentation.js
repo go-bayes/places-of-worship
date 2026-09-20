@@ -134,7 +134,11 @@
     }
 
     // a later read of a task never regresses a terminal status; the
-    // caller keeps `previous` when the incoming row would move it back
+    // caller keeps `previous` when the incoming row would move it back.
+    // callers with `updated_at` on both rows compare stamps first (the ra
+    // portal's mergeTaskRead), since a curator may reopen an exported
+    // task and that newer row must land; absorb is the rule when there
+    // is nothing to compare
     function absorb(previous, incoming) {
         if (previous && TERMINAL.has(previous.status) && incoming && !TERMINAL.has(incoming.status)) {
             return previous;
