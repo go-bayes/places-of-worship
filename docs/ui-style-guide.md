@@ -10,13 +10,20 @@ The live reference today is `apps/regions/nz/verification.html` and
 
 ## Product Wording
 
-- Use `＋ Add a missing place`, not `Add to map`, for user-created candidate
-  intake (ruled 2026-08-29). One label serves every country, rapid entry
-  included. Pair it with the helper line "Your nomination goes to human
-  review — it does not change the public map.", which carries the nomination
-  semantics the older `Nominate missing PoW` label expressed. Treat
-  `Nominate missing PoW` as a legacy technical label where it survives in
-  code or older documents.
+- Use `Add / Revise` for the one intake control on the contributor portal
+  (ruled 2026-09-20: "ADD/REVISE the only button on the phone"; it
+  supersedes `＋ Add a missing place`, ruled 2026-08-29). One label serves
+  every country. With a dot selected on the map the button revises that
+  place; otherwise it drops a pin. The one-line hint under it says which
+  ("Revises St Mary's." or "Drops a pin for a new place. Tap a dot first
+  to revise that place."). While an entry is open the same button reads
+  `Cancel` in the danger outline and is the way out on every screen, since
+  a phone has no Escape key; the copy never says "Esc". Treat
+  `Nominate missing PoW` and `Add a missing place` as legacy labels where
+  they survive in code or older documents.
+- Use `Take photo or add files` for the one file control, in front of the
+  hidden native input (a phone then offers its camera); the chosen count
+  reads beside it. Never show a bare `Choose Files` input.
 - Use `Save draft` when the RA is still gathering evidence.
 - Use `Submit for review` when the RA wants JB or a reviewer to inspect the
   evidence.
@@ -52,12 +59,28 @@ marker legend reads in two columns, fills beside rings, so the map data
 panel stays clear of the floating card. The sign-in card
 carries the Google button, a `Contact to join` button and the folded `Wrong
 account showing?` help, nothing else (ruled 2026-09-19: fewer words); the
-batch id lives in the header, and the invited address shows only when the
-link carries it. After sign-in a
-chooser offers two activities — `Assigned tasks` and `Add places` — and the
-sidebar then shows only the chosen activity's sections. A `← Change activity`
-link returns to the chooser; the choice persists for the tab
-(`sessionStorage`), so a reload lands where the contributor was.
+header carries only the title and the `Exit` and `Guide` buttons, at body
+size on a 44 px target, with no batch line (ruled 2026-09-20: words to cut);
+the invited address shows only when the link carries it. After sign-in the
+portal lands in `Add / Revise` on every screen, with the task list, filters
+and counts absent (ruled 2026-09-20: the task list is specialist assignment
+work, most of which goes to agents or through the review portal).
+`Add / Revise`, `Cancel` and `Assigned tasks` share one size (56 px, `--fs-lg`);
+`Assigned tasks` appears under the control only while the batch holds work
+for the contributor (tasks open to them or work of theirs in progress) and
+opens that sheet, whose bar offers `← Add / Revise`; the choice persists for
+the tab (`sessionStorage`), so a reload lands where the contributor was. The
+chooser no longer renders. The pin card heads with `Add a place` (or
+`Revise …`) at `--fs-xl` and three full-width options: `Drop pin at my
+location`, `Drop pin on map`, `Search and drop` (which folds open the
+address search and the coordinate boxes); a pin already down reads `Move
+pin`. Typed coordinates apply on change and the pin drags on the map, so
+there is no move button. The `Flag for discussion` checkbox carries its
+label alone; the field that opens takes the description. The Map data panel
+offers one toggle, `Hide points` / `Show points` (ruled 2026-09-20: the
+on/off select and the note about the target year were artefacts); today's
+places show by default and the legend names them `place on today's map,
+tap to revise`.
 
 The map offers `Streets` (OSM standard tiles), `Hybrid` (MapTiler imagery
 with street and place labels), and `Satellite` (bare MapTiler imagery)
@@ -133,7 +156,9 @@ Use button hierarchy consistently:
 - `.tertiary`: small supporting action, such as sign out, using OSM URL, or
   using Street View URL.
 - Destructive or clearing actions should use a danger style, not the primary
-  action colour.
+  action colour. `Cancel` on the open entry is the primary control's own
+  slot in the danger outline (`.primary-action.cancelling`), full width and
+  48 px, never a keyboard-only exit.
 
 Buttons should have at least 44 px touch height in RA-facing surfaces unless
 they are small inline controls with a larger surrounding target.

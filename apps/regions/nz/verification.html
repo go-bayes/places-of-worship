@@ -123,17 +123,35 @@
             line-height: 1.45;
         }
 
+        /* the portal's header carries no batch line (jb 2026-09-20: words
+           to cut); the demo map keeps its snapshot line */
+        body.assignment-mode .sidebar-header p {
+            display: none;
+        }
+
+        /* exit and guide are the two links every contributor uses, so they
+           read at body size on a full-height tap target (jb 2026-09-20) */
         .nav-links {
             display: flex;
-            gap: 12px;
-            margin-top: 12px;
+            gap: 10px;
+            margin-top: 10px;
         }
 
         .nav-links a {
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 0 16px;
+            border: 1px solid var(--action);
+            border-radius: var(--r-sm);
             color: var(--action);
-            font-size: var(--fs-sm);
+            font-size: var(--fs-md);
             text-decoration: none;
             font-weight: 600;
+        }
+
+        .nav-links a:hover {
+            background: var(--action-soft);
         }
 
         /* the one dominant action in the sidebar: adding a missing place.
@@ -314,16 +332,66 @@
             cursor: pointer;
         }
 
-        /* in-place feedback while the map waits for the pin: the button
-           itself carries the instruction on the amber in-progress pair */
-        .primary-action.placing,
-        .primary-action.placing:disabled {
-            background: var(--caution-soft);
-            border-color: var(--caution-strong);
-            color: var(--caution);
-            opacity: 1;
-            cursor: default;
+        /* while an entry is open the one control is the way out: a plain
+           red-outlined Cancel at the same size on any screen, since a phone
+           has no Escape key (jb 2026-09-20) */
+        .primary-action.cancelling {
+            background: var(--panel);
+            border-color: var(--danger);
+            color: var(--danger);
             box-shadow: none;
+        }
+
+        .primary-action.cancelling:hover {
+            background: var(--danger-soft);
+            border-color: var(--danger);
+        }
+
+        /* the file control: one button in front of the native input, which
+           stays for the browser's own picker (a phone offers its camera);
+           the chosen count reads beside it (jb 2026-09-20) */
+        .file-pick {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 6px 0;
+        }
+
+        .attachments-block .file-pick input[type="file"],
+        .file-pick input[type="file"] {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: 0;
+            opacity: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .file-pick-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            padding: 0 16px;
+            border: 1px solid var(--action);
+            border-radius: var(--r-sm);
+            background: var(--action-soft);
+            color: var(--action);
+            font-weight: 600;
+            font-size: var(--fs-md);
+            cursor: pointer;
+        }
+
+        .file-pick input:focus-visible + .file-pick-button {
+            outline: 3px solid var(--action);
+            outline-offset: 2px;
+        }
+
+        .file-pick-count {
+            color: var(--muted);
         }
 
         .primary-action {
@@ -332,11 +400,31 @@
             background: var(--action);
             color: var(--panel);
             font-weight: 600;
-            font-size: var(--fs-md);
-            min-height: 48px;
+            /* one size for Add / Revise, Cancel and Assigned tasks (jb
+               2026-09-20: "Add / Revise should be as large as Cancel") */
+            font-size: var(--fs-lg);
+            min-height: 56px;
             border-radius: var(--r-sm);
             cursor: pointer;
             box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+        }
+
+        /* the assigned-task sheet's button: the same size, outlined, and
+           present only while the batch holds work for this contributor */
+        .primary-action.secondary-action {
+            margin-top: 10px;
+            background: var(--panel);
+            color: var(--action);
+            box-shadow: none;
+        }
+
+        .primary-action.secondary-action:hover {
+            background: var(--action-soft);
+            border-color: var(--action);
+        }
+
+        .primary-action.secondary-action[hidden] {
+            display: none;
         }
 
         .primary-action:hover {
@@ -939,9 +1027,53 @@
 
         .pin-host-title {
             margin: 0;
-            font-size: var(--fs-sm);
+            font-size: var(--fs-xl);
             font-weight: 600;
+            line-height: 1.2;
             color: var(--entry);
+        }
+
+        /* the three ways to land the pin, each a full-width button (jb
+           2026-09-20); the search and coordinate boxes fold under the third */
+        .pin-locate-options {
+            display: grid;
+            gap: 8px;
+        }
+
+        .pin-locate-options .locate-option {
+            width: 100%;
+            min-height: 52px;
+            padding: 0 14px;
+            border: 1px solid var(--entry);
+            border-radius: var(--r-sm);
+            background: var(--panel);
+            color: var(--entry);
+            font-size: var(--fs-md);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .pin-locate-options .locate-option:hover {
+            background: var(--entry-soft);
+        }
+
+        .pin-locate-options .locate-option[aria-expanded="true"] {
+            background: var(--entry-soft);
+        }
+
+        .pin-locate-options .locate-option:disabled {
+            color: var(--muted);
+            border-color: var(--line);
+            cursor: progress;
+        }
+
+        .pin-search-block {
+            display: grid;
+            gap: 8px;
+        }
+
+        .pin-search-block[hidden] {
+            display: none;
         }
 
         .nomination-panel summary {
@@ -979,6 +1111,9 @@
             border-right: 1px solid var(--line);
             cursor: col-resize;
             touch-action: none;
+            /* a drag on the bar must not become a page or pane scroll on
+               ios (jb 2026-09-20) */
+            overscroll-behavior: none;
             user-select: none;
             -webkit-user-select: none;
         }
@@ -1091,16 +1226,9 @@
 
         .pin-coord-row {
             display: grid;
-            grid-template-columns: 1fr 1fr auto;
+            grid-template-columns: 1fr 1fr;
             gap: 6px;
             align-items: end;
-        }
-
-        .pin-coord-row button {
-            min-height: 40px;
-            width: auto;
-            padding: 0 12px;
-            font-size: var(--fs-sm);
         }
 
         .pin-search-results {
@@ -2187,15 +2315,22 @@
             color: var(--caution);
             font-size: var(--fs-sm);
         }
-        .points-mode-note {
-            font-size: var(--fs-xs);
-            line-height: 1.35;
-            color: var(--muted);
-            max-width: 210px;
+        /* one toggle for the points (jb 2026-09-20): shown by default */
+        .points-toggle {
+            width: auto;
+            min-height: 36px;
+            padding: 0 14px;
+            border: 1px solid var(--action);
+            border-radius: var(--r-sm);
+            background: var(--panel);
+            color: var(--action);
+            font-size: var(--fs-sm);
+            font-weight: 600;
+            cursor: pointer;
         }
 
-        .points-mode-note[hidden] {
-            display: none;
+        .points-toggle:hover {
+            background: var(--action-soft);
         }
 
         .map-legend {
@@ -2935,6 +3070,19 @@
                 overflow-y: auto;
             }
 
+            /* the one control never leaves the entry pane on a phone (jb
+               2026-09-20): it sticks to the pane's bottom edge until the
+               pane is scrolled past it, so Add / Revise is on screen at
+               rest and Cancel is on screen while aiming with the pane at
+               its narrowest */
+            body.portal-add .sidebar-actions {
+                position: sticky;
+                bottom: 0;
+                z-index: 3;
+                background: var(--panel);
+                box-shadow: 0 -1px 0 var(--line);
+            }
+
             #map {
                 grid-row: 1;
                 height: 100%;
@@ -3204,8 +3352,11 @@
             <section id="portalModeBar" class="portal-mode-bar" hidden></section>
 
             <div class="sidebar-actions">
-                <button type="button" id="addPlaceButton" class="primary-action">＋ Add a missing place</button>
-                <p class="sidebar-actions-help">Goes to human review — not straight to the public map. To revise a place already recorded, click its grey dot on the map and press "Revise this place".</p>
+                <button type="button" id="addPlaceButton" class="primary-action">Add / Revise</button>
+                <p id="addReviseHint" class="sidebar-actions-help">Drops a pin for a new place. Tap a dot first to revise that place.</p>
+                <!-- the specialist sheet, one button of the same size, shown
+                     only while the batch holds work for this contributor -->
+                <button type="button" id="assignedTasksButton" class="primary-action secondary-action" hidden>Assigned tasks</button>
             </div>
 
             <!-- the transient pin cards (address search, coordinates, confirm,

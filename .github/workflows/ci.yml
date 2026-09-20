@@ -50,6 +50,7 @@ jobs:
           node apps/regions/nz/js/refresh-merge.test.cjs
           node apps/regions/nz/js/task-presentation.test.cjs
           node apps/regions/nz/js/task-state-dom.test.cjs
+          node apps/regions/nz/js/add-revise-control.test.cjs
           node apps/regions/nz/js/review-state-dom.test.cjs
           node apps/regions/nz/js/osm-history.test.cjs
           node apps/regions/nz/js/deep-link-context.test.cjs
