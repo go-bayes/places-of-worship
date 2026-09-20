@@ -159,9 +159,71 @@
         }
 
         .layout {
+            /* side by side: the queue width is the reviewer's (jb 2026-09-21,
+               "we need the sliders on the review panel"); the bar between the
+               queue and the detail drags it and the device remembers it */
+            --sidebar-w: 390px;
+            --divider-w: 14px;
             display: grid;
-            grid-template-columns: minmax(320px, 390px) minmax(0, 1fr);
+            grid-template-columns: var(--sidebar-w) var(--divider-w) minmax(0, 1fr);
             min-height: calc(100vh - 95px);
+        }
+
+        /* the drag bars, the ra portal's idiom: between the queue and the
+           detail it drags the queue width; under the map it drags the map's
+           height on every screen */
+        .pane-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--panel-2);
+            border-left: 1px solid var(--line);
+            border-right: 1px solid var(--line);
+            cursor: col-resize;
+            touch-action: none;
+            /* a drag on the bar must not become a page scroll on ios */
+            overscroll-behavior: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .pane-divider:focus-visible {
+            outline: 2px solid var(--action);
+            outline-offset: -2px;
+        }
+
+        .pane-divider.pane-dragging,
+        .pane-divider:active {
+            background: var(--action-soft);
+        }
+
+        .pane-grip {
+            font-size: var(--fs-xs);
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: var(--muted);
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 2px 12px;
+            pointer-events: none;
+            white-space: nowrap;
+            flex: none;
+        }
+
+        /* side by side the grip reads down the bar */
+        .pane-divider[aria-orientation="vertical"] .pane-grip {
+            writing-mode: vertical-rl;
+            padding: 12px 2px;
+        }
+
+        /* under the map: a bar the width of the detail, then the cards */
+        .map-divider {
+            height: 28px;
+            margin: 0 0 14px;
+            border: 1px solid var(--line);
+            border-radius: var(--r-md);
+            cursor: row-resize;
         }
 
         .sidebar,
@@ -393,9 +455,13 @@
 
         /* the review map (jb 2026-09-04): the ra portal's map above the
            review cards, so the reviewer sees the submission where it sits */
+        .detail {
+            --map-h: 440px;
+        }
+
         .review-map {
-            height: 440px;
-            min-height: 280px;
+            height: var(--map-h);
+            min-height: 200px;
             border: 1px solid var(--line);
             border-radius: var(--r-md);
             margin-bottom: 14px;
@@ -753,6 +819,12 @@
                 grid-template-columns: 1fr;
             }
 
+            /* stacked, the page scrolls: the queue keeps its own height and
+               the bar between the columns has nothing to drag */
+            #paneDivider {
+                display: none;
+            }
+
             .sidebar {
                 border-right: 0;
                 border-bottom: 1px solid var(--line);
@@ -778,8 +850,8 @@
                 max-height: 420px;
             }
 
-            .review-map {
-                height: 300px;
+            .detail {
+                --map-h: 300px;
             }
         }
         .osm-history-host { margin: 8px 0; }
@@ -909,8 +981,15 @@
             </section>
         </aside>
 
+        <div id="paneDivider" class="pane-divider" role="separator" aria-orientation="vertical" aria-label="Resize the queue and the detail" aria-valuemin="320" aria-valuemax="900" aria-valuenow="390" tabindex="0">
+            <span class="pane-grip">⠿ drag · queue ↔ detail</span>
+        </div>
+
         <div class="detail">
             <div id="reviewMap" class="review-map" role="region" aria-label="Map of the review queue and the unreviewed places"></div>
+            <div id="mapDivider" class="pane-divider map-divider" role="separator" aria-orientation="horizontal" aria-label="Resize the map" aria-valuemin="200" aria-valuemax="900" aria-valuenow="440" tabindex="0">
+                <span class="pane-grip">⠿ drag · map ↕ cards</span>
+            </div>
             <section id="detailPanel">
                 <div class="panel"><div class="state-empty"><strong>Sign in, then select a task from the queue.</strong></div></div>
             </section>
@@ -926,6 +1005,7 @@
     <script src="js/unvalidated-places.js?v=20260904a"></script>
     <script src="js/source-links.js?v=20260904a"></script>
     <script src="js/review-map.js?v=20260920a"></script>
+    <script src="js/review-panes.js?v=20260921a"></script>
     <script src="js/convex-config.js?v=20260523-vanuatu"></script>
     <script src="js/convex-task-client.js?v=20260905a"></script>
     <script src="js/claude-review-panel.js?v=20260825-ai-review"></script>
@@ -934,6 +1014,6 @@
     <script src="js/occupancy-review.js?v=20260903a"></script>
     <script src="js/review-snapshot-content.js?v=20260912b"></script>
     <script src="js/task-presentation.js?v=20260919a"></script>
-    <script src="js/review-portal.js?v=20260919a"></script>
+    <script src="js/review-portal.js?v=20260921a"></script>
 </body>
 </html>
