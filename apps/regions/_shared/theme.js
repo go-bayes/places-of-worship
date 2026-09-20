@@ -21,6 +21,10 @@
         }
     }
 
+    // the choice in hand: read from storage once at boot, then held here,
+    // so a page whose storage is blocked still keeps a set for its lifetime
+    var current = stored();
+
     function effectiveFor(choice) {
         if (choice === "light" || choice === "dark") return choice;
         return query && query.matches ? "dark" : "light";
@@ -51,6 +55,7 @@
         } catch (error) {
             // storage unavailable: the choice lives for this page only
         }
+        current = next;
         apply(next);
         announce(next);
         return next;
@@ -79,20 +84,20 @@
                 });
             })(buttons[i]);
         }
-        syncButtons(target, stored());
+        syncButtons(target, current);
     }
 
     // the device's preference changes while auto is chosen: follow it
     if (query && typeof query.addEventListener === "function") {
         query.addEventListener("change", function () {
-            if (stored() === "system") {
+            if (current === "system") {
                 apply("system");
                 announce("system");
             }
         });
     }
 
-    apply(stored());
+    apply(current);
     if (typeof document.addEventListener === "function") {
         document.addEventListener("DOMContentLoaded", function () { bind(document); });
     }
@@ -100,8 +105,8 @@
     window.PowTheme = {
         KEY: KEY,
         CHOICES: CHOICES.slice(),
-        get: stored,
-        effective: function () { return effectiveFor(stored()); },
+        get: function () { return current; },
+        effective: function () { return effectiveFor(current); },
         set: set,
         bind: bind,
     };

@@ -88,12 +88,26 @@ function boot({ stored = null, deviceDark = false, storageThrows = false } = {})
   assert.equal(t.attrs["data-theme-effective"], "light");
 }
 
-// 5. blocked storage: the page still paints and a choice lives for the page
+// 5. blocked storage: the page still paints and a choice lives for the page:
+//    get and effective report it, a device change does not overwrite it,
+//    and the buttons show it (greptile p1 on #130)
 {
   const t = boot({ storageThrows: true });
   assert.equal(t.attrs["data-theme-effective"], "light");
   assert.equal(t.PowTheme.set("dark"), "dark");
   assert.equal(t.attrs["data-theme"], "dark");
+  assert.equal(t.PowTheme.get(), "dark");
+  assert.equal(t.PowTheme.effective(), "dark");
+  t.query.matches = false;
+  t.queryListeners.forEach((fn) => fn());
+  assert.equal(t.attrs["data-theme"], "dark");
+  assert.equal(t.attrs["data-theme-effective"], "dark");
+  t.listeners.DOMContentLoaded();
+  assert.equal(t.buttons[2].attrs["aria-pressed"], "true");
+  assert.equal(t.buttons[0].attrs["aria-pressed"], "false");
+  t.PowTheme.set("system");
+  assert.equal(t.PowTheme.get(), "system");
+  assert.equal(t.attrs["data-theme"], undefined);
 }
 
 // 6. both portals: script before the sheets, the sheet linked, the control present,
