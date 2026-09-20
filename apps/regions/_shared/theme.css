@@ -1,0 +1,217 @@
+/* one token system for the ra portal and the review portal (r-u2 to
+   r-u4, confirmed 2026-09-19). the meanings are ruled in
+   docs/ui-style-guide.md; the dark values are provisional until joseph b's
+   colour session. never reuse one token for an unrelated meaning.
+   the light set is the default; the dark set applies when the device asks
+   for it and no choice is stored, or when the stored choice is dark
+   (theme.js sets data-theme and data-theme-effective on <html> before
+   paint) */
+:root {
+  color-scheme: light;
+  --bg: #f4f6f8;
+  --panel: #ffffff;
+  --panel-2: #f3f6f9;
+  --ink: #17202a;
+  --muted: #5b6776;
+  --line: #cfd6df;
+  --control-line: #8a94a3;
+  --action: #1f618d;
+  --action-hover: #17527a;
+  --action-soft: #e8f1fb;
+  --danger: #b42318;
+  --danger-soft: #fee4e2;
+  --caution: #6b4e00;
+  --caution-soft: #fff4dc;
+  --caution-strong: #9a6700;
+  --present: #145a32;
+  --present-soft: #dff3e6;
+  --absent: #374151;
+  --absent-soft: #e5e7eb;
+  --not-assessed: #1f4e79;
+  --not-assessed-soft: #e8f1fb;
+  --entry: #0f766e;
+  --entry-soft: #e6f4f1;
+  --stale: #7d3c98;
+  --marker-unvalidated: #f59e0b;
+  --marker-halo: #ffffff;
+  --shade-soft: rgba(15, 23, 42, 0.12);
+  --shade: rgba(15, 23, 42, 0.25);
+  --shade-deep: rgba(15, 23, 42, 0.35);
+  --shade-ink: rgba(0, 0, 0, 0.45);
+  --shade-ink-deep: rgba(0, 0, 0, 0.7);
+  --veil: rgba(255, 255, 255, 0.94);
+  --action-glow: rgba(31, 97, 141, 0.18);
+  --present-glow: rgba(22, 101, 52, 0.16);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --fs-xs: 13px;
+  --fs-sm: 14px;
+  --fs-md: 16px;
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-pill: 999px;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f1620;
+  --panel: #17202a;
+  --panel-2: #1e2a36;
+  --ink: #e8edf3;
+  --muted: #a7b3c2;
+  --line: #2c3a48;
+  --control-line: #5b6b7d;
+  --action: #7fb3e6;
+  --action-hover: #93c1ec;
+  --action-soft: #1b3550;
+  --danger: #f28b82;
+  --danger-soft: #4a1f1c;
+  --caution: #f2c14e;
+  --caution-soft: #3f3110;
+  --caution-strong: #e0a800;
+  --present: #6fcf97;
+  --present-soft: #163a26;
+  --absent: #b8c2d0;
+  --absent-soft: #2c3a48;
+  --not-assessed: #8fb8e0;
+  --not-assessed-soft: #1b3550;
+  --entry: #5fd3c4;
+  --entry-soft: #123a36;
+  --stale: #c69ae0;
+  --marker-unvalidated: #f59e0b;
+  --marker-halo: #ffffff;
+  --shade-soft: rgba(0, 0, 0, 0.35);
+  --shade: rgba(0, 0, 0, 0.5);
+  --shade-deep: rgba(0, 0, 0, 0.6);
+  --shade-ink: rgba(0, 0, 0, 0.6);
+  --shade-ink-deep: rgba(0, 0, 0, 0.8);
+  --veil: rgba(23, 32, 42, 0.92);
+  --action-glow: rgba(127, 179, 230, 0.25);
+  --present-glow: rgba(111, 207, 151, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0f1620;
+    --panel: #17202a;
+    --panel-2: #1e2a36;
+    --ink: #e8edf3;
+    --muted: #a7b3c2;
+    --line: #2c3a48;
+    --control-line: #5b6b7d;
+    --action: #7fb3e6;
+    --action-hover: #93c1ec;
+    --action-soft: #1b3550;
+    --danger: #f28b82;
+    --danger-soft: #4a1f1c;
+    --caution: #f2c14e;
+    --caution-soft: #3f3110;
+    --caution-strong: #e0a800;
+    --present: #6fcf97;
+    --present-soft: #163a26;
+    --absent: #b8c2d0;
+    --absent-soft: #2c3a48;
+    --not-assessed: #8fb8e0;
+    --not-assessed-soft: #1b3550;
+    --entry: #5fd3c4;
+    --entry-soft: #123a36;
+    --stale: #c69ae0;
+    --marker-unvalidated: #f59e0b;
+    --marker-halo: #ffffff;
+    --shade-soft: rgba(0, 0, 0, 0.35);
+    --shade: rgba(0, 0, 0, 0.5);
+    --shade-deep: rgba(0, 0, 0, 0.6);
+    --shade-ink: rgba(0, 0, 0, 0.6);
+    --shade-ink-deep: rgba(0, 0, 0, 0.8);
+    --veil: rgba(23, 32, 42, 0.92);
+    --action-glow: rgba(127, 179, 230, 0.25);
+    --present-glow: rgba(111, 207, 151, 0.2);
+  }
+}
+
+/* the three-state theme control: auto follows the device, light and dark
+   are the contributor's choice, kept on the device */
+.theme-control {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--control-line);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+
+.theme-control button {
+  width: auto;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 0;
+  background: var(--panel);
+  color: var(--muted);
+  font-family: var(--font);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.theme-control button + button {
+  border-left: 1px solid var(--control-line);
+}
+
+.theme-control button:hover {
+  background: var(--panel-2);
+}
+
+.theme-control button[aria-pressed="true"] {
+  background: var(--action-soft);
+  color: var(--action);
+}
+
+.theme-control button:focus-visible {
+  outline: 2px solid var(--action);
+  outline-offset: -2px;
+}
+
+/* leaflet's own chrome follows the tokens, so popups, zoom buttons and the
+   attribution read on either surface */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.leaflet-bar a,
+.leaflet-bar a:hover,
+.leaflet-bar a:focus {
+  background: var(--panel);
+  color: var(--ink);
+  border-bottom-color: var(--line);
+}
+
+.leaflet-bar a.leaflet-disabled {
+  background: var(--panel-2);
+  color: var(--muted);
+}
+
+.leaflet-control-attribution {
+  background: var(--veil);
+  color: var(--muted);
+}
+
+.leaflet-control-attribution a {
+  color: var(--action);
+}
+
+/* r-u3: without a maptiler key the openstreetmap streets tiles take a
+   filter in dark mode; imagery is never darkened (buildings would misread) */
+:root[data-theme-effective="dark"] .streets-tiles-filtered {
+  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.95);
+}

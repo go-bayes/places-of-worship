@@ -989,6 +989,13 @@ const SATELLITE_TILE_URL = MAPTILER_API_KEY
 const HYBRID_TILE_URL = MAPTILER_API_KEY
     ? `https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${encodeURIComponent(MAPTILER_API_KEY)}`
     : "";
+// r-u3 (confirmed 2026-09-19): in dark mode the streets basemap is
+// maptiler's dark streets raster where a key ships; without one the
+// openstreetmap tiles take a css filter. imagery is never darkened
+const STREETS_TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+const STREETS_DARK_TILE_URL = MAPTILER_API_KEY
+    ? `https://api.maptiler.com/maps/streets-v2-dark/{z}/{x}/{y}.png?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+    : "";
 // the map lands on hybrid (jb 2026-09-19): imagery for the buildings with
 // street and place labels for orientation; streets is the fallback when no
 // key ships or the key is refused. satellite stays on offer for a bare look
@@ -2779,11 +2786,14 @@ class NzVerificationMap {
         // keep the zoom-out floor at 5 for compact countries, but let
         // continental configs (au/br/ca/mx/us open below 5) take effect
         const minZoom = Math.min(5, Math.floor(COUNTRY_CONFIG.mapZoom));
-        this.streetsLayer = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        this.streetsLayer = L.tileLayer(STREETS_TILE_URL, {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             maxZoom: 19,
             minZoom,
+            className: "streets-tiles",
         }).addTo(this.map);
+        this.syncStreetsTheme();
+        window.addEventListener?.("pow-theme-change", () => this.syncStreetsTheme());
         if (SATELLITE_TILE_URL) {
             // imagery so the pin can be steered onto the real building;
             // maptiler serves z20 (upsampled where no aerial exists)
@@ -3276,6 +3286,39 @@ class NzVerificationMap {
             return false;
         } finally {
             if (button) button.disabled = false;
+        }
+    }
+
+    // r-u3: the streets basemap follows the theme. with a key the tile url
+    // swaps to the dark raster (and the attribution with it); without one
+    // the openstreetmap tiles take the css filter. imagery layers never
+    // change
+    syncStreetsTheme() {
+        const layer = this.streetsLayer;
+        if (!layer) return;
+        const dark = document.documentElement?.getAttribute?.("data-theme-effective") === "dark";
+        const container = layer.getContainer?.();
+        if (STREETS_DARK_TILE_URL) {
+            const url = dark ? STREETS_DARK_TILE_URL : STREETS_TILE_URL;
+            if (this.streetsUrl !== url) {
+                this.streetsUrl = url;
+                layer.setUrl?.(url);
+                // the attribution lives on the layer, so a later add reads
+                // the right one; a layer on the map swaps it at once
+                const osm = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+                const maptiler = `&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> ${osm}`;
+                const previous = layer.options?.attribution;
+                const next = dark ? maptiler : osm;
+                if (layer.options) layer.options.attribution = next;
+                const control = this.map?.attributionControl;
+                if (control && this.map.hasLayer(layer) && previous !== next) {
+                    control.removeAttribution(previous);
+                    control.addAttribution(next);
+                }
+            }
+            container?.classList?.remove("streets-tiles-filtered");
+        } else {
+            container?.classList?.toggle("streets-tiles-filtered", dark);
         }
     }
 

@@ -13,55 +13,16 @@
     <!-- shared tokens, type stack, and hidden-attribute guard; this page
          stays a light workspace and keeps its own colours below -->
     <link rel="stylesheet" href="../../shared/map-shell.css">
+    <!-- theme: the choice is applied to <html> before paint (r-u2) -->
+    <script src="../_shared/theme.js?v=20260920a"></script>
+    <link rel="stylesheet" href="../_shared/theme.css?v=20260920a">
     <link rel="stylesheet" href="../_shared/state.css?v=20260919a">
 
     <style>
         :root {
-            /* one system for the ra portal, the review portal and the map
-               shell (docs/development/ui-design-audit-2026-09-03.md, section
-               3). colour meanings stay those of docs/ui-style-guide.md:
-               never reuse one token for an unrelated meaning */
-            --bg: #f4f6f8;
-            --panel: #ffffff;
-            --panel-2: #f3f6f9;
-            --ink: #17202a;
-            --muted: #5b6776;               /* 5.6:1 on the palest surface */
-            --line: #cfd6df;
-            --control-line: #8a94a3;        /* 3.0:1 control boundaries */
-            --action: #1f618d;              /* buttons, links, focus, the validated ring */
-            --action-hover: #17527a;
-            --action-soft: #e8f1fb;
-            --danger: #b42318;
-            --danger-soft: #fee4e2;
-            /* one amber: uncertain, caution, disputed */
-            --caution: #6b4e00;
-            --caution-soft: #fff4dc;
-            --caution-strong: #9a6700;      /* white on it 4.9:1 */
-            --present: #145a32;
-            --present-soft: #dff3e6;
-            --absent: #374151;
-            --absent-soft: #e5e7eb;
-            --not-assessed: #1f4e79;
-            --not-assessed-soft: #e8f1fb;
-            --entry: #0f766e;               /* nominations and pure entry, containers only */
-            --entry-soft: #e6f4f1;
-            --stale: #7d3c98;               /* reserved: stale_validation ring, unreachable today */
-            --marker-unvalidated: #f59e0b;  /* r-d1' (jb 2026-09-04): every unreviewed place is an open case, amber disc, white halo; js/unvalidated-places.js */
-            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            --fs-xs: 13px;
-            --fs-sm: 14px;
-            --fs-md: 16px;
-            --fs-lg: 18px;
-            --fs-xl: 22px;
-            --sp-1: 4px;
-            --sp-2: 8px;
-            --sp-3: 12px;
-            --sp-4: 16px;
-            --sp-5: 24px;
-            --r-sm: 6px;
-            --r-md: 12px;
-            --r-lg: 16px;
-            --r-pill: 999px;
+            /* colour, type, spacing and radius tokens live in
+               ../_shared/theme.css (light and dark); this page keeps only
+               its layout tokens below */
         }
 
         body {
@@ -133,8 +94,14 @@
            read at body size on a full-height tap target (jb 2026-09-20) */
         .nav-links {
             display: flex;
+            flex-wrap: wrap;
+            align-items: center;
             gap: 10px;
             margin-top: 10px;
+        }
+
+        .nav-links .theme-control {
+            margin-left: auto;
         }
 
         .nav-links a {
@@ -406,7 +373,7 @@
             min-height: 56px;
             border-radius: var(--r-sm);
             cursor: pointer;
-            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+            box-shadow: 0 1px 2px var(--shade-soft);
         }
 
         /* the assigned-task sheet's button: the same size, outlined, and
@@ -1263,10 +1230,10 @@
         /* streets/satellite pill, top-right of the map */
         .basemap-toggle {
             display: inline-flex;
-            background: rgba(255, 255, 255, 0.94);
+            background: var(--veil);
             border: 1px solid var(--control-line);
             border-radius: var(--r-sm);
-            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.25);
+            box-shadow: 0 1px 4px var(--shade);
             overflow: hidden;
         }
 
@@ -1297,8 +1264,8 @@
             height: 16px;
             border-radius: 50%;
             background: var(--danger);
-            border: 2px solid var(--panel);
-            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.45);
+            border: 2px solid var(--marker-halo);
+            box-shadow: 0 1px 4px var(--shade-deep);
         }
 
         .pin-card {
@@ -1804,7 +1771,7 @@
         .backend-card.auth-required {
             border-color: var(--action);
             background: var(--action-soft);
-            box-shadow: 0 1px 4px rgba(31, 97, 141, 0.18);
+            box-shadow: 0 1px 4px var(--action-glow);
         }
 
         .backend-card.signed-in {
@@ -2120,7 +2087,7 @@
         .verification-marker {
             border: 2px solid var(--panel);
             border-radius: 50%;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 0 5px var(--shade-ink);
         }
 
         /* not assessed: hollow white with a grey border, so a validated
@@ -2137,14 +2104,14 @@
            both hue AND lightness so they survive colour-blind viewing on the
            light basemap. */
         .verification-marker.vm-validated-present {
-            box-shadow: 0 0 0 2px var(--panel), 0 0 0 5px var(--action), 0 0 5px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 5px var(--action), 0 0 5px var(--shade-ink);
         }
 
         /* validated_absent: distinct closed ring — a single heavy near-black
            ring, far darker than the blue present ring, so the two read apart
            without relying on hue */
         .verification-marker.vm-validated-absent {
-            box-shadow: 0 0 0 2px var(--panel), 0 0 0 5px var(--ink), 0 0 5px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 5px var(--ink), 0 0 5px var(--shade-ink);
         }
 
         .verification-marker.vm-in-review {
@@ -2158,13 +2125,13 @@
            it is open and wears the same amber as the unreviewed dots, as a
            thin single ring; the darker caution ring below is disputed */
         .verification-marker.vm-unvalidated {
-            box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3.5px var(--marker-unvalidated), 0 0 5px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 0 0 1.5px var(--marker-halo), 0 0 0 3.5px var(--marker-unvalidated), 0 0 5px var(--shade-ink);
         }
 
         /* disputed: intermediate single amber ring — trust dropped back, one
            ring not two, in a caution hue distinct from validated blue */
         .verification-marker.vm-disputed {
-            box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--caution-strong), 0 0 5px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 4px var(--caution-strong), 0 0 5px var(--shade-ink);
         }
 
         /* imagery basemaps (hybrid, satellite): every marker gains an outer
@@ -2172,46 +2139,46 @@
            border survive tree canopy and pale roofs (jb 2026-09-02). the
            ring encoding itself is unchanged: the halo sits outside it. */
         .basemap-imagery .verification-marker {
-            box-shadow: 0 0 0 1px var(--ink), 0 0 6px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 0 1px var(--ink), 0 0 6px var(--shade-ink-deep);
         }
 
         .basemap-imagery .verification-marker.vm-validated-present {
-            box-shadow: 0 0 0 2px var(--panel), 0 0 0 5px var(--action), 0 0 0 7px var(--panel), 0 0 6px 7px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 5px var(--action), 0 0 0 7px var(--marker-halo), 0 0 6px 7px var(--shade-ink-deep);
         }
 
         .basemap-imagery .verification-marker.vm-validated-absent {
-            box-shadow: 0 0 0 2px var(--panel), 0 0 0 5px var(--ink), 0 0 0 7px var(--panel), 0 0 6px 7px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 5px var(--ink), 0 0 0 7px var(--marker-halo), 0 0 6px 7px var(--shade-ink-deep);
         }
 
         .basemap-imagery .verification-marker.vm-in-review {
-            box-shadow: 0 0 0 2px var(--panel), 0 0 6px 2px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 6px 2px var(--shade-ink-deep);
         }
 
         .basemap-imagery .verification-marker.vm-unvalidated {
-            box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3.5px var(--marker-unvalidated), 0 0 0 5px var(--panel), 0 0 6px 5px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 0 1.5px var(--marker-halo), 0 0 0 3.5px var(--marker-unvalidated), 0 0 0 5px var(--marker-halo), 0 0 6px 5px var(--shade-ink-deep);
         }
 
         .basemap-imagery .verification-marker.vm-disputed {
-            box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--caution-strong), 0 0 0 6px var(--panel), 0 0 6px 6px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 4px var(--caution-strong), 0 0 0 6px var(--marker-halo), 0 0 6px 6px var(--shade-ink-deep);
         }
 
         .basemap-imagery .verification-marker.vm-stale {
-            box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--stale), 0 0 0 6px var(--panel), 0 0 6px 6px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 4px var(--stale), 0 0 0 6px var(--marker-halo), 0 0 6px 6px var(--shade-ink-deep);
         }
 
         .basemap-imagery .verification-marker.vm-nomination {
-            box-shadow: 0 0 0 2px var(--panel), 0 0 6px 2px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 6px 2px var(--shade-ink-deep);
         }
 
         /* stale_validation: reserved treatment (violet intermediate ring).
            Unreachable until per-wave re-confirmation data exists; see
            validationState() in verification-map.js. */
         .verification-marker.vm-stale {
-            box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--stale), 0 0 5px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 4px var(--stale), 0 0 5px var(--shade-ink);
         }
 
         .points-legend-control {
-            background: rgba(255, 255, 255, 0.94);
+            background: var(--veil);
             border: 1px solid var(--control-line);
             border-radius: var(--r-sm);
             padding: 8px 10px;
@@ -2219,7 +2186,7 @@
             gap: 6px;
             font-size: var(--fs-sm);
             color: var(--ink);
-            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.25);
+            box-shadow: 0 1px 4px var(--shade);
         }
 
         /* one bar: the grip (drag to move) and the fold button (name the
@@ -2276,7 +2243,7 @@
         }
 
         .points-legend-control.dragging {
-            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.35);
+            box-shadow: 0 4px 14px var(--shade-deep);
         }
 
         .points-legend-control.dragging .legend-grip {
@@ -2371,7 +2338,7 @@
         .legend-dot.fill-absent-swatch,
         .legend-dot.fill-uncertain-swatch {
             border: 1.5px solid var(--panel);
-            box-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 3px var(--shade-ink);
         }
 
         .legend-dot.fill-present-swatch {
@@ -2439,7 +2406,7 @@
         .legend-dot.context-dot-swatch {
             background: var(--marker-unvalidated);
             border: 1.5px solid var(--panel);
-            box-shadow: 0 0 3px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 0 3px var(--shade-ink);
             width: 10px;
             height: 10px;
         }
@@ -2523,7 +2490,7 @@
 
         .rapid-choice:has(input:checked) {
             border-color: var(--present);
-            box-shadow: 0 0 0 2px rgba(22, 101, 52, 0.16);
+            box-shadow: 0 0 0 2px var(--present-glow);
             background: var(--present-soft);
         }
 
@@ -3218,7 +3185,7 @@
             overflow-y: auto;
             border: 1px solid var(--line);
             border-radius: var(--r-md, 10px);
-            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.28);
+            box-shadow: 0 10px 30px var(--shade-deep);
             background: var(--panel);
         }
 
@@ -3255,7 +3222,7 @@
         }
 
         body.assignment-mode.portal-signed-out .sidebar.dragging {
-            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.4);
+            box-shadow: 0 16px 40px var(--shade-deep);
         }
 
         body.assignment-mode.portal-signed-out .backend-panel {
@@ -3340,6 +3307,12 @@
                 <div class="nav-links">
                     <a href="../../global/">Exit</a>
                     <a href="https://religionmap.org/apps/guides/ra.html" target="_blank" rel="noopener">Guide</a>
+                    <!-- theme choice (r-u2): auto follows the device -->
+                    <div class="theme-control" role="group" aria-label="Theme">
+                        <button type="button" data-theme-choice="system" aria-pressed="true">Auto</button>
+                        <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+                        <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+                    </div>
                 </div>
                 <div id="modeNotice" class="pilot-note"></div>
             </header>
@@ -3465,6 +3438,6 @@
     <script src="js/source-links.js?v=20260904a"></script>
     <script src="js/unvalidated-places.js?v=20260904a"></script>
     <script src="js/task-presentation.js?v=20260919a"></script>
-    <script src="js/verification-map.js?v=20260920c"></script>
+    <script src="js/verification-map.js?v=20260920d"></script>
 </body>
 </html>
