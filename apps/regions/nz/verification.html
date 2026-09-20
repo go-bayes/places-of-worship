@@ -1283,6 +1283,26 @@
             color: var(--ink);
         }
 
+        /* the street view check on the confirm card: one full-width link
+           on a 44 px target, outlined like the header links */
+        .pin-check-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 0 14px;
+            border: 1px solid var(--action);
+            border-radius: var(--r-sm);
+            color: var(--action);
+            font-size: var(--fs-md);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .pin-check-link:hover {
+            background: var(--action-soft);
+        }
+
         .pin-zoom-gate {
             font-size: var(--fs-sm);
             color: var(--caution-strong);
@@ -3438,6 +3458,6 @@
     <script src="js/source-links.js?v=20260904a"></script>
     <script src="js/unvalidated-places.js?v=20260904a"></script>
     <script src="js/task-presentation.js?v=20260919a"></script>
-    <script src="js/verification-map.js?v=20260920d"></script>
+    <script src="js/verification-map.js?v=20260921a"></script>
 </body>
 </html>

@@ -278,4 +278,65 @@ const dot = { type: "Feature", properties: { name: "St Mary's", osm_id: "1", osm
   assert.equal(toggle.attrs["aria-pressed"], "true");
 }
 
-console.log("add-revise-control: 10 checks passed");
+// 11. once a pin is down the confirm card offers a Street View check kept on
+//     the pin, and choosing an area (or another radius) fits the circle into
+//     view, once, never below the zoom an area needs
+{
+  const app = fresh();
+  app.reviseContext = null;
+  app.occupancyPinContext = null;
+  app.pinPlaceholderExample = () => ({ place: "St Paul's, Wellington", lat: "-41.28", lng: "174.77" });
+  app.pinCardCarriesBasis = () => false;
+  app.rapidEntryFormHtml = () => "";
+  app.geolocationAvailable = () => true;
+  app.pinPeriodsBlockHtml = () => "";
+  app.rapidObservationFieldsHtml = () => "";
+  const html = app.pinCardsHtml();
+  assert.match(html, /<a id="pinStreetViewLink"[^>]*target="_blank"[^>]*>Check Street View at the pin</);
+  // a leaflet stub: circles carry their radius, the map records its fits
+  const calls = [];
+  let zoom = 19;
+  context.L = {
+    latLng: (lat, lng) => ({ lat, lng, equals: (o) => o.lat === lat && o.lng === lng }),
+    circle: (position, options) => ({ radius: options.radius, getBounds: () => ({ radius: options.radius }), addTo() { return this; } }),
+  };
+  app.map = {
+    getZoom: () => zoom,
+    setZoom: (z) => { zoom = z; calls.push(["setZoom", z]); },
+    fitBounds: (bounds) => { calls.push(["fit", bounds.radius]); zoom = bounds.radius > 50000 ? 6 : 14; },
+    getBounds: () => ({ contains: () => true }),
+    removeLayer() {},
+  };
+  app.pinMode = true;
+  app.pinConfirmed = null;
+  app.rapidFormOptions = null;
+  app.pinUncertaintyCircle = null;
+  app.pinAreaKey = "";
+  app.pinMarker = { getLatLng: () => ({ lat: -41.2865, lng: 174.7762 }) };
+  const link = element("pinStreetViewLink", { href: "#" });
+  element("pinLat"); element("pinLng");
+  const mode = element("pinLocationMode", { value: "building_identified" });
+  const radius = element("pinLocationRadius", { value: "500" });
+  element("pinConfirmButton"); element("pinZoomGate"); element("pinLocationGrade"); element("pinLocationRadiusCustomField");
+  const radiusField = element("pinLocationRadiusField", { scrolled: 0, scrollIntoView() { this.scrolled += 1; } });
+  app.updatePinConfirmCard();
+  assert.match(link.href, /map_action=pano&viewpoint=-41\.2865%2C174\.7762/);
+  assert.deepEqual(calls, []);
+  assert.equal(app.pinUncertaintyCircle, null);
+  mode.value = "approximate_area";
+  app.updatePinConfirmCard();
+  assert.deepEqual(calls, [["fit", 500]]);
+  assert.equal(radiusField.scrolled, 1);
+  // the same area again (a drag, a zoom): no second fit
+  app.updatePinConfirmCard();
+  assert.deepEqual(calls, [["fit", 500]]);
+  radius.value = "100000";
+  app.updatePinConfirmCard();
+  assert.deepEqual(calls, [["fit", 500], ["fit", 100000], ["setZoom", 8]]);
+  mode.value = "building_identified";
+  app.updatePinConfirmCard();
+  assert.equal(app.pinUncertaintyCircle, null);
+  assert.equal(calls.length, 3);
+}
+
+console.log("add-revise-control: 11 checks passed");

@@ -187,9 +187,12 @@ const flows = [
       await step("Filter the task list by name, priority, map suggestion, or status.");
       await page.fill("#searchInput", "");
       await page.locator(".more-filters > summary").click();
-      await page.selectOption("#portalPointsSelect", "all");
+      // points show by default (jb 2026-09-20); the toggle hides and shows them
+      await page.click("#portalPointsToggle");
+      await page.waitForTimeout(600);
+      await page.click("#portalPointsToggle");
       await page.waitForTimeout(1200);
-      await step("The Points control adds muted context dots; the legend explains marker states.");
+      await step("Hide points / Show points toggles today's places; the legend explains marker states.");
       await page.evaluate(() => {
         const app = window.nzVerificationMap;
         app.map.setView([-41.29, 174.77], 12, { animate: false });

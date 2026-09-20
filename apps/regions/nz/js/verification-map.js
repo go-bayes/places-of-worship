@@ -10862,6 +10862,10 @@ class NzVerificationMap {
             </div>
             <div id="pinConfirmCard" class="pin-card" hidden>
                 <div class="pin-coords">Pin: <span id="pinLat"></span>, <span id="pinLng"></span></div>
+                <!-- look around the site before confirming (jb 2026-09-21):
+                     google's street view at the pin, in a new tab; a phone
+                     may hand it to the maps app -->
+                <a id="pinStreetViewLink" class="pin-check-link" href="#" target="_blank" rel="noopener">Check Street View at the pin</a>
                 <label>
                     How sure are you of this location?
                     <select id="pinLocationMode">
@@ -11211,6 +11215,7 @@ class NzVerificationMap {
             }),
         }).addTo(this.map);
         this.pinHistory = [L.latLng(latlng)];
+        this.pinAreaKey = "";
         this.pinMarker.on("drag", () => this.updatePinConfirmCard());
         this.pinMarker.on("dragend", () => this.recordPinPosition());
         this._pinZoomHandler = () => this.updatePinConfirmCard();
@@ -11431,6 +11436,8 @@ class NzVerificationMap {
         const lngEl = document.getElementById("pinLng");
         if (latEl) latEl.textContent = position.lat.toFixed(5);
         if (lngEl) lngEl.textContent = position.lng.toFixed(5);
+        const streetViewLink = document.getElementById("pinStreetViewLink");
+        if (streetViewLink) streetViewLink.href = streetViewUrlForCoordinates([position.lng, position.lat]);
         // the typed-coordinate fields track the pin, unless being edited
         [["pinLatInput", position.lat], ["pinLngInput", position.lng]].forEach(([id, value]) => {
             const field = document.getElementById(id);
@@ -11465,8 +11472,8 @@ class NzVerificationMap {
         const customField = document.getElementById("pinLocationRadiusCustomField");
         if (customField) customField.hidden = document.getElementById("pinLocationRadius")?.value !== "custom";
         const gradeEl = document.getElementById("pinLocationGrade");
+        const radius = this.pinLocationRadius();
         if (gradeEl) {
-            const radius = this.pinLocationRadius();
             // the ra sees the grade the master data will carry, derived from
             // the radius exactly as the server derives it
             gradeEl.textContent = mode === "approximate_area" && Number.isFinite(radius) && window.PowLocationAssertion
@@ -11474,6 +11481,24 @@ class NzVerificationMap {
                 : "";
         }
         this.updatePinUncertaintyCircle(position);
+        // the area or its radius just chosen: the whole circle comes into
+        // view, so the distance reads on the map (at building zoom a 500 m
+        // circle is larger than the screen and shows nothing). a drag or a
+        // zoom of the same area leaves the view alone
+        const areaKey = mode === "approximate_area" && Number.isFinite(radius) ? String(radius) : "";
+        if (areaKey !== this.pinAreaKey) {
+            this.pinAreaKey = areaKey;
+            if (areaKey) this.showPinUncertaintyCircle();
+        }
+    }
+
+    showPinUncertaintyCircle() {
+        if (!this.pinUncertaintyCircle || !this.map) return;
+        this.map.fitBounds(this.pinUncertaintyCircle.getBounds(), { padding: [32, 32], animate: false });
+        // never below the zoom an area needs to be confirmed
+        if (this.map.getZoom() < PIN_MIN_APPROXIMATE_ZOOM) this.map.setZoom(PIN_MIN_APPROXIMATE_ZOOM);
+        // on a phone the radius sits under the fold of the entry pane
+        document.getElementById("pinLocationRadiusField")?.scrollIntoView?.({ block: "nearest" });
     }
 
     confirmPinLocation() {
