@@ -87,6 +87,10 @@
         })
         : null;
 
+    // the drag bars (jb 2026-09-21): the queue width and the map height
+    // are the reviewer's; leaflet re-measures after every change
+    window.PowReviewPanes?.setup({ onResize: () => reviewMap?.map?.invalidateSize?.() });
+
     const els = {
         authPanel: document.getElementById("authPanel"),
         authStatus: document.getElementById("authStatus"),
