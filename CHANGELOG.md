@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-20 (stale reads never move a task back)
+
+- Greptile's P1 on #127 was valid: `absorb()` was exported and tested but never called, so two refreshes finishing out of order could show an exported or PI-accepted task as open again. The RA portal now sequences its refreshes (a response superseded by a later refresh is dropped whole) and merges every row against the copy it holds: a row stamped older by `updated_at` is a stale read and stays out; with no stamps to compare, `absorb` keeps the terminal copy. A curator's reopen of an exported task carries a newer stamp, so it still lands, which a bare `absorb` call would have blocked. The review portal already refuses a second load while one is in flight, so it needs no merge. Test `refresh-merge.test.cjs` in CI; stamp `verification-map.js?v=20260920c`.
+
 ### 2026-09-20 (one add / revise control)
 
 - The contributor portal's sidebar has one intake button, `Add / Revise` (JB, 2026-09-20: "ADD/REVISE the only button on the phone"). With a dot's popup open on the map it revises that place (signed out, it parks the place on the sign-in card as before); otherwise it drops a pin. The line under it says which it will do now. While an entry is open the same button reads `Cancel`, full width in the danger outline, and is the way out on phone and computer alike, since a phone has no Escape key; a period placement returns to its periods, an add or revise entry is discarded with a confirmation only when a pin or text would be lost. Every "Esc cancels" and "Press Escape" line is gone. Arming the pin keeps every recorded dot on the map so a pin never lands on a recorded place without the offer to revise it. `docs/ui-style-guide.md` records the ruling; `＋ Add a missing place` (ruled 2026-08-29) is superseded.
