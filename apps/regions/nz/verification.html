@@ -314,16 +314,66 @@
             cursor: pointer;
         }
 
-        /* in-place feedback while the map waits for the pin: the button
-           itself carries the instruction on the amber in-progress pair */
-        .primary-action.placing,
-        .primary-action.placing:disabled {
-            background: var(--caution-soft);
-            border-color: var(--caution-strong);
-            color: var(--caution);
-            opacity: 1;
-            cursor: default;
+        /* while an entry is open the one control is the way out: a plain
+           red-outlined Cancel at the same size on any screen, since a phone
+           has no Escape key (jb 2026-09-20) */
+        .primary-action.cancelling {
+            background: var(--panel);
+            border-color: var(--danger);
+            color: var(--danger);
             box-shadow: none;
+        }
+
+        .primary-action.cancelling:hover {
+            background: var(--danger-soft);
+            border-color: var(--danger);
+        }
+
+        /* the file control: one button in front of the native input, which
+           stays for the browser's own picker (a phone offers its camera);
+           the chosen count reads beside it (jb 2026-09-20) */
+        .file-pick {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 6px 0;
+        }
+
+        .attachments-block .file-pick input[type="file"],
+        .file-pick input[type="file"] {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: 0;
+            opacity: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .file-pick-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            padding: 0 16px;
+            border: 1px solid var(--action);
+            border-radius: var(--r-sm);
+            background: var(--action-soft);
+            color: var(--action);
+            font-weight: 600;
+            font-size: var(--fs-md);
+            cursor: pointer;
+        }
+
+        .file-pick input:focus-visible + .file-pick-button {
+            outline: 3px solid var(--action);
+            outline-offset: 2px;
+        }
+
+        .file-pick-count {
+            color: var(--muted);
         }
 
         .primary-action {
@@ -2935,6 +2985,19 @@
                 overflow-y: auto;
             }
 
+            /* the one control never leaves the entry pane on a phone (jb
+               2026-09-20): it sticks to the pane's bottom edge until the
+               pane is scrolled past it, so Add / Revise is on screen at
+               rest and Cancel is on screen while aiming with the pane at
+               its narrowest */
+            body.portal-add .sidebar-actions {
+                position: sticky;
+                bottom: 0;
+                z-index: 3;
+                background: var(--panel);
+                box-shadow: 0 -1px 0 var(--line);
+            }
+
             #map {
                 grid-row: 1;
                 height: 100%;
@@ -3204,8 +3267,8 @@
             <section id="portalModeBar" class="portal-mode-bar" hidden></section>
 
             <div class="sidebar-actions">
-                <button type="button" id="addPlaceButton" class="primary-action">＋ Add a missing place</button>
-                <p class="sidebar-actions-help">Goes to human review — not straight to the public map. To revise a place already recorded, click its grey dot on the map and press "Revise this place".</p>
+                <button type="button" id="addPlaceButton" class="primary-action">Add / Revise</button>
+                <p id="addReviseHint" class="sidebar-actions-help">Drops a pin for a new place. Tap a dot first to revise that place.</p>
             </div>
 
             <!-- the transient pin cards (address search, coordinates, confirm,
