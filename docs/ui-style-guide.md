@@ -75,7 +75,12 @@ chooser no longer renders. The pin card heads with `Add a place` (or
 location`, `Drop pin on map`, `Search and drop` (which folds open the
 address search and the coordinate boxes); a pin already down reads `Move
 pin`. Typed coordinates apply on change and the pin drags on the map, so
-there is no move button. The `Flag for discussion` checkbox carries its
+there is no move button. Once the pin is down the confirm card carries one
+outlined link, `Check Street View at the pin` (`.pin-check-link`, 44 px),
+which opens Google Street View there in a new tab (JB, 2026-09-21).
+Choosing `I can only place an area`, or another radius, fits the whole
+uncertainty circle into the map, once, so the distance reads on the map; a
+drag or a zoom of the same area leaves the view alone. The `Flag for discussion` checkbox carries its
 label alone; the field that opens takes the description. The Map data panel
 offers one toggle, `Hide points` / `Show points` (ruled 2026-09-20: the
 on/off select and the note about the target year were artefacts); today's

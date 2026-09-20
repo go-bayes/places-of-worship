@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-09-21 (street view at the pin, the area circle in view)
+
+- Once a pin is down the confirm card offers `Check Street View at the pin` (JB, 2026-09-21: "once a pin is placed, the user should be able to check street view (phone/desktop)"): Google Street View at the pin's coordinates in a new tab, kept on the pin as it moves; a phone may hand it to the Maps app. The form's own source links after confirmation are unchanged.
+- Choosing `I can only place an area`, or changing its radius, fits the whole uncertainty circle into the map with the radius field scrolled into view (JB: "lost approx distance from pin showing when approx is selected"; at building zoom a 500 m circle is larger than the screen, so the shaded circle showed nothing). A drag or a zoom of the same area leaves the view alone, and the fit never drops below the zoom an area needs. Test check 10 in `add-revise-control.test.cjs`.
+- RA guide drift: the pin paragraph now names `Cancel` as the way out on any screen (the on-screen Escape lines went in #128; the keys still work) and the Street View check; the area paragraph says the map fits the circle. The guide capture tool's points step drives the `Hide points` / `Show points` toggle instead of the retired select.
+- JB verified the iPhone Safari divider fix from #128 on his device (2026-09-21).
+- Stamp `verification-map.js?v=20260921a`.
+
 ### 2026-09-20 (theme control and dark mode, PR-2)
 
 - One token sheet for both portals, `apps/regions/_shared/theme.css`, with the light set the pages carried and a provisional dark set (R-U2 to R-U4, confirmed 2026-09-19; the meanings are ruled, the values await Joseph B's colour session). `apps/regions/_shared/theme.js` runs in `<head>` before the stylesheets and applies the device's stored choice to `<html>` before paint; a three-button control, `Auto`, `Light`, `Dark`, sits in each portal's header, and auto follows the device, including a change while the page is open. The Streets basemap follows the theme: MapTiler's `streets-v2-dark` raster where a key ships (attribution swaps with it), the OpenStreetMap tiles under a CSS filter otherwise; Hybrid and Satellite never darken. Marker halos are `--marker-halo` (white on every surface) rather than the panel colour; every `rgba()` shadow and veil in the two pages is a token (`--shade-*`, `--veil`, `--action-glow`, `--present-glow`); Leaflet's popups, zoom buttons and attribution read from the tokens. `docs/ui-style-guide.md` gains a Theme section with the light and dark values and a contrast table. The choice is held in memory once read, so a page whose storage is blocked keeps a set for its lifetime (Greptile P1 on #130 was valid: `get`, `effective` and the device-change listener re-read storage and forgot it). The RA guide names the control and says Streets follows the theme. Test `theme.test.cjs` in CI. Stamps `verification-map.js?v=20260920d`, `review-map.js?v=20260920a`.
