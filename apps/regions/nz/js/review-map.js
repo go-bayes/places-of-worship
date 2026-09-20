@@ -80,9 +80,39 @@
         const minZoom = Math.min(5, Math.floor(zoom));
         const map = L.map(container, { preferCanvas: true }).setView(centre, zoom);
         const attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-        const streets = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution, maxZoom: 19, minZoom }).addTo(map);
+        const streetsUrl = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+        const streets = L.tileLayer(streetsUrl, { attribution, maxZoom: 19, minZoom, className: "streets-tiles" }).addTo(map);
         const key = String(options.maptilerKey || window.MAPTILER_API_KEY || "").trim();
         const imageryAttribution = '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+        // r-u3: dark streets raster with a key, a css filter without one;
+        // imagery never darkens
+        const streetsDarkUrl = key ? `https://api.maptiler.com/maps/streets-v2-dark/{z}/{x}/{y}.png?key=${encodeURIComponent(key)}` : "";
+        let streetsCurrentUrl = streetsUrl;
+        function syncStreetsTheme() {
+            const dark = document.documentElement?.getAttribute?.("data-theme-effective") === "dark";
+            const tileContainer = streets.getContainer?.();
+            if (streetsDarkUrl) {
+                const url = dark ? streetsDarkUrl : streetsUrl;
+                if (url !== streetsCurrentUrl) {
+                    streetsCurrentUrl = url;
+                    streets.setUrl?.(url);
+                    // the attribution lives on the layer, so a later add
+                    // reads the right one; a layer on the map swaps it now
+                    const previous = streets.options.attribution;
+                    const next = dark ? imageryAttribution : attribution;
+                    streets.options.attribution = next;
+                    if (map.attributionControl && map.hasLayer(streets) && previous !== next) {
+                        map.attributionControl.removeAttribution(previous);
+                        map.attributionControl.addAttribution(next);
+                    }
+                }
+                tileContainer?.classList?.remove("streets-tiles-filtered");
+            } else {
+                tileContainer?.classList?.toggle("streets-tiles-filtered", dark);
+            }
+        }
+        syncStreetsTheme();
+        window.addEventListener?.("pow-theme-change", syncStreetsTheme);
         const layers = { streets };
         if (key) {
             layers.satellite = L.tileLayer(`https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=${encodeURIComponent(key)}`, { attribution: imageryAttribution, maxZoom: 20, minZoom });

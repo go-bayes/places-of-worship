@@ -109,6 +109,65 @@ Do not reuse these colours for unrelated meanings.
 
 If these colours change, update both the CSS and this table. Since PR-H3 (2026-09-04) the three surfaces share one token system, the block in section 3 of `docs/development/ui-design-audit-2026-09-03.md`: `verification.html` and `review.html` each declare it in their `:root` (`--bg`, `--panel`, `--panel-2`, `--ink`, `--muted`, `--line`, `--control-line`, `--action*`, `--danger*`, `--caution*`, `--present*`, `--absent*`, `--not-assessed*`, `--entry*`, `--marker-unvalidated`, `--font`, `--fs-*`, `--sp-*`, `--r-*`), and the public map shell scopes its dark variant under `.map-chrome` in `apps/shared/map-shell.css`. Change a meaning by changing its variable, then update this table. Type: base 16 px in the working tools, meta and pills 14 px, nothing under 13 px; labels 600, prose 400; the system font stack everywhere, declared once. Buttons: one filled primary per row, the outline as the secondary idiom, disabled controls keep readable text (grey face, muted ink, never opacity).
 
+## Theme
+
+Both portals share one token sheet, `apps/regions/_shared/theme.css`, with a light set and a dark set (R-U2 to R-U4, confirmed 2026-09-19). The meanings are ruled; the dark values below are provisional until Joseph B's colour session, and every value change goes through this table. `apps/regions/_shared/theme.js` runs in `<head>` before the stylesheets: it reads the device's stored choice (`localStorage["pow-theme"]`: `light` or `dark`; absent means auto), sets `data-theme` (the choice, absent for auto) and `data-theme-effective` (`light` or `dark`, what paints) on `<html>`, follows a change in the device preference while auto is chosen, and fires `pow-theme-change` on every change. The control is three buttons, `Auto`, `Light`, `Dark`, in each portal's header (`.theme-control`, 44 px targets), wired by `PowTheme.bind`. In dark mode the Streets basemap is MapTiler's `streets-v2-dark` raster where a key ships and the OpenStreetMap tiles under a CSS filter otherwise (`.streets-tiles-filtered`); Hybrid and Satellite are never darkened (R-U3: darkened imagery misreads buildings). Marker halos use `--marker-halo` (white on every surface, both themes), never `--panel`. Shadows and veils are tokens too (`--shade-*`, `--veil`, `--action-glow`, `--present-glow`); no `rgba()` literal remains in either page.
+
+| Token | Light | Dark (provisional) |
+| --- | --- | --- |
+| `--bg` | `#f4f6f8` | `#0f1620` |
+| `--panel` | `#ffffff` | `#17202a` |
+| `--panel-2` | `#f3f6f9` | `#1e2a36` |
+| `--ink` | `#17202a` | `#e8edf3` |
+| `--muted` | `#5b6776` | `#a7b3c2` |
+| `--line` | `#cfd6df` | `#2c3a48` |
+| `--control-line` | `#8a94a3` | `#5b6b7d` |
+| `--action` | `#1f618d` | `#7fb3e6` |
+| `--action-hover` | `#17527a` | `#93c1ec` |
+| `--action-soft` | `#e8f1fb` | `#1b3550` |
+| `--danger` | `#b42318` | `#f28b82` |
+| `--danger-soft` | `#fee4e2` | `#4a1f1c` |
+| `--caution` | `#6b4e00` | `#f2c14e` |
+| `--caution-soft` | `#fff4dc` | `#3f3110` |
+| `--caution-strong` | `#9a6700` | `#e0a800` |
+| `--present` | `#145a32` | `#6fcf97` |
+| `--present-soft` | `#dff3e6` | `#163a26` |
+| `--absent` | `#374151` | `#b8c2d0` |
+| `--absent-soft` | `#e5e7eb` | `#2c3a48` |
+| `--not-assessed` | `#1f4e79` | `#8fb8e0` |
+| `--not-assessed-soft` | `#e8f1fb` | `#1b3550` |
+| `--entry` | `#0f766e` | `#5fd3c4` |
+| `--entry-soft` | `#e6f4f1` | `#123a36` |
+| `--stale` | `#7d3c98` | `#c69ae0` |
+| `--marker-unvalidated` | `#f59e0b` | `#f59e0b` |
+| `--marker-halo` | `#ffffff` | `#ffffff` |
+| `--shade-soft` | `rgba(15, 23, 42, 0.12)` | `rgba(0, 0, 0, 0.35)` |
+| `--shade` | `rgba(15, 23, 42, 0.25)` | `rgba(0, 0, 0, 0.5)` |
+| `--shade-deep` | `rgba(15, 23, 42, 0.35)` | `rgba(0, 0, 0, 0.6)` |
+| `--shade-ink` | `rgba(0, 0, 0, 0.45)` | `rgba(0, 0, 0, 0.6)` |
+| `--shade-ink-deep` | `rgba(0, 0, 0, 0.7)` | `rgba(0, 0, 0, 0.8)` |
+| `--veil` | `rgba(255, 255, 255, 0.94)` | `rgba(23, 32, 42, 0.92)` |
+| `--action-glow` | `rgba(31, 97, 141, 0.18)` | `rgba(127, 179, 230, 0.25)` |
+| `--present-glow` | `rgba(22, 101, 52, 0.16)` | `rgba(111, 207, 151, 0.2)` |
+
+Contrast (WCAG relative luminance) on the pairs the pages actually draw. Body text needs 4.5:1, large or bold text and control boundaries 3:1.
+
+| Pair (foreground on surface) | Light | Dark |
+| --- | --- | --- |
+| `--ink` on `--panel` | 16.5:1 | 14.0:1 |
+| `--muted` on `--panel` | 5.8:1 | 7.7:1 |
+| `--muted` on `--panel-2` | 5.3:1 | 6.9:1 |
+| `--action` on `--panel` | 6.7:1 | 7.4:1 |
+| `--panel` on `--action` | 6.7:1 | 7.4:1 |
+| `--danger` on `--panel` | 6.6:1 | 6.9:1 |
+| `--caution` on `--panel` | 7.7:1 | 9.8:1 |
+| `--panel` on `--caution-strong` | 4.9:1 | 7.7:1 |
+| `--present` on `--panel` | 8.3:1 | 8.7:1 |
+| `--entry` on `--panel` | 5.5:1 | 9.1:1 |
+| `--not-assessed` on `--panel` | 8.7:1 | 7.9:1 |
+| `--absent` on `--panel` | 10.3:1 | 9.1:1 |
+| `--ink` on `--bg` | 15.2:1 | 15.4:1 |
+
 ## Status Components
 
 Use pill or badge components for short machine states:

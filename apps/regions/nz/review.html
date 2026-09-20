@@ -7,52 +7,13 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
           crossorigin="">
+    <!-- theme: the choice is applied to <html> before paint (r-u2) -->
+    <script src="../_shared/theme.js?v=20260920a"></script>
+    <link rel="stylesheet" href="../_shared/theme.css?v=20260920a">
     <link rel="stylesheet" href="../_shared/state.css?v=20260919a">
     <style>
-        /* shared tokens (docs/development/ui-design-audit-2026-09-03.md, section 3) */
-        :root {
-            color-scheme: light;
-            --bg: #f4f6f8;
-            --panel: #ffffff;
-            --panel-2: #f3f6f9;
-            --ink: #17202a;
-            --muted: #5b6776;
-            --line: #cfd6df;
-            --control-line: #8a94a3;
-            --action: #1f618d;
-            --action-hover: #17527a;
-            --action-soft: #e8f1fb;
-            --danger: #b42318;
-            --danger-soft: #fee4e2;
-            /* one amber: uncertain, caution, disputed */
-            --caution: #6b4e00;
-            --caution-soft: #fff4dc;
-            --caution-strong: #9a6700;
-            --present: #145a32;
-            --present-soft: #dff3e6;
-            --absent: #374151;
-            --absent-soft: #e5e7eb;
-            --not-assessed: #1f4e79;
-            --not-assessed-soft: #e8f1fb;
-            --entry: #0f766e;
-            --entry-soft: #e6f4f1;
-            --marker-unvalidated: #f59e0b;  /* r-d1' (jb 2026-09-04): every unreviewed place is an open case, amber */
-            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            --fs-xs: 13px;
-            --fs-sm: 14px;
-            --fs-md: 16px;
-            --fs-lg: 18px;
-            --fs-xl: 22px;
-            --sp-1: 4px;
-            --sp-2: 8px;
-            --sp-3: 12px;
-            --sp-4: 16px;
-            --sp-5: 24px;
-            --r-sm: 6px;
-            --r-md: 12px;
-            --r-lg: 16px;
-            --r-pill: 999px;
-        }
+        /* colour, type, spacing and radius tokens live in
+           ../_shared/theme.css (light and dark) */
 
         * {
             box-sizing: border-box;
@@ -537,10 +498,10 @@
 
         .basemap-toggle {
             display: inline-flex;
-            background: rgba(255, 255, 255, 0.94);
+            background: var(--veil);
             border: 1px solid var(--control-line);
             border-radius: var(--r-sm);
-            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.25);
+            box-shadow: 0 1px 4px var(--shade);
             overflow: hidden;
         }
 
@@ -567,7 +528,7 @@
         }
 
         .points-legend-control {
-            background: rgba(255, 255, 255, 0.94);
+            background: var(--veil);
             border: 1px solid var(--control-line);
             border-radius: var(--r-sm);
             padding: 8px 10px;
@@ -575,7 +536,7 @@
             gap: 6px;
             font-size: var(--fs-sm);
             color: var(--ink);
-            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.25);
+            box-shadow: 0 1px 4px var(--shade);
             max-width: 260px;
         }
 
@@ -627,7 +588,7 @@
         .legend-dot.context-dot-swatch {
             background: var(--marker-unvalidated);
             border: 1.5px solid var(--panel);
-            box-shadow: 0 0 3px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 0 3px var(--shade-ink);
             width: 10px;
             height: 10px;
         }
@@ -636,7 +597,7 @@
         .verification-marker {
             border: 2px solid var(--panel);
             border-radius: 50%;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 0 5px var(--shade-ink);
             background: var(--muted);
         }
         .verification-marker.vm-unknown {
@@ -648,10 +609,10 @@
             outline-offset: 2px;
         }
         .verification-marker.vm-validated-present {
-            box-shadow: 0 0 0 2px var(--panel), 0 0 0 5px var(--action), 0 0 5px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 5px var(--action), 0 0 5px var(--shade-ink);
         }
         .verification-marker.vm-validated-absent {
-            box-shadow: 0 0 0 2px var(--panel), 0 0 0 5px var(--ink), 0 0 5px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 5px var(--ink), 0 0 5px var(--shade-ink);
         }
         .verification-marker.vm-in-review {
             background: var(--panel);
@@ -660,10 +621,10 @@
             border-color: var(--action);
         }
         .verification-marker.vm-unvalidated {
-            box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3.5px var(--marker-unvalidated), 0 0 5px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 0 0 1.5px var(--marker-halo), 0 0 0 3.5px var(--marker-unvalidated), 0 0 5px var(--shade-ink);
         }
         .verification-marker.vm-disputed {
-            box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--caution-strong), 0 0 5px rgba(0, 0, 0, 0.45);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 4px var(--caution-strong), 0 0 5px var(--shade-ink);
         }
         .verification-marker.vm-nomination {
             background: var(--panel);
@@ -672,20 +633,20 @@
             border-color: var(--entry);
         }
         .basemap-imagery .verification-marker {
-            box-shadow: 0 0 0 1px var(--ink), 0 0 6px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 0 1px var(--ink), 0 0 6px var(--shade-ink-deep);
         }
         .basemap-imagery .verification-marker.vm-validated-present {
-            box-shadow: 0 0 0 2px var(--panel), 0 0 0 5px var(--action), 0 0 0 7px var(--panel), 0 0 6px 7px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 5px var(--action), 0 0 0 7px var(--marker-halo), 0 0 6px 7px var(--shade-ink-deep);
         }
         .basemap-imagery .verification-marker.vm-unvalidated {
-            box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 3.5px var(--marker-unvalidated), 0 0 0 5px var(--panel), 0 0 6px 5px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 0 1.5px var(--marker-halo), 0 0 0 3.5px var(--marker-unvalidated), 0 0 0 5px var(--marker-halo), 0 0 6px 5px var(--shade-ink-deep);
         }
         .basemap-imagery .verification-marker.vm-disputed {
-            box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--caution-strong), 0 0 0 6px var(--panel), 0 0 6px 6px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 0 4px var(--caution-strong), 0 0 0 6px var(--marker-halo), 0 0 6px 6px var(--shade-ink-deep);
         }
         .basemap-imagery .verification-marker.vm-in-review,
         .basemap-imagery .verification-marker.vm-nomination {
-            box-shadow: 0 0 0 2px var(--panel), 0 0 6px 2px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 0 2px var(--marker-halo), 0 0 6px 2px var(--shade-ink-deep);
         }
 
         .field-grid {
@@ -764,7 +725,7 @@
             z-index: 5;
             max-height: 60vh;
             overflow: auto;
-            box-shadow: 0 -6px 18px rgba(23, 32, 42, 0.14);
+            box-shadow: 0 -6px 18px var(--shade-soft);
         }
 
         .decision-form {
@@ -888,6 +849,12 @@
 <body>
     <header>
         <h1>Review submitted evidence</h1>
+        <!-- theme choice (r-u2): auto follows the device -->
+        <div class="theme-control" role="group" aria-label="Theme">
+            <button type="button" data-theme-choice="system" aria-pressed="true">Auto</button>
+            <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+            <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+        </div>
         <p>Review task submissions saved in Convex. Decisions recorded here do not update the public map or master data until an export bundle is validated through <code>pow</code>.</p>
         <nav class="header-links">
             <a href="https://religionmap.org/apps/guides/pi.html" target="_blank" rel="noopener">Guide</a>
@@ -964,7 +931,7 @@
     <script src="../../global/config.public.js"></script>
     <script src="js/unvalidated-places.js?v=20260904a"></script>
     <script src="js/source-links.js?v=20260904a"></script>
-    <script src="js/review-map.js?v=20260905a"></script>
+    <script src="js/review-map.js?v=20260920a"></script>
     <script src="js/convex-config.js?v=20260523-vanuatu"></script>
     <script src="js/convex-task-client.js?v=20260905a"></script>
     <script src="js/claude-review-panel.js?v=20260825-ai-review"></script>

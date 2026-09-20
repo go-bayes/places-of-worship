@@ -47,6 +47,7 @@ jobs:
           node apps/regions/nz/js/pane-divider.test.cjs
           node apps/regions/nz/js/phone-walkthrough-dom.test.cjs
           node apps/regions/nz/js/portal-first-screen.test.cjs
+          node apps/regions/_shared/theme.test.cjs
           node apps/regions/nz/js/task-presentation.test.cjs
           node apps/regions/nz/js/task-state-dom.test.cjs
           node apps/regions/nz/js/review-state-dom.test.cjs
