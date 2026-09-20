@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-20 (stale reads never move a task back)
+
+- Greptile's P1 on #127 was valid: `absorb()` was exported and tested but never called, so two refreshes finishing out of order could show an exported or PI-accepted task as open again. The RA portal now sequences its refreshes (a response superseded by a later refresh is dropped whole) and merges every row against the copy it holds: a row stamped older by `updated_at` is a stale read and stays out; with no stamps to compare, `absorb` keeps the terminal copy. A curator's reopen of an exported task carries a newer stamp, so it still lands, which a bare `absorb` call would have blocked. The review portal already refuses a second load while one is in flight, so it needs no merge. Test `refresh-merge.test.cjs` in CI; stamp `verification-map.js?v=20260920c`.
+
 ### 2026-09-19 (one state per task)
 
 - One shared presentation contract now decides how a task's state is shown on both portals (JB, 2026-09-19, after the T3 Code survey: "go for beautiful clean ui"). `apps/regions/nz/js/task-presentation.js` turns a task's status, its latest review decision and any saved revision into one label, one tone, a precedence and the next action for the viewer (`present`), a one-line rollup for a batch or a queue that takes the most urgent tone and counts only its rows (`rollup`), a sort (`compare`), terminal absorption so a stale read never moves an exported or PI-accepted task back (`absorb`), and a separate transport axis (`transport`). Colour is reserved for act now (amber), in motion (blue) and broken (red); resting and terminal states are uncoloured, with the rule and the label tables in `docs/ui-style-guide.md`. Twelve table tests cover both viewers, the rollup, absorption and transport. A shared stylesheet, `apps/regions/_shared/state.css`, carries `.state-pill`, `.state-rollup`, `.transport-dot`, `.state-banner`, `.state-empty` and `.decision-choice`, all on the pages' existing tokens.

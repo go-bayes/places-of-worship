@@ -4387,8 +4387,37 @@ class NzVerificationMap {
         }
     }
 
+    // a refresh that lands after a newer one must not move a task back
+    // (greptile on #127: nothing sequenced the reads). two guards: a
+    // whole response superseded by a later refresh is dropped, and each
+    // row is merged against the copy held, so a copy stamped older than
+    // the held one is a stale read and stays out. with no stamps to
+    // compare, a terminal status absorbs the read (task-presentation
+    // absorb). a curator's reopen of an exported task carries a newer
+    // stamp, so it still lands
+    mergeTaskRead(previous, incoming) {
+        if (!previous) return incoming;
+        if (!incoming) return previous;
+        const heldAt = Number(previous.updated_at);
+        const readAt = Number(incoming.updated_at);
+        if (Number.isFinite(heldAt) && Number.isFinite(readAt)) return readAt < heldAt ? previous : incoming;
+        const absorb = window.PowTaskPresentation?.absorb;
+        return typeof absorb === "function" ? absorb(previous, incoming) : incoming;
+    }
+
+    mergeTaskReads(previousById, rows) {
+        const merged = new Map();
+        for (const task of rows || []) {
+            if (!task?.task_id) continue;
+            merged.set(task.task_id, this.mergeTaskRead(previousById?.get?.(task.task_id), task));
+        }
+        return merged;
+    }
+
     async refreshBackendTasks() {
         if (!this.backend?.configured || !this.backend.signedIn) return;
+        const generation = (this.refreshGeneration || 0) + 1;
+        this.refreshGeneration = generation;
         try {
             const query = {
                 countryCode: COUNTRY_CONFIG.countryCode,
@@ -4412,9 +4441,13 @@ class NzVerificationMap {
                     limit: 1000,
                 })) || [];
             }
-            this.backendTasksById = new Map(allTasks.map(task => [task.task_id, task]));
-            for (const task of manualBatchTasks) {
-                this.backendTasksById.set(task.task_id, task);
+            // a later refresh finished first: its rows are newer, so this
+            // response is dropped whole
+            if (generation !== this.refreshGeneration) return;
+            const held = this.backendTasksById;
+            this.backendTasksById = this.mergeTaskReads(held, allTasks);
+            for (const [taskId, task] of this.mergeTaskReads(held, manualBatchTasks)) {
+                this.backendTasksById.set(taskId, task);
             }
             // re-merge local copies so the ra stays landed in a task
             // created moments ago that the queries have not indexed yet
