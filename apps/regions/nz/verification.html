@@ -14,14 +14,14 @@
          stays a light workspace and keeps its own colours below -->
     <link rel="stylesheet" href="../../shared/map-shell.css">
     <!-- theme: the choice is applied to <html> before paint (r-u2) -->
-    <script src="../_shared/theme.js?v=20260920a"></script>
-    <link rel="stylesheet" href="../_shared/theme.css?v=20260920a">
+    <script src="../_shared/theme.js?v=20260921a"></script>
+    <link rel="stylesheet" href="../_shared/theme.css?v=20260921a">
     <link rel="stylesheet" href="../_shared/state.css?v=20260919a">
 
     <style>
         :root {
             /* colour, type, spacing and radius tokens live in
-               ../_shared/theme.css (light and dark); this page keeps only
+               ../_shared/theme.css (dark); this page keeps only
                its layout tokens below */
         }
 
@@ -98,10 +98,6 @@
             align-items: center;
             gap: 10px;
             margin-top: 10px;
-        }
-
-        .nav-links .theme-control {
-            margin-left: auto;
         }
 
         .nav-links a {
@@ -3327,12 +3323,6 @@
                 <div class="nav-links">
                     <a href="../../global/">Exit</a>
                     <a href="https://religionmap.org/apps/guides/ra.html" target="_blank" rel="noopener">Guide</a>
-                    <!-- theme choice (r-u2): auto follows the device -->
-                    <div class="theme-control" role="group" aria-label="Theme">
-                        <button type="button" data-theme-choice="system" aria-pressed="true">Auto</button>
-                        <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
-                        <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
-                    </div>
                 </div>
                 <div id="modeNotice" class="pilot-note"></div>
             </header>
