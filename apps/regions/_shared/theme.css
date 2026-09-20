@@ -2,8 +2,8 @@
    one theme (jb 2026-09-21: "the dark theme is beautiful. can we simply
    make that default with no options?"); the three-state control of r-u2
    (2026-09-19) is retired and the light set is recorded in
-   docs/ui-style-guide.md only. the meanings are ruled there; the values
-   await joseph b's colour session. never reuse one token for an unrelated
+   docs/ui-style-guide.md only. the meanings are ruled there and the values
+   approved (jb, 2026-09-21). never reuse one token for an unrelated
    meaning. theme.js marks <html> dark before paint. */
 :root {
   color-scheme: dark;
