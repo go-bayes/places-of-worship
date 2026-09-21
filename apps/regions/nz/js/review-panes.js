@@ -41,6 +41,14 @@
         }
     }
 
+    function readPreset(bar) {
+        try {
+            return window.localStorage?.getItem(`pow-review-${bar}-preset`) ?? null;
+        } catch (error) {
+            return null;
+        }
+    }
+
     function write(key, value) {
         try {
             if (value === null) window.localStorage?.removeItem(key);
@@ -94,6 +102,7 @@
         const api = {
             sidebarWidth: null,
             mapHeight: null,
+            selectedPresets: { sidebar: readPreset("sidebar"), map: readPreset("map") },
 
             // the widest the queue may be: six tenths of the layout, never under the floor
             sidebarMax(width = layout?.getBoundingClientRect?.()?.width) {
@@ -109,6 +118,7 @@
             // chosen: a drag or key by hand; null: back to the default and forgotten
             setSidebarWidth(value, { chosen = false } = {}) {
                 if (!layout) return null;
+                if (chosen) api.rememberPreset("sidebar", null);
                 if (value === null) {
                     api.sidebarWidth = null;
                     layout.style?.removeProperty?.("--sidebar-w");
@@ -152,6 +162,7 @@
             },
             setMapHeight(value, { chosen = false } = {}) {
                 if (!detail) return null;
+                if (chosen) api.rememberPreset("map", null);
                 if (value === null) {
                     api.mapHeight = null;
                     detail.style?.removeProperty?.("--map-h");
@@ -196,15 +207,26 @@
             // a preset is a choice by hand: remembered like a drag
             applyPreset(bar, kind) {
                 const target = api.presetTarget(bar, kind);
-                return bar === "sidebar"
+                const current = bar === "sidebar"
                     ? api.setSidebarWidth(target, { chosen: true })
                     : api.setMapHeight(target, { chosen: true });
+                api.rememberPreset(bar, kind);
+                api.syncPresets(bar, current);
+                return current;
+            },
+            rememberPreset(bar, kind) {
+                api.selectedPresets[bar] = kind;
+                write(`pow-review-${bar}-preset`, kind);
             },
             // the preset in force at a size; a dragged size between presets is none
             activePreset(bar, current) {
                 const kinds = bar === "sidebar" ? ["queue", "even", "detail"] : ["map", "even", "cards"];
                 const clampTo = bar === "sidebar" ? (v) => api.clampSidebar(v) : (v) => api.clampMap(v);
-                return kinds.find((kind) => clampTo(api.presetTarget(bar, kind)) === current) ?? null;
+                const matches = kinds.filter((kind) => clampTo(api.presetTarget(bar, kind)) === current);
+                // clamped presets may coincide on a short screen; retain the
+                // actual choice, and avoid guessing after a drag or reset
+                const selected = api.selectedPresets[bar];
+                return matches.includes(selected) ? selected : matches.length === 1 ? matches[0] : null;
             },
             syncPresets(bar, current) {
                 const host = bar === "sidebar" ? sidebarBar : mapBar;
@@ -279,7 +301,10 @@
         // ceiling; leaflet re-measures either way
         window.addEventListener?.("resize", () => {
             if (api.sidebarWidth !== null) api.setSidebarWidth(api.sidebarWidth);
-            else onResize();
+            else api.describeSidebar(SIDEBAR_DEFAULT);
+            if (api.mapHeight !== null) api.setMapHeight(read(MAP_KEY) ?? api.mapHeight);
+            else api.describeMap(api.currentMapHeight());
+            onResize();
         });
         return api;
     }

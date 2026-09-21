@@ -33,7 +33,8 @@ function box(rect) {
     };
 }
 let innerHeight = 900;
-const window = { localStorage, matchMedia: () => ({ matches: false }), get innerHeight() { return innerHeight; }, addEventListener() {} };
+const windowListeners = {};
+const window = { localStorage, matchMedia: () => ({ matches: false }), get innerHeight() { return innerHeight; }, addEventListener(type, fn) { windowListeners[type] = fn; } };
 window.window = window;
 const document = { querySelector: () => null, getElementById: () => null };
 const context = vm.createContext({ window, document, Number, String, Boolean, Math, console });
@@ -213,4 +214,44 @@ console.log("review-panes: ok");
     api.setMapHeight(null, { chosen: true });
     assert.equal(pressed(mapPresets), "", "a reset to the measured 440px presses none");
     console.log("review presets ok");
+}
+
+// short landscape screens can clamp two named presets to the same height
+{
+    values.clear();
+    innerHeight = 390;
+    const { api } = build();
+    api.applyPreset("map", "cards");
+    assert.equal(api.mapHeight, 200);
+    assert.equal(api.activePreset("map", 200), "cards");
+    assert.equal(build().api.activePreset("map", 200), "cards", "reload preserves the actual choice");
+    api.applyPreset("map", "even");
+    assert.equal(api.activePreset("map", 200), "even");
+    assert.equal(build().api.activePreset("map", 200), "even");
+    api.setMapHeight(200, { chosen: true });
+    assert.equal(api.activePreset("map", 200), null, "a drag does not invent a choice between coincident presets");
+    assert.equal(values.has("pow-review-map-preset"), false);
+    api.applyPreset("map", "cards");
+    api.setMapHeight(null, { chosen: true });
+    assert.equal(values.has("pow-review-map-preset"), false, "reset clears the chosen preset");
+    innerHeight = 900;
+    console.log("short-screen review presets ok");
+}
+
+// rotation clamps the displayed map, then restores the remembered size
+{
+    values.clear();
+    innerHeight = 900;
+    const { api, mapBar } = build();
+    api.applyPreset("map", "map");
+    innerHeight = 390;
+    windowListeners.resize();
+    assert.equal(api.mapHeight, 351);
+    assert.equal(mapBar.attrs["aria-valuemax"], "351");
+    assert.equal(values.get("pow-review-map-h"), "810");
+    innerHeight = 900;
+    windowListeners.resize();
+    assert.equal(api.mapHeight, 810);
+    assert.equal(api.activePreset("map", 810), "map");
+    console.log("review map resize restoration ok");
 }

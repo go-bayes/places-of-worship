@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-21 (review preset selection)
+
+- Review-map presets retain the selected name when a short screen clamps `Even` and `More cards` to the same height. Reload preserves the choice; dragging or resetting clears it. Resizing refreshes the map height and preset indicators.
+
 ### 2026-09-21 (PR-4: targets, one button system, divider presets)
 
 - R-U6 applied on both portals: every control on a first-time RA's path is 44 px (Search and its results, Move pin, Refresh task list and Sign out, the basemap toggle, the locate button, the decision menu, the review page's inputs and derived-year buttons); secondary inline controls are 40 px (`.tertiary`, `.link-button`, skip chips, session and attachment rows, the points select, More filters); popup links keep 36 px where the popup's width would break, as the ruling allows. The drag bars draw at 18 px and take the pointer across 44 px through a pseudo-element. Disclosure summaries are 40 px on both pages. Native selects carry an explicit height (44 px, the points select 40 px) because Safari ignores an author's padding and min-height on a select (measured 23 px in WebKit under both; the RA page's Target year select had the same gap on main). `--fs-sm` rises to 15 px and `--fs-xs` to 14 px in `theme.css`; the three 11 px chart labels on the review page rise to the 13 px floor; focus rings are 3 px on both pages.
