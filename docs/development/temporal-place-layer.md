@@ -31,13 +31,7 @@ filter expression in `region-map.js` and a plain JS filter in
 `verification-map.js`. Any change to the predicate MUST update both
 files and this section in the same commit.
 
-**Defaults (surface-specific, deliberate).** Country maps auto-select:
-`period` when the selected year is more than 15 years stale and a
-dated product is wired, else `all`; an explicit user choice persists
-across year and level changes. The portal defaults to `off`: context
-dots are subordinate to task markers, and every portal target year is
-historical by construction, so an auto-`period` default would clutter
-every task view.
+**Defaults (surface-specific, deliberate).** Country maps open in `all` on every year (Joseph B, 2026-09-21: show place points on first opening). Previously, a year more than 15 years before the current year selected `period` when a dated product was wired. The Bahamas' 2010 default crossed that threshold in 2026, so its map opened with two dated places and the snapshot hidden. Of the current country configurations, only the Bahamas combined a default year at or before 2010 with a dated product. `period` remains an explicit choice where a dated product is wired, and the chosen mode persists across year and level changes. The portal defaults to `off` so task markers remain the primary display.
 
 **Styling (surface-specific, deliberate).** Country maps colour dated
 dots by religion with the amber date-tag stroke, scale radius by zoom,
@@ -98,13 +92,7 @@ assemble.
 
 ## Interim rule (implemented in the shared runtime)
 
-When the selected census year sits more than 15 years before today, the
-dot layers fade to a faint texture and the legend states: "place dots
-show today's OpenStreetMap places, not {year} places — historical place
-layers are being assembled from evidence." Data-keyed, no country
-conditionals; the census choropleth (which IS year-true) stays fully
-saturated. Recent years keep normal dots because a current snapshot is a
-reasonable stand-in within roughly one census cycle.
+When the selected census year sits more than 15 years before today, the snapshot dots fade to roughly half their normal opacity and the legend explains that the dots represent today's OpenStreetMap places. The census choropleth retains its selected-year values. Recent years keep normal snapshot opacity; the snapshot remains contemporary context even when displayed beside a historical census.
 
 ## Place-dot visibility modes (JB directive 2026-07-07, implemented)
 
@@ -116,12 +104,9 @@ per mode. The design below is the spec it implements.
 
 A `Points` control joins the census panel with three modes:
 
-- **Period** (default whenever the selected year is historical): only
-  dated dots alive at the year render (the current amber-ring layer);
-  the undated snapshot tier is hidden entirely rather than faded.
-- **All**: today's full OSM snapshot plus the dated layer — the current
-  behaviour.
-- **Off**: no place dots at all; the choropleth alone.
+- **Period** (explicit choice where a dated product is wired): dated dots meeting the selected-year predicate render, and the snapshot is hidden.
+- **All** (country-map default): today's OSM snapshot renders. The dated layer also renders when the selected year is more than 15 years before the current year; recent years retain the existing snapshot-only behaviour.
+- **Off**: place dots are hidden and the choropleth remains.
 
 Within Period mode, a **"show later foundations"** checkbox additionally
 renders dated dots with start_year AFTER the selected year in a distinct

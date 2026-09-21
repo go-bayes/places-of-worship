@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### 2026-09-21 (every place on the map at first sight)
+
+- Country maps now open with the OSM snapshot visible on every census year (Joseph B, 2026-09-21). The Bahamas' 2010 default crossed the 15-year threshold in 2026; because the Bahamas wires a dated product, its map had begun opening with only two dated places. The runtime now defaults to `all` until the reader chooses; `period` remains available where a dated product is wired. Older snapshot dots retain roughly half their normal opacity with a legend caveat. The temporal-layer instructions describe the revised default and the existing recent-year behaviour. All 102 active country pages and the global page load `region-map.js?v=20260921a` (103 pages in total).
+
+
 ### 2026-09-21 (review preset selection)
 
 - Review-map presets retain the selected name when a short screen clamps `Even` and `More cards` to the same height. Reload preserves the choice; dragging or resetting clears it. Resizing refreshes the map height and preset indicators and restores the remembered height when space returns. The review-map grip shows its handle on phones so the preset buttons fit.
