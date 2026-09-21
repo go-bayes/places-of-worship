@@ -390,6 +390,32 @@
             display: none;
         }
 
+        /* the quick photo control: the native input stays off screen so
+           the button in front of it is the one target (as .file-pick) */
+        .quick-photo[hidden] {
+            display: none;
+        }
+
+        .quick-photo input[type="file"] {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: 0;
+            opacity: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .quick-photo-preview {
+            display: block;
+            width: 100%;
+            max-height: 240px;
+            object-fit: cover;
+            border-radius: var(--r-sm);
+            margin: 0 0 10px 0;
+            background: var(--shade-soft);
+        }
+
         .primary-action:hover {
             background: var(--action-hover);
             border-color: var(--action-hover);
@@ -3422,6 +3448,15 @@
                 <!-- the specialist sheet, one button of the same size, shown
                      only while the batch holds work for this contributor -->
                 <button type="button" id="assignedTasksButton" class="primary-action secondary-action" hidden>Assigned tasks</button>
+                <!-- quick photo (jb 2026-09-22): one press opens the camera;
+                     the photo, the phone's position and today's date go to
+                     review as a flagged entry, details to follow. shown only
+                     signed in with attachment storage wired -->
+                <div id="quickPhotoWrap" class="quick-photo" hidden>
+                    <input id="quickPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" aria-hidden="true" tabindex="-1">
+                    <button type="button" id="quickPhotoButton" class="primary-action secondary-action">Quick photo</button>
+                    <p id="quickPhotoHint" class="sidebar-actions-help">Snap a possible place of worship where you stand. The photo goes to review with your position; the details can wait.</p>
+                </div>
             </div>
 
             <!-- the transient pin cards (address search, coordinates, confirm,
@@ -3533,6 +3568,6 @@
     <script src="js/source-links.js?v=20260904a"></script>
     <script src="js/unvalidated-places.js?v=20260922a"></script>
     <script src="js/task-presentation.js?v=20260919a"></script>
-    <script src="js/verification-map.js?v=20260922b"></script>
+    <script src="js/verification-map.js?v=20260922c"></script>
 </body>
 </html>
