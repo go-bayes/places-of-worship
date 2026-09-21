@@ -44,6 +44,24 @@ assert.equal(layers.places.opts.interactive, false);
 assert.equal(layers.overview.opts.pane, "overlayPane");
 assert.equal(Object.keys(layers.overview.opts.vectorTileLayerStyles).join(), "places_overview");
 assert.equal(Object.keys(layers.places.opts.vectorTileLayerStyles).join(), "places");
+// without a canvas tile renderer the module's default (svg) stands
+assert.equal("rendererFactory" in layers.overview.opts, false);
+// the dots paint on canvas tiles where the bundled build offers them (jb
+// 2026-09-22: the svg renderer's dom paths crashed ios safari on sweden),
+// and the overview tier draws only the places the caller keeps
+const tile = () => "canvas-tile";
+const withCanvas = { ...fakeL, canvas: { tile } };
+const kept = mod.createLayers(withCanvas, { overviewKeep: props => props.country_code === "SE" });
+assert.equal(kept.overview.opts.rendererFactory, tile);
+assert.equal(kept.places.opts.rendererFactory, tile);
+const overviewStyle = kept.overview.opts.vectorTileLayerStyles.places_overview;
+assert.equal(typeof overviewStyle, "function");
+assert.equal(overviewStyle({ country_code: "SE" }).fillColor, "#f59e0b");
+assert.equal(JSON.stringify(overviewStyle({ country_code: "DE" })), "[]");
+// the full tier keeps every place, whatever the caller keeps at overview
+assert.equal(kept.places.opts.vectorTileLayerStyles.places.fillColor, "#f59e0b");
+// no keeper: the overview style is the plain style, as before
+assert.equal(mod.createLayers(withCanvas).overview.opts.vectorTileLayerStyles.places_overview.fillColor, "#f59e0b");
 
 // nearestSymbol: the nearest rendered symbol within the radius, across
 // layers, with the feature's own position handed back by the projector

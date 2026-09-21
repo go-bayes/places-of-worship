@@ -76,7 +76,8 @@ const dot = { type: "Feature", properties: { name: "St Mary's", osm_id: "1", osm
   assert.equal(button.textContent, "Add / Revise");
   assert.equal(button.classList.contains("cancelling"), false);
   assert.match(hint.textContent, /Drops a pin/);
-  assert.match(hint.textContent, /Tap a dot first/);
+  assert.match(hint.textContent, /Hold on the map/);
+  assert.match(hint.textContent, /tap a dot to revise it/);
 }
 
 // 2. a dot's popup open: the hint names the place, and a press revises it
@@ -339,4 +340,107 @@ const dot = { type: "Feature", properties: { name: "St Mary's", osm_id: "1", osm
   assert.equal(calls.length, 3);
 }
 
-console.log("add-revise-control: 11 checks passed");
+// 12. the add gesture (jb 2026-09-22): a held touch or a double click on
+//     the map opens the add entry with the pin on the spot; on a dot the
+//     press is the dot's; with a pin armed it lands the pin; with the pin
+//     down nothing moves (the taps and the drag already do)
+{
+  const app = fresh();
+  const calls = [];
+  app.map = { closePopup: () => calls.push("closePopup"), latLngToContainerPoint: () => ({ distanceTo: () => 99 }) };
+  app.contextDotLayer = null;
+  app.tileDotAt = () => null;
+  app.enterPinMode = () => { calls.push("enterPinMode"); app.pinMode = true; };
+  app.placePin = (latlng) => calls.push(["placePin", latlng.lat, latlng.lng]);
+  app.openContextDot = (feature) => calls.push(["openContextDot", feature.properties.name]);
+  const press = (type, extra = {}) => ({ type, latlng: { lat: -41.3, lng: 174.8 }, containerPoint: { x: 10, y: 10 }, originalEvent: { target: { closest: () => null } }, ...extra });
+  // at rest: the entry opens and the pin lands where the press was
+  app.handleAddGesture(press("contextmenu"));
+  assert.deepEqual(calls, ["closePopup", "enterPinMode", ["placePin", -41.3, 174.8]]);
+  // with the pin down: the gesture leaves it alone
+  app.pinMarker = {};
+  app.handleAddGesture(press("dblclick"));
+  assert.equal(calls.length, 3);
+  // armed without a pin: the gesture lands it
+  app.pinMarker = null;
+  app.pinConfirmed = null;
+  app.reviseContext = null;
+  app.handleAddGesture(press("dblclick"));
+  assert.deepEqual(calls[3], ["placePin", -41.3, 174.8]);
+  // on a recorded place at rest: a hold opens the place, a double click
+  // defers to the tap that already did, and no pin drops either way
+  app.pinMode = false;
+  app.tileDotAt = () => ({ feature: dot, latlng: { lat: -41.3, lng: 174.7 } });
+  app.handleAddGesture(press("contextmenu"));
+  assert.deepEqual(calls[4], ["openContextDot", "St Mary's"]);
+  app.handleAddGesture(press("dblclick"));
+  assert.equal(calls.length, 5);
+  // a task marker under the press owns it too
+  app.tileDotAt = () => null;
+  app.handleAddGesture(press("dblclick", { originalEvent: { target: { closest: (sel) => (sel === ".leaflet-marker-icon" ? {} : null) } } }));
+  assert.equal(calls.length, 5);
+  // a dated dot within a finger's width owns it
+  app.contextDotLayer = { getLayers: () => [{ options: { interactive: true }, getLatLng: () => ({}) }] };
+  app.map.latLngToContainerPoint = () => ({ distanceTo: () => 8 });
+  app.handleAddGesture(press("contextmenu"));
+  assert.equal(calls.length, 5);
+  // the double click no longer zooms
+  const source = fs.readFileSync(path.join(__dirname, "verification-map.js"), "utf8");
+  assert.match(source, /L\.map\("map", \{ preferCanvas: true, doubleClickZoom: false \}\)/);
+  assert.match(source, /this\.map\.on\("dblclick", event => this\.handleAddGesture\(event\)\)/);
+  assert.match(source, /this\.map\.on\("contextmenu", event => this\.handleAddGesture\(event\)\)/);
+}
+
+// 13. the tap is the edit (jb 2026-09-22): signed in, a tap on a tile dot
+//     opens the revise entry with no popup between; signed out, or with a
+//     pin armed, or where the rapid lane cannot take the record, the popup
+//     opens as before
+{
+  const app = fresh();
+  const calls = [];
+  app.matchContextTask = () => null;
+  app.canReviseDirectly = () => true;
+  app.reviseFromFeature = (feature, options) => calls.push(["revise", feature.properties.name, options]);
+  context.L = { popup: () => { throw new Error("no popup on a direct edit"); } };
+  app.openContextDot(dot, { lat: -41.3, lng: 174.7 });
+  assert.equal(JSON.stringify(calls), JSON.stringify([["revise", "St Mary's", null]]));
+  // the popup path: signed out
+  let popups = 0;
+  const popup = { setLatLng() { return this; }, setContent() { return this; }, openOn() { popups += 1; return this; }, getElement: () => null };
+  context.L = { popup: () => popup };
+  app.contextDotPopupHtml = () => "<strong>St Mary's</strong>";
+  app.backendUser = null;
+  app.openContextDot(dot, { lat: -41.3, lng: 174.7 });
+  assert.equal(popups, 1);
+  assert.equal(calls.length, 1);
+  // the popup path: a pin armed and not yet down offers revise or add here
+  app.backendUser = { _id: "user_1" };
+  app.pinMode = true;
+  app.pinMarker = null;
+  app.reviseContext = null;
+  app.openContextDot(dot, { lat: -41.3, lng: 174.7 });
+  assert.equal(popups, 2);
+  assert.equal(calls.length, 1);
+  // the popup path: the rapid lane cannot take the record, so the card
+  // opens beside the popup
+  app.pinMode = false;
+  app.canReviseDirectly = () => false;
+  app.openContextDot(dot, { lat: -41.3, lng: 174.7 });
+  assert.equal(popups, 3);
+  assert.equal(JSON.stringify(calls[1]), JSON.stringify(["revise", "St Mary's", { keepPopup: true }]));
+  // a matched task opens the task, popup kept
+  app.canReviseDirectly = () => true;
+  app.matchContextTask = () => ({ task_id: "t9" });
+  let selected = null;
+  app.selectTaskById = (id) => { selected = id; };
+  app.openContextDot(dot, { lat: -41.3, lng: 174.7 });
+  assert.equal(selected, "t9");
+  assert.equal(popups, 4);
+  // canReviseDirectly itself: a coordinate and a signed-in backend
+  const real = fresh();
+  assert.equal(real.canReviseDirectly({ geometry: { coordinates: [] } }), false);
+  real.backend = { configured: true, signedIn: false };
+  assert.equal(real.canReviseDirectly(dot), false);
+}
+
+console.log("add-revise-control: 13 checks passed");

@@ -11,7 +11,9 @@
 //
 // leaflet.vectorgrid 1.3.0's own hit-testing predates leaflet 1.8 and never
 // fires, so callers hit-test the map's click against the rendered symbols
-// with nearestDot() instead: the nearest dot within a finger's width.
+// with nearestDot() instead: the nearest dot within a finger's width. the
+// canvas tile renderer keeps the same per-tile symbol table the svg one
+// does, so the hit test reads either.
 (function () {
     const COLOUR = "#f59e0b";
     const HALO = "#ffffff";
@@ -40,9 +42,16 @@
     }
 
     // both tile layers for a leaflet map; neither is interactive (an
-    // interactive path swallows the click before the map sees it)
-    function createLayers(L) {
+    // interactive path swallows the click before the map sees it). the
+    // dots paint on canvas tiles: vectorgrid's default svg renderer makes
+    // one dom path per dot, and the overview tiles a phone requests at
+    // country scale carry some 300,000 places across europe, which ios
+    // safari could not hold through a zoom (jb 2026-09-22, sweden).
+    // `options.overviewKeep(props)`, when given, says which places the
+    // overview tier draws at all; the full tier always draws every place
+    function createLayers(L, options = {}) {
         if (!L || !L.vectorGrid || typeof L.vectorGrid.protobuf !== "function") return null;
+        const keep = typeof options.overviewKeep === "function" ? options.overviewKeep : null;
         const common = {
             interactive: false,
             // the overlay pane sits above every basemap tile and below the
@@ -50,10 +59,16 @@
             pane: "overlayPane",
             attribution: ATTRIBUTION,
             getFeatureId: props => `${props.osm_type || "node"}/${props.osm_id}`,
+            // the bundled build ships the canvas tile renderer; the module's
+            // own default (svg) stands only where it is missing
+            ...(L.canvas && typeof L.canvas.tile === "function" ? { rendererFactory: L.canvas.tile } : {}),
         };
+        // an empty style list makes vectorgrid skip the feature: no symbol
+        // object, no draw, no hit-test entry
+        const overviewStyle = keep ? props => (keep(props) ? dotStyle(false) : []) : dotStyle(false);
         const overview = L.vectorGrid.protobuf(OVERVIEW_TILE_URL, {
             ...common,
-            vectorTileLayerStyles: { [OVERVIEW_TILE_LAYER]: dotStyle(false) },
+            vectorTileLayerStyles: { [OVERVIEW_TILE_LAYER]: overviewStyle },
             maxZoom: PLACES_MIN_ZOOM - 1,
             maxNativeZoom: OVERVIEW_TILE_MAX_NATIVE_ZOOM,
         });

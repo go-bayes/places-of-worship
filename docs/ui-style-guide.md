@@ -20,8 +20,18 @@ and is dated in place.
   supersedes `＋ Add a missing place`, ruled 2026-08-29). One label serves
   every country. With a dot selected on the map the button revises that
   place; otherwise it drops a pin. The one-line hint under it says which
-  ("Revises St Mary's." or "Drops a pin for a new place. Tap a dot first
-  to revise that place."). While an entry is open the same button reads
+  ("Revises St Mary's." or "Drops a pin for a new place. Hold on the map
+  (double-click on a computer) to add one there; tap a dot to revise
+  it."). The map carries the same two intents as gestures (ruled
+  2026-09-22: "hit a dot on the map and press, you automatically get
+  edit; press longer on the map, you automatically get add; double click
+  on desktop"): signed in, a tap on a recorded dot opens the revise entry
+  on that record with no popup between (the popup remains signed out,
+  with a pin armed, and where the rapid lane cannot take the record); a
+  held touch on the map, a double click or a right click on a computer,
+  opens the add entry with the pin already on that spot, and on a dot the
+  press belongs to the dot. The double click no longer zooms; the buttons,
+  the wheel and the pinch do. While an entry is open the same button reads
   `Cancel` in the danger outline and is the way out on every screen, since
   a phone has no Escape key; the copy never says "Esc". Treat
   `Nominate missing PoW` and `Add a missing place` as legacy labels where
@@ -90,7 +100,12 @@ label alone; the field that opens takes the description. The Map data panel
 offers one toggle, `Hide points` / `Show points` (ruled 2026-09-20: the
 on/off select and the note about the target year were artefacts); today's
 places show by default and the legend names them `place on today's map,
-tap to revise`.
+tap to revise`. The dots paint on canvas tiles, never as DOM paths (the
+overview tiles of a phone's viewport at country scale carried 317,000
+places across Europe, 7,500 of them in Sweden, and iOS Safari killed the
+page on the first pinch, 2026-09-22); at zooms 5 to 7 only the portal's
+own country draws, and from zoom 8 every place, a neighbour's dot with
+its own portal named in the popup.
 
 The map offers `Streets` (OSM standard tiles), `Hybrid` (MapTiler imagery
 with street and place labels), and `Satellite` (bare MapTiler imagery)
