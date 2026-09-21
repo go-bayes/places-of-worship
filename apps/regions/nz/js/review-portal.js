@@ -444,7 +444,7 @@ function human(value) {
             // one line and one action: the filter case clears the filter,
             // the empty queue refreshes it
             els.queueList.innerHTML = claimFilter
-                ? `<div class="state-empty"><strong>No tasks in this queue for this filter.</strong><button type="button" id="queueShowAll">Show all tasks</button></div>`
+                ? `<div class="state-empty"><strong>No tasks in this queue for this filter.</strong><button type="button" class="primary" id="queueShowAll">Show all tasks</button></div>`
                 : `<div class="state-empty"><strong>Nothing in this queue.</strong><button type="button" id="queueRefreshEmpty">Refresh</button></div>`;
             document.getElementById("queueShowAll")?.addEventListener("click", () => {
                 if (els.queueClaimFilter) els.queueClaimFilter.value = "";
@@ -907,7 +907,7 @@ function human(value) {
         }
         // a failure of unknown cause stays open with a retry, never a dead
         // end: the retry re-reads the task in full
-        host.innerHTML = `<div class="state-banner tone-broken"><span>Could not load the review snapshot: ${escapeHtml(state.reviewSnapshotError || "unknown error")}. The panels show the evidence as fetched separately; the snapshot is needed before accepting for export.</span><button type="button" id="retrySnapshot">Retry</button></div>`;
+        host.innerHTML = `<div class="state-banner tone-broken"><span>Could not load the review snapshot: ${escapeHtml(state.reviewSnapshotError || "unknown error")}. The panels show the evidence as fetched separately; the snapshot is needed before accepting for export.</span><button type="button" class="primary" id="retrySnapshot">Retry</button></div>`;
         document.getElementById("retrySnapshot")?.addEventListener("click", () => {
             const id = state.selected?.task?.task_id;
             if (id) selectTask(id);
@@ -935,7 +935,7 @@ function human(value) {
             // the banner carries the reason and one control; the reload has
             // already happened, so the control re-reads once more on demand
             statusText.className = "state-banner tone-act";
-            statusText.innerHTML = `<span>Reloaded after a stale snapshot: ${escapeHtml(notice)} Check the evidence again before deciding.</span><button type="button" id="reloadTaskAgain">Reload again</button>`;
+            statusText.innerHTML = `<span>Reloaded after a stale snapshot: ${escapeHtml(notice)} Check the evidence again before deciding.</span><button type="button" class="primary" id="reloadTaskAgain">Reload again</button>`;
             document.getElementById("reloadTaskAgain")?.addEventListener("click", () => selectTask(taskId));
         }
     }
@@ -1119,7 +1119,7 @@ function human(value) {
             : "";
         const actions = isAuthor ? "" : `
                 <div class="review-actions derived-year-actions derived-function-actions">
-                    <button type="button" data-fn-action="confirm" ${fn.derived_status !== "stated" ? `disabled title="An uncertain denomination needs an override naming the label, or a rejection."` : ""}>Confirm denomination</button>
+                    <button type="button" class="primary" data-fn-action="confirm" ${fn.derived_status !== "stated" ? `disabled title="An uncertain denomination needs an override naming the label, or a rejection."` : ""}>Confirm denomination</button>
                     <button type="button" class="secondary" data-fn-action="override">Override</button>
                     <button type="button" class="danger-outline" data-fn-action="reject">Reject</button>
                 </div>
@@ -1145,7 +1145,7 @@ function human(value) {
                     <textarea name="note" required minlength="8" placeholder="${action === "override" ? "Why the derived label is wrong and what the source supports." : "Why this derived denomination should not be written."}"></textarea>
                 </div>
                 <div class="wide review-actions">
-                    <button type="submit" ${action === "override" ? "" : `class="danger"`}>${action === "override" ? "Save override" : "Reject this denomination"}</button>
+                    <button type="submit" class="${action === "override" ? "primary" : "danger"}">${action === "override" ? "Save override" : "Reject this denomination"}</button>
                     <button type="button" class="secondary" data-fn-cancel>Cancel</button>
                     <span class="muted" data-fn-form-status></span>
                 </div>
@@ -1194,7 +1194,7 @@ function human(value) {
             ? `<div class="muted">You submitted this evidence; another team member must decide its derived years.</div>`
             : `
                 <div class="review-actions derived-year-actions">
-                    <button type="button" data-occ-action="confirm" ${presence.conflicts_observation ? `disabled title="Confirm is refused while the derived state conflicts with an observed status; override with a note or reject."` : ""}>Confirm</button>
+                    <button type="button" class="primary" data-occ-action="confirm" ${presence.conflicts_observation ? `disabled title="Confirm is refused while the derived state conflicts with an observed status; override with a note or reject."` : ""}>Confirm</button>
                     <button type="button" class="secondary" data-occ-action="override">Override</button>
                     <button type="button" class="danger-outline" data-occ-action="reject">Reject</button>
                 </div>
@@ -1287,7 +1287,7 @@ function human(value) {
                     <div class="derived-year-list">
                         <div class="derived-year-toolbar">
                             <strong>Derived census years</strong>
-                            ${eligible.length > 0 || eligibleFunctions.length > 0 ? `<button type="button" data-occ-confirm-all ${state.occupancyBusy ? "disabled" : ""}>Confirm all eligible (${eligibleWords})</button>` : ""}
+                            ${eligible.length > 0 || eligibleFunctions.length > 0 ? `<button type="button" class="primary" data-occ-confirm-all ${state.occupancyBusy ? "disabled" : ""}>Confirm all eligible (${eligibleWords})</button>` : ""}
                             ${isAuthor ? `<span class="muted">You submitted this evidence.</span>` : ""}
                         </div>
                         ${presence.length === 0
@@ -1358,7 +1358,7 @@ function human(value) {
                 ${overrideFields}
                 ${noteField}
                 <div class="wide review-actions">
-                    <button type="submit" ${action === "override" ? "" : `class="danger"`}>${action === "override" ? "Save override" : "Reject this year"}</button>
+                    <button type="submit" class="${action === "override" ? "primary" : "danger"}">${action === "override" ? "Save override" : "Reject this year"}</button>
                     <button type="button" class="secondary" data-occ-cancel>Cancel</button>
                     <span class="muted" data-occ-form-status></span>
                 </div>
@@ -1756,7 +1756,7 @@ function human(value) {
                         <option value="deferred">deferred</option>
                     </select>
                     <div class="decision-choice" role="group" aria-labelledby="decisionChoiceLabel">
-                        <button type="button" data-decision="accepted_for_export" aria-pressed="false" ${canDecide ? "" : "disabled"}>Accept for export</button>
+                        <button type="button" class="primary" data-decision="accepted_for_export" aria-pressed="false" ${canDecide ? "" : "disabled"}>Accept for export</button>
                         <button type="button" class="secondary" id="requestMoreEvidence" data-decision="needs_more_evidence" aria-pressed="false" ${canDecide ? "" : "disabled"}>Request changes</button>
                         ${canDecide ? `
                             <details id="decisionMore">
@@ -1813,7 +1813,7 @@ function human(value) {
                 </div>
                 <div class="wide">
                     <div id="decisionHelp" class="review-warning">${escapeHtml(canDecide ? decisionHint("") : "This task is already reviewed or exported. Change the queue status to inspect other work, or reopen from the maintainer workflow if new evidence requires action.")}</div>
-                    <button type="submit" id="recordDecisionButton" ${state.busy || !canDecide || ownSubmission ? "disabled" : ""}>Record decision</button>
+                    <button type="submit" class="primary" id="recordDecisionButton" ${state.busy || !canDecide || ownSubmission ? "disabled" : ""}>Record decision</button>
                     <span id="decisionStatusText" class="muted">${draft ? `Draft: ${escapeHtml(draft.evidence_draft_id)}` : "Accepted-for-export requires an evidence draft."}</span>
                 </div>
                 <input type="hidden" name="taskId" value="${escapeHtml(task.task_id)}">
@@ -1843,7 +1843,7 @@ function human(value) {
                 <h2>Decision recorded</h2>
                 <div class="state-banner tone-done"><span>Task is now ${escapeHtml(presentRow({ status: taskStatus }).label.toLowerCase())}.</span></div>
                 <div class="review-actions">
-                    <button id="openNextInQueue" type="button" ${queueEmpty ? "disabled" : ""}>Open next in queue</button>
+                    <button id="openNextInQueue" class="primary" type="button" ${queueEmpty ? "disabled" : ""}>Open next in queue</button>
                 </div>
                 <div id="nextInQueueStatus" class="muted" aria-live="polite">
                     ${queueEmpty

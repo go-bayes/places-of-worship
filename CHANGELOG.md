@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### 2026-09-21 (PR-4: targets, one button system, divider presets)
+
+- R-U6 applied on both portals: every control on a first-time RA's path is 44 px (Search and its results, Move pin, Refresh task list and Sign out, the basemap toggle, the locate button, the decision menu, the review page's inputs and derived-year buttons); secondary inline controls are 40 px (`.tertiary`, `.link-button`, skip chips, session and attachment rows, the points select, More filters); popup links keep 36 px where the popup's width would break, as the ruling allows. The drag bars draw at 18 px and take the pointer across 44 px through a pseudo-element. Disclosure summaries are 40 px on both pages. Native selects carry an explicit height (44 px, the points select 40 px) because Safari ignores an author's padding and min-height on a select (measured 23 px in WebKit under both; the RA page's Target year select had the same gap on main). `--fs-sm` rises to 15 px and `--fs-xs` to 14 px in `theme.css`; the three 11 px chart labels on the review page rise to the 13 px floor; focus rings are 3 px on both pages.
+- One button convention: the review page adopts the RA page's (unclassed is the outline, `.primary` is the one filled button in its row); `.secondary` stays as a retired alias. Record decision, Accept for export, Confirm, Confirm all eligible, Save override, Show all tasks, Retry, Reload again and Open next in queue gain `class="primary"` in `review-portal.js`.
+- R-U7 applied: three named positions on each drag bar. RA portal: `More map`, `Even`, `More form` (the detents when stacked; the narrowest sidebar, half the window, the widest sidebar side by side). Review portal: `More queue`, `Even`, `More detail` on the column bar, `More map`, `Even`, `More cards` on the map bar. The position in force is pressed; a preset is remembered like a drag; the RA grip drops its words on a phone width. Tests in `pane-divider.test.cjs` and `review-panes.test.cjs`. Stamps `theme.css?v=20260921b`, `state.css?v=20260921a`, `verification-map.js?v=20260921b`, `review-panes.js?v=20260921b`, `review-portal.js?v=20260921b`.
+
 ### 2026-09-21 (style guide approved)
 
 - Joseph B approved `docs/ui-style-guide.md` as it stands ("approve the style guide", 2026-09-21): dark as the one theme and the Theme table's values are no longer provisional. The guide records the approval under its opening; later changes are dated rulings in place.

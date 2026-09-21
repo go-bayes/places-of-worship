@@ -230,7 +230,7 @@ button.state-pill:focus-visible { outline: 2px solid var(--action); outline-offs
     width: 100%;
     justify-content: flex-start;
     text-align: left;
-    min-height: 40px;
+    min-height: 44px;
     border: 0;
     border-radius: var(--r-sm, 6px);
     background: transparent;

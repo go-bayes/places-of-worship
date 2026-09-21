@@ -42,8 +42,10 @@
   --action-glow: rgba(127, 179, 230, 0.25);
   --present-glow: rgba(111, 207, 151, 0.2);
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --fs-xs: 13px;
-  --fs-sm: 14px;
+  /* r-u6 (2026-09-21): labels, meta and pills read at 15 px, the small
+     register at 14 px; nothing under 13 px anywhere */
+  --fs-xs: 14px;
+  --fs-sm: 15px;
   --fs-md: 16px;
   --fs-lg: 18px;
   --fs-xl: 22px;

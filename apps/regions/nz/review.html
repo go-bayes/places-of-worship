@@ -9,8 +9,8 @@
           crossorigin="">
     <!-- theme: the choice is applied to <html> before paint (r-u2) -->
     <script src="../_shared/theme.js?v=20260921a"></script>
-    <link rel="stylesheet" href="../_shared/theme.css?v=20260921a">
-    <link rel="stylesheet" href="../_shared/state.css?v=20260919a">
+    <link rel="stylesheet" href="../_shared/theme.css?v=20260921b">
+    <link rel="stylesheet" href="../_shared/state.css?v=20260921a">
     <style>
         /* colour, type, spacing and radius tokens live in
            ../_shared/theme.css (dark) */
@@ -39,20 +39,34 @@
             font: inherit;
         }
 
-        /* an unclassed button is the one primary in its row; the outline is
-           the secondary idiom, red says destructive */
+        /* one button convention on both portals (r-u6, 2026-09-21), the ra
+           portal's: the outline is the default and the secondary idiom, an
+           unclassed button never renders as a filled primary, one .primary
+           per row, red says destructive. .secondary stays as a retired alias
+           of the default so older markup keeps its look */
         button {
             min-height: 44px;
             border: 1px solid var(--action);
             border-radius: var(--r-sm);
-            background: var(--action);
-            color: var(--panel);
+            background: var(--panel);
+            color: var(--action);
             padding: 10px 14px;
             cursor: pointer;
             font-weight: 600;
         }
 
-        button:hover:not(:disabled) {
+        button:hover:not(:disabled),
+        button.secondary:hover:not(:disabled) {
+            background: var(--action-soft);
+            border-color: var(--action);
+        }
+
+        button.primary {
+            background: var(--action);
+            color: var(--panel);
+        }
+
+        button.primary:hover:not(:disabled) {
             background: var(--action-hover);
             border-color: var(--action-hover);
         }
@@ -63,13 +77,8 @@
             border-color: var(--action);
         }
 
-        button.secondary:hover:not(:disabled) {
-            background: var(--action-soft);
-            border-color: var(--action);
-        }
-
         button.tertiary {
-            min-height: 36px;
+            min-height: 40px;
             background: transparent;
             border-color: transparent;
             color: var(--action);
@@ -119,7 +128,7 @@
         input:focus-visible,
         summary:focus-visible,
         a:focus-visible {
-            outline: 2px solid var(--action);
+            outline: 3px solid var(--action);
             outline-offset: 2px;
         }
 
@@ -163,7 +172,7 @@
                "we need the sliders on the review panel"); the bar between the
                queue and the detail drags it and the device remembers it */
             --sidebar-w: 390px;
-            --divider-w: 14px;
+            --divider-w: 18px;
             display: grid;
             grid-template-columns: var(--sidebar-w) var(--divider-w) minmax(0, 1fr);
             min-height: calc(100vh - 95px);
@@ -173,9 +182,11 @@
            detail it drags the queue width; under the map it drags the map's
            height on every screen */
         .pane-divider {
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 8px;
             background: var(--panel-2);
             border-left: 1px solid var(--line);
             border-right: 1px solid var(--line);
@@ -190,6 +201,55 @@
         .pane-divider:focus-visible {
             outline: 2px solid var(--action);
             outline-offset: -2px;
+        }
+
+        /* the bar's hit area is 44 px though it draws at 18 px (r-u6): a
+           pseudo-element the pointer reaches past both edges */
+        .pane-divider::before {
+            content: "";
+            position: absolute;
+            inset: 0 -13px;
+        }
+
+        .pane-divider[aria-orientation="vertical"] {
+            flex-direction: column;
+        }
+
+        /* r-u7 (jb 2026-09-19: "a drag bar alone is easy to miss"): three
+           named positions on each bar, the one in force pressed; each fills
+           the bar and reaches 8 px past it so the target is 44 px */
+        .pane-preset {
+            width: auto;
+            flex: none;
+            min-height: 28px;
+            padding: 0 10px;
+            font-size: var(--fs-xs);
+            font-weight: 600;
+            line-height: 1;
+            border-radius: 999px;
+            touch-action: manipulation;
+            position: relative;
+        }
+
+        .pane-preset::before {
+            content: "";
+            position: absolute;
+            inset: -8px 0;
+        }
+
+        .pane-preset[aria-pressed="true"] {
+            background: var(--action);
+            color: var(--panel);
+        }
+
+        .pane-divider[aria-orientation="vertical"] .pane-preset {
+            writing-mode: vertical-rl;
+            padding: 10px 0;
+            min-height: 0;
+        }
+
+        .pane-divider[aria-orientation="vertical"] .pane-preset::before {
+            inset: 0 -13px;
         }
 
         .pane-divider.pane-dragging,
@@ -224,6 +284,10 @@
             border: 1px solid var(--line);
             border-radius: var(--r-md);
             cursor: row-resize;
+        }
+
+        .map-divider::before {
+            inset: -8px 0;
         }
 
         .sidebar,
@@ -285,11 +349,19 @@
         textarea,
         input {
             width: 100%;
+            min-height: 44px;
             border: 1px solid var(--control-line);
             border-radius: var(--r-sm);
             padding: 9px 10px;
             background: var(--panel);
             color: var(--ink);
+        }
+
+        /* safari sizes a native select only from an explicit height: it
+           ignores an author's padding and min-height (measured 23 px in
+           webkit under both), so the 44 px is a height (r-u6) */
+        select {
+            height: 44px;
         }
 
         select:hover:not(:disabled),
@@ -441,7 +513,7 @@
         /* small outlined control so a task with four photos does not show
            four primaries above the decision */
         .attachment-open {
-            min-height: 32px;
+            min-height: 40px;
             padding: 4px 10px;
             margin-left: 6px;
             font-size: var(--fs-sm);
@@ -506,7 +578,7 @@
 
         .popup-actions .popup-revise-primary {
             grid-column: 1 / -1;
-            min-height: 40px;
+            min-height: 44px;
             background: var(--action);
             border: 1px solid var(--action);
             border-radius: var(--r-sm);
@@ -579,7 +651,7 @@
             font-size: var(--fs-sm);
             font-weight: 600;
             padding: 6px 10px;
-            min-height: 32px;
+            min-height: 44px;
             width: auto;
             cursor: pointer;
         }
@@ -608,7 +680,9 @@
 
         .points-legend-control select {
             font-size: var(--fs-sm);
-            padding: 3px 6px;
+            height: 40px;
+            min-height: 40px;
+            padding: 6px 8px;
             border: 1px solid var(--control-line);
             border-radius: var(--r-sm);
             background: var(--panel);
@@ -742,9 +816,15 @@
             margin-top: 10px;
         }
 
+        /* a disclosure is a control too (r-u6): 40 px tall with the
+           marker kept, the text held off the edges by padding */
         summary {
             cursor: pointer;
             font-weight: 600;
+            min-height: 40px;
+            box-sizing: border-box;
+            padding-top: 8px;
+            padding-bottom: 8px;
         }
 
         summary:hover {
@@ -879,12 +959,12 @@
         .occupancy-bar { display: block; max-height: 120px; background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--r-sm); }
         .occupancy-bar .ob-band { fill: var(--not-assessed-soft); opacity: 0.7; }
         .occupancy-bar .ob-tick { stroke: var(--line); stroke-width: 1; }
-        .occupancy-bar .ob-tick-label { font-size: 11px; fill: var(--not-assessed); font-weight: 600; }
+        .occupancy-bar .ob-tick-label { font-size: 13px; fill: var(--not-assessed); font-weight: 600; }
         .occupancy-bar .ob-core { fill: var(--not-assessed); }
         .occupancy-bar .ob-window { fill: var(--caution-soft); stroke: var(--caution-strong); stroke-width: 1.2; stroke-dasharray: 4 3; }
         .occupancy-bar .ob-arrow { fill: var(--not-assessed); opacity: 0.6; }
         .occupancy-bar .ob-asof { stroke: var(--not-assessed); stroke-width: 2; }
-        .occupancy-bar .ob-label { font-size: 11px; font-weight: 600; fill: var(--ink); paint-order: stroke; stroke: var(--panel); stroke-width: 3; }
+        .occupancy-bar .ob-label { font-size: 13px; font-weight: 600; fill: var(--ink); paint-order: stroke; stroke: var(--panel); stroke-width: 3; }
         .occupancy-key { font-size: var(--fs-xs); margin: 4px 0 8px; }
         .occupancy-periods { margin: 0 0 10px; padding-left: 18px; font-size: var(--fs-sm); }
         .occupancy-periods li { margin: 3px 0; }
@@ -893,13 +973,13 @@
         .derived-year-function { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
         .occupancy-chain { margin: 10px 0; }
         .occupancy-chain-list { margin: 4px 0 0; padding-left: 20px; }
-        .derived-year-toolbar button { min-height: 36px; padding: 6px 12px; }
+        .derived-year-toolbar button { min-height: 44px; padding: 6px 12px; }
         .derived-year-row { border-top: 1px solid var(--line); padding: 8px 0; font-size: var(--fs-sm); }
         .derived-year-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 4px; }
         .derived-year-head strong { font-size: var(--fs-md); min-width: 3em; }
         .derived-year-locations div { margin: 2px 0 2px 12px; }
         .derived-year-actions { margin-top: 6px; }
-        .derived-year-actions button { min-height: 36px; padding: 6px 12px; }
+        .derived-year-actions button { min-height: 44px; padding: 6px 12px; }
         .derived-year-form { margin-top: 8px; padding: 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--panel-2); }
         .derived-year-form textarea { min-height: 64px; }
         .derived-year-form .review-actions { align-items: center; margin-top: 0; }
@@ -914,7 +994,7 @@
         .occupancy-scatter .os-task { fill: var(--danger); }
         .occupancy-scatter .os-point { fill: var(--not-assessed); fill-opacity: 0.8; }
         .occupancy-scatter .os-point.approx { fill: var(--caution-soft); fill-opacity: 0.8; stroke: var(--caution-strong); stroke-width: 1.2; stroke-dasharray: 3 2; }
-        .occupancy-scatter .os-label { font-size: 11px; font-weight: 600; fill: var(--ink); }
+        .occupancy-scatter .os-label { font-size: 13px; font-weight: 600; fill: var(--ink); }
         .occupancy-scatter-legend { font-size: var(--fs-xs); }
 </style>
 </head>
@@ -983,12 +1063,18 @@
 
         <div id="paneDivider" class="pane-divider" role="separator" aria-orientation="vertical" aria-label="Resize the queue and the detail" aria-valuemin="320" aria-valuemax="900" aria-valuenow="390" tabindex="0">
             <span class="pane-grip">⠿ drag · queue ↔ detail</span>
+            <button type="button" class="pane-preset" data-pane-preset="queue" aria-pressed="false" title="Mostly queue">More queue</button>
+            <button type="button" class="pane-preset" data-pane-preset="even" aria-pressed="false" title="Half and half">Even</button>
+            <button type="button" class="pane-preset" data-pane-preset="detail" aria-pressed="false" title="Mostly detail">More detail</button>
         </div>
 
         <div class="detail">
             <div id="reviewMap" class="review-map" role="region" aria-label="Map of the review queue and the unreviewed places"></div>
             <div id="mapDivider" class="pane-divider map-divider" role="separator" aria-orientation="horizontal" aria-label="Resize the map" aria-valuemin="200" aria-valuemax="900" aria-valuenow="440" tabindex="0">
                 <span class="pane-grip">⠿ drag · map ↕ cards</span>
+                <button type="button" class="pane-preset" data-pane-preset="map" aria-pressed="false" title="Mostly map">More map</button>
+                <button type="button" class="pane-preset" data-pane-preset="even" aria-pressed="false" title="Half the window">Even</button>
+                <button type="button" class="pane-preset" data-pane-preset="cards" aria-pressed="false" title="Mostly cards">More cards</button>
             </div>
             <section id="detailPanel">
                 <div class="panel"><div class="state-empty"><strong>Sign in, then select a task from the queue.</strong></div></div>
@@ -1005,7 +1091,7 @@
     <script src="js/unvalidated-places.js?v=20260904a"></script>
     <script src="js/source-links.js?v=20260904a"></script>
     <script src="js/review-map.js?v=20260920a"></script>
-    <script src="js/review-panes.js?v=20260921a"></script>
+    <script src="js/review-panes.js?v=20260921b"></script>
     <script src="js/convex-config.js?v=20260523-vanuatu"></script>
     <script src="js/convex-task-client.js?v=20260905a"></script>
     <script src="js/claude-review-panel.js?v=20260825-ai-review"></script>
@@ -1014,6 +1100,6 @@
     <script src="js/occupancy-review.js?v=20260903a"></script>
     <script src="js/review-snapshot-content.js?v=20260912b"></script>
     <script src="js/task-presentation.js?v=20260919a"></script>
-    <script src="js/review-portal.js?v=20260921a"></script>
+    <script src="js/review-portal.js?v=20260921b"></script>
 </body>
 </html>

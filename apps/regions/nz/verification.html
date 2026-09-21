@@ -15,8 +15,8 @@
     <link rel="stylesheet" href="../../shared/map-shell.css">
     <!-- theme: the choice is applied to <html> before paint (r-u2) -->
     <script src="../_shared/theme.js?v=20260921a"></script>
-    <link rel="stylesheet" href="../_shared/theme.css?v=20260921a">
-    <link rel="stylesheet" href="../_shared/state.css?v=20260919a">
+    <link rel="stylesheet" href="../_shared/theme.css?v=20260921b">
+    <link rel="stylesheet" href="../_shared/state.css?v=20260921a">
 
     <style>
         :root {
@@ -50,7 +50,7 @@
                map's size should be adjustable); the divider between the panes
                drags it and the device remembers it */
             --sidebar-w: 420px;
-            --divider-w: 14px;
+            --divider-w: 18px;
             display: grid;
             grid-template-columns: var(--sidebar-w) var(--divider-w) minmax(0, 1fr);
             height: 100vh;
@@ -286,7 +286,7 @@
             background: none;
             border: 0;
             padding: 6px 0;
-            min-height: 32px;
+            min-height: 40px;
             width: auto;
             color: var(--action);
             font-size: var(--fs-sm);
@@ -420,8 +420,20 @@
             font-size: var(--fs-sm);
         }
 
+        /* a disclosure is a control too (r-u6): 40 px tall with the
+           marker kept, the text held off the edges by padding */
+        details > summary {
+            min-height: 40px;
+            box-sizing: border-box;
+            padding-top: 8px;
+            padding-bottom: 8px;
+        }
+
         .more-filters > summary {
             cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            min-height: 40px;
             color: var(--muted);
             font-size: var(--fs-sm);
             font-weight: 600;
@@ -454,6 +466,13 @@
             font-size: var(--fs-md);
             padding: 10px 12px;
             background: var(--panel);
+        }
+
+        /* safari sizes a native select only from an explicit height: it
+           ignores an author's padding and min-height (measured 23 px in
+           webkit under both), so the 44 px is a height (r-u6) */
+        select {
+            height: 44px;
         }
 
         /* the outline is the default and the secondary idiom: an unclassed
@@ -510,7 +529,7 @@
             font-weight: 600;
             font-size: var(--fs-sm);
             padding: 6px 10px;
-            min-height: 32px;
+            min-height: 40px;
             width: auto;
         }
 
@@ -519,7 +538,7 @@
             background: none;
             border: 0;
             padding: 6px 0;
-            min-height: 32px;
+            min-height: 40px;
             width: auto;
             color: var(--action);
             font-weight: 400;
@@ -790,7 +809,7 @@
         /* low-prominence issue entry on task markers: quiet text button */
         .popup-actions .popup-report-issue {
             grid-column: 1 / -1;
-            min-height: 28px;
+            min-height: 36px;
             background: transparent;
             border: none;
             color: var(--muted);
@@ -803,7 +822,7 @@
         /* pr-g (jb 2026-09-02): on a recorded place's dot the revise entry
            is the first, primary action; the links sit beneath it */
         .popup-actions .popup-report-issue.popup-revise-primary {
-            min-height: 40px;
+            min-height: 44px;
             background: var(--action);
             border: 1px solid var(--action);
             border-radius: var(--r-sm);
@@ -826,7 +845,7 @@
         }
 
         .skip-reason-chips .skip-chip {
-            min-height: 28px;
+            min-height: 40px;
             font-size: var(--fs-sm);
             font-weight: 400;
             padding: 4px 8px;
@@ -936,7 +955,7 @@
             font-size: var(--fs-md);
         }
 
-        .button-row button.link-button { min-height: 32px; font-size: var(--fs-sm); }
+        .button-row button.link-button { min-height: 40px; font-size: var(--fs-sm); }
 
         .wide-output {
             min-height: 72px;
@@ -1064,6 +1083,7 @@
            jb 2026-09-19 every screen): side by side it drags the sidebar width;
            stacked it drags the split between the panes */
         .pane-divider {
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1084,6 +1104,18 @@
         .pane-divider:focus-visible {
             outline: 2px solid var(--action);
             outline-offset: -2px;
+        }
+
+        /* the bar's hit area is 44 px though it draws at 18 px (r-u6): a
+           pseudo-element the pointer reaches past both edges */
+        .pane-divider::before {
+            content: "";
+            position: absolute;
+            inset: 0 -13px;
+        }
+
+        .pane-divider[aria-orientation="vertical"] {
+            flex-direction: column;
         }
 
         .app-shell.pane-dragging .pane-divider,
@@ -1119,18 +1151,58 @@
             /* the page's buttons fill their column; this one sits in a bar */
             width: auto;
             flex: none;
-            min-height: 24px;
+            min-height: 28px;
             padding: 0 10px;
             font-size: var(--fs-xs);
             font-weight: 600;
             border-radius: 999px;
             touch-action: manipulation;
+            position: relative;
+        }
+
+        /* r-u7 (jb 2026-09-19: "a drag bar alone is easy to miss"): three
+           named positions on the bar, the one in force pressed; each fills
+           the bar and reaches 8 px past it so the target is 44 px */
+        .pane-preset {
+            width: auto;
+            flex: none;
+            min-height: 28px;
+            padding: 0 10px;
+            font-size: var(--fs-xs);
+            font-weight: 600;
+            line-height: 1;
+            border-radius: 999px;
+            touch-action: manipulation;
+            position: relative;
+        }
+
+        .pane-preset::before,
+        .pane-swap::before {
+            content: "";
+            position: absolute;
+            inset: -8px 0;
+        }
+
+        .pane-preset[aria-pressed="true"] {
+            background: var(--action);
+            color: var(--panel);
+        }
+
+        /* side by side the presets read down the bar like the grip */
+        .pane-divider[aria-orientation="vertical"] .pane-preset {
+            writing-mode: vertical-rl;
+            padding: 10px 0;
+            min-height: 0;
+        }
+
+        .pane-divider[aria-orientation="vertical"] .pane-preset::before {
+            inset: 0 -13px;
         }
 
         /* the contributor's own position: a map button that centres on them */
         .locate-control button {
-            width: 30px;
-            height: 30px;
+            width: 44px;
+            height: 44px;
             display: grid;
             place-items: center;
             padding: 0;
@@ -1181,7 +1253,7 @@
         }
 
         .pin-locate-row button {
-            min-height: 40px;
+            min-height: 44px;
             width: auto;
             padding: 0 12px;
             font-size: var(--fs-sm);
@@ -1216,7 +1288,7 @@
             font-size: var(--fs-sm);
             line-height: 1.35;
             padding: 6px 8px;
-            min-height: 36px;
+            min-height: 44px;
         }
 
         .pin-search-results button:hover {
@@ -1241,7 +1313,7 @@
             font-size: var(--fs-sm);
             font-weight: 600;
             padding: 6px 10px;
-            min-height: 32px;
+            min-height: 44px;
             width: auto;
             cursor: pointer;
         }
@@ -1499,7 +1571,7 @@
         .attachment-row button {
             font-size: var(--fs-sm);
             padding: 4px 10px;
-            min-height: 32px;
+            min-height: 40px;
             width: auto;
         }
 
@@ -1613,7 +1685,7 @@
             color: var(--ink);
             font-weight: 600;
             list-style-position: inside;
-            padding: 2px 0;
+            padding: 8px 0;
         }
 
         .quickstart a {
@@ -1851,7 +1923,7 @@
         }
 
         .backend-actions button {
-            min-height: 42px;
+            min-height: 44px;
             font-size: var(--fs-sm);
         }
 
@@ -1878,7 +1950,7 @@
             font-size: var(--fs-sm);
             font-weight: 600;
             color: var(--ink);
-            padding: 4px 0;
+            padding: 8px 0;
         }
 
         .session-empty {
@@ -1928,7 +2000,7 @@
 
         .session-entry button {
             width: auto;
-            min-height: 32px;
+            min-height: 40px;
             padding: 4px 10px;
             font-size: var(--fs-sm);
             font-weight: 600;
@@ -2036,7 +2108,7 @@
 
         .session-buttons button {
             flex: 1;
-            min-height: 36px;
+            min-height: 44px;
             padding: 6px 10px;
             font-size: var(--fs-sm);
             font-weight: 600;
@@ -2217,7 +2289,7 @@
         .legend-grip,
         .legend-fold {
             width: auto;
-            min-height: 28px;
+            min-height: 40px;
             padding: 2px 8px;
             border: 0;
             border-radius: var(--r-sm);
@@ -2268,7 +2340,9 @@
 
         .points-legend-control select {
             font-size: var(--fs-sm);
-            padding: 3px 6px;
+            height: 40px;
+            min-height: 40px;
+            padding: 6px 8px;
             border: 1px solid var(--control-line);
             border-radius: var(--r-sm);
             background: var(--panel);
@@ -2301,7 +2375,7 @@
         /* one toggle for the points (jb 2026-09-20): shown by default */
         .points-toggle {
             width: auto;
-            min-height: 36px;
+            min-height: 44px;
             padding: 0 14px;
             border: 1px solid var(--action);
             border-radius: var(--r-sm);
@@ -3034,6 +3108,10 @@
                 padding: 2px 12px;
             }
 
+            .pane-divider::before {
+                inset: -8px 0;
+            }
+
             .pane-swap {
                 display: inline-flex;
                 align-items: center;
@@ -3141,6 +3219,10 @@
            that would cover a third of a phone-height map leaves; the Points
            control stays. a portrait monitor keeps both */
         @media (max-width: 700px) {
+            /* the presets carry the words on a phone; the handle stays */
+            .pane-grip-text {
+                display: none;
+            }
             .field-grid,
             .button-row {
                 grid-template-columns: 1fr;
@@ -3217,8 +3299,8 @@
             position: absolute;
             top: 10px;
             right: 10px;
-            width: 28px;
-            min-height: 28px;
+            width: 40px;
+            min-height: 40px;
             padding: 0;
             border: 0;
             border-radius: var(--r-sm);
@@ -3417,7 +3499,10 @@
         </aside>
 
         <div id="paneDivider" class="pane-divider" role="separator" aria-orientation="horizontal" aria-label="Resize the entry pane and the map" aria-valuemin="15" aria-valuemax="85" aria-valuenow="50" tabindex="0">
-            <span class="pane-grip">⠿ drag · entry ↕ map</span>
+            <span class="pane-grip">⠿ <span class="pane-grip-text">drag · entry ↕ map</span></span>
+            <button type="button" class="pane-preset" data-pane-preset="map" aria-pressed="false" title="Mostly map">More map</button>
+            <button type="button" class="pane-preset" data-pane-preset="even" aria-pressed="true" title="Half and half">Even</button>
+            <button type="button" class="pane-preset" data-pane-preset="form" aria-pressed="false" title="Mostly the form">More form</button>
             <button id="paneSwapButton" class="pane-swap" type="button" title="Put the other pane on top" aria-label="Swap the entry pane and the map">⇅ Swap</button>
         </div>
 
@@ -3448,6 +3533,6 @@
     <script src="js/source-links.js?v=20260904a"></script>
     <script src="js/unvalidated-places.js?v=20260904a"></script>
     <script src="js/task-presentation.js?v=20260919a"></script>
-    <script src="js/verification-map.js?v=20260921a"></script>
+    <script src="js/verification-map.js?v=20260921b"></script>
 </body>
 </html>

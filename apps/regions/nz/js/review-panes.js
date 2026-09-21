@@ -5,7 +5,9 @@
 // the ra portal's bar drags its sidebar; the bar under the map drags the
 // map's height on every screen, phone included. the device remembers both.
 // keyboard: left / right and up / down step, home resets; a double click
-// resets too. same idiom as verification-map.js setupPaneDivider.
+// resets too. same idiom as verification-map.js setupPaneDivider. r-u7:
+// each bar carries three named positions (a drag bar alone is easy to
+// miss); the one in force is pressed.
 (function () {
     const SIDEBAR_KEY = "pow-review-sidebar-w";
     const MAP_KEY = "pow-review-map-h";
@@ -129,6 +131,7 @@
                 const max = api.sidebarMax();
                 sidebarBar.setAttribute?.("aria-valuemax", String(Number.isFinite(max) ? max : SIDEBAR_DEFAULT));
                 sidebarBar.setAttribute?.("aria-valuenow", String(width));
+                api.syncPresets("sidebar", width);
             },
 
             // the tallest the map may be: nine tenths of the window, never under the floor
@@ -172,9 +175,61 @@
                 const max = api.mapMax();
                 mapBar.setAttribute?.("aria-valuemax", String(Number.isFinite(max) ? max : MAP_MIN));
                 mapBar.setAttribute?.("aria-valuenow", String(height));
+                api.syncPresets("map", height);
+            },
+
+            // the named positions: on the column bar the widest queue, half
+            // the layout, and the narrowest queue; on the map bar the tallest
+            // map, half the window, and the shortest map
+            presetTarget(bar, kind) {
+                if (bar === "sidebar") {
+                    const width = layout?.getBoundingClientRect?.()?.width;
+                    if (kind === "queue") return api.sidebarMax(width);
+                    if (kind === "detail") return SIDEBAR_MIN;
+                    return Number.isFinite(width) && width > 0 ? Math.round(width / 2) : SIDEBAR_DEFAULT;
+                }
+                const viewport = window.innerHeight;
+                if (kind === "map") return api.mapMax(viewport);
+                if (kind === "cards") return MAP_MIN;
+                return Number.isFinite(viewport) && viewport > 0 ? Math.round(viewport / 2) : MAP_MIN;
+            },
+            // a preset is a choice by hand: remembered like a drag
+            applyPreset(bar, kind) {
+                const target = api.presetTarget(bar, kind);
+                return bar === "sidebar"
+                    ? api.setSidebarWidth(target, { chosen: true })
+                    : api.setMapHeight(target, { chosen: true });
+            },
+            // the preset in force at a size; a dragged size between presets is none
+            activePreset(bar, current) {
+                const kinds = bar === "sidebar" ? ["queue", "even", "detail"] : ["map", "even", "cards"];
+                const clampTo = bar === "sidebar" ? (v) => api.clampSidebar(v) : (v) => api.clampMap(v);
+                return kinds.find((kind) => clampTo(api.presetTarget(bar, kind)) === current) ?? null;
+            },
+            syncPresets(bar, current) {
+                const host = bar === "sidebar" ? sidebarBar : mapBar;
+                const buttons = host?.querySelectorAll?.("[data-pane-preset]");
+                if (!buttons || !buttons.length) return;
+                const active = api.activePreset(bar, current);
+                buttons.forEach((button) => button.setAttribute?.("aria-pressed", String(button.getAttribute?.("data-pane-preset") === active)));
             },
             stacked,
         };
+
+        // the presets sit on the bars: their taps are not drags, and a
+        // quick second tap is not the bar's reset
+        function wirePresets(host, bar) {
+            host?.querySelectorAll?.("[data-pane-preset]")?.forEach?.((button) => {
+                button.addEventListener("pointerdown", (event) => event.stopPropagation?.());
+                button.addEventListener("dblclick", (event) => event.stopPropagation?.());
+                button.addEventListener("click", (event) => {
+                    event.stopPropagation?.();
+                    api.applyPreset(bar, button.getAttribute("data-pane-preset"));
+                });
+            });
+        }
+        wirePresets(sidebarBar, "sidebar");
+        wirePresets(mapBar, "map");
 
         // what the device remembers, applied before the first paint settles
         const savedSidebar = read(SIDEBAR_KEY);

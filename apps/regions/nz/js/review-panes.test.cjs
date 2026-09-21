@@ -152,3 +152,65 @@ function build() {
 }
 
 console.log("review-panes: ok");
+
+// 4. the named presets on each bar (r-u7): the column bar's widest queue,
+// half the layout and narrowest queue; the map bar's tallest map, half the
+// window and shortest map; a preset is remembered like a drag, the one in
+// force is pressed, and a dragged size between presets presses none
+{
+    values.clear();
+    innerHeight = 900;
+    function presetButtons(kinds) {
+        return kinds.map((kind) => ({ kind, attrs: {}, listeners: {},
+            getAttribute(name) { return name === "data-pane-preset" ? this.kind : this.attrs[name] ?? null; },
+            setAttribute(name, value) { this.attrs[name] = value; },
+            addEventListener(type, fn) { (this.listeners[type] ||= []).push(fn); },
+            click() { for (const fn of this.listeners.click || []) fn({ stopPropagation() {} }); } }));
+    }
+    const pressed = (buttons) => buttons.filter((b) => b.attrs["aria-pressed"] === "true").map((b) => b.kind).join(",");
+    const layout = box({ left: 0, top: 0, width: 1440, height: 900 });
+    const detail = box({ left: 404, top: 95, width: 1036, height: 800 });
+    const mapEl = box({ left: 404, top: 95, width: 1036, height: 440 });
+    const sidebarBar = bar();
+    const mapBar = bar();
+    const sidebarPresets = presetButtons(["queue", "even", "detail"]);
+    const mapPresets = presetButtons(["map", "even", "cards"]);
+    sidebarBar.querySelectorAll = (selector) => (selector === "[data-pane-preset]" ? sidebarPresets : []);
+    mapBar.querySelectorAll = (selector) => (selector === "[data-pane-preset]" ? mapPresets : []);
+    const api = panes.setup({ layout, detail, mapEl, sidebarBar, mapBar, onResize() {} });
+    assert.equal(pressed(sidebarPresets), "", "the default queue width of 390px is no preset");
+    assert.equal(pressed(mapPresets), "", "the measured map of 440px is no preset");
+    assert.equal(api.presetTarget("sidebar", "queue"), 864, "more queue is six tenths of the layout");
+    assert.equal(api.presetTarget("sidebar", "even"), 720, "even is half the layout");
+    assert.equal(api.presetTarget("sidebar", "detail"), 320, "more detail is the narrowest queue");
+    assert.equal(api.presetTarget("map", "map"), 810, "more map is nine tenths of the window");
+    assert.equal(api.presetTarget("map", "even"), 450, "even is half the window");
+    assert.equal(api.presetTarget("map", "cards"), 200, "more cards is the shortest map");
+    sidebarPresets[0].click();
+    assert.equal(layout.styles["--sidebar-w"], "864px");
+    assert.equal(values.get("pow-review-sidebar-w"), "864", "a preset is remembered like a drag");
+    assert.equal(pressed(sidebarPresets), "queue", "the preset in force is pressed");
+    sidebarPresets[2].click();
+    assert.equal(layout.styles["--sidebar-w"], "320px");
+    assert.equal(pressed(sidebarPresets), "detail");
+    api.setSidebarWidth(500, { chosen: true });
+    assert.equal(pressed(sidebarPresets), "", "a dragged width between presets presses none");
+    sidebarPresets[1].click();
+    assert.equal(layout.styles["--sidebar-w"], "720px");
+    assert.equal(pressed(sidebarPresets), "even");
+    mapPresets[0].click();
+    assert.equal(detail.styles["--map-h"], "810px");
+    assert.equal(values.get("pow-review-map-h"), "810");
+    assert.equal(pressed(mapPresets), "map");
+    mapPresets[2].click();
+    assert.equal(detail.styles["--map-h"], "200px");
+    assert.equal(pressed(mapPresets), "cards");
+    api.setMapHeight(600, { chosen: true });
+    assert.equal(pressed(mapPresets), "");
+    mapPresets[1].click();
+    assert.equal(detail.styles["--map-h"], "450px");
+    assert.equal(pressed(mapPresets), "even");
+    api.setMapHeight(null, { chosen: true });
+    assert.equal(pressed(mapPresets), "", "a reset to the measured 440px presses none");
+    console.log("review presets ok");
+}

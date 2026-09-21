@@ -277,3 +277,79 @@ const fresh = () => Object.create(window.NzVerificationMap.prototype);
     console.log("phone panes and use-my-location ok");
   })().catch((error) => { console.error(error); process.exit(1); });
 }
+
+// 5. the named presets on the bar (r-u7): stacked they are the detents, side
+// by side the narrowest, half and widest sidebar; a preset is remembered like
+// a drag, the one in force is pressed, and a dragged width between them is none
+setTimeout(() => { try {
+  const app = fresh();
+  const styles = {};
+  const shellAttrs = {};
+  let shellWidth = 1440;
+  const shell = {
+    style: { setProperty(name, value) { styles[name] = value; } },
+    classList: classList(),
+    getBoundingClientRect() { return { left: 0, top: 0, width: shellWidth, height: 900 }; },
+    setAttribute(name, value) { shellAttrs[name] = value; },
+    removeAttribute(name) { delete shellAttrs[name]; },
+    getAttribute(name) { return shellAttrs[name] ?? null; },
+  };
+  const presets = ["map", "even", "form"].map((kind) => {
+    const button = { kind, attrs: {}, listeners: {},
+      getAttribute(name) { return name === "data-pane-preset" ? this.kind : this.attrs[name] ?? null; },
+      setAttribute(name, value) { this.attrs[name] = value; },
+      addEventListener(type, fn) { (this.listeners[type] ||= []).push(fn); },
+      click() { for (const fn of this.listeners.click || []) fn({ stopPropagation() {} }); } };
+    return button;
+  });
+  const pressed = () => presets.filter((b) => b.attrs["aria-pressed"] === "true").map((b) => b.kind).join(",");
+  document.querySelector = (selector) => (selector === ".app-shell" ? shell : null);
+  const divider = element("paneDivider");
+  divider.querySelector = () => null;
+  divider.querySelectorAll = (selector) => (selector === "[data-pane-preset]" ? presets : []);
+  app.map = { invalidated: 0, invalidateSize() { app.map.invalidated += 1; } };
+  window.addEventListener = () => {};
+  window.requestAnimationFrame = undefined;
+  phone = false;
+  localStorage.removeItem("pow-pane-split-cols");
+  localStorage.removeItem("pow-pane-split");
+  app.setupPaneDivider();
+  assert.equal(pressed(), "", "the default width of 420px is no preset");
+  assert.equal(app.panePresetTarget("map"), 320, "side by side, more map is the narrowest sidebar");
+  assert.equal(app.panePresetTarget("even"), 720, "even is half the shell");
+  assert.equal(app.panePresetTarget("form"), 864, "more form is six tenths of the shell");
+  presets[0].click();
+  assert.equal(styles["--sidebar-w"], "320px");
+  assert.equal(localStorage.getItem("pow-pane-split-cols"), "320", "a preset is remembered like a drag");
+  assert.equal(pressed(), "map", "the preset in force is pressed");
+  presets[2].click();
+  assert.equal(styles["--sidebar-w"], "864px");
+  assert.equal(pressed(), "form");
+  app.applySidebarWidth(500, { chosen: true });
+  assert.equal(pressed(), "", "a dragged width between presets presses none");
+  presets[1].click();
+  assert.equal(styles["--sidebar-w"], "720px");
+  assert.equal(pressed(), "even");
+  // stacked: the presets are the detents
+  phone = true;
+  app.refreshPaneAxis();
+  assert.equal(app.panePresetTarget("map"), 15);
+  assert.equal(app.panePresetTarget("even"), 50);
+  assert.equal(app.panePresetTarget("form"), 85);
+  presets[2].click();
+  assert.equal(app.paneShare, 85, "more form is the entry detent");
+  assert.equal(localStorage.getItem("pow-pane-split"), "85");
+  assert.equal(pressed(), "form");
+  presets[0].click();
+  assert.equal(app.paneShare, 15, "more map is the map detent");
+  assert.equal(pressed(), "map");
+  presets[1].click();
+  assert.equal(app.paneShare, 50);
+  assert.equal(pressed(), "even");
+  phone = false;
+  localStorage.removeItem("pow-pane-split-cols");
+  localStorage.removeItem("pow-pane-split");
+  document.querySelector = () => null;
+  window.addEventListener = undefined;
+  console.log("divider presets ok");
+} catch (error) { console.error(error); process.exit(1); } }, 900);

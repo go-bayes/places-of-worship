@@ -2906,6 +2906,7 @@ class NzVerificationMap {
             }
         }
         this.map?.invalidateSize();
+        this.syncPanePresets();
         return true;
     }
 
@@ -2915,13 +2916,14 @@ class NzVerificationMap {
         const divider = document.getElementById("paneDivider");
         if (!divider) return;
         const grip = divider.querySelector?.(".pane-grip");
+        const gripText = divider.querySelector?.(".pane-grip-text") || grip;
         if (this.paneLayoutActive()) {
             divider.setAttribute("aria-orientation", "horizontal");
             divider.setAttribute("aria-label", "Resize the entry pane and the map");
             divider.setAttribute("aria-valuemin", String(PANE_DETENTS[0]));
             divider.setAttribute("aria-valuemax", String(PANE_DETENTS[PANE_DETENTS.length - 1]));
             divider.setAttribute("aria-valuenow", String(Math.round(this.paneShare ?? PANE_DETENTS[1])));
-            if (grip) grip.textContent = this.paneEntryOnTop() ? "⠿ drag · entry ↕ map" : "⠿ drag · map ↕ entry";
+            if (grip) gripText.textContent = gripText === grip ? (this.paneEntryOnTop() ? "⠿ drag · entry ↕ map" : "⠿ drag · map ↕ entry") : (this.paneEntryOnTop() ? "drag · entry ↕ map" : "drag · map ↕ entry");
         } else {
             divider.setAttribute("aria-orientation", "vertical");
             divider.setAttribute("aria-label", "Resize the sidebar and the map");
@@ -2930,7 +2932,7 @@ class NzVerificationMap {
             const max = this.sidebarWidthMax(shellWidth);
             divider.setAttribute("aria-valuemax", String(Number.isFinite(max) ? max : SIDEBAR_W_DEFAULT));
             divider.setAttribute("aria-valuenow", String(this.sidebarWidth ?? SIDEBAR_W_DEFAULT));
-            if (grip) grip.textContent = "⠿ drag · sidebar ↔ map";
+            if (grip) gripText.textContent = gripText === grip ? "⠿ drag · sidebar ↔ map" : "drag · sidebar ↔ map";
         }
     }
 
@@ -2978,6 +2980,7 @@ class NzVerificationMap {
             if (divider && this.paneLayoutActive()) divider.setAttribute("aria-valuenow", String(Math.round(share)));
             paint(share);
             this.map?.invalidateSize();
+            this.syncPanePresets();
         };
         if (this.paneAnimation) window.cancelAnimationFrame?.(this.paneAnimation);
         this.paneAnimation = 0;
@@ -3034,6 +3037,55 @@ class NzVerificationMap {
         return this.setPaneSplit(share);
     }
 
+    // r-u7 (jb 2026-09-19): the three named positions on the bar. stacked
+    // they are the detents (mostly map, half, mostly entry); side by side
+    // they are the narrowest sidebar, half the shell, and the widest the
+    // sidebar may be
+    panePresetTarget(kind) {
+        if (this.paneLayoutActive()) {
+            return kind === "map" ? PANE_DETENTS[0] : kind === "form" ? PANE_DETENTS[2] : PANE_DETENTS[1];
+        }
+        if (this.paneColumnsActive()) {
+            const shellWidth = this.paneShell?.getBoundingClientRect?.()?.width;
+            if (kind === "map") return SIDEBAR_W_MIN;
+            if (kind === "form") return this.sidebarWidthMax(shellWidth);
+            return Number.isFinite(shellWidth) && shellWidth > 0 ? Math.round(shellWidth / 2) : SIDEBAR_W_DEFAULT;
+        }
+        return null;
+    }
+
+    // a preset is a choice by hand: remembered like a drag
+    applyPanePreset(kind) {
+        const target = this.panePresetTarget(kind);
+        if (target === null) return false;
+        if (this.paneLayoutActive()) return this.setPaneSplit(target, { chosen: true });
+        return this.applySidebarWidth(target, { chosen: true });
+    }
+
+    // the preset in force; a dragged position between presets is none
+    activePanePreset() {
+        if (this.paneLayoutActive()) {
+            const share = this.paneShare;
+            return share === PANE_DETENTS[0] ? "map" : share === PANE_DETENTS[2] ? "form" : share === PANE_DETENTS[1] ? "even" : null;
+        }
+        if (this.paneColumnsActive()) {
+            const width = this.sidebarWidth ?? SIDEBAR_W_DEFAULT;
+            const shellWidth = this.paneShell?.getBoundingClientRect?.()?.width;
+            for (const kind of ["map", "even", "form"]) {
+                if (this.clampSidebarWidth(this.panePresetTarget(kind), shellWidth) === width) return kind;
+            }
+        }
+        return null;
+    }
+
+    syncPanePresets() {
+        const divider = document.getElementById("paneDivider");
+        const buttons = divider?.querySelectorAll?.("[data-pane-preset]");
+        if (!buttons || !buttons.length) return;
+        const active = this.activePanePreset();
+        buttons.forEach((button) => button.setAttribute?.("aria-pressed", String(button.getAttribute?.("data-pane-preset") === active)));
+    }
+
     setupPaneDivider() {
         const divider = document.getElementById("paneDivider");
         const shell = document.querySelector(".app-shell");
@@ -3073,6 +3125,17 @@ class NzVerificationMap {
                 this.setPaneStack(this.paneEntryOnTop() ? "map-top" : "entry-top", { chosen: true });
             });
         }
+        // the presets sit on the drag bar too: their taps are not drags,
+        // and a quick second tap is not the bar's reset
+        divider.querySelectorAll?.("[data-pane-preset]")?.forEach?.((button) => {
+            button.addEventListener("pointerdown", (event) => event.stopPropagation());
+            button.addEventListener("dblclick", (event) => event.stopPropagation());
+            button.addEventListener("click", (event) => {
+                event.stopPropagation();
+                this.applyPanePreset(button.getAttribute("data-pane-preset"));
+            });
+        });
+        this.syncPanePresets();
         let drag = null;
         divider.addEventListener("pointerdown", (event) => {
             if (event.button !== undefined && event.button !== 0) return;
