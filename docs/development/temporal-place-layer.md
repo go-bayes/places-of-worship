@@ -31,10 +31,14 @@ filter expression in `region-map.js` and a plain JS filter in
 `verification-map.js`. Any change to the predicate MUST update both
 files and this section in the same commit.
 
-**Defaults (surface-specific, deliberate).** Country maps auto-select:
-`period` when the selected year is more than 15 years stale and a
-dated product is wired, else `all`; an explicit user choice persists
-across year and level changes. The portal defaults to `off`: context
+**Defaults (surface-specific, deliberate).** Country maps open in
+`all` on every year (Joseph B, 2026-09-21: every place is on the map at
+first sight). Until then they auto-selected `period` when the selected
+year was more than 15 years stale and a dated product was wired, which
+on 1 January 2026 tipped every country whose default wave is 2010 or
+earlier (the Bahamas opened on two dated places and nothing else).
+`period` remains the user's choice where a dated product is wired; an
+explicit user choice persists across year and level changes. The portal defaults to `off`: context
 dots are subordinate to task markers, and every portal target year is
 historical by construction, so an auto-`period` default would clutter
 every task view.

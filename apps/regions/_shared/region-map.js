@@ -4196,14 +4196,15 @@ function placeSnapshotStale() {
 // place-dot visibility modes (docs/development/temporal-place-layer.md):
 // period = only dated dots alive at the selected year, undated snapshot
 // hidden; all = snapshot plus dated layer (the pre-modes behaviour);
-// off = choropleth alone. mode null means the user has not chosen, so
-// the year decides: historical years open in period (where dated data
-// exists), recent years in all. a user choice persists across year and
-// level changes until they change it again.
+// off = choropleth alone. mode null means the user has not chosen, and
+// the page opens in all: every place is on the map at first sight (jb
+// 2026-09-21, the bahamas opened on its 2010 wave showing two dated
+// places and nothing else once that wave crossed the horizon). period is
+// the user's choice, offered where dated data exists; a choice persists
+// across year and level changes until they change it again.
 const placesDotState = { mode: null, future: false };
 function effectivePointsMode() {
-  if (placesDotState.mode) return placesDotState.mode;
-  return placeSnapshotStale() && RC.datedPlaces ? "period" : "all";
+  return placesDotState.mode || "all";
 }
 const DATED = {
   source: "pow-dated",
@@ -4864,8 +4865,10 @@ function syncPlaceDotEra() {
   if (map.getLayer(LAYERS.places)) {
     map.setLayoutProperty(LAYERS.places, "visibility", hideSnapshot ? "none" : "visible");
   }
+  // the stale fade is a step down, not a vanishing: the dots stay
+  // readable on a historical year and the legend note carries the caveat
   const overviewBase = RC.overviewDotOpacity ?? 0.75;
-  const ov = stale ? overviewBase * 0.15 : overviewBase;
+  const ov = stale ? overviewBase * 0.5 : overviewBase;
   if (map.getLayer(LAYERS.overview)) {
     map.setPaintProperty(LAYERS.overview, "circle-opacity",
       ["interpolate", ["linear"], ["zoom"], 0, ov, 5, ov, 6, 0.0]);
@@ -4873,7 +4876,7 @@ function syncPlaceDotEra() {
   if (map.getLayer(LAYERS.places)) {
     const censusFirst = censusState.enabled && !stale;
     map.setPaintProperty(LAYERS.places, "circle-opacity", stale
-      ? ["interpolate", ["linear"], ["zoom"], 6, 0.05, 9, 0.2, 12, 0.18, 18, 0.18]
+      ? ["interpolate", ["linear"], ["zoom"], 6, 0.1, 9, 0.45, 12, 0.4, 18, 0.4]
       : censusFirst
         ? ["interpolate", ["linear"], ["zoom"], 6, 0.08, 8, 0.45, 9, 0.85, 12, 0.75, 18, 0.7]
         : ["interpolate", ["linear"], ["zoom"], 6, 0.2, 9, 0.85, 12, 0.75, 18, 0.7]);

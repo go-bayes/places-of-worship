@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-21 (every place on the map at first sight)
+
+- Country maps open with every place dot showing on every census year (JB, 2026-09-21: "ensure that all POW points are initially visible on the country layers graph, which only shows historic cases presently"). Since 1 January 2026 the 15-year stale-snapshot horizon had tipped every country whose default wave is 2010 or earlier into `period` mode at boot, so the Bahamas (2010 wave, two dated places) opened on two amber dots and nothing else; nine countries were affected and six more (2011 waves) would have followed in 2027. `effectivePointsMode()` now answers `all` until the reader chooses, `period` stays on the points control where a dated product is wired, and the stale-year fade steps the snapshot down to about half strength instead of a fifth so the dots stay readable under the legend's caveat. `docs/development/temporal-place-layer.md` records the ruling; stamp `region-map.js?v=20260921a` on all 103 pages.
+
 ### 2026-09-21 (style guide approved)
 
 - Joseph B approved `docs/ui-style-guide.md` as it stands ("approve the style guide", 2026-09-21): dark as the one theme and the Theme table's values are no longer provisional. The guide records the approval under its opening; later changes are dated rulings in place.
