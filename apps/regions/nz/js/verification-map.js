@@ -11413,7 +11413,7 @@ class NzVerificationMap {
 
     openPinHoldMenu() {
         if (!this.map || !this.pinMarker) return;
-        const popup = L.popup({ maxWidth: 260, offset: [0, -6] }).setLatLng(this.pinMarker.getLatLng()).setContent(this.pinHoldMenuHtml());
+        const popup = L.popup({ minWidth: 200, maxWidth: 260, offset: [0, -6] }).setLatLng(this.pinMarker.getLatLng()).setContent(this.pinHoldMenuHtml());
         popup.openOn(this.map);
         const el = popup.getElement();
         if (!el) return;
