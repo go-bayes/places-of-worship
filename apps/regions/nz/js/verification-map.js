@@ -2776,11 +2776,21 @@ class NzVerificationMap {
     }
 
     setupMap() {
-        this.map = L.map("map", { preferCanvas: true }).setView(COUNTRY_CONFIG.mapCentre, COUNTRY_CONFIG.mapZoom);
+        // the double click adds a place (below) rather than zooming; the
+        // buttons, the wheel and the pinch still zoom
+        this.map = L.map("map", { preferCanvas: true, doubleClickZoom: false }).setView(COUNTRY_CONFIG.mapCentre, COUNTRY_CONFIG.mapZoom);
         // the dot whose popup is open is the revise target of the one add /
         // revise control (jb 2026-09-20); closing it returns the control to
         // dropping a pin
         this.map.on("popupclose", () => this.setSelectedContextFeature(null));
+        // a held touch on the map, or a double click on a computer, adds a
+        // place at that spot with the pin already down (jb 2026-09-22: "if
+        // you press longer on the map you automatically get add (double
+        // click on desktop)"). leaflet turns a held touch into contextmenu
+        // on mobile safari (its tapHold handler) and android does so
+        // natively; a right click on a computer takes the same path
+        this.map.on("dblclick", event => this.handleAddGesture(event));
+        this.map.on("contextmenu", event => this.handleAddGesture(event));
         // openstreetmap standard tiles: no key to ship, and building
         // footprints render unwatermarked at the zooms pin placement needs
         // keep the zoom-out floor at 5 for compact countries, but let
@@ -3686,13 +3696,33 @@ class NzVerificationMap {
             return;
         }
         if (!this.tileDotLayers) {
-            this.tileDotLayers = UNVALIDATED_PLACES.createLayers(L);
+            // at country scale only this country's places draw (plus any the
+            // tiles leave untagged): sweden's 7,500 stood among the 317,000
+            // the overview tiles of a phone's viewport carried, and ios
+            // safari killed the page on the first zoom (jb 2026-09-22). from
+            // zoom 8 the full tier draws every place, a neighbour's dot with
+            // its own portal named in the popup. the world view keeps all
+            const ownIso = this.ownIsoCode();
+            const overviewKeep = ownIso && ownIso !== "ZZ"
+                ? props => {
+                    const code = String(props?.country_code || "").toUpperCase();
+                    return !code || code === ownIso;
+                }
+                : null;
+            this.tileDotLayers = UNVALIDATED_PLACES.createLayers(L, { overviewKeep });
             if (!this.tileDotLayers) return;
             // vectorgrid's own hit-testing never fires here (see the module),
             // so the map's click is hit-tested against the rendered dots
             this.map.on("click", event => this.handleTileDotClick(event));
         }
         UNVALIDATED_PLACES.addTo(this.map, this.tileDotLayers);
+    }
+
+    // the iso code the tiles use for this country (gb where the project
+    // says uk)
+    ownIsoCode() {
+        const ownEntry = COUNTRY_REGISTRY.get(COUNTRY_CONFIG.countryCode.toLowerCase());
+        return String(ownEntry?.iso2 || COUNTRY_CONFIG.countryCode).toUpperCase();
     }
 
     // the rendered tile dot nearest a container point, with its feature
@@ -3717,6 +3747,17 @@ class NzVerificationMap {
     // card, the popup kept for its links. the dated dots reach the same
     // outcome through their bound popup and click handler
     openContextDot(feature, latlng) {
+        // the tap is the edit (jb 2026-09-22: "hit a dot on the map and
+        // press, you automatically get edit"): signed in, with no pin armed
+        // and no task already on the record, the revise entry opens on the
+        // record with no popup between; the popup stays for the signed-out
+        // reader (its sign-in entry), the armed pin (revise or add here)
+        // and the flag-only card
+        const matched = this.backendUser ? this.matchContextTask(feature) : null;
+        if (this.backendUser && !this.pinArmedWithoutPin() && !matched?.task_id && this.canReviseDirectly(feature)) {
+            this.reviseFromFeature(feature);
+            return;
+        }
         const popup = L.popup({ maxWidth: 320 }).setLatLng(latlng).setContent(this.contextDotPopupHtml(feature));
         popup.openOn(this.map);
         this.bindContextDotPopup(popup, feature);
@@ -3724,12 +3765,55 @@ class NzVerificationMap {
         // a new pin is armed but not yet placed: the popup alone offers the
         // choice, revise this place or add a new one here
         if (this.pinArmedWithoutPin()) return;
-        const matched = this.matchContextTask(feature);
         if (matched?.task_id) {
             this.selectTaskById(matched.task_id, { focusDetail: true });
         } else {
-            this.openContextIssueForm(feature, { keepPopup: true });
+            this.reviseFromFeature(feature, { keepPopup: true });
         }
+    }
+
+    // the add gesture (a held touch, a double click): on a recorded place
+    // the press belongs to that place, since a pin never lands on one
+    // without the offer to revise it (a tap already opened it; a hold
+    // opens it now); with a pin armed and not yet down it lands the pin;
+    // with the pin down the taps and the drag already move it; at rest it
+    // opens the add entry with the pin on the spot, so the locate card's
+    // three options are there to move it, not to place it
+    handleAddGesture(event) {
+        if (!this.map || !event?.latlng) return;
+        const tileDot = this.tileDotAt(event.containerPoint);
+        if (!this.pinMode || this.pinArmedWithoutPin()) {
+            if (tileDot) {
+                if (event.type === "contextmenu" && !this.pinMode) this.openContextDot(tileDot.feature, tileDot.latlng);
+                return;
+            }
+            if (this.tapTargetAt(event)) return;
+        }
+        if (this.pinMode) {
+            if (this.pinConfirmed || this.pinMarker) return;
+            this.placePin(event.latlng);
+            return;
+        }
+        this.map.closePopup();
+        this.enterPinMode();
+        if (!this.pinMode) return;
+        this.placePin(event.latlng);
+    }
+
+    // a dated dot or a task marker under the press: each owns its tap
+    tapTargetAt(event) {
+        if (event.originalEvent?.target?.closest?.(".leaflet-marker-icon")) return true;
+        const layers = this.contextDotLayer?.getLayers?.() || [];
+        return layers.some(layer => layer.options?.interactive && typeof layer.getLatLng === "function"
+            && this.map.latLngToContainerPoint(layer.getLatLng()).distanceTo(event.containerPoint) <= 14);
+    }
+
+    // the rapid revise entry can open straight on a record: the lane is
+    // on, the record has a coordinate and the contributor is signed in
+    canReviseDirectly(feature) {
+        const coords = feature?.geometry?.coordinates || [];
+        return RAPID_NOMINATION_ENTRY && Number.isFinite(Number(coords[1])) && Number.isFinite(Number(coords[0]))
+            && Boolean(this.backend?.configured && this.backend.signedIn);
     }
 
     // one control for add and revise (jb 2026-09-20: "ADD/REVISE the only
@@ -3786,7 +3870,7 @@ class NzVerificationMap {
         if (hint) {
             hint.textContent = selected
                 ? `Revises ${name || "the selected place"}.`
-                : "Drops a pin for a new place. Tap a dot first to revise that place.";
+                : "Drops a pin for a new place. Hold on the map (double-click on a computer) to add one there; tap a dot to revise it.";
         }
         this.renderAssignedTasksButton();
     }
@@ -3935,7 +4019,9 @@ class NzVerificationMap {
                 if (matched?.task_id) {
                     this.selectTaskById(matched.task_id, { focusDetail: true });
                 } else {
-                    this.openContextIssueForm(feature, { keepPopup: true });
+                    // the tap is the edit (jb 2026-09-22): straight into the
+                    // revise entry where the rapid lane allows
+                    this.reviseFromFeature(feature, { keepPopup: true });
                 }
             });
             this.contextDotLayer.addLayer(dot);
@@ -3997,8 +4083,7 @@ class NzVerificationMap {
         // a tile dot in a neighbouring country (a border, an enclave) is
         // offered with its own portal rather than filed under this one
         const dotCountry = String(props.country_code || "").toUpperCase();
-        const ownEntry = COUNTRY_REGISTRY.get(COUNTRY_CONFIG.countryCode.toLowerCase());
-        const ownIso = String(ownEntry?.iso2 || COUNTRY_CONFIG.countryCode).toUpperCase();
+        const ownIso = this.ownIsoCode();
         const foreign = dotCountry && dotCountry !== ownIso ? COUNTRY_REGISTRY_BY_ISO.get(dotCountry) : null;
         const foreignNote = foreign
             ? `<span class="popup-foreign-note">In ${escapeHtml(foreign.name)}. <a href="verification.html?country=${escapeHtml(foreign.code)}">Open the ${escapeHtml(foreign.name)} portal</a> to revise it.</span><br>`
@@ -4092,15 +4177,13 @@ class NzVerificationMap {
     // the map's revise entry for a recorded place: signed in with the rapid
     // lane and a coordinate, straight into the pin flow on the record;
     // otherwise the card with its flag-only issue form
-    reviseFromFeature(feature) {
+    reviseFromFeature(feature, options = {}) {
         const props = feature.properties || {};
         const coords = feature.geometry?.coordinates || [];
         const latitude = Number(coords[1]);
         const longitude = Number(coords[0]);
-        const direct = RAPID_NOMINATION_ENTRY && Number.isFinite(latitude) && Number.isFinite(longitude)
-            && Boolean(this.backend?.configured && this.backend.signedIn);
-        if (!direct) {
-            this.openContextIssueForm(feature);
+        if (!this.canReviseDirectly(feature)) {
+            this.openContextIssueForm(feature, options);
             return;
         }
         if (!this.ensureAddModeForRevise()) return;
