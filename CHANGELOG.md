@@ -4,7 +4,7 @@
 
 ### 2026-09-21 (review preset selection)
 
-- Review-map presets retain the selected name when a short screen clamps `Even` and `More cards` to the same height. Reload preserves the choice; dragging or resetting clears it. Resizing refreshes the map height and preset indicators.
+- Review-map presets retain the selected name when a short screen clamps `Even` and `More cards` to the same height. Reload preserves the choice; dragging or resetting clears it. Resizing refreshes the map height and preset indicators and restores the remembered height when space returns. The review-map grip shows its handle on phones so the preset buttons fit.
 
 ### 2026-09-21 (PR-4: targets, one button system, divider presets)
 

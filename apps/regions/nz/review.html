@@ -925,6 +925,12 @@
         }
 
         /* phone height only: a portrait monitor keeps the full queue and map */
+        @media (max-width: 700px) {
+            .map-divider .pane-grip-text { display: none; }
+            .map-divider { gap: 6px; }
+            .map-divider .pane-preset { padding-inline: 6px; }
+        }
+
         @media (max-width: 900px) {
             .queue {
                 max-height: 420px;
@@ -1071,7 +1077,7 @@
         <div class="detail">
             <div id="reviewMap" class="review-map" role="region" aria-label="Map of the review queue and the unreviewed places"></div>
             <div id="mapDivider" class="pane-divider map-divider" role="separator" aria-orientation="horizontal" aria-label="Resize the map" aria-valuemin="200" aria-valuemax="900" aria-valuenow="440" tabindex="0">
-                <span class="pane-grip">⠿ drag · map ↕ cards</span>
+                <span class="pane-grip">⠿<span class="pane-grip-text"> drag · map ↕ cards</span></span>
                 <button type="button" class="pane-preset" data-pane-preset="map" aria-pressed="false" title="Mostly map">More map</button>
                 <button type="button" class="pane-preset" data-pane-preset="even" aria-pressed="false" title="Half the window">Even</button>
                 <button type="button" class="pane-preset" data-pane-preset="cards" aria-pressed="false" title="Mostly cards">More cards</button>
