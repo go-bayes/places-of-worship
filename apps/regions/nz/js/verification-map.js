@@ -11364,6 +11364,14 @@ class NzVerificationMap {
         this.pinAreaKey = "";
         this.pinMarker.on("drag", () => this.updatePinConfirmCard());
         this.pinMarker.on("dragend", () => this.recordPinPosition());
+        // a held touch on the pin (a right click on a computer) opens the
+        // pin's own menu (jb 2026-09-22: "once a pin is dropped, say by
+        // accident, how can we remove it"), since the card's Cancel
+        // placement can sit below the fold on a tall entry pane
+        this.pinMarker.on("contextmenu", event => {
+            if (event.originalEvent) L.DomEvent.stop(event.originalEvent);
+            this.openPinHoldMenu();
+        });
         this._pinZoomHandler = () => this.updatePinConfirmCard();
         this.map.on("zoomend", this._pinZoomHandler);
         const card = document.getElementById("pinConfirmCard");
@@ -11384,6 +11392,73 @@ class NzVerificationMap {
                 this.updatePinConfirmCard();
             }, 300);
         }
+    }
+
+    // the pin's own menu: before the location is confirmed, Remove pin
+    // lifts it and the entry stays armed for another drop, and Cancel
+    // placement leaves the entry as the card's button does; once confirmed
+    // the location is part of the entry, so the menu offers the discard
+    // that asks first
+    pinHoldMenuHtml() {
+        const confirmed = Boolean(this.pinConfirmed);
+        const actions = confirmed
+            ? `<button class="popup-report-issue popup-revise-primary" type="button" data-pin-discard="1">Discard this entry</button>`
+            : `<button class="popup-report-issue popup-revise-primary" type="button" data-pin-remove="1">Remove pin</button>
+               <button class="popup-report-issue" type="button" data-pin-cancel="1">Cancel placement</button>`;
+        return `
+            <strong>${confirmed ? "Location confirmed" : "Pin down"}</strong><br>
+            <div class="popup-actions">${actions}</div>
+        `;
+    }
+
+    openPinHoldMenu() {
+        if (!this.map || !this.pinMarker) return;
+        const popup = L.popup({ maxWidth: 260, offset: [0, -6] }).setLatLng(this.pinMarker.getLatLng()).setContent(this.pinHoldMenuHtml());
+        popup.openOn(this.map);
+        const el = popup.getElement();
+        if (!el) return;
+        el.querySelector("[data-pin-remove]")?.addEventListener("click", () => this.removePendingPin());
+        el.querySelector("[data-pin-cancel]")?.addEventListener("click", () => {
+            this.map.closePopup();
+            this.exitPinMode();
+        });
+        el.querySelector("[data-pin-discard]")?.addEventListener("click", () => {
+            this.map.closePopup();
+            this.discardEntryAttempt();
+        });
+    }
+
+    // lifts an unconfirmed pin and keeps the entry armed for another drop;
+    // false once the location is confirmed, when the discard is the way
+    removePendingPin() {
+        if (!this.pinMode || !this.pinMarker || this.pinConfirmed) return false;
+        this.liftPendingPin("Pin removed. Tap the building on the map to drop it again, or choose an option above.");
+        // aiming again wants the map
+        this.paneSnap("map");
+        return true;
+    }
+
+    // takes the pending pin off the map with its circle and zoom handler;
+    // placement stays armed
+    liftPendingPin(statusText) {
+        if (!this.pinMarker) return;
+        this.map.closePopup();
+        this.map.removeLayer(this.pinMarker);
+        this.pinMarker = null;
+        this.pinHistory = [];
+        this.pinAreaKey = "";
+        if (this.pinUncertaintyCircle) {
+            this.map.removeLayer(this.pinUncertaintyCircle);
+            this.pinUncertaintyCircle = null;
+        }
+        if (this._pinZoomHandler) {
+            this.map.off("zoomend", this._pinZoomHandler);
+            this._pinZoomHandler = null;
+        }
+        const card = document.getElementById("pinConfirmCard");
+        if (card) card.hidden = true;
+        const status = document.getElementById("pinStatus");
+        if (status) status.textContent = statusText;
     }
 
     // undo history for the pending pin: every placement, click-move, typed
@@ -11407,20 +11482,7 @@ class NzVerificationMap {
             return;
         }
         // undoing the first drop removes the pin; placement stays armed
-        this.map.removeLayer(this.pinMarker);
-        this.pinMarker = null;
-        if (this.pinUncertaintyCircle) {
-            this.map.removeLayer(this.pinUncertaintyCircle);
-            this.pinUncertaintyCircle = null;
-        }
-        if (this._pinZoomHandler) {
-            this.map.off("zoomend", this._pinZoomHandler);
-            this._pinZoomHandler = null;
-        }
-        const card = document.getElementById("pinConfirmCard");
-        if (card) card.hidden = true;
-        const status = document.getElementById("pinStatus");
-        if (status) status.textContent = "Pin removed. Click the building on the map to drop it again.";
+        this.liftPendingPin("Pin removed. Click the building on the map to drop it again.");
     }
 
     // search, typed coordinates, and the map click all land here: one

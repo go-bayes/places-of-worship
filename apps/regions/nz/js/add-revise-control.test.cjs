@@ -443,4 +443,43 @@ const dot = { type: "Feature", properties: { name: "St Mary's", osm_id: "1", osm
   assert.equal(real.canReviseDirectly(dot), false);
 }
 
-console.log("add-revise-control: 13 checks passed");
+// 14. a held touch on the pin (jb 2026-09-22): Remove pin lifts an
+//     unconfirmed pin and keeps the entry armed; a confirmed location
+//     offers only the discard that asks first
+{
+  const app = fresh();
+  const calls = [];
+  app.map = { closePopup() { calls.push("closePopup"); }, removeLayer(layer) { calls.push(layer.name); }, off() {} };
+  app.pinMode = true;
+  app.pinConfirmed = null;
+  app.pinMarker = { name: "pin" };
+  app.pinUncertaintyCircle = { name: "circle" };
+  app._pinZoomHandler = () => {};
+  app.pinHistory = [{}, {}];
+  app.paneSnap = (name) => { calls.push(`snap:${name}`); return true; };
+  const card = element("pinConfirmCard", { hidden: false });
+  const status = element("pinStatus");
+  assert.match(app.pinHoldMenuHtml(), /data-pin-remove="1">Remove pin</);
+  assert.match(app.pinHoldMenuHtml(), /data-pin-cancel="1">Cancel placement</);
+  assert.equal(app.removePendingPin(), true);
+  assert.equal(app.pinMarker, null);
+  assert.equal(app.pinUncertaintyCircle, null);
+  assert.equal(app._pinZoomHandler, null);
+  assert.equal(app.pinHistory.length, 0);
+  assert.equal(app.pinMode, true);
+  assert.equal(card.hidden, true);
+  assert.match(status.textContent, /Pin removed/);
+  assert.deepEqual(calls, ["closePopup", "pin", "circle", "snap:map"]);
+  // confirmed: the menu offers the discard and the lift refuses
+  app.pinMarker = { name: "pin" };
+  app.pinConfirmed = { latitude: -41.3, longitude: 174.8 };
+  assert.match(app.pinHoldMenuHtml(), /data-pin-discard="1">Discard this entry</);
+  assert.equal(/Remove pin/.test(app.pinHoldMenuHtml()), false);
+  assert.equal(app.removePendingPin(), false);
+  assert.equal(app.pinMarker.name, "pin");
+  // the marker binds the hold
+  const source = fs.readFileSync(path.join(__dirname, "verification-map.js"), "utf8");
+  assert.match(source, /this\.pinMarker\.on\("contextmenu", event => \{/);
+}
+
+console.log("add-revise-control: 14 checks passed");
