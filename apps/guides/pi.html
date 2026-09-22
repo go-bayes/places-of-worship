@@ -16,6 +16,7 @@
       <nav class="site-nav" aria-label="Guide links">
         <a href="ra.html">RA field guide</a>
         <a href="../regions/">Data maps</a>
+        <a href="definition.html">Operational definition</a>
       </nav>
       <p class="storage-note">Every screenshot uses demonstration data only; the places, tasks, and people shown are fictional (St Demo Church, task_demo_*).</p>
     </div>
@@ -29,6 +30,7 @@
       <li><a href="#ai-evidence-checks">How the AI evidence checks work</a></li>
       <li><a href="#decision-records-and-hashes">How decisions are recorded and hashed</a></li>
       <li><a href="#change-class">Genuine change versus map correction</a></li>
+      <li><a href="#identity-decisions">Identity decisions</a></li>
       <li><a href="#seeding-and-exports">Seeding and exports</a></li>
     </ol>
   </nav>
@@ -140,6 +142,25 @@
   <li><strong>Can&#x27;t tell yet</strong> — the honest default. Leave it selected unless your evidence supports one of the other two; a reviewer or a later source can upgrade it.</li>
 </ul>
 <p>If this distinction were ignored, every improvement in the map would masquerade as religious change — a wave of &quot;new&quot; places that were always there. Answering it carefully is one of the most consequential things an RA does in this project.</p>
+</section>
+
+<section class="guide-section prose-section" id="identity-decisions">
+  <h2>Identity decisions</h2>
+  <p class="section-note">Identity is not observable at a site visit. The reviewer decides it, records the basis, and can revise it.</p>
+  <p>The identifier follows the place of worship as a place of worship at its site. It survives rebuilding, restoration, a building shifted within its own grounds, a change of religion or congregation while worship continues, and periods of inactivity. It changes only when the entity does. The full rule is in the <a href="definition.html#identity-over-time">operational definition</a>, and its <a href="definition.html#worked-examples">worked examples</a> are the cases most often decided wrongly.</p>
+  <p>Record one of these bases with every identity decision:</p>
+<ul class="prose-list">
+  <li><strong>Same place.</strong> The evidence continues an existing place: rebuilt, restored, enlarged, shifted within its parcel, or reopened after inactivity.</li>
+  <li><strong>Conversion.</strong> Worship continued at the site under a new community, as when a church became a mosque. Same identifier, with a dated change of community attributes. Hagia Sophia is one place.</li>
+  <li><strong>Successor at a new site.</strong> A community moved to a different property. The new site is a new place with its own identifier, linked to its predecessor, and the old site stays in the record as inactive or ended. Christchurch&#x27;s Transitional Cathedral is a second place.</li>
+  <li><strong>End and new foundation.</strong> Worship ceased and the site was destroyed, repurposed, or abandoned with no community continuing or succeeding to its use; a later recurrence there is a new place, linked by location. The Templo Mayor and the Metropolitan Cathedral are two.</li>
+  <li><strong>Split</strong> and <strong>merge</strong>, as before: one place becoming two, or two becoming one, with the links preserved.</li>
+  <li><strong>Uncertain.</strong> The evidence supports more than one reading. Keep the alternatives, their evidence, and your confidence. No proximity heuristic or import settles identity.</li>
+</ul>
+  <p><strong>Inactive or ended is your judgement on the evidence.</strong> A place whose worship has ceased while its site stands and no other use has claimed it is inactive and keeps its identifier. It ends when worship ceases and the site is destroyed, repurposed, or abandoned with no succession. The definition sets no duration threshold: Christ Church Cathedral has been inactive since 2011 and is still one place.</p>
+  <p><strong>Within one plotted point, count one place per distinct worship space,</strong> unless the spaces are parts of one coherent worship complex, which counts once. Two chapels known only to the same hospital centroid are two places drawn at one point. A cathedral&#x27;s nave and side chapel are one. A hospital chaplaincy suite run as one centre is one. Two independently established neighbours are two, whatever roof or owner they share. Where a coherent complex ends is still open: record the basis and the alternative.</p>
+  <p><strong>Households and kin groups.</strong> A household is one co-resident domestic unit of any size and is not a community. A place counts when worship there is by or for people of more than one household. A lineage&#x27;s ancestral hall is a place; the lineage&#x27;s compound is a household.</p>
+  <p class="section-note">The review form&#x27;s <em>Identity decision</em> choices predate version 0.1.6. Until the form is updated: record a conversion as <em>same site</em>, a successor at a new site and an end-and-new-foundation as <em>new candidate</em>, and name the basis and the linked predecessor in your decision note. Do not use <em>relocation</em> for a successor at a new site, because the current data contract reads relocation as the same place continuing; that implementation follow-up is listed in the definition&#x27;s revision note.</p>
 </section>
 
 <section class="guide-section prose-section" id="seeding-and-exports">

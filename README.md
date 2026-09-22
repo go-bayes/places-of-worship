@@ -35,6 +35,7 @@ Building historical datasets fit for scientific inference is remarkably difficul
 - [Vanuatu regional map](https://religionmap.org/apps/regions/vu/)
 - [Roadmap](ROADMAP.md)
 - [System map](docs/system-map.md)
+- [Operational definition, rendered for RAs and reviewers](https://religionmap.org/apps/guides/definition.html)
 - [FAQ](FAQ.md)
 - [Lexicon](LEXICON.md)
 - [Religious change in the census-religion corpus](docs/religious-change-highlights.md)
