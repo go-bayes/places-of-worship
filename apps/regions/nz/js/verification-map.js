@@ -989,6 +989,9 @@ const SIDEBAR_W_STEP = 40;
 const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 };
 const POSITION_ZOOM = 17;
 const PIN_PROXIMITY_METRES = 150;
+// a mouse held still on the pin opens its menu after this long, as a
+// held touch does on a phone (jb 2026-09-23)
+const PIN_HOLD_MS = 600;
 // quick photo (jb 2026-09-22): the photo types attachment storage takes,
 // its 10 MB cap, and the location contract's radius bounds
 const QUICK_PHOTO_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -11967,6 +11970,10 @@ class NzVerificationMap {
             if (event.originalEvent) L.DomEvent.stop(event.originalEvent);
             this.openPinHoldMenu();
         });
+        // a mouse held still on the pin opens the same menu (jb 2026-09-23:
+        // "if you hold the pin you should get the same remove pin options
+        // as on the phone"); a drag, a release or leaving the pin cancels
+        this.armPinHold(this.pinMarker);
         this._pinZoomHandler = () => this.updatePinConfirmCard();
         this.map.on("zoomend", this._pinZoomHandler);
         const card = document.getElementById("pinConfirmCard");
@@ -11987,6 +11994,28 @@ class NzVerificationMap {
                 this.updatePinConfirmCard();
             }, 300);
         }
+    }
+
+    // the mouse's hold on the pin: the left button down and still for
+    // PIN_HOLD_MS. a touch hold already arrives as contextmenu (leaflet's
+    // tapHold on mobile safari, the native long press on android), and the
+    // right button too, so both are left to that handler
+    armPinHold(marker) {
+        const clear = () => {
+            if (!this._pinHoldTimer) return;
+            window.clearTimeout(this._pinHoldTimer);
+            this._pinHoldTimer = null;
+        };
+        marker.on("mousedown", event => {
+            const original = event.originalEvent;
+            if (!original || original.pointerType === "touch" || (original.button !== undefined && original.button !== 0)) return;
+            clear();
+            this._pinHoldTimer = window.setTimeout(() => {
+                this._pinHoldTimer = null;
+                if (this.pinMarker === marker) this.openPinHoldMenu();
+            }, PIN_HOLD_MS);
+        });
+        ["mouseup", "dragstart", "mouseout", "remove"].forEach(name => marker.on(name, clear));
     }
 
     // the pin's own menu: before the location is confirmed, Remove pin

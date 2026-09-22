@@ -116,7 +116,7 @@ address search and the coordinate boxes); a pin already down reads `Move
 pin`. Typed coordinates apply on change and the pin drags on the map, so
 there is no move button. Once the pin is down the confirm card carries one
 outlined link, `Check Street View at the pin` (`.pin-check-link`, 44 px),
-which opens Google Street View there in a new tab (JB, 2026-09-21). A held touch on the pin (a right click on a computer) opens the pin's own menu (JB, 2026-09-22: "once a pin is dropped, say by accident, how can we remove it", and the card's `Cancel placement` can sit below the fold on a tall entry pane): before the location is confirmed, `Remove pin` lifts the pin and keeps the entry armed for another drop, and `Cancel placement` leaves the entry; once confirmed the menu offers `Discard this entry`, which asks first.
+which opens Google Street View there in a new tab (JB, 2026-09-21). A held touch on the pin (a held mouse button or a right click on a computer) opens the pin's own menu (JB, 2026-09-22: "once a pin is dropped, say by accident, how can we remove it", and the card's `Cancel placement` can sit below the fold on a tall entry pane): before the location is confirmed, `Remove pin` lifts the pin and keeps the entry armed for another drop, and `Cancel placement` leaves the entry; once confirmed the menu offers `Discard this entry`, which asks first.
 Choosing `I can only place an area`, or another radius, fits the whole
 uncertainty circle into the map, once, so the distance reads on the map; a
 drag or a zoom of the same area leaves the view alone. The `Flag for discussion` checkbox carries its
