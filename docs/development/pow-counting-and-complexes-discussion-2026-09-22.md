@@ -2,6 +2,8 @@
 
 Date: 2026-09-22. Status: public discussion of the direction agreed with the project lead. The examples clarify the intended counting unit; the general rule for identifying a coherent complex still needs operational criteria. This discussion precedes a versioned revision of the [operational definition](../operational-definition.md) and the corresponding implementation.
 
+Update, 2026-09-22: [version 0.1.6 of the operational definition](place-of-worship-definition-2026-09-22-v0.1.6.md) adopted the rule that a move to a new site begins a new place of worship, so the Transitional Cathedral has its own identifier, and adopted the shared-room and distinct-chapel examples. The four operational questions below remain open, and the implementation still follows the earlier rule.
+
 ## The proposed counting unit
 
 A place of worship (PoW) is counted at the level of a mappable worship place or coherent worship complex. Once that spatial unit is defined, it has one PoW identifier at a given time. Communities, religious affiliations, rituals, and internal structures describe the PoW and can change through time. Multiple affiliations or rituals within the same unit do not multiply its PoW count.
@@ -65,4 +67,8 @@ Investigators declare an activity threshold and an uncertainty treatment when de
 
 The [current operational definition](../operational-definition.md#identity-over-time) allows a PoW identifier to follow relocation and allows several PoWs at a site. The [occupancy specification](occupancy-build-brief-2026-09-02.md) likewise treats relocation as continuity under the same identifier. The direction discussed here instead gives distinct replacement venues their own identities and counts shared use within an operationally defined place as attributes of that PoW. A later revision must reconcile the meaning of “site”, complex membership, and relocation across the definition, entry, review, and export contracts.
 
+Superseded in part, 2026-09-22: [version 0.1.6](place-of-worship-definition-2026-09-22-v0.1.6.md) adopted the direction above for the definition, so the identifier no longer follows relocation and a distinct replacement venue has its own identifier. The occupancy specification and the occupancy validator still encode same-identity relocation; that is the lagging implementation the version's revision note lists, and the paragraph above stands as the record of the conflict as it was when this discussion was written.
+
 The canonical and dated definitions need consistent guidance on worship frequency. The [dated definition's amendment](place-of-worship-definition-2026-09-03-v0.1.5.md#revision-note-014--015) distinguishes known annual or occasional use from uncertain use, whereas the canonical definition still reproduces the earlier derivation threshold. A coordinated revision should preserve the distinction between activity and confidence. Publication of this discussion does not change accepted identifiers, observations, or implemented counting rules.
+
+Resolved, 2026-09-22: version 0.1.6 carries amendment R-F1′ in criterion 2, so the canonical and dated definitions now agree on frequency. Accepted identifiers, observations, and implemented counting rules remain unchanged by the revision.

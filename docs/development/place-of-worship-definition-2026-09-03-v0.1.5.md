@@ -1,6 +1,6 @@
 # Operational definition of a place of worship
 
-Version: 0.1.5. Date: 2026-09-03. Status: adopted working operational definition. This dated snapshot preserves version 0.1.5. The [canonical operational definition](../operational-definition.md) presents the current version.
+Version: 0.1.5. Date: 2026-09-03. Status: adopted working operational definition. This dated snapshot preserves version 0.1.5. The [canonical operational definition](../operational-definition.md) presents the current version. Superseded by [version 0.1.6](place-of-worship-definition-2026-09-22-v0.1.6.md) on 2026-09-22; the original text stands below.
 
 **At a specified time, a place of worship is a reproducibly mappable site for which source evidence supports recurring religious worship by or for a community.**
 

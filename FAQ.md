@@ -50,7 +50,7 @@ Candidate collection is broader than accepted classification. An OSM tag, direct
 
 ## How should shared rooms and worship complexes be counted?
 
-The proposed direction treats a shared multi-faith prayer room as a PoW and distinct hospital chapels as distinct PoWs. A coherent worship complex can include several buildings, rooms, or altars. The boundary of a coherent complex needs further operational examples. See the [public discussion of counting places and coherent worship complexes](docs/development/pow-counting-and-complexes-discussion-2026-09-22.md) for the examples, persistent identifiers through inactivity, and open questions. The discussion precedes changes to the operational definition and implemented counting rules.
+The proposed direction treats a shared multi-faith prayer room as a PoW and distinct hospital chapels as distinct PoWs. A coherent worship complex can include several buildings, rooms, or altars. The boundary of a coherent complex needs further operational examples. See the [public discussion of counting places and coherent worship complexes](docs/development/pow-counting-and-complexes-discussion-2026-09-22.md) for the examples, persistent identifiers through inactivity, and open questions. Version 0.1.6 of the operational definition (2026-09-22) adopted the discussion's rule for shared rooms and replacement venues; the boundary of a coherent complex and the implemented counting rules remain follow-up work.
 
 ## What do opening, closure, and change dates mean here?
 
