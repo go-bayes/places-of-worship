@@ -13,7 +13,7 @@
 
 ### 2026-09-22 (counting places and coherent worship complexes)
 
-- Added a [public discussion of the PoW counting unit](docs/development/pow-counting-and-complexes-discussion-2026-09-22.md), with examples distinguishing shared prayer rooms, distinct hospital chapels, internal worship spaces, rebuilding, and replacement venues. The discussion records the agreed direction and unresolved complex boundaries, activity aggregation, and mapping uncertainty. Linked it from the operational definition and FAQ; implementation and a versioned definition revision remain follow-up work.
+- Added a [public discussion of the PoW counting unit](docs/development/pow-counting-and-complexes-discussion-2026-09-22.md), with examples distinguishing shared prayer rooms, distinct hospital chapels, internal worship spaces, rebuilding, and replacement venues. The discussion records the agreed direction and unresolved complex boundaries, activity aggregation, and mapping uncertainty. Linked it from the operational definition and FAQ; implementation and a versioned definition revision remain follow-up work. The definition's Version history names the discussion as a pending revision and lists the points on which the canonical page and version 0.1.5 differ, and the rule that a shared representative point is evidence about location alone now stands as its own sentence under Identity over time.
 
 ### 2026-09-22 (quick photo from the phone)
 
