@@ -48,6 +48,10 @@ At a specified time, a place of worship is a reproducibly mappable site for whic
 
 Candidate collection is broader than accepted classification. An OSM tag, directory entry, public nomination, or field observation may create a provisional claim for review. The claim becomes an accepted site-time state when the evidence supports the working definition. Boundary and culturally restricted cases retain their source wording, uncertainty, and access conditions. See the [current operational definition](docs/operational-definition.md) for the full rule and its application to measurement over time.
 
+## How should shared rooms and worship complexes be counted?
+
+The proposed direction treats a shared multi-faith prayer room as a PoW and distinct hospital chapels as distinct PoWs. A coherent worship complex can include several buildings, rooms, or altars. The boundary of a coherent complex needs further operational examples. See the [public discussion of counting places and coherent worship complexes](docs/development/pow-counting-and-complexes-discussion-2026-09-22.md) for the examples, persistent identifiers through inactivity, and open questions. The discussion precedes changes to the operational definition and implemented counting rules.
+
 ## What do opening, closure, and change dates mean here?
 
 These are source-backed dates and changes in the history of a worship site,
