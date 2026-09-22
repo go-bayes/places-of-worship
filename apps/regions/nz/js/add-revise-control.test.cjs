@@ -480,6 +480,47 @@ const dot = { type: "Feature", properties: { name: "St Mary's", osm_id: "1", osm
   // the marker binds the hold
   const source = fs.readFileSync(path.join(__dirname, "verification-map.js"), "utf8");
   assert.match(source, /this\.pinMarker\.on\("contextmenu", event => \{/);
+  assert.match(source, /this\.armPinHold\(this\.pinMarker\);/);
 }
 
-console.log("add-revise-control: 14 checks passed");
+// 15. a mouse held still on the pin (jb 2026-09-23): the left button
+//     down for the hold time opens the same menu; a drag, a release or
+//     the right button (contextmenu's) does not
+{
+  const app = fresh();
+  const timers = [];
+  window.setTimeout = (fn, ms) => { timers.push({ fn, ms, cleared: false }); return timers.length; };
+  window.clearTimeout = (id) => { if (timers[id - 1]) timers[id - 1].cleared = true; };
+  const handlers = {};
+  const marker = { on(name, fn) { handlers[name] = fn; } };
+  app.pinMarker = marker;
+  let opened = 0;
+  app.openPinHoldMenu = () => { opened += 1; };
+  app.armPinHold(marker);
+  handlers.mousedown({ originalEvent: { button: 0 } });
+  assert.equal(timers.length, 1);
+  assert.equal(timers[0].ms, 600);
+  timers[0].fn();
+  assert.equal(opened, 1, "a still hold opens the menu");
+  // a drag cancels the hold
+  handlers.mousedown({ originalEvent: { button: 0 } });
+  handlers.dragstart();
+  assert.equal(timers[1].cleared, true);
+  // a release cancels it
+  handlers.mousedown({ originalEvent: { button: 0 } });
+  handlers.mouseup();
+  assert.equal(timers[2].cleared, true);
+  // the right button and a touch belong to contextmenu
+  handlers.mousedown({ originalEvent: { button: 2 } });
+  handlers.mousedown({ originalEvent: { button: 0, pointerType: "touch" } });
+  assert.equal(timers.length, 3);
+  // a pin lifted before the hold fires opens nothing
+  handlers.mousedown({ originalEvent: { button: 0 } });
+  app.pinMarker = null;
+  timers[3].fn();
+  assert.equal(opened, 1);
+  window.setTimeout = setTimeout;
+  window.clearTimeout = clearTimeout;
+}
+
+console.log("add-revise-control: 15 checks passed");
