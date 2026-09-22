@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-22 (operational definition 0.1.6)
+
+- Version 0.1.6 of the [operational definition](docs/operational-definition.md), snapshot at `docs/development/place-of-worship-definition-2026-09-22-v0.1.6.md` (JB rulings, 2026-09-22). A new section, Purpose and entity, states why the project counts places of worship and defines the entity by six kinds of attribute (spatial, temporal, worship, community, functional, relational), each carrying uncertainty and vagueness, with the identifier tracking identity through time. Identity is now the joint continuity of site and community: a community that moves to a new site begins a new place of worship linked to its predecessor, the entity at the old site persists as inactive or ends, a building moved within its site keeps its identifier, and a new community's worship over a former site is a new place (Christ Church Cathedral and the Transitional Cathedral are the worked example). Amendment R-F1′, the country index and the shared-point rule are folded into the canonical text; a shared room is one place with several community attributes and a hospital's separate chapel and prayer room are two. The v0.1.5 snapshot carries a supersession notice, and the FAQ and the counting discussion point at the new version. Documentation only: the occupancy validator, the occupancy plan and the review-decision vocabulary still encode the earlier relocation rule, listed in the revision note as follow-up work.
+
 ### 2026-09-23 (the mouse's hold on the pin)
 
 - On a computer the pin's menu now opens from a held mouse button as well as a right click (JB, 2026-09-23: "if you hold the pin you should get the same remove pin options as on the phone"): the left button down and still on the pin for 600 ms opens `Remove pin` / `Cancel placement` (or `Discard this entry` once confirmed), exactly as the held touch does on a phone; a drag, a release, leaving the pin or the right button cancel the hold. Check 15 in `add-revise-control.test.cjs`; RA guide updated; stamp `verification-map.js?v=20260923b`.

@@ -2,6 +2,8 @@
 
 Date: 2026-09-22. Status: public discussion of the direction agreed with the project lead. The examples clarify the intended counting unit; the general rule for identifying a coherent complex still needs operational criteria. This discussion precedes a versioned revision of the [operational definition](../operational-definition.md) and the corresponding implementation.
 
+Update, 2026-09-22: [version 0.1.6 of the operational definition](place-of-worship-definition-2026-09-22-v0.1.6.md) adopted the rule that a move to a new site begins a new place of worship, so the Transitional Cathedral has its own identifier, and adopted the shared-room and distinct-chapel examples. The four operational questions below remain open, and the implementation still follows the earlier rule.
+
 ## The proposed counting unit
 
 A place of worship (PoW) is counted at the level of a mappable worship place or coherent worship complex. Once that spatial unit is defined, it has one PoW identifier at a given time. Communities, religious affiliations, rituals, and internal structures describe the PoW and can change through time. Multiple affiliations or rituals within the same unit do not multiply its PoW count.
