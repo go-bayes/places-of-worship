@@ -975,6 +975,12 @@ const SIDEBAR_W_STEP = 40;
 const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 };
 const POSITION_ZOOM = 17;
 const PIN_PROXIMITY_METRES = 150;
+// quick photo (jb 2026-09-22): the photo types attachment storage takes,
+// its 10 MB cap, and the location contract's radius bounds
+const QUICK_PHOTO_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const QUICK_PHOTO_MAX_BYTES = 10 * 1024 * 1024;
+const QUICK_PHOTO_MIN_RADIUS_M = 25;
+const QUICK_PHOTO_MAX_RADIUS_M = 100000;
 // nearby tasks one entry may link as probably the same place (backend
 // PROBABLE_SAME_AS_MAX)
 const PIN_LINK_MAX = 5;
@@ -1944,6 +1950,10 @@ class NzVerificationMap {
         this.pinUncertaintyCircle = null;
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
+        // quick photo (jb 2026-09-22): the open card, and a photo carried
+        // into the pin flow when no position was found
+        this.quickPhoto = null;
+        this.quickPhotoCarry = null;
         // nearby tasks the contributor linked as probably this same place
         // while keeping the new pin (guy, 2026-09-07)
         this.pinLinkedRefs = [];
@@ -3821,6 +3831,10 @@ class NzVerificationMap {
     // place, otherwise it drops a pin; while an entry is open the same
     // button is the way out, since a phone has no Escape key
     handleAddReviseClick() {
+        if (this.quickPhoto) {
+            this.cancelQuickPhoto();
+            return;
+        }
         if (this.pinMode) {
             // a period placement returns to its periods pane with nothing
             // lost; an add or revise entry is discarded, asking first only
@@ -3855,12 +3869,14 @@ class NzVerificationMap {
         if (!button) return;
         button.disabled = false;
         button.removeAttribute?.("disabled");
-        if (this.pinMode) {
+        if (this.pinMode || this.quickPhoto) {
             button.textContent = "Cancel";
             button.classList.add("cancelling");
             if (hint) hint.textContent = "";
-            // the sheet's button leaves with the hint while an entry is open
+            // the sheet's button and the quick photo leave with the hint
+            // while an entry is open
             this.renderAssignedTasksButton();
+            this.renderQuickPhotoButton();
             return;
         }
         button.classList.remove("cancelling");
@@ -3873,6 +3889,7 @@ class NzVerificationMap {
                 : "Drops a pin for a new place. Hold on the map (double-click on a computer) to add one there; tap a dot to revise it.";
         }
         this.renderAssignedTasksButton();
+        this.renderQuickPhotoButton();
     }
 
     // the specialist sheet's button sits under the control at the same
@@ -3890,7 +3907,7 @@ class NzVerificationMap {
         const assigned = document.getElementById("assignedTasksButton");
         if (!assigned) return;
         const count = this.assignedTaskCount();
-        const show = Boolean(count) && !this.pinMode && this.portalMode === "add";
+        const show = Boolean(count) && !this.pinMode && !this.quickPhoto && this.portalMode === "add";
         assigned.hidden = !show;
         assigned.textContent = show ? `Assigned tasks (${count})` : "Assigned tasks";
     }
@@ -3900,8 +3917,431 @@ class NzVerificationMap {
         if (!input?.classList?.contains?.("attachment-file-input")) return;
         const count = input.closest?.(".file-pick")?.querySelector?.(".file-pick-count");
         if (!count) return;
-        const n = input.files?.length || 0;
+        const carried = input.id === "pinEvidenceFiles" ? (this.quickPhotoCarry?.files?.length || 0) : 0;
+        const n = (input.files?.length || 0) + carried;
         count.textContent = n ? `${n} chosen` : "";
+    }
+
+    // --- quick photo (jb 2026-09-22: "a quick photo entry button, where a
+    // user snaps a shot of a possible PoW for further (potentially AI)
+    // review"). one press opens the camera; the photo, the phone's
+    // position and today's date go to review as a flagged partial entry
+    // on the rapid lane (an approximate area the size of the fix), and the
+    // photo attaches to the task that entry creates. the reviewer, or a
+    // later entry, fills in the details; nothing reaches the public map
+
+    quickPhotoOffered() {
+        return ASSIGNMENT_MODE && RAPID_NOMINATION_ENTRY
+            && Boolean(this.backend?.configured && this.backendUser)
+            && this.portalMode === "add";
+    }
+
+    // shown only signed in, in Add / Revise, with attachment storage
+    // wired, and while no entry is open
+    renderQuickPhotoButton() {
+        const wrap = document.getElementById("quickPhotoWrap");
+        if (!wrap) return;
+        const offered = this.quickPhotoOffered();
+        if (offered && this.attachmentsEnabledCache === undefined) this.probeAttachmentsEnabled();
+        wrap.hidden = !(offered && this.attachmentsEnabledCache === true && !this.pinMode && !this.quickPhoto);
+    }
+
+    // one probe per sign-in; the answer re-renders the button
+    probeAttachmentsEnabled() {
+        if (this.attachmentsProbe) return this.attachmentsProbe;
+        this.attachmentsProbe = Promise.resolve()
+            .then(() => this.backend.attachmentsEnabled())
+            .then(enabled => { this.attachmentsEnabledCache = Boolean(enabled); }, () => { this.attachmentsEnabledCache = false; })
+            .then(() => {
+                this.attachmentsProbe = null;
+                this.renderQuickPhotoButton();
+            });
+        return this.attachmentsProbe;
+    }
+
+    startQuickPhoto() {
+        const input = document.getElementById("quickPhotoInput");
+        if (!input || !this.quickPhotoOffered() || this.pinMode || this.quickPhoto) return;
+        // the position request starts with the press so the fix is usually
+        // in hand when the shutter closes; it settles, never rejects
+        this.quickPhotoFix = this.geolocationAvailable()
+            ? this.requestPosition().then(fix => ({ fix }), error => ({ error: error.message }))
+            : Promise.resolve({ error: "This browser offers no location here." });
+        input.value = "";
+        input.click();
+    }
+
+    quickPhotoChosen(file) {
+        const hint = document.getElementById("quickPhotoHint");
+        if (!file || this.quickPhoto) return;
+        if (!QUICK_PHOTO_TYPES.has(file.type)) {
+            if (hint) hint.textContent = "That file is not a JPEG, PNG or WebP photo. Take the photo again.";
+            return;
+        }
+        if (file.size > QUICK_PHOTO_MAX_BYTES) {
+            if (hint) hint.textContent = "That photo is over 10 MB. Take it again at a smaller size.";
+            return;
+        }
+        if (this.pinMode) this.exitPinMode();
+        this.quickPhoto = {
+            file,
+            fix: null,
+            positionError: "",
+            // one id per card so a retry of a failed send never lands twice
+            submissionId: window.PowRapidEntry?.secureSubmissionId?.() || "",
+            previewUrl: window.URL?.createObjectURL?.(file) || "",
+        };
+        // a new entry starts from a clean slate, as the pin flow does
+        this.selectedTask = null;
+        this.issueFormOpenTaskId = null;
+        this.map?.closePopup?.();
+        this.setEntryOpen(true);
+        document.body?.classList?.add("pin-open");
+        this.mountQuickPhotoCard();
+        this.renderAddReviseControl();
+        this.paneSnap("entry");
+        this._quickPhotoKeyHandler = (event) => {
+            if (event.key === "Escape") this.cancelQuickPhoto();
+        };
+        document.addEventListener?.("keydown", this._quickPhotoKeyHandler);
+        const fix = this.quickPhotoFix || Promise.resolve({ error: "Your position was not requested." });
+        this.quickPhotoFix = null;
+        fix.then(result => this.quickPhotoPositioned(result));
+    }
+
+    quickPhotoCardHtml() {
+        const preview = this.quickPhoto?.previewUrl
+            ? `<img id="quickPhotoPreview" class="quick-photo-preview" src="${escapeHtml(this.quickPhoto.previewUrl)}" alt="Your photo">`
+            : "";
+        return `
+            <h2 class="pin-host-title">Quick photo</h2>
+            <div id="quickPhotoCard" class="pin-card">
+                ${preview}
+                <div id="quickPhotoPosition" class="copy-help" aria-live="polite">Finding your position…</div>
+                <label>
+                    Place name, if you know it (optional)
+                    <input id="quickPhotoName" type="text" maxlength="200" placeholder="e.g. St Mary's Church" autocomplete="off">
+                </label>
+                <label>
+                    Note for the reviewer (optional)
+                    <input id="quickPhotoNote" type="text" maxlength="500" placeholder="e.g. small church on the corner" autocomplete="off">
+                </label>
+                <div id="quickPhotoNearby" class="pilot-note" hidden></div>
+                <div class="copy-help">Sent for review with your position and today's date, flagged for a reviewer to fill in the details. Review-only, never public.</div>
+                <div class="button-row">
+                    <button id="quickPhotoSendButton" class="primary" type="button" disabled>Send for review</button>
+                    <button id="quickPhotoDropPinButton" type="button" hidden>Drop the pin instead</button>
+                    <button id="quickPhotoCancelButton" type="button">Cancel</button>
+                </div>
+                <div id="quickPhotoStatus" class="copy-status" aria-live="polite"></div>
+            </div>
+        `;
+    }
+
+    mountQuickPhotoCard() {
+        const host = document.getElementById("pinCardHost");
+        if (!host) return;
+        host.innerHTML = this.quickPhotoCardHtml();
+        host.hidden = false;
+        document.getElementById("quickPhotoSendButton")?.addEventListener("click", () => this.sendQuickPhoto());
+        document.getElementById("quickPhotoDropPinButton")?.addEventListener("click", () => this.quickPhotoDropPinInstead());
+        document.getElementById("quickPhotoCancelButton")?.addEventListener("click", () => this.cancelQuickPhoto());
+        ["quickPhotoName", "quickPhotoNote"].forEach(id => {
+            document.getElementById(id)?.addEventListener("keydown", event => {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    this.sendQuickPhoto();
+                }
+            });
+        });
+        // the position line and the send button start in the waiting state
+        this.renderQuickPhotoPosition();
+        this.revealPinHost();
+    }
+
+    // the fix arrives after the card is up: the map goes to the spot and
+    // the send button opens; without one the pin flow is the way on
+    quickPhotoPositioned(result) {
+        if (!this.quickPhoto) return;
+        if (result?.fix) {
+            this.quickPhoto.fix = result.fix;
+            this.quickPhoto.positionError = "";
+            this.lastPositionFix = result.fix;
+            this.showPositionOnMap(result.fix);
+            this.map?.setView?.([result.fix.latitude, result.fix.longitude], POSITION_ZOOM);
+        } else {
+            this.quickPhoto.fix = null;
+            this.quickPhoto.positionError = result?.error || "Could not find your position.";
+        }
+        this.renderQuickPhotoPosition();
+    }
+
+    renderQuickPhotoPosition() {
+        const line = document.getElementById("quickPhotoPosition");
+        const send = document.getElementById("quickPhotoSendButton");
+        const dropPin = document.getElementById("quickPhotoDropPinButton");
+        const fix = this.quickPhoto?.fix;
+        if (fix) {
+            const radius = this.quickPhotoRadius(fix);
+            if (line) {
+                line.textContent = `Position: your phone's fix, about ${fix.accuracyM} m, shown by the blue ring on the map. The place is recorded as an area of ${radius} m around it.`
+                    + (fix.accuracyM > 50 ? " The fix is rough here; the reviewer will place the building." : "");
+            }
+            if (send) send.disabled = false;
+            if (dropPin) dropPin.hidden = true;
+            return;
+        }
+        if (line) {
+            line.textContent = this.quickPhoto?.positionError
+                ? `${this.quickPhoto.positionError} Drop the pin where the photo was taken instead; the photo comes with it.`
+                : "Finding your position…";
+        }
+        if (send) send.disabled = true;
+        if (dropPin) dropPin.hidden = !this.quickPhoto?.positionError;
+    }
+
+    // the recorded area is the fix's accuracy, within the contract's bounds
+    quickPhotoRadius(fix) {
+        const accuracy = Math.round(Number(fix?.accuracyM) || 0);
+        return Math.min(QUICK_PHOTO_MAX_RADIUS_M, Math.max(QUICK_PHOTO_MIN_RADIUS_M, accuracy));
+    }
+
+    quickPhotoDiscussionNote(note, fix, nearby) {
+        const radius = this.quickPhotoRadius(fix);
+        const names = (nearby || []).map(row => `${row.name} (${row.distance} m)`);
+        const checked = names.length
+            ? ` Nearby check: ${names.length} recorded within ${Math.max(PIN_PROXIMITY_METRES, radius)} m, sent anyway: ${names.join("; ")}.`
+            : ` Nearby check: nothing recorded within ${Math.max(PIN_PROXIMITY_METRES, radius)} m on this device's map.`;
+        return `Quick photo capture: a photo taken on the spot for review, position from the phone (about ${fix.accuracyM} m); details not entered.`
+            + checked
+            + (note ? ` Note: ${note}` : "");
+    }
+
+    // what this device can see near the fix: the task features the portal
+    // holds, and the rendered dot nearest the fix on the map's tiles (the
+    // map moved there when the fix arrived, so the tiles are usually in).
+    // the pin flow makes the same two checks, with the contributor's eyes
+    // on the map; here the card names what was found instead
+    quickPhotoNearby(fix, radius) {
+        const rows = this.nearbyTaskRows({ lat: fix.latitude, lng: fix.longitude }, radius).map(row => ({ ...row, source: "task" }));
+        const map = this.map;
+        const zoom = map?.getZoom?.();
+        if (map?.latLngToContainerPoint && Number.isFinite(zoom) && this.tileDotLayers) {
+            // metres to pixels at this zoom and latitude, capped so a rough
+            // fix never scans the whole screen
+            const metresPerPixel = 40075016.686 * Math.cos(fix.latitude * Math.PI / 180) / (256 * 2 ** zoom);
+            const reach = Math.max(PIN_PROXIMITY_METRES, radius);
+            const radiusPx = Math.min(600, Math.max(14, reach / metresPerPixel));
+            const point = map.latLngToContainerPoint(L.latLng(fix.latitude, fix.longitude));
+            const dot = this.tileDotAt(point, radiusPx);
+            if (dot?.latlng) {
+                const distance = Math.round(L.latLng(fix.latitude, fix.longitude).distanceTo(dot.latlng));
+                rows.push({ name: dot.feature?.properties?.name || "Unnamed place on the map", distance, status: "on the map", source: "dot", feature: dot.feature });
+            }
+        }
+        return rows.sort((a, b) => a.distance - b.distance);
+    }
+
+    // a recorded place near the fix is shown once before sending; the
+    // second press sends anyway and the note names what was found
+    renderQuickPhotoNearby(rows) {
+        const block = document.getElementById("quickPhotoNearby");
+        if (!block) return;
+        block.hidden = !rows.length;
+        if (!rows.length) return;
+        const shown = rows.slice(0, 5);
+        block.innerHTML = `Already recorded near here: ${shown.map(row => `<strong>${escapeHtml(row.name)}</strong> (${row.distance} m, ${escapeHtml(row.status)})`).join(", ")}${rows.length > shown.length ? ` and ${rows.length - shown.length} more` : ""}. If your photo is one of these, cancel and revise it from its dot; otherwise press <em>Send for review</em> again.`;
+    }
+
+    async sendQuickPhoto() {
+        const capture = this.quickPhoto;
+        const status = document.getElementById("quickPhotoStatus");
+        const send = document.getElementById("quickPhotoSendButton");
+        const refuse = text => {
+            if (!status) return;
+            status.textContent = text;
+            status.classList.add("copy-status-error");
+        };
+        status?.classList.remove("copy-status-error");
+        if (!capture) return;
+        if (!capture.fix) {
+            refuse("Your position is not known yet. Wait for the fix, or drop the pin instead.");
+            return;
+        }
+        if (!this.backend?.configured || !this.backend.signedIn) {
+            refuse("Sign in before sending this photo.");
+            return;
+        }
+        if (!window.PowRapidEntry || !window.PowLocationAssertion) {
+            refuse("The entry contracts did not load. Reload the portal before sending.");
+            return;
+        }
+        const name = (document.getElementById("quickPhotoName")?.value || "").trim().slice(0, 200);
+        const note = (document.getElementById("quickPhotoNote")?.value || "").trim().slice(0, 500);
+        const fix = capture.fix;
+        const radius = this.quickPhotoRadius(fix);
+        const nearby = this.quickPhotoNearby(fix, radius);
+        if (nearby.length && !capture.nearbyShown) {
+            capture.nearbyShown = true;
+            this.renderQuickPhotoNearby(nearby);
+            refuse("A recorded place is near this spot. Check the line above, then press Send for review again to send anyway.");
+            return;
+        }
+        let locationAssertion;
+        try {
+            locationAssertion = window.PowLocationAssertion.payload({
+                mode: "approximate_area",
+                basis: "local_investigator_account",
+                latitude: fix.latitude,
+                longitude: fix.longitude,
+                uncertaintyRadiusM: radius,
+                sourceWording: `Phone position while photographing the place, accuracy about ${fix.accuracyM} m.`,
+                confidence: fix.accuracyM <= 50 ? "moderate" : "low",
+                contributorConfirmed: true,
+            });
+        } catch (error) {
+            refuse(error.message || "The position could not be recorded.");
+            return;
+        }
+        const values = {
+            currentStatus: "",
+            observationBasis: "",
+            observedOn: window.PowRapidEntry.localIsoDate(),
+            privacyFlag: "needs_review",
+            discussionNote: this.quickPhotoDiscussionNote(note, fix, nearby),
+            uncertaintyNote: "",
+        };
+        const flagOptions = { flagForDiscussion: true };
+        const problem = window.PowRapidEntry.validateObservationDetailed(values, flagOptions);
+        if (problem) {
+            refuse(problem.message);
+            return;
+        }
+        const candidate = {
+            name: name || "Unknown place of worship",
+            latitude: fix.latitude,
+            longitude: fix.longitude,
+            locationAssertion,
+        };
+        const zoom = Number.isFinite(this.map?.getZoom?.()) ? this.map.getZoom() : POSITION_ZOOM;
+        if (send) send.disabled = true;
+        if (status) status.textContent = "Sending securely for review...";
+        try {
+            const result = await this.backend.submitCurrentObservation({
+                clientSubmissionId: capture.submissionId,
+                countryCode: COUNTRY_CONFIG.countryCode,
+                candidate,
+                observation: window.PowRapidEntry.observationPayload(values, flagOptions),
+                flagForDiscussion: true,
+                clientContext: {
+                    placement_zoom: zoom,
+                    proximity_checked: true,
+                    nearby_count: nearby.length,
+                    portal_version: "rapid-current-v1-multicountry",
+                },
+            });
+            // synthesise the backend-task shape locally so the entry is on
+            // the map and in the list before the batch queries catch up
+            const manualTask = {
+                task_id: result.task_id,
+                batch_id: `manual-${COUNTRY_CONFIG.countryCode.toLowerCase()}`,
+                country_code: COUNTRY_CONFIG.countryCode,
+                task_type: "missing_from_project_map",
+                priority: "high",
+                status: result.task_status,
+                assigned_to: this.backendUser?._id,
+                target_years: COUNTRY_CONFIG.targetYears.map(Number),
+                candidate_site_id: result.candidate_site_id,
+                name: candidate.name,
+                geometry: { type: "Point", coordinates: [fix.longitude, fix.latitude] },
+                initial_location_assertion: locationAssertion,
+                automated_checks: [{
+                    check_id: "quick_photo_capture",
+                    severity: "info",
+                    message: "A contributor sent a quick photo of a possible place of worship from the spot; the details are not entered.",
+                    suggested_action: "review_photo_and_place_building",
+                }],
+                task_brief: "Review this quick photo capture. Place the building from the photo and the position ring, confirm it is a place of worship, and check whether an existing project or OSM record already represents it.",
+            };
+            this.manualTasksById.set(result.task_id, manualTask);
+            this.backendTasksById.set(result.task_id, manualTask);
+            this.latestDraftsByTaskId.set(result.task_id, null);
+            await this.refreshBackendTasks();
+            this.applyFilters();
+            const file = capture.file;
+            this.closeQuickPhoto({ keepEntry: true });
+            const submittedProps = { task_id: result.task_id, name: candidate.name };
+            // the confirmation screen uploads the photo against the new
+            // task, exactly as the form's chosen files do
+            this.renderSubmissionRecordedDetail(submittedProps, {
+                deduped: Boolean(result.deduped),
+                nomination: true,
+                hasEvidenceFiles: true,
+                pendingFiles: { files: [file], caption: "Quick photo capture" },
+                withdrawDraftId: result.evidence_draft_id,
+                knownHistory: {
+                    taskId: result.task_id,
+                    parentEvidenceDraftId: result.evidence_draft_id,
+                    taskName: candidate.name,
+                    referenceDate: values.observedOn,
+                    referenceDateFromParent: true,
+                    nomination: true,
+                },
+            });
+            this.focusDetailPanel();
+        } catch (error) {
+            if (error.authExpired) {
+                this.backendUser = null;
+                this.backendLastError = error.message;
+                this.renderBackendPanel();
+            }
+            if (send) send.disabled = false;
+            refuse(`${error.message || "Could not send the photo."} Nothing was sent — try again.`);
+        }
+    }
+
+    // no position: the photo rides into the ordinary add flow and uploads
+    // with whatever the contributor saves there
+    quickPhotoDropPinInstead() {
+        const capture = this.quickPhoto;
+        if (!capture) return;
+        this.closeQuickPhoto({ keepEntry: true });
+        this.quickPhotoCarry = { files: [capture.file], caption: "Quick photo capture" };
+        this.enterPinMode();
+        const status = document.getElementById("pinStatus");
+        if (status) status.textContent = "Drop the pin where the photo was taken. Your photo attaches when you save.";
+    }
+
+    cancelQuickPhoto() {
+        if (!this.quickPhoto) return;
+        if (!window.confirm("Discard this photo? Nothing has been saved.")) return;
+        this.closeQuickPhoto();
+        const status = document.getElementById("copyStatus");
+        if (status) status.textContent = "Entry discarded. Nothing was saved.";
+    }
+
+    // tears the card down; keepEntry leaves the entry-open state to the
+    // screen that follows (the recorded screen or the pin flow)
+    closeQuickPhoto({ keepEntry = false } = {}) {
+        const capture = this.quickPhoto;
+        if (capture?.previewUrl) window.URL?.revokeObjectURL?.(capture.previewUrl);
+        this.quickPhoto = null;
+        this.quickPhotoFix = null;
+        if (this._quickPhotoKeyHandler) {
+            document.removeEventListener?.("keydown", this._quickPhotoKeyHandler);
+            this._quickPhotoKeyHandler = null;
+        }
+        const host = document.getElementById("pinCardHost");
+        if (host) {
+            host.innerHTML = "";
+            host.hidden = true;
+        }
+        document.body?.classList?.remove("pin-open");
+        if (!keepEntry) {
+            this.setEntryOpen(false);
+            this.renderInitialDetail();
+        }
+        this.renderAddReviseControl();
     }
 
     // the add flow is armed (the contributor pressed Add a place) but no
@@ -4349,6 +4789,8 @@ class NzVerificationMap {
                 // the transient cards render into #pinCardHost on demand
                 document.getElementById("addPlaceButton")?.addEventListener("click", () => this.handleAddReviseClick());
                 document.getElementById("assignedTasksButton")?.addEventListener("click", () => this.setPortalMode("assigned"));
+                document.getElementById("quickPhotoButton")?.addEventListener("click", () => this.startQuickPhoto());
+                document.getElementById("quickPhotoInput")?.addEventListener("change", event => this.quickPhotoChosen(event.target?.files?.[0]));
             }
         }
 
@@ -7468,7 +7910,14 @@ class NzVerificationMap {
     pendingEvidenceFiles(prefix) {
         const input = document.getElementById(`${prefix}EvidenceFiles`);
         const caption = (document.getElementById(`${prefix}EvidenceFilesCaption`)?.value || "").trim();
-        return { files: [...(input?.files || [])], caption };
+        const chosen = [...(input?.files || [])];
+        // a quick photo that found no position rides the pin flow instead
+        const carry = prefix === "pin" && this.quickPhotoCarry ? this.quickPhotoCarry : null;
+        const carried = carry?.files || [];
+        return {
+            files: [...chosen, ...carried],
+            caption: caption || (carried.length && !chosen.length ? carry.caption : ""),
+        };
     }
 
     // a deployment without attachment storage hides the in-form picker,
@@ -11090,6 +11539,7 @@ class NzVerificationMap {
         if (!host) return;
         host.innerHTML = this.pinCardsHtml();
         host.hidden = false;
+        if (this.quickPhotoCarry) this.syncFilePickCount(document.getElementById("pinEvidenceFiles"));
         document.getElementById("pinConfirmButton")?.addEventListener("click", () => this.confirmPinLocation());
         document.getElementById("pinCancelButton")?.addEventListener("click", () => this.exitPinMode());
         document.getElementById("pinFormCancelButton")?.addEventListener("click", () => this.exitPinMode());
@@ -11196,7 +11646,7 @@ class NzVerificationMap {
     // down, and nothing is left behind to resume. asks first only when
     // there is something to lose
     discardEntryAttempt({ confirmFirst = true } = {}) {
-        const somethingToLose = Boolean(this.formDirty || this.pinConfirmed);
+        const somethingToLose = Boolean(this.formDirty || this.pinConfirmed || this.quickPhotoCarry);
         if (confirmFirst && somethingToLose && !window.confirm("Discard this entry? Nothing has been saved.")) return false;
         this.clearRapidDraft("rapid-pin");
         this.clearGuidedPeriods(RAPID_PIN_PERIODS_KEY);
@@ -12059,6 +12509,7 @@ class NzVerificationMap {
         this.pinLinkedRefs = [];
         this.pinSubmissionId = null;
         this.pinHistory = [];
+        this.quickPhotoCarry = null;
         if (this._pinClickHandler) {
             this.map.off("click", this._pinClickHandler);
             this._pinClickHandler = null;

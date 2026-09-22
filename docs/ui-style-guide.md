@@ -39,6 +39,19 @@ and is dated in place.
 - Use `Take photo or add files` for the one file control, in front of the
   hidden native input (a phone then offers its camera); the chosen count
   reads beside it. Never show a bare `Choose Files` input.
+- Use `Quick photo` for the camera-first shortcut under `Add / Revise`
+  (ruled 2026-09-22: "a quick photo entry button, where a user snaps a
+  shot of a possible PoW for further review"). It is the third button of
+  the same size, outlined, shown only signed in, in `Add / Revise`, with
+  attachment storage wired and no entry open. Its card is headed `Quick
+  photo`; `Send for review` is its one filled button, `Drop the pin
+  instead` appears only when no position was found, and `Cancel` sits
+  beside them. Its two text fields are `Place name, if you know it` and
+  `Note for the reviewer`, never one field for both: a name is identity
+  data and a note is commentary. A recorded place near the fix is named
+  on the card before the first send goes through. The entry it sends is a flagged partial entry, so the
+  review queue shows it as `Note to resolve`, never as a complete
+  observation.
 - Use `Save draft` when the RA is still gathering evidence.
 - Use `Submit for review` when the RA wants JB or a reviewer to inspect the
   evidence.
