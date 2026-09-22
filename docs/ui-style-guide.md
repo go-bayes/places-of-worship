@@ -46,7 +46,10 @@ and is dated in place.
   attachment storage wired and no entry open. Its card is headed `Quick
   photo`; `Send for review` is its one filled button, `Drop the pin
   instead` appears only when no position was found, and `Cancel` sits
-  beside them. The entry it sends is a flagged partial entry, so the
+  beside them. Its two text fields are `Place name, if you know it` and
+  `Note for the reviewer`, never one field for both: a name is identity
+  data and a note is commentary. A recorded place near the fix is named
+  on the card before the first send goes through. The entry it sends is a flagged partial entry, so the
   review queue shows it as `Note to resolve`, never as a complete
   observation.
 - Use `Save draft` when the RA is still gathering evidence.

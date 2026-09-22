@@ -4019,9 +4019,14 @@ class NzVerificationMap {
                 ${preview}
                 <div id="quickPhotoPosition" class="copy-help" aria-live="polite">Finding your position…</div>
                 <label>
-                    Name or note (optional)
-                    <input id="quickPhotoNote" type="text" maxlength="200" placeholder="e.g. small church on the corner" autocomplete="off">
+                    Place name, if you know it (optional)
+                    <input id="quickPhotoName" type="text" maxlength="200" placeholder="e.g. St Mary's Church" autocomplete="off">
                 </label>
+                <label>
+                    Note for the reviewer (optional)
+                    <input id="quickPhotoNote" type="text" maxlength="500" placeholder="e.g. small church on the corner" autocomplete="off">
+                </label>
+                <div id="quickPhotoNearby" class="pilot-note" hidden></div>
                 <div class="copy-help">Sent for review with your position and today's date, flagged for a reviewer to fill in the details. Review-only, never public.</div>
                 <div class="button-row">
                     <button id="quickPhotoSendButton" class="primary" type="button" disabled>Send for review</button>
@@ -4041,11 +4046,13 @@ class NzVerificationMap {
         document.getElementById("quickPhotoSendButton")?.addEventListener("click", () => this.sendQuickPhoto());
         document.getElementById("quickPhotoDropPinButton")?.addEventListener("click", () => this.quickPhotoDropPinInstead());
         document.getElementById("quickPhotoCancelButton")?.addEventListener("click", () => this.cancelQuickPhoto());
-        document.getElementById("quickPhotoNote")?.addEventListener("keydown", event => {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                this.sendQuickPhoto();
-            }
+        ["quickPhotoName", "quickPhotoNote"].forEach(id => {
+            document.getElementById(id)?.addEventListener("keydown", event => {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    this.sendQuickPhoto();
+                }
+            });
         });
         // the position line and the send button start in the waiting state
         this.renderQuickPhotoPosition();
@@ -4099,9 +4106,51 @@ class NzVerificationMap {
         return Math.min(QUICK_PHOTO_MAX_RADIUS_M, Math.max(QUICK_PHOTO_MIN_RADIUS_M, accuracy));
     }
 
-    quickPhotoDiscussionNote(note, fix) {
+    quickPhotoDiscussionNote(note, fix, nearby) {
+        const radius = this.quickPhotoRadius(fix);
+        const names = (nearby || []).map(row => `${row.name} (${row.distance} m)`);
+        const checked = names.length
+            ? ` Nearby check: ${names.length} recorded within ${Math.max(PIN_PROXIMITY_METRES, radius)} m, sent anyway: ${names.join("; ")}.`
+            : ` Nearby check: nothing recorded within ${Math.max(PIN_PROXIMITY_METRES, radius)} m on this device's map.`;
         return `Quick photo capture: a photo taken on the spot for review, position from the phone (about ${fix.accuracyM} m); details not entered.`
+            + checked
             + (note ? ` Note: ${note}` : "");
+    }
+
+    // what this device can see near the fix: the task features the portal
+    // holds, and the rendered dot nearest the fix on the map's tiles (the
+    // map moved there when the fix arrived, so the tiles are usually in).
+    // the pin flow makes the same two checks, with the contributor's eyes
+    // on the map; here the card names what was found instead
+    quickPhotoNearby(fix, radius) {
+        const rows = this.nearbyTaskRows({ lat: fix.latitude, lng: fix.longitude }, radius).map(row => ({ ...row, source: "task" }));
+        const map = this.map;
+        const zoom = map?.getZoom?.();
+        if (map?.latLngToContainerPoint && Number.isFinite(zoom) && this.tileDotLayers) {
+            // metres to pixels at this zoom and latitude, capped so a rough
+            // fix never scans the whole screen
+            const metresPerPixel = 40075016.686 * Math.cos(fix.latitude * Math.PI / 180) / (256 * 2 ** zoom);
+            const reach = Math.max(PIN_PROXIMITY_METRES, radius);
+            const radiusPx = Math.min(600, Math.max(14, reach / metresPerPixel));
+            const point = map.latLngToContainerPoint(L.latLng(fix.latitude, fix.longitude));
+            const dot = this.tileDotAt(point, radiusPx);
+            if (dot?.latlng) {
+                const distance = Math.round(L.latLng(fix.latitude, fix.longitude).distanceTo(dot.latlng));
+                rows.push({ name: dot.feature?.properties?.name || "Unnamed place on the map", distance, status: "on the map", source: "dot", feature: dot.feature });
+            }
+        }
+        return rows.sort((a, b) => a.distance - b.distance);
+    }
+
+    // a recorded place near the fix is shown once before sending; the
+    // second press sends anyway and the note names what was found
+    renderQuickPhotoNearby(rows) {
+        const block = document.getElementById("quickPhotoNearby");
+        if (!block) return;
+        block.hidden = !rows.length;
+        if (!rows.length) return;
+        const shown = rows.slice(0, 5);
+        block.innerHTML = `Already recorded near here: ${shown.map(row => `<strong>${escapeHtml(row.name)}</strong> (${row.distance} m, ${escapeHtml(row.status)})`).join(", ")}${rows.length > shown.length ? ` and ${rows.length - shown.length} more` : ""}. If your photo is one of these, cancel and revise it from its dot; otherwise press <em>Send for review</em> again.`;
     }
 
     async sendQuickPhoto() {
@@ -4127,9 +4176,17 @@ class NzVerificationMap {
             refuse("The entry contracts did not load. Reload the portal before sending.");
             return;
         }
-        const note = (document.getElementById("quickPhotoNote")?.value || "").trim().slice(0, 200);
+        const name = (document.getElementById("quickPhotoName")?.value || "").trim().slice(0, 200);
+        const note = (document.getElementById("quickPhotoNote")?.value || "").trim().slice(0, 500);
         const fix = capture.fix;
         const radius = this.quickPhotoRadius(fix);
+        const nearby = this.quickPhotoNearby(fix, radius);
+        if (nearby.length && !capture.nearbyShown) {
+            capture.nearbyShown = true;
+            this.renderQuickPhotoNearby(nearby);
+            refuse("A recorded place is near this spot. Check the line above, then press Send for review again to send anyway.");
+            return;
+        }
         let locationAssertion;
         try {
             locationAssertion = window.PowLocationAssertion.payload({
@@ -4151,7 +4208,7 @@ class NzVerificationMap {
             observationBasis: "",
             observedOn: window.PowRapidEntry.localIsoDate(),
             privacyFlag: "needs_review",
-            discussionNote: this.quickPhotoDiscussionNote(note, fix),
+            discussionNote: this.quickPhotoDiscussionNote(note, fix, nearby),
             uncertaintyNote: "",
         };
         const flagOptions = { flagForDiscussion: true };
@@ -4161,12 +4218,11 @@ class NzVerificationMap {
             return;
         }
         const candidate = {
-            name: note || "Unknown place of worship",
+            name: name || "Unknown place of worship",
             latitude: fix.latitude,
             longitude: fix.longitude,
             locationAssertion,
         };
-        const nearby = this.nearbyTaskRows({ lat: fix.latitude, lng: fix.longitude }, radius);
         const zoom = Number.isFinite(this.map?.getZoom?.()) ? this.map.getZoom() : POSITION_ZOOM;
         if (send) send.disabled = true;
         if (status) status.textContent = "Sending securely for review...";

@@ -59,7 +59,8 @@ const window = {
 };
 const navigator = { geolocation: { getCurrentPosition() {} } };
 // leaflet's latLng is only used for the nearby check here
-const L = { latLng: (lat, lng) => ({ lat, lng, distanceTo: () => 1e9 }) };
+// leaflet's latLng, with a flat-earth distance good enough for the nearby check
+const L = { latLng: (lat, lng) => ({ lat, lng, distanceTo(other) { const dy = (other.lat - lat) * 111320; const dx = (other.lng - lng) * 111320 * Math.cos(lat * Math.PI / 180); return Math.sqrt(dx * dx + dy * dy); } }) };
 const context = vm.createContext({
   window, document, localStorage, sessionStorage: localStorage, navigator, L,
   URLSearchParams, Map, Set, Date, Number, String, Boolean, Object, Array, Math, JSON, RegExp, Intl, console, setTimeout, clearTimeout, Promise, Error, Uint8Array,
@@ -104,7 +105,9 @@ const mountElements = () => {
   element("quickPhotoSendButton");
   element("quickPhotoDropPinButton");
   element("quickPhotoCancelButton");
+  element("quickPhotoName");
   element("quickPhotoNote");
+  element("quickPhotoNearby");
   element("quickPhotoStatus");
   element("copyStatus");
   element("pinStatus");
@@ -176,6 +179,7 @@ const mountElements = () => {
     loose.deepEqual(views, [[[-41.3, 174.8], 17]]);
     assert.match(document.getElementById("quickPhotoPosition").textContent, /about 8 m/);
     assert.match(document.getElementById("quickPhotoPosition").textContent, /area of 25 m/, "the radius floor is 25 m");
+    document.getElementById("quickPhotoName").value = " St Mary's ";
     document.getElementById("quickPhotoNote").value = " Small church on the corner ";
     let sent = null;
     let recorded = null;
@@ -186,7 +190,7 @@ const mountElements = () => {
     assert.equal(sent.flagForDiscussion, true);
     assert.equal(sent.countryCode, "NZ");
     assert.equal(sent.clientSubmissionId, "11111111-2222-4333-8444-555555555555");
-    assert.equal(sent.candidate.name, "Small church on the corner");
+    assert.equal(sent.candidate.name, "St Mary's", "the name field is the place name");
     assert.equal(sent.candidate.latitude, -41.3);
     assert.equal(sent.candidate.locationAssertion.mode, "approximate_area");
     assert.equal(sent.candidate.locationAssertion.basis, "local_investigator_account");
@@ -199,10 +203,13 @@ const mountElements = () => {
     assert.equal(sent.observation.privacy_flag, "needs_review");
     assert.equal(sent.observation.observed_on, window.PowRapidEntry.localIsoDate());
     assert.match(sent.observation.uncertainty_note, /^For discussion: Quick photo capture/);
-    assert.match(sent.observation.uncertainty_note, /Note: Small church on the corner/);
+    assert.match(sent.observation.uncertainty_note, /Nearby check: nothing recorded within 150 m/);
+    assert.match(sent.observation.uncertainty_note, /Note: Small church on the corner$/, "the note is commentary, not the name");
+    assert.doesNotMatch(sent.observation.uncertainty_note, /St Mary/);
     loose.deepEqual(sent.clientContext, { placement_zoom: 17, proximity_checked: true, nearby_count: 0, portal_version: "rapid-current-v1-multicountry" });
     assert.ok(recorded, "the recorded screen follows");
     assert.equal(recorded.props.task_id, "task_q1");
+    assert.equal(recorded.props.name, "St Mary's");
     assert.equal(recorded.options.nomination, true);
     assert.equal(recorded.options.hasEvidenceFiles, true);
     loose.deepEqual(recorded.options.pendingFiles, { files: [photo], caption: "Quick photo capture" });
@@ -216,6 +223,42 @@ const mountElements = () => {
     assert.equal(app.quickPhotoRadius(app.quickPhoto.fix), 120);
     assert.equal(app.quickPhotoRadius({ accuracyM: 5e6 }), 100000);
     app.quickPhoto = null;
+  }
+
+  // 3b. a recorded place near the fix: the first press names it and holds,
+  //     the second sends with the count and the names in the note; a note
+  //     alone never becomes the place name
+  {
+    const app = fresh();
+    mountElements();
+    app.attachmentsEnabledCache = true;
+    element("quickPhotoInput", { click() {} });
+    app.tasks = [{ type: "Feature", properties: { task_id: "task_near", name: "Old Chapel" }, geometry: { type: "Point", coordinates: [174.8001, -41.3001] } }];
+    app.backendTasksById.set("task_near", { status: "needs_review" });
+    // a rendered dot 20 m east of the fix on the map's tiles
+    app.tileDotLayers = {};
+    app.map.latLngToContainerPoint = () => ({ x: 100, y: 100 });
+    app.tileDotAt = (point, radiusPx) => (radiusPx > 14 ? { latlng: { lat: -41.3, lng: 174.80024 }, feature: { properties: { name: "Wayside Shrine" } } } : null);
+    app.requestPosition = () => Promise.resolve({ latitude: -41.3, longitude: 174.8, accuracyM: 40 });
+    app.startQuickPhoto();
+    app.quickPhotoChosen(photo);
+    await tick();
+    document.getElementById("quickPhotoNote").value = "white building behind the trees";
+    let sent = null;
+    app.backend.submitCurrentObservation = async (args) => { sent = args; return { task_id: "task_q2", evidence_draft_id: "draft_q2", task_status: "unresolved_note", deduped: false, corrected: false }; };
+    app.renderSubmissionRecordedDetail = () => {};
+    await app.sendQuickPhoto();
+    assert.equal(sent, null, "the first press holds");
+    assert.equal(document.getElementById("quickPhotoNearby").hidden, false);
+    assert.match(document.getElementById("quickPhotoNearby").innerHTML, /Old Chapel<\/strong> \(14 m, needs review\)/);
+    assert.match(document.getElementById("quickPhotoNearby").innerHTML, /Wayside Shrine<\/strong> \(20 m, on the map\)/);
+    assert.match(document.getElementById("quickPhotoStatus").textContent, /press Send for review again/);
+    await app.sendQuickPhoto();
+    assert.ok(sent, "the second press sends");
+    assert.equal(sent.candidate.name, "Unknown place of worship");
+    assert.equal(sent.clientContext.nearby_count, 2);
+    assert.match(sent.observation.uncertainty_note, /Nearby check: 2 recorded within 150 m, sent anyway: Old Chapel \(14 m\); Wayside Shrine \(20 m\)\./);
+    assert.match(sent.observation.uncertainty_note, /Note: white building behind the trees$/);
   }
 
   // 4. a failed send keeps the card and the same submission id for the retry
