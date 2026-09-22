@@ -4,6 +4,8 @@
 
 Current version: 0.1.5. Adopted: 2026-09-03.
 
+The [2026-09-22 discussion of counting places and coherent worship complexes](development/pow-counting-and-complexes-discussion-2026-09-22.md) records the proposed direction for shared rooms, distinct chapels, rebuilding, and replacement venues. Its examples and open boundary questions inform a later revision of this definition.
+
 ## Criteria
 
 A site meets the definition when source evidence supports all three criteria:
