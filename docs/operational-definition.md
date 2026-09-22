@@ -4,6 +4,8 @@
 
 Current version: 0.1.5. Adopted: 2026-09-03.
 
+The [2026-09-22 discussion of counting places and coherent worship complexes](development/pow-counting-and-complexes-discussion-2026-09-22.md) records the proposed direction for shared rooms, distinct chapels, rebuilding, and replacement venues. Its examples and open boundary questions inform a later revision of this definition.
+
 ## Criteria
 
 A site meets the definition when source evidence supports all three criteria:
@@ -26,6 +28,8 @@ A place of worship is neither a building nor an organisation. An organisation ma
 
 Identity is not observable at a site visit. Whether worship at a location continues an earlier place of worship is an inference from evidence about the community and its practice. The project therefore records identity as an explicit, revisable review decision with a stated basis — same place, relocation, split, merge, or uncertain — and no import pipeline or proximity heuristic settles identity silently.
 
+A shared representative point is evidence about location alone. Two distinct hospital chapels known only to the same hospital centroid remain two places of worship drawn at the same point; identity requires evidence about the places the point represents (recorded 2026-09-22).
+
 ## Measurement over time
 
 The analytical unit is a place of worship's time-indexed **worship-function state**. Record physical existence, worship use, location, organisations, congregations, timing, and uncertainty as distinct claims. The `site_id` identifies the place of worship rather than a location; dated occupancy records locate the place of worship.
@@ -39,3 +43,5 @@ A country is an index derived from location, never a claim about the place. Each
 ## Version history
 
 Versioned snapshots preserve the rule used by each study: [version 0.1.5](development/place-of-worship-definition-2026-09-03-v0.1.5.md), [version 0.1.4](development/place-of-worship-definition-2026-09-01-v0.1.4.md), [version 0.1.3](development/place-of-worship-definition-2026-08-31-v0.1.3.md), [version 0.1.2](development/place-of-worship-definition-2026-08-27-v0.1.2.md), [version 0.1.1](development/place-of-worship-definition-2026-08-27-v0.1.1.md), [version 0.1.0](development/place-of-worship-definition-2026-08-27.md), and the [version 0.0.1 discussion draft](development/place-of-worship-definition-2026-08-22.md). A later revision records its implications for accepted states, event derivations, study populations, and earlier estimates.
+
+Pending revision (recorded 2026-09-22): the [2026-09-22 discussion of counting places and coherent worship complexes](development/pow-counting-and-complexes-discussion-2026-09-22.md) records a direction that departs from the Identity section on replacement venues. This page also differs from its dated version on two points: the frequency paragraph under Criteria still states ruling R-F1, whereas version 0.1.5 records the amendment R-F1′; and the country-index paragraph under Measurement over time and the shared-point sentence under Identity over time await a dated snapshot. Version 0.1.6 reconciles these in a dated snapshot.
