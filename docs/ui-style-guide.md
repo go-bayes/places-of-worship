@@ -52,6 +52,17 @@ and is dated in place.
   on the card before the first send goes through. The entry it sends is a flagged partial entry, so the
   review queue shows it as `Note to resolve`, never as a complete
   observation.
+  The button is filled in the entry teal (`--entry`), the one filled
+  button besides `Add / Revise` in the sidebar (ruled 2026-09-23: "make
+  the QUICK PHOTO tab easy to see"); it borrows no state colour.
+- Entry follows the pin (ruled 2026-09-23). The page names the country
+  the contributor landed on; the entry's country is the pin's. When they
+  differ the entry carries one note, never a block: "This pin is in
+  New Zealand; this page opened for Sweden. The entry is recorded as
+  New Zealand.", and the header reads "Sweden evidence · entry in
+  New Zealand" while the entry is open. A neighbour's dot reads "In
+  Norway: revising it here records it as Norway." and revises in place.
+  Never send the contributor to another portal to record a place.
 - Use `Save draft` when the RA is still gathering evidence.
 - Use `Submit for review` when the RA wants JB or a reviewer to inspect the
   evidence.

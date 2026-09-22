@@ -65,7 +65,7 @@ const context = vm.createContext({
   window, document, localStorage, sessionStorage: localStorage, navigator, L,
   URLSearchParams, Map, Set, Date, Number, String, Boolean, Object, Array, Math, JSON, RegExp, Intl, console, setTimeout, clearTimeout, Promise, Error, Uint8Array,
 });
-for (const file of ["rapid-entry-contract.js", "location-assertion-contract.js", "occupancy-contract.js", "function-chain-contract.js", "task-presentation.js", "verification-map.js"]) {
+for (const file of ["../../../shared/data/country-registry.js", "../../../shared/region-resolve.js", "rapid-entry-contract.js", "location-assertion-contract.js", "occupancy-contract.js", "function-chain-contract.js", "task-presentation.js", "verification-map.js"]) {
   vm.runInContext(fs.readFileSync(path.join(__dirname, file), "utf8"), context, { filename: file });
 }
 
@@ -80,6 +80,9 @@ const fresh = ({ attachments = true } = {}) => {
   app.pinMode = false;
   app.quickPhoto = null;
   app.quickPhotoCarry = null;
+  app.pinCountry = null;
+  app.entryPageRegions = null;
+  app.entryWorldRegions = null;
   app.occupancyPinContext = null;
   app.selectedContextFeature = null;
   app.tasks = [];
@@ -108,6 +111,7 @@ const mountElements = () => {
   element("quickPhotoName");
   element("quickPhotoNote");
   element("quickPhotoNearby");
+  element("quickPhotoCountryNote");
   element("quickPhotoStatus");
   element("copyStatus");
   element("pinStatus");
@@ -189,6 +193,7 @@ const mountElements = () => {
     assert.ok(sent, "the observation was submitted");
     assert.equal(sent.flagForDiscussion, true);
     assert.equal(sent.countryCode, "NZ");
+    assert.equal(document.getElementById("quickPhotoCountryNote").hidden, true, "a home fix carries no warning");
     assert.equal(sent.clientSubmissionId, "11111111-2222-4333-8444-555555555555");
     assert.equal(sent.candidate.name, "St Mary's", "the name field is the place name");
     assert.equal(sent.candidate.latitude, -41.3);
@@ -259,6 +264,33 @@ const mountElements = () => {
     assert.equal(sent.clientContext.nearby_count, 2);
     assert.match(sent.observation.uncertainty_note, /Nearby check: 2 recorded within 150 m, sent anyway: Old Chapel \(14 m\); Wayside Shrine \(20 m\)\./);
     assert.match(sent.observation.uncertainty_note, /Note: white building behind the trees$/);
+  }
+
+  // 3c. a fix in another country: the card warns, the entry records that
+  //     country and lands in its batch, nothing is blocked
+  {
+    const app = fresh();
+    mountElements();
+    app.attachmentsEnabledCache = true;
+    element("quickPhotoInput", { click() {} });
+    app.requestPosition = () => Promise.resolve({ latitude: 59.3293, longitude: 18.0686, accuracyM: 12 });
+    app.startQuickPhoto();
+    app.quickPhotoChosen(photo);
+    await tick();
+    const note = document.getElementById("quickPhotoCountryNote");
+    assert.equal(note.hidden, false);
+    assert.equal(note.textContent, "This pin is in Sweden; this page opened for New Zealand. The entry is recorded as Sweden.");
+    let sent = null;
+    let recorded = null;
+    app.backend.submitCurrentObservation = async (args) => { sent = args; return { task_id: "task_se", evidence_draft_id: "draft_se", task_status: "unresolved_note", deduped: false, corrected: false }; };
+    app.renderSubmissionRecordedDetail = (props, options) => { recorded = options; };
+    await app.sendQuickPhoto();
+    assert.equal(sent.countryCode, "SE");
+    assert.equal(app.manualTasksById.get("task_se").batch_id, "manual-se");
+    assert.equal(app.manualTasksById.get("task_se").country_code, "SE");
+    loose.deepEqual(app.manualTasksById.get("task_se").target_years, []);
+    assert.match(recorded.countryNote, /recorded as Sweden/);
+    assert.equal(note.hidden, true, "the card is gone with its note");
   }
 
   // 4. a failed send keeps the card and the same submission id for the retry

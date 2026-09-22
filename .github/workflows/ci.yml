@@ -53,6 +53,7 @@ jobs:
           node apps/regions/nz/js/task-state-dom.test.cjs
           node apps/regions/nz/js/add-revise-control.test.cjs
           node apps/regions/nz/js/quick-photo.test.cjs
+          node apps/regions/nz/js/entry-country.test.cjs
           node apps/regions/nz/js/unvalidated-places.test.cjs
           node apps/regions/nz/js/review-state-dom.test.cjs
           node apps/regions/nz/js/review-panes.test.cjs

@@ -661,6 +661,20 @@ if (REQUESTED_COUNTRY_PARAM && !REQUESTED_COUNTRY_KEY) {
 }
 const COUNTRY_KEY = REQUESTED_COUNTRY_KEY || (REQUESTED_COUNTRY_PARAM ? "zz" : "") || PATH_COUNTRY_KEY || CONFIG_COUNTRY_KEY || "nz";
 const COUNTRY_CONFIG = COUNTRY_CONFIGS[COUNTRY_KEY];
+// entry follows the pin (jb ruling 2026-09-23: "sign in at a country, but
+// allow entry to move effortlessly between them; a PoW is a place on a
+// map in time, and countries can be recovered from places and time"). the
+// page is where the contributor lands; the entry's country is derived
+// from the pin, or the quick photo's fix, through the shared resolver:
+// the page manifest's exact outlines, then the world outlines, then the
+// registry's boxes until either manifest arrives. a moved entry carries a
+// warning, never a block; the derived country is the present-day index
+// the review queue and the master data use, not a historical claim
+const ENTRY_COUNTRY_PAGE_MANIFEST = "../_shared/data/region-bboxes.json";
+const ENTRY_COUNTRY_WORLD_MANIFEST = "../../shared/data/world-outlines.json";
+const REGISTRY_REGIONS = [...COUNTRY_REGISTRY.values()]
+    .filter(entry => Array.isArray(entry.bbox) && entry.bbox.length === 4)
+    .map(entry => ({ code: String(entry.code || "").toLowerCase(), name: entry.name || "", boxes: [entry.bbox] }));
 // F1: the contracts validate dates against this country's floor (date-floor.js)
 window.POW_DATE_FLOOR_YEAR = window.PowDateFloor ? window.PowDateFloor.yearFor(COUNTRY_CONFIG.countryCode) : 1600;
 const TARGET_YEARS = COUNTRY_CONFIG.targetYears;
@@ -1954,6 +1968,10 @@ class NzVerificationMap {
         // into the pin flow when no position was found
         this.quickPhoto = null;
         this.quickPhotoCarry = null;
+        // the pin's country while an entry is open (entry follows the pin)
+        this.pinCountry = null;
+        this.entryPageRegions = null;
+        this.entryWorldRegions = null;
         // nearby tasks the contributor linked as probably this same place
         // while keeping the new pin (guy, 2026-09-07)
         this.pinLinkedRefs = [];
@@ -3944,6 +3962,7 @@ class NzVerificationMap {
         const offered = this.quickPhotoOffered();
         if (offered && this.attachmentsEnabledCache === undefined) this.probeAttachmentsEnabled();
         wrap.hidden = !(offered && this.attachmentsEnabledCache === true && !this.pinMode && !this.quickPhoto);
+        if (offered) this.loadEntryCountryOutlines();
     }
 
     // one probe per sign-in; the answer re-renders the button
@@ -3957,6 +3976,118 @@ class NzVerificationMap {
                 this.renderQuickPhotoButton();
             });
         return this.attachmentsProbe;
+    }
+
+    // --- entry follows the pin (jb ruling 2026-09-23). the outlines load
+    // once, off the critical path, the first time an entry could need them
+    loadEntryCountryOutlines() {
+        if (this.entryOutlinesRequested || typeof window.fetch !== "function") return;
+        this.entryOutlinesRequested = true;
+        const read = (url, key) => window.fetch(url)
+            .then(res => (res && res.ok ? res.json() : null))
+            .then(doc => {
+                if (!doc || !Array.isArray(doc.regions)) return;
+                this[key] = doc.regions;
+                this.refreshEntryCountry();
+            })
+            .catch(() => {});
+        read(ENTRY_COUNTRY_PAGE_MANIFEST, "entryPageRegions");
+        read(ENTRY_COUNTRY_WORLD_MANIFEST, "entryWorldRegions");
+    }
+
+    // the country under a point: the page manifest's outlines, then the
+    // world outlines, then the registry's boxes (smallest containing box,
+    // so a neighbour's wide box never claims an island). null over open
+    // water or before any source can answer
+    countryAtPoint(lat, lng) {
+        const resolver = window.RegionResolve;
+        if (!resolver || !Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+        const x = resolver.normaliseLng(lng);
+        for (const regions of [this.entryPageRegions, this.entryWorldRegions, REGISTRY_REGIONS]) {
+            if (!Array.isArray(regions) || !regions.length) continue;
+            const hit = resolver.resolveAt(regions, x, lat);
+            if (hit) {
+                return { code: String(hit.code || "").toLowerCase(), name: hit.name || "", method: Array.isArray(hit.rings) ? "outline" : "box" };
+            }
+        }
+        return null;
+    }
+
+    // the country an entry at this point records: its config (census
+    // years, batches) and whether it differs from the page's. a point no
+    // source can place keeps the page's country, and the server's intake
+    // box has the last word
+    entryCountryFor(lat, lng) {
+        const hit = this.countryAtPoint(lat, lng);
+        const key = hit ? countryConfigKey(hit.code) : "";
+        const config = key ? COUNTRY_CONFIGS[key] : COUNTRY_CONFIG;
+        return {
+            key: key || COUNTRY_KEY,
+            config,
+            code: config.countryCode,
+            name: config.countryName,
+            moved: Boolean(key) && key !== COUNTRY_KEY,
+            resolved: Boolean(hit),
+            method: hit?.method || "",
+        };
+    }
+
+    pageCountry() {
+        return { key: COUNTRY_KEY, config: COUNTRY_CONFIG, code: COUNTRY_CONFIG.countryCode, name: COUNTRY_CONFIG.countryName, moved: false, resolved: true, method: "page" };
+    }
+
+    // the country the open entry records: the pin's, else the quick
+    // photo fix's, else the page's
+    entryCountry() {
+        return this.pinCountry || this.quickPhoto?.country || this.pageCountry();
+    }
+
+    notePinCountry(latlng) {
+        this.pinCountry = latlng && Number.isFinite(latlng.lat) && Number.isFinite(latlng.lng)
+            ? this.entryCountryFor(latlng.lat, latlng.lng)
+            : null;
+        this.renderEntryCountryNote();
+    }
+
+    entryCountryNoteText(country) {
+        if (!country?.moved) return "";
+        return `This pin is in ${country.name}; this page opened for ${COUNTRY_CONFIG.countryName}. The entry is recorded as ${country.name}.`;
+    }
+
+    // the warning, on the entry and in the header, whenever the entry's
+    // country is not the page's; it never blocks
+    renderEntryCountryNote() {
+        const country = this.pinCountry || this.quickPhoto?.country || null;
+        const text = this.entryCountryNoteText(country);
+        ["pinCountryNote", "quickPhotoCountryNote"].forEach(id => {
+            const note = document.getElementById(id);
+            if (!note) return;
+            note.textContent = text;
+            note.hidden = !text;
+        });
+        const title = document.querySelector?.(".sidebar-header h1");
+        if (title) {
+            if (this.pageTitleText === undefined) this.pageTitleText = title.textContent;
+            title.textContent = text ? `${this.pageTitleText} · entry in ${country.name}` : this.pageTitleText;
+        }
+    }
+
+    // an outline manifest arriving mid-entry re-reads the open entry's point
+    refreshEntryCountry() {
+        if (this.pinMarker?.getLatLng) {
+            this.notePinCountry(this.pinMarker.getLatLng());
+        } else if (this.quickPhoto?.fix) {
+            this.quickPhoto.country = this.entryCountryFor(this.quickPhoto.fix.latitude, this.quickPhoto.fix.longitude);
+            this.renderEntryCountryNote();
+        }
+    }
+
+    // the contributor's own work follows the user, not the page (jb
+    // 2026-09-23): the assignment batch, and any country's nomination or
+    // issue batch
+    ownWorkBatch(batchId) {
+        const id = String(batchId || "");
+        return id === ASSIGNMENT_BATCH_ID || /^manual-[a-z]{2}$/.test(id) || /^ra-issues-[a-z]{2}$/.test(id);
     }
 
     startQuickPhoto() {
@@ -4018,6 +4149,7 @@ class NzVerificationMap {
             <div id="quickPhotoCard" class="pin-card">
                 ${preview}
                 <div id="quickPhotoPosition" class="copy-help" aria-live="polite">Finding your position…</div>
+                <div id="quickPhotoCountryNote" class="pilot-note entry-country-note" aria-live="polite" hidden></div>
                 <label>
                     Place name, if you know it (optional)
                     <input id="quickPhotoName" type="text" maxlength="200" placeholder="e.g. St Mary's Church" autocomplete="off">
@@ -4066,6 +4198,8 @@ class NzVerificationMap {
         if (result?.fix) {
             this.quickPhoto.fix = result.fix;
             this.quickPhoto.positionError = "";
+            this.quickPhoto.country = this.entryCountryFor(result.fix.latitude, result.fix.longitude);
+            this.renderEntryCountryNote();
             this.lastPositionFix = result.fix;
             this.showPositionOnMap(result.fix);
             this.map?.setView?.([result.fix.latitude, result.fix.longitude], POSITION_ZOOM);
@@ -4180,6 +4314,7 @@ class NzVerificationMap {
         const note = (document.getElementById("quickPhotoNote")?.value || "").trim().slice(0, 500);
         const fix = capture.fix;
         const radius = this.quickPhotoRadius(fix);
+        const entryCountry = capture.country || this.entryCountryFor(fix.latitude, fix.longitude);
         const nearby = this.quickPhotoNearby(fix, radius);
         if (nearby.length && !capture.nearbyShown) {
             capture.nearbyShown = true;
@@ -4229,7 +4364,7 @@ class NzVerificationMap {
         try {
             const result = await this.backend.submitCurrentObservation({
                 clientSubmissionId: capture.submissionId,
-                countryCode: COUNTRY_CONFIG.countryCode,
+                countryCode: entryCountry.code,
                 candidate,
                 observation: window.PowRapidEntry.observationPayload(values, flagOptions),
                 flagForDiscussion: true,
@@ -4244,13 +4379,13 @@ class NzVerificationMap {
             // the map and in the list before the batch queries catch up
             const manualTask = {
                 task_id: result.task_id,
-                batch_id: `manual-${COUNTRY_CONFIG.countryCode.toLowerCase()}`,
-                country_code: COUNTRY_CONFIG.countryCode,
+                batch_id: `manual-${entryCountry.code.toLowerCase()}`,
+                country_code: entryCountry.code,
                 task_type: "missing_from_project_map",
                 priority: "high",
                 status: result.task_status,
                 assigned_to: this.backendUser?._id,
-                target_years: COUNTRY_CONFIG.targetYears.map(Number),
+                target_years: entryCountry.config.targetYears.map(Number),
                 candidate_site_id: result.candidate_site_id,
                 name: candidate.name,
                 geometry: { type: "Point", coordinates: [fix.longitude, fix.latitude] },
@@ -4276,6 +4411,7 @@ class NzVerificationMap {
             this.renderSubmissionRecordedDetail(submittedProps, {
                 deduped: Boolean(result.deduped),
                 nomination: true,
+                countryNote: this.entryCountryNoteText(entryCountry),
                 hasEvidenceFiles: true,
                 pendingFiles: { files: [file], caption: "Quick photo capture" },
                 withdrawDraftId: result.evidence_draft_id,
@@ -4327,6 +4463,7 @@ class NzVerificationMap {
         if (capture?.previewUrl) window.URL?.revokeObjectURL?.(capture.previewUrl);
         this.quickPhoto = null;
         this.quickPhotoFix = null;
+        this.renderEntryCountryNote();
         if (this._quickPhotoKeyHandler) {
             document.removeEventListener?.("keydown", this._quickPhotoKeyHandler);
             this._quickPhotoKeyHandler = null;
@@ -4526,7 +4663,7 @@ class NzVerificationMap {
         const ownIso = this.ownIsoCode();
         const foreign = dotCountry && dotCountry !== ownIso ? COUNTRY_REGISTRY_BY_ISO.get(dotCountry) : null;
         const foreignNote = foreign
-            ? `<span class="popup-foreign-note">In ${escapeHtml(foreign.name)}. <a href="verification.html?country=${escapeHtml(foreign.code)}">Open the ${escapeHtml(foreign.name)} portal</a> to revise it.</span><br>`
+            ? `<span class="popup-foreign-note">In ${escapeHtml(foreign.name)}: revising it here records it as ${escapeHtml(foreign.name)}.</span><br>`
             : "";
         let issueButton;
         if (!this.backendUser && this.backend?.configured) {
@@ -5200,16 +5337,12 @@ class NzVerificationMap {
             // no batch scope: my work covers the assignment batch and the
             // ra's own nominated candidates in the manual batch
             const myItems = ASSIGNMENT_MODE
+                // no country scope either (jb 2026-09-23): an entry made from
+                // another country's page is still this contributor's work
                 ? ((await this.backend.listMyTasks({
-                    countryCode: COUNTRY_CONFIG.countryCode,
                     statuses: MY_WORK_STATUSES,
                     limit: 200,
-                })) || []).filter(item => {
-                    const batchId = item?.task?.batch_id || "";
-                    return batchId === ASSIGNMENT_BATCH_ID
-                        || batchId === `manual-${COUNTRY_CONFIG.countryCode.toLowerCase()}`
-                        || batchId === `ra-issues-${COUNTRY_CONFIG.countryCode.toLowerCase()}`;
-                })
+                })) || []).filter(item => this.ownWorkBatch(item?.task?.batch_id))
                 : [];
             // assignment work and the ra's own nominations are separate
             // lists (jb 2026-08-31): my work covers the batch; nominations
@@ -5868,6 +6001,7 @@ class NzVerificationMap {
         periodsError = "",
         pendingFiles = null,
         withdrawDraftId = "",
+        countryNote = "",
     } = {}) {
         const panel = document.getElementById("detailPanel");
         if (!panel) return;
@@ -5895,6 +6029,7 @@ class NzVerificationMap {
             </div>
             ${periodsLine ? `<div class="copy-status" role="status">${escapeHtml(periodsLine)}</div>` : ""}
             ${periodsError ? `<div class="pilot-note" role="alert">Your observation is recorded, but the periods were not: ${escapeHtml(periodsError)} Your cards are kept — press <em>Add where and when</em> to record them.</div>` : ""}
+            ${countryNote ? `<div class="pilot-note entry-country-note">${escapeHtml(countryNote)}</div>` : ""}
             ${!skipped && props.task_id ? `<div id="confirmAttachmentsBlock" class="attachments-block" hidden></div>` : ""}
             <div class="button-row">
                 ${knownHistory ? `<button id="addKnownHistoryButton" class="primary" type="button">Add known history</button>` : ""}
@@ -7986,7 +8121,7 @@ class NzVerificationMap {
                 && values.sourceTitle?.trim() && values.sourceReference?.trim()) {
                 try {
                     const created = await this.backend.createSource({
-                        countryCode: COUNTRY_CONFIG.countryCode,
+                        countryCode: this.entryCountry().code,
                         sourceType: "other",
                         title: values.sourceTitle.trim(),
                         url: values.sourceReference.trim(),
@@ -7999,9 +8134,11 @@ class NzVerificationMap {
             // a revision first opens (or claims) its task in the issue
             // batch, then submits the observation against that task
             const revision = options.createTask ? await options.createTask() : null;
+            // the entry's country is the pin's (entry follows the pin)
+            const entryCountry = this.entryCountry();
             const result = await this.backend.submitCurrentObservation({
                 clientSubmissionId: form.dataset.submissionId,
-                countryCode: COUNTRY_CONFIG.countryCode,
+                countryCode: entryCountry.code,
                 ...(options.props?.task_id
                     ? { taskId: options.props.task_id }
                     : revision
@@ -8076,13 +8213,13 @@ class NzVerificationMap {
             // the proximity check before the batch queries catch up
             const manualTask = {
                 task_id: result.task_id,
-                batch_id: `manual-${COUNTRY_CONFIG.countryCode.toLowerCase()}`,
-                country_code: COUNTRY_CONFIG.countryCode,
+                batch_id: `manual-${entryCountry.code.toLowerCase()}`,
+                country_code: entryCountry.code,
                 task_type: "missing_from_project_map",
                 priority: "high",
                 status: result.task_status,
                 assigned_to: this.backendUser?._id,
-                target_years: COUNTRY_CONFIG.targetYears.map(Number),
+                target_years: entryCountry.config.targetYears.map(Number),
                 candidate_site_id: result.candidate_site_id,
                 name: candidate.name,
                 address: candidate.address,
@@ -8112,6 +8249,7 @@ class NzVerificationMap {
                 ...periodsOutcome,
                 deduped: Boolean(result.deduped),
                 nomination: true,
+                countryNote: this.entryCountryNoteText(entryCountry),
                 hasEvidenceFiles: Boolean(values.hasEvidenceFiles),
                 pendingFiles,
                 withdrawDraftId: result.evidence_draft_id,
@@ -11425,6 +11563,7 @@ class NzVerificationMap {
                 : "Once the pin is down, drag it onto the building.";
         return `
             <h2 class="pin-host-title">${hostTitle}</h2>
+            <div id="pinCountryNote" class="pilot-note entry-country-note" aria-live="polite" hidden></div>
             <div id="pinLocateCard" class="pin-card">
                 <div class="pin-locate-options">
                     ${this.geolocationAvailable() ? `<button id="pinLocateMeButton" type="button" class="locate-option">${verb} at my location</button>` : ""}
@@ -11710,8 +11849,9 @@ class NzVerificationMap {
         const note = moved
             ? `Revision with evidence: the pin was moved from the record's point ${target.latitude.toFixed(5)}, ${target.longitude.toFixed(5)}.`
             : "Revision with evidence recorded against the existing record.";
+        const entryCountry = this.entryCountry();
         const result = await this.backend.createIssueTask({
-            countryCode: COUNTRY_CONFIG.countryCode,
+            countryCode: entryCountry.code,
             name,
             issueType: document.getElementById("pinIssueType")?.value || "verify_existing_site",
             note,
@@ -11724,10 +11864,10 @@ class NzVerificationMap {
             ...(locationAssertion ? { locationAssertion } : {}),
             ...(target.taskId ? { sourceTaskId: target.taskId } : {}),
             assignToReporter: true,
-            targetYears: COUNTRY_CONFIG.targetYears.map(Number),
+            targetYears: entryCountry.config.targetYears.map(Number),
             clientContext: {
                 source: "portal_revise_place",
-                country_code: COUNTRY_CONFIG.countryCode,
+                country_code: entryCountry.code,
                 page_path: window.location.pathname,
                 placement_zoom: confirmed.zoom,
                 location_mode: confirmed.locationMode,
@@ -11739,6 +11879,7 @@ class NzVerificationMap {
     enterPinMode() {
         if (this.pinMode || !this.map) return;
         this.pinMode = true;
+        this.loadEntryCountryOutlines();
         // a new entry starts from a clean slate: the previously selected task
         // is released and the sidebar narrows to the entry (jb 2026-09-03)
         this.selectedTask = null;
@@ -11812,8 +11953,12 @@ class NzVerificationMap {
         }).addTo(this.map);
         this.pinHistory = [L.latLng(latlng)];
         this.pinAreaKey = "";
+        this.notePinCountry(this.pinMarker.getLatLng());
         this.pinMarker.on("drag", () => this.updatePinConfirmCard());
-        this.pinMarker.on("dragend", () => this.recordPinPosition());
+        this.pinMarker.on("dragend", () => {
+            this.recordPinPosition();
+            this.notePinCountry(this.pinMarker.getLatLng());
+        });
         // a held touch on the pin (a right click on a computer) opens the
         // pin's own menu (jb 2026-09-22: "once a pin is dropped, say by
         // accident, how can we remove it"), since the card's Cancel
@@ -11950,6 +12095,7 @@ class NzVerificationMap {
         if (this.pinMarker) {
             this.pinMarker.setLatLng(latlng);
             this.recordPinPosition();
+            this.notePinCountry(latlng);
             this.updatePinConfirmCard();
         } else {
             this.placePin(latlng);
@@ -12180,6 +12326,7 @@ class NzVerificationMap {
         }
         if (status) status.textContent = "";
         const position = this.pinMarker.getLatLng();
+        this.notePinCountry(position);
         this.pinConfirmed = {
             latitude: position.lat,
             longitude: position.lng,
@@ -12510,6 +12657,8 @@ class NzVerificationMap {
         this.pinSubmissionId = null;
         this.pinHistory = [];
         this.quickPhotoCarry = null;
+        this.pinCountry = null;
+        this.renderEntryCountryNote();
         if (this._pinClickHandler) {
             this.map.off("click", this._pinClickHandler);
             this._pinClickHandler = null;

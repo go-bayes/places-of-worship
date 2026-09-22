@@ -100,12 +100,13 @@ check(confirmDefaults.existenceStatus === "present" && confirmDefaults.worshipUs
 // p3-7: no "the target year" leaks into copy
 check(fc.targetYearListText() === "" && fc.targetYearAndListText() === "", "Empty year lists must render as nothing, not as 'the target year'.");
 app.backendUser = { _id: "user_1" };
-// signed in, the popup offers revise; a dot across the border names its portal
+// signed in, the popup offers revise; a dot across the border names its
+// country and revises here (entry follows the pin, 2026-09-23)
 const signedInHtml = app.contextDotPopupHtml(suvaCathedral);
 check(signedInHtml.includes("Revise this place") && !signedInHtml.includes("Sign in to revise"), "Signed in, the popup must offer the revise entry.");
 const tonganDot = { ...suvaCathedral, properties: { ...suvaCathedral.properties, country_code: "TO", name: "Centenary Church" } };
 const foreignHtml = app.contextDotPopupHtml(tonganDot);
-check(foreignHtml.includes("popup-foreign-note") && foreignHtml.includes("Open the Tonga portal") && foreignHtml.includes("verification.html?country=to"), `A Tongan dot on the Fiji portal must point at the Tonga portal: ${foreignHtml}`);
+check(foreignHtml.includes("popup-foreign-note") && foreignHtml.includes("In Tonga: revising it here records it as Tonga.") && foreignHtml.includes("Revise this place") && !foreignHtml.includes("verification.html?country=to"), `A Tongan dot on the Fiji portal revises here, recorded as Tonga: ${foreignHtml}`);
 // the sign-in card names the parked place
 app.pendingDeepLink = pending;
 app.backendUser = null;
