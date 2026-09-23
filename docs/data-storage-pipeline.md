@@ -24,16 +24,27 @@ task generation needs:
 Git stores code, schemas, documentation, and manifests. It should not store
 large raw extracts, private source files, or generated intermediate products.
 
+## Storage responsibilities and current status
+
+The project has a configured private Google Cloud Storage archive. Its access instructions and object inventory belong in the private research tier. A reusable dataset still needs its own verified durable URI, source permissions, hashes, and recovery record. Source and dataset copies explicitly admitted to private Git or Git LFS retain their recorded exceptions.
+
+| Record | Storage responsibility | Verification boundary |
+| --- | --- | --- |
+| Working documents and collaborator edits | Project-controlled Google Drive where familiar shared editing is useful | Export mutable documents to stable bytes before ingestion and hashing. |
+| Permitted source editions, research outputs, and rebuild inputs | Configured private project object archive, with authorised Git/LFS exceptions | Record actual object URIs, access restrictions, byte hashes, and verified retrieval in the manifest. |
+| Tasks, evidence versions, judgments, and review state | Convex under the maintained review contracts | Server-side permissions and version-bound decisions govern access and mutation. |
+| Frozen export files | Convex file storage under the implemented [frozen-export contract](development/frozen-exports.md) | Freeze and retrieval verify stored bytes; the manifest identifies membership and hashes. |
+| Accepted events and public products | Governed `pow` processing and versioned release storage or tracked app artefacts | Record accepted-event, reconstruction, and publication evidence independently of export freezing. |
+
+The [human review and occasional release design](development/human-review-and-release.md) permits evidence inspection and review between releases. Retained inspection collections need verified storage references before operational intake. Routine viewing preserves workflow state; freezing export bytes is a later, deliberate operation. An `exported` task identifies the current freeze transition and requires separate processing evidence before it can be described as accepted master data.
+
+The broader export-storage changes in the [lean-storage brief](development/lean-storage-brief-2026-09-12.md) remain subject to their recorded rulings. A possible relocation of export bytes is distinct from the existing source archive. Storage migration requires its own authority. A source manifest and verified object establish whether a particular source has been archived.
+
 ## Current Data Flow And Locations
 
-The project currently has two different kinds of data locations:
+The diagram and inventory below document the pilot's data flows and dataset-specific storage work. The responsibility table above describes the current hosted storage arrangements. Verify each dataset's current manifest before reuse; an older inventory or local cache path may describe an earlier preservation state.
 
-- committed public app data, which is in Git and is served by the map; and
-- temporary working files under ignored folders such as `data/raw/` and
-  `data/intermediate/`, which are useful for processing but are not a project
-  storage location.
-
-This is the current New Zealand flow:
+The New Zealand pilot flow is:
 
 ```mermaid
 flowchart TD
@@ -169,21 +180,16 @@ Purpose:
 longer-term storage for immutable raw snapshots, reviewed exports, media
 quarantine, and rebuild inputs.
 
-Default reference:
-Google Cloud Storage for object storage; PostgreSQL/PostGIS when the project
-needs live map/database searches over stored spatial data. This follows the
-portal storage plan and keeps the path compatible with future Rust services.
+The configured private Google Cloud Storage archive holds authorised source and research objects. Follow its private access instructions and record each dataset's actual object references. PostgreSQL/PostGIS remains an option when live geospatial queries justify a database. Frozen Convex export files follow the distinct implemented contract in [storage responsibilities](#storage-responsibilities-and-current-status).
 
-Intended object layout, once a bucket is opened:
+The following paths illustrate the country and version partitions for a dataset. Manifests must identify actual object addresses and preserve existing archive prefixes. Adapting an example layout is a design task; relocating stored objects requires an authorised migration.
 
 - `gs://<project-bucket>/raw/<country>/<dataset>/<retrieval_date>/...`
 - `gs://<project-bucket>/intermediate/<country>/<dataset>/<run_id>/...`
 - `gs://<project-bucket>/accepted/<country>/<dataset_version_id>/...`
 - `gs://<project-bucket>/public/<country>/<dataset_version_id>/...`
 
-The concrete bucket name must be chosen when the cloud project is configured
-and then recorded in tracked manifests. Do not use a personal account bucket as
-the durable project location.
+The private storage instructions identify the project archive and its access process. Select the authorised destination for the dataset, verify the stored bytes, and record the resulting URI in the manifest. Restricted object addresses and access details remain in the private tier.
 
 Rules:
 
@@ -441,6 +447,8 @@ reviewed change events and included in an accepted-diff manifest.
 
 ## NZ OSM Annual Extraction
 
+Historical follow-up: the local-only status and promotion checklist below describe the original extraction checkpoint. The inventory earlier on this page records later archive manifests. Use the dataset's current manifest to establish recoverability and downstream eligibility before repeating a promotion or assigning review work.
+
 The 2026-05-07 strict New Zealand annual OSM extraction currently exists only
 as ignored local execution-cache output under
 `data/intermediate/nz_osm_temporal/`. This is not a project storage location.
@@ -483,7 +491,8 @@ For each data-producing run:
 - Live task coordination: Convex.
 - Local execution cache: ignored `data/` and `exports/`, disposable and never
   the storage location.
-- Durable reference for future staging and object storage: Google Cloud.
+- Source and research archive: the configured private project Google Cloud Storage archive, with dataset-specific manifests and authorised Git/LFS exceptions.
+- Frozen export files: Convex file storage under the maintained frozen-export contract; wider storage changes retain their own decision gates.
 - Public map/data products: generated only from reviewed exports and tracked
   committed app data.
 

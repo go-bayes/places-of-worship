@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-23 (human review and occasional release design)
+
+- Aligned the public workflow references around retained evidence in the existing human review portal, with read-only inspection as default and operator-scheduled backend release. Added the delivery and verification contract and a FAQ answer, distinguishing implemented review and frozen-export controls from planned collection browsing and PI batch release. Clarified source-archive and export-storage responsibilities, and marked the older occupancy plan's identity provisions as superseded by definition 0.1.6. This documentation change leaves implementation, operational imports, and release pending.
+
 ### 2026-09-22 (the definition as a guide page)
 
 - The operational definition is now a page beside the guides, `apps/guides/definition.html`, rendered from `docs/operational-definition.md` by `scripts/build_definition_guide.mjs` (JB, 2026-09-22: "HTML is easier to follow for most people"). The Markdown stays the source: the script owns the HTML, `--check` runs in CI beside the fixture checks, and a stale page fails the build. Relative links resolve to the rendered files on GitHub; the contents list, section ids and the worked-examples anchor come from the headings. The RA field guide gains "What counts as a place of worship": the three criteria in entry words, the candidate default for cemeteries and homes, one shared room versus separate rooms, and the instruction to record what moved, when and what the source says, and never to decide identity. The PI and reviewer guide gains "Identity decisions": the seven bases with the three cathedral examples, inactive versus ended with no duration threshold, one place per distinct space within a plotted point, the residence test, and an interim mapping onto the review form's older choices (conversion as same site; successor at a new site and end-and-new-foundation as new candidate with the predecessor named; never relocation, which the contract still reads as continuity). Both guides link the definition from their header nav, and the README links the rendered page. Guide footers read 2026-09-22.

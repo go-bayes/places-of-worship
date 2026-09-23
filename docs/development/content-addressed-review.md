@@ -10,6 +10,8 @@ Convex remains the shared task and review service. `pow` remains the governed va
 
 ## Approved Review And Release Workflow
 
+The project lead clarified delivery on 2026-09-23: retained evidence should be inspectable in the existing human review portal, with read-only navigation as default, while backend releases follow an irregular schedule. The [human review and occasional release design](human-review-and-release.md) separates the portal milestone from release readiness. Evidence can accumulate and receive human review between releases; deliberate PI authority and governed processing determine the accepted master changes.
+
 Submitted evidence goes to a reviewer. The reviewer either returns it for correction or accepts it into a transparent export queue. A principal investigator (PI) can return queued items to review or explicitly release a batch for governed `pow` processing. Batch release provides PI acceptance for the exact included versions, replacing a separate PI acceptance action for every item.
 
 ```mermaid
@@ -44,6 +46,8 @@ The analogy maps Git's version structure and review relations onto project revie
 | Merge | Accepted event plus accepted-diff manifest after PI batch release and governed `pow` acceptance | Accepted longitudinal data retain the proposal, evidence, decision, and rebuild chain. |
 
 ## Why The Current Hashes Are Insufficient
+
+Historical design baseline: the problem described in this section predates immutable evidence versions and stored frozen exports. The status statement above and the linked implementation contracts identify the controls now implemented. Proposal binding and PI batch release remain outstanding.
 
 The current system hashes several parts of the review history. Batch imports may include a `claim_hash` for duplicate detection. Review decisions and per-item PI acceptances receive SHA-256 hashes over their stored fields. `pow stage` hashes the raw input bytes and retains that hash with the staged batch.
 
