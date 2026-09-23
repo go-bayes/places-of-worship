@@ -1,12 +1,12 @@
 # Human review and occasional release
 
-Status: delivery direction clarified by the project lead on 2026-09-23. The existing human review portal is the destination for retained evidence, with read-only inspection as the default interaction. Release into the accepted master follows an irregular, operator-scheduled process. Collection browsing, international inspection adapters, and proposal-bound previews remain implementation work; the current review and PI controls remain in force.
+Status: delivery direction clarified by the project lead on 2026-09-23. The existing human review portal is the destination for retained evidence, with read-only inspection as the default interaction. Master release follows an irregular schedule authorised by the principal investigator (PI); an operator executes it only on the PI’s instruction. Collection browsing, international inspection adapters, and proposal-bound previews remain implementation work; the current review and PI controls remain in force.
 
 ## Evidence inspection is a delivery milestone
 
 Retained research should become inspectable in the existing authenticated human review portal before its eventual release into the accepted master. A local viewer or synthetic fixture can support development. The delivery milestone is an authorised collection of retained evidence that a human can inspect through the shared portal, with its sources, uncertainty, history, and recorded agent assessments.
 
-Read-only inspection means that opening cases, filtering or paging a collection, comparing versions, and changing the map leave research and workflow records unchanged. An eligible reviewer deliberately enters the existing decision workflow to record a finding or decision. Human preparation and independent review retain their current roles, including author exclusion and the provisional status of intake-only agent research.
+The design requires read-only inspection: opening cases, filtering or paging a collection, comparing versions, and changing the map leave research and workflow records unchanged. An eligible reviewer deliberately enters the existing decision workflow to record a finding or decision. Human preparation and independent review retain their current roles, including author exclusion and the provisional status of intake-only agent research.
 
 The collection view should retain access to incomplete, deferred, rejected, reviewed-unreleased, superseded, and released evidence. Its pagination and filters must disclose the membership they show. A location-unresolved observation belongs in the case list; supported geometry determines whether it can appear on the map. Case history should distinguish an accepted version from a later draft.
 
@@ -14,7 +14,7 @@ The existing country review pages use the shared portal. The present queue queri
 
 ## Review, export, processing, and publication
 
-Portal evidence and master data have different authority. Convex coordinates tasks, evidence, and review; `pow` governs validation, staging, acceptance, replay, and export of master changes. Backend deployment, provisional evidence import, a human review action, export freezing, master processing, and map publication must each be named in operational records.
+Master release means governed handoff to `pow`, acceptance and reconstruction of master changes, and subsequent publication. The PI authorises the release and its timing; an operator acts on that instruction. Portal evidence and master data have different authority. Convex coordinates tasks, evidence, and review. The `pow` CLI currently supports validation, staging, proposal generation, diff reports, object hashing, and frozen-export verification; the complete master acceptance, replay, and publication chain remains planned. Making new collections inspectable may first require an authorised Convex deployment and provisional import. Backend deployment, provisional evidence import, a human review action, export freezing, master processing, and map publication must each be named in operational records.
 
 | Stage | Meaning | Current or planned control |
 | --- | --- | --- |
@@ -22,8 +22,8 @@ Portal evidence and master data have different authority. Convex coordinates tas
 | Human reviewed | A qualified reviewer has recorded a decision on inspected content. | Existing role checks, author exclusion, and snapshot-linked decisions remain in force. |
 | PI authority | The principal investigator has authorised eligible evidence for handoff. | Current per-item PI acceptance remains until the approved batch-release replacement is implemented and verified. |
 | Frozen export | Stored export bytes and their membership can be retrieved and verified. | Implemented [frozen-export contract](frozen-exports.md); the task label `exported` records that workflow transition. |
-| Accepted master change | Governed processing has accepted the relevant events and verified reconstruction. | Recorded `pow` authority and processing evidence; an export alone does not establish this stage. |
-| Published output | A versioned public product has been built and published from accepted inputs. | Publication records identify the release, transformation, and output hashes. |
+| Accepted master change | Governed processing has accepted the relevant events and verified reconstruction. | Planned: recorded `pow` release authority and processing evidence; an export alone does not establish this stage. |
+| Published output | A versioned public product has been built and published from accepted inputs. | Planned for this governed chain: publication records identify the release, transformation, and output hashes. Existing static map publication does not establish that chain. |
 
 The [content-addressed review contract](content-addressed-review.md) specifies reviewer acceptance into a transparent queue and explicit PI batch release. That replacement remains planned. The current per-item gate must continue to protect exports until the replacement's queue, permissions, return path, version checks, and downstream verification are implemented together.
 
@@ -33,7 +33,7 @@ Historical claims retain their evidence basis between releases. A changed source
 
 ## Definition and map interpretation
 
-The [operational definition](../operational-definition.md) governs current interpretation. [Version 0.1.6](place-of-worship-definition-2026-09-22-v0.1.6.md) requires a new identity at a distinct property and preserves identity through inactivity, subject to its recorded end and succession rules. Claims about location, worship, community, time, function, and relationships retain their own evidence and review scope. A supported name correction leaves the other attributes at their recorded review state.
+The [operational definition](../operational-definition.md) governs current interpretation. [Version 0.1.6](place-of-worship-definition-2026-09-22-v0.1.6.md) requires a new identity at a distinct property and preserves identity through inactivity, subject to its recorded end and succession rules. The proposed claim-level design gives location, worship, community, time, function, and relationships their own evidence and review scope. Under that proposal, a supported name correction preserves the other attributes’ recorded review state. Current decisions apply to the inspected whole draft or evidence version; independent attribute acceptance requires new review and export contracts.
 
 Evidential uncertainty concerns incomplete knowledge, such as competing coordinates or bounded dates. Vagueness concerns the concept boundary, such as membership of a coherent worship complex. Preserve the evidence, the applicable rule and version, the reviewer’s rationale, and unresolved alternatives. Study counts follow declared recurrence and confidence criteria applied to the recorded attributes.
 
@@ -49,11 +49,11 @@ The [storage pipeline](../data-storage-pipeline.md#storage-responsibilities-and-
 
 Each imported collection needs a manifest identifying membership, source editions, adapter version, hashes, access restrictions, and validation results. Identical retries should return the existing receipt; changed input creates a linked version. Original source bytes and transformed content retain distinct hashes where necessary. A recovery exercise must reconstruct the inspection data from project-controlled storage and manifests using a clean cache.
 
-Source permissions determine which bytes may be retained and shown. Inaccessible or restricted sources retain permitted locators, extracts, dates, and explicit limitations. Source access can constrain acceptance of a claim while leaving its provisional record useful for further investigation. Private payloads remain behind server-side authorisation; a public portal shell does not make its evidence public.
+Source permissions determine which bytes may be retained and shown. Pending permission, inspection can expose permitted locators and metadata; unlicensed extracts and attachments remain unavailable. Inaccessible or restricted sources retain permitted locators, extracts, dates, and explicit limitations. Source access can constrain acceptance of a claim while leaving its provisional record useful for further investigation. Private payloads remain behind server-side authorisation; a public portal shell does not make its evidence public.
 
 ## Delivery and verification
 
-The first implementation milestone combines the collection contract, verified storage references, an inspection adapter, and retained evidence in the existing portal. Definition-compatible review can proceed alongside inspection development. Proposal binding and occasional governed release follow their own prerequisites. Release scheduling therefore remains independent of the first portal walkthrough.
+The first implementation milestone combines the collection contract, verified storage references, an inspection adapter, and retained evidence in the existing portal. Definition-compatible review can proceed alongside inspection development. Proposal pinning and occasional master release follow their own prerequisites. The first portal walkthrough can precede master release, after any required deployment and provisional import.
 
 | Implementation area | Required evidence |
 | --- | --- |

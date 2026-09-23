@@ -4,7 +4,7 @@
 
 ### 2026-09-23 (human review and occasional release design)
 
-- Aligned the public workflow references around retained evidence in the existing human review portal, with read-only inspection as default and operator-scheduled backend release. Added the delivery and verification contract and a FAQ answer, distinguishing implemented review and frozen-export controls from planned collection browsing and PI batch release. Clarified source-archive and export-storage responsibilities, and marked the older occupancy plan's identity provisions as superseded by definition 0.1.6. This documentation change leaves implementation, operational imports, and release pending.
+- Aligned the public workflow references around retained evidence in the existing human review portal, with read-only inspection as default and PI-authorised occasional master release. Added the delivery and verification contract and a FAQ answer, distinguishing implemented review and frozen-export controls from planned collection browsing and PI batch release. Clarified source-archive and export-storage responsibilities, and marked the older occupancy plan's identity provisions as superseded by definition 0.1.6. JB clarified the delivery direction on 2026-09-23: “At present -- read-only is default, as we have a review layer. I'd like to see the data in the (human review) portal. Release to the backend occurs irrecularly.” The workflow reference uses “master release” to distinguish that step from Convex deployment. This documentation change leaves implementation, operational imports, and release pending.
 
 ### 2026-09-22 (the definition as a guide page)
 

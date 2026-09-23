@@ -34,7 +34,7 @@ The [content-addressed review contract](development/content-addressed-review.md)
 
 The [internal agent review pilot](development/internal-agent-review.md) adds public-web research, independent advisory review, validated provisional intake, and human batch review APIs. It joins Evidence Intake and Authenticated Review; governed processing retains its existing authority.
 
-The [human review and occasional release design](development/human-review-and-release.md) records the delivery direction clarified on 2026-09-23. Retained evidence should appear in the existing authenticated human review portal, with read-only inspection as default. Review proceeds between operator-scheduled releases. Persistent collection browsing, inspection adapters, and proposal-bound previews remain implementation work; the current per-item PI gate and frozen-export controls remain in force.
+The [human review and occasional release design](development/human-review-and-release.md) records the delivery direction clarified on 2026-09-23. Retained evidence should appear in the existing authenticated human review portal, with read-only inspection as default. Review proceeds between master releases authorised by the PI, with operators acting on that instruction. Persistent collection browsing, inspection adapters, and proposal-bound previews remain implementation work; the current per-item PI gate and frozen-export controls remain in force.
 
 ## Module Table
 
@@ -55,7 +55,7 @@ The [human review and occasional release design](development/human-review-and-re
 
 ## Current Tactical Focus
 
-The next evidence-review milestone is an authorised retained collection in the existing human review portal. Completion requires inspectable sources and versions, access to incomplete and reviewed-unreleased cases, and verified storage recovery. Definition reconciliation and release readiness have their own dependencies; the first portal walkthrough can precede a backend release. The staged NZ workflow below remains the reference authority chain.
+The next evidence-review milestone is an authorised retained collection in the existing human review portal. Completion requires inspectable sources and versions, access to incomplete and reviewed-unreleased cases, and verified storage recovery. Definition reconciliation and release readiness have their own dependencies; the first portal walkthrough can precede master release, following any required authorised Convex deployment and provisional import. The staged NZ workflow below remains the reference authority chain.
 
 The immediate New Zealand pilot has five stages spanning six modules:
 

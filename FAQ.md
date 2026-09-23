@@ -4,11 +4,11 @@ This FAQ explains current operating rules for the New Zealand pilot and the
 planned staged data workflow. The authoritative contracts remain in schemas and
 planning documents; this page is a readable guide.
 
-## Can evidence appear in the human review portal before a backend release?
+## Can evidence appear in the human review portal before a master release?
 
-Yes. The human review portal provides access to provisional evidence and recorded review decisions. Review can continue between occasional releases into the accepted master. Inspecting a case is read-only by default; eligible reviewers deliberately record decisions through the review workflow.
+Yes for evidence already supported by the NZ task workflow: authorised reviewers can inspect provisional evidence and recorded decisions before master release. Master release means governed handoff to `pow`, acceptance and reconstruction of master changes, and subsequent publication; its complete processing chain remains planned. The PI authorises its timing. The design requires read-only inspection by default, with eligible reviewers deliberately entering the decision workflow.
 
-The next delivery milestone is retained research in the existing authenticated portal. Persistent collection browsing should keep incomplete cases and reviewed evidence awaiting release accessible; that collection view and its adapters remain implementation work. The current per-item PI acceptance gate remains in force. Stored export bytes, accepted `pow` events, and published map outputs identify different stages. See [human review and occasional release](docs/development/human-review-and-release.md) for their contracts and implementation status.
+The next delivery milestone is retained research in the existing authenticated portal. Persistent collection browsing should keep incomplete cases and reviewed evidence awaiting release accessible; that collection view and its adapters remain implementation work and may require an authorised Convex deployment and provisional import before inspection. The current per-item PI acceptance gate remains in force. Stored export bytes, accepted `pow` events, and published map outputs identify different stages. See [human review and occasional release](docs/development/human-review-and-release.md) for their contracts and implementation status.
 
 ## Can accepted evidence return to review before export processing?
 

@@ -8,9 +8,11 @@ Review proposals should behave like commits. A submitted evidence version receiv
 
 Convex remains the shared task and review service. `pow` remains the governed validation, acceptance, replay, and export boundary. Git stores code, schemas, documentation, and compact manifests. The content-addressed contract lets the dashboard, command-line tools, and later agent clients refer to the same review objects. Per-task Git branches and GitHub pull requests remain outside the review workflow.
 
-## Approved Review And Release Workflow
+## Delivery Clarification — 2026-09-23
 
-The project lead clarified delivery on 2026-09-23: retained evidence should be inspectable in the existing human review portal, with read-only navigation as default, while backend releases follow an irregular schedule. The [human review and occasional release design](human-review-and-release.md) separates the portal milestone from release readiness. Evidence can accumulate and receive human review between releases; deliberate PI authority and governed processing determine the accepted master changes.
+The project lead clarified delivery on 2026-09-23: retained evidence should be inspectable in the existing human review portal, with read-only navigation as default, while master releases follow an irregular schedule authorised by the PI. The [human review and occasional release design](human-review-and-release.md) defines master release and separates the portal milestone from release readiness. Inspection can require an authorised Convex deployment and provisional import. This delivery clarification preserves the review and release workflow approved on 2026-09-11 below.
+
+## Approved Review And Release Workflow
 
 Submitted evidence goes to a reviewer. The reviewer either returns it for correction or accepts it into a transparent export queue. A principal investigator (PI) can return queued items to review or explicitly release a batch for governed `pow` processing. Batch release provides PI acceptance for the exact included versions, replacing a separate PI acceptance action for every item.
 
@@ -47,7 +49,7 @@ The analogy maps Git's version structure and review relations onto project revie
 
 ## Why The Current Hashes Are Insufficient
 
-Historical design baseline: the problem described in this section predates immutable evidence versions and stored frozen exports. The status statement above and the linked implementation contracts identify the controls now implemented. Proposal binding and PI batch release remain outstanding.
+Historical design baseline: the problem described in this section predates immutable evidence versions and stored frozen exports. The status statement above and the linked implementation contracts identify the controls now implemented. Proposal pinning, the export queue, PI batch release, and `pow` release verification of a PI-released package remain outstanding.
 
 The current system hashes several parts of the review history. Batch imports may include a `claim_hash` for duplicate detection. Review decisions and per-item PI acceptances receive SHA-256 hashes over their stored fields. `pow stage` hashes the raw input bytes and retains that hash with the staged batch.
 
