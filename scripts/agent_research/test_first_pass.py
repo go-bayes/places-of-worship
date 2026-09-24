@@ -460,5 +460,32 @@ class WireFormatTests(unittest.TestCase):
         self.assertEqual(fp.read_object(Path(tmp.name) / 'b', digest)[0], raw)
 
 
+    def test_records_archived_under_earlier_rules_read_and_restore_byte_identically(self):
+        # a researched record as archived before the digest-provenance and quarantine rules:
+        # its idempotency key was synthetic and its quarantine block was marked unredacted
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        record = json.loads((HERE / 'fixtures/first-pass-researched.json').read_text())
+        record['dossier']['run_manifest']['idempotency_key'] = '42faf40c9d778c93f5a3dd6cdadec24b24a4d3ee8f7521a0c6a634c77cb6609e'
+        record['dossier']['personal_details_quarantine']['redacted'] = False
+        with self.assertRaises(ValueError):
+            fp.validate(record)  # today's intake rules refuse it as a new record
+        raw = fp.encode(record)
+        store = Path(tmp.name) / 'a'
+        digest = fp.put_bytes(store, raw)  # the bytes an earlier archive wrote
+        self.assertEqual(fp.read_object(store, digest)[0], raw)
+        self.assertEqual(set(fp.verify(store, digest)), {digest})
+        self.assertEqual(fp.copy_history(store, Path(tmp.name) / 'copy', digest), 1)
+        # a receipt the backend already holds for those bytes restores them exactly
+        backend = FakeBackend()
+        backend.receipts[digest] = raw.decode('ascii')
+        self.assertEqual(fp.restore(Path(tmp.name) / 'b', digest, 'local', run=backend), 1)
+        self.assertEqual(fp.read_object(Path(tmp.name) / 'b', digest)[0], raw)
+        # integrity still binds: altered bytes under the same name are refused
+        fp.object_path(store, digest).write_bytes(raw.replace(b'"redacted":false', b'"redacted":true '))
+        with self.assertRaisesRegex(ValueError, 'hash'):
+            fp.read_object(store, digest)
+
+
 if __name__ == '__main__':
     unittest.main()

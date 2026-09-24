@@ -773,7 +773,7 @@ def _write_run_result(output_dir: Path, status: str, error: str | None = None, b
         "bundle": bundle,
         "allowlist_version": (counters or {}).get("allowlist_version"),
         "allowlist_violations": (counters or {}).get("allowlist_violations"),
-        "allowlist_violation_hosts": (counters or {}).get("allowlist_violation_hosts"),
+        "allowlist_violation_domains": (counters or {}).get("allowlist_violation_domains"),
         # a transport refused for personal details: the stage and the refused paths, never the text.
         # the original stays in this private run directory for a human to handle or a rerun.
         "personal_detail_refusal": refusal,
@@ -960,7 +960,8 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
     counters = {
         "allowlist_version": allowlist_version,
         "allowlist_violations": None if violations is None else len(violations),
-        "allowlist_violation_hosts": None if violations is None else sorted({v["host"] for v in violations}),
+        # the registrable domain of each off-list host, screened: a host label may carry text
+        "allowlist_violation_domains": None if violations is None else sorted({lib.screened_domain(v["host"]) for v in violations}),
     }
     # every later failure keeps the counters: a dossier existed, so null would misreport the run.
     try:

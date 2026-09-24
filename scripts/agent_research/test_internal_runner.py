@@ -321,7 +321,7 @@ class ValidationAndAuditTest(unittest.TestCase):
             self.assertEqual(run_result["exit_code"], 0)
             self.assertEqual(run_result["bundle"]["provisional"], True)
             self.assertEqual((run_result["allowlist_version"], run_result["allowlist_violations"],
-                              run_result["allowlist_violation_hosts"]), ("nz-v1", 0, []))
+                              run_result["allowlist_violation_domains"]), ("nz-v1", 0, []))
             bundle = json.loads((Path(tmp) / "out" / "bundle.json").read_text())
             manifest = bundle["dossier"]["run_manifest"]
             # the dossier's cost is the sum over billing models, not the requested model's share.
@@ -451,8 +451,29 @@ class ValidationAndAuditTest(unittest.TestCase):
             self.assertEqual(run_result["exit_code"], 2)
             self.assertIn("not on allowlist nz-v1", run_result["error"])
             self.assertEqual(run_result["allowlist_violations"], 1)
-            self.assertEqual(run_result["allowlist_violation_hosts"], ["www.example-parish.nz"])
+            self.assertEqual(run_result["allowlist_violation_domains"], ["example-parish.nz"])
             self.assertFalse((Path(tmp) / "out" / "bundle.json").exists())
+
+    def test_allowlist_counter_never_records_text_from_a_host(self):
+        digest = __import__("hashlib").sha1(b"office@example.org").hexdigest()
+        # a digest label falls outside the registrable domain; a phone-number label is redacted
+        # out of the locator by the quarantine before counting, leaving no host to record
+        for host, expected in ((f"{digest}.example.org", "example.org"),
+                               ("021-123-4567.parish.example.co.nz", "<unparsed host>"),
+                               ("www.stjohns.org.nz", "stjohns.org.nz")):
+            with self.subTest(host), tempfile.TemporaryDirectory() as tmp:
+                _, run_result = self._run_pair(Path(tmp), f"https://{host}/about",
+                                               self._claude_manifest("research"), self._codex_manifest("review", "gpt-5.6-luna"))
+                self.assertEqual(run_result["allowlist_violations"], 1)
+                self.assertEqual(run_result["allowlist_violation_domains"], [expected])
+                self.assertNotIn(digest, json.dumps(run_result))
+                self.assertNotIn("021-123-4567", json.dumps(run_result))
+        screened = runner.lib.screened_domain
+        self.assertEqual(screened("021-123-4567.nz"), "<label#0>.nz")
+        self.assertEqual(screened(f"www.{digest}.co.nz"), "<label#0>.co.nz")
+        self.assertEqual(screened(f"{digest.upper()}.ORG"), "<label#0>.org")
+        self.assertEqual(screened("parish.example.co.nz"), "example.co.nz")
+        self.assertEqual(screened(""), "<unparsed host>")
 
     def test_unreported_research_model_is_refused_before_review(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -488,7 +509,7 @@ class ValidationAndAuditTest(unittest.TestCase):
                 self.assertEqual(run_result["status"], "failed")
                 self.assertIn(message, run_result["error"])
                 self.assertEqual((run_result["allowlist_version"], run_result["allowlist_violations"],
-                                  run_result["allowlist_violation_hosts"]), ("nz-v1", 0, []))
+                                  run_result["allowlist_violation_domains"]), ("nz-v1", 0, []))
 
     def test_incomplete_or_absent_per_model_cost_is_unknown_not_unmetered(self):
         envelope = json.loads(json.dumps(self.CLAUDE_ENVELOPE))

@@ -74,7 +74,8 @@ async function checkedContext(ctx: { db: any }, record: FirstPassRecord): Promis
   }
   if (owners.length === 0) return {};
   const taskIds = new Set(owners.map(([, taskId]) => taskId));
-  if (taskIds.size !== 1) throw new Error(`First-pass context names records from different tasks (${owners.map(([field, taskId]) => `${field}: ${taskId}`).join("; ")}).`);
+  // the fields that disagree, never the supplied or stored task ids
+  if (taskIds.size !== 1) throw new Error(`First-pass context names records from different tasks (${owners.map(([field]) => field).join(", ")}).`);
   const [taskId] = taskIds;
   const task: Doc<"tasks"> | null = await ctx.db.query("tasks").withIndex("by_task_id", (q: any) => q.eq("task_id", taskId)).unique();
   if (task === null) throw new Error("First-pass context names a task this deployment does not hold.");
@@ -187,9 +188,10 @@ export const ingestFirstPass = internalMutation({
     const { record, byteLength } = validateFirstPassRecord(args.recordJson, args.recordHash);
     // predecessors must already hold receipts for the same place, so the
     // backend never holds a revision whose history it cannot return
-    for (const parent of record.parents) {
+    // lookup failures name the parent by position, never by the supplied hash
+    for (const [index, parent] of record.parents.entries()) {
       const parentReceipt = await receiptByHash(ctx, parent);
-      if (parentReceipt === null) throw new Error(`Parent first pass ${parent} has no receipt; submit its history first.`);
+      if (parentReceipt === null) throw new Error(`Parent first pass #${index} has no receipt; submit its history first.`);
       if (parentReceipt.place_ref !== record.place_ref) throw new Error("Parent first pass belongs to another place.");
     }
     const resolved = await checkedContext(ctx, record);

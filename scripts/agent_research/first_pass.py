@@ -88,6 +88,21 @@ def validate(record):
     return record
 
 
+def integrity_record(raw: bytes):
+    """Parse archived or receipted bytes for reading only: the bounded strict parser, the fields
+    the parent graph needs, and nothing else. Intake rules (schema, screening, digest provenance)
+    apply when a record is archived or submitted, never when it is read or restored, so a record
+    archived under earlier rules stays readable byte for byte. Callers check the hash, the byte
+    limit and the version-1 wire form."""
+    record = intake.parse_json(raw)
+    if not isinstance(record, dict) or not isinstance(record.get('place_ref'), str):
+        raise ValueError('object is not a first-pass record')
+    parents = record.get('parents')
+    if not isinstance(parents, list) or not all(isinstance(p, str) and re.fullmatch(r'[a-f0-9]{64}', p) for p in parents):
+        raise ValueError('object parents are not record hashes')
+    return record
+
+
 def object_path(store: Path, digest: str):
     if not re.fullmatch(r'[a-f0-9]{64}', digest):
         raise ValueError('invalid object hash')
@@ -103,7 +118,7 @@ def read_object(store: Path, digest: str):
         raw = stream.read(intake.MAX_BYTES + 1)
     if len(raw) > intake.MAX_BYTES or hashlib.sha256(raw).hexdigest() != digest:
         raise ValueError('object hash or byte limit mismatch')
-    record = validate(intake.parse_json(raw))
+    record = integrity_record(raw)
     if encode(record) != raw:
         raise ValueError('object is not in version-1 wire format')
     return raw, record
@@ -294,7 +309,7 @@ def restore(store: Path, digest: str, deployment: str, run=convex_run):
         raw = stored['record_json'].encode('ascii')
         if hashlib.sha256(raw).hexdigest() != current:
             raise ValueError('receipt bytes do not match their hash')
-        record = validate(intake.parse_json(raw))
+        record = integrity_record(raw)
         if encode(record) != raw:
             raise ValueError('receipt bytes are not in version-1 wire format')
         put_bytes(store, raw)

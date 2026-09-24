@@ -241,7 +241,8 @@ test("a revision needs its parent's receipt first, for the same place", async ()
   const parentInput = args(researched());
   const child = partial();
   child.parents = [parentInput.recordHash];
-  await assert.rejects(ingestFirstPass._handler(ctx, args(child)), /has no receipt/);
+  // the lookup failure names the parent by position, never by the supplied hash
+  await assert.rejects(ingestFirstPass._handler(ctx, args(child)), (error) => /Parent first pass #0 has no receipt/.test(error.message) && !error.message.includes(parentInput.recordHash));
   assert.equal(ctx.rows.agent_first_pass_receipts.length, 0);
   await ingestFirstPass._handler(ctx, parentInput);
   const childResult = await ingestFirstPass._handler(ctx, args(child));
@@ -295,7 +296,8 @@ test("every context field resolves to one task in the record's country and about
   ];
   for (const [value, pattern] of refusals) {
     record.context = value;
-    await assert.rejects(ingestFirstPass._handler(ctx, args(record)), pattern, JSON.stringify(value));
+    // lookup failures name fields, never the supplied or stored identifiers
+    await assert.rejects(ingestFirstPass._handler(ctx, args(record)), (error) => pattern.test(error.message) && !/task_nz|task_vu|draft_other|draft_nz/.test(error.message) && !(value.evidence_version_hash && error.message.includes(value.evidence_version_hash)), JSON.stringify(value));
   }
   assert.equal(ctx.rows.agent_first_pass_receipts.length, 0);
   assert.equal(ctx.rows.agent_judgments.length, 0);

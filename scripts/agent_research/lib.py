@@ -222,6 +222,25 @@ def hash_token_spans(text: str) -> list[tuple[int, int]]:
             if len(m.group(0)) in (40, 64) and set(m.group(0)) <= _HEX_DIGITS]
 
 
+# second-level labels under which a country code's registrable domains sit (co.nz, org.uk);
+# an approximation of the public suffix list, used only to shorten recorded hosts
+_SECOND_LEVEL = frozenset({"ac", "co", "com", "edu", "gen", "geek", "gov", "govt", "health", "iwi", "kiwi",
+                           "maori", "mil", "net", "nom", "org", "parliament", "school", "cri"})
+
+
+def screened_domain(host: str) -> str:
+    """the registrable part of a host, for a run-row counter: the last two labels, or three under
+    a country code's second-level label. any label that carries a personal detail or a hex digest
+    is replaced by its position (<label#N>), so the counter never records such text."""
+    labels = [label for label in (host or "").lower().rstrip(".").split(".") if label]
+    if not labels:
+        return "<unparsed host>"
+    keep = 3 if len(labels) >= 3 and len(labels[-1]) == 2 and labels[-2] in _SECOND_LEVEL else 2
+    kept = labels[-keep:]
+    return ".".join(f"<label#{index}>" if find_personal_details(label) or hash_token_spans(label) else label
+                    for index, label in enumerate(kept))
+
+
 def key_ref(obj: dict, key: str) -> str:
     """an opaque positional reference to an undeclared object key, so diagnostics and refusal
     records never copy the key itself: its index among the object's keys in code-point order."""
