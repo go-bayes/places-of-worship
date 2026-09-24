@@ -257,6 +257,15 @@ An assigned pull request is carried to closure by one agent, so no merged change
 - Halt and hand over on any surprise: CI red after a rebase, a new blocking finding, a deployment error, or a mismatch between the deployed functions and the head. A halted closure is recorded, never retried silently.
 - Closure never includes data mutations (migration versions, acceptances, freezes, imports), secrets or environment variables, `npx convex deploy` to the production deployment, Pages or tile configuration, or outward messages. Each of those needs its own instruction.
 
+## Development Methods Record
+
+Joseph intends to publish an account of how this site was developed (Joseph, 2026-09-24), so agents record their methods as they work. The public repository is the record that is always present; the private handovers in `pow-research` keep the operational detail.
+
+- At the end of each sitting in which work is merged, deployed or designed, the closure owner (the agent that carried the work to closure; reviewing agents stay read-only) appends a dated entry to `docs/development/methods-log.md`. Write at summary grain, one line per paragraph, New Zealand English.
+- Each entry states: what was built or decided and why; which roles did the work (the human rulings, the implementing agent and model, the reviewing models and their tier under the review rule above); the number of review rounds and findings by severity for each pull request, stating which reviewers' findings are counted; how the work was verified (continuous integration, isolated local backends, read-back of the live deployment after a deploy); and any deviation from the rules in this file, such as a merge made before its review, with how it was remedied.
+- Record costs, credentials, private research data and personal details nowhere in the log. Name people only as the project already credits them.
+- A later correction appends a new entry rather than rewriting an earlier one.
+
 ## Useful Commands
 
 - Rust checks: `cargo fmt --all`, `cargo test`, `cargo clippy --all-targets -- -D warnings`.
