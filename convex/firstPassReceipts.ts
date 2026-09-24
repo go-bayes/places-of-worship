@@ -8,8 +8,7 @@ import { FIRST_PASS_SCHEMA_VERSION, validateFirstPassRecord, type FirstPassRecor
 import { costBasisOf, recordJudgments, type JudgmentContext, type JudgmentInput } from "./lib/agentJudgments";
 import { OBJECT_RECEIPT_CONTRACT, convexOnlyStorage, isSha256Hex, objectReceiptId } from "./lib/objectReceipts";
 
-// first-pass receipts (j2 of the ai-judgment recording design, jb rulings
-// r-j1 to r-j7 of 2026-09-19; docs/development/agent-first-passes.md). the
+// first-pass receipts (docs/development/agent-first-passes.md). the
 // operator's `first_pass.py submit` sends each archived record, parents
 // first, to ingestFirstPass; the backend verifies the bytes against their
 // hash, keeps them under the object-receipt.v1 contract, and records the
@@ -86,9 +85,9 @@ async function checkedContext(ctx: { db: any }, record: FirstPassRecord): Promis
 const MANIFEST_UNREPORTED = "The researcher's run manifest reported no model id.";
 const ATTRIBUTION_PROVIDER_UNREPORTED = "not_reported";
 
-// judgments come from two runs, each attributed from its own record (brief
-// section 6: ingest emits status_assessment and annotation judgments; the
-// claims stay in the record):
+// judgments come from two runs, each attributed from its own record (ingest
+// emits status_assessment and annotation judgments; the claims stay in the
+// record):
 // - the status assessment is the dossier researcher's verdict, so its judge,
 //   models, prompt, run id and cost all come from the dossier's validated
 //   run manifest. it is keyed on that run and the record's context, not on

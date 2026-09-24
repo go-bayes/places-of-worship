@@ -656,8 +656,8 @@ export default defineSchema({
     .index("by_bundle_hash", ["bundle_hash"])
     .index("by_receipt_id", ["receipt_id"]),
 
-  // receipt for one archived agent-first-pass.v1 record (j2 of the
-  // ai-judgment recording design; docs/development/agent-first-passes.md).
+  // receipt for one archived agent-first-pass.v1 record
+  // (docs/development/agent-first-passes.md).
   // the backend's copy of the exact archive bytes under the object-receipt.v1
   // contract (lib/objectReceipts): written once by
   // firstPassReceipts.ingestFirstPass, never patched, keyed by the sha256 of

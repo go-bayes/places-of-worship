@@ -346,6 +346,48 @@ class FirstPassSubmitTests(unittest.TestCase):
             'potential personal details in next_questions[0] require human handling'])
 
 
+    def test_every_screened_string_is_refused_before_submission(self):
+        base = json.loads((HERE / 'fixtures/first-pass-all-fields.json').read_text())
+        self.assertEqual(fp.submission_errors(base), [])
+        paths = [path for path, _ in fp.screened_text(base)]
+        for expected in ('dossier.run_manifest.notes', 'dossier.candidate_location.basis_note',
+                         'dossier.claims[0].source.licence_note', 'dossier.place.seed_tags.denomination'):
+            self.assertIn(expected, paths)
+
+        def inject(value, path):
+            if isinstance(value, str):
+                return value + ('?contact=someone@example.org' if value.startswith('http') else ' someone@example.org')
+            return value
+
+        def mutate(node, target, prefix=''):
+            if isinstance(node, dict):
+                return {k: (inject(v, f'{prefix}{k}') if f'{prefix}{k}' == target else mutate(v, target, f'{prefix}{k}.'))
+                        for k, v in node.items()}
+            if isinstance(node, list):
+                base_path = prefix[:-1]
+                return [inject(v, f'{base_path}[{i}]') if f'{base_path}[{i}]' == target else mutate(v, target, f'{base_path}[{i}].')
+                        for i, v in enumerate(node)]
+            return node
+
+        for path in paths:
+            if path.endswith(' (key)'):
+                continue
+            with self.subTest(path=path):
+                errors = fp.submission_errors(mutate(base, path))
+                self.assertIn(f'potential personal details in {path} require human handling', errors)
+        tagged = copy.deepcopy(base)
+        tagged['dossier']['place']['seed_tags']['contact someone@example.org'] = 'x'
+        self.assertIn('potential personal details in dossier.place.seed_tags.contact someone@example.org (key) require human handling',
+                      fp.submission_errors(tagged))
+
+    def test_floats_where_the_schema_needs_integers_are_refused(self):
+        raw = fp.encode(json.loads((HERE / 'fixtures/first-pass-researched.json').read_text())).decode()
+        for before, after, message in (('"item_count":0,', '"item_count":0.0,', 'item_count: invalid constant'),
+                                       ('"input_tokens":10,', '"input_tokens":10.0,', 'input_tokens: invalid type')):
+            with self.subTest(field=before):
+                with self.assertRaisesRegex(ValueError, message):
+                    fp.validate(fp.intake.parse_json(raw.replace(before, after)))
+
     def test_convex_run_names_the_target_and_passes_exact_bytes(self):
         raw, _ = fp.read_object(self.store, self.first)
         payload = {'recordJson': raw.decode('ascii'), 'recordHash': self.first}

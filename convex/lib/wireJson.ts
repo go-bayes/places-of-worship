@@ -58,8 +58,11 @@ function compareCodePoints(left: string, right: string): number {
 
 // parse json text and return python's canonical encoding of the same value
 // (without the final newline). duplicate keys and non-finite numbers are
-// refused, as the archive's parser refuses them.
-export function canonicalWireJson(text: string): string {
+// refused, as the archive's parser refuses them. when floatPaths is given it
+// receives the path of every number python reads as a float, in the path
+// notation of lib/agentIntake schemaCheck ($, .key, [index]), so a schema
+// check over the parsed value can apply python's int/float distinction.
+export function canonicalWireJson(text: string, floatPaths?: Set<string>): string {
   let at = 0;
   const skip = () => { while (at < text.length && " \t\n\r".includes(text[at])) at += 1; };
   const fail = (message: string): never => { throw new Error(`${message} at offset ${at}`); };
@@ -76,7 +79,7 @@ export function canonicalWireJson(text: string): string {
       return fail("invalid string");
     }
   };
-  const value = (depth: number): string => {
+  const value = (depth: number, path: string): string => {
     if (depth > MAX_DEPTH) fail("JSON exceeds depth limit");
     skip();
     const c = text[at];
@@ -94,7 +97,7 @@ export function canonicalWireJson(text: string): string {
         seen.add(key);
         skip();
         expect(":");
-        members.push([key, value(depth + 1)]);
+        members.push([key, value(depth + 1, `${path}.${key}`)]);
         skip();
         if (text[at] === ",") { at += 1; continue; }
         expect("}");
@@ -109,7 +112,7 @@ export function canonicalWireJson(text: string): string {
       skip();
       if (text[at] === "]") { at += 1; return "[]"; }
       for (;;) {
-        items.push(value(depth + 1));
+        items.push(value(depth + 1, `${path}[${items.length}]`));
         skip();
         if (text[at] === ",") { at += 1; continue; }
         expect("]");
@@ -130,9 +133,10 @@ export function canonicalWireJson(text: string): string {
       // a python int keeps its digits; -0 parses as 0
       return lexeme === "-0" ? "0" : lexeme;
     }
+    floatPaths?.add(path);
     return pythonFloatRepr(Number(lexeme));
   };
-  const encoded = value(0);
+  const encoded = value(0, "$");
   skip();
   if (at !== text.length) fail("trailing text after JSON value");
   return encoded;

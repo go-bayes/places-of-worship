@@ -39,17 +39,22 @@ export type AgentRun = {
 };
 
 // apply the self-contained transport schema without resolving external references.
-export function schemaCheck(value: any, schema: any, path = "$", root: any = bundleSchema): void {
+// floats, when given, names the paths of numbers written as floats (see
+// lib/wireJson canonicalWireJson): python's schema check then refuses them
+// where an integer or an integer constant is required, as first_pass.py does
+// (every numeric const in these schemas is a python int).
+export function schemaCheck(value: any, schema: any, path = "$", root: any = bundleSchema, floats?: ReadonlySet<string>): void {
   if (schema.$ref) {
     if (!schema.$ref.startsWith("#/")) throw new Error("external schema reference");
     let target = root;
     for (const part of schema.$ref.slice(2).split("/")) target = target[part];
-    return schemaCheck(value, target, path, root);
+    return schemaCheck(value, target, path, root, floats);
   }
+  const isFloat = floats?.has(path) === true;
   const kinds = Array.isArray(schema.type) ? schema.type : schema.type ? [schema.type] : [];
-  const matches = (kind: string): boolean => kind === "null" ? value === null : kind === "array" ? Array.isArray(value) : kind === "object" ? value !== null && typeof value === "object" && !Array.isArray(value) : kind === "integer" ? Number.isInteger(value) : typeof value === kind;
+  const matches = (kind: string): boolean => kind === "null" ? value === null : kind === "array" ? Array.isArray(value) : kind === "object" ? value !== null && typeof value === "object" && !Array.isArray(value) : kind === "integer" ? Number.isInteger(value) && !isFloat : typeof value === kind;
   if (kinds.length && !kinds.some(matches)) throw new Error(`${path}: invalid type`);
-  if ("const" in schema && value !== schema.const) throw new Error(`${path}: invalid constant`);
+  if ("const" in schema && (value !== schema.const || (isFloat && typeof schema.const === "number"))) throw new Error(`${path}: invalid constant`);
   if (schema.enum && !schema.enum.includes(value)) throw new Error(`${path}: invalid enum`);
   if (typeof value === "string") {
     const length = [...value].length;
@@ -58,11 +63,11 @@ export function schemaCheck(value: any, schema: any, path = "$", root: any = bun
   if (typeof value === "number" && (!Number.isFinite(value) || value < (schema.minimum ?? -Infinity) || value > (schema.maximum ?? Infinity))) throw new Error(`${path}: invalid number`);
   if (Array.isArray(value)) {
     if (value.length < (schema.minItems ?? 0) || value.length > (schema.maxItems ?? Infinity)) throw new Error(`${path}: invalid array size`);
-    value.forEach((item, i) => { if (schema.items) schemaCheck(item, schema.items, `${path}[${i}]`, root); });
+    value.forEach((item, i) => { if (schema.items) schemaCheck(item, schema.items, `${path}[${i}]`, root, floats); });
   } else if (value !== null && typeof value === "object") {
     for (const key of schema.required ?? []) if (!Object.hasOwn(value, key)) throw new Error(`${path}: missing ${key}`);
     for (const [key, item] of Object.entries(value)) {
-      if (Object.hasOwn(schema.properties ?? {}, key)) schemaCheck(item, schema.properties[key], `${path}.${key}`, root);
+      if (Object.hasOwn(schema.properties ?? {}, key)) schemaCheck(item, schema.properties[key], `${path}.${key}`, root, floats);
       else if (schema.additionalProperties === false) throw new Error(`${path}: unknown field ${key}`);
     }
   }
@@ -175,9 +180,9 @@ export function validateDossierRecord(d: Record<string, any>): Map<string, strin
 // a dossier carried without a review bundle (inside a first-pass record):
 // the bundle schema's dossier definition, the nz pilot restriction, the
 // researcher model policy and a completed run, then the shared checks.
-export function validateStandaloneDossier(d: unknown): Map<string, string> {
+export function validateStandaloneDossier(d: unknown, floats?: ReadonlySet<string>): Map<string, string> {
   guard(d);
-  schemaCheck(d, (bundleSchema as any).$defs.dossier, "$.dossier", bundleSchema);
+  schemaCheck(d, (bundleSchema as any).$defs.dossier, "$.dossier", bundleSchema, floats);
   const dossier = d as Record<string, any>;
   if (dossier.place.country_code !== "NZ") throw new Error("internal pilot requires NZ");
   const models: Record<string, string> = { claude: "sonnet", codex: "gpt-5.6-luna" };

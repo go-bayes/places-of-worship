@@ -9,6 +9,7 @@ const { ingestFirstPass, getFirstPassRecord, getFirstPassReceipt, listFirstPassR
 const { sha256 } = await import("./lib/sha256.ts");
 const { verifyObjectBytes, objectReceiptId } = await import("./lib/objectReceipts.ts");
 const { canonicalWireJson } = await import("./lib/wireJson.ts");
+const { screenedText } = await import("./lib/firstPass.ts");
 
 const fixtureText = (name) => fs.readFileSync(new URL(`../scripts/agent_research/fixtures/${name}`, import.meta.url), "utf8");
 const fixture = (name) => JSON.parse(fixtureText(name));
@@ -340,6 +341,89 @@ test("free text with personal details is refused before a reviewer could read it
   await assert.rejects(ingestFirstPass._handler(ctx, args(basis)), /personal details in dossier\.status_assessment\.basis/);
   assert.equal(ctx.rows.agent_first_pass_receipts.length, 0);
   assert.equal(ctx.rows.agent_judgments.length, 0);
+});
+
+// every string leaf and every object key of a record, with a setter that
+// injects a synthetic email into it; written independently of screenedText
+function everyString(record) {
+  const out = [];
+  const walk = (value, path, setLeaf, renameKey) => {
+    if (typeof value === "string") {
+      out.push({ path, kind: "value", inject: (r) => setLeaf(r, value.startsWith("http") ? `${value}?contact=someone@example.org` : `${value} someone@example.org`) });
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach((item, i) => walk(item, `${path}[${i}]`, (r, v) => { at(r, path)[i] = v; }));
+      return;
+    }
+    if (value === null || typeof value !== "object") return;
+    for (const key of Object.keys(value)) {
+      const child = path === "" ? key : `${path}.${key}`;
+      out.push({ path: `${child} (key)`, kind: "key", inject: (r) => { const o = at(r, path); const renamed = {}; for (const [k, v] of Object.entries(o)) renamed[k === key ? `contact someone@example.org` : k] = v; Object.keys(o).forEach((k) => delete o[k]); Object.assign(o, renamed); } });
+      walk(value[key], child, (r, v) => { at(r, path)[key] = v; });
+    }
+  };
+  const at = (r, path) => (path === "" ? r : path.split(/\.|(?=\[)/).reduce((o, part) => (part.startsWith("[") ? o[Number(part.slice(1, -1))] : o[part]), r));
+  walk(record, "", null);
+  return out;
+}
+
+test("every string of the record and its dossier is screened unless its shape is fixed", async () => {
+  enable();
+  const base = fixture("first-pass-all-fields.json");
+  assert.equal((await ingestFirstPass._handler(context(), args(base))).created, true, "the all-fields fixture is valid");
+  const screened = new Set(screenedText(JSON.parse(wire(fixtureText("first-pass-all-fields.json")))).map(([path]) => path));
+  // the fields the second review found unscreened are now screened
+  for (const path of ["dossier.run_manifest.notes", "dossier.candidate_location.basis_note", "dossier.claims[0].source.licence_note", "dossier.place.seed_tags.denomination", "dossier.place.seed_tags.denomination (key)", "dossier.osm_version_chain[0].change_note", "context.assistance_request_id"]) {
+    assert.ok(screened.has(path), path);
+  }
+  const refusedForPersonalDetails = new Set();
+  const cases = everyString(base);
+  assert.ok(cases.length > 150, `${cases.length} generated cases`);
+  for (const { path, kind, inject } of cases) {
+    const record = structuredClone(base);
+    inject(record);
+    const error = await ingestFirstPass._handler(context(), args(record)).then(() => null, (e) => e);
+    assert.ok(error !== null, `injected ${path} was accepted`);
+    const match = /potential personal details in (.+) require human handling/.exec(error.message);
+    if (match !== null) {
+      // a renamed key is reported under its new name
+      if (kind === "key") assert.equal(match[1], `${path.slice(0, path.lastIndexOf(".") + 1)}contact someone@example.org (key)`, path);
+      else assert.equal(match[1], path);
+      refusedForPersonalDetails.add(match[1]);
+    } else {
+      // a closed vocabulary, a fixed shape or a declared key refuses the text itself
+      assert.match(error.message, /invalid (enum|constant|string)|unknown field|missing /, `${path}: ${error.message}`);
+    }
+  }
+  // exactly the strings the walk screens were refused for personal details
+  const screenedValues = [...screened].filter((path) => !path.endsWith(" (key)"));
+  for (const path of screenedValues) assert.ok(refusedForPersonalDetails.has(path), `${path} not refused for personal details`);
+});
+
+test("python and typescript screen the same strings", async (t) => {
+  const { spawnSync } = await import("node:child_process");
+  if (spawnSync("python3", ["--version"]).status !== 0) { t.skip("python3 is not available"); return; }
+  for (const name of ["first-pass.json", "first-pass-all-fields.json"]) {
+    const script = `import json,sys\nsys.path.insert(0, 'scripts/agent_research')\nimport first_pass as fp\nprint(json.dumps([p for p, _ in fp.screened_text(json.load(open('scripts/agent_research/fixtures/${name}')))]))`;
+    const run = spawnSync("python3", ["-c", script], { cwd: fileURLToPath(new URL("..", import.meta.url)), encoding: "utf8" });
+    assert.equal(run.status, 0, run.stderr);
+    assert.deepEqual(JSON.parse(run.stdout), screenedText(fixture(name)).map(([path]) => path), name);
+  }
+});
+
+test("a float where python's schema needs an integer is refused, so every receipt restores", async () => {
+  enable();
+  const exact = wire(fixtureText("first-pass-researched.json"));
+  assert.ok(exact.includes('"item_count":0,') && exact.includes('"input_tokens":10,'));
+  for (const [from, to, pattern] of [['"item_count":0,', '"item_count":0.0,', /item_count: invalid constant/], ['"input_tokens":10,', '"input_tokens":10.0,', /input_tokens: invalid type/]]) {
+    const text = exact.replace(from, to);
+    // canonical python bytes, so only the int/float distinction can refuse them
+    assert.equal(wire(text), text);
+    const ctx = context();
+    await assert.rejects(ingestFirstPass._handler(ctx, { recordJson: text, recordHash: sha256(text) }), pattern);
+    assert.equal(ctx.rows.agent_first_pass_receipts.length, 0);
+  }
 });
 
 test("the parent lookup stays bounded on a place with a long judgment history", async () => {

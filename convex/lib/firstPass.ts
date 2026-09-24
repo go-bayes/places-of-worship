@@ -1,4 +1,6 @@
 import firstPassSchema from "../../scripts/agent_research/schemas/agent-first-pass.v1.json" with { type: "json" };
+import bundleSchema from "../../scripts/agent_research/schemas/agent-review-bundle.v1.json" with { type: "json" };
+import { canonicalWireJson } from "./wireJson.ts";
 import { assertNoDuplicateJsonKeys, dateBounds, guard, hasPersonalDetails, publicUrl, schemaCheck, validateStandaloneDossier } from "./agentIntake.ts";
 import { verifyObjectBytes } from "./objectReceipts.ts";
 
@@ -62,31 +64,56 @@ function timestamp(value: string, label: string): number {
   return parsed;
 }
 
-// the record's free text, by path. reviewers read receipts, so a record whose
-// text carries a phone, email or honorific-led name is refused at the backend
-// and stays in the operator's private archive for human handling
-// (docs/development/agent-first-passes.md; the dossier's claims are screened
-// by validateStandaloneDossier). first_pass.py personal_detail_fields mirrors
-// this list.
-export function firstPassFreeText(record: FirstPassRecord): Array<[string, string]> {
-  const fields: Array<[string, string]> = [
-    ["question", record.question],
-    ["stop_reason", record.stop_reason],
-    ["usage.note", record.usage.note],
-    ["attribution.responsible_human_ref", record.attribution.responsible_human_ref],
-  ];
-  if (record.attribution.model_unreported_reason !== null) fields.push(["attribution.model_unreported_reason", record.attribution.model_unreported_reason]);
-  record.annotations.forEach((annotation, i) => fields.push([`annotations[${i}].note`, annotation.note]));
-  record.searches.forEach((search, i) => {
-    for (const key of ["query", "note", "source_name", "licence_note", "access_note"] as const) {
-      const value = search[key];
-      if (value !== null) fields.push([`searches[${i}].${key}`, value]);
+const SCHEMA_OVERRIDES: Record<string, [any, any]> = {
+  // the embedded dossier is walked against its own schema
+  dossier: [(bundleSchema as any).$defs.dossier, bundleSchema],
+};
+const HASH_SHAPED = /^(?:sha256:)?(?:[0-9a-f]{40}|[0-9a-f]{64})$/;
+
+// every string in the record and its embedded dossier that could carry a
+// personal detail, by path: each string value, and each object key the schema
+// does not declare (free-form maps such as seed_tags or usage). reviewers read
+// receipts, so a record whose text carries a phone, email or honorific-led
+// name is refused at the backend and stays in the operator's own archive for
+// human handling. the only strings left out are those the schema constrains
+// to a closed vocabulary or a fixed shape (enum, const or pattern: hashes,
+// timestamps, dates, place refs, country codes) and values shaped as a hex
+// hash. first_pass.py screened_text mirrors this walk.
+export function screenedText(record: unknown): Array<[string, string]> {
+  const found: Array<[string, string]> = [];
+  const join = (path: string, key: string) => (path === "" ? key : `${path}.${key}`);
+  const visit = (value: unknown, schemaNode: any, root: any, path: string): void => {
+    let schema = schemaNode ?? {};
+    while (typeof schema.$ref === "string" && schema.$ref.startsWith("#/")) {
+      let target = root;
+      for (const part of schema.$ref.slice(2).split("/")) target = target?.[part];
+      schema = target ?? {};
     }
-  });
-  record.next_questions.forEach((question, i) => fields.push([`next_questions[${i}]`, question]));
-  const basis = record.dossier?.status_assessment?.basis;
-  if (typeof basis === "string") fields.push(["dossier.status_assessment.basis", basis]);
-  return fields;
+    if (typeof value === "string") {
+      if (!("enum" in schema || "const" in schema || "pattern" in schema || HASH_SHAPED.test(value))) found.push([path, value]);
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => visit(item, schema.items, root, `${path}[${index}]`));
+      return;
+    }
+    if (value === null || typeof value !== "object") return;
+    const properties = schema.properties ?? {};
+    for (const [key, child] of Object.entries(value)) {
+      const childPath = join(path, key);
+      const override = path === "" ? SCHEMA_OVERRIDES[key] : undefined;
+      if (override !== undefined) {
+        visit(child, override[0], override[1], childPath);
+      } else if (Object.hasOwn(properties, key)) {
+        visit(child, properties[key], root, childPath);
+      } else {
+        found.push([`${childPath} (key)`, key]);
+        visit(child, {}, root, childPath);
+      }
+    }
+  };
+  visit(record, firstPassSchema, firstPassSchema, "");
+  return found;
 }
 
 export function validateFirstPassRecord(recordJson: string, recordHash: string): { record: FirstPassRecord; byteLength: number } {
@@ -99,7 +126,14 @@ export function validateFirstPassRecord(recordJson: string, recordHash: string):
     throw new Error("recordJson must be valid JSON");
   }
   guard(parsed);
-  schemaCheck(parsed, firstPassSchema, "$", firstPassSchema);
+  // python reads 1.0 as a float and 1 as an int; the schema check applies that
+  // distinction so every accepted record also passes first_pass.py restore
+  const floats = new Set<string>();
+  canonicalWireJson(recordJson.slice(0, -1), floats);
+  schemaCheck(parsed, firstPassSchema, "$", firstPassSchema, floats);
+  for (const [path, text] of screenedText(parsed)) {
+    if (hasPersonalDetails(text)) throw new Error(`potential personal details in ${path} require human handling`);
+  }
   const record = parsed as FirstPassRecord;
   timestamp(record.created_at, "creation timestamp");
   if (new Set(record.parents).size !== record.parents.length) throw new Error("duplicate parent hash");
@@ -117,7 +151,7 @@ export function validateFirstPassRecord(recordJson: string, recordHash: string):
   }
   let claimIds = new Set<string>();
   if (record.dossier !== null) {
-    claimIds = new Set(validateStandaloneDossier(record.dossier).keys());
+    claimIds = new Set(validateStandaloneDossier(record.dossier, floats).keys());
     if (record.dossier.place.place_ref !== record.place_ref) throw new Error("dossier belongs to another place");
     // an attribution naming the dossier's own run describes that one run, so
     // its models must be the run manifest's
@@ -133,9 +167,6 @@ export function validateFirstPassRecord(recordJson: string, recordHash: string):
   }
   for (const annotation of record.annotations) {
     if (!claimIds.has(annotation.claim_id)) throw new Error("annotation references an unknown claim");
-  }
-  for (const [path, text] of firstPassFreeText(record)) {
-    if (hasPersonalDetails(text)) throw new Error(`potential personal details in ${path} require human handling`);
   }
   for (const search of record.searches) {
     const attempted = search.attempted_at === null ? null : timestamp(search.attempted_at, "search attempted_at");

@@ -1,6 +1,6 @@
 # Revisitable agent research and storage
 
-Status: implementation proposal with a working local archive and backend receipts. The archive preserves provisional research attempts, including attempts that stop before producing a dossier. Since 2026-09-24 (J2 of the [agent judgments](agent-judgments.md) design) an operator can submit archived records to the shared backend, which keeps their exact bytes under a receipt and records their judgments. Automatic dispatch, hosted object storage, and portal display remain proposed. Existing review and release rules continue to apply.
+Status: implementation proposal with a working local archive and backend receipts. The archive preserves provisional research attempts, including attempts that stop before producing a dossier. Since 2026-09-24 an operator can submit archived records to the shared backend, which keeps their exact bytes under a receipt and records their [judgments](agent-judgments.md). Automatic dispatch, hosted object storage, and portal display remain proposed. Existing review and release rules continue to apply.
 
 ## A useful first pass
 

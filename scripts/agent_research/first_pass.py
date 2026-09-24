@@ -183,23 +183,50 @@ def copy_history(source: Path, destination: Path, digest: str):
     return len(objects)
 
 
-def personal_detail_fields(record):
-    """The record's free text by path, as the backend screens it (convex/lib/firstPass.ts)."""
-    fields = [('question', record['question']), ('stop_reason', record['stop_reason']),
-              ('usage.note', record['usage']['note']),
-              ('attribution.responsible_human_ref', record['attribution']['responsible_human_ref'])]
-    if record['attribution']['model_unreported_reason'] is not None:
-        fields.append(('attribution.model_unreported_reason', record['attribution']['model_unreported_reason']))
-    fields += [(f'annotations[{i}].note', a['note']) for i, a in enumerate(record['annotations'])]
-    for i, search in enumerate(record['searches']):
-        for key in ('query', 'note', 'source_name', 'licence_note', 'access_note'):
-            if search[key] is not None:
-                fields.append((f'searches[{i}].{key}', search[key]))
-    fields += [(f'next_questions[{i}]', q) for i, q in enumerate(record['next_questions'])]
-    basis = ((record['dossier'] or {}).get('status_assessment') or {}).get('basis')
-    if isinstance(basis, str):
-        fields.append(('dossier.status_assessment.basis', basis))
-    return fields
+BUNDLE_SCHEMA = json.loads(intake.BUNDLE_SCHEMA.read_text())
+HASH_SHAPED = re.compile(r'(?:sha256:)?(?:[0-9a-f]{40}|[0-9a-f]{64})')
+
+
+def screened_text(record):
+    """Every string of the record and its dossier that could carry a personal detail, by path.
+
+    Mirrors convex/lib/firstPass.ts screenedText: each string value, and each
+    object key the schema does not declare, except strings the schema
+    constrains by enum, const or pattern and values shaped as a hex hash.
+    """
+    found = []
+
+    def resolve(schema, root):
+        schema = schema or {}
+        while isinstance(schema.get('$ref'), str) and schema['$ref'].startswith('#/'):
+            target = root
+            for part in schema['$ref'][2:].split('/'):
+                target = target.get(part, {}) if isinstance(target, dict) else {}
+            schema = target or {}
+        return schema
+
+    def visit(value, schema, root, path):
+        schema = resolve(schema, root)
+        if isinstance(value, str):
+            if not ({'enum', 'const', 'pattern'} & set(schema) or HASH_SHAPED.fullmatch(value)):
+                found.append((path, value))
+        elif isinstance(value, list):
+            for index, item in enumerate(value):
+                visit(item, schema.get('items'), root, f'{path}[{index}]')
+        elif isinstance(value, dict):
+            properties = schema.get('properties', {})
+            for key, child in value.items():
+                child_path = f'{path}.{key}' if path else key
+                if path == '' and key == 'dossier':
+                    visit(child, BUNDLE_SCHEMA['$defs']['dossier'], BUNDLE_SCHEMA, child_path)
+                elif key in properties:
+                    visit(child, properties[key], root, child_path)
+                else:
+                    found.append((f'{child_path} (key)', key))
+                    visit(child, {}, root, child_path)
+
+    visit(record, SCHEMA, SCHEMA, '')
+    return found
 
 
 def submission_errors(record):
@@ -209,7 +236,7 @@ def submission_errors(record):
     record; a record that fails here stays there for human handling.
     """
     errors = [f'potential personal details in {path} require human handling'
-              for path, text in personal_detail_fields(record) if lib.find_personal_details(text)]
+              for path, text in screened_text(record) if lib.find_personal_details(text)]
     dossier = record['dossier']
     if dossier is not None:
         manifest = dossier['run_manifest']
