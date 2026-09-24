@@ -5,6 +5,7 @@
 ### 2026-09-24 (inspection collection contract)
 
 - Add a provisional Bahamas inspection collection contract, immutable object receipts, source-permission screening, and synthetic recovery verification.
+- Tighten inspection ingest after review: extracts require both copy and display permission, context links resolve against existing tasks and evidence versions, changed cases and collections require receipted parents, and the phone screen catches unseparated ten-digit and space-separated local numbers. The operational hosted-object recovery drill remains outstanding.
 
 ### 2026-09-24 (agent quarantine block)
 

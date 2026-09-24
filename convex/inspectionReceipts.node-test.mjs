@@ -16,8 +16,8 @@ const H = "a".repeat(64);
 function input() { return { case_ref: "synthetic:case-1", country_code: "bs", source_snapshot_date: "2026-09-01", definition_version: "0.1.6", definition_hash: H, source_records: [{ source_ref: "synthetic:source-1", source_family_ref: "synthetic:family-1", locator: "https://example.org/directory", publisher: "Synthetic directory", publication_date: "2020", retrieved_at: "2026-09-01T12:00:00Z", returned_date: null, access_result: "snippet_only", licence_note: "Permission pending", copy_permission: "needs_review", display_permission: "needs_review", original_hash: null, extract: null }], candidate_links: [{ candidate_ref: "synthetic:candidate-1", basis: "Address correspondence only", disposition: "possible", osm_ref: "way/123", project_site_id: null }], claims: [{ claim_ref: "synthetic:claim-1", attribute: "worship", wording: "A synthetic meeting is mentioned", described_date: "2019", observation_date: "2020", geometry: null, source_refs: ["synthetic:source-1"], uncertainty: "Address only; location unresolved" }], agent_assessments: [{ assessment_ref: "synthetic:assessment-1", subject_ref: "synthetic:claim-1", agent_name: "synthetic-agent", model_requested: "synthetic-model", model_reported: null, model_unreported_reason: "Provider omitted model identifier", outcome: "unclear", basis: "Snippet does not establish the site" }], context: { task_id: null, evidence_version_hash: null }, parents: [] }; }
 export { input, addressed };
 function dbContext(identity = null, roles = []) {
-  const rows = { inspection_object_receipts: [], users: [{ _id: "user-1", auth_subject: "identity", status: "active", roles }] };
-  const db = { query(table) { const filters = []; const q = { eq(key, value) { filters.push([key, value]); return q; } }; const chain = { withIndex(_index, callback) { callback(q); return chain; }, async unique() { return rows[table].find(row => filters.every(([key, value]) => row[key] === value)) ?? null; } }; return chain; }, async insert(table, row) { rows[table].push({ ...row, _id: `receipt-${rows[table].length + 1}` }); } };
+  const rows = { inspection_object_receipts: [], tasks: [], evidence_versions: [], users: [{ _id: "user-1", auth_subject: "identity", status: "active", roles }] };
+  const db = { query(table) { const filters = []; const q = { eq(key, value) { filters.push([key, value]); return q; } }; const chain = { withIndex(_index, callback) { callback(q); return chain; }, async unique() { return rows[table].find(row => filters.every(([key, value]) => row[key] === value)) ?? null; }, async first() { return chain.unique(); } }; return chain; }, async insert(table, row) { rows[table].push({ ...row, _id: `receipt-${rows[table].length + 1}` }); } };
   return { db, rows, auth: { async getUserIdentity() { return identity === null ? null : { tokenIdentifier: identity }; } } };
 }
 
@@ -41,6 +41,26 @@ test("unsupported fields, restricted extracts, broken links and personal details
     [{ ...input(), claims: [{ ...input().claims[0], geometry: { latitude: 91, longitude: 1 } }] }, /invalid geometry/],
   ];
   for (const [value, message] of cases) assert.throws(() => adaptInspectionCase(value), message);
+});
+
+test("extracts require both copy and display permission", () => {
+  for (const copyPermission of ["needs_review", "restricted"]) {
+    const value = input();
+    value.source_records[0].copy_permission = copyPermission;
+    value.source_records[0].display_permission = "permitted";
+    value.source_records[0].extract = "Synthetic extract for testing";
+    assert.throws(() => adaptInspectionCase(value), error => {
+      assert.match(error.message, /source_records\[0\]: extract requires copy and display permission/);
+      assert.doesNotMatch(error.message, /Synthetic extract/);
+      return true;
+    });
+    const projection = adaptInspectionCase(input()).projection;
+    projection.sources[0] = { ...value.source_records[0] };
+    const object = addressed(projection, "case");
+    assert.throws(() => validateInspectionCase(object.objectJson, object.objectHash), /source_records\[0\]: extract requires copy and display permission/);
+    value.source_records[0].extract = null;
+    assert.equal(adaptInspectionCase(value).report.source_permissions[0].decision, "locator and metadata only");
+  }
 });
 
 test("undeclared inspection keys and values produce positional, value-free diagnostics", () => {
@@ -70,7 +90,7 @@ test("undeclared inspection keys and values produce positional, value-free diagn
 });
 
 test("bahamas phone numbers and clergy passages are refused by path without their values", async () => {
-  for (const phone of ["+1 242 555 0199", "+1 (242) 555-0199", "(242) 555-0199", "242-555-0199", "242.555.0199", "555-0199"]) {
+  for (const phone of ["+1 242 555 0199", "+1 (242) 555-0199", "(242) 555-0199", "242-555-0199", "242.555.0199", "2425550199", "555-0199", "555 0199"]) {
     const value = input();
     value.claims[0].wording = `Call ${phone}`;
     assert.throws(() => adaptInspectionCase(value), error => {
@@ -83,6 +103,9 @@ test("bahamas phone numbers and clergy passages are refused by path without thei
     const object = addressed(projection, "case");
     assert.throws(() => validateInspectionCase(object.objectJson, object.objectHash), /potential personal details in sources\[0\]\.publisher/);
   }
+  const ordinaryNumbers = input();
+  ordinaryNumbers.claims[0].wording = "The 2020 count was 1234";
+  assert.equal(adaptInspectionCase(ordinaryNumbers).projection.claims[0].wording, ordinaryNumbers.claims[0].wording);
   assert.throws(() => validateInspectionCollection({ schema_version: "inspection-collection.v1", country_code: "bs", collection_ref: "synthetic:collection-1", adapter_version: ADAPTER_VERSION, source_snapshot_date: "2026-09-01", definition_version: "Call 242-555-0199", definition_hash: H, case_hashes: [], parents: [] }), /potential personal details in definition_version/);
   process.env.POW_INTERNAL_AGENT_INGEST_ENABLED = "true";
   const ctx = dbContext();
@@ -97,6 +120,48 @@ test("bahamas phone numbers and clergy passages are refused by path without thei
     assert.doesNotMatch(error.message, /unnamed/);
     return true;
   });
+});
+
+test("inspection context resolves an existing task and its evidence version", async () => {
+  process.env.POW_INTERNAL_AGENT_INGEST_ENABLED = "true";
+  const ctx = dbContext();
+  ctx.rows.tasks.push({ task_id: "synthetic:task-1", country_code: "bs" });
+  ctx.rows.evidence_versions.push({ object_hash: `sha256:${H}`, task_id: "synthetic:task-1" });
+  const linked = input();
+  linked.context = { task_id: "synthetic:task-1", evidence_version_hash: H };
+  assert.equal((await ingestInspectionObject._handler(ctx, addressed(adaptInspectionCase(linked).projection, "case"))).created, true);
+  for (const [context, expected] of [
+    [{ task_id: "synthetic:missing-task", evidence_version_hash: null }, /context\.task_id: task does not exist/],
+    [{ task_id: "synthetic:task-1", evidence_version_hash: "b".repeat(64) }, /context\.evidence_version_hash: version does not exist/],
+    [{ task_id: "synthetic:task-1", evidence_version_hash: "c".repeat(64) }, /context\.evidence_version_hash: version belongs to another task/],
+  ]) {
+    const value = input();
+    value.case_ref = `synthetic:case-${ctx.rows.inspection_object_receipts.length + 2}`;
+    value.context = context;
+    if (context.evidence_version_hash === "c".repeat(64)) ctx.rows.evidence_versions.push({ object_hash: `sha256:${context.evidence_version_hash}`, task_id: "synthetic:task-2" });
+    await assert.rejects(ingestInspectionObject._handler(ctx, addressed(adaptInspectionCase(value).projection, "case")), error => {
+      assert.match(error.message, expected);
+      assert.doesNotMatch(error.message, /synthetic:|a{64}|b{64}|c{64}/);
+      return true;
+    });
+  }
+  assert.equal(ctx.rows.inspection_object_receipts.length, 1);
+});
+
+test("changed case and collection roots require parents", async () => {
+  process.env.POW_INTERNAL_AGENT_INGEST_ENABLED = "true";
+  const ctx = dbContext();
+  const first = addressed(adaptInspectionCase(input()).projection, "case");
+  await ingestInspectionObject._handler(ctx, first);
+  const changedCase = input();
+  changedCase.claims[0].wording = "A changed synthetic notice";
+  const secondCase = addressed(adaptInspectionCase(changedCase).projection, "case");
+  await assert.rejects(ingestInspectionObject._handler(ctx, secondCase), /parents: a revision requires a receipted parent/);
+  const collection = { schema_version: "inspection-collection.v1", country_code: "bs", collection_ref: "synthetic:collection-1", adapter_version: ADAPTER_VERSION, source_snapshot_date: "2026-09-01", definition_version: "0.1.6", definition_hash: H, case_hashes: [first.objectHash], parents: [] };
+  await ingestInspectionObject._handler(ctx, addressed(collection, "collection"));
+  const changedCollection = addressed({ ...collection, case_hashes: [] }, "collection");
+  await assert.rejects(ingestInspectionObject._handler(ctx, changedCollection), /parents: a revision requires a receipted parent/);
+  assert.equal(ctx.rows.inspection_object_receipts.length, 2);
 });
 
 test("hash tokens are refused outside designated inspection hash fields", () => {
@@ -119,7 +184,7 @@ test("immutable receipts collapse retries, link versions and require complete me
   const member = addressed(collection, "collection");
   assert.equal((await ingestInspectionObject._handler(ctx, member)).created, true);
   assert.equal((await ingestInspectionObject._handler(ctx, member)).created, false);
-  const interrupted = addressed({ ...collection, case_hashes: ["b".repeat(64)] }, "collection");
+  const interrupted = addressed({ ...collection, case_hashes: ["b".repeat(64)], parents: [member.objectHash] }, "collection");
   await assert.rejects(ingestInspectionObject._handler(ctx, interrupted), /member must hold/);
   assert.equal(ctx.rows.inspection_object_receipts.length, 3);
   assert.deepEqual((await getInspectionObjectForRecovery._handler(ctx, { objectHash: second.objectHash })).parents, [first.objectHash]);

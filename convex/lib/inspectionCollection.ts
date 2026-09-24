@@ -40,7 +40,7 @@ const inputHashFields = new Set([...SCREEN_HASH_FIELDS[INSPECTION_SCHEMA]].map(p
 // the shared detector recognises New Zealand numbers only. Bahamas numbers
 // follow the North American plan: +1 or (242) forms, 10-digit groups, and
 // the 7-digit local form. hits are named by path, never by value.
-const NANP_PHONE = /\+1[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b|\(\d{3}\)\s?\d{3}[\s.-]\d{4}\b|\b\d{3}[\s.-]\d{3}[\s.-]\d{4}\b|\b\d{3}-\d{4}\b/;
+const NANP_PHONE = /\+1[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b|\(\d{3}\)\s?\d{3}[\s.-]\d{4}\b|\b(?:\d{10}|\d{3}[\s.-]\d{3}[\s.-]\d{4}|\d{3}[\s.-]\d{4})\b/;
 function assertNoNanpPhone(value: unknown, schema: any): void {
   for (const [path, text] of screenedStrings(value, schema, schema)) if (NANP_PHONE.test(text)) throw new Error(`potential personal details in ${path} require human handling`);
 }
@@ -139,10 +139,10 @@ export function adaptInspectionCase(input: unknown): { projection: InspectionCas
     if (!PERMISSIONS.has(copy) || !PERMISSIONS.has(display)) throw new Error(`${at}: invalid source permission`);
     const sourceRef = ref(source.source_ref, `${at}.source_ref`);
     const extract = optionalString(source.extract, `${at}.extract`);
-    if (display !== "permitted" && extract !== null) throw new Error(`${at}: extract requires display permission`);
+    if (extract !== null && (copy !== "permitted" || display !== "permitted")) throw new Error(`${at}: extract requires copy and display permission`);
     const originalHash = source.original_hash === null ? null : hash(source.original_hash, `${at}.original_hash`);
     if (copy !== "permitted" && originalHash !== null) throw new Error(`${at}: unpermitted copy cannot name stored bytes`);
-    report.source_permissions.push({ source_ref: sourceRef, copy_permission: copy, display_permission: display, decision: display === "permitted" ? "extract may be inspected" : "locator and metadata only" });
+    report.source_permissions.push({ source_ref: sourceRef, copy_permission: copy, display_permission: display, decision: copy === "permitted" && display === "permitted" ? "extract may be inspected" : "locator and metadata only" });
     if (copy !== "permitted" || display !== "permitted") report.findings.push(`${sourceRef}: source permissions limit retained bytes or display`);
     return { source_ref: sourceRef, source_family_ref: ref(source.source_family_ref, `${at}.source_family_ref`), locator: checkLocator(source.locator, `${at}.locator`), publisher: string(source.publisher, `${at}.publisher`), publication_date: source.publication_date === null ? null : date(source.publication_date, `${at}.publication_date`), retrieved_at: source.retrieved_at === null ? null : timestamp(source.retrieved_at, `${at}.retrieved_at`), returned_date: source.returned_date === null ? null : date(source.returned_date, `${at}.returned_date`), access_result: string(source.access_result, `${at}.access_result`), licence_note: string(source.licence_note, `${at}.licence_note`), copy_permission: copy as InspectionCase["sources"][number]["copy_permission"], display_permission: display as InspectionCase["sources"][number]["display_permission"], original_hash: originalHash, extract };
   });

@@ -34,7 +34,24 @@ export const ingestInspectionObject = internalMutation({
     if (args.objectKind === "collection" && `${canonicalWireJson(JSON.stringify(object))}\n` !== args.objectJson) throw new Error("Collection does not round-trip.");
     const logicalRef = args.objectKind === "case" ? (object as ReturnType<typeof validateInspectionCase>).case_ref : (object as ReturnType<typeof validateInspectionCollection>).collection_ref;
     const parents = object.parents;
+    if (args.objectKind === "case") {
+      const { task_id: taskId, evidence_version_hash: versionHash } = (object as ReturnType<typeof validateInspectionCase>).context;
+      if (taskId !== null) {
+        const task = await ctx.db.query("tasks").withIndex("by_task_id", (q: any) => q.eq("task_id", taskId)).unique();
+        if (task === null) throw new Error("context.task_id: task does not exist.");
+        if (task.country_code !== "bs") throw new Error("context.task_id: task is in another country.");
+      }
+      if (versionHash !== null) {
+        const version = await ctx.db.query("evidence_versions").withIndex("by_object_hash", (q: any) => q.eq("object_hash", `sha256:${versionHash}`)).unique();
+        if (version === null) throw new Error("context.evidence_version_hash: version does not exist.");
+        if (taskId === null || version.task_id !== taskId) throw new Error("context.evidence_version_hash: version belongs to another task.");
+      }
+    }
     if (parents.includes(args.objectHash)) throw new Error("An object cannot parent itself.");
+    if (parents.length === 0) {
+      const root = await ctx.db.query("inspection_object_receipts").withIndex("by_logical_ref", (q: any) => q.eq("object_kind", args.objectKind).eq("logical_ref", logicalRef)).first();
+      if (root !== null) throw new Error("parents: a revision requires a receipted parent for this object.");
+    }
     for (const parentHash of parents) {
       const parent = await byHash(ctx, parentHash);
       if (parent === null || parent.object_kind !== args.objectKind || parent.logical_ref !== logicalRef) throw new Error("Parent must be a receipted version of the same object.");
