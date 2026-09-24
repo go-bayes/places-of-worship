@@ -52,7 +52,7 @@
         "date_end": null,
         "date_precision": "year",
         "source": {
-          "locator": "https://example.org/history",
+          "locator": "https://nzhistory.govt.nz/history",
           "source_name": "History",
           "source_type": "archive_collection",
           "source_date": null,
@@ -78,7 +78,7 @@
         "date_end": null,
         "date_precision": "unknown",
         "source": {
-          "locator": "https://example.org/history",
+          "locator": "https://nzhistory.govt.nz/history",
           "source_name": "History",
           "source_type": "archive_collection",
           "source_date": null,

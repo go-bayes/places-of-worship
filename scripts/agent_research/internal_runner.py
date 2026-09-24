@@ -137,6 +137,14 @@ class DuplicateJSONKey(RunnerError):
     pass
 
 
+class RunRejected(RunnerError):
+    """A dossier or bundle refused by validation, with its run-row counters."""
+
+    def __init__(self, message: str, counters: dict):
+        super().__init__(message)
+        self.counters = counters
+
+
 class ProcessResult:
     def __init__(self, returncode: int | None, stdout: bytes, stderr: bytes, timed_out: bool, output_limited: bool):
         self.returncode = returncode
@@ -631,6 +639,9 @@ def _manifest(stage: str, provider: str, model: str, start: str, end: str, resul
     }
     if isinstance((fields or {}).get("usage_full"), dict):
         manifest["usage"]["provider_usage"] = (fields or {})["usage_full"]
+        per_model = _per_model_usage((fields or {})["usage_full"])
+        if per_model is not None:
+            manifest["usage"]["per_model"] = per_model
     if isinstance(raw_usage, dict) and raw_usage != manifest["usage"]:
         manifest["usage_raw"] = raw_usage
     if fields and "tool_audit" in fields:
@@ -659,6 +670,57 @@ def _normalise_usage(usage: Any) -> dict:
     }
 
 
+def _per_model_usage(usage_full: Any) -> dict | None:
+    """Read tokens and cost for every billing model from ``provider_usage.modelUsage``.
+
+    Claude's flat usage block describes the requested model only; a helper model
+    the client chose bills separately and appears only here.  Totals are null,
+    never zero, when any model omits the field.  None means the client reported
+    no per-model block (Codex).
+    """
+    model_usage = usage_full.get("modelUsage") if isinstance(usage_full, dict) else None
+    if not isinstance(model_usage, dict) or not model_usage:
+        return None
+
+    def integer(value: Any) -> int | None:
+        return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
+
+    def dollars(value: Any) -> float | None:
+        ok = isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) and value >= 0
+        return float(value) if ok else None
+
+    def total(values: list) -> Any:
+        return None if any(value is None for value in values) else sum(values)
+
+    models = []
+    for key in sorted(model_usage):
+        row = model_usage[key] if isinstance(model_usage[key], dict) else {}
+        cost = dollars(row.get("costUSD"))
+        models.append({
+            "model_key": key,
+            "model_id_reported": row.get("canonicalModel") or key,
+            "input_tokens": integer(row.get("inputTokens")),
+            "cached_input_tokens": integer(row.get("cacheReadInputTokens")),
+            "cache_write_input_tokens": integer(row.get("cacheCreationInputTokens")),
+            "output_tokens": integer(row.get("outputTokens")),
+            "reasoning_tokens": integer(row.get("thinkingTokens")),
+            "web_search_requests": integer(row.get("webSearchRequests")),
+            "cost_usd_reported": cost,
+            "cost_basis": "tool_list_price" if row.get("costBasis") == "list" and cost is not None else "unknown",
+        })
+    cost = total([model["cost_usd_reported"] for model in models])
+    return {
+        "source": "provider_usage.modelUsage",
+        "models": models,
+        "input_tokens": total([model["input_tokens"] for model in models]),
+        "output_tokens": total([model["output_tokens"] for model in models]),
+        "web_search_requests": total([model["web_search_requests"] for model in models]),
+        "cost_usd_reported": None if cost is None else round(cost, 9),
+        "cost_basis": "tool_list_price" if all(model["cost_basis"] == "tool_list_price" for model in models) else "unknown",
+        "provider_total_cost_usd": dollars(usage_full.get("total_cost_usd")),
+    }
+
+
 def _dossier_usage(manifest: dict) -> dict:
     return _normalise_usage(manifest.get("usage"))
 
@@ -669,8 +731,12 @@ def _write_attempt(path: Path, envelope: dict) -> None:
         handle.write(json.dumps(envelope, ensure_ascii=False, sort_keys=True) + "\n")
 
 
-def _write_run_result(output_dir: Path, status: str, error: str | None = None, bundle: dict | None = None) -> None:
-    """Persist the controller outcome in the private run directory."""
+def _write_run_result(output_dir: Path, status: str, error: str | None = None, bundle: dict | None = None,
+                      counters: dict | None = None) -> None:
+    """Persist the controller outcome in the private run directory.
+
+    Allowlist counters are null when the run failed before a dossier existed.
+    """
     output_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
     output_dir.chmod(0o700)
     result = {
@@ -679,6 +745,9 @@ def _write_run_result(output_dir: Path, status: str, error: str | None = None, b
         "ended_at": _utc_now(),
         "error": error[:2000] if error else None,
         "bundle": bundle,
+        "allowlist_version": (counters or {}).get("allowlist_version"),
+        "allowlist_violations": (counters or {}).get("allowlist_violations"),
+        "allowlist_violation_hosts": (counters or {}).get("allowlist_violation_hosts"),
     }
     path = output_dir / "run-result.json"
     path.write_text(json.dumps(result, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8")
@@ -828,43 +897,71 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
             _write_attempt(raw_path, {"kind": "preflight", "output": None, "manifest": failed})
             raise
     system, user = _prompt_pair(place)
+    allowlist_version = json.loads(ALLOWLIST_PATH.read_text(encoding="utf-8"))["allowlist_version"]
     research_output, research_manifest = _invoke("research", backend, RESEARCH_MODELS[backend], system, user,
                                                   timeout_s, budget_usd, pause_file, research_raw, preflight[backend])
+    # cost is read per billing model; the flat usage block omits helper models.
+    # without a complete per-model block the cost stays null with basis unknown: the runner
+    # cannot establish that a plan covered the run, and a missing field is not a zero charge.
+    research_cost = (research_manifest.get("usage") or {}).get("per_model") or {}
+    research_cost_usd = research_cost.get("cost_usd_reported")
+    research_cost_basis = research_cost.get("cost_basis", "unknown") if research_cost_usd is not None else "unknown"
     dossier = assemble_dossier(place, research_output, backend, RESEARCH_MODELS[backend], {
         "model_id_reported": research_manifest.get("model_id_reported"),
         "usage": _dossier_usage(research_manifest),
-        "cost_usd_reported": None,
-        "cost_basis": "subscription_unmetered",
+        "cost_usd_reported": research_cost_usd,
+        "cost_basis": research_cost_basis,
         "tool_permissions": ["public web search/fetch"],
         "notes": "internal bounded runner",
     }, research_manifest["started_at"], research_manifest["ended_at"], research_manifest["duration_seconds"],
                                f"internal-{research_manifest['started_at'].replace(':', '').replace('-', '')}",
-                               json.loads(ALLOWLIST_PATH.read_text(encoding="utf-8"))["allowlist_version"])
+                               allowlist_version)
     # A clean dossier is committed only after the quarantine block has been
     # marked redacted.  Any detected personal detail remains local and causes
     # intake validation to reject the run before the reviewer sees it.
     if dossier["personal_details_quarantine"].get("item_count", 0) == 0:
         lib.redact_quarantine(dossier)
-    dossier_errors = _validate_dossier_for_review(dossier)
-    if dossier_errors:
-        raise RunnerError("dossier rejected before review: " + "; ".join(dossier_errors[:12]))
-    dossier_path = out / "dossier.json"
-    dossier_path.write_text(json.dumps(dossier, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    review_system, review_user = _review_prompt(dossier)
-    review_output, review_manifest = _invoke("review", review_backend, REVIEW_MODELS[review_backend], review_system,
-                                              review_user, timeout_s, budget_usd, pause_file, review_raw, preflight[review_backend])
-    if intake is not None and hasattr(intake, "validate_review"):
-        review_errors = list(intake.validate_review(review_output, dossier))
-    else:
-        review_errors = lib.validate(review_output, _review_schema())
-    if review_errors:
-        raise RunnerError("review rejected before bundle: " + "; ".join(review_errors[:12]))
-    review_path = out / "review.json"
-    review_path.write_text(json.dumps(review_output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    if intake is None or not hasattr(intake, "write_bundle"):
-        raise RunnerError("intake.write_bundle is unavailable; refusing to create an ungoverned bundle")
-    bundle = intake.write_bundle(out, dossier, review_output, research_manifest, review_manifest)
-    _write_run_result(out, "completed", bundle=bundle)
+    try:
+        violations = intake.allowlist_violations(dossier)
+    except ValueError:
+        violations = None
+    counters = {
+        "allowlist_version": allowlist_version,
+        "allowlist_violations": None if violations is None else len(violations),
+        "allowlist_violation_hosts": None if violations is None else sorted({v["host"] for v in violations}),
+    }
+    # every later failure keeps the counters: a dossier existed, so null would misreport the run.
+    try:
+        dossier_errors = _validate_dossier_for_review(dossier)
+        # the review is not bought for a dossier whose provider named no model.
+        if not research_manifest.get("model_id_reported"):
+            dossier_errors.append("research provider reported no model id")
+        if dossier_errors:
+            raise RunRejected("dossier rejected before review: " + "; ".join(dossier_errors[:12]), counters)
+        dossier_path = out / "dossier.json"
+        dossier_path.write_text(json.dumps(dossier, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        review_system, review_user = _review_prompt(dossier)
+        review_output, review_manifest = _invoke("review", review_backend, REVIEW_MODELS[review_backend], review_system,
+                                                  review_user, timeout_s, budget_usd, pause_file, review_raw, preflight[review_backend])
+        if intake is not None and hasattr(intake, "validate_review"):
+            review_errors = list(intake.validate_review(review_output, dossier))
+        else:
+            review_errors = lib.validate(review_output, _review_schema())
+        if review_errors:
+            raise RunnerError("review rejected before bundle: " + "; ".join(review_errors[:12]))
+        review_path = out / "review.json"
+        review_path.write_text(json.dumps(review_output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        if intake is None or not hasattr(intake, "write_bundle"):
+            raise RunnerError("intake.write_bundle is unavailable; refusing to create an ungoverned bundle")
+        try:
+            bundle = intake.write_bundle(out, dossier, review_output, research_manifest, review_manifest)
+        except ValueError as exc:
+            raise RunRejected(f"bundle rejected: {exc}", counters) from exc
+        _write_run_result(out, "completed", bundle=bundle, counters=counters)
+    except (RunnerError, OSError, UnicodeError, RecursionError, json.JSONDecodeError) as exc:
+        if getattr(exc, "counters", None) is None:
+            exc.counters = counters
+        raise
     return {"bundle": bundle, "dossier": dossier, "review": review_output, "same_provider_note": same_provider_note}
 
 
@@ -887,7 +984,7 @@ def main(argv: list[str] | None = None) -> int:
     except (RunnerError, OSError, UnicodeError, RecursionError, json.JSONDecodeError) as exc:
         if not (args.out / "bundle.json").exists():
             try:
-                _write_run_result(args.out, "failed", error=str(exc))
+                _write_run_result(args.out, "failed", error=str(exc), counters=getattr(exc, "counters", None))
             except OSError:
                 pass
         print(f"internal runner refused: {exc}", file=sys.stderr)

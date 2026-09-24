@@ -10,11 +10,11 @@
     "changes": [
       [
         "/dossier/claims/0/source/locator",
-        "https://@example.org/history"
+        "https://@nzhistory.govt.nz/history"
       ],
       [
         "/review/claim_checks/0/source_url",
-        "https://@example.org/history"
+        "https://@nzhistory.govt.nz/history"
       ]
     ]
   },
@@ -135,6 +135,332 @@
       [
         "/dossier/run_manifest/started_at",
         "2026-02-30T00:00:00Z"
+      ]
+    ]
+  },
+  {
+    "name": "off-allowlist claim locator",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://www.example-parish.nz/pages/about"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://www.example-parish.nz/pages/about"
+      ]
+    ]
+  },
+  {
+    "name": "allowlist suffix without a label boundary",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://notnzhistory.govt.nz/history"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://notnzhistory.govt.nz/history"
+      ]
+    ]
+  },
+  {
+    "name": "allowlisted domain as a subdomain of another host",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://nzhistory.govt.nz.example.org/history"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://nzhistory.govt.nz.example.org/history"
+      ]
+    ]
+  },
+  {
+    "name": "subdomain of an allowlisted domain",
+    "valid": true,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://www.nzhistory.govt.nz/history"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://www.nzhistory.govt.nz/history"
+      ]
+    ]
+  },
+  {
+    "name": "never-listed social host",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://www.facebook.com/testchurch"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://www.facebook.com/testchurch"
+      ]
+    ]
+  },
+  {
+    "name": "unknown allowlist version",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/run_manifest/allowlist_version",
+        "nz-v0"
+      ]
+    ]
+  },
+  {
+    "name": "null research model id",
+    "valid": false,
+    "changes": [
+      [
+        "/research_run/model_id_reported",
+        null
+      ]
+    ]
+  },
+  {
+    "name": "null review model id",
+    "valid": false,
+    "changes": [
+      [
+        "/review_run/model_id_reported",
+        null
+      ]
+    ]
+  },
+  {
+    "name": "empty research model id",
+    "valid": false,
+    "changes": [
+      [
+        "/research_run/model_id_reported",
+        ""
+      ]
+    ]
+  },
+  {
+    "name": "null dossier reported model id",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/run_manifest/model_id_reported",
+        null
+      ]
+    ]
+  },
+  {
+    "name": "dossier and research reported model ids differ",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/run_manifest/model_id_reported",
+        "gpt-5.6-luna-2026-09-01"
+      ]
+    ]
+  },
+  {
+    "name": "host policy: fullwidth letters",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://ｎｚhistory.govt.nz/history"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://ｎｚhistory.govt.nz/history"
+      ]
+    ]
+  },
+  {
+    "name": "host policy: ideographic full stop",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://nzhistory。govt.nz/history"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://nzhistory。govt.nz/history"
+      ]
+    ]
+  },
+  {
+    "name": "host policy: Kelvin sign folding to an allowlisted host",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://waimaKariri.govt.nz/history"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://waimaKariri.govt.nz/history"
+      ]
+    ]
+  },
+  {
+    "name": "host policy: non-ASCII subdomain",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://é.nzhistory.govt.nz/history"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://é.nzhistory.govt.nz/history"
+      ]
+    ]
+  },
+  {
+    "name": "host policy: percent-encoded host",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://nzhistory%2Egovt.nz/history"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://nzhistory%2Egovt.nz/history"
+      ]
+    ]
+  },
+  {
+    "name": "host policy: two trailing dots",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://nzhistory.govt.nz../history"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://nzhistory.govt.nz../history"
+      ]
+    ]
+  },
+  {
+    "name": "host policy: empty label",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://nzhistory..govt.nz/history"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://nzhistory..govt.nz/history"
+      ]
+    ]
+  },
+  {
+    "name": "host policy: label with a leading hyphen",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://-www.nzhistory.govt.nz/history"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://-www.nzhistory.govt.nz/history"
+      ]
+    ]
+  },
+  {
+    "name": "host policy: empty port",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://nzhistory.govt.nz:/history"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://nzhistory.govt.nz:/history"
+      ]
+    ]
+  },
+  {
+    "name": "host policy: port zero",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://nzhistory.govt.nz:0/history"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://nzhistory.govt.nz:0/history"
+      ]
+    ]
+  },
+  {
+    "name": "host policy: port above 65535",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://nzhistory.govt.nz:65536/history"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://nzhistory.govt.nz:65536/history"
+      ]
+    ]
+  },
+  {
+    "name": "host policy: upper case with one trailing dot",
+    "valid": true,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://NZHistory.govt.NZ./history"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://NZHistory.govt.NZ./history"
+      ]
+    ]
+  },
+  {
+    "name": "host policy: explicit port",
+    "valid": true,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://nzhistory.govt.nz:443/history"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://nzhistory.govt.nz:443/history"
+      ]
+    ]
+  },
+  {
+    "name": "host policy: punycode subdomain of an allowlisted domain",
+    "valid": true,
+    "changes": [
+      [
+        "/dossier/claims/0/source/locator",
+        "https://xn--80akhbyknj4f.nzhistory.govt.nz/history"
+      ],
+      [
+        "/review/claim_checks/0/source_url",
+        "https://xn--80akhbyknj4f.nzhistory.govt.nz/history"
       ]
     ]
   }

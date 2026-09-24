@@ -110,21 +110,21 @@ class ValidationAndAuditTest(unittest.TestCase):
             "structured_output": {},
             "usage": {"input_tokens": 10, "cache_read_input_tokens": 20, "output_tokens": 30,
                        "output_tokens_details": {"thinking_tokens": 4}},
-            "total_cost_usd": 0.62,
+            "total_cost_usd": 0.75,
             "modelUsage": {
-                "claude-haiku-4-5-20251001": {"canonicalModel": "claude-haiku-4-5", "inputTokens": 100, "costUSD": 0.4},
-                "claude-sonnet-5": {"canonicalModel": "claude-sonnet-5", "inputTokens": 200, "costUSD": 0.22},
+                "claude-haiku-4-5-20251001": {"canonicalModel": "claude-haiku-4-5", "inputTokens": 100, "costUSD": 0.5},
+                "claude-sonnet-5": {"canonicalModel": "claude-sonnet-5", "inputTokens": 200, "costUSD": 0.25},
             },
         }
         output, fields = runner._parse_claude(json.dumps(envelope), "sonnet")
         self.assertEqual(output, {})
         self.assertEqual(fields["model_id_reported"], "claude-sonnet-5")
-        self.assertEqual(fields["usage_full"]["total_cost_usd"], 0.62)
+        self.assertEqual(fields["usage_full"]["total_cost_usd"], 0.75)
         self.assertIn("claude-haiku-4-5-20251001", fields["usage_full"]["modelUsage"])
         manifest = runner._manifest("review", "claude", "sonnet", "2026-09-11T00:00:00+00:00",
                                      "2026-09-11T00:00:01+00:00", runner.ProcessResult(0, b"{}", b"", False, False),
                                      fields, "prompt", {"version": "test"}, exit_status="completed")
-        self.assertEqual(manifest["usage"]["provider_usage"]["total_cost_usd"], 0.62)
+        self.assertEqual(manifest["usage"]["provider_usage"]["total_cost_usd"], 0.75)
         self.assertEqual(manifest["usage"]["cached_input_tokens"], 20)
         self.assertEqual(manifest["usage"]["reasoning_tokens"], 4)
 
@@ -228,8 +228,41 @@ class ValidationAndAuditTest(unittest.TestCase):
         self.assertLessEqual(len(manifest["stdout"].encode()), runner.MAX_OUTPUT_BYTES + 100)
         self.assertEqual(manifest["tool_policy_version"], "public-web-only.v1")
 
-    def test_mocked_pair_reaches_real_intake_bundle_validation(self):
-        source_url = "https://example.org/test-church"
+    # synthetic usage: a helper model the client chose bills beside the requested Sonnet.
+    CLAUDE_ENVELOPE = {
+        "structured_output": {},
+        "total_cost_usd": 0.4,
+        "usage": {"input_tokens": 7, "cache_read_input_tokens": 4321, "output_tokens": 8765,
+                   "output_tokens_details": {"thinking_tokens": 1234},
+                   "server_tool_use": {"web_search_requests": 0, "web_fetch_requests": 0}},
+        "modelUsage": {
+            "claude-haiku-4-5-20251001": {"canonicalModel": "claude-haiku-4-5", "costBasis": "list", "costUSD": 0.3,
+                                          "inputTokens": 200000, "cacheReadInputTokens": 0, "cacheCreationInputTokens": 0,
+                                          "outputTokens": 1111, "thinkingTokens": 0, "webSearchRequests": 2},
+            "claude-sonnet-5": {"canonicalModel": "claude-sonnet-5", "costBasis": "list", "costUSD": 0.1,
+                                "inputTokens": 7, "cacheReadInputTokens": 4321, "cacheCreationInputTokens": 3333,
+                                "outputTokens": 8765, "thinkingTokens": 1234, "webSearchRequests": 0},
+        },
+    }
+
+    def _claude_manifest(self, stage: str, envelope: dict | None = None) -> dict:
+        _, fields = runner._parse_claude(json.dumps(envelope or self.CLAUDE_ENVELOPE), "sonnet")
+        return runner._manifest(stage, "claude", "sonnet", "2026-09-11T00:00:00+00:00", "2026-09-11T00:00:01+00:00",
+                                runner.ProcessResult(0, b"{}", b"", False, False), fields, "prompt", {"version": "test"},
+                                exit_status="completed")
+
+    def _codex_manifest(self, stage: str, model_id_reported: str | None) -> dict:
+        return runner._manifest(stage, "codex", "gpt-5.6-luna", "2026-09-11T00:00:02+00:00", "2026-09-11T00:00:03+00:00",
+                                runner.ProcessResult(0, b"{}", b"", False, False),
+                                {"usage": {"output_tokens": 1}, "usage_full": {"output_tokens": 1},
+                                 "model_id_reported": model_id_reported}, "prompt", {"version": "test"},
+                                exit_status="completed")
+
+    def _run_pair(self, tmp: Path, source_url: str, research_manifest: dict, review_manifest: dict,
+                  research_backend: str = "claude", review_error: Exception | None = None,
+                  review_source_url: str | None = None) -> tuple[list[str], dict | None]:
+        """Run the runner with mocked providers; return the stages invoked and the run() result."""
+        review_backend = "codex" if research_backend == "claude" else "claude"
         reader_output = {
             "name": "Test Church",
             "candidate_location": {"latitude": -43.0, "longitude": 172.0, "basis": "osm_object", "basis_note": "",
@@ -244,31 +277,152 @@ class ValidationAndAuditTest(unittest.TestCase):
                                   "osm_stale": None, "osm_stale_basis": ""},
             "osm_version_chain": [], "sources_consulted": [{"locator": source_url, "outcome": "relevant"}], "notes": "",
         }
-        research_manifest = runner._manifest("research", "claude", "sonnet", "2026-09-11T00:00:00+00:00",
-                                             "2026-09-11T00:00:01+00:00", runner.ProcessResult(0, b"{}", b"", False, False),
-                                             {"usage": {"input_tokens": 1}, "model_id_reported": None}, "prompt", {"version": "test"},
-                                             exit_status="completed")
-        review_manifest = runner._manifest("review", "codex", "gpt-5.6-luna", "2026-09-11T00:00:02+00:00",
-                                           "2026-09-11T00:00:03+00:00", runner.ProcessResult(0, b"{}", b"", False, False),
-                                           {"usage": {"output_tokens": 1}, "model_id_reported": None}, "prompt", {"version": "test"},
-                                           exit_status="completed")
+        stages: list[str] = []
 
         def fake_invoke(stage, provider, model, system, user, timeout_s, budget_usd, pause_file, raw_path, preflight):
+            stages.append(stage)
             if stage == "research":
                 return reader_output, research_manifest
+            if review_error is not None:
+                raise review_error
             return {"schema_version": "agent-review.v1", "recommendation": "revise", "reasoning": "test",
-                    "claim_checks": [{"claim_id": "osm:way/123:claude:c01", "outcome": "supported",
-                                       "source_url": source_url, "note": "test", "access_method": "opened"}],
+                    "claim_checks": [{"claim_id": f"osm:way/123:{research_backend}:c01", "outcome": "supported",
+                                       "source_url": review_source_url or source_url, "note": "test",
+                                       "access_method": "opened"}],
                     "cultural_sensitivity": {"flagged": False, "basis": "none"}, "limitations": []}, review_manifest
 
+        seed_path = tmp / "seed.json"
+        seed_path.write_text(json.dumps(SEED), encoding="utf-8")
+        out = tmp / "out"
+        with patch.object(runner, "_preflight", return_value={"provider": "test", "version": "test"}), \
+             patch.object(runner, "_invoke", side_effect=fake_invoke), \
+             patch("sys.stdout", new_callable=io.StringIO), patch("sys.stderr", new_callable=io.StringIO):
+            code = runner.main(["--backend", research_backend, "--review-backend", review_backend, "--seed", str(seed_path),
+                                "--out", str(out), "--public-nonsensitive"])
+        run_result = json.loads((out / "run-result.json").read_text())
+        run_result["exit_code"] = code
+        return stages, run_result
+
+    def test_mocked_pair_reaches_real_intake_bundle_validation(self):
         with tempfile.TemporaryDirectory() as tmp:
-            with patch.object(runner, "_preflight", return_value={"provider": "test", "version": "test"}), \
-                 patch.object(runner, "_invoke", side_effect=fake_invoke):
-                result = runner.run(SEED, "claude", "codex", Path(tmp), public_nonsensitive=True)
-            self.assertTrue((Path(tmp) / "bundle.json").exists())
-            run_result = json.loads((Path(tmp) / "run-result.json").read_text())
+            stages, run_result = self._run_pair(Path(tmp), "https://www.anglicanlife.org.nz/test-church",
+                                                self._claude_manifest("research"), self._codex_manifest("review", "gpt-5.6-luna"))
+            self.assertEqual(stages, ["research", "review"])
             self.assertEqual(run_result["status"], "completed")
-            self.assertEqual(result["bundle"]["provisional"], True)
+            self.assertEqual(run_result["exit_code"], 0)
+            self.assertEqual(run_result["bundle"]["provisional"], True)
+            self.assertEqual((run_result["allowlist_version"], run_result["allowlist_violations"],
+                              run_result["allowlist_violation_hosts"]), ("nz-v1", 0, []))
+            bundle = json.loads((Path(tmp) / "out" / "bundle.json").read_text())
+            manifest = bundle["dossier"]["run_manifest"]
+            # the dossier's cost is the sum over billing models, not the requested model's share.
+            self.assertAlmostEqual(manifest["cost_usd_reported"], 0.4, places=7)
+            self.assertEqual(manifest["cost_basis"], "tool_list_price")
+            self.assertEqual(bundle["research_run"]["usage"]["per_model"]["web_search_requests"], 2)
+            self.assertEqual(bundle["research_run"]["model_id_reported"], "claude-sonnet-5")
+            self.assertEqual(bundle["review_run"]["model_id_reported"], "gpt-5.6-luna")
+
+    def test_off_allowlist_locator_is_refused_before_review_and_counted(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            stages, run_result = self._run_pair(Path(tmp), "https://www.example-parish.nz/pages/about",
+                                                self._claude_manifest("research"), self._codex_manifest("review", "gpt-5.6-luna"))
+            self.assertEqual(stages, ["research"])
+            self.assertEqual(run_result["status"], "failed")
+            self.assertEqual(run_result["exit_code"], 2)
+            self.assertIn("not on allowlist nz-v1", run_result["error"])
+            self.assertEqual(run_result["allowlist_violations"], 1)
+            self.assertEqual(run_result["allowlist_violation_hosts"], ["www.example-parish.nz"])
+            self.assertFalse((Path(tmp) / "out" / "bundle.json").exists())
+
+    def test_unreported_research_model_is_refused_before_review(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            stages, run_result = self._run_pair(Path(tmp), "https://nzhistory.govt.nz/test-church",
+                                                self._codex_manifest("research", None), self._claude_manifest("review"),
+                                                research_backend="codex")
+            self.assertEqual(stages, ["research"])
+            self.assertEqual(run_result["status"], "failed")
+            self.assertIn("reported no model id", run_result["error"])
+            self.assertEqual(run_result["allowlist_violations"], 0)
+
+    def test_unreported_review_model_is_refused_at_the_bundle(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            stages, run_result = self._run_pair(Path(tmp), "https://www.anglicanlife.org.nz/test-church",
+                                                self._claude_manifest("research"), self._codex_manifest("review", None))
+            self.assertEqual(stages, ["research", "review"])
+            self.assertEqual(run_result["status"], "failed")
+            self.assertIn("bundle rejected", run_result["error"])
+            self.assertIn("model_id_reported", run_result["error"])
+            self.assertFalse((Path(tmp) / "out" / "bundle.json").exists())
+
+    def test_review_failures_keep_the_allowlist_counters(self):
+        cases = [
+            ("rejected review", {"review_source_url": "https://www.anglicanlife.org.nz/other-page"}, "review rejected"),
+            ("review provider error", {"review_error": runner.RunnerError("codex timed out after 1s")}, "timed out"),
+        ]
+        for name, options, message in cases:
+            with self.subTest(name), tempfile.TemporaryDirectory() as tmp:
+                stages, run_result = self._run_pair(Path(tmp), "https://www.anglicanlife.org.nz/test-church",
+                                                    self._claude_manifest("research"),
+                                                    self._codex_manifest("review", "gpt-5.6-luna"), **options)
+                self.assertEqual(stages, ["research", "review"])
+                self.assertEqual(run_result["status"], "failed")
+                self.assertIn(message, run_result["error"])
+                self.assertEqual((run_result["allowlist_version"], run_result["allowlist_violations"],
+                                  run_result["allowlist_violation_hosts"]), ("nz-v1", 0, []))
+
+    def test_incomplete_or_absent_per_model_cost_is_unknown_not_unmetered(self):
+        envelope = json.loads(json.dumps(self.CLAUDE_ENVELOPE))
+        del envelope["modelUsage"]["claude-haiku-4-5-20251001"]["costUSD"]
+        for name, research_manifest, backend in [
+            ("claude with a missing model cost", self._claude_manifest("research", envelope), "claude"),
+            ("codex with no per-model block", self._codex_manifest("research", "gpt-5.6-luna"), "codex"),
+        ]:
+            review_manifest = self._codex_manifest("review", "gpt-5.6-luna") if backend == "claude" \
+                else self._claude_manifest("review")
+            with self.subTest(name), tempfile.TemporaryDirectory() as tmp:
+                _, run_result = self._run_pair(Path(tmp), "https://www.anglicanlife.org.nz/test-church",
+                                               research_manifest, review_manifest, research_backend=backend)
+                self.assertEqual(run_result["status"], "completed", run_result["error"])
+                manifest = json.loads((Path(tmp) / "out" / "bundle.json").read_text())["dossier"]["run_manifest"]
+                self.assertIsNone(manifest["cost_usd_reported"])
+                self.assertEqual(manifest["cost_basis"], "unknown")
+
+    def test_provider_failure_leaves_allowlist_counters_null(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "out"
+            seed = Path(tmp) / "seed.json"
+            seed.write_text(json.dumps(SEED), encoding="utf-8")
+            with patch.object(runner, "_preflight", return_value={"provider": "test", "version": "test"}), \
+                 patch.object(runner, "_invoke", side_effect=runner.RunnerError("claude exited 1")), \
+                 patch("sys.stderr", new_callable=io.StringIO):
+                self.assertEqual(runner.main(["--seed", str(seed), "--out", str(out), "--public-nonsensitive"]), 2)
+            run_result = json.loads((out / "run-result.json").read_text())
+            self.assertIsNone(run_result["allowlist_violations"])
+
+    def test_cost_is_read_per_billing_model(self):
+        usage = self._claude_manifest("review")["usage"]
+        per_model = usage["per_model"]
+        self.assertEqual(per_model["source"], "provider_usage.modelUsage")
+        self.assertEqual([m["model_id_reported"] for m in per_model["models"]], ["claude-haiku-4-5", "claude-sonnet-5"])
+        self.assertAlmostEqual(per_model["cost_usd_reported"], 0.4, places=7)
+        self.assertAlmostEqual(per_model["provider_total_cost_usd"], 0.4, places=7)
+        self.assertEqual(per_model["cost_basis"], "tool_list_price")
+        self.assertEqual(per_model["input_tokens"], 200007)
+        self.assertEqual(per_model["web_search_requests"], 2)
+        # the flat block still describes the requested model alone, which is why cost is not read from it.
+        self.assertEqual(usage["input_tokens"], 7)
+        sonnet = next(m for m in per_model["models"] if m["model_key"] == "claude-sonnet-5")
+        self.assertAlmostEqual(per_model["cost_usd_reported"] / sonnet["cost_usd_reported"], 4.0, places=7)
+
+    def test_per_model_totals_are_null_not_zero_when_a_model_omits_them(self):
+        envelope = json.loads(json.dumps(self.CLAUDE_ENVELOPE))
+        del envelope["modelUsage"]["claude-haiku-4-5-20251001"]["costUSD"]
+        del envelope["modelUsage"]["claude-sonnet-5"]["webSearchRequests"]
+        per_model = self._claude_manifest("review", envelope)["usage"]["per_model"]
+        self.assertIsNone(per_model["cost_usd_reported"])
+        self.assertEqual(per_model["cost_basis"], "unknown")
+        self.assertIsNone(per_model["web_search_requests"])
+        self.assertNotIn("per_model", self._codex_manifest("review", "gpt-5.6-luna")["usage"])
 
     def test_existing_bundle_refuses_before_provider_preflight(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -5,7 +5,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 registerHooks({ resolve(specifier, context, nextResolve) { if (specifier.startsWith(".") && !/\.[a-z]+$/i.test(specifier)) { for (const ext of [".js", ".ts"]) { const candidate = new URL(`${specifier}${ext}`, context.parentURL); if (fs.existsSync(fileURLToPath(candidate))) return nextResolve(candidate.href, context); } } return nextResolve(specifier, context); } });
-const { ingestBundle, batchDisposeReceipts, getReceipt } = await import("./internalAgentIntake.ts");
+const { ingestBundle, batchDisposeReceipts, getReceipt, findReceiptForBytes } = await import("./internalAgentIntake.ts");
 const { sha256 } = await import("./lib/sha256.ts");
 const fixtureUrl = new URL("../scripts/agent_research/fixtures/internal-review-bundle.json", import.meta.url);
 const bundleJson = fs.readFileSync(fixtureUrl, "utf8");
@@ -55,6 +55,30 @@ test("enabled intake writes one provisional receipt and is idempotent", async ()
   assert.equal(second.created, false); assert.equal(second.receipt_id, first.receipt_id); assert.equal(ctx.rows.tasks.length, 1);
 });
 
+test("an exact retry of receipted bytes returns the receipt even when current rules refuse them", async () => {
+  process.env.POW_INTERNAL_AGENT_INGEST_ENABLED = "true";
+  const ctx = context();
+  // a bundle receipted before the reported-model rule: its review run carries no model id.
+  const legacy = JSON.parse(bundleJson); legacy.review_run.model_id_reported = null;
+  const legacyJson = JSON.stringify(legacy); const legacyHash = sha256(legacyJson);
+  ctx.rows.agent_intake_receipts.push({ _id: "agent_intake_receipts_1", receipt_id: "legacy:receipt", submission_key: legacy.submission_key, bundle_hash: legacyHash, bundle_json: legacyJson, task_id: "legacy", evidence_draft_id: "legacy:draft:1", agent_review_id: "legacy:review:1", created_at: 1 });
+  const retry = await ingestBundle._handler(ctx, { bundleJson: legacyJson, bundleHash: legacyHash });
+  assert.deepEqual(retry, { receipt_id: "legacy:receipt", task_id: "legacy", evidence_draft_id: "legacy:draft:1", agent_review_id: "legacy:review:1", created: false });
+  assert.equal(ctx.rows.tasks.length, 0);
+  // the read-only route used by the submit command finds the same receipt and writes nothing.
+  const found = await findReceiptForBytes._handler(ctx, { bundleJson: legacyJson, bundleHash: legacyHash });
+  assert.deepEqual(found, { receipt_id: "legacy:receipt", task_id: "legacy", evidence_draft_id: "legacy:draft:1", agent_review_id: "legacy:review:1" });
+  assert.equal(await findReceiptForBytes._handler(context(), { bundleJson: legacyJson, bundleHash: legacyHash }), null);
+  await assert.rejects(findReceiptForBytes._handler(ctx, { bundleJson: legacyJson, bundleHash: "0".repeat(64) }), /does not match/);
+  assert.equal(await findReceiptForBytes._handler(ctx, { bundleJson: legacyJson + " ", bundleHash: sha256(legacyJson + " ") }), null);
+  assert.equal(ctx.rows.agent_intake_receipts.length, 1);
+  // the same bytes without a receipt, or a stored receipt whose bytes differ, are validated and refused.
+  await assert.rejects(ingestBundle._handler(context(), { bundleJson: legacyJson, bundleHash: legacyHash }), /model_id_reported/);
+  ctx.rows.agent_intake_receipts[0].bundle_json = "{}";
+  await assert.rejects(ingestBundle._handler(ctx, { bundleJson: legacyJson, bundleHash: legacyHash }), /model_id_reported/);
+  assert.equal(ctx.rows.tasks.length, 0);
+});
+
 test("intake records claim-grain judgments with the real access method (r-j7)", async () => {
   process.env.POW_INTERNAL_AGENT_INGEST_ENABLED = "true";
   const ctx = context(); const bundleHash = sha256(bundleJson);
@@ -71,8 +95,9 @@ test("intake records claim-grain judgments with the real access method (r-j7)", 
     assert.equal(supports[index].outcome, check.outcome);
     assert.equal(supports[index].judge.agent_name, "claude-advisory-reviewer-internal");
     assert.equal(supports[index].judge.instruction_sha256, bundle.review_run.prompt_sha256);
-    assert.equal(supports[index].judge.model_reported, undefined);
-    assert.ok(supports[index].judge.model_unreported_reason);
+    // intake now refuses a run without a provider-reported model id, so the judge names it.
+    assert.equal(supports[index].judge.model_reported, bundle.review_run.model_id_reported);
+    assert.equal(supports[index].judge.model_unreported_reason, undefined);
   }
   const recommendation = judgments.find(j => j.judgment_kind === "recommendation");
   assert.equal(recommendation.outcome, bundle.review.recommendation);

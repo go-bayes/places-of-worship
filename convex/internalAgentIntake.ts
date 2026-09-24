@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { internalMutation, mutation, query } from "./_generated/server";
+import { internalMutation, internalQuery, mutation, query, type QueryCtx } from "./_generated/server";
 import { requireUser } from "./lib/auth";
 import { applyReviewDecision } from "./reviews";
 import { appendTaskEvent } from "./lib/taskEvents";
@@ -10,12 +10,33 @@ import { costBasisOf, recordJudgments, type JudgmentInput } from "./lib/agentJud
 
 import { assertInternalAgentIngestEnabled as enabled, internalAgentServiceUser } from "./lib/agentServiceUser";
 
+// find a receipt whose stored bytes equal the submitted bytes exactly; never validates or writes.
+async function receiptForBytes(ctx: QueryCtx, bundleJson: string, bundleHash: string) {
+  if (!/^[0-9a-f]{64}$/.test(bundleHash)) throw new Error("bundleHash must be 64 lowercase hex characters");
+  if (sha256(bundleJson) !== bundleHash) throw new Error("bundleHash does not match bundleJson");
+  const receipted = await ctx.db.query("agent_intake_receipts").withIndex("by_bundle_hash", (q) => q.eq("bundle_hash", bundleHash)).first();
+  if (receipted === null || receipted.bundle_json !== bundleJson) return null;
+  return { receipt_id: receipted.receipt_id, task_id: receipted.task_id, evidence_draft_id: receipted.evidence_draft_id, agent_review_id: receipted.agent_review_id };
+}
+
+// read-only retry route for the submit command: a bundle receipted before a validation rule was
+// tightened can recover its receipt without re-validation, and nothing new is admitted.
+export const findReceiptForBytes = internalQuery({
+  args: { bundleJson: v.string(), bundleHash: v.string() },
+  returns: v.union(v.null(), v.object({ receipt_id: v.string(), task_id: v.string(), evidence_draft_id: v.string(), agent_review_id: v.string() })),
+  handler: async (ctx, args) => receiptForBytes(ctx, args.bundleJson, args.bundleHash),
+});
+
 export const ingestBundle = internalMutation({
   args: { bundleJson: v.string(), bundleHash: v.string() },
   returns: v.object({ receipt_id: v.string(), task_id: v.string(), evidence_draft_id: v.string(), agent_review_id: v.string(), created: v.boolean() }),
   handler: async (ctx, args) => {
     enabled();
-    if (!/^[0-9a-f]{64}$/.test(args.bundleHash)) throw new Error("bundleHash must be 64 lowercase hex characters");
+    // an exact retry of bytes already receipted returns that receipt without writing. It runs before
+    // validation so a rule tightened after the first ingest cannot turn an idempotent retry into an error;
+    // the stored bytes must equal the submitted bytes, so nothing unvalidated is admitted.
+    const receipted = await receiptForBytes(ctx, args.bundleJson, args.bundleHash);
+    if (receipted !== null) return { ...receipted, created: false };
     let parsed: unknown;
     try { assertNoDuplicateJsonKeys(args.bundleJson); parsed = JSON.parse(args.bundleJson); } catch (error) { throw new Error(error instanceof Error ? error.message : "bundleJson must be valid JSON"); }
     const checked = validateAgentReviewBundle(parsed, args.bundleJson);
@@ -69,7 +90,7 @@ export const ingestBundle = internalMutation({
       agent_review_id: reviewId, task_id: taskId, evidence_draft_id: draftId, batch_id: `internal-agent:${checked.bundle.submission_key}`, version: 1,
       recommendation: checked.bundle.review.recommendation, reasoning: checked.bundle.review.reasoning, sources_checked: sourcesChecked,
       cultural_sensitivity: checked.bundle.review.cultural_sensitivity, agent_name: `${checked.bundle.research_run.backend}+${checked.bundle.review_run.backend}-internal`, model_provider: checked.bundle.research_run.backend,
-      model_name: checked.bundle.research_run.model_id_reported ?? checked.bundle.research_run.model_requested, source_check_model: checked.bundle.review_run.model_id_reported ?? checked.bundle.review_run.model_requested,
+      model_name: checked.bundle.research_run.model_id_reported, source_check_model: checked.bundle.review_run.model_id_reported,
       prompt_version: "agent-review-bundle.v1", actor_user_id: service._id, ai_generated: true, created_at: now,
     });
     await ctx.db.insert("agent_intake_receipts", { receipt_id: receiptId, submission_key: checked.bundle.submission_key, bundle_hash: args.bundleHash, bundle_json: args.bundleJson, task_id: taskId, evidence_draft_id: draftId, agent_review_id: reviewId, created_at: now });
@@ -84,8 +105,7 @@ export const ingestBundle = internalMutation({
       agent_name: `${run.backend}-${role}-internal`,
       model_provider: run.backend,
       model_requested: run.model_requested,
-      model_reported: run.model_id_reported ?? undefined,
-      model_unreported_reason: run.model_id_reported === null ? "The client did not report a model id for this run." : undefined,
+      model_reported: run.model_id_reported,
       prompt_version: promptVersion,
       instruction_sha256: run.prompt_sha256,
     });
