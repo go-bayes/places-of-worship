@@ -540,12 +540,18 @@ const dot = { type: "Feature", properties: { name: "St Mary's", osm_id: "1", osm
   };
   const inside = { name: "pin" };
   const container = { contains: node => node === inside };
-  app.map = { getContainer: () => container };
+  let menuOpen = false;
+  app.pinHoldPopup = { name: "menu" };
+  app.map = { getContainer: () => container, hasLayer: layer => menuOpen && layer === app.pinHoldPopup };
   const fire = (type, target) => {
     const event = { target, stopped: false, prevented: false, stopPropagation() { this.stopped = true; }, preventDefault() { this.prevented = true; } };
     listeners.filter(item => item.type === type).forEach(item => item.fn(event));
     return event;
   };
+  // no menu open, nothing to protect: no catch
+  app.swallowHoldRelease();
+  assert.equal(listeners.length, 0, "no catch without an open menu");
+  menuOpen = true;
   app.swallowHoldRelease();
   assert.equal(listeners.every(item => item.capture === true), true, "capture phase, ahead of leaflet");
   const release = fire("click", inside);
@@ -566,6 +572,7 @@ const dot = { type: "Feature", properties: { name: "St Mary's", osm_id: "1", osm
   app.swallowHoldRelease();
   app.swallowHoldRelease();
   assert.equal(listeners.filter(item => item.type === "click").length, 1);
+  app.disarmHoldRelease?.();
   delete window.addEventListener;
   delete window.removeEventListener;
 }
@@ -616,4 +623,80 @@ const dot = { type: "Feature", properties: { name: "St Mary's", osm_id: "1", osm
   delete context.L;
 }
 
-console.log("add-revise-control: 17 checks passed");
+// 18. the catch lives only as long as the menu (gpt-6-sol review of #158):
+//     a release that fires no click, then escape, then the menu reopened
+//     from the keyboard's side: its Remove pin, pressed with enter (a click
+//     with no mousedown before it), is not eaten; lifting the pin and
+//     leaving the entry disarm too, and every close thaws the pin
+{
+  const app = fresh();
+  const listeners = [];
+  window.addEventListener = (type, fn, capture) => listeners.push({ type, fn, capture });
+  window.removeEventListener = (type, fn, capture) => {
+    const index = listeners.findIndex(item => item.type === type && item.fn === fn && item.capture === capture);
+    if (index >= 0) listeners.splice(index, 1);
+  };
+  const button = { name: "Remove pin" };
+  const container = { contains: node => node === button };
+  const fireClick = () => {
+    const event = { target: button, stopped: false, stopPropagation() { this.stopped = true; }, preventDefault() {} };
+    listeners.filter(item => item.type === "click").forEach(item => item.fn(event));
+    return event;
+  };
+  let dragOn = true;
+  const marker = { getLatLng: () => ({ lat: -41.3, lng: 174.8 }), dragging: { enabled: () => dragOn, enable() { dragOn = true; }, disable() { dragOn = false; } } };
+  const layers = new Set();
+  const makePopup = () => {
+    const handlers = {};
+    const popup = {
+      on(name, fn) { handlers[name] = fn; return popup; },
+      setLatLng() { return popup; }, setContent() { return popup; },
+      openOn() { layers.add(popup); return popup; },
+      getElement: () => null,
+      close() { if (!layers.delete(popup)) return; handlers.remove?.(); },
+    };
+    return popup;
+  };
+  context.L = { popup: () => makePopup() };
+  app.map = { getContainer: () => container, hasLayer: layer => layers.has(layer), closePopup: popup => (popup ? [popup] : [...layers]).forEach(item => item.close()), removeLayer() {} };
+  app.pinMarker = marker;
+  app.pinMode = true;
+  app.paneSnap = () => true;
+  const hold = () => { app.openPinHoldMenu({ fromHold: true }); app.swallowHoldRelease(); };
+  // hold, release with no click, escape
+  hold();
+  assert.equal(listeners.length, 2, "the catch is armed");
+  assert.equal(dragOn, false);
+  assert.equal(app.closePinHoldMenu(), true, "escape closes the menu");
+  assert.equal(listeners.length, 0, "closing the menu disarms the catch");
+  assert.equal(dragOn, true, "escape thaws the pin");
+  // reopened (right click), Remove pin pressed with enter
+  app.openPinHoldMenu();
+  assert.equal(fireClick().stopped, false, "a keyboard click on Remove pin is not eaten");
+  app.closePinHoldMenu();
+  // a hold on a hold: the first menu's thaw runs before the second freezes
+  hold();
+  hold();
+  assert.equal(dragOn, false, "the second hold's menu still freezes the pin");
+  assert.equal(listeners.filter(item => item.type === "click").length, 1, "no double registration");
+  app.closePinHoldMenu();
+  assert.equal(dragOn, true);
+  assert.equal(listeners.length, 0);
+  // lifting the pin disarms and closes
+  hold();
+  app.liftPendingPin("");
+  assert.equal(listeners.length, 0, "lifting the pin disarms the catch");
+  assert.equal(app.pinHoldPopup, null);
+  // leaving the entry disarms: exitPinMode's first act
+  app.pinMarker = marker;
+  hold();
+  const source = fs.readFileSync(path.join(__dirname, "verification-map.js"), "utf8");
+  assert.match(source, /exitPinMode\(\) \{\n\s*this\.disarmHoldRelease\?\.\(\);/);
+  app.disarmHoldRelease();
+  assert.equal(listeners.length, 0);
+  delete context.L;
+  delete window.addEventListener;
+  delete window.removeEventListener;
+}
+
+console.log("add-revise-control: 18 checks passed");

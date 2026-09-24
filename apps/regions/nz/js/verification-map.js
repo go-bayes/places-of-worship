@@ -12029,11 +12029,14 @@ class NzVerificationMap {
     // opened (on the map a click also moves the pin). the next click is
     // held back in the capture phase; a fresh press disarms the catch, so a
     // browser that fires no click for the release cannot eat the click that
-    // chooses Remove pin
+    // chooses Remove pin. the catch lives only as long as the menu: closing
+    // it (a button, a map click, escape), lifting the pin or leaving the
+    // entry disarms it too, so a keyboard press on a control after a
+    // release that fired no click is never eaten
     swallowHoldRelease() {
         const container = this.map?.getContainer();
-        if (!container) return;
         this.disarmHoldRelease?.();
+        if (!container || !this.pinHoldPopup || !this.map.hasLayer(this.pinHoldPopup)) return;
         const disarm = () => {
             window.removeEventListener("click", swallow, true);
             window.removeEventListener("mousedown", disarm, true);
@@ -12069,6 +12072,9 @@ class NzVerificationMap {
 
     openPinHoldMenu(options = {}) {
         if (!this.map || !this.pinMarker) return;
+        // a menu already open closes first, so its thaw runs before this
+        // one decides whether to freeze the pin
+        this.closePinHoldMenu();
         const marker = this.pinMarker;
         // escape belongs to the portal's key handler, which closes this menu
         // before it would leave the entry
@@ -12079,7 +12085,10 @@ class NzVerificationMap {
         const freeze = options.fromHold && marker.dragging?.enabled();
         if (freeze) marker.dragging.disable();
         popup.on("remove", () => {
-            if (this.pinHoldPopup === popup) this.pinHoldPopup = null;
+            if (this.pinHoldPopup === popup) {
+                this.pinHoldPopup = null;
+                this.disarmHoldRelease?.();
+            }
             if (freeze && this.pinMarker === marker && !this.pinConfirmed) marker.dragging.enable();
         });
         this.pinHoldPopup = popup;
@@ -12118,6 +12127,7 @@ class NzVerificationMap {
     // takes the pending pin off the map with its circle and zoom handler;
     // placement stays armed
     liftPendingPin(statusText) {
+        this.disarmHoldRelease?.();
         if (!this.pinMarker) return;
         this.map.closePopup();
         this.map.removeLayer(this.pinMarker);
@@ -12722,6 +12732,7 @@ class NzVerificationMap {
     }
 
     exitPinMode() {
+        this.disarmHoldRelease?.();
         if (this.formDirtyTaskId === "rapid-pin" || this.formDirtyTaskId === "location-pin") {
             this.clearFormDirty();
         }
