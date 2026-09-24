@@ -14,6 +14,7 @@ import {
   evidenceDraftStatus,
   exportBatchStatus,
   exportFormat,
+  exportRunStatus,
   historicalClaimConfidence,
   historicalClaimContractVersion,
   historicalClaimKind,
@@ -80,6 +81,29 @@ import {
   judgmentSubjectKind,
 } from "./lib/agentJudgments";
 import { objectStorage } from "./lib/objectReceipts";
+
+// the gzip codec record carried beside every stored export file (pr l1,
+// ruling 3; convex/lib/bundleCodec.ts)
+const codecRecord = v.object({
+  name: v.literal("fflate"),
+  version: v.string(),
+  level: v.number(),
+  header: v.object({ mtime: v.number(), filename: v.boolean() }),
+});
+
+// one object a freeze attempt stored (pending_freeze.stored_objects)
+const storedObjectEntry = v.object({
+  attempt_id: v.string(),
+  filename: v.string(),
+  object_key: v.string(),
+  storage_id: v.id("_storage"),
+  sha256: v.string(),
+  byte_length: v.number(),
+  stored_sha256: v.string(),
+  stored_byte_length: v.number(),
+  codec_id: v.string(),
+  recorded_at: v.number(),
+});
 
 export default defineSchema({
   users: defineTable({
@@ -152,6 +176,11 @@ export default defineSchema({
     created_at: v.number(),
     updated_at: v.number(),
     last_event_at: v.optional(v.number()),
+    // the frozen export batch that last moved this task to exported, and
+    // when (stamped by exports:completeFreeze beside the exported patch;
+    // lean-storage brief, pr l1)
+    last_export_batch_id: v.optional(v.string()),
+    last_exported_at: v.optional(v.number()),
   })
     .index("by_task_id", ["task_id"])
     .index("by_status_priority", ["status", "priority"])
@@ -820,6 +849,11 @@ export default defineSchema({
         started_at: v.number(),
         started_by: v.id("users"),
         manifest: v.any(),
+        // every object an attempt stored, recorded as it is stored, so an
+        // attempt that dies mid-freeze leaves a trail; carried forward when
+        // a later attempt replaces this one, and cleaned up (its blobs
+        // deleted) when a later attempt commits or fails (pr l1)
+        stored_objects: v.optional(v.array(storedObjectEntry)),
       }),
     ),
     // the most recent failed attempt, kept for operator visibility; cleared
@@ -849,6 +883,14 @@ export default defineSchema({
           sha256: v.string(),
           byte_length: v.number(),
           content_type: v.string(),
+          // the stored encoding (pr l1, ruling 3): sha256 and byte_length
+          // above keep describing the plain bytes; these describe the
+          // stored gzip bytes and the codec that reproduces them. An entry
+          // without `encoding` (frozen before pr l1) stores plain bytes
+          encoding: v.optional(v.literal("gzip")),
+          stored_sha256: v.optional(v.string()),
+          stored_byte_length: v.optional(v.number()),
+          codec: v.optional(codecRecord),
         }),
       ),
     ),
@@ -861,10 +903,99 @@ export default defineSchema({
     supersedes_export_batch_id: v.optional(v.string()),
     superseded_by_export_batch_id: v.optional(v.string()),
     superseded_at: v.optional(v.number()),
+    // budgeted composition (lean-storage brief section 3.1, pr l1): the run
+    // that composed this batch, if any, and the estimate the budget was
+    // applied to (plain bundle bytes; documents and index ranges the freeze
+    // recheck and bundle build read)
+    export_run_id: v.optional(v.string()),
+    estimated_bytes: v.optional(v.number()),
+    estimated_documents: v.optional(v.number()),
+    estimated_index_ranges: v.optional(v.number()),
+    // a draft replaced by a later composition takes status `archived`
+    archived_at: v.optional(v.number()),
+    archived_by: v.optional(v.id("users")),
+    archived_reason: v.optional(v.string()),
   })
     .index("by_export_batch_id", ["export_batch_id"])
     .index("by_country_status", ["country_code", "status"])
-    .index("by_created_time", ["created_at"]),
+    .index("by_created_time", ["created_at"])
+    .index("by_export_run_status", ["export_run_id", "status"]),
+
+  // an export run (lean-storage brief section 3.1, rulings 1 and 2, pr l1):
+  // one composition of a country's pi_accepted tasks into budgeted draft
+  // batches, then the scheduled chain that freezes them one per invocation.
+  // Membership is captured at composition (export_run_members), so the
+  // chain freezes exactly that set and a task accepted later waits for the
+  // next run. The lease is the per-country run lock: one invocation holds
+  // it for one composition step or one batch freeze, and a stopped run
+  // resumes once it has expired.
+  export_runs: defineTable({
+    run_id: v.string(),
+    country_code: v.string(),
+    status: exportRunStatus,
+    started_by: v.id("users"),
+    started_at: v.number(),
+    // composition progress: tasks are read through tasks.by_country_status
+    // in _creationTime order; members are cut into batches in seq order
+    phase: v.union(v.literal("estimating"), v.literal("cutting"), v.literal("done")),
+    estimate_cursor: v.optional(v.number()),
+    // task ids already taken at exactly estimate_cursor, so a continuation
+    // reading from that creation time on never takes one twice
+    estimate_cursor_ids: v.optional(v.array(v.string())),
+    next_member_seq: v.number(),
+    cut_cursor_seq: v.optional(v.number()),
+    member_count: v.number(),
+    refused_count: v.number(),
+    // the first refusals, for the curator to read; the full list is the
+    // refused rows in export_run_members
+    refusals: v.array(v.object({ task_id: v.string(), reason: v.string() })),
+    batch_count: v.number(),
+    frozen_batch_count: v.number(),
+    estimated_bytes: v.number(),
+    composed_at: v.optional(v.number()),
+    // the curator whose authority the scheduled freeze chain acts under
+    // (set when freezing starts or resumes) and who is recorded on events
+    freeze_actor: v.optional(v.id("users")),
+    freeze_started_at: v.optional(v.number()),
+    lease: v.optional(
+      v.object({
+        holder: v.string(),
+        expires_at: v.number(),
+        export_batch_id: v.optional(v.string()),
+      }),
+    ),
+    last_error: v.optional(
+      v.object({ at: v.number(), reason: v.string(), export_batch_id: v.optional(v.string()) }),
+    ),
+    completed_at: v.optional(v.number()),
+    replaced_by_run_id: v.optional(v.string()),
+    replaced_at: v.optional(v.number()),
+  })
+    .index("by_run_id", ["run_id"])
+    .index("by_country_started", ["country_code", "started_at"]),
+
+  // one captured member of an export run: the task, the accepted decisions
+  // and acceptances it contributes, the authority pins the freeze rechecks,
+  // and the estimate the composer measured; or the reason it was refused
+  export_run_members: defineTable({
+    run_id: v.string(),
+    seq: v.number(),
+    task_id: v.string(),
+    review_decision_ids: v.array(v.string()),
+    acceptance_ids: v.array(v.string()),
+    authority_review_decision_id: v.optional(v.string()),
+    evidence_version_hash: v.optional(v.string()),
+    review_snapshot_hash: v.optional(v.string()),
+    estimated_bytes: v.number(),
+    estimated_read_bytes: v.number(),
+    estimated_documents: v.number(),
+    estimated_index_ranges: v.number(),
+    refusal: v.optional(v.string()),
+    export_batch_id: v.optional(v.string()),
+  })
+    .index("by_run_seq", ["run_id", "seq"])
+    .index("by_run_task", ["run_id", "task_id"])
+    .index("by_export_batch", ["export_batch_id"]),
 
   // photo and document citations for a task's evidence: metadata only —
   // the bytes live in a private r2 bucket reached through short-lived

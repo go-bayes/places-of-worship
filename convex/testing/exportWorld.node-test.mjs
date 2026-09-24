@@ -19,6 +19,7 @@
 import { registerHooks } from "node:module";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
 import { getFunctionName } from "convex/server";
 
 // Convex resolves extensionless local TypeScript imports during bundling;
@@ -26,8 +27,7 @@ import { getFunctionName } from "convex/server";
 // consumer of this module resolves correctly.
 registerHooks({ resolve(specifier, context, nextResolve) { if (specifier.startsWith(".") && !/\.[a-z]+$/i.test(specifier)) { for (const ext of [".js", ".ts"]) { const candidate = new URL(`${specifier}${ext}`, context.parentURL); if (fs.existsSync(fileURLToPath(candidate))) return nextResolve(candidate.href, context); } } return nextResolve(specifier, context); } });
 
-const { prepareFreeze, completeFreeze, recordFreezeFailure, freezeAttemptOutcome, getExportBatchRow, buildDraftBundle, requireActingUser } =
-  await import("../exports.ts");
+const exportsModule = await import("../exports.ts");
 
 // a fixed clock that advances one millisecond per read, so recorded times
 // (and every id derived from them) are deterministic and reproducible byte
@@ -55,7 +55,13 @@ export function world() {
     derived_year_locations: [], derived_target_year_functions: [], derived_state_events: [],
     review_decisions: [], agent_reviews: [], sources: [], task_batches: [],
     task_acceptances: [], export_batches: [], review_snapshots: [],
+    export_runs: [], export_run_members: [],
   };
+  // functions scheduled through ctx.scheduler, run by helper.drainScheduled()
+  const scheduled = [];
+  // the blob store mutations see (ctx.storage, ctx.db.system); actionCtx()
+  // attaches the same store the action uses
+  let storage = null;
   const counters = {};
   let creationTime = 1_780_000_000_000;
   let subject = null;
@@ -73,9 +79,18 @@ export function world() {
       if (rows[table] === undefined) throw new Error(`No fake table for ${table}.`);
       const filters = [];
       let descending = false;
-      const q = { eq(field, value) { filters.push([field, value]); return q; } };
+      // eq plus the range operators the export composer uses (on
+      // _creationTime and seq); every row is kept in insertion order, which
+      // is _creationTime order
+      const q = {
+        eq(field, value) { filters.push([field, (candidate) => candidate === value]); return q; },
+        gt(field, value) { filters.push([field, (candidate) => candidate > value]); return q; },
+        gte(field, value) { filters.push([field, (candidate) => candidate >= value]); return q; },
+        lt(field, value) { filters.push([field, (candidate) => candidate < value]); return q; },
+        lte(field, value) { filters.push([field, (candidate) => candidate <= value]); return q; },
+      };
       const selected = () => {
-        const matched = rows[table].filter((row) => filters.every(([field, value]) => row[field] === value));
+        const matched = rows[table].filter((row) => filters.every(([field, test]) => test(row[field])));
         return descending ? [...matched].reverse() : matched;
       };
       const chain = {
@@ -104,6 +119,10 @@ export function world() {
       return stored._id;
     },
     async get(id) { return find(id); },
+    // the _storage system table, backed by the attached fake store
+    system: {
+      async get(id) { return storage === null ? null : storage._meta(id); },
+    },
     async patch(id, value) {
       const row = find(id);
       if (row === null) throw new Error(`Patch of a missing row ${id}.`);
@@ -118,6 +137,10 @@ export function world() {
   const ctx = {
     auth: { async getUserIdentity() { return subject === null ? null : { tokenIdentifier: subject }; } },
     db,
+    scheduler: {
+      async runAfter(delayMs, ref, args) { scheduled.push({ delayMs, ref, args }); return `scheduled_${scheduled.length}`; },
+    },
+    get storage() { return storage; },
   };
 
   const helper = {
@@ -125,6 +148,37 @@ export function world() {
     db,
     rows,
     as(user) { subject = user.auth_subject; return ctx; },
+    // a call with no identity, as a scheduled function runs
+    anonymous() { subject = null; return ctx; },
+    useStorage(store) { storage = store; },
+    scheduled,
+    // runs every scheduled function in order (including those scheduled
+    // while draining) with no identity, as Convex runs them; returns how
+    // many ran. `onError` receives a scheduled action's failure, which
+    // Convex would only log
+    async drainScheduled(store, { max = 1000, onError = () => {} } = {}) {
+      let ran = 0;
+      while (scheduled.length > 0) {
+        if (ran >= max) throw new Error(`drainScheduled ran ${max} functions without settling.`);
+        const { ref, args } = scheduled.shift();
+        const fn = handlerFor(ref);
+        const previous = subject;
+        subject = null;
+        try {
+          if (fn.isAction) {
+            await fn._handler(actionCtx(helper, store ?? storage), args);
+          } else {
+            await fn._handler(ctx, args);
+          }
+        } catch (error) {
+          onError(error, ref, args);
+        } finally {
+          subject = previous;
+        }
+        ran += 1;
+      }
+      return ran;
+    },
     row(table, field, value) { return rows[table].find((candidate) => candidate[field] === value) ?? null; },
     events(type) { return rows.task_events.filter((event) => event.event_type === type); },
     async addUser(authSubject, roles, status = "active") {
@@ -214,9 +268,19 @@ export function fakeStorage() {
       }
       return new Blob([bytes]);
     },
+    // Convex refuses to delete a missing blob; callers must guard
     async delete(id) {
+      if (!blobs.has(id)) throw new Error(`Storage id ${id} not found.`);
       blobs.delete(id);
     },
+    _meta(id) {
+      const bytes = blobs.get(id);
+      if (bytes === undefined) return null;
+      return { _id: id, size: bytes.length, sha256: createHash("sha256").update(bytes).digest("base64") };
+    },
+    _has(id) { return blobs.has(id); },
+    _bytes(id) { return blobs.get(id); },
+    _put(id, bytes) { blobs.set(id, bytes); },
     _blobCount() { return blobs.size; },
     _corruptNextGet() { corruptNextGet = true; },
     _runOnFirstStore(hook) { onFirstStore = hook; },
@@ -231,22 +295,21 @@ export function fakeStorage() {
   };
 }
 
-const EXPORTS_HANDLERS = {
-  prepareFreeze,
-  completeFreeze,
-  recordFreezeFailure,
-  freezeAttemptOutcome,
-  getExportBatchRow,
-  buildDraftBundle,
-  requireActingUser,
-};
-
-async function dispatchInternal(w, ref, args) {
+// every exports.ts function a reference may name (internal.exports.*)
+function handlerFor(ref) {
   const name = getFunctionName(ref);
-  const fnName = name.split(":")[1];
-  const fn = EXPORTS_HANDLERS[fnName];
-  if (fn === undefined) {
+  const [moduleName, fnName] = name.split(":");
+  const fn = moduleName === "exports" ? exportsModule[fnName] : undefined;
+  if (fn === undefined || typeof fn._handler !== "function") {
     throw new Error(`No fake handler registered for ${name}.`);
+  }
+  return fn;
+}
+
+async function dispatchInternal(w, storage, ref, args) {
+  const fn = handlerFor(ref);
+  if (fn.isAction) {
+    return await fn._handler(actionCtx(w, storage), args);
   }
   return await fn._handler(w.ctx, args);
 }
@@ -258,11 +321,14 @@ async function dispatchInternal(w, ref, args) {
 // ctx uses, so `w.as(user)` before a call still selects the acting identity
 // the dispatched internal handlers see.
 export function actionCtx(w, storage) {
+  w.useStorage(storage);
   return {
     auth: w.ctx.auth,
     storage,
-    async runQuery(ref, args) { return dispatchInternal(w, ref, args); },
-    async runMutation(ref, args) { return dispatchInternal(w, ref, args); },
+    scheduler: w.ctx.scheduler,
+    async runQuery(ref, args) { return dispatchInternal(w, storage, ref, args); },
+    async runMutation(ref, args) { return dispatchInternal(w, storage, ref, args); },
+    async runAction(ref, args) { return dispatchInternal(w, storage, ref, args); },
   };
 }
 
