@@ -125,7 +125,7 @@ test("bahamas phone numbers and clergy passages are refused by path without thei
 test("inspection context resolves an existing task and its evidence version", async () => {
   process.env.POW_INTERNAL_AGENT_INGEST_ENABLED = "true";
   const ctx = dbContext();
-  ctx.rows.tasks.push({ task_id: "synthetic:task-1", country_code: "bs" });
+  ctx.rows.tasks.push({ task_id: "synthetic:task-1", country_code: "BS" });
   ctx.rows.evidence_versions.push({ object_hash: `sha256:${H}`, task_id: "synthetic:task-1" });
   const linked = input();
   linked.context = { task_id: "synthetic:task-1", evidence_version_hash: H };

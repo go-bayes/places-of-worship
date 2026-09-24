@@ -39,7 +39,8 @@ export const ingestInspectionObject = internalMutation({
       if (taskId !== null) {
         const task = await ctx.db.query("tasks").withIndex("by_task_id", (q: any) => q.eq("task_id", taskId)).unique();
         if (task === null) throw new Error("context.task_id: task does not exist.");
-        if (task.country_code !== "bs") throw new Error("context.task_id: task is in another country.");
+        // tasks store upper-case country codes ("NZ", "VU"); the interchange contract uses "bs"
+        if (task.country_code.toUpperCase() !== "BS") throw new Error("context.task_id: task is in another country.");
       }
       if (versionHash !== null) {
         const version = await ctx.db.query("evidence_versions").withIndex("by_object_hash", (q: any) => q.eq("object_hash", `sha256:${versionHash}`)).unique();
