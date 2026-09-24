@@ -69,6 +69,36 @@ test("undeclared inspection keys and values produce positional, value-free diagn
   });
 });
 
+test("bahamas phone numbers and clergy passages are refused by path without their values", async () => {
+  for (const phone of ["+1 242 555 0199", "+1 (242) 555-0199", "(242) 555-0199", "242-555-0199", "242.555.0199", "555-0199"]) {
+    const value = input();
+    value.claims[0].wording = `Call ${phone}`;
+    assert.throws(() => adaptInspectionCase(value), error => {
+      assert.match(error.message, /potential personal details in claims\[0\]\.wording/);
+      assert.doesNotMatch(error.message, /555/);
+      return true;
+    });
+    const projection = adaptInspectionCase(input()).projection;
+    projection.sources[0].publisher = `Call ${phone}`;
+    const object = addressed(projection, "case");
+    assert.throws(() => validateInspectionCase(object.objectJson, object.objectHash), /potential personal details in sources\[0\]\.publisher/);
+  }
+  assert.throws(() => validateInspectionCollection({ schema_version: "inspection-collection.v1", country_code: "bs", collection_ref: "synthetic:collection-1", adapter_version: ADAPTER_VERSION, source_snapshot_date: "2026-09-01", definition_version: "Call 242-555-0199", definition_hash: H, case_hashes: [], parents: [] }), /potential personal details in definition_version/);
+  process.env.POW_INTERNAL_AGENT_INGEST_ENABLED = "true";
+  const ctx = dbContext();
+  const projection = adaptInspectionCase(input()).projection;
+  projection.agent_assessments[0].basis = "Office line +1 242 555 0199";
+  await assert.rejects(ingestInspectionObject._handler(ctx, addressed(projection, "case")), /agent_assessments\[0\]\.basis/);
+  assert.equal(ctx.rows.inspection_object_receipts.length, 0);
+  const clergy = input();
+  clergy.claims[0].uncertainty = "The pastor is unnamed";
+  assert.throws(() => adaptInspectionCase(clergy), error => {
+    assert.match(error.message, /^claims\[0\]\.uncertainty: source-derived personal or tenure detail/);
+    assert.doesNotMatch(error.message, /unnamed/);
+    return true;
+  });
+});
+
 test("hash tokens are refused outside designated inspection hash fields", () => {
   const value = input();
   value.claims[0].wording = `Reference ${"B".repeat(64)}`;

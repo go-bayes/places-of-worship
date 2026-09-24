@@ -1,4 +1,4 @@
-import { assertNoDuplicateJsonKeys, assertScreened, dateBounds, guard, keyRef, publicUrl, SCREEN_HASH_FIELDS } from "./agentIntake.ts";
+import { assertNoDuplicateJsonKeys, assertScreened, dateBounds, guard, keyRef, publicUrl, SCREEN_HASH_FIELDS, screenedStrings } from "./agentIntake.ts";
 import { isSha256Hex, verifyObjectBytes } from "./objectReceipts.ts";
 import { sha256 } from "./sha256.ts";
 import { canonicalWireJson } from "./wireJson.ts";
@@ -37,13 +37,23 @@ collectionShape.properties.case_hashes = { items: {} };
 collectionShape.properties.parents = { items: {} };
 const inputHashFields = new Set([...SCREEN_HASH_FIELDS[INSPECTION_SCHEMA]].map(path => path.replace(/^sources\[\]/, "source_records[]")));
 
+// the shared detector recognises New Zealand numbers only. Bahamas numbers
+// follow the North American plan: +1 or (242) forms, 10-digit groups, and
+// the 7-digit local form. hits are named by path, never by value.
+const NANP_PHONE = /\+1[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b|\(\d{3}\)\s?\d{3}[\s.-]\d{4}\b|\b\d{3}[\s.-]\d{3}[\s.-]\d{4}\b|\b\d{3}-\d{4}\b/;
+function assertNoNanpPhone(value: unknown, schema: any): void {
+  for (const [path, text] of screenedStrings(value, schema, schema)) if (NANP_PHONE.test(text)) throw new Error(`potential personal details in ${path} require human handling`);
+}
+
 export function screenInspectionCase(value: unknown, adapterInput = false): void {
   const schema = adapterInput ? inputShape : caseShape;
   assertScreened(value, schema, schema, adapterInput ? inputHashFields : SCREEN_HASH_FIELDS[INSPECTION_SCHEMA]);
+  assertNoNanpPhone(value, schema);
 }
 
 export function screenInspectionCollection(value: unknown): void {
   assertScreened(value, collectionShape, collectionShape, SCREEN_HASH_FIELDS[COLLECTION_SCHEMA]);
+  assertNoNanpPhone(value, collectionShape);
 }
 
 type JsonRecord = Record<string, unknown>;
@@ -178,8 +188,7 @@ export function adaptInspectionCase(input: unknown): { projection: InspectionCas
   // The shared detector catches contact details and honorific-led names. A
   // conservatively broader field screen holds clergy and tenure passages for
   // human redaction even when a title is absent.
-  const sensitive = JSON.stringify(projection).match(/\b(?:clergy|minister|pastor|vicar|tenure)\b/i);
-  if (sensitive) throw new Error("source-derived personal or tenure detail requires human restriction or redaction");
+  for (const [path] of screenedStrings(projection, caseShape, caseShape).filter(([, text]) => /\b(?:clergy|minister|pastor|vicar|tenure)\b/i.test(text))) throw new Error(`${path}: source-derived personal or tenure detail requires human restriction or redaction`);
   return { projection, report };
 }
 
