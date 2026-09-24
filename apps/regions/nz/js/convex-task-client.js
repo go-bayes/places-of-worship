@@ -74,6 +74,12 @@
         }
     }
 
+    function staleGrantError() {
+        const error = new Error("The confirmation was for a sign-in that has since ended. Confirm again.");
+        error.staleGrant = true;
+        return error;
+    }
+
     function readMigrationGrant() {
         try {
             const record = JSON.parse(window.sessionStorage?.getItem(MIGRATION_GRANT_KEY) || "null");
@@ -227,6 +233,8 @@
             this.completion = null;
             this.signOutPromise = null;
             this.signOutFailure = null;
+            this.grantEpoch = 0;
+            this.heldMigrationGrant = null;
             // lifecycle callbacks the page registers once, whether the user
             // came back through restoreSession or the sign-in card
             this.lifecycle = {};
@@ -325,6 +333,11 @@
             this.sessionId = nextSessionId;
             this.user = null;
             this.claimFailure = null;
+            // an established session that ends (another tab, expiry) or turns
+            // into another one takes any held or pending grant with it; a
+            // first session keeps the grant confirmed before sign-in, which
+            // is the google-first hand-off
+            if (hadSession) this.invalidateMigrationGrant();
             this.releaseSignInElement();
             if (!nextSessionId) {
                 if (hadSession) this.lifecycle.onSignedOut?.({ deliberate: false });
@@ -395,7 +408,7 @@
             // so it never re-admits the session being ended
             this.sessionId = "";
             this.signOutFailure = null;
-            this.clearMigrationGrant();
+            this.invalidateMigrationGrant();
             this.releaseSignInElement();
             if (sessionId) writePendingSignOut(sessionId);
             this.signOutPromise = (async () => {
@@ -616,6 +629,9 @@
             const host = scope.querySelector?.("[data-pow-google-confirm]");
             const status = scope.querySelector?.("[data-pow-migration-status]");
             if (!host || !this.migrationOpen) return;
+            // the lifecycle this button belongs to; a click that lands after
+            // a sign-out or session change is discarded
+            const epoch = this.grantEpoch || 0;
             try {
                 await loadScriptOnce(GSI_SCRIPT_SRC, {}, { cors: false });
                 const google = window.google?.accounts?.id;
@@ -624,14 +640,16 @@
                     client_id: this.config.googleMigrationClientId,
                     auto_select: false,
                     callback: async (response) => {
+                        if (epoch !== (this.grantEpoch || 0)) return;
                         if (status) status.textContent = "Confirming…";
                         try {
-                            await this.beginIdentityMigration(response?.credential || "");
+                            await this.beginIdentityMigration(response?.credential || "", epoch);
                             if (status) status.textContent = this.sessionId
                                 ? "Confirmed. Moving your account…"
                                 : "Confirmed. Now sign in above with Google or an email code, using the same address.";
                             await afterGrant();
                         } catch (error) {
+                            if (error.staleGrant) return;
                             if (status) status.textContent = serverMessage(error);
                         }
                     },
@@ -745,10 +763,23 @@
             writeMigrationGrant(null);
         }
 
+        // every sign-out and every change of an established session bumps
+        // the grant lifecycle: a grant already held goes, and an issuance
+        // or google callback started before the bump writes nothing
+        invalidateMigrationGrant() {
+            this.grantEpoch = (this.grantEpoch || 0) + 1;
+            this.clearMigrationGrant();
+        }
+
         // r-c18: the member's google sign-in asks the backend for a grant to
-        // move its own row; the id token is used for this one call only
-        async beginIdentityMigration(googleCredential) {
+        // move its own row; the id token is used for this one call only.
+        // epoch: the lifecycle the caller started in (default: now)
+        async beginIdentityMigration(googleCredential, epoch = this.grantEpoch || 0) {
+            if (epoch !== (this.grantEpoch || 0)) throw staleGrantError();
             const record = await this.request("mutation", "users:beginIdentityMigration", {}, { overrideToken: googleCredential });
+            // a sign-out or session change while the request was in flight:
+            // the grant is dropped, never written
+            if (epoch !== (this.grantEpoch || 0)) throw staleGrantError();
             this.heldMigrationGrant = { grant: record.grant, expires_at: record.expires_at };
             writeMigrationGrant(record);
             return record;
