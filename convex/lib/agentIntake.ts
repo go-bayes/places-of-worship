@@ -39,7 +39,7 @@ export type AgentRun = {
 };
 
 // apply the self-contained transport schema without resolving external references.
-function schemaCheck(value: any, schema: any, path = "$", root: any = bundleSchema): void {
+export function schemaCheck(value: any, schema: any, path = "$", root: any = bundleSchema): void {
   if (schema.$ref) {
     if (!schema.$ref.startsWith("#/")) throw new Error("external schema reference");
     let target = root;
@@ -69,7 +69,7 @@ function schemaCheck(value: any, schema: any, path = "$", root: any = bundleSche
 }
 
 // reject deep, non-finite, prototype-like, and control-bearing values everywhere.
-function guard(value: any, depth = 0): void {
+export function guard(value: any, depth = 0): void {
   if (depth > 32) throw new Error("JSON exceeds depth limit");
   if (typeof value === "number" && !Number.isFinite(value)) throw new Error("non-finite JSON number");
   if (typeof value === "string" && /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value)) throw new Error("control character in JSON");
@@ -81,7 +81,7 @@ function guard(value: any, depth = 0): void {
 }
 
 // validate calendar dates without JavaScript's rollover of impossible dates.
-function dateBounds(value: string): [string, string] {
+export function dateBounds(value: string): [string, string] {
   if (!/^\d{4}(-\d{2}(-\d{2})?)?$/.test(value)) throw new Error("invalid partial ISO date");
   const [year, month = 1, day = 1] = value.split("-").map(Number);
   const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
@@ -91,7 +91,7 @@ function dateBounds(value: string): [string, string] {
 }
 
 // intake never fetches URLs; reject credentials and non-public literal destinations.
-function publicUrl(value: string): void {
+export function publicUrl(value: string): void {
   if (/[\s\\\u007f]/.test(value)) throw new Error("invalid public HTTP(S) URL");
   if (/^[^:]+:\/\/[^/?#]*@/.test(value)) throw new Error("invalid public HTTP(S) URL");
   let url: URL;
@@ -121,6 +121,24 @@ export function validateAgentReviewBundle(value: unknown, bundleJson: string): {
     if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) throw new Error("invalid run timestamp");
   }
   if (d.run_manifest.backend !== bundle.research_run.backend || d.run_manifest.model_id_requested !== bundle.research_run.model_requested || d.run_manifest.exit_status !== "completed") throw new Error("inconsistent dossier run provenance");
+  const locators = validateDossierRecord(d);
+  const checked = new Set<string>();
+  for (const check of bundle.review.claim_checks) {
+    if (checked.has(check.claim_id) || locators.get(check.claim_id) !== check.source_url) throw new Error("review must cover every claim uniquely at its source_url");
+    checked.add(check.claim_id);
+    if (check.access_method === "not_checked" && check.outcome === "supported") throw new Error("unchecked source cannot be supported");
+    if (bundle.review.recommendation === "accept" && (check.outcome !== "supported" || check.access_method !== "opened")) throw new Error("accept requires opened supported sources");
+  }
+  if (checked.size !== locators.size) throw new Error("review must cover every claim");
+  if (bundle.review.cultural_sensitivity.flagged && bundle.review.recommendation !== "defer_cultural") throw new Error("sensitive review must defer");
+  return { bundle, bundleHash: sha256(bundleJson), claimLocators: locators };
+}
+
+// the dossier checks shared by the review bundle and the first-pass record:
+// run timestamps, claim sources, reader provenance, dates, status and osm
+// references. returns each claim id with its source locator. the caller has
+// already schema-checked the dossier and applied its own provenance checks.
+export function validateDossierRecord(d: Record<string, any>): Map<string, string> {
   dateBounds(d.run_manifest.started_at.split("T")[0]); dateBounds(d.run_manifest.ended_at.split("T")[0]);
   const manifestStart = Date.parse(d.run_manifest.started_at), manifestEnd = Date.parse(d.run_manifest.ended_at);
   if (!Number.isFinite(manifestStart) || !Number.isFinite(manifestEnd) || manifestEnd < manifestStart) throw new Error("invalid dossier run timestamp");
@@ -144,16 +162,20 @@ export function validateAgentReviewBundle(value: unknown, bundleJson: string): {
   dateBounds(d.status_assessment.asof_date);
   for (const id of d.status_assessment.supporting_claim_ids) if (!locators.has(id)) throw new Error("unknown status claim");
   for (const row of d.osm_version_chain) publicUrl(row.locator);
-  const checked = new Set<string>();
-  for (const check of bundle.review.claim_checks) {
-    if (checked.has(check.claim_id) || locators.get(check.claim_id) !== check.source_url) throw new Error("review must cover every claim uniquely at its source_url");
-    checked.add(check.claim_id);
-    if (check.access_method === "not_checked" && check.outcome === "supported") throw new Error("unchecked source cannot be supported");
-    if (bundle.review.recommendation === "accept" && (check.outcome !== "supported" || check.access_method !== "opened")) throw new Error("accept requires opened supported sources");
-  }
-  if (checked.size !== locators.size) throw new Error("review must cover every claim");
-  if (bundle.review.cultural_sensitivity.flagged && bundle.review.recommendation !== "defer_cultural") throw new Error("sensitive review must defer");
-  return { bundle, bundleHash: sha256(bundleJson), claimLocators: locators };
+  return locators;
+}
+
+// a dossier carried without a review bundle (inside a first-pass record):
+// the bundle schema's dossier definition, the nz pilot restriction, the
+// researcher model policy and a completed run, then the shared checks.
+export function validateStandaloneDossier(d: unknown): Map<string, string> {
+  guard(d);
+  schemaCheck(d, (bundleSchema as any).$defs.dossier, "$.dossier", bundleSchema);
+  const dossier = d as Record<string, any>;
+  if (dossier.place.country_code !== "NZ") throw new Error("internal pilot requires NZ");
+  const models: Record<string, string> = { claude: "sonnet", codex: "gpt-5.6-luna" };
+  if (models[dossier.run_manifest.backend] !== dossier.run_manifest.model_id_requested || dossier.run_manifest.exit_status !== "completed") throw new Error("inconsistent dossier run provenance");
+  return validateDossierRecord(dossier);
 }
 
 // scan string tokens only; a following colon identifies an object key even inside arrays.

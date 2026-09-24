@@ -8,15 +8,7 @@ import { assertNoDuplicateJsonKeys, validateAgentReviewBundle } from "./lib/agen
 import { recordEvidenceVersion } from "./evidenceVersions";
 import { costBasisOf, recordJudgments, type JudgmentInput } from "./lib/agentJudgments";
 
-declare const process: { env: Record<string, string | undefined> };
-
-const SERVICE_EMAIL = "internal-agent-intake@service.local";
-
-function enabled(): void {
-  if (process.env.POW_INTERNAL_AGENT_INGEST_ENABLED !== "true") {
-    throw new Error("Internal agent intake is disabled on this deployment.");
-  }
-}
+import { assertInternalAgentIngestEnabled as enabled, internalAgentServiceUser } from "./lib/agentServiceUser";
 
 export const ingestBundle = internalMutation({
   args: { bundleJson: v.string(), bundleHash: v.string() },
@@ -34,12 +26,7 @@ export const ingestBundle = internalMutation({
       return { receipt_id: existing.receipt_id, task_id: existing.task_id, evidence_draft_id: existing.evidence_draft_id, agent_review_id: existing.agent_review_id, created: false };
     }
     const now = Date.now();
-    let service = await ctx.db.query("users").withIndex("by_email", (q) => q.eq("email", SERVICE_EMAIL)).unique();
-    if (service === null) {
-      const id = await ctx.db.insert("users", { email: SERVICE_EMAIL, display_name: "Internal agent intake", initials: "AI", roles: ["service"], status: "active", created_at: now, updated_at: now });
-      service = await ctx.db.get(id);
-    }
-    if (service === null || service.status !== "active" || !service.roles.includes("service")) throw new Error("Intake identity must be an active service user");
+    const service = await internalAgentServiceUser(ctx, now);
     const taskId = `agent-research:${checked.bundle.submission_key}`;
     const draftId = `${taskId}:draft:1`;
     const reviewId = `${taskId}:review:1`;

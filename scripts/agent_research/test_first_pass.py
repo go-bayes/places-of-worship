@@ -1,6 +1,8 @@
 """Exercise revision preservation, tamper detection, and concurrent archive writes."""
 import copy
+import hashlib
 import json
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -202,6 +204,134 @@ class FirstPassTests(unittest.TestCase):
         self.record['searches'][0]['locator'] = 'http://127.0.0.1/secrets'
         with self.assertRaisesRegex(ValueError, 'public HTTP'):
             fp.validate(self.record)
+
+
+    def test_researched_fixture_validates(self):
+        record = json.loads((HERE / 'fixtures/first-pass-researched.json').read_text())
+        restored = fp.validate(record)
+        self.assertEqual(restored['outcome'], 'researched')
+        self.assertEqual(len(restored['annotations']), 2)
+
+
+class FakeBackend:
+    """Stand-in for the Convex receipt functions: hash-checked, parents first, idempotent."""
+
+    def __init__(self):
+        self.receipts = {}
+        self.calls = []
+
+    def __call__(self, deployment, function, payload):
+        self.calls.append((deployment, function))
+        if function == fp.INGEST_FUNCTION:
+            raw = payload['recordJson']
+            digest = payload['recordHash']
+            if hashlib.sha256(raw.encode('ascii')).hexdigest() != digest:
+                raise ValueError('hash mismatch')
+            for parent in json.loads(raw)['parents']:
+                if parent not in self.receipts:
+                    raise ValueError('parent has no receipt')
+            created = digest not in self.receipts
+            self.receipts.setdefault(digest, raw)
+            return {'receipt_id': f'first-pass:{digest}', 'record_hash': digest, 'created': created,
+                    'storage_tier': 'convex_only', 'judgment_ids': []}
+        if function == fp.RECORD_FUNCTION:
+            raw = self.receipts.get(payload['recordHash'])
+            if raw is None:
+                return None
+            return {'record_hash': payload['recordHash'], 'record_json': raw,
+                    'parents': json.loads(raw)['parents']}
+        raise AssertionError(function)
+
+
+class FirstPassSubmitTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.store = Path(self.tmp.name) / 'archive'
+        record = json.loads((HERE / 'fixtures/first-pass.json').read_text())
+        self.first = fp.archive(self.store, record)
+        revised = copy.deepcopy(record)
+        revised['parents'] = [self.first]
+        revised['stop_reason'] = 'A later attempt found the archive inaccessible.'
+        self.second = fp.archive(self.store, revised)
+        self.backend = FakeBackend()
+
+    def test_submit_sends_history_parents_first_and_retries_idempotently(self):
+        receipts = fp.submit(self.store, self.second, 'local', run=self.backend)
+        self.assertEqual([r['record_hash'] for r in receipts], [self.first, self.second])
+        self.assertTrue(all(r['created'] for r in receipts))
+        self.assertEqual(self.backend.calls[0], ('local', 'firstPassReceipts:ingestFirstPass'))
+        again = fp.submit(self.store, self.second, 'local', run=self.backend)
+        self.assertEqual([r['created'] for r in again], [False, False])
+        self.assertEqual(len(self.backend.receipts), 2)
+        # the backend holds the archive's exact bytes
+        for digest in (self.first, self.second):
+            raw, _ = fp.read_object(self.store, digest)
+            self.assertEqual(self.backend.receipts[digest].encode('ascii'), raw)
+
+    def test_history_order_handles_shared_ancestors(self):
+        record = json.loads((HERE / 'fixtures/first-pass.json').read_text())
+        record['parents'] = [self.first]
+        record['stop_reason'] = 'A parallel revisit of the first attempt.'
+        sibling = fp.archive(self.store, record)
+        record['parents'] = [self.second, sibling]
+        record['stop_reason'] = 'A merge of two revisits.'
+        merged = fp.archive(self.store, record)
+        order = fp.history_order(fp.verify(self.store, merged), merged)
+        self.assertEqual(len(order), 4)
+        self.assertEqual(order[0], self.first)
+        self.assertEqual(order[-1], merged)
+        fp.submit(self.store, merged, 'dev', run=self.backend)
+        self.assertEqual(len(self.backend.receipts), 4)
+
+    def test_submit_requires_an_explicit_deployment_and_a_verified_store(self):
+        for selector in (None, 'prod', 'pastel-goshawk-398', ''):
+            with self.assertRaisesRegex(ValueError, 'explicit dev or local'):
+                fp.submit(self.store, self.second, selector, run=self.backend)
+        with self.assertRaisesRegex(ValueError, 'explicit dev or local'):
+            fp.convex_run('prod', fp.INGEST_FUNCTION, {})
+        fp.object_path(self.store, self.first).write_text('{}')
+        with self.assertRaisesRegex(ValueError, 'hash'):
+            fp.submit(self.store, self.second, 'local', run=self.backend)
+        self.assertEqual(self.backend.calls, [])
+
+    def test_submit_refuses_a_receipt_for_another_record(self):
+        def wrong(deployment, function, payload):
+            return {'record_hash': '0' * 64, 'created': True}
+        with self.assertRaisesRegex(ValueError, 'different record'):
+            fp.submit(self.store, self.second, 'local', run=wrong)
+
+    def test_restore_rebuilds_a_clean_archive_from_receipts(self):
+        fp.submit(self.store, self.second, 'local', run=self.backend)
+        clean = Path(self.tmp.name) / 'clean'
+        self.assertEqual(fp.restore(clean, self.second, 'local', run=self.backend), 2)
+        for digest in (self.first, self.second):
+            self.assertEqual(fp.read_object(clean, digest), fp.read_object(self.store, digest))
+        # an identical restore reuses the verified objects
+        self.assertEqual(fp.restore(clean, self.second, 'local', run=self.backend), 2)
+
+    def test_restore_refuses_tampered_or_missing_receipts(self):
+        fp.submit(self.store, self.second, 'local', run=self.backend)
+        clean = Path(self.tmp.name) / 'clean'
+        self.backend.receipts[self.first] = self.backend.receipts[self.first].replace('invented', 'altered')
+        with self.assertRaisesRegex(ValueError, 'do not match'):
+            fp.restore(clean, self.second, 'local', run=self.backend)
+        with self.assertRaises(FileNotFoundError):
+            fp.verify(clean, self.first)
+        with self.assertRaisesRegex(ValueError, 'no receipt'):
+            fp.restore(clean, 'f' * 64, 'local', run=FakeBackend())
+
+    def test_convex_run_names_the_target_and_passes_exact_bytes(self):
+        raw, _ = fp.read_object(self.store, self.first)
+        payload = {'recordJson': raw.decode('ascii'), 'recordHash': self.first}
+        completed = subprocess.CompletedProcess([], 0, stdout='{"record_hash": "x"}\n', stderr='')
+        with patch.object(fp.subprocess, 'run', return_value=completed) as run:
+            self.assertEqual(fp.convex_run('local', fp.INGEST_FUNCTION, payload), {'record_hash': 'x'})
+        command = run.call_args.args[0]
+        self.assertEqual(command[:7], ['npx', '--no-install', 'convex', 'run', '--deployment', 'local', '--codegen'])
+        self.assertEqual(command[-2], 'firstPassReceipts:ingestFirstPass')
+        self.assertEqual(json.loads(command[-1]), payload)
+        self.assertTrue(run.call_args.kwargs['check'])
 
 
 if __name__ == '__main__':
