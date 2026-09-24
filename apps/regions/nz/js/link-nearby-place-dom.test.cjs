@@ -184,6 +184,8 @@ if (!reviseContext || reviseContext.taskId !== "vu-survey-12" || reviseContext.l
 if (elements.get("pinIssueType").value !== "geometry_check") throw new Error("Move the pin did not preselect the wrong-location issue type.");
 
 let issueArgs = null;
+// a signed-in contributor: the revision runs only inside a live session (c1)
+app.backendUser = { _id: "ra_1" };
 app.backend.createIssueTask = async (args) => { issueArgs = args; return { task_id: "vu-issue-1", deduped: false }; };
 app.pinConfirmed = { latitude: -17.7401, longitude: 168.3201, locationMode: "building_identified", zoom: 18 };
 const revision = await app.createRevisionTask({ ...reviseContext, siteId: undefined, osmId: undefined });

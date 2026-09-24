@@ -80,8 +80,9 @@ function signedInApp(userId = "user_a") {
   return { app, calls };
 }
 
-const snapshotKey = "powFormSnapshot:NZ:task_1";
-const rapidKey = "powRapidDraft:NZ:rapid-pin";
+// device drafts live under owner-scoped keys since c1
+const snapshotKey = "powFormSnapshot2:NZ:user_a:task_1";
+const rapidKey = "powRapidDraft2:NZ:user_a:rapid-pin";
 
 // 1. an ended session empties the page but keeps the owner's device drafts
 {
@@ -131,32 +132,42 @@ const rapidKey = "powRapidDraft:NZ:rapid-pin";
   assert.equal(app.readRapidDraft("rapid-pin").values.directObservation, "a church hall");
 }
 
-let noticeCheck = Promise.resolve();
-
-// 1b. drafts written before owners were recorded belong to nobody: never
-// read back for anyone, removed at load, the next sign-in told without
-// seeing them; a signed-out page writes nothing ownerless
+// 1b. drafts written before c1 carry no owner: device access is not
+// authorship, so they are quarantined. they stay on the device exactly as
+// written, are never read into a form or shown, and every signed-in user
+// on the device sees a notice until they dismiss it for the session (round
+// 3: never deleted, never claimed by the first account to sign in)
 {
   values.clear();
   const { app } = signedInApp("user_b");
-  values.set("powRapidDraft:NZ:rapid-pin", JSON.stringify({ saved_at: 1, values: { directObservation: "legacy text" }, pin: { latitude: 1, longitude: 2 } }));
-  values.set("powFormSnapshot:NZ:task_9", JSON.stringify({ saved_at: 1, snapshot: { evidence_note: "legacy note" } }));
-  values.set("powFormSnapshot:VU:task_3", JSON.stringify({ saved_at: 1, snapshot: { evidence_note: "legacy vu" } }));
-  values.set("powFormSnapshot:NZ:task_8", JSON.stringify({ saved_at: 1, owner: "user_a", snapshot: { evidence_note: "a's" } }));
-  assert.equal(app.readRapidDraft("rapid-pin"), null, "an ownerless draft is granted to nobody");
+  const legacy = {
+    "powRapidDraft:NZ:rapid-pin": JSON.stringify({ saved_at: 1, values: { directObservation: "legacy text" }, pin: { latitude: 1, longitude: 2 } }),
+    "powFormSnapshot:NZ:task_9": JSON.stringify({ saved_at: 1, snapshot: { evidence_note: "legacy note" } }),
+    "powFormSnapshot:VU:task_3": JSON.stringify({ saved_at: 1, snapshot: { evidence_note: "legacy vu" } }),
+  };
+  for (const [key, value] of Object.entries(legacy)) values.set(key, value);
+  assert.equal(app.readRapidDraft("rapid-pin"), null, "a legacy draft is read for nobody");
   assert.equal(app.getFormSnapshot("task_9"), undefined);
-  assert.equal(app.dropOwnerlessDeviceDrafts(), 3, "every country's ownerless drafts go");
-  assert.equal(values.has("powRapidDraft:NZ:rapid-pin"), false);
-  assert.equal(values.has("powFormSnapshot:VU:task_3"), false);
-  assert.ok(values.has("powFormSnapshot:NZ:task_8"), "owned drafts stay");
-  let notice = "";
-  app.setBackendTransientStatus = (text) => { notice = text; };
-  Object.assign(app, { refreshBackendTasks: async () => {}, setTransportBusy() {}, restorePortalMode() {}, renderDetailPreservingForm() {}, applyPendingDeepLink() {}, resumeRapidPinFromDevice() {} });
-  noticeCheck = Promise.resolve(app.onBackendSignedIn({ _id: "user_b" }, { refreshTasks: false })).then(() => {
-    assert.match(notice, /3 unsaved entries kept on this device from before the sign-in change could not be matched to an account and were removed/);
-    assert.doesNotMatch(notice, /legacy/, "the notice names no content");
-    assert.equal(app.ownerlessDraftsDropped, 0, "told once");
-  });
+  // a new draft of the same kind goes to its own owner-scoped key and never
+  // overwrites the legacy record
+  app.pinConfirmed = null;
+  app.persistRapidDraft("pin", "rapid-pin");
+  app.setFormSnapshot("task_9", { evidence_note: "b's new note" });
+  for (const [key, value] of Object.entries(legacy)) assert.equal(values.get(key), value, `${key} kept exactly as written`);
+  assert.equal(app.legacyDeviceDraftCount(), 3, "every country's legacy drafts are counted");
+  const notice = app.legacyDraftNoticeHtml();
+  assert.match(notice, /This device holds 3 unsaved entries from before the sign-in update\. They are kept safely and are not shown to anyone\. Contact the project team to recover them\./);
+  assert.doesNotMatch(notice, /legacy (text|note|vu)/, "the notice shows no content");
+  assert.match(notice, /id="legacyDraftNoticeDismiss"/);
+  assert.equal(app.legacyDraftNoticeHtml(), notice, "it persists across repaints");
+  app.dismissLegacyDraftNotice();
+  assert.equal(app.legacyDraftNoticeHtml(), "", "dismissed for this session");
+  values.delete("powLegacyDraftNoticeDismissed:v1");
+  assert.match(app.legacyDraftNoticeHtml(), /3 unsaved entries/, "a new session shows it again");
+  // a deliberate sign-out never touches them
+  app.onBackendSessionEnded({ deliberate: true });
+  for (const [key, value] of Object.entries(legacy)) assert.equal(values.get(key), value);
+  // a signed-out page writes nothing to the device
   const signedOut = signedInApp("user_x").app;
   signedOut.backendUser = null;
   values.clear();
@@ -165,15 +176,22 @@ let noticeCheck = Promise.resolve();
   assert.equal(values.size, 0, "nothing ownerless is written");
 }
 
-// 1c. a deliberate sign-out deletes only its own user's snapshots
+// 1c. a deliberate sign-out deletes the departing user's snapshots and
+// rapid drafts, text and pin, on every country, and nobody else's
 {
   values.clear();
   const { app } = signedInApp("user_b");
-  values.set("powFormSnapshot:NZ:task_a", JSON.stringify({ saved_at: 1, owner: "user_a", snapshot: {} }));
-  values.set("powFormSnapshot:NZ:task_b", JSON.stringify({ saved_at: 1, owner: "user_b", snapshot: {} }));
+  values.set("powFormSnapshot2:NZ:user_a:task_a", JSON.stringify({ saved_at: 1, owner: "user_a", snapshot: {} }));
+  values.set("powFormSnapshot2:NZ:user_b:task_b", JSON.stringify({ saved_at: 1, owner: "user_b", snapshot: {} }));
+  values.set("powRapidDraft2:NZ:user_a:rapid-pin", JSON.stringify({ saved_at: 1, owner: "user_a", values: { directObservation: "a's text" } }));
+  values.set("powRapidDraft2:NZ:user_b:rapid-pin", JSON.stringify({ saved_at: 1, owner: "user_b", values: { directObservation: "b's text" } }));
+  values.set("powRapidDraft2:VU:user_b:quick", JSON.stringify({ saved_at: 1, owner: "user_b", values: {} }));
   app.onBackendSessionEnded({ deliberate: true });
-  assert.ok(values.has("powFormSnapshot:NZ:task_a"), "another contributor's kept work stays (greptile 4091758537)");
-  assert.equal(values.has("powFormSnapshot:NZ:task_b"), false);
+  assert.ok(values.has("powFormSnapshot2:NZ:user_a:task_a"), "another contributor's kept work stays (greptile 4091758537)");
+  assert.ok(values.has("powRapidDraft2:NZ:user_a:rapid-pin"));
+  assert.equal(values.has("powFormSnapshot2:NZ:user_b:task_b"), false);
+  assert.equal(values.has("powRapidDraft2:NZ:user_b:rapid-pin"), false, "the departing user's rapid text goes too");
+  assert.equal(values.has("powRapidDraft2:VU:user_b:quick"), false, "on every country");
 }
 
 // 2. a deliberate sign-out also deletes the device copies and the activity
@@ -229,10 +247,175 @@ async function lateResponses() {
   assert.equal(third.latestDraftsByTaskId.size, 0, "user a's draft never reaches user b's page");
 }
 
+// 3b. round 3: every signed-in async path checks its session after each
+// await; the task-history cache is per user and cleared at session end; a
+// late submission deletes only the exact record it sent
+async function roundThree() {
+  const deferred = () => { let resolve; const promise = new Promise((r) => { resolve = r; }); return { promise, resolve }; };
+  const bodies = new Map();
+  const node = (id) => { const el = { id, innerHTML: "", textContent: "", isConnected: true, querySelector: () => null }; bodies.set(id, el); return el; };
+  const realGet = document.getElementById;
+  document.getElementById = (id) => bodies.get(id) || null;
+
+  // task history: a late response lands nowhere, and the cache is per user
+  {
+    const { app } = signedInApp("user_a");
+    app.taskHistoryByTaskId = new Map();
+    app.taskHistoryHtml = (history) => `history:${history.owner}`;
+    const body = node("taskHistoryBody");
+    let pending = deferred();
+    Object.assign(app.backend, { configured: true, signedIn: true, user: { _id: "user_a" }, getTaskHistory: () => pending.promise });
+    const late = app.loadTaskHistory("task_1");
+    app.onBackendSessionEnded({ deliberate: false });
+    pending.resolve({ owner: "a" });
+    await late;
+    assert.equal(app.taskHistoryByTaskId.size, 0, "a late history response is not cached");
+    assert.doesNotMatch(body.innerHTML, /history:a/, "nor shown");
+
+    // a cached entry serves only the user it was fetched for
+    app.backendUser = { _id: "user_a" };
+    app.backend.user = { _id: "user_a" };
+    pending = deferred();
+    const fetched = app.loadTaskHistory("task_1");
+    pending.resolve({ owner: "a" });
+    await fetched;
+    assert.equal(body.innerHTML, "history:a");
+    app.backendUser = { _id: "user_b" };
+    app.backend.user = { _id: "user_b" };
+    let asked = 0;
+    app.backend.getTaskHistory = async () => { asked += 1; return { owner: "b" }; };
+    await app.loadTaskHistory("task_1");
+    assert.equal(asked, 1, "user b's history comes from the server, not a's cache");
+    assert.equal(body.innerHTML, "history:b");
+    app.onBackendSessionEnded({ deliberate: false });
+    assert.equal(app.taskHistoryByTaskId.size, 0, "the cache empties at session end");
+  }
+
+  // attachment view: a signed URL returned after sign-out is never opened
+  {
+    const { app } = signedInApp("user_a");
+    Object.assign(app.backend, { configured: true, signedIn: true, user: { _id: "user_a" } });
+    let viewHandler = null;
+    const row = { dataset: { attachmentId: "att_1" }, querySelector: (sel) => sel === ".attachment-view" ? { addEventListener: (_t, fn) => { viewHandler = fn; } } : null };
+    const block = { querySelector: (sel) => sel === ".attachment-list" ? { set innerHTML(v) {}, querySelectorAll: () => [row] } : null };
+    app.backend.listTaskAttachments = async () => [{ attachment_id: "att_1", byte_size: 1000, content_type: "image/jpeg" }];
+    await app.refreshAttachmentList("task_1", block);
+    const pending = deferred();
+    app.backend.requestAttachmentView = () => pending.promise;
+    const opened = [];
+    window.open = (url) => opened.push(url);
+    const click = viewHandler();
+    app.onBackendSessionEnded({ deliberate: false });
+    pending.resolve({ view_url: "https://r2.example/signed" });
+    await click;
+    assert.deepEqual(opened, [], "the previous user's file does not open after sign-out");
+  }
+
+  // occupancy entry: nothing opens signed out, and nothing renders after a
+  // sign-out that lands mid-load (astra m1)
+  {
+    const { app } = signedInApp("user_a");
+    let rendered = 0;
+    app.renderOccupancyEntry = () => { rendered += 1; };
+    app.map = { closePopup() {} };
+    app.taskCanAddOccupancy = () => true;
+    app.latestDraftForTask = () => ({ evidence_draft_id: "d1" });
+    app.historicalClaimContext = () => ({});
+    app.latestDraftsByTaskId.set("task_1", { evidence_draft_id: "d1" });
+    Object.assign(app.backend, { configured: true, signedIn: true, user: { _id: "user_a" } });
+    const pending = deferred();
+    app.backend.listTaskOccupancies = () => pending.promise;
+    const opening = app.openOccupancyFromRecord({ task_id: "task_1" });
+    app.onBackendSessionEnded({ deliberate: false });
+    app.backend.user = null; // as the client leaves it once clerk's session ends
+    pending.resolve([]);
+    await opening;
+    assert.equal(rendered, 0, "no occupancy entry renders for an ended session");
+    await app.openOccupancyFromRecord({ task_id: "task_1" });
+    assert.equal(rendered, 0, "and none opens while signed out");
+  }
+
+  // a late rapid submission deletes only the exact draft it sent: another
+  // contributor who signed in meanwhile keeps theirs, and the submitter's own
+  // later edit is kept too (astra m4)
+  {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    app.backend.user = { _id: "user_a" };
+    values.set("powRapidDraft2:NZ:user_a:rapid-pin", JSON.stringify({ saved_at: 100, owner: "user_a", values: { directObservation: "a's sent text" } }));
+    const sent = app.rapidDraftVersion("rapid-pin");
+    assert.deepEqual({ ...sent }, { owner: "user_a", savedAt: 100 });
+    // a signs out while the submission is in flight; b signs in and types
+    app.onBackendSessionEnded({ deliberate: false });
+    app.backendUser = { _id: "user_b" };
+    app.backend.user = { _id: "user_b" };
+    values.set("powRapidDraft2:NZ:user_b:rapid-pin", JSON.stringify({ saved_at: 200, owner: "user_b", values: { directObservation: "b's unsent text" } }));
+    app.clearSubmittedRapidDraft("rapid-pin", sent);
+    assert.equal(values.has("powRapidDraft2:NZ:user_a:rapid-pin"), false, "a's sent draft goes, so it is never sent twice");
+    assert.ok(values.has("powRapidDraft2:NZ:user_b:rapid-pin"), "b's draft is untouched");
+    // a newer edit of the same key is not the sent version
+    values.set("powRapidDraft2:NZ:user_a:rapid-pin", JSON.stringify({ saved_at: 300, owner: "user_a", values: { directObservation: "a typed more" } }));
+    app.clearSubmittedRapidDraft("rapid-pin", sent);
+    assert.ok(values.has("powRapidDraft2:NZ:user_a:rapid-pin"), "a later edit stays");
+    // the same for a guided form snapshot
+    values.set("powFormSnapshot2:NZ:user_a:task_1", JSON.stringify({ saved_at: 400, owner: "user_a", snapshot: {} }));
+    app.backendUser = { _id: "user_a" };
+    app.backend.user = { _id: "user_a" };
+    const snap = app.formSnapshotVersion("task_1");
+    app.backendUser = { _id: "user_b" };
+    app.backend.user = { _id: "user_b" };
+    values.set("powFormSnapshot2:NZ:user_b:task_1", JSON.stringify({ saved_at: 500, owner: "user_b", snapshot: {} }));
+    app.deleteSubmittedFormSnapshot("task_1", snap);
+    assert.equal(values.has("powFormSnapshot2:NZ:user_a:task_1"), false);
+    assert.ok(values.has("powFormSnapshot2:NZ:user_b:task_1"), "b's snapshot is untouched");
+  }
+
+  // quick photo: a sign-out during the refresh that follows the send leaves
+  // the page as the sign-out left it (astra m1, line 4486)
+  {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    Object.assign(app.backend, { configured: true, signedIn: true, user: { _id: "user_a" } });
+    app.quickPhoto = { fix: { latitude: -41.29, longitude: 174.78, accuracyM: 10 }, submissionId: "sub_1", file: null, nearbyShown: true };
+    const refreshing = deferred();
+    let recorded = 0;
+    app.refreshBackendTasks = () => refreshing.promise;
+    app.renderSubmissionRecordedDetail = () => { recorded += 1; };
+    let submitted = 0;
+    let refreshed = 0;
+    app.refreshBackendTasks = () => { refreshed += 1; return refreshing.promise; };
+    app.backend.submitCurrentObservation = async () => { submitted += 1; return { task_id: "t_q", task_status: "needs_review", candidate_site_id: "c1" }; };
+    // the contracts and helpers the send path reads, stubbed
+    window.PowRapidEntry = { localIsoDate: () => "2026-09-24", validateObservationDetailed: () => null, observationPayload: (x) => x };
+    window.PowLocationAssertion = { payload: (x) => x };
+    Object.assign(app, {
+      entryCountryFor: () => ({ code: "NZ", config: { targetYears: [2026] } }),
+      quickPhotoRadius: () => 50,
+      quickPhotoNearby: () => [],
+      quickPhotoDiscussionNote: () => "photo",
+      map: { getZoom: () => 17 },
+      withdrawnNominationTaskIds: new Set(),
+      manualTasksById: new Map(),
+    });
+    const sending = app.sendQuickPhoto().catch((error) => error);
+    await new Promise((r) => setTimeout(r, 0));
+    assert.equal(submitted, 1, "the photo was sent");
+    assert.equal(refreshed, 1, "and the refresh after it started");
+    app.onBackendSessionEnded({ deliberate: false });
+    refreshing.resolve();
+    await sending;
+    assert.equal(recorded, 0, "the recorded-submission card does not render after sign-out");
+    assert.equal(app.backendTasksById.size, 0);
+    assert.equal(app.manualTasksById?.size ?? 0, 0);
+  }
+
+  document.getElementById = realGet;
+}
+
 // 3. the sign-out button waits for clerk: success says signed out, a
 // refusal says the sign-out did not finish
 (async () => {
-  await noticeCheck;
+  await roundThree();
   await lateResponses();
   values.clear();
   const ok = signedInApp("user_a");

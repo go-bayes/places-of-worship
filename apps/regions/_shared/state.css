@@ -262,3 +262,19 @@ button.state-pill:focus-visible { outline: 2px solid var(--action); outline-offs
     width: 100%;
     min-height: 44px;
 }
+
+/* pre-c1 device drafts held in quarantine: a note to every signed-in user
+   on the device, dismissible for the session; it never shows their content */
+.legacy-draft-notice {
+    display: block;
+    padding: 8px 10px;
+    border: 1px solid var(--caution-strong);
+    border-radius: var(--r-sm, 6px);
+    background: var(--caution-soft);
+    color: var(--ink);
+    font-size: var(--fs-sm, 15px);
+    line-height: 1.45;
+}
+.legacy-draft-notice .link-button {
+    min-height: 40px;
+}

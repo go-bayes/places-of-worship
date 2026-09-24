@@ -771,6 +771,11 @@ const REVISION_AUTO_ATTACH_STATUSES = new Set(["needs_review", "unresolved_note"
 // (nominations and revisions) so dates are entered before submission; the
 // cards persist under this key until they are recorded or discarded
 const RAPID_PIN_PERIODS_KEY = "rapid-pin-periods";
+// owner-scoped device drafts (c1) and the pre-c1 prefixes kept in quarantine
+const FORM_SNAPSHOT_PREFIX = "powFormSnapshot2:";
+const RAPID_DRAFT_PREFIX = "powRapidDraft2:";
+const LEGACY_DEVICE_DRAFT_PREFIXES = ["powFormSnapshot:", "powRapidDraft:"];
+const LEGACY_DRAFT_NOTICE_KEY = "powLegacyDraftNoticeDismissed:v1";
 const RAPID_STATUS_LABELS = {
     currently_used_for_worship: "Used for worship",
     place_exists_worship_uncertain: "Exists; worship use uncertain",
@@ -2235,6 +2240,7 @@ class NzVerificationMap {
                 <span class="entry-hide">${assignmentLabel}</span>`}
                 <span>Signed in as ${escapeHtml(label)}. ${this.transportDotHtml()}<span class="entry-hide"> ${escapeHtml(assignmentStatusText)}</span><span class="entry-only"> <button type="button" class="link-button" id="showTaskListButton">Show task list</button></span>${addMode ? ` <button type="button" class="link-button entry-hide" id="signOutButton">Sign out</button>` : ""}</span>
                 ${batchRollup ? `<span class="entry-hide">${batchRollup}</span>` : ""}
+                ${this.legacyDraftNoticeHtml()}
                 <span id="backendRefreshStatus" class="copy-status entry-hide" aria-live="polite">${escapeHtml(this.backendTransientStatus || "")}</span>
                 ${addMode ? "" : `<div class="backend-actions entry-hide">
                     <button type="button" class="secondary" id="refreshBackendTasksButton">Refresh task list</button>
@@ -2244,12 +2250,15 @@ class NzVerificationMap {
         `;
         this.syncPortalChrome();
         document.getElementById("showTaskListButton")?.addEventListener("click", () => this.setEntryOpen(false));
+        document.getElementById("legacyDraftNoticeDismiss")?.addEventListener("click", () => this.dismissLegacyDraftNotice());
         document.getElementById("refreshBackendTasksButton")?.addEventListener("click", async event => {
+            const alive = this.sessionGuard();
             // lock the button for the flight; the refresh re-renders this
             // card, so the outcome reports through the fresh copy
             const button = event.currentTarget;
             button.disabled = true;
             await this.refreshBackendTasks();
+            if (!alive()) return;
             // if the refresh bailed early without re-rendering, unlock
             if (button.isConnected) button.disabled = false;
             this.applyFilters();
@@ -2374,12 +2383,14 @@ class NzVerificationMap {
     // after the sign-in card, after an expired session's re-sign-in, and
     // after a reload with the sign-in kept on the device
     async onBackendSignedIn(user, { refreshTasks = true } = {}) {
+        const alive = this.sessionGuard();
         this.backendUser = user;
         this.signedOutDeliberately = false;
         if (refreshTasks) {
             this.setTransportBusy("signing_in");
             try {
                 await this.refreshBackendTasks();
+                if (!alive()) return;
             } finally {
                 this.setTransportBusy("");
             }
@@ -2399,11 +2410,6 @@ class NzVerificationMap {
         }
         this.applyPendingDeepLink();
         this.resumeRapidPinFromDevice();
-        if (this.ownerlessDraftsDropped) {
-            const count = this.ownerlessDraftsDropped;
-            this.ownerlessDraftsDropped = 0;
-            this.setBackendTransientStatus(`${count === 1 ? "An unsaved entry" : `${count} unsaved entries`} kept on this device from before the sign-in change could not be matched to an account and ${count === 1 ? "was" : "were"} removed. Drafts saved with Save draft and submissions are unaffected.`, { durationMs: 30000 });
-        }
     }
 
     // a sign-in kept on the device from before a reload (a phone discards
@@ -2465,6 +2471,13 @@ class NzVerificationMap {
         return { epoch: this.sessionEpoch || 0, userId: this.backendUser?._id || this.backend?.user?._id || "" };
     }
 
+    // a check for one async path: true while the session that started it is
+    // still the page's session
+    sessionGuard() {
+        const ticket = this.sessionTicket();
+        return () => this.sessionCurrent(ticket);
+    }
+
     sessionCurrent(ticket) {
         const userId = this.backendUser?._id || this.backend?.user?._id || "";
         return Boolean(ticket) && ticket.epoch === (this.sessionEpoch || 0) && Boolean(userId) && ticket.userId === userId;
@@ -2495,6 +2508,7 @@ class NzVerificationMap {
         this.backendTasksById.clear();
         this.latestDraftsByTaskId.clear();
         this.manualTasksById?.clear();
+        this.taskHistoryByTaskId?.clear();
         this.withdrawnNominationTaskIds?.clear();
         this.myWorkItems = [];
         this.myNominationItems = [];
@@ -2506,6 +2520,9 @@ class NzVerificationMap {
         this.guidedPeriodsByTaskId.clear();
         if (deliberate) {
             this.clearFormSnapshots(signedOutUserId);
+            // the departing user's rapid drafts, text and pin, on every
+            // country; nobody else's
+            this.clearOwnedDeviceRecords(RAPID_DRAFT_PREFIX, signedOutUserId);
             // pr-e: period cards leave with the session; on a shared
             // computer the next user must not find them
             this.clearAllGuidedPeriods(signedOutUserId);
@@ -2542,7 +2559,6 @@ class NzVerificationMap {
         document.addEventListener("keydown", event => this.handleGlobalKeydown(event));
         // the file button hides the native input, so the chosen count is shown beside it
         document.addEventListener("change", event => this.syncFilePickCount(event.target));
-        this.dropOwnerlessDeviceDrafts();
         const restoredUser = await this.restoreBackendSession();
         this.renderBackendPanel();
         await this.loadTasks();
@@ -2725,6 +2741,9 @@ class NzVerificationMap {
     // answers a reviewer's return-for-comment question from the panel; the
     // reply lands in the audit trail and the task rejoins the review queue
     async sendCommentReply(taskId, entryEl) {
+        const alive = this.sessionGuard();
+        // signed-in work only: nothing starts for an ended session
+        if (!alive()) return;
         const input = entryEl?.querySelector(".comment-reply-input");
         const errorEl = entryEl?.querySelector(".changes-error");
         const button = entryEl?.querySelector(".comment-reply-send");
@@ -2736,10 +2755,13 @@ class NzVerificationMap {
         if (button) button.disabled = true;
         try {
             await this.backend.respondToReviewerComment({ taskId, response });
+            if (!alive()) return;
             this.taskHistoryByTaskId.delete(taskId);
             await this.refreshBackendTasks();
+            if (!alive()) return;
             this.applyFilters();
         } catch (error) {
+            if (!alive()) return;
             if (button) button.disabled = false;
             if (errorEl) errorEl.textContent = error.message || "Could not send the answer.";
         }
@@ -2750,6 +2772,7 @@ class NzVerificationMap {
     // returned draft id is tracked so the next save writes the clone, not the
     // immutable submitted draft.
     async reviseNow(taskId, entryEl) {
+        const alive = this.sessionGuard();
         if (!taskId || !this.backend?.signedIn) return;
         const button = entryEl?.querySelector(".revise-now");
         const errorEl = entryEl?.querySelector(".changes-error");
@@ -2759,19 +2782,19 @@ class NzVerificationMap {
             button.textContent = "Starting revision...";
         }
         try {
-            const sessionTicket = this.sessionTicket();
             const result = await this.backend.reviseEvidenceDraft({ taskId });
-            // the session ended while this was in flight: nothing lands on the page
-            if (!this.sessionCurrent(sessionTicket)) return;
+            if (!alive()) return;
             this.revisionDraftIdsByTaskId.set(taskId, result.evidence_draft_id);
             this.latestDraftsByTaskId.delete(taskId);
             await this.refreshBackendTasks();
+            if (!alive()) return;
             this.selectTaskById(taskId, { focusDetail: true });
             const status = document.getElementById("copyStatus");
             if (status) {
                 status.textContent = "Editable revision draft ready. Update the evidence, then submit the revision for review when ready.";
             }
         } catch (error) {
+            if (!alive()) return;
             if (button) {
                 button.disabled = false;
                 button.textContent = "Revise now";
@@ -4367,6 +4390,9 @@ class NzVerificationMap {
     }
 
     async sendQuickPhoto() {
+        const alive = this.sessionGuard();
+        // signed-in work only: nothing starts for an ended session
+        if (!alive()) return;
         const capture = this.quickPhoto;
         const status = document.getElementById("quickPhotoStatus");
         const send = document.getElementById("quickPhotoSendButton");
@@ -4414,6 +4440,7 @@ class NzVerificationMap {
                 contributorConfirmed: true,
             });
         } catch (error) {
+            if (!alive()) return;
             refuse(error.message || "The position could not be recorded.");
             return;
         }
@@ -4441,7 +4468,6 @@ class NzVerificationMap {
         if (send) send.disabled = true;
         if (status) status.textContent = "Sending securely for review...";
         try {
-            const sessionTicket = this.sessionTicket();
             const result = await this.backend.submitCurrentObservation({
                 clientSubmissionId: capture.submissionId,
                 countryCode: entryCountry.code,
@@ -4455,8 +4481,7 @@ class NzVerificationMap {
                     portal_version: "rapid-current-v1-multicountry",
                 },
             });
-            // the session ended while this was in flight: nothing lands on the page
-            if (!this.sessionCurrent(sessionTicket)) return;
+            if (!alive()) return;
             // synthesise the backend-task shape locally so the entry is on
             // the map and in the list before the batch queries catch up
             const manualTask = {
@@ -4484,6 +4509,7 @@ class NzVerificationMap {
             this.backendTasksById.set(result.task_id, manualTask);
             this.latestDraftsByTaskId.set(result.task_id, null);
             await this.refreshBackendTasks();
+            if (!alive()) return;
             this.applyFilters();
             const file = capture.file;
             this.closeQuickPhoto({ keepEntry: true });
@@ -4508,6 +4534,7 @@ class NzVerificationMap {
             });
             this.focusDetailPanel();
         } catch (error) {
+            if (!alive()) return;
             if (error.authExpired) {
                 this.backendUser = null;
                 this.backendLastError = error.message;
@@ -4919,6 +4946,7 @@ class NzVerificationMap {
     // reopenTask mutation, then refreshes the task list and lands on it.
     // Signed-out or misconfigured backends fall back to the issue form.
     async reopenIssueFromContext(taskId, feature) {
+        const alive = this.sessionGuard();
         if (!this.backend?.configured || !this.backend.signedIn) {
             this.openContextIssueForm(feature);
             return;
@@ -4929,12 +4957,15 @@ class NzVerificationMap {
                 taskId,
                 reason: "Reopened from map context-dot inspection.",
             });
+            if (!alive()) return;
             // drop the cached history so the new reopened event shows
             this.taskHistoryByTaskId.delete(taskId);
             await this.refreshBackendTasks();
+            if (!alive()) return;
             this.applyFilters();
             this.selectTaskById(taskId, { focusDetail: true });
         } catch (error) {
+            if (!alive()) return;
             if (error.authExpired) {
                 this.backendUser = null;
                 this.backendLastError = error.message;
@@ -6154,13 +6185,16 @@ class NzVerificationMap {
         // submission-side second-opinion call (jb 2026-09-01): the entry
         // then needs an extra independent reviewer before acceptance
         document.getElementById("requestOpinionButton")?.addEventListener("click", async () => {
+            const alive = this.sessionGuard();
             const note = window.prompt("Why should a second reviewer look at this entry? (at least 8 characters)") || "";
             if (!note.trim()) return;
             const statusEl = document.getElementById("confirmPaneStatus");
             try {
                 const result = await this.backend.requestAdditionalOpinion({ taskId: props.task_id, note: note.trim() });
+                if (!alive()) return;
                 if (statusEl) statusEl.textContent = `Second opinion requested: acceptance now needs ${result.extra_opinions_required} extra independent reviewer decision${result.extra_opinions_required === 1 ? "" : "s"}.`;
             } catch (error) {
+                if (!alive()) return;
                 if (statusEl) statusEl.textContent = error.message || "Could not request a second opinion.";
             }
         });
@@ -6199,6 +6233,7 @@ class NzVerificationMap {
     // nomination then leaves the map, the list and the past-submissions
     // count on this device, and the contributor is back on the add card
     async withdrawFreshSubmission(props, { evidenceDraftId, revision = false } = {}) {
+        const alive = this.sessionGuard();
         const statusEl = document.getElementById("confirmPaneStatus");
         const buttons = ["withdrawConfirmButton", "withdrawKeepButton", "withdrawSubmissionButton"]
             .map(id => document.getElementById(id)).filter(Boolean);
@@ -6214,6 +6249,7 @@ class NzVerificationMap {
                 evidenceDraftId,
                 reason: `${revision ? "Revision" : "Candidate"} cancelled by its contributor on the confirmation screen.`,
             });
+            if (!alive()) return;
             const taskId = props.task_id;
             this.withdrawnNominationTaskIds.add(taskId);
             this.pendingEvidenceAttachTaskId = null;
@@ -6223,6 +6259,7 @@ class NzVerificationMap {
             this.taskHistoryByTaskId.delete(taskId);
             this.selectedTask = null;
             await this.refreshBackendTasks();
+            if (!alive()) return;
             this.applyFilters();
             this.renderInitialDetail();
             const panel = document.getElementById("detailPanel");
@@ -6233,6 +6270,7 @@ class NzVerificationMap {
             panel?.prepend(note);
             this.focusDetailPanel();
         } catch (error) {
+            if (!alive()) return;
             buttons.forEach(button => { button.disabled = false; });
             if (statusEl) statusEl.textContent = error.message || "Could not withdraw the submission.";
         }
@@ -6263,6 +6301,7 @@ class NzVerificationMap {
     }
 
     async undoSkip(taskId) {
+        const alive = this.sessionGuard();
         const status = document.getElementById("confirmPaneStatus");
         if (!taskId) return;
         if (!this.backend?.configured || !this.backend.signedIn) {
@@ -6274,14 +6313,17 @@ class NzVerificationMap {
         if (status) status.textContent = "Undoing the skip...";
         try {
             const result = await this.backend.unskipTask({ taskId });
+            if (!alive()) return;
             this.taskHistoryByTaskId.delete(taskId);
             await this.refreshBackendTasks();
+            if (!alive()) return;
             this.applyFilters();
             // land the ra back in the reopened task's detail panel
             this.selectTaskById(result.task_id, { focusDetail: true });
             const copyStatus = document.getElementById("copyStatus");
             if (copyStatus) copyStatus.textContent = "Skip undone. The task is back in progress.";
         } catch (error) {
+            if (!alive()) return;
             if (error.authExpired) {
                 this.backendUser = null;
                 this.backendLastError = error.message;
@@ -6350,6 +6392,7 @@ class NzVerificationMap {
     }
 
     async submitIssueReport(context) {
+        const alive = this.sessionGuard();
         const status = document.getElementById("issueStatus");
         const note = (document.getElementById("issueNoteInput")?.value || "").trim();
         if (!note) {
@@ -6386,6 +6429,7 @@ class NzVerificationMap {
                     page_path: window.location.pathname,
                 },
             });
+            if (!alive()) return;
             if (status) {
                 status.textContent = result.deduped
                     ? `An open issue for this place already exists — your note was added to it (task ${result.task_id}).`
@@ -6395,6 +6439,7 @@ class NzVerificationMap {
             const noteInput = document.getElementById("issueNoteInput");
             if (noteInput) noteInput.value = "";
         } catch (error) {
+            if (!alive()) return;
             if (error.authExpired) {
                 this.backendUser = null;
                 this.backendLastError = error.message;
@@ -6571,10 +6616,14 @@ class NzVerificationMap {
     // periods already recorded for this parent load into the cards, because
     // a new submission replaces the earlier set rather than adding to it
     async openOccupancyFromRecord(props) {
+        const alive = this.sessionGuard();
+        // signed-in work only: nothing starts for an ended session
+        if (!alive()) return;
         const taskId = props?.task_id || "";
         if (!taskId || !window.PowOccupancy) return;
         this.map?.closePopup();
         if (!this.latestDraftsByTaskId.has(taskId)) await this.loadLatestDraftForTask(taskId);
+        if (!alive()) return;
         if (!this.taskCanAddOccupancy(taskId)) {
             const status = document.getElementById("copyStatus");
             if (status) status.textContent = "Periods can be recorded only by the author of this place's submitted evidence while it awaits review.";
@@ -6586,7 +6635,9 @@ class NzVerificationMap {
         let loadNote = "";
         try {
             rows = (await this.backend.listTaskOccupancies({ taskId })) || [];
+            if (!alive()) return;
         } catch (error) {
+            if (!alive()) return;
             if (error.authExpired) {
                 this.backendUser = null;
                 this.backendLastError = error.message;
@@ -6651,6 +6702,7 @@ class NzVerificationMap {
     // the audited "delete": withdraws the recorded draft from review while
     // the row stays in the task history, and the task returns to the ra
     async withdrawRapidDraft(props) {
+        const alive = this.sessionGuard();
         const taskId = props?.task_id || "";
         const draft = taskId ? this.latestDraftForTask(taskId) : null;
         const status = document.getElementById("copyStatus");
@@ -6660,15 +6712,18 @@ class NzVerificationMap {
         if (button) button.disabled = true;
         try {
             await this.backend.withdrawEvidenceDraft({ evidenceDraftId: draft.evidence_draft_id });
+            if (!alive()) return;
             this.rapidCorrectionTaskIds.delete(taskId);
             this.latestDraftsByTaskId.delete(taskId);
             this.taskHistoryByTaskId.delete(taskId);
             this.clearFormDirty();
             await this.refreshBackendTasks();
+            if (!alive()) return;
             this.applyFilters();
             this.renderDetail(this.featureForTaskId(taskId) || this.selectedTask);
             this.focusDetailPanel();
         } catch (error) {
+            if (!alive()) return;
             if (button) button.disabled = false;
             if (status) status.textContent = error.message || "Could not delete the draft.";
         }
@@ -6680,6 +6735,7 @@ class NzVerificationMap {
     // and records a task event, so every revision start reaches
     // reviews:feedbackLoopMetrics rather than only the changes_requested ones.
     async startSubmissionRevision(props) {
+        const alive = this.sessionGuard();
         const taskId = props?.task_id || "";
         if (!taskId || !this.taskCanRevise(taskId) || !this.backend?.signedIn) return;
         const button = document.getElementById("reviseSubmissionButton");
@@ -6688,20 +6744,21 @@ class NzVerificationMap {
             button.textContent = "Starting revision...";
         }
         try {
-            const sessionTicket = this.sessionTicket();
             const result = await this.backend.reviseEvidenceDraft({ taskId });
-            // the session ended while this was in flight: nothing lands on the page
-            if (!this.sessionCurrent(sessionTicket)) return;
+            if (!alive()) return;
             this.revisionDraftIdsByTaskId.set(taskId, result.evidence_draft_id);
             this.latestDraftsByTaskId.delete(taskId);
             await this.refreshBackendTasks();
+            if (!alive()) return;
             await this.loadLatestDraftForTask(taskId);
+            if (!alive()) return;
             this.renderDetail(this.featureForTaskId(taskId) || this.selectedTask);
             const status = document.getElementById("copyStatus");
             if (status) {
                 status.textContent = "Revision started. Save a revision draft while working, then submit the revision for review when ready.";
             }
         } catch (error) {
+            if (!alive()) return;
             if (error.authExpired) {
                 this.backendUser = null;
                 this.backendLastError = error.message;
@@ -6761,8 +6818,13 @@ class NzVerificationMap {
     // the in-memory map is the working copy; the device copy is what a
     // reload mid-entry comes back to (jb 2026-09-05)
 
-    formSnapshotStorageKey(taskId) {
-        return `powFormSnapshot:${COUNTRY_CONFIG.countryCode}:${taskId}`;
+    // device drafts live under owner-scoped keys (c1): the owner's user id
+    // is part of the key and of the record, so two contributors on one
+    // device never share a key. the keys written before c1
+    // (powFormSnapshot:, powRapidDraft:) are never read or written again;
+    // see legacyDeviceDraftCount
+    formSnapshotStorageKey(taskId, owner = this.draftOwnerId()) {
+        return owner ? `${FORM_SNAPSHOT_PREFIX}${COUNTRY_CONFIG.countryCode}:${owner}:${taskId}` : "";
     }
 
     // unsent work on the device carries its owner's user id and is read
@@ -6778,37 +6840,43 @@ class NzVerificationMap {
         return Boolean(owner) && Boolean(record?.owner) && record.owner === owner;
     }
 
-    // drafts written before owners were recorded (before c1) cannot be
-    // attributed to an account, so none may be shown to whoever signs in
-    // next. they are removed once, at load, before anyone signs in; the
-    // first person to sign in is told, without being shown the content.
-    // work saved with Save draft or submitted lives on the server and is
-    // untouched
-    dropOwnerlessDeviceDrafts() {
-        let dropped = 0;
+    // drafts written before c1 carry no owner and cannot be attributed to
+    // an account: device access is not authorship. they stay on the device
+    // exactly as written, quarantined: never read into a form, never shown,
+    // never sent. every signed-in user on the device is told they exist; a
+    // supervised recovery is a later ruling for jb
+    legacyDeviceDraftCount() {
+        let count = 0;
         try {
-            const keys = [];
             for (let index = 0; index < window.localStorage.length; index += 1) {
                 const key = window.localStorage.key(index);
-                if (key && (key.startsWith("powFormSnapshot:") || key.startsWith("powRapidDraft:"))) keys.push(key);
-            }
-            for (const key of keys) {
-                let record = null;
-                try {
-                    record = JSON.parse(window.localStorage.getItem(key) || "null");
-                } catch (error) {
-                    record = null;
-                }
-                if (!record?.owner) {
-                    window.localStorage.removeItem(key);
-                    dropped += 1;
-                }
+                if (key && LEGACY_DEVICE_DRAFT_PREFIXES.some(prefix => key.startsWith(prefix))) count += 1;
             }
         } catch (error) {
-            // storage unavailable: nothing kept to drop
+            // storage unavailable: nothing held
         }
-        this.ownerlessDraftsDropped = (this.ownerlessDraftsDropped || 0) + dropped;
-        return dropped;
+        return count;
+    }
+
+    legacyDraftNoticeHtml() {
+        let dismissed = false;
+        try {
+            dismissed = window.sessionStorage.getItem(LEGACY_DRAFT_NOTICE_KEY) === "1";
+        } catch (error) {
+            dismissed = false;
+        }
+        const count = dismissed ? 0 : this.legacyDeviceDraftCount();
+        if (!count) return "";
+        return `<span class="legacy-draft-notice entry-hide" role="note">This device holds ${count} unsaved ${count === 1 ? "entry" : "entries"} from before the sign-in update. They are kept safely and are not shown to anyone. Contact the project team to recover them. <button type="button" class="link-button" id="legacyDraftNoticeDismiss">Dismiss</button></span>`;
+    }
+
+    dismissLegacyDraftNotice() {
+        try {
+            window.sessionStorage.setItem(LEGACY_DRAFT_NOTICE_KEY, "1");
+        } catch (error) {
+            // storage unavailable: the notice returns on the next render
+        }
+        this.renderBackendPanel();
     }
 
     setFormSnapshot(taskId, snapshot) {
@@ -6826,8 +6894,10 @@ class NzVerificationMap {
     getFormSnapshot(taskId) {
         if (!taskId) return undefined;
         if (this.formSnapshotsByTaskId.has(taskId)) return this.formSnapshotsByTaskId.get(taskId);
+        const key = this.formSnapshotStorageKey(taskId);
+        if (!key) return undefined;
         try {
-            const raw = window.localStorage.getItem(this.formSnapshotStorageKey(taskId));
+            const raw = window.localStorage.getItem(key);
             const record = raw ? JSON.parse(raw) : null;
             if (record?.snapshot && typeof record.snapshot === "object" && this.ownsDeviceDraft(record)) {
                 this.formSnapshotsByTaskId.set(taskId, record.snapshot);
@@ -6841,20 +6911,57 @@ class NzVerificationMap {
 
     deleteFormSnapshot(taskId) {
         this.formSnapshotsByTaskId.delete(taskId);
+        const key = this.formSnapshotStorageKey(taskId);
+        if (!key) return;
         try {
-            window.localStorage.removeItem(this.formSnapshotStorageKey(taskId));
+            window.localStorage.removeItem(key);
         } catch (error) {
             // nothing to clear when storage is unavailable
         }
+    }
+
+    // the stored snapshot as it stands, to delete exactly that version once
+    // its submission is recorded
+    formSnapshotVersion(taskId) {
+        const owner = this.draftOwnerId();
+        const key = this.formSnapshotStorageKey(taskId, owner);
+        if (!key) return null;
+        try {
+            const record = JSON.parse(window.localStorage.getItem(key) || "null");
+            return record?.owner === owner ? { owner, savedAt: record.saved_at } : { owner, savedAt: null };
+        } catch (error) {
+            return { owner, savedAt: null };
+        }
+    }
+
+    // deletes the owner's record only if it is still the submitted version;
+    // a later edit, or another contributor's record, is never touched
+    deleteSubmittedFormSnapshot(taskId, version) {
+        if (!version?.owner) return;
+        const key = this.formSnapshotStorageKey(taskId, version.owner);
+        try {
+            const record = JSON.parse(window.localStorage.getItem(key) || "null");
+            if (record && record.owner === version.owner && record.saved_at === version.savedAt) {
+                window.localStorage.removeItem(key);
+            }
+        } catch (error) {
+            // nothing to clear when storage is unavailable
+        }
+        if (this.draftOwnerId() === version.owner) this.formSnapshotsByTaskId.delete(taskId);
     }
 
     // a deliberate sign-out deletes the signing-out user's snapshots only;
     // another contributor's kept work on the same device stays theirs
     clearFormSnapshots(ownerId) {
         this.formSnapshotsByTaskId.clear();
+        this.clearOwnedDeviceRecords(FORM_SNAPSHOT_PREFIX, ownerId);
+    }
+
+    // every country's records of one owner under one prefix; other owners'
+    // records and the quarantined legacy drafts are never touched
+    clearOwnedDeviceRecords(prefix, ownerId) {
         if (!ownerId) return;
         try {
-            const prefix = this.formSnapshotStorageKey("");
             const keys = [];
             for (let index = 0; index < window.localStorage.length; index += 1) {
                 const key = window.localStorage.key(index);
@@ -7109,17 +7216,24 @@ class NzVerificationMap {
             `;
             return;
         }
+        // history is filtered for the caller on the server, so a cached copy
+        // serves only the user it was fetched for (c1 review round 3)
+        const userId = this.draftOwnerId();
         const cached = this.taskHistoryByTaskId.get(taskId);
-        if (cached) {
-            body.innerHTML = this.taskHistoryHtml(cached);
+        if (cached && cached.userId === userId) {
+            body.innerHTML = this.taskHistoryHtml(cached.history);
             return;
         }
         body.textContent = "Loading history...";
+        const alive = this.sessionGuard();
         try {
             const history = await this.backend.getTaskHistory({ taskId });
-            this.taskHistoryByTaskId.set(taskId, history);
+            if (!alive()) return;
+            this.taskHistoryByTaskId.set(taskId, { userId, history });
+            if (body.isConnected === false) return;
             body.innerHTML = this.taskHistoryHtml(history);
         } catch (error) {
+            if (!alive()) return;
             if (error.authExpired) {
                 this.backendUser = null;
                 this.backendLastError = error.message;
@@ -7740,8 +7854,29 @@ class NzVerificationMap {
 
     // ---- unsubmitted rapid drafts, kept on this device only ----
 
-    rapidDraftStorageKey(key) {
-        return `powRapidDraft:${COUNTRY_CONFIG.countryCode}:${key}`;
+    rapidDraftStorageKey(key, owner = this.draftOwnerId()) {
+        return owner ? `${RAPID_DRAFT_PREFIX}${COUNTRY_CONFIG.countryCode}:${owner}:${key}` : "";
+    }
+
+    rapidDraftVersion(key) {
+        const owner = this.draftOwnerId();
+        return owner ? { owner, savedAt: this.readRapidDraft(key)?.saved_at ?? null } : null;
+    }
+
+    // deletes the owner's rapid draft only if it is still the submitted
+    // version (astra m4): a response arriving after another contributor
+    // signed in cannot reach their draft, whose key carries their id
+    clearSubmittedRapidDraft(key, version) {
+        if (!version?.owner) return;
+        const storageKey = this.rapidDraftStorageKey(key, version.owner);
+        try {
+            const record = JSON.parse(window.localStorage.getItem(storageKey) || "null");
+            if (record && record.owner === version.owner && record.saved_at === version.savedAt) {
+                window.localStorage.removeItem(storageKey);
+            }
+        } catch (error) {
+            // nothing to clear when storage is unavailable
+        }
     }
 
     persistRapidDraft(prefix, key, extraValues = {}) {
@@ -7763,8 +7898,10 @@ class NzVerificationMap {
     }
 
     readRapidDraft(key) {
+        const storageKey = this.rapidDraftStorageKey(key);
+        if (!storageKey) return null;
         try {
-            const raw = window.localStorage.getItem(this.rapidDraftStorageKey(key));
+            const raw = window.localStorage.getItem(storageKey);
             const record = raw ? JSON.parse(raw) : null;
             return this.ownsDeviceDraft(record) ? record : null;
         } catch (error) {
@@ -7848,8 +7985,10 @@ class NzVerificationMap {
     }
 
     clearRapidDraft(key) {
+        const storageKey = this.rapidDraftStorageKey(key);
+        if (!storageKey) return;
         try {
-            window.localStorage.removeItem(this.rapidDraftStorageKey(key));
+            window.localStorage.removeItem(storageKey);
         } catch (error) {
             // nothing to clear when storage is unavailable
         }
@@ -8066,10 +8205,13 @@ class NzVerificationMap {
                 return;
             }
             searchTimer = window.setTimeout(async () => {
+                const alive = this.sessionGuard();
                 let rows = [];
                 try {
                     rows = await this.backend.searchSources({ search, countryCode: COUNTRY_CONFIG.countryCode });
+                    if (!alive()) return;
                 } catch (error) {
+                    if (!alive()) return;
                     hideList();
                     return;
                 }
@@ -8211,6 +8353,7 @@ class NzVerificationMap {
     // a deployment without attachment storage hides the in-form picker,
     // as the confirmation screen already does with its block
     async syncInlineEvidenceFiles(prefix) {
+        const alive = this.sessionGuard();
         const block = document.getElementById(`${prefix}EvidenceFilesBlock`);
         if (!block) return;
         if (!this.backend?.configured || !this.backendUser) {
@@ -8220,7 +8363,9 @@ class NzVerificationMap {
         if (this.attachmentsEnabledCache === undefined) {
             try {
                 this.attachmentsEnabledCache = await this.backend.attachmentsEnabled();
+                if (!alive()) return;
             } catch (error) {
+                if (!alive()) return;
                 this.attachmentsEnabledCache = false;
             }
         }
@@ -8228,6 +8373,7 @@ class NzVerificationMap {
     }
 
     async submitRapidObservation(prefix, options = {}) {
+        const alive = this.sessionGuard();
         const form = document.getElementById(`${prefix}RapidCurrentForm`);
         const status = document.getElementById(`${prefix}RapidStatus`);
         const submitButton = document.getElementById(`${prefix}RapidSubmit`);
@@ -8279,17 +8425,23 @@ class NzVerificationMap {
                         title: values.sourceTitle.trim(),
                         url: values.sourceReference.trim(),
                     });
+                    if (!alive()) return;
                     values.sourceId = created.source_id;
                 } catch (error) {
+                    if (!alive()) return;
                     // the register is optional; the citation strings still land
                 }
             }
             // a revision first opens (or claims) its task in the issue
             // batch, then submits the observation against that task
             const revision = options.createTask ? await options.createTask() : null;
+            if (!alive()) return;
             // the entry's country is the pin's (entry follows the pin)
             const entryCountry = this.entryCountry();
-            const sessionTicket = this.sessionTicket();
+            // the exact device records this submission sends, so only they
+            // are deleted once it is recorded (astra m4)
+            const draftVersion = options.draftKey ? this.rapidDraftVersion(options.draftKey) : null;
+            const snapshotVersion = options.props?.task_id ? this.formSnapshotVersion(options.props.task_id) : null;
             const result = await this.backend.submitCurrentObservation({
                 clientSubmissionId: form.dataset.submissionId,
                 countryCode: entryCountry.code,
@@ -8309,20 +8461,25 @@ class NzVerificationMap {
                     portal_version: "rapid-current-v1-multicountry",
                 },
             });
+            // the observation is recorded, so the exact draft it sent goes,
+            // whatever happens next: the key carries the submitter's id and
+            // the version must match, so a later edit or another
+            // contributor's draft is never touched, and the sent entry never
+            // comes back to be sent twice. then, if the session ended while
+            // this was in flight, nothing else lands on the page
+            if (options.draftKey) this.clearSubmittedRapidDraft(options.draftKey, draftVersion);
+            if (options.props?.task_id) this.deleteSubmittedFormSnapshot(options.props.task_id, snapshotVersion);
+            if (!alive()) return;
             this.clearFormDirty();
-            // the observation is recorded, so its device draft goes whatever
-            // happens next; if the session ended while this was in flight,
-            // nothing else lands on the page
-            if (options.draftKey) this.clearRapidDraft(options.draftKey);
-            if (!this.sessionCurrent(sessionTicket)) return;
             const periodsOutcome = await this.recordRapidPeriods(periodsPlan, result, options.periodsKey);
+            if (!alive()) return;
             if (options.props?.task_id) {
                 const taskId = options.props.task_id;
                 this.rapidCorrectionTaskIds.delete(taskId);
-                this.deleteFormSnapshot(taskId);
                 this.latestDraftsByTaskId.delete(taskId);
                 this.taskHistoryByTaskId.delete(taskId);
                 await this.refreshBackendTasks();
+                if (!alive()) return;
                 this.selectedTask = null;
                 this.applyFilters();
                 this.renderSubmissionRecordedDetail(options.props, {
@@ -8343,6 +8500,7 @@ class NzVerificationMap {
             }
             if (revision) {
                 await this.refreshBackendTasks();
+                if (!alive()) return;
                 this.applyFilters();
                 this.exitPinMode();
                 const revisedProps = { task_id: revision.task_id, name: revision.name };
@@ -8397,6 +8555,7 @@ class NzVerificationMap {
             this.manualTasksById.set(result.task_id, manualTask);
             this.backendTasksById.set(result.task_id, manualTask);
             await this.refreshBackendTasks();
+            if (!alive()) return;
             this.applyFilters();
             this.exitPinMode();
             const submittedProps = {
@@ -8422,6 +8581,7 @@ class NzVerificationMap {
             });
             this.focusDetailPanel();
         } catch (error) {
+            if (!alive()) return;
             if (error.authExpired) {
                 this.backendUser = null;
                 this.backendLastError = error.message;
@@ -8613,6 +8773,7 @@ class NzVerificationMap {
 
     // submits one claim and returns a clean form for another distinct claim.
     async submitHistoricalClaim(context, recordedCount) {
+        const alive = this.sessionGuard();
         const form = document.getElementById("historicalClaimForm");
         const status = document.getElementById("historicalClaimStatus");
         const submitButton = document.getElementById("submitHistoricalClaimButton");
@@ -8639,6 +8800,7 @@ class NzVerificationMap {
                     portal_version: "historical-claim-v1",
                 },
             });
+            if (!alive()) return;
             this.clearFormDirty();
             this.taskHistoryByTaskId.delete(context.taskId);
             this.renderHistoricalClaimEntry(context, {
@@ -8648,6 +8810,7 @@ class NzVerificationMap {
                     : "Historical claim recorded for human review. Add another claim only when it concerns a distinct event or state.",
             });
         } catch (error) {
+            if (!alive()) return;
             if (error.authExpired) {
                 this.backendUser = null;
                 this.backendLastError = error.message;
@@ -8919,8 +9082,8 @@ class NzVerificationMap {
 
     // device persistence, keyed by country, user, and task, so a shared
     // browser never shows one user's cards to another
-    guidedPeriodsStorageKey(taskId) {
-        const user = this.backendUser?._id || this.backend?.user?._id || "anon";
+    guidedPeriodsStorageKey(taskId, owner) {
+        const user = owner || this.backendUser?._id || this.backend?.user?._id || "anon";
         const prefix = window.PowOccupancy?.guidedPeriodsStoragePrefix(COUNTRY_CONFIG.countryCode, user)
             || `powGuidedPeriods:${COUNTRY_CONFIG.countryCode}:${user}:`;
         return `${prefix}${taskId}`;
@@ -8956,11 +9119,13 @@ class NzVerificationMap {
         }
     }
 
-    clearGuidedPeriods(taskId) {
+    // owner: the submitter, when a recorded submission clears its periods
+    // after the session may have ended (their key, never the current one)
+    clearGuidedPeriods(taskId, owner) {
         if (!taskId) return;
-        this.guidedPeriodsByTaskId.delete(taskId);
+        if (!owner || owner === this.draftOwnerId()) this.guidedPeriodsByTaskId.delete(taskId);
         try {
-            window.localStorage.removeItem(this.guidedPeriodsStorageKey(taskId));
+            window.localStorage.removeItem(this.guidedPeriodsStorageKey(taskId, owner));
         } catch (error) {
             // nothing to clear when storage is unavailable
         }
@@ -9565,7 +9730,11 @@ class NzVerificationMap {
     }
 
     async loadGuidedPeriodsFromRows(taskId) {
+        const alive = this.sessionGuard();
+        // signed-in work only: nothing starts for an ended session
+        if (!alive()) return;
         const rows = await this.backend.listTaskOccupancies({ taskId });
+        if (!alive()) return;
         const state = this.guidedPeriodsState(taskId);
         if (!Array.isArray(rows) || rows.length === 0 || window.PowOccupancy.cardsTouched(state.segments)) return;
         const mine = rows.filter(row => row.claim_status === "submitted" && (!this.backendUser?._id || row.created_by === this.backendUser._id));
@@ -9578,6 +9747,7 @@ class NzVerificationMap {
         // pr-f: the chain recorded with that set comes back with it
         const storedChain = this.latestDraftsByTaskId.get(taskId)?.function_chain
             || (await this.backend.listTaskEvidence?.({ taskId }).catch(() => null))?.find?.(draft => draft.evidence_draft_id === latestParent)?.function_chain;
+            if (!alive()) return;
         if (storedChain && window.PowFunctionChain) state.chain = window.PowFunctionChain.chainFromPayload(storedChain);
         state.sameSource = false;
         state.gapAnswer = state.segments.length > 1 ? "yes" : "no";
@@ -9957,6 +10127,7 @@ class NzVerificationMap {
     }
 
     async submitOccupancies(context) {
+        const alive = this.sessionGuard();
         const form = document.getElementById("occupancyForm");
         const status = document.getElementById("occupancyStatus");
         const submitButton = document.getElementById("occupancySubmitButton");
@@ -9998,11 +10169,13 @@ class NzVerificationMap {
                 ...(chainTouched ? { chain: window.PowFunctionChain.payload(chainToSend) } : {}),
                 clientContext: { portal_version: "occupancy-v2" },
             });
+            if (!alive()) return;
             this.clearFormDirty();
             this.taskHistoryByTaskId.delete(context.taskId);
             this.occupancyDraft = null;
             this.renderOccupancyRecorded(context, result, segments.length);
         } catch (error) {
+            if (!alive()) return;
             if (error.authExpired) {
                 this.backendUser = null;
                 this.backendLastError = error.message;
@@ -11124,6 +11297,7 @@ class NzVerificationMap {
     // portal; every view uses a fresh short-lived url minted by the backend
 
     async initAttachmentsBlock(props, block, { prominent = false } = {}) {
+        const alive = this.sessionGuard();
         if (!block || !this.backend?.configured || !this.backendUser) return;
         if (prominent) {
             // show the step immediately rather than popping in after the
@@ -11134,7 +11308,9 @@ class NzVerificationMap {
         if (this.attachmentsEnabledCache === undefined) {
             try {
                 this.attachmentsEnabledCache = await this.backend.attachmentsEnabled();
+                if (!alive()) return;
             } catch (error) {
+                if (!alive()) return;
                 this.attachmentsEnabledCache = false;
             }
         }
@@ -11166,12 +11342,15 @@ class NzVerificationMap {
     }
 
     async refreshAttachmentList(taskId, block) {
+        const alive = this.sessionGuard();
         const list = block?.querySelector(".attachment-list");
         if (!list) return;
         let rows = [];
         try {
             rows = await this.backend.listTaskAttachments({ taskId });
+            if (!alive()) return;
         } catch (error) {
+            if (!alive()) return;
             list.textContent = "";
             return;
         }
@@ -11195,19 +11374,25 @@ class NzVerificationMap {
         list.querySelectorAll(".attachment-row").forEach(rowEl => {
             const attachmentId = rowEl.dataset.attachmentId;
             rowEl.querySelector(".attachment-view")?.addEventListener("click", async () => {
+                const alive = this.sessionGuard();
                 try {
                     const grant = await this.backend.requestAttachmentView({ attachmentId });
+                    if (!alive()) return;
                     window.open(grant.view_url, "_blank", "noopener");
                 } catch (error) {
+                    if (!alive()) return;
                     const status = block.querySelector(".attachment-status");
                     if (status) status.textContent = error.message || "Could not open the file.";
                 }
             });
             rowEl.querySelector(".attachment-remove")?.addEventListener("click", async () => {
+                const alive = this.sessionGuard();
                 try {
                     await this.backend.removeAttachment({ attachmentId });
+                    if (!alive()) return;
                     this.refreshAttachmentList(taskId, block);
                 } catch (error) {
+                    if (!alive()) return;
                     const status = block.querySelector(".attachment-status");
                     if (status) status.textContent = error.message || "Could not remove the file.";
                 }
@@ -11216,6 +11401,9 @@ class NzVerificationMap {
     }
 
     async uploadAttachment(taskId, block) {
+        const alive = this.sessionGuard();
+        // signed-in work only: nothing starts for an ended session
+        if (!alive()) return;
         const input = block?.querySelector(".attachment-file-input");
         const status = block?.querySelector(".attachment-status");
         const files = [...(input?.files || [])];
@@ -11225,12 +11413,16 @@ class NzVerificationMap {
         }
         const caption = (block?.querySelector(".attachment-caption-input")?.value || "").trim();
         await this.uploadFiles(taskId, block, files, caption);
+        if (!alive()) return;
     }
 
     // uploads the given files against a task, reporting into the block's
     // status line; used by the block's own button and by the files chosen
     // in the add / revise form before the save
     async uploadFiles(taskId, block, files, caption) {
+        const alive = this.sessionGuard();
+        // signed-in work only: nothing starts for an ended session
+        if (!alive()) return;
         const input = block?.querySelector(".attachment-file-input");
         const status = block?.querySelector(".attachment-status");
         const button = block?.querySelector(".attachment-upload-button");
@@ -11251,9 +11443,12 @@ class NzVerificationMap {
                     byteSize: file.size,
                     caption: caption || undefined,
                 });
+                if (!alive()) return;
                 const put = await fetch(grant.upload_url, { method: "PUT", body: file });
+                if (!alive()) return;
                 if (!put.ok) throw new Error(`Upload of ${file.name} failed (${put.status}). Try again.`);
                 await this.backend.confirmAttachmentUpload({ attachmentId: grant.attachment_id });
+                if (!alive()) return;
                 added += 1;
             }
             if (status) status.textContent = added === 1 ? "File added." : `${added} files added.`;
@@ -11264,6 +11459,7 @@ class NzVerificationMap {
             const captionInput = block?.querySelector(".attachment-caption-input");
             if (captionInput) captionInput.value = "";
         } catch (error) {
+            if (!alive()) return;
             const base = error.message || "Upload failed.";
             if (status) status.textContent = added > 0 ? `${base} ${added} file(s) were added before the failure.` : base;
         } finally {
@@ -11278,6 +11474,8 @@ class NzVerificationMap {
     }
 
     async saveEvidenceToBackend(props, options = {}) {
+        const alive = this.sessionGuard();
+        const submitter = this.draftOwnerId();
         const status = document.getElementById("copyStatus");
         const values = this.currentFormValues();
         const unresolved = Boolean(options.unresolved);
@@ -11337,19 +11535,20 @@ class NzVerificationMap {
                 selected_target_year: this.targetYear,
                 page_path: window.location.pathname,
             };
-            const sessionTicket = this.sessionTicket();
             const saved = await this.backend.saveEvidenceDraft({
                 taskId: props.task_id,
                 evidenceDraftId: revisionDraftId || undefined,
                 draft,
                 clientContext,
             });
+            if (!alive()) return;
             let periods = null;
             if (unresolved) {
                 await this.backend.submitUnresolvedNote({
                     evidenceDraftId: saved.evidence_draft_id,
                     note: values.note || undefined,
                 });
+                if (!alive()) return;
             } else if (submit) {
                 const result = await this.backend.submitEvidenceDraftWithOccupancies({
                     evidenceDraftId: saved.evidence_draft_id,
@@ -11359,10 +11558,13 @@ class NzVerificationMap {
                     ...(guidedSubmission.chain ? { chain: guidedSubmission.chain } : {}),
                     clientContext: { ...clientContext, portal_version: "assigned-periods-atomic-v2" },
                 });
+                // recorded: the submitter's device copy of the periods goes,
+                // even if the session ended meanwhile
+                this.clearGuidedPeriods(props.task_id, submitter);
+                if (!alive()) return;
                 periods = result.period_count > 0 ? { ok: true, result, count: result.period_count } : null;
-                this.clearGuidedPeriods(props.task_id);
             }
-            if (!this.sessionCurrent(sessionTicket)) return;
+            if (!alive()) return;
             this.latestDraftsByTaskId.set(props.task_id, {
                 ...draft,
                 task_id: props.task_id,
@@ -11378,6 +11580,7 @@ class NzVerificationMap {
             // the write added task events; drop the cached history
             this.taskHistoryByTaskId.delete(props.task_id);
             await this.refreshBackendTasks();
+            if (!alive()) return;
             if (unresolved || submit) {
                 // a recorded submission closes the task for this ra: mirror
                 // the review portal's return-to-list by clearing the
@@ -11416,6 +11619,7 @@ class NzVerificationMap {
                     : "Draft saved to the shared backend. Submit for review when the row is ready.";
             }
         } catch (error) {
+            if (!alive()) return;
             if (error.authExpired) {
                 this.backendUser = null;
                 this.backendLastError = error.message;
@@ -11572,6 +11776,10 @@ class NzVerificationMap {
     // records the planned cards against the observation just submitted;
     // a failure keeps them for the pane's retry
     async recordRapidPeriods(plan, result, periodsKey) {
+        const alive = this.sessionGuard();
+        const submitter = this.draftOwnerId();
+        // signed-in work only: nothing starts for an ended session
+        if (!alive()) return;
         if (!plan || plan.problem || !result?.task_id || !result?.evidence_draft_id) return {};
         try {
             const recorded = await this.backend.submitOccupancies({
@@ -11582,10 +11790,14 @@ class NzVerificationMap {
                 ...(plan.chain ? { chain: plan.chain } : {}),
                 clientContext: { portal_version: "occupancy-v2-with-observation" },
             });
-            this.clearGuidedPeriods(periodsKey);
+            // recorded: the submitter's device copy of these periods goes,
+            // even if the session ended meanwhile, so they are never sent twice
+            this.clearGuidedPeriods(periodsKey, submitter);
+            if (!alive()) return;
             this.taskHistoryByTaskId.delete(result.task_id);
             return { periodsRecorded: { result: recorded, count: plan.count } };
         } catch (error) {
+            if (!alive()) return;
             const state = plan.state;
             this.occupancyDraft = {
                 taskId: result.task_id,
@@ -11988,6 +12200,9 @@ class NzVerificationMap {
     // opens (or claims) the revision task for the record, carrying the
     // confirmed location; returns the task id the observation submits to
     async createRevisionTask(target) {
+        const alive = this.sessionGuard();
+        // signed-in work only: nothing starts for an ended session
+        if (!alive()) return;
         const confirmed = this.pinConfirmed;
         if (!confirmed) throw new Error("Confirm the map location before recording this observation.");
         const approximate = confirmed.locationMode === "approximate_area";
@@ -12033,6 +12248,7 @@ class NzVerificationMap {
                 location_mode: confirmed.locationMode,
             },
         });
+        if (!alive()) return;
         return { task_id: result.task_id, name, deduped: Boolean(result.deduped) };
     }
 
@@ -12712,6 +12928,7 @@ class NzVerificationMap {
     }
 
     async submitPinNomination() {
+        const alive = this.sessionGuard();
         const status = document.getElementById("pinStatus");
         if (!this.pinConfirmed) {
             if (status) status.textContent = "Confirm the pin location first.";
@@ -12746,7 +12963,6 @@ class NzVerificationMap {
         if (submitButton) submitButton.disabled = true;
         if (status) status.textContent = "Creating the candidate task...";
         try {
-            const sessionTicket = this.sessionTicket();
             const result = await this.backend.createManualCandidateTask({
                 countryCode: COUNTRY_CONFIG.countryCode,
                 name,
@@ -12770,8 +12986,7 @@ class NzVerificationMap {
                     location_mode: locationAssertion.mode,
                 },
             });
-            // the session ended while this was in flight: nothing lands on the page
-            if (!this.sessionCurrent(sessionTicket)) return;
+            if (!alive()) return;
             // synthesise the backend-task shape locally so the detail panel
             // can land on the new task before any batch-scoped refresh
             const manualTask = {
@@ -12807,6 +13022,7 @@ class NzVerificationMap {
             this.latestDraftsByTaskId.set(result.task_id, null);
             const pinChangeClass = document.getElementById("pinChangeClassSelect")?.value || "uncertain";
             await this.refreshBackendTasks();
+            if (!alive()) return;
             this.applyFilters();
             this.exitPinMode();
             this.selectTaskById(result.task_id, { focusDetail: true });
@@ -12817,6 +13033,7 @@ class NzVerificationMap {
             const copyStatus = document.getElementById("copyStatus");
             if (copyStatus) copyStatus.textContent = "Candidate task created. Record your evidence, then submit for review.";
         } catch (error) {
+            if (!alive()) return;
             if (error.authExpired) {
                 this.backendUser = null;
                 this.backendLastError = error.message;
@@ -13026,6 +13243,7 @@ class NzVerificationMap {
     }
 
     async skipCurrentTask(props, reason) {
+        const alive = this.sessionGuard();
         const status = document.getElementById("copyStatus");
         if (this.backend?.configured && this.backend.signedIn && this.backendTasksById.has(props.task_id)) {
             try {
@@ -13033,12 +13251,14 @@ class NzVerificationMap {
                     taskId: props.task_id,
                     reason: reason || undefined,
                 });
+                if (!alive()) return;
                 this.taskHistoryByTaskId.delete(props.task_id);
                 // the skip intentionally discards any typed values for this task
                 this.clearFormDirty();
                 this.formSnapshotsByTaskId.delete(props.task_id);
                 this.clearGuidedPeriods(props.task_id);
                 await this.refreshBackendTasks();
+                if (!alive()) return;
                 // a recorded skip closes the task for this ra too: same
                 // return-to-list as submit, with skip wording
                 this.selectedTask = null;
@@ -13047,6 +13267,7 @@ class NzVerificationMap {
                 this.focusDetailPanel();
                 return;
             } catch (error) {
+                if (!alive()) return;
                 if (error.authExpired) {
                     this.backendUser = null;
                     this.backendLastError = error.message;
