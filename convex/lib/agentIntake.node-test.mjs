@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
-import { assertNoDuplicateJsonKeys, validateAgentReviewBundle } from "./agentIntake.ts";
+import { assertNoDuplicateJsonKeys, hostAllowed, validateAgentReviewBundle } from "./agentIntake.ts";
 const fixturePath = new URL("../../scripts/agent_research/fixtures/internal-review-bundle.json", import.meta.url);
 const fixture = JSON.parse(fs.readFileSync(fixturePath, "utf8"));
 const bundle = () => structuredClone(fixture);
@@ -92,3 +92,16 @@ for (const row of regressions) {
     else assert.throws(validate);
   });
 }
+
+test("claim hosts must fall inside the pinned allowlist's domains", () => {
+  const domains = ["anglicanlife.org.nz", "nzhistory.govt.nz"];
+  assert.equal(hostAllowed("https://WWW.AnglicanLife.org.nz./parish", domains), true);
+  for (const url of ["https://notanglicanlife.org.nz/", "https://anglicanlife.org.nz.example.org/", "https://www.example-parish.nz/", "not a url"]) {
+    assert.equal(hostAllowed(url, domains), false, url);
+  }
+  const offList = bundle(); offList.dossier.claims[1].source.locator = "https://www.example-parish.nz/pages/about";
+  offList.review.claim_checks[1].source_url = offList.dossier.claims[1].source.locator;
+  assert.throws(() => validateAgentReviewBundle(offList, JSON.stringify(offList)), /not on allowlist nz-v1/);
+  const unreported = bundle(); unreported.dossier.run_manifest.model_id_reported = null;
+  assert.throws(() => validateAgentReviewBundle(unreported, JSON.stringify(unreported)), /reported/);
+});

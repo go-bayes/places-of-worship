@@ -72,6 +72,40 @@ class IntakeTest(unittest.TestCase):
             b = fixture(); mutate(b)
             self.assertTrue(intake.validate_bundle(b))
 
+    def test_claim_hosts_are_checked_against_the_pinned_allowlist(self):
+        domains = intake.load_allowlist('nz-v1')['domains']
+        self.assertTrue(intake.host_allowed('www.anglicanlife.org.nz', domains))
+        self.assertTrue(intake.host_allowed(intake.locator_host('https://WWW.AnglicanLife.org.nz./parish'), domains))
+        for host in ['notanglicanlife.org.nz', 'anglicanlife.org.nz.example.org', 'www.example-parish.nz',
+                     'anglicanliferangiora.church', 'www.facebook.com', '']:
+            self.assertFalse(intake.host_allowed(host, domains), host)
+        b = fixture()
+        off_list = 'https://www.example-parish.nz/pages/about'
+        b['dossier']['claims'][1]['source']['locator'] = off_list
+        b['review']['claim_checks'][1]['source_url'] = off_list
+        self.assertEqual(intake.allowlist_violations(b['dossier']),
+                         [{'claim_id': 'osm:way/1:codex:c02', 'host': 'www.example-parish.nz'}])
+        self.assertTrue(any('not on allowlist nz-v1' in error for error in intake.validate_bundle(b)))
+        for version in [None, '', 'nz-v0', '../fixtures/allowlist-nz-v1']:
+            b = fixture()
+            b['dossier']['run_manifest']['allowlist_version'] = version
+            with self.assertRaisesRegex(ValueError, 'no known source allowlist'):
+                intake.allowlist_violations(b['dossier'])
+            self.assertTrue(intake.validate_dossier(b['dossier']))
+
+    def test_every_run_must_carry_a_provider_reported_model_id(self):
+        for mutate in [lambda b: b['research_run'].update(model_id_reported=None),
+                       lambda b: b['review_run'].update(model_id_reported=None),
+                       lambda b: b['review_run'].update(model_id_reported=''),
+                       lambda b: b['dossier']['run_manifest'].update(model_id_reported=None),
+                       lambda b: b['dossier']['run_manifest'].update(model_id_reported='gpt-5.6-luna-2026-09-01')]:
+            b = fixture(); mutate(b)
+            self.assertTrue(intake.validate_bundle(b))
+        # the dossier alone keeps the tool's null; the bundle refuses it.
+        b = fixture()
+        b['dossier']['run_manifest']['model_id_reported'] = None
+        self.assertEqual(intake.validate_dossier(b['dossier']), [])
+
     def test_immutable_bundle_retries(self):
         b = fixture()
         with tempfile.TemporaryDirectory() as tmp:
@@ -95,6 +129,36 @@ class IntakeTest(unittest.TestCase):
             payload = json.loads(args[-1])
             self.assertEqual(payload['bundleHash'], hashlib.sha256(path.read_bytes()).hexdigest())
             self.assertNotIn('shell', run.call_args.kwargs)
+
+    def test_submit_retry_of_receipted_bytes_uses_the_read_only_lookup(self):
+        b = fixture()
+        b['review_run']['model_id_reported'] = None
+        receipt = {'receipt_id': 'r', 'task_id': 't', 'evidence_draft_id': 'd', 'agent_review_id': 'a'}
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'bundle.json'
+            path.write_text(json.dumps(b))
+            raw = path.read_bytes()
+            for found, code in ((receipt, 0), (None, 1)):
+                with self.subTest(found=found), patch('intake.subprocess.run') as run, \
+                        contextlib.redirect_stdout(io.StringIO()) as out:
+                    run.return_value.stdout = json.dumps(found)
+                    self.assertEqual(intake.main(['submit', str(path), '--deployment', 'dev']), code)
+                    # one read-only lookup, never an ingestion, carrying the exact bytes and digest.
+                    self.assertEqual(run.call_count, 1)
+                    args = run.call_args.args[0]
+                    self.assertIn('internalAgentIntake:findReceiptForBytes', args)
+                    self.assertNotIn('internalAgentIntake:ingestBundle', args)
+                    payload = json.loads(args[-1])
+                    self.assertEqual(payload['bundleJson'].encode(), raw)
+                    self.assertEqual(payload['bundleHash'], hashlib.sha256(raw).hexdigest())
+                    report = json.loads(out.getvalue())
+                    self.assertFalse(report['valid'])
+                    self.assertEqual(report.get('already_receipted', False), found is not None)
+            # validate never contacts the server, and submit to another deployment is refused first.
+            with patch('intake.subprocess.run') as run, contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(intake.main(['validate', str(path)]), 1)
+                self.assertEqual(intake.main(['submit', str(path), '--deployment', 'prod']), 1)
+                run.assert_not_called()
 
 
 if __name__ == '__main__':

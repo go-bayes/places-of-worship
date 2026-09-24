@@ -22,6 +22,8 @@ REVIEW_SCHEMA = HERE / 'schemas' / 'agent-review.v1.json'
 MAX_BYTES = 65_536
 MAX_DEPTH = 32
 MODELS = {'claude': 'sonnet', 'codex': 'gpt-5.6-luna'}
+# pinned source allowlists by version; a dossier naming any other version is refused.
+ALLOWLISTS = {'nz-v1': HERE / 'fixtures' / 'allowlist-nz-v1.json'}
 RUN_KEYS = ('backend', 'model_requested', 'model_id_reported', 'started_at', 'ended_at',
             'duration_seconds', 'usage', 'raw_trace_sha256', 'prompt_sha256', 'cli_version',
             'exit_code', 'tool_policy_version')
@@ -146,6 +148,66 @@ def public_url(url):
         return False
 
 
+# load the pinned allowlist named by a dossier; an unknown version is never defaulted.
+def load_allowlist(version):
+    path = ALLOWLISTS.get(version) if isinstance(version, str) else None
+    if path is None:
+        raise ValueError('dossier names no known source allowlist version')
+    allowlist = json.loads(path.read_text(encoding='utf-8'))
+    if allowlist.get('allowlist_version') != version:
+        raise ValueError('allowlist file does not match its pinned version')
+    return allowlist
+
+
+_DNS_LABEL = re.compile(r'[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?')
+
+
+# one host policy shared with the TypeScript and Rust validators: read the host as written,
+# refuse non-ASCII, userinfo, empty or invalid ports and empty labels, lower-case it, and
+# strip exactly one trailing root dot. Punycode (xn--) labels pass as ASCII labels.
+def locator_host(url):
+    if not isinstance(url, str):
+        raise ValueError('source URL must be a string')
+    scheme = next((s for s in ('http://', 'https://') if url[:len(s)].lower() == s), None)
+    if scheme is None:
+        raise ValueError('source URL must use http or https')
+    rest = url[len(scheme):]
+    authority = rest[:min([i for i in (rest.find(c) for c in '/?#') if i >= 0] or [len(rest)])]
+    if '@' in authority:
+        raise ValueError('source URL must not carry user information')
+    host, has_port, port = authority.partition(':')
+    if has_port and (not re.fullmatch(r'[0-9]{1,5}', port) or not 1 <= int(port) <= 65535):
+        raise ValueError('source URL port must be a number from 1 to 65535')
+    if not host.isascii():
+        raise ValueError('source URL host must be an ASCII DNS name')
+    host = host.lower()
+    if host.endswith('.'):
+        host = host[:-1]
+    if not host or len(host) > 253 or not all(_DNS_LABEL.fullmatch(label) for label in host.split('.')):
+        raise ValueError('source URL host must be an ASCII DNS name')
+    return host
+
+
+# an allowlisted domain covers itself and its subdomains, never a lookalike suffix.
+def host_allowed(host, domains):
+    return bool(host) and any(host == domain or host.endswith('.' + domain) for domain in domains)
+
+
+# list claims whose source host is absent from the dossier's pinned allowlist.
+def allowlist_violations(dossier):
+    allowlist = load_allowlist(dossier['run_manifest'].get('allowlist_version'))
+    domains = [domain.lower().rstrip('.') for domain in allowlist['domains']]
+    violations = []
+    for claim in dossier['claims']:
+        try:
+            host = locator_host(claim['source']['locator'])
+        except ValueError:
+            host = ''
+        if not host_allowed(host, domains):
+            violations.append({'claim_id': claim['claim_id'], 'host': host})
+    return violations
+
+
 # convert a partial calendar date into its earliest/latest represented date.
 def date_bounds(value):
     if not isinstance(value, str) or not re.fullmatch(r'\d{4}(-\d{2}(-\d{2})?)?', value):
@@ -193,6 +255,10 @@ def validate_dossier(dossier):
         ids.add(cid)
         if not public_url(claim['source']['locator']):
             errors.append(f'{cid}: only public HTTP(S) source locators are permitted')
+        try:
+            locator_host(claim['source']['locator'])
+        except ValueError as exc:
+            errors.append(f'{cid}: {exc}')
         for field in ['value', 'quoted_support', 'note']:
             if lib.find_personal_details(claim.get(field, '')):
                 errors.append(f'{cid}: potential personal details require human handling')
@@ -220,6 +286,14 @@ def validate_dossier(dossier):
         reader = claim['reader']
         if reader['backend'] != run['backend'] or reader['model_id'] not in {run['model_id_requested'], run['model_id_reported']}:
             errors.append(f'{cid}: inconsistent researcher provenance')
+    try:
+        allowlist = load_allowlist(run.get('allowlist_version'))
+        if allowlist.get('country_code') != dossier['place']['country_code']:
+            errors.append('source allowlist belongs to another country')
+        for violation in allowlist_violations(dossier):
+            errors.append(f"{violation['claim_id']}: source host {violation['host']!r} is not on allowlist {run['allowlist_version']}")
+    except ValueError as exc:
+        errors.append(str(exc))
     for cid in dossier['status_assessment']['supporting_claim_ids']:
         if cid not in ids:
             errors.append('status assessment references unknown claim')
@@ -228,6 +302,11 @@ def validate_dossier(dossier):
     except ValueError:
         errors.append('invalid assessment date')
     for entry in dossier['osm_version_chain']:
+        try:
+            locator_host(entry['locator'])
+        except ValueError:
+            errors.append('invalid OSM history locator')
+            continue
         if not public_url(entry['locator']):
             errors.append('invalid OSM history locator')
     return errors
@@ -294,6 +373,11 @@ def validate_bundle(bundle):
     original = bundle['dossier']['run_manifest']
     if original['backend'] != research['backend'] or original['model_id_requested'] != research['model_requested']:
         errors.append('dossier and research manifest disagree')
+    # a model id must come back from the provider; the requested alias is not evidence of the model.
+    if not isinstance(original.get('model_id_reported'), str) or not original['model_id_reported']:
+        errors.append('dossier run manifest lacks the model id the provider reported')
+    elif original['model_id_reported'] != research['model_id_reported']:
+        errors.append('dossier and research manifest disagree on the reported model')
     return errors
 
 
@@ -324,6 +408,18 @@ def write_bundle(output_dir, dossier, review, research_manifest, review_manifest
             'sha256': hashlib.sha256(raw).hexdigest(), 'provisional': True}
 
 
+# ask the server, read-only, whether these exact bytes already hold a receipt; never admits anything.
+def find_existing_receipt(raw, deployment):
+    command = ['npx', '--no-install', 'convex', 'run', '--deployment', deployment, '--codegen', 'disable',
+               'internalAgentIntake:findReceiptForBytes',
+               json.dumps({'bundleJson': raw.decode('utf-8'), 'bundleHash': hashlib.sha256(raw).hexdigest()})]
+    result = subprocess.run(command, check=True, capture_output=True, text=True)
+    receipt = json.loads(result.stdout.strip() or 'null')
+    if receipt is not None and not (isinstance(receipt, dict) and isinstance(receipt.get('receipt_id'), str)):
+        raise ValueError('receipt lookup returned an unexpected result')
+    return receipt
+
+
 # validate locally or explicitly upload a validated bundle to an enabled development backend.
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
@@ -332,15 +428,28 @@ def main(argv=None):
     parser.add_argument('--deployment', help='explicit dev or local selector; required for submit')
     args = parser.parse_args(argv)
     try:
+        if args.command == 'submit' and args.deployment not in {'dev', 'local'}:
+            raise ValueError('submit requires explicit dev or local deployment')
         with args.bundle.open('rb') as stream:
             raw = stream.read(MAX_BYTES + 1)
         bundle = parse_json(raw)
         errors = validate_bundle(bundle)
         if errors:
+            # a bundle receipted before a rule was tightened may retry: only a receipt holding these
+            # exact bytes is reported, and the bundle itself is never sent for ingestion.
+            if args.command == 'submit':
+                try:
+                    receipt = find_existing_receipt(raw, args.deployment)
+                except (ValueError, OSError, subprocess.CalledProcessError) as exc:
+                    raise ValueError('; '.join(errors[:12]) + f'; receipt lookup failed: {exc}') from exc
+                if receipt is not None:
+                    print(json.dumps({'valid': False, 'already_receipted': True, 'receipt': receipt,
+                                      'sha256': hashlib.sha256(raw).hexdigest(),
+                                      'note': 'these exact bytes were receipted before; nothing was submitted',
+                                      'current_errors': errors[:12]}))
+                    return 0
             raise ValueError('; '.join(errors[:12]))
         if args.command == 'submit':
-            if args.deployment not in {'dev', 'local'}:
-                raise ValueError('submit requires explicit dev or local deployment')
             command = ['npx', '--no-install', 'convex', 'run', '--deployment', args.deployment, '--codegen', 'disable',
                        'internalAgentIntake:ingestBundle', json.dumps({'bundleJson': raw.decode('utf-8'), 'bundleHash': hashlib.sha256(raw).hexdigest()})]
             # the controller invokes the API; no model sees this process or its credentials.

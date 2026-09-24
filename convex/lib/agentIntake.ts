@@ -1,5 +1,9 @@
 import { canonicalJson, sha256 } from "./sha256.ts";
 import bundleSchema from "../../scripts/agent_research/schemas/agent-review-bundle.v1.json" with { type: "json" };
+import allowlistNzV1 from "../../scripts/agent_research/fixtures/allowlist-nz-v1.json" with { type: "json" };
+
+// pinned source allowlists by version; a dossier naming any other version is refused.
+const ALLOWLISTS: Record<string, { allowlist_version: string; country_code: string; domains: string[] }> = { "nz-v1": allowlistNzV1 };
 
 export type AgentReviewBundle = {
   schema_version: "agent-review-bundle.v1";
@@ -26,7 +30,7 @@ export type AgentReviewBundle = {
 export type AgentRun = {
   backend: "claude" | "codex";
   model_requested: "gpt-5.6-luna" | "sonnet";
-  model_id_reported: string | null;
+  model_id_reported: string;
   started_at: string;
   ended_at: string;
   duration_seconds: number;
@@ -102,6 +106,36 @@ function publicUrl(value: string): void {
   if (/^[0-9.]+$/.test(host) || host.includes(":")) throw new Error("source URL must use a public DNS hostname");
 }
 
+// one host policy shared with the Python and Rust validators: read the host as written (never
+// through URL's IDNA and percent decoding), refuse non-ASCII, userinfo, empty or invalid ports
+// and empty labels, lower-case it, and strip exactly one trailing root dot.
+export function canonicalHost(locator: string): string {
+  const scheme = ["http://", "https://"].find(s => locator.slice(0, s.length).toLowerCase() === s);
+  if (!scheme) throw new Error("source URL must use http or https");
+  const rest = locator.slice(scheme.length);
+  const ends = ["/", "?", "#"].map(c => rest.indexOf(c)).filter(i => i >= 0);
+  const authority = rest.slice(0, ends.length ? Math.min(...ends) : rest.length);
+  if (authority.includes("@")) throw new Error("source URL must not carry user information");
+  const colon = authority.indexOf(":");
+  let host = colon >= 0 ? authority.slice(0, colon) : authority;
+  if (colon >= 0) {
+    const port = authority.slice(colon + 1);
+    if (!/^[0-9]{1,5}$/.test(port) || Number(port) < 1 || Number(port) > 65535) throw new Error("source URL port must be a number from 1 to 65535");
+  }
+  if (!/^[\x00-\x7f]*$/.test(host)) throw new Error("source URL host must be an ASCII DNS name");
+  host = host.toLowerCase();
+  if (host.endsWith(".")) host = host.slice(0, -1);
+  if (!host || host.length > 253 || !host.split(".").every(label => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label))) throw new Error("source URL host must be an ASCII DNS name");
+  return host;
+}
+
+// an allowlisted domain covers itself and its subdomains, never a lookalike suffix.
+export function hostAllowed(locator: string, domains: string[]): boolean {
+  let host: string;
+  try { host = canonicalHost(locator); } catch { return false; }
+  return domains.some(domain => host === domain || host.endsWith(`.${domain}`));
+}
+
 // validate the exact bytes and cross-field evidence relations before any database writes.
 export function validateAgentReviewBundle(value: unknown, bundleJson: string): { bundle: AgentReviewBundle; bundleHash: string; claimLocators: Map<string, string> } {
   assertNoDuplicateJsonKeys(bundleJson);
@@ -121,6 +155,13 @@ export function validateAgentReviewBundle(value: unknown, bundleJson: string): {
     if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) throw new Error("invalid run timestamp");
   }
   if (d.run_manifest.backend !== bundle.research_run.backend || d.run_manifest.model_id_requested !== bundle.research_run.model_requested || d.run_manifest.exit_status !== "completed") throw new Error("inconsistent dossier run provenance");
+  // a model id must come back from the provider; the requested alias is not evidence of the model.
+  if (typeof d.run_manifest.model_id_reported !== "string" || d.run_manifest.model_id_reported === "") throw new Error("dossier run manifest lacks the model id the provider reported");
+  if (d.run_manifest.model_id_reported !== bundle.research_run.model_id_reported) throw new Error("dossier and research manifest disagree on the reported model");
+  const allowlist = typeof d.run_manifest.allowlist_version === "string" && Object.hasOwn(ALLOWLISTS, d.run_manifest.allowlist_version) ? ALLOWLISTS[d.run_manifest.allowlist_version] : undefined;
+  if (!allowlist) throw new Error("dossier names no known source allowlist version");
+  if (allowlist.country_code !== d.place.country_code) throw new Error("source allowlist belongs to another country");
+  const domains = allowlist.domains.map(domain => domain.toLowerCase().replace(/\.$/, ""));
   dateBounds(d.run_manifest.started_at.split("T")[0]); dateBounds(d.run_manifest.ended_at.split("T")[0]);
   const manifestStart = Date.parse(d.run_manifest.started_at), manifestEnd = Date.parse(d.run_manifest.ended_at);
   if (!Number.isFinite(manifestStart) || !Number.isFinite(manifestEnd) || manifestEnd < manifestStart) throw new Error("invalid dossier run timestamp");
@@ -131,7 +172,8 @@ export function validateAgentReviewBundle(value: unknown, bundleJson: string): {
       const text = claim[field] ?? "";
       if (/(?:\+64|\b0)[\s-]?\d{1,2}[\s-]?\d{3,4}[\s-]?\d{3,5}\b/.test(text) || /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(text) || /\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'-]+\s?){1,3}/.test(text)) throw new Error("potential personal details require human handling");
     }
-    publicUrl(claim.source.locator); locators.set(claim.claim_id, claim.source.locator);
+    publicUrl(claim.source.locator); canonicalHost(claim.source.locator); locators.set(claim.claim_id, claim.source.locator);
+    if (!hostAllowed(claim.source.locator, domains)) throw new Error(`source host is not on allowlist ${allowlist.allowlist_version}`);
     if (claim.reader.backend !== d.run_manifest.backend || ![d.run_manifest.model_id_requested, d.run_manifest.model_id_reported].includes(claim.reader.model_id)) throw new Error("inconsistent claim reader");
     for (const key of ["date_start", "date_end"]) if (claim[key] != null) {
       dateBounds(claim[key]);
@@ -143,7 +185,7 @@ export function validateAgentReviewBundle(value: unknown, bundleJson: string): {
   }
   dateBounds(d.status_assessment.asof_date);
   for (const id of d.status_assessment.supporting_claim_ids) if (!locators.has(id)) throw new Error("unknown status claim");
-  for (const row of d.osm_version_chain) publicUrl(row.locator);
+  for (const row of d.osm_version_chain) { publicUrl(row.locator); canonicalHost(row.locator); }
   const checked = new Set<string>();
   for (const check of bundle.review.claim_checks) {
     if (checked.has(check.claim_id) || locators.get(check.claim_id) !== check.source_url) throw new Error("review must cover every claim uniquely at its source_url");

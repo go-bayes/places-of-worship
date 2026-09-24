@@ -25,6 +25,11 @@ const PROPOSE_VERSION: &str = "pow-propose.v1";
 const AGENT_REVIEW_SCHEMA_VERSION: &str = "agent-review-bundle.v1";
 const AGENT_REVIEW_MAX_BYTES: usize = 64 * 1024;
 const AGENT_REVIEW_MAX_DEPTH: usize = 32;
+// pinned source allowlists by version; a dossier naming any other version is refused.
+const AGENT_ALLOWLISTS: &[(&str, &str)] = &[(
+    "nz-v1",
+    include_str!("../../../scripts/agent_research/fixtures/allowlist-nz-v1.json"),
+)];
 
 #[derive(Parser, Debug)]
 #[command(name = "pow")]
@@ -564,6 +569,7 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
         errors.push("/dossier/place/country_code: only NZ bundles are accepted".to_owned());
     }
 
+    let allowlist = agent_allowlist(dossier, errors);
     let claims = dossier
         .get("claims")
         .and_then(Value::as_array)
@@ -585,6 +591,19 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
             if let Some(locator) = source.get("locator").and_then(Value::as_str) {
                 if let Err(reason) = validate_source_locator(locator) {
                     errors.push(format!("{path}/source/locator: {reason}"));
+                } else {
+                    match canonical_locator_host(locator) {
+                        Err(reason) => errors.push(format!("{path}/source/locator: {reason}")),
+                        Ok(host) => {
+                            if let Some((version, domains)) = &allowlist
+                                && !host_allowed(&host, domains)
+                            {
+                                errors.push(format!(
+                                    "{path}/source/locator: host is not on allowlist {version}"
+                                ));
+                            }
+                        }
+                    }
                 }
                 if let Some(claim_id) = claim_object.get("claim_id").and_then(Value::as_str) {
                     claim_locators.insert(claim_id.to_owned(), locator.to_owned());
@@ -668,6 +687,7 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
                 .and_then(|entry| entry.get("locator"))
                 .and_then(Value::as_str)
                 && let Err(reason) = validate_source_locator(locator)
+                    .and_then(|()| canonical_locator_host(locator).map(|_| ()))
             {
                 errors.push(format!(
                     "/dossier/osm_version_chain/{index}/locator: {reason}"
@@ -811,8 +831,125 @@ fn validate_agent_runs(
                 "/dossier/run_manifest/exit_status: research attempt was not completed".to_owned(),
             );
         }
+        // a model id must come back from the provider; the requested alias is not evidence.
+        match manifest.get("model_id_reported").and_then(Value::as_str) {
+            Some(reported) if !reported.is_empty() => {
+                if Some(reported) != research.get("model_id_reported").and_then(Value::as_str) {
+                    errors.push(
+                        "/dossier/run_manifest/model_id_reported: must match /research_run/model_id_reported"
+                            .to_owned(),
+                    );
+                }
+            }
+            _ => errors.push(
+                "/dossier/run_manifest/model_id_reported: the provider reported no model id"
+                    .to_owned(),
+            ),
+        }
         validate_run_times(manifest, "/dossier/run_manifest", errors);
     }
+}
+
+/// Resolve the dossier's pinned allowlist; an unknown version or another country is an error.
+fn agent_allowlist(
+    dossier: &serde_json::Map<String, Value>,
+    errors: &mut Vec<String>,
+) -> Option<(String, Vec<String>)> {
+    let manifest = dossier.get("run_manifest").and_then(Value::as_object)?;
+    let version = manifest.get("allowlist_version").and_then(Value::as_str);
+    let Some((version, source)) = AGENT_ALLOWLISTS
+        .iter()
+        .find(|(known, _)| Some(*known) == version)
+    else {
+        errors.push(
+            "/dossier/run_manifest/allowlist_version: no known source allowlist version".to_owned(),
+        );
+        return None;
+    };
+    let allowlist: Value = serde_json::from_str(source).expect("pinned allowlist is valid JSON");
+    let country = dossier
+        .get("place")
+        .and_then(Value::as_object)
+        .and_then(|place| place.get("country_code"))
+        .and_then(Value::as_str);
+    if allowlist.get("country_code").and_then(Value::as_str) != country {
+        errors.push(
+            "/dossier/run_manifest/allowlist_version: allowlist belongs to another country"
+                .to_owned(),
+        );
+    }
+    let domains = allowlist
+        .get("domains")
+        .and_then(Value::as_array)
+        .map(|domains| {
+            domains
+                .iter()
+                .filter_map(Value::as_str)
+                .map(|domain| domain.trim_end_matches('.').to_ascii_lowercase())
+                .collect()
+        })
+        .unwrap_or_default();
+    Some(((*version).to_owned(), domains))
+}
+
+/// One host policy shared with the Python and TypeScript validators: read the host as
+/// written, refuse non-ASCII, userinfo, empty or invalid ports and empty labels, lower-case
+/// it, and strip exactly one trailing root dot. Punycode (xn--) labels pass as ASCII labels.
+fn canonical_locator_host(locator: &str) -> std::result::Result<String, String> {
+    let scheme_len = ["http://", "https://"]
+        .iter()
+        .find(|scheme| {
+            locator
+                .get(..scheme.len())
+                .is_some_and(|prefix| prefix.eq_ignore_ascii_case(scheme))
+        })
+        .map(|scheme| scheme.len())
+        .ok_or_else(|| "source URL must use http or https".to_owned())?;
+    let rest = &locator[scheme_len..];
+    let authority = &rest[..rest.find(['/', '?', '#']).unwrap_or(rest.len())];
+    if authority.contains('@') {
+        return Err("source URL must not carry user information".to_owned());
+    }
+    let (host, port) = match authority.split_once(':') {
+        Some((host, port)) => (host, Some(port)),
+        None => (authority, None),
+    };
+    if let Some(port) = port {
+        let valid = (1..=5).contains(&port.len())
+            && port.bytes().all(|byte| byte.is_ascii_digit())
+            && port
+                .parse::<u32>()
+                .is_ok_and(|number| (1..=65_535).contains(&number));
+        if !valid {
+            return Err("source URL port must be a number from 1 to 65535".to_owned());
+        }
+    }
+    let invalid = || "source URL host must be an ASCII DNS name".to_owned();
+    if !host.is_ascii() {
+        return Err(invalid());
+    }
+    let lower = host.to_ascii_lowercase();
+    let host = lower.strip_suffix('.').unwrap_or(&lower);
+    let label_ok = |label: &str| {
+        let bytes = label.as_bytes();
+        (1..=63).contains(&bytes.len())
+            && bytes
+                .iter()
+                .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || *byte == b'-')
+            && bytes[0] != b'-'
+            && bytes[bytes.len() - 1] != b'-'
+    };
+    if host.is_empty() || host.len() > 253 || !host.split('.').all(label_ok) {
+        return Err(invalid());
+    }
+    Ok(host.to_owned())
+}
+
+/// An allowlisted domain covers itself and its subdomains, never a lookalike suffix.
+fn host_allowed(host: &str, domains: &[String]) -> bool {
+    domains
+        .iter()
+        .any(|domain| host == domain || host.ends_with(&format!(".{domain}")))
 }
 
 fn agent_run_model_allowed(backend: Option<&str>, model: Option<&str>) -> bool {
@@ -5010,6 +5147,13 @@ mod tests {
                 .get_mut("claims")
                 .and_then(Value::as_array_mut)
                 .expect("claims array");
+            // the parish's own website is outside allowlist nz-v1's domains.
+            claims.retain(|claim| {
+                !claim["source"]["locator"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .contains("anglicanliferangiora.church")
+            });
             for claim in claims.iter_mut() {
                 let claim_object = claim.as_object_mut().expect("claim object");
                 claim_object.remove("value_structured");
@@ -5024,11 +5168,23 @@ mod tests {
                 .expect("run manifest");
             manifest.insert("backend".to_owned(), json!("codex"));
             manifest.insert("model_id_requested".to_owned(), json!("gpt-5.6-luna"));
+            manifest.insert("model_id_reported".to_owned(), json!("gpt-5.6-luna"));
+            manifest.insert("allowlist_version".to_owned(), json!("nz-v1"));
             manifest.insert("started_at".to_owned(), json!("2026-09-11T01:00:00Z"));
             manifest.insert("ended_at".to_owned(), json!("2026-09-11T01:01:00Z"));
             manifest.insert("exit_status".to_owned(), json!("completed"));
         }
 
+        let retained: BTreeSet<String> = dossier_object["claims"]
+            .as_array()
+            .expect("claims array")
+            .iter()
+            .filter_map(|claim| claim["claim_id"].as_str().map(str::to_owned))
+            .collect();
+        dossier_object["status_assessment"]["supporting_claim_ids"]
+            .as_array_mut()
+            .expect("supporting claim ids")
+            .retain(|id| id.as_str().is_some_and(|id| retained.contains(id)));
         let claims = dossier_object
             .get("claims")
             .and_then(Value::as_array)
@@ -5188,6 +5344,58 @@ mod tests {
         assert!(errors.iter().any(|error| error.contains("credentials")));
         assert!(errors.iter().all(|error| !error.contains("touch")));
         assert!(validate_source_locator("https://example.org/a b").is_err());
+    }
+
+    #[test]
+    fn agent_bundle_refuses_off_allowlist_hosts_and_unreported_models() {
+        // the church-website rule in allowlist nz-v1 is not machine-checkable, so a
+        // parish's own domain is refused like any other host outside the listed domains.
+        for locator in [
+            "https://anglicanliferangiora.church/our-churches",
+            "https://www.example-parish.nz/pages/about",
+            "https://notanglicanlife.org.nz/",
+            "https://www.anglicanlife.org.nz.example.org/",
+        ] {
+            let mut bundle = valid_agent_bundle();
+            bundle["dossier"]["claims"][0]["source"]["locator"] = json!(locator);
+            bundle["review"]["claim_checks"][0]["source_url"] = json!(locator);
+            let mut errors = Vec::new();
+            validate_agent_semantics(&bundle, &mut errors);
+            assert!(
+                errors
+                    .iter()
+                    .any(|error| error.contains("not on allowlist nz-v1")),
+                "{locator}: {errors:?}"
+            );
+        }
+        let mut subdomain = valid_agent_bundle();
+        subdomain["dossier"]["claims"][0]["source"]["locator"] =
+            json!("https://WWW.AnglicanLife.org.nz./parish");
+        subdomain["review"]["claim_checks"][0]["source_url"] =
+            json!("https://WWW.AnglicanLife.org.nz./parish");
+        let mut errors = Vec::new();
+        validate_agent_semantics(&subdomain, &mut errors);
+        assert!(errors.is_empty(), "{errors:?}");
+
+        let mut unknown = valid_agent_bundle();
+        unknown["dossier"]["run_manifest"]["allowlist_version"] = json!("nz-v0");
+        let mut errors = Vec::new();
+        validate_agent_semantics(&unknown, &mut errors);
+        assert!(
+            errors
+                .iter()
+                .any(|error| error.contains("allowlist_version"))
+        );
+
+        let mut unreported = valid_agent_bundle();
+        unreported["dossier"]["run_manifest"]["model_id_reported"] = Value::Null;
+        let mut errors = Vec::new();
+        validate_agent_semantics(&unreported, &mut errors);
+        assert!(
+            errors
+                .iter()
+                .any(|error| error.contains("reported no model id"))
+        );
     }
 
     #[test]

@@ -894,11 +894,10 @@
           ]
         },
         "model_id_reported": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "maxLength": 256
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "The model id the provider returned for this run. A run whose provider reported no model id is refused."
         },
         "started_at": {
           "type": "string",
