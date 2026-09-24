@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### 2026-09-24 (development methods log)
+
+- Added a public log of how the site is developed, for a methods publication, and a rule in the contributor guidance that each working session records its methods there.
 ### 2026-09-24 (confidence standard 0.2.0)
 
 - Version 0.2.0 of the [confidence standard](docs/confidence-standard.md), snapshot at `docs/development/confidence-standard-2026-09-24-v0.2.0.md`, after two review threads on the merged 0.1.0. The promotion rule for research assistants gains two conditions: an output's non-inferiority test counts only when at least the planned number of sampled pairs have a resolved reference label for that output and unresolved labels are at most 10 per cent of the sampled pairs, so a test cannot pass on labels that settled nothing; and a task-type stratum without an adopted required-output mapping (possible duplicate, denomination or shared use, geometry check, other) cannot be promoted and stays with human research assistants. The change is a minor version under the standard's own rule because it alters the promotion rule; no promotion decision has been taken under 0.1.0.
