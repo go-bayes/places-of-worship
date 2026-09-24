@@ -103,7 +103,12 @@ fewer words; the Clerk form and its copy replace the Google button and the
 `Wrong account showing?` help under the contributor-access brief's C1,
 2026-09-24). A signed-in address the project has not admitted sees the
 address, one line saying it has no project access and a `Sign out` button,
-never the portal; the
+never the portal. While existing Google members move to the new sign-in
+(R-C18, JB 2026-09-24), the card also folds `Used Google sign-in here
+before?` under the form, and an existing member's refused sign-in shows
+`Confirm your existing account for the new sign-in` with Google's own
+`Continue with Google` button, a status line and `Sign out`; both leave when
+the move closes; the
 header carries only the title and the `Exit` and `Guide` buttons, at body
 size on a 44 px target, with no batch line (ruled 2026-09-20: words to cut);
 the invited address shows only when the link carries it. After sign-in the

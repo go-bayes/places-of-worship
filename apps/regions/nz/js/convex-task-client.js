@@ -3,6 +3,9 @@
         enabled: false,
         url: "",
         clerkPublishableKey: "",
+        // set only while existing google members are being moved to clerk
+        // (r-c18): the public google client id for the confirmation step
+        googleMigrationClientId: "",
         countryCode: "NZ",
     };
     // clerk sessions (contributor-access brief 4.4): clerk keeps the person
@@ -13,6 +16,11 @@
     const CLERK_JS_MAJOR = "6";
     const CLERK_UI_MAJOR = "1";
     const LEGACY_AUTH_STORAGE_KEY = "powConvexAuth:v1";
+    // r-c18: the single-use grant from users:beginIdentityMigration, held for
+    // the tab only, until the clerk claim spends it or it expires
+    const MIGRATION_GRANT_KEY = "powMigrationGrant:v1";
+    const GSI_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
+    const MIGRATION_NEEDED = /Confirm that Google account first|expired or was already used/i;
     // a sign-out clerk has not confirmed, by session id: a reload retries it
     // rather than restoring the session (shared devices)
     const SIGN_OUT_PENDING_KEY = "powSignOutPending:v1";
@@ -23,7 +31,7 @@
     const CLERK_FRONTEND_API_HOSTS = ["sure-lizard-50.clerk.accounts.dev"];
     const NO_ACCESS_HELP = "This address has no project access yet. Sign out and use the invited address, or ask the project lead to invite this one.";
     // the claimInvite refusals a person can act on (brief 4.3.2)
-    const ACCESS_REFUSED = /No pending project invitation|Verify this email address|bound to another sign-in method|requires a verified email/i;
+    const ACCESS_REFUSED = /No pending project invitation|Verify this email address|bound to another sign-in method|requires a verified email|Confirm that Google account first|expired or was already used/i;
     const scriptLoads = new Map();
 
     // convex wraps a thrown error as "[Request ID: …] Server Error Uncaught
@@ -66,6 +74,26 @@
         }
     }
 
+    function readMigrationGrant() {
+        try {
+            const record = JSON.parse(window.sessionStorage?.getItem(MIGRATION_GRANT_KEY) || "null");
+            if (typeof record?.grant === "string" && Number(record.expires_at) > Date.now()) return record.grant;
+            window.sessionStorage?.removeItem(MIGRATION_GRANT_KEY);
+        } catch (error) {
+            // blocked storage: no grant held
+        }
+        return "";
+    }
+
+    function writeMigrationGrant(record) {
+        try {
+            if (record?.grant) window.sessionStorage?.setItem(MIGRATION_GRANT_KEY, JSON.stringify({ grant: record.grant, expires_at: record.expires_at }));
+            else window.sessionStorage?.removeItem(MIGRATION_GRANT_KEY);
+        } catch (error) {
+            // blocked storage: the grant is held in this page's memory below
+        }
+    }
+
     function readPendingSignOut() {
         try {
             return window.localStorage?.getItem(SIGN_OUT_PENDING_KEY) || "";
@@ -83,7 +111,9 @@
         }
     }
 
-    function loadScriptOnce(src, attributes = {}) {
+    // clerk's bundles are loaded as cors scripts; google's gsi client is not
+    // served with cors headers, so it loads as a plain script
+    function loadScriptOnce(src, attributes = {}, { cors = true } = {}) {
         if (scriptLoads.has(src)) return scriptLoads.get(src);
         const existing = document.querySelector(`script[src="${src}"]`);
         if (existing) {
@@ -93,7 +123,7 @@
             const script = document.createElement("script");
             script.src = src;
             script.async = true;
-            script.crossOrigin = "anonymous";
+            if (cors) script.crossOrigin = "anonymous";
             Object.entries(attributes).forEach(([name, value]) => script.setAttribute?.(name, value));
             script.onload = () => resolve();
             script.onerror = () => {
@@ -229,6 +259,11 @@
             return Boolean(this.configured && (this.sessionId || sessionCookieHint()));
         }
 
+        // the move of google members to clerk is open on this page
+        get migrationOpen() {
+            return Boolean(this.configured && this.config.googleMigrationClientId);
+        }
+
         // the address clerk verified for this session, shown on the card
         get accountEmail() {
             return this.clerk?.user?.primaryEmailAddress?.emailAddress || "";
@@ -312,10 +347,12 @@
                 let user;
                 try {
                     await this.claimInvite(options.initials || "");
+                    this.clearMigrationGrant();
                     user = await this.me();
                     if (!user) throw new Error("No pending project invitation found for this email.");
                 } catch (error) {
                     const message = serverMessage(error);
+                    if (/expired or was already used/i.test(message)) this.clearMigrationGrant();
                     if (this.sessionId === sessionId) {
                         this.user = null;
                         this.claimFailure = { sessionId, message };
@@ -358,6 +395,7 @@
             // so it never re-admits the session being ended
             this.sessionId = "";
             this.signOutFailure = null;
+            this.clearMigrationGrant();
             this.releaseSignInElement();
             if (sessionId) writePendingSignOut(sessionId);
             this.signOutPromise = (async () => {
@@ -448,7 +486,9 @@
             // the page repaints its card often; only the newest host counts
             if (this.signInHost !== container) return;
             if (!this.sessionId) {
-                container.replaceChildren(this.signInElement(clerk));
+                const parts = [this.signInElement(clerk)];
+                if (this.migrationOpen) parts.push(this.migrationElement());
+                container.replaceChildren(...parts);
                 return;
             }
             if (this.user) return;
@@ -462,7 +502,9 @@
                     await this.completeSignIn(options);
                     return;
                 } catch (error) {
-                    // falls through to the account note below
+                    // a refusal the card explains was drawn by completeSignIn
+                    if (error.accessRefused && this.signInHost === container) return;
+                    // anything else falls through to the account note below
                 }
             }
             if (this.signInHost !== container || this.user) return;
@@ -487,6 +529,7 @@
         }
 
         releaseSignInElement() {
+            this.migrationNode = null;
             if (!this.signInNode) return;
             try {
                 this.clerk?.unmountSignIn(this.signInNode);
@@ -510,6 +553,10 @@
 
         renderAccountNote(container) {
             const failure = this.claimFailure?.message || "";
+            if (this.migrationOpen && MIGRATION_NEEDED.test(failure)) {
+                this.renderMigrationStep(container);
+                return;
+            }
             const noInvitation = /No pending project invitation/i.test(failure);
             container.innerHTML = `
                 <div class="pow-account-note" role="status">
@@ -519,6 +566,81 @@
                 </div>
             `;
             container.querySelector("[data-pow-sign-out]")?.addEventListener("click", () => this.retrySignOut(container));
+        }
+
+        // r-c18, signed in to clerk but not yet admitted: the member confirms
+        // the google account they used before, and the claim is retried with
+        // the grant it returns
+        renderMigrationStep(container) {
+            const expired = /expired or was already used/i.test(this.claimFailure?.message || "");
+            container.innerHTML = `
+                <div class="pow-account-note pow-migration-step" role="status">
+                    <strong class="inline">Confirm your existing account for the new sign-in</strong>
+                    <span>Signed in as <strong class="inline">${escapeText(this.accountEmail || "this account")}</strong>.</span>
+                    <span>This address belongs to a project member who used Google sign-in before. ${expired ? "The last confirmation expired. " : ""}Continue with that Google account once, and your roles and work move to the new sign-in.</span>
+                    <div class="pow-google-confirm" data-pow-google-confirm></div>
+                    <span class="pow-migration-status" data-pow-migration-status aria-live="polite"></span>
+                    <button type="button" data-pow-sign-out>Sign out</button>
+                </div>
+            `;
+            container.querySelector("[data-pow-sign-out]")?.addEventListener("click", () => this.retrySignOut(container));
+            this.mountGoogleConfirm(container, { afterGrant: () => {
+                this.claimFailure = null;
+                return this.renderSignInButton(container, this.signInOptions);
+            } });
+        }
+
+        // r-c18, before signing in: the member confirms the google account
+        // first, then signs in with the clerk form above, which presents the
+        // grant on its claim
+        migrationElement() {
+            // one element per signed-out spell, like the clerk form, so a
+            // repaint keeps it open and keeps its status line
+            if (this.migrationNode) return this.migrationNode;
+            const element = document.createElement("details");
+            this.migrationNode = element;
+            element.className = "pow-migration-details";
+            element.innerHTML = `
+                <summary>Used Google sign-in here before?</summary>
+                <span>Confirm your existing account for the new sign-in: continue with the Google account you used before, then sign in above with the same address.</span>
+                <div class="pow-google-confirm" data-pow-google-confirm></div>
+                <span class="pow-migration-status" data-pow-migration-status aria-live="polite"></span>
+            `;
+            element.addEventListener?.("toggle", () => {
+                if (element.open) this.mountGoogleConfirm(element, { afterGrant: () => {} });
+            });
+            return element;
+        }
+
+        async mountGoogleConfirm(scope, { afterGrant }) {
+            const host = scope.querySelector?.("[data-pow-google-confirm]");
+            const status = scope.querySelector?.("[data-pow-migration-status]");
+            if (!host || !this.migrationOpen) return;
+            try {
+                await loadScriptOnce(GSI_SCRIPT_SRC, {}, { cors: false });
+                const google = window.google?.accounts?.id;
+                if (!google) throw new Error("Google sign-in did not load.");
+                google.initialize({
+                    client_id: this.config.googleMigrationClientId,
+                    auto_select: false,
+                    callback: async (response) => {
+                        if (status) status.textContent = "Confirming…";
+                        try {
+                            await this.beginIdentityMigration(response?.credential || "");
+                            if (status) status.textContent = this.sessionId
+                                ? "Confirmed. Moving your account…"
+                                : "Confirmed. Now sign in above with Google or an email code, using the same address.";
+                            await afterGrant();
+                        } catch (error) {
+                            if (status) status.textContent = serverMessage(error);
+                        }
+                    },
+                });
+                host.innerHTML = "";
+                google.renderButton(host, { theme: "filled_black", size: "large", text: "continue_with", width: 300 });
+            } catch (error) {
+                if (status) status.textContent = "Google sign-in could not load. Check the connection, then try again.";
+            }
         }
 
         renderSignOutFailure(container) {
@@ -552,11 +674,13 @@
             }
         }
 
-        async request(kind, path, args = {}) {
+        // overrideToken: a google id token for the one r-c18 call that must
+        // be made as the member's google sign-in, never stored
+        async request(kind, path, args = {}, { overrideToken = "" } = {}) {
             if (!this.configured) {
                 throw new Error("Convex is not configured for this map.");
             }
-            const token = await this.getToken();
+            const token = overrideToken || await this.getToken();
             const endpoint = kind === "query" ? "query" : kind === "action" ? "action" : "mutation";
             const headers = {
                 "Content-Type": "application/json",
@@ -583,8 +707,8 @@
             }
             const message = payload.errorMessage || text || `Convex ${kind} failed.`;
             if (
-                response.status === 401
-                || /Authentication required|Unauthenticated|JWT|token/i.test(message)
+                !overrideToken
+                && (response.status === 401 || /Authentication required|Unauthenticated|JWT|token/i.test(message))
             ) {
                 this.signOut();
                 const authError = new Error("Your sign-in expired. Sign in again, then retry.");
@@ -607,7 +731,27 @@
         async claimInvite(initials) {
             return await this.request("mutation", "users:claimInvite", {
                 initials: initials || undefined,
+                migrationGrant: this.migrationGrant() || undefined,
             });
+        }
+
+        migrationGrant() {
+            if (this.heldMigrationGrant && this.heldMigrationGrant.expires_at > Date.now()) return this.heldMigrationGrant.grant;
+            return readMigrationGrant();
+        }
+
+        clearMigrationGrant() {
+            this.heldMigrationGrant = null;
+            writeMigrationGrant(null);
+        }
+
+        // r-c18: the member's google sign-in asks the backend for a grant to
+        // move its own row; the id token is used for this one call only
+        async beginIdentityMigration(googleCredential) {
+            const record = await this.request("mutation", "users:beginIdentityMigration", {}, { overrideToken: googleCredential });
+            this.heldMigrationGrant = { grant: record.grant, expires_at: record.expires_at };
+            writeMigrationGrant(record);
+            return record;
         }
 
         async listTasks(args) {

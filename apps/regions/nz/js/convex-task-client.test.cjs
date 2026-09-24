@@ -60,8 +60,15 @@ function harness({ session = null, cookie = "", responses = {}, failLoads = 0, f
     async getToken(options) { calls.getToken.push(options); return `jwt-for-${id}-${calls.getToken.length}`; },
   });
   if (session) Object.assign(session, makeSession(session.id, session.email));
+  const sessionValues = new Map();
+  const sessionStorage = {
+    getItem(key) { return sessionValues.has(key) ? sessionValues.get(key) : null; },
+    setItem(key, value) { sessionValues.set(key, String(value)); },
+    removeItem(key) { sessionValues.delete(key); },
+  };
   const window = {
     localStorage,
+    sessionStorage,
     location: { href: "https://religionmap.org/apps/regions/nz/verification.html?country=vu", origin: "https://religionmap.org", pathname: "/apps/regions/nz/verification.html", assign(url) { calls.assigned = url; } },
     getComputedStyle() { return { getPropertyValue(name) { return name === "--panel" ? " #17202a " : ""; } }; },
   };
@@ -76,6 +83,12 @@ function harness({ session = null, cookie = "", responses = {}, failLoads = 0, f
         if (failLoads > 0) { failLoads -= 1; setTimeout(() => script.onerror?.(), 0); return; }
         if (script.src.includes("@clerk/ui@")) window.__internal_ClerkUICtor = function ClerkUI() {};
         if (script.src.includes("@clerk/clerk-js@")) window.Clerk = clerk;
+        if (script.src.includes("accounts.google.com/gsi/client")) {
+          window.google = { accounts: { id: {
+            initialize(options) { calls.gsiInit = options; },
+            renderButton() { calls.gsiButtons = (calls.gsiButtons || 0) + 1; },
+          } } };
+        }
         setTimeout(() => script.onload?.(), 0);
       },
     },
@@ -93,7 +106,7 @@ function harness({ session = null, cookie = "", responses = {}, failLoads = 0, f
     },
   });
   vm.runInContext(fs.readFileSync(path.join(__dirname, "convex-task-client.js"), "utf8"), context, { filename: "convex-task-client.js" });
-  return { Client: window.PowConvexTaskClient, window, document, clerk, calls, values, makeSession };
+  return { Client: window.PowConvexTaskClient, window, document, clerk, calls, values, sessionValues, makeSession };
 }
 
 const config = { enabled: true, url: "https://example.convex.cloud", clerkPublishableKey: PUBLISHABLE_KEY };
@@ -101,7 +114,20 @@ const ok = (value) => ({ status: 200, body: { status: "success", value } });
 const refused = (message) => ({ status: 200, body: { status: "error", errorMessage: message } });
 const member = { _id: "user_1", email: "guy@example.org", roles: ["ra"], status: "active" };
 const tick = () => new Promise((resolve) => setTimeout(resolve, 5));
-const container = () => ({ innerHTML: "", children: [], replaceChildren(...nodes) { this.children = nodes; this.innerHTML = ""; }, querySelector(selector) { return this.innerHTML.includes("data-pow-sign-out") && selector === "[data-pow-sign-out]" ? (this.button ||= { addEventListener: (_type, handler) => { this.click = handler; } }) : null; } });
+const container = () => ({
+  innerHTML: "", children: [], parts: {},
+  replaceChildren(...nodes) { this.children = nodes; this.innerHTML = ""; },
+  querySelector(selector) {
+    if (selector === "[data-pow-sign-out]" && this.innerHTML.includes("data-pow-sign-out")) {
+      return (this.button ||= { addEventListener: (_type, handler) => { this.click = handler; } });
+    }
+    const name = selector.replace(/^\[data-pow-|\]$/g, "");
+    if (["google-confirm", "migration-status"].includes(name) && this.innerHTML.includes(`data-pow-${name}`)) {
+      return (this.parts[name] ||= { innerHTML: "", textContent: "" });
+    }
+    return null;
+  },
+});
 
 (async () => {
   // 1. configuration: the publishable key names the frontend api host; the
@@ -362,6 +388,94 @@ const container = () => ({ innerHTML: "", children: [], replaceChildren(...nodes
     assert.equal(keyed(PUBLISHABLE_KEY).clerkFrontendApi, HOST);
     await keyed(`pk_test_${encode("example-attacker.org")}`).renderSignInButton(container(), {});
     assert.equal(h.calls.scripts.length, 0, "no script loads for a refused key");
+  }
+
+  // 12. r-c18: an existing google member signed in to clerk is asked to
+  // confirm their google account; the google id token is used for the one
+  // grant request, the grant is held for the tab, presented on the claim,
+  // and cleared once spent
+  {
+    const confirm = "[Request ID: 1] Server Error Uncaught Error: This address belongs to an existing member who signed in with Google. Confirm that Google account first, then sign in again. at handler (x)";
+    const claims = [];
+    const responses = {
+      "users:claimInvite": (body) => { claims.push(body.args[0]); return body.args[0].migrationGrant ? ok("user_1") : refused(confirm); },
+      "users:me": ok(member),
+      "users:beginIdentityMigration": ok({ grant: "g-secret-1", expires_at: Date.now() + 600000 }),
+    };
+    const h = harness({ session: { id: "sess_m", email: "guy@example.org" }, cookie: "__client_uat=1", responses });
+    const client = new h.Client({ ...config, googleMigrationClientId: "google-client-id" });
+    const seen = [];
+    const host = container();
+    await client.renderSignInButton(host, { onSignedIn: (user) => seen.push(user._id) });
+    assert.match(host.innerHTML, /Confirm your existing account for the new sign-in/);
+    assert.match(host.innerHTML, /guy@example\.org/);
+    await tick();
+    assert.ok(h.calls.scripts.some((script) => script.src === "https://accounts.google.com/gsi/client"), "google's button loads for the step");
+    assert.equal(h.calls.gsiInit.client_id, "google-client-id");
+    assert.equal(h.calls.gsiButtons, 1);
+    // the member confirms with google
+    await h.calls.gsiInit.callback({ credential: "google-id-token" });
+    const grantRequest = h.calls.fetches.find((fetch) => fetch.body.path === "users:beginIdentityMigration");
+    assert.equal(grantRequest.headers.Authorization, "Bearer google-id-token", "the grant request is made as the google sign-in");
+    await tick();
+    assert.equal(claims.at(-1).migrationGrant, "g-secret-1", "the claim presents the grant");
+    assert.deepEqual(seen, ["user_1"], "and the member is in");
+    assert.equal(h.sessionValues.has("powMigrationGrant:v1"), false, "the spent grant is cleared");
+    assert.equal(client.migrationGrant(), "");
+  }
+
+  // 13. with the move closed, the same refusal is a plain note: no google step
+  {
+    const h = harness({ session: { id: "sess_c", email: "guy@example.org" }, cookie: "__client_uat=1", responses: { "users:claimInvite": refused("Confirm that Google account first, then sign in again.") } });
+    const client = new h.Client(config);
+    const host = container();
+    await client.renderSignInButton(host, {});
+    assert.doesNotMatch(host.innerHTML, /Confirm your existing account/);
+    assert.equal(h.calls.scripts.some((script) => script.src.includes("gsi/client")), false);
+  }
+
+  // 14. google first: before signing in, the folded step issues the grant,
+  // which the later clerk claim presents; an expired grant is never sent;
+  // a deliberate sign-out drops a held grant
+  {
+    const claims = [];
+    const responses = {
+      "users:claimInvite": (body) => { claims.push(body.args[0]); return ok("user_1"); },
+      "users:me": ok(member),
+      "users:beginIdentityMigration": ok({ grant: "g-secret-2", expires_at: Date.now() + 600000 }),
+    };
+    const h = harness({ responses });
+    const client = new h.Client({ ...config, googleMigrationClientId: "google-client-id" });
+    const host = container();
+    await client.renderSignInButton(host, {});
+    assert.equal(host.children.length, 2, "the clerk form and the folded google step");
+    const details = host.children[1];
+    assert.equal(details.tag, "details");
+    assert.match(details.innerHTML, /Used Google sign-in here before\?/);
+    details.querySelector = (selector) => selector.includes("google-confirm") ? (details.hostEl ||= { innerHTML: "" }) : (details.statusEl ||= { textContent: "" });
+    await client.mountGoogleConfirm(details, { afterGrant: () => {} });
+    await h.calls.gsiInit.callback({ credential: "google-id-token" });
+    assert.match(details.statusEl.textContent, /Confirmed\. Now sign in above/);
+    assert.equal(JSON.parse(h.sessionValues.get("powMigrationGrant:v1")).grant, "g-secret-2", "held for the tab");
+    await client.renderSignInButton(container(), {});
+    assert.equal(host.children[1], details, "a repaint keeps the same step");
+    h.clerk.setSession(h.makeSession("sess_g", "guy@example.org"));
+    await tick();
+    assert.equal(claims.at(-1).migrationGrant, "g-secret-2", "the clerk claim presents it");
+    // an expired grant stays home
+    h.sessionValues.set("powMigrationGrant:v1", JSON.stringify({ grant: "old", expires_at: Date.now() - 1 }));
+    client.heldMigrationGrant = null;
+    assert.equal(client.migrationGrant(), "");
+    assert.equal(h.sessionValues.has("powMigrationGrant:v1"), false);
+    // sign-out drops a held grant
+    h.sessionValues.set("powMigrationGrant:v1", JSON.stringify({ grant: "held", expires_at: Date.now() + 60000 }));
+    await client.signOut({ deliberate: true });
+    assert.equal(h.sessionValues.has("powMigrationGrant:v1"), false);
+    // with the move closed the signed-out card carries the clerk form only
+    const closed = new (harness().Client)(config);
+    const closedHost = container();
+    await closed.renderSignInButton(closedHost, {});
+    assert.equal(closedHost.children.length, 1);
   }
 
   console.log("convex-task-client: clerk sessions ok");

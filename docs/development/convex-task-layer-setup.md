@@ -147,8 +147,14 @@ npx convex env set CLERK_JWT_ISSUER_DOMAIN https://sure-lizard-50.clerk.accounts
 whose identifiers `claimInvite` may re-key to the Clerk issuer; unset or empty
 disables re-keying. It holds `https://accounts.google.com` only during
 Google's rollback week (R-C16); any other entry needs Joseph B's written
-authority (brief section 4.3.3). A re-keyed member's Google identifier stays
-in `user_identities`, so the rollback client still reaches the same row.
+authority (brief section 4.3.3). Re-keying also needs proof that the
+member holds the old Google account (R-C18, JB 2026-09-24): the portal's
+confirmation step calls `users:beginIdentityMigration` with a Google ID token
+(its client id comes from `googleMigrationClientId` in `convex-config.js`,
+removed when the move closes), and `claimInvite` spends the single-use,
+ten-minute grant it returns; a verified email alone never re-keys a row. A
+re-keyed member's Google identifier stays in `user_identities`, so the
+rollback client still reaches the same row.
 `users:adminResetAuthSubject` (CLI only) repairs a stuck account.
 
 Run `npx convex dev --once` after changing the provider configuration. That

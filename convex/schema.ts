@@ -138,6 +138,24 @@ export default defineSchema({
     .index("by_token_identifier", ["token_identifier"])
     .index("by_user", ["user_id"]),
 
+  // single-use proofs that the holder of a row's current (google) sign-in
+  // asked to move it to clerk (r-c18, jb 2026-09-24). only the sha-256 of the
+  // secret is stored; the secret goes once to the caller. bound to the row
+  // and to the identifier it was issued for; ten minutes; consumed in the
+  // re-keying transaction, or revoked when a newer grant is issued
+  identity_migration_grants: defineTable({
+    user_id: v.id("users"),
+    secret_hash: v.string(),
+    source_token_identifier: v.string(),
+    issued_at: v.number(),
+    expires_at: v.number(),
+    consumed_at: v.optional(v.number()),
+    consumed_by_token_identifier: v.optional(v.string()),
+    revoked_at: v.optional(v.number()),
+  })
+    .index("by_secret_hash", ["secret_hash"])
+    .index("by_user", ["user_id", "issued_at"]),
+
   // append-only record of role and status changes (brief 8.4). from_status
   // is absent when the event created the row
   role_events: defineTable({

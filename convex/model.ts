@@ -33,6 +33,10 @@ export const roleEventReason = v.union(
   v.literal("auth_provider_migration"),
   v.literal("auth_subject_reset"),
   v.literal("role_change"),
+  // r-c18 (jb 2026-09-24, option 1): a google-authenticated member proves
+  // possession of the account a re-keying moves away from
+  v.literal("migration_grant_issued"),
+  v.literal("migration_grant_consumed"),
 );
 
 // keep in step with the taskStatus validator below; used for per-status
