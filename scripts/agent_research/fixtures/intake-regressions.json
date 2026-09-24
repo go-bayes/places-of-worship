@@ -768,5 +768,143 @@
         1
       ]
     ]
+  },
+  {
+    "name": "screen: phone number as a new-place slug",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/place/place_ref",
+        "new:021-123-4567"
+      ]
+    ]
+  },
+  {
+    "name": "screen: hash of an email as a source name",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/source_name",
+        "735787717e06f7039a8052991cd3e57278eeb3b1313404632811a20bad238cb4"
+      ]
+    ]
+  },
+  {
+    "name": "screen: prefixed hash in a claim note",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/note",
+        "sha256:735787717e06f7039a8052991cd3e57278eeb3b1313404632811a20bad238cb4"
+      ]
+    ]
+  },
+  {
+    "name": "screen: forty-digit hex digest in the status basis",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/status_assessment/basis",
+        "735787717e06f7039a8052991cd3e57278eeb3b1"
+      ]
+    ]
+  },
+  {
+    "name": "screen: hash in the reviewer's limitations",
+    "valid": false,
+    "changes": [
+      [
+        "/review/limitations",
+        [
+          "735787717e06f7039a8052991cd3e57278eeb3b1313404632811a20bad238cb4"
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "screen: hash-shaped key in run usage",
+    "valid": false,
+    "changes": [
+      [
+        "/review_run/usage",
+        {
+          "735787717e06f7039a8052991cd3e57278eeb3b1313404632811a20bad238cb4": 1
+        }
+      ]
+    ]
+  },
+  {
+    "name": "screen: a digest in a designated hash field",
+    "valid": true,
+    "changes": [
+      [
+        "/submission_key",
+        "735787717e06f7039a8052991cd3e57278eeb3b1313404632811a20bad238cb4"
+      ]
+    ]
+  },
+  {
+    "name": "screen: email in the reviewer's reasoning",
+    "valid": false,
+    "changes": [
+      [
+        "/review/reasoning",
+        "Confirmed with office@example.org."
+      ]
+    ]
+  },
+  {
+    "name": "screen: phone in a claim check note",
+    "valid": false,
+    "changes": [
+      [
+        "/review/claim_checks/0/note",
+        "Rang 04 123 4567 to confirm."
+      ]
+    ]
+  },
+  {
+    "name": "screen: honorific name in the cultural sensitivity basis",
+    "valid": false,
+    "changes": [
+      [
+        "/review/cultural_sensitivity/basis",
+        "Rev'd Pat Example asked for care."
+      ]
+    ]
+  },
+  {
+    "name": "screen: email in the reviewer's limitations",
+    "valid": false,
+    "changes": [
+      [
+        "/review/limitations",
+        [
+          "Ask office@example.org for access."
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "screen: email in review run usage",
+    "valid": false,
+    "changes": [
+      [
+        "/review_run/usage",
+        {
+          "note": "billing office@example.org"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "screen: honorific name in the research client version",
+    "valid": false,
+    "changes": [
+      [
+        "/research_run/cli_version",
+        "built by Dr Pat Example"
+      ]
+    ]
   }
 ]

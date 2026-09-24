@@ -1,6 +1,7 @@
 import { canonicalJson, sha256 } from "./sha256.ts";
 import bundleSchema from "../../scripts/agent_research/schemas/agent-review-bundle.v1.json" with { type: "json" };
 import allowlistNzV1 from "../../scripts/agent_research/fixtures/allowlist-nz-v1.json" with { type: "json" };
+import screenPolicy from "../../scripts/agent_research/schemas/screen-policy.v1.json" with { type: "json" };
 
 // pinned source allowlists by version; a dossier naming any other version is refused.
 const ALLOWLISTS: Record<string, { allowlist_version: string; country_code: string; domains: string[] }> = { "nz-v1": allowlistNzV1 };
@@ -121,15 +122,21 @@ export function hasPersonalDetails(text: string): boolean {
 
 const HASH_SHAPED = /^(?:sha256:)?(?:[0-9a-f]{40}|[0-9a-f]{64})$/;
 
-// every string that could carry a personal detail, by path: each string value, and each object
-// key the schema does not declare (free-form maps such as seed_tags or usage). the only strings
-// left out are those the schema constrains to a closed vocabulary or a fixed shape (enum, const
-// or pattern) and values shaped as a hex hash. overrides walk a top-level key against another
-// schema. lib.py screened_strings and pow-cli screened_strings mirror this walk.
-export function screenedStrings(value: unknown, schemaNode: any, root: any, overrides: Record<string, [any, any]> = {}): Array<[string, string]> {
-  const found: Array<[string, string]> = [];
-  const join = (path: string, key: string) => (path === "" ? key : `${path}.${key}`);
-  const visit = (item: unknown, node: any, base: any, path: string): void => {
+// the audited fields of each record type that may hold a hex digest (screen-policy.v1).
+export const SCREEN_HASH_FIELDS: Record<string, ReadonlySet<string>> = Object.fromEntries(
+  Object.entries(screenPolicy.hash_fields as Record<string, string[]>).map(([name, fields]) => [name, new Set(fields)]),
+);
+
+type Screened = { path: string; norm: string; text: string; isKey: boolean };
+
+// every string value and every object key the schema does not declare, whatever the schema says
+// about the value: enum, const and pattern exempt nothing. norm is the path with every array
+// index written as []. overrides walk a top-level key against another schema. lib.py
+// _walk_screened and pow-cli screened_strings mirror this walk.
+function walkScreened(value: unknown, schemaNode: any, root: any, overrides: Record<string, [any, any]>, prefix: string): Screened[] {
+  const found: Screened[] = [];
+  const join = (base: string, key: string) => (base === "" ? key : `${base}.${key}`);
+  const visit = (item: unknown, node: any, base: any, path: string, norm: string): void => {
     let schema = node ?? {};
     while (typeof schema.$ref === "string" && schema.$ref.startsWith("#/")) {
       let target = base;
@@ -137,28 +144,45 @@ export function screenedStrings(value: unknown, schemaNode: any, root: any, over
       schema = target ?? {};
     }
     if (typeof item === "string") {
-      if (!("enum" in schema || "const" in schema || "pattern" in schema || HASH_SHAPED.test(item))) found.push([path, item]);
+      found.push({ path, norm, text: item, isKey: false });
       return;
     }
     if (Array.isArray(item)) {
-      item.forEach((child, index) => visit(child, schema.items, base, `${path}[${index}]`));
+      item.forEach((child, index) => visit(child, schema.items, base, `${path}[${index}]`, `${norm}[]`));
       return;
     }
     if (item === null || typeof item !== "object") return;
     const properties = schema.properties ?? {};
     for (const [key, child] of Object.entries(item)) {
-      const childPath = join(path, key);
+      const childPath = join(path, key), childNorm = join(norm, key);
       const override = path === "" && Object.hasOwn(overrides, key) ? overrides[key] : undefined;
-      if (override !== undefined) visit(child, override[0], override[1], childPath);
-      else if (Object.hasOwn(properties, key)) visit(child, properties[key], base, childPath);
+      if (override !== undefined) visit(child, override[0], override[1], childPath, childNorm);
+      else if (Object.hasOwn(properties, key)) visit(child, properties[key], base, childPath, childNorm);
       else {
-        found.push([`${childPath} (key)`, key]);
-        visit(child, {}, base, childPath);
+        found.push({ path: `${childPath} (key)`, norm: childNorm, text: key, isKey: true });
+        visit(child, {}, base, childPath, childNorm);
       }
     }
   };
-  visit(value, schemaNode, root, "");
+  visit(value, schemaNode, root, prefix, prefix);
   return found;
+}
+
+// every string value and undeclared key, by path.
+export function screenedStrings(value: unknown, schemaNode: any, root: any, overrides: Record<string, [any, any]> = {}, prefix = ""): Array<[string, string]> {
+  return walkScreened(value, schemaNode, root, overrides, prefix).map(({ path, text }) => [path, text]);
+}
+
+// the first screen failure as an error message naming only the path: a phone number, email
+// address or honorific-led name anywhere, or a hex-hash-shaped value outside a designated hash
+// field. paths under a skipped prefix are left to another check. lib.py screen_findings mirrors it.
+export function assertScreened(value: unknown, schemaNode: any, root: any, hashFields: ReadonlySet<string>, options: { overrides?: Record<string, [any, any]>; prefix?: string; skip?: string[] } = {}): void {
+  const skip = options.skip ?? [];
+  for (const { path, norm, text, isKey } of walkScreened(value, schemaNode, root, options.overrides ?? {}, options.prefix ?? "")) {
+    if (skip.some(s => norm === s || norm.startsWith(`${s}.`) || norm.startsWith(`${s}[`))) continue;
+    if (hasPersonalDetails(text)) throw new Error(`potential personal details in ${path} require human handling`);
+    if (HASH_SHAPED.test(text) && (isKey || !hashFields.has(norm))) throw new Error(`hash-shaped value in ${path} is outside a designated hash field`);
+  }
 }
 
 // one host policy shared with the Python and Rust validators: read the host as written (never
@@ -214,6 +238,8 @@ export function validateAgentReviewBundle(value: unknown, bundleJson: string): {
   if (typeof d.run_manifest.model_id_reported !== "string" || d.run_manifest.model_id_reported === "") throw new Error("dossier run manifest lacks the model id the provider reported");
   if (d.run_manifest.model_id_reported !== bundle.research_run.model_id_reported) throw new Error("dossier and research manifest disagree on the reported model");
   const locators = validateDossierRecord(d);
+  // the reviewer's text and both run manifests travel too; the dossier was screened above.
+  assertScreened(value, bundleSchema, bundleSchema, SCREEN_HASH_FIELDS["agent-review-bundle.v1"], { skip: ["dossier"] });
   const checked = new Set<string>();
   for (const check of bundle.review.claim_checks) {
     if (checked.has(check.claim_id) || locators.get(check.claim_id) !== check.source_url) throw new Error("review must cover every claim uniquely at its source_url");
@@ -241,9 +267,7 @@ export function validateDossierRecord(d: Record<string, any>): Map<string, strin
   if (!Number.isFinite(manifestStart) || !Number.isFinite(manifestEnd) || manifestEnd < manifestStart) throw new Error("invalid dossier run timestamp");
   // every free-text string of the dossier, not only claim text: a detail the runner's redaction
   // missed must not reach reviewers or Convex.
-  for (const [path, text] of screenedStrings(d, (bundleSchema as any).$defs.dossier, bundleSchema)) {
-    if (hasPersonalDetails(text)) throw new Error(`potential personal details in dossier.${path} require human handling`);
-  }
+  assertScreened(d, (bundleSchema as any).$defs.dossier, bundleSchema, SCREEN_HASH_FIELDS["agent-review-bundle.v1"], { prefix: "dossier" });
   const locators = new Map<string, string>();
   for (const claim of d.claims) {
     if (locators.has(claim.claim_id)) throw new Error("duplicate claim ID");

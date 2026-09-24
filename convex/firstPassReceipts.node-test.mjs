@@ -368,7 +368,7 @@ function everyString(record) {
   return out;
 }
 
-test("every string of the record and its dossier is screened unless its shape is fixed", async () => {
+test("every string of the record and its dossier is screened, whatever its schema", async () => {
   enable();
   const base = fixture("first-pass-all-fields.json");
   assert.equal((await ingestFirstPass._handler(context(), args(base))).created, true, "the all-fields fixture is valid");
@@ -378,6 +378,7 @@ test("every string of the record and its dossier is screened unless its shape is
     assert.ok(screened.has(path), path);
   }
   const refusedForPersonalDetails = new Set();
+  const refusedBySchema = new Set();
   const cases = everyString(base);
   assert.ok(cases.length > 150, `${cases.length} generated cases`);
   for (const { path, kind, inject } of cases) {
@@ -394,11 +395,14 @@ test("every string of the record and its dossier is screened unless its shape is
     } else {
       // a closed vocabulary, a fixed shape or a declared key refuses the text itself
       assert.match(error.message, /invalid (enum|constant|string)|unknown field|missing /, `${path}: ${error.message}`);
+      refusedBySchema.add(path);
     }
   }
-  // exactly the strings the walk screens were refused for personal details
+  // every string value is screened now, including pattern-constrained ones such as place_ref;
+  // each injected value is refused, by its schema where the schema closes it, otherwise by the screen
   const screenedValues = [...screened].filter((path) => !path.endsWith(" (key)"));
-  for (const path of screenedValues) assert.ok(refusedForPersonalDetails.has(path), `${path} not refused for personal details`);
+  for (const path of ["place_ref", "dossier.place.place_ref", "created_at"]) assert.ok(screened.has(path), `${path} not screened`);
+  for (const path of screenedValues) assert.ok(refusedForPersonalDetails.has(path) || refusedBySchema.has(path), `${path} not refused`);
 });
 
 test("python and typescript screen the same strings", async (t) => {

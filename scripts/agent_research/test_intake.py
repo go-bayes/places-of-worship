@@ -130,36 +130,37 @@ class IntakeTest(unittest.TestCase):
             self.assertEqual(payload['bundleHash'], hashlib.sha256(path.read_bytes()).hexdigest())
             self.assertNotIn('shell', run.call_args.kwargs)
 
-    def test_submit_retry_of_receipted_bytes_uses_the_read_only_lookup(self):
+    def test_submit_retry_of_receipted_bytes_uses_a_hash_only_lookup(self):
         b = fixture()
         b['review_run']['model_id_reported'] = None
-        receipt = {'receipt_id': 'r', 'task_id': 't', 'evidence_draft_id': 'd', 'agent_review_id': 'a'}
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / 'bundle.json'
             path.write_text(json.dumps(b))
             raw = path.read_bytes()
-            for found, code in ((receipt, 0), (None, 1)):
+            digest = hashlib.sha256(raw).hexdigest()
+            receipt = {'receipt_id': 'r', 'task_id': 't', 'evidence_draft_id': 'd', 'agent_review_id': 'a'}
+            for found, code in (({**receipt, 'stored_bundle_sha256': digest}, 0),
+                                ({**receipt, 'stored_bundle_sha256': '0' * 64}, 1),
+                                (None, 1)):
                 with self.subTest(found=found), patch('intake.subprocess.run') as run, \
                         contextlib.redirect_stdout(io.StringIO()) as out:
                     run.return_value.stdout = json.dumps(found)
                     self.assertEqual(intake.main(['submit', str(path), '--deployment', 'dev']), code)
-                    # one read-only lookup, never an ingestion, carrying the exact bytes and digest.
+                    # one read-only lookup carrying the digest alone: the rejected bytes never leave.
                     self.assertEqual(run.call_count, 1)
                     args = run.call_args.args[0]
-                    self.assertIn('internalAgentIntake:findReceiptForBytes', args)
+                    self.assertIn('internalAgentIntake:findReceiptByHash', args)
                     self.assertNotIn('internalAgentIntake:ingestBundle', args)
-                    payload = json.loads(args[-1])
-                    self.assertEqual(payload['bundleJson'].encode(), raw)
-                    self.assertEqual(payload['bundleHash'], hashlib.sha256(raw).hexdigest())
+                    self.assertEqual(json.loads(args[-1]), {'bundleHash': digest})
+                    self.assertNotIn(raw.decode()[:40], ' '.join(args))
                     report = json.loads(out.getvalue())
                     self.assertFalse(report['valid'])
-                    self.assertEqual(report.get('already_receipted', False), found is not None)
+                    self.assertEqual(report.get('already_receipted', False), code == 0)
             # validate never contacts the server, and submit to another deployment is refused first.
             with patch('intake.subprocess.run') as run, contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(intake.main(['validate', str(path)]), 1)
                 self.assertEqual(intake.main(['submit', str(path), '--deployment', 'prod']), 1)
                 run.assert_not_called()
-
 
 if __name__ == '__main__':
     unittest.main()

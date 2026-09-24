@@ -138,11 +138,13 @@ class DuplicateJSONKey(RunnerError):
 
 
 class RunRejected(RunnerError):
-    """A dossier or bundle refused by validation, with its run-row counters."""
+    """A dossier or bundle refused by validation, with its run-row counters and, when the
+    refusal is for personal details, the paths refused (never their text)."""
 
-    def __init__(self, message: str, counters: dict):
+    def __init__(self, message: str, counters: dict, refusal: dict | None = None):
         super().__init__(message)
         self.counters = counters
+        self.refusal = refusal
 
 
 class ProcessResult:
@@ -731,8 +733,22 @@ def _write_attempt(path: Path, envelope: dict) -> None:
         handle.write(json.dumps(envelope, ensure_ascii=False, sort_keys=True) + "\n")
 
 
+def _refusal(stage: str, findings: list[dict]) -> dict:
+    """the run-row record of a transport refused for personal details. interim policy: refuse
+    before transport and keep the original in this private run directory. the findings carry
+    path, detector and code-point span, never the text, so a later flag-and-hold review can
+    propose redactions from them."""
+    return {
+        "stage": stage,
+        "policy": "interim_refuse_before_transport",
+        "offset_unit": "unicode_code_point",
+        "paths": sorted({finding["path"] for finding in findings}),
+        "findings": findings,
+    }
+
+
 def _write_run_result(output_dir: Path, status: str, error: str | None = None, bundle: dict | None = None,
-                      counters: dict | None = None) -> None:
+                      counters: dict | None = None, refusal: dict | None = None) -> None:
     """Persist the controller outcome in the private run directory.
 
     Allowlist counters are null when the run failed before a dossier existed.
@@ -748,6 +764,9 @@ def _write_run_result(output_dir: Path, status: str, error: str | None = None, b
         "allowlist_version": (counters or {}).get("allowlist_version"),
         "allowlist_violations": (counters or {}).get("allowlist_violations"),
         "allowlist_violation_hosts": (counters or {}).get("allowlist_violation_hosts"),
+        # a transport refused for personal details: the stage and the refused paths, never the text.
+        # the original stays in this private run directory for a human to handle or a rerun.
+        "personal_detail_refusal": refusal,
     }
     path = output_dir / "run-result.json"
     path.write_text(json.dumps(result, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8")
@@ -918,6 +937,9 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
                                allowlist_version)
     # quarantined values become hashes in the private dossier copy; the reviewer and the bundle
     # see only the kind of each withheld detail and its claim, never a value or a hash.
+    # values the quarantine caught; nothing transported may contain one of them or its hash.
+    known_map = lib.known_values(dossier["personal_details_quarantine"]["items"])
+    known_values = list(known_map)
     lib.redact_quarantine(dossier)
     private_dossier = json.loads(json.dumps(dossier))
     lib.bundle_quarantine(dossier)
@@ -936,6 +958,12 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
         # the review is not bought for a dossier whose provider named no model.
         if not research_manifest.get("model_id_reported"):
             dossier_errors.append("research provider reported no model id")
+        leaked = lib.known_value_findings(dossier, known_values)
+        if leaked:
+            findings = [f for f in lib.screen_spans(dossier, {}, {}, frozenset(), known_map)
+                        if f["detector"].startswith("known_value")]
+            raise RunRejected("dossier rejected before review: a quarantined value or its hash remains",
+                              counters, _refusal("dossier", findings))
         if dossier_errors:
             raise RunRejected("dossier rejected before review: " + "; ".join(dossier_errors[:12]), counters)
         dossier_path = out / "dossier.json"
@@ -949,6 +977,18 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
             review_errors = lib.validate(review_output, _review_schema())
         if review_errors:
             raise RunnerError("review rejected before bundle: " + "; ".join(review_errors[:12]))
+        # screen everything that would travel, the reviewer's text and both run manifests included.
+        # contaminated output is refused, never silently redacted, since redaction could change what
+        # the reviewer said; the original stays in this private run directory.
+        outgoing = intake.build_bundle(dossier, review_output, research_manifest, review_manifest)
+        bundle_schema = json.loads(intake.BUNDLE_SCHEMA.read_text(encoding="utf-8"))
+        findings = lib.screen_spans(outgoing, bundle_schema, bundle_schema, intake.BUNDLE_HASH_FIELDS, known_map)
+        if findings:
+            refused_path = out / "review.refused.json"
+            refused_path.write_text(json.dumps(review_output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            refused_path.chmod(0o600)
+            raise RunRejected("bundle refused before transport: personal details or hashes outside designated fields",
+                              counters, _refusal("bundle", findings))
         review_path = out / "review.json"
         review_path.write_text(json.dumps(review_output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         if intake is None or not hasattr(intake, "write_bundle"):
@@ -984,7 +1024,8 @@ def main(argv: list[str] | None = None) -> int:
     except (RunnerError, OSError, UnicodeError, RecursionError, json.JSONDecodeError) as exc:
         if not (args.out / "bundle.json").exists():
             try:
-                _write_run_result(args.out, "failed", error=str(exc), counters=getattr(exc, "counters", None))
+                _write_run_result(args.out, "failed", error=str(exc), counters=getattr(exc, "counters", None),
+                                  refusal=getattr(exc, "refusal", None))
             except OSError:
                 pass
         print(f"internal runner refused: {exc}", file=sys.stderr)

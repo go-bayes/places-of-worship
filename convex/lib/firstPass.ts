@@ -1,7 +1,7 @@
 import firstPassSchema from "../../scripts/agent_research/schemas/agent-first-pass.v1.json" with { type: "json" };
 import bundleSchema from "../../scripts/agent_research/schemas/agent-review-bundle.v1.json" with { type: "json" };
 import { canonicalWireJson } from "./wireJson.ts";
-import { assertNoDuplicateJsonKeys, dateBounds, guard, hasPersonalDetails, publicUrl, schemaCheck, screenedStrings, validateStandaloneDossier } from "./agentIntake.ts";
+import { assertNoDuplicateJsonKeys, assertScreened, dateBounds, guard, publicUrl, schemaCheck, SCREEN_HASH_FIELDS, screenedStrings, validateStandaloneDossier } from "./agentIntake.ts";
 import { verifyObjectBytes } from "./objectReceipts.ts";
 
 // server-side validation of an agent-first-pass.v1 record, mirroring
@@ -97,9 +97,7 @@ export function validateFirstPassRecord(recordJson: string, recordHash: string):
   const floats = new Set<string>();
   canonicalWireJson(recordJson.slice(0, -1), floats);
   schemaCheck(parsed, firstPassSchema, "$", firstPassSchema, floats);
-  for (const [path, text] of screenedText(parsed)) {
-    if (hasPersonalDetails(text)) throw new Error(`potential personal details in ${path} require human handling`);
-  }
+  assertScreened(parsed, firstPassSchema, firstPassSchema, SCREEN_HASH_FIELDS["agent-first-pass.v1"], { overrides: SCHEMA_OVERRIDES });
   const record = parsed as FirstPassRecord;
   timestamp(record.created_at, "creation timestamp");
   if (new Set(record.parents).size !== record.parents.length) throw new Error("duplicate parent hash");

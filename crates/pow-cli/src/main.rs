@@ -33,6 +33,9 @@ const AGENT_ALLOWLISTS: &[(&str, &str)] = &[(
 // the bundle schema a dossier's free text is screened against, pinned at build time.
 const AGENT_BUNDLE_SCHEMA: &str =
     include_str!("../../../scripts/agent_research/schemas/agent-review-bundle.v1.json");
+// the audited fields that may hold a hex digest, shared with lib.py and agentIntake.ts.
+const SCREEN_POLICY: &str =
+    include_str!("../../../scripts/agent_research/schemas/screen-policy.v1.json");
 
 #[derive(Parser, Debug)]
 #[command(name = "pow")]
@@ -573,22 +576,34 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
     }
 
     let allowlist = agent_allowlist(dossier, errors);
-    // every free-text string of the dossier, not only claim text: a detail the runner's
-    // redaction missed must not reach reviewers or Convex.
+    // every string of the whole bundle, dossier, reviewer text and both run manifests: a
+    // phone number, email address or honorific-led name anywhere is refused, and so is a
+    // hex-hash-shaped value outside a designated hash field.
     let screen_root: Value =
         serde_json::from_str(AGENT_BUNDLE_SCHEMA).expect("pinned bundle schema is valid JSON");
+    let policy: Value = serde_json::from_str(SCREEN_POLICY).expect("screen policy is valid JSON");
+    let hash_fields: BTreeSet<String> = policy["hash_fields"]["agent-review-bundle.v1"]
+        .as_array()
+        .map(|fields| {
+            fields
+                .iter()
+                .filter_map(Value::as_str)
+                .map(str::to_owned)
+                .collect()
+        })
+        .unwrap_or_default();
     let mut screened = Vec::new();
-    screened_strings(
-        &Value::Object(dossier.clone()),
-        &screen_root["$defs"]["dossier"],
-        &screen_root,
-        "",
-        &mut screened,
-    );
-    for (path, text) in screened {
-        if contains_personal_details(&text) {
+    screened_strings(value, &screen_root, &screen_root, "", "", &mut screened);
+    for item in screened {
+        if contains_personal_details(&item.text) {
             errors.push(format!(
-                "/dossier/{path}: potential personal details require human handling"
+                "/{}: potential personal details require human handling",
+                item.path
+            ));
+        } else if is_hash_shaped(&item.text) && (item.is_key || !hash_fields.contains(&item.norm)) {
+            errors.push(format!(
+                "/{}: hash-shaped value is outside a designated hash field",
+                item.path
             ));
         }
     }
@@ -1068,16 +1083,34 @@ fn validate_partial_date(value: Option<&Value>, path: &str, errors: &mut Vec<Str
     }
 }
 
-/// Every string that could carry a personal detail, by path: each string value, and each
-/// object key the schema does not declare. Strings the schema constrains by enum, const or
-/// pattern, and values shaped as a hex hash, are left out. Mirrors
-/// convex/lib/agentIntake.ts screenedStrings and lib.py screened_strings.
+struct ScreenedString {
+    path: String,
+    norm: String,
+    text: String,
+    is_key: bool,
+}
+
+fn is_hash_shaped(text: &str) -> bool {
+    static HASH_SHAPED: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+    HASH_SHAPED
+        .get_or_init(|| {
+            regex::Regex::new(r"^(?:sha256:)?(?:[0-9a-f]{40}|[0-9a-f]{64})$")
+                .expect("valid hash pattern")
+        })
+        .is_match(text)
+}
+
+/// Every string value and every object key the schema does not declare, whatever the schema
+/// says about the value: enum, const and pattern exempt nothing. `norm` is the path with every
+/// array index written as []. Mirrors convex/lib/agentIntake.ts walkScreened and lib.py
+/// _walk_screened.
 fn screened_strings(
     value: &Value,
     schema: &Value,
     root: &Value,
     path: &str,
-    found: &mut Vec<(String, String)>,
+    norm: &str,
+    found: &mut Vec<ScreenedString>,
 ) {
     static NULL: Value = Value::Null;
     let mut schema = schema;
@@ -1092,45 +1125,49 @@ fn screened_strings(
         }
         schema = target;
     }
-    let join = |key: &str| {
-        if path.is_empty() {
+    let join = |base: &str, key: &str| {
+        if base.is_empty() {
             key.to_owned()
         } else {
-            format!("{path}.{key}")
+            format!("{base}.{key}")
         }
     };
     match value {
-        Value::String(text) => {
-            let constrained = ["enum", "const", "pattern"]
-                .iter()
-                .any(|keyword| schema.get(keyword).is_some());
-            static HASH_SHAPED: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
-            let hash_shaped = HASH_SHAPED
-                .get_or_init(|| {
-                    regex::Regex::new(r"^(?:sha256:)?(?:[0-9a-f]{40}|[0-9a-f]{64})$")
-                        .expect("valid hash pattern")
-                })
-                .is_match(text);
-            if !constrained && !hash_shaped {
-                found.push((path.to_owned(), text.clone()));
-            }
-        }
+        Value::String(text) => found.push(ScreenedString {
+            path: path.to_owned(),
+            norm: norm.to_owned(),
+            text: text.clone(),
+            is_key: false,
+        }),
         Value::Array(items) => {
             let item_schema = schema.get("items").unwrap_or(&NULL);
             for (index, item) in items.iter().enumerate() {
-                screened_strings(item, item_schema, root, &format!("{path}[{index}]"), found);
+                screened_strings(
+                    item,
+                    item_schema,
+                    root,
+                    &format!("{path}[{index}]"),
+                    &format!("{norm}[]"),
+                    found,
+                );
             }
         }
         Value::Object(map) => {
             let properties = schema.get("properties");
             for (key, child) in map {
+                let (child_path, child_norm) = (join(path, key), join(norm, key));
                 match properties.and_then(|properties| properties.get(key)) {
                     Some(child_schema) => {
-                        screened_strings(child, child_schema, root, &join(key), found)
+                        screened_strings(child, child_schema, root, &child_path, &child_norm, found)
                     }
                     None => {
-                        found.push((format!("{} (key)", join(key)), key.clone()));
-                        screened_strings(child, &NULL, root, &join(key), found);
+                        found.push(ScreenedString {
+                            path: format!("{child_path} (key)"),
+                            norm: child_norm.clone(),
+                            text: key.clone(),
+                            is_key: true,
+                        });
+                        screened_strings(child, &NULL, root, &child_path, &child_norm, found);
                     }
                 }
             }
@@ -1143,22 +1180,14 @@ fn contains_personal_details(text: &str) -> bool {
     contains_email(text) || contains_nz_phone(text) || contains_honorific_name(text)
 }
 
+/// Email addresses, with the pattern lib.py `_EMAIL` and agentIntake.ts use, so a trailing
+/// full stop or bracket does not hide an address from one validator alone.
 fn contains_email(text: &str) -> bool {
-    text.split_whitespace().any(|token| {
-        let token = token.trim_matches(|character: char| {
-            !character.is_ascii_alphanumeric() && !"._%+-@".contains(character)
-        });
-        let Some((local, domain)) = token.split_once('@') else {
-            return false;
-        };
-        !local.is_empty()
-            && domain.rsplit_once('.').is_some_and(|(_, suffix)| {
-                suffix.len() >= 2
-                    && suffix
-                        .chars()
-                        .all(|character| character.is_ascii_alphabetic())
-            })
-    })
+    static EMAIL: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+        regex::Regex::new(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
+            .expect("valid email expression")
+    });
+    EMAIL.is_match(text)
 }
 
 // detect the same NZ phone forms as the Python and TypeScript intake gates.

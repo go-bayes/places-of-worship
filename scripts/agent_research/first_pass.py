@@ -184,6 +184,7 @@ def copy_history(source: Path, destination: Path, digest: str):
 
 
 BUNDLE_SCHEMA = json.loads(intake.BUNDLE_SCHEMA.read_text())
+FIRST_PASS_HASH_FIELDS = lib.screen_hash_fields('agent-first-pass.v1')
 
 
 def screened_text(record):
@@ -202,8 +203,8 @@ def submission_errors(record):
     The local archive stays the operator's private working copy and keeps any
     record; a record that fails here stays there for human handling.
     """
-    errors = [f'potential personal details in {path} require human handling'
-              for path, text in screened_text(record) if lib.find_personal_details(text)]
+    errors = lib.screen_errors(lib.screen_findings(record, SCHEMA, SCHEMA, FIRST_PASS_HASH_FIELDS,
+                                                   {'dossier': (BUNDLE_SCHEMA['$defs']['dossier'], BUNDLE_SCHEMA)}))
     dossier = record['dossier']
     if dossier is not None:
         manifest = dossier['run_manifest']

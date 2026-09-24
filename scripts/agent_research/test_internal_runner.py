@@ -261,7 +261,7 @@ class ValidationAndAuditTest(unittest.TestCase):
     def _run_pair(self, tmp: Path, source_url: str, research_manifest: dict, review_manifest: dict,
                   research_backend: str = "claude", review_error: Exception | None = None,
                   review_source_url: str | None = None, claim_note: str = "", source_name: str = "Test source",
-                  prompts: list[str] | None = None) -> tuple[list[str], dict | None]:
+                  prompts: list[str] | None = None, review_changes: dict | None = None) -> tuple[list[str], dict | None]:
         """Run the runner with mocked providers; return the stages invoked and the run() result."""
         review_backend = "codex" if research_backend == "claude" else "claude"
         reader_output = {
@@ -288,11 +288,17 @@ class ValidationAndAuditTest(unittest.TestCase):
                 return reader_output, research_manifest
             if review_error is not None:
                 raise review_error
-            return {"schema_version": "agent-review.v1", "recommendation": "revise", "reasoning": "test",
+            review = {"schema_version": "agent-review.v1", "recommendation": "revise", "reasoning": "test",
                     "claim_checks": [{"claim_id": f"osm:way/123:{research_backend}:c01", "outcome": "supported",
                                        "source_url": review_source_url or source_url, "note": "test",
                                        "access_method": "opened"}],
-                    "cultural_sensitivity": {"flagged": False, "basis": "none"}, "limitations": []}, review_manifest
+                    "cultural_sensitivity": {"flagged": False, "basis": "none"}, "limitations": []}
+            for key, value in (review_changes or {}).items():
+                if key == "claim_note":
+                    review["claim_checks"][0]["note"] = value
+                else:
+                    review[key] = value
+            return review, review_manifest
 
         seed_path = tmp / "seed.json"
         seed_path.write_text(json.dumps(SEED), encoding="utf-8")
@@ -351,6 +357,46 @@ class ValidationAndAuditTest(unittest.TestCase):
                 self.assertNotIn(digest, text)
                 self.assertNotIn("Pat Example", text)
                 self.assertNotIn("value_sha256", text)
+
+    def test_contaminated_review_is_refused_kept_privately_and_recorded(self):
+        cases = [
+            ("email in the reasoning", {"reasoning": "Confirmed with office@example.org."}, "", "review.reasoning"),
+            ("known name in a check note", {"claim_note": "Pat Example confirmed the services."},
+             "The directory lists Rev'd Pat Example as vicar.", "review.claim_checks[0].note"),
+            ("hash of a known name", {"limitations": ["ref " + runner.lib.sha256("Rev'd Pat Example")]},
+             "The directory lists Rev'd Pat Example as vicar.", "review.limitations[0]"),
+        ]
+        for name, changes, claim_note, path in cases:
+            with self.subTest(name), tempfile.TemporaryDirectory() as tmp:
+                stages, run_result = self._run_pair(Path(tmp), "https://www.anglicanlife.org.nz/test-church",
+                                                    self._claude_manifest("research"),
+                                                    self._codex_manifest("review", "gpt-5.6-luna"),
+                                                    claim_note=claim_note, review_changes=changes)
+                out = Path(tmp) / "out"
+                self.assertEqual(stages, ["research", "review"])
+                self.assertEqual(run_result["status"], "failed")
+                self.assertEqual(run_result["personal_detail_refusal"]["stage"], "bundle")
+                refusal = run_result["personal_detail_refusal"]
+                self.assertIn(path, refusal["paths"])
+                self.assertEqual((refusal["policy"], refusal["offset_unit"]), ("interim_refuse_before_transport", "unicode_code_point"))
+                finding = next(f for f in refusal["findings"] if f["path"] == path)
+                self.assertEqual(set(finding), {"path", "detector", "start", "end"})
+                self.assertIn(finding["detector"], {"email", "known_value", "known_value_hash"})
+                refused_text = json.loads((Path(tmp) / "out" / "review.refused.json").read_text())
+                field = {"review.reasoning": lambda r: r["reasoning"],
+                         "review.claim_checks[0].note": lambda r: r["claim_checks"][0]["note"],
+                         "review.limitations[0]": lambda r: r["limitations"][0]}[path](refused_text)
+                # the span locates the detail in the privately kept original
+                self.assertTrue(field[finding["start"]:finding["end"]])
+                self.assertIn(field[finding["start"]:finding["end"]].lower(),
+                              {"office@example.org", "pat example", runner.lib.sha256("Rev'd Pat Example")})
+                # the run row names paths, never the refused text; the original stays private.
+                self.assertNotIn("example.org", json.dumps(run_result))
+                self.assertNotIn("Pat Example", json.dumps(run_result))
+                refused = out / "review.refused.json"
+                self.assertEqual(refused.stat().st_mode & 0o777, 0o600)
+                self.assertFalse((out / "bundle.json").exists())
+                self.assertFalse((out / "review.json").exists())
 
     def test_off_allowlist_locator_is_refused_before_review_and_counted(self):
         with tempfile.TemporaryDirectory() as tmp:
