@@ -12,8 +12,8 @@ const vm = require("node:vm");
 const PUBLISHABLE_KEY = "pk_test_c3VyZS1saXphcmQtNTAuY2xlcmsuYWNjb3VudHMuZGV2JA";
 const HOST = "sure-lizard-50.clerk.accounts.dev";
 
-function harness({ session = null, cookie = "", responses = {}, failLoads = 0 } = {}) {
-  const values = new Map([["powConvexAuth:v1", JSON.stringify({ token: "old-google-token" })]]);
+function harness({ session = null, cookie = "", responses = {}, failLoads = 0, failSignOuts = 0, storage } = {}) {
+  const values = storage || new Map([["powConvexAuth:v1", JSON.stringify({ token: "old-google-token" })]]);
   const localStorage = {
     getItem(key) { return values.has(key) ? values.get(key) : null; },
     setItem(key, value) { values.set(key, String(value)); },
@@ -28,7 +28,12 @@ function harness({ session = null, cookie = "", responses = {}, failLoads = 0 } 
     addListener(listener) { listeners.push(listener); listener({ session: clerk.session, user: clerk.user }); return () => {}; },
     mountSignIn(node, props) { calls.mountSignIn.push({ node, props }); node.mounted = true; },
     unmountSignIn(node) { calls.unmountSignIn += 1; node.mounted = false; },
-    async signOut() { calls.signOut += 1; clerk.setSession(null); },
+    async signOut() {
+      calls.signOut += 1;
+      // like clerk-js: the local session goes even when the server refuses
+      if (failSignOuts > 0) { failSignOuts -= 1; clerk.setSession(null); throw new Error("revocation refused"); }
+      clerk.setSession(null);
+    },
     setSession(next) {
       clerk.session = next;
       clerk.user = next ? { primaryEmailAddress: { emailAddress: next.email } } : null;
@@ -178,7 +183,8 @@ const container = () => ({ innerHTML: "", children: [], replaceChildren(...nodes
     const host = container();
     const signedOut = [];
     const errors = [];
-    await client.renderSignInButton(host, { onError: (error) => errors.push(error.message), onSignedOut: () => signedOut.push(true) });
+    client.setLifecycle({ onSignedOut: (event) => signedOut.push(event?.deliberate ? "deliberate" : "ended") });
+    await client.renderSignInButton(host, { onError: (error) => errors.push(error.message) });
     assert.equal(h.calls.mountSignIn.length, 0, "a signed-in session gets no second sign-in form");
     assert.match(host.innerHTML, /stranger@example\.org/);
     assert.match(host.innerHTML, /no project access yet/);
@@ -188,7 +194,7 @@ const container = () => ({ innerHTML: "", children: [], replaceChildren(...nodes
     assert.equal(h.calls.fetches.filter((fetch) => fetch.body.path === "users:claimInvite").length, 1, "the refused claim is not retried on every render");
     await host.click();
     assert.equal(h.calls.signOut, 1, "the button ends the clerk session");
-    assert.equal(signedOut.length, 1, "and returns the page to the sign-in card");
+    assert.deepEqual(signedOut, ["deliberate"], "and returns the page to the sign-in card");
     await client.renderSignInButton(host, {});
     assert.equal(h.calls.mountSignIn.length, 1);
   }
@@ -198,12 +204,13 @@ const container = () => ({ innerHTML: "", children: [], replaceChildren(...nodes
     const h = harness({ session: { id: "sess_4", email: "guy@example.org" }, cookie: "__client_uat=1", responses: { "users:claimInvite": ok("user_1"), "users:me": ok(member) } });
     const client = new h.Client(config);
     const ended = [];
-    await client.renderSignInButton(container(), { onSignedOut: () => ended.push(true) });
+    client.setLifecycle({ onSignedOut: (event) => ended.push(event?.deliberate ? "deliberate" : "ended") });
+    await client.renderSignInButton(container(), {});
     await tick();
     assert.equal(client.signedIn, true);
     h.clerk.setSession(null);
     assert.equal(client.signedIn, false);
-    assert.equal(ended.length, 1);
+    assert.deepEqual(ended, ["ended"]);
   }
 
   // 6. the sign-out button ends the clerk session without a second signal;
@@ -212,7 +219,8 @@ const container = () => ({ innerHTML: "", children: [], replaceChildren(...nodes
     const h = harness({ session: { id: "sess_5", email: "guy@example.org" }, cookie: "__client_uat=1", responses: { "users:claimInvite": ok("user_1"), "users:me": ok(member), "tasks:listTasks": { status: 401, body: { errorMessage: "Authentication required." } } } });
     const client = new h.Client(config);
     const ended = [];
-    await client.renderSignInButton(container(), { onSignedOut: () => ended.push(true) });
+    client.setLifecycle({ onSignedOut: (event) => ended.push(event?.deliberate ? "deliberate" : "ended") });
+    await client.renderSignInButton(container(), {});
     await tick();
     await assert.rejects(client.listTasks({}), (error) => error.authExpired === true);
     assert.equal(client.user, null);
@@ -240,6 +248,75 @@ const container = () => ({ innerHTML: "", children: [], replaceChildren(...nodes
     await tick();
     assert.equal(h.calls.mountSignIn.length, 1, "the retry loads clerk and shows the form");
     assert.equal(host.children[0], h.calls.mountSignIn[0].node);
+  }
+
+  // 8. a session restored on load, never shown the card, still hears of a
+  // sign-out in another tab (astra m1)
+  {
+    const h = harness({ session: { id: "sess_8", email: "guy@example.org" }, cookie: "__client_uat=1", responses: { "users:claimInvite": ok("user_1"), "users:me": ok(member) } });
+    const client = new h.Client(config);
+    const ended = [];
+    client.setLifecycle({ onSignedOut: (event) => ended.push(event?.deliberate ? "deliberate" : "ended") });
+    assert.equal((await client.restoreSession())._id, "user_1");
+    assert.equal(h.calls.mountSignIn.length, 0, "no card was rendered");
+    h.clerk.setSession(null);
+    assert.deepEqual(ended, ["ended"]);
+    assert.equal(client.signedIn, false);
+  }
+
+  // 9. clerk refuses the sign-out: the promise rejects, the session stays
+  // known, the card offers the retry instead of re-admitting the user, a
+  // reload retries before restoring, and the retry reports completion only
+  // once clerk confirms (sol m2, astra m3)
+  {
+    const storage = new Map();
+    const responses = { "users:claimInvite": ok("user_1"), "users:me": ok(member) };
+    const h = harness({ session: { id: "sess_9", email: "guy@example.org" }, cookie: "__client_uat=1", responses, failSignOuts: 1, storage });
+    const client = new h.Client(config);
+    const ended = [];
+    client.setLifecycle({ onSignedOut: (event) => ended.push(event?.deliberate ? "deliberate" : "ended") });
+    await client.restoreSession();
+    const claims = () => h.calls.fetches.filter((fetch) => fetch.body.path === "users:claimInvite").length;
+    const claimsBefore = claims();
+    await assert.rejects(client.signOut({ deliberate: true }), (error) => error.signOutFailed === true && /may still be signed in/.test(error.message));
+    assert.equal(client.signedIn, false, "the page shows nobody");
+    assert.equal(client.sessionId, "sess_9", "the unrevoked session is still known");
+    assert.equal(storage.get("powSignOutPending:v1"), "sess_9", "a reload will retry");
+    assert.deepEqual(ended, [], "no completion reported");
+    const host = container();
+    await client.renderSignInButton(host, {});
+    assert.match(host.innerHTML, /Sign-out did not finish/);
+    assert.match(host.innerHTML, /Try sign-out again/);
+    assert.equal(claims(), claimsBefore, "the card does not sign the user back in");
+    // a reload in the same browser retries the sign-out instead of restoring
+    const reload = harness({ session: { id: "sess_9", email: "guy@example.org" }, cookie: "__client_uat=1", responses, failSignOuts: 1, storage });
+    const reloaded = new reload.Client(config);
+    assert.equal(await reloaded.restoreSession(), null, "a pending sign-out is never undone by a reload");
+    assert.equal(reload.calls.signOut, 1);
+    assert.equal(reload.calls.fetches.length, 0, "and the backend is not asked to admit the session");
+    // the retry in the first page succeeds this time, although clerk had
+    // already dropped its local copy of the session
+    assert.equal(h.clerk.session, null);
+    await host.click();
+    assert.equal(h.calls.signOut, 2);
+    assert.deepEqual(ended, ["deliberate"], "completion reported once clerk confirms");
+    assert.equal(storage.has("powSignOutPending:v1"), false);
+  }
+
+  // 10. the publishable key must name an approved clerk host (sol and astra, low)
+  {
+    const h = harness();
+    const encode = (host) => Buffer.from(`${host}$`).toString("base64");
+    const keyed = (key) => new h.Client({ ...config, clerkPublishableKey: key });
+    assert.equal(keyed(`pk_test_${encode("example-attacker.org")}`).configured, false, "an unlisted host is refused");
+    assert.equal(keyed(`pk_test_${encode("sure-lizard-50.clerk.accounts.dev.example.org")}`).configured, false);
+    assert.equal(keyed(`pk_test_${Buffer.from("sure-lizard-50.clerk.accounts.dev").toString("base64")}`).configured, false, "no trailing $");
+    assert.equal(keyed(`pk_test_${encode("sure-lizard-50.clerk.accounts.dev$x")}`).configured, false);
+    assert.equal(keyed(`sk_test_${encode(HOST)}`).configured, false, "a secret-key prefix is refused");
+    assert.equal(keyed(`pk_test_${encode(HOST)}<script>`).configured, false);
+    assert.equal(keyed(PUBLISHABLE_KEY).clerkFrontendApi, HOST);
+    await keyed(`pk_test_${encode("example-attacker.org")}`).renderSignInButton(container(), {});
+    assert.equal(h.calls.scripts.length, 0, "no script loads for a refused key");
   }
 
   console.log("convex-task-client: clerk sessions ok");

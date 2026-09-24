@@ -13,6 +13,14 @@
     const CLERK_JS_MAJOR = "6";
     const CLERK_UI_MAJOR = "1";
     const LEGACY_AUTH_STORAGE_KEY = "powConvexAuth:v1";
+    // a sign-out clerk has not confirmed, by session id: a reload retries it
+    // rather than restoring the session (shared devices)
+    const SIGN_OUT_PENDING_KEY = "powSignOutPending:v1";
+    const SIGN_OUT_FAILED = "Sign-out did not finish, so this browser may still be signed in. Try again before you leave the device.";
+    // the clerk frontend api hosts this project loads scripts from; a key
+    // naming any other host is refused. add the production instance's host
+    // (for example clerk.religionmap.org) when it is activated
+    const CLERK_FRONTEND_API_HOSTS = ["sure-lizard-50.clerk.accounts.dev"];
     const NO_ACCESS_HELP = "This address has no project access yet. Sign out and use the invited address, or ask the project lead to invite this one.";
     // the claimInvite refusals a person can act on (brief 4.3.2)
     const ACCESS_REFUSED = /No pending project invitation|Verify this email address|bound to another sign-in method|requires a verified email/i;
@@ -43,15 +51,35 @@
     }
 
     // a publishable key is pk_test_ or pk_live_ and the base64 of the
-    // instance's frontend api host followed by "$"
+    // instance's frontend api host followed by "$". the host must be one
+    // this project approved, since clerk's scripts load from it
     function clerkFrontendApi(publishableKey) {
-        const encoded = String(publishableKey || "").split("_").slice(2).join("_");
-        if (!encoded) return "";
+        const match = /^pk_(test|live)_([A-Za-z0-9+/]+={0,2})$/.exec(String(publishableKey || ""));
+        if (!match) return "";
         try {
-            const host = atob(encoded).replace(/\$$/, "");
-            return /^[a-z0-9.-]+$/i.test(host) ? host : "";
+            const decoded = atob(match[2]);
+            if (!decoded.endsWith("$") || decoded.indexOf("$") !== decoded.length - 1) return "";
+            const host = decoded.slice(0, -1).toLowerCase();
+            return CLERK_FRONTEND_API_HOSTS.includes(host) ? host : "";
         } catch (error) {
             return "";
+        }
+    }
+
+    function readPendingSignOut() {
+        try {
+            return window.localStorage?.getItem(SIGN_OUT_PENDING_KEY) || "";
+        } catch (error) {
+            return "";
+        }
+    }
+
+    function writePendingSignOut(sessionId) {
+        try {
+            if (sessionId) window.localStorage?.setItem(SIGN_OUT_PENDING_KEY, sessionId);
+            else window.localStorage?.removeItem(SIGN_OUT_PENDING_KEY);
+        } catch (error) {
+            // blocked storage: the retry lives in this page only
         }
     }
 
@@ -133,17 +161,24 @@
                 borderRadius: "6px",
             },
             elements: {
-                // the card's own heading and frame are ours; clerk supplies
-                // the choices inside it
+                // the card's frame is ours; clerk's header stays, since its
+                // later steps name the address a code went to
                 rootBox: { width: "100%" },
                 cardBox: { width: "100%", boxShadow: "none", border: "none" },
                 card: { boxShadow: "none", border: "none", padding: "0", background: "transparent" },
-                header: { display: "none" },
+                headerTitle: { fontSize: "1rem" },
                 // 44 px targets on a first-time contributor's path (r-u6)
-                socialButtonsBlockButton: { minHeight: "44px" },
-                formButtonPrimary: { minHeight: "44px", fontSize: "1rem" },
-                formFieldInput: { minHeight: "44px", fontSize: "1rem" },
-                otpCodeFieldInput: { minHeight: "44px" },
+                socialButtonsBlockButton: {
+                    minHeight: "44px",
+                    backgroundColor: themeToken("--panel-2", "#1e2a36"),
+                    boxShadow: `0 0 0 1px ${themeToken("--control-line", "#5b6b7d")}`,
+                    color: themeToken("--ink", "#e8edf3"),
+                },
+                socialButtonsBlockButtonText: { color: themeToken("--ink", "#e8edf3"), fontWeight: "600" },
+                formButtonPrimary: { minHeight: "44px", width: "100%", fontSize: "1rem" },
+                otpCodeFieldInput: { minHeight: "44px", boxShadow: `0 0 0 1px ${themeToken("--control-line", "#5b6b7d")}` },
+                formFieldInput: { minHeight: "44px", fontSize: "1rem", boxShadow: `0 0 0 1px ${themeToken("--control-line", "#5b6b7d")}` },
+                formResendCodeLink: { minHeight: "40px" },
                 footerActionLink: { minHeight: "40px", display: "inline-flex", alignItems: "center" },
             },
         };
@@ -161,10 +196,20 @@
             this.signInNode = null;
             this.completion = null;
             this.signOutPromise = null;
+            this.signOutFailure = null;
+            // lifecycle callbacks the page registers once, whether the user
+            // came back through restoreSession or the sign-in card
+            this.lifecycle = {};
             // the session whose claim the backend refused, and why: the card
             // then says so rather than asking again on every render
             this.claimFailure = null;
             removeLegacyToken();
+        }
+
+        // onSignedOut({ deliberate }): the session ended, in another tab, by
+        // expiry, or by a sign-out this client completed
+        setLifecycle(handlers = {}) {
+            this.lifecycle = { ...handlers };
         }
 
         get configured() {
@@ -246,7 +291,7 @@
             this.claimFailure = null;
             this.releaseSignInElement();
             if (!nextSessionId) {
-                if (hadSession) this.signInOptions.onSignedOut?.();
+                if (hadSession) this.lifecycle.onSignedOut?.({ deliberate: false });
                 return;
             }
             if (this.signInHost) {
@@ -296,25 +341,43 @@
             return promise;
         }
 
-        // deliberate: the sign-out button, which ends the clerk session.
+        // deliberate: the sign-out button, which ends the clerk session and
+        // resolves only once clerk confirms it; a refusal rejects, the card
+        // then offers the retry and a reload retries before restoring.
         // otherwise only the project user is forgotten, and the card asks
         // the backend again with the session clerk still holds
         signOut({ deliberate = false } = {}) {
             this.user = null;
             this.claimFailure = null;
             if (!deliberate) return Promise.resolve();
+            if (this.signOutPromise) return this.signOutPromise;
+            const clerk = this.clerk;
+            const sessionId = this.sessionId || clerk?.session?.id || "";
             // the page may repaint its card at once; the card waits for this
             // so it never re-admits the session being ended
             this.sessionId = "";
+            this.signOutFailure = null;
             this.releaseSignInElement();
-            const clerk = this.clerk;
+            if (sessionId) writePendingSignOut(sessionId);
             this.signOutPromise = (async () => {
-                if (!clerk?.session) return;
+                if (!clerk || !sessionId) {
+                    writePendingSignOut("");
+                    return;
+                }
                 try {
                     await clerk.signOut({ redirectUrl: window.location.href });
                 } catch (error) {
-                    // the session may already have ended elsewhere
+                    // clerk drops its local copy of the session even when the
+                    // server refuses to end it (seen 2026-09-24 with a 422),
+                    // and a reload would bring the session back; so any
+                    // refusal is a failure, whatever clerk.session says now
+                    this.sessionId = clerk.session?.id || sessionId;
+                    this.signOutFailure = { sessionId: this.sessionId };
+                    const failure = new Error(SIGN_OUT_FAILED);
+                    failure.signOutFailed = true;
+                    throw failure;
                 }
+                writePendingSignOut("");
             })().finally(() => {
                 this.signOutPromise = null;
             });
@@ -329,6 +392,12 @@
             try {
                 await this.ensureClerkLoaded();
                 if (!this.sessionId) return null;
+                // a sign-out that never finished is finished first, never
+                // silently undone by a reload
+                if (readPendingSignOut() === this.sessionId) {
+                    await this.signOut({ deliberate: true }).catch(() => {});
+                    return null;
+                }
                 return await this.completeSignIn({ ...this.signInOptions, onSignedIn: undefined, onError: undefined });
             } catch (error) {
                 return null;
@@ -352,7 +421,7 @@
                 if (this.signInHost === container) this.renderLoadFailure(container, options);
                 return;
             }
-            if (this.signOutPromise) await this.signOutPromise;
+            if (this.signOutPromise) await this.signOutPromise.catch(() => {});
             // the page repaints its card often; only the newest host counts
             if (this.signInHost !== container) return;
             if (!this.sessionId) {
@@ -360,6 +429,10 @@
                 return;
             }
             if (this.user) return;
+            if (this.signOutFailure?.sessionId === this.sessionId || readPendingSignOut() === this.sessionId) {
+                this.renderSignOutFailure(container);
+                return;
+            }
             if (this.claimFailure?.sessionId !== this.sessionId) {
                 container.innerHTML = `<p class="pow-account-note">Checking project access…</p>`;
                 try {
@@ -422,10 +495,27 @@
                     <button type="button" data-pow-sign-out>Sign out</button>
                 </div>
             `;
-            container.querySelector("[data-pow-sign-out]")?.addEventListener("click", async () => {
+            container.querySelector("[data-pow-sign-out]")?.addEventListener("click", () => this.retrySignOut(container));
+        }
+
+        renderSignOutFailure(container) {
+            container.innerHTML = `
+                <div class="pow-account-note" role="alert">
+                    <span>${escapeText(SIGN_OUT_FAILED)}</span>
+                    <button type="button" data-pow-sign-out>Try sign-out again</button>
+                </div>
+            `;
+            container.querySelector("[data-pow-sign-out]")?.addEventListener("click", () => this.retrySignOut(container));
+        }
+
+        async retrySignOut(container) {
+            try {
                 await this.signOut({ deliberate: true });
-                this.signInOptions.onSignedOut?.();
-            });
+            } catch (error) {
+                if (this.signInHost === container) this.renderSignOutFailure(container);
+                return;
+            }
+            this.lifecycle.onSignedOut?.({ deliberate: true });
         }
 
         // a fresh short-lived convex token per request; clerk caches it for

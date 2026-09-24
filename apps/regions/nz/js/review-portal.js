@@ -41,6 +41,16 @@
     const countryCode = country.code;
     const countryName = country.label;
     const client = new window.PowConvexTaskClient(config);
+    // registered before any restore: a session restored on load and then
+    // ended in another tab, by expiry, or by the card's retried sign-out
+    // clears the queue and the open task (c1)
+    client.setLifecycle?.({
+        onSignedOut: ({ deliberate } = {}) => showSignedOut(deliberate
+            ? "Signed out. Sign in again to review submitted evidence."
+            : state.user
+                ? "Your sign-in ended. Sign in again to review submitted evidence."
+                : "Sign in to review submitted evidence."),
+    });
     const state = {
         user: null,
         queue: [],
@@ -353,10 +363,6 @@ function human(value) {
                 onError: (error) => {
                     setStatus(els.authStatus, error.message || "Sign-in failed.", "error");
                 },
-                // the clerk session ended in another tab or expired
-                onSignedOut: () => showSignedOut(state.user
-                    ? "Your sign-in ended. Sign in again to review submitted evidence."
-                    : "Sign in to review submitted evidence."),
             }).catch((error) => {
                 setStatus(els.authStatus, error.message || "Sign-in failed.", "error");
             });
@@ -373,9 +379,17 @@ function human(value) {
                 <button id="signOut" class="tertiary" type="button">Sign out</button>
             </div>
         `;
-        document.getElementById("signOut").addEventListener("click", () => {
-            client.signOut({ deliberate: true });
-            showSignedOut("Signed out. Sign in again to review submitted evidence.");
+        document.getElementById("signOut").addEventListener("click", async () => {
+            const signingOut = client.signOut({ deliberate: true });
+            showSignedOut("Signing out…");
+            try {
+                await signingOut;
+                renderEmptyDetail("Signed out. Sign in again to review submitted evidence.");
+            } catch (error) {
+                // the sign-in card shows the failure and the retry
+                renderEmptyDetail(error.message || "Sign-out did not finish.");
+                setStatus(els.authStatus, error.message || "Sign-out did not finish.", "error");
+            }
         });
     }
 

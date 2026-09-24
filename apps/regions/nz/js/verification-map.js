@@ -1922,6 +1922,11 @@ class NzVerificationMap {
                 countryCode: COUNTRY_CONFIG.countryCode,
             })
             : null;
+        // registered before any restore, so a session restored on load and
+        // then ended in another tab still clears the page (c1)
+        this.backend?.setLifecycle?.({
+            onSignedOut: ({ deliberate } = {}) => this.onBackendSessionEnded({ deliberate }),
+        });
         this.backendUser = null;
         this.backendTasksById = new Map();
         this.latestDraftsByTaskId = new Map();
@@ -2190,7 +2195,6 @@ class NzVerificationMap {
             this.backend.renderSignInButton(document.getElementById("clerkSignInHost"), {
                 initials: this.getRaInitials(),
                 onSignedIn: user => this.onBackendSignedIn(user),
-                onSignedOut: () => this.onBackendSessionEnded(),
                 onError: error => {
                     this.backendLastError = error.message || "Could not sign in to the shared backend.";
                     this.renderBackendPanel();
@@ -2413,46 +2417,81 @@ class NzVerificationMap {
     }
 
     // the clerk session ended elsewhere (another tab signed out, or the
-    // session expired): the card returns, the chosen activity is kept
-    onBackendSessionEnded() {
-        if (this.backendUser) {
-            this.backendUser = null;
-            this.backendLastError = "Your sign-in ended. Sign in again to carry on.";
+    // session expired): the page keeps nothing of the person on screen, as
+    // on a deliberate sign-out, but their unsent drafts stay on the device
+    // keyed to them and come back only when they sign in again; the chosen
+    // activity is kept for the return
+    onBackendSessionEnded({ deliberate = false } = {}) {
+        const wasSignedIn = Boolean(this.backendUser);
+        this.clearSignedInState({ deliberate });
+        // an ended session is not a connection fault: the dot reads signed out
+        this.signedOutDeliberately = true;
+        this.backendLastError = deliberate
+            ? "Signed out. On a shared computer, also sign out of Google in the browser if you used it."
+            : wasSignedIn ? "Your sign-in ended. Sign in again to carry on." : "";
+        this.renderBackendPanel();
+        this.applyFilters();
+    }
+
+    async signOutBackend() {
+        // started first, so the repainted card waits for clerk's answer
+        // rather than re-admitting the session being ended
+        const signingOut = this.backend?.signOut({ deliberate: true });
+        this.clearSignedInState({ deliberate: true });
+        this.backendLastError = "Signing out…";
+        this.renderBackendPanel();
+        this.applyFilters();
+        try {
+            await signingOut;
+            this.backendLastError = "Signed out. On a shared computer, also sign out of Google in the browser if you used it.";
+        } catch (error) {
+            // the card itself says so and offers the retry
+            // (convex-task-client.js); a failure the card cannot show stays here
+            this.backendLastError = error.signOutFailed ? "" : (error.message || "Sign-out did not finish.");
+            this.signedOutDeliberately = Boolean(error.signOutFailed);
         }
         this.renderBackendPanel();
     }
 
-    signOutBackend() {
+    // what a signed-in person leaves on the page goes on every sign-out, so
+    // the next person at the screen finds none of it. a deliberate sign-out
+    // also deletes the device copies and forgets the activity; an ended
+    // session keeps the device copies, which carry their owner's id
+    clearSignedInState({ deliberate }) {
         const signedOutUserId = this.backendUser?._id || this.backend?.user?._id || "";
-        this.backend?.signOut({ deliberate: true });
+        // a deliberate exit drops the kept pin while the owner is still known;
+        // after a session ends the owner is gone first, so the pin stays
+        if (deliberate && this.pinMode) this.exitPinMode();
         this.backendUser = null;
-        this.signedOutDeliberately = true;
-        // a deliberate sign-out forgets the chosen activity; an expired
-        // session (backendUser cleared elsewhere) keeps it for the return
+        this.signedOutDeliberately = deliberate;
         if (this.pinMode) this.exitPinMode();
-        this.portalMode = null;
-        try {
-            sessionStorage.removeItem(PORTAL_MODE_KEY);
-        } catch (error) {
-            // storage unavailable: nothing to forget
+        if (deliberate) {
+            this.portalMode = null;
+            try {
+                sessionStorage.removeItem(PORTAL_MODE_KEY);
+            } catch (error) {
+                // storage unavailable: nothing to forget
+            }
         }
         this.backendTasksById.clear();
         this.latestDraftsByTaskId.clear();
         this.myWorkItems = [];
         this.myNominationItems = [];
         this.revisionDraftIdsByTaskId.clear();
-        // sign-out discards the form with the panel; a lingering dirty flag
-        // would fire beforeunload against a page showing no form at all
+        // the form leaves with the panel; a lingering dirty flag would fire
+        // beforeunload against a page showing no form at all
         this.clearFormDirty();
-        this.clearFormSnapshots();
-        // pr-e: period cards leave with the session; on a shared computer
-        // the next user must not find them
-        this.clearAllGuidedPeriods(signedOutUserId);
-        this.backendLastError = "Signed out. On a shared computer, also sign out of Google in the browser if you used it.";
+        this.formSnapshotsByTaskId.clear();
+        this.guidedPeriodsByTaskId.clear();
+        if (deliberate) {
+            this.clearFormSnapshots();
+            // pr-e: period cards leave with the session; on a shared
+            // computer the next user must not find them
+            this.clearAllGuidedPeriods(signedOutUserId);
+        }
         if (ASSIGNMENT_MODE) {
             this.tasks = [];
             this.filteredTasks = [];
-            this.selectedTask = null;
             this.assignedAvailableCount = 0;
             this.markerLayer?.clearLayers();
             const snapshotEl = document.getElementById("snapshotId");
@@ -2461,10 +2500,10 @@ class NzVerificationMap {
                     ? `${COUNTRY_CONFIG.countryName} | sign in to add or revise places`
                     : `${ASSIGNMENT_BATCH_ID} | sign in to load assigned tasks`;
             }
-            this.renderInitialDetail();
         }
-        this.renderBackendPanel();
-        this.applyFilters();
+        // the open task's evidence and any typed form leave the screen
+        this.selectedTask = null;
+        this.renderInitialDetail();
     }
 
     async init() {
@@ -6689,10 +6728,20 @@ class NzVerificationMap {
         return `powFormSnapshot:${COUNTRY_CONFIG.countryCode}:${taskId}`;
     }
 
+    // unsent work on the device carries its owner's user id and is read
+    // back only for that user (c1: a session can end with the page open)
+    draftOwnerId() {
+        return this.backendUser?._id || this.backend?.user?._id || "";
+    }
+
+    ownsDeviceDraft(record) {
+        return !record?.owner || record.owner === this.draftOwnerId();
+    }
+
     setFormSnapshot(taskId, snapshot) {
         this.formSnapshotsByTaskId.set(taskId, snapshot);
         try {
-            window.localStorage.setItem(this.formSnapshotStorageKey(taskId), JSON.stringify({ saved_at: Date.now(), snapshot }));
+            window.localStorage.setItem(this.formSnapshotStorageKey(taskId), JSON.stringify({ saved_at: Date.now(), owner: this.draftOwnerId() || undefined, snapshot }));
         } catch (error) {
             // private windows or blocked storage keep the snapshot in memory only
         }
@@ -6704,7 +6753,7 @@ class NzVerificationMap {
         try {
             const raw = window.localStorage.getItem(this.formSnapshotStorageKey(taskId));
             const record = raw ? JSON.parse(raw) : null;
-            if (record?.snapshot && typeof record.snapshot === "object") {
+            if (record?.snapshot && typeof record.snapshot === "object" && this.ownsDeviceDraft(record)) {
                 this.formSnapshotsByTaskId.set(taskId, record.snapshot);
                 return record.snapshot;
             }
@@ -7615,6 +7664,7 @@ class NzVerificationMap {
         try {
             const record = {
                 saved_at: Date.now(),
+                owner: this.draftOwnerId() || undefined,
                 values: this.rapidObservationValues(prefix),
                 extra: extraValues,
             };
@@ -7630,7 +7680,8 @@ class NzVerificationMap {
     readRapidDraft(key) {
         try {
             const raw = window.localStorage.getItem(this.rapidDraftStorageKey(key));
-            return raw ? JSON.parse(raw) : null;
+            const record = raw ? JSON.parse(raw) : null;
+            return this.ownsDeviceDraft(record) ? record : null;
         } catch (error) {
             return null;
         }
@@ -7642,6 +7693,7 @@ class NzVerificationMap {
     keepRapidPinOnDevice() {
         if (!RAPID_NOMINATION_ENTRY || this.reviseContext || this.occupancyPinContext || !this.pinConfirmed) return;
         const record = this.readRapidDraft("rapid-pin") || { saved_at: Date.now() };
+        record.owner = this.draftOwnerId() || record.owner;
         record.pin = { ...this.pinConfirmed, linkedRefs: this.pinLinkedRefs || [] };
         try {
             window.localStorage.setItem(this.rapidDraftStorageKey("rapid-pin"), JSON.stringify(record));
