@@ -260,7 +260,8 @@ class ValidationAndAuditTest(unittest.TestCase):
 
     def _run_pair(self, tmp: Path, source_url: str, research_manifest: dict, review_manifest: dict,
                   research_backend: str = "claude", review_error: Exception | None = None,
-                  review_source_url: str | None = None) -> tuple[list[str], dict | None]:
+                  review_source_url: str | None = None, claim_note: str = "",
+                  prompts: list[str] | None = None) -> tuple[list[str], dict | None]:
         """Run the runner with mocked providers; return the stages invoked and the run() result."""
         review_backend = "codex" if research_backend == "claude" else "claude"
         reader_output = {
@@ -271,7 +272,7 @@ class ValidationAndAuditTest(unittest.TestCase):
                 "claim_type": "name", "value": "Test Church", "date_start": None, "date_end": None,
                 "date_precision": "unknown", "source": {"locator": source_url, "source_name": "Test source",
                 "source_type": "church_website", "source_date": None, "source_date_basis": "not_stated"},
-                "quoted_support": "Test Church", "evidential_weight": "primary_institutional", "confidence": "high", "note": "",
+                "quoted_support": "Test Church", "evidential_weight": "primary_institutional", "confidence": "high", "note": claim_note,
             }],
             "status_assessment": {"current_status": "unknown", "basis": "test", "asof_date": "2026-09-11",
                                   "osm_stale": None, "osm_stale_basis": ""},
@@ -281,6 +282,8 @@ class ValidationAndAuditTest(unittest.TestCase):
 
         def fake_invoke(stage, provider, model, system, user, timeout_s, budget_usd, pause_file, raw_path, preflight):
             stages.append(stage)
+            if prompts is not None:
+                prompts.append(system + "\n" + user)
             if stage == "research":
                 return reader_output, research_manifest
             if review_error is not None:
@@ -321,6 +324,29 @@ class ValidationAndAuditTest(unittest.TestCase):
             self.assertEqual(bundle["research_run"]["usage"]["per_model"]["web_search_requests"], 2)
             self.assertEqual(bundle["research_run"]["model_id_reported"], "claude-sonnet-5")
             self.assertEqual(bundle["review_run"]["model_id_reported"], "gpt-5.6-luna")
+
+    def test_quarantine_hashes_stay_in_the_private_dossier_copy(self):
+        prompts: list[str] = []
+        with tempfile.TemporaryDirectory() as tmp:
+            stages, run_result = self._run_pair(Path(tmp), "https://www.anglicanlife.org.nz/test-church",
+                                                self._claude_manifest("research"), self._codex_manifest("review", "gpt-5.6-luna"),
+                                                claim_note="The directory lists Rev'd Pat Example as vicar.", prompts=prompts)
+            self.assertEqual(stages, ["research", "review"])
+            self.assertEqual(run_result["status"], "completed", run_result["error"])
+            out = Path(tmp) / "out"
+            private = json.loads((out / "dossier.json").read_text())["personal_details_quarantine"]
+            self.assertEqual(private["item_count"], 1)
+            digest = private["items"][0]["value_sha256"]
+            self.assertRegex(digest, r"^[0-9a-f]{64}$")
+            bundle_text = (out / "bundle.json").read_text()
+            block = json.loads(bundle_text)["dossier"]["personal_details_quarantine"]
+            self.assertEqual(block["items"], [{"kind": "person_name", "context_claim_id": "osm:way/123:claude:c01"}])
+            self.assertEqual(block["item_count"], 1)
+            # neither the bundle nor the reviewer's prompt carries the value or its hash.
+            for text in (bundle_text, prompts[1]):
+                self.assertNotIn(digest, text)
+                self.assertNotIn("Pat Example", text)
+                self.assertNotIn("value_sha256", text)
 
     def test_off_allowlist_locator_is_refused_before_review_and_counted(self):
         with tempfile.TemporaryDirectory() as tmp:

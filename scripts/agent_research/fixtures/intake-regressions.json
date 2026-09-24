@@ -463,5 +463,197 @@
         "https://xn--80akhbyknj4f.nzhistory.govt.nz/history"
       ]
     ]
+  },
+  {
+    "name": "quarantine: one redacted item with its claim",
+    "valid": true,
+    "changes": [
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01"
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ]
+    ]
+  },
+  {
+    "name": "quarantine: item from the status assessment",
+    "valid": true,
+    "changes": [
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "phone",
+            "context_claim_id": null
+          },
+          {
+            "kind": "email",
+            "context_claim_id": "osm:way/1:codex:c01"
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        2
+      ]
+    ]
+  },
+  {
+    "name": "quarantine: item carries a value hash",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "value_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ]
+    ]
+  },
+  {
+    "name": "quarantine: item carries a value",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "phone",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "value": "not a real value"
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ]
+    ]
+  },
+  {
+    "name": "quarantine: count exceeds items",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01"
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        2
+      ]
+    ]
+  },
+  {
+    "name": "quarantine: count without items",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ]
+    ]
+  },
+  {
+    "name": "quarantine: items without a count",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01"
+          }
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "quarantine: block not redacted",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/personal_details_quarantine/redacted",
+        false
+      ]
+    ]
+  },
+  {
+    "name": "quarantine: unknown claim reference",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c99"
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ]
+    ]
+  },
+  {
+    "name": "quarantine: unknown kind",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "address",
+            "context_claim_id": "osm:way/1:codex:c01"
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ]
+    ]
+  },
+  {
+    "name": "quarantine: item missing its claim reference",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name"
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ]
+    ]
   }
 ]

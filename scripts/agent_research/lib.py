@@ -262,20 +262,40 @@ def quarantine_dossier(dossier: dict, extra_names: list[str] | None = None) -> d
 
 
 def redact_quarantine(dossier: dict) -> dict:
+    """replace each quarantined value by its sha256 for the private dossier copy.
+    an item with neither a value nor a hash is refused, since it could not show recurrence."""
     block = dossier.get("personal_details_quarantine", {"items": []})
     stripped = []
     for item in block.get("items", []):
         entry = {"kind": item["kind"], "context_claim_id": item.get("context_claim_id")}
         if "value" in item:
             entry["value_sha256"] = sha256(item["value"])
-        elif "value_sha256" in item:
+        elif re.fullmatch(r"[0-9a-f]{64}", str(item.get("value_sha256", ""))):
             entry["value_sha256"] = item["value_sha256"]
+        else:
+            raise ValueError("quarantine item has neither a value nor a value hash")
         stripped.append(entry)
     dossier["personal_details_quarantine"] = {
         "redacted": True,
         "item_count": len(stripped),
         "items": stripped,
         "note": "personal details stripped before commit; hashes let a later run recognise recurrence",
+    }
+    return dossier
+
+
+def bundle_quarantine(dossier: dict) -> dict:
+    """reduce a redacted quarantine block to the form a review bundle carries: the kind of
+    detail and its claim only. no value and no hash of a value leaves the private copy."""
+    block = dossier.get("personal_details_quarantine", {"items": []})
+    if not block.get("redacted") or any("value" in item for item in block.get("items", [])):
+        raise ValueError("quarantine block must be redacted before it enters a bundle")
+    items = [{"kind": item["kind"], "context_claim_id": item.get("context_claim_id")} for item in block.get("items", [])]
+    dossier["personal_details_quarantine"] = {
+        "redacted": True,
+        "item_count": len(items),
+        "items": items,
+        "note": "personal details withheld; the kind and claim of each are recorded, and hashes stay in the private dossier copy",
     }
     return dossier
 

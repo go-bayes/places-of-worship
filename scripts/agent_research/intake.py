@@ -235,8 +235,12 @@ def validate_dossier(dossier):
     if dossier['place']['country_code'] != 'NZ':
         errors.append('internal pilot permits only operator-cleared NZ sources')
     quarantine = dossier['personal_details_quarantine']
-    if quarantine['items'] or quarantine['item_count']:
-        errors.append('personal-details quarantine requires human handling')
+    if quarantine['item_count'] != len(quarantine['items']):
+        errors.append('personal-details quarantine count does not match its items')
+    claim_ids = {claim['claim_id'] for claim in dossier['claims']}
+    for item in quarantine['items']:
+        if item['context_claim_id'] is not None and item['context_claim_id'] not in claim_ids:
+            errors.append('personal-details quarantine references an unknown claim')
     run = dossier['run_manifest']
     if run['backend'] not in MODELS or run['model_id_requested'] != MODELS.get(run['backend']):
         errors.append('unsupported researcher model')

@@ -154,6 +154,34 @@ class ImportTest(unittest.TestCase):
         self.assertTrue(all(re.fullmatch(r"[0-9a-f]{64}", i["value_sha256"]) for i in dossier["personal_details_quarantine"]["items"]))
         self.assertEqual(lib.validate_dossier(dossier), [])
 
+    def test_bundle_quarantine_keeps_kind_and_claim_only(self):
+        dossier = synthetic_import()
+        with self.assertRaisesRegex(ValueError, "redacted"):
+            lib.bundle_quarantine(json.loads(json.dumps(dossier)))
+        lib.redact_quarantine(dossier)
+        hashes = [item["value_sha256"] for item in dossier["personal_details_quarantine"]["items"]]
+        bundled = lib.bundle_quarantine(json.loads(json.dumps(dossier)))
+        block = bundled["personal_details_quarantine"]
+        self.assertTrue(block["redacted"])
+        self.assertEqual(block["item_count"], len(block["items"]))
+        self.assertEqual(block["item_count"], len(hashes))
+        self.assertTrue(all(set(item) == {"kind", "context_claim_id"} for item in block["items"]))
+        text = json.dumps(bundled)
+        self.assertFalse(any(digest in text for digest in hashes))
+        self.assertNotIn("value_sha256", text)
+        # the private copy keeps the hashes that let a later run recognise recurrence.
+        self.assertEqual([item["value_sha256"] for item in dossier["personal_details_quarantine"]["items"]], hashes)
+
+    def test_redaction_refuses_an_item_without_value_or_hash(self):
+        for item in ({"kind": "phone", "context_claim_id": None},
+                     {"kind": "phone", "context_claim_id": None, "value_sha256": "not-a-digest"}):
+            dossier = {"personal_details_quarantine": {"redacted": False, "item_count": 1, "items": [item]}}
+            with self.assertRaisesRegex(ValueError, "neither a value nor a value hash"):
+                lib.redact_quarantine(dossier)
+        kept = {"kind": "email", "context_claim_id": "c1", "value_sha256": "a" * 64}
+        dossier = lib.redact_quarantine({"personal_details_quarantine": {"redacted": True, "item_count": 1, "items": [kept]}})
+        self.assertEqual(dossier["personal_details_quarantine"]["items"], [kept])
+
     def test_committed_fixture_is_valid_and_redacted(self):
         dossier = lib.read_json(FIXTURE)
         self.assertEqual(lib.validate_dossier(dossier), [])

@@ -765,17 +765,32 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
         );
     }
 
-    if dossier
+    // a bundle's quarantine block records only the kind and claim of each withheld detail;
+    // the schema refuses values and hashes, and the count must equal the items.
+    if let Some(quarantine) = dossier
         .get("personal_details_quarantine")
         .and_then(Value::as_object)
-        .and_then(|quarantine| quarantine.get("items"))
-        .and_then(Value::as_array)
-        .is_some_and(|items| !items.is_empty())
     {
-        errors.push(
-            "/dossier/personal_details_quarantine/items: must be empty in a review bundle"
-                .to_owned(),
-        );
+        let items = quarantine
+            .get("items")
+            .and_then(Value::as_array)
+            .cloned()
+            .unwrap_or_default();
+        if quarantine.get("item_count").and_then(Value::as_u64) != Some(items.len() as u64) {
+            errors.push(
+                "/dossier/personal_details_quarantine/item_count: must equal the number of items"
+                    .to_owned(),
+            );
+        }
+        for (index, item) in items.iter().enumerate() {
+            if let Some(claim_id) = item.get("context_claim_id").and_then(Value::as_str)
+                && !claim_ids.contains(claim_id)
+            {
+                errors.push(format!(
+                    "/dossier/personal_details_quarantine/items/{index}/context_claim_id: unknown claim"
+                ));
+            }
+        }
     }
 
     validate_agent_runs(root, dossier, errors);

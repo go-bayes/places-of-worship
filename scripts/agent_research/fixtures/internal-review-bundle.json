@@ -95,7 +95,7 @@
       }
     ],
     "personal_details_quarantine": {
-      "redacted": false,
+      "redacted": true,
       "item_count": 0,
       "items": [],
       "note": "values held in the run directory only; redact_quarantine strips them before commit"

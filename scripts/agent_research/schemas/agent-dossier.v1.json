@@ -111,7 +111,7 @@
           "type": "boolean",
           "description": "True once the quarantined values have been stripped; a committed dossier must be redacted."
         },
-        "item_count": { "type": "integer", "minimum": 0 },
+        "item_count": { "type": "integer", "minimum": 0, "description": "Must equal the number of items." },
         "items": {
           "type": "array",
           "items": {
@@ -122,7 +122,7 @@
               "kind": { "type": "string", "enum": ["person_name", "phone", "email", "other"] },
               "context_claim_id": { "type": ["string", "null"] },
               "value": { "type": "string", "description": "Present only before redaction; never committed." },
-              "value_sha256": { "type": "string", "description": "Hash of the stripped value so a later run can tell whether the same detail recurred." }
+              "value_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$", "description": "SHA-256 of the stripped value so a later run can tell whether the same detail recurred. Kept in the private dossier copy only; a review bundle carries neither value nor hash." }
             }
           }
         },

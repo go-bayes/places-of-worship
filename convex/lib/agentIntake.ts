@@ -183,6 +183,11 @@ export function validateAgentReviewBundle(value: unknown, bundleJson: string): {
     if (claim.date_end && (!claim.date_start || dateBounds(claim.date_start)[0] > dateBounds(claim.date_end)[1])) throw new Error("invalid date interval");
     for (const key of ["source_date", "retrieved_at"]) if (claim.source[key]) dateBounds(claim.source[key].split("T")[0]);
   }
+  // a bundle's quarantine block records only the kind and claim of each withheld detail;
+  // the schema refuses values and hashes, and the count must equal the items.
+  const quarantine = d.personal_details_quarantine;
+  if (quarantine.item_count !== quarantine.items.length) throw new Error("personal_details_quarantine item_count must equal the number of items");
+  for (const item of quarantine.items) if (item.context_claim_id !== null && !locators.has(item.context_claim_id)) throw new Error("personal_details_quarantine references an unknown claim");
   dateBounds(d.status_assessment.asof_date);
   for (const id of d.status_assessment.supporting_claim_ids) if (!locators.has(id)) throw new Error("unknown status claim");
   for (const row of d.osm_version_chain) { publicUrl(row.locator); canonicalHost(row.locator); }

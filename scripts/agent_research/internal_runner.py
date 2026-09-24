@@ -916,11 +916,11 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
     }, research_manifest["started_at"], research_manifest["ended_at"], research_manifest["duration_seconds"],
                                f"internal-{research_manifest['started_at'].replace(':', '').replace('-', '')}",
                                allowlist_version)
-    # A clean dossier is committed only after the quarantine block has been
-    # marked redacted.  Any detected personal detail remains local and causes
-    # intake validation to reject the run before the reviewer sees it.
-    if dossier["personal_details_quarantine"].get("item_count", 0) == 0:
-        lib.redact_quarantine(dossier)
+    # quarantined values become hashes in the private dossier copy; the reviewer and the bundle
+    # see only the kind of each withheld detail and its claim, never a value or a hash.
+    lib.redact_quarantine(dossier)
+    private_dossier = json.loads(json.dumps(dossier))
+    lib.bundle_quarantine(dossier)
     try:
         violations = intake.allowlist_violations(dossier)
     except ValueError:
@@ -939,7 +939,7 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
         if dossier_errors:
             raise RunRejected("dossier rejected before review: " + "; ".join(dossier_errors[:12]), counters)
         dossier_path = out / "dossier.json"
-        dossier_path.write_text(json.dumps(dossier, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        dossier_path.write_text(json.dumps(private_dossier, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         review_system, review_user = _review_prompt(dossier)
         review_output, review_manifest = _invoke("review", review_backend, REVIEW_MODELS[review_backend], review_system,
                                                   review_user, timeout_s, budget_usd, pause_file, review_raw, preflight[review_backend])
