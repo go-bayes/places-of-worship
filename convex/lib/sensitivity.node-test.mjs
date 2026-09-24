@@ -29,6 +29,11 @@ test("ordinary guided evidence and legacy evidence still receive source checks",
   assert.equal(isExternalAiReviewEligible({}), true);
 });
 
+test("internal agent intake is ineligible even with a clear privacy flag", () => {
+  assert.equal(isExternalAiReviewEligible({ agent_intake_only: true, privacy_flag: "clear" }), false);
+  assert.equal(isExternalAiReviewEligible({ agent_intake_only: false, privacy_flag: "clear" }), true);
+});
+
 test("privacy review and restriction both prevent external processing", () => {
   assert.equal(evidenceSensitivityFor({ country_code: "NZ" }, { privacy_flag: "needs_review" }).flagged, true);
   assert.equal(evidenceSensitivityFor({ country_code: "NZ" }, { privacy_flag: "restricted" }).flagged, true);
