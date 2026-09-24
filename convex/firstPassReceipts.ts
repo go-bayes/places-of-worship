@@ -4,8 +4,8 @@ import type { Doc } from "./_generated/dataModel";
 import { requireUser } from "./lib/auth";
 import { assertInternalAgentIngestEnabled, internalAgentServiceUser } from "./lib/agentServiceUser";
 import { validateStandaloneDossier } from "./lib/agentIntake";
-import { validateFirstPassRecord, type FirstPassRecord } from "./lib/firstPass";
-import { recordJudgments, type JudgmentContext, type JudgmentInput } from "./lib/agentJudgments";
+import { FIRST_PASS_SCHEMA_VERSION, validateFirstPassRecord, type FirstPassRecord } from "./lib/firstPass";
+import { costBasisOf, recordJudgments, type JudgmentContext, type JudgmentInput } from "./lib/agentJudgments";
 import { OBJECT_RECEIPT_CONTRACT, convexOnlyStorage, isSha256Hex, objectReceiptId } from "./lib/objectReceipts";
 
 // first-pass receipts (j2 of the ai-judgment recording design, jb rulings
@@ -35,85 +35,135 @@ async function receiptByHash(ctx: { db: any }, hash: string): Promise<Doc<"agent
     .unique();
 }
 
-// a record run for a portal record must name records that exist here and
-// agree with each other; the judgments inherit this context, so a wrong link
-// would misfile them. returns the evidence version's stored object hash.
-async function checkedContext(ctx: { db: any }, record: FirstPassRecord): Promise<{ evidenceVersionObjectHash?: string }> {
+// the place a task is about, as the refs a first-pass record could use
+function taskPlaceRefs(task: Doc<"tasks">): Set<string> {
+  const refs = new Set<string>();
+  if (task.osm_object_type !== undefined && task.matched_osm_id !== undefined) refs.add(`osm:${task.osm_object_type}/${task.matched_osm_id}`);
+  if (task.source_record_id !== undefined) refs.add(task.source_record_id);
+  return refs;
+}
+
+export type ResolvedContext = { taskId?: string; draftId?: string; evidenceVersionObjectHash?: string };
+
+// a record run for a portal record must name records that exist here, belong
+// to one task, and are about the record's place in the record's country; the
+// judgments inherit this context, so a wrong link would misfile them. every
+// field the record supplies is resolved to its owning task, so naming only a
+// draft or only an evidence version is checked as strictly as naming the task.
+async function checkedContext(ctx: { db: any }, record: FirstPassRecord): Promise<ResolvedContext> {
   const context = record.context;
   if (context === undefined) return {};
-  if (context.task_id !== undefined) {
-    const task = await ctx.db.query("tasks").withIndex("by_task_id", (q: any) => q.eq("task_id", context.task_id)).unique();
-    if (task === null) throw new Error("First-pass context names a task this deployment does not hold.");
-    if (task.country_code !== record.country_code) throw new Error("First-pass context task is in a different country.");
-  }
+  const owners: Array<[string, string]> = [];
+  if (context.task_id !== undefined) owners.push(["task_id", context.task_id]);
+  let draftId: string | undefined;
   if (context.evidence_draft_id !== undefined) {
     const draft = await ctx.db.query("evidence_drafts").withIndex("by_evidence_draft_id", (q: any) => q.eq("evidence_draft_id", context.evidence_draft_id)).unique();
     if (draft === null) throw new Error("First-pass context names an evidence draft this deployment does not hold.");
-    if (context.task_id !== undefined && draft.task_id !== context.task_id) throw new Error("First-pass context draft belongs to a different task.");
+    owners.push(["evidence_draft_id", draft.task_id]);
+    draftId = draft.evidence_draft_id;
   }
-  if (context.evidence_version_hash === undefined) return {};
-  const objectHash = `sha256:${context.evidence_version_hash}`;
-  const version = await ctx.db.query("evidence_versions").withIndex("by_object_hash", (q: any) => q.eq("object_hash", objectHash)).unique();
-  if (version === null) throw new Error("First-pass context names an evidence version this deployment does not hold.");
-  if (context.task_id !== undefined && version.task_id !== context.task_id) throw new Error("First-pass context evidence version belongs to a different task.");
-  if (context.evidence_draft_id !== undefined && version.evidence_draft_id !== context.evidence_draft_id) throw new Error("First-pass context evidence version belongs to a different draft.");
-  return { evidenceVersionObjectHash: version.object_hash };
+  let evidenceVersionObjectHash: string | undefined;
+  if (context.evidence_version_hash !== undefined) {
+    const objectHash = `sha256:${context.evidence_version_hash}`;
+    const version = await ctx.db.query("evidence_versions").withIndex("by_object_hash", (q: any) => q.eq("object_hash", objectHash)).unique();
+    if (version === null) throw new Error("First-pass context names an evidence version this deployment does not hold.");
+    if (draftId !== undefined && version.evidence_draft_id !== draftId) throw new Error("First-pass context evidence version belongs to a different draft.");
+    owners.push(["evidence_version_hash", version.task_id]);
+    draftId = draftId ?? version.evidence_draft_id;
+    evidenceVersionObjectHash = version.object_hash;
+  }
+  if (owners.length === 0) return {};
+  const taskIds = new Set(owners.map(([, taskId]) => taskId));
+  if (taskIds.size !== 1) throw new Error(`First-pass context names records from different tasks (${owners.map(([field, taskId]) => `${field}: ${taskId}`).join("; ")}).`);
+  const [taskId] = taskIds;
+  const task: Doc<"tasks"> | null = await ctx.db.query("tasks").withIndex("by_task_id", (q: any) => q.eq("task_id", taskId)).unique();
+  if (task === null) throw new Error("First-pass context names a task this deployment does not hold.");
+  if (task.country_code !== record.country_code) throw new Error("First-pass context task is in a different country.");
+  if (!taskPlaceRefs(task).has(record.place_ref)) throw new Error("First-pass context task is about a different place, or names no place the record can be checked against.");
+  return { taskId, draftId, evidenceVersionObjectHash };
 }
 
-// ingest emits status_assessment and annotation judgments (brief section 6);
-// the claims themselves stay in the record. both need the dossier, whose run
-// manifest names the provider; a record without one yields no judgments
-// rather than an invented judge.
+const MANIFEST_UNREPORTED = "The researcher's run manifest reported no model id.";
+const ATTRIBUTION_PROVIDER_UNREPORTED = "not_reported";
+
+// judgments come from two runs, each attributed from its own record (brief
+// section 6: ingest emits status_assessment and annotation judgments; the
+// claims stay in the record):
+// - the status assessment is the dossier researcher's verdict, so its judge,
+//   models, prompt, run id and cost all come from the dossier's validated
+//   run manifest. it is keyed on that run and the record's context, not on
+//   the first-pass record: a later pass that carries the same dossier cites
+//   the same judgment (its receipt lists the id) instead of writing a second
+//   copy of one model output, which would count it twice in agreement rates.
+// - annotations are the first-pass author's own judgments of the dossier's
+//   claims, keyed on the record (subject <record sha256>#<claim_id>), and
+//   attributed from the record's attribution block. the provider is the
+//   dossier's backend only when the attribution names the dossier's own run
+//   (validateFirstPassRecord then requires the models to agree); an
+//   annotating agent from another run keeps its own models and an explicit
+//   unreported provider rather than borrowing the researcher's.
 export function firstPassJudgments(record: FirstPassRecord, recordHash: string, context: JudgmentContext): JudgmentInput[] {
   const dossier = record.dossier;
   if (dossier === null) return [];
   const locators = validateStandaloneDossier(dossier);
   const manifest = dossier.run_manifest;
-  const attribution = record.attribution;
-  const judge = {
-    agent_name: `${manifest.backend}-first-pass`,
-    model_provider: manifest.backend,
-    model_requested: attribution.model_requested,
-    model_reported: attribution.model_reported ?? undefined,
-    model_unreported_reason: attribution.model_unreported_reason ?? undefined,
-    prompt_version: typeof manifest.prompt_version === "string" ? manifest.prompt_version : "agent-first-pass.v1",
-    code_revision: attribution.code_revision,
-    instruction_sha256: attribution.instruction_sha256,
-  };
-  const run = {
-    agent_run_id: attribution.agent_run_id,
-    attempt: 1,
-    cost_usd: record.usage.cost_usd ?? undefined,
-    cost_basis: record.usage.cost_basis,
-  };
   const judgments: JudgmentInput[] = [];
   const status = dossier.status_assessment;
   if (status && typeof status.current_status === "string") {
+    let basisOfCost = costBasisOf(manifest.cost_basis);
+    let cost: number | undefined = undefined;
+    if (basisOfCost !== "unknown" && basisOfCost !== "subscription_unmetered") {
+      if (typeof manifest.cost_usd_reported === "number" && Number.isFinite(manifest.cost_usd_reported) && manifest.cost_usd_reported >= 0) cost = manifest.cost_usd_reported;
+      else basisOfCost = "unknown";
+    }
     const basis = `${typeof status.basis === "string" ? status.basis : ""}${typeof status.asof_date === "string" ? ` (as of ${status.asof_date})` : ""}`.trim();
     judgments.push({
       subject: { kind: "place", ref: record.place_ref },
       judgment_kind: "status_assessment",
       outcome: status.current_status,
       basis_note: basis === "" ? undefined : basis.slice(0, 2_000),
-      judge,
-      run,
+      judge: {
+        agent_name: `${manifest.backend}-first-pass-researcher`,
+        model_provider: manifest.backend,
+        model_requested: manifest.model_id_requested,
+        model_reported: manifest.model_id_reported ?? undefined,
+        model_unreported_reason: manifest.model_id_reported == null ? MANIFEST_UNREPORTED : undefined,
+        prompt_version: manifest.prompt_version,
+      },
+      run: { agent_run_id: manifest.run_id, attempt: 1, cost_usd: cost, cost_basis: basisOfCost },
       context,
     });
   }
-  record.annotations.forEach((annotation, index) => {
-    judgments.push({
-      subject: { kind: "claim", ref: `${recordHash}#${annotation.claim_id}` },
-      judgment_kind: "annotation",
-      outcome: annotation.kind,
-      // sibling annotations on one claim are not revisions of each other
-      facet: `annotation-${index + 1}`,
-      source_locator: locators.get(annotation.claim_id),
-      basis_note: annotation.note.slice(0, 2_000),
-      judge,
-      run,
-      context,
+  if (record.annotations.length > 0) {
+    const attribution = record.attribution;
+    const sameRun = attribution.agent_run_id === manifest.run_id;
+    const provider = sameRun ? manifest.backend : ATTRIBUTION_PROVIDER_UNREPORTED;
+    const judge = {
+      agent_name: sameRun ? `${manifest.backend}-first-pass-annotator` : "first-pass-annotator",
+      model_provider: provider,
+      model_requested: attribution.model_requested,
+      model_reported: attribution.model_reported ?? undefined,
+      model_unreported_reason: attribution.model_unreported_reason ?? undefined,
+      prompt_version: FIRST_PASS_SCHEMA_VERSION,
+      code_revision: attribution.code_revision,
+      instruction_sha256: attribution.instruction_sha256,
+    };
+    const run = { agent_run_id: attribution.agent_run_id, attempt: 1, cost_usd: record.usage.cost_usd ?? undefined, cost_basis: record.usage.cost_basis };
+    record.annotations.forEach((annotation, index) => {
+      judgments.push({
+        subject: { kind: "claim", ref: `${recordHash}#${annotation.claim_id}` },
+        judgment_kind: "annotation",
+        outcome: annotation.kind,
+        // sibling annotations on one claim are not revisions of each other
+        facet: `annotation-${index + 1}`,
+        source_locator: locators.get(annotation.claim_id),
+        basis_note: annotation.note.slice(0, 2_000),
+        judge,
+        run,
+        context,
+      });
     });
-  });
+  }
   return judgments;
 }
 
@@ -136,13 +186,13 @@ export const ingestFirstPass = internalMutation({
       if (parentReceipt === null) throw new Error(`Parent first pass ${parent} has no receipt; submit its history first.`);
       if (parentReceipt.place_ref !== record.place_ref) throw new Error("Parent first pass belongs to another place.");
     }
-    const { evidenceVersionObjectHash } = await checkedContext(ctx, record);
+    const resolved = await checkedContext(ctx, record);
     const now = Date.now();
     const service = await internalAgentServiceUser(ctx, now);
     const context: JudgmentContext = {
-      task_id: record.context?.task_id,
-      evidence_draft_id: record.context?.evidence_draft_id,
-      evidence_version_hash: evidenceVersionObjectHash,
+      task_id: resolved.taskId,
+      evidence_draft_id: resolved.draftId,
+      evidence_version_hash: resolved.evidenceVersionObjectHash,
       place_ref: record.place_ref,
       country_code: record.country_code,
     };
@@ -162,8 +212,9 @@ export const ingestFirstPass = internalMutation({
       stop_reason: record.stop_reason,
       parents: record.parents,
       record_created_at: record.created_at,
-      task_id: record.context?.task_id,
-      evidence_draft_id: record.context?.evidence_draft_id,
+      // resolved from whichever context fields the record names
+      task_id: resolved.taskId,
+      evidence_draft_id: resolved.draftId,
       evidence_version_hash: record.context?.evidence_version_hash,
       assistance_request_id: record.context?.assistance_request_id,
       agent_run_id: record.attribution.agent_run_id,

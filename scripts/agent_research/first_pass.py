@@ -13,6 +13,7 @@ from datetime import datetime
 from pathlib import Path
 
 import intake
+import lib
 
 HERE = Path(__file__).resolve().parent
 SCHEMA = json.loads((HERE / 'schemas/agent-first-pass.v1.json').read_text())
@@ -182,6 +183,44 @@ def copy_history(source: Path, destination: Path, digest: str):
     return len(objects)
 
 
+def personal_detail_fields(record):
+    """The record's free text by path, as the backend screens it (convex/lib/firstPass.ts)."""
+    fields = [('question', record['question']), ('stop_reason', record['stop_reason']),
+              ('usage.note', record['usage']['note']),
+              ('attribution.responsible_human_ref', record['attribution']['responsible_human_ref'])]
+    if record['attribution']['model_unreported_reason'] is not None:
+        fields.append(('attribution.model_unreported_reason', record['attribution']['model_unreported_reason']))
+    fields += [(f'annotations[{i}].note', a['note']) for i, a in enumerate(record['annotations'])]
+    for i, search in enumerate(record['searches']):
+        for key in ('query', 'note', 'source_name', 'licence_note', 'access_note'):
+            if search[key] is not None:
+                fields.append((f'searches[{i}].{key}', search[key]))
+    fields += [(f'next_questions[{i}]', q) for i, q in enumerate(record['next_questions'])]
+    basis = ((record['dossier'] or {}).get('status_assessment') or {}).get('basis')
+    if isinstance(basis, str):
+        fields.append(('dossier.status_assessment.basis', basis))
+    return fields
+
+
+def submission_errors(record):
+    """Rules the shared backend adds to the archive's: reviewers read receipts.
+
+    The local archive stays the operator's private working copy and keeps any
+    record; a record that fails here stays there for human handling.
+    """
+    errors = [f'potential personal details in {path} require human handling'
+              for path, text in personal_detail_fields(record) if lib.find_personal_details(text)]
+    dossier = record['dossier']
+    if dossier is not None:
+        manifest = dossier['run_manifest']
+        attribution = record['attribution']
+        if attribution['agent_run_id'] == manifest['run_id'] and (
+                attribution['model_requested'] != manifest['model_id_requested']
+                or attribution['model_reported'] != manifest.get('model_id_reported')):
+            errors.append("attribution names the dossier's run but disagrees with its models")
+    return errors
+
+
 def convex_run(deployment, function, payload):
     """Run one internal Convex function through the CLI and return its JSON result."""
     if deployment not in DEPLOYMENTS:
@@ -216,6 +255,11 @@ def submit(store: Path, digest: str, deployment: str, run=convex_run):
     if deployment not in DEPLOYMENTS:
         raise ValueError('an explicit dev or local deployment is required')
     objects = verify(store, digest)
+    # screen the whole history before the first call, so nothing partial is sent
+    for current, (_, record) in objects.items():
+        errors = submission_errors(record)
+        if errors:
+            raise ValueError(f'{current}: ' + '; '.join(errors))
     receipts = []
     for current in history_order(objects, digest):
         raw = objects[current][0]

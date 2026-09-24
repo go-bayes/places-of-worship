@@ -1,5 +1,5 @@
 import firstPassSchema from "../../scripts/agent_research/schemas/agent-first-pass.v1.json" with { type: "json" };
-import { assertNoDuplicateJsonKeys, dateBounds, guard, publicUrl, schemaCheck, validateStandaloneDossier } from "./agentIntake.ts";
+import { assertNoDuplicateJsonKeys, dateBounds, guard, hasPersonalDetails, publicUrl, schemaCheck, validateStandaloneDossier } from "./agentIntake.ts";
 import { verifyObjectBytes } from "./objectReceipts.ts";
 
 // server-side validation of an agent-first-pass.v1 record, mirroring
@@ -62,6 +62,33 @@ function timestamp(value: string, label: string): number {
   return parsed;
 }
 
+// the record's free text, by path. reviewers read receipts, so a record whose
+// text carries a phone, email or honorific-led name is refused at the backend
+// and stays in the operator's private archive for human handling
+// (docs/development/agent-first-passes.md; the dossier's claims are screened
+// by validateStandaloneDossier). first_pass.py personal_detail_fields mirrors
+// this list.
+export function firstPassFreeText(record: FirstPassRecord): Array<[string, string]> {
+  const fields: Array<[string, string]> = [
+    ["question", record.question],
+    ["stop_reason", record.stop_reason],
+    ["usage.note", record.usage.note],
+    ["attribution.responsible_human_ref", record.attribution.responsible_human_ref],
+  ];
+  if (record.attribution.model_unreported_reason !== null) fields.push(["attribution.model_unreported_reason", record.attribution.model_unreported_reason]);
+  record.annotations.forEach((annotation, i) => fields.push([`annotations[${i}].note`, annotation.note]));
+  record.searches.forEach((search, i) => {
+    for (const key of ["query", "note", "source_name", "licence_note", "access_note"] as const) {
+      const value = search[key];
+      if (value !== null) fields.push([`searches[${i}].${key}`, value]);
+    }
+  });
+  record.next_questions.forEach((question, i) => fields.push([`next_questions[${i}]`, question]));
+  const basis = record.dossier?.status_assessment?.basis;
+  if (typeof basis === "string") fields.push(["dossier.status_assessment.basis", basis]);
+  return fields;
+}
+
 export function validateFirstPassRecord(recordJson: string, recordHash: string): { record: FirstPassRecord; byteLength: number } {
   const { byteLength } = verifyObjectBytes(recordJson, recordHash);
   assertNoDuplicateJsonKeys(recordJson);
@@ -92,6 +119,13 @@ export function validateFirstPassRecord(recordJson: string, recordHash: string):
   if (record.dossier !== null) {
     claimIds = new Set(validateStandaloneDossier(record.dossier).keys());
     if (record.dossier.place.place_ref !== record.place_ref) throw new Error("dossier belongs to another place");
+    // an attribution naming the dossier's own run describes that one run, so
+    // its models must be the run manifest's
+    const manifest = record.dossier.run_manifest;
+    if (attribution.agent_run_id === manifest.run_id
+      && (attribution.model_requested !== manifest.model_id_requested || attribution.model_reported !== (manifest.model_id_reported ?? null))) {
+      throw new Error("attribution names the dossier's run but disagrees with its models");
+    }
   }
   if (record.outcome === "researched" && record.dossier === null) throw new Error("researched requires a validated dossier");
   if ((record.outcome === "partial" || record.outcome === "blocked") && record.next_questions.length === 0) {
@@ -99,6 +133,9 @@ export function validateFirstPassRecord(recordJson: string, recordHash: string):
   }
   for (const annotation of record.annotations) {
     if (!claimIds.has(annotation.claim_id)) throw new Error("annotation references an unknown claim");
+  }
+  for (const [path, text] of firstPassFreeText(record)) {
+    if (hasPersonalDetails(text)) throw new Error(`potential personal details in ${path} require human handling`);
   }
   for (const search of record.searches) {
     const attempted = search.attempted_at === null ? null : timestamp(search.attempted_at, "search attempted_at");

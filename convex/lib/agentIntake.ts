@@ -102,6 +102,14 @@ export function publicUrl(value: string): void {
   if (/^[0-9.]+$/.test(host) || host.includes(":")) throw new Error("source URL must use a public DNS hostname");
 }
 
+// phones, emails and honorific-led names, as scripts/agent_research/lib.py
+// find_personal_details detects them; every hit needs human handling.
+export function hasPersonalDetails(text: string): boolean {
+  return /(?:\+64|\b0)[\s-]?\d{1,2}[\s-]?\d{3,4}[\s-]?\d{3,5}\b/.test(text)
+    || /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(text)
+    || /\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'-]+\s?){1,3}/.test(text);
+}
+
 // validate the exact bytes and cross-field evidence relations before any database writes.
 export function validateAgentReviewBundle(value: unknown, bundleJson: string): { bundle: AgentReviewBundle; bundleHash: string; claimLocators: Map<string, string> } {
   assertNoDuplicateJsonKeys(bundleJson);
@@ -146,8 +154,7 @@ export function validateDossierRecord(d: Record<string, any>): Map<string, strin
   for (const claim of d.claims) {
     if (locators.has(claim.claim_id)) throw new Error("duplicate claim ID");
     for (const field of ["value", "quoted_support", "note"]) {
-      const text = claim[field] ?? "";
-      if (/(?:\+64|\b0)[\s-]?\d{1,2}[\s-]?\d{3,4}[\s-]?\d{3,5}\b/.test(text) || /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(text) || /\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'-]+\s?){1,3}/.test(text)) throw new Error("potential personal details require human handling");
+      if (hasPersonalDetails(claim[field] ?? "")) throw new Error("potential personal details require human handling");
     }
     publicUrl(claim.source.locator); locators.set(claim.claim_id, claim.source.locator);
     if (claim.reader.backend !== d.run_manifest.backend || ![d.run_manifest.model_id_requested, d.run_manifest.model_id_reported].includes(claim.reader.model_id)) throw new Error("inconsistent claim reader");

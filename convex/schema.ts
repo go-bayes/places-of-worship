@@ -619,7 +619,10 @@ export default defineSchema({
     .index("by_subject", ["subject_ref", "created_at"])
     .index("by_task", ["context.task_id", "created_at"])
     .index("by_batch", ["run.batch_id", "created_at"])
-    .index("by_prompt_version", ["judge.prompt_version", "created_at"]),
+    .index("by_prompt_version", ["judge.prompt_version", "created_at"])
+    // one lane's revisions of one judgment on one subject, newest first: the
+    // bounded parent lookup in lib/agentJudgments.recordJudgments
+    .index("by_lineage", ["subject_ref", "judgment_kind", "judge.agent_name", "facet", "source_locator", "created_at"]),
 
   // what a person did with one judgment (r-j3): append-only, at claim grain.
   // review_decisions keeps its draft-level agent_review_id link and its hash

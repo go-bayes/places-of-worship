@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { sha256 } from "./sha256.ts";
+import { canonicalWireJson } from "./wireJson.ts";
 
 // immutable object receipts (docs/development/agent-first-passes.md,
 // "receipt contract"): the backend's record that it holds the exact bytes of
@@ -10,6 +11,8 @@ import { sha256 } from "./sha256.ts";
 // the contract, in brief:
 // - the object is addressed by the sha256 of its exact bytes, and the
 //   receipt id is `<namespace>:<sha256>`;
+// - the bytes are the archive's version-1 wire format (lib/wireJson) and
+//   nothing else, so the receipt alone rebuilds the archived object;
 // - an identical retry returns the existing receipt and writes nothing;
 // - changed content is a different hash and therefore a new receipt, whose
 //   predecessors are named explicitly and must already hold receipts;
@@ -47,16 +50,21 @@ export function objectReceiptId(namespace: string, hash: string): string {
   return `${namespace}:${hash}`;
 }
 
-// check the transported text against its claimed address before anything
-// parses it. objects in this contract are ascii json ending in one newline,
-// so the string's utf-16 length is its byte length and the hash covers
-// exactly the bytes the archive wrote.
+// check the transported text against its claimed address and wire format
+// before anything interprets it. objects in this contract are the archive's
+// version-1 wire format (lib/wireJson): python's sorted, compact, ascii json
+// and one final newline. the string's utf-16 length is therefore its byte
+// length, the hash covers exactly the bytes the archive wrote, and a receipt
+// holds only bytes the archive itself would write, so it always restores.
 export function verifyObjectBytes(text: string, claimedHash: string, maxBytes = OBJECT_BYTES_MAX): { byteLength: number } {
   if (!isSha256Hex(claimedHash)) throw new Error("Object hash must be 64 lowercase hex characters.");
   if (text.length === 0 || text.length > maxBytes) throw new Error(`Object must be 1 to ${maxBytes} bytes.`);
-  // python's ensure_ascii output: escaped controls, raw ascii 0x20 to 0x7f
-  if (!/^[\x20-\x7f]*\n$/.test(text)) throw new Error("Object must be one line of ASCII JSON ending in a newline.");
+  // python's ensure_ascii output escapes everything outside 0x20 to 0x7e
+  if (!/^[\x20-\x7e]*\n$/.test(text)) throw new Error("Object must be one line of ASCII JSON ending in a newline.");
   if (sha256(text) !== claimedHash) throw new Error("Object hash does not match its bytes.");
+  if (canonicalWireJson(text.slice(0, -1)) !== text.slice(0, -1)) {
+    throw new Error("Object is not in the archive's version-1 wire format (sorted keys, compact separators, python number and string encoding).");
+  }
   return { byteLength: text.length };
 }
 

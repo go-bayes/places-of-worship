@@ -26,7 +26,8 @@ function context(roles = ["reviewer"]) {
     query(table) {
       let filters = [];
       const q = { eq(key, value) { filters.push([key, value]); return q; } };
-      const selected = () => rows[table].filter(row => filters.every(([k, v]) => row[k] === v));
+      // index fields may be nested paths; convex walks a descending index newest first
+      const selected = () => rows[table].filter(row => filters.every(([k, v]) => k.split(".").reduce((o, part) => o?.[part], row) === v));
       let desc = false;
       const ordered = () => { const rows = selected(); return desc ? rows.slice().sort((a, b) => b.created_at - a.created_at) : rows; };
       const chain = { withIndex(_name, select) { if (select) select(q); return chain; }, order(direction) { desc = direction === "desc"; return chain; }, async unique() { return selected()[0] ?? null; }, async collect() { return selected(); }, async take(n) { return ordered().slice(0, n); } };

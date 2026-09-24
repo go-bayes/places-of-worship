@@ -51,6 +51,7 @@ import type * as lib_sources from "../lib/sources.js";
 import type * as lib_taskEvents from "../lib/taskEvents.js";
 import type * as lib_validators from "../lib/validators.js";
 import type * as lib_wideEvidenceFields from "../lib/wideEvidenceFields.js";
+import type * as lib_wireJson from "../lib/wireJson.js";
 import type * as model from "../model.js";
 import type * as occupancies from "../occupancies.js";
 import type * as rapidEntry from "../rapidEntry.js";
@@ -111,6 +112,7 @@ declare const fullApi: ApiFromModules<{
   "lib/taskEvents": typeof lib_taskEvents;
   "lib/validators": typeof lib_validators;
   "lib/wideEvidenceFields": typeof lib_wideEvidenceFields;
+  "lib/wireJson": typeof lib_wireJson;
   model: typeof model;
   occupancies: typeof occupancies;
   rapidEntry: typeof rapidEntry;

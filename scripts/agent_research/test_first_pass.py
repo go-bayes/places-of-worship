@@ -10,6 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import first_pass as fp
+import wire_vectors
 
 HERE = Path(__file__).resolve().parent
 
@@ -321,6 +322,30 @@ class FirstPassSubmitTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'no receipt'):
             fp.restore(clean, 'f' * 64, 'local', run=FakeBackend())
 
+    def test_submit_screens_the_whole_history_before_any_call(self):
+        record = json.loads((HERE / 'fixtures/first-pass.json').read_text())
+        record['parents'] = [self.second]
+        record['stop_reason'] = 'Stopped; ask the office on 04 123 4567.'
+        third = fp.archive(self.store, record)
+        with self.assertRaisesRegex(ValueError, 'personal details in stop_reason'):
+            fp.submit(self.store, third, 'local', run=self.backend)
+        self.assertEqual(self.backend.calls, [])
+
+    def test_submission_rules_match_the_backend(self):
+        record = json.loads((HERE / 'fixtures/first-pass-researched.json').read_text())
+        self.assertEqual(fp.submission_errors(record), [])
+        record['attribution']['agent_run_id'] = record['dossier']['run_manifest']['run_id']
+        self.assertEqual(fp.submission_errors(record), [])
+        record['attribution']['model_requested'] = 'sonnet'
+        self.assertRegex('; '.join(fp.submission_errors(record)), 'disagrees with its models')
+        record = json.loads((HERE / 'fixtures/first-pass.json').read_text())
+        record['next_questions'] = ['Ask Father Smithers about the first service.']
+        record['searches'][0]['access_note'] = 'Call +64 21 123 4567 for access.'
+        self.assertEqual(fp.submission_errors(record), [
+            'potential personal details in searches[0].access_note require human handling',
+            'potential personal details in next_questions[0] require human handling'])
+
+
     def test_convex_run_names_the_target_and_passes_exact_bytes(self):
         raw, _ = fp.read_object(self.store, self.first)
         payload = {'recordJson': raw.decode('ascii'), 'recordHash': self.first}
@@ -332,6 +357,35 @@ class FirstPassSubmitTests(unittest.TestCase):
         self.assertEqual(command[-2], 'firstPassReceipts:ingestFirstPass')
         self.assertEqual(json.loads(command[-1]), payload)
         self.assertTrue(run.call_args.kwargs['check'])
+
+
+class WireFormatTests(unittest.TestCase):
+    """Python leg of the cross-language wire-format contract (convex/lib/wireJson.ts)."""
+
+    def test_vectors_are_current(self):
+        self.assertEqual(wire_vectors.main(['--check']), 0)
+
+    def test_expected_encodings_are_python_fixed_points_and_archive_bytes(self):
+        vectors = json.loads(wire_vectors.VECTORS.read_text())
+        for vector in vectors['canonical']:
+            with self.subTest(input=vector['input']):
+                expected = vector['expected']
+                self.assertEqual(wire_vectors.canonical(expected), expected)
+                self.assertEqual(fp.encode(json.loads(expected)), (expected + '\n').encode('ascii'))
+
+    def test_float_spellings_survive_archive_and_restore(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        record = json.loads((HERE / 'fixtures/first-pass-researched.json').read_text())
+        record['usage']['cost_usd'] = 1e-7
+        digest = fp.archive(Path(tmp.name) / 'a', record)
+        raw, _ = fp.read_object(Path(tmp.name) / 'a', digest)
+        self.assertIn(b'"cost_usd":1e-07,', raw)
+        self.assertIn(b'"seed_latitude":-43.0,', raw)
+        backend = FakeBackend()
+        fp.submit(Path(tmp.name) / 'a', digest, 'local', run=backend)
+        self.assertEqual(fp.restore(Path(tmp.name) / 'b', digest, 'local', run=backend), 1)
+        self.assertEqual(fp.read_object(Path(tmp.name) / 'b', digest)[0], raw)
 
 
 if __name__ == '__main__':
