@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://religionmap.org/schemas/inspection-collection.v1.schema.json",
+  "title": "Provisional inspection collection",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "country_code", "collection_ref", "adapter_version", "source_snapshot_date", "definition_version", "definition_hash", "case_hashes", "parents"],
+  "properties": {
+    "schema_version": { "const": "inspection-collection.v1" },
+    "country_code": { "const": "bs" },
+    "collection_ref": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._:/-]{0,159}$" },
+    "adapter_version": { "const": "bahamas-inspection-adapter.v1" },
+    "source_snapshot_date": { "type": "string", "pattern": "^[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?$" },
+    "definition_version": { "type": "string", "minLength": 1 },
+    "definition_hash": { "$ref": "#/$defs/hash" },
+    "case_hashes": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/hash" } },
+    "parents": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/hash" } }
+  },
+  "$defs": { "hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" } }
+}

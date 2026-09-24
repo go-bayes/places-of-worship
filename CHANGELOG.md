@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-24 (inspection collection contract)
+
+- Add a provisional Bahamas inspection collection contract, immutable object receipts, source-permission screening, and synthetic recovery verification.
+
 ### 2026-09-24 (agent quarantine block)
 
 - Agent-assisted research records now withhold personal details more thoroughly before a human reviewer or the shared backend sees them. A record may carry a redacted list of the details withheld from it, naming only the kind of each detail and the claim it came from; the values, and any hash of them, stay in the operator's private copy. Every text field of an outgoing record, an advisory reviewer's comments included, is screened for phone numbers, email addresses and names led by a title, and for strings shaped like cryptographic digests outside the few fields that hold the pipeline's own digests. Those fields are treated in three ways: two are recomputed from the record's own content and refused on mismatch, two must name records the backend already holds, and the rest, digests of the operator's private trace, prompt and instructions, are accepted on the operator's attestation because the record does not carry their inputs. Records archived or receipted under earlier rules remain readable and restorable byte for byte, since reading checks integrity only. A detail found once is withheld wherever it recurs. Output that still carries a personal detail is held back for human handling instead of being stored, and the record of that refusal names fields and positions, never the text; this refusal is interim until a flag-and-hold review exists. The Python, TypeScript and Rust validators apply one shared policy, held to agreement by shared test cases.
@@ -59,7 +63,6 @@
 ### 2026-09-21 (every place on the map at first sight)
 
 - Country maps now open with the OSM snapshot visible on every census year (Joseph B, 2026-09-21). The Bahamas' 2010 default crossed the 15-year threshold in 2026; because the Bahamas wires a dated product, its map had begun opening with only two dated places. The runtime now defaults to `all` until the reader chooses; `period` remains available where a dated product is wired. Older snapshot dots retain roughly half their normal opacity with a legend caveat. The temporal-layer instructions describe the revised default and the existing recent-year behaviour. All 102 active country pages and the global page load `region-map.js?v=20260921a` (103 pages in total).
-
 
 ### 2026-09-21 (review preset selection)
 
@@ -950,7 +953,6 @@
   the legend now reports how many qualifying dots exist ("2 in this
   dataset"), so sparse historical data reads as sparse rather than
   broken.
-
 
 - Merged the portal session's research-workbench pull request (#17):
   the free-contribution portal is browser-verified against every
