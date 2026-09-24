@@ -3,10 +3,12 @@ export type EvidenceSensitivity = { flagged: boolean; basis?: string };
 // keep guided denomination claims outside the existing external AI review lane;
 // ordinary guided evidence (existence, dates, location) still receives source checks
 export function isExternalAiReviewEligible(draft: {
+  agent_intake_only?: boolean;
   observation_contract_version?: string;
   action?: string;
   denomination_or_tradition_raw?: string;
 }): boolean {
+  if (draft.agent_intake_only === true) return false;
   // rapid current observations are human-review only by contract: they are
   // first-hand RA field evidence, largely from Vanuatu, and carry no source
   // an external checker could verify without exporting the observation
