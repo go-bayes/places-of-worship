@@ -532,6 +532,22 @@ export const exportBatchStatus = v.union(
   v.literal("superseded"),
 );
 
+// an export run's lifecycle (lean-storage brief section 3.1, pr l1):
+// composing (estimating then cutting batches), composed (every batch cut,
+// none freezing), freezing (the scheduled chain holds or may take the
+// lease), stopped (a composition step or a batch freeze failed; a curator
+// re-run resumes), completed (every batch of the run frozen), replaced (a
+// later composition for the country replaced it; its remaining drafts are
+// archived)
+export const exportRunStatus = v.union(
+  v.literal("composing"),
+  v.literal("composed"),
+  v.literal("freezing"),
+  v.literal("stopped"),
+  v.literal("completed"),
+  v.literal("replaced"),
+);
+
 export const exportFormat = v.union(
   v.literal("site_evidence_wide_csv"),
   v.literal("change_events_jsonl"),

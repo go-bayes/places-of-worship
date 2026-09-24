@@ -1,9 +1,28 @@
 import { v, type Infer } from "convex/values";
-import { action, internalMutation, internalQuery, mutation, query } from "./_generated/server";
+import { action, internalAction, internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { exportFormat, exportBatchStatus } from "./model";
 import { chooseActorRole, requireUser } from "./lib/auth";
+import {
+  BUNDLE_CODEC,
+  codecId,
+  gzipBundleFile,
+  sha256Hex,
+  storedObjectKey,
+  utf8Bytes,
+  verifyStoredFile,
+  type CodecRecord,
+} from "./lib/bundleCodec";
+import {
+  addReadCounts,
+  exceededDimension,
+  meteredCtx,
+  newMeter,
+  ReadBudgetExceeded,
+  type Meter,
+  type ReadCounts,
+} from "./lib/readMeter";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { ACCEPTANCE_NOTE_MIN, exportRefusalForTask } from "./lib/acceptance";
 import { assertMaxString, TASK_REASON_MAX } from "./lib/limits";
@@ -14,7 +33,7 @@ import { isWideEvidenceExportEligible } from "./lib/exportEligibility";
 import { targetYearsOrEmpty } from "./lib/countryYears";
 import { locationOutcomeColumns } from "./lib/locationOutcome";
 import { readGeneratedWideRow, wideEvidenceFields, wideEvidenceRowValues } from "./lib/wideEvidenceFields";
-import { exportBatchDoc } from "./lib/validators";
+import { exportBatchDoc, exportRunDoc, userDoc } from "./lib/validators";
 
 // frozen exports (docs/development/frozen-exports.md, D20 step two): freezing
 // captures the complete bundle contract `pow-export-bundle.v1` (every file's
@@ -66,12 +85,6 @@ function csvLine(values: unknown[]): string {
 // never the ecmascript string length, which counts utf-16 code units
 function utf8Length(text: string): number {
   return new TextEncoder().encode(text).length;
-}
-
-function hexOfDigest(digest: ArrayBuffer): string {
-  return Array.from(new Uint8Array(digest))
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
 }
 
 function sortedUnique(values: readonly string[]): string[] {
@@ -253,16 +266,76 @@ const FILE_KEYS: Record<string, string> = {
   "review_snapshots.jsonl": "review_snapshots_jsonl",
 };
 
-// interim scale gate (review of PR #112, 2026-09-12; lifted by the budgeted
-// composer in the lean-storage brief): prepareFreeze reads and builds a whole
-// batch in one transaction and returns every file's text in one result, so a
-// batch is bounded by the Convex per-call and transaction-read caps (16 MiB).
-// Automatic selection is capped at a small count and refuses, naming the
-// count, when a country holds more accepted tasks than that, so a curator
-// names bounded lists explicitly; and every freeze refuses at capture when
-// the built bundle exceeds the byte budget, before any blob is stored.
-export const AUTOMATIC_BATCH_TASK_LIMIT = 100;
-export const EXPORT_BATCH_BYTE_BUDGET = 6 * 1024 * 1024;
+// batch budgets (lean-storage brief section 3.1, rulings 1 and 2, jb
+// 2026-09-24; pr l1 replaces the interim 100-task automatic-selection cap
+// and the capture-time byte refusal of pr #112). A batch must fit one
+// prepareFreeze and one completeFreeze transaction, which Convex bounds at
+// 16 MiB read, 32,000 documents scanned, 4,096 index ranges read, and a
+// 16 MiB function result. The byte budget holds the plain bundle (every
+// file prepareFreeze returns in its one result) at 37.5% of the result cap;
+// the read budget holds the reads the freeze recheck and bundle build make,
+// as measured at composition (convex/lib/readMeter.ts), at a fraction of
+// each transaction cap. Both are starting values: the figures measured on a
+// real backend are recorded in docs/development/frozen-exports.md.
+const MIB = 1024 * 1024;
+export const EXPORT_BATCH_BYTE_BUDGET = 6 * MIB;
+export const EXPORT_BATCH_READ_BUDGET: ReadCounts = { bytes: 10 * MIB, documents: 16_000, index_ranges: 2_048 };
+// a guard on the batch document itself (1 MiB cap): its id lists are held
+// twice, on the batch and in pending_freeze.manifest, beside the manifest's
+// version and snapshot hashes and the stored-object trail; the row budget
+// keeps the estimate of all of it at a quarter of the cap
+export const EXPORT_BATCH_MAX_TASKS = 500;
+export const EXPORT_BATCH_ROW_BYTE_BUDGET = 256 * 1024;
+// the batch row's fixed part: its scalar members, the manifest's file list,
+// and a full stored-object trail (sixteen entries); an allowance
+const BATCH_ROW_BASE_BYTES = 24 * 1024;
+// how far a composed batch's bundle may grow between composition and
+// capture before prepareFreeze refuses it by name (rows added to its tasks
+// since, such as notes)
+export const EXPORT_BATCH_CAPTURE_TOLERANCE = 1 * 1024 * 1024;
+// the ceiling on everything one of this module's transactions reads through
+// the meter (candidate pages, measurements, the freeze recheck and build),
+// with headroom under Convex's 16 MiB, 32,000 documents, and 4,096 ranges
+// for the unmetered rows around them; a read that would pass it stops within
+// one document
+export const TRANSACTION_READ_CEILING: ReadCounts = { bytes: 14 * MIB, documents: 28_000, index_ranges: 3_600 };
+// the manifest's fixed members and its fifteen file entries, pretty-printed;
+// an allowance, above the committed fixture's 3.3 KB manifest
+const MANIFEST_BASE_BYTES = 8 * 1024;
+// reads a batch makes beyond its tasks' own (the batch row, the members, the
+// predecessor): an allowance
+const BATCH_BASE_READS: ReadCounts = { bytes: 256 * 1024, documents: 16, index_ranges: 16 };
+// what a task adds to a freeze beyond the reads measured for it: its run
+// member row (read by prepareFreeze) and its task row (read again by
+// completeFreeze to move it to exported); an allowance
+const PER_TASK_FREEZE_READS: ReadCounts = { bytes: 2 * 1024, documents: 2, index_ranges: 1 };
+// one composition step's own reads: a fraction of the transaction caps low
+// enough that the step's last task, measured up to EXPORT_BATCH_READ_BUDGET
+// before it is refused, still fits one transaction
+export const COMPOSE_STEP_READ_BUDGET: ReadCounts = { bytes: 3 * MIB, documents: 6_000, index_ranges: 1_024 };
+// one candidate page: bounded by count and by bytes, so individually large
+// task rows cannot make the page itself the read that breaks the step
+const COMPOSE_CANDIDATE_PAGE = 64;
+const COMPOSE_CANDIDATE_PAGE_BYTES = 1 * MIB;
+// drafts archived per step when a composition replaces an earlier run: at
+// most 20 batch rows of up to the 256 KiB row budget, 5 MiB, per step
+const ARCHIVE_STEP_DRAFTS = 20;
+// a cutting step stops at the first batch boundary past this many members
+// or past CUT_STEP_READ_BUDGET, and its member stream stops within one row
+// of CUT_STEP_READ_CEILING
+const CUT_STEP_MEMBERS = 1_000;
+export const CUT_STEP_READ_BUDGET: ReadCounts = { bytes: 3 * MIB, documents: 6_000, index_ranges: 1_000 };
+const CUT_STEP_READ_CEILING: ReadCounts = { bytes: 6 * MIB, documents: 12_000, index_ranges: 1_800 };
+// a run's lease: longer than an action may run, so a live holder never
+// loses it; renewed between the phases of each batch freeze
+export const EXPORT_RUN_LEASE_MS = 15 * 60 * 1000;
+// between one settled freeze and the scheduled invocation that claims the
+// next batch, the run holds a short hand-off lease that only a chain
+// invocation may take, so no second chain can start in the gap; if the
+// scheduled invocation never runs, it lapses and a curator can resume
+export const EXPORT_RUN_HANDOFF_MS = 2 * 60 * 1000;
+const RUN_HANDOFF_HOLDER = "chain-handoff";
+const EXPORT_RUN_REFUSALS_KEPT = 20;
 
 type BuiltFile = { text: string; content_type: string; sha256: string; byte_length: number };
 
@@ -279,7 +352,10 @@ function flattenFiles(filesByFilename: Record<string, BuiltFile>): Record<string
 // the per-task reads are the same indexed queries the pre-freeze bundle used,
 // extended with the three new per-task tables and the snapshot rows the
 // included decisions name
-async function collectBundleRows(ctx: any, batch: Doc<"export_batches">) {
+async function collectBundleRows(
+  ctx: any,
+  batch: Pick<Doc<"export_batches">, "included_task_ids" | "included_review_decision_ids" | "included_acceptance_ids">,
+) {
   const taskIds = sortedUnique(batch.included_task_ids);
   const reviewDecisionIds = sortedUnique(batch.included_review_decision_ids);
   const acceptanceIds = sortedUnique(batch.included_acceptance_ids ?? []);
@@ -393,18 +469,12 @@ async function collectBundleRows(ctx: any, batch: Doc<"export_batches">) {
 // contract: only a frozen bundle carries one. deterministic for a fixed
 // database state, since every read above is an indexed lookup over a sorted
 // id list and nothing here reads `Date.now()`.
-async function buildBundle(
-  ctx: any,
-  batch: Doc<"export_batches">,
-  frozenAt: number | undefined,
-  includeHash: boolean,
-): Promise<{
-  manifest: Record<string, unknown>;
-  manifestHash: string | undefined;
-  filesByFilename: Record<string, BuiltFile>;
-}> {
-  const rows = await collectBundleRows(ctx, batch);
-  const wide = siteEvidenceWideCsv(batch.country_code, rows.evidenceDrafts, rows.reviewDecisions, rows.derivedLocations, rows.tasks);
+type BundleRows = Awaited<ReturnType<typeof collectBundleRows>>;
+
+// every content file's exact text (all but export_manifest.json) and its
+// record count, for the collected rows
+function bundleFileTexts(countryCode: string, rows: BundleRows) {
+  const wide = siteEvidenceWideCsv(countryCode, rows.evidenceDrafts, rows.reviewDecisions, rows.derivedLocations, rows.tasks);
 
   const fileTexts: Record<string, string> = {
     "tasks.jsonl": jsonl(rows.tasks),
@@ -440,6 +510,21 @@ async function buildBundle(
     "task_acceptances.jsonl": rows.taskAcceptances.length,
     "review_snapshots.jsonl": rows.reviewSnapshots.length,
   };
+  return { wide, fileTexts, recordCounts };
+}
+
+async function buildBundle(
+  ctx: any,
+  batch: Doc<"export_batches">,
+  frozenAt: number | undefined,
+  includeHash: boolean,
+): Promise<{
+  manifest: Record<string, unknown>;
+  manifestHash: string | undefined;
+  filesByFilename: Record<string, BuiltFile>;
+}> {
+  const rows = await collectBundleRows(ctx, batch);
+  const { wide, fileTexts, recordCounts } = bundleFileTexts(batch.country_code, rows);
 
   const filesManifest = Object.keys(fileTexts)
     .sort()
@@ -515,10 +600,21 @@ async function buildBundle(
 // membership immediately before it is frozen); returns every accepted
 // decision id and every accepted acceptance id on the task, which is what a
 // batch stores as retained history, not only the authoritative pair.
+type TaskExportAuthority = {
+  reviewDecisionIds: string[];
+  acceptanceIds: string[];
+  // the decision carrying the task's current export authority and the pins
+  // it holds, captured by an export run at composition and rechecked by
+  // prepareFreeze
+  authorityReviewDecisionId: string | undefined;
+  evidenceVersionHash: string | undefined;
+  reviewSnapshotHash: string | undefined;
+};
+
 async function assertTaskExportAuthority(
   ctx: any,
   taskId: string,
-): Promise<{ reviewDecisionIds: string[]; acceptanceIds: string[] }> {
+): Promise<TaskExportAuthority> {
   const task = await taskByTaskId(ctx, taskId);
   if (task?.source_context?.training?.exclude_from_exports === true) {
     throw new Error(`Task ${taskId} is training-excluded and cannot enter an export batch.`);
@@ -574,7 +670,139 @@ async function assertTaskExportAuthority(
   return {
     reviewDecisionIds: accepted.map((decision) => decision.review_decision_id),
     acceptanceIds: acceptedAcceptances.map((row) => row.acceptance_id),
+    authorityReviewDecisionId: authority?.review_decision_id,
+    evidenceVersionHash: authority?.evidence_version_hash,
+    reviewSnapshotHash: authority?.review_snapshot_hash,
   };
+}
+
+// the utf-8 bytes one id adds to the pretty-printed manifest's id lists:
+// four spaces, two quotes, a comma, and a newline around the id itself
+function manifestIdBytes(ids: readonly string[]): number {
+  return ids.reduce((total, id) => total + utf8Length(id) + 8, 0);
+}
+
+// the csv header line the batch's site_evidence_wide.csv carries once,
+// whatever the number of rows
+function wideCsvHeaderBytes(countryCode: string): number {
+  return utf8Length(`${csvLine(wideEvidenceFields(targetYearsOrEmpty(countryCode)))}\n`);
+}
+
+// the bytes one id adds to the batch row's lists: the id and its quotes and
+// separator in the stored JSON
+function rowIdBytes(ids: readonly string[]): number {
+  return ids.reduce((total, id) => total + utf8Length(id) + 3, 0);
+}
+
+type TaskMeasurement =
+  | { ok: true; authority: TaskExportAuthority; bundleBytes: number; rowBytes: number; reads: ReadCounts }
+  // `deferred`: the transaction's own read ceiling, not the task, stopped
+  // the measurement; the task is measured again in a fresh transaction
+  | { ok: false; deferred: boolean; reason: string; reads: ReadCounts };
+
+// measures what one task adds to a batch (lean-storage brief section 3.1):
+// runs the freeze recheck (assertTaskExportAuthority) and the bundle reads
+// (collectBundleRows) for the task alone through the read meter, and sizes
+// the task's share of the bundle exactly as buildBundle writes it: its rows
+// in every jsonl file, its csv rows without the header (counted once per
+// batch), and its ids in the manifest; and its share of the batch row. The
+// reads are charged document by document to the task's own meter (limit
+// EXPORT_BATCH_READ_BUDGET) and to the calling transaction's meter, so an
+// oversized history stops within one document of whichever limit it meets
+// first. A task whose recheck refuses, or whose rows alone exceed the byte
+// or read budget, is refused by name.
+async function measureTaskForExport(
+  ctx: any,
+  taskId: string,
+  countryCode: string,
+  transaction: Meter,
+): Promise<TaskMeasurement> {
+  const task = newMeter("task", EXPORT_BATCH_READ_BUDGET);
+  const metered = meteredCtx(ctx, task, transaction);
+  try {
+    const authority = await assertTaskExportAuthority(metered, taskId);
+    const rows = await collectBundleRows(metered, {
+      included_task_ids: [taskId],
+      included_review_decision_ids: authority.reviewDecisionIds,
+      included_acceptance_ids: authority.acceptanceIds,
+    });
+    const { wide, fileTexts } = bundleFileTexts(countryCode, rows);
+    let bundleBytes = 0;
+    for (const text of Object.values(fileTexts)) bundleBytes += utf8Length(text);
+    if (wide.rowCount > 0) bundleBytes -= wideCsvHeaderBytes(countryCode);
+    const hashes = [
+      ...sortedUnique(rows.evidenceVersions.map((row) => row.object_hash)),
+      ...sortedUnique(rows.reviewSnapshots.map((row) => row.snapshot_hash)),
+    ];
+    bundleBytes += manifestIdBytes([...rows.taskIds, ...rows.reviewDecisionIds, ...rows.acceptanceIds, ...hashes]);
+    const rowBytes = 2 * rowIdBytes([...rows.taskIds, ...rows.reviewDecisionIds, ...rows.acceptanceIds]) + rowIdBytes(hashes);
+    if (bundleBytes + MANIFEST_BASE_BYTES > EXPORT_BATCH_BYTE_BUDGET) {
+      return {
+        ok: false,
+        deferred: false,
+        reason: `Task ${taskId}: its bundle rows alone are ${bundleBytes} bytes, above the ${EXPORT_BATCH_BYTE_BUDGET}-byte batch budget; it cannot be exported in any batch until its rows are reduced.`,
+        reads: task.counts,
+      };
+    }
+    if (rowBytes + BATCH_ROW_BASE_BYTES > EXPORT_BATCH_ROW_BYTE_BUDGET) {
+      return {
+        ok: false,
+        deferred: false,
+        reason: `Task ${taskId}: its ids and hashes alone take ${rowBytes} bytes of the batch row, above the ${EXPORT_BATCH_ROW_BYTE_BUDGET}-byte row budget; it cannot be exported in any batch until its history is reduced.`,
+        reads: task.counts,
+      };
+    }
+    return { ok: true, authority, bundleBytes, rowBytes, reads: addReadCounts(task.counts, PER_TASK_FREEZE_READS) };
+  } catch (error) {
+    if (error instanceof ReadBudgetExceeded) {
+      if (error.meter !== "task") {
+        return { ok: false, deferred: true, reason: `Task ${taskId}: measurement deferred at the transaction read ceiling.`, reads: task.counts };
+      }
+      return {
+        ok: false,
+        deferred: false,
+        reason: `Task ${taskId}: its rows alone exceed the batch read budget on ${error.dimension.replace("_", " ")} (more than ${EXPORT_BATCH_READ_BUDGET[error.dimension]}); it cannot be exported in any batch until its rows are reduced.`,
+        reads: task.counts,
+      };
+    }
+    return { ok: false, deferred: false, reason: errorMessage(error), reads: task.counts };
+  }
+}
+
+function ceilingRefusal(taskId: string): string {
+  return `Task ${taskId}: its rows cannot be read within one transaction's read ceiling; it cannot be exported in any batch until its rows are reduced.`;
+}
+
+// a batch estimate: plain bundle bytes, the batch row's bytes, and the
+// reads its freeze makes
+type BatchEstimate = { bytes: number; rowBytes: number; reads: ReadCounts };
+
+function emptyBatchEstimate(countryCode: string): BatchEstimate {
+  return {
+    bytes: MANIFEST_BASE_BYTES + wideCsvHeaderBytes(countryCode),
+    rowBytes: BATCH_ROW_BASE_BYTES,
+    reads: { ...BATCH_BASE_READS },
+  };
+}
+
+// whether a task fits the open batch; the reason names the budget it breaks
+function batchWouldExceed(
+  estimate: BatchEstimate,
+  taskCount: number,
+  add: { bytes: number; rowBytes: number; reads: ReadCounts },
+): string | null {
+  if (taskCount + 1 > EXPORT_BATCH_MAX_TASKS) return `more than ${EXPORT_BATCH_MAX_TASKS} tasks`;
+  if (estimate.bytes + add.bytes > EXPORT_BATCH_BYTE_BUDGET) {
+    return `${estimate.bytes + add.bytes} bundle bytes, above the ${EXPORT_BATCH_BYTE_BUDGET}-byte budget`;
+  }
+  if (estimate.rowBytes + add.rowBytes > EXPORT_BATCH_ROW_BYTE_BUDGET) {
+    return `${estimate.rowBytes + add.rowBytes} batch row bytes, above the ${EXPORT_BATCH_ROW_BYTE_BUDGET}-byte row budget`;
+  }
+  const dimension = exceededDimension(addReadCounts(estimate.reads, add.reads), EXPORT_BATCH_READ_BUDGET);
+  if (dimension !== null) {
+    return `${estimate.reads[dimension] + add.reads[dimension]} ${dimension.replace("_", " ")} read, above the ${EXPORT_BATCH_READ_BUDGET[dimension]} budget`;
+  }
+  return null;
 }
 
 export const listExportBatches = query({
@@ -658,52 +886,88 @@ export const createExportBatch = mutation({
       }
     }
 
-    let requestedTaskIds: string[];
-    if (args.taskIds !== undefined) {
-      requestedTaskIds = args.taskIds;
-    } else {
-      const accepted = await ctx.db
-        .query("tasks")
-        // the pi acceptance layer (jb 2026-09-04): a batch takes only
-        // tasks a principal investigator has accepted, never a
-        // reviewer's acceptance alone
-        .withIndex("by_country_status", (q) => q.eq("country_code", args.countryCode).eq("status", "pi_accepted"))
-        .take(AUTOMATIC_BATCH_TASK_LIMIT + 1);
-      if (accepted.length > AUTOMATIC_BATCH_TASK_LIMIT) {
-        throw new Error(
-          `${args.countryCode} has more than ${AUTOMATIC_BATCH_TASK_LIMIT} pi_accepted tasks; automatic selection would exceed one freeze's transaction budget. Name up to ${AUTOMATIC_BATCH_TASK_LIMIT} tasks explicitly in taskIds per batch until the budgeted batch composer lands.`,
-        );
-      }
-      requestedTaskIds = accepted.map((task) => task.task_id);
+    // budgeted selection (lean-storage brief section 3.1, ruling 2): every
+    // task is measured (its freeze recheck and bundle reads) as it is taken,
+    // and the batch is refused as soon as the running estimate breaks the
+    // byte, row, or read budget. Every read, the candidate rows included,
+    // is charged to this transaction's meter, which stops within one
+    // document of TRANSACTION_READ_CEILING. An explicit list over budget is
+    // refused, never truncated; automatic selection over budget is refused
+    // in favour of composeExportBatches, which cuts a country into budgeted
+    // batches.
+    const namedTaskIds = args.taskIds === undefined ? undefined : sortedUnique(args.taskIds);
+    if (namedTaskIds !== undefined && namedTaskIds.length > EXPORT_BATCH_MAX_TASKS) {
+      throw new Error(
+        `A batch may name at most ${EXPORT_BATCH_MAX_TASKS} tasks; ${namedTaskIds.length} were named. Compose the country with exports:composeExportBatches, or name fewer tasks.`,
+      );
     }
-
-    // training tasks never enter an export bundle, even when named
-    // explicitly; a named task a pi has not accepted refuses the batch
+    const overBudget = (detail: string): Error =>
+      new Error(
+        namedTaskIds !== undefined
+          ? `The named tasks exceed one export batch's budget (${detail}); name fewer tasks per batch, or compose the country with exports:composeExportBatches.`
+          : `${args.countryCode}'s pi_accepted tasks exceed one export batch's budget (${detail}); compose the country into budgeted batches with exports:composeExportBatches.`,
+      );
+    const transaction = newMeter("transaction", TRANSACTION_READ_CEILING);
     const taskIds: string[] = [];
-    for (const taskId of requestedTaskIds) {
-      const task = await ctx.db
-        .query("tasks")
-        .withIndex("by_task_id", (q) => q.eq("task_id", taskId))
-        .unique();
+    const reviewDecisionIds: string[] = [];
+    const acceptanceIds: string[] = [];
+    const estimate = emptyBatchEstimate(args.countryCode);
+    const take = async (task: Doc<"tasks"> | null, taskId: string): Promise<void> => {
+      // training tasks never enter an export bundle, even when named
+      // explicitly; a named task a pi has not accepted refuses the batch
       if (task?.source_context?.training?.exclude_from_exports === true) {
-        continue;
+        return;
       }
       const refusal = exportRefusalForTask(taskId, task?.status);
       if (refusal !== null) {
         throw new Error(refusal);
       }
+      // the shared authority check (also run again, per task, at freeze
+      // time by prepareFreeze) computes the accepted decisions and accepted
+      // acceptances a task contributes to the batch's retained history
+      const measured = await measureTaskForExport(ctx, taskId, args.countryCode, transaction);
+      if (!measured.ok) {
+        // the first task alone reaching the ceiling is the task's own size
+        if (measured.deferred && taskIds.length === 0) throw new Error(ceilingRefusal(taskId));
+        if (measured.deferred) throw overBudget(`this transaction's read ceiling reached at task ${taskId}`);
+        throw new Error(measured.reason);
+      }
+      const over = batchWouldExceed(estimate, taskIds.length, { bytes: measured.bundleBytes, rowBytes: measured.rowBytes, reads: measured.reads });
+      if (over !== null) {
+        throw overBudget(`${over} by task ${taskId}`);
+      }
       taskIds.push(taskId);
-    }
+      reviewDecisionIds.push(...measured.authority.reviewDecisionIds);
+      acceptanceIds.push(...measured.authority.acceptanceIds);
+      estimate.bytes += measured.bundleBytes;
+      estimate.rowBytes += measured.rowBytes;
+      estimate.reads = addReadCounts(estimate.reads, measured.reads);
+    };
 
-    // the shared authority check (also run again, per task, at freeze
-    // time by prepareFreeze) computes the accepted decisions and accepted
-    // acceptances a task contributes to the batch's retained history
-    const reviewDecisionIds: string[] = [];
-    const acceptanceIds: string[] = [];
-    for (const taskId of taskIds) {
-      const authority = await assertTaskExportAuthority(ctx, taskId);
-      reviewDecisionIds.push(...authority.reviewDecisionIds);
-      acceptanceIds.push(...authority.acceptanceIds);
+    const metered = meteredCtx(ctx, transaction);
+    try {
+      if (namedTaskIds !== undefined) {
+        for (const taskId of namedTaskIds) {
+          await take(await taskByTaskId(metered, taskId), taskId);
+        }
+      } else {
+        // the pi acceptance layer (jb 2026-09-04): a batch takes only tasks
+        // a principal investigator has accepted, never a reviewer's
+        // acceptance alone. The index range is streamed one row at a time
+        // (no page boundary, so rows sharing a creation time are never
+        // skipped), stopping at the first task over budget
+        const candidates = metered.db
+          .query("tasks")
+          .withIndex("by_country_status", (q: any) => q.eq("country_code", args.countryCode).eq("status", "pi_accepted"));
+        for await (const task of candidates as AsyncIterable<Doc<"tasks">>) {
+          await take(task, task.task_id);
+        }
+      }
+    } catch (error) {
+      if (error instanceof ReadBudgetExceeded) {
+        throw overBudget(`this transaction's read ceiling reached on ${error.dimension.replace("_", " ")}`);
+      }
+      throw error;
     }
 
     if (args.supersedesExportBatchId !== undefined) {
@@ -728,6 +992,9 @@ export const createExportBatch = mutation({
       pow_validation_status: "not_run",
       notes: args.notes,
       supersedes_export_batch_id: args.supersedesExportBatchId,
+      estimated_bytes: estimate.bytes,
+      estimated_documents: estimate.reads.documents,
+      estimated_index_ranges: estimate.reads.index_ranges,
     });
 
     return {
@@ -738,21 +1005,110 @@ export const createExportBatch = mutation({
   },
 });
 
+// the acting curator for a freeze step. A caller with an identity (the
+// freezeExportBatch and freezeCountryBatches actions) is checked as before;
+// the scheduled freeze chain has no identity, so an internal call without
+// one acts for the user id the run recorded, who must still be an active
+// curator or admin (lean-storage brief section 3.1, service authority).
+// Internal functions are reachable only from server code, never a client.
+async function requireFreezeActor(ctx: any, userId: Id<"users"> | undefined): Promise<Doc<"users">> {
+  const identity = await ctx.auth.getUserIdentity();
+  if (identity !== null) {
+    const caller = await requireUser(ctx, ["curator", "admin"]);
+    // a caller with an identity acts only as itself
+    if (userId !== undefined && userId !== caller._id) {
+      throw new Error("A freeze step called with an identity may act only for that identity's own user.");
+    }
+    return caller;
+  }
+  if (userId === undefined) {
+    throw new Error("Authentication required.");
+  }
+  const user: Doc<"users"> | null = await ctx.db.get(userId);
+  if (user === null || user.status !== "active" || !(user.roles.includes("curator") || user.roles.includes("admin"))) {
+    throw new Error("The curator this freeze acts for is no longer an active curator or admin; a current curator must resume it.");
+  }
+  return user;
+}
+
+type StoredObjectEntry = NonNullable<NonNullable<Doc<"export_batches">["pending_freeze"]>["stored_objects"]>[number];
+
+// deletes the blobs of trail entries that no committed file references,
+// skipping any already gone (an attempt's own failure path may have deleted
+// them first). Runs inside a mutation, so the deletions commit or roll back
+// with the batch patch that retires the trail.
+async function discardTrailBlobs(
+  ctx: any,
+  entries: readonly StoredObjectEntry[] | undefined,
+  keep: ReadonlySet<string>,
+): Promise<number> {
+  let discarded = 0;
+  for (const entry of entries ?? []) {
+    if (keep.has(entry.storage_id)) continue;
+    const meta = await ctx.db.system.get(entry.storage_id);
+    if (meta === null) continue;
+    await ctx.storage.delete(entry.storage_id);
+    discarded += 1;
+  }
+  return discarded;
+}
+
+// a run batch's captured membership (export_run_members, written at
+// composition) must still describe the task's current export authority:
+// the same authoritative decision and the same pinned evidence version and
+// snapshot. Anything else means the approval that covered the run no longer
+// covers this task, and the batch is refused rather than frozen.
+async function assertRunMembershipCurrent(
+  ctx: any,
+  batch: Doc<"export_batches">,
+  authorities: Map<string, TaskExportAuthority>,
+): Promise<void> {
+  const members: Doc<"export_run_members">[] = await ctx.db
+    .query("export_run_members")
+    .withIndex("by_export_batch", (q: any) => q.eq("export_batch_id", batch.export_batch_id))
+    .collect();
+  const memberTaskIds = sortedUnique(members.map((member) => member.task_id));
+  const batchTaskIds = sortedUnique(batch.included_task_ids);
+  if (memberTaskIds.length !== batchTaskIds.length || memberTaskIds.some((taskId, index) => taskId !== batchTaskIds[index])) {
+    throw new Error(
+      `Export batch ${batch.export_batch_id}: its tasks no longer match the membership run ${batch.export_run_id} captured; compose a new run.`,
+    );
+  }
+  for (const member of members) {
+    const current = authorities.get(member.task_id);
+    if (
+      current === undefined
+      || current.authorityReviewDecisionId !== member.authority_review_decision_id
+      || current.evidenceVersionHash !== member.evidence_version_hash
+      || current.reviewSnapshotHash !== member.review_snapshot_hash
+    ) {
+      throw new Error(
+        `Export batch ${batch.export_batch_id}: task ${member.task_id}'s export authority changed since run ${batch.export_run_id} captured it (captured decision ${member.authority_review_decision_id ?? "none"}, now ${current?.authorityReviewDecisionId ?? "none"}); compose a new run.`,
+      );
+    }
+  }
+}
+
 // step 1 of freezing (docs/development/frozen-exports.md section 3):
 // rechecks every included task's eligibility and export authority, checks
-// the batch's stored membership still matches what that recheck returns,
-// builds the complete bundle at this attempt's `frozen_at`, and records the
-// attempt with its full manifest on the batch. Its only write is the final
-// patch, so any refusal above it leaves the batch completely untouched.
+// the batch's stored membership still matches what that recheck returns
+// (and, for a batch an export run composed, the authority pins the run
+// captured), builds the complete bundle at this attempt's `frozen_at`, and
+// records the attempt with its full manifest on the batch. Its only write is
+// the final patch, so any refusal above it leaves the batch completely
+// untouched. The byte budget is applied when the batch is composed or
+// created (pr l1), not here.
 export const prepareFreeze = internalMutation({
-  args: { exportBatchId: v.string(), userId: v.id("users"), attemptId: v.string() },
+  // runLeaseHolder: the run-chain invocation's lease holder; required, and
+  // checked against the run's lease, for a batch an export run composed
+  args: { exportBatchId: v.string(), userId: v.id("users"), attemptId: v.string(), runLeaseHolder: v.optional(v.string()) },
   returns: v.object({
     manifest_hash: v.string(),
     frozen_at: v.number(),
     files: v.array(v.object({ filename: v.string(), content_type: v.string(), text: v.string() })),
   }),
   handler: async (ctx, args) => {
-    await requireUser(ctx, ["curator", "admin"]);
+    await requireFreezeActor(ctx, args.userId);
     const batch = await batchByExportBatchId(ctx, args.exportBatchId);
     if (batch === null) {
       throw new Error(`Export batch not found: ${args.exportBatchId}`);
@@ -760,43 +1116,85 @@ export const prepareFreeze = internalMutation({
     if (batch.status !== "draft") {
       throw new Error("Only draft export batches can be frozen.");
     }
+    // a run's batch is frozen only by that run's chain, under its lease for
+    // this batch (review of pr #149): a direct freeze would race the chain
+    // and bypass the run's progress record
+    if (batch.export_run_id !== undefined) {
+      const run = await runByRunId(ctx, batch.export_run_id);
+      if (
+        args.runLeaseHolder === undefined
+        || run === null
+        || run.status !== "freezing"
+        || run.lease?.holder !== args.runLeaseHolder
+        || run.lease.export_batch_id !== batch.export_batch_id
+      ) {
+        throw new Error(
+          `Export batch ${args.exportBatchId} belongs to export run ${batch.export_run_id}; freeze it through exports:freezeCountryBatches.`,
+        );
+      }
+    }
 
+    // every read below goes through the transaction meter, so a batch whose
+    // rows grew past what one transaction can read is refused by name here
+    // rather than aborted by Convex
+    const transaction = newMeter("transaction", TRANSACTION_READ_CEILING);
+    const readCtx = meteredCtx(ctx, transaction);
     const currentDecisionIds: string[] = [];
     const currentAcceptanceIds: string[] = [];
-    for (const taskId of batch.included_task_ids) {
-      const authority = await assertTaskExportAuthority(ctx, taskId);
-      currentDecisionIds.push(...authority.reviewDecisionIds);
-      currentAcceptanceIds.push(...authority.acceptanceIds);
-    }
-    const storedDecisionIds = sortedUnique(batch.included_review_decision_ids);
-    const storedAcceptanceIds = sortedUnique(batch.included_acceptance_ids ?? []);
-    const nowDecisionIds = sortedUnique(currentDecisionIds);
-    const nowAcceptanceIds = sortedUnique(currentAcceptanceIds);
-    const sameMembership =
-      storedDecisionIds.length === nowDecisionIds.length
-      && storedDecisionIds.every((id, index) => id === nowDecisionIds[index])
-      && storedAcceptanceIds.length === nowAcceptanceIds.length
-      && storedAcceptanceIds.every((id, index) => id === nowAcceptanceIds[index]);
-    if (!sameMembership) {
-      throw new Error(
-        `Export batch ${args.exportBatchId}: membership changed since it was created (its accepted review decisions or acceptances no longer match); create a new batch.`,
-      );
-    }
-
+    const authorities = new Map<string, TaskExportAuthority>();
+    let built: Awaited<ReturnType<typeof buildBundle>>;
     const frozenAt = Date.now();
-    const built = await buildBundle(ctx, batch, frozenAt, true);
+    try {
+      for (const taskId of batch.included_task_ids) {
+        const authority = await assertTaskExportAuthority(readCtx, taskId);
+        authorities.set(taskId, authority);
+        currentDecisionIds.push(...authority.reviewDecisionIds);
+        currentAcceptanceIds.push(...authority.acceptanceIds);
+      }
+      const storedDecisionIds = sortedUnique(batch.included_review_decision_ids);
+      const storedAcceptanceIds = sortedUnique(batch.included_acceptance_ids ?? []);
+      const nowDecisionIds = sortedUnique(currentDecisionIds);
+      const nowAcceptanceIds = sortedUnique(currentAcceptanceIds);
+      const sameMembership =
+        storedDecisionIds.length === nowDecisionIds.length
+        && storedDecisionIds.every((id, index) => id === nowDecisionIds[index])
+        && storedAcceptanceIds.length === nowAcceptanceIds.length
+        && storedAcceptanceIds.every((id, index) => id === nowAcceptanceIds[index]);
+      if (!sameMembership) {
+        throw new Error(
+          `Export batch ${args.exportBatchId}: membership changed since it was created (its accepted review decisions or acceptances no longer match); create a new batch.`,
+        );
+      }
+      if (batch.export_run_id !== undefined) {
+        await assertRunMembershipCurrent(readCtx, batch, authorities);
+      }
+
+      built = await buildBundle(readCtx, batch, frozenAt, true);
+    } catch (error) {
+      if (error instanceof ReadBudgetExceeded) {
+        throw new Error(
+          `Export batch ${args.exportBatchId}: its recheck and bundle reads passed this transaction's read ceiling on ${error.dimension.replace("_", " ")} (its tasks' rows grew after it was created); compose or create smaller batches.`,
+        );
+      }
+      throw error;
+    }
     const bundleBytes = Object.values(built.filesByFilename).reduce((total, file) => total + file.byte_length, 0);
-    if (bundleBytes > EXPORT_BATCH_BYTE_BUDGET) {
+    if (bundleBytes > EXPORT_BATCH_BYTE_BUDGET + EXPORT_BATCH_CAPTURE_TOLERANCE) {
       throw new Error(
-        `Export batch ${args.exportBatchId}: the bundle is ${bundleBytes} bytes over ${batch.included_task_ids.length} tasks, above the ${EXPORT_BATCH_BYTE_BUDGET}-byte freeze budget; create smaller batches (name fewer tasks in taskIds).`,
+        `Export batch ${args.exportBatchId}: its bundle is ${bundleBytes} bytes, above the ${EXPORT_BATCH_BYTE_BUDGET}-byte budget plus the ${EXPORT_BATCH_CAPTURE_TOLERANCE}-byte capture tolerance (its tasks' rows grew after it was created); compose or create smaller batches.`,
       );
     }
+    // an earlier attempt's stored-object trail is carried forward, so the
+    // blobs of an attempt that died mid-freeze stay listed until this one
+    // commits or fails and discards them
+    const inheritedTrail = batch.pending_freeze?.stored_objects;
     await ctx.db.patch(batch._id, {
       pending_freeze: {
         attempt_id: args.attemptId,
         started_at: frozenAt,
         started_by: args.userId,
         manifest: built.manifest,
+        stored_objects: inheritedTrail,
       },
     });
 
@@ -806,6 +1204,60 @@ export const prepareFreeze = internalMutation({
       text: file.text,
     }));
     return { manifest_hash: built.manifestHash as string, frozen_at: frozenAt, files };
+  },
+});
+
+const codecRecordValidator = v.object({
+  name: v.literal("fflate"),
+  version: v.string(),
+  level: v.number(),
+  header: v.object({ mtime: v.number(), filename: v.boolean() }),
+});
+
+// step 2's trail (lean-storage brief section 3.1, item 4): the action records
+// every object it stores, as soon as it is stored and before it is read
+// back, so an attempt that dies leaves the object listed on the batch.
+// Returns false, recording nothing, when this attempt is no longer the
+// batch's current one (the action then stops and discards its own blobs).
+export const recordStoredObject = internalMutation({
+  args: {
+    exportBatchId: v.string(),
+    attemptId: v.string(),
+    userId: v.optional(v.id("users")),
+    filename: v.string(),
+    storageId: v.id("_storage"),
+    sha256: v.string(),
+    byteLength: v.number(),
+    storedSha256: v.string(),
+    storedByteLength: v.number(),
+    codec: codecRecordValidator,
+  },
+  returns: v.boolean(),
+  handler: async (ctx, args) => {
+    await requireFreezeActor(ctx, args.userId);
+    const batch = await batchByExportBatchId(ctx, args.exportBatchId);
+    if (batch === null || batch.status !== "draft" || batch.pending_freeze?.attempt_id !== args.attemptId) {
+      return false;
+    }
+    const entry: StoredObjectEntry = {
+      attempt_id: args.attemptId,
+      filename: args.filename,
+      object_key: storedObjectKey(args.sha256, args.codec),
+      storage_id: args.storageId,
+      sha256: args.sha256,
+      byte_length: args.byteLength,
+      stored_sha256: args.storedSha256,
+      stored_byte_length: args.storedByteLength,
+      codec_id: codecId(args.codec),
+      recorded_at: Date.now(),
+    };
+    await ctx.db.patch(batch._id, {
+      pending_freeze: {
+        ...batch.pending_freeze,
+        stored_objects: [...(batch.pending_freeze.stored_objects ?? []), entry],
+      },
+    });
+    return true;
   },
 });
 
@@ -846,7 +1298,7 @@ function committedFreezeResult(
 // deleted. Withdrawal and supersession keep `frozen_by_attempt_id`, so a
 // batch that commits and is then withdrawn still answers committed.
 export const freezeAttemptOutcome = internalQuery({
-  args: { exportBatchId: v.string(), attemptId: v.string() },
+  args: { exportBatchId: v.string(), attemptId: v.string(), userId: v.optional(v.id("users")) },
   returns: v.union(
     v.null(),
     v.object({
@@ -858,7 +1310,7 @@ export const freezeAttemptOutcome = internalQuery({
     }),
   ),
   handler: async (ctx, args) => {
-    await requireUser(ctx, ["curator", "admin"]);
+    await requireFreezeActor(ctx, args.userId);
     const batch = await batchByExportBatchId(ctx, args.exportBatchId);
     if (batch === null) {
       return null;
@@ -879,6 +1331,11 @@ export const completeFreeze = internalMutation({
         sha256: v.string(),
         byteLength: v.number(),
         contentType: v.string(),
+        // the stored encoding (pr l1): absent means plain bytes were stored
+        encoding: v.optional(v.literal("gzip")),
+        storedSha256: v.optional(v.string()),
+        storedByteLength: v.optional(v.number()),
+        codec: v.optional(codecRecordValidator),
       }),
     ),
   },
@@ -890,7 +1347,7 @@ export const completeFreeze = internalMutation({
     file_count: v.number(),
   }),
   handler: async (ctx, args) => {
-    const user = await requireUser(ctx, ["curator", "admin"]);
+    const user = await requireFreezeActor(ctx, args.userId);
     const batch = await batchByExportBatchId(ctx, args.exportBatchId);
     if (batch === null) {
       throw new Error(`Export batch not found: ${args.exportBatchId}`);
@@ -911,6 +1368,7 @@ export const completeFreeze = internalMutation({
 
     const pendingManifest = batch.pending_freeze.manifest as Record<string, unknown>;
     const frozenAt = batch.pending_freeze.started_at;
+    const trail = batch.pending_freeze.stored_objects;
 
     // a fresh rebuild, compared file by file to the manifest captured at
     // prepare time: any difference means a row changed between capture and
@@ -928,6 +1386,46 @@ export const completeFreeze = internalMutation({
     }
     if (rebuilt.manifestHash !== pendingManifest.manifest_hash) {
       throw new Error(`Export batch ${args.exportBatchId}: the export manifest changed between freeze capture and completion.`);
+    }
+
+    // the stored files must be exactly the bundle's files (review of pr
+    // #149): one per file, each with the plain hash and length the capture
+    // recorded (the rebuild above reproduced them, export_manifest.json
+    // included), each gzip-encoded, and each a blob this attempt recorded
+    // on its own trail with the same four values and codec
+    const expectedNames = Object.keys(rebuilt.filesByFilename);
+    const storedNames = new Set(args.storedFiles.map((file) => file.filename));
+    if (args.storedFiles.length !== expectedNames.length || storedNames.size !== expectedNames.length) {
+      throw new Error(
+        `Export batch ${args.exportBatchId}: completion names ${args.storedFiles.length} stored files, but the bundle has ${expectedNames.length} distinct files.`,
+      );
+    }
+    for (const file of args.storedFiles) {
+      const expected = rebuilt.filesByFilename[file.filename];
+      if (expected === undefined || expected.sha256 !== file.sha256 || expected.byte_length !== file.byteLength) {
+        throw new Error(
+          `Export batch ${args.exportBatchId}: stored file ${file.filename} does not match the captured bundle (sha256 ${file.sha256}, ${file.byteLength} bytes).`,
+        );
+      }
+      if (file.encoding !== "gzip" || file.storedSha256 === undefined || file.storedByteLength === undefined || file.codec === undefined) {
+        throw new Error(
+          `Export batch ${args.exportBatchId}: stored file ${file.filename} lacks its gzip encoding, stored hash, stored length, or codec record.`,
+        );
+      }
+      const recorded = (trail ?? []).find((entry) => entry.storage_id === file.storageId && entry.attempt_id === args.attemptId);
+      if (
+        recorded === undefined
+        || recorded.filename !== file.filename
+        || recorded.sha256 !== file.sha256
+        || recorded.byte_length !== file.byteLength
+        || recorded.stored_sha256 !== file.storedSha256
+        || recorded.stored_byte_length !== file.storedByteLength
+        || recorded.codec_id !== codecId(file.codec)
+      ) {
+        throw new Error(
+          `Export batch ${args.exportBatchId}: stored file ${file.filename} (${file.storageId}) is not on this attempt's stored-object trail with the same values.`,
+        );
+      }
     }
 
     // the predecessor is rechecked in this transaction, before any write:
@@ -969,19 +1467,29 @@ export const completeFreeze = internalMutation({
         sha256: file.sha256,
         byte_length: file.byteLength,
         content_type: file.contentType,
+        encoding: file.encoding,
+        stored_sha256: file.storedSha256,
+        stored_byte_length: file.storedByteLength,
+        codec: file.codec,
       })),
       pending_freeze: undefined,
     });
+    // the committed files are the batch's bytes now; every other object on
+    // the trail belongs to an attempt that died or was replaced
+    await discardTrailBlobs(ctx, trail, new Set(args.storedFiles.map((file) => file.storageId as string)));
 
     for (const taskId of batch.included_task_ids) {
       const task = await taskByTaskId(ctx, taskId);
       if (task === null) {
         continue;
       }
+      // the exported transition stays at freeze completion (ruling 12)
       await ctx.db.patch(task._id, {
         status: "exported",
         updated_at: now,
         last_event_at: now,
+        last_export_batch_id: args.exportBatchId,
+        last_exported_at: now,
       });
       await appendTaskEvent(ctx, {
         taskId,
@@ -1002,6 +1510,15 @@ export const completeFreeze = internalMutation({
       });
     }
 
+    // a run's progress is recorded in the transaction that freezes its
+    // batch, so a lost settle cannot undercount it (review of pr #149)
+    if (batch.export_run_id !== undefined) {
+      const run = await runByRunId(ctx, batch.export_run_id);
+      if (run !== null) {
+        await ctx.db.patch(run._id, { frozen_batch_count: run.frozen_batch_count + 1 });
+      }
+    }
+
     return {
       export_batch_id: args.exportBatchId,
       status: "frozen" as const,
@@ -1017,12 +1534,13 @@ export const completeFreeze = internalMutation({
 // `pending_freeze` (an older attempt's belated failure must not clobber a
 // newer, still-current one). When prepareFreeze itself refused before
 // writing anything, `pending_freeze` is simply absent, and this still
-// records the failure.
+// records the failure. The attempt's own blobs were deleted by the action;
+// any carried-forward trail of earlier attempts is discarded here.
 export const recordFreezeFailure = internalMutation({
-  args: { exportBatchId: v.string(), attemptId: v.string(), reason: v.string() },
+  args: { exportBatchId: v.string(), attemptId: v.string(), reason: v.string(), userId: v.optional(v.id("users")) },
   returns: v.null(),
   handler: async (ctx, args) => {
-    await requireUser(ctx, ["curator", "admin"]);
+    await requireFreezeActor(ctx, args.userId);
     const batch = await batchByExportBatchId(ctx, args.exportBatchId);
     if (batch === null || batch.status !== "draft") {
       return null;
@@ -1030,6 +1548,7 @@ export const recordFreezeFailure = internalMutation({
     if (batch.pending_freeze !== undefined && batch.pending_freeze.attempt_id !== args.attemptId) {
       return null;
     }
+    await discardTrailBlobs(ctx, batch.pending_freeze?.stored_objects, new Set());
     await ctx.db.patch(batch._id, {
       pending_freeze: undefined,
       last_freeze_failure: { attempt_id: args.attemptId, at: Date.now(), reason: args.reason },
@@ -1038,13 +1557,159 @@ export const recordFreezeFailure = internalMutation({
   },
 });
 
-// freezeExportBatch: an action orchestrating the three internal mutations
-// above. It holds no state beyond the storage ids it created: it stores
-// every file, reads each back, verifies its bytes, and only then commits
-// the freeze; any failure at any step deletes the blobs it stored and
-// records why, leaving the batch exactly as it was.
+// freezes one batch: prepareFreeze, then every file gzip-compressed under the
+// pinned codec, stored, recorded on the trail, read back, and verified on
+// all four values (stored sha256 and length, then plain sha256 and length
+// after decoding), then completeFreeze. Any definite failure deletes the
+// blobs this attempt stored and records why, leaving the batch exactly as
+// it was; a completion whose outcome is ambiguous keeps every blob. Shared
+// by the freezeExportBatch action and the scheduled run chain.
 type FreezeResult = { export_batch_id: string; status: "frozen"; manifest_hash: string; frozen_at: number; file_count: number };
 
+type StoredFile = {
+  filename: string;
+  storageId: Id<"_storage">;
+  sha256: string;
+  byteLength: number;
+  contentType: string;
+  encoding: "gzip";
+  storedSha256: string;
+  storedByteLength: number;
+  codec: CodecRecord;
+};
+
+async function deleteBlobsQuietly(ctx: any, storageIds: readonly Id<"_storage">[]): Promise<void> {
+  for (const storageId of storageIds) {
+    try {
+      await ctx.storage.delete(storageId);
+    } catch {
+      // already gone: a completing or failing attempt may have discarded it
+    }
+  }
+}
+
+async function freezeBatchCore(
+  ctx: any,
+  exportBatchId: string,
+  userId: Id<"users">,
+  run?: { holder: string; renewLease: () => Promise<void> },
+): Promise<FreezeResult> {
+  const attemptId = crypto.randomUUID();
+  const renewLease = run?.renewLease;
+
+  let prepared: { manifest_hash: string; frozen_at: number; files: { filename: string; content_type: string; text: string }[] };
+  try {
+    prepared = await ctx.runMutation(internal.exports.prepareFreeze, {
+      exportBatchId,
+      userId,
+      attemptId,
+      runLeaseHolder: run?.holder,
+    });
+  } catch (error) {
+    await ctx.runMutation(internal.exports.recordFreezeFailure, { exportBatchId, attemptId, userId, reason: errorMessage(error) });
+    throw error;
+  }
+
+  const storedFiles: StoredFile[] = [];
+  // every blob this attempt stores, whether or not it goes on to verify;
+  // a file that fails its own read-back check was still stored and must
+  // still be deleted on the way out
+  const allStorageIds: Id<"_storage">[] = [];
+  try {
+    if (renewLease !== undefined) await renewLease();
+    for (const file of prepared.files) {
+      const plain = utf8Bytes(file.text);
+      const expected = {
+        sha256: sha256(file.text),
+        byte_length: plain.length,
+        stored_sha256: "",
+        stored_byte_length: 0,
+      };
+      const gzipped = gzipBundleFile(plain);
+      expected.stored_sha256 = await sha256Hex(gzipped);
+      expected.stored_byte_length = gzipped.length;
+      const storageId: Id<"_storage"> = await ctx.storage.store(new Blob([gzipped as Uint8Array<ArrayBuffer>], { type: "application/gzip" }));
+      allStorageIds.push(storageId);
+      const current: boolean = await ctx.runMutation(internal.exports.recordStoredObject, {
+        exportBatchId,
+        attemptId,
+        userId,
+        filename: file.filename,
+        storageId,
+        sha256: expected.sha256,
+        byteLength: expected.byte_length,
+        storedSha256: expected.stored_sha256,
+        storedByteLength: expected.stored_byte_length,
+        codec: BUNDLE_CODEC,
+      });
+      if (!current) {
+        throw new Error(
+          `Export batch ${exportBatchId}: this freeze attempt is no longer current (a later attempt, or a status change, superseded it).`,
+        );
+      }
+      const blob = await ctx.storage.get(storageId);
+      if (blob === null) {
+        throw new Error(`Stored file ${file.filename} could not be read back from storage.`);
+      }
+      const bytes = new Uint8Array(await blob.arrayBuffer());
+      try {
+        await verifyStoredFile(`Stored file ${file.filename}`, bytes, expected);
+      } catch (error) {
+        throw new Error(`Stored file ${file.filename} did not verify on read-back: ${errorMessage(error)}`);
+      }
+      storedFiles.push({
+        filename: file.filename,
+        storageId,
+        sha256: expected.sha256,
+        byteLength: expected.byte_length,
+        contentType: file.content_type,
+        encoding: "gzip",
+        storedSha256: expected.stored_sha256,
+        storedByteLength: expected.stored_byte_length,
+        codec: BUNDLE_CODEC,
+      });
+    }
+    if (renewLease !== undefined) await renewLease();
+  } catch (error) {
+    await deleteBlobsQuietly(ctx, allStorageIds);
+    await ctx.runMutation(internal.exports.recordFreezeFailure, { exportBatchId, attemptId, userId, reason: errorMessage(error) });
+    throw error;
+  }
+
+  try {
+    const completed: FreezeResult = await ctx.runMutation(internal.exports.completeFreeze, {
+      exportBatchId,
+      attemptId,
+      userId,
+      storedFiles,
+    });
+    return completed;
+  } catch (error) {
+    // a failed call is ambiguous: the transaction may have been rejected,
+    // or it may have committed and only its response been lost. Only a
+    // batch that answers "not committed by this attempt" has its blobs
+    // deleted; a committed one returns its result, and an outcome that
+    // cannot be established keeps every blob and says so.
+    let outcome: FreezeResult | null;
+    try {
+      outcome = await ctx.runQuery(internal.exports.freezeAttemptOutcome, { exportBatchId, attemptId, userId });
+    } catch (probeError) {
+      throw new Error(
+        `Export batch ${exportBatchId}: freeze completion failed (${errorMessage(error)}) and its outcome could not be established (${errorMessage(probeError)}); the ${storedFiles.length} stored blobs were kept (${storedFiles.map((stored) => stored.storageId).join(", ")}). Reconcile the batch before retrying.`,
+      );
+    }
+    if (outcome !== null) {
+      return outcome;
+    }
+    await deleteBlobsQuietly(ctx, storedFiles.map((stored) => stored.storageId));
+    await ctx.runMutation(internal.exports.recordFreezeFailure, { exportBatchId, attemptId, userId, reason: errorMessage(error) });
+    throw error;
+  }
+}
+
+// freezeExportBatch: freezes one named draft batch now, as the calling
+// curator (docs/development/frozen-exports.md section 3). A country's
+// composed run is frozen through freezeCountryBatches instead.
 export const freezeExportBatch = action({
   args: { exportBatchId: v.string() },
   returns: v.object({
@@ -1061,102 +1726,17 @@ export const freezeExportBatch = action({
     // query that shares the caller's ctx.auth; every internal mutation this
     // action drives re-checks the role itself too (defence in depth)
     const user: Doc<"users"> = await ctx.runQuery(internal.exports.requireActingUser, {});
-    const attemptId = crypto.randomUUID();
-
-    let prepared: { manifest_hash: string; frozen_at: number; files: { filename: string; content_type: string; text: string }[] };
-    try {
-      prepared = await ctx.runMutation(internal.exports.prepareFreeze, {
-        exportBatchId: args.exportBatchId,
-        userId: user._id,
-        attemptId,
-      });
-    } catch (error) {
-      await ctx.runMutation(internal.exports.recordFreezeFailure, {
-        exportBatchId: args.exportBatchId,
-        attemptId,
-        reason: errorMessage(error),
-      });
-      throw error;
+    // a batch an export run composed is frozen only by that run's chain
+    // (review of pr #149); refused before any attempt is recorded on it
+    const batch: Doc<"export_batches"> | null = await ctx.runQuery(internal.exports.getExportBatchRow, {
+      exportBatchId: args.exportBatchId,
+    });
+    if (batch?.export_run_id !== undefined) {
+      throw new Error(
+        `Export batch ${args.exportBatchId} belongs to export run ${batch.export_run_id}; freeze it through exports:freezeCountryBatches.`,
+      );
     }
-
-    const storedFiles: { filename: string; storageId: Id<"_storage">; sha256: string; byteLength: number; contentType: string }[] = [];
-    // every blob this attempt stores, whether or not it goes on to verify;
-    // a file that fails its own read-back check was still stored and must
-    // still be deleted on the way out
-    const allStorageIds: Id<"_storage">[] = [];
-    try {
-      for (const file of prepared.files) {
-        const expectedSha256 = sha256(file.text);
-        const expectedByteLength = utf8Length(file.text);
-        const storageId = await ctx.storage.store(new Blob([file.text], { type: file.content_type }));
-        allStorageIds.push(storageId);
-        const blob = await ctx.storage.get(storageId);
-        if (blob === null) {
-          throw new Error(`Stored file ${file.filename} could not be read back from storage.`);
-        }
-        const bytes = new Uint8Array(await blob.arrayBuffer());
-        const digest = await crypto.subtle.digest("SHA-256", bytes);
-        const actualSha256 = hexOfDigest(digest);
-        if (actualSha256 !== expectedSha256 || bytes.length !== expectedByteLength) {
-          throw new Error(
-            `Stored file ${file.filename} did not verify on read-back (expected sha256 ${expectedSha256} and ${expectedByteLength} bytes, got ${actualSha256} and ${bytes.length} bytes).`,
-          );
-        }
-        storedFiles.push({
-          filename: file.filename,
-          storageId,
-          sha256: expectedSha256,
-          byteLength: expectedByteLength,
-          contentType: file.content_type,
-        });
-      }
-    } catch (error) {
-      for (const storageId of allStorageIds) {
-        await ctx.storage.delete(storageId);
-      }
-      await ctx.runMutation(internal.exports.recordFreezeFailure, {
-        exportBatchId: args.exportBatchId,
-        attemptId,
-        reason: errorMessage(error),
-      });
-      throw error;
-    }
-
-    try {
-      const completed: FreezeResult = await ctx.runMutation(internal.exports.completeFreeze, {
-        exportBatchId: args.exportBatchId,
-        attemptId,
-        userId: user._id,
-        storedFiles,
-      });
-      return completed;
-    } catch (error) {
-      // a failed call is ambiguous: the transaction may have been rejected,
-      // or it may have committed and only its response been lost. Only a
-      // batch that answers "not committed by this attempt" has its blobs
-      // deleted; a committed one returns its result, and an outcome that
-      // cannot be established keeps every blob and says so.
-      let outcome: FreezeResult | null;
-      try {
-        outcome = await ctx.runQuery(internal.exports.freezeAttemptOutcome, { exportBatchId: args.exportBatchId, attemptId });
-      } catch (probeError) {
-        throw new Error(
-          `Export batch ${args.exportBatchId}: freeze completion failed (${errorMessage(error)}) and its outcome could not be established (${errorMessage(probeError)}); the ${storedFiles.length} stored blobs were kept (${storedFiles.map((stored) => stored.storageId).join(", ")}). Reconcile the batch before retrying.`,
-        );
-      }
-      if (outcome !== null) {
-        return outcome;
-      }
-      for (const stored of storedFiles) {
-        await ctx.storage.delete(stored.storageId);
-      }
-      await ctx.runMutation(internal.exports.recordFreezeFailure, {
-        exportBatchId: args.exportBatchId,
-        attemptId,
-        reason: errorMessage(error),
-      });
-      throw error;
-    }
+    return await freezeBatchCore(ctx, args.exportBatchId, user._id);
   },
 });
 
@@ -1165,7 +1745,7 @@ export const freezeExportBatch = action({
 // the check (sharing the action's ctx.auth) and hands back the user doc.
 export const requireActingUser = internalQuery({
   args: {},
-  returns: v.any(),
+  returns: userDoc,
   handler: async (ctx) => {
     return await requireUser(ctx, ["curator", "admin"]);
   },
@@ -1285,8 +1865,26 @@ export const getExportBundle = action({
           throw new Error(`Export batch ${args.exportBatchId}: stored file ${entry.filename} is missing from storage.`);
         }
         const bytes = new Uint8Array(await blob.arrayBuffer());
-        const digest = await crypto.subtle.digest("SHA-256", bytes);
-        const actualSha256 = hexOfDigest(digest);
+        if (entry.encoding === "gzip") {
+          // pr l1: stored gzip bytes verify on all four values, stored
+          // sha256 and length first, then plain sha256 and length after
+          // decoding; the plain bytes are what the bundle contract hashes
+          if (entry.stored_sha256 === undefined || entry.stored_byte_length === undefined || entry.codec === undefined) {
+            throw new Error(
+              `Export batch ${args.exportBatchId}: stored file ${entry.filename} is gzip-encoded but lacks its stored hash, stored length, or codec record.`,
+            );
+          }
+          const plain = await verifyStoredFile(`Export batch ${args.exportBatchId}: stored file ${entry.filename}`, bytes, {
+            sha256: entry.sha256,
+            byte_length: entry.byte_length,
+            stored_sha256: entry.stored_sha256,
+            stored_byte_length: entry.stored_byte_length,
+          });
+          filesByFilename[entry.filename] = new TextDecoder().decode(plain);
+          continue;
+        }
+        // a batch frozen before pr l1 stored plain bytes, verified as then
+        const actualSha256 = await sha256Hex(bytes);
         if (actualSha256 !== entry.sha256 || bytes.length !== entry.byte_length) {
           throw new Error(
             `Export batch ${args.exportBatchId}: stored file ${entry.filename} failed verification (expected sha256 ${entry.sha256} and ${entry.byte_length} bytes, got ${actualSha256} and ${bytes.length} bytes).`,
@@ -1341,11 +1939,13 @@ export const getExportBundle = action({
       { exportBatchId: args.exportBatchId },
     );
 
-    if (batch.status === "draft") {
+    // a draft, or a draft a later composition archived (pr l1): a live
+    // preview that was never frozen, not a legacy freeze
+    if (batch.status === "draft" || batch.status === "archived") {
       return {
         export_manifest: built.manifest,
         files: built.files as unknown as Infer<typeof exportBundleFiles>,
-        disposition: { status: "draft" as const, stored_bytes: false, verified: false, processing_allowed: false },
+        disposition: { status: batch.status, stored_bytes: false, verified: false, processing_allowed: false },
       };
     }
 
@@ -1411,5 +2011,614 @@ export const withdrawExportBatch = mutation({
     }
 
     return { export_batch_id: args.exportBatchId, status: "withdrawn" as const };
+  },
+});
+
+// ---------------------------------------------------------------------------
+// export runs (lean-storage brief section 3.1, rulings 1 and 2, jb
+// 2026-09-24; pr l1). composeExportBatches cuts a country's pi_accepted
+// tasks into budgeted draft batches and captures the run's membership;
+// freezeCountryBatches then freezes the run's batches one per invocation,
+// each invocation scheduling the next, under the run's lease.
+// ---------------------------------------------------------------------------
+
+async function runByRunId(ctx: any, runId: string): Promise<Doc<"export_runs"> | null> {
+  return await ctx.db
+    .query("export_runs")
+    .withIndex("by_run_id", (q: any) => q.eq("run_id", runId))
+    .unique();
+}
+
+async function latestRunForCountry(ctx: any, countryCode: string): Promise<Doc<"export_runs"> | null> {
+  return await ctx.db
+    .query("export_runs")
+    .withIndex("by_country_started", (q: any) => q.eq("country_code", countryCode))
+    .order("desc")
+    .first();
+}
+
+function leaseLive(run: Doc<"export_runs">, now: number): boolean {
+  return run.lease !== undefined && run.lease.expires_at > now;
+}
+
+// the run's recorded curator must still hold the role; a scheduled step has
+// no identity of its own (service authority, brief section 3.1)
+async function runActorStillAuthorised(ctx: any, userId: Id<"users"> | undefined): Promise<boolean> {
+  if (userId === undefined) return false;
+  const user: Doc<"users"> | null = await ctx.db.get(userId);
+  return user !== null && user.status === "active" && (user.roles.includes("curator") || user.roles.includes("admin"));
+}
+
+// composeExportBatches: starts an export run for a country. A run still
+// composing or freezing under a live lease refuses a second one (the
+// per-country run lock); an earlier run that is composed, stopped, or whose
+// lease has lapsed is marked replaced at once, and the new run's first
+// scheduled steps archive its unfrozen drafts in bounded chunks (their
+// frozen batches keep their bytes). The composition itself then runs in
+// scheduled steps, each bounded by its own read budget.
+export const composeExportBatches = mutation({
+  args: { countryCode: v.string() },
+  returns: v.object({ run_id: v.string(), replaced_run_id: v.optional(v.string()) }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["curator", "admin"]);
+    const now = Date.now();
+    const runId = `${args.countryCode.toLowerCase()}-export-run-${now}`;
+
+    const previous = await latestRunForCountry(ctx, args.countryCode);
+    if (previous !== null && (previous.status === "composing" || previous.status === "freezing") && leaseLive(previous, now)) {
+      throw new Error(
+        `Export run ${previous.run_id} for ${args.countryCode} is still ${previous.status} (its lease runs to ${new Date(previous.lease!.expires_at).toISOString()}); wait for it, or for its lease to lapse, before composing again.`,
+      );
+    }
+    let replacedRunId: string | undefined;
+    if (previous !== null && previous.status !== "completed" && previous.status !== "replaced") {
+      await ctx.db.patch(previous._id, {
+        status: "replaced",
+        replaced_by_run_id: runId,
+        replaced_at: now,
+        lease: undefined,
+      });
+      replacedRunId = previous.run_id;
+    }
+
+    await ctx.db.insert("export_runs", {
+      run_id: runId,
+      country_code: args.countryCode,
+      status: "composing",
+      started_by: user._id,
+      started_at: now,
+      phase: replacedRunId !== undefined ? "archiving" : "estimating",
+      replacing_run_id: replacedRunId,
+      archived_batch_count: 0,
+      candidate_queue: [],
+      next_member_seq: 0,
+      member_count: 0,
+      refused_count: 0,
+      refusals: [],
+      batch_count: 0,
+      frozen_batch_count: 0,
+      estimated_bytes: 0,
+      lease: { holder: "compose", expires_at: now + EXPORT_RUN_LEASE_MS },
+    });
+    await ctx.scheduler.runAfter(0, internal.exports.composeRunStep, { runId });
+    return { run_id: runId, replaced_run_id: replacedRunId };
+  },
+});
+
+// creates one composed draft batch from consecutive run members
+async function insertComposedBatch(
+  ctx: any,
+  run: Doc<"export_runs">,
+  members: Doc<"export_run_members">[],
+  estimate: BatchEstimate,
+  now: number,
+): Promise<string> {
+  const index = run.batch_count;
+  const exportBatchId = `${run.run_id.replace("-export-run-", "-convex-export-")}-${String(index + 1).padStart(4, "0")}`;
+  await ctx.db.insert("export_batches", {
+    export_batch_id: exportBatchId,
+    country_code: run.country_code,
+    status: "draft",
+    created_by: run.started_by,
+    created_at: now,
+    included_task_ids: members.map((member) => member.task_id),
+    included_review_decision_ids: members.flatMap((member) => member.review_decision_ids),
+    included_acceptance_ids: members.flatMap((member) => member.acceptance_ids),
+    schema_version: "convex-task-layer.v0.1",
+    export_format: "bundle",
+    pow_validation_status: "not_run",
+    notes: `Composed by export run ${run.run_id}, batch ${index + 1}.`,
+    export_run_id: run.run_id,
+    estimated_bytes: estimate.bytes,
+    estimated_documents: estimate.reads.documents,
+    estimated_index_ranges: estimate.reads.index_ranges,
+  });
+  for (const member of members) {
+    await ctx.db.patch(member._id, { export_batch_id: exportBatchId });
+  }
+  run.batch_count += 1;
+  return exportBatchId;
+}
+
+// one composition step, every read charged to one transaction meter.
+// Archiving (after a replacement): archives up to ARCHIVE_STEP_DRAFTS of the
+// replaced run's drafts, discarding any dead attempt's trail with them.
+// Estimating: takes at most one candidate page per step (paginate, bounded
+// by count and bytes, with the continuation cursor stored on the run, so
+// rows sharing a creation time are never skipped), queues its task ids on
+// the run, and measures queued tasks one at a time, recording each as a run
+// member (captured membership, ruling 2) or a named refusal, until the
+// step's reads reach COMPOSE_STEP_READ_BUDGET. Every row read is charged,
+// training-excluded and re-read ones included. Cutting: walks the members
+// in order and closes a batch whenever the next member would break the
+// byte, row, or read budget, ending each step on a batch boundary. Every
+// step renews the run's lease and schedules the next; the last marks the
+// run composed.
+export const composeRunStep = internalMutation({
+  args: { runId: v.string() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const run = await runByRunId(ctx, args.runId);
+    if (run === null || run.status !== "composing") {
+      return null;
+    }
+    const now = Date.now();
+    if (!(await runActorStillAuthorised(ctx, run.started_by))) {
+      await ctx.db.patch(run._id, {
+        status: "stopped",
+        lease: undefined,
+        last_error: { at: now, reason: "The curator who started this run is no longer an active curator or admin; compose again." },
+      });
+      return null;
+    }
+    const renewed = { holder: "compose", expires_at: now + EXPORT_RUN_LEASE_MS };
+
+    if (run.phase === "archiving") {
+      const drafts: Doc<"export_batches">[] =
+        run.replacing_run_id === undefined
+          ? []
+          : await ctx.db
+            .query("export_batches")
+            .withIndex("by_export_run_status", (q) => q.eq("export_run_id", run.replacing_run_id).eq("status", "draft"))
+            .take(ARCHIVE_STEP_DRAFTS);
+      for (const draft of drafts) {
+        // a dead freeze attempt's stored objects go with the draft
+        await discardTrailBlobs(ctx, draft.pending_freeze?.stored_objects, new Set());
+        await ctx.db.patch(draft._id, {
+          status: "archived",
+          archived_at: now,
+          archived_by: run.started_by,
+          archived_reason: `Replaced by export run ${run.run_id}.`,
+          pending_freeze: undefined,
+        });
+      }
+      await ctx.db.patch(run._id, {
+        archived_batch_count: (run.archived_batch_count ?? 0) + drafts.length,
+        phase: drafts.length < ARCHIVE_STEP_DRAFTS ? "estimating" : "archiving",
+        lease: renewed,
+      });
+      await ctx.scheduler.runAfter(0, internal.exports.composeRunStep, { runId: args.runId });
+      return null;
+    }
+
+    if (run.phase === "estimating") {
+      const transaction = newMeter("transaction", TRANSACTION_READ_CEILING);
+      const metered = meteredCtx(ctx, transaction);
+      let queue = [...(run.candidate_queue ?? [])];
+      let cursor = run.candidate_cursor ?? null;
+      let candidatesDone = run.candidates_done ?? false;
+      let pageFetched = false;
+      let measuredThisStep = 0;
+      let seq = run.next_member_seq;
+      let memberCount = run.member_count;
+      let refusedCount = run.refused_count;
+      let estimatedBytes = run.estimated_bytes;
+      const refusals = [...run.refusals];
+      try {
+        for (;;) {
+          if (queue.length === 0) {
+            // Convex allows one paginated query per function, so a step
+            // takes at most one page
+            if (candidatesDone || pageFetched) break;
+            const page = await metered.db
+              .query("tasks")
+              .withIndex("by_country_status", (q: any) => q.eq("country_code", run.country_code).eq("status", "pi_accepted"))
+              .paginate({ numItems: COMPOSE_CANDIDATE_PAGE, cursor, maximumBytesRead: COMPOSE_CANDIDATE_PAGE_BYTES });
+            pageFetched = true;
+            queue = page.page.map((task: Doc<"tasks">) => task.task_id);
+            cursor = page.continueCursor;
+            candidatesDone = page.isDone;
+            continue;
+          }
+          if (exceededDimension(transaction.counts, COMPOSE_STEP_READ_BUDGET) !== null) break;
+          const taskId = queue[0];
+          const task: Doc<"tasks"> | null = await taskByTaskId(metered, taskId);
+          // a queued task that has since left pi_accepted (or the country),
+          // or a training task, never enters the run
+          if (
+            task === null
+            || task.status !== "pi_accepted"
+            || task.country_code !== run.country_code
+            || task.source_context?.training?.exclude_from_exports === true
+          ) {
+            queue.shift();
+            continue;
+          }
+          let measured = await measureTaskForExport(ctx, taskId, run.country_code, transaction);
+          if (!measured.ok && measured.deferred) {
+            // deferred to a fresh step, unless this step has measured
+            // nothing yet: then the task alone fills a transaction, and it
+            // is refused by name rather than deferred for ever
+            if (measuredThisStep > 0) break;
+            measured = { ...measured, deferred: false, reason: ceilingRefusal(taskId) };
+          }
+          measuredThisStep += 1;
+          if (measured.ok) {
+            await ctx.db.insert("export_run_members", {
+              run_id: run.run_id,
+              seq,
+              task_id: taskId,
+              review_decision_ids: measured.authority.reviewDecisionIds,
+              acceptance_ids: measured.authority.acceptanceIds,
+              authority_review_decision_id: measured.authority.authorityReviewDecisionId,
+              evidence_version_hash: measured.authority.evidenceVersionHash,
+              review_snapshot_hash: measured.authority.reviewSnapshotHash,
+              estimated_bytes: measured.bundleBytes,
+              estimated_row_bytes: measured.rowBytes,
+              estimated_read_bytes: measured.reads.bytes,
+              estimated_documents: measured.reads.documents,
+              estimated_index_ranges: measured.reads.index_ranges,
+            });
+            memberCount += 1;
+            estimatedBytes += measured.bundleBytes;
+          } else {
+            await ctx.db.insert("export_run_members", {
+              run_id: run.run_id,
+              seq,
+              task_id: taskId,
+              review_decision_ids: [],
+              acceptance_ids: [],
+              estimated_bytes: 0,
+              estimated_row_bytes: 0,
+              estimated_read_bytes: measured.reads.bytes,
+              estimated_documents: measured.reads.documents,
+              estimated_index_ranges: measured.reads.index_ranges,
+              refusal: measured.reason,
+            });
+            refusedCount += 1;
+            if (refusals.length < EXPORT_RUN_REFUSALS_KEPT) {
+              refusals.push({ task_id: taskId, reason: measured.reason });
+            }
+          }
+          seq += 1;
+          queue.shift();
+        }
+      } catch (error) {
+        // the transaction ceiling stopped a page or task read: this step
+        // ends where it is, and the next one starts afresh from the queue
+        if (!(error instanceof ReadBudgetExceeded)) throw error;
+      }
+      const exhausted = queue.length === 0 && candidatesDone;
+      await ctx.db.patch(run._id, {
+        candidate_queue: queue,
+        candidate_cursor: cursor,
+        candidates_done: candidatesDone,
+        next_member_seq: seq,
+        member_count: memberCount,
+        refused_count: refusedCount,
+        refusals,
+        estimated_bytes: estimatedBytes,
+        phase: exhausted ? "cutting" : "estimating",
+        lease: renewed,
+      });
+      await ctx.scheduler.runAfter(0, internal.exports.composeRunStep, { runId: args.runId });
+      return null;
+    }
+
+    if (run.phase === "cutting") {
+      // members stream through the read meter (review of pr #149, round 2):
+      // a member row carries its task's decision and acceptance ids and can
+      // be tens of kilobytes, so the step stops at the first batch boundary
+      // past CUT_STEP_READ_BUDGET, and within one row of
+      // CUT_STEP_READ_CEILING at the latest (half the transaction ceiling,
+      // since closing a batch patches its members again)
+      const afterSeq = run.cut_cursor_seq ?? -1;
+      const transaction = newMeter("transaction", CUT_STEP_READ_CEILING);
+      const metered = meteredCtx(ctx, transaction);
+      const members = metered.db
+        .query("export_run_members")
+        .withIndex("by_run_seq", (q: any) => q.eq("run_id", run.run_id).gt("seq", afterSeq));
+      const mutableRun = { ...run };
+      let open: Doc<"export_run_members">[] = [];
+      let estimate = emptyBatchEstimate(run.country_code);
+      let lastClosedSeq = afterSeq;
+      let lastWalkedSeq = afterSeq;
+      let walked = 0;
+      let stopped = false;
+      let exhausted = false;
+      try {
+        for await (const member of members as AsyncIterable<Doc<"export_run_members">>) {
+          if (member.refusal === undefined) {
+            const add = {
+              bytes: member.estimated_bytes,
+              rowBytes: member.estimated_row_bytes,
+              reads: {
+                bytes: member.estimated_read_bytes,
+                documents: member.estimated_documents,
+                index_ranges: member.estimated_index_ranges,
+              },
+            };
+            if (open.length > 0 && batchWouldExceed(estimate, open.length, add) !== null) {
+              await insertComposedBatch(ctx, mutableRun, open, estimate, now);
+              lastClosedSeq = open[open.length - 1].seq;
+              open = [];
+              estimate = emptyBatchEstimate(run.country_code);
+              if (walked >= CUT_STEP_MEMBERS || exceededDimension(transaction.counts, CUT_STEP_READ_BUDGET) !== null) {
+                stopped = true;
+                break;
+              }
+            }
+            open.push(member);
+            estimate.bytes += add.bytes;
+            estimate.rowBytes += add.rowBytes;
+            estimate.reads = addReadCounts(estimate.reads, add.reads);
+          }
+          lastWalkedSeq = member.seq;
+          walked += 1;
+        }
+        if (!stopped) exhausted = true;
+      } catch (error) {
+        if (!(error instanceof ReadBudgetExceeded)) throw error;
+      }
+      // not stopped on a boundary (the members ran out, or the ceiling
+      // stopped the stream): the open batch closes, which fits by
+      // construction, so the next step starts past everything walked here
+      if (!stopped) {
+        if (open.length > 0) {
+          await insertComposedBatch(ctx, mutableRun, open, estimate, now);
+        }
+        lastClosedSeq = lastWalkedSeq;
+      }
+      const done = exhausted && !stopped;
+      await ctx.db.patch(run._id, {
+        cut_cursor_seq: lastClosedSeq,
+        batch_count: mutableRun.batch_count,
+        phase: done ? "done" : "cutting",
+        status: done ? "composed" : "composing",
+        composed_at: done ? now : undefined,
+        lease: done ? undefined : renewed,
+      });
+      if (!done) {
+        await ctx.scheduler.runAfter(0, internal.exports.composeRunStep, { runId: args.runId });
+      }
+      return null;
+    }
+    return null;
+  },
+});
+
+// a run composing or freezing with no live lease has stalled: its step or
+// chain invocation died, and a curator can compose again or resume it
+function runStalled(run: Doc<"export_runs">, now: number): boolean {
+  return (run.status === "composing" || run.status === "freezing") && !leaseLive(run, now);
+}
+
+// the country's latest run (or the named one), for the curator following a
+// composition or a freeze chain, with whether it has stalled
+export const getExportRun = query({
+  args: { countryCode: v.optional(v.string()), runId: v.optional(v.string()) },
+  returns: v.union(v.null(), v.object({ ...exportRunDoc.fields, stalled: v.boolean() })),
+  handler: async (ctx, args) => {
+    await requireUser(ctx, ["curator", "admin"]);
+    let run: Doc<"export_runs"> | null;
+    if (args.runId !== undefined) run = await runByRunId(ctx, args.runId);
+    else if (args.countryCode !== undefined) run = await latestRunForCountry(ctx, args.countryCode);
+    else throw new Error("Name a runId or a countryCode.");
+    return run === null ? null : { ...run, stalled: runStalled(run, Date.now()) };
+  },
+});
+
+// starts or resumes the freeze chain of a country's latest run, as the
+// calling curator (whose authority the scheduled steps then carry). A run
+// still composing, a chain running under a live lease (the hand-off lease
+// between invocations included), or a run with nothing left to freeze is
+// refused.
+export const startRunFreeze = internalMutation({
+  // holder: the starting invocation's lease holder, taken here in the same
+  // transaction that sets the run freezing (review of pr #149, round 2), so
+  // no composition can replace the run before the chain claims a batch
+  args: { countryCode: v.string(), userId: v.id("users"), holder: v.string() },
+  returns: v.object({ run_id: v.string() }),
+  handler: async (ctx, args) => {
+    const user = await requireFreezeActor(ctx, args.userId);
+    const now = Date.now();
+    const run = await latestRunForCountry(ctx, args.countryCode);
+    if (run === null) {
+      throw new Error(`No export run for ${args.countryCode}; compose one with exports:composeExportBatches.`);
+    }
+    if (run.phase !== "done") {
+      throw new Error(
+        run.status === "composing"
+          ? `Export run ${run.run_id} is still composing${runStalled(run, now) ? " but has stalled; compose again" : "; freeze it once getExportRun reports it composed"}.`
+          : `Export run ${run.run_id} stopped before its composition finished (${run.last_error?.reason ?? "no reason recorded"}); compose again.`,
+      );
+    }
+    if (run.status === "completed" || run.status === "replaced") {
+      throw new Error(`Export run ${run.run_id} is ${run.status}; compose a new run to export tasks accepted since.`);
+    }
+    if (run.status === "freezing" && leaseLive(run, now)) {
+      throw new Error(`Export run ${run.run_id} is already freezing (lease held to ${new Date(run.lease!.expires_at).toISOString()}).`);
+    }
+    await ctx.db.patch(run._id, {
+      status: "freezing",
+      freeze_actor: user._id,
+      freeze_started_at: run.freeze_started_at ?? now,
+      last_error: undefined,
+      lease: { holder: args.holder, expires_at: now + EXPORT_RUN_LEASE_MS },
+    });
+    return { run_id: run.run_id };
+  },
+});
+
+// takes the run's lease for its next draft batch (composition order), or
+// reports that the run is done (marking it completed), busy (another
+// invocation holds a live lease), or inactive (not freezing, or its curator
+// lost the role, which stops it). The hand-off lease a settled freeze
+// leaves may be taken by any chain invocation.
+export const claimRunBatch = internalMutation({
+  args: { runId: v.string(), holder: v.string() },
+  returns: v.union(
+    v.object({ kind: v.literal("batch"), export_batch_id: v.string(), user_id: v.id("users") }),
+    v.object({ kind: v.literal("done") }),
+    v.object({ kind: v.literal("busy") }),
+    v.object({ kind: v.literal("inactive") }),
+  ),
+  handler: async (ctx, args) => {
+    const run = await runByRunId(ctx, args.runId);
+    const now = Date.now();
+    if (run === null || run.status !== "freezing" || run.freeze_actor === undefined) {
+      return { kind: "inactive" as const };
+    }
+    if (leaseLive(run, now) && run.lease!.holder !== args.holder && run.lease!.holder !== RUN_HANDOFF_HOLDER) {
+      return { kind: "busy" as const };
+    }
+    if (!(await runActorStillAuthorised(ctx, run.freeze_actor))) {
+      await ctx.db.patch(run._id, {
+        status: "stopped",
+        lease: undefined,
+        last_error: { at: now, reason: "The curator freezing this run is no longer an active curator or admin; a current curator must resume it." },
+      });
+      return { kind: "inactive" as const };
+    }
+    const next = await ctx.db
+      .query("export_batches")
+      .withIndex("by_export_run_status", (q) => q.eq("export_run_id", run.run_id).eq("status", "draft"))
+      .first();
+    if (next === null) {
+      await ctx.db.patch(run._id, { status: "completed", completed_at: now, lease: undefined });
+      return { kind: "done" as const };
+    }
+    await ctx.db.patch(run._id, {
+      lease: { holder: args.holder, expires_at: now + EXPORT_RUN_LEASE_MS, export_batch_id: next.export_batch_id },
+    });
+    return { kind: "batch" as const, export_batch_id: next.export_batch_id, user_id: run.freeze_actor };
+  },
+});
+
+// renews a held lease between the phases of one batch freeze; refuses when
+// the lease was lost, so the freeze stops rather than run unguarded
+export const renewRunLease = internalMutation({
+  args: { runId: v.string(), holder: v.string() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const run = await runByRunId(ctx, args.runId);
+    if (run === null || run.status !== "freezing" || run.lease?.holder !== args.holder) {
+      throw new Error(`Export run ${args.runId}: this invocation no longer holds the run's lease; the freeze stops.`);
+    }
+    await ctx.db.patch(run._id, { lease: { ...run.lease, expires_at: Date.now() + EXPORT_RUN_LEASE_MS } });
+    return null;
+  },
+});
+
+// settles one batch freeze of the chain: a frozen batch (whose progress
+// completeFreeze already recorded) hands the lease to the next invocation,
+// scheduled in the same transaction; a failed one stops the run with the
+// reason (the batch stays draft with its last_freeze_failure, never
+// skipped), for a curator re-run to resume
+export const settleRunBatch = internalMutation({
+  args: {
+    runId: v.string(),
+    holder: v.string(),
+    exportBatchId: v.string(),
+    outcome: v.union(v.literal("frozen"), v.literal("failed")),
+    reason: v.optional(v.string()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const run = await runByRunId(ctx, args.runId);
+    if (run === null || run.lease?.holder !== args.holder) {
+      return null;
+    }
+    const now = Date.now();
+    if (args.outcome === "frozen") {
+      if (run.status === "freezing") {
+        await ctx.db.patch(run._id, { lease: { holder: RUN_HANDOFF_HOLDER, expires_at: now + EXPORT_RUN_HANDOFF_MS } });
+        await ctx.scheduler.runAfter(0, internal.exports.freezeRunStep, { runId: args.runId });
+      } else {
+        await ctx.db.patch(run._id, { lease: undefined });
+      }
+      return null;
+    }
+    await ctx.db.patch(run._id, {
+      status: "stopped",
+      lease: undefined,
+      last_error: { at: now, reason: args.reason ?? "The batch freeze failed.", export_batch_id: args.exportBatchId },
+    });
+    return null;
+  },
+});
+
+type RunStepResult = { run_id: string; status: "frozen" | "done" | "busy" | "inactive"; export_batch_id?: string };
+
+// one invocation of the chain: claim the next batch, freeze it under the
+// lease, settle (which schedules the next invocation)
+async function freezeRunStepCore(ctx: any, runId: string, startedHolder?: string): Promise<RunStepResult> {
+  const holder = startedHolder ?? crypto.randomUUID();
+  const claim = await ctx.runMutation(internal.exports.claimRunBatch, { runId, holder });
+  if (claim.kind !== "batch") {
+    return { run_id: runId, status: claim.kind };
+  }
+  const renewLease = async () => {
+    await ctx.runMutation(internal.exports.renewRunLease, { runId, holder });
+  };
+  try {
+    await freezeBatchCore(ctx, claim.export_batch_id, claim.user_id, { holder, renewLease });
+  } catch (error) {
+    await ctx.runMutation(internal.exports.settleRunBatch, {
+      runId,
+      holder,
+      exportBatchId: claim.export_batch_id,
+      outcome: "failed",
+      reason: errorMessage(error),
+    });
+    throw error;
+  }
+  await ctx.runMutation(internal.exports.settleRunBatch, { runId, holder, exportBatchId: claim.export_batch_id, outcome: "frozen" });
+  return { run_id: runId, status: "frozen", export_batch_id: claim.export_batch_id };
+}
+
+const runStepResult = v.object({
+  run_id: v.string(),
+  status: v.union(v.literal("frozen"), v.literal("done"), v.literal("busy"), v.literal("inactive")),
+  export_batch_id: v.optional(v.string()),
+});
+
+// freezeCountryBatches: starts or resumes the freeze chain of the country's
+// latest composed run. This call freezes the first batch itself (so a
+// refusal reaches the caller) and the chain continues by itself, one batch
+// per scheduled invocation, until every batch of the run is frozen or one
+// fails; getExportRun follows it.
+export const freezeCountryBatches = action({
+  args: { countryCode: v.string() },
+  returns: runStepResult,
+  handler: async (ctx, args): Promise<RunStepResult> => {
+    const user: Doc<"users"> = await ctx.runQuery(internal.exports.requireActingUser, {});
+    const holder = crypto.randomUUID();
+    const started: { run_id: string } = await ctx.runMutation(internal.exports.startRunFreeze, {
+      countryCode: args.countryCode,
+      userId: user._id,
+      holder,
+    });
+    return await freezeRunStepCore(ctx, started.run_id, holder);
+  },
+});
+
+// the scheduled continuation of the chain; acts for the run's recorded
+// curator (claimRunBatch rechecks that curator's role every invocation)
+export const freezeRunStep = internalAction({
+  args: { runId: v.string() },
+  returns: runStepResult,
+  handler: async (ctx, args): Promise<RunStepResult> => {
+    return await freezeRunStepCore(ctx, args.runId);
   },
 });
