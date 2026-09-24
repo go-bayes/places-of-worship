@@ -87,7 +87,12 @@ class FirstPassTests(unittest.TestCase):
         self.record['dossier'] = bundle['dossier']
         self.record['annotations'][0]['claim_id'] = bundle['dossier']['claims'][0]['claim_id']
         fp.validate(self.record)
-        self.record['dossier']['place']['place_ref'] = 'osm:way/2'
+        place = self.record['dossier']['place']
+        place['place_ref'] = 'osm:way/2'
+        manifest = self.record['dossier']['run_manifest']
+        # keep the recomputed idempotency key consistent so only the place mismatch remains
+        manifest['idempotency_key'] = fp.lib.idempotency_key(place['place_ref'], manifest['prompt_version'],
+                                                             manifest['model_id_requested'], place['seed_source'])
         with self.assertRaisesRegex(ValueError, 'another place'):
             fp.validate(self.record)
 
@@ -114,7 +119,7 @@ class FirstPassTests(unittest.TestCase):
 
     def test_context_rejects_unknown_fields_and_bad_hashes(self):
         self.record['context'] = {'task_id': 'task_01', 'reviewer': 'someone'}
-        with self.assertRaisesRegex(ValueError, 'unexpected field reviewer'):
+        with self.assertRaisesRegex(ValueError, 'unexpected field <key#0>'):
             fp.validate(self.record)
         self.record['context'] = {'evidence_version_hash': 'not-a-hash'}
         with self.assertRaisesRegex(ValueError, 'invalid string pattern'):
@@ -366,8 +371,10 @@ class FirstPassSubmitTests(unittest.TestCase):
         base = json.loads((HERE / 'fixtures/first-pass-all-fields.json').read_text())
         self.assertEqual(fp.submission_errors(base), [])
         paths = [path for path, _ in fp.screened_text(base)]
+        # an undeclared key such as a seed tag is named by position, never copied
+        denomination = 'dossier.place.seed_tags.' + fp.lib.key_ref(base['dossier']['place']['seed_tags'], 'denomination')
         for expected in ('dossier.run_manifest.notes', 'dossier.candidate_location.basis_note',
-                         'dossier.claims[0].source.licence_note', 'dossier.place.seed_tags.denomination'):
+                         'dossier.claims[0].source.licence_note', denomination):
             self.assertIn(expected, paths)
 
         def inject(value, path):
@@ -386,15 +393,22 @@ class FirstPassSubmitTests(unittest.TestCase):
             return node
 
         for path in paths:
-            if path.endswith(' (key)'):
+            # positional key paths are exercised by the tagged cases below
+            if path.endswith(' (key)') or '<key#' in path:
                 continue
             with self.subTest(path=path):
                 errors = fp.submission_errors(mutate(base, path))
                 self.assertIn(f'potential personal details in {path} require human handling', errors)
         tagged = copy.deepcopy(base)
-        tagged['dossier']['place']['seed_tags']['contact someone@example.org'] = 'x'
-        self.assertIn('potential personal details in dossier.place.seed_tags.contact someone@example.org (key) require human handling',
-                      fp.submission_errors(tagged))
+        tags = tagged['dossier']['place']['seed_tags']
+        tags['contact someone@example.org'] = 'x'
+        errors = fp.submission_errors(tagged)
+        self.assertIn(f"potential personal details in dossier.place.seed_tags.{fp.lib.key_ref(tags, 'contact someone@example.org')} (key) require human handling",
+                      errors)
+        self.assertNotIn('someone@example.org', '; '.join(errors))
+        tagged = copy.deepcopy(base)
+        tagged['dossier']['place']['seed_tags']['denomination'] += ' someone@example.org'
+        self.assertIn(f'potential personal details in {denomination} require human handling', fp.submission_errors(tagged))
 
     def test_floats_where_the_schema_needs_integers_are_refused(self):
         raw = fp.encode(json.loads((HERE / 'fixtures/first-pass-researched.json').read_text())).decode()

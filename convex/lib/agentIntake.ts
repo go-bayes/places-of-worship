@@ -73,7 +73,7 @@ export function schemaCheck(value: any, schema: any, path = "$", root: any = bun
     for (const key of schema.required ?? []) if (!Object.hasOwn(value, key)) throw new Error(`${path}: missing ${key}`);
     for (const [key, item] of Object.entries(value)) {
       if (Object.hasOwn(schema.properties ?? {}, key)) schemaCheck(item, schema.properties[key], `${path}.${key}`, root, floats);
-      else if (schema.additionalProperties === false) throw new Error(`${path}: unknown field ${key}`);
+      else if (schema.additionalProperties === false) throw new Error(`${path}: unknown field ${keyRef(value, key)}`);
     }
   }
 }
@@ -120,12 +120,34 @@ export function hasPersonalDetails(text: string): boolean {
     || /\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'-]+\s?){1,3}/.test(text);
 }
 
-const HASH_SHAPED = /^(?:sha256:)?(?:[0-9a-f]{40}|[0-9a-f]{64})$/;
+const DIGEST = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/;
 
 // the audited fields of each record type that may hold a hex digest (screen-policy.v1).
 export const SCREEN_HASH_FIELDS: Record<string, ReadonlySet<string>> = Object.fromEntries(
-  Object.entries(screenPolicy.hash_fields as Record<string, string[]>).map(([name, fields]) => [name, new Set(fields)]),
+  Object.entries(screenPolicy.hash_fields as Record<string, Record<string, unknown>>).map(([name, fields]) => [name, new Set(Object.keys(fields))]),
 );
+
+// 40- or 64-digit hex tokens anywhere in text: maximal runs of ASCII letters and digits, any
+// case, so "sha256:<digest>", "Reference <DIGEST>" and a bare digest all count. lib.py
+// hash_token_spans and pow-cli hash_token_spans mirror it.
+export function hasHashToken(text: string): boolean {
+  for (const token of text.match(/[0-9A-Za-z]+/g) ?? []) {
+    if ((token.length === 40 || token.length === 64) && /^[0-9A-Fa-f]+$/.test(token)) return true;
+  }
+  return false;
+}
+
+// an opaque positional reference to an undeclared object key, so diagnostics never copy the key:
+// its index among the object's keys in code-point order, as lib.py key_ref and pow-cli order them.
+export function keyRef(object: object, key: string): string {
+  const codePoints = (text: string) => Array.from(text, (c) => c.codePointAt(0) ?? 0);
+  const compare = (a: string, b: string) => {
+    const x = codePoints(a), y = codePoints(b);
+    for (let i = 0; i < Math.min(x.length, y.length); i++) if (x[i] !== y[i]) return x[i] - y[i];
+    return x.length - y.length;
+  };
+  return `<key#${Object.keys(object).sort(compare).indexOf(key)}>`;
+}
 
 type Screened = { path: string; norm: string; text: string; isKey: boolean };
 
@@ -154,8 +176,10 @@ function walkScreened(value: unknown, schemaNode: any, root: any, overrides: Rec
     if (item === null || typeof item !== "object") return;
     const properties = schema.properties ?? {};
     for (const [key, child] of Object.entries(item)) {
-      const childPath = join(path, key), childNorm = join(norm, key);
       const override = path === "" && Object.hasOwn(overrides, key) ? overrides[key] : undefined;
+      // an undeclared key is named by position, never copied into a path
+      const label = override !== undefined || Object.hasOwn(properties, key) ? key : keyRef(item, key);
+      const childPath = join(path, label), childNorm = join(norm, label);
       if (override !== undefined) visit(child, override[0], override[1], childPath, childNorm);
       else if (Object.hasOwn(properties, key)) visit(child, properties[key], base, childPath, childNorm);
       else {
@@ -181,7 +205,8 @@ export function assertScreened(value: unknown, schemaNode: any, root: any, hashF
   for (const { path, norm, text, isKey } of walkScreened(value, schemaNode, root, options.overrides ?? {}, options.prefix ?? "")) {
     if (skip.some(s => norm === s || norm.startsWith(`${s}.`) || norm.startsWith(`${s}[`))) continue;
     if (hasPersonalDetails(text)) throw new Error(`potential personal details in ${path} require human handling`);
-    if (HASH_SHAPED.test(text) && (isKey || !hashFields.has(norm))) throw new Error(`hash-shaped value in ${path} is outside a designated hash field`);
+    const exempt = !isKey && hashFields.has(norm) && DIGEST.test(text);
+    if (!exempt && hasHashToken(text)) throw new Error(`hash-shaped value in ${path} is outside a designated hash field`);
   }
 }
 
@@ -237,6 +262,8 @@ export function validateAgentReviewBundle(value: unknown, bundleJson: string): {
   // a model id must come back from the provider; the requested alias is not evidence of the model.
   if (typeof d.run_manifest.model_id_reported !== "string" || d.run_manifest.model_id_reported === "") throw new Error("dossier run manifest lacks the model id the provider reported");
   if (d.run_manifest.model_id_reported !== bundle.research_run.model_id_reported) throw new Error("dossier and research manifest disagree on the reported model");
+  // designated hash fields must equal the digests of their inputs in this record (screen-policy.v1)
+  if (bundle.submission_key !== sha256(d.dossier_id)) throw new Error("submission_key does not match the dossier id");
   const locators = validateDossierRecord(d);
   // the reviewer's text and both run manifests travel too; the dossier was screened above.
   assertScreened(value, bundleSchema, bundleSchema, SCREEN_HASH_FIELDS["agent-review-bundle.v1"], { skip: ["dossier"] });
@@ -268,6 +295,7 @@ export function validateDossierRecord(d: Record<string, any>): Map<string, strin
   // every free-text string of the dossier, not only claim text: a detail the runner's redaction
   // missed must not reach reviewers or Convex.
   assertScreened(d, (bundleSchema as any).$defs.dossier, bundleSchema, SCREEN_HASH_FIELDS["agent-review-bundle.v1"], { prefix: "dossier" });
+  if (d.run_manifest.idempotency_key !== sha256([d.place.place_ref, d.run_manifest.prompt_version, d.run_manifest.model_id_requested, d.place.seed_source].join("|"))) throw new Error("dossier run manifest idempotency_key does not match its inputs");
   const locators = new Map<string, string>();
   for (const claim of d.claims) {
     if (locators.has(claim.claim_id)) throw new Error("duplicate claim ID");

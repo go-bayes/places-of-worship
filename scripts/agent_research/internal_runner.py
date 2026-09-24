@@ -137,6 +137,16 @@ class DuplicateJSONKey(RunnerError):
     pass
 
 
+class SchemaRejected(RunnerError):
+    """Structured provider output that failed its schema; the output is kept on the exception so
+    the runner can screen it for personal details before anything is recorded. The message names
+    schema paths only, never values."""
+
+    def __init__(self, message: str, output: dict):
+        super().__init__(message)
+        self.output = output
+
+
 class RunRejected(RunnerError):
     """A dossier or bundle refused by validation, with its run-row counters and, when the
     refusal is for personal details, the paths refused (never their text)."""
@@ -856,7 +866,7 @@ def _invoke(stage: str, provider: str, model: str, system: str, user: str, timeo
             raise RunnerError("structured provider output is not an object")
         schema_errors = lib.validate(output, schema)
         if schema_errors:
-            raise RunnerError("structured output failed schema: " + "; ".join(schema_errors[:8]))
+            raise SchemaRejected("structured output failed schema: " + "; ".join(schema_errors[:8]), output)
         ended = _utc_now()
         envelope = _manifest(stage, provider, model, started, ended, result, fields, prompt, preflight, exit_status="completed")
         _write_attempt(raw_path, {"kind": "attempt", "output": output, "manifest": envelope})
@@ -958,9 +968,10 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
         # the review is not bought for a dossier whose provider named no model.
         if not research_manifest.get("model_id_reported"):
             dossier_errors.append("research provider reported no model id")
-        leaked = lib.known_value_findings(dossier, known_values)
+        dossier_schema, dossier_root = lib.dossier_screen_schema()
+        leaked = lib.known_value_findings(dossier, known_values, dossier_schema, dossier_root, "dossier")
         if leaked:
-            findings = [f for f in lib.screen_spans(dossier, {}, {}, frozenset(), known_map)
+            findings = [f for f in lib.screen_spans(dossier, dossier_schema, dossier_root, frozenset(), known_map, "dossier")
                         if f["detector"].startswith("known_value")]
             raise RunRejected("dossier rejected before review: a quarantined value or its hash remains",
                               counters, _refusal("dossier", findings))
@@ -969,26 +980,37 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
         dossier_path = out / "dossier.json"
         dossier_path.write_text(json.dumps(private_dossier, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         review_system, review_user = _review_prompt(dossier)
-        review_output, review_manifest = _invoke("review", review_backend, REVIEW_MODELS[review_backend], review_system,
-                                                  review_user, timeout_s, budget_usd, pause_file, review_raw, preflight[review_backend])
+        bundle_schema = json.loads(intake.BUNDLE_SCHEMA.read_text(encoding="utf-8"))
+
+        # contaminated reviewer output is refused, never silently redacted, since redaction could
+        # change what the reviewer said; the original stays in this private run directory. the
+        # screen runs before any schema check, so a detail in an invalid field is still refused
+        # as a personal detail and no schema message can carry it.
+        def refuse_if_contaminated(review, subject, schema, root, prefix, stage):
+            findings = lib.screen_spans(subject, schema, root, intake.BUNDLE_HASH_FIELDS, known_map, prefix)
+            if findings:
+                refused_path = out / "review.refused.json"
+                refused_path.write_text(json.dumps(review, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                refused_path.chmod(0o600)
+                raise RunRejected("review refused before transport: personal details or hashes outside designated fields",
+                                  counters, _refusal(stage, findings))
+
+        try:
+            review_output, review_manifest = _invoke("review", review_backend, REVIEW_MODELS[review_backend], review_system,
+                                                      review_user, timeout_s, budget_usd, pause_file, review_raw, preflight[review_backend])
+        except SchemaRejected as exc:
+            review_schema = _review_schema()
+            refuse_if_contaminated(exc.output, exc.output, review_schema, review_schema, "review", "review")
+            raise
+        # screen everything that would travel, the reviewer's text and both run manifests included.
+        outgoing = intake.build_bundle(dossier, review_output, research_manifest, review_manifest)
+        refuse_if_contaminated(review_output, outgoing, bundle_schema, bundle_schema, "", "bundle")
         if intake is not None and hasattr(intake, "validate_review"):
             review_errors = list(intake.validate_review(review_output, dossier))
         else:
             review_errors = lib.validate(review_output, _review_schema())
         if review_errors:
             raise RunnerError("review rejected before bundle: " + "; ".join(review_errors[:12]))
-        # screen everything that would travel, the reviewer's text and both run manifests included.
-        # contaminated output is refused, never silently redacted, since redaction could change what
-        # the reviewer said; the original stays in this private run directory.
-        outgoing = intake.build_bundle(dossier, review_output, research_manifest, review_manifest)
-        bundle_schema = json.loads(intake.BUNDLE_SCHEMA.read_text(encoding="utf-8"))
-        findings = lib.screen_spans(outgoing, bundle_schema, bundle_schema, intake.BUNDLE_HASH_FIELDS, known_map)
-        if findings:
-            refused_path = out / "review.refused.json"
-            refused_path.write_text(json.dumps(review_output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-            refused_path.chmod(0o600)
-            raise RunRejected("bundle refused before transport: personal details or hashes outside designated fields",
-                              counters, _refusal("bundle", findings))
         review_path = out / "review.json"
         review_path.write_text(json.dumps(review_output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         if intake is None or not hasattr(intake, "write_bundle"):

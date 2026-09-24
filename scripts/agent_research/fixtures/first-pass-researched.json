@@ -143,7 +143,7 @@
       },
       "cost_usd_reported": 0.01,
       "cost_basis": "tool_list_price",
-      "idempotency_key": "42faf40c9d778c93f5a3dd6cdadec24b24a4d3ee8f7521a0c6a634c77cb6609e",
+      "idempotency_key": "a3f7329231602454250164cfc5e4650d839379129230c557fee5a611de812353",
       "allowlist_version": "nz-v1",
       "tool_permissions": [],
       "exit_status": "completed",

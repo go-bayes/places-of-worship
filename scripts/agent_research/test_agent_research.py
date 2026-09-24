@@ -211,9 +211,11 @@ class ImportTest(unittest.TestCase):
         values = [i["value"] for i in dossier["personal_details_quarantine"]["items"]]
         self.assertIn("Jane Example", values)
         # the transport check sees a known value or its hash anywhere, including one added later
-        self.assertEqual(lib.known_value_findings(dossier["status_assessment"], ["Kim Sample"]), ["basis"])
-        hashed = {"note": "ref " + lib.sha256("Kim Sample")}
-        self.assertEqual(lib.known_value_findings(hashed, ["Kim Sample"]), ["note"])
+        schema, root = lib.dossier_screen_schema()
+        self.assertEqual(lib.known_value_findings(dossier, ["Kim Sample"], schema, root), ["status_assessment.basis"])
+        # without a schema every key is undeclared, so the path names keys by position only
+        hashed = {"note": "ref " + lib.sha256("Kim Sample").upper()}
+        self.assertEqual(lib.known_value_findings(hashed, ["Kim Sample"]), ["<key#0>"])
         self.assertEqual(lib.known_value_findings({"note": "clean"}, ["Kim Sample"]), [])
 
     def test_screen_exempts_only_designated_hash_fields(self):

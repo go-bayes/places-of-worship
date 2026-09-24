@@ -80,7 +80,7 @@ def validate(instance, schema: dict, root: dict | None = None, path: str = "$") 
     if "const" in schema and instance != schema["const"]:
         errors.append(f"{path}: expected const {schema['const']!r}")
     if "enum" in schema and instance not in schema["enum"]:
-        errors.append(f"{path}: {instance!r} not in enum")
+        errors.append(f"{path}: not in enum")
     if "type" in schema:
         types = schema["type"] if isinstance(schema["type"], list) else [schema["type"]]
         if not any(_type_ok(instance, t) for t in types):
@@ -88,16 +88,16 @@ def validate(instance, schema: dict, root: dict | None = None, path: str = "$") 
             return errors
     if isinstance(instance, str):
         if "pattern" in schema and re.search(schema["pattern"].removesuffix("$") + (r"\Z" if schema["pattern"].endswith("$") else ""), instance) is None:
-            errors.append(f"{path}: {instance!r} does not match {schema['pattern']}")
+            errors.append(f"{path}: does not match {schema['pattern']}")
         if "minLength" in schema and len(instance) < schema["minLength"]:
             errors.append(f"{path}: shorter than {schema['minLength']}")
         if "maxLength" in schema and len(instance) > schema["maxLength"]:
             errors.append(f"{path}: longer than {schema['maxLength']}")
     if isinstance(instance, (int, float)) and not isinstance(instance, bool):
         if "minimum" in schema and instance < schema["minimum"]:
-            errors.append(f"{path}: {instance} below minimum {schema['minimum']}")
+            errors.append(f"{path}: below minimum {schema['minimum']}")
         if "maximum" in schema and instance > schema["maximum"]:
-            errors.append(f"{path}: {instance} above maximum {schema['maximum']}")
+            errors.append(f"{path}: above maximum {schema['maximum']}")
     if isinstance(instance, dict):
         for key in schema.get("required", []):
             if key not in instance:
@@ -107,7 +107,7 @@ def validate(instance, schema: dict, root: dict | None = None, path: str = "$") 
             if key in props:
                 errors.extend(validate(value, props[key], root, f"{path}.{key}"))
             elif schema.get("additionalProperties", True) is False:
-                errors.append(f"{path}: unexpected property {key!r}")
+                errors.append(f"{path}: unexpected property {key_ref(instance, key)}")
     if isinstance(instance, list) and "items" in schema:
         for index, item in enumerate(instance):
             errors.extend(validate(item, schema["items"], root, f"{path}[{index}]"))
@@ -210,13 +210,33 @@ def redact_text(text: str, details: list[dict]) -> str:
 
 BUNDLE_SCHEMA_PATH = HERE / "schemas" / "agent-review-bundle.v1.json"
 SCREEN_POLICY_PATH = HERE / "schemas" / "screen-policy.v1.json"
-_HASH_SHAPED = re.compile(r"(?:sha256:)?(?:[0-9a-f]{40}|[0-9a-f]{64})")
+_DIGEST = re.compile(r"[0-9a-f]{40}|[0-9a-f]{64}")
+_ASCII_TOKEN = re.compile(r"[0-9A-Za-z]+")
+_HEX_DIGITS = frozenset("0123456789abcdefABCDEF")
+
+
+def hash_token_spans(text: str) -> list[tuple[int, int]]:
+    """spans of 40- or 64-digit hex tokens anywhere in text: maximal runs of ASCII letters and
+    digits, any case, so "sha256:<digest>", "Reference <DIGEST>" and a bare digest all count."""
+    return [m.span() for m in _ASCII_TOKEN.finditer(text)
+            if len(m.group(0)) in (40, 64) and set(m.group(0)) <= _HEX_DIGITS]
+
+
+def key_ref(obj: dict, key: str) -> str:
+    """an opaque positional reference to an undeclared object key, so diagnostics and refusal
+    records never copy the key itself: its index among the object's keys in code-point order."""
+    return f"<key#{sorted(obj).index(key)}>"
 
 
 def screen_hash_fields(schema_version: str) -> frozenset[str]:
     """the audited fields of a record type that may hold a hex digest (screen-policy.v1)."""
     policy = json.loads(SCREEN_POLICY_PATH.read_text(encoding="utf-8"))
     return frozenset(policy["hash_fields"][schema_version])
+
+
+def _digest_exempt(norm: str, text: str, is_key: bool, hash_fields) -> bool:
+    """a designated hash field whose whole value is a lowercase digest."""
+    return not is_key and norm in hash_fields and _DIGEST.fullmatch(text) is not None
 
 
 def _walk_screened(value, schema, root, on_string, overrides=None, path="", norm="", parent=None, key=None):
@@ -240,8 +260,11 @@ def _walk_screened(value, schema, root, on_string, overrides=None, path="", norm
     elif isinstance(value, dict):
         properties = schema.get("properties", {})
         for child_key, child in list(value.items()):
-            child_path = f"{path}.{child_key}" if path else child_key
-            child_norm = f"{norm}.{child_key}" if norm else child_key
+            declared = child_key in properties or (overrides and path == "" and child_key in overrides)
+            # an undeclared key is named by position, never copied into a path
+            label = child_key if declared else key_ref(value, child_key)
+            child_path = f"{path}.{label}" if path else label
+            child_norm = f"{norm}.{label}" if norm else label
             if overrides and path == "" and child_key in overrides:
                 _walk_screened(child, overrides[child_key][0], overrides[child_key][1], on_string, None, child_path, child_norm, value, child_key)
             elif child_key in properties:
@@ -270,7 +293,7 @@ def screen_findings(value, schema, root, hash_fields, overrides=None, prefix="",
             return None
         if find_personal_details(text):
             findings.append((path, "personal"))
-        elif _HASH_SHAPED.fullmatch(text) and (is_key or norm not in hash_fields):
+        elif not _digest_exempt(norm, text, is_key, hash_fields) and hash_token_spans(text):
             findings.append((path, "hash"))
         return None
 
@@ -290,7 +313,7 @@ def normalise_detail(text: str) -> str:
     return re.sub(r"\s+", " ", unicodedata.normalize("NFKC", text or "").casefold()).strip()
 
 
-def known_value_findings(value, known_values) -> list[str]:
+def known_value_findings(value, known_values, schema=None, root=None, prefix="") -> list[str]:
     """paths of strings or keys, anywhere in value, that contain a known quarantined value
     (normalised) or the sha256 of one. the runner applies this to everything it transports."""
     needles = [(normalise_detail(v), sha256(v)) for v in known_values if isinstance(v, str) and v.strip()]
@@ -303,7 +326,7 @@ def known_value_findings(value, known_values) -> list[str]:
         return None
 
     if needles:
-        _walk_screened(value, {}, {}, check)
+        _walk_screened(value, schema or {}, root or {}, check, None, prefix, prefix)
     return found
 
 
@@ -322,7 +345,7 @@ def known_values(items) -> dict[str, str]:
     return known
 
 
-def screen_spans(value, schema, root, hash_fields, known: dict[str, str] | None = None) -> list[dict]:
+def screen_spans(value, schema, root, hash_fields, known: dict[str, str] | None = None, prefix: str = "") -> list[dict]:
     """every screen finding as {path, detector, start, end}, never the text: a structured record
     that the later flag-and-hold review can reuse to propose redactions. offsets are Unicode
     code-point indices into the string at path. detectors: phone, email, person_name (patterns),
@@ -335,8 +358,8 @@ def screen_spans(value, schema, root, hash_fields, known: dict[str, str] | None 
         spans = [("phone", m.span()) for m in _PHONE.finditer(text)]
         spans += [("email", m.span()) for m in _EMAIL.finditer(text)]
         spans += [("person_name", m.span()) for m in _HONORIFIC_NAME.finditer(text)]
-        if _HASH_SHAPED.fullmatch(text) and (is_key or norm not in hash_fields):
-            spans.append(("hash_outside_field", (0, len(text))))
+        if not _digest_exempt(norm, text, is_key, hash_fields):
+            spans += [("hash_outside_field", span) for span in hash_token_spans(text)]
         for value_, pattern, digest in needles:
             if normalise_detail(value_) in normalise_detail(text):
                 match = pattern.search(text)
@@ -348,7 +371,7 @@ def screen_spans(value, schema, root, hash_fields, known: dict[str, str] | None 
             found.append({"path": path, "detector": detector, "start": start, "end": end})
         return None
 
-    _walk_screened(value, schema, root, check)
+    _walk_screened(value, schema, root, check, None, prefix, prefix)
     return found
 
 

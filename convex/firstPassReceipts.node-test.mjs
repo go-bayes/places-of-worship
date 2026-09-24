@@ -10,6 +10,7 @@ const { sha256 } = await import("./lib/sha256.ts");
 const { verifyObjectBytes, objectReceiptId } = await import("./lib/objectReceipts.ts");
 const { canonicalWireJson } = await import("./lib/wireJson.ts");
 const { screenedText } = await import("./lib/firstPass.ts");
+const { keyRef } = await import("./lib/agentIntake.ts");
 
 const fixtureText = (name) => fs.readFileSync(new URL(`../scripts/agent_research/fixtures/${name}`, import.meta.url), "utf8");
 const fixture = (name) => JSON.parse(fixtureText(name));
@@ -374,7 +375,11 @@ test("every string of the record and its dossier is screened, whatever its schem
   assert.equal((await ingestFirstPass._handler(context(), args(base))).created, true, "the all-fields fixture is valid");
   const screened = new Set(screenedText(JSON.parse(wire(fixtureText("first-pass-all-fields.json")))).map(([path]) => path));
   // the fields the second review found unscreened are now screened
-  for (const path of ["dossier.run_manifest.notes", "dossier.candidate_location.basis_note", "dossier.claims[0].source.licence_note", "dossier.place.seed_tags.denomination", "dossier.place.seed_tags.denomination (key)", "dossier.osm_version_chain[0].change_note", "context.assistance_request_id"]) {
+  // an undeclared key such as a seed tag is named by position, never copied into a path
+  const atPath = (r, path) => (path === "" ? r : path.split(/\.|(?=\[)/).reduce((o, part) => (part.startsWith("[") ? o[Number(part.slice(1, -1))] : o[part]), r));
+  const screenPath = (r, path) => path.replace(/^dossier\.place\.seed_tags\.([^.[]+)/, (_, key) => `dossier.place.seed_tags.${keyRef(r.dossier.place.seed_tags, key)}`);
+  const denomination = screenPath(base, "dossier.place.seed_tags.denomination");
+  for (const path of ["dossier.run_manifest.notes", "dossier.candidate_location.basis_note", "dossier.claims[0].source.licence_note", denomination, `${denomination} (key)`, "dossier.osm_version_chain[0].change_note", "context.assistance_request_id"]) {
     assert.ok(screened.has(path), path);
   }
   const refusedForPersonalDetails = new Set();
@@ -387,10 +392,15 @@ test("every string of the record and its dossier is screened, whatever its schem
     const error = await ingestFirstPass._handler(context(), args(record)).then(() => null, (e) => e);
     assert.ok(error !== null, `injected ${path} was accepted`);
     const match = /potential personal details in (.+) require human handling/.exec(error.message);
+    assert.ok(!error.message.includes("someone@example.org"), `${path}: the diagnostic copies the detail`);
     if (match !== null) {
-      // a renamed key is reported under its new name
-      if (kind === "key") assert.equal(match[1], `${path.slice(0, path.lastIndexOf(".") + 1)}contact someone@example.org (key)`, path);
-      else assert.equal(match[1], path);
+      if (kind === "key") {
+        // a renamed key is reported by its position in the renamed object, never by its text
+        const child = path.slice(0, -" (key)".length);
+        const parent = child.includes(".") ? child.slice(0, child.lastIndexOf(".")) : "";
+        const expected = `${parent === "" ? "" : `${screenPath(base, parent)}.`}${keyRef(atPath(record, parent), "contact someone@example.org")} (key)`;
+        assert.equal(match[1], expected, path);
+      } else assert.equal(match[1], screenPath(base, path));
       refusedForPersonalDetails.add(match[1]);
     } else {
       // a closed vocabulary, a fixed shape or a declared key refuses the text itself
@@ -485,7 +495,7 @@ test("the server applies the archive's semantic rules", async () => {
     [(r) => { r.parents = ["a".repeat(64), "a".repeat(64)]; }, /duplicate parent/],
     [(r) => { r.created_at = "2026-02-30T00:00:00Z"; }, /creation timestamp/],
     [(r) => { r.country_code = "BS"; }, /invalid constant/],
-    [(r) => { r.context = { reviewer: "someone" }; }, /unknown field reviewer/],
+    [(r) => { r.context = { reviewer: "someone" }; }, /unknown field <key#0>/],
     [(r) => { Object.assign(r.searches[0], { outcome: "opened" }); }, /requires a locator/],
     [(r) => { Object.assign(r.searches[0], { outcome: "opened", locator: "http://127.0.0.1/secrets" }); }, /public HTTP/],
     [(r) => { Object.assign(r.searches[0], { outcome: "opened", locator: "https://example.org/a", attempted_at: "2026-09-18T05:50:00Z", retrieved_at: "2026-09-18T05:49:00Z" }); }, /precedes/],
@@ -498,6 +508,9 @@ test("the server applies the archive's semantic rules", async () => {
   }
   const foreign = researched();
   foreign.dossier.place.place_ref = "osm:way/2";
+  // keep the recomputed idempotency key consistent so only the place mismatch remains
+  const fm = foreign.dossier.run_manifest;
+  fm.idempotency_key = sha256(["osm:way/2", fm.prompt_version, fm.model_id_requested, foreign.dossier.place.seed_source].join("|"));
   await assert.rejects(ingestFirstPass._handler(ctx, args(foreign)), /another place/);
   assert.equal(ctx.rows.agent_first_pass_receipts.length, 0);
 });

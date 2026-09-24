@@ -126,7 +126,7 @@ def schema_errors(value, schema, root=None, path='$'):
             if key in props:
                 errors += schema_errors(item, props[key], root, f'{path}.{key}')
             elif schema.get('additionalProperties') is False:
-                errors.append(f'{path}: unexpected field {key}')
+                errors.append(f'{path}: unexpected field {lib.key_ref(value, key)}')
     return errors
 
 
@@ -256,21 +256,23 @@ def validate_dossier(dossier):
             errors.append('dossier run timestamps are reversed')
     except ValueError:
         errors.append('invalid dossier run timestamp')
+    # the digests this record's designated hash fields must equal, recomputed from its own inputs
+    if run['idempotency_key'] != lib.idempotency_key(dossier['place']['place_ref'], run['prompt_version'],
+                                                     run['model_id_requested'], dossier['place']['seed_source']):
+        errors.append('dossier run manifest idempotency_key does not match its inputs')
     ids = set()
-    for claim in dossier['claims']:
-        cid = claim['claim_id']
-        if cid in ids:
+    for index, claim in enumerate(dossier['claims']):
+        # claim ids are record text: diagnostics name the claim by position instead
+        cid = f'claims[{index}]'
+        if claim['claim_id'] in ids:
             errors.append('duplicate claim id')
-        ids.add(cid)
+        ids.add(claim['claim_id'])
         if not public_url(claim['source']['locator']):
             errors.append(f'{cid}: only public HTTP(S) source locators are permitted')
         try:
             locator_host(claim['source']['locator'])
         except ValueError as exc:
             errors.append(f'{cid}: {exc}')
-        for field in ['value', 'quoted_support', 'note']:
-            if lib.find_personal_details(claim.get(field, '')):
-                errors.append(f'{cid}: potential personal details require human handling')
         bounds = {}
         for key in ('date_start', 'date_end'):
             if claim.get(key) is not None:
@@ -299,8 +301,9 @@ def validate_dossier(dossier):
         allowlist = load_allowlist(run.get('allowlist_version'))
         if allowlist.get('country_code') != dossier['place']['country_code']:
             errors.append('source allowlist belongs to another country')
+        positions = {claim['claim_id']: index for index, claim in enumerate(dossier['claims'])}
         for violation in allowlist_violations(dossier):
-            errors.append(f"{violation['claim_id']}: source host {violation['host']!r} is not on allowlist {run['allowlist_version']}")
+            errors.append(f"claims[{positions[violation['claim_id']]}]: source host is not on allowlist {run['allowlist_version']}")
     except ValueError as exc:
         errors.append(str(exc))
     for cid in dossier['status_assessment']['supporting_claim_ids']:
@@ -332,8 +335,9 @@ def validate_review(review, dossier):
         return errors
     claims = {c['claim_id']: c for c in dossier['claims']}
     checked = set()
-    for check in review['claim_checks']:
+    for index, check in enumerate(review['claim_checks']):
         cid = check['claim_id']
+        label = f'claim_checks[{index}]'
         if cid not in claims:
             errors.append('review references unknown claim')
             continue
@@ -341,9 +345,9 @@ def validate_review(review, dossier):
             errors.append('duplicate review claim check')
         checked.add(cid)
         if check['source_url'] != claims[cid]['source']['locator']:
-            errors.append(f'{cid}: review source differs from claim source')
+            errors.append(f'{label}: review source differs from claim source')
         if check['access_method'] == 'not_checked' and check['outcome'] == 'supported':
-            errors.append(f'{cid}: unchecked source cannot be supported')
+            errors.append(f'{label}: unchecked source cannot be supported')
     if set(claims) != checked:
         errors.append('review must cover every claim')
     if review['cultural_sensitivity']['flagged'] and review['recommendation'] != 'defer_cultural':
@@ -381,6 +385,8 @@ def validate_bundle(bundle):
                 errors.append('run timestamps are reversed')
         except ValueError:
             errors.append('invalid run timestamp')
+    if bundle['submission_key'] != lib.sha256(bundle['dossier']['dossier_id']):
+        errors.append('submission_key does not match the dossier id')
     original = bundle['dossier']['run_manifest']
     if original['backend'] != research['backend'] or original['model_id_requested'] != research['model_requested']:
         errors.append('dossier and research manifest disagree')

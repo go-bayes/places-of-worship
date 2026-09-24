@@ -13,6 +13,7 @@ from unittest.mock import patch
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import intake
+import lib
 
 
 # provide a complete synthetic bundle shared by all three validators.
@@ -105,6 +106,28 @@ class IntakeTest(unittest.TestCase):
         b = fixture()
         b['dossier']['run_manifest']['model_id_reported'] = None
         self.assertEqual(intake.validate_dossier(b['dossier']), [])
+
+    def test_diagnostics_name_undeclared_keys_by_position_only(self):
+        b = fixture()
+        b['review_run']['usage'] = {'tokens': 1, 'office@example.org': 2}
+        b['dossier']['claims'][0]['hostile office@example.org'] = True
+        errors = intake.validate_bundle(b)
+        self.assertTrue(errors)
+        text = '; '.join(errors)
+        self.assertNotIn('example.org', text)
+        self.assertIn('<key#', text)
+        b = fixture()
+        b['review_run']['usage'] = {'tokens': 1, 'office@example.org': 2}
+        self.assertEqual(intake.validate_bundle(b),
+                         ['potential personal details in review_run.usage.<key#0> (key) require human handling'])
+
+    def test_designated_hash_fields_are_recomputed(self):
+        b = fixture()
+        b['submission_key'] = lib.sha256('office@example.org')
+        self.assertIn('submission_key does not match the dossier id', intake.validate_bundle(b))
+        b = fixture()
+        b['dossier']['run_manifest']['idempotency_key'] = lib.sha256('office@example.org')
+        self.assertIn('dossier run manifest idempotency_key does not match its inputs', intake.validate_dossier(b['dossier']))
 
     def test_immutable_bundle_retries(self):
         b = fixture()

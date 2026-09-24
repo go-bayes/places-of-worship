@@ -134,7 +134,7 @@ test("human batch return validates every receipt before writes", async () => {
   await ctx.db.insert("users", {auth_subject: "human", status: "active", roles: ["reviewer"]});
   const items = [];
   for (const key of ["c", "d"]) {
-    const b = JSON.parse(bundleJson); b.submission_key = key.repeat(64);
+    const b = JSON.parse(bundleJson); b.dossier.dossier_id = `${b.dossier.dossier_id}:${key}`; b.submission_key = sha256(b.dossier.dossier_id);
     const raw = JSON.stringify(b); const hash = sha256(raw);
     const receipt = await ingestBundle._handler(ctx, {bundleJson: raw, bundleHash: hash});
     items.push({receipt_id: receipt.receipt_id, expected_hash: hash});
@@ -173,6 +173,7 @@ test("OSM intake retains object type and bare identifier, while new nominations 
   process.env.POW_INTERNAL_AGENT_INGEST_ENABLED = "true";
   for (const ref of ["osm:node/12", "osm:way/34", "osm:relation/56", "new:example-church"]) {
     const ctx = context(); const b = JSON.parse(bundleJson); b.dossier.place.place_ref = ref;
+    const m = b.dossier.run_manifest; m.idempotency_key = sha256([ref, m.prompt_version, m.model_id_requested, b.dossier.place.seed_source].join("|"));
     const raw = JSON.stringify(b);
     await ingestBundle._handler(ctx, {bundleJson: raw, bundleHash: sha256(raw)});
     const task = ctx.rows.tasks[0];

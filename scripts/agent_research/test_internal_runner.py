@@ -381,7 +381,7 @@ class ValidationAndAuditTest(unittest.TestCase):
                 self.assertEqual((refusal["policy"], refusal["offset_unit"]), ("interim_refuse_before_transport", "unicode_code_point"))
                 finding = next(f for f in refusal["findings"] if f["path"] == path)
                 self.assertEqual(set(finding), {"path", "detector", "start", "end"})
-                self.assertIn(finding["detector"], {"email", "known_value", "known_value_hash"})
+                self.assertIn(finding["detector"], {"email", "known_value", "known_value_hash", "hash_outside_field"})
                 refused_text = json.loads((Path(tmp) / "out" / "review.refused.json").read_text())
                 field = {"review.reasoning": lambda r: r["reasoning"],
                          "review.claim_checks[0].note": lambda r: r["claim_checks"][0]["note"],
@@ -397,6 +397,50 @@ class ValidationAndAuditTest(unittest.TestCase):
                 self.assertEqual(refused.stat().st_mode & 0o777, 0o600)
                 self.assertFalse((out / "bundle.json").exists())
                 self.assertFalse((out / "review.json").exists())
+
+    def test_schema_invalid_review_is_screened_first_and_never_echoed(self):
+        # an email in an enum field fails the review schema; the privacy screen still runs first
+        for name, error in [("semantic schema check", None),
+                            ("provider schema check", "schema")]:
+            with self.subTest(name), tempfile.TemporaryDirectory() as tmp:
+                if error == "schema":
+                    review = {"schema_version": "agent-review.v1", "recommendation": "office@example.org"}
+                    raised = runner.SchemaRejected("structured output failed schema: recommendation: not in enum", review)
+                    stages, run_result = self._run_pair(Path(tmp), "https://www.anglicanlife.org.nz/test-church",
+                                                        self._claude_manifest("research"),
+                                                        self._codex_manifest("review", "gpt-5.6-luna"), review_error=raised)
+                else:
+                    stages, run_result = self._run_pair(Path(tmp), "https://www.anglicanlife.org.nz/test-church",
+                                                        self._claude_manifest("research"),
+                                                        self._codex_manifest("review", "gpt-5.6-luna"),
+                                                        review_changes={"recommendation": "office@example.org"})
+                self.assertEqual(run_result["status"], "failed")
+                refusal = run_result["personal_detail_refusal"]
+                self.assertIn("review.recommendation", refusal["paths"])
+                self.assertNotIn("example.org", json.dumps(run_result))
+                self.assertTrue((Path(tmp) / "out" / "review.refused.json").exists())
+
+    def test_refusal_record_names_undeclared_keys_by_position(self):
+        review_manifest = self._codex_manifest("review", "gpt-5.6-luna")
+        review_manifest["usage"]["office@example.org"] = 1
+        with tempfile.TemporaryDirectory() as tmp:
+            _, run_result = self._run_pair(Path(tmp), "https://www.anglicanlife.org.nz/test-church",
+                                           self._claude_manifest("research"), review_manifest)
+            refusal = run_result["personal_detail_refusal"]
+            self.assertEqual(run_result["status"], "failed")
+            self.assertNotIn("example.org", json.dumps(run_result))
+            self.assertTrue(any(path.startswith("review_run.usage.<key#") and path.endswith(" (key)")
+                                for path in refusal["paths"]), refusal["paths"])
+
+    def test_schema_messages_never_echo_values_or_undeclared_keys(self):
+        schema = {"type": "object", "additionalProperties": False,
+                  "properties": {"kind": {"enum": ["a"]}, "code": {"type": "string", "pattern": "^x$"}, "n": {"type": "number", "maximum": 1}}}
+        errors = runner.lib.validate({"kind": "office@example.org", "code": "021 123 4567", "n": 99, "Rev'd Pat Example": 1}, schema)
+        self.assertEqual(len(errors), 4)
+        text = "; ".join(errors)
+        for leaked in ("office@example.org", "021 123 4567", "99", "Pat Example"):
+            self.assertNotIn(leaked, text)
+        self.assertIn("unexpected property <key#0>", text)
 
     def test_off_allowlist_locator_is_refused_before_review_and_counted(self):
         with tempfile.TemporaryDirectory() as tmp:
