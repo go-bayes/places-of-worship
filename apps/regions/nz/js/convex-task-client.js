@@ -282,8 +282,9 @@
         // the card, a sign-out in another tab, a session that ended
         onClerkChange(resources) {
             const nextSessionId = resources?.session?.id || "";
-            // a deliberate sign-out already cleared the session and its page
-            if (this.signOutPromise && !nextSessionId) return;
+            // a deliberate sign-out owns the session state until clerk
+            // confirms it (its confirming reload may report changes)
+            if (this.signOutPromise) return;
             if (nextSessionId === this.sessionId) return;
             const hadSession = Boolean(this.sessionId);
             this.sessionId = nextSessionId;
@@ -366,11 +367,19 @@
                 }
                 try {
                     await clerk.signOut({ redirectUrl: window.location.href });
+                    // clerk resolves even when the revocation never reached
+                    // its server (it swallows network_error); only the
+                    // server's own list of this browser's sessions confirms it
+                    if (!(await this.confirmSignedOut(clerk, sessionId))) {
+                        throw new Error("sign-out unconfirmed");
+                    }
                 } catch (error) {
                     // clerk drops its local copy of the session even when the
-                    // server refuses to end it (seen 2026-09-24 with a 422),
-                    // and a reload would bring the session back; so any
-                    // refusal is a failure, whatever clerk.session says now
+                    // server refuses to end it (seen 2026-09-24 with a 422)
+                    // or never hears of it (an aborted request), and a reload
+                    // would bring the session back; so any refusal or
+                    // unconfirmed revocation is a failure, whatever
+                    // clerk.session says now
                     this.sessionId = clerk.session?.id || sessionId;
                     this.signOutFailure = { sessionId: this.sessionId };
                     const failure = new Error(SIGN_OUT_FAILED);
@@ -382,6 +391,20 @@
                 this.signOutPromise = null;
             });
             return this.signOutPromise;
+        }
+
+        // the server's view after a sign-out: clerk.client.reload() fetches
+        // this browser's sessions; the ended one must not be live. a reload
+        // that fails (offline) confirms nothing
+        async confirmSignedOut(clerk, sessionId) {
+            try {
+                const client = await clerk.client?.reload?.();
+                if (!client) return false;
+                return !(client.sessions || []).some((session) => session?.id === sessionId
+                    && (session.status === "active" || session.status === "pending"));
+            } catch (error) {
+                return false;
+            }
         }
 
         // after a reload: a live clerk session names the user again, else

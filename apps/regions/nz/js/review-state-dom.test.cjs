@@ -124,4 +124,40 @@ assert.equal(elements.get("transportDot").className, "transport-dot tone-broken"
 portal.setTransport("ready");
 assert.equal(elements.get("transportDot").textContent, "Connected");
 
-console.log("review state dom test passed");
+// a queue response that arrives after the session ended lands nowhere (c1
+// review, sol m1): the sign-out bumps the session epoch, and a response for
+// another reviewer is dropped as well
+(async () => {
+    const deferred = () => { let resolve; const promise = new Promise((r) => { resolve = r; }); return { promise, resolve }; };
+    portal.client.renderSignInButton = () => Promise.resolve();
+    portal.state.busy = false;
+    portal.state.user = { _id: "reviewer_1", display_name: "Reviewer", roles: ["reviewer"] };
+    portal.state.queue = [];
+    let pending = deferred();
+    portal.client.listReviewQueue = () => pending.promise;
+    const inFlight = portal.loadQueue();
+    portal.showSignedOut("Your sign-in ended.");
+    pending.resolve([row("secret", "needs_review")]);
+    await inFlight;
+    assert.equal(portal.state.queue.length, 0, "the ended session's queue is not restored");
+    assert.doesNotMatch(elements.get("queueList").innerHTML, /Task secret/);
+
+    portal.state.user = { _id: "reviewer_1", display_name: "Reviewer", roles: ["reviewer"] };
+    pending = deferred();
+    const second = portal.loadQueue();
+    portal.showSignedOut("Signed out.");
+    portal.state.user = { _id: "reviewer_2", display_name: "Other", roles: ["reviewer"] };
+    pending.resolve([row("secret", "needs_review")]);
+    await second;
+    assert.equal(portal.state.queue.length, 0, "nor handed to the next reviewer");
+
+    pending = deferred();
+    const third = portal.loadQueue();
+    pending.resolve([row("mine", "needs_review")]);
+    await third;
+    assert.equal(portal.state.queue.length, 1, "a current response still lands");
+    console.log("review state dom test passed");
+})().catch((error) => {
+    console.error(error);
+    process.exit(1);
+});

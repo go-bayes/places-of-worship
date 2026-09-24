@@ -394,9 +394,19 @@ function human(value) {
     }
 
     function showSignedOut(message) {
+        // a response asked for by the ended session lands nowhere (c1)
+        state.sessionEpoch = (state.sessionEpoch || 0) + 1;
         state.user = null;
         state.queue = [];
         state.selected = null;
+        state.drafts = [];
+        state.historicalClaims = [];
+        state.events = [];
+        state.attachments = [];
+        state.content = null;
+        state.reviewSnapshot = null;
+        state.occupancy = null;
+        state.sharedSource = null;
         reviewMap?.setQueue([], "");
         renderAuth();
         renderQueue();
@@ -410,18 +420,23 @@ function human(value) {
         els.refreshQueue.disabled = true;
         setStatus(els.queueStatusText, "Loading review queue...");
         setTransport("loading");
+        const epoch = state.sessionEpoch || 0;
+        const userId = state.user?._id;
+        const current = () => (state.sessionEpoch || 0) === epoch && Boolean(state.user) && state.user._id === userId;
         try {
             const rows = await client.listReviewQueue({
                 countryCode,
                 status: els.queueStatus.value,
                 limit: 100,
             });
+            if (!current()) return;
             state.queue = rows || [];
             renderQueue();
             reviewMap?.setQueue(state.queue, state.selected?.task?.task_id);
             renderQueueRollup();
             setTransport("ready");
         } catch (error) {
+            if (!current()) return;
             state.queue = [];
             renderQueue();
             reviewMap?.setQueue([], "");
@@ -2030,7 +2045,7 @@ function human(value) {
     // the dom tests load this file with the flag set and drive the pure-ish
     // renderers directly; the page itself boots as before
     if (window.__POW_TEST_NO_BOOTSTRAP__) {
-        window.__PowReviewPortalTest = { state, els, renderQueue, renderQueueRollup, renderDetail, renderEmptyDetail, decisionForm, wireDecisionForm, setDecisionFormValues, setTransport, renderAuth };
+        window.__PowReviewPortalTest = { state, els, client, loadQueue, showSignedOut, renderQueue, renderQueueRollup, renderDetail, renderEmptyDetail, decisionForm, wireDecisionForm, setDecisionFormValues, setTransport, renderAuth };
     } else {
         init();
     }

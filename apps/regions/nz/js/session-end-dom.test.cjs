@@ -129,10 +129,51 @@ const rapidKey = "powRapidDraft:NZ:rapid-pin";
   app.backendUser = { _id: "user_a" };
   assert.equal(app.getFormSnapshot("task_1").evidence_note, "typed, unsent");
   assert.equal(app.readRapidDraft("rapid-pin").values.directObservation, "a church hall");
-  // a draft written before owners were recorded stays readable
-  values.set("powRapidDraft:NZ:legacy", JSON.stringify({ saved_at: 1, values: {} }));
-  app.backendUser = { _id: "user_b" };
-  assert.ok(app.readRapidDraft("legacy"));
+}
+
+let noticeCheck = Promise.resolve();
+
+// 1b. drafts written before owners were recorded belong to nobody: never
+// read back for anyone, removed at load, the next sign-in told without
+// seeing them; a signed-out page writes nothing ownerless
+{
+  values.clear();
+  const { app } = signedInApp("user_b");
+  values.set("powRapidDraft:NZ:rapid-pin", JSON.stringify({ saved_at: 1, values: { directObservation: "legacy text" }, pin: { latitude: 1, longitude: 2 } }));
+  values.set("powFormSnapshot:NZ:task_9", JSON.stringify({ saved_at: 1, snapshot: { evidence_note: "legacy note" } }));
+  values.set("powFormSnapshot:VU:task_3", JSON.stringify({ saved_at: 1, snapshot: { evidence_note: "legacy vu" } }));
+  values.set("powFormSnapshot:NZ:task_8", JSON.stringify({ saved_at: 1, owner: "user_a", snapshot: { evidence_note: "a's" } }));
+  assert.equal(app.readRapidDraft("rapid-pin"), null, "an ownerless draft is granted to nobody");
+  assert.equal(app.getFormSnapshot("task_9"), undefined);
+  assert.equal(app.dropOwnerlessDeviceDrafts(), 3, "every country's ownerless drafts go");
+  assert.equal(values.has("powRapidDraft:NZ:rapid-pin"), false);
+  assert.equal(values.has("powFormSnapshot:VU:task_3"), false);
+  assert.ok(values.has("powFormSnapshot:NZ:task_8"), "owned drafts stay");
+  let notice = "";
+  app.setBackendTransientStatus = (text) => { notice = text; };
+  Object.assign(app, { refreshBackendTasks: async () => {}, setTransportBusy() {}, restorePortalMode() {}, renderDetailPreservingForm() {}, applyPendingDeepLink() {}, resumeRapidPinFromDevice() {} });
+  noticeCheck = Promise.resolve(app.onBackendSignedIn({ _id: "user_b" }, { refreshTasks: false })).then(() => {
+    assert.match(notice, /3 unsaved entries kept on this device from before the sign-in change could not be matched to an account and were removed/);
+    assert.doesNotMatch(notice, /legacy/, "the notice names no content");
+    assert.equal(app.ownerlessDraftsDropped, 0, "told once");
+  });
+  const signedOut = signedInApp("user_x").app;
+  signedOut.backendUser = null;
+  values.clear();
+  signedOut.setFormSnapshot("task_1", { evidence_note: "typed signed out" });
+  signedOut.persistRapidDraft("pin", "rapid-pin");
+  assert.equal(values.size, 0, "nothing ownerless is written");
+}
+
+// 1c. a deliberate sign-out deletes only its own user's snapshots
+{
+  values.clear();
+  const { app } = signedInApp("user_b");
+  values.set("powFormSnapshot:NZ:task_a", JSON.stringify({ saved_at: 1, owner: "user_a", snapshot: {} }));
+  values.set("powFormSnapshot:NZ:task_b", JSON.stringify({ saved_at: 1, owner: "user_b", snapshot: {} }));
+  app.onBackendSessionEnded({ deliberate: true });
+  assert.ok(values.has("powFormSnapshot:NZ:task_a"), "another contributor's kept work stays (greptile 4091758537)");
+  assert.equal(values.has("powFormSnapshot:NZ:task_b"), false);
 }
 
 // 2. a deliberate sign-out also deletes the device copies and the activity
@@ -149,9 +190,50 @@ const rapidKey = "powRapidDraft:NZ:rapid-pin";
   assert.match(app.backendLastError, /^Signed out\./);
 }
 
+// 3a. responses asked for by an ended session land nowhere (sol m4)
+async function lateResponses() {
+  const deferred = () => { let resolve; const promise = new Promise((r) => { resolve = r; }); return { promise, resolve }; };
+  values.clear();
+  const { app } = signedInApp("user_a");
+  let pending = deferred();
+  Object.assign(app.backend, { configured: true, signedIn: true, user: { _id: "user_a" }, listTasks: () => pending.promise, listMyTasks: async () => [], listTaskEvidence: () => pending.promise });
+  const refresh = app.refreshBackendTasks();
+  app.onBackendSessionEnded({ deliberate: false });
+  app.backend.user = null;
+  pending.resolve([{ task_id: "secret_task", status: "open" }]);
+  await refresh;
+  assert.equal(app.backendTasksById.size, 0, "a late task list does not repopulate the page");
+  assert.equal(app.tasks.length, 0);
+  assert.equal(app.myWorkItems.length, 0);
+
+  // a draft read in flight at sign-out is dropped too
+  const second = signedInApp("user_a").app;
+  pending = deferred();
+  Object.assign(second.backend, { configured: true, signedIn: true, user: { _id: "user_a" }, listTaskEvidence: () => pending.promise });
+  const read = second.loadLatestDraftForTask("task_1");
+  second.onBackendSessionEnded({ deliberate: false });
+  pending.resolve([{ evidence_note: "private" }]);
+  assert.equal(await read, null);
+  assert.equal(second.latestDraftsByTaskId.size, 0);
+
+  // and one that returns after another user signed in on the same page
+  const third = signedInApp("user_a").app;
+  pending = deferred();
+  Object.assign(third.backend, { configured: true, signedIn: true, user: { _id: "user_a" }, listTaskEvidence: () => pending.promise });
+  const crossed = third.loadLatestDraftForTask("task_1");
+  third.onBackendSessionEnded({ deliberate: false });
+  third.backendUser = { _id: "user_b" };
+  third.backend.user = { _id: "user_b" };
+  pending.resolve([{ evidence_note: "a's private note" }]);
+  assert.equal(await crossed, null);
+  assert.equal(third.latestDraftsByTaskId.size, 0, "user a's draft never reaches user b's page");
+}
+
 // 3. the sign-out button waits for clerk: success says signed out, a
 // refusal says the sign-out did not finish
 (async () => {
+  await noticeCheck;
+  await lateResponses();
   values.clear();
   const ok = signedInApp("user_a");
   let resolveSignOut;

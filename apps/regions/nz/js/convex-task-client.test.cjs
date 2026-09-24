@@ -12,14 +12,16 @@ const vm = require("node:vm");
 const PUBLISHABLE_KEY = "pk_test_c3VyZS1saXphcmQtNTAuY2xlcmsuYWNjb3VudHMuZGV2JA";
 const HOST = "sure-lizard-50.clerk.accounts.dev";
 
-function harness({ session = null, cookie = "", responses = {}, failLoads = 0, failSignOuts = 0, storage } = {}) {
+function harness({ session = null, cookie = "", responses = {}, failLoads = 0, failSignOuts = 0, networkFailSignOuts = 0, offlineReloads = 0, storage } = {}) {
   const values = storage || new Map([["powConvexAuth:v1", JSON.stringify({ token: "old-google-token" })]]);
   const localStorage = {
     getItem(key) { return values.has(key) ? values.get(key) : null; },
     setItem(key, value) { values.set(key, String(value)); },
     removeItem(key) { values.delete(key); },
   };
-  const calls = { scripts: [], load: [], getToken: [], mountSignIn: [], unmountSignIn: 0, signOut: 0, fetches: [] };
+  const calls = { scripts: [], load: [], getToken: [], mountSignIn: [], unmountSignIn: 0, signOut: 0, reload: 0, fetches: [] };
+  // the sessions clerk's server still holds for this browser
+  const serverSessions = new Set(session ? [session.id] : []);
   const listeners = [];
   const clerk = {
     session,
@@ -30,11 +32,24 @@ function harness({ session = null, cookie = "", responses = {}, failLoads = 0, f
     unmountSignIn(node) { calls.unmountSignIn += 1; node.mounted = false; },
     async signOut() {
       calls.signOut += 1;
+      const id = clerk.session?.id || [...serverSessions][0];
       // like clerk-js: the local session goes even when the server refuses
       if (failSignOuts > 0) { failSignOuts -= 1; clerk.setSession(null); throw new Error("revocation refused"); }
+      // like clerk-js on network_error: resolves, the server never heard
+      if (networkFailSignOuts > 0) { networkFailSignOuts -= 1; clerk.setSession(null); return; }
+      serverSessions.clear();
+      if (id) serverSessions.delete(id);
       clerk.setSession(null);
     },
+    client: {
+      async reload() {
+        calls.reload += 1;
+        if (offlineReloads > 0) { offlineReloads -= 1; throw new Error("network_error"); }
+        return { sessions: [...serverSessions].map((id) => ({ id, status: "active" })) };
+      },
+    },
     setSession(next) {
+      if (next) serverSessions.add(next.id);
       clerk.session = next;
       clerk.user = next ? { primaryEmailAddress: { emailAddress: next.email } } : null;
       listeners.forEach((listener) => listener({ session: clerk.session, user: clerk.user }));
@@ -301,6 +316,36 @@ const container = () => ({ innerHTML: "", children: [], replaceChildren(...nodes
     assert.equal(h.calls.signOut, 2);
     assert.deepEqual(ended, ["deliberate"], "completion reported once clerk confirms");
     assert.equal(storage.has("powSignOutPending:v1"), false);
+  }
+
+  // 11. clerk resolves a sign-out whose request never reached its server
+  // (network_error); the client asks the server for this browser's
+  // sessions and, finding the session still live, reports a failure and
+  // keeps the reload retry. an offline confirmation confirms nothing (sol
+  // and astra round 2)
+  {
+    const storage = new Map();
+    const responses = { "users:claimInvite": ok("user_1"), "users:me": ok(member) };
+    const h = harness({ session: { id: "sess_11", email: "guy@example.org" }, cookie: "__client_uat=1", responses, networkFailSignOuts: 1, storage });
+    const client = new h.Client(config);
+    const ended = [];
+    client.setLifecycle({ onSignedOut: (event) => ended.push(event?.deliberate ? "deliberate" : "ended") });
+    await client.restoreSession();
+    await assert.rejects(client.signOut({ deliberate: true }), (error) => error.signOutFailed === true);
+    assert.equal(h.clerk.session, null, "clerk had already dropped its local session");
+    assert.equal(h.calls.reload, 1, "the server was asked");
+    assert.equal(storage.get("powSignOutPending:v1"), "sess_11", "the reload retry is kept");
+    const host = container();
+    await client.renderSignInButton(host, {});
+    assert.match(host.innerHTML, /Sign-out did not finish/);
+    await host.click();
+    assert.deepEqual(ended, ["deliberate"], "confirmed on the retry");
+    assert.equal(storage.has("powSignOutPending:v1"), false);
+
+    const offline = harness({ session: { id: "sess_12", email: "guy@example.org" }, cookie: "__client_uat=1", responses, offlineReloads: 1, storage: new Map() });
+    const offlineClient = new offline.Client(config);
+    await offlineClient.restoreSession();
+    await assert.rejects(offlineClient.signOut({ deliberate: true }), (error) => error.signOutFailed === true, "unconfirmed counts as failed");
   }
 
   // 10. the publishable key must name an approved clerk host (sol and astra, low)

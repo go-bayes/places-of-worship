@@ -286,3 +286,22 @@ test("the allowlist parses separators and an empty value disables re-keying", ()
   assert.equal(allowlistedSourceIssuer(`${GOOGLE}.evil|123`, [GOOGLE]), undefined);
   assert.equal(allowlistedSourceIssuer(undefined, [GOOGLE]), undefined);
 });
+
+test("a caller already bound to a row is resolved without writes, verified or not (greptile 4091515504)", async () => {
+  const w = world({ allowlist: GOOGLE });
+  const member = w.addUser({ email: "guy@example.org", roles: ["ra"], status: "active", auth_subject: `${GOOGLE}|g-guy` });
+  await claim(w.as(identity(CLERK, "user_guy", "guy@example.org")));
+  const before = JSON.stringify(w.rows);
+  // the linked google identifier, now presenting an unverified email
+  const unverified = identity(GOOGLE, "g-guy", "guy@example.org", { verified: false });
+  assert.equal(await claim(w.as(unverified)), member._id);
+  assert.equal(JSON.stringify(w.rows), before, "no row changes on the resolved path");
+  // requireUser admits the same identifier on the same basis
+  assert.equal((await requireUser(w.as(unverified), ["ra"]))._id, member._id);
+  // a disabled row is returned unchanged and still refused by requireUser
+  const gone = w.addUser({ email: "gone@example.org", roles: ["ra"], status: "disabled", auth_subject: `${CLERK}|gone` });
+  const goneWho = identity(CLERK, "gone", "gone@example.org", { verified: false });
+  assert.equal(await claim(w.as(goneWho)), gone._id);
+  assert.equal(gone.status, "disabled");
+  await assert.rejects(requireUser(w.as(goneWho), ["ra"]), /not active/);
+});

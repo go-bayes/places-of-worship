@@ -321,6 +321,12 @@ export const claimInvite = mutation({
 
     const resolved = await resolveUser(ctx, identity);
     if (resolved !== null) {
+      // an identifier already bound to a row is resolved as requireUser
+      // resolves it: the verified-email rule (below) gates every write that
+      // binds an identifier or changes a status, and a bound identifier was
+      // bound under it (claim, re-keying) or before c1 by google sign-in. an
+      // active, disabled or other non-pending row is returned unchanged; no
+      // write happens on this path, so it grants nothing requireUser would not
       // lock-out repair: inviteUser on an active member sets the row back to
       // pending and keeps its auth_subject, so the member's own sign-in finds
       // a pending row. it activates when the verified email still matches
