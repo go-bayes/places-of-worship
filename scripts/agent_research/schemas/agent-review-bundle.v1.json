@@ -284,6 +284,7 @@
         "personal_details_quarantine": {
           "type": "object",
           "additionalProperties": false,
+          "description": "Redacted quarantine block. Each item records only the kind of personal detail withheld and the claim it came from; no value and no hash of a value enters a bundle. Hashes stay in the private dossier copy.",
           "required": [
             "redacted",
             "item_count",
@@ -291,11 +292,13 @@
           ],
           "properties": {
             "redacted": {
-              "type": "boolean",
-              "description": "True once the quarantined values have been stripped; a committed dossier must be redacted."
+              "const": true
             },
             "item_count": {
-              "const": 0
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 64,
+              "description": "Must equal the number of items."
             },
             "items": {
               "type": "array",
@@ -314,28 +317,19 @@
                       "phone",
                       "email",
                       "other"
-                    ],
-                    "maxLength": 8000
+                    ]
                   },
                   "context_claim_id": {
                     "type": [
                       "string",
                       "null"
-                    ]
-                  },
-                  "value": {
-                    "type": "string",
-                    "description": "Present only before redaction; never committed.",
-                    "maxLength": 8000
-                  },
-                  "value_sha256": {
-                    "type": "string",
-                    "description": "Hash of the stripped value so a later run can tell whether the same detail recurred.",
-                    "maxLength": 8000
+                    ],
+                    "maxLength": 8000,
+                    "description": "The claim whose text held the withheld detail, or null for the status assessment or OSM version chain."
                   }
                 }
               },
-              "maxItems": 0
+              "maxItems": 64
             },
             "note": {
               "type": "string",

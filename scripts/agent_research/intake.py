@@ -22,6 +22,7 @@ REVIEW_SCHEMA = HERE / 'schemas' / 'agent-review.v1.json'
 MAX_BYTES = 65_536
 MAX_DEPTH = 32
 MODELS = {'claude': 'sonnet', 'codex': 'gpt-5.6-luna'}
+BUNDLE_HASH_FIELDS = lib.screen_hash_fields('agent-review-bundle.v1')
 # pinned source allowlists by version; a dossier naming any other version is refused.
 ALLOWLISTS = {'nz-v1': HERE / 'fixtures' / 'allowlist-nz-v1.json'}
 RUN_KEYS = ('backend', 'model_requested', 'model_id_reported', 'started_at', 'ended_at',
@@ -125,7 +126,7 @@ def schema_errors(value, schema, root=None, path='$'):
             if key in props:
                 errors += schema_errors(item, props[key], root, f'{path}.{key}')
             elif schema.get('additionalProperties') is False:
-                errors.append(f'{path}: unexpected field {key}')
+                errors.append(f'{path}: unexpected field {lib.key_ref(value, key)}')
     return errors
 
 
@@ -234,9 +235,17 @@ def validate_dossier(dossier):
         return errors
     if dossier['place']['country_code'] != 'NZ':
         errors.append('internal pilot permits only operator-cleared NZ sources')
+    # every free-text string of the dossier, not only claim text: a detail the runner's
+    # redaction missed must not reach reviewers or Convex.
+    screen_schema, screen_root = lib.dossier_screen_schema()
+    errors += lib.screen_errors(lib.screen_findings(dossier, screen_schema, screen_root, BUNDLE_HASH_FIELDS, prefix='dossier'))
     quarantine = dossier['personal_details_quarantine']
-    if quarantine['items'] or quarantine['item_count']:
-        errors.append('personal-details quarantine requires human handling')
+    if quarantine['item_count'] != len(quarantine['items']):
+        errors.append('personal-details quarantine count does not match its items')
+    claim_ids = {claim['claim_id'] for claim in dossier['claims']}
+    for item in quarantine['items']:
+        if item['context_claim_id'] is not None and item['context_claim_id'] not in claim_ids:
+            errors.append('personal-details quarantine references an unknown claim')
     run = dossier['run_manifest']
     if run['backend'] not in MODELS or run['model_id_requested'] != MODELS.get(run['backend']):
         errors.append('unsupported researcher model')
@@ -247,21 +256,23 @@ def validate_dossier(dossier):
             errors.append('dossier run timestamps are reversed')
     except ValueError:
         errors.append('invalid dossier run timestamp')
+    # the digests this record's designated hash fields must equal, recomputed from its own inputs
+    if run['idempotency_key'] != lib.idempotency_key(dossier['place']['place_ref'], run['prompt_version'],
+                                                     run['model_id_requested'], dossier['place']['seed_source']):
+        errors.append('dossier run manifest idempotency_key does not match its inputs')
     ids = set()
-    for claim in dossier['claims']:
-        cid = claim['claim_id']
-        if cid in ids:
+    for index, claim in enumerate(dossier['claims']):
+        # claim ids are record text: diagnostics name the claim by position instead
+        cid = f'claims[{index}]'
+        if claim['claim_id'] in ids:
             errors.append('duplicate claim id')
-        ids.add(cid)
+        ids.add(claim['claim_id'])
         if not public_url(claim['source']['locator']):
             errors.append(f'{cid}: only public HTTP(S) source locators are permitted')
         try:
             locator_host(claim['source']['locator'])
         except ValueError as exc:
             errors.append(f'{cid}: {exc}')
-        for field in ['value', 'quoted_support', 'note']:
-            if lib.find_personal_details(claim.get(field, '')):
-                errors.append(f'{cid}: potential personal details require human handling')
         bounds = {}
         for key in ('date_start', 'date_end'):
             if claim.get(key) is not None:
@@ -290,8 +301,9 @@ def validate_dossier(dossier):
         allowlist = load_allowlist(run.get('allowlist_version'))
         if allowlist.get('country_code') != dossier['place']['country_code']:
             errors.append('source allowlist belongs to another country')
+        positions = {claim['claim_id']: index for index, claim in enumerate(dossier['claims'])}
         for violation in allowlist_violations(dossier):
-            errors.append(f"{violation['claim_id']}: source host {violation['host']!r} is not on allowlist {run['allowlist_version']}")
+            errors.append(f"claims[{positions[violation['claim_id']]}]: source host is not on allowlist {run['allowlist_version']}")
     except ValueError as exc:
         errors.append(str(exc))
     for cid in dossier['status_assessment']['supporting_claim_ids']:
@@ -323,8 +335,9 @@ def validate_review(review, dossier):
         return errors
     claims = {c['claim_id']: c for c in dossier['claims']}
     checked = set()
-    for check in review['claim_checks']:
+    for index, check in enumerate(review['claim_checks']):
         cid = check['claim_id']
+        label = f'claim_checks[{index}]'
         if cid not in claims:
             errors.append('review references unknown claim')
             continue
@@ -332,9 +345,9 @@ def validate_review(review, dossier):
             errors.append('duplicate review claim check')
         checked.add(cid)
         if check['source_url'] != claims[cid]['source']['locator']:
-            errors.append(f'{cid}: review source differs from claim source')
+            errors.append(f'{label}: review source differs from claim source')
         if check['access_method'] == 'not_checked' and check['outcome'] == 'supported':
-            errors.append(f'{cid}: unchecked source cannot be supported')
+            errors.append(f'{label}: unchecked source cannot be supported')
     if set(claims) != checked:
         errors.append('review must cover every claim')
     if review['cultural_sensitivity']['flagged'] and review['recommendation'] != 'defer_cultural':
@@ -358,6 +371,8 @@ def validate_bundle(bundle):
         return errors
     errors += validate_dossier(bundle['dossier'])
     errors += validate_review(bundle['review'], bundle['dossier'])
+    # the reviewer's text and both run manifests travel too; the dossier was screened above.
+    errors += lib.screen_errors(lib.screen_findings(bundle, schema, schema, BUNDLE_HASH_FIELDS, skip=('dossier',)))
     research, review = bundle['research_run'], bundle['review_run']
     if research['backend'] == review['backend']:
         errors.append('research and review must use different providers')
@@ -370,6 +385,8 @@ def validate_bundle(bundle):
                 errors.append('run timestamps are reversed')
         except ValueError:
             errors.append('invalid run timestamp')
+    if bundle['submission_key'] != lib.sha256(bundle['dossier']['dossier_id']):
+        errors.append('submission_key does not match the dossier id')
     original = bundle['dossier']['run_manifest']
     if original['backend'] != research['backend'] or original['model_id_requested'] != research['model_requested']:
         errors.append('dossier and research manifest disagree')
@@ -382,13 +399,18 @@ def validate_bundle(bundle):
 
 
 # produce a retry-safe immutable JSON file; models never choose file paths or identities.
-def write_bundle(output_dir, dossier, review, research_manifest, review_manifest):
+# the exact bundle that write_bundle would transport, before validation.
+def build_bundle(dossier, review, research_manifest, review_manifest):
     normalised = []
     for manifest in (research_manifest, review_manifest):
         normalised.append({key: manifest.get(key) for key in RUN_KEYS})
-    bundle = {'schema_version': 'agent-review-bundle.v1',
-              'submission_key': lib.sha256(dossier['dossier_id']), 'dossier': dossier,
-              'review': review, 'research_run': normalised[0], 'review_run': normalised[1]}
+    return {'schema_version': 'agent-review-bundle.v1',
+            'submission_key': lib.sha256(dossier['dossier_id']), 'dossier': dossier,
+            'review': review, 'research_run': normalised[0], 'review_run': normalised[1]}
+
+
+def write_bundle(output_dir, dossier, review, research_manifest, review_manifest):
+    bundle = build_bundle(dossier, review, research_manifest, review_manifest)
     errors = validate_bundle(bundle)
     if errors:
         raise ValueError('; '.join(errors[:12]))
@@ -409,15 +431,21 @@ def write_bundle(output_dir, dossier, review, research_manifest, review_manifest
 
 
 # ask the server, read-only, whether these exact bytes already hold a receipt; never admits anything.
+# ask the server, by hash alone, for a receipt whose stored bytes hash to these bytes' digest.
+# the rejected bundle itself never leaves this machine; the byte comparison is made here.
 def find_existing_receipt(raw, deployment):
+    digest = hashlib.sha256(raw).hexdigest()
     command = ['npx', '--no-install', 'convex', 'run', '--deployment', deployment, '--codegen', 'disable',
-               'internalAgentIntake:findReceiptForBytes',
-               json.dumps({'bundleJson': raw.decode('utf-8'), 'bundleHash': hashlib.sha256(raw).hexdigest()})]
+               'internalAgentIntake:findReceiptByHash', json.dumps({'bundleHash': digest})]
     result = subprocess.run(command, check=True, capture_output=True, text=True)
     receipt = json.loads(result.stdout.strip() or 'null')
-    if receipt is not None and not (isinstance(receipt, dict) and isinstance(receipt.get('receipt_id'), str)):
+    if receipt is None:
+        return None
+    if not (isinstance(receipt, dict) and isinstance(receipt.get('receipt_id'), str)
+            and isinstance(receipt.get('stored_bundle_sha256'), str)):
         raise ValueError('receipt lookup returned an unexpected result')
-    return receipt
+    # the stored bytes must be these bytes; a receipt for other bytes under this hash field is not a retry.
+    return receipt if receipt['stored_bundle_sha256'] == digest else None
 
 
 # validate locally or explicitly upload a validated bundle to an enabled development backend.
@@ -436,7 +464,7 @@ def main(argv=None):
         errors = validate_bundle(bundle)
         if errors:
             # a bundle receipted before a rule was tightened may retry: only a receipt holding these
-            # exact bytes is reported, and the bundle itself is never sent for ingestion.
+            # exact bytes is reported, and the bundle itself is never sent, not even to the lookup.
             if args.command == 'submit':
                 try:
                     receipt = find_existing_receipt(raw, args.deployment)

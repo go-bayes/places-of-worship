@@ -154,6 +154,95 @@ class ImportTest(unittest.TestCase):
         self.assertTrue(all(re.fullmatch(r"[0-9a-f]{64}", i["value_sha256"]) for i in dossier["personal_details_quarantine"]["items"]))
         self.assertEqual(lib.validate_dossier(dossier), [])
 
+    def test_bundle_quarantine_keeps_kind_and_claim_only(self):
+        dossier = synthetic_import()
+        with self.assertRaisesRegex(ValueError, "redacted"):
+            lib.bundle_quarantine(json.loads(json.dumps(dossier)))
+        lib.redact_quarantine(dossier)
+        hashes = [item["value_sha256"] for item in dossier["personal_details_quarantine"]["items"]]
+        bundled = lib.bundle_quarantine(json.loads(json.dumps(dossier)))
+        block = bundled["personal_details_quarantine"]
+        self.assertTrue(block["redacted"])
+        self.assertEqual(block["item_count"], len(block["items"]))
+        self.assertEqual(block["item_count"], len(hashes))
+        self.assertTrue(all(set(item) == {"kind", "context_claim_id"} for item in block["items"]))
+        text = json.dumps(bundled)
+        self.assertFalse(any(digest in text for digest in hashes))
+        self.assertNotIn("value_sha256", text)
+        # the private copy keeps the hashes that let a later run recognise recurrence.
+        self.assertEqual([item["value_sha256"] for item in dossier["personal_details_quarantine"]["items"]], hashes)
+
+    def test_quarantine_reaches_every_screened_string(self):
+        dossier = synthetic_import()
+        lib.redact_quarantine(dossier)
+        # plant details where the earlier field list never looked
+        claim = dossier["claims"][0]
+        claim["source"]["source_name"] = "Directory entry for Rev'd Pat Example"
+        dossier["candidate_location"]["basis_note"] = "Office 04 123 4567"
+        dossier["run_manifest"]["notes"] = "Contact office@example.org"
+        before = dossier["personal_details_quarantine"]["item_count"]
+        dossier["personal_details_quarantine"] = {"redacted": False, "item_count": before, "items": [
+            {"kind": i["kind"], "context_claim_id": i["context_claim_id"], "value": "x" + str(n)}
+            for n, i in enumerate(dossier["personal_details_quarantine"]["items"])]}
+        lib.quarantine_dossier(dossier)
+        schema, root = lib.dossier_screen_schema()
+        survivors = [path for path, text in lib.screened_strings(dossier, schema, root)
+                     if lib.find_personal_details(text) and not path.startswith("personal_details_quarantine")]
+        self.assertEqual(survivors, [])
+        added = dossier["personal_details_quarantine"]["items"][before:]
+        self.assertIn({"kind": "person_name", "context_claim_id": claim["claim_id"], "value": "Rev'd Pat Example"}, added)
+        self.assertIn("phone", {i["kind"] for i in added})
+        self.assertIn("email", {i["kind"] for i in added})
+        self.assertEqual(claim["source"]["source_name"], "Directory entry for [person_name withheld]")
+
+    def test_known_quarantined_values_are_withheld_wherever_they_recur(self):
+        dossier = synthetic_import()
+        claim = dossier["claims"][0]
+        claim["note"] = "The directory lists Rev'd Jane Example as vicar."
+        # recurrences the patterns alone cannot see: no honorific, other case, spacing and width
+        claim["source"]["source_name"] = "Parish page kept by jane  EXAMPLE"
+        dossier["candidate_location"]["basis_note"] = "Site confirmed by Ｊａｎｅ Example"
+        dossier["run_manifest"]["notes"] = "Quoted Jane Example on the history."
+        lib.quarantine_dossier(dossier, extra_names=["Kim Sample"])
+        dossier["status_assessment"]["basis"] = "kim sample"  # set after the pass: must be caught below
+        text = json.dumps({k: v for k, v in dossier.items() if k != "personal_details_quarantine"}, ensure_ascii=False)
+        for survivor in ("Jane Example", "jane  EXAMPLE", "Ｊａｎｅ", "Rev'd Jane"):
+            self.assertNotIn(survivor, text)
+        values = [i["value"] for i in dossier["personal_details_quarantine"]["items"]]
+        self.assertIn("Jane Example", values)
+        # the transport check sees a known value or its hash anywhere, including one added later
+        schema, root = lib.dossier_screen_schema()
+        self.assertEqual(lib.known_value_findings(dossier, ["Kim Sample"], schema, root), ["status_assessment.basis"])
+        # without a schema every key is undeclared, so the path names keys by position only
+        hashed = {"note": "ref " + lib.sha256("Kim Sample").upper()}
+        self.assertEqual(lib.known_value_findings(hashed, ["Kim Sample"]), ["<key#0>"])
+        self.assertEqual(lib.known_value_findings({"note": "clean"}, ["Kim Sample"]), [])
+
+    def test_screen_exempts_only_designated_hash_fields(self):
+        bundle = json.loads((HERE / "fixtures" / "internal-review-bundle.json").read_text())
+        schema = json.loads(lib.BUNDLE_SCHEMA_PATH.read_text())
+        fields = lib.screen_hash_fields("agent-review-bundle.v1")
+        self.assertEqual(lib.screen_findings(bundle, schema, schema, fields), [])
+        digest = lib.sha256("office@example.org")
+        bundle["dossier"]["claims"][0]["source"]["source_name"] = digest
+        bundle["dossier"]["place"]["place_ref"] = "new:021-123-4567"
+        bundle["review"]["reasoning"] = "Ask office@example.org."
+        self.assertEqual(sorted(lib.screen_findings(bundle, schema, schema, fields)), [
+            ("dossier.claims[0].source.source_name", "hash"),
+            ("dossier.place.place_ref", "personal"),
+            ("review.reasoning", "personal"),
+        ])
+
+    def test_redaction_refuses_an_item_without_value_or_hash(self):
+        for item in ({"kind": "phone", "context_claim_id": None},
+                     {"kind": "phone", "context_claim_id": None, "value_sha256": "not-a-digest"}):
+            dossier = {"personal_details_quarantine": {"redacted": False, "item_count": 1, "items": [item]}}
+            with self.assertRaisesRegex(ValueError, "neither a value nor a value hash"):
+                lib.redact_quarantine(dossier)
+        kept = {"kind": "email", "context_claim_id": "c1", "value_sha256": "a" * 64}
+        dossier = lib.redact_quarantine({"personal_details_quarantine": {"redacted": True, "item_count": 1, "items": [kept]}})
+        self.assertEqual(dossier["personal_details_quarantine"]["items"], [kept])
+
     def test_committed_fixture_is_valid_and_redacted(self):
         dossier = lib.read_json(FIXTURE)
         self.assertEqual(lib.validate_dossier(dossier), [])

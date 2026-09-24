@@ -1,6 +1,7 @@
 import { canonicalJson, sha256 } from "./sha256.ts";
 import bundleSchema from "../../scripts/agent_research/schemas/agent-review-bundle.v1.json" with { type: "json" };
 import allowlistNzV1 from "../../scripts/agent_research/fixtures/allowlist-nz-v1.json" with { type: "json" };
+import screenPolicy from "../../scripts/agent_research/schemas/screen-policy.v1.json" with { type: "json" };
 
 // pinned source allowlists by version; a dossier naming any other version is refused.
 const ALLOWLISTS: Record<string, { allowlist_version: string; country_code: string; domains: string[] }> = { "nz-v1": allowlistNzV1 };
@@ -72,7 +73,7 @@ export function schemaCheck(value: any, schema: any, path = "$", root: any = bun
     for (const key of schema.required ?? []) if (!Object.hasOwn(value, key)) throw new Error(`${path}: missing ${key}`);
     for (const [key, item] of Object.entries(value)) {
       if (Object.hasOwn(schema.properties ?? {}, key)) schemaCheck(item, schema.properties[key], `${path}.${key}`, root, floats);
-      else if (schema.additionalProperties === false) throw new Error(`${path}: unknown field ${key}`);
+      else if (schema.additionalProperties === false) throw new Error(`${path}: unknown field ${keyRef(value, key)}`);
     }
   }
 }
@@ -117,6 +118,96 @@ export function hasPersonalDetails(text: string): boolean {
   return /(?:\+64|\b0)[\s-]?\d{1,2}[\s-]?\d{3,4}[\s-]?\d{3,5}\b/.test(text)
     || /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(text)
     || /\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'-]+\s?){1,3}/.test(text);
+}
+
+const DIGEST = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/;
+
+// the audited fields of each record type that may hold a hex digest (screen-policy.v1).
+export const SCREEN_HASH_FIELDS: Record<string, ReadonlySet<string>> = Object.fromEntries(
+  Object.entries(screenPolicy.hash_fields as Record<string, Record<string, unknown>>).map(([name, fields]) => [name, new Set(Object.keys(fields))]),
+);
+
+// 40- or 64-digit hex tokens anywhere in text: maximal runs of ASCII letters and digits, any
+// case, so "sha256:<digest>", "Reference <DIGEST>" and a bare digest all count. lib.py
+// hash_token_spans and pow-cli hash_token_spans mirror it.
+export function hasHashToken(text: string): boolean {
+  for (const token of text.match(/[0-9A-Za-z]+/g) ?? []) {
+    if ((token.length === 40 || token.length === 64) && /^[0-9A-Fa-f]+$/.test(token)) return true;
+  }
+  return false;
+}
+
+// an opaque positional reference to an undeclared object key, so diagnostics never copy the key:
+// its index among the object's keys in code-point order, as lib.py key_ref and pow-cli order them.
+export function keyRef(object: object, key: string): string {
+  const codePoints = (text: string) => Array.from(text, (c) => c.codePointAt(0) ?? 0);
+  const compare = (a: string, b: string) => {
+    const x = codePoints(a), y = codePoints(b);
+    for (let i = 0; i < Math.min(x.length, y.length); i++) if (x[i] !== y[i]) return x[i] - y[i];
+    return x.length - y.length;
+  };
+  return `<key#${Object.keys(object).sort(compare).indexOf(key)}>`;
+}
+
+type Screened = { path: string; norm: string; text: string; isKey: boolean };
+
+// every string value and every object key the schema does not declare, whatever the schema says
+// about the value: enum, const and pattern exempt nothing. norm is the path with every array
+// index written as []. overrides walk a top-level key against another schema. lib.py
+// _walk_screened and pow-cli screened_strings mirror this walk.
+function walkScreened(value: unknown, schemaNode: any, root: any, overrides: Record<string, [any, any]>, prefix: string): Screened[] {
+  const found: Screened[] = [];
+  const join = (base: string, key: string) => (base === "" ? key : `${base}.${key}`);
+  const visit = (item: unknown, node: any, base: any, path: string, norm: string): void => {
+    let schema = node ?? {};
+    while (typeof schema.$ref === "string" && schema.$ref.startsWith("#/")) {
+      let target = base;
+      for (const part of schema.$ref.slice(2).split("/")) target = target?.[part];
+      schema = target ?? {};
+    }
+    if (typeof item === "string") {
+      found.push({ path, norm, text: item, isKey: false });
+      return;
+    }
+    if (Array.isArray(item)) {
+      item.forEach((child, index) => visit(child, schema.items, base, `${path}[${index}]`, `${norm}[]`));
+      return;
+    }
+    if (item === null || typeof item !== "object") return;
+    const properties = schema.properties ?? {};
+    for (const [key, child] of Object.entries(item)) {
+      const override = path === "" && Object.hasOwn(overrides, key) ? overrides[key] : undefined;
+      // an undeclared key is named by position, never copied into a path
+      const label = override !== undefined || Object.hasOwn(properties, key) ? key : keyRef(item, key);
+      const childPath = join(path, label), childNorm = join(norm, label);
+      if (override !== undefined) visit(child, override[0], override[1], childPath, childNorm);
+      else if (Object.hasOwn(properties, key)) visit(child, properties[key], base, childPath, childNorm);
+      else {
+        found.push({ path: `${childPath} (key)`, norm: childNorm, text: key, isKey: true });
+        visit(child, {}, base, childPath, childNorm);
+      }
+    }
+  };
+  visit(value, schemaNode, root, prefix, prefix);
+  return found;
+}
+
+// every string value and undeclared key, by path.
+export function screenedStrings(value: unknown, schemaNode: any, root: any, overrides: Record<string, [any, any]> = {}, prefix = ""): Array<[string, string]> {
+  return walkScreened(value, schemaNode, root, overrides, prefix).map(({ path, text }) => [path, text]);
+}
+
+// the first screen failure as an error message naming only the path: a phone number, email
+// address or honorific-led name anywhere, or a hex-hash-shaped value outside a designated hash
+// field. paths under a skipped prefix are left to another check. lib.py screen_findings mirrors it.
+export function assertScreened(value: unknown, schemaNode: any, root: any, hashFields: ReadonlySet<string>, options: { overrides?: Record<string, [any, any]>; prefix?: string; skip?: string[] } = {}): void {
+  const skip = options.skip ?? [];
+  for (const { path, norm, text, isKey } of walkScreened(value, schemaNode, root, options.overrides ?? {}, options.prefix ?? "")) {
+    if (skip.some(s => norm === s || norm.startsWith(`${s}.`) || norm.startsWith(`${s}[`))) continue;
+    if (hasPersonalDetails(text)) throw new Error(`potential personal details in ${path} require human handling`);
+    const exempt = !isKey && hashFields.has(norm) && DIGEST.test(text);
+    if (!exempt && hasHashToken(text)) throw new Error(`hash-shaped value in ${path} is outside a designated hash field`);
+  }
 }
 
 // one host policy shared with the Python and Rust validators: read the host as written (never
@@ -171,7 +262,11 @@ export function validateAgentReviewBundle(value: unknown, bundleJson: string): {
   // a model id must come back from the provider; the requested alias is not evidence of the model.
   if (typeof d.run_manifest.model_id_reported !== "string" || d.run_manifest.model_id_reported === "") throw new Error("dossier run manifest lacks the model id the provider reported");
   if (d.run_manifest.model_id_reported !== bundle.research_run.model_id_reported) throw new Error("dossier and research manifest disagree on the reported model");
+  // designated hash fields must equal the digests of their inputs in this record (screen-policy.v1)
+  if (bundle.submission_key !== sha256(d.dossier_id)) throw new Error("submission_key does not match the dossier id");
   const locators = validateDossierRecord(d);
+  // the reviewer's text and both run manifests travel too; the dossier was screened above.
+  assertScreened(value, bundleSchema, bundleSchema, SCREEN_HASH_FIELDS["agent-review-bundle.v1"], { skip: ["dossier"] });
   const checked = new Set<string>();
   for (const check of bundle.review.claim_checks) {
     if (checked.has(check.claim_id) || locators.get(check.claim_id) !== check.source_url) throw new Error("review must cover every claim uniquely at its source_url");
@@ -197,12 +292,13 @@ export function validateDossierRecord(d: Record<string, any>): Map<string, strin
   dateBounds(d.run_manifest.started_at.split("T")[0]); dateBounds(d.run_manifest.ended_at.split("T")[0]);
   const manifestStart = Date.parse(d.run_manifest.started_at), manifestEnd = Date.parse(d.run_manifest.ended_at);
   if (!Number.isFinite(manifestStart) || !Number.isFinite(manifestEnd) || manifestEnd < manifestStart) throw new Error("invalid dossier run timestamp");
+  // every free-text string of the dossier, not only claim text: a detail the runner's redaction
+  // missed must not reach reviewers or Convex.
+  assertScreened(d, (bundleSchema as any).$defs.dossier, bundleSchema, SCREEN_HASH_FIELDS["agent-review-bundle.v1"], { prefix: "dossier" });
+  if (d.run_manifest.idempotency_key !== sha256([d.place.place_ref, d.run_manifest.prompt_version, d.run_manifest.model_id_requested, d.place.seed_source].join("|"))) throw new Error("dossier run manifest idempotency_key does not match its inputs");
   const locators = new Map<string, string>();
   for (const claim of d.claims) {
     if (locators.has(claim.claim_id)) throw new Error("duplicate claim ID");
-    for (const field of ["value", "quoted_support", "note"]) {
-      if (hasPersonalDetails(claim[field] ?? "")) throw new Error("potential personal details require human handling");
-    }
     publicUrl(claim.source.locator); canonicalHost(claim.source.locator); locators.set(claim.claim_id, claim.source.locator);
     if (!hostAllowed(claim.source.locator, domains)) throw new Error(`source host is not on allowlist ${allowlist.allowlist_version}`);
     if (claim.reader.backend !== d.run_manifest.backend || ![d.run_manifest.model_id_requested, d.run_manifest.model_id_reported].includes(claim.reader.model_id)) throw new Error("inconsistent claim reader");
@@ -214,6 +310,11 @@ export function validateDossierRecord(d: Record<string, any>): Map<string, strin
     if (claim.date_end && (!claim.date_start || dateBounds(claim.date_start)[0] > dateBounds(claim.date_end)[1])) throw new Error("invalid date interval");
     for (const key of ["source_date", "retrieved_at"]) if (claim.source[key]) dateBounds(claim.source[key].split("T")[0]);
   }
+  // a bundle's quarantine block records only the kind and claim of each withheld detail;
+  // the schema refuses values and hashes, and the count must equal the items.
+  const quarantine = d.personal_details_quarantine;
+  if (quarantine.item_count !== quarantine.items.length) throw new Error("personal_details_quarantine item_count must equal the number of items");
+  for (const item of quarantine.items) if (item.context_claim_id !== null && !locators.has(item.context_claim_id)) throw new Error("personal_details_quarantine references an unknown claim");
   dateBounds(d.status_assessment.asof_date);
   for (const id of d.status_assessment.supporting_claim_ids) if (!locators.has(id)) throw new Error("unknown status claim");
   for (const row of d.osm_version_chain) { publicUrl(row.locator); canonicalHost(row.locator); }

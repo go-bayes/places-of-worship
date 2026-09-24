@@ -5,7 +5,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 registerHooks({ resolve(specifier, context, nextResolve) { if (specifier.startsWith(".") && !/\.[a-z]+$/i.test(specifier)) { for (const ext of [".js", ".ts"]) { const candidate = new URL(`${specifier}${ext}`, context.parentURL); if (fs.existsSync(fileURLToPath(candidate))) return nextResolve(candidate.href, context); } } return nextResolve(specifier, context); } });
-const { recordArtifact } = await import("./claudeReviews.ts");
+const { pendingForBatch, recordArtifact, runBatch } = await import("./claudeReviews.ts");
 
 function context({ withVersion = true } = {}) {
   const rows = {
@@ -74,4 +74,57 @@ test("a draft without a version is judged as a draft, and a re-run appends with 
   const later = ctx.rows.agent_judgments.slice(4);
   assert.ok(later.every(j => j.parents.length === 1 && before.includes(j.parents[0])), "each judgment revises its own earlier version only");
   assert.equal(new Set(later.map(j => j.parents[0])).size, 4, "four distinct lineages");
+});
+
+test("pendingForBatch excludes a clear agent-intake draft", async () => {
+  const task = { task_id: "task_1", status: "needs_review", country_code: "NZ" };
+  const intake = { evidence_draft_id: "intake_1", task_id: "task_1", draft_status: "submitted", updated_at: 2, privacy_flag: "clear", agent_intake_only: true };
+  const olderHuman = { evidence_draft_id: "human_1", task_id: "task_1", draft_status: "submitted", updated_at: 1, privacy_flag: "clear" };
+  const rows = { tasks: [task], evidence_drafts: [olderHuman, intake], agent_reviews: [] };
+  const db = {
+    query(table) {
+      const filters = [];
+      const q = { eq(key, value) { filters.push([key, value]); return q; } };
+      let descending = false;
+      const chain = {
+        withIndex(_name, select) { select(q); return chain; },
+        order(direction) { descending = direction === "desc"; return chain; },
+        async take(limit) {
+          const matching = rows[table].filter(row => filters.every(([key, value]) => row[key] === value));
+          return (descending ? matching.reverse() : matching).slice(0, limit);
+        },
+      };
+      return chain;
+    },
+  };
+  const pending = await pendingForBatch._handler({ db }, { promptVersion: "claude-batch-review-v1" });
+  assert.deepEqual(pending, [], "the older human draft must not replace the latest intake draft");
+});
+
+test("runBatch never fetches a source or calls a model for a clear agent-intake draft", async () => {
+  const draft = { evidence_draft_id: "intake_1", task_id: "task_1", draft_status: "submitted", privacy_flag: "clear", agent_intake_only: true, source_url_or_file: "https://example.org/source" };
+  const originalKey = process.env.ANTHROPIC_API_KEY;
+  const originalFetch = globalThis.fetch;
+  const requests = [];
+  const mutations = [];
+  process.env.ANTHROPIC_API_KEY = "test-key-for-no-external-calls";
+  globalThis.fetch = async (url) => { requests.push(url); throw new Error("External request attempted"); };
+  try {
+    const result = await runBatch._handler({
+      async runQuery() { return [{ task: { task_id: "task_1", country_code: "NZ" }, draft, alreadyReviewed: false }]; },
+      async runMutation(_reference, args) {
+        mutations.push(args);
+        return "service_user_1";
+      },
+    }, { maxItems: 1 });
+    assert.deepEqual(requests, [], "neither a source fetch nor an Anthropic call occurred");
+    assert.equal(result.reviewed, 0);
+    assert.equal(result.failed, 0);
+    assert.equal(mutations.length, 3, "only service identity and batch bookkeeping ran");
+    assert.ok(mutations.every(args => args.evidenceDraftId === undefined), "no review artifact was recorded");
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalKey === undefined) delete process.env.ANTHROPIC_API_KEY;
+    else process.env.ANTHROPIC_API_KEY = originalKey;
+  }
 });

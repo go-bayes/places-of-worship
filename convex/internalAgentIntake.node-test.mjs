@@ -5,7 +5,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 registerHooks({ resolve(specifier, context, nextResolve) { if (specifier.startsWith(".") && !/\.[a-z]+$/i.test(specifier)) { for (const ext of [".js", ".ts"]) { const candidate = new URL(`${specifier}${ext}`, context.parentURL); if (fs.existsSync(fileURLToPath(candidate))) return nextResolve(candidate.href, context); } } return nextResolve(specifier, context); } });
-const { ingestBundle, batchDisposeReceipts, getReceipt, findReceiptForBytes } = await import("./internalAgentIntake.ts");
+const { ingestBundle, batchDisposeReceipts, getReceipt, findReceiptForBytes, findReceiptByHash } = await import("./internalAgentIntake.ts");
 const { sha256 } = await import("./lib/sha256.ts");
 const fixtureUrl = new URL("../scripts/agent_research/fixtures/internal-review-bundle.json", import.meta.url);
 const bundleJson = fs.readFileSync(fixtureUrl, "utf8");
@@ -72,10 +72,17 @@ test("an exact retry of receipted bytes returns the receipt even when current ru
   await assert.rejects(findReceiptForBytes._handler(ctx, { bundleJson: legacyJson, bundleHash: "0".repeat(64) }), /does not match/);
   assert.equal(await findReceiptForBytes._handler(ctx, { bundleJson: legacyJson + " ", bundleHash: sha256(legacyJson + " ") }), null);
   assert.equal(ctx.rows.agent_intake_receipts.length, 1);
+  // the submit command's hash-only lookup: the digest of the stored bytes comes back, never the bytes.
+  const byHash = await findReceiptByHash._handler(ctx, { bundleHash: legacyHash });
+  assert.deepEqual(byHash, { receipt_id: "legacy:receipt", task_id: "legacy", evidence_draft_id: "legacy:draft:1", agent_review_id: "legacy:review:1", stored_bundle_sha256: legacyHash });
+  assert.equal(await findReceiptByHash._handler(context(), { bundleHash: legacyHash }), null);
+  await assert.rejects(findReceiptByHash._handler(ctx, { bundleHash: "not-a-hash" }), /64 lowercase hex/);
   // the same bytes without a receipt, or a stored receipt whose bytes differ, are validated and refused.
   await assert.rejects(ingestBundle._handler(context(), { bundleJson: legacyJson, bundleHash: legacyHash }), /model_id_reported/);
   ctx.rows.agent_intake_receipts[0].bundle_json = "{}";
   await assert.rejects(ingestBundle._handler(ctx, { bundleJson: legacyJson, bundleHash: legacyHash }), /model_id_reported/);
+  // altered stored bytes report their own digest, so the caller's comparison fails.
+  assert.equal((await findReceiptByHash._handler(ctx, { bundleHash: legacyHash })).stored_bundle_sha256, sha256("{}"));
   assert.equal(ctx.rows.tasks.length, 0);
 });
 
@@ -127,7 +134,7 @@ test("human batch return validates every receipt before writes", async () => {
   await ctx.db.insert("users", {auth_subject: "human", status: "active", roles: ["reviewer"]});
   const items = [];
   for (const key of ["c", "d"]) {
-    const b = JSON.parse(bundleJson); b.submission_key = key.repeat(64);
+    const b = JSON.parse(bundleJson); b.dossier.dossier_id = `${b.dossier.dossier_id}:${key}`; b.submission_key = sha256(b.dossier.dossier_id);
     const raw = JSON.stringify(b); const hash = sha256(raw);
     const receipt = await ingestBundle._handler(ctx, {bundleJson: raw, bundleHash: hash});
     items.push({receipt_id: receipt.receipt_id, expected_hash: hash});
@@ -166,6 +173,7 @@ test("OSM intake retains object type and bare identifier, while new nominations 
   process.env.POW_INTERNAL_AGENT_INGEST_ENABLED = "true";
   for (const ref of ["osm:node/12", "osm:way/34", "osm:relation/56", "new:example-church"]) {
     const ctx = context(); const b = JSON.parse(bundleJson); b.dossier.place.place_ref = ref;
+    const m = b.dossier.run_manifest; m.idempotency_key = sha256([ref, m.prompt_version, m.model_id_requested, b.dossier.place.seed_source].join("|"));
     const raw = JSON.stringify(b);
     await ingestBundle._handler(ctx, {bundleJson: raw, bundleHash: sha256(raw)});
     const task = ctx.rows.tasks[0];

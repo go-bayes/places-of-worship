@@ -30,6 +30,12 @@ const AGENT_ALLOWLISTS: &[(&str, &str)] = &[(
     "nz-v1",
     include_str!("../../../scripts/agent_research/fixtures/allowlist-nz-v1.json"),
 )];
+// the bundle schema a dossier's free text is screened against, pinned at build time.
+const AGENT_BUNDLE_SCHEMA: &str =
+    include_str!("../../../scripts/agent_research/schemas/agent-review-bundle.v1.json");
+// the audited fields that may hold a hex digest, shared with lib.py and agentIntake.ts.
+const SCREEN_POLICY: &str =
+    include_str!("../../../scripts/agent_research/schemas/screen-policy.v1.json");
 
 #[derive(Parser, Debug)]
 #[command(name = "pow")]
@@ -502,7 +508,14 @@ fn validate_agent(args: ValidateAgentArgs) -> Result<AgentValidationReport> {
     report.errors.extend(
         validator
             .iter_errors(&value)
-            .map(|error| format!("schema {}: {}", error.instance_path(), error)),
+            // the keyword and location only: the crate's messages quote instance values and keys
+            .map(|error| {
+                format!(
+                    "schema {}: fails {}",
+                    error.instance_path(),
+                    error.kind().keyword()
+                )
+            }),
     );
     validate_agent_semantics(&value, &mut report.errors);
     report.valid = report.errors.is_empty();
@@ -570,6 +583,33 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
     }
 
     let allowlist = agent_allowlist(dossier, errors);
+    // every string of the whole bundle, dossier, reviewer text and both run manifests: a
+    // phone number, email address or honorific-led name anywhere is refused, and so is a
+    // hex-hash-shaped value outside a designated hash field.
+    let screen_root: Value =
+        serde_json::from_str(AGENT_BUNDLE_SCHEMA).expect("pinned bundle schema is valid JSON");
+    let policy: Value = serde_json::from_str(SCREEN_POLICY).expect("screen policy is valid JSON");
+    let hash_fields: BTreeSet<String> = policy["hash_fields"]["agent-review-bundle.v1"]
+        .as_object()
+        .map(|fields| fields.keys().cloned().collect())
+        .unwrap_or_default();
+    let mut screened = Vec::new();
+    screened_strings(value, &screen_root, &screen_root, "", "", &mut screened);
+    for item in screened {
+        if contains_personal_details(&item.text) {
+            errors.push(format!(
+                "/{}: potential personal details require human handling",
+                item.path
+            ));
+        } else if !(!item.is_key && hash_fields.contains(&item.norm) && is_digest(&item.text))
+            && has_hash_token(&item.text)
+        {
+            errors.push(format!(
+                "/{}: hash-shaped value is outside a designated hash field",
+                item.path
+            ));
+        }
+    }
     let claims = dossier
         .get("claims")
         .and_then(Value::as_array)
@@ -585,7 +625,7 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
         if let Some(claim_id) = claim_object.get("claim_id").and_then(Value::as_str)
             && !claim_ids.insert(claim_id.to_owned())
         {
-            errors.push(format!("{path}/claim_id: duplicate claim id {claim_id:?}"));
+            errors.push(format!("{path}/claim_id: duplicate claim id"));
         }
         if let Some(source) = claim_object.get("source").and_then(Value::as_object) {
             if let Some(locator) = source.get("locator").and_then(Value::as_str) {
@@ -668,9 +708,9 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
         if let Some(supporting) = status.get("supporting_claim_ids").and_then(Value::as_array) {
             for claim_id in supporting.iter().filter_map(Value::as_str) {
                 if !claim_ids.contains(claim_id) {
-                    errors.push(format!(
-                        "/dossier/status_assessment/supporting_claim_ids: unknown claim {claim_id:?}"
-                    ));
+                    errors.push(
+                        "/dossier/status_assessment/supporting_claim_ids: unknown claim".to_owned(),
+                    );
                 }
             }
         }
@@ -711,9 +751,7 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
             continue;
         };
         if !claim_ids.contains(claim_id) {
-            errors.push(format!(
-                "{path}/claim_id: no dossier claim with id {claim_id:?}"
-            ));
+            errors.push(format!("{path}/claim_id: no dossier claim with this id"));
         }
         if !checked_ids.insert(claim_id.to_owned()) {
             errors.push(format!("{path}/claim_id: duplicate review claim check"));
@@ -724,7 +762,7 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
             }
             if claim_locators.get(claim_id).map(String::as_str) != Some(source_url) {
                 errors.push(format!(
-                    "{path}/source_url: does not exactly equal /dossier/claims source.locator for {claim_id:?}"
+                    "{path}/source_url: does not exactly equal the claim's source.locator"
                 ));
             }
         }
@@ -734,10 +772,12 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
             errors.push(format!("{path}: unchecked source cannot be supported"));
         }
     }
-    for claim_id in &claim_ids {
-        if !checked_ids.contains(claim_id) {
+    for (index, claim) in claims.iter().enumerate() {
+        if let Some(claim_id) = claim.get("claim_id").and_then(Value::as_str)
+            && !checked_ids.contains(claim_id)
+        {
             errors.push(format!(
-                "/review/claim_checks: dossier claim {claim_id:?} is not covered"
+                "/review/claim_checks: dossier claim {index} is not covered"
             ));
         }
     }
@@ -765,20 +805,69 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
         );
     }
 
-    if dossier
+    // a bundle's quarantine block records only the kind and claim of each withheld detail;
+    // the schema refuses values and hashes, and the count must equal the items.
+    if let Some(quarantine) = dossier
         .get("personal_details_quarantine")
         .and_then(Value::as_object)
-        .and_then(|quarantine| quarantine.get("items"))
-        .and_then(Value::as_array)
-        .is_some_and(|items| !items.is_empty())
     {
-        errors.push(
-            "/dossier/personal_details_quarantine/items: must be empty in a review bundle"
-                .to_owned(),
-        );
+        let items = quarantine
+            .get("items")
+            .and_then(Value::as_array)
+            .cloned()
+            .unwrap_or_default();
+        if quarantine.get("item_count").and_then(Value::as_u64) != Some(items.len() as u64) {
+            errors.push(
+                "/dossier/personal_details_quarantine/item_count: must equal the number of items"
+                    .to_owned(),
+            );
+        }
+        for (index, item) in items.iter().enumerate() {
+            if let Some(claim_id) = item.get("context_claim_id").and_then(Value::as_str)
+                && !claim_ids.contains(claim_id)
+            {
+                errors.push(format!(
+                    "/dossier/personal_details_quarantine/items/{index}/context_claim_id: unknown claim"
+                ));
+            }
+        }
     }
 
     validate_agent_runs(root, dossier, errors);
+    validate_agent_digests(root, dossier, errors);
+}
+
+/// Designated hash fields must equal the digests of their inputs in this record
+/// (screen-policy.v1): the submission key from the dossier id, and the idempotency key from the
+/// place, prompt version, requested model and seed source.
+fn validate_agent_digests(
+    root: &serde_json::Map<String, Value>,
+    dossier: &serde_json::Map<String, Value>,
+    errors: &mut Vec<String>,
+) {
+    let text = |value: Option<&Value>| value.and_then(Value::as_str).unwrap_or_default().to_owned();
+    let dossier_id = text(dossier.get("dossier_id"));
+    if root.get("submission_key").and_then(Value::as_str)
+        != Some(sha256_hex(dossier_id.as_bytes()).as_str())
+    {
+        errors.push("/submission_key: does not match the dossier id".to_owned());
+    }
+    let place = dossier.get("place");
+    let manifest = dossier.get("run_manifest");
+    let inputs = [
+        text(place.and_then(|place| place.get("place_ref"))),
+        text(manifest.and_then(|manifest| manifest.get("prompt_version"))),
+        text(manifest.and_then(|manifest| manifest.get("model_id_requested"))),
+        text(place.and_then(|place| place.get("seed_source"))),
+    ]
+    .join("|");
+    if manifest
+        .and_then(|manifest| manifest.get("idempotency_key"))
+        .and_then(Value::as_str)
+        != Some(sha256_hex(inputs.as_bytes()).as_str())
+    {
+        errors.push("/dossier/run_manifest/idempotency_key: does not match its inputs".to_owned());
+    }
 }
 
 fn validate_agent_runs(
@@ -1031,26 +1120,137 @@ fn validate_partial_date(value: Option<&Value>, path: &str, errors: &mut Vec<Str
     }
 }
 
+struct ScreenedString {
+    path: String,
+    norm: String,
+    text: String,
+    is_key: bool,
+}
+
+/// A whole lowercase 40- or 64-digit hex digest, as a designated hash field holds.
+fn is_digest(text: &str) -> bool {
+    matches!(text.len(), 40 | 64)
+        && text
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+}
+
+/// Any 40- or 64-digit hex token in text: maximal runs of ASCII letters and digits, any case.
+/// Mirrors lib.py hash_token_spans and agentIntake.ts hasHashToken.
+fn has_hash_token(text: &str) -> bool {
+    text.split(|character: char| !character.is_ascii_alphanumeric())
+        .any(|token| {
+            matches!(token.len(), 40 | 64) && token.bytes().all(|byte| byte.is_ascii_hexdigit())
+        })
+}
+
+/// An opaque positional reference to an undeclared object key: its index among the object's
+/// keys in code-point order, as lib.py key_ref and agentIntake.ts keyRef order them.
+fn key_ref(map: &serde_json::Map<String, Value>, key: &str) -> String {
+    let mut keys: Vec<&String> = map.keys().collect();
+    keys.sort();
+    let index = keys
+        .iter()
+        .position(|candidate| *candidate == key)
+        .unwrap_or(0);
+    format!("<key#{index}>")
+}
+
+/// Every string value and every object key the schema does not declare, whatever the schema
+/// says about the value: enum, const and pattern exempt nothing. `norm` is the path with every
+/// array index written as []. Mirrors convex/lib/agentIntake.ts walkScreened and lib.py
+/// _walk_screened.
+fn screened_strings(
+    value: &Value,
+    schema: &Value,
+    root: &Value,
+    path: &str,
+    norm: &str,
+    found: &mut Vec<ScreenedString>,
+) {
+    static NULL: Value = Value::Null;
+    let mut schema = schema;
+    while let Some(reference) = schema
+        .get("$ref")
+        .and_then(Value::as_str)
+        .filter(|reference| reference.starts_with("#/"))
+    {
+        let mut target = root;
+        for part in reference[2..].split('/') {
+            target = target.get(part).unwrap_or(&NULL);
+        }
+        schema = target;
+    }
+    let join = |base: &str, key: &str| {
+        if base.is_empty() {
+            key.to_owned()
+        } else {
+            format!("{base}.{key}")
+        }
+    };
+    match value {
+        Value::String(text) => found.push(ScreenedString {
+            path: path.to_owned(),
+            norm: norm.to_owned(),
+            text: text.clone(),
+            is_key: false,
+        }),
+        Value::Array(items) => {
+            let item_schema = schema.get("items").unwrap_or(&NULL);
+            for (index, item) in items.iter().enumerate() {
+                screened_strings(
+                    item,
+                    item_schema,
+                    root,
+                    &format!("{path}[{index}]"),
+                    &format!("{norm}[]"),
+                    found,
+                );
+            }
+        }
+        Value::Object(map) => {
+            let properties = schema.get("properties");
+            for (key, child) in map {
+                let declared = properties.and_then(|properties| properties.get(key));
+                // an undeclared key is named by position, never copied into a path
+                let label = if declared.is_some() {
+                    key.clone()
+                } else {
+                    key_ref(map, key)
+                };
+                let (child_path, child_norm) = (join(path, &label), join(norm, &label));
+                match declared {
+                    Some(child_schema) => {
+                        screened_strings(child, child_schema, root, &child_path, &child_norm, found)
+                    }
+                    None => {
+                        found.push(ScreenedString {
+                            path: format!("{child_path} (key)"),
+                            norm: child_norm.clone(),
+                            text: key.clone(),
+                            is_key: true,
+                        });
+                        screened_strings(child, &NULL, root, &child_path, &child_norm, found);
+                    }
+                }
+            }
+        }
+        _ => {}
+    }
+}
+
 fn contains_personal_details(text: &str) -> bool {
     contains_email(text) || contains_nz_phone(text) || contains_honorific_name(text)
 }
 
+/// Email addresses, with the pattern lib.py `_EMAIL` and agentIntake.ts use, so a trailing
+/// full stop or bracket does not hide an address from one validator alone.
 fn contains_email(text: &str) -> bool {
-    text.split_whitespace().any(|token| {
-        let token = token.trim_matches(|character: char| {
-            !character.is_ascii_alphanumeric() && !"._%+-@".contains(character)
-        });
-        let Some((local, domain)) = token.split_once('@') else {
-            return false;
-        };
-        !local.is_empty()
-            && domain.rsplit_once('.').is_some_and(|(_, suffix)| {
-                suffix.len() >= 2
-                    && suffix
-                        .chars()
-                        .all(|character| character.is_ascii_alphabetic())
-            })
-    })
+    static EMAIL: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+        regex::Regex::new(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
+            .expect("valid email expression")
+    });
+    EMAIL.is_match(text)
 }
 
 // detect the same NZ phone forms as the Python and TypeScript intake gates.
@@ -1062,30 +1262,18 @@ fn contains_nz_phone(text: &str) -> bool {
     PHONE.is_match(text)
 }
 
+/// Honorific-led names, with the pattern lib.py `_HONORIFIC_NAME` and agentIntake.ts use,
+/// so the three validators agree on forms such as "Rev'd".
 fn contains_honorific_name(text: &str) -> bool {
-    let words: Vec<&str> = text.split_whitespace().collect();
-    words.windows(2).any(|window| {
-        let title = window[0].trim_matches(|character: char| !character.is_ascii_alphabetic());
-        let name = window[1].trim_matches(|character: char| !character.is_ascii_alphabetic());
-        matches!(
-            title,
-            "Rev"
-                | "Revd"
-                | "Reverend"
-                | "Fr"
-                | "Father"
-                | "Pastor"
-                | "Vicar"
-                | "Archdeacon"
-                | "Bishop"
-                | "Canon"
-                | "Dean"
-                | "Mr"
-                | "Mrs"
-                | "Ms"
-                | "Dr"
-        ) && name.chars().next().is_some_and(char::is_uppercase)
-    })
+    static PATTERN: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+    PATTERN
+        .get_or_init(|| {
+            regex::Regex::new(
+                r"\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'\-]+\s?){1,3}",
+            )
+            .expect("valid honorific pattern")
+        })
+        .is_match(text)
 }
 
 #[derive(Clone, Copy)]
@@ -5161,6 +5349,14 @@ mod tests {
                 claim_object["reader"]["model_id"] = json!("gpt-5.6-luna");
             }
         }
+        let dossier_place_ref = dossier_object["place"]["place_ref"]
+            .as_str()
+            .unwrap_or_default()
+            .to_owned();
+        let dossier_seed_source = dossier_object["place"]["seed_source"]
+            .as_str()
+            .unwrap_or_default()
+            .to_owned();
         {
             let manifest = dossier_object
                 .get_mut("run_manifest")
@@ -5170,6 +5366,17 @@ mod tests {
             manifest.insert("model_id_requested".to_owned(), json!("gpt-5.6-luna"));
             manifest.insert("model_id_reported".to_owned(), json!("gpt-5.6-luna"));
             manifest.insert("allowlist_version".to_owned(), json!("nz-v1"));
+            let inputs = [
+                dossier_place_ref.as_str(),
+                manifest["prompt_version"].as_str().unwrap_or_default(),
+                "gpt-5.6-luna",
+                dossier_seed_source.as_str(),
+            ]
+            .join("|");
+            manifest.insert(
+                "idempotency_key".to_owned(),
+                json!(sha256_hex(inputs.as_bytes())),
+            );
             manifest.insert("started_at".to_owned(), json!("2026-09-11T01:00:00Z"));
             manifest.insert("ended_at".to_owned(), json!("2026-09-11T01:01:00Z"));
             manifest.insert("exit_status".to_owned(), json!("completed"));
@@ -5202,9 +5409,15 @@ mod tests {
                 })
             })
             .collect();
+        let submission_key = sha256_hex(
+            dossier["dossier_id"]
+                .as_str()
+                .unwrap_or_default()
+                .as_bytes(),
+        );
         json!({
             "schema_version": "agent-review-bundle.v1",
-            "submission_key": "a".repeat(64),
+            "submission_key": submission_key,
             "dossier": dossier,
             "review": {
                 "schema_version": "agent-review.v1",
@@ -5395,6 +5608,38 @@ mod tests {
             errors
                 .iter()
                 .any(|error| error.contains("reported no model id"))
+        );
+    }
+
+    #[test]
+    fn agent_diagnostics_never_copy_keys_or_values_and_digests_are_recomputed() {
+        let mut bundle = valid_agent_bundle();
+        bundle["review_run"]["usage"] = json!({"tokens": 1, "office@example.org": 2});
+        bundle["dossier"]["claims"][0]["claim_id"] = json!("Rev'd Pat Example");
+        let mut errors = Vec::new();
+        validate_agent_semantics(&bundle, &mut errors);
+        let text = errors.join("; ");
+        assert!(text.contains("/review_run.usage.<key#0> (key)"), "{text}");
+        assert!(
+            !text.contains("example.org") && !text.contains("Pat Example"),
+            "{text}"
+        );
+
+        let mut forged = valid_agent_bundle();
+        forged["submission_key"] = json!(sha256_hex(b"office@example.org"));
+        forged["dossier"]["run_manifest"]["idempotency_key"] =
+            json!(sha256_hex(b"office@example.org"));
+        let mut errors = Vec::new();
+        validate_agent_semantics(&forged, &mut errors);
+        assert!(
+            errors
+                .iter()
+                .any(|error| error.starts_with("/submission_key"))
+        );
+        assert!(
+            errors
+                .iter()
+                .any(|error| error.starts_with("/dossier/run_manifest/idempotency_key"))
         );
     }
 

@@ -137,12 +137,24 @@ class DuplicateJSONKey(RunnerError):
     pass
 
 
-class RunRejected(RunnerError):
-    """A dossier or bundle refused by validation, with its run-row counters."""
+class SchemaRejected(RunnerError):
+    """Structured provider output that failed its schema; the output is kept on the exception so
+    the runner can screen it for personal details before anything is recorded. The message names
+    schema paths only, never values."""
 
-    def __init__(self, message: str, counters: dict):
+    def __init__(self, message: str, output: dict):
+        super().__init__(message)
+        self.output = output
+
+
+class RunRejected(RunnerError):
+    """A dossier or bundle refused by validation, with its run-row counters and, when the
+    refusal is for personal details, the paths refused (never their text)."""
+
+    def __init__(self, message: str, counters: dict, refusal: dict | None = None):
         super().__init__(message)
         self.counters = counters
+        self.refusal = refusal
 
 
 class ProcessResult:
@@ -731,8 +743,22 @@ def _write_attempt(path: Path, envelope: dict) -> None:
         handle.write(json.dumps(envelope, ensure_ascii=False, sort_keys=True) + "\n")
 
 
+def _refusal(stage: str, findings: list[dict]) -> dict:
+    """the run-row record of a transport refused for personal details. interim policy: refuse
+    before transport and keep the original in this private run directory. the findings carry
+    path, detector and code-point span, never the text, so a later flag-and-hold review can
+    propose redactions from them."""
+    return {
+        "stage": stage,
+        "policy": "interim_refuse_before_transport",
+        "offset_unit": "unicode_code_point",
+        "paths": sorted({finding["path"] for finding in findings}),
+        "findings": findings,
+    }
+
+
 def _write_run_result(output_dir: Path, status: str, error: str | None = None, bundle: dict | None = None,
-                      counters: dict | None = None) -> None:
+                      counters: dict | None = None, refusal: dict | None = None) -> None:
     """Persist the controller outcome in the private run directory.
 
     Allowlist counters are null when the run failed before a dossier existed.
@@ -747,7 +773,10 @@ def _write_run_result(output_dir: Path, status: str, error: str | None = None, b
         "bundle": bundle,
         "allowlist_version": (counters or {}).get("allowlist_version"),
         "allowlist_violations": (counters or {}).get("allowlist_violations"),
-        "allowlist_violation_hosts": (counters or {}).get("allowlist_violation_hosts"),
+        "allowlist_violation_domains": (counters or {}).get("allowlist_violation_domains"),
+        # a transport refused for personal details: the stage and the refused paths, never the text.
+        # the original stays in this private run directory for a human to handle or a rerun.
+        "personal_detail_refusal": refusal,
     }
     path = output_dir / "run-result.json"
     path.write_text(json.dumps(result, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8")
@@ -837,7 +866,7 @@ def _invoke(stage: str, provider: str, model: str, system: str, user: str, timeo
             raise RunnerError("structured provider output is not an object")
         schema_errors = lib.validate(output, schema)
         if schema_errors:
-            raise RunnerError("structured output failed schema: " + "; ".join(schema_errors[:8]))
+            raise SchemaRejected("structured output failed schema: " + "; ".join(schema_errors[:8]), output)
         ended = _utc_now()
         envelope = _manifest(stage, provider, model, started, ended, result, fields, prompt, preflight, exit_status="completed")
         _write_attempt(raw_path, {"kind": "attempt", "output": output, "manifest": envelope})
@@ -916,11 +945,14 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
     }, research_manifest["started_at"], research_manifest["ended_at"], research_manifest["duration_seconds"],
                                f"internal-{research_manifest['started_at'].replace(':', '').replace('-', '')}",
                                allowlist_version)
-    # A clean dossier is committed only after the quarantine block has been
-    # marked redacted.  Any detected personal detail remains local and causes
-    # intake validation to reject the run before the reviewer sees it.
-    if dossier["personal_details_quarantine"].get("item_count", 0) == 0:
-        lib.redact_quarantine(dossier)
+    # quarantined values become hashes in the private dossier copy; the reviewer and the bundle
+    # see only the kind of each withheld detail and its claim, never a value or a hash.
+    # values the quarantine caught; nothing transported may contain one of them or its hash.
+    known_map = lib.known_values(dossier["personal_details_quarantine"]["items"])
+    known_values = list(known_map)
+    lib.redact_quarantine(dossier)
+    private_dossier = json.loads(json.dumps(dossier))
+    lib.bundle_quarantine(dossier)
     try:
         violations = intake.allowlist_violations(dossier)
     except ValueError:
@@ -928,7 +960,8 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
     counters = {
         "allowlist_version": allowlist_version,
         "allowlist_violations": None if violations is None else len(violations),
-        "allowlist_violation_hosts": None if violations is None else sorted({v["host"] for v in violations}),
+        # the registrable domain of each off-list host, screened: a host label may carry text
+        "allowlist_violation_domains": None if violations is None else sorted({lib.screened_domain(v["host"]) for v in violations}),
     }
     # every later failure keeps the counters: a dossier existed, so null would misreport the run.
     try:
@@ -936,13 +969,43 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
         # the review is not bought for a dossier whose provider named no model.
         if not research_manifest.get("model_id_reported"):
             dossier_errors.append("research provider reported no model id")
+        dossier_schema, dossier_root = lib.dossier_screen_schema()
+        leaked = lib.known_value_findings(dossier, known_values, dossier_schema, dossier_root, "dossier")
+        if leaked:
+            findings = [f for f in lib.screen_spans(dossier, dossier_schema, dossier_root, frozenset(), known_map, "dossier")
+                        if f["detector"].startswith("known_value")]
+            raise RunRejected("dossier rejected before review: a quarantined value or its hash remains",
+                              counters, _refusal("dossier", findings))
         if dossier_errors:
             raise RunRejected("dossier rejected before review: " + "; ".join(dossier_errors[:12]), counters)
         dossier_path = out / "dossier.json"
-        dossier_path.write_text(json.dumps(dossier, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        dossier_path.write_text(json.dumps(private_dossier, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         review_system, review_user = _review_prompt(dossier)
-        review_output, review_manifest = _invoke("review", review_backend, REVIEW_MODELS[review_backend], review_system,
-                                                  review_user, timeout_s, budget_usd, pause_file, review_raw, preflight[review_backend])
+        bundle_schema = json.loads(intake.BUNDLE_SCHEMA.read_text(encoding="utf-8"))
+
+        # contaminated reviewer output is refused, never silently redacted, since redaction could
+        # change what the reviewer said; the original stays in this private run directory. the
+        # screen runs before any schema check, so a detail in an invalid field is still refused
+        # as a personal detail and no schema message can carry it.
+        def refuse_if_contaminated(review, subject, schema, root, prefix, stage):
+            findings = lib.screen_spans(subject, schema, root, intake.BUNDLE_HASH_FIELDS, known_map, prefix)
+            if findings:
+                refused_path = out / "review.refused.json"
+                refused_path.write_text(json.dumps(review, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                refused_path.chmod(0o600)
+                raise RunRejected("review refused before transport: personal details or hashes outside designated fields",
+                                  counters, _refusal(stage, findings))
+
+        try:
+            review_output, review_manifest = _invoke("review", review_backend, REVIEW_MODELS[review_backend], review_system,
+                                                      review_user, timeout_s, budget_usd, pause_file, review_raw, preflight[review_backend])
+        except SchemaRejected as exc:
+            review_schema = _review_schema()
+            refuse_if_contaminated(exc.output, exc.output, review_schema, review_schema, "review", "review")
+            raise
+        # screen everything that would travel, the reviewer's text and both run manifests included.
+        outgoing = intake.build_bundle(dossier, review_output, research_manifest, review_manifest)
+        refuse_if_contaminated(review_output, outgoing, bundle_schema, bundle_schema, "", "bundle")
         if intake is not None and hasattr(intake, "validate_review"):
             review_errors = list(intake.validate_review(review_output, dossier))
         else:
@@ -984,7 +1047,8 @@ def main(argv: list[str] | None = None) -> int:
     except (RunnerError, OSError, UnicodeError, RecursionError, json.JSONDecodeError) as exc:
         if not (args.out / "bundle.json").exists():
             try:
-                _write_run_result(args.out, "failed", error=str(exc), counters=getattr(exc, "counters", None))
+                _write_run_result(args.out, "failed", error=str(exc), counters=getattr(exc, "counters", None),
+                                  refusal=getattr(exc, "refusal", None))
             except OSError:
                 pass
         print(f"internal runner refused: {exc}", file=sys.stderr)

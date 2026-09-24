@@ -80,7 +80,7 @@ def validate(instance, schema: dict, root: dict | None = None, path: str = "$") 
     if "const" in schema and instance != schema["const"]:
         errors.append(f"{path}: expected const {schema['const']!r}")
     if "enum" in schema and instance not in schema["enum"]:
-        errors.append(f"{path}: {instance!r} not in enum")
+        errors.append(f"{path}: not in enum")
     if "type" in schema:
         types = schema["type"] if isinstance(schema["type"], list) else [schema["type"]]
         if not any(_type_ok(instance, t) for t in types):
@@ -88,16 +88,16 @@ def validate(instance, schema: dict, root: dict | None = None, path: str = "$") 
             return errors
     if isinstance(instance, str):
         if "pattern" in schema and re.search(schema["pattern"].removesuffix("$") + (r"\Z" if schema["pattern"].endswith("$") else ""), instance) is None:
-            errors.append(f"{path}: {instance!r} does not match {schema['pattern']}")
+            errors.append(f"{path}: does not match {schema['pattern']}")
         if "minLength" in schema and len(instance) < schema["minLength"]:
             errors.append(f"{path}: shorter than {schema['minLength']}")
         if "maxLength" in schema and len(instance) > schema["maxLength"]:
             errors.append(f"{path}: longer than {schema['maxLength']}")
     if isinstance(instance, (int, float)) and not isinstance(instance, bool):
         if "minimum" in schema and instance < schema["minimum"]:
-            errors.append(f"{path}: {instance} below minimum {schema['minimum']}")
+            errors.append(f"{path}: below minimum {schema['minimum']}")
         if "maximum" in schema and instance > schema["maximum"]:
-            errors.append(f"{path}: {instance} above maximum {schema['maximum']}")
+            errors.append(f"{path}: above maximum {schema['maximum']}")
     if isinstance(instance, dict):
         for key in schema.get("required", []):
             if key not in instance:
@@ -107,7 +107,7 @@ def validate(instance, schema: dict, root: dict | None = None, path: str = "$") 
             if key in props:
                 errors.extend(validate(value, props[key], root, f"{path}.{key}"))
             elif schema.get("additionalProperties", True) is False:
-                errors.append(f"{path}: unexpected property {key!r}")
+                errors.append(f"{path}: unexpected property {key_ref(instance, key)}")
     if isinstance(instance, list) and "items" in schema:
         for index, item in enumerate(instance):
             errors.extend(validate(item, schema["items"], root, f"{path}[{index}]"))
@@ -208,41 +208,249 @@ def redact_text(text: str, details: list[dict]) -> str:
     return out
 
 
+BUNDLE_SCHEMA_PATH = HERE / "schemas" / "agent-review-bundle.v1.json"
+SCREEN_POLICY_PATH = HERE / "schemas" / "screen-policy.v1.json"
+_DIGEST = re.compile(r"[0-9a-f]{40}|[0-9a-f]{64}")
+_ASCII_TOKEN = re.compile(r"[0-9A-Za-z]+")
+_HEX_DIGITS = frozenset("0123456789abcdefABCDEF")
+
+
+def hash_token_spans(text: str) -> list[tuple[int, int]]:
+    """spans of 40- or 64-digit hex tokens anywhere in text: maximal runs of ASCII letters and
+    digits, any case, so "sha256:<digest>", "Reference <DIGEST>" and a bare digest all count."""
+    return [m.span() for m in _ASCII_TOKEN.finditer(text)
+            if len(m.group(0)) in (40, 64) and set(m.group(0)) <= _HEX_DIGITS]
+
+
+# second-level labels under which a country code's registrable domains sit (co.nz, org.uk);
+# an approximation of the public suffix list, used only to shorten recorded hosts
+_SECOND_LEVEL = frozenset({"ac", "co", "com", "edu", "gen", "geek", "gov", "govt", "health", "iwi", "kiwi",
+                           "maori", "mil", "net", "nom", "org", "parliament", "school", "cri"})
+
+
+def screened_domain(host: str) -> str:
+    """the registrable part of a host, for a run-row counter: the last two labels, or three under
+    a country code's second-level label. any label that carries a personal detail or a hex digest
+    is replaced by its position (<label#N>), so the counter never records such text."""
+    labels = [label for label in (host or "").lower().rstrip(".").split(".") if label]
+    if not labels:
+        return "<unparsed host>"
+    keep = 3 if len(labels) >= 3 and len(labels[-1]) == 2 and labels[-2] in _SECOND_LEVEL else 2
+    kept = labels[-keep:]
+    return ".".join(f"<label#{index}>" if find_personal_details(label) or hash_token_spans(label) else label
+                    for index, label in enumerate(kept))
+
+
+def key_ref(obj: dict, key: str) -> str:
+    """an opaque positional reference to an undeclared object key, so diagnostics and refusal
+    records never copy the key itself: its index among the object's keys in code-point order."""
+    return f"<key#{sorted(obj).index(key)}>"
+
+
+def screen_hash_fields(schema_version: str) -> frozenset[str]:
+    """the audited fields of a record type that may hold a hex digest (screen-policy.v1)."""
+    policy = json.loads(SCREEN_POLICY_PATH.read_text(encoding="utf-8"))
+    return frozenset(policy["hash_fields"][schema_version])
+
+
+def _digest_exempt(norm: str, text: str, is_key: bool, hash_fields) -> bool:
+    """a designated hash field whose whole value is a lowercase digest."""
+    return not is_key and norm in hash_fields and _DIGEST.fullmatch(text) is not None
+
+
+def _walk_screened(value, schema, root, on_string, overrides=None, path="", norm="", parent=None, key=None):
+    """visit every string value and every object key the schema does not declare, whatever the
+    schema says about the value: enum, const and pattern exempt nothing. on_string(parent, key,
+    path, norm, text, is_key) may return a replacement for a value; norm is the path with every
+    array index written as []. mirrors convex/lib/agentIntake.ts and pow-cli's walk."""
+    schema = schema or {}
+    while isinstance(schema.get("$ref"), str) and schema["$ref"].startswith("#/"):
+        target = root
+        for part in schema["$ref"][2:].split("/"):
+            target = target.get(part, {}) if isinstance(target, dict) else {}
+        schema = target or {}
+    if isinstance(value, str):
+        replacement = on_string(parent, key, path, norm, value, False)
+        if replacement is not None and parent is not None:
+            parent[key] = replacement
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            _walk_screened(item, schema.get("items"), root, on_string, None, f"{path}[{index}]", f"{norm}[]", value, index)
+    elif isinstance(value, dict):
+        properties = schema.get("properties", {})
+        for child_key, child in list(value.items()):
+            declared = child_key in properties or (overrides and path == "" and child_key in overrides)
+            # an undeclared key is named by position, never copied into a path
+            label = child_key if declared else key_ref(value, child_key)
+            child_path = f"{path}.{label}" if path else label
+            child_norm = f"{norm}.{label}" if norm else label
+            if overrides and path == "" and child_key in overrides:
+                _walk_screened(child, overrides[child_key][0], overrides[child_key][1], on_string, None, child_path, child_norm, value, child_key)
+            elif child_key in properties:
+                _walk_screened(child, properties[child_key], root, on_string, None, child_path, child_norm, value, child_key)
+            else:
+                on_string(None, None, f"{child_path} (key)", child_norm, child_key, True)
+                _walk_screened(child, {}, root, on_string, None, child_path, child_norm, value, child_key)
+
+
+def screened_strings(value, schema, root, overrides=None, prefix="") -> list[tuple[str, str]]:
+    """every string value and undeclared key of value, by path."""
+    found: list[tuple[str, str]] = []
+    _walk_screened(value, schema, root, lambda parent, key, path, norm, text, is_key: found.append((path, text)),
+                   overrides, prefix, prefix)
+    return found
+
+
+def screen_findings(value, schema, root, hash_fields, overrides=None, prefix="", skip=()) -> list[tuple[str, str]]:
+    """(path, reason) for every string or undeclared key that carries a phone number, email
+    address or honorific-led name ("personal"), or is shaped as a hex hash outside a designated
+    hash field ("hash"). paths under a skipped prefix are left to another check."""
+    findings: list[tuple[str, str]] = []
+
+    def check(parent, key, path, norm, text, is_key):
+        if any(norm == s or norm.startswith(s + ".") or norm.startswith(s + "[") for s in skip):
+            return None
+        if find_personal_details(text):
+            findings.append((path, "personal"))
+        elif not _digest_exempt(norm, text, is_key, hash_fields) and hash_token_spans(text):
+            findings.append((path, "hash"))
+        return None
+
+    _walk_screened(value, schema, root, check, overrides, prefix, prefix)
+    return findings
+
+
+def screen_errors(findings) -> list[str]:
+    """the validators' messages for screen findings; they name paths, never the text."""
+    return [f"potential personal details in {path} require human handling" if reason == "personal"
+            else f"hash-shaped value in {path} is outside a designated hash field"
+            for path, reason in findings]
+
+
+def normalise_detail(text: str) -> str:
+    """case-, width- and whitespace-insensitive form used to match a known quarantined value."""
+    return re.sub(r"\s+", " ", unicodedata.normalize("NFKC", text or "").casefold()).strip()
+
+
+def known_value_findings(value, known_values, schema=None, root=None, prefix="") -> list[str]:
+    """paths of strings or keys, anywhere in value, that contain a known quarantined value
+    (normalised) or the sha256 of one. the runner applies this to everything it transports."""
+    needles = [(normalise_detail(v), sha256(v)) for v in known_values if isinstance(v, str) and v.strip()]
+    found: list[str] = []
+
+    def check(parent, key, path, norm, text, is_key):
+        plain, lowered = normalise_detail(text), text.lower()
+        if any(needle and needle in plain or digest in lowered for needle, digest in needles):
+            found.append(path)
+        return None
+
+    if needles:
+        _walk_screened(value, schema or {}, root or {}, check, None, prefix, prefix)
+    return found
+
+
+def known_values(items) -> dict[str, str]:
+    """every quarantined value to withhold, with its kind. a name caught with its honorific is
+    withheld without it too, so "Rev'd Pat Example" also withholds "Pat Example"."""
+    known: dict[str, str] = {}
+    for item in items:
+        value = item.get("value")
+        if not isinstance(value, str) or not value.strip():
+            continue
+        known.setdefault(value, item["kind"])
+        match = _HONORIFIC_NAME.fullmatch(value.strip()) if item["kind"] == "person_name" else None
+        if match and len(match.group(1).strip()) >= 3:
+            known.setdefault(match.group(1).strip(), "person_name")
+    return known
+
+
+def screen_spans(value, schema, root, hash_fields, known: dict[str, str] | None = None, prefix: str = "") -> list[dict]:
+    """every screen finding as {path, detector, start, end}, never the text: a structured record
+    that the later flag-and-hold review can reuse to propose redactions. offsets are Unicode
+    code-point indices into the string at path. detectors: phone, email, person_name (patterns),
+    hash_outside_field, known_value (a quarantined value, case/width/whitespace normalised) and
+    known_value_hash (the sha256 of one)."""
+    needles = [(value_, _known_pattern(value_), sha256(value_)) for value_ in (known or {}) if value_.strip()]
+    found: list[dict] = []
+
+    def check(parent, key, path, norm, text, is_key):
+        spans = [("phone", m.span()) for m in _PHONE.finditer(text)]
+        spans += [("email", m.span()) for m in _EMAIL.finditer(text)]
+        spans += [("person_name", m.span()) for m in _HONORIFIC_NAME.finditer(text)]
+        if not _digest_exempt(norm, text, is_key, hash_fields):
+            spans += [("hash_outside_field", span) for span in hash_token_spans(text)]
+        for value_, pattern, digest in needles:
+            if normalise_detail(value_) in normalise_detail(text):
+                match = pattern.search(text)
+                spans.append(("known_value", match.span() if match else (0, len(text))))
+            at = text.lower().find(digest)
+            if at >= 0:
+                spans.append(("known_value_hash", (at, at + len(digest))))
+        for detector, (start, end) in sorted(set(spans), key=lambda s: (s[1], s[0])):
+            found.append({"path": path, "detector": detector, "start": start, "end": end})
+        return None
+
+    _walk_screened(value, schema, root, check, None, prefix, prefix)
+    return found
+
+
+def _known_pattern(value: str):
+    return re.compile(r"\s+".join(re.escape(token) for token in value.split()), re.IGNORECASE)
+
+
+def dossier_screen_schema() -> tuple[dict, dict]:
+    """the schema an outgoing dossier is screened against: the review bundle's dossier."""
+    root = json.loads(BUNDLE_SCHEMA_PATH.read_text(encoding="utf-8"))
+    return root["$defs"]["dossier"], root
+
+
+def _claim_context(claims, path):
+    match = re.match(r"claims\[(\d+)\]", path)
+    if match and int(match.group(1)) < len(claims):
+        return claims[int(match.group(1))].get("claim_id")
+    return None
+
+
 def quarantine_dossier(dossier: dict, extra_names: list[str] | None = None) -> dict:
-    """move personal details out of claim text into the quarantine block,
-    values kept (redacted=false). call redact_quarantine before committing."""
+    """move personal details out of every string of the dossier into the quarantine block,
+    values kept (redacted=false). call redact_quarantine before committing. two passes: the
+    pattern pass finds phones, emails and honorific-led names; the known-value pass then removes
+    every recurrence of each quarantined value (case, width and whitespace normalised), so a name
+    caught once is withheld wherever it repeats. an undeclared object key cannot be redacted and
+    stays refusable."""
     items = list(dossier.get("personal_details_quarantine", {}).get("items", []))
     extra = [{"kind": "person_name", "value": n} for n in (extra_names or [])]
-    for claim in dossier.get("claims", []):
-        for field in ("value", "quoted_support", "note"):
-            text = claim.get(field)
-            if not text:
+    claims = dossier.get("claims", [])
+    schema, root = dossier_screen_schema()
+
+    def redact(parent, key, path, norm, text, is_key):
+        if parent is None or path.startswith("personal_details_quarantine"):
+            return None
+        details = find_personal_details(text) + [e for e in extra if e["value"] in text]
+        if not details:
+            return None
+        claim_id = _claim_context(claims, path)
+        for d in details:
+            items.append({"kind": d["kind"], "context_claim_id": claim_id, "value": d["value"]})
+        return redact_text(text, details)
+
+    _walk_screened(dossier, schema, root, redact)
+    ordered = sorted(known_values(items + extra).items(), key=lambda pair: -len(pair[0]))
+
+    def redact_known(parent, key, path, norm, text, is_key):
+        if parent is None or path.startswith("personal_details_quarantine"):
+            return None
+        out = text
+        for value, kind in ordered:
+            if normalise_detail(value) not in normalise_detail(out):
                 continue
-            details = find_personal_details(text) + [e for e in extra if e["value"] in text]
-            if not details:
-                continue
-            claim[field] = redact_text(text, details)
-            for d in details:
-                items.append({"kind": d["kind"], "context_claim_id": claim["claim_id"], "value": d["value"]})
-    for entry in dossier.get("osm_version_chain", []):
-        for field in ("tags_summary", "change_note"):
-            text = entry.get(field)
-            if not text:
-                continue
-            details = find_personal_details(text) + [e for e in extra if e["value"] in text]
-            if details:
-                entry[field] = redact_text(text, details)
-                for d in details:
-                    items.append({"kind": d["kind"], "context_claim_id": None, "value": d["value"]})
-    assessment = dossier.get("status_assessment", {})
-    for field in ("basis", "osm_stale_basis"):
-        text = assessment.get(field)
-        if text:
-            details = find_personal_details(text) + [e for e in extra if e["value"] in text]
-            if details:
-                assessment[field] = redact_text(text, details)
-                for d in details:
-                    items.append({"kind": d["kind"], "context_claim_id": None, "value": d["value"]})
+            replaced = _known_pattern(value).sub(f"[{kind} withheld]", out)
+            # a width or compatibility variant the pattern cannot see withholds the whole string
+            out = replaced if normalise_detail(value) not in normalise_detail(replaced) else f"[{kind} withheld]"
+            items.append({"kind": kind, "context_claim_id": _claim_context(claims, path), "value": value})
+        return out if out != text else None
+
+    _walk_screened(dossier, schema, root, redact_known)
     # dedupe by (kind, value, claim)
     seen = set()
     unique = []
@@ -262,20 +470,40 @@ def quarantine_dossier(dossier: dict, extra_names: list[str] | None = None) -> d
 
 
 def redact_quarantine(dossier: dict) -> dict:
+    """replace each quarantined value by its sha256 for the private dossier copy.
+    an item with neither a value nor a hash is refused, since it could not show recurrence."""
     block = dossier.get("personal_details_quarantine", {"items": []})
     stripped = []
     for item in block.get("items", []):
         entry = {"kind": item["kind"], "context_claim_id": item.get("context_claim_id")}
         if "value" in item:
             entry["value_sha256"] = sha256(item["value"])
-        elif "value_sha256" in item:
+        elif re.fullmatch(r"[0-9a-f]{64}", str(item.get("value_sha256", ""))):
             entry["value_sha256"] = item["value_sha256"]
+        else:
+            raise ValueError("quarantine item has neither a value nor a value hash")
         stripped.append(entry)
     dossier["personal_details_quarantine"] = {
         "redacted": True,
         "item_count": len(stripped),
         "items": stripped,
         "note": "personal details stripped before commit; hashes let a later run recognise recurrence",
+    }
+    return dossier
+
+
+def bundle_quarantine(dossier: dict) -> dict:
+    """reduce a redacted quarantine block to the form a review bundle carries: the kind of
+    detail and its claim only. no value and no hash of a value leaves the private copy."""
+    block = dossier.get("personal_details_quarantine", {"items": []})
+    if not block.get("redacted") or any("value" in item for item in block.get("items", [])):
+        raise ValueError("quarantine block must be redacted before it enters a bundle")
+    items = [{"kind": item["kind"], "context_claim_id": item.get("context_claim_id")} for item in block.get("items", [])]
+    dossier["personal_details_quarantine"] = {
+        "redacted": True,
+        "item_count": len(items),
+        "items": items,
+        "note": "personal details withheld; the kind and claim of each are recorded, and hashes stay in the private dossier copy",
     }
     return dossier
 

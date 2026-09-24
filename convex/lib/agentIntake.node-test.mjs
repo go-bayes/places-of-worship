@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
 import { assertNoDuplicateJsonKeys, hostAllowed, validateAgentReviewBundle } from "./agentIntake.ts";
+import { sha256 } from "./sha256.ts";
 const fixturePath = new URL("../../scripts/agent_research/fixtures/internal-review-bundle.json", import.meta.url);
 const fixture = JSON.parse(fs.readFileSync(fixturePath, "utf8"));
 const bundle = () => structuredClone(fixture);
@@ -43,7 +44,7 @@ test("duplicate JSON keys are rejected before JSON.parse can collapse them", () 
 
 test("claim extras and missing required dossier fields are refused", () => {
   const extra = bundle(); extra.dossier.claims[0].hostile = true;
-  assert.throws(() => validateAgentReviewBundle(extra, JSON.stringify(extra)), /unknown field hostile/);
+  assert.throws(() => validateAgentReviewBundle(extra, JSON.stringify(extra)), (error) => /unknown field <key#\d+>/.test(error.message) && !error.message.includes("hostile"));
   const missing = bundle(); delete missing.dossier.claims[0].reader;
   assert.throws(() => validateAgentReviewBundle(missing, JSON.stringify(missing)), /reader/);
 });
@@ -104,4 +105,15 @@ test("claim hosts must fall inside the pinned allowlist's domains", () => {
   assert.throws(() => validateAgentReviewBundle(offList, JSON.stringify(offList)), /not on allowlist nz-v1/);
   const unreported = bundle(); unreported.dossier.run_manifest.model_id_reported = null;
   assert.throws(() => validateAgentReviewBundle(unreported, JSON.stringify(unreported)), /reported/);
+});
+
+test("diagnostics name undeclared keys by position and designated hashes are recomputed", () => {
+  const keyed = bundle(); keyed.review_run.usage = { tokens: 1, "office@example.org": 2 };
+  assert.throws(() => validateAgentReviewBundle(keyed, JSON.stringify(keyed)), (error) => error.message === "potential personal details in review_run.usage.<key#0> (key) require human handling");
+  const extra = bundle(); extra.dossier.claims[0]["hostile office@example.org"] = true;
+  assert.throws(() => validateAgentReviewBundle(extra, JSON.stringify(extra)), (error) => /<key#\d+>/.test(error.message) && !error.message.includes("example.org"));
+  const forged = bundle(); forged.submission_key = sha256("office@example.org");
+  assert.throws(() => validateAgentReviewBundle(forged, JSON.stringify(forged)), /submission_key does not match the dossier id/);
+  const idem = bundle(); idem.dossier.run_manifest.idempotency_key = sha256("office@example.org");
+  assert.throws(() => validateAgentReviewBundle(idem, JSON.stringify(idem)), /idempotency_key does not match its inputs/);
 });

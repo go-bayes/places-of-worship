@@ -88,6 +88,21 @@ def validate(record):
     return record
 
 
+def integrity_record(raw: bytes):
+    """Parse archived or receipted bytes for reading only: the bounded strict parser, the fields
+    the parent graph needs, and nothing else. Intake rules (schema, screening, digest provenance)
+    apply when a record is archived or submitted, never when it is read or restored, so a record
+    archived under earlier rules stays readable byte for byte. Callers check the hash, the byte
+    limit and the version-1 wire form."""
+    record = intake.parse_json(raw)
+    if not isinstance(record, dict) or not isinstance(record.get('place_ref'), str):
+        raise ValueError('object is not a first-pass record')
+    parents = record.get('parents')
+    if not isinstance(parents, list) or not all(isinstance(p, str) and re.fullmatch(r'[a-f0-9]{64}', p) for p in parents):
+        raise ValueError('object parents are not record hashes')
+    return record
+
+
 def object_path(store: Path, digest: str):
     if not re.fullmatch(r'[a-f0-9]{64}', digest):
         raise ValueError('invalid object hash')
@@ -103,7 +118,7 @@ def read_object(store: Path, digest: str):
         raw = stream.read(intake.MAX_BYTES + 1)
     if len(raw) > intake.MAX_BYTES or hashlib.sha256(raw).hexdigest() != digest:
         raise ValueError('object hash or byte limit mismatch')
-    record = validate(intake.parse_json(raw))
+    record = integrity_record(raw)
     if encode(record) != raw:
         raise ValueError('object is not in version-1 wire format')
     return raw, record
@@ -184,7 +199,7 @@ def copy_history(source: Path, destination: Path, digest: str):
 
 
 BUNDLE_SCHEMA = json.loads(intake.BUNDLE_SCHEMA.read_text())
-HASH_SHAPED = re.compile(r'(?:sha256:)?(?:[0-9a-f]{40}|[0-9a-f]{64})')
+FIRST_PASS_HASH_FIELDS = lib.screen_hash_fields('agent-first-pass.v1')
 
 
 def screened_text(record):
@@ -194,39 +209,7 @@ def screened_text(record):
     object key the schema does not declare, except strings the schema
     constrains by enum, const or pattern and values shaped as a hex hash.
     """
-    found = []
-
-    def resolve(schema, root):
-        schema = schema or {}
-        while isinstance(schema.get('$ref'), str) and schema['$ref'].startswith('#/'):
-            target = root
-            for part in schema['$ref'][2:].split('/'):
-                target = target.get(part, {}) if isinstance(target, dict) else {}
-            schema = target or {}
-        return schema
-
-    def visit(value, schema, root, path):
-        schema = resolve(schema, root)
-        if isinstance(value, str):
-            if not ({'enum', 'const', 'pattern'} & set(schema) or HASH_SHAPED.fullmatch(value)):
-                found.append((path, value))
-        elif isinstance(value, list):
-            for index, item in enumerate(value):
-                visit(item, schema.get('items'), root, f'{path}[{index}]')
-        elif isinstance(value, dict):
-            properties = schema.get('properties', {})
-            for key, child in value.items():
-                child_path = f'{path}.{key}' if path else key
-                if path == '' and key == 'dossier':
-                    visit(child, BUNDLE_SCHEMA['$defs']['dossier'], BUNDLE_SCHEMA, child_path)
-                elif key in properties:
-                    visit(child, properties[key], root, child_path)
-                else:
-                    found.append((f'{child_path} (key)', key))
-                    visit(child, {}, root, child_path)
-
-    visit(record, SCHEMA, SCHEMA, '')
-    return found
+    return lib.screened_strings(record, SCHEMA, SCHEMA, {'dossier': (BUNDLE_SCHEMA['$defs']['dossier'], BUNDLE_SCHEMA)})
 
 
 def submission_errors(record):
@@ -235,8 +218,8 @@ def submission_errors(record):
     The local archive stays the operator's private working copy and keeps any
     record; a record that fails here stays there for human handling.
     """
-    errors = [f'potential personal details in {path} require human handling'
-              for path, text in screened_text(record) if lib.find_personal_details(text)]
+    errors = lib.screen_errors(lib.screen_findings(record, SCHEMA, SCHEMA, FIRST_PASS_HASH_FIELDS,
+                                                   {'dossier': (BUNDLE_SCHEMA['$defs']['dossier'], BUNDLE_SCHEMA)}))
     dossier = record['dossier']
     if dossier is not None:
         manifest = dossier['run_manifest']
@@ -326,7 +309,7 @@ def restore(store: Path, digest: str, deployment: str, run=convex_run):
         raw = stored['record_json'].encode('ascii')
         if hashlib.sha256(raw).hexdigest() != current:
             raise ValueError('receipt bytes do not match their hash')
-        record = validate(intake.parse_json(raw))
+        record = integrity_record(raw)
         if encode(record) != raw:
             raise ValueError('receipt bytes are not in version-1 wire format')
         put_bytes(store, raw)

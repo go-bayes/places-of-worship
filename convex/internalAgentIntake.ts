@@ -19,8 +19,23 @@ async function receiptForBytes(ctx: QueryCtx, bundleJson: string, bundleHash: st
   return { receipt_id: receipted.receipt_id, task_id: receipted.task_id, evidence_draft_id: receipted.evidence_draft_id, agent_review_id: receipted.agent_review_id };
 }
 
-// read-only retry route for the submit command: a bundle receipted before a validation rule was
-// tightened can recover its receipt without re-validation, and nothing new is admitted.
+// read-only retry route for the submit command, by hash alone: the caller never sends a bundle
+// its own validation refused. returns the receipt with the sha256 of the bytes actually stored, so
+// the caller compares against its local bytes; a stored row whose bytes no longer hash to its
+// bundle_hash field reports its real digest and so never matches.
+export const findReceiptByHash = internalQuery({
+  args: { bundleHash: v.string() },
+  returns: v.union(v.null(), v.object({ receipt_id: v.string(), task_id: v.string(), evidence_draft_id: v.string(), agent_review_id: v.string(), stored_bundle_sha256: v.string() })),
+  handler: async (ctx, args) => {
+    if (!/^[0-9a-f]{64}$/.test(args.bundleHash)) throw new Error("bundleHash must be 64 lowercase hex characters");
+    const receipted = await ctx.db.query("agent_intake_receipts").withIndex("by_bundle_hash", (q) => q.eq("bundle_hash", args.bundleHash)).first();
+    if (receipted === null) return null;
+    return { receipt_id: receipted.receipt_id, task_id: receipted.task_id, evidence_draft_id: receipted.evidence_draft_id, agent_review_id: receipted.agent_review_id, stored_bundle_sha256: sha256(receipted.bundle_json) };
+  },
+});
+
+// superseded by findReceiptByHash, which the submit command now uses so that a locally refused
+// bundle is never sent; kept only because removing a deployed function is a non-additive change.
 export const findReceiptForBytes = internalQuery({
   args: { bundleJson: v.string(), bundleHash: v.string() },
   returns: v.union(v.null(), v.object({ receipt_id: v.string(), task_id: v.string(), evidence_draft_id: v.string(), agent_review_id: v.string() })),

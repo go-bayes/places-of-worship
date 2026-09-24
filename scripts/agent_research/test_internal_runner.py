@@ -260,7 +260,8 @@ class ValidationAndAuditTest(unittest.TestCase):
 
     def _run_pair(self, tmp: Path, source_url: str, research_manifest: dict, review_manifest: dict,
                   research_backend: str = "claude", review_error: Exception | None = None,
-                  review_source_url: str | None = None) -> tuple[list[str], dict | None]:
+                  review_source_url: str | None = None, claim_note: str = "", source_name: str = "Test source",
+                  prompts: list[str] | None = None, review_changes: dict | None = None) -> tuple[list[str], dict | None]:
         """Run the runner with mocked providers; return the stages invoked and the run() result."""
         review_backend = "codex" if research_backend == "claude" else "claude"
         reader_output = {
@@ -269,9 +270,9 @@ class ValidationAndAuditTest(unittest.TestCase):
                                     "uncertainty_radius_m": 10, "address": None},
             "claims": [{
                 "claim_type": "name", "value": "Test Church", "date_start": None, "date_end": None,
-                "date_precision": "unknown", "source": {"locator": source_url, "source_name": "Test source",
+                "date_precision": "unknown", "source": {"locator": source_url, "source_name": source_name,
                 "source_type": "church_website", "source_date": None, "source_date_basis": "not_stated"},
-                "quoted_support": "Test Church", "evidential_weight": "primary_institutional", "confidence": "high", "note": "",
+                "quoted_support": "Test Church", "evidential_weight": "primary_institutional", "confidence": "high", "note": claim_note,
             }],
             "status_assessment": {"current_status": "unknown", "basis": "test", "asof_date": "2026-09-11",
                                   "osm_stale": None, "osm_stale_basis": ""},
@@ -281,15 +282,23 @@ class ValidationAndAuditTest(unittest.TestCase):
 
         def fake_invoke(stage, provider, model, system, user, timeout_s, budget_usd, pause_file, raw_path, preflight):
             stages.append(stage)
+            if prompts is not None:
+                prompts.append(system + "\n" + user)
             if stage == "research":
                 return reader_output, research_manifest
             if review_error is not None:
                 raise review_error
-            return {"schema_version": "agent-review.v1", "recommendation": "revise", "reasoning": "test",
+            review = {"schema_version": "agent-review.v1", "recommendation": "revise", "reasoning": "test",
                     "claim_checks": [{"claim_id": f"osm:way/123:{research_backend}:c01", "outcome": "supported",
                                        "source_url": review_source_url or source_url, "note": "test",
                                        "access_method": "opened"}],
-                    "cultural_sensitivity": {"flagged": False, "basis": "none"}, "limitations": []}, review_manifest
+                    "cultural_sensitivity": {"flagged": False, "basis": "none"}, "limitations": []}
+            for key, value in (review_changes or {}).items():
+                if key == "claim_note":
+                    review["claim_checks"][0]["note"] = value
+                else:
+                    review[key] = value
+            return review, review_manifest
 
         seed_path = tmp / "seed.json"
         seed_path.write_text(json.dumps(SEED), encoding="utf-8")
@@ -312,7 +321,7 @@ class ValidationAndAuditTest(unittest.TestCase):
             self.assertEqual(run_result["exit_code"], 0)
             self.assertEqual(run_result["bundle"]["provisional"], True)
             self.assertEqual((run_result["allowlist_version"], run_result["allowlist_violations"],
-                              run_result["allowlist_violation_hosts"]), ("nz-v1", 0, []))
+                              run_result["allowlist_violation_domains"]), ("nz-v1", 0, []))
             bundle = json.loads((Path(tmp) / "out" / "bundle.json").read_text())
             manifest = bundle["dossier"]["run_manifest"]
             # the dossier's cost is the sum over billing models, not the requested model's share.
@@ -321,6 +330,117 @@ class ValidationAndAuditTest(unittest.TestCase):
             self.assertEqual(bundle["research_run"]["usage"]["per_model"]["web_search_requests"], 2)
             self.assertEqual(bundle["research_run"]["model_id_reported"], "claude-sonnet-5")
             self.assertEqual(bundle["review_run"]["model_id_reported"], "gpt-5.6-luna")
+
+    def test_quarantine_hashes_stay_in_the_private_dossier_copy(self):
+        prompts: list[str] = []
+        with tempfile.TemporaryDirectory() as tmp:
+            stages, run_result = self._run_pair(Path(tmp), "https://www.anglicanlife.org.nz/test-church",
+                                                self._claude_manifest("research"), self._codex_manifest("review", "gpt-5.6-luna"),
+                                                claim_note="The directory lists Rev'd Pat Example as vicar.",
+                                                source_name="Parish directory: Rev'd Pat Example", prompts=prompts)
+            self.assertEqual(stages, ["research", "review"])
+            self.assertEqual(run_result["status"], "completed", run_result["error"])
+            out = Path(tmp) / "out"
+            private = json.loads((out / "dossier.json").read_text())["personal_details_quarantine"]
+            # the same name in the note and the source name is one detail of one claim.
+            self.assertEqual(private["item_count"], 1)
+            digest = private["items"][0]["value_sha256"]
+            self.assertRegex(digest, r"^[0-9a-f]{64}$")
+            bundle_text = (out / "bundle.json").read_text()
+            block = json.loads(bundle_text)["dossier"]["personal_details_quarantine"]
+            self.assertEqual(block["items"], [{"kind": "person_name", "context_claim_id": "osm:way/123:claude:c01"}])
+            self.assertEqual(block["item_count"], 1)
+            bundled_claim = json.loads(bundle_text)["dossier"]["claims"][0]
+            self.assertEqual(bundled_claim["source"]["source_name"], "Parish directory: [person_name withheld]")
+            # neither the bundle nor the reviewer's prompt carries the value or its hash.
+            for text in (bundle_text, prompts[1]):
+                self.assertNotIn(digest, text)
+                self.assertNotIn("Pat Example", text)
+                self.assertNotIn("value_sha256", text)
+
+    def test_contaminated_review_is_refused_kept_privately_and_recorded(self):
+        cases = [
+            ("email in the reasoning", {"reasoning": "Confirmed with office@example.org."}, "", "review.reasoning"),
+            ("known name in a check note", {"claim_note": "Pat Example confirmed the services."},
+             "The directory lists Rev'd Pat Example as vicar.", "review.claim_checks[0].note"),
+            ("hash of a known name", {"limitations": ["ref " + runner.lib.sha256("Rev'd Pat Example")]},
+             "The directory lists Rev'd Pat Example as vicar.", "review.limitations[0]"),
+        ]
+        for name, changes, claim_note, path in cases:
+            with self.subTest(name), tempfile.TemporaryDirectory() as tmp:
+                stages, run_result = self._run_pair(Path(tmp), "https://www.anglicanlife.org.nz/test-church",
+                                                    self._claude_manifest("research"),
+                                                    self._codex_manifest("review", "gpt-5.6-luna"),
+                                                    claim_note=claim_note, review_changes=changes)
+                out = Path(tmp) / "out"
+                self.assertEqual(stages, ["research", "review"])
+                self.assertEqual(run_result["status"], "failed")
+                self.assertEqual(run_result["personal_detail_refusal"]["stage"], "bundle")
+                refusal = run_result["personal_detail_refusal"]
+                self.assertIn(path, refusal["paths"])
+                self.assertEqual((refusal["policy"], refusal["offset_unit"]), ("interim_refuse_before_transport", "unicode_code_point"))
+                finding = next(f for f in refusal["findings"] if f["path"] == path)
+                self.assertEqual(set(finding), {"path", "detector", "start", "end"})
+                self.assertIn(finding["detector"], {"email", "known_value", "known_value_hash", "hash_outside_field"})
+                refused_text = json.loads((Path(tmp) / "out" / "review.refused.json").read_text())
+                field = {"review.reasoning": lambda r: r["reasoning"],
+                         "review.claim_checks[0].note": lambda r: r["claim_checks"][0]["note"],
+                         "review.limitations[0]": lambda r: r["limitations"][0]}[path](refused_text)
+                # the span locates the detail in the privately kept original
+                self.assertTrue(field[finding["start"]:finding["end"]])
+                self.assertIn(field[finding["start"]:finding["end"]].lower(),
+                              {"office@example.org", "pat example", runner.lib.sha256("Rev'd Pat Example")})
+                # the run row names paths, never the refused text; the original stays private.
+                self.assertNotIn("example.org", json.dumps(run_result))
+                self.assertNotIn("Pat Example", json.dumps(run_result))
+                refused = out / "review.refused.json"
+                self.assertEqual(refused.stat().st_mode & 0o777, 0o600)
+                self.assertFalse((out / "bundle.json").exists())
+                self.assertFalse((out / "review.json").exists())
+
+    def test_schema_invalid_review_is_screened_first_and_never_echoed(self):
+        # an email in an enum field fails the review schema; the privacy screen still runs first
+        for name, error in [("semantic schema check", None),
+                            ("provider schema check", "schema")]:
+            with self.subTest(name), tempfile.TemporaryDirectory() as tmp:
+                if error == "schema":
+                    review = {"schema_version": "agent-review.v1", "recommendation": "office@example.org"}
+                    raised = runner.SchemaRejected("structured output failed schema: recommendation: not in enum", review)
+                    stages, run_result = self._run_pair(Path(tmp), "https://www.anglicanlife.org.nz/test-church",
+                                                        self._claude_manifest("research"),
+                                                        self._codex_manifest("review", "gpt-5.6-luna"), review_error=raised)
+                else:
+                    stages, run_result = self._run_pair(Path(tmp), "https://www.anglicanlife.org.nz/test-church",
+                                                        self._claude_manifest("research"),
+                                                        self._codex_manifest("review", "gpt-5.6-luna"),
+                                                        review_changes={"recommendation": "office@example.org"})
+                self.assertEqual(run_result["status"], "failed")
+                refusal = run_result["personal_detail_refusal"]
+                self.assertIn("review.recommendation", refusal["paths"])
+                self.assertNotIn("example.org", json.dumps(run_result))
+                self.assertTrue((Path(tmp) / "out" / "review.refused.json").exists())
+
+    def test_refusal_record_names_undeclared_keys_by_position(self):
+        review_manifest = self._codex_manifest("review", "gpt-5.6-luna")
+        review_manifest["usage"]["office@example.org"] = 1
+        with tempfile.TemporaryDirectory() as tmp:
+            _, run_result = self._run_pair(Path(tmp), "https://www.anglicanlife.org.nz/test-church",
+                                           self._claude_manifest("research"), review_manifest)
+            refusal = run_result["personal_detail_refusal"]
+            self.assertEqual(run_result["status"], "failed")
+            self.assertNotIn("example.org", json.dumps(run_result))
+            self.assertTrue(any(path.startswith("review_run.usage.<key#") and path.endswith(" (key)")
+                                for path in refusal["paths"]), refusal["paths"])
+
+    def test_schema_messages_never_echo_values_or_undeclared_keys(self):
+        schema = {"type": "object", "additionalProperties": False,
+                  "properties": {"kind": {"enum": ["a"]}, "code": {"type": "string", "pattern": "^x$"}, "n": {"type": "number", "maximum": 1}}}
+        errors = runner.lib.validate({"kind": "office@example.org", "code": "021 123 4567", "n": 99, "Rev'd Pat Example": 1}, schema)
+        self.assertEqual(len(errors), 4)
+        text = "; ".join(errors)
+        for leaked in ("office@example.org", "021 123 4567", "99", "Pat Example"):
+            self.assertNotIn(leaked, text)
+        self.assertIn("unexpected property <key#0>", text)
 
     def test_off_allowlist_locator_is_refused_before_review_and_counted(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -331,8 +451,29 @@ class ValidationAndAuditTest(unittest.TestCase):
             self.assertEqual(run_result["exit_code"], 2)
             self.assertIn("not on allowlist nz-v1", run_result["error"])
             self.assertEqual(run_result["allowlist_violations"], 1)
-            self.assertEqual(run_result["allowlist_violation_hosts"], ["www.example-parish.nz"])
+            self.assertEqual(run_result["allowlist_violation_domains"], ["example-parish.nz"])
             self.assertFalse((Path(tmp) / "out" / "bundle.json").exists())
+
+    def test_allowlist_counter_never_records_text_from_a_host(self):
+        digest = __import__("hashlib").sha1(b"office@example.org").hexdigest()
+        # a digest label falls outside the registrable domain; a phone-number label is redacted
+        # out of the locator by the quarantine before counting, leaving no host to record
+        for host, expected in ((f"{digest}.example.org", "example.org"),
+                               ("021-123-4567.parish.example.co.nz", "<unparsed host>"),
+                               ("www.stjohns.org.nz", "stjohns.org.nz")):
+            with self.subTest(host), tempfile.TemporaryDirectory() as tmp:
+                _, run_result = self._run_pair(Path(tmp), f"https://{host}/about",
+                                               self._claude_manifest("research"), self._codex_manifest("review", "gpt-5.6-luna"))
+                self.assertEqual(run_result["allowlist_violations"], 1)
+                self.assertEqual(run_result["allowlist_violation_domains"], [expected])
+                self.assertNotIn(digest, json.dumps(run_result))
+                self.assertNotIn("021-123-4567", json.dumps(run_result))
+        screened = runner.lib.screened_domain
+        self.assertEqual(screened("021-123-4567.nz"), "<label#0>.nz")
+        self.assertEqual(screened(f"www.{digest}.co.nz"), "<label#0>.co.nz")
+        self.assertEqual(screened(f"{digest.upper()}.ORG"), "<label#0>.org")
+        self.assertEqual(screened("parish.example.co.nz"), "example.co.nz")
+        self.assertEqual(screened(""), "<unparsed host>")
 
     def test_unreported_research_model_is_refused_before_review(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -368,7 +509,7 @@ class ValidationAndAuditTest(unittest.TestCase):
                 self.assertEqual(run_result["status"], "failed")
                 self.assertIn(message, run_result["error"])
                 self.assertEqual((run_result["allowlist_version"], run_result["allowlist_violations"],
-                                  run_result["allowlist_violation_hosts"]), ("nz-v1", 0, []))
+                                  run_result["allowlist_violation_domains"]), ("nz-v1", 0, []))
 
     def test_incomplete_or_absent_per_model_cost_is_unknown_not_unmetered(self):
         envelope = json.loads(json.dumps(self.CLAUDE_ENVELOPE))

@@ -150,7 +150,9 @@ export const pendingForBatch = internalQuery({
         .order("desc")
         .take(25);
       const draft = latestReviewableDraft([...submitted, ...unresolved]);
-      if (draft === null) {
+      // agent-intake drafts never enter the external review queue; other ineligible drafts
+      // still reach runBatch, which counts them as policy exclusions on the batch record
+      if (draft === null || draft.agent_intake_only === true) {
         continue;
       }
       const priorForDraft = await ctx.db
@@ -527,7 +529,7 @@ const CHECK_NAMES: SourceCheckName[] = ["existence", "date_support", "location_p
 
 function claimSummary(task: Doc<"tasks">, draft: Doc<"evidence_drafts">): string {
   if (!isExternalAiReviewEligible(draft)) {
-    throw new Error("This evidence is outside the external AI review contract (rapid current observations and guided denomination claims stay with human review).");
+    throw new Error("This evidence is outside the external AI review contract.");
   }
   return JSON.stringify(
     {
@@ -828,7 +830,7 @@ export const runBatch = internalAction({
     let failed = 0;
     let attempted = 0;
     const errorNotes: string[] = policyExcluded > 0
-      ? [`policy exclusion: ${policyExcluded} guided denomination draft(s) remained outside the external AI review lane.`]
+      ? [`policy exclusion: ${policyExcluded} draft(s) remained outside the external AI review lane.`]
       : [];
     const runStartedAt = Date.now();
 

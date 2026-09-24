@@ -10,6 +10,7 @@ const { sha256 } = await import("./lib/sha256.ts");
 const { verifyObjectBytes, objectReceiptId } = await import("./lib/objectReceipts.ts");
 const { canonicalWireJson } = await import("./lib/wireJson.ts");
 const { screenedText } = await import("./lib/firstPass.ts");
+const { keyRef } = await import("./lib/agentIntake.ts");
 
 const fixtureText = (name) => fs.readFileSync(new URL(`../scripts/agent_research/fixtures/${name}`, import.meta.url), "utf8");
 const fixture = (name) => JSON.parse(fixtureText(name));
@@ -240,7 +241,8 @@ test("a revision needs its parent's receipt first, for the same place", async ()
   const parentInput = args(researched());
   const child = partial();
   child.parents = [parentInput.recordHash];
-  await assert.rejects(ingestFirstPass._handler(ctx, args(child)), /has no receipt/);
+  // the lookup failure names the parent by position, never by the supplied hash
+  await assert.rejects(ingestFirstPass._handler(ctx, args(child)), (error) => /Parent first pass #0 has no receipt/.test(error.message) && !error.message.includes(parentInput.recordHash));
   assert.equal(ctx.rows.agent_first_pass_receipts.length, 0);
   await ingestFirstPass._handler(ctx, parentInput);
   const childResult = await ingestFirstPass._handler(ctx, args(child));
@@ -294,7 +296,8 @@ test("every context field resolves to one task in the record's country and about
   ];
   for (const [value, pattern] of refusals) {
     record.context = value;
-    await assert.rejects(ingestFirstPass._handler(ctx, args(record)), pattern, JSON.stringify(value));
+    // lookup failures name fields, never the supplied or stored identifiers
+    await assert.rejects(ingestFirstPass._handler(ctx, args(record)), (error) => pattern.test(error.message) && !/task_nz|task_vu|draft_other|draft_nz/.test(error.message) && !(value.evidence_version_hash && error.message.includes(value.evidence_version_hash)), JSON.stringify(value));
   }
   assert.equal(ctx.rows.agent_first_pass_receipts.length, 0);
   assert.equal(ctx.rows.agent_judgments.length, 0);
@@ -368,16 +371,21 @@ function everyString(record) {
   return out;
 }
 
-test("every string of the record and its dossier is screened unless its shape is fixed", async () => {
+test("every string of the record and its dossier is screened, whatever its schema", async () => {
   enable();
   const base = fixture("first-pass-all-fields.json");
   assert.equal((await ingestFirstPass._handler(context(), args(base))).created, true, "the all-fields fixture is valid");
   const screened = new Set(screenedText(JSON.parse(wire(fixtureText("first-pass-all-fields.json")))).map(([path]) => path));
   // the fields the second review found unscreened are now screened
-  for (const path of ["dossier.run_manifest.notes", "dossier.candidate_location.basis_note", "dossier.claims[0].source.licence_note", "dossier.place.seed_tags.denomination", "dossier.place.seed_tags.denomination (key)", "dossier.osm_version_chain[0].change_note", "context.assistance_request_id"]) {
+  // an undeclared key such as a seed tag is named by position, never copied into a path
+  const atPath = (r, path) => (path === "" ? r : path.split(/\.|(?=\[)/).reduce((o, part) => (part.startsWith("[") ? o[Number(part.slice(1, -1))] : o[part]), r));
+  const screenPath = (r, path) => path.replace(/^dossier\.place\.seed_tags\.([^.[]+)/, (_, key) => `dossier.place.seed_tags.${keyRef(r.dossier.place.seed_tags, key)}`);
+  const denomination = screenPath(base, "dossier.place.seed_tags.denomination");
+  for (const path of ["dossier.run_manifest.notes", "dossier.candidate_location.basis_note", "dossier.claims[0].source.licence_note", denomination, `${denomination} (key)`, "dossier.osm_version_chain[0].change_note", "context.assistance_request_id"]) {
     assert.ok(screened.has(path), path);
   }
   const refusedForPersonalDetails = new Set();
+  const refusedBySchema = new Set();
   const cases = everyString(base);
   assert.ok(cases.length > 150, `${cases.length} generated cases`);
   for (const { path, kind, inject } of cases) {
@@ -386,19 +394,27 @@ test("every string of the record and its dossier is screened unless its shape is
     const error = await ingestFirstPass._handler(context(), args(record)).then(() => null, (e) => e);
     assert.ok(error !== null, `injected ${path} was accepted`);
     const match = /potential personal details in (.+) require human handling/.exec(error.message);
+    assert.ok(!error.message.includes("someone@example.org"), `${path}: the diagnostic copies the detail`);
     if (match !== null) {
-      // a renamed key is reported under its new name
-      if (kind === "key") assert.equal(match[1], `${path.slice(0, path.lastIndexOf(".") + 1)}contact someone@example.org (key)`, path);
-      else assert.equal(match[1], path);
+      if (kind === "key") {
+        // a renamed key is reported by its position in the renamed object, never by its text
+        const child = path.slice(0, -" (key)".length);
+        const parent = child.includes(".") ? child.slice(0, child.lastIndexOf(".")) : "";
+        const expected = `${parent === "" ? "" : `${screenPath(base, parent)}.`}${keyRef(atPath(record, parent), "contact someone@example.org")} (key)`;
+        assert.equal(match[1], expected, path);
+      } else assert.equal(match[1], screenPath(base, path));
       refusedForPersonalDetails.add(match[1]);
     } else {
       // a closed vocabulary, a fixed shape or a declared key refuses the text itself
       assert.match(error.message, /invalid (enum|constant|string)|unknown field|missing /, `${path}: ${error.message}`);
+      refusedBySchema.add(path);
     }
   }
-  // exactly the strings the walk screens were refused for personal details
+  // every string value is screened now, including pattern-constrained ones such as place_ref;
+  // each injected value is refused, by its schema where the schema closes it, otherwise by the screen
   const screenedValues = [...screened].filter((path) => !path.endsWith(" (key)"));
-  for (const path of screenedValues) assert.ok(refusedForPersonalDetails.has(path), `${path} not refused for personal details`);
+  for (const path of ["place_ref", "dossier.place.place_ref", "created_at"]) assert.ok(screened.has(path), `${path} not screened`);
+  for (const path of screenedValues) assert.ok(refusedForPersonalDetails.has(path) || refusedBySchema.has(path), `${path} not refused`);
 });
 
 test("python and typescript screen the same strings", async (t) => {
@@ -416,7 +432,7 @@ test("a float where python's schema needs an integer is refused, so every receip
   enable();
   const exact = wire(fixtureText("first-pass-researched.json"));
   assert.ok(exact.includes('"item_count":0,') && exact.includes('"input_tokens":10,'));
-  for (const [from, to, pattern] of [['"item_count":0,', '"item_count":0.0,', /item_count: invalid constant/], ['"input_tokens":10,', '"input_tokens":10.0,', /input_tokens: invalid type/]]) {
+  for (const [from, to, pattern] of [['"item_count":0,', '"item_count":0.0,', /item_count: invalid type/], ['"input_tokens":10,', '"input_tokens":10.0,', /input_tokens: invalid type/]]) {
     const text = exact.replace(from, to);
     // canonical python bytes, so only the int/float distinction can refuse them
     assert.equal(wire(text), text);
@@ -481,7 +497,7 @@ test("the server applies the archive's semantic rules", async () => {
     [(r) => { r.parents = ["a".repeat(64), "a".repeat(64)]; }, /duplicate parent/],
     [(r) => { r.created_at = "2026-02-30T00:00:00Z"; }, /creation timestamp/],
     [(r) => { r.country_code = "BS"; }, /invalid constant/],
-    [(r) => { r.context = { reviewer: "someone" }; }, /unknown field reviewer/],
+    [(r) => { r.context = { reviewer: "someone" }; }, /unknown field <key#0>/],
     [(r) => { Object.assign(r.searches[0], { outcome: "opened" }); }, /requires a locator/],
     [(r) => { Object.assign(r.searches[0], { outcome: "opened", locator: "http://127.0.0.1/secrets" }); }, /public HTTP/],
     [(r) => { Object.assign(r.searches[0], { outcome: "opened", locator: "https://example.org/a", attempted_at: "2026-09-18T05:50:00Z", retrieved_at: "2026-09-18T05:49:00Z" }); }, /precedes/],
@@ -494,6 +510,9 @@ test("the server applies the archive's semantic rules", async () => {
   }
   const foreign = researched();
   foreign.dossier.place.place_ref = "osm:way/2";
+  // keep the recomputed idempotency key consistent so only the place mismatch remains
+  const fm = foreign.dossier.run_manifest;
+  fm.idempotency_key = sha256(["osm:way/2", fm.prompt_version, fm.model_id_requested, foreign.dossier.place.seed_source].join("|"));
   await assert.rejects(ingestFirstPass._handler(ctx, args(foreign)), /another place/);
   assert.equal(ctx.rows.agent_first_pass_receipts.length, 0);
 });
