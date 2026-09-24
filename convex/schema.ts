@@ -79,6 +79,7 @@ import {
   judgmentRun,
   judgmentSubjectKind,
 } from "./lib/agentJudgments";
+import { objectStorage } from "./lib/objectReceipts";
 
 export default defineSchema({
   users: defineTable({
@@ -618,7 +619,10 @@ export default defineSchema({
     .index("by_subject", ["subject_ref", "created_at"])
     .index("by_task", ["context.task_id", "created_at"])
     .index("by_batch", ["run.batch_id", "created_at"])
-    .index("by_prompt_version", ["judge.prompt_version", "created_at"]),
+    .index("by_prompt_version", ["judge.prompt_version", "created_at"])
+    // one lane's revisions of one judgment on one subject, newest first: the
+    // bounded parent lookup in lib/agentJudgments.recordJudgments
+    .index("by_lineage", ["subject_ref", "judgment_kind", "judge.agent_name", "facet", "source_locator", "created_at"]),
 
   // what a person did with one judgment (r-j3): append-only, at claim grain.
   // review_decisions keeps its draft-level agent_review_id link and its hash
@@ -651,6 +655,50 @@ export default defineSchema({
     .index("by_submission_key", ["submission_key"])
     .index("by_bundle_hash", ["bundle_hash"])
     .index("by_receipt_id", ["receipt_id"]),
+
+  // receipt for one archived agent-first-pass.v1 record
+  // (docs/development/agent-first-passes.md).
+  // the backend's copy of the exact archive bytes under the object-receipt.v1
+  // contract (lib/objectReceipts): written once by
+  // firstPassReceipts.ingestFirstPass, never patched, keyed by the sha256 of
+  // the bytes. record_json stays until an independent copy verifies. the
+  // index fields repeat what the record says so reviewers can find it; the
+  // record itself remains provisional and grants nothing.
+  agent_first_pass_receipts: defineTable({
+    receipt_id: v.string(),
+    receipt_contract: v.literal("object-receipt.v1"),
+    record_hash: v.string(),
+    record_json: v.string(),
+    schema_version: v.literal("agent-first-pass.v1"),
+    place_ref: v.string(),
+    country_code: v.string(),
+    outcome: v.union(v.literal("partial"), v.literal("blocked"), v.literal("researched")),
+    stop_reason: v.string(),
+    // predecessor records, each already holding a receipt for the same place
+    parents: v.array(v.string()),
+    record_created_at: v.string(),
+    // the portal record the pass served, when the record names one
+    task_id: v.optional(v.string()),
+    evidence_draft_id: v.optional(v.string()),
+    evidence_version_hash: v.optional(v.string()),
+    assistance_request_id: v.optional(v.string()),
+    agent_run_id: v.string(),
+    model_requested: v.string(),
+    model_reported: v.optional(v.string()),
+    model_unreported_reason: v.optional(v.string()),
+    // unknown or unmetered cost stays absent, never zero
+    cost_usd: v.optional(v.number()),
+    cost_basis: v.union(v.literal("tool_list_price"), v.literal("api_invoice"), v.literal("subscription_unmetered"), v.literal("unknown")),
+    storage: objectStorage,
+    // agent_judgments rows this record produced at ingest
+    judgment_ids: v.array(v.string()),
+    submitted_by: v.id("users"),
+    created_at: v.number(),
+  })
+    .index("by_receipt_id", ["receipt_id"])
+    .index("by_record_hash", ["record_hash"])
+    .index("by_place", ["place_ref", "created_at"])
+    .index("by_task", ["task_id", "created_at"]),
 
   // immutable evidence versions (docs/development/content-addressed-review.md,
   // evidence-version.v1): one row per submission or correction of an

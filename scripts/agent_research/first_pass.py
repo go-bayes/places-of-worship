@@ -7,15 +7,21 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 import tempfile
 from datetime import datetime
 from pathlib import Path
 
 import intake
+import lib
 
 HERE = Path(__file__).resolve().parent
 SCHEMA = json.loads((HERE / 'schemas/agent-first-pass.v1.json').read_text())
 MAX_CHAIN = 1000
+# explicit selectors only; the operator names the target, as intake.py submit does
+DEPLOYMENTS = ('dev', 'local')
+INGEST_FUNCTION = 'firstPassReceipts:ingestFirstPass'
+RECORD_FUNCTION = 'firstPassReceipts:getFirstPassRecord'
 
 
 def encode(record):
@@ -177,6 +183,159 @@ def copy_history(source: Path, destination: Path, digest: str):
     return len(objects)
 
 
+BUNDLE_SCHEMA = json.loads(intake.BUNDLE_SCHEMA.read_text())
+HASH_SHAPED = re.compile(r'(?:sha256:)?(?:[0-9a-f]{40}|[0-9a-f]{64})')
+
+
+def screened_text(record):
+    """Every string of the record and its dossier that could carry a personal detail, by path.
+
+    Mirrors convex/lib/firstPass.ts screenedText: each string value, and each
+    object key the schema does not declare, except strings the schema
+    constrains by enum, const or pattern and values shaped as a hex hash.
+    """
+    found = []
+
+    def resolve(schema, root):
+        schema = schema or {}
+        while isinstance(schema.get('$ref'), str) and schema['$ref'].startswith('#/'):
+            target = root
+            for part in schema['$ref'][2:].split('/'):
+                target = target.get(part, {}) if isinstance(target, dict) else {}
+            schema = target or {}
+        return schema
+
+    def visit(value, schema, root, path):
+        schema = resolve(schema, root)
+        if isinstance(value, str):
+            if not ({'enum', 'const', 'pattern'} & set(schema) or HASH_SHAPED.fullmatch(value)):
+                found.append((path, value))
+        elif isinstance(value, list):
+            for index, item in enumerate(value):
+                visit(item, schema.get('items'), root, f'{path}[{index}]')
+        elif isinstance(value, dict):
+            properties = schema.get('properties', {})
+            for key, child in value.items():
+                child_path = f'{path}.{key}' if path else key
+                if path == '' and key == 'dossier':
+                    visit(child, BUNDLE_SCHEMA['$defs']['dossier'], BUNDLE_SCHEMA, child_path)
+                elif key in properties:
+                    visit(child, properties[key], root, child_path)
+                else:
+                    found.append((f'{child_path} (key)', key))
+                    visit(child, {}, root, child_path)
+
+    visit(record, SCHEMA, SCHEMA, '')
+    return found
+
+
+def submission_errors(record):
+    """Rules the shared backend adds to the archive's: reviewers read receipts.
+
+    The local archive stays the operator's private working copy and keeps any
+    record; a record that fails here stays there for human handling.
+    """
+    errors = [f'potential personal details in {path} require human handling'
+              for path, text in screened_text(record) if lib.find_personal_details(text)]
+    dossier = record['dossier']
+    if dossier is not None:
+        manifest = dossier['run_manifest']
+        attribution = record['attribution']
+        if attribution['agent_run_id'] == manifest['run_id'] and (
+                attribution['model_requested'] != manifest['model_id_requested']
+                or attribution['model_reported'] != manifest.get('model_id_reported')):
+            errors.append("attribution names the dossier's run but disagrees with its models")
+    return errors
+
+
+def convex_run(deployment, function, payload):
+    """Run one internal Convex function through the CLI and return its JSON result."""
+    if deployment not in DEPLOYMENTS:
+        raise ValueError('an explicit dev or local deployment is required')
+    command = ['npx', '--no-install', 'convex', 'run', '--deployment', deployment,
+               '--codegen', 'disable', function, json.dumps(payload)]
+    # the controller invokes the api; no model sees this process or its credentials.
+    completed = subprocess.run(command, check=True, capture_output=True, text=True)
+    return json.loads(completed.stdout)
+
+
+def history_order(objects, digest):
+    """Order a verified parent graph so every parent precedes its revisions."""
+    order, done, stack = [], set(), [(digest, False)]
+    while stack:
+        current, expanded = stack.pop()
+        if current in done:
+            continue
+        if expanded:
+            done.add(current)
+            order.append(current)
+            continue
+        stack.append((current, True))
+        for parent in objects[current][1]['parents']:
+            if parent not in done:
+                stack.append((parent, False))
+    return order
+
+
+def submit(store: Path, digest: str, deployment: str, run=convex_run):
+    """Send a verified record and its history, parents first, and collect the receipts."""
+    if deployment not in DEPLOYMENTS:
+        raise ValueError('an explicit dev or local deployment is required')
+    objects = verify(store, digest)
+    # screen the whole history before the first write, so nothing partial is
+    # sent. a record that fails only because a rule tightened after it was
+    # receipted may still retry: a read-only lookup must show the backend
+    # holding these exact bytes, and the record is then not sent again.
+    receipted = {}
+    for current, (raw, record) in objects.items():
+        errors = submission_errors(record)
+        if errors:
+            stored = run(deployment, RECORD_FUNCTION, {'recordHash': current})
+            if stored is None or stored.get('record_json', '').encode('ascii') != raw:
+                raise ValueError(f'{current}: ' + '; '.join(errors))
+            receipted[current] = {'record_hash': current, 'receipt_id': f'first-pass:{current}', 'created': False,
+                                  'already_receipted': True, 'current_errors': errors}
+    receipts = []
+    for current in history_order(objects, digest):
+        if current in receipted:
+            receipts.append(receipted[current])
+            continue
+        raw = objects[current][0]
+        receipt = run(deployment, INGEST_FUNCTION, {'recordJson': raw.decode('ascii'), 'recordHash': current})
+        if not isinstance(receipt, dict) or receipt.get('record_hash') != current:
+            raise ValueError('receipt names a different record')
+        receipts.append(receipt)
+    return receipts
+
+
+def restore(store: Path, digest: str, deployment: str, run=convex_run):
+    """Rebuild a record's history in a local archive from backend receipts, verifying every hash."""
+    if deployment not in DEPLOYMENTS:
+        raise ValueError('an explicit dev or local deployment is required')
+    pending, restored = [digest], set()
+    while pending:
+        current = pending.pop()
+        if current in restored:
+            continue
+        if len(restored) >= MAX_CHAIN:
+            raise ValueError('parent graph exceeds verification limit')
+        object_path(store, current)
+        stored = run(deployment, RECORD_FUNCTION, {'recordHash': current})
+        if stored is None:
+            raise ValueError(f'no receipt holds {current}')
+        raw = stored['record_json'].encode('ascii')
+        if hashlib.sha256(raw).hexdigest() != current:
+            raise ValueError('receipt bytes do not match their hash')
+        record = validate(intake.parse_json(raw))
+        if encode(record) != raw:
+            raise ValueError('receipt bytes are not in version-1 wire format')
+        put_bytes(store, raw)
+        restored.add(current)
+        pending.extend(record['parents'])
+    verify(store, digest)
+    return len(restored)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='command', required=True)
@@ -190,8 +349,28 @@ def main(argv=None):
     recover.add_argument('hash')
     recover.add_argument('--store', type=Path, required=True)
     recover.add_argument('--destination', type=Path, required=True)
+    send = commands.add_parser('submit', help='send a verified record and its history to Convex for receipts')
+    send.add_argument('hash')
+    send.add_argument('--store', type=Path, required=True)
+    send.add_argument('--deployment', choices=DEPLOYMENTS, required=True)
+    fetch = commands.add_parser('restore', help='rebuild a record and its history from Convex receipts')
+    fetch.add_argument('hash')
+    fetch.add_argument('--store', type=Path, required=True)
+    fetch.add_argument('--deployment', choices=DEPLOYMENTS, required=True)
     args = parser.parse_args(argv)
     try:
+        if args.command == 'submit':
+            receipts = submit(args.store, args.hash, args.deployment)
+            print(json.dumps({'sha256': args.hash, 'submitted': len(receipts),
+                              'created': sum(1 for receipt in receipts if receipt.get('created')),
+                              'receipts': receipts, 'disposition': 'provisional', 'storage': 'convex_only'}))
+            return 0
+        if args.command == 'restore':
+            restored = restore(args.store, args.hash, args.deployment)
+            objects = verify(args.store, args.hash)
+            print(json.dumps({'sha256': args.hash, 'restored_objects': restored, 'verified_objects': len(objects),
+                              'disposition': 'provisional', 'storage': 'local_only'}))
+            return 0
         if args.command == 'archive':
             digest = archive(args.store, intake.read_json(args.record))
         else:
@@ -204,7 +383,9 @@ def main(argv=None):
         print(json.dumps({'sha256': digest, 'verified_objects': len(objects),
                           'disposition': 'provisional', 'storage': 'local_only'}))
         return 0
-    except (OSError, ValueError, TypeError) as exc:
+    except subprocess.CalledProcessError as exc:
+        parser.exit(1, f'first-pass archive: convex run failed: {(exc.stderr or "").strip()[-2000:]!r}\n')
+    except (OSError, ValueError, TypeError, KeyError) as exc:
         parser.exit(1, f'first-pass archive: {str(exc)!r}\n')
 
 

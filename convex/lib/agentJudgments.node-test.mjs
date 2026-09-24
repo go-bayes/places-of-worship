@@ -13,8 +13,10 @@ function context() {
     query(table) {
       let filters = [];
       const q = { eq(key, value) { filters.push([key, value]); return q; } };
-      const selected = () => rows[table].filter(row => filters.every(([k, v]) => row[k] === v));
-      const chain = { withIndex(_name, select) { if (select) select(q); return chain; }, async unique() { return selected()[0] ?? null; }, async collect() { return selected(); } };
+      // index fields may be nested paths; convex walks a descending index newest first
+      const selected = () => rows[table].filter(row => filters.every(([k, v]) => k.split(".").reduce((o, part) => o?.[part], row) === v));
+      let descending = false;
+      const chain = { withIndex(_name, select) { if (select) select(q); return chain; }, order(direction) { descending = direction === "desc"; return chain; }, async take(n) { const found = selected(); return (descending ? found.reverse() : found).slice(0, n); }, async unique() { return selected()[0] ?? null; }, async collect() { return selected(); } };
       return chain;
     },
     async insert(table, value) { const id = `${table}_${rows[table].length + 1}`; rows[table].push({ ...value, _id: id }); return id; },

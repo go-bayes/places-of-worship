@@ -244,19 +244,21 @@ export async function recordJudgments(
       results.push({ judgment_id: judgmentId, created: false });
       continue;
     }
-    const priorOnSubject: Doc<"agent_judgments">[] = await ctx.db
+    // the lineage index holds exactly the rows a re-judgment revises, newest
+    // first, so the read stays bounded however many judgments the subject
+    // has gathered from other lanes (a missing facet or source is indexed as
+    // undefined and matched by eq undefined)
+    const lineage: Doc<"agent_judgments">[] = await ctx.db
       .query("agent_judgments")
-      .withIndex("by_subject", (q) => q.eq("subject_ref", input.subject.ref))
-      .collect();
-    const parents = priorOnSubject
-      .filter((row) =>
-        row.judgment_kind === input.judgment_kind
-        && row.judge.agent_name === input.judge.agent_name
-        && row.facet === input.facet
-        && row.source_locator === input.source_locator)
-      .sort((left, right) => right.created_at - left.created_at)
-      .slice(0, JUDGMENT_PARENTS_MAX)
-      .map((row) => row.judgment_id);
+      .withIndex("by_lineage", (q) => q
+        .eq("subject_ref", input.subject.ref)
+        .eq("judgment_kind", input.judgment_kind)
+        .eq("judge.agent_name", input.judge.agent_name)
+        .eq("facet", input.facet)
+        .eq("source_locator", input.source_locator))
+      .order("desc")
+      .take(JUDGMENT_PARENTS_MAX);
+    const parents = lineage.map((row) => row.judgment_id);
     await ctx.db.insert("agent_judgments", {
       judgment_id: judgmentId,
       schema_version: JUDGMENT_SCHEMA_VERSION,

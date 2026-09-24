@@ -43,17 +43,22 @@ export type AgentRun = {
 };
 
 // apply the self-contained transport schema without resolving external references.
-function schemaCheck(value: any, schema: any, path = "$", root: any = bundleSchema): void {
+// floats, when given, names the paths of numbers written as floats (see
+// lib/wireJson canonicalWireJson): python's schema check then refuses them
+// where an integer or an integer constant is required, as first_pass.py does
+// (every numeric const in these schemas is a python int).
+export function schemaCheck(value: any, schema: any, path = "$", root: any = bundleSchema, floats?: ReadonlySet<string>): void {
   if (schema.$ref) {
     if (!schema.$ref.startsWith("#/")) throw new Error("external schema reference");
     let target = root;
     for (const part of schema.$ref.slice(2).split("/")) target = target[part];
-    return schemaCheck(value, target, path, root);
+    return schemaCheck(value, target, path, root, floats);
   }
+  const isFloat = floats?.has(path) === true;
   const kinds = Array.isArray(schema.type) ? schema.type : schema.type ? [schema.type] : [];
-  const matches = (kind: string): boolean => kind === "null" ? value === null : kind === "array" ? Array.isArray(value) : kind === "object" ? value !== null && typeof value === "object" && !Array.isArray(value) : kind === "integer" ? Number.isInteger(value) : typeof value === kind;
+  const matches = (kind: string): boolean => kind === "null" ? value === null : kind === "array" ? Array.isArray(value) : kind === "object" ? value !== null && typeof value === "object" && !Array.isArray(value) : kind === "integer" ? Number.isInteger(value) && !isFloat : typeof value === kind;
   if (kinds.length && !kinds.some(matches)) throw new Error(`${path}: invalid type`);
-  if ("const" in schema && value !== schema.const) throw new Error(`${path}: invalid constant`);
+  if ("const" in schema && (value !== schema.const || (isFloat && typeof schema.const === "number"))) throw new Error(`${path}: invalid constant`);
   if (schema.enum && !schema.enum.includes(value)) throw new Error(`${path}: invalid enum`);
   if (typeof value === "string") {
     const length = [...value].length;
@@ -62,18 +67,18 @@ function schemaCheck(value: any, schema: any, path = "$", root: any = bundleSche
   if (typeof value === "number" && (!Number.isFinite(value) || value < (schema.minimum ?? -Infinity) || value > (schema.maximum ?? Infinity))) throw new Error(`${path}: invalid number`);
   if (Array.isArray(value)) {
     if (value.length < (schema.minItems ?? 0) || value.length > (schema.maxItems ?? Infinity)) throw new Error(`${path}: invalid array size`);
-    value.forEach((item, i) => { if (schema.items) schemaCheck(item, schema.items, `${path}[${i}]`, root); });
+    value.forEach((item, i) => { if (schema.items) schemaCheck(item, schema.items, `${path}[${i}]`, root, floats); });
   } else if (value !== null && typeof value === "object") {
     for (const key of schema.required ?? []) if (!Object.hasOwn(value, key)) throw new Error(`${path}: missing ${key}`);
     for (const [key, item] of Object.entries(value)) {
-      if (Object.hasOwn(schema.properties ?? {}, key)) schemaCheck(item, schema.properties[key], `${path}.${key}`, root);
+      if (Object.hasOwn(schema.properties ?? {}, key)) schemaCheck(item, schema.properties[key], `${path}.${key}`, root, floats);
       else if (schema.additionalProperties === false) throw new Error(`${path}: unknown field ${key}`);
     }
   }
 }
 
 // reject deep, non-finite, prototype-like, and control-bearing values everywhere.
-function guard(value: any, depth = 0): void {
+export function guard(value: any, depth = 0): void {
   if (depth > 32) throw new Error("JSON exceeds depth limit");
   if (typeof value === "number" && !Number.isFinite(value)) throw new Error("non-finite JSON number");
   if (typeof value === "string" && /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value)) throw new Error("control character in JSON");
@@ -85,7 +90,7 @@ function guard(value: any, depth = 0): void {
 }
 
 // validate calendar dates without JavaScript's rollover of impossible dates.
-function dateBounds(value: string): [string, string] {
+export function dateBounds(value: string): [string, string] {
   if (!/^\d{4}(-\d{2}(-\d{2})?)?$/.test(value)) throw new Error("invalid partial ISO date");
   const [year, month = 1, day = 1] = value.split("-").map(Number);
   const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
@@ -95,7 +100,7 @@ function dateBounds(value: string): [string, string] {
 }
 
 // intake never fetches URLs; reject credentials and non-public literal destinations.
-function publicUrl(value: string): void {
+export function publicUrl(value: string): void {
   if (/[\s\\\u007f]/.test(value)) throw new Error("invalid public HTTP(S) URL");
   if (/^[^:]+:\/\/[^/?#]*@/.test(value)) throw new Error("invalid public HTTP(S) URL");
   let url: URL;
@@ -104,6 +109,14 @@ function publicUrl(value: string): void {
   if (!["http:", "https:"].includes(url.protocol) || url.username || url.password || url.port === "0" || !host || host === "localhost" || /\.(localhost|local|internal)$/.test(host) || host.includes("%")) throw new Error("invalid public HTTP(S) URL");
   // numeric hosts have inconsistent interpretations across URL implementations.
   if (/^[0-9.]+$/.test(host) || host.includes(":")) throw new Error("source URL must use a public DNS hostname");
+}
+
+// phones, emails and honorific-led names, as scripts/agent_research/lib.py
+// find_personal_details detects them; every hit needs human handling.
+export function hasPersonalDetails(text: string): boolean {
+  return /(?:\+64|\b0)[\s-]?\d{1,2}[\s-]?\d{3,4}[\s-]?\d{3,5}\b/.test(text)
+    || /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(text)
+    || /\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'-]+\s?){1,3}/.test(text);
 }
 
 // one host policy shared with the Python and Rust validators: read the host as written (never
@@ -158,6 +171,25 @@ export function validateAgentReviewBundle(value: unknown, bundleJson: string): {
   // a model id must come back from the provider; the requested alias is not evidence of the model.
   if (typeof d.run_manifest.model_id_reported !== "string" || d.run_manifest.model_id_reported === "") throw new Error("dossier run manifest lacks the model id the provider reported");
   if (d.run_manifest.model_id_reported !== bundle.research_run.model_id_reported) throw new Error("dossier and research manifest disagree on the reported model");
+  const locators = validateDossierRecord(d);
+  const checked = new Set<string>();
+  for (const check of bundle.review.claim_checks) {
+    if (checked.has(check.claim_id) || locators.get(check.claim_id) !== check.source_url) throw new Error("review must cover every claim uniquely at its source_url");
+    checked.add(check.claim_id);
+    if (check.access_method === "not_checked" && check.outcome === "supported") throw new Error("unchecked source cannot be supported");
+    if (bundle.review.recommendation === "accept" && (check.outcome !== "supported" || check.access_method !== "opened")) throw new Error("accept requires opened supported sources");
+  }
+  if (checked.size !== locators.size) throw new Error("review must cover every claim");
+  if (bundle.review.cultural_sensitivity.flagged && bundle.review.recommendation !== "defer_cultural") throw new Error("sensitive review must defer");
+  return { bundle, bundleHash: sha256(bundleJson), claimLocators: locators };
+}
+
+// the dossier checks shared by the review bundle and the first-pass record:
+// the pinned source allowlist, run timestamps, claim sources and hosts,
+// reader provenance, dates, status and osm references. returns each claim id with its source locator. the caller has
+// already schema-checked the dossier and applied its own provenance checks.
+export function validateDossierRecord(d: Record<string, any>): Map<string, string> {
+  // the pinned source allowlist, as intake.py validate_dossier applies it
   const allowlist = typeof d.run_manifest.allowlist_version === "string" && Object.hasOwn(ALLOWLISTS, d.run_manifest.allowlist_version) ? ALLOWLISTS[d.run_manifest.allowlist_version] : undefined;
   if (!allowlist) throw new Error("dossier names no known source allowlist version");
   if (allowlist.country_code !== d.place.country_code) throw new Error("source allowlist belongs to another country");
@@ -169,8 +201,7 @@ export function validateAgentReviewBundle(value: unknown, bundleJson: string): {
   for (const claim of d.claims) {
     if (locators.has(claim.claim_id)) throw new Error("duplicate claim ID");
     for (const field of ["value", "quoted_support", "note"]) {
-      const text = claim[field] ?? "";
-      if (/(?:\+64|\b0)[\s-]?\d{1,2}[\s-]?\d{3,4}[\s-]?\d{3,5}\b/.test(text) || /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(text) || /\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'-]+\s?){1,3}/.test(text)) throw new Error("potential personal details require human handling");
+      if (hasPersonalDetails(claim[field] ?? "")) throw new Error("potential personal details require human handling");
     }
     publicUrl(claim.source.locator); canonicalHost(claim.source.locator); locators.set(claim.claim_id, claim.source.locator);
     if (!hostAllowed(claim.source.locator, domains)) throw new Error(`source host is not on allowlist ${allowlist.allowlist_version}`);
@@ -191,16 +222,20 @@ export function validateAgentReviewBundle(value: unknown, bundleJson: string): {
   dateBounds(d.status_assessment.asof_date);
   for (const id of d.status_assessment.supporting_claim_ids) if (!locators.has(id)) throw new Error("unknown status claim");
   for (const row of d.osm_version_chain) { publicUrl(row.locator); canonicalHost(row.locator); }
-  const checked = new Set<string>();
-  for (const check of bundle.review.claim_checks) {
-    if (checked.has(check.claim_id) || locators.get(check.claim_id) !== check.source_url) throw new Error("review must cover every claim uniquely at its source_url");
-    checked.add(check.claim_id);
-    if (check.access_method === "not_checked" && check.outcome === "supported") throw new Error("unchecked source cannot be supported");
-    if (bundle.review.recommendation === "accept" && (check.outcome !== "supported" || check.access_method !== "opened")) throw new Error("accept requires opened supported sources");
-  }
-  if (checked.size !== locators.size) throw new Error("review must cover every claim");
-  if (bundle.review.cultural_sensitivity.flagged && bundle.review.recommendation !== "defer_cultural") throw new Error("sensitive review must defer");
-  return { bundle, bundleHash: sha256(bundleJson), claimLocators: locators };
+  return locators;
+}
+
+// a dossier carried without a review bundle (inside a first-pass record):
+// the bundle schema's dossier definition, the nz pilot restriction, the
+// researcher model policy and a completed run, then the shared checks.
+export function validateStandaloneDossier(d: unknown, floats?: ReadonlySet<string>): Map<string, string> {
+  guard(d);
+  schemaCheck(d, (bundleSchema as any).$defs.dossier, "$.dossier", bundleSchema, floats);
+  const dossier = d as Record<string, any>;
+  if (dossier.place.country_code !== "NZ") throw new Error("internal pilot requires NZ");
+  const models: Record<string, string> = { claude: "sonnet", codex: "gpt-5.6-luna" };
+  if (models[dossier.run_manifest.backend] !== dossier.run_manifest.model_id_requested || dossier.run_manifest.exit_status !== "completed") throw new Error("inconsistent dossier run provenance");
+  return validateDossierRecord(dossier);
 }
 
 // scan string tokens only; a following colon identifies an object key even inside arrays.

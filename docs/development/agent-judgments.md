@@ -27,7 +27,7 @@ One row per judgment, written once, never patched. `judgment_id` is the SHA-256 
 | `parents` | The lane's earlier judgments of the same kind, facet and source on the same subject, newest first, at most ten. |
 | `actor_user_id`, `ai_generated: true`, `created_at` | As in `agent_reviews`. |
 
-Indexes: by judgment id, and by subject, task, batch and prompt version, each followed by `created_at` so a bounded read walks newest first and a cap drops the oldest rows.
+Indexes: by judgment id, and by subject, task, batch and prompt version, each followed by `created_at` so a bounded read walks newest first and a cap drops the oldest rows; and `by_lineage` (subject, kind, judge, facet, source, `created_at`), which the writer uses to find a re-judgment's parents.
 
 ## The `judgment_dispositions` table
 
@@ -35,11 +35,13 @@ What a person did with one judgment: `judgment_id`, `reviewer_user_id`, `disposi
 
 ## Writers
 
-`convex/lib/agentJudgments.recordJudgments` is the one write path. It validates each input, computes the id, returns an existing row unchanged, computes parents, and inserts. It accepts at most 100 judgments per call.
+`convex/lib/agentJudgments.recordJudgments` is the one write path. It validates each input, computes the id, returns an existing row unchanged, computes parents, and inserts. It accepts at most 100 judgments per call. The parent lookup reads the `by_lineage` index (subject, kind, judge, facet, source, newest first) and takes at most ten rows, so it stays bounded however many judgments other lanes have written about the subject; before 2026-09-24 it collected every judgment on the subject.
 
 The Claude batch-review lane (`claudeReviews.recordArtifact`) writes one `recommendation` judgment for the draft and one `claim_support` judgment per recorded source check, in the same transaction as the `agent_reviews` artifact. The subject is the draft's newest evidence version when one exists, else the draft. The lane records the requested model and states that the response model id is not captured.
 
 The internal bundle intake (`internalAgentIntake.ingestBundle`) writes one `claim_support` judgment per advisory `claim_checks` entry with its real `access_method`, one `recommendation` judgment on the intake evidence version, and one `status_assessment` judgment for the place from the researcher's dossier. The source-level `sources_checked` summary on the `agent_reviews` row now records `not_checked` when the reviewer did not check the source and `model_assessment` otherwise, and names the source rather than the claim id; the earlier row asserted an `existence` check by `model_assessment` for every claim.
+
+The first-pass receipt ingest (`firstPassReceipts.ingestFirstPass`, added 2026-09-24) writes one `status_assessment` judgment for the place, attributed entirely from the dossier's run manifest (`<provider>-first-pass-researcher`) and keyed on that run, so passes carrying the same dossier share it; and one `annotation` judgment per claim annotation, attributed from the record's own attribution (`first-pass-annotator`, or `<provider>-first-pass-annotator` when the attribution names the dossier's run), whose subject is `<first-pass sha256>#<claim_id>` and whose `facet` numbers the annotation so sibling annotations on one claim are not read as revisions of each other. A record without a dossier yields no judgments. The claims stay in the record. See [revisitable agent research](agent-first-passes.md#receipts-in-the-shared-backend).
 
 ## Reads and the human disposition
 
@@ -47,4 +49,4 @@ The internal bundle intake (`internalAgentIntake.ingestBundle`) writes one `clai
 
 ## Deployment
 
-The change is additive: two new tables, one new module, new optional writes inside two existing mutations. It deploys from the reviewed head under the closure procedure in `AGENTS.md`. A reviewer panel that shows judgments per claim and records dispositions, and the first-pass receipt table with its submit command, are the next steps and are documented in the private research tier until ruled.
+The change is additive: two new tables, one new module, new optional writes inside two existing mutations. It deploys from the reviewed head under the closure procedure in `AGENTS.md`. A reviewer panel that shows judgments per claim and records dispositions is the next step.

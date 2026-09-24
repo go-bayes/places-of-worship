@@ -1,0 +1,179 @@
+{
+  "schema_version": "agent-first-pass.v1",
+  "disposition": "provisional",
+  "place_ref": "osm:way/1",
+  "country_code": "NZ",
+  "question": "What is the worship status and denomination of this synthetic site?",
+  "outcome": "researched",
+  "stop_reason": "Synthetic fixture: the dossier answers the question within the permitted sources.",
+  "created_at": "2026-09-18T06:00:00Z",
+  "parents": [],
+  "attribution": {
+    "responsible_human_ref": "fixture:commissioner",
+    "agent_run_id": "fixture:first-pass-researched",
+    "model_requested": "gpt-5.6-luna",
+    "model_reported": "gpt-5.6-luna",
+    "model_unreported_reason": null,
+    "code_revision": "0000000000000000000000000000000000000000",
+    "instruction_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+    "definition_sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+  },
+  "usage": {
+    "cost_usd": 0.01,
+    "cost_basis": "tool_list_price",
+    "note": "Synthetic fixture; the value is illustrative."
+  },
+  "dossier": {
+    "schema_version": "agent-dossier.v1",
+    "dossier_id": "osm:way/1:codex:model-x:researcher.v1:test-run",
+    "place": {
+      "place_ref": "osm:way/1",
+      "name": "St Test's",
+      "country_code": "NZ",
+      "seed_latitude": -43.0,
+      "seed_longitude": 172.0,
+      "seed_source": "test edition",
+      "seed_tags": {}
+    },
+    "candidate_location": {
+      "latitude": -43,
+      "longitude": 172,
+      "basis": "osm_object",
+      "basis_note": "",
+      "uncertainty_radius_m": 20,
+      "address": null
+    },
+    "claims": [
+      {
+        "claim_id": "osm:way/1:codex:c01",
+        "claim_type": "start_date",
+        "value": "opened 1891",
+        "date_start": "1891",
+        "date_end": null,
+        "date_precision": "year",
+        "source": {
+          "locator": "https://nzhistory.govt.nz/history",
+          "source_name": "History",
+          "source_type": "archive_collection",
+          "source_date": null,
+          "source_date_basis": "not_stated",
+          "retrieved_at": "2026-09-10"
+        },
+        "quoted_support": "built in 1891",
+        "evidential_weight": "secondary",
+        "reader": {
+          "reader_id": "codex:model-x:researcher.v1",
+          "backend": "codex",
+          "model_id": "gpt-5.6-luna",
+          "prompt_version": "researcher.v1"
+        },
+        "confidence": "medium",
+        "note": ""
+      },
+      {
+        "claim_id": "osm:way/1:codex:c02",
+        "claim_type": "denomination",
+        "value": "Anglican",
+        "date_start": null,
+        "date_end": null,
+        "date_precision": "unknown",
+        "source": {
+          "locator": "https://nzhistory.govt.nz/history",
+          "source_name": "History",
+          "source_type": "archive_collection",
+          "source_date": null,
+          "source_date_basis": "not_stated",
+          "retrieved_at": "2026-09-10"
+        },
+        "quoted_support": "an Anglican church",
+        "evidential_weight": "secondary",
+        "reader": {
+          "reader_id": "codex:model-x:researcher.v1",
+          "backend": "codex",
+          "model_id": "gpt-5.6-luna",
+          "prompt_version": "researcher.v1"
+        },
+        "confidence": "high",
+        "note": ""
+      }
+    ],
+    "status_assessment": {
+      "current_status": "unknown",
+      "basis": "test",
+      "asof_date": "2026-09-10",
+      "supporting_claim_ids": [],
+      "osm_stale": null,
+      "osm_stale_basis": ""
+    },
+    "osm_version_chain": [
+      {
+        "version": 1,
+        "changeset": 111,
+        "timestamp": "2018",
+        "timestamp_basis": "approximate",
+        "tags_summary": "",
+        "change_note": "",
+        "locator": "https://www.openstreetmap.org/way/1/history/1"
+      }
+    ],
+    "personal_details_quarantine": {
+      "redacted": false,
+      "item_count": 0,
+      "items": [],
+      "note": "values held in the run directory only; redact_quarantine strips them before commit"
+    },
+    "provenance": {
+      "producer": "agent_reader",
+      "ai_generated": true,
+      "produced_by": "codex:model-x:researcher.v1",
+      "lane": "agent_autonomous"
+    },
+    "run_manifest": {
+      "run_id": "test-run",
+      "backend": "codex",
+      "model_id_requested": "gpt-5.6-luna",
+      "model_id_reported": "gpt-5.6-luna",
+      "prompt_version": "researcher.v1",
+      "started_at": "2026-09-10T00:00:00+00:00",
+      "ended_at": "2026-09-10T00:01:00+00:00",
+      "duration_s": 60.0,
+      "usage": {
+        "input_tokens": 10,
+        "output_tokens": 5
+      },
+      "cost_usd_reported": 0.01,
+      "cost_basis": "tool_list_price",
+      "idempotency_key": "42faf40c9d778c93f5a3dd6cdadec24b24a4d3ee8f7521a0c6a634c77cb6609e",
+      "allowlist_version": "nz-v1",
+      "tool_permissions": [],
+      "exit_status": "completed",
+      "notes": ""
+    }
+  },
+  "annotations": [
+    {
+      "claim_id": "osm:way/1:codex:c01",
+      "kind": "qualification",
+      "note": "The source dates the building, not the first worship service."
+    },
+    {
+      "claim_id": "osm:way/1:codex:c02",
+      "kind": "follow_up",
+      "note": "Confirm the denomination against a current parish list."
+    }
+  ],
+  "searches": [
+    {
+      "query": "synthetic site history",
+      "locator": "https://example.org/history",
+      "outcome": "opened",
+      "note": "Synthetic example of an opened source.",
+      "source_name": "History",
+      "attempted_at": "2026-09-18T05:50:00Z",
+      "retrieved_at": "2026-09-18T05:51:00Z",
+      "licence_note": "Not assessed; synthetic fixture.",
+      "access_note": "Opened without restriction in this synthetic example."
+    }
+  ],
+  "next_questions": []
+}
