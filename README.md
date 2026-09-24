@@ -36,6 +36,8 @@ Building historical datasets fit for scientific inference is remarkably difficul
 - [Roadmap](ROADMAP.md)
 - [System map](docs/system-map.md)
 - [Operational definition, rendered for RAs and reviewers](https://religionmap.org/apps/guides/definition.html)
+- [Confidence standard for recorded judgments](docs/confidence-standard.md)
+- [AI assistance in the research pipeline](docs/ai-assisted-research.md)
 - [FAQ](FAQ.md)
 - [Lexicon](LEXICON.md)
 - [Religious change in the census-religion corpus](docs/religious-change-highlights.md)

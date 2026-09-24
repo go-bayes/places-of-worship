@@ -80,6 +80,8 @@ Source records, OpenStreetMap objects, and field observations provide evidence a
 
 **We allow investigators to decide which frequency and confidence combinations meet their criteria for counting.**
 
+The [confidence standard](confidence-standard.md) is the companion to this definition: it states how sure the project is that a recorded site meets the definition, how that confidence is scored, calibrated and validated, and under which standard version each recorded judgment was made. The [summary of AI assistance in the research pipeline](ai-assisted-research.md) states which of those judgments models make and where people decide.
+
 Counting follows from the recorded attributes and a study's declared rule.
 
 Each study states its target population, observation times, evidence standard, and filters. That holds for our own studies, and it is how the record will serve groups whose interests and purposes differ from ours: the record holds the attributes and their imprecision, and a count is a study's derivation from them.

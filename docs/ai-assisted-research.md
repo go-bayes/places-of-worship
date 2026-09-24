@@ -1,0 +1,61 @@
+# AI assistance in the research pipeline
+
+**Models recommend; people decide.** This page summarises how the project uses AI models in its research, what it records about every model output, and where people make the decisions. It is the public, standing account; the private research tier holds the working detail. Each item below states whether the project lead has adopted it or whether it is under decision.
+
+## Roles
+
+Models take four roles, and none of them changes a task, an evidence draft, a review decision or the map. A *reader* researches a place from public sources and writes a dossier of claims, each with a verbatim quotation of at most 600 characters and a locator for the page it came from. A *screen* is a bulk model that answers a structured question about a place, such as whether an institutional page describes worship there in the two years before the edition date. A *judge* takes the readers' dossiers, the validator's findings and any advisory review, and writes a dossier for a person where readers disagree or the evidence is thin. A *scorer* is deterministic code that computes evidence signals and a registration confidence for every feature of an edition under the [confidence standard](confidence-standard.md). Each of these outputs is written as an append-only judgment with its author, model, run and basis, and a person disposes of it.
+
+People take the decisions. Research assistants prepare evidence and close tasks, and, once a stratum passes the promotion rule in the confidence standard, dispose of model judgments and correct model drafts rather than preparing evidence from scratch. Reviewers decide on evidence, with each decision bound to the evidence as reviewed. Curators decide on withheld personal details and on export batches. The principal investigator accepts evidence for release, and the project lead rules on the standards themselves. The rule that models recommend and people decide is standing (recorded 2026-09-04 and again in the standing authority of 2026-09-24), and no function that writes a model judgment may change a task, draft or decision.
+
+## Model tiers
+
+The project lead assigned models to tiers on 2026-09-24 (adopted). The *reserved* tier, `gpt-6-astra`, Claude Fable 5.1 and Claude Opus 5.5, is for planning, design and security-sensitive judgment. The *intelligence* tier, `gpt-6-sol`, does pull-request review, implementation and repairs. The *bulk* tier, `gpt-6-luna`, handles cheap passes such as the confidence screen. Interface work uses Fable 5.1 or Opus 5.5 or a later release. For the confidence pipeline, the screen runs on the bulk tier and the judge on Fable 5.1, or on Claude Sonnet 5 where spend must be limited (adopted). The standing reader set for the research runner, two cheap models from different model families with a stronger model on disagreement, is under decision.
+
+## Audit-trail guarantees
+
+Five guarantees apply to every model output the shared backend accepts, and the first three were built in September 2026 (adopted 2026-09-24). First, a claim citing a source outside the agreed list of source domains for its country is refused and counted on the run record; the list is versioned and the record names the version. Second, a record must name the model the provider reported, or state why it could not, and never only the model requested. Third, cost is recorded per model that billed, including helper models the provider chose, with its basis (list price, invoice, unmetered subscription, collaborator-reported or unknown); an unknown cost is recorded as unknown, never as zero. Fourth, every research record and review bundle the backend holds is a receipt keyed by the SHA-256 of its bytes, written once and never patched. As such, an operator can rebuild and verify a record's history from its receipts. Fifth, every judgment is a row whose identifier is the hash of its content. A retried write therefore collapses onto a single row, and a re-judgment appends with its parents named. A run ledger that would join these records per attempt, with page fingerprints and per-model usage, is under decision.
+
+Two things stay outside the record. Whether a claim is true is a human decision. Whether a page said what a reader quoted, on the day the reader opened it, is unknowable when the provider fetched the page inside its own tool. The project's validator therefore re-fetches every locator and records its own finding (verified, dead or unresolved) as the reproducible observation.
+
+## Privacy screening
+
+The personal-details policy binds every published surface: a detail that identifies a living person is published only with permission, whether or not it is already public, and only a recorded death date establishes that a person has died. Every text field of an outgoing model record, an advisory reviewer's comments included, is screened for telephone numbers, email addresses and names led by a title, and for strings shaped like cryptographic digests outside the few fields that hold the pipeline's own digests. Screening is applied by three validators in three languages, held to agreement by shared test cases.
+
+The interim behaviour (built 2026-09-24) refuses a record that still contains a personal detail before it leaves the operator's machine; the operator's private copy keeps the original, and the record of the refusal names fields and positions and never the text. The planned behaviour, whose direction the project lead ruled on 2026-09-24 and whose design is under review, withholds each detail behind a placeholder, holds the original in a restricted, deletable store that only curators and the principal investigator can open, and shows the item to the human review layer as inadmissible in its current form with suggested redactions, for a person to accept, edit, rule admissible with a recorded reason, or reject. The single relaxation is the cited-name rule in the confidence standard: a clergy or office-holder's name from a public source may be published with a verified citation of that source.
+
+Two further gates apply before any content reaches a model provider. Content under the cultural-sensitivity gate, which at present excludes Vanuatu material and every kastom-gated country from external readers, is withheld until a machine-verified clearance exists. The project lead ruled on 2026-09-24 that the public place content the project sends to model providers is public-domain research material with no commercial value and that no separate institutional data-governance approval is required before sending it; cultural-sensitivity handling remains project policy on the advice of the project's Vanuatu collaborator.
+
+## Review gates
+
+Code and documents merge only after review (adopted 2026-09-24). The merge review runs on `gpt-6-sol` at reasoning effort medium or above; a design brief, a security- or privacy-sensitive change, or a finding that the review and the author dispute needs, in addition, a review by a reserved model, and both must clear. Continuous integration must pass on the final head, every review thread must be answered, and every pull-request body, review and comment an agent writes ends with the model's name and version so that a reader of the thread later knows which model produced it. An agent takes its own pull request to closure, including any backend deployment, under written authority given per pull request.
+
+Data pass three human gates. A reviewer disposes of each model judgment as agreed, disagreed, corrected or not considered. A reviewer's decision binds to the evidence as reviewed, byte for byte, and retired evidence stays restorable. The principal investigator accepts a batch for release, and export batches are recorded byte for byte under a hash. Nothing a model wrote reaches a public product without passing all three.
+
+## Orchestration
+
+The project measures before it builds (adopted). A measurement run of about fifty New Zealand places on the current research runner reports the first-attempt success rate, searches per pass, per-model cost, reviewer seconds per place, and how well a model closes a task that a research assistant has already closed, blind, with agreement, error types, time and cost per task. A canary set of about 25 New Zealand places with human ground truth, rerun on every change to a prompt, model, client or scorer, catches drift (adopted). Provider credentials stay out of the research code: research records are refused or accepted by validators that hold no credential.
+
+The control plane is under decision. Its proposed shape is a deterministic dispatcher in the shared backend that leases jobs, meters spend and rate, retries within pinned limits, escalates on disagreement, and reports, with an agentic proposer added later that sees run summaries alone and writes proposals the dispatcher executes or refuses under a ceiling the project lead sets. The dispatcher could never accept, release or export anything, change a pinned prompt, allowlist, model or price table, raise a budget, resume a paused run, or contact a collaborator. Also under decision are provider credentials held as backend environment variables and exercised only by backend actions, reader processes that hold no project credential, the run ledger, and a collaborator channel in which a signed-in person confirms every submission before any review is spent or any queue row is written.
+
+## Reviewers of the standard
+
+Joseph Watts (Joseph W), who leads the project's Christchurch validation study, is invited as the blinded adjudicator of the reference labels that calibrate the confidence standard, under the reference procedure of that study, with a second assessor on a 20 per cent subsample to estimate assessor agreement; the project lead decides where Joseph W declines (adopted 2026-09-24 as an invitation). Joseph W owns the analysis and recommendations he develops. No change to the operational definition, the confidence standard, the review rules, accepted classifications or public claims is ratified on his judgment alone; his recommendations enter the project's review and ratification process. The project lead adopts each version of the confidence standard.
+
+## Status of the rulings
+
+| Item | Status |
+| --- | --- |
+| Models recommend, people decide; no model output changes a task, draft or decision | standing rule |
+| Model tiers (reserved, intelligence, bulk; interface work on Fable 5.1 or Opus 5.5) | adopted 2026-09-24 |
+| Source allowlist refusal, reported model id, per-model cost | adopted 2026-09-24, built |
+| Content-addressed receipts and hash-identified judgments | built 2026-09-19 and 2026-09-24 |
+| Measurement run before any build; canary set | adopted 2026-09-24 |
+| Confidence standard version 0.1.0 | adopted 2026-09-24 |
+| Joseph W as blinded adjudicator | invited 2026-09-24; his agreement is outstanding |
+| Interim refusal of records with personal details | built 2026-09-24 |
+| Withhold-and-hold review of personal details | direction ruled 2026-09-24; design under review |
+| Cited clergy-name publication | relaxation ruled 2026-09-24; machine rule proposed |
+| Institutional data-governance approval before sending public place content overseas | ruled unnecessary 2026-09-24 |
+| Vanuatu submissions in the closure measurement | declined until a machine-verified cultural clearance exists |
+| Reader set, dispatcher, proposer, provider credentials in the backend, run ledger, collaborator channel | under decision |
