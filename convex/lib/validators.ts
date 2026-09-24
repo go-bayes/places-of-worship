@@ -42,6 +42,12 @@ export const exportBatchDoc = v.object({
   ...schema.tables.export_batches.validator.fields,
 });
 
+export const userDoc = v.object({
+  _id: v.id("users"),
+  _creationTime: v.number(),
+  ...schema.tables.users.validator.fields,
+});
+
 export const exportRunDoc = v.object({
   _id: v.id("export_runs"),
   _creationTime: v.number(),

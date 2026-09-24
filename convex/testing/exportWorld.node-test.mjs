@@ -104,6 +104,35 @@ export function world() {
         async first() { return selected()[0] ?? null; },
         async take(count) { return selected().slice(0, count); },
         async collect() { return selected(); },
+        // Convex streams a query one document per call; so does this
+        [Symbol.asyncIterator]() {
+          let rowsSeen = null;
+          let index = 0;
+          return {
+            async next() {
+              if (rowsSeen === null) rowsSeen = selected();
+              if (index >= rowsSeen.length) return { done: true, value: undefined };
+              return { done: false, value: rowsSeen[index++] };
+            },
+            async return(value) { index = Number.POSITIVE_INFINITY; return { done: true, value }; },
+          };
+        },
+        // cursor-based pages over the selected rows, honouring numItems and
+        // maximumBytesRead (at least one row per page, as Convex does)
+        async paginate({ numItems, cursor, maximumBytesRead }) {
+          const all = selected();
+          const start = cursor === null || cursor === undefined ? 0 : Number(cursor);
+          const page = [];
+          let bytes = 0;
+          for (let index = start; index < all.length && page.length < numItems; index += 1) {
+            const size = Buffer.byteLength(JSON.stringify(all[index]));
+            if (page.length > 0 && maximumBytesRead !== undefined && bytes + size > maximumBytesRead) break;
+            bytes += size;
+            page.push(all[index]);
+          }
+          const next = start + page.length;
+          return { page, isDone: next >= all.length, continueCursor: String(next) };
+        },
       };
       return chain;
     },
