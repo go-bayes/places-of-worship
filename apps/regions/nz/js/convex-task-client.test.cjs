@@ -12,7 +12,7 @@ const vm = require("node:vm");
 const PUBLISHABLE_KEY = "pk_test_c3VyZS1saXphcmQtNTAuY2xlcmsuYWNjb3VudHMuZGV2JA";
 const HOST = "sure-lizard-50.clerk.accounts.dev";
 
-function harness({ session = null, cookie = "", responses = {} } = {}) {
+function harness({ session = null, cookie = "", responses = {}, failLoads = 0 } = {}) {
   const values = new Map([["powConvexAuth:v1", JSON.stringify({ token: "old-google-token" })]]);
   const localStorage = {
     getItem(key) { return values.has(key) ? values.get(key) : null; },
@@ -26,8 +26,8 @@ function harness({ session = null, cookie = "", responses = {} } = {}) {
     user: session ? { primaryEmailAddress: { emailAddress: session.email } } : null,
     async load(options) { calls.load.push(options); },
     addListener(listener) { listeners.push(listener); listener({ session: clerk.session, user: clerk.user }); return () => {}; },
-    mountSignIn(container, props) { calls.mountSignIn.push({ container, props }); container.innerHTML = "<clerk-sign-in>"; },
-    unmountSignIn() { calls.unmountSignIn += 1; },
+    mountSignIn(node, props) { calls.mountSignIn.push({ node, props }); node.mounted = true; },
+    unmountSignIn(node) { calls.unmountSignIn += 1; node.mounted = false; },
     async signOut() { calls.signOut += 1; clerk.setSession(null); },
     setSession(next) {
       clerk.session = next;
@@ -49,10 +49,11 @@ function harness({ session = null, cookie = "", responses = {} } = {}) {
     cookie,
     documentElement: {},
     querySelector() { return null; },
-    createElement() { const attributes = {}; return { attributes, setAttribute(name, value) { attributes[name] = value; } }; },
+    createElement(tag) { const attributes = {}; return { tag, attributes, setAttribute(name, value) { attributes[name] = value; } }; },
     head: {
       appendChild(script) {
         calls.scripts.push({ src: script.src, attributes: script.attributes, crossOrigin: script.crossOrigin });
+        if (failLoads > 0) { failLoads -= 1; setTimeout(() => script.onerror?.(), 0); return; }
         if (script.src.includes("@clerk/ui@")) window.__internal_ClerkUICtor = function ClerkUI() {};
         if (script.src.includes("@clerk/clerk-js@")) window.Clerk = clerk;
         setTimeout(() => script.onload?.(), 0);
@@ -80,7 +81,7 @@ const ok = (value) => ({ status: 200, body: { status: "success", value } });
 const refused = (message) => ({ status: 200, body: { status: "error", errorMessage: message } });
 const member = { _id: "user_1", email: "guy@example.org", roles: ["ra"], status: "active" };
 const tick = () => new Promise((resolve) => setTimeout(resolve, 5));
-const container = () => ({ innerHTML: "", querySelector(selector) { return this.innerHTML.includes("data-pow-sign-out") && selector === "[data-pow-sign-out]" ? (this.button ||= { addEventListener: (_type, handler) => { this.click = handler; } }) : null; } });
+const container = () => ({ innerHTML: "", children: [], replaceChildren(...nodes) { this.children = nodes; this.innerHTML = ""; }, querySelector(selector) { return this.innerHTML.includes("data-pow-sign-out") && selector === "[data-pow-sign-out]" ? (this.button ||= { addEventListener: (_type, handler) => { this.click = handler; } }) : null; } });
 
 (async () => {
   // 1. configuration: the publishable key names the frontend api host; the
@@ -140,24 +141,37 @@ const container = () => ({ innerHTML: "", querySelector(selector) { return this.
     const seen = [];
     await client.renderSignInButton(host, { initials: "GL", onSignedIn: (user) => seen.push(user._id) });
     assert.equal(h.calls.mountSignIn.length, 1);
-    assert.equal(h.calls.mountSignIn[0].container, host);
+    assert.deepEqual(host.children, [h.calls.mountSignIn[0].node], "clerk's form sits in the card");
     assert.equal(h.calls.mountSignIn[0].props.withSignUp, true);
     assert.equal(h.calls.fetches.length, 0, "no backend call before sign-in");
+    // the page repaints its card: the same form moves across, mounted once,
+    // so a half-typed address survives
+    const repainted = container();
+    await client.renderSignInButton(repainted, { initials: "GL", onSignedIn: (user) => seen.push(user._id) });
+    assert.equal(h.calls.mountSignIn.length, 1);
+    assert.equal(repainted.children[0], h.calls.mountSignIn[0].node);
+    // two repaints racing the first clerk load leave the form in the newest
+    const race = harness();
+    const racer = new race.Client(config);
+    const older = container();
+    const newer = container();
+    await Promise.all([racer.renderSignInButton(older, {}), racer.renderSignInButton(newer, {})]);
+    assert.equal(race.calls.mountSignIn.length, 1);
+    assert.equal(newer.children[0], race.calls.mountSignIn[0].node);
+    assert.equal(older.children.length, 0);
     h.clerk.setSession(h.makeSession("sess_2", "guy@example.org"));
     await tick();
     assert.deepEqual(seen, ["user_1"], "the page hears of the sign-in");
     assert.equal(client.signedIn, true);
     assert.equal(h.calls.fetches[0].body.path, "users:claimInvite");
     assert.equal(h.calls.fetches[0].body.args[0].initials, "GL");
-    // a later render of the card on a fresh host unmounts the old one
-    await client.renderSignInButton(container(), {});
-    assert.equal(h.calls.unmountSignIn, 1);
+    assert.equal(h.calls.unmountSignIn, 1, "the finished form is released");
   }
 
   // 4. an uninvited applicant: the backend refuses the claim, the card shows
   // the address and a sign-out button, not the portal, and asks only once
   {
-    const h = harness({ session: { id: "sess_3", email: "stranger@example.org" }, cookie: "__client_uat=1790000000", responses: { "users:claimInvite": refused("No pending project invitation found for this email.") } });
+    const h = harness({ session: { id: "sess_3", email: "stranger@example.org" }, cookie: "__client_uat=1790000000", responses: { "users:claimInvite": refused("[Request ID: 7e3c] Server Error Uncaught Error: No pending project invitation found for this email. at handler (../convex/users.ts:370:24)") } });
     const client = new h.Client(config);
     assert.equal(await client.restoreSession(), null, "no project user");
     assert.equal(client.signedIn, false);
@@ -169,6 +183,8 @@ const container = () => ({ innerHTML: "", querySelector(selector) { return this.
     assert.match(host.innerHTML, /stranger@example\.org/);
     assert.match(host.innerHTML, /no project access yet/);
     assert.match(host.innerHTML, /data-pow-sign-out/);
+    assert.doesNotMatch(host.innerHTML, /Request ID|Uncaught/, "no raw server text on the card");
+    assert.deepEqual(errors, [], "a refusal the card explains is not also reported as a page error");
     assert.equal(h.calls.fetches.filter((fetch) => fetch.body.path === "users:claimInvite").length, 1, "the refused claim is not retried on every render");
     await host.click();
     assert.equal(h.calls.signOut, 1, "the button ends the clerk session");
@@ -209,6 +225,21 @@ const container = () => ({ innerHTML: "", querySelector(selector) { return this.
     assert.equal(ended.length, 0, "a deliberate sign-out is not reported as a session ending elsewhere");
     await client.renderSignInButton(container(), {});
     assert.equal(h.calls.mountSignIn.length, 1, "the card offers sign-in again");
+  }
+
+  // 7. clerk cannot load (a blocked or slow network): the card says so and
+  // retries on request, without throwing back to the page
+  {
+    const h = harness({ failLoads: 1 });
+    const client = new h.Client(config);
+    const host = { ...container(), querySelector(selector) { return selector === "[data-pow-retry]" && this.innerHTML.includes("data-pow-retry") ? { addEventListener: (_type, handler) => { this.retry = handler; } } : null; } };
+    await client.renderSignInButton(host, {});
+    assert.match(host.innerHTML, /Sign-in could not load/);
+    assert.equal(h.calls.mountSignIn.length, 0);
+    host.retry();
+    await tick();
+    assert.equal(h.calls.mountSignIn.length, 1, "the retry loads clerk and shows the form");
+    assert.equal(host.children[0], h.calls.mountSignIn[0].node);
   }
 
   console.log("convex-task-client: clerk sessions ok");

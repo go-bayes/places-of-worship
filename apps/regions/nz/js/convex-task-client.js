@@ -14,7 +14,17 @@
     const CLERK_UI_MAJOR = "1";
     const LEGACY_AUTH_STORAGE_KEY = "powConvexAuth:v1";
     const NO_ACCESS_HELP = "This address has no project access yet. Sign out and use the invited address, or ask the project lead to invite this one.";
+    // the claimInvite refusals a person can act on (brief 4.3.2)
+    const ACCESS_REFUSED = /No pending project invitation|Verify this email address|bound to another sign-in method|requires a verified email/i;
     const scriptLoads = new Map();
+
+    // convex wraps a thrown error as "[Request ID: …] Server Error Uncaught
+    // Error: <message> at handler (…)"; the card shows only the message
+    function serverMessage(error) {
+        const raw = String(error?.message || "Could not sign in to the project.");
+        const match = raw.match(/Uncaught Error:\s*([\s\S]*?)(?:\s+at\s+\S+\s+\(|$)/);
+        return (match ? match[1] : raw).trim();
+    }
 
     function normaliseConfig(config) {
         return { ...DEFAULT_CONFIG, ...(config || {}) };
@@ -58,7 +68,11 @@
             script.crossOrigin = "anonymous";
             Object.entries(attributes).forEach(([name, value]) => script.setAttribute?.(name, value));
             script.onload = () => resolve();
-            script.onerror = () => reject(new Error(`Could not load ${src}`));
+            script.onerror = () => {
+                scriptLoads.delete(src);
+                script.remove?.();
+                reject(new Error(`Could not load ${src}`));
+            };
             document.head.appendChild(script);
         });
         scriptLoads.set(src, load);
@@ -144,6 +158,7 @@
             this.sessionId = "";
             this.signInOptions = {};
             this.signInHost = null;
+            this.signInNode = null;
             this.completion = null;
             this.signOutPromise = null;
             // the session whose claim the backend refused, and why: the card
@@ -229,11 +244,13 @@
             this.sessionId = nextSessionId;
             this.user = null;
             this.claimFailure = null;
+            this.releaseSignInElement();
             if (!nextSessionId) {
                 if (hadSession) this.signInOptions.onSignedOut?.();
                 return;
             }
             if (this.signInHost) {
+                this.signInHost.innerHTML = `<p class="pow-account-note">Checking project access…</p>`;
                 this.completeSignIn(this.signInOptions).catch(() => {});
             }
         }
@@ -246,25 +263,34 @@
             if (!sessionId) return null;
             if (this.completion?.sessionId === sessionId) return this.completion.promise;
             const promise = (async () => {
+                let user;
                 try {
                     await this.claimInvite(options.initials || "");
-                    const user = await this.me();
+                    user = await this.me();
                     if (!user) throw new Error("No pending project invitation found for this email.");
-                    if (this.sessionId !== sessionId) return null;
-                    this.user = user;
-                    this.claimFailure = null;
-                    if (options.onSignedIn) await options.onSignedIn(user);
-                    return user;
                 } catch (error) {
+                    const message = serverMessage(error);
                     if (this.sessionId === sessionId) {
                         this.user = null;
-                        this.claimFailure = { sessionId, message: error.message || "Could not sign in to the project." };
+                        this.claimFailure = { sessionId, message };
                     }
-                    if (options.onError) options.onError(error);
+                    // the backend refused this address: the card says so
+                    // itself; anything else (a network fault) goes to the page
+                    if (ACCESS_REFUSED.test(message)) {
+                        error.accessRefused = true;
+                        if (this.signInHost && this.sessionId === sessionId) this.renderAccountNote(this.signInHost);
+                    } else if (options.onError) {
+                        options.onError(error);
+                    }
                     throw error;
                 } finally {
                     if (this.completion?.sessionId === sessionId) this.completion = null;
                 }
+                if (this.sessionId !== sessionId) return null;
+                this.user = user;
+                this.claimFailure = null;
+                if (options.onSignedIn) await options.onSignedIn(user);
+                return user;
             })();
             this.completion = { sessionId, promise };
             return promise;
@@ -280,6 +306,7 @@
             // the page may repaint its card at once; the card waits for this
             // so it never re-admits the session being ended
             this.sessionId = "";
+            this.releaseSignInElement();
             const clerk = this.clerk;
             this.signOutPromise = (async () => {
                 if (!clerk?.session) return;
@@ -314,24 +341,22 @@
         async renderSignInButton(container, options = {}) {
             if (!this.configured || !container) return;
             this.signInOptions = options;
-            const clerk = await this.ensureClerkLoaded();
-            if (this.signOutPromise) await this.signOutPromise;
-            if (this.signInHost && this.signInHost !== container) {
-                try {
-                    clerk.unmountSignIn(this.signInHost);
-                } catch (error) {
-                    // the old host left the page with its card
-                }
-            }
             this.signInHost = container;
+            let clerk;
+            try {
+                clerk = await this.ensureClerkLoaded();
+            } catch (error) {
+                // a slow or blocked network: say so in the card and offer a
+                // retry, rather than failing back to the page, which would
+                // repaint the card and ask again at once
+                if (this.signInHost === container) this.renderLoadFailure(container, options);
+                return;
+            }
+            if (this.signOutPromise) await this.signOutPromise;
+            // the page repaints its card often; only the newest host counts
+            if (this.signInHost !== container) return;
             if (!this.sessionId) {
-                container.innerHTML = "";
-                clerk.mountSignIn(container, {
-                    appearance: clerkAppearance(),
-                    withSignUp: true,
-                    forceRedirectUrl: window.location.href,
-                    signUpForceRedirectUrl: window.location.href,
-                });
+                container.replaceChildren(this.signInElement(clerk));
                 return;
             }
             if (this.user) return;
@@ -348,12 +373,51 @@
             this.renderAccountNote(container);
         }
 
+        // clerk's sign-in lives in one element for a whole signed-out spell
+        // and moves between the page's repainted cards, so a half-typed
+        // address or code survives a repaint. a new spell gets a fresh form
+        signInElement(clerk) {
+            if (!this.signInNode) {
+                this.signInNode = document.createElement("div");
+                this.signInNode.className = "clerk-sign-in-mount";
+                clerk.mountSignIn(this.signInNode, {
+                    appearance: clerkAppearance(),
+                    withSignUp: true,
+                    forceRedirectUrl: window.location.href,
+                    signUpForceRedirectUrl: window.location.href,
+                });
+            }
+            return this.signInNode;
+        }
+
+        releaseSignInElement() {
+            if (!this.signInNode) return;
+            try {
+                this.clerk?.unmountSignIn(this.signInNode);
+            } catch (error) {
+                // already gone with its page
+            }
+            this.signInNode = null;
+        }
+
+        renderLoadFailure(container, options) {
+            container.innerHTML = `
+                <div class="pow-account-note" role="alert">
+                    <span>Sign-in could not load. Check the connection, then try again.</span>
+                    <button type="button" data-pow-retry>Try again</button>
+                </div>
+            `;
+            container.querySelector("[data-pow-retry]")?.addEventListener("click", () => {
+                this.renderSignInButton(container, options);
+            });
+        }
+
         renderAccountNote(container) {
             const failure = this.claimFailure?.message || "";
             const noInvitation = /No pending project invitation/i.test(failure);
             container.innerHTML = `
                 <div class="pow-account-note" role="status">
-                    <span>Signed in as <strong>${escapeText(this.accountEmail || "this account")}</strong>.</span>
+                    <span>Signed in as <strong>${escapeText(this.accountEmail || "this account")}</strong></span>
                     <span>${escapeText(noInvitation ? NO_ACCESS_HELP : failure)}</span>
                     <button type="button" data-pow-sign-out>Sign out</button>
                 </div>

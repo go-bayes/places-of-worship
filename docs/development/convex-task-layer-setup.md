@@ -120,21 +120,36 @@ users:claimInvite({
 Do not use this mocked-identity path for the hosted pilot unless you plan to
 replace the admin user with a real claimed invite before RA work begins.
 
-## Google/OIDC Auth
+## Sign-In: Clerk Sessions, With Google For The Rollback Week
 
-The first hosted pilot should use Google sign-in through an OpenID
-Connect-compatible provider. `convex/auth.config.ts` is configured for direct
-Google OpenID Connect:
+Since the contributor-access brief's C1 (2026-09-24), the portals sign people
+in through Clerk, which keeps a session for up to seven days and mints a
+sixty-second Convex token per request from its `convex` JWT template.
+`convex/auth.config.ts` lists two providers:
 
-- issuer/domain: `https://accounts.google.com`,
-- application id: the public Google client id already committed in
-  `convex/auth.config.ts` and the frontend Convex config.
+- Clerk: domain `process.env.CLERK_JWT_ISSUER_DOMAIN` (the Clerk instance's
+  Frontend API URL, for the development instance
+  `https://sure-lizard-50.clerk.accounts.dev`), application id `convex`;
+- Google, as before (`https://accounts.google.com` and the public Google
+  client id), kept for one week as the rollback path (R-C3). Removing it is a
+  separate, non-additive deployment.
 
-The Google client id is intentionally public configuration. It is also useful
-to keep `GOOGLE_CLIENT_ID` in the hosted Convex deployment environment for
-operator visibility and older branches, but the current `auth.config.ts` does
-not read it at codegen time because local anonymous Convex deployments reject a
-missing deployment environment variable before hosted settings are available.
+`CLERK_JWT_ISSUER_DOMAIN` must be set on every deployment before a push,
+including an anonymous local backend; the push fails with "Environment
+variable CLERK_JWT_ISSUER_DOMAIN is used in auth config file but its value was
+not set" until it is. For a local walkthrough:
+
+```sh
+npx convex env set CLERK_JWT_ISSUER_DOMAIN https://sure-lizard-50.clerk.accounts.dev
+```
+
+`AUTH_MIGRATION_SOURCE_ISSUERS` (comma or space separated) lists the issuers
+whose identifiers `claimInvite` may re-key to the Clerk issuer; unset or empty
+disables re-keying. It holds `https://accounts.google.com` only during
+Google's rollback week (R-C16); any other entry needs Joseph B's written
+authority (brief section 4.3.3). A re-keyed member's Google identifier stays
+in `user_identities`, so the rollback client still reaches the same row.
+`users:adminResetAuthSubject` (CLI only) repairs a stuck account.
 
 Run `npx convex dev --once` after changing the provider configuration. That
 pushes to the deployment named in `.env.local` (`dev:pastel-goshawk-398`),
@@ -144,7 +159,7 @@ pending the dev-to-prod cutover ruling; pushing there changes nothing the
 portals see.
 
 `docs/development/convex-auth-google.config.example.ts` is kept only as a small
-reference copy of the same configuration.
+reference copy of the Google provider.
 
 The deploy key and any OAuth client secret are not public. Configure secrets in
 the Convex dashboard, GitHub secrets, or a local shell environment. Do not paste
@@ -170,24 +185,27 @@ be disabled:
 window.POW_CONVEX_CONFIG = {
     enabled: false,
     url: "",
-    googleClientId: "",
+    clerkPublishableKey: "",
     countryCode: "NZ",
 };
 ```
 
 For the hosted NZ pilot, the committed file is enabled with the live Convex URL
-and the public Google client id:
+and the Clerk development instance's publishable key (a `pk_live_` key
+replaces it when the production instance is activated):
 
 ```js
 window.POW_CONVEX_CONFIG = {
     enabled: true,
     url: "https://pastel-goshawk-398.convex.cloud",
-    googleClientId: "365609603908-modldahk3205acfdf1pshhckufho13v0.apps.googleusercontent.com",
+    clerkPublishableKey: "pk_test_c3VyZS1saXphcmQtNTAuY2xlcmsuYWNjb3VudHMuZGV2JA",
     countryCode: "NZ",
 };
 ```
 
-The Convex URL and Google client id are public configuration. Setup tokens,
+The client derives the Clerk Frontend API host from the key and loads Clerk's
+scripts from it. The Convex URL and the publishable key are public
+configuration; the Clerk secret key is not. Setup tokens,
 deploy keys, and OAuth secrets are private and must stay in the Convex
 dashboard, GitHub secrets, or a local ignored environment file.
 

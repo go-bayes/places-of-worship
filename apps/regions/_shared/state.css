@@ -248,6 +248,9 @@ button.state-pill:focus-visible { outline: 2px solid var(--action); outline-offs
     min-height: 44px;
     width: 100%;
 }
+.clerk-sign-in-host:empty {
+    min-height: 0;
+}
 .clerk-sign-in-host button {
     width: auto;
     min-height: 0;

@@ -58,13 +58,14 @@ and export bundles. Accepted changes become research data only after export,
 
 | Function | Kind | Roles | Purpose | Writes |
 | --- | --- | --- | --- | --- |
-| `me` | query | signed-in user or anonymous | Return the current project user record, or `null` if not signed in. | None |
+| `me` | query | signed-in user or anonymous | Return the current project user record, found through `resolveUser` (the current `auth_subject`, then an unretired `user_identities` link), or `null`. | None |
 | `bootstrapFirstAdmin` | mutation | setup token plus authenticated user | Create the first active admin when the deployment has no users. | `users` |
 | `bootstrapPendingInvites` | mutation | setup token | Create the initial pending admin and RA invites before users claim them. | `users` |
-| `inviteUser` | mutation | `admin` | Create or update a pending invitation and assigned roles. | `users` |
-| `claimInvite` | mutation | invited authenticated user | Bind a pending email invitation to the Google-authenticated subject. | `users` |
+| `inviteUser` | mutation | `admin` | Create or update a pending invitation and assigned roles, recording the inviter in a `role_events` row (reason `invite`). | `users`, `role_events` |
+| `claimInvite` | mutation | invited authenticated user | Activate a pending invitation, or re-key an active member from an allowlisted source issuer (`AUTH_MIGRATION_SOURCE_ISSUERS`) to the Clerk issuer (`CLERK_JWT_ISSUER_DOMAIN`), keeping the old identifier linked. Requires `emailVerified === true`; never activates a disabled or service row; a pending row found by its own identifier (an active member reset by `inviteUser`) activates when the verified email still matches. Rules in the contributor-access brief, section 4.3.2. | `users`, `user_identities`, `role_events` |
 | `listUsers` | query | `admin` | List project users, optionally filtered by status. | None |
-| `adminUpsertUser` | internal mutation | `admin key` | Repair a user record: patch roles on an existing user while preserving status (unlike `inviteUser`, which resets active users to pending), or insert a pending invite when no row matches the email. | `users` |
+| `adminUpsertUser` | internal mutation | `admin key` | Repair a user record: patch roles on an existing user while preserving status (unlike `inviteUser`, which resets active users to pending), or insert a pending invite when no row matches the email. Creations and role or status changes append `role_events` (`invite`, `role_change`). | `users`, `role_events` |
+| `adminResetAuthSubject` | internal mutation | `admin key` | Repair a stuck account for one email: retire its `user_identities` links, clear `auth_subject`, set it `pending` with roles unchanged, and append `role_events` (`auth_subject_reset`); the person then claims again. Refuses service and disabled rows. | `users`, `user_identities`, `role_events` |
 
 ## `tasks.ts`
 

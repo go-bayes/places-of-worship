@@ -96,8 +96,14 @@ under) the card is a strip above the map instead, so nothing covers the
 map's own controls. After sign-in the sidebar returns with the work. The
 marker legend reads in two columns, fills beside rings, so the map data
 panel stays clear of the floating card. The sign-in card
-carries the Google button, a `Contact to join` button and the folded `Wrong
-account showing?` help, nothing else (ruled 2026-09-19: fewer words); the
+carries the line `Sign in with Google or an email code.`, Clerk's sign-in
+form in the portal's dark tokens with 44 px controls, a `Contact to join`
+button and the folded `Which address?` help, nothing else (ruled 2026-09-19:
+fewer words; the Clerk form and its copy replace the Google button and the
+`Wrong account showing?` help under the contributor-access brief's C1,
+2026-09-24). A signed-in address the project has not admitted sees the
+address, one line saying it has no project access and a `Sign out` button,
+never the portal; the
 header carries only the title and the `Exit` and `Guide` buttons, at body
 size on a 44 px target, with no batch line (ruled 2026-09-20: words to cut);
 the invited address shows only when the link carries it. After sign-in the
