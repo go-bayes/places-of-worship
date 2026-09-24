@@ -24,6 +24,7 @@ import type * as lib_agentIntake from "../lib/agentIntake.js";
 import type * as lib_agentJudgments from "../lib/agentJudgments.js";
 import type * as lib_assignedTaskPeriods from "../lib/assignedTaskPeriods.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as lib_bundleCodec from "../lib/bundleCodec.js";
 import type * as lib_canonicalJson from "../lib/canonicalJson.js";
 import type * as lib_countryYears from "../lib/countryYears.js";
 import type * as lib_evidenceVersions from "../lib/evidenceVersions.js";
@@ -41,6 +42,7 @@ import type * as lib_probableSameAsRecords from "../lib/probableSameAsRecords.js
 import type * as lib_r2Presign from "../lib/r2Presign.js";
 import type * as lib_rapidEntry from "../lib/rapidEntry.js";
 import type * as lib_rateLimits from "../lib/rateLimits.js";
+import type * as lib_readMeter from "../lib/readMeter.js";
 import type * as lib_sensitivity from "../lib/sensitivity.js";
 import type * as lib_sha256 from "../lib/sha256.js";
 import type * as lib_sources from "../lib/sources.js";
@@ -80,6 +82,7 @@ declare const fullApi: ApiFromModules<{
   "lib/agentJudgments": typeof lib_agentJudgments;
   "lib/assignedTaskPeriods": typeof lib_assignedTaskPeriods;
   "lib/auth": typeof lib_auth;
+  "lib/bundleCodec": typeof lib_bundleCodec;
   "lib/canonicalJson": typeof lib_canonicalJson;
   "lib/countryYears": typeof lib_countryYears;
   "lib/evidenceVersions": typeof lib_evidenceVersions;
@@ -97,6 +100,7 @@ declare const fullApi: ApiFromModules<{
   "lib/r2Presign": typeof lib_r2Presign;
   "lib/rapidEntry": typeof lib_rapidEntry;
   "lib/rateLimits": typeof lib_rateLimits;
+  "lib/readMeter": typeof lib_readMeter;
   "lib/sensitivity": typeof lib_sensitivity;
   "lib/sha256": typeof lib_sha256;
   "lib/sources": typeof lib_sources;

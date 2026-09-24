@@ -12,6 +12,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@convex-dev/rate-limiter": "^0.3.2"
+    "@convex-dev/rate-limiter": "^0.3.2",
+    "fflate": "0.8.3"
   }
 }
