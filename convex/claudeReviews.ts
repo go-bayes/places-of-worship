@@ -150,7 +150,9 @@ export const pendingForBatch = internalQuery({
         .order("desc")
         .take(25);
       const draft = latestReviewableDraft([...submitted, ...unresolved]);
-      if (draft === null || !isExternalAiReviewEligible(draft)) {
+      // agent-intake drafts never enter the external review queue; other ineligible drafts
+      // still reach runBatch, which counts them as policy exclusions on the batch record
+      if (draft === null || draft.agent_intake_only === true) {
         continue;
       }
       const priorForDraft = await ctx.db
