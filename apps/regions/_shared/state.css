@@ -239,3 +239,27 @@ button.state-pill:focus-visible { outline: 2px solid var(--action); outline-offs
 }
 .decision-choice .decision-more button:hover { background: var(--panel-2); }
 .decision-choice .decision-more button.is-danger { color: var(--danger); }
+
+/* the clerk sign-in card (contributor-access brief c1) and the account note
+   shown when a signed-in address has no project access. both portals load
+   this file, so the card reads the same on each; clerk's own colours come
+   from the page tokens through the client's appearance settings */
+.clerk-sign-in-host {
+    min-height: 44px;
+    width: 100%;
+}
+.clerk-sign-in-host button {
+    width: auto;
+    min-height: 0;
+}
+.pow-account-note {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    color: var(--ink);
+    line-height: 1.45;
+}
+.pow-account-note button {
+    width: 100%;
+    min-height: 44px;
+}

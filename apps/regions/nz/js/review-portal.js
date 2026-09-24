@@ -353,8 +353,12 @@ function human(value) {
                 onError: (error) => {
                     setStatus(els.authStatus, error.message || "Sign-in failed.", "error");
                 },
+                // the clerk session ended in another tab or expired
+                onSignedOut: () => showSignedOut(state.user
+                    ? "Your sign-in ended. Sign in again to review submitted evidence."
+                    : "Sign in to review submitted evidence."),
             }).catch((error) => {
-                setStatus(els.authStatus, error.message || "Google sign-in failed.", "error");
+                setStatus(els.authStatus, error.message || "Sign-in failed.", "error");
             });
             return;
         }
@@ -371,15 +375,19 @@ function human(value) {
         `;
         document.getElementById("signOut").addEventListener("click", () => {
             client.signOut({ deliberate: true });
-            state.user = null;
-            state.queue = [];
-            state.selected = null;
-            reviewMap?.setQueue([], "");
-            renderAuth();
-            renderQueue();
-            renderEmptyDetail("Signed out. Sign in again to review submitted evidence.");
-            setStatus(els.queueStatusText, "Sign in to load the queue.");
+            showSignedOut("Signed out. Sign in again to review submitted evidence.");
         });
+    }
+
+    function showSignedOut(message) {
+        state.user = null;
+        state.queue = [];
+        state.selected = null;
+        reviewMap?.setQueue([], "");
+        renderAuth();
+        renderQueue();
+        renderEmptyDetail(message);
+        setStatus(els.queueStatusText, "Sign in to load the queue.");
     }
 
     async function loadQueue() {
@@ -1989,7 +1997,7 @@ function human(value) {
         setupPageLabel();
         setupBoundary();
         // a sign-in kept on the device from before a reload (jb 2026-09-05)
-        if (client.authToken) {
+        if (client.mayHaveSession) {
             state.user = await client.restoreSession().catch(() => null);
         }
         els.refreshQueue.addEventListener("click", loadQueue);

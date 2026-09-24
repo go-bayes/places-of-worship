@@ -680,7 +680,7 @@ window.POW_DATE_FLOOR_YEAR = window.PowDateFloor ? window.PowDateFloor.yearFor(C
 const TARGET_YEARS = COUNTRY_CONFIG.targetYears;
 const DEFAULT_TARGET_YEAR = COUNTRY_CONFIG.defaultTargetYear || TARGET_YEARS[TARGET_YEARS.length - 1] || "";
 const BACKEND_CONFIG = window.POW_CONVEX_CONFIG || {};
-const BACKEND_CONFIGURED = Boolean(BACKEND_CONFIG.enabled && BACKEND_CONFIG.url && BACKEND_CONFIG.googleClientId);
+const BACKEND_CONFIGURED = Boolean(BACKEND_CONFIG.enabled && BACKEND_CONFIG.url && BACKEND_CONFIG.clerkPublishableKey);
 const FULL_MAP_MODE = SEARCH_PARAMS.get("full") === "1" || SEARCH_PARAMS.get("batch") === "all";
 const REQUESTED_ASSIGNMENT_BATCH_ID = (SEARCH_PARAMS.get("batch") || "").trim();
 const DEFAULT_ASSIGNMENT_BATCH_ID = COUNTRY_CONFIG.defaultAssignmentBatchId || "";
@@ -1877,7 +1877,7 @@ function assignmentQuickstartHtml() {
     if (COUNTRY_CONFIG.countryCode === "VU") {
         return `
             <ol>
-                <li>Sign in with Google at the top of this panel.</li>
+                <li>Sign in at the top of this panel.</li>
                 <li>Use this as a Vanuatu source-first test, not as the final country task map.</li>
                 <li>Work from source-backed leads. OSM is sparse in Vanuatu, so treat any OSM record as context rather than the main evidence.</li>
                 <li>Record 1989, 1999, 2009, and 2020 status only where a source supports a target-year judgement.</li>
@@ -1888,7 +1888,7 @@ function assignmentQuickstartHtml() {
     if (COUNTRY_CONFIG.countryCode !== "NZ") {
         return `
             <ol>
-                <li>Sign in with Google at the top of this panel.</li>
+                <li>Sign in at the top of this panel.</li>
                 <li>Work down the assigned ${COUNTRY_CONFIG.countryName} task list in order. Stop at a natural stopping point and tell JB where you stopped.</li>
                 <li>Open Street View or Google Maps to look around the site, and use the OSM object only as context. Record the imagery capture date if Street View is your evidence.</li>
                 <li>Record ${TARGET_YEARS.length ? `${targetYearAndListText()} status` : "the current status"}, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
@@ -1897,7 +1897,7 @@ function assignmentQuickstartHtml() {
     }
     return `
         <ol>
-            <li>Sign in with Google at the top of this panel.</li>
+            <li>Sign in at the top of this panel.</li>
             <li>Work down the assigned task list in order. Stop at a natural stopping point and tell JB where you stopped.</li>
             <li>Open Street View or Google Maps to look around the site, and use the OSM object only as context. Record the imagery capture date if Street View is your evidence.</li>
             <li>Record 2013, 2018, and 2023 status, confidence, source title, source URL or file reference, and any useful lifecycle date.</li>
@@ -2170,25 +2170,27 @@ class NzVerificationMap {
         }
 
         if (!this.backendUser) {
-            // fewer words (jb 2026-09-19): the google button, one line to
-            // ask for access, and the account help folded away. the batch
-            // id already sits in the header; the invited address shows only
-            // when the link carries it
+            // fewer words (jb 2026-09-19): the sign-in (google or an email
+            // code, through clerk since c1), one line to ask for access, and
+            // the account help folded away. the batch id already sits in the
+            // header; the invited address shows only when the link carries it
             panel.innerHTML = `
                 <div class="backend-card auth-required">
                     <strong>${ASSIGNMENT_MODE ? "1. Sign in to start" : "Sign in"}</strong>
                     ${this.pendingDeepLink ? `<span role="note">Sign in to revise <em>${escapeHtml(this.pendingDeepLink.name || "a place on the map")}</em>; it opens here after sign-in.</span>` : ""}
                     ${INVITED_EMAIL_HINT ? `<span>Use <strong class="inline">${escapeHtml(INVITED_EMAIL_HINT)}</strong>.</span>` : ""}
-                    <div id="googleSignInButton" class="google-sign-in-host"></div>
+                    <span>Sign in with Google or an email code.</span>
+                    <div id="clerkSignInHost" class="clerk-sign-in-host"></div>
                     <a class="join-button" href="https://github.com/go-bayes/places-of-worship" target="_blank" rel="noopener">Contact to join</a>
-                    <details class="backend-help"><summary>Wrong account showing?</summary>The button lists accounts already signed in to this browser. Pick another, or open a browser profile signed in to the invited account.</details>
+                    <details class="backend-help"><summary>Which address?</summary>The one your invitation went to: Google for a Google account, otherwise an emailed code.</details>
                     ${this.transportDotHtml()}
                     ${this.backendLastError ? `<span class="copy-status${this.signedOutDeliberately ? "" : " error"}">${escapeHtml(this.backendLastError)}</span>` : ""}
                 </div>
             `;
-            this.backend.renderSignInButton(document.getElementById("googleSignInButton"), {
+            this.backend.renderSignInButton(document.getElementById("clerkSignInHost"), {
                 initials: this.getRaInitials(),
                 onSignedIn: user => this.onBackendSignedIn(user),
+                onSignedOut: () => this.onBackendSessionEnded(),
                 onError: error => {
                     this.backendLastError = error.message || "Could not sign in to the shared backend.";
                     this.renderBackendPanel();
@@ -2365,7 +2367,7 @@ class NzVerificationMap {
         }, 6000);
     }
 
-    // after the google button, after an expired session's re-sign-in, and
+    // after the sign-in card, after an expired session's re-sign-in, and
     // after a reload with the sign-in kept on the device
     async onBackendSignedIn(user, { refreshTasks = true } = {}) {
         this.backendUser = user;
@@ -2399,7 +2401,7 @@ class NzVerificationMap {
     // the tab while the contributor is in the photo gallery, then reloads
     // it) names the user again before the panel paints (jb 2026-09-05)
     async restoreBackendSession() {
-        if (!this.backend?.configured || !this.backend.authToken || this.backendUser) return null;
+        if (!this.backend?.configured || !this.backend.mayHaveSession || this.backendUser) return null;
         this.setTransportBusy("signing_in");
         try {
             const user = await this.backend.restoreSession();
@@ -2408,6 +2410,16 @@ class NzVerificationMap {
         } finally {
             this.setTransportBusy("");
         }
+    }
+
+    // the clerk session ended elsewhere (another tab signed out, or the
+    // session expired): the card returns, the chosen activity is kept
+    onBackendSessionEnded() {
+        if (this.backendUser) {
+            this.backendUser = null;
+            this.backendLastError = "Your sign-in ended. Sign in again to carry on.";
+        }
+        this.renderBackendPanel();
     }
 
     signOutBackend() {
@@ -2436,7 +2448,7 @@ class NzVerificationMap {
         // pr-e: period cards leave with the session; on a shared computer
         // the next user must not find them
         this.clearAllGuidedPeriods(signedOutUserId);
-        this.backendLastError = "Signed out here. On a shared computer, also sign out of Google in the browser.";
+        this.backendLastError = "Signed out. On a shared computer, also sign out of Google in the browser if you used it.";
         if (ASSIGNMENT_MODE) {
             this.tasks = [];
             this.filteredTasks = [];
@@ -6219,7 +6231,7 @@ class NzVerificationMap {
                 </div>
                 ${signedIn ? "" : `
                     <div class="demo-warning" role="alert">
-                        Sign in with Google at the top of this panel to file an issue.
+                        Sign in at the top of this panel to file an issue.
                     </div>
                 `}
                 <label>
@@ -6959,7 +6971,7 @@ class NzVerificationMap {
         if (!this.backend?.configured || !this.backend.signedIn) {
             body.innerHTML = `
                 <div class="demo-warning" role="alert">
-                    Sign in with Google at the top of this panel to see task history.
+                    Sign in at the top of this panel to see task history.
                 </div>
             `;
             return;
@@ -7315,7 +7327,7 @@ class NzVerificationMap {
         if (ASSIGNMENT_MODE) {
             return `
                 <div class="demo-warning" role="alert">
-                    Sign in with Google at the top of this panel before recording this assignment.
+                    Sign in at the top of this panel before recording this assignment.
                 </div>
             `;
         }
@@ -9887,7 +9899,7 @@ class NzVerificationMap {
             return `
                 <h3>2. Sign in first</h3>
                 <div class="demo-warning" role="alert">
-                    Sign in with Google at the top of this panel before recording this assignment.
+                    Sign in at the top of this panel before recording this assignment.
                 </div>
             `;
         }
@@ -10175,7 +10187,7 @@ class NzVerificationMap {
                     `}
                 ` : ASSIGNMENT_MODE ? `
                     <div class="demo-warning" role="alert">
-                        Sign in with Google at the top of this panel before recording this assignment.
+                        Sign in at the top of this panel before recording this assignment.
                     </div>
                 ` : `
                     <div class="copy-help">

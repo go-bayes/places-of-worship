@@ -517,7 +517,7 @@ const contributeEscape = (value) => String(value).replace(/[&<>"']/g, (c) => ({ 
 function contributePortalMarkup(decision, idPrefix) {
   if (decision.kind === "config" || decision.kind === "country") {
     const named = decision.name ? ` · ${contributeEscape(decision.name)}` : "";
-    return `<a id="${idPrefix}-portal" href="${decision.portal}"><strong>Submit evidence to religionmap.org${named}</strong><span>Project members sign in with Google. If you are not yet a member, the sign-in page says how to get in touch.</span></a>`;
+    return `<a id="${idPrefix}-portal" href="${decision.portal}"><strong>Submit evidence to religionmap.org${named}</strong><span>Project members sign in with Google or an email code. If you are not yet a member, the sign-in page says how to get in touch.</span></a>`;
   }
   return `<span id="${idPrefix}-note" class="shell-panel-note" role="note">Zoom to a country to submit evidence</span>`;
 }

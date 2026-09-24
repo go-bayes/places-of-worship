@@ -17,6 +17,24 @@ export const userStatus = v.union(
   v.literal("pending"),
 );
 
+// why a sign-in identifier other than users.auth_subject resolves to a row
+// (contributor-access brief 4.3.1): the identifier a member used before an
+// auth-provider migration, or one an admin linked by hand
+export const identityLinkReason = v.union(
+  v.literal("auth_provider_migration"),
+  v.literal("admin_relink"),
+);
+
+// the append-only record of every change to who a user is and what they may
+// do (brief 8.4). c1 writes the first five; c2 adds the application reasons
+export const roleEventReason = v.union(
+  v.literal("invite"),
+  v.literal("claim"),
+  v.literal("auth_provider_migration"),
+  v.literal("auth_subject_reset"),
+  v.literal("role_change"),
+);
+
 // keep in step with the taskStatus validator below; used for per-status
 // indexed loops
 export const taskStatusValues = [

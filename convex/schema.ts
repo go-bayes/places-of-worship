@@ -28,6 +28,7 @@ import {
   observationContractVersion,
   nearbySiteRef,
   privacyFlag,
+  identityLinkReason,
   projectRole,
   reviewDecisionStatus,
   taskBatchSourceKind,
@@ -40,6 +41,7 @@ import {
   targetYearEvidenceSet,
   targetYearConfidenceSet,
   targetYearStatusSet,
+  roleEventReason,
   userStatus,
   occupancyContractVersion,
   occupancyStartMode,
@@ -95,6 +97,38 @@ export default defineSchema({
     .index("by_auth_subject", ["auth_subject"])
     .index("by_email", ["email"])
     .index("by_status", ["status"]),
+
+  // sign-in identifiers that resolve to a user besides users.auth_subject
+  // (contributor-access brief 4.3.1). a re-keyed member's previous
+  // identifier stays linked so the rollback client still finds the same row;
+  // a retired link resolves nothing
+  user_identities: defineTable({
+    user_id: v.id("users"),
+    token_identifier: v.string(),
+    issuer: v.string(),
+    linked_at: v.number(),
+    linked_reason: identityLinkReason,
+    retired_at: v.optional(v.number()),
+    retired_reason: v.optional(v.string()),
+  })
+    .index("by_token_identifier", ["token_identifier"])
+    .index("by_user", ["user_id"]),
+
+  // append-only record of role and status changes (brief 8.4). from_status
+  // is absent when the event created the row
+  role_events: defineTable({
+    user_id: v.id("users"),
+    actor_user_id: v.optional(v.id("users")),
+    from_roles: v.array(projectRole),
+    to_roles: v.array(projectRole),
+    from_status: v.optional(userStatus),
+    to_status: userStatus,
+    reason: roleEventReason,
+    note: v.optional(v.string()),
+    created_at: v.number(),
+  })
+    .index("by_user", ["user_id", "created_at"])
+    .index("by_reason", ["reason", "created_at"]),
 
   task_batches: defineTable({
     batch_id: v.string(),
