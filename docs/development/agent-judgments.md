@@ -41,10 +41,12 @@ The Claude batch-review lane (`claudeReviews.recordArtifact`) writes one `recomm
 
 The internal bundle intake (`internalAgentIntake.ingestBundle`) writes one `claim_support` judgment per advisory `claim_checks` entry with its real `access_method`, one `recommendation` judgment on the intake evidence version, and one `status_assessment` judgment for the place from the researcher's dossier. The source-level `sources_checked` summary on the `agent_reviews` row now records `not_checked` when the reviewer did not check the source and `model_assessment` otherwise, and names the source rather than the claim id; the earlier row asserted an `existence` check by `model_assessment` for every claim.
 
+The first-pass receipt ingest (`firstPassReceipts.ingestFirstPass`, added 2026-09-24 as J2) writes one `status_assessment` judgment for the place from the record's dossier and one `annotation` judgment per claim annotation, whose subject is `<first-pass sha256>#<claim_id>` and whose `facet` numbers the annotation so sibling annotations on one claim are not read as revisions of each other. The judge is `<provider>-first-pass`, with the provider taken from the dossier's run manifest; a record without a dossier yields no judgments. The claims stay in the record. See [revisitable agent research](agent-first-passes.md#receipts-in-the-shared-backend).
+
 ## Reads and the human disposition
 
 `agentJudgments.listJudgmentsForTask`, `listJudgmentsForSubject` and `listDispositionsForJudgment` return newest first to reviewers, curators, administrators and the PI. `agentJudgments.recordJudgmentDisposition` appends one disposition; it refuses an unknown judgment, an unknown review decision, a decision about a different task or evidence draft from the judgment, and a disagreement or correction without a note of at least eight characters.
 
 ## Deployment
 
-The change is additive: two new tables, one new module, new optional writes inside two existing mutations. It deploys from the reviewed head under the closure procedure in `AGENTS.md`. A reviewer panel that shows judgments per claim and records dispositions, and the first-pass receipt table with its submit command, are the next steps and are documented in the private research tier until ruled.
+The change is additive: two new tables, one new module, new optional writes inside two existing mutations. It deploys from the reviewed head under the closure procedure in `AGENTS.md`. A reviewer panel that shows judgments per claim and records dispositions is the next step.

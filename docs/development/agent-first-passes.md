@@ -1,6 +1,6 @@
 # Revisitable agent research and storage
 
-Status: implementation proposal with a working local archive. The archive preserves provisional research attempts, including attempts that stop before producing a dossier. Automatic dispatch, hosted object storage, and portal integration remain proposed. Existing review and release rules continue to apply.
+Status: implementation proposal with a working local archive and backend receipts. The archive preserves provisional research attempts, including attempts that stop before producing a dossier. Since 2026-09-24 (J2 of the [agent judgments](agent-judgments.md) design) an operator can submit archived records to the shared backend, which keeps their exact bytes under a receipt and records their judgments. Automatic dispatch, hosted object storage, and portal display remain proposed. Existing review and release rules continue to apply.
 
 ## A useful first pass
 
@@ -70,9 +70,35 @@ python3 -m unittest discover -s scripts/agent_research -p 'test_*.py'
 
 The archive validates the structure of supplied attribution fields. A trusted controller must populate or verify responsible-human identifiers, code and instruction hashes, operational-definition hashes, and provider receipts. A missing reported model identifier requires an explicit reason. A schema-valid record can still contain false evidence or sensitive text; keep actual records in the private tier and inspect them before any wider use.
 
+## Receipts in the shared backend
+
+`first_pass.py submit` sends an archived record and its complete parent history to the backend, parents first. The backend keeps each record's exact archive bytes in an `agent_first_pass_receipts` row and returns a receipt. Its checks mirror the archive's: the bytes must hash to the claimed SHA-256 and be one line of ASCII JSON ending in a newline, and the record must pass the first-pass schema and every semantic rule above, including the embedded dossier's checks and the New Zealand restriction. Each parent must already hold a receipt for the same place, so the backend never holds a revision whose history it cannot return. A `context` block must name a task, evidence draft, and evidence version that exist on that deployment and agree with one another. The submission runs through an internal mutation behind the `POW_INTERNAL_AGENT_INGEST_ENABLED` gate that also governs the internal bundle intake, and the command requires an explicit `dev` or `local` deployment selector.
+
+A record with a dossier also produces agent judgments: one `status_assessment` of the place and one `annotation` judgment per claim annotation, each attributed to the dossier's provider, the record's requested and reported models, its code revision, and its instruction hash. The claims themselves stay in the record, which a judgment names as `<record sha256>#<claim_id>`. A record without a dossier receives a receipt and no judgments. The receipt creates no task, evidence draft, evidence version, or review decision, and every record remains provisional.
+
+The receipt follows a general contract, `object-receipt.v1`, implemented in `convex/lib/objectReceipts.ts` so that a later import needing immutable references can reuse it:
+
+- The object is addressed by the SHA-256 of its exact bytes, and the receipt id is `<namespace>:<sha256>` (here `first-pass:<sha256>`).
+- An identical retry returns the existing receipt and writes nothing. An operator therefore repeats an interrupted submission unchanged.
+- Changed content has a different hash and therefore receives a new receipt; its predecessors are named explicitly and must already hold receipts.
+- The receipt records the byte length and a storage tier. The tier is `convex_only` until an independent copy has been written, read back, and verified, when it becomes `r2_verified` with the object key and verification time. The bytes stay in the receipt until that verification.
+
+`first_pass.py restore` rebuilds a record and its history in a clean local archive from the receipts alone, checking each object's hash and wire format before publishing it and verifying the complete graph afterwards. A `convex_only` receipt is a recoverable second copy, not the durable project-controlled storage that the storage table above requires; the hosted object adapter and its independent verification remain to be built.
+
+```sh
+# synthetic data only; the deployment must be one you are authorised to write to.
+uv run python scripts/agent_research/first_pass.py submit HASH \
+  --store /tmp/pow-first-pass-archive --deployment local
+
+uv run python scripts/agent_research/first_pass.py restore HASH \
+  --store /tmp/pow-first-pass-restored --deployment local
+```
+
+Reviewers, curators, administrators, and the PI can read a receipt with `firstPassReceipts:getFirstPassReceipt` and list receipts by place or task with `listFirstPassReceipts`. The review portal does not yet display them.
+
 ## Delivery and evaluation
 
-The next implementation should connect the existing internal runner to the first-pass archive, preserving a blocked record when a provider fails or a dossier needs revision. The hosted storage adapter should then write immutable objects, retrieve and verify every uploaded object, and return a receipt. A reconstruction exercise from an independent stored copy should precede any durability claim.
+The next implementation should connect the existing internal runner to the first-pass archive, preserving a blocked record when a provider fails or a dossier needs revision. The hosted storage adapter should then write immutable objects, retrieve and verify every uploaded object, and advance the backend receipt to `r2_verified`. A reconstruction exercise from an independent stored copy should precede any durability claim.
 
 Portal delivery first makes retained evidence inspectable through the existing authenticated human review portal, as clarified on 2026-09-23 in [human review and occasional release](human-review-and-release.md). A reviewed inspection adapter and verified hosted references can deliver that collection while runner integration proceeds. The current NZ intake restrictions remain in force until a country-compatible contract is reviewed and implemented. Persistent collection browsing remains planned; master release can follow later, on the PI’s instruction. Inspection may first require an authorised Convex deployment and provisional import.
 
