@@ -28,6 +28,17 @@
         "from": "sha256 of the review prompt, kept in the private run directory"
       }
     },
+    "inspection-case.v1": {
+      "definition_hash": { "provenance": "private_input", "from": "sha256 of the operational definition used by the adapter" },
+      "sources[].original_hash": { "provenance": "private_input", "from": "sha256 of permitted source bytes held in project-controlled storage" },
+      "context.evidence_version_hash": { "provenance": "server_lookup", "from": "the receipted evidence version named by the inspection context" },
+      "parents[]": { "provenance": "server_lookup", "from": "the digest of an earlier inspection case receipt" }
+    },
+    "inspection-collection.v1": {
+      "definition_hash": { "provenance": "private_input", "from": "sha256 of the operational definition used by the adapter" },
+      "case_hashes[]": { "provenance": "server_lookup", "from": "the digest of an inspection case receipt included in the collection" },
+      "parents[]": { "provenance": "server_lookup", "from": "the digest of an earlier inspection collection receipt" }
+    },
     "agent-first-pass.v1": {
       "parents[]": {
         "provenance": "server_lookup",

@@ -3,7 +3,7 @@ import { internalMutation, internalQuery, query } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireUser } from "./lib/auth";
 import { assertInternalAgentIngestEnabled } from "./lib/agentServiceUser";
-import { validateInspectionCase, validateInspectionCollection } from "./lib/inspectionCollection";
+import { screenInspectionCase, screenInspectionCollection, validateInspectionCase, validateInspectionCollection } from "./lib/inspectionCollection";
 import { OBJECT_RECEIPT_CONTRACT, convexOnlyStorage, isSha256Hex, objectReceiptId, verifyObjectBytes } from "./lib/objectReceipts";
 import { sha256 } from "./lib/sha256";
 import { canonicalWireJson } from "./lib/wireJson";
@@ -28,6 +28,8 @@ export const ingestInspectionObject = internalMutation({
     }
     const { byteLength } = verifyObjectBytes(args.objectJson, args.objectHash);
     const value = JSON.parse(args.objectJson);
+    if (args.objectKind === "case") screenInspectionCase(value);
+    else screenInspectionCollection(value);
     const object = args.objectKind === "case" ? validateInspectionCase(args.objectJson, args.objectHash) : validateInspectionCollection(value);
     if (args.objectKind === "collection" && `${canonicalWireJson(JSON.stringify(object))}\n` !== args.objectJson) throw new Error("Collection does not round-trip.");
     const logicalRef = args.objectKind === "case" ? (object as ReturnType<typeof validateInspectionCase>).case_ref : (object as ReturnType<typeof validateInspectionCollection>).collection_ref;

@@ -1,5 +1,4 @@
-import { assertNoDuplicateJsonKeys, dateBounds, guard, publicUrl } from "./agentIntake.ts";
-import { screenAllText } from "./firstPass.ts";
+import { assertNoDuplicateJsonKeys, assertScreened, dateBounds, guard, keyRef, publicUrl, SCREEN_HASH_FIELDS } from "./agentIntake.ts";
 import { isSha256Hex, verifyObjectBytes } from "./objectReceipts.ts";
 import { sha256 } from "./sha256.ts";
 import { canonicalWireJson } from "./wireJson.ts";
@@ -12,6 +11,40 @@ export const ADAPTER_VERSION = "bahamas-inspection-adapter.v1";
 const REFERENCE = /^[a-z0-9][a-z0-9._:/-]{0,159}$/;
 const FIELDS = new Set(["case_ref", "country_code", "source_snapshot_date", "definition_version", "definition_hash", "source_records", "candidate_links", "claims", "agent_assessments", "context", "parents"]);
 const PERMISSIONS = new Set(["permitted", "needs_review", "restricted"]);
+const shape = (names: string[]): { properties: Record<string, any> } => ({ properties: Object.fromEntries(names.map(name => [name, {}])) });
+const sourceShape = shape(["source_ref", "source_family_ref", "locator", "publisher", "publication_date", "retrieved_at", "returned_date", "access_result", "licence_note", "copy_permission", "display_permission", "original_hash", "extract"]);
+const linkShape = shape(["candidate_ref", "basis", "disposition", "osm_ref", "project_site_id"]);
+const claimShape = shape(["claim_ref", "attribute", "wording", "described_date", "observation_date", "geometry", "source_refs", "uncertainty"]);
+claimShape.properties.geometry = shape(["latitude", "longitude"]);
+claimShape.properties.source_refs = { items: {} };
+const assessmentShape = shape(["assessment_ref", "subject_ref", "agent_name", "model_requested", "model_reported", "model_unreported_reason", "outcome", "basis"]);
+const caseShape = shape(["schema_version", "disposition", "case_ref", "country_code", "source_snapshot_date", "definition_version", "definition_hash", "sources", "candidate_links", "claims", "agent_assessments", "context", "parents"]);
+caseShape.properties.sources = { items: sourceShape };
+caseShape.properties.candidate_links = { items: linkShape };
+caseShape.properties.claims = { items: claimShape };
+caseShape.properties.agent_assessments = { items: assessmentShape };
+caseShape.properties.context = shape(["task_id", "evidence_version_hash"]);
+caseShape.properties.parents = { items: {} };
+const inputShape = shape([...FIELDS]);
+inputShape.properties.source_records = { items: sourceShape };
+inputShape.properties.candidate_links = { items: linkShape };
+inputShape.properties.claims = { items: claimShape };
+inputShape.properties.agent_assessments = { items: assessmentShape };
+inputShape.properties.context = caseShape.properties.context;
+inputShape.properties.parents = { items: {} };
+const collectionShape = shape(["schema_version", "country_code", "collection_ref", "adapter_version", "source_snapshot_date", "definition_version", "definition_hash", "case_hashes", "parents"]);
+collectionShape.properties.case_hashes = { items: {} };
+collectionShape.properties.parents = { items: {} };
+const inputHashFields = new Set([...SCREEN_HASH_FIELDS[INSPECTION_SCHEMA]].map(path => path.replace(/^sources\[\]/, "source_records[]")));
+
+export function screenInspectionCase(value: unknown, adapterInput = false): void {
+  const schema = adapterInput ? inputShape : caseShape;
+  assertScreened(value, schema, schema, adapterInput ? inputHashFields : SCREEN_HASH_FIELDS[INSPECTION_SCHEMA]);
+}
+
+export function screenInspectionCollection(value: unknown): void {
+  assertScreened(value, collectionShape, collectionShape, SCREEN_HASH_FIELDS[COLLECTION_SCHEMA]);
+}
 
 type JsonRecord = Record<string, unknown>;
 function record(value: unknown, path: string): JsonRecord {
@@ -19,7 +52,7 @@ function record(value: unknown, path: string): JsonRecord {
   return value as JsonRecord;
 }
 function keys(value: JsonRecord, allowed: readonly string[], path: string): void {
-  for (const key of Object.keys(value)) if (!allowed.includes(key)) throw new Error(`${path}: unsupported field ${key}`);
+  for (const key of Object.keys(value)) if (!allowed.includes(key)) throw new Error(`${path}: unsupported field ${keyRef(value, key)}`);
 }
 function string(value: unknown, path: string): string {
   if (typeof value !== "string" || value.trim() === "") throw new Error(`${path}: non-empty string required`);
@@ -82,6 +115,7 @@ export type AdapterReport = { adapter_version: typeof ADAPTER_VERSION; field_map
 // A private adapter may supply this bounded interchange shape. No caller may
 // silently add research fields; it must account for omission in its report.
 export function adaptInspectionCase(input: unknown): { projection: InspectionCase; report: AdapterReport } {
+  screenInspectionCase(input, true);
   const raw = record(input, "input");
   keys(raw, [...FIELDS], "input");
   if (raw.country_code !== "bs") throw new Error("input: Bahamas country code required");
@@ -140,8 +174,7 @@ export function adaptInspectionCase(input: unknown): { projection: InspectionCas
   const context = record(raw.context, "context"); keys(context, ["task_id", "evidence_version_hash"], "context");
   const parents = list(raw.parents, "parents").map((value, index) => hash(value, `parents[${index}]`)); unique(parents, "parents");
   const projection: InspectionCase = { schema_version: INSPECTION_SCHEMA, disposition: "provisional", case_ref: ref(raw.case_ref, "case_ref"), country_code: "bs", source_snapshot_date: date(raw.source_snapshot_date, "source_snapshot_date"), definition_version: string(raw.definition_version, "definition_version"), definition_hash: hash(raw.definition_hash, "definition_hash"), sources, candidate_links, claims, agent_assessments, context: { task_id: context.task_id === null ? null : ref(context.task_id, "context.task_id"), evidence_version_hash: context.evidence_version_hash === null ? null : hash(context.evidence_version_hash, "context.evidence_version_hash") }, parents };
-  const hits = screenAllText(projection);
-  if (hits.length) throw new Error(`potential personal details require human handling: ${hits.join(", ")}`);
+  screenInspectionCase(projection);
   // The shared detector catches contact details and honorific-led names. A
   // conservatively broader field screen holds clergy and tenure passages for
   // human redaction even when a title is absent.
@@ -155,6 +188,7 @@ export function validateInspectionCase(text: string, claimedHash: string): Inspe
   assertNoDuplicateJsonKeys(text);
   const parsed: unknown = JSON.parse(text);
   guard(parsed);
+  screenInspectionCase(parsed);
   const input = record(parsed, "projection");
   keys(input, ["schema_version", "disposition", "case_ref", "country_code", "source_snapshot_date", "definition_version", "definition_hash", "sources", "candidate_links", "claims", "agent_assessments", "context", "parents"], "projection");
   if (input.schema_version !== INSPECTION_SCHEMA || input.disposition !== "provisional") throw new Error("invalid inspection contract");
@@ -165,12 +199,12 @@ export function validateInspectionCase(text: string, claimedHash: string): Inspe
 }
 
 export function validateInspectionCollection(value: unknown): InspectionCollection {
+  screenInspectionCollection(value);
   const row = record(value, "collection"); keys(row, ["schema_version", "country_code", "collection_ref", "adapter_version", "source_snapshot_date", "definition_version", "definition_hash", "case_hashes", "parents"], "collection");
   if (row.schema_version !== COLLECTION_SCHEMA || row.country_code !== "bs" || row.adapter_version !== ADAPTER_VERSION) throw new Error("invalid collection contract");
   const case_hashes = list(row.case_hashes, "case_hashes").map((item, index) => hash(item, `case_hashes[${index}]`)); unique(case_hashes, "case_hashes");
   const parents = list(row.parents, "parents").map((item, index) => hash(item, `parents[${index}]`)); unique(parents, "parents");
   const result: InspectionCollection = { schema_version: COLLECTION_SCHEMA, country_code: "bs", collection_ref: ref(row.collection_ref, "collection_ref"), adapter_version: ADAPTER_VERSION, source_snapshot_date: date(row.source_snapshot_date, "source_snapshot_date"), definition_version: string(row.definition_version, "definition_version"), definition_hash: hash(row.definition_hash, "definition_hash"), case_hashes, parents };
-  const hits = screenAllText(result); if (hits.length) throw new Error(`potential personal details: ${hits.join(", ")}`);
   return result;
 }
 

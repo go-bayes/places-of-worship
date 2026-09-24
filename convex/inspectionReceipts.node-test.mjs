@@ -43,6 +43,38 @@ test("unsupported fields, restricted extracts, broken links and personal details
   for (const [value, message] of cases) assert.throws(() => adaptInspectionCase(value), message);
 });
 
+test("undeclared inspection keys and values produce positional, value-free diagnostics", () => {
+  const privateKey = "Rev Example";
+  const withPrivateKey = input();
+  withPrivateKey.claims[0][privateKey] = "unrecognised";
+  assert.throws(() => adaptInspectionCase(withPrivateKey), error => {
+    assert.match(error.message, /claims\[0\]\.<key#\d+> \(key\)/);
+    assert.doesNotMatch(error.message, /Rev Example|unrecognised/);
+    return true;
+  });
+  const projection = adaptInspectionCase(input()).projection;
+  projection.claims[0][privateKey] = "unrecognised";
+  const object = addressed(projection, "case");
+  assert.throws(() => validateInspectionCase(object.objectJson, object.objectHash), error => {
+    assert.match(error.message, /claims\[0\]\.<key#\d+> \(key\)/);
+    assert.doesNotMatch(error.message, /Rev Example|unrecognised/);
+    return true;
+  });
+  const value = input();
+  value.claims[0].wording = "Contact person@example.org";
+  assert.throws(() => adaptInspectionCase(value), error => {
+    assert.match(error.message, /claims\[0\]\.wording/);
+    assert.doesNotMatch(error.message, /person@example\.org/);
+    return true;
+  });
+});
+
+test("hash tokens are refused outside designated inspection hash fields", () => {
+  const value = input();
+  value.claims[0].wording = `Reference ${"B".repeat(64)}`;
+  assert.throws(() => adaptInspectionCase(value), /hash-shaped value in claims\[0\]\.wording/);
+});
+
 test("immutable receipts collapse retries, link versions and require complete membership", async () => {
   process.env.POW_INTERNAL_AGENT_INGEST_ENABLED = "true";
   const ctx = dbContext();
