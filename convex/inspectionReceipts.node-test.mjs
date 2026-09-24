@@ -14,6 +14,7 @@ const wire = (value) => `${canonicalWireJson(JSON.stringify(value))}\n`;
 const addressed = (value, objectKind) => { const objectJson = wire(value); return { objectJson, objectHash: sha256(objectJson), objectKind }; };
 const H = "a".repeat(64);
 function input() { return { case_ref: "synthetic:case-1", country_code: "bs", source_snapshot_date: "2026-09-01", definition_version: "0.1.6", definition_hash: H, source_records: [{ source_ref: "synthetic:source-1", source_family_ref: "synthetic:family-1", locator: "https://example.org/directory", publisher: "Synthetic directory", publication_date: "2020", retrieved_at: "2026-09-01T12:00:00Z", returned_date: null, access_result: "snippet_only", licence_note: "Permission pending", copy_permission: "needs_review", display_permission: "needs_review", original_hash: null, extract: null }], candidate_links: [{ candidate_ref: "synthetic:candidate-1", basis: "Address correspondence only", disposition: "possible", osm_ref: "way/123", project_site_id: null }], claims: [{ claim_ref: "synthetic:claim-1", attribute: "worship", wording: "A synthetic meeting is mentioned", described_date: "2019", observation_date: "2020", geometry: null, source_refs: ["synthetic:source-1"], uncertainty: "Address only; location unresolved" }], agent_assessments: [{ assessment_ref: "synthetic:assessment-1", subject_ref: "synthetic:claim-1", agent_name: "synthetic-agent", model_requested: "synthetic-model", model_reported: null, model_unreported_reason: "Provider omitted model identifier", outcome: "unclear", basis: "Snippet does not establish the site" }], context: { task_id: null, evidence_version_hash: null }, parents: [] }; }
+export { input, addressed };
 function dbContext(identity = null, roles = []) {
   const rows = { inspection_object_receipts: [], users: [{ _id: "user-1", auth_subject: "identity", status: "active", roles }] };
   const db = { query(table) { const filters = []; const q = { eq(key, value) { filters.push([key, value]); return q; } }; const chain = { withIndex(_index, callback) { callback(q); return chain; }, async unique() { return rows[table].find(row => filters.every(([key, value]) => row[key] === value)) ?? null; } }; return chain; }, async insert(table, row) { rows[table].push({ ...row, _id: `receipt-${rows[table].length + 1}` }); } };
@@ -68,17 +69,17 @@ test("immutable receipts collapse retries, link versions and require complete me
 });
 
 test("a clean cache restores the exact projection from synthetic project-controlled objects", async () => {
-  const storage = fs.mkdtempSync(path.join(os.tmpdir(), "pow-inspection-storage-"));
+  const storage = fileURLToPath(new URL("../scripts/agent_research/fixtures/inspection-objects/", import.meta.url));
   const cache = fs.mkdtempSync(path.join(os.tmpdir(), "pow-inspection-cache-"));
   try {
     const first = addressed(adaptInspectionCase(input()).projection, "case");
     const manifest = addressed(validateInspectionCollection({ schema_version: "inspection-collection.v1", country_code: "bs", collection_ref: "synthetic:collection-1", adapter_version: ADAPTER_VERSION, source_snapshot_date: "2026-09-01", definition_version: "0.1.6", definition_hash: H, case_hashes: [first.objectHash], parents: [] }), "collection");
-    for (const object of [first, manifest]) fs.writeFileSync(path.join(storage, object.objectHash), object.objectJson, { flag: "wx" });
+    assert.equal(fs.readFileSync(path.join(storage, "root.txt"), "utf8"), `${manifest.objectHash}\n`);
+    for (const object of [first, manifest]) assert.equal(fs.readFileSync(path.join(storage, `${object.objectHash}.json`), "utf8"), object.objectJson);
     fs.rmSync(cache, { recursive: true, force: true });
-    const restored = await restoreInspectionCollection(manifest.objectHash, async hash => { const filename = path.join(storage, hash); return fs.existsSync(filename) ? { object_hash: hash, object_json: fs.readFileSync(filename, "utf8"), object_kind: hash === manifest.objectHash ? "collection" : "case" } : null; });
+    const restored = await restoreInspectionCollection(manifest.objectHash, async hash => { const filename = path.join(storage, `${hash}.json`); return fs.existsSync(filename) ? { object_hash: hash, object_json: fs.readFileSync(filename, "utf8"), object_kind: hash === manifest.objectHash ? "collection" : "case" } : null; });
     assert.equal(wire(restored.collection), manifest.objectJson);
     assert.equal(wire(restored.cases[0]), first.objectJson);
-    fs.writeFileSync(path.join(storage, first.objectHash), first.objectJson.replace("synthetic meeting", "different meeting"));
-    await assert.rejects(restoreInspectionCollection(manifest.objectHash, async hash => ({ object_hash: hash, object_json: fs.readFileSync(path.join(storage, hash), "utf8"), object_kind: hash === manifest.objectHash ? "collection" : "case" })), /hash does not match/);
-  } finally { fs.rmSync(storage, { recursive: true, force: true }); fs.rmSync(cache, { recursive: true, force: true }); }
+    await assert.rejects(restoreInspectionCollection(manifest.objectHash, async hash => ({ object_hash: hash, object_json: hash === first.objectHash ? first.objectJson.replace("synthetic meeting", "different meeting") : fs.readFileSync(path.join(storage, `${hash}.json`), "utf8"), object_kind: hash === manifest.objectHash ? "collection" : "case" })), /hash does not match/);
+  } finally { fs.rmSync(cache, { recursive: true, force: true }); }
 });
