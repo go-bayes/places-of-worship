@@ -220,12 +220,14 @@ class FakeBackend:
     def __init__(self):
         self.receipts = {}
         self.calls = []
+        self.ingested = []
 
     def __call__(self, deployment, function, payload):
         self.calls.append((deployment, function))
         if function == fp.INGEST_FUNCTION:
             raw = payload['recordJson']
             digest = payload['recordHash']
+            self.ingested.append(digest)
             if hashlib.sha256(raw.encode('ascii')).hexdigest() != digest:
                 raise ValueError('hash mismatch')
             for parent in json.loads(raw)['parents']:
@@ -329,7 +331,21 @@ class FirstPassSubmitTests(unittest.TestCase):
         third = fp.archive(self.store, record)
         with self.assertRaisesRegex(ValueError, 'personal details in stop_reason'):
             fp.submit(self.store, third, 'local', run=self.backend)
-        self.assertEqual(self.backend.calls, [])
+        # only the read-only lookup ran; nothing was sent for ingestion
+        self.assertEqual(self.backend.calls, [('local', fp.RECORD_FUNCTION)])
+
+    def test_a_record_receipted_before_a_rule_tightened_can_retry(self):
+        record = json.loads((HERE / 'fixtures/first-pass.json').read_text())
+        record['parents'] = [self.second]
+        record['stop_reason'] = 'Stopped; ask the office on 04 123 4567.'
+        third = fp.archive(self.store, record)
+        fp.submit(self.store, self.second, 'local', run=self.backend)
+        raw, _ = fp.read_object(self.store, third)
+        self.backend.receipts[third] = raw.decode('ascii')
+        receipts = fp.submit(self.store, third, 'local', run=self.backend)
+        self.assertEqual([r['created'] for r in receipts], [False, False, False])
+        self.assertTrue(receipts[-1]['already_receipted'])
+        self.assertNotIn(third, self.backend.ingested)
 
     def test_submission_rules_match_the_backend(self):
         record = json.loads((HERE / 'fixtures/first-pass-researched.json').read_text())

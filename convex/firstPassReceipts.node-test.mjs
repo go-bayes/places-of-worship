@@ -426,6 +426,26 @@ test("a float where python's schema needs an integer is refused, so every receip
   }
 });
 
+test("a retry of receipted bytes succeeds even after a rule has tightened", async () => {
+  enable();
+  const ctx = context();
+  const input = args(partial());
+  const first = await ingestFirstPass._handler(ctx, input);
+  // simulate a receipt written before a stricter rule: the stored bytes now fail validation
+  const stale = partial();
+  stale.stop_reason = "Stopped; ask the office on 04 123 4567.";
+  const staleInput = args(stale);
+  await assert.rejects(ingestFirstPass._handler(ctx, staleInput), /personal details/);
+  ctx.rows.agent_first_pass_receipts.push({ ...ctx.rows.agent_first_pass_receipts[0], _id: "stale", receipt_id: `first-pass:${staleInput.recordHash}`, record_hash: staleInput.recordHash, record_json: staleInput.recordJson, judgment_ids: [] });
+  const retried = await ingestFirstPass._handler(ctx, staleInput);
+  assert.equal(retried.created, false);
+  assert.equal(retried.receipt_id, `first-pass:${staleInput.recordHash}`);
+  // a wrong hash never reaches the stored receipt
+  await assert.rejects(ingestFirstPass._handler(ctx, { recordJson: input.recordJson, recordHash: staleInput.recordHash }), /does not match/);
+  assert.equal((await ingestFirstPass._handler(ctx, input)).receipt_id, first.receipt_id);
+  assert.equal(ctx.rows.agent_first_pass_receipts.length, 2);
+});
+
 test("the parent lookup stays bounded on a place with a long judgment history", async () => {
   enable();
   const ctx = context({ guardUnbounded: true });

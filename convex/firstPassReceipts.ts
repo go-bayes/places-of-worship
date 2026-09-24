@@ -7,6 +7,7 @@ import { validateStandaloneDossier } from "./lib/agentIntake";
 import { FIRST_PASS_SCHEMA_VERSION, validateFirstPassRecord, type FirstPassRecord } from "./lib/firstPass";
 import { costBasisOf, recordJudgments, type JudgmentContext, type JudgmentInput } from "./lib/agentJudgments";
 import { OBJECT_RECEIPT_CONTRACT, convexOnlyStorage, isSha256Hex, objectReceiptId } from "./lib/objectReceipts";
+import { sha256 } from "./lib/sha256";
 
 // first-pass receipts (docs/development/agent-first-passes.md). the
 // operator's `first_pass.py submit` sends each archived record, parents
@@ -171,13 +172,19 @@ export const ingestFirstPass = internalMutation({
   returns: receiptResult,
   handler: async (ctx, args) => {
     assertInternalAgentIngestEnabled();
-    const { record, byteLength } = validateFirstPassRecord(args.recordJson, args.recordHash);
-    const existing = await receiptByHash(ctx, args.recordHash);
-    if (existing !== null) {
-      // same hash, same bytes: an identical retry returns the receipt unchanged
-      if (existing.record_json !== args.recordJson) throw new Error("Stored first-pass bytes differ from their hash; refusing to continue.");
-      return { receipt_id: existing.receipt_id, record_hash: existing.record_hash, created: false, storage_tier: existing.storage.tier, judgment_ids: existing.judgment_ids };
+    // an exact retry of bytes already receipted returns that receipt without
+    // writing, before validation, so a rule tightened after the first ingest
+    // cannot turn an idempotent retry into an error. the stored bytes must
+    // equal the submitted bytes and hash to the address, so nothing
+    // unvalidated is admitted (the same rule as internalAgentIntake).
+    if (isSha256Hex(args.recordHash) && sha256(args.recordJson) === args.recordHash) {
+      const existing = await receiptByHash(ctx, args.recordHash);
+      if (existing !== null) {
+        if (existing.record_json !== args.recordJson) throw new Error("Stored first-pass bytes differ from their hash; refusing to continue.");
+        return { receipt_id: existing.receipt_id, record_hash: existing.record_hash, created: false, storage_tier: existing.storage.tier, judgment_ids: existing.judgment_ids };
+      }
     }
+    const { record, byteLength } = validateFirstPassRecord(args.recordJson, args.recordHash);
     // predecessors must already hold receipts for the same place, so the
     // backend never holds a revision whose history it cannot return
     for (const parent of record.parents) {

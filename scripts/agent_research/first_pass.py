@@ -282,13 +282,24 @@ def submit(store: Path, digest: str, deployment: str, run=convex_run):
     if deployment not in DEPLOYMENTS:
         raise ValueError('an explicit dev or local deployment is required')
     objects = verify(store, digest)
-    # screen the whole history before the first call, so nothing partial is sent
-    for current, (_, record) in objects.items():
+    # screen the whole history before the first write, so nothing partial is
+    # sent. a record that fails only because a rule tightened after it was
+    # receipted may still retry: a read-only lookup must show the backend
+    # holding these exact bytes, and the record is then not sent again.
+    receipted = {}
+    for current, (raw, record) in objects.items():
         errors = submission_errors(record)
         if errors:
-            raise ValueError(f'{current}: ' + '; '.join(errors))
+            stored = run(deployment, RECORD_FUNCTION, {'recordHash': current})
+            if stored is None or stored.get('record_json', '').encode('ascii') != raw:
+                raise ValueError(f'{current}: ' + '; '.join(errors))
+            receipted[current] = {'record_hash': current, 'receipt_id': f'first-pass:{current}', 'created': False,
+                                  'already_receipted': True, 'current_errors': errors}
     receipts = []
     for current in history_order(objects, digest):
+        if current in receipted:
+            receipts.append(receipted[current])
+            continue
         raw = objects[current][0]
         receipt = run(deployment, INGEST_FUNCTION, {'recordJson': raw.decode('ascii'), 'recordHash': current})
         if not isinstance(receipt, dict) or receipt.get('record_hash') != current:
