@@ -500,8 +500,11 @@ const dot = { type: "Feature", properties: { name: "St Mary's", osm_id: "1", osm
   handlers.mousedown({ originalEvent: { button: 0 } });
   assert.equal(timers.length, 1);
   assert.equal(timers[0].ms, 600);
+  let swallowed = 0;
+  app.swallowHoldRelease = () => { swallowed += 1; };
   timers[0].fn();
   assert.equal(opened, 1, "a still hold opens the menu");
+  assert.equal(swallowed, 1, "the hold's release is held back");
   // a drag cancels the hold
   handlers.mousedown({ originalEvent: { button: 0 } });
   handlers.dragstart();
@@ -523,4 +526,94 @@ const dot = { type: "Feature", properties: { name: "St Mary's", osm_id: "1", osm
   window.clearTimeout = clearTimeout;
 }
 
-console.log("add-revise-control: 15 checks passed");
+// 16. the hold's release is not a click on the map (jb 2026-09-24: "as you
+//     mouse up to hit it, it disappears"): the one click that ends the hold
+//     stops in the capture phase before leaflet's preclick can close the
+//     menu, a later click passes, and a fresh press disarms the catch
+{
+  const app = fresh();
+  const listeners = [];
+  window.addEventListener = (type, fn, capture) => listeners.push({ type, fn, capture });
+  window.removeEventListener = (type, fn, capture) => {
+    const index = listeners.findIndex(item => item.type === type && item.fn === fn && item.capture === capture);
+    if (index >= 0) listeners.splice(index, 1);
+  };
+  const inside = { name: "pin" };
+  const container = { contains: node => node === inside };
+  app.map = { getContainer: () => container };
+  const fire = (type, target) => {
+    const event = { target, stopped: false, prevented: false, stopPropagation() { this.stopped = true; }, preventDefault() { this.prevented = true; } };
+    listeners.filter(item => item.type === type).forEach(item => item.fn(event));
+    return event;
+  };
+  app.swallowHoldRelease();
+  assert.equal(listeners.every(item => item.capture === true), true, "capture phase, ahead of leaflet");
+  const release = fire("click", inside);
+  assert.equal(release.stopped, true, "the release click stops before the map");
+  assert.equal(release.prevented, true);
+  assert.equal(listeners.length, 0, "one click only");
+  assert.equal(fire("click", inside).stopped, false, "the next click reaches the menu");
+  // no click for the release: the next press disarms, so its click passes
+  app.swallowHoldRelease();
+  fire("mousedown", inside);
+  assert.equal(listeners.length, 0);
+  assert.equal(fire("click", inside).stopped, false);
+  // a release outside the map is left alone
+  app.swallowHoldRelease();
+  assert.equal(fire("click", { name: "sidebar" }).stopped, false);
+  assert.equal(listeners.length, 0);
+  // a second hold replaces the first catch rather than stacking
+  app.swallowHoldRelease();
+  app.swallowHoldRelease();
+  assert.equal(listeners.filter(item => item.type === "click").length, 1);
+  delete window.addEventListener;
+  delete window.removeEventListener;
+}
+
+// 17. the hold's menu freezes the pin while open and escape closes the menu
+//     alone; a right-click menu leaves dragging as it was, and a pin
+//     confirmed while the menu was open stays frozen
+{
+  const app = fresh();
+  let dragOn = true;
+  const marker = { getLatLng: () => ({ lat: -41.3, lng: 174.8 }), dragging: { enabled: () => dragOn, enable() { dragOn = true; }, disable() { dragOn = false; } } };
+  const layers = new Set();
+  const popupOptions = [];
+  const makePopup = () => {
+    const handlers = {};
+    const popup = {
+      on(name, fn) { handlers[name] = fn; return popup; },
+      setLatLng() { return popup; }, setContent() { return popup; },
+      openOn() { layers.add(popup); return popup; },
+      getElement: () => null,
+      close() { layers.delete(popup); handlers.remove?.(); },
+    };
+    return popup;
+  };
+  context.L = { popup: options => { popupOptions.push(options); return makePopup(); } };
+  app.map = { hasLayer: layer => layers.has(layer), closePopup: popup => popup.close() };
+  app.pinMarker = marker;
+  app.pinMode = true;
+  app.openPinHoldMenu({ fromHold: true });
+  assert.equal(popupOptions[0].closeOnEscapeKey, false, "escape belongs to the portal's handler");
+  assert.equal(dragOn, false, "the pin does not follow the held button");
+  assert.equal(app.closePinHoldMenu(), true);
+  assert.equal(dragOn, true, "the pin drags again once the menu closes");
+  assert.equal(app.pinHoldPopup, null);
+  assert.equal(app.closePinHoldMenu(), false, "nothing open, so escape may leave the entry");
+  // the right click (or a touch hold) never froze it
+  app.openPinHoldMenu();
+  assert.equal(dragOn, true);
+  app.closePinHoldMenu();
+  // confirmed while the menu was open: the confirm froze it, and it stays so
+  app.openPinHoldMenu({ fromHold: true });
+  app.pinConfirmed = { latitude: -41.3, longitude: 174.8 };
+  app.closePinHoldMenu();
+  assert.equal(dragOn, false);
+  // the key handler asks the menu first
+  const source = fs.readFileSync(path.join(__dirname, "verification-map.js"), "utf8");
+  assert.match(source, /if \(this\.closePinHoldMenu\(\)\) return;\n\s*this\.exitPinMode\(\);/);
+  delete context.L;
+}
+
+console.log("add-revise-control: 17 checks passed");

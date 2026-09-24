@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-24 (the pin's menu stays open after a mouse hold)
+
+- On a computer the pin's menu opened by a held mouse button no longer vanishes as the pointer moves up to it (JB, 2026-09-24: "as you mouse up to hit it, it disappears unless you are very quick"). The release that ends the hold reached the map as a click, and the map's click closed the menu at once (it faded out over 200 ms, the only window in which `Remove pin` could be reached). That one click is now held back, the pin no longer follows a button still held while the menu is open, and Escape closes the menu alone before a second Escape leaves the entry. No grace timer was needed. Checks 16 and 17 in `add-revise-control.test.cjs`; RA guide and UI style guide updated; stamp `verification-map.js?v=20260924a`.
+
 ### 2026-09-24 (development methods log)
 
 - Added a public log of how the site is developed, for a methods publication, and a rule in the contributor guidance that each working session records its methods there.
