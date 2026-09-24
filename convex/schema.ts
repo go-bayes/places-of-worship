@@ -887,13 +887,17 @@ export default defineSchema({
     status: exportRunStatus,
     started_by: v.id("users"),
     started_at: v.number(),
-    // composition progress: tasks are read through tasks.by_country_status
-    // in _creationTime order; members are cut into batches in seq order
-    phase: v.union(v.literal("estimating"), v.literal("cutting"), v.literal("done")),
-    estimate_cursor: v.optional(v.number()),
-    // task ids already taken at exactly estimate_cursor, so a continuation
-    // reading from that creation time on never takes one twice
-    estimate_cursor_ids: v.optional(v.array(v.string())),
+    // composition progress: archiving (the drafts of the run this one
+    // replaced), then estimating (tasks read through tasks.by_country_status
+    // one paginated page per step, the page's task ids queued on the run and
+    // the continuation cursor stored), then cutting (members cut into
+    // batches in seq order)
+    phase: v.union(v.literal("archiving"), v.literal("estimating"), v.literal("cutting"), v.literal("done")),
+    replacing_run_id: v.optional(v.string()),
+    archived_batch_count: v.optional(v.number()),
+    candidate_cursor: v.optional(v.union(v.string(), v.null())),
+    candidate_queue: v.optional(v.array(v.string())),
+    candidates_done: v.optional(v.boolean()),
     next_member_seq: v.number(),
     cut_cursor_seq: v.optional(v.number()),
     member_count: v.number(),
@@ -939,6 +943,8 @@ export default defineSchema({
     evidence_version_hash: v.optional(v.string()),
     review_snapshot_hash: v.optional(v.string()),
     estimated_bytes: v.number(),
+    // the task's share of the batch row (its ids twice, its manifest hashes)
+    estimated_row_bytes: v.number(),
     estimated_read_bytes: v.number(),
     estimated_documents: v.number(),
     estimated_index_ranges: v.number(),

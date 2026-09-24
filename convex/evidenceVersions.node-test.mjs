@@ -78,6 +78,16 @@ function world() {
         async first() { return selected()[0] ?? null; },
         async take(count) { return selected().slice(0, count); },
         async collect() { return selected(); },
+        // Convex streams a query one document per call (the export read
+        // meter iterates this way)
+        [Symbol.asyncIterator]() {
+          const matched = selected();
+          let index = 0;
+          return {
+            async next() { return index < matched.length ? { done: false, value: matched[index++] } : { done: true, value: undefined }; },
+            async return(value) { index = matched.length; return { done: true, value }; },
+          };
+        },
       };
       return chain;
     },
