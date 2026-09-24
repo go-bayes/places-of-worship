@@ -992,6 +992,9 @@ const PIN_PROXIMITY_METRES = 150;
 // a mouse held still on the pin opens its menu after this long, as a
 // held touch does on a phone (jb 2026-09-23)
 const PIN_HOLD_MS = 600;
+// the release click follows its mouseup in the same turn; the catch for it
+// ends this long after the mouseup whether it came or not
+const HOLD_RELEASE_CLICK_MS = 100;
 // quick photo (jb 2026-09-22): the photo types attachment storage takes,
 // its 10 MB cap, and the location contract's radius bounds
 const QUICK_PHOTO_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -12026,30 +12029,42 @@ class NzVerificationMap {
     // "as you mouse up to hit it, it disappears"): the browser turns the
     // release into a click, on the pin or, if the mouse has moved, on the
     // map, and leaflet's preclick then closes the menu the hold has just
-    // opened (on the map a click also moves the pin). the next click is
-    // held back in the capture phase; a fresh press disarms the catch, so a
-    // browser that fires no click for the release cannot eat the click that
-    // chooses Remove pin. the catch lives only as long as the menu: closing
-    // it (a button, a map click, escape), lifting the pin or leaving the
-    // entry disarms it too, so a keyboard press on a control after a
-    // release that fired no click is never eaten
+    // opened (on the map a click also moves the pin). that one click is held
+    // back in the capture phase, and only that one: the catch ends
+    // HOLD_RELEASE_CLICK_MS after the mouseup that ends the hold, whether a
+    // click came or not, and a click on the menu itself always passes, so a
+    // keyboard press on Remove pin or on a map control is never eaten.
+    // closing the menu, a fresh press, lifting the pin and leaving the entry
+    // all disarm it too
     swallowHoldRelease() {
         const container = this.map?.getContainer();
         this.disarmHoldRelease?.();
-        if (!container || !this.pinHoldPopup || !this.map.hasLayer(this.pinHoldPopup)) return;
+        const popup = this.pinHoldPopup;
+        if (!container || !popup || !this.map.hasLayer(popup)) return;
+        let expiry = null;
         const disarm = () => {
             window.removeEventListener("click", swallow, true);
             window.removeEventListener("mousedown", disarm, true);
+            window.removeEventListener("mouseup", released, true);
+            if (expiry) window.clearTimeout(expiry);
+            expiry = null;
             if (this.disarmHoldRelease === disarm) this.disarmHoldRelease = null;
+        };
+        const released = () => {
+            window.removeEventListener("mouseup", released, true);
+            expiry = window.setTimeout(disarm, HOLD_RELEASE_CLICK_MS);
         };
         const swallow = event => {
             disarm();
-            if (!container.contains(event.target)) return;
+            const target = event.target;
+            if (!container.contains(target)) return;
+            if (popup.getElement?.()?.contains(target)) return;
             event.stopPropagation();
             event.preventDefault();
         };
         window.addEventListener("click", swallow, true);
         window.addEventListener("mousedown", disarm, true);
+        window.addEventListener("mouseup", released, true);
         this.disarmHoldRelease = disarm;
     }
 

@@ -665,7 +665,7 @@ const dot = { type: "Feature", properties: { name: "St Mary's", osm_id: "1", osm
   const hold = () => { app.openPinHoldMenu({ fromHold: true }); app.swallowHoldRelease(); };
   // hold, release with no click, escape
   hold();
-  assert.equal(listeners.length, 2, "the catch is armed");
+  assert.equal(listeners.length, 3, "the catch is armed (click, mousedown, mouseup)");
   assert.equal(dragOn, false);
   assert.equal(app.closePinHoldMenu(), true, "escape closes the menu");
   assert.equal(listeners.length, 0, "closing the menu disarms the catch");
@@ -699,4 +699,59 @@ const dot = { type: "Feature", properties: { name: "St Mary's", osm_id: "1", osm
   delete window.removeEventListener;
 }
 
-console.log("add-revise-control: 18 checks passed");
+// 19. the catch is for the release click alone (greptile on #158): a
+//     release that fires no click leaves no catch once
+//     HOLD_RELEASE_CLICK_MS has passed, so enter on Remove pin (a click
+//     with no mousedown) acts; and a click on the menu itself is never
+//     eaten, even inside that window
+{
+  const app = fresh();
+  const listeners = [];
+  const timers = [];
+  window.addEventListener = (type, fn, capture) => listeners.push({ type, fn, capture });
+  window.removeEventListener = (type, fn, capture) => {
+    const index = listeners.findIndex(item => item.type === type && item.fn === fn && item.capture === capture);
+    if (index >= 0) listeners.splice(index, 1);
+  };
+  window.setTimeout = (fn, ms) => { timers.push({ fn, ms, cleared: false }); return timers.length; };
+  window.clearTimeout = (id) => { if (timers[id - 1]) timers[id - 1].cleared = true; };
+  const removeButton = { name: "Remove pin" };
+  const pinIcon = { name: "pin" };
+  const menuElement = { contains: node => node === removeButton };
+  const container = { contains: node => node === removeButton || node === pinIcon };
+  const popup = { getElement: () => menuElement };
+  app.pinHoldPopup = popup;
+  app.map = { getContainer: () => container, hasLayer: layer => layer === popup };
+  const fire = (type, target) => {
+    const event = { target, stopped: false, stopPropagation() { this.stopped = true; }, preventDefault() {} };
+    listeners.filter(item => item.type === type).forEach(item => item.fn(event));
+    return event;
+  };
+  // the hold's mouseup comes with no click; the catch ends after the window
+  app.swallowHoldRelease();
+  fire("mouseup", pinIcon);
+  assert.equal(timers.length, 1);
+  assert.equal(timers[0].ms, 100, "the catch ends 100 ms after the release");
+  timers[0].fn();
+  assert.equal(listeners.length, 0, "nothing left armed");
+  assert.equal(app.disarmHoldRelease, null);
+  assert.equal(fire("click", removeButton).stopped, false, "enter on Remove pin acts");
+  // inside the window: the menu's own click passes, and ends the catch
+  app.swallowHoldRelease();
+  assert.equal(fire("click", removeButton).stopped, false, "a click on the menu is never eaten");
+  assert.equal(listeners.length, 0);
+  // the ordinary release: mouseup then its click on the pin, same turn
+  app.swallowHoldRelease();
+  fire("mouseup", pinIcon);
+  assert.equal(fire("click", pinIcon).stopped, true, "the release click is held back");
+  assert.equal(listeners.length, 0);
+  assert.equal(timers[timers.length - 1].cleared, true, "its expiry is cleared");
+  const source = fs.readFileSync(path.join(__dirname, "verification-map.js"), "utf8");
+  assert.match(source, /const HOLD_RELEASE_CLICK_MS = 100;/);
+  window.setTimeout = setTimeout;
+  window.clearTimeout = clearTimeout;
+  delete window.addEventListener;
+  delete window.removeEventListener;
+}
+
+console.log("add-revise-control: 19 checks passed");
