@@ -42,7 +42,9 @@ const inputHashFields = new Set([...SCREEN_HASH_FIELDS[INSPECTION_SCHEMA]].map(p
 // the 7-digit local form. hits are named by path, never by value.
 const NANP_PHONE = /\+1[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b|\(\d{3}\)\s?\d{3}[\s.-]\d{4}\b|\b(?:\d{10}|\d{3}[\s.-]\d{3}[\s.-]\d{4}|\d{3}[\s.-]\d{4})\b/;
 function assertNoNanpPhone(value: unknown, schema: any): void {
-  for (const [path, text] of screenedStrings(value, schema, schema)) if (NANP_PHONE.test(text)) throw new Error(`potential personal details in ${path} require human handling`);
+  // source locators are validated URLs whose record ids can look like local numbers; the shared
+  // screen still covers them, the NANP pattern does not
+  for (const [path, text] of screenedStrings(value, schema, schema)) if (!/\.locator$/.test(path) && NANP_PHONE.test(text)) throw new Error(`potential personal details in ${path} require human handling`);
 }
 
 export function screenInspectionCase(value: unknown, adapterInput = false): void {

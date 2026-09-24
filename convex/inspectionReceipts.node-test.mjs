@@ -210,3 +210,9 @@ test("a clean cache restores the exact projection from synthetic project-control
     await assert.rejects(restoreInspectionCollection(manifest.objectHash, async hash => ({ object_hash: hash, object_json: hash === first.objectHash ? first.objectJson.replace("synthetic meeting", "different meeting") : fs.readFileSync(path.join(storage, `${hash}.json`), "utf8"), object_kind: hash === manifest.objectHash ? "collection" : "case" })), /hash does not match/);
   } finally { fs.rmSync(cache, { recursive: true, force: true }); }
 });
+
+test("a source locator whose record id looks like a local number is accepted", () => {
+  const value = input();
+  value.source_records[0].locator = "https://example.org/record/123-4567";
+  assert.doesNotThrow(() => adaptInspectionCase(value));
+});
