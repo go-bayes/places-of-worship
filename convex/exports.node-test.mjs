@@ -16,8 +16,21 @@ import { world, draftContent, fakeStorage, actionCtx, utf8Length } from "./testi
 const { submitEvidenceDraft } = await import("./evidence.ts");
 const { recordReviewDecision, getReviewSnapshot } = await import("./reviews.ts");
 const { recordAcceptance } = await import("./acceptances.ts");
-const { createExportBatch, freezeExportBatch, getExportBundle, withdrawExportBatch, prepareFreeze, completeFreeze } =
-  await import("./exports.ts");
+const {
+  createExportBatch,
+  freezeExportBatch,
+  getExportBundle,
+  withdrawExportBatch,
+  prepareFreeze,
+  completeFreeze,
+  recordStoredObject,
+  composeExportBatches,
+  freezeCountryBatches,
+  getExportRun,
+  EXPORT_BATCH_BYTE_BUDGET,
+  EXPORT_BATCH_READ_BUDGET,
+} = await import("./exports.ts");
+const { BUNDLE_CODEC, gzipBundleFile, utf8Bytes, sha256Hex } = await import("./lib/bundleCodec.ts");
 const { reopenTask } = await import("./tasks.ts");
 const { objectHash } = await import("./lib/canonicalJson.ts");
 const { sha256 } = await import("./lib/sha256.ts");
@@ -634,39 +647,451 @@ test("a predecessor withdrawn or superseded after the replacement was created re
   assert.equal(w.task.status, "pi_accepted");
 });
 
-// the interim scale gate (review of PR #112, 2026-09-12)
-test("automatic selection refuses a country with more accepted tasks than one freeze can hold, naming the limit", async () => {
-  const w = await scene({ country: "VU" });
-  const admin2 = await w.addUser("admin-subject-2", ["admin"]);
-  for (let index = 0; index < 101; index += 1) {
-    await w.addTask({ task_id: `bulk_${index}`, country_code: "VU", status: "pi_accepted" });
+
+// ---------------------------------------------------------------------------
+// pr l1, lean freeze (lean-storage brief section 3.1; rulings 1, 2, 3, 12)
+// ---------------------------------------------------------------------------
+
+// the plain bytes of a served bundle: every file, manifest included
+function servedBundleBytes(bundle) {
+  return Object.values(bundle.files).reduce((total, text) => total + utf8Length(text), 0);
+}
+
+test("a frozen batch stores every file gzip-compressed and records all four values and the codec on frozen_files; the task records its batch", async () => {
+  const w = await freezableScene();
+  const storage = fakeStorage();
+  await freezeExportBatch._handler(actionCtx(w, storage), { exportBatchId: w.batch.export_batch_id });
+
+  const batchRow = w.row("export_batches", "export_batch_id", w.batch.export_batch_id);
+  const bundle = await getExportBundle._handler(actionCtx(w, storage), { exportBatchId: w.batch.export_batch_id });
+  const manifestEntries = new Map(bundle.export_manifest.files.map((entry) => [entry.filename, entry]));
+  let storedTotal = 0;
+  let plainTotal = 0;
+  for (const entry of batchRow.frozen_files) {
+    assert.equal(entry.encoding, "gzip");
+    assert.deepEqual(entry.codec, BUNDLE_CODEC);
+    const stored = storage._bytes(entry.storage_id);
+    assert.deepEqual([...stored.subarray(0, 4)], [0x1f, 0x8b, 0x08, 0x00]);
+    assert.equal(entry.stored_byte_length, stored.length);
+    assert.equal(entry.stored_sha256, await sha256Hex(stored));
+    // sha256 and byte_length keep describing the plain bytes, as the
+    // manifest does
+    if (entry.filename !== "export_manifest.json") {
+      assert.equal(entry.sha256, manifestEntries.get(entry.filename).sha256);
+      assert.equal(entry.byte_length, manifestEntries.get(entry.filename).byte_length);
+    }
+    storedTotal += entry.stored_byte_length;
+    plainTotal += entry.byte_length;
   }
+  assert.ok(storedTotal < plainTotal, `stored ${storedTotal} bytes should be below plain ${plainTotal}`);
+  assert.equal(batchRow.pending_freeze, undefined);
+
+  const task = w.row("tasks", "task_id", "task_1");
+  assert.equal(task.status, "exported");
+  assert.equal(task.last_export_batch_id, w.batch.export_batch_id);
+  assert.equal(task.last_exported_at, batchRow.freeze_completed_at);
+});
+
+test("retrieval refuses stored bytes that decode to different content, or do not decode, even when the stored values were rewritten to match", async () => {
+  const w = await freezableScene();
+  const storage = fakeStorage();
+  await freezeExportBatch._handler(actionCtx(w, storage), { exportBatchId: w.batch.export_batch_id });
+  const batchRow = w.row("export_batches", "export_batch_id", w.batch.export_batch_id);
+  const target = batchRow.frozen_files.find((entry) => entry.filename === "tasks.jsonl");
+
+  // consistent substitution: other content, gzip-compressed, with the
+  // stored hash and length on the row rewritten to match it
+  const substitute = gzipBundleFile(utf8Bytes('{"task_id":"task_substituted"}\n'));
+  storage._put(target.storage_id, substitute);
+  target.stored_sha256 = await sha256Hex(substitute);
+  target.stored_byte_length = substitute.length;
   await assert.rejects(
-    createExportBatch._handler(w.as(admin2), { countryCode: "VU" }),
-    /more than 100 pi_accepted tasks.*Name up to 100 tasks explicitly/,
+    getExportBundle._handler(actionCtx(w, storage), { exportBatchId: w.batch.export_batch_id }),
+    /stored file tasks\.jsonl: decoded bytes failed verification/,
+  );
+
+  // bytes that are not gzip, with matching stored values
+  const notGzip = utf8Bytes("not a gzip stream");
+  storage._put(target.storage_id, notGzip);
+  target.stored_sha256 = await sha256Hex(notGzip);
+  target.stored_byte_length = notGzip.length;
+  await assert.rejects(
+    getExportBundle._handler(actionCtx(w, storage), { exportBatchId: w.batch.export_batch_id }),
+    /stored file tasks\.jsonl: stored bytes do not decode as gzip/,
+  );
+
+  // an encoded entry missing its codec record
+  delete target.codec;
+  await assert.rejects(
+    getExportBundle._handler(actionCtx(w, storage), { exportBatchId: w.batch.export_batch_id }),
+    /stored file tasks\.jsonl is gzip-encoded but lacks/,
   );
 });
 
-test("a bundle over the byte budget is refused at capture: no blob stored, the batch stays draft with the reason", async () => {
+test("a batch frozen before pr l1 (plain stored bytes, no encoding) is still served and verified as then", async () => {
   const w = await freezableScene();
   const storage = fakeStorage();
-  await appendTaskEvent(w.ctx, {
-    taskId: "task_1",
-    eventType: "note_added",
-    actorUserId: w.admin2._id,
-    actorRole: "admin",
-    reason: "A note whose stored row is enlarged below.",
-  });
-  const note = w.events("note_added").at(-1);
-  await w.ctx.db.patch(note._id, { reason: "x".repeat(7 * 1024 * 1024) });
+  await freezeExportBatch._handler(actionCtx(w, storage), { exportBatchId: w.batch.export_batch_id });
+  const before = await getExportBundle._handler(actionCtx(w, storage), { exportBatchId: w.batch.export_batch_id });
 
+  // rewrite the stored objects to the pre-l1 form: plain bytes, and
+  // frozen_files entries carrying only the plain sha256 and length
+  const batchRow = w.row("export_batches", "export_batch_id", w.batch.export_batch_id);
+  for (const entry of batchRow.frozen_files) {
+    const plain = utf8Bytes(new TextDecoder().decode(require_gunzip(storage._bytes(entry.storage_id))));
+    storage._put(entry.storage_id, plain);
+    delete entry.encoding;
+    delete entry.stored_sha256;
+    delete entry.stored_byte_length;
+    delete entry.codec;
+  }
+  const after = await getExportBundle._handler(actionCtx(w, storage), { exportBatchId: w.batch.export_batch_id });
+  assert.equal(after.disposition.verified, true);
+  assert.deepEqual(after.files, before.files);
+
+  // and a flipped plain byte is still refused, naming the file
+  const target = batchRow.frozen_files.find((entry) => entry.byte_length > 0);
+  storage._corrupt(target.storage_id);
+  await assert.rejects(
+    getExportBundle._handler(actionCtx(w, storage), { exportBatchId: w.batch.export_batch_id }),
+    new RegExp(`stored file ${target.filename.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} failed verification`),
+  );
+});
+
+import { gunzipSync as require_gunzip } from "node:zlib";
+
+test("an attempt that died after storing objects leaves a trail on pending_freeze; the next attempt carries it and discards those blobs when it commits", async () => {
+  const w = await freezableScene();
+  const storage = fakeStorage();
+  const ctx = actionCtx(w, storage);
+
+  // attempt A: prepared, one object stored and recorded, then the action died
+  await prepareFreeze._handler(w.as(w.admin2), { exportBatchId: w.batch.export_batch_id, userId: w.admin2._id, attemptId: "attempt-dead" });
+  const plain = utf8Bytes("an object the dead attempt stored\n");
+  const gz = gzipBundleFile(plain);
+  const deadId = await storage.store(new Blob([gz]));
+  const recorded = await recordStoredObject._handler(w.as(w.admin2), {
+    exportBatchId: w.batch.export_batch_id,
+    attemptId: "attempt-dead",
+    userId: w.admin2._id,
+    filename: "tasks.jsonl",
+    storageId: deadId,
+    sha256: await sha256Hex(plain),
+    byteLength: plain.length,
+    storedSha256: await sha256Hex(gz),
+    storedByteLength: gz.length,
+    codec: BUNDLE_CODEC,
+  });
+  assert.equal(recorded, true);
+  const trail = w.row("export_batches", "export_batch_id", w.batch.export_batch_id).pending_freeze.stored_objects;
+  assert.equal(trail.length, 1);
+  assert.equal(trail[0].attempt_id, "attempt-dead");
+  assert.match(trail[0].object_key, /^objects\/sha256\/[0-9a-f]{64}\/fflate-[0-9.]+-l6\.gz$/);
+  assert.equal(trail[0].codec_id, `fflate-${BUNDLE_CODEC.version}-l6`);
+
+  // a stale attempt may not add to the trail
+  assert.equal(
+    await recordStoredObject._handler(w.as(w.admin2), {
+      exportBatchId: w.batch.export_batch_id,
+      attemptId: "attempt-other",
+      userId: w.admin2._id,
+      filename: "tasks.jsonl",
+      storageId: deadId,
+      sha256: await sha256Hex(plain),
+      byteLength: plain.length,
+      storedSha256: await sha256Hex(gz),
+      storedByteLength: gz.length,
+      codec: BUNDLE_CODEC,
+    }),
+    false,
+  );
+
+  const result = await freezeExportBatch._handler(ctx, { exportBatchId: w.batch.export_batch_id });
+  assert.equal(result.status, "frozen");
+  assert.equal(storage._has(deadId), false, "the dead attempt's blob is discarded once a later attempt commits");
+  assert.equal(storage._blobCount(), 16);
+  assert.equal(w.row("export_batches", "export_batch_id", w.batch.export_batch_id).pending_freeze, undefined);
+});
+
+test("a failed attempt deletes its own blobs and discards an inherited trail; the batch keeps no pending_freeze", async () => {
+  const w = await freezableScene();
+  const storage = fakeStorage();
+  await prepareFreeze._handler(w.as(w.admin2), { exportBatchId: w.batch.export_batch_id, userId: w.admin2._id, attemptId: "attempt-dead" });
+  const gz = gzipBundleFile(utf8Bytes("x\n"));
+  const deadId = await storage.store(new Blob([gz]));
+  await recordStoredObject._handler(w.as(w.admin2), {
+    exportBatchId: w.batch.export_batch_id,
+    attemptId: "attempt-dead",
+    userId: w.admin2._id,
+    filename: "tasks.jsonl",
+    storageId: deadId,
+    sha256: await sha256Hex(utf8Bytes("x\n")),
+    byteLength: 2,
+    storedSha256: await sha256Hex(gz),
+    storedByteLength: gz.length,
+    codec: BUNDLE_CODEC,
+  });
+
+  storage._corruptNextGet();
   await assert.rejects(
     freezeExportBatch._handler(actionCtx(w, storage), { exportBatchId: w.batch.export_batch_id }),
-    /above the 6291456-byte freeze budget; create smaller batches/,
+    /did not verify on read-back: Stored file .*: stored bytes failed verification/,
   );
   assert.equal(storage._blobCount(), 0);
   const batchRow = w.row("export_batches", "export_batch_id", w.batch.export_batch_id);
   assert.equal(batchRow.status, "draft");
   assert.equal(batchRow.pending_freeze, undefined);
-  assert.match(batchRow.last_freeze_failure.reason, /freeze budget/);
+  assert.ok(batchRow.last_freeze_failure);
+});
+
+// budget and composition fixtures: tasks whose rows carry a padded brief, so
+// a handful of them fill a batch
+async function paddedAcceptedTasks(w, count, { briefBytes = 40_000, prefix = "bulk" } = {}) {
+  const ids = [];
+  for (let index = 0; index < count; index += 1) {
+    const taskId = `${prefix}_${String(index).padStart(3, "0")}`;
+    await w.addTask({ task_id: taskId, country_code: "VU", status: "in_progress", task_brief: "b".repeat(briefBytes) });
+    await w.addDraft({ evidence_draft_id: `${taskId}:draft_a`, task_id: taskId, created_by: w.ra._id });
+    await reviewAndAccept(w, { taskId, evidenceDraftId: `${taskId}:draft_a`, pi: w.pi });
+    ids.push(taskId);
+  }
+  return ids;
+}
+
+async function budgetScene() {
+  const w = await scene({ country: "VU" });
+  const pi = await w.addUser("pi-subject", ["pi"]);
+  const admin2 = await w.addUser("admin-subject-2", ["admin"]);
+  return Object.assign(w, { pi, admin2 });
+}
+
+test("createExportBatch refuses an explicit list or an automatic selection over one batch's budget, naming the task that breaks it and the composer", async () => {
+  const w = await budgetScene();
+  const ids = await paddedAcceptedTasks(w, 60, { briefBytes: 60_000 });
+
+  await assert.rejects(
+    createExportBatch._handler(w.as(w.admin2), { countryCode: "VU", taskIds: ids }),
+    /named tasks exceed one export batch's budget \(\d+ (bundle bytes, above the 6291456-byte budget|bytes read, above the 10485760 budget) by task bulk_\d+\); name fewer tasks per batch, or compose the country with exports:composeExportBatches/,
+  );
+  await assert.rejects(
+    createExportBatch._handler(w.as(w.admin2), { countryCode: "VU" }),
+    /VU's pi_accepted tasks exceed one export batch's budget .*composeExportBatches/,
+  );
+  assert.equal(w.rows.export_batches.length, 0);
+
+  // a list within budget is created, carrying its estimate
+  const created = await createExportBatch._handler(w.as(w.admin2), { countryCode: "VU", taskIds: ids.slice(0, 5) });
+  const batchRow = w.row("export_batches", "export_batch_id", created.export_batch_id);
+  assert.ok(batchRow.estimated_bytes > 5 * 60_000 && batchRow.estimated_bytes <= EXPORT_BATCH_BYTE_BUDGET);
+  assert.ok(batchRow.estimated_index_ranges > 0 && batchRow.estimated_documents > 0);
+
+  // and the estimate bounds what the freeze actually builds
+  const storage = fakeStorage();
+  await freezeExportBatch._handler(actionCtx(w, storage), { exportBatchId: created.export_batch_id });
+  const bundle = await getExportBundle._handler(actionCtx(w, storage), { exportBatchId: created.export_batch_id });
+  const actual = servedBundleBytes(bundle);
+  assert.ok(actual <= batchRow.estimated_bytes, `built ${actual} bytes, estimated ${batchRow.estimated_bytes}`);
+  assert.ok(batchRow.estimated_bytes - actual < 16 * 1024, `estimate ${batchRow.estimated_bytes} should be within 16 KiB of ${actual}`);
+});
+
+test("a single task whose rows alone exceed the budget is refused by name", async () => {
+  const w = await budgetScene();
+  await w.addTask({ task_id: "huge_1", country_code: "VU", status: "pi_accepted", task_brief: "h".repeat(7 * 1024 * 1024) });
+  await assert.rejects(
+    createExportBatch._handler(w.as(w.admin2), { countryCode: "VU", taskIds: ["huge_1"] }),
+    /Task huge_1: its (bundle )?rows alone .*cannot be exported in any batch/,
+  );
+  await assert.rejects(
+    createExportBatch._handler(w.as(w.admin2), { countryCode: "VU", taskIds: Array.from({ length: 501 }, (_, i) => `t${i}`) }),
+    /at most 500 tasks/,
+  );
+});
+
+// the composer and the scheduled freeze chain, on a 200-task country
+test("composeExportBatches cuts a 200-task country into budgeted batches that cover every task once; the scheduled chain freezes them all", async () => {
+  const w = await budgetScene();
+  const ids = await paddedAcceptedTasks(w, 200);
+  // a training-excluded accepted task never enters a run
+  await w.addTask({
+    task_id: "training_1",
+    country_code: "VU",
+    status: "pi_accepted",
+    source_context: { training: { exclude_from_exports: true } },
+  });
+
+  const storage = fakeStorage();
+  w.useStorage(storage);
+  const composed = await composeExportBatches._handler(w.as(w.admin2), { countryCode: "VU" });
+  const composeSteps = await w.drainScheduled(storage);
+  assert.ok(composeSteps > 3, `expected several bounded composition steps, got ${composeSteps}`);
+
+  const run = await getExportRun._handler(w.as(w.admin2), { countryCode: "VU" });
+  assert.equal(run.run_id, composed.run_id);
+  assert.equal(run.status, "composed");
+  assert.equal(run.phase, "done");
+  assert.equal(run.member_count, 200);
+  assert.equal(run.refused_count, 0);
+  assert.equal(run.lease, undefined);
+
+  const batches = w.rows.export_batches.filter((row) => row.export_run_id === run.run_id);
+  assert.equal(batches.length, run.batch_count);
+  assert.ok(batches.length >= 3, `expected the 200 tasks in several batches, got ${batches.length}`);
+  const covered = batches.flatMap((batch) => batch.included_task_ids);
+  assert.deepEqual([...covered].sort(), [...ids].sort());
+  assert.equal(new Set(covered).size, covered.length, "no task is in two batches");
+  for (const batch of batches) {
+    assert.equal(batch.status, "draft");
+    assert.ok(batch.estimated_bytes <= EXPORT_BATCH_BYTE_BUDGET);
+    assert.ok(batch.estimated_documents <= EXPORT_BATCH_READ_BUDGET.documents);
+    assert.ok(batch.estimated_index_ranges <= EXPORT_BATCH_READ_BUDGET.index_ranges);
+  }
+  // membership is captured per task, with the authority pins
+  const members = w.rows.export_run_members.filter((row) => row.run_id === run.run_id);
+  assert.equal(members.length, 200);
+  for (const member of members) {
+    assert.ok(member.export_batch_id);
+    assert.match(member.evidence_version_hash, /^sha256:/);
+    assert.match(member.review_snapshot_hash ?? "", /^[0-9a-f]{64}$|^sha256:/);
+  }
+
+  // a task accepted after composition waits for the next run
+  await paddedAcceptedTasks(w, 1, { prefix: "late" });
+
+  w.as(w.admin2);
+  const first = await freezeCountryBatches._handler(actionCtx(w, storage), { countryCode: "VU" });
+  assert.equal(first.status, "frozen");
+  const chainSteps = await w.drainScheduled(storage);
+  assert.equal(chainSteps, batches.length, "one scheduled invocation per remaining batch, plus the one that finds none left");
+
+  const finished = await getExportRun._handler(w.as(w.admin2), { runId: run.run_id });
+  assert.equal(finished.status, "completed");
+  assert.equal(finished.frozen_batch_count, batches.length);
+  assert.equal(finished.lease, undefined);
+  for (const taskId of ids) {
+    const task = w.row("tasks", "task_id", taskId);
+    assert.equal(task.status, "exported");
+    const batch = batches.find((row) => row.included_task_ids.includes(taskId));
+    assert.equal(task.last_export_batch_id, batch.export_batch_id);
+  }
+  assert.equal(w.row("tasks", "task_id", "late_000").status, "pi_accepted");
+  assert.equal(w.row("tasks", "task_id", "training_1").status, "pi_accepted");
+
+  // every frozen batch serves verified bytes within the budget and its estimate
+  for (const batch of batches) {
+    const bundle = await getExportBundle._handler(actionCtx(w, storage), { exportBatchId: batch.export_batch_id });
+    assert.equal(bundle.disposition.verified, true);
+    const row = w.row("export_batches", "export_batch_id", batch.export_batch_id);
+    const actual = servedBundleBytes(bundle);
+    assert.ok(actual <= row.estimated_bytes && row.estimated_bytes <= EXPORT_BATCH_BYTE_BUDGET, `${actual} <= ${row.estimated_bytes}`);
+    // the exported events name the run's curator
+    const exported = w.events("exported").filter((event) => event.export_batch_id === batch.export_batch_id);
+    assert.equal(exported.length, batch.included_task_ids.length);
+    assert.ok(exported.every((event) => event.actor_user_id === w.admin2._id));
+  }
+});
+
+test("the run lock refuses a second composition or a second chain while a lease is live; a later composition replaces a stopped run and archives its drafts", async () => {
+  const w = await budgetScene();
+  await paddedAcceptedTasks(w, 40, { briefBytes: 120_000 });
+  const storage = fakeStorage();
+  w.useStorage(storage);
+
+  await composeExportBatches._handler(w.as(w.admin2), { countryCode: "VU" });
+  await assert.rejects(composeExportBatches._handler(w.as(w.admin2), { countryCode: "VU" }), /is still composing/);
+  await assert.rejects(
+    freezeCountryBatches._handler(actionCtx(w, storage), { countryCode: "VU" }),
+    /is still composing/,
+  );
+  await w.drainScheduled(storage);
+  const run = await getExportRun._handler(w.as(w.admin2), { countryCode: "VU" });
+  assert.equal(run.status, "composed");
+  assert.ok(run.batch_count >= 2);
+
+  // freeze the first batch, then drift one task of a later batch: reopen,
+  // re-review, and re-accept it on a new draft, so its batch no longer
+  // matches what the run captured
+  w.as(w.admin2);
+  await freezeCountryBatches._handler(actionCtx(w, storage), { countryCode: "VU" });
+  const later = w.rows.export_batches.filter((row) => row.export_run_id === run.run_id && row.status === "draft");
+  const driftTask = later[0].included_task_ids[0];
+  await reacceptTask(w, driftTask, `${driftTask}:draft_b`);
+  w.as(w.admin2);
+  const errors = [];
+  await w.drainScheduled(storage, { onError: (error) => errors.push(error.message) });
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /membership changed since it was created/);
+
+  const stopped = await getExportRun._handler(w.as(w.admin2), { countryCode: "VU" });
+  assert.equal(stopped.status, "stopped");
+  assert.equal(stopped.last_error.export_batch_id, later[0].export_batch_id);
+  assert.equal(stopped.frozen_batch_count, 1);
+  const failedBatch = w.row("export_batches", "export_batch_id", later[0].export_batch_id);
+  assert.equal(failedBatch.status, "draft");
+  assert.match(failedBatch.last_freeze_failure.reason, /membership changed/);
+
+  // a curator re-run resumes and stops again on the same batch (never skips it)
+  w.as(w.admin2);
+  await assert.rejects(freezeCountryBatches._handler(actionCtx(w, storage), { countryCode: "VU" }), /membership changed/);
+
+  // a new composition replaces the stopped run and archives its drafts
+  const again = await composeExportBatches._handler(w.as(w.admin2), { countryCode: "VU" });
+  assert.equal(again.replaced_run_id, run.run_id);
+  assert.equal(again.archived_batch_count, run.batch_count - 1);
+  const archived = w.row("export_batches", "export_batch_id", later[0].export_batch_id);
+  assert.equal(archived.status, "archived");
+  assert.match(archived.archived_reason, new RegExp(again.run_id));
+  const archivedBundle = await getExportBundle._handler(actionCtx(w, storage), { exportBatchId: archived.export_batch_id });
+  assert.equal(archivedBundle.disposition.status, "archived");
+  assert.equal(archivedBundle.disposition.legacy_unfrozen_bytes, undefined);
+  await assert.rejects(freezeExportBatch._handler(actionCtx(w, storage), { exportBatchId: archived.export_batch_id }), /Only draft export batches/);
+
+  await w.drainScheduled(storage);
+  const second = await getExportRun._handler(w.as(w.admin2), { countryCode: "VU" });
+  assert.equal(second.status, "composed");
+  // the tasks already exported by the first batch are not pi_accepted any
+  // more; everything else, the re-accepted task included, is in the new run
+  const exportedCount = w.rows.tasks.filter((task) => task.status === "exported").length;
+  assert.equal(second.member_count, 40 - exportedCount);
+  w.as(w.admin2);
+  await freezeCountryBatches._handler(actionCtx(w, storage), { countryCode: "VU" });
+  await w.drainScheduled(storage);
+  assert.equal((await getExportRun._handler(w.as(w.admin2), { countryCode: "VU" })).status, "completed");
+  assert.equal(w.rows.tasks.filter((task) => task.task_id.startsWith("bulk_") && task.status !== "exported").length, 0);
+});
+
+test("a run batch whose captured authority pin no longer matches is refused at freeze; a curator who lost the role stops the chain", async () => {
+  const w = await budgetScene();
+  await paddedAcceptedTasks(w, 30, { briefBytes: 120_000 });
+  const storage = fakeStorage();
+  w.useStorage(storage);
+  await composeExportBatches._handler(w.as(w.admin2), { countryCode: "VU" });
+  await w.drainScheduled(storage);
+  const run = await getExportRun._handler(w.as(w.admin2), { countryCode: "VU" });
+
+  const member = w.rows.export_run_members.find((row) => row.run_id === run.run_id && row.seq === 0);
+  member.evidence_version_hash = "sha256:" + "0".repeat(64);
+  w.as(w.admin2);
+  await assert.rejects(
+    freezeCountryBatches._handler(actionCtx(w, storage), { countryCode: "VU" }),
+    new RegExp(`task ${member.task_id}'s export authority changed since run ${run.run_id} captured it`),
+  );
+
+  // repair the pin, resume, then demote the run's curator before the next step
+  member.evidence_version_hash = w.row("evidence_drafts", "task_id", member.task_id).evidence_version_hash;
+  w.as(w.admin2);
+  await freezeCountryBatches._handler(actionCtx(w, storage), { countryCode: "VU" });
+  await w.db.patch(w.admin2._id, { roles: ["reviewer"] });
+  await w.drainScheduled(storage);
+  const stopped = await getExportRun._handler(w.as(w.admin), { countryCode: "VU" });
+  assert.equal(stopped.status, "stopped");
+  assert.match(stopped.last_error.reason, /no longer an active curator or admin/);
+  assert.equal(stopped.frozen_batch_count, 1);
+
+  // another curator resumes, and the chain finishes under that curator
+  w.as(w.admin);
+  await freezeCountryBatches._handler(actionCtx(w, storage), { countryCode: "VU" });
+  await w.drainScheduled(storage);
+  const done = await getExportRun._handler(w.as(w.admin), { countryCode: "VU" });
+  assert.equal(done.status, "completed");
+  assert.equal(done.freeze_actor, w.admin._id);
 });
