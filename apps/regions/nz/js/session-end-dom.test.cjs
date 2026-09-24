@@ -370,6 +370,64 @@ async function roundThree() {
     assert.ok(values.has("powFormSnapshot2:NZ:user_b:task_1"), "b's snapshot is untouched");
   }
 
+  // guided periods: a recorded submission deletes the submitter's periods
+  // only if the device copy is still the version it sent (round 4)
+  {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    app.backend.user = { _id: "user_a" };
+    const key = window.PowOccupancy.guidedPeriodsStoragePrefix("NZ", "user_a") + "task_p";
+    values.set(key, JSON.stringify({ saved_at: 100, segments: [{ start: "1990" }] }));
+    app.guidedPeriodsByTaskId.set("task_p", { segments: [{ start: "1990" }] });
+    const sent = { ...app.guidedPeriodsVersion("task_p"), epoch: app.sessionEpoch || 0 };
+    assert.deepEqual({ owner: sent.owner, savedAt: sent.savedAt }, { owner: "user_a", savedAt: 100 });
+    // the session ends while the submission is in flight; the same
+    // contributor signs back in and edits the periods
+    app.onBackendSessionEnded({ deliberate: false });
+    app.backendUser = { _id: "user_a" };
+    app.backend.user = { _id: "user_a" };
+    values.set(key, JSON.stringify({ saved_at: 200, segments: [{ start: "1991" }] }));
+    app.guidedPeriodsByTaskId.set("task_p", { segments: [{ start: "1991" }] });
+    app.clearSubmittedGuidedPeriods("task_p", sent);
+    assert.equal(JSON.parse(values.get(key)).saved_at, 200, "the newer device copy stays");
+    assert.ok(app.guidedPeriodsByTaskId.has("task_p"), "and so does the new working copy");
+    // the sent version itself goes; in its own session, the working copy too
+    const { app: same } = signedInApp("user_a");
+    same.backend.user = { _id: "user_a" };
+    values.set(key, JSON.stringify({ saved_at: 300, segments: [{ start: "1992" }] }));
+    same.guidedPeriodsByTaskId.set("task_p", { segments: [{ start: "1992" }] });
+    const mine = { ...same.guidedPeriodsVersion("task_p"), epoch: same.sessionEpoch || 0 };
+    same.clearSubmittedGuidedPeriods("task_p", mine);
+    assert.equal(values.has(key), false);
+    assert.equal(same.guidedPeriodsByTaskId.has("task_p"), false);
+    // another contributor's periods are never reached
+    const otherKey = window.PowOccupancy.guidedPeriodsStoragePrefix("NZ", "user_b") + "task_p";
+    values.set(otherKey, JSON.stringify({ saved_at: 300, segments: [{}] }));
+    same.clearSubmittedGuidedPeriods("task_p", mine);
+    assert.ok(values.has(otherKey));
+  }
+
+  // the rapid path: recordRapidPeriods deletes by the plan's version
+  {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    app.backend.user = { _id: "user_a" };
+    window.PowOccupancy.payload = window.PowOccupancy.payload || ((x) => x);
+    const key = window.PowOccupancy.guidedPeriodsStoragePrefix("NZ", "user_a") + "rapid-pin-periods";
+    values.set(key, JSON.stringify({ saved_at: 10, segments: [{}] }));
+    const plan = { version: { ...app.guidedPeriodsVersion("rapid-pin-periods"), epoch: app.sessionEpoch || 0 }, submissionId: "s", segments: [{}], count: 1, state: { segments: [{}] } };
+    const pending = deferred();
+    app.backend.submitOccupancies = () => pending.promise;
+    const recording = app.recordRapidPeriods(plan, { task_id: "t", evidence_draft_id: "d" }, "rapid-pin-periods");
+    app.onBackendSessionEnded({ deliberate: false });
+    app.backendUser = { _id: "user_a" };
+    app.backend.user = { _id: "user_a" };
+    values.set(key, JSON.stringify({ saved_at: 20, segments: [{ start: "new" }] }));
+    pending.resolve({ recorded: 1 });
+    await recording;
+    assert.equal(JSON.parse(values.get(key)).saved_at, 20, "a late recording keeps the newer periods");
+  }
+
   // quick photo: a sign-out during the refresh that follows the send leaves
   // the page as the sign-out left it (astra m1, line 4486)
   {

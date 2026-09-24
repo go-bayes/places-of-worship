@@ -156,6 +156,123 @@ assert.equal(elements.get("transportDot").textContent, "Connected");
     pending.resolve([row("mine", "needs_review")]);
     await third;
     assert.equal(portal.state.queue.length, 1, "a current response still lands");
+
+    // round 4: every other review action checks its session after each
+    // await, in success and error paths alike
+    const signIn = (id) => { portal.state.user = { _id: id, display_name: id, roles: ["reviewer"] }; };
+    const detail = elements.get("detailPanel");
+
+    // a private attachment url that arrives after sign-out is never opened
+    signIn("reviewer_1");
+    pending = deferred();
+    portal.client.requestAttachmentView = () => pending.promise;
+    const opened = [];
+    window.open = (url) => opened.push(url);
+    const button = { dataset: { attachmentId: "att_1" }, disabled: false, textContent: "Open" };
+    const opening = portal.openAttachment(button);
+    portal.showSignedOut("Signed out.");
+    pending.resolve({ view_url: "https://r2.example/signed" });
+    await opening;
+    assert.deepEqual(opened, [], "the url is not opened after sign-out");
+    signIn("reviewer_1");
+    pending = deferred();
+    const current = portal.openAttachment(button);
+    pending.resolve({ view_url: "https://r2.example/current" });
+    await current;
+    assert.deepEqual(opened, ["https://r2.example/current"], "a current request still opens");
+
+    // an occupancy load for a task that the next reviewer has since opened
+    element("occupancyPanelHost");
+    window.PowOccupancyReview = {};
+    signIn("reviewer_1");
+    const task = row("occ", "needs_review").task;
+    portal.state.selected = { task };
+    pending = deferred();
+    portal.client.listTaskOccupancies = () => pending.promise;
+    portal.client.listDerivedStates = async () => ({ presence: [], locations: [], events: [] });
+    const occupancy = portal.loadOccupancyPanel(task);
+    portal.showSignedOut("Signed out.");
+    signIn("reviewer_2");
+    portal.state.selected = { task };
+    pending.resolve([{ private: "reviewer_1's view" }]);
+    await occupancy;
+    assert.equal(portal.state.occupancy, null, "reviewer 1's occupancy load never reaches reviewer 2's view of the same task");
+
+    // a derived-year decision whose answer arrives after sign-out
+    signIn("reviewer_1");
+    portal.state.selected = { task };
+    pending = deferred();
+    let panelLoads = 0;
+    portal.client.decideDerivedYear = () => pending.promise;
+    portal.client.listTaskOccupancies = async () => { panelLoads += 1; return []; };
+    const deciding = portal.decideOccupancyYear(task, "d1", 2000, "confirm");
+    portal.showSignedOut("Signed out.");
+    signIn("reviewer_2");
+    portal.state.selected = { task };
+    pending.resolve({ target_year: 2000, review_state: "confirmed" });
+    await deciding;
+    assert.equal(panelLoads, 0, "no panel reload after sign-out");
+    assert.equal(portal.state.occupancyBusy, false, "the sign-out reset the busy flag");
+
+    // claim, release, extra opinion and return for comment share one runner
+    const claimButton = { disabled: false, handlers: {}, addEventListener(type, fn) { this.handlers[type] = fn; } };
+    const statusLine = element("claimStatusText");
+    elements.set("claimReviewButton", claimButton);
+    signIn("reviewer_1");
+    portal.state.queue = [row("claim", "needs_review")];
+    portal.wireClaimControls(row("claim", "needs_review").task);
+    pending = deferred();
+    let queueLoads = 0;
+    portal.client.claimReviewTask = () => pending.promise;
+    portal.client.listReviewQueue = async () => { queueLoads += 1; return []; };
+    const claiming = claimButton.handlers.click({ currentTarget: claimButton });
+    portal.showSignedOut("Signed out.");
+    signIn("reviewer_2");
+    statusLine.textContent = "reviewer 2's status";
+    pending.resolve({});
+    await claiming;
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    assert.equal(queueLoads, 0, "no queue reload for the ended session");
+    assert.equal(statusLine.textContent, "reviewer 2's status", "the next reviewer's status line is untouched");
+
+    // a recorded decision whose answer arrives after sign-out
+    const decisionStatusText = element("decisionStatusText");
+    signIn("reviewer_1");
+    portal.state.busy = false;
+    portal.state.selected = { task: row("dec", "needs_review").task, latestDraft: { evidence_draft_id: "d9" } };
+    portal.state.content = null;
+    pending = deferred();
+    portal.client.recordReviewDecision = () => pending.promise;
+    const form = {
+        decisionStatus: { value: "needs_more_evidence" },
+        decisionNote: { value: "please add the source" },
+        acceptedAction: { value: "" },
+        identityDecision: { value: "" },
+        requiredFollowUp: { value: "" },
+        querySelector: () => null,
+    };
+    const deciding2 = portal.submitDecision({ preventDefault() {}, currentTarget: form });
+    portal.showSignedOut("Signed out.");
+    signIn("reviewer_2");
+    portal.state.selected = { task: row("other", "needs_review").task };
+    decisionStatusText.textContent = "reviewer 2's form";
+    pending.resolve({ task_status: "changes_requested" });
+    await deciding2;
+    assert.equal(decisionStatusText.textContent, "reviewer 2's form", "no confirmation lands on the next reviewer's page");
+    assert.equal(portal.state.selected.task.task_id, "other", "and their selection stands");
+
+    // the stale-snapshot reload of an ended session does nothing
+    signIn("reviewer_1");
+    pending = deferred();
+    portal.client.recordReviewDecision = () => pending.promise;
+    portal.state.busy = false;
+    portal.state.selected = { task: row("dec", "needs_review").task, latestDraft: { evidence_draft_id: "d9" } };
+    queueLoads = 0;
+    const stale = portal.submitDecision({ preventDefault() {}, currentTarget: form });
+    portal.showSignedOut("Signed out.");
+    pending.resolve(Promise.reject(new Error("Stale review snapshot.")));
+    await stale.catch(() => {});
+    assert.equal(queueLoads, 0, "no reload for an ended session");
     console.log("review state dom test passed");
 })().catch((error) => {
     console.error(error);

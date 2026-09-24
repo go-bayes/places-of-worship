@@ -9119,15 +9119,53 @@ class NzVerificationMap {
         }
     }
 
-    // owner: the submitter, when a recorded submission clears its periods
-    // after the session may have ended (their key, never the current one)
-    clearGuidedPeriods(taskId, owner) {
+    clearGuidedPeriods(taskId) {
         if (!taskId) return;
-        if (!owner || owner === this.draftOwnerId()) this.guidedPeriodsByTaskId.delete(taskId);
+        this.guidedPeriodsByTaskId.delete(taskId);
         try {
-            window.localStorage.removeItem(this.guidedPeriodsStorageKey(taskId, owner));
+            window.localStorage.removeItem(this.guidedPeriodsStorageKey(taskId));
         } catch (error) {
             // nothing to clear when storage is unavailable
+        }
+    }
+
+    // the stored periods as they stand when a submission is sent: the owner
+    // and the saved_at of the device copy (null when nothing is stored)
+    guidedPeriodsVersion(taskId) {
+        const owner = this.draftOwnerId();
+        if (!taskId || !owner) return null;
+        let savedAt = null;
+        try {
+            savedAt = JSON.parse(window.localStorage.getItem(this.guidedPeriodsStorageKey(taskId, owner)) || "null")?.saved_at ?? null;
+        } catch (error) {
+            savedAt = null;
+        }
+        return { owner, savedAt };
+    }
+
+    // after a recorded submission: the submitter's periods go only if the
+    // device copy is still the version that was sent (same rule as the
+    // rapid and form drafts). a newer edit, made after the same person
+    // signed back in, or another contributor's periods, stay
+    clearSubmittedGuidedPeriods(taskId, version) {
+        if (!taskId || !version?.owner) return;
+        const key = this.guidedPeriodsStorageKey(taskId, version.owner);
+        let current = null;
+        try {
+            current = JSON.parse(window.localStorage.getItem(key) || "null");
+        } catch (error) {
+            current = null;
+        }
+        if ((current?.saved_at ?? null) !== version.savedAt) return;
+        try {
+            if (current) window.localStorage.removeItem(key);
+        } catch (error) {
+            // nothing to clear when storage is unavailable
+        }
+        // the working copy goes with it only on the submitter's own session
+        // that sent it; a later session reloads its own copy from the device
+        if (this.draftOwnerId() === version.owner && version.epoch === (this.sessionEpoch || 0)) {
+            this.guidedPeriodsByTaskId.delete(taskId);
         }
     }
 
@@ -11475,7 +11513,6 @@ class NzVerificationMap {
 
     async saveEvidenceToBackend(props, options = {}) {
         const alive = this.sessionGuard();
-        const submitter = this.draftOwnerId();
         const status = document.getElementById("copyStatus");
         const values = this.currentFormValues();
         const unresolved = Boolean(options.unresolved);
@@ -11506,6 +11543,12 @@ class NzVerificationMap {
         const draft = this.buildEvidenceDraft(props, row, { unresolved });
         const guidedSubmission = submit && !unresolved
             ? this.guidedPeriodsSubmission(props.task_id, values)
+            : null;
+        // the exact periods version this submission sends, taken after
+        // guidedPeriodsSubmission saved it (see
+        // clearSubmittedGuidedPeriods)
+        const periodsVersion = submit && !unresolved && this.guidedPeriodsVersion(props.task_id)
+            ? { ...this.guidedPeriodsVersion(props.task_id), epoch: this.sessionEpoch || 0 }
             : null;
         // prefer the tracked revision draft; otherwise continue the latest
         // editable draft. the fallback covers a reload after a server-side
@@ -11560,7 +11603,7 @@ class NzVerificationMap {
                 });
                 // recorded: the submitter's device copy of the periods goes,
                 // even if the session ended meanwhile
-                this.clearGuidedPeriods(props.task_id, submitter);
+                this.clearSubmittedGuidedPeriods(props.task_id, periodsVersion);
                 if (!alive()) return;
                 periods = result.period_count > 0 ? { ok: true, result, count: result.period_count } : null;
             }
@@ -11747,6 +11790,8 @@ class NzVerificationMap {
         state.submissionId = state.submissionId || window.PowRapidEntry.secureSubmissionId();
         this.persistGuidedPeriods(periodsKey);
         return {
+            // the exact device copy this plan sends, deleted once recorded
+            version: this.guidedPeriodsVersion(periodsKey) && { ...this.guidedPeriodsVersion(periodsKey), epoch: this.sessionEpoch || 0 },
             submissionId: state.submissionId,
             segments,
             chain: chainToSend ? window.PowFunctionChain.payload(chainToSend) : undefined,
@@ -11777,7 +11822,6 @@ class NzVerificationMap {
     // a failure keeps them for the pane's retry
     async recordRapidPeriods(plan, result, periodsKey) {
         const alive = this.sessionGuard();
-        const submitter = this.draftOwnerId();
         // signed-in work only: nothing starts for an ended session
         if (!alive()) return;
         if (!plan || plan.problem || !result?.task_id || !result?.evidence_draft_id) return {};
@@ -11792,7 +11836,7 @@ class NzVerificationMap {
             });
             // recorded: the submitter's device copy of these periods goes,
             // even if the session ended meanwhile, so they are never sent twice
-            this.clearGuidedPeriods(periodsKey, submitter);
+            this.clearSubmittedGuidedPeriods(periodsKey, plan.version);
             if (!alive()) return;
             this.taskHistoryByTaskId.delete(result.task_id);
             return { periodsRecorded: { result: recorded, count: plan.count } };

@@ -393,9 +393,20 @@ function human(value) {
         });
     }
 
+    // every async path records the session it started in and checks it after
+    // each await, success and error alike: a response for an ended session,
+    // or for the reviewer who signed in after it, lands nowhere (c1)
+    function sessionGuard() {
+        const epoch = state.sessionEpoch || 0;
+        const userId = state.user?._id;
+        return () => (state.sessionEpoch || 0) === epoch && Boolean(state.user) && Boolean(userId) && state.user._id === userId;
+    }
+
     function showSignedOut(message) {
         // a response asked for by the ended session lands nowhere (c1)
         state.sessionEpoch = (state.sessionEpoch || 0) + 1;
+        state.busy = false;
+        state.occupancyBusy = false;
         state.user = null;
         state.queue = [];
         state.selected = null;
@@ -420,9 +431,7 @@ function human(value) {
         els.refreshQueue.disabled = true;
         setStatus(els.queueStatusText, "Loading review queue...");
         setTransport("loading");
-        const epoch = state.sessionEpoch || 0;
-        const userId = state.user?._id;
-        const current = () => (state.sessionEpoch || 0) === epoch && Boolean(state.user) && state.user._id === userId;
+        const current = sessionGuard();
         try {
             const rows = await client.listReviewQueue({
                 countryCode,
@@ -443,8 +452,10 @@ function human(value) {
             setStatus(els.queueStatusText, error.message || "Could not load the review queue.", "error");
             setTransport("error");
         } finally {
-            state.busy = false;
-            els.refreshQueue.disabled = false;
+            if (current()) {
+                state.busy = false;
+                els.refreshQueue.disabled = false;
+            }
         }
     }
 
@@ -539,7 +550,8 @@ function human(value) {
         if (!row) return;
         state.selected = row;
         const token = ++state.selectionToken;
-        const isCurrent = () => state.selectionToken === token && state.selected === row;
+        const alive = sessionGuard();
+        const isCurrent = () => alive() && state.selectionToken === token && state.selected === row;
         // the map flies to a queue pick; a marker click already sits there
         reviewMap?.select(taskId, { fly: !fromMap });
         if (fromMap) els.detailPanel?.scrollIntoView({ block: "start", behavior: "smooth" });
@@ -909,17 +921,7 @@ function human(value) {
         // evidence files open through a fresh short-lived url per click —
         // nothing in the page holds a durable link to the private bucket
         els.detailPanel.querySelectorAll(".attachment-open").forEach((button) => {
-            button.addEventListener("click", async () => {
-                button.disabled = true;
-                try {
-                    const grant = await client.requestAttachmentView({ attachmentId: button.dataset.attachmentId });
-                    window.open(grant.view_url, "_blank", "noopener");
-                } catch (error) {
-                    button.textContent = "Could not open";
-                } finally {
-                    button.disabled = false;
-                }
-            });
+            button.addEventListener("click", () => openAttachment(button));
         });
     }
 
@@ -952,6 +954,24 @@ function human(value) {
     }
 
     // after a stale-snapshot refusal the selected task is re-read in full
+    // a fresh short-lived url per click; a private url that arrives after
+    // the session ended is never opened (c1)
+    async function openAttachment(button) {
+        const alive = sessionGuard();
+        if (!alive()) return;
+        button.disabled = true;
+        try {
+            const grant = await client.requestAttachmentView({ attachmentId: button.dataset.attachmentId });
+            if (!alive()) return;
+            window.open(grant.view_url, "_blank", "noopener");
+        } catch (error) {
+            if (!alive()) return;
+            button.textContent = "Could not open";
+        } finally {
+            button.disabled = false;
+        }
+    }
+
     // (review finding 2026-09-12): refetching the snapshot line alone left
     // the evidence, claims, and review panels showing the content the
     // refused decision was made on, while the next click would have sent
@@ -960,13 +980,17 @@ function human(value) {
     // re-renders every panel and fetches the snapshot; the server's message
     // is repeated on the fresh form
     async function reloadSelectedTask(taskId, notice) {
+        const alive = sessionGuard();
+        if (!alive()) return;
         await loadQueue();
+        if (!alive()) return;
         if (!state.queue.some((entry) => entry.task.task_id === taskId)) {
             state.selected = null;
             renderEmptyDetail(`${notice} The task is no longer in this queue; change the queue status to find it.`);
             return;
         }
         await selectTask(taskId);
+        if (!alive()) return;
         const statusText = document.getElementById("decisionStatusText");
         if (statusText && state.selected?.task?.task_id === taskId) {
             // the banner carries the reason and one control; the reload has
@@ -1008,19 +1032,24 @@ function human(value) {
     async function loadOccupancyPanel(task, message = "", messageKind = "ok") {
         const host = document.getElementById("occupancyPanelHost");
         if (!host || !window.PowOccupancyReview) return;
+        const alive = sessionGuard();
+        if (!alive()) return;
+        // the same task selected by the next reviewer is not this load's
+        const current = () => alive() && state.selected?.task?.task_id === task.task_id;
         try {
             const [occupancies, derived] = await Promise.all([
                 client.listTaskOccupancies({ taskId: task.task_id, limit: 200 }),
                 client.listDerivedStates({ taskId: task.task_id }),
             ]);
-            // the reviewer may have moved on while the fetch was in flight
-            if (state.selected?.task?.task_id !== task.task_id) return;
+            // the reviewer may have moved on, or signed out, while the fetch
+            // was in flight
+            if (!current()) return;
             state.occupancy = {
                 occupancies: occupancies || [],
                 derived: derived || { presence: [], locations: [], events: [] },
             };
         } catch (error) {
-            if (state.selected?.task?.task_id !== task.task_id) return;
+            if (!current()) return;
             state.occupancy = null;
             host.innerHTML = `
                 <section class="panel occupancy-panel">
@@ -1406,6 +1435,8 @@ function human(value) {
     // one per-year decision against the server; the panel alone re-renders
     async function decideOccupancyYear(task, parentId, year, action, note, override, derivation) {
         if (state.occupancyBusy) return;
+        const alive = sessionGuard();
+        if (!alive()) return;
         state.occupancyBusy = true;
         try {
             const result = await client.decideDerivedYear({
@@ -1417,6 +1448,7 @@ function human(value) {
                 ...(note ? { note } : {}),
                 ...(override ? { override } : {}),
             });
+            if (!alive()) return;
             const stateWords = String(result.review_state || "").replaceAll("_", " ");
             const written = result.written_status
                 ? ` ${result.written_status} written to the evidence record.`
@@ -1424,6 +1456,7 @@ function human(value) {
             state.occupancyBusy = false;
             await loadOccupancyPanel(task, `${result.target_year}: ${stateWords}.${written}`, "ok");
         } catch (error) {
+            if (!alive()) return;
             state.occupancyBusy = false;
             await loadOccupancyPanel(task, error.message || "The decision failed.", "error");
         }
@@ -1436,13 +1469,17 @@ function human(value) {
             const parentId = parentEl.dataset.parent;
             parentEl.querySelector("[data-occ-confirm-all]")?.addEventListener("click", async (event) => {
                 if (state.occupancyBusy) return;
+                const alive = sessionGuard();
+                if (!alive()) return;
                 event.currentTarget.disabled = true;
                 state.occupancyBusy = true;
                 try {
                     const result = await client.confirmAllDerived({ taskId: task.task_id, parentEvidenceDraftId: parentId });
+                    if (!alive()) return;
                     state.occupancyBusy = false;
                     await loadOccupancyPanel(task, window.PowOccupancyReview.confirmAllSummary(result), result.confirmed.length > 0 ? "ok" : "");
                 } catch (error) {
+                    if (!alive()) return;
                     state.occupancyBusy = false;
                     await loadOccupancyPanel(task, error.message || "Confirm all failed.", "error");
                 }
@@ -1575,18 +1612,24 @@ function human(value) {
     function wireClaimControls(task) {
         const statusLine = () => document.getElementById("claimStatusText");
         const run = async (button, action, doneMessage) => {
+            const alive = sessionGuard();
+            if (!alive()) return;
             button.disabled = true;
             try {
                 await action();
+                if (!alive()) return;
                 await loadQueue();
+                if (!alive()) return;
                 const refreshed = state.queue.find((entry) => entry.task.task_id === task.task_id);
                 if (refreshed) {
                     await selectTask(task.task_id);
+                    if (!alive()) return;
                 } else {
                     renderDetail(false);
                 }
                 if (statusLine()) statusLine().textContent = doneMessage;
             } catch (error) {
+                if (!alive()) return;
                 button.disabled = false;
                 if (statusLine()) statusLine().textContent = error.message || "The action failed.";
             }
@@ -1962,6 +2005,8 @@ function human(value) {
             );
         }
 
+        const alive = sessionGuard();
+        if (!alive()) return;
         state.busy = true;
         const submitButton = form.querySelector('button[type="submit"]');
         if (submitButton) submitButton.disabled = true;
@@ -1977,6 +2022,9 @@ function human(value) {
                 // status; the server requires it only for accepted_for_export
                 snapshotHash: state.reviewSnapshot ? state.reviewSnapshot.snapshot_hash : undefined,
             });
+            // the decision is recorded on the server either way; the page
+            // shows it only to the session that made it
+            if (!alive()) return;
             statusText.textContent = `Recorded. Task is now ${presentRow({ status: result.task_status }).label.toLowerCase()}.`;
             statusText.className = "state-banner tone-done";
             setTransport("ready");
@@ -1985,8 +2033,10 @@ function human(value) {
             const previousIds = state.queue.map((entry) => entry.task.task_id);
             state.selected = null;
             await loadQueue();
+            if (!alive()) return;
             renderDecisionRecorded(result.task_status, previousIds, decidedTaskId);
         } catch (error) {
+            if (!alive()) return;
             const message = error.message || "Could not record the review decision.";
             // the server answered, so transport is fine; the refusal stays
             // on screen and the record button is the retry
@@ -2001,7 +2051,9 @@ function human(value) {
                 await reloadSelectedTask(selectedTask.task_id, message);
             }
         } finally {
-            state.busy = false;
+            // an ended session's flags were reset by showSignedOut; the next
+            // reviewer's are not this call's to touch
+            if (alive()) state.busy = false;
             if (submitButton) submitButton.disabled = false;
         }
     }
@@ -2045,7 +2097,7 @@ function human(value) {
     // the dom tests load this file with the flag set and drive the pure-ish
     // renderers directly; the page itself boots as before
     if (window.__POW_TEST_NO_BOOTSTRAP__) {
-        window.__PowReviewPortalTest = { state, els, client, loadQueue, showSignedOut, renderQueue, renderQueueRollup, renderDetail, renderEmptyDetail, decisionForm, wireDecisionForm, setDecisionFormValues, setTransport, renderAuth };
+        window.__PowReviewPortalTest = { state, els, client, loadQueue, showSignedOut, sessionGuard, openAttachment, loadOccupancyPanel, decideOccupancyYear, wireClaimControls, reloadSelectedTask, submitDecision, renderQueue, renderQueueRollup, renderDetail, renderEmptyDetail, decisionForm, wireDecisionForm, setDecisionFormValues, setTransport, renderAuth };
     } else {
         init();
     }
