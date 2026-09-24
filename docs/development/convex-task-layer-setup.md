@@ -364,6 +364,17 @@ exports:freezeExportBatch({
 })
 ```
 
+A batch is bounded by a byte and read budget (see
+`docs/development/frozen-exports.md`), so `createExportBatch` refuses a
+selection larger than one batch. A whole country is composed into budgeted
+batches and frozen by a scheduled chain instead:
+
+```json
+exports:composeExportBatches({ "countryCode": "NZ" })
+exports:getExportRun({ "countryCode": "NZ" })
+exports:freezeCountryBatches({ "countryCode": "NZ" })
+```
+
 The export query returns JSON documents for tasks, task events, evidence drafts,
 review decisions, and a `files` block. The `files` block contains
 `site_evidence_wide.csv` plus JSONL artefacts for `pow` handoff.
