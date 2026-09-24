@@ -11,6 +11,11 @@
 - Review round 3: device drafts now live under owner-scoped keys (`powFormSnapshot2:<country>:<user>:…`, `powRapidDraft2:…`), so two contributors on one device never share a key. Drafts written before this change (`powFormSnapshot:`, `powRapidDraft:`) are kept exactly as written but quarantined: never read into a form, never shown, never sent. Every signed-in user on that device sees "This device holds N unsaved entries from before the sign-in update. They are kept safely and are not shown to anyone. Contact the project team to recover them." until they dismiss it for the session; recovery is a later ruling. Every signed-in async path on the RA portal checks its session before each write or render after an await (task history, occupancy entry, attachment view and upload, quick photo, rapid and guided submissions, revisions, skips, issue reports); the task-history cache serves only the user it was fetched for and empties at session end. A submission deletes only the exact device draft, snapshot and periods it sent, under its submitter's key, so a response arriving after another contributor signed in never reaches their work. A deliberate sign-out also deletes the departing user's own rapid drafts on every country. Tests `basemap-and-drafts.test.cjs` added to CI. Stamps `?v=20260924-clerk4`.
 - Files: `convex/{auth.config,users,schema,model}.ts`, `convex/lib/auth.ts`, `convex/users.node-test.mjs`, `apps/regions/nz/js/{convex-task-client,convex-config,verification-map,review-portal}.js` (stamps `?v=20260924-clerk`), `apps/regions/nz/js/{convex-task-client,portal-first-screen}.test.cjs`, `apps/regions/nz/{verification,review}.html`, `apps/regions/_shared/{state.css,region-map.js}`, `apps/guides/ra.html`, `docs/ui-style-guide.md`, `docs/api/convex-functions.md`, `docs/development/convex-task-layer-setup.md`; the client test now runs in CI.
 
+### 2026-09-24 (inspection collection contract)
+
+- Add a provisional Bahamas inspection collection contract, immutable object receipts, source-permission screening, and synthetic recovery verification.
+- Tighten inspection ingest after review: extracts require both copy and display permission, context links resolve against existing tasks and evidence versions, changed cases and collections require receipted parents, and the phone screen catches unseparated ten-digit and space-separated local numbers. The operational hosted-object recovery drill remains outstanding.
+
 ### 2026-09-24 (agent quarantine block)
 
 - Agent-assisted research records now withhold personal details more thoroughly before a human reviewer or the shared backend sees them. A record may carry a redacted list of the details withheld from it, naming only the kind of each detail and the claim it came from; the values, and any hash of them, stay in the operator's private copy. Every text field of an outgoing record, an advisory reviewer's comments included, is screened for phone numbers, email addresses and names led by a title, and for strings shaped like cryptographic digests outside the few fields that hold the pipeline's own digests. Those fields are treated in three ways: two are recomputed from the record's own content and refused on mismatch, two must name records the backend already holds, and the rest, digests of the operator's private trace, prompt and instructions, are accepted on the operator's attestation because the record does not carry their inputs. Records archived or receipted under earlier rules remain readable and restorable byte for byte, since reading checks integrity only. A detail found once is withheld wherever it recurs. Output that still carries a personal detail is held back for human handling instead of being stored, and the record of that refusal names fields and positions, never the text; this refusal is interim until a flag-and-hold review exists. The Python, TypeScript and Rust validators apply one shared policy, held to agreement by shared test cases.
@@ -68,7 +73,6 @@
 ### 2026-09-21 (every place on the map at first sight)
 
 - Country maps now open with the OSM snapshot visible on every census year (Joseph B, 2026-09-21). The Bahamas' 2010 default crossed the 15-year threshold in 2026; because the Bahamas wires a dated product, its map had begun opening with only two dated places. The runtime now defaults to `all` until the reader chooses; `period` remains available where a dated product is wired. Older snapshot dots retain roughly half their normal opacity with a legend caveat. The temporal-layer instructions describe the revised default and the existing recent-year behaviour. All 102 active country pages and the global page load `region-map.js?v=20260921a` (103 pages in total).
-
 
 ### 2026-09-21 (review preset selection)
 
@@ -959,7 +963,6 @@
   the legend now reports how many qualifying dots exist ("2 in this
   dataset"), so sparse historical data reads as sparse rather than
   broken.
-
 
 - Merged the portal session's research-workbench pull request (#17):
   the free-contribution portal is browser-verified against every

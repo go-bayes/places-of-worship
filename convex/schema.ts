@@ -763,6 +763,26 @@ export default defineSchema({
     .index("by_place", ["place_ref", "created_at"])
     .index("by_task", ["task_id", "created_at"]),
 
+  // Provisional Bahamas inspection objects. Exact wire bytes and membership
+  // are immutable; a new hash and explicit parents represent a revision.
+  // These rows do not grant evidence, review, or release authority.
+  inspection_object_receipts: defineTable({
+    receipt_id: v.string(),
+    receipt_contract: v.literal("object-receipt.v1"),
+    object_hash: v.string(),
+    object_json: v.string(),
+    object_kind: v.union(v.literal("case"), v.literal("collection")),
+    country_code: v.literal("bs"),
+    logical_ref: v.string(),
+    parents: v.array(v.string()),
+    case_hashes: v.array(v.string()),
+    storage: objectStorage,
+    created_at: v.number(),
+  })
+    .index("by_object_hash", ["object_hash"])
+    .index("by_receipt_id", ["receipt_id"])
+    .index("by_logical_ref", ["object_kind", "logical_ref", "created_at"]),
+
   // immutable evidence versions (docs/development/content-addressed-review.md,
   // evidence-version.v1): one row per submission or correction of an
   // evidence record, written once by the server and never patched. the
