@@ -324,7 +324,7 @@
                       "string",
                       "null"
                     ],
-                    "maxLength": 200,
+                    "maxLength": 8000,
                     "description": "The claim whose text held the withheld detail, or null for the status assessment or OSM version chain."
                   }
                 }

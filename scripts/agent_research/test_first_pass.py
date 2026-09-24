@@ -398,7 +398,7 @@ class FirstPassSubmitTests(unittest.TestCase):
 
     def test_floats_where_the_schema_needs_integers_are_refused(self):
         raw = fp.encode(json.loads((HERE / 'fixtures/first-pass-researched.json').read_text())).decode()
-        for before, after, message in (('"item_count":0,', '"item_count":0.0,', 'item_count: invalid constant'),
+        for before, after, message in (('"item_count":0,', '"item_count":0.0,', 'item_count: invalid type'),
                                        ('"input_tokens":10,', '"input_tokens":10.0,', 'input_tokens: invalid type')):
             with self.subTest(field=before):
                 with self.assertRaisesRegex(ValueError, message):

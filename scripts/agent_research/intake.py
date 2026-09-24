@@ -234,6 +234,12 @@ def validate_dossier(dossier):
         return errors
     if dossier['place']['country_code'] != 'NZ':
         errors.append('internal pilot permits only operator-cleared NZ sources')
+    # every free-text string of the dossier, not only claim text: a detail the runner's
+    # redaction missed must not reach reviewers or Convex.
+    screen_schema, screen_root = lib.dossier_screen_schema()
+    for path, text in lib.screened_strings(dossier, screen_schema, screen_root):
+        if lib.find_personal_details(text):
+            errors.append(f'potential personal details in dossier.{path} require human handling')
     quarantine = dossier['personal_details_quarantine']
     if quarantine['item_count'] != len(quarantine['items']):
         errors.append('personal-details quarantine count does not match its items')

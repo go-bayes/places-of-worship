@@ -122,7 +122,7 @@
       }
     ],
     "personal_details_quarantine": {
-      "redacted": false,
+      "redacted": true,
       "item_count": 0,
       "items": [],
       "note": "Synthetic quarantine note."

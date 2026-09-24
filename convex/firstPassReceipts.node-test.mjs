@@ -416,7 +416,7 @@ test("a float where python's schema needs an integer is refused, so every receip
   enable();
   const exact = wire(fixtureText("first-pass-researched.json"));
   assert.ok(exact.includes('"item_count":0,') && exact.includes('"input_tokens":10,'));
-  for (const [from, to, pattern] of [['"item_count":0,', '"item_count":0.0,', /item_count: invalid constant/], ['"input_tokens":10,', '"input_tokens":10.0,', /input_tokens: invalid type/]]) {
+  for (const [from, to, pattern] of [['"item_count":0,', '"item_count":0.0,', /item_count: invalid type/], ['"input_tokens":10,', '"input_tokens":10.0,', /input_tokens: invalid type/]]) {
     const text = exact.replace(from, to);
     // canonical python bytes, so only the int/float distinction can refuse them
     assert.equal(wire(text), text);

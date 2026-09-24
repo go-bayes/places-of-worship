@@ -1,7 +1,7 @@
 import firstPassSchema from "../../scripts/agent_research/schemas/agent-first-pass.v1.json" with { type: "json" };
 import bundleSchema from "../../scripts/agent_research/schemas/agent-review-bundle.v1.json" with { type: "json" };
 import { canonicalWireJson } from "./wireJson.ts";
-import { assertNoDuplicateJsonKeys, dateBounds, guard, hasPersonalDetails, publicUrl, schemaCheck, validateStandaloneDossier } from "./agentIntake.ts";
+import { assertNoDuplicateJsonKeys, dateBounds, guard, hasPersonalDetails, publicUrl, schemaCheck, screenedStrings, validateStandaloneDossier } from "./agentIntake.ts";
 import { verifyObjectBytes } from "./objectReceipts.ts";
 
 // server-side validation of an agent-first-pass.v1 record, mirroring
@@ -68,7 +68,6 @@ const SCHEMA_OVERRIDES: Record<string, [any, any]> = {
   // the embedded dossier is walked against its own schema
   dossier: [(bundleSchema as any).$defs.dossier, bundleSchema],
 };
-const HASH_SHAPED = /^(?:sha256:)?(?:[0-9a-f]{40}|[0-9a-f]{64})$/;
 
 // every string in the record and its embedded dossier that could carry a
 // personal detail, by path: each string value, and each object key the schema
@@ -80,40 +79,7 @@ const HASH_SHAPED = /^(?:sha256:)?(?:[0-9a-f]{40}|[0-9a-f]{64})$/;
 // timestamps, dates, place refs, country codes) and values shaped as a hex
 // hash. first_pass.py screened_text mirrors this walk.
 export function screenedText(record: unknown): Array<[string, string]> {
-  const found: Array<[string, string]> = [];
-  const join = (path: string, key: string) => (path === "" ? key : `${path}.${key}`);
-  const visit = (value: unknown, schemaNode: any, root: any, path: string): void => {
-    let schema = schemaNode ?? {};
-    while (typeof schema.$ref === "string" && schema.$ref.startsWith("#/")) {
-      let target = root;
-      for (const part of schema.$ref.slice(2).split("/")) target = target?.[part];
-      schema = target ?? {};
-    }
-    if (typeof value === "string") {
-      if (!("enum" in schema || "const" in schema || "pattern" in schema || HASH_SHAPED.test(value))) found.push([path, value]);
-      return;
-    }
-    if (Array.isArray(value)) {
-      value.forEach((item, index) => visit(item, schema.items, root, `${path}[${index}]`));
-      return;
-    }
-    if (value === null || typeof value !== "object") return;
-    const properties = schema.properties ?? {};
-    for (const [key, child] of Object.entries(value)) {
-      const childPath = join(path, key);
-      const override = path === "" ? SCHEMA_OVERRIDES[key] : undefined;
-      if (override !== undefined) {
-        visit(child, override[0], override[1], childPath);
-      } else if (Object.hasOwn(properties, key)) {
-        visit(child, properties[key], root, childPath);
-      } else {
-        found.push([`${childPath} (key)`, key]);
-        visit(child, {}, root, childPath);
-      }
-    }
-  };
-  visit(record, firstPassSchema, firstPassSchema, "");
-  return found;
+  return screenedStrings(record, firstPassSchema, firstPassSchema, SCHEMA_OVERRIDES);
 }
 
 export function validateFirstPassRecord(recordJson: string, recordHash: string): { record: FirstPassRecord; byteLength: number } {

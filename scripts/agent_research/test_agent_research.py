@@ -172,6 +172,29 @@ class ImportTest(unittest.TestCase):
         # the private copy keeps the hashes that let a later run recognise recurrence.
         self.assertEqual([item["value_sha256"] for item in dossier["personal_details_quarantine"]["items"]], hashes)
 
+    def test_quarantine_reaches_every_screened_string(self):
+        dossier = synthetic_import()
+        lib.redact_quarantine(dossier)
+        # plant details where the earlier field list never looked
+        claim = dossier["claims"][0]
+        claim["source"]["source_name"] = "Directory entry for Rev'd Pat Example"
+        dossier["candidate_location"]["basis_note"] = "Office 04 123 4567"
+        dossier["run_manifest"]["notes"] = "Contact office@example.org"
+        before = dossier["personal_details_quarantine"]["item_count"]
+        dossier["personal_details_quarantine"] = {"redacted": False, "item_count": before, "items": [
+            {"kind": i["kind"], "context_claim_id": i["context_claim_id"], "value": "x" + str(n)}
+            for n, i in enumerate(dossier["personal_details_quarantine"]["items"])]}
+        lib.quarantine_dossier(dossier)
+        schema, root = lib.dossier_screen_schema()
+        survivors = [path for path, text in lib.screened_strings(dossier, schema, root)
+                     if lib.find_personal_details(text) and not path.startswith("personal_details_quarantine")]
+        self.assertEqual(survivors, [])
+        added = dossier["personal_details_quarantine"]["items"][before:]
+        self.assertIn({"kind": "person_name", "context_claim_id": claim["claim_id"], "value": "Rev'd Pat Example"}, added)
+        self.assertIn("phone", {i["kind"] for i in added})
+        self.assertIn("email", {i["kind"] for i in added})
+        self.assertEqual(claim["source"]["source_name"], "Directory entry for [person_name withheld]")
+
     def test_redaction_refuses_an_item_without_value_or_hash(self):
         for item in ({"kind": "phone", "context_claim_id": None},
                      {"kind": "phone", "context_claim_id": None, "value_sha256": "not-a-digest"}):

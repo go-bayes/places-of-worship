@@ -119,6 +119,48 @@ export function hasPersonalDetails(text: string): boolean {
     || /\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'-]+\s?){1,3}/.test(text);
 }
 
+const HASH_SHAPED = /^(?:sha256:)?(?:[0-9a-f]{40}|[0-9a-f]{64})$/;
+
+// every string that could carry a personal detail, by path: each string value, and each object
+// key the schema does not declare (free-form maps such as seed_tags or usage). the only strings
+// left out are those the schema constrains to a closed vocabulary or a fixed shape (enum, const
+// or pattern) and values shaped as a hex hash. overrides walk a top-level key against another
+// schema. lib.py screened_strings and pow-cli screened_strings mirror this walk.
+export function screenedStrings(value: unknown, schemaNode: any, root: any, overrides: Record<string, [any, any]> = {}): Array<[string, string]> {
+  const found: Array<[string, string]> = [];
+  const join = (path: string, key: string) => (path === "" ? key : `${path}.${key}`);
+  const visit = (item: unknown, node: any, base: any, path: string): void => {
+    let schema = node ?? {};
+    while (typeof schema.$ref === "string" && schema.$ref.startsWith("#/")) {
+      let target = base;
+      for (const part of schema.$ref.slice(2).split("/")) target = target?.[part];
+      schema = target ?? {};
+    }
+    if (typeof item === "string") {
+      if (!("enum" in schema || "const" in schema || "pattern" in schema || HASH_SHAPED.test(item))) found.push([path, item]);
+      return;
+    }
+    if (Array.isArray(item)) {
+      item.forEach((child, index) => visit(child, schema.items, base, `${path}[${index}]`));
+      return;
+    }
+    if (item === null || typeof item !== "object") return;
+    const properties = schema.properties ?? {};
+    for (const [key, child] of Object.entries(item)) {
+      const childPath = join(path, key);
+      const override = path === "" && Object.hasOwn(overrides, key) ? overrides[key] : undefined;
+      if (override !== undefined) visit(child, override[0], override[1], childPath);
+      else if (Object.hasOwn(properties, key)) visit(child, properties[key], base, childPath);
+      else {
+        found.push([`${childPath} (key)`, key]);
+        visit(child, {}, base, childPath);
+      }
+    }
+  };
+  visit(value, schemaNode, root, "");
+  return found;
+}
+
 // one host policy shared with the Python and Rust validators: read the host as written (never
 // through URL's IDNA and percent decoding), refuse non-ASCII, userinfo, empty or invalid ports
 // and empty labels, lower-case it, and strip exactly one trailing root dot.
@@ -197,12 +239,14 @@ export function validateDossierRecord(d: Record<string, any>): Map<string, strin
   dateBounds(d.run_manifest.started_at.split("T")[0]); dateBounds(d.run_manifest.ended_at.split("T")[0]);
   const manifestStart = Date.parse(d.run_manifest.started_at), manifestEnd = Date.parse(d.run_manifest.ended_at);
   if (!Number.isFinite(manifestStart) || !Number.isFinite(manifestEnd) || manifestEnd < manifestStart) throw new Error("invalid dossier run timestamp");
+  // every free-text string of the dossier, not only claim text: a detail the runner's redaction
+  // missed must not reach reviewers or Convex.
+  for (const [path, text] of screenedStrings(d, (bundleSchema as any).$defs.dossier, bundleSchema)) {
+    if (hasPersonalDetails(text)) throw new Error(`potential personal details in dossier.${path} require human handling`);
+  }
   const locators = new Map<string, string>();
   for (const claim of d.claims) {
     if (locators.has(claim.claim_id)) throw new Error("duplicate claim ID");
-    for (const field of ["value", "quoted_support", "note"]) {
-      if (hasPersonalDetails(claim[field] ?? "")) throw new Error("potential personal details require human handling");
-    }
     publicUrl(claim.source.locator); canonicalHost(claim.source.locator); locators.set(claim.claim_id, claim.source.locator);
     if (!hostAllowed(claim.source.locator, domains)) throw new Error(`source host is not on allowlist ${allowlist.allowlist_version}`);
     if (claim.reader.backend !== d.run_manifest.backend || ![d.run_manifest.model_id_requested, d.run_manifest.model_id_reported].includes(claim.reader.model_id)) throw new Error("inconsistent claim reader");

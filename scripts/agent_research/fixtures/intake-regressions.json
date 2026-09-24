@@ -655,5 +655,118 @@
         1
       ]
     ]
+  },
+  {
+    "name": "screen: honorific name in a claim's source name",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/source/source_name",
+        "Parish directory entry for Rev'd Pat Example"
+      ]
+    ]
+  },
+  {
+    "name": "screen: Rev'd name in a claim note",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/note",
+        "The directory lists Rev'd Pat Example as vicar."
+      ]
+    ]
+  },
+  {
+    "name": "screen: phone in the candidate location basis",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/candidate_location/basis_note",
+        "Office phone 04 123 4567 confirms the site."
+      ]
+    ]
+  },
+  {
+    "name": "screen: email in the run manifest notes",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/run_manifest/notes",
+        "Contact office@example.org for the register."
+      ]
+    ]
+  },
+  {
+    "name": "screen: honorific name in the status basis",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/status_assessment/basis",
+        "Rev'd Pat Example confirmed services continue."
+      ]
+    ]
+  },
+  {
+    "name": "screen: honorific name in an OSM change note",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/osm_version_chain/0/change_note",
+        "Edited after a call with Rev'd Pat Example."
+      ]
+    ]
+  },
+  {
+    "name": "screen: email in an undeclared seed tag key",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/place/seed_tags",
+        {
+          "contact office@example.org": "yes"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "screen: withheld marker in a source name",
+    "valid": true,
+    "changes": [
+      [
+        "/dossier/claims/0/source/source_name",
+        "Parish directory entry for [person_name withheld]"
+      ]
+    ]
+  },
+  {
+    "name": "quarantine: reference to a claim id longer than 200 characters",
+    "valid": true,
+    "changes": [
+      [
+        "/dossier/claims/0/claim_id",
+        "osm:way/1:codex:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      ],
+      [
+        "/review/claim_checks/0/claim_id",
+        "osm:way/1:codex:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      ],
+      [
+        "/dossier/status_assessment/supporting_claim_ids",
+        []
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ]
+    ]
   }
 ]

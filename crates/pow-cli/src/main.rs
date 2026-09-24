@@ -30,6 +30,9 @@ const AGENT_ALLOWLISTS: &[(&str, &str)] = &[(
     "nz-v1",
     include_str!("../../../scripts/agent_research/fixtures/allowlist-nz-v1.json"),
 )];
+// the bundle schema a dossier's free text is screened against, pinned at build time.
+const AGENT_BUNDLE_SCHEMA: &str =
+    include_str!("../../../scripts/agent_research/schemas/agent-review-bundle.v1.json");
 
 #[derive(Parser, Debug)]
 #[command(name = "pow")]
@@ -570,6 +573,25 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
     }
 
     let allowlist = agent_allowlist(dossier, errors);
+    // every free-text string of the dossier, not only claim text: a detail the runner's
+    // redaction missed must not reach reviewers or Convex.
+    let screen_root: Value =
+        serde_json::from_str(AGENT_BUNDLE_SCHEMA).expect("pinned bundle schema is valid JSON");
+    let mut screened = Vec::new();
+    screened_strings(
+        &Value::Object(dossier.clone()),
+        &screen_root["$defs"]["dossier"],
+        &screen_root,
+        "",
+        &mut screened,
+    );
+    for (path, text) in screened {
+        if contains_personal_details(&text) {
+            errors.push(format!(
+                "/dossier/{path}: potential personal details require human handling"
+            ));
+        }
+    }
     let claims = dossier
         .get("claims")
         .and_then(Value::as_array)
@@ -1046,6 +1068,77 @@ fn validate_partial_date(value: Option<&Value>, path: &str, errors: &mut Vec<Str
     }
 }
 
+/// Every string that could carry a personal detail, by path: each string value, and each
+/// object key the schema does not declare. Strings the schema constrains by enum, const or
+/// pattern, and values shaped as a hex hash, are left out. Mirrors
+/// convex/lib/agentIntake.ts screenedStrings and lib.py screened_strings.
+fn screened_strings(
+    value: &Value,
+    schema: &Value,
+    root: &Value,
+    path: &str,
+    found: &mut Vec<(String, String)>,
+) {
+    static NULL: Value = Value::Null;
+    let mut schema = schema;
+    while let Some(reference) = schema
+        .get("$ref")
+        .and_then(Value::as_str)
+        .filter(|reference| reference.starts_with("#/"))
+    {
+        let mut target = root;
+        for part in reference[2..].split('/') {
+            target = target.get(part).unwrap_or(&NULL);
+        }
+        schema = target;
+    }
+    let join = |key: &str| {
+        if path.is_empty() {
+            key.to_owned()
+        } else {
+            format!("{path}.{key}")
+        }
+    };
+    match value {
+        Value::String(text) => {
+            let constrained = ["enum", "const", "pattern"]
+                .iter()
+                .any(|keyword| schema.get(keyword).is_some());
+            static HASH_SHAPED: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+            let hash_shaped = HASH_SHAPED
+                .get_or_init(|| {
+                    regex::Regex::new(r"^(?:sha256:)?(?:[0-9a-f]{40}|[0-9a-f]{64})$")
+                        .expect("valid hash pattern")
+                })
+                .is_match(text);
+            if !constrained && !hash_shaped {
+                found.push((path.to_owned(), text.clone()));
+            }
+        }
+        Value::Array(items) => {
+            let item_schema = schema.get("items").unwrap_or(&NULL);
+            for (index, item) in items.iter().enumerate() {
+                screened_strings(item, item_schema, root, &format!("{path}[{index}]"), found);
+            }
+        }
+        Value::Object(map) => {
+            let properties = schema.get("properties");
+            for (key, child) in map {
+                match properties.and_then(|properties| properties.get(key)) {
+                    Some(child_schema) => {
+                        screened_strings(child, child_schema, root, &join(key), found)
+                    }
+                    None => {
+                        found.push((format!("{} (key)", join(key)), key.clone()));
+                        screened_strings(child, &NULL, root, &join(key), found);
+                    }
+                }
+            }
+        }
+        _ => {}
+    }
+}
+
 fn contains_personal_details(text: &str) -> bool {
     contains_email(text) || contains_nz_phone(text) || contains_honorific_name(text)
 }
@@ -1077,30 +1170,18 @@ fn contains_nz_phone(text: &str) -> bool {
     PHONE.is_match(text)
 }
 
+/// Honorific-led names, with the pattern lib.py `_HONORIFIC_NAME` and agentIntake.ts use,
+/// so the three validators agree on forms such as "Rev'd".
 fn contains_honorific_name(text: &str) -> bool {
-    let words: Vec<&str> = text.split_whitespace().collect();
-    words.windows(2).any(|window| {
-        let title = window[0].trim_matches(|character: char| !character.is_ascii_alphabetic());
-        let name = window[1].trim_matches(|character: char| !character.is_ascii_alphabetic());
-        matches!(
-            title,
-            "Rev"
-                | "Revd"
-                | "Reverend"
-                | "Fr"
-                | "Father"
-                | "Pastor"
-                | "Vicar"
-                | "Archdeacon"
-                | "Bishop"
-                | "Canon"
-                | "Dean"
-                | "Mr"
-                | "Mrs"
-                | "Ms"
-                | "Dr"
-        ) && name.chars().next().is_some_and(char::is_uppercase)
-    })
+    static PATTERN: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+    PATTERN
+        .get_or_init(|| {
+            regex::Regex::new(
+                r"\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'\-]+\s?){1,3}",
+            )
+            .expect("valid honorific pattern")
+        })
+        .is_match(text)
 }
 
 #[derive(Clone, Copy)]

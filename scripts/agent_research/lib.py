@@ -208,41 +208,81 @@ def redact_text(text: str, details: list[dict]) -> str:
     return out
 
 
+BUNDLE_SCHEMA_PATH = HERE / "schemas" / "agent-review-bundle.v1.json"
+_HASH_SHAPED = re.compile(r"(?:sha256:)?(?:[0-9a-f]{40}|[0-9a-f]{64})")
+
+
+def _walk_screened(value, schema, root, on_string, overrides=None, path="", parent=None, key=None):
+    """visit every string that could carry a personal detail. strings the schema constrains
+    by enum, const or pattern, and values shaped as a hex hash, are skipped; object keys the
+    schema does not declare are reported as text too. on_string(parent, key, path, text) may
+    return a replacement string. mirrors convex/lib/agentIntake.ts screenedStrings and
+    pow-cli's screened_strings."""
+    schema = schema or {}
+    while isinstance(schema.get("$ref"), str) and schema["$ref"].startswith("#/"):
+        target = root
+        for part in schema["$ref"][2:].split("/"):
+            target = target.get(part, {}) if isinstance(target, dict) else {}
+        schema = target or {}
+    if isinstance(value, str):
+        if not ({"enum", "const", "pattern"} & set(schema) or _HASH_SHAPED.fullmatch(value)):
+            replacement = on_string(parent, key, path, value)
+            if replacement is not None and parent is not None:
+                parent[key] = replacement
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            _walk_screened(item, schema.get("items"), root, on_string, None, f"{path}[{index}]", value, index)
+    elif isinstance(value, dict):
+        properties = schema.get("properties", {})
+        for child_key, child in list(value.items()):
+            child_path = f"{path}.{child_key}" if path else child_key
+            if path == "" and overrides and child_key in overrides:
+                _walk_screened(child, overrides[child_key][0], overrides[child_key][1], on_string, None, child_path, value, child_key)
+            elif child_key in properties:
+                _walk_screened(child, properties[child_key], root, on_string, None, child_path, value, child_key)
+            else:
+                on_string(None, None, f"{child_path} (key)", child_key)
+                _walk_screened(child, {}, root, on_string, None, child_path, value, child_key)
+
+
+def screened_strings(value, schema, root, overrides=None) -> list[tuple[str, str]]:
+    """every screened string of value, by path."""
+    found: list[tuple[str, str]] = []
+    _walk_screened(value, schema, root, lambda parent, key, path, text: found.append((path, text)), overrides)
+    return found
+
+
+def dossier_screen_schema() -> tuple[dict, dict]:
+    """the schema an outgoing dossier is screened against: the review bundle's dossier."""
+    root = json.loads(BUNDLE_SCHEMA_PATH.read_text(encoding="utf-8"))
+    return root["$defs"]["dossier"], root
+
+
 def quarantine_dossier(dossier: dict, extra_names: list[str] | None = None) -> dict:
-    """move personal details out of claim text into the quarantine block,
-    values kept (redacted=false). call redact_quarantine before committing."""
+    """move personal details out of every free-text string of the dossier into the
+    quarantine block, values kept (redacted=false). call redact_quarantine before committing.
+    the walk is the one the validators screen with, so nothing they would refuse survives
+    in a string; a detail in an undeclared object key cannot be redacted and stays refusable."""
     items = list(dossier.get("personal_details_quarantine", {}).get("items", []))
     extra = [{"kind": "person_name", "value": n} for n in (extra_names or [])]
-    for claim in dossier.get("claims", []):
-        for field in ("value", "quoted_support", "note"):
-            text = claim.get(field)
-            if not text:
-                continue
-            details = find_personal_details(text) + [e for e in extra if e["value"] in text]
-            if not details:
-                continue
-            claim[field] = redact_text(text, details)
-            for d in details:
-                items.append({"kind": d["kind"], "context_claim_id": claim["claim_id"], "value": d["value"]})
-    for entry in dossier.get("osm_version_chain", []):
-        for field in ("tags_summary", "change_note"):
-            text = entry.get(field)
-            if not text:
-                continue
-            details = find_personal_details(text) + [e for e in extra if e["value"] in text]
-            if details:
-                entry[field] = redact_text(text, details)
-                for d in details:
-                    items.append({"kind": d["kind"], "context_claim_id": None, "value": d["value"]})
-    assessment = dossier.get("status_assessment", {})
-    for field in ("basis", "osm_stale_basis"):
-        text = assessment.get(field)
-        if text:
-            details = find_personal_details(text) + [e for e in extra if e["value"] in text]
-            if details:
-                assessment[field] = redact_text(text, details)
-                for d in details:
-                    items.append({"kind": d["kind"], "context_claim_id": None, "value": d["value"]})
+    claims = dossier.get("claims", [])
+
+    def redact(parent, key, path, text):
+        if parent is None or path.startswith("personal_details_quarantine"):
+            return None
+        details = find_personal_details(text) + [e for e in extra if e["value"] in text]
+        if not details:
+            return None
+        match = re.match(r"claims\[(\d+)\]", path)
+        claim_id = None
+        if match and int(match.group(1)) < len(claims):
+            claim_id = claims[int(match.group(1))].get("claim_id")
+        for d in details:
+            items.append({"kind": d["kind"], "context_claim_id": claim_id, "value": d["value"]})
+        return redact_text(text, details)
+
+    schema, root = dossier_screen_schema()
+    _walk_screened(dossier, schema, root, redact)
     # dedupe by (kind, value, claim)
     seen = set()
     unique = []
