@@ -320,9 +320,12 @@ const COMPOSE_CANDIDATE_PAGE_BYTES = 1 * MIB;
 // drafts archived per step when a composition replaces an earlier run: at
 // most 20 batch rows of up to the 256 KiB row budget, 5 MiB, per step
 const ARCHIVE_STEP_DRAFTS = 20;
-// members read per cutting step (small rows); a step stops at the first
-// batch boundary past this count
+// a cutting step stops at the first batch boundary past this many members
+// or past CUT_STEP_READ_BUDGET, and its member stream stops within one row
+// of CUT_STEP_READ_CEILING
 const CUT_STEP_MEMBERS = 1_000;
+export const CUT_STEP_READ_BUDGET: ReadCounts = { bytes: 3 * MIB, documents: 6_000, index_ranges: 1_000 };
+const CUT_STEP_READ_CEILING: ReadCounts = { bytes: 6 * MIB, documents: 12_000, index_ranges: 1_800 };
 // a run's lease: longer than an action may run, so a live holder never
 // loses it; renewed between the phases of each batch freeze
 export const EXPORT_RUN_LEASE_MS = 15 * 60 * 1000;
@@ -2313,58 +2316,68 @@ export const composeRunStep = internalMutation({
     }
 
     if (run.phase === "cutting") {
+      // members stream through the read meter (review of pr #149, round 2):
+      // a member row carries its task's decision and acceptance ids and can
+      // be tens of kilobytes, so the step stops at the first batch boundary
+      // past CUT_STEP_READ_BUDGET, and within one row of
+      // CUT_STEP_READ_CEILING at the latest (half the transaction ceiling,
+      // since closing a batch patches its members again)
       const afterSeq = run.cut_cursor_seq ?? -1;
-      const page: Doc<"export_run_members">[] = await ctx.db
+      const transaction = newMeter("transaction", CUT_STEP_READ_CEILING);
+      const metered = meteredCtx(ctx, transaction);
+      const members = metered.db
         .query("export_run_members")
-        .withIndex("by_run_seq", (q) => q.eq("run_id", run.run_id).gt("seq", afterSeq))
-        .take(CUT_STEP_MEMBERS + EXPORT_BATCH_MAX_TASKS + 1);
-      const exhausted = page.length <= CUT_STEP_MEMBERS + EXPORT_BATCH_MAX_TASKS;
+        .withIndex("by_run_seq", (q: any) => q.eq("run_id", run.run_id).gt("seq", afterSeq));
       const mutableRun = { ...run };
       let open: Doc<"export_run_members">[] = [];
       let estimate = emptyBatchEstimate(run.country_code);
       let lastClosedSeq = afterSeq;
+      let lastWalkedSeq = afterSeq;
       let walked = 0;
       let stopped = false;
-      for (const member of page) {
-        if (member.refusal !== undefined) {
-          if (open.length === 0) lastClosedSeq = member.seq;
-          walked += 1;
-          continue;
-        }
-        const add = {
-          bytes: member.estimated_bytes,
-          rowBytes: member.estimated_row_bytes,
-          reads: {
-            bytes: member.estimated_read_bytes,
-            documents: member.estimated_documents,
-            index_ranges: member.estimated_index_ranges,
-          },
-        };
-        if (open.length > 0 && batchWouldExceed(estimate, open.length, add) !== null) {
-          await insertComposedBatch(ctx, mutableRun, open, estimate, now);
-          lastClosedSeq = open[open.length - 1].seq;
-          open = [];
-          estimate = emptyBatchEstimate(run.country_code);
-          if (walked >= CUT_STEP_MEMBERS) {
-            stopped = true;
-            break;
+      let exhausted = false;
+      try {
+        for await (const member of members as AsyncIterable<Doc<"export_run_members">>) {
+          if (member.refusal === undefined) {
+            const add = {
+              bytes: member.estimated_bytes,
+              rowBytes: member.estimated_row_bytes,
+              reads: {
+                bytes: member.estimated_read_bytes,
+                documents: member.estimated_documents,
+                index_ranges: member.estimated_index_ranges,
+              },
+            };
+            if (open.length > 0 && batchWouldExceed(estimate, open.length, add) !== null) {
+              await insertComposedBatch(ctx, mutableRun, open, estimate, now);
+              lastClosedSeq = open[open.length - 1].seq;
+              open = [];
+              estimate = emptyBatchEstimate(run.country_code);
+              if (walked >= CUT_STEP_MEMBERS || exceededDimension(transaction.counts, CUT_STEP_READ_BUDGET) !== null) {
+                stopped = true;
+                break;
+              }
+            }
+            open.push(member);
+            estimate.bytes += add.bytes;
+            estimate.rowBytes += add.rowBytes;
+            estimate.reads = addReadCounts(estimate.reads, add.reads);
           }
+          lastWalkedSeq = member.seq;
+          walked += 1;
         }
-        open.push(member);
-        estimate.bytes += add.bytes;
-        estimate.rowBytes += add.rowBytes;
-        estimate.reads = addReadCounts(estimate.reads, add.reads);
-        walked += 1;
+        if (!stopped) exhausted = true;
+      } catch (error) {
+        if (!(error instanceof ReadBudgetExceeded)) throw error;
       }
-      // at the end of the page (and not stopped on a boundary), the open
-      // batch closes: at the end of the members it is the last batch, and
-      // mid-way (a page of mostly refused members) closing it guarantees the
-      // next step starts past everything walked here
+      // not stopped on a boundary (the members ran out, or the ceiling
+      // stopped the stream): the open batch closes, which fits by
+      // construction, so the next step starts past everything walked here
       if (!stopped) {
         if (open.length > 0) {
           await insertComposedBatch(ctx, mutableRun, open, estimate, now);
         }
-        if (page.length > 0) lastClosedSeq = page[page.length - 1].seq;
+        lastClosedSeq = lastWalkedSeq;
       }
       const done = exhausted && !stopped;
       await ctx.db.patch(run._id, {
@@ -2411,7 +2424,10 @@ export const getExportRun = query({
 // between invocations included), or a run with nothing left to freeze is
 // refused.
 export const startRunFreeze = internalMutation({
-  args: { countryCode: v.string(), userId: v.id("users") },
+  // holder: the starting invocation's lease holder, taken here in the same
+  // transaction that sets the run freezing (review of pr #149, round 2), so
+  // no composition can replace the run before the chain claims a batch
+  args: { countryCode: v.string(), userId: v.id("users"), holder: v.string() },
   returns: v.object({ run_id: v.string() }),
   handler: async (ctx, args) => {
     const user = await requireFreezeActor(ctx, args.userId);
@@ -2438,7 +2454,7 @@ export const startRunFreeze = internalMutation({
       freeze_actor: user._id,
       freeze_started_at: run.freeze_started_at ?? now,
       last_error: undefined,
-      lease: undefined,
+      lease: { holder: args.holder, expires_at: now + EXPORT_RUN_LEASE_MS },
     });
     return { run_id: run.run_id };
   },
@@ -2546,8 +2562,8 @@ type RunStepResult = { run_id: string; status: "frozen" | "done" | "busy" | "ina
 
 // one invocation of the chain: claim the next batch, freeze it under the
 // lease, settle (which schedules the next invocation)
-async function freezeRunStepCore(ctx: any, runId: string): Promise<RunStepResult> {
-  const holder = crypto.randomUUID();
+async function freezeRunStepCore(ctx: any, runId: string, startedHolder?: string): Promise<RunStepResult> {
+  const holder = startedHolder ?? crypto.randomUUID();
   const claim = await ctx.runMutation(internal.exports.claimRunBatch, { runId, holder });
   if (claim.kind !== "batch") {
     return { run_id: runId, status: claim.kind };
@@ -2587,11 +2603,13 @@ export const freezeCountryBatches = action({
   returns: runStepResult,
   handler: async (ctx, args): Promise<RunStepResult> => {
     const user: Doc<"users"> = await ctx.runQuery(internal.exports.requireActingUser, {});
+    const holder = crypto.randomUUID();
     const started: { run_id: string } = await ctx.runMutation(internal.exports.startRunFreeze, {
       countryCode: args.countryCode,
       userId: user._id,
+      holder,
     });
-    return await freezeRunStepCore(ctx, started.run_id);
+    return await freezeRunStepCore(ctx, started.run_id, holder);
   },
 });
 

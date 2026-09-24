@@ -1405,3 +1405,127 @@ test("#12: a task named twice enters the batch once", async () => {
   assert.equal(batch.included_task_count, 2);
   assert.deepEqual(w.row("export_batches", "export_batch_id", batch.export_batch_id).included_task_ids, ["task_1", "task_2"]);
 });
+
+// review of pr #149, round 2 (gpt-6-astra, 2026-09-24)
+
+test("round 2, 1: the cutting phase streams member rows through the meter and stops at a batch boundary, so large member rows never make one step read tens of MiB", async () => {
+  const { composeRunStep, CUT_STEP_READ_BUDGET } = await import("./exports.ts");
+  const w = await budgetScene();
+  const now = Date.now();
+  const runId = "vu-export-run-cutting";
+  await w.db.insert("export_runs", {
+    run_id: runId,
+    country_code: "VU",
+    status: "composing",
+    started_by: w.admin2._id,
+    started_at: now,
+    phase: "cutting",
+    next_member_seq: 600,
+    member_count: 600,
+    refused_count: 0,
+    refusals: [],
+    batch_count: 0,
+    frozen_batch_count: 0,
+    estimated_bytes: 0,
+    lease: { holder: "compose", expires_at: now + 60_000 },
+  });
+  // composer-shaped members about 29 KB each (a task with many accepted
+  // decisions and acceptances): 600 of them are 17 MB
+  const ids = (prefix, count) => Array.from({ length: count }, (_, index) => `${prefix}:${String(index).padStart(3, "0")}:${"d".repeat(80)}`);
+  for (let seq = 0; seq < 600; seq += 1) {
+    await w.db.insert("export_run_members", {
+      run_id: runId,
+      seq,
+      task_id: `member_${seq}`,
+      review_decision_ids: ids(`member_${seq}:review`, 160),
+      acceptance_ids: ids(`member_${seq}:acceptance`, 160),
+      estimated_bytes: 20_000,
+      estimated_row_bytes: 58_000,
+      estimated_read_bytes: 40_000,
+      estimated_documents: 20,
+      estimated_index_ranges: 20,
+    });
+  }
+  const memberBytes = Buffer.byteLength(JSON.stringify(w.rows.export_run_members[0]));
+  assert.ok(memberBytes > 25_000 && memberBytes < 35_000, `member rows are ${memberBytes} bytes`);
+
+  // count the member bytes each step streams
+  let streamed = 0;
+  const query = w.db.query.bind(w.db);
+  w.db.query = (table) => {
+    const chain = query(table);
+    if (table !== "export_run_members") return chain;
+    const iterate = chain[Symbol.asyncIterator].bind(chain);
+    chain[Symbol.asyncIterator] = () => {
+      const iterator = iterate();
+      return {
+        async next() {
+          const step = await iterator.next();
+          if (!step.done) streamed += Buffer.byteLength(JSON.stringify(step.value));
+          return step;
+        },
+        return: (value) => iterator.return(value),
+      };
+    };
+    // materialising reads are counted too, so an unmetered take() fails here
+    for (const method of ["take", "collect"]) {
+      const read = chain[method].bind(chain);
+      chain[method] = async (...args) => {
+        const rows = await read(...args);
+        for (const row of rows) streamed += Buffer.byteLength(JSON.stringify(row));
+        return rows;
+      };
+    }
+    const withIndex = chain.withIndex.bind(chain);
+    chain.withIndex = (...args) => { withIndex(...args); return chain; };
+    return chain;
+  };
+  let steps = 0;
+  let largest = 0;
+  await composeRunStep._handler(w.anonymous(), { runId });
+  for (;;) {
+    steps += 1;
+    largest = Math.max(largest, streamed);
+    streamed = 0;
+    const next = w.scheduled.shift();
+    if (next === undefined) break;
+    await composeRunStep._handler(w.anonymous(), next.args);
+  }
+  w.db.query = query;
+  // each step stops at the first batch boundary past 3 MiB, one batch (at
+  // most four such members) past it at worst
+  assert.ok(largest <= CUT_STEP_READ_BUDGET.bytes + 5 * memberBytes, `a step streamed ${largest} bytes`);
+  assert.ok(steps >= 5, `expected several cutting steps, got ${steps}`);
+
+  const run = w.row("export_runs", "run_id", runId);
+  assert.equal(run.status, "composed");
+  const batches = w.rows.export_batches.filter((row) => row.export_run_id === runId);
+  const covered = batches.flatMap((row) => row.included_task_ids);
+  assert.equal(covered.length, 600);
+  assert.equal(new Set(covered).size, 600);
+  assert.ok(batches.every((row) => row.included_task_ids.length <= 4), "the row budget caps these batches at four members");
+});
+
+test("round 2, 2: starting or resuming a chain takes the run's lease in the same transaction, so no composition can replace the run before the first claim", async () => {
+  const { startRunFreeze, claimRunBatch } = await import("./exports.ts");
+  const w = await budgetScene();
+  await paddedAcceptedTasks(w, 2);
+  const storage = fakeStorage();
+  const { run } = await composeAndDrain(w, storage);
+
+  await startRunFreeze._handler(w.as(w.admin2), { countryCode: "VU", userId: w.admin2._id, holder: "starting-holder" });
+  const started = w.row("export_runs", "run_id", run.run_id);
+  assert.equal(started.status, "freezing");
+  assert.equal(started.lease.holder, "starting-holder");
+  assert.ok(started.lease.expires_at > Date.now());
+
+  // the interval before the action's first claim: a composition is refused
+  await assert.rejects(composeExportBatches._handler(w.as(w.admin2), { countryCode: "VU" }), /is still freezing/);
+  await assert.rejects(
+    startRunFreeze._handler(w.as(w.admin2), { countryCode: "VU", userId: w.admin2._id, holder: "other" }),
+    /already freezing/,
+  );
+  // another invocation cannot claim, the starting one can
+  assert.equal((await claimRunBatch._handler(w.anonymous(), { runId: run.run_id, holder: "other" })).kind, "busy");
+  assert.equal((await claimRunBatch._handler(w.anonymous(), { runId: run.run_id, holder: "starting-holder" })).kind, "batch");
+});
