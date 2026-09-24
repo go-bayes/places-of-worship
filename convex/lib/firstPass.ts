@@ -116,6 +116,28 @@ export function screenedText(record: unknown): Array<[string, string]> {
   return found;
 }
 
+// Inspection adapters have their own schema, but need the same exhaustive
+// value-and-key walk and detector as first-pass receipts. No free-text field
+// is exempt merely because its name looks like metadata.
+export function screenAllText(value: unknown): string[] {
+  const hits: string[] = [];
+  const visit = (part: unknown, path: string): void => {
+    if (typeof part === "string") {
+      if (hasPersonalDetails(part)) hits.push(path);
+    } else if (Array.isArray(part)) {
+      part.forEach((child, index) => visit(child, `${path}[${index}]`));
+    } else if (part !== null && typeof part === "object") {
+      for (const [key, child] of Object.entries(part)) {
+        const childPath = path === "" ? key : `${path}.${key}`;
+        if (hasPersonalDetails(key)) hits.push(`${childPath} (key)`);
+        visit(child, childPath);
+      }
+    }
+  };
+  visit(value, "");
+  return hits;
+}
+
 export function validateFirstPassRecord(recordJson: string, recordHash: string): { record: FirstPassRecord; byteLength: number } {
   const { byteLength } = verifyObjectBytes(recordJson, recordHash);
   assertNoDuplicateJsonKeys(recordJson);

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://religionmap.org/schemas/inspection-case.v1.schema.json",
+  "title": "Provisional inspection case",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "disposition", "case_ref", "country_code", "source_snapshot_date", "definition_version", "definition_hash", "sources", "candidate_links", "claims", "agent_assessments", "context", "parents"],
+  "properties": {
+    "schema_version": { "const": "inspection-case.v1" },
+    "disposition": { "const": "provisional" },
+    "case_ref": { "$ref": "#/$defs/ref" },
+    "country_code": { "const": "bs" },
+    "source_snapshot_date": { "$ref": "#/$defs/date" },
+    "definition_version": { "type": "string", "minLength": 1 },
+    "definition_hash": { "$ref": "#/$defs/hash" },
+    "sources": { "type": "array", "items": { "$ref": "#/$defs/source" } },
+    "candidate_links": { "type": "array", "items": { "$ref": "#/$defs/link" } },
+    "claims": { "type": "array", "items": { "$ref": "#/$defs/claim" } },
+    "agent_assessments": { "type": "array", "items": { "$ref": "#/$defs/assessment" } },
+    "context": { "$ref": "#/$defs/context" },
+    "parents": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/hash" } }
+  },
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "ref": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._:/-]{0,159}$" },
+    "date": { "type": "string", "pattern": "^[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?$" },
+    "nullableDate": { "oneOf": [{ "$ref": "#/$defs/date" }, { "type": "null" }] },
+    "nullableString": { "type": ["string", "null"] },
+    "nullableHash": { "oneOf": [{ "$ref": "#/$defs/hash" }, { "type": "null" }] },
+    "permission": { "enum": ["permitted", "needs_review", "restricted"] },
+    "source": { "type": "object", "additionalProperties": false, "required": ["source_ref", "source_family_ref", "locator", "publisher", "publication_date", "retrieved_at", "returned_date", "access_result", "licence_note", "copy_permission", "display_permission", "original_hash", "extract"], "properties": { "source_ref": { "$ref": "#/$defs/ref" }, "source_family_ref": { "$ref": "#/$defs/ref" }, "locator": { "type": "string", "format": "uri" }, "publisher": { "type": "string" }, "publication_date": { "$ref": "#/$defs/nullableDate" }, "retrieved_at": { "$ref": "#/$defs/nullableString" }, "returned_date": { "$ref": "#/$defs/nullableDate" }, "access_result": { "type": "string" }, "licence_note": { "type": "string" }, "copy_permission": { "$ref": "#/$defs/permission" }, "display_permission": { "$ref": "#/$defs/permission" }, "original_hash": { "$ref": "#/$defs/nullableHash" }, "extract": { "$ref": "#/$defs/nullableString" } } },
+    "link": { "type": "object", "additionalProperties": false, "required": ["candidate_ref", "basis", "disposition", "osm_ref", "project_site_id"], "properties": { "candidate_ref": { "$ref": "#/$defs/ref" }, "basis": { "type": "string" }, "disposition": { "type": "string" }, "osm_ref": { "$ref": "#/$defs/nullableString" }, "project_site_id": { "$ref": "#/$defs/nullableString" } } },
+    "point": { "type": "object", "additionalProperties": false, "required": ["latitude", "longitude"], "properties": { "latitude": { "type": "number", "minimum": -90, "maximum": 90 }, "longitude": { "type": "number", "minimum": -180, "maximum": 180 } } },
+    "claim": { "type": "object", "additionalProperties": false, "required": ["claim_ref", "attribute", "wording", "described_date", "observation_date", "geometry", "source_refs", "uncertainty"], "properties": { "claim_ref": { "$ref": "#/$defs/ref" }, "attribute": { "type": "string" }, "wording": { "type": "string" }, "described_date": { "$ref": "#/$defs/nullableDate" }, "observation_date": { "$ref": "#/$defs/nullableDate" }, "geometry": { "oneOf": [{ "$ref": "#/$defs/point" }, { "type": "null" }] }, "source_refs": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/ref" } }, "uncertainty": { "$ref": "#/$defs/nullableString" } } },
+    "assessment": { "type": "object", "additionalProperties": false, "required": ["assessment_ref", "subject_ref", "agent_name", "model_requested", "model_reported", "model_unreported_reason", "outcome", "basis"], "properties": { "assessment_ref": { "$ref": "#/$defs/ref" }, "subject_ref": { "$ref": "#/$defs/ref" }, "agent_name": { "type": "string" }, "model_requested": { "type": "string" }, "model_reported": { "$ref": "#/$defs/nullableString" }, "model_unreported_reason": { "$ref": "#/$defs/nullableString" }, "outcome": { "type": "string" }, "basis": { "type": "string" } } },
+    "context": { "type": "object", "additionalProperties": false, "required": ["task_id", "evidence_version_hash"], "properties": { "task_id": { "$ref": "#/$defs/nullableString" }, "evidence_version_hash": { "$ref": "#/$defs/nullableHash" } } }
+  }
+}
