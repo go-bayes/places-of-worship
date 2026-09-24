@@ -2,7 +2,7 @@
 
 **A confidence score is a recorded judgment about a candidate place of worship. Confidence scores are recorded AI judgments; humans decide acceptance.**
 
-Version: 0.1.0. Date: 2026-09-24. Status: adopted by the project lead. This dated snapshot keeps version 0.1.0 as adopted. The [canonical confidence standard](../confidence-standard.md) presents the current version. The section headed "Not yet ruled" lists what the project lead has yet to decide; everything else in this document is adopted.
+Version: 0.1.0. Date: 2026-09-24. Status: adopted by the project lead. This dated snapshot keeps version 0.1.0 as adopted. Version 0.1.0 was superseded by [version 0.2.0](confidence-standard-2026-09-24-v0.2.0.md) on 2026-09-24. The [canonical confidence standard](../confidence-standard.md) presents the current version. The section headed "Not yet ruled" lists what the project lead has yet to decide; everything else in this document is adopted.
 
 ## Purpose
 

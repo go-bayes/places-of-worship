@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-24 (confidence standard 0.2.0)
+
+- Version 0.2.0 of the [confidence standard](docs/confidence-standard.md), snapshot at `docs/development/confidence-standard-2026-09-24-v0.2.0.md`, after two review threads on the merged 0.1.0. The promotion rule for research assistants gains two conditions: an output's non-inferiority test counts only when at least the planned number of sampled pairs have a resolved reference label for that output and unresolved labels are at most 10 per cent of the sampled pairs, so a test cannot pass on labels that settled nothing; and a task-type stratum without an adopted required-output mapping (possible duplicate, denomination or shared use, geometry check, other) cannot be promoted and stays with human research assistants. The change is a minor version under the standard's own rule because it alters the promotion rule; no promotion decision has been taken under 0.1.0.
+
 ### 2026-09-24 (confidence standard and AI assistance)
 
 - Add the public, versioned [confidence standard](docs/confidence-standard.md), version 0.1.0, adopted by the project lead on 2026-09-24, with its snapshot at `docs/development/confidence-standard-2026-09-24-v0.1.0.md`. The standard defines a confidence score as a recorded judgment that accepts nothing: the calibrated probability that a recorded feature is a real place of worship, at its stated location within 75 metres, in use at the edition date, with four recorded components; the evidence signals; three review tiers with provisional cut points; calibration on development sets and validation on a separate random sample per country; how a reviewer disposes of a score; the published-name rule for cited clergy names and the adopted machine rule that applies it; the rule for promoting research assistants to final review; and the versioning rule under which every recorded judgment names the standard version and the rule version it was made under. The judgment record has fields for the rule version today and none for the standard version; adding `judge.standard_version` is listed as follow-up work.
