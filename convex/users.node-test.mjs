@@ -411,3 +411,19 @@ test("r-c18: a grant for one row never re-keys another", async () => {
   row.auth_subject = `${GOOGLE}|g-guy-new`;
   await assert.rejects(claim(moved.as(identity(CLERK, "user_guy", "guy@example.org")), grant), /expired or was already used/);
 });
+
+test("r-c18: grant issuance resolves the caller through resolveUser and refuses a linked, earlier identifier (greptile 4093249238)", async () => {
+  const w = world({ allowlist: GOOGLE });
+  const member = w.addUser({ email: "guy@example.org", roles: ["ra"], status: "active", auth_subject: `${CLERK}|user_guy` });
+  // an earlier google identifier still linked to the row: resolveUser finds
+  // the row through user_identities, but it is not the row's current sign-in
+  w.rows.user_identities.push({ _id: "user_identities_old", user_id: member._id, token_identifier: `${GOOGLE}|g-guy`, issuer: GOOGLE, linked_at: 1, linked_reason: "auth_provider_migration" });
+  const google = identity(GOOGLE, "g-guy", "guy@example.org");
+  assert.equal((await me._handler(w.as(google), {}))._id, member._id, "the helper resolves the linked identifier");
+  await assert.rejects(beginIdentityMigration._handler(w.as(google), {}), /not a project member's current sign-in/);
+  assert.equal(w.rows.identity_migration_grants.length, 0);
+  // a link that resolveUser treats as retired resolves nothing, and is refused the same way
+  w.rows.user_identities[0].retired_at = 2;
+  await assert.rejects(beginIdentityMigration._handler(w.as(google), {}), /not a project member's current sign-in/);
+  assert.equal(w.rows.role_events.length, 0);
+});

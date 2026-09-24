@@ -16,9 +16,11 @@
     const CLERK_JS_MAJOR = "6";
     const CLERK_UI_MAJOR = "1";
     const LEGACY_AUTH_STORAGE_KEY = "powConvexAuth:v1";
-    // r-c18: the single-use grant from users:beginIdentityMigration, held for
-    // the tab only, until the clerk claim spends it or it expires
-    const MIGRATION_GRANT_KEY = "powMigrationGrant:v1";
+    // r-c18: the single-use grant from users:beginIdentityMigration is held
+    // in this page's memory only, never in storage, and is presented only
+    // by the session it was issued in, or by the next sign-in started in
+    // this page (greptile 4093166052). an earlier build's tab copy is removed
+    const LEGACY_MIGRATION_GRANT_KEY = "powMigrationGrant:v1";
     const GSI_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
     const MIGRATION_NEEDED = /Confirm that Google account first|expired or was already used/i;
     // a sign-out clerk has not confirmed, by session id: a reload retries it
@@ -80,23 +82,11 @@
         return error;
     }
 
-    function readMigrationGrant() {
+    function removeLegacyMigrationGrant() {
         try {
-            const record = JSON.parse(window.sessionStorage?.getItem(MIGRATION_GRANT_KEY) || "null");
-            if (typeof record?.grant === "string" && Number(record.expires_at) > Date.now()) return record.grant;
-            window.sessionStorage?.removeItem(MIGRATION_GRANT_KEY);
+            window.sessionStorage?.removeItem(LEGACY_MIGRATION_GRANT_KEY);
         } catch (error) {
-            // blocked storage: no grant held
-        }
-        return "";
-    }
-
-    function writeMigrationGrant(record) {
-        try {
-            if (record?.grant) window.sessionStorage?.setItem(MIGRATION_GRANT_KEY, JSON.stringify({ grant: record.grant, expires_at: record.expires_at }));
-            else window.sessionStorage?.removeItem(MIGRATION_GRANT_KEY);
-        } catch (error) {
-            // blocked storage: the grant is held in this page's memory below
+            // blocked storage: nothing kept
         }
     }
 
@@ -242,6 +232,7 @@
             // then says so rather than asking again on every render
             this.claimFailure = null;
             removeLegacyToken();
+            removeLegacyMigrationGrant();
         }
 
         // onSignedOut({ deliberate }): the session ended, in another tab, by
@@ -337,7 +328,18 @@
             // into another one takes any held or pending grant with it; a
             // first session keeps the grant confirmed before sign-in, which
             // is the google-first hand-off
-            if (hadSession) this.invalidateMigrationGrant();
+            if (hadSession) {
+                this.invalidateMigrationGrant();
+            } else if (nextSessionId && this.heldMigrationGrant && !this.heldMigrationGrant.sessionId) {
+                // a grant armed before sign-in passes only to a session begun
+                // with this page's form after the grant was issued; a session
+                // that arrives from another tab, or anything else, drops it
+                if ((this.signInStartedAt || 0) >= this.heldMigrationGrant.issuedAt) {
+                    this.heldMigrationGrant.sessionId = nextSessionId;
+                } else {
+                    this.invalidateMigrationGrant();
+                }
+            }
             this.releaseSignInElement();
             if (!nextSessionId) {
                 if (hadSession) this.lifecycle.onSignedOut?.({ deliberate: false });
@@ -531,6 +533,10 @@
             if (!this.signInNode) {
                 this.signInNode = document.createElement("div");
                 this.signInNode.className = "clerk-sign-in-mount";
+                // a sign-in started in this page (r-c18 hand-off binding)
+                for (const type of ["pointerdown", "keydown", "submit"]) {
+                    this.signInNode.addEventListener?.(type, () => this.markSignInStarted(), { capture: true });
+                }
                 clerk.mountSignIn(this.signInNode, {
                     appearance: clerkAppearance(),
                     withSignUp: true,
@@ -753,14 +759,23 @@
             });
         }
 
+        // the grant this page may present now: unexpired, and bound to the
+        // current session (issued in it, or armed before sign-in and claimed
+        // by a sign-in started here)
         migrationGrant() {
-            if (this.heldMigrationGrant && this.heldMigrationGrant.expires_at > Date.now()) return this.heldMigrationGrant.grant;
-            return readMigrationGrant();
+            const held = this.heldMigrationGrant;
+            if (!held || held.expires_at <= Date.now()) return "";
+            return held.sessionId && held.sessionId === this.sessionId ? held.grant : "";
         }
 
         clearMigrationGrant() {
             this.heldMigrationGrant = null;
-            writeMigrationGrant(null);
+        }
+
+        // the member used this page's own sign-in form: a grant confirmed
+        // before sign-in may pass to the session that form starts
+        markSignInStarted() {
+            this.signInStartedAt = Date.now();
         }
 
         // every sign-out and every change of an established session bumps
@@ -780,8 +795,14 @@
             // a sign-out or session change while the request was in flight:
             // the grant is dropped, never written
             if (epoch !== (this.grantEpoch || 0)) throw staleGrantError();
-            this.heldMigrationGrant = { grant: record.grant, expires_at: record.expires_at };
-            writeMigrationGrant(record);
+            // issued while signed in: bound to that session. issued before
+            // sign-in: armed for the next sign-in started in this page
+            this.heldMigrationGrant = {
+                grant: record.grant,
+                expires_at: record.expires_at,
+                issuedAt: Date.now(),
+                sessionId: this.sessionId || "",
+            };
             return record;
         }
 

@@ -377,12 +377,15 @@ export const beginIdentityMigration = mutation({
     if (destination === undefined || destination === GOOGLE_ISSUER) {
       throw new Error("The new sign-in is not configured on this deployment.");
     }
-    const row = await ctx.db
-      .query("users")
-      .withIndex("by_auth_subject", (q) => q.eq("auth_subject", identity.tokenIdentifier))
-      .unique();
+    // the caller is resolved through the shared authority helper, as every
+    // public mutation does; the grant then needs more than resolveUser
+    // grants: the identifier must be the row's current one (a linked,
+    // earlier identifier is refused), and the row active or pending and not
+    // a service identity
+    const row = await resolveUser(ctx, identity);
     if (
       row === null
+      || row.auth_subject !== identity.tokenIdentifier
       || (row.status !== "active" && row.status !== "pending")
       || row.roles.includes("service")
     ) {
