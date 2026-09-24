@@ -85,6 +85,8 @@ Totals out of 150: operations 97, minimal 95, external-durable 94, content-addre
 
 ## 6. Rulings for the project lead
 
+The project lead ruled on 2026-09-24: rulings 1, 2, 3 and 12 stand as recommended; rulings 4 to 11, 13 and 14 are deferred. PR L1 needs only the first group.
+
 1. Adopt section 3 as D20 step two-b, before proposal pinning. Recommendation: yes.
 2. Batch byte budget 6 MiB raw as the starting value, validated by L1's measured transaction reads, document counts, index ranges, and runtime on a real backend; composer as the normal path, explicit lists refused over budget; a run's membership captured at composition so one approval covers exactly that set. Consequence for the deferred batch-release step: with exact membership at release, NZ is 77 PI releases per cycle, so the release brief should let one PI act cover a country's run. Recommendation: yes.
 3. Pinned pure-JS gzip (`fflate`) with a deterministic header (mtime 0, no filename) and the codec record in `frozen.json` and object metadata, keys naming plain hash and codec id together, or identity encoding now. Recommendation: gzip.
