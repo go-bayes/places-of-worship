@@ -259,12 +259,7 @@ An assigned pull request is carried to closure by one agent, so no merged change
 
 ## Development Methods Record
 
-Joseph intends to publish an account of how this site was developed (Joseph, 2026-09-24), so agents record their methods as they work. The public repository is the record that is always present; the private handovers in `pow-research` keep the operational detail.
-
-- At the end of each sitting in which work is merged, deployed or designed, the closure owner (the agent that carried the work to closure; reviewing agents stay read-only) appends a dated entry to `docs/development/methods-log.md`. Write at summary grain, one line per paragraph, New Zealand English.
-- Each entry states: what was built or decided and why; which roles did the work (the human rulings, the implementing agent and model, the reviewing models and their tier under the review rule above); the number of review rounds and findings by severity for each pull request, stating which reviewers' findings are counted; how the work was verified (continuous integration, isolated local backends, read-back of the live deployment after a deploy); and any deviation from the rules in this file, such as a merge made before its review, with how it was remedied.
-- Record costs, credentials, private research data and personal details nowhere in the log. Name people only as the project already credits them.
-- A later correction appends a new entry rather than rewriting an earlier one.
+Joseph intends to publish an account of how this site was developed (Joseph, 2026-09-24), so agents record their methods as they work. Since 2026-09-26 the methods log and its rules are kept in the private `pow-research` repository (`methods/methods-log.md` and that repository's `AGENTS.md`), on Joseph's instruction; the log's first entry, of 2026-09-24, remains in this repository's history. At the end of each sitting in which work is merged, deployed or designed, the closure owner appends a dated entry there. The public [confidence standard](docs/confidence-standard.md) and [summary of AI assistance](docs/ai-assisted-research.md) stay in this repository.
 
 ## Useful Commands
 

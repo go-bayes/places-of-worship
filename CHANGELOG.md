@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### 2026-09-26 (confidence standard 0.3.0; methods log moved)
+
+- Version 0.3.0 of the [confidence standard](docs/confidence-standard.md), snapshot at `docs/development/confidence-standard-2026-09-26-v0.3.0.md`, on the project lead's ruling of 2026-09-26: living persons appear on published surfaces only under pseudonyms, clergy and church-office holders included, with the key from pseudonym to name held privately; a person with a death date recorded from a cited source may be named. The public scope of the cited clergy-name rule `public_source_cited.v1` is withdrawn; its internal scope in the review layer is unchanged. The [summary of AI assistance](docs/ai-assisted-research.md) states the same rule.
+- The development methods log moves to the project's private research repository on the project lead's instruction; `docs/development/methods-log.md` is removed and the contributor guidance points to the new location.
+
 ### 2026-09-24 (the pin's menu stays open after a mouse hold)
 
 - On a computer the pin's menu opened by a held mouse button no longer vanishes as the pointer moves up to it (JB, 2026-09-24: "as you mouse up to hit it, it disappears unless you are very quick"). The release that ends the hold reached the map as a click, and the map's click closed the menu at once (it faded out over 200 ms, the only window in which `Remove pin` could be reached). That one click is now held back and nothing else: the catch ends 100 ms after the release whether a click came or not, a click on the menu itself always passes, and closing the menu, lifting the pin or leaving the entry drops it, so a keyboard press on the menu or a map control is never eaten, the pin no longer follows a button still held while the menu is open, and Escape closes the menu alone before a second Escape leaves the entry. No grace timer was needed. Checks 16 to 19 in `add-revise-control.test.cjs`; RA guide and UI style guide updated; stamp `verification-map.js?v=20260924a`.
