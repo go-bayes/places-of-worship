@@ -138,23 +138,28 @@ export default defineSchema({
     .index("by_token_identifier", ["token_identifier"])
     .index("by_user", ["user_id"]),
 
-  // single-use proofs that the holder of a row's current (google) sign-in
-  // asked to move it to clerk (r-c18, jb 2026-09-24). only the sha-256 of the
-  // secret is stored; the secret goes once to the caller. bound to the row
-  // and to the identifier it was issued for; ten minutes; consumed in the
-  // re-keying transaction, or revoked when a newer grant is issued
-  identity_migration_grants: defineTable({
+  // r-c18 (jb 2026-09-24, option 1): a server-side pairing between one
+  // clerk sign-in and one google-bound row. the clerk sign-in requests it
+  // (bound here to its own identifier and to the row its verified email
+  // matches); the row's current google sign-in approves it by the nonce it
+  // is shown; claimInvite re-keys only for that clerk identifier and row,
+  // spending the pairing in the same transaction. only the nonce's sha-256
+  // is stored; ten minutes; one open pairing per row
+  identity_migration_pairings: defineTable({
     user_id: v.id("users"),
-    secret_hash: v.string(),
+    clerk_token_identifier: v.string(),
     source_token_identifier: v.string(),
-    issued_at: v.number(),
+    nonce_hash: v.string(),
+    requested_at: v.number(),
     expires_at: v.number(),
+    approved_at: v.optional(v.number()),
+    approved_by_token_identifier: v.optional(v.string()),
     consumed_at: v.optional(v.number()),
-    consumed_by_token_identifier: v.optional(v.string()),
     revoked_at: v.optional(v.number()),
   })
-    .index("by_secret_hash", ["secret_hash"])
-    .index("by_user", ["user_id", "issued_at"]),
+    .index("by_nonce_hash", ["nonce_hash"])
+    .index("by_user", ["user_id", "requested_at"])
+    .index("by_clerk_identifier", ["clerk_token_identifier", "requested_at"]),
 
   // append-only record of role and status changes (brief 8.4). from_status
   // is absent when the event created the row

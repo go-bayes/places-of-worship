@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import type { Infer } from "convex/values";
+import type { UserIdentity } from "convex/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 import { internalMutation, mutation, query } from "./_generated/server";
@@ -21,12 +22,12 @@ declare const process: {
 
 const NO_INVITATION = "No pending project invitation found for this email.";
 // r-c18 (jb 2026-09-24, option 1): moving an existing google-bound member to
-// clerk needs a grant issued to that google sign-in; a verified email alone
-// never re-keys a row
+// clerk needs the row's current google sign-in to approve a pairing that the
+// clerk sign-in requested; the binding lives on the server, and a verified
+// email alone never re-keys a row
 const GOOGLE_ISSUER = "https://accounts.google.com";
-const MIGRATION_GRANT_TTL_MS = 10 * 60 * 1000;
+const PAIRING_TTL_MS = 10 * 60 * 1000;
 const MIGRATION_CONFIRM = "This address belongs to an existing member who signed in with Google. Confirm that Google account first, then sign in again.";
-const MIGRATION_GRANT_INVALID = "The Google confirmation has expired or was already used. Confirm your Google account again, then sign in.";
 const VERIFY_EMAIL = "Verify this email address with the sign-in provider, then sign in again.";
 
 type RoleEventInput = {
@@ -309,79 +310,153 @@ export const adminUpsertUser = internalMutation({
   },
 });
 
-// a grant the caller may spend on this row: found by the hash of the
-// presented secret, issued for this row and for the identifier the row still
-// holds, unexpired, unconsumed and unrevoked
-async function liveMigrationGrant(
+// the row a clerk sign-in may be moved onto: matched by its verified email,
+// google-bound (an allowlisted source identifier) and open to re-keying to
+// this clerk issuer, and not a service or disabled row
+async function migrationTarget(
   ctx: MutationCtx,
-  secret: string,
+  identity: UserIdentity,
+): Promise<Doc<"users">> {
+  const destination = migrationDestinationIssuer();
+  if (destination === undefined || normaliseIssuer(identity.issuer) !== destination) {
+    throw new Error("Only the new sign-in can ask to move an existing account.");
+  }
+  if (identity.emailVerified !== true) {
+    throw new Error(VERIFY_EMAIL);
+  }
+  const email = normaliseEmail(identity.email);
+  if (email === undefined) {
+    throw new Error(VERIFY_EMAIL);
+  }
+  if ((await resolveUser(ctx, identity)) !== null) {
+    throw new Error("This sign-in already belongs to a project member.");
+  }
+  const row = await ctx.db
+    .query("users")
+    .withIndex("by_email", (q) => q.eq("email", email))
+    .unique();
+  const source = allowlistedSourceIssuer(row?.auth_subject, migrationSourceIssuers());
+  if (
+    row === null
+    || source !== GOOGLE_ISSUER
+    || source === destination
+    || (row.status !== "active" && row.status !== "pending")
+    || row.roles.includes("service")
+  ) {
+    throw new Error(NO_INVITATION);
+  }
+  return row;
+}
+
+// the approved pairing this clerk identifier may spend on this row
+async function approvedPairing(
+  ctx: MutationCtx,
+  clerkTokenIdentifier: string,
   row: Doc<"users">,
   now: number,
-): Promise<Doc<"identity_migration_grants"> | null> {
-  const found = await ctx.db
-    .query("identity_migration_grants")
-    .withIndex("by_secret_hash", (q) => q.eq("secret_hash", sha256(secret)))
-    .unique();
-  if (
-    found === null
-    || found.user_id !== row._id
-    || found.source_token_identifier !== row.auth_subject
-    || found.consumed_at !== undefined
-    || found.revoked_at !== undefined
-    || found.expires_at <= now
-  ) {
-    return null;
-  }
-  return found;
+): Promise<Doc<"identity_migration_pairings"> | null> {
+  const pairings = await ctx.db
+    .query("identity_migration_pairings")
+    .withIndex("by_clerk_identifier", (q) => q.eq("clerk_token_identifier", clerkTokenIdentifier))
+    .collect();
+  return pairings.find((pairing) => pairing.user_id === row._id
+    && pairing.source_token_identifier === row.auth_subject
+    && pairing.approved_at !== undefined
+    && pairing.consumed_at === undefined
+    && pairing.revoked_at === undefined
+    && pairing.expires_at > now) ?? null;
 }
 
 // spent in the same transaction as the re-keying it authorises
-async function consumeMigrationGrant(
+async function consumePairing(
   ctx: MutationCtx,
-  grant: Doc<"identity_migration_grants">,
+  pairing: Doc<"identity_migration_pairings">,
   row: Doc<"users">,
-  tokenIdentifier: string,
   now: number,
 ) {
-  await ctx.db.patch(grant._id, { consumed_at: now, consumed_by_token_identifier: tokenIdentifier });
+  await ctx.db.patch(pairing._id, { consumed_at: now });
   await appendRoleEvent(ctx, {
     user_id: row._id,
     from_roles: row.roles,
     to_roles: row.roles,
     from_status: row.status,
     to_status: row.status,
-    reason: "migration_grant_consumed",
-    note: `grant ${grant._id}`,
+    reason: "pairing_consumed",
+    note: `pairing ${pairing._id}`,
   }, now);
 }
 
-// r-c18 (jb 2026-09-24, option 1): a member still signed in with google asks
-// to move that account to clerk. callable only by a google-issued identity,
-// while google is on the migration allowlist and a clerk issuer is
-// configured, for the row whose current identifier it is (active or pending
-// after an invite reset; never service or disabled). returns a secret once;
-// only its sha-256 is kept. a newer grant revokes the row's earlier ones
-export const beginIdentityMigration = mutation({
+// r-c18 step 1: a clerk sign-in whose verified email matches a google-bound
+// member asks to take the row over. the pairing is bound here to this clerk
+// identifier and that row; the nonce returned links it to the approval only
+// and is useless to any other clerk identifier. a newer request revokes the
+// row's earlier open pairings
+export const requestIdentityMigration = mutation({
   args: {},
-  returns: v.object({ grant: v.string(), expires_at: v.number() }),
+  returns: v.object({ nonce: v.string(), expires_at: v.number() }),
   handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (identity === null) {
+      throw new Error("Authentication required.");
+    }
+    const row = await migrationTarget(ctx, identity);
+    const now = Date.now();
+    const open = await ctx.db
+      .query("identity_migration_pairings")
+      .withIndex("by_user", (q) => q.eq("user_id", row._id))
+      .collect();
+    for (const pairing of open) {
+      if (pairing.consumed_at === undefined && pairing.revoked_at === undefined) {
+        await ctx.db.patch(pairing._id, { revoked_at: now });
+      }
+    }
+    // 244 random bits from two v4 uuids (crypto.randomUUID runs in convex
+    // mutations, as in exports.ts)
+    const nonce = `${crypto.randomUUID()}${crypto.randomUUID()}`.replaceAll("-", "");
+    const expiresAt = now + PAIRING_TTL_MS;
+    const pairingId = await ctx.db.insert("identity_migration_pairings", {
+      user_id: row._id,
+      clerk_token_identifier: identity.tokenIdentifier,
+      source_token_identifier: row.auth_subject!,
+      nonce_hash: sha256(nonce),
+      requested_at: now,
+      expires_at: expiresAt,
+    });
+    await appendRoleEvent(ctx, {
+      user_id: row._id,
+      from_roles: row.roles,
+      to_roles: row.roles,
+      from_status: row.status,
+      to_status: row.status,
+      reason: "pairing_requested",
+      note: `pairing ${pairingId}, expires ${new Date(expiresAt).toISOString()}`,
+    }, now);
+    return { nonce, expires_at: expiresAt };
+  },
+});
+
+// r-c18 step 2: the row's current google sign-in approves the pairing it was
+// shown. it never learns or chooses the clerk identifier; it can approve
+// only an open pairing for its own row. resolved through the shared
+// resolveUser, then held to more: a google issuer, the move open, the row's
+// current identifier (never a linked earlier one), active or pending, not a
+// service identity
+export const approveIdentityMigration = mutation({
+  args: { nonce: v.string() },
+  returns: v.object({ approved: v.boolean(), expires_at: v.number() }),
+  handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (identity === null) {
       throw new Error("Authentication required.");
     }
     const issuer = normaliseIssuer(identity.issuer);
     if (issuer !== GOOGLE_ISSUER || !migrationSourceIssuers().includes(GOOGLE_ISSUER)) {
-      throw new Error("Only a Google sign-in can be confirmed for the move, and only while the move is open.");
+      throw new Error("Only a Google sign-in can approve the move, and only while the move is open.");
     }
     const destination = migrationDestinationIssuer();
     if (destination === undefined || destination === GOOGLE_ISSUER) {
       throw new Error("The new sign-in is not configured on this deployment.");
     }
-    // the caller is resolved through the shared authority helper, as every
-    // public mutation does; the grant then needs more than resolveUser
-    // grants: the identifier must be the row's current one (a linked,
-    // earlier identifier is refused), and the row active or pending and not
-    // a service identity
     const row = await resolveUser(ctx, identity);
     if (
       row === null
@@ -392,36 +467,33 @@ export const beginIdentityMigration = mutation({
       throw new Error("This Google account is not a project member's current sign-in.");
     }
     const now = Date.now();
-    const earlier = await ctx.db
-      .query("identity_migration_grants")
-      .withIndex("by_user", (q) => q.eq("user_id", row._id))
-      .collect();
-    for (const grant of earlier) {
-      if (grant.consumed_at === undefined && grant.revoked_at === undefined) {
-        await ctx.db.patch(grant._id, { revoked_at: now });
-      }
+    const pairing = await ctx.db
+      .query("identity_migration_pairings")
+      .withIndex("by_nonce_hash", (q) => q.eq("nonce_hash", sha256(args.nonce)))
+      .unique();
+    if (
+      pairing === null
+      || pairing.user_id !== row._id
+      || pairing.source_token_identifier !== identity.tokenIdentifier
+      || pairing.consumed_at !== undefined
+      || pairing.revoked_at !== undefined
+      || pairing.expires_at <= now
+    ) {
+      throw new Error("This request to move the account has expired or does not belong to this Google account. Start again from the new sign-in.");
     }
-    // 244 random bits from two v4 uuids (crypto.randomUUID runs in convex
-    // mutations, as in exports.ts)
-    const secret = `${crypto.randomUUID()}${crypto.randomUUID()}`.replaceAll("-", "");
-    const expiresAt = now + MIGRATION_GRANT_TTL_MS;
-    const grantId = await ctx.db.insert("identity_migration_grants", {
-      user_id: row._id,
-      secret_hash: sha256(secret),
-      source_token_identifier: identity.tokenIdentifier,
-      issued_at: now,
-      expires_at: expiresAt,
-    });
-    await appendRoleEvent(ctx, {
-      user_id: row._id,
-      from_roles: row.roles,
-      to_roles: row.roles,
-      from_status: row.status,
-      to_status: row.status,
-      reason: "migration_grant_issued",
-      note: `grant ${grantId}, expires ${new Date(expiresAt).toISOString()}`,
-    }, now);
-    return { grant: secret, expires_at: expiresAt };
+    if (pairing.approved_at === undefined) {
+      await ctx.db.patch(pairing._id, { approved_at: now, approved_by_token_identifier: identity.tokenIdentifier });
+      await appendRoleEvent(ctx, {
+        user_id: row._id,
+        from_roles: row.roles,
+        to_roles: row.roles,
+        from_status: row.status,
+        to_status: row.status,
+        reason: "pairing_approved",
+        note: `pairing ${pairing._id}`,
+      }, now);
+    }
+    return { approved: true, expires_at: pairing.expires_at };
   },
 });
 
@@ -433,9 +505,6 @@ export const beginIdentityMigration = mutation({
 export const claimInvite = mutation({
   args: {
     initials: v.optional(v.string()),
-    // the secret users:beginIdentityMigration returned to the member's
-    // google sign-in; needed to re-key a google-bound row (r-c18)
-    migrationGrant: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -510,25 +579,25 @@ export const claimInvite = mutation({
       .collect();
     // a re-keying moves the row from an allowlisted source issuer to the
     // configured destination; the old identifier stays linked for rollback.
-    // the window being open is not enough: the caller must also present a
-    // live grant issued to the row's current sign-in (r-c18)
+    // the window being open is not enough: the row's current google sign-in
+    // must have approved a pairing this clerk identifier requested (r-c18)
     const windowOpen = row.auth_subject !== undefined
       && source !== undefined
       && destination !== undefined
       && tokenIssuer === destination
       && source !== destination
       && takenLinks.length === 0;
-    let grant: Doc<"identity_migration_grants"> | null = null;
+    // the pairing must be approved by the row's current google sign-in and
+    // requested by this very clerk identifier; nothing the client holds or
+    // sends can stand in for it
+    let pairing: Doc<"identity_migration_pairings"> | null = null;
     if (windowOpen) {
-      if (!args.migrationGrant) {
+      pairing = await approvedPairing(ctx, identity.tokenIdentifier, row, now);
+      if (pairing === null) {
         throw new Error(MIGRATION_CONFIRM);
       }
-      grant = await liveMigrationGrant(ctx, args.migrationGrant, row, now);
-      if (grant === null) {
-        throw new Error(MIGRATION_GRANT_INVALID);
-      }
     }
-    const mayRekey = windowOpen && grant !== null;
+    const mayRekey = windowOpen && pairing !== null;
 
     const previousSubject = row.auth_subject;
     const { roles, status } = row;
@@ -542,8 +611,8 @@ export const claimInvite = mutation({
       if (previousSubject !== undefined && !mayRekey) {
         throw new Error("This invitation is bound to another sign-in method. Sign in that way, or ask a project admin to reset it.");
       }
-      if (previousSubject !== undefined && source !== undefined && grant !== null) {
-        await consumeMigrationGrant(ctx, grant, row, identity.tokenIdentifier, now);
+      if (previousSubject !== undefined && source !== undefined && pairing !== null) {
+        await consumePairing(ctx, pairing, row, now);
         await ctx.db.insert("user_identities", {
           user_id: row._id,
           token_identifier: previousSubject,
@@ -572,8 +641,8 @@ export const claimInvite = mutation({
     }
 
     // rule 5: an active row re-keys only on every condition above
-    if (status === "active" && mayRekey && previousSubject !== undefined && source !== undefined && grant !== null) {
-      await consumeMigrationGrant(ctx, grant, row, identity.tokenIdentifier, now);
+    if (status === "active" && mayRekey && previousSubject !== undefined && source !== undefined && pairing !== null) {
+      await consumePairing(ctx, pairing, row, now);
       await ctx.db.insert("user_identities", {
         user_id: row._id,
         token_identifier: previousSubject,

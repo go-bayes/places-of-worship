@@ -280,20 +280,8 @@ button.state-pill:focus-visible { outline: 2px solid var(--action); outline-offs
 }
 
 /* r-c18: confirming the google account an existing member used before, so
-   the move to the new sign-in carries their roles; shown only while the
-   move is open */
-.pow-migration-details {
-    color: var(--muted);
-    font-size: var(--fs-sm, 15px);
-    line-height: 1.45;
-}
-.pow-migration-details summary {
-    min-height: 40px;
-    line-height: 40px;
-    cursor: pointer;
-    color: var(--action);
-}
-.pow-migration-details > span,
+   the move to the new sign-in carries their roles; shown only to a member
+   signed in with the new sign-in, and only while the move is open */
 .pow-migration-step > span {
     display: block;
     margin: 6px 0;

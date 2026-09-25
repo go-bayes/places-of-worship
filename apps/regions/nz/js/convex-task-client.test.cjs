@@ -390,17 +390,18 @@ const container = () => ({
     assert.equal(h.calls.scripts.length, 0, "no script loads for a refused key");
   }
 
-  // 12. r-c18: an existing google member signed in to clerk is asked to
-  // confirm their google account; the google id token is used for the one
-  // grant request, the grant is held for the tab, presented on the claim,
-  // and cleared once spent
+  // 12. r-c18, bound on the server: an existing google member signed in to
+  // clerk is asked to confirm their google account. the clerk sign-in asks
+  // for the pairing, the google sign-in approves it with its own token, and
+  // the claim is retried with the clerk token; nothing is stored
   {
     const confirm = "[Request ID: 1] Server Error Uncaught Error: This address belongs to an existing member who signed in with Google. Confirm that Google account first, then sign in again. at handler (x)";
-    const claims = [];
+    let approved = false;
     const responses = {
-      "users:claimInvite": (body) => { claims.push(body.args[0]); return body.args[0].migrationGrant ? ok("user_1") : refused(confirm); },
+      "users:claimInvite": () => (approved ? ok("user_1") : refused(confirm)),
       "users:me": ok(member),
-      "users:beginIdentityMigration": ok({ grant: "g-secret-1", expires_at: Date.now() + 600000 }),
+      "users:requestIdentityMigration": ok({ nonce: "n-1", expires_at: Date.now() + 600000 }),
+      "users:approveIdentityMigration": (body) => { approved = body.args[0].nonce === "n-1"; return ok({ approved: true, expires_at: Date.now() + 600000 }); },
     };
     const h = harness({ session: { id: "sess_m", email: "guy@example.org" }, cookie: "__client_uat=1", responses });
     const client = new h.Client({ ...config, googleMigrationClientId: "google-client-id" });
@@ -413,16 +414,18 @@ const container = () => ({
     assert.ok(h.calls.scripts.some((script) => script.src === "https://accounts.google.com/gsi/client"), "google's button loads for the step");
     assert.equal(h.calls.gsiInit.client_id, "google-client-id");
     assert.equal(h.calls.gsiButtons, 1);
-    // the member confirms with google
     await h.calls.gsiInit.callback({ credential: "google-id-token" });
-    const grantRequest = h.calls.fetches.find((fetch) => fetch.body.path === "users:beginIdentityMigration");
-    assert.equal(grantRequest.headers.Authorization, "Bearer google-id-token", "the grant request is made as the google sign-in");
     await tick();
-    assert.equal(claims.at(-1).migrationGrant, "g-secret-1", "the claim presents the grant");
-    assert.deepEqual(seen, ["user_1"], "and the member is in");
-    assert.equal(client.heldMigrationGrant, null, "the spent grant is cleared");
-    assert.equal(h.sessionValues.size, 0, "a grant never reaches storage");
-    assert.equal(client.migrationGrant(), "");
+    const request = h.calls.fetches.find((fetch) => fetch.body.path === "users:requestIdentityMigration");
+    const approval = h.calls.fetches.find((fetch) => fetch.body.path === "users:approveIdentityMigration");
+    assert.match(request.headers.Authorization, /^Bearer jwt-for-sess_m-/, "the clerk sign-in asks");
+    assert.equal(approval.headers.Authorization, "Bearer google-id-token", "the google sign-in approves");
+    assert.equal(approval.body.args[0].nonce, "n-1");
+    const lastClaim = h.calls.fetches.filter((fetch) => fetch.body.path === "users:claimInvite").at(-1);
+    assert.match(lastClaim.headers.Authorization, /^Bearer jwt-for-sess_m-/, "the claim is the clerk sign-in's");
+    assert.deepEqual(Object.keys(lastClaim.body.args[0]), [], "and carries no grant or nonce");
+    assert.deepEqual(seen, ["user_1"], "the member is in");
+    assert.equal(h.sessionValues.size, 0, "nothing reaches storage");
   }
 
   // 13. with the move closed, the same refusal is a plain note: no google step
@@ -435,168 +438,48 @@ const container = () => ({
     assert.equal(h.calls.scripts.some((script) => script.src.includes("gsi/client")), false);
   }
 
-  // 14. google first: before signing in, the folded step issues the grant,
-  // which the later clerk claim presents; an expired grant is never sent;
-  // a deliberate sign-out drops a held grant
+  // 14. clerk first only: the signed-out card carries the clerk form alone,
+  // even while the move is open
   {
-    const claims = [];
-    const responses = {
-      "users:claimInvite": (body) => { claims.push(body.args[0]); return ok("user_1"); },
-      "users:me": ok(member),
-      "users:beginIdentityMigration": ok({ grant: "g-secret-2", expires_at: Date.now() + 600000 }),
-    };
-    const h = harness({ responses });
+    const h = harness();
     const client = new h.Client({ ...config, googleMigrationClientId: "google-client-id" });
     const host = container();
     await client.renderSignInButton(host, {});
-    assert.equal(host.children.length, 2, "the clerk form and the folded google step");
-    const details = host.children[1];
-    assert.equal(details.tag, "details");
-    assert.match(details.innerHTML, /Used Google sign-in here before\?/);
-    details.querySelector = (selector) => selector.includes("google-confirm") ? (details.hostEl ||= { innerHTML: "" }) : (details.statusEl ||= { textContent: "" });
-    await client.mountGoogleConfirm(details, { afterGrant: () => {} });
-    await h.calls.gsiInit.callback({ credential: "google-id-token" });
-    assert.match(details.statusEl.textContent, /Confirmed\. Now sign in above/);
-    assert.equal(client.heldMigrationGrant.grant, "g-secret-2", "held in this page's memory");
-    assert.equal(client.heldMigrationGrant.sessionId, "", "armed for the next sign-in started here");
-    assert.equal(h.sessionValues.size, 0, "never in storage");
-    assert.equal(client.migrationGrant(), "", "not presentable before a session");
-    await client.renderSignInButton(container(), {});
-    assert.equal(host.children[1], details, "a repaint keeps the same step");
-    // the member uses this page's sign-in form, and the session it starts
-    // presents the grant
-    client.markSignInStarted();
-    h.clerk.setSession(h.makeSession("sess_g", "guy@example.org"));
-    await tick();
-    assert.equal(claims.at(-1).migrationGrant, "g-secret-2", "the clerk claim presents it");
-    // an expired grant is never presented
-    client.heldMigrationGrant = { grant: "old", expires_at: Date.now() - 1, issuedAt: 1, sessionId: client.sessionId };
-    assert.equal(client.migrationGrant(), "");
-    // sign-out drops a held grant
-    client.heldMigrationGrant = { grant: "held", expires_at: Date.now() + 60000, issuedAt: 1, sessionId: client.sessionId };
-    await client.signOut({ deliberate: true });
-    assert.equal(client.heldMigrationGrant, null);
-    // with the move closed the signed-out card carries the clerk form only
-    const closed = new (harness().Client)(config);
-    const closedHost = container();
-    await closed.renderSignInButton(closedHost, {});
-    assert.equal(closedHost.children.length, 1);
+    assert.equal(host.children.length, 1, "no google-first step");
+    assert.equal(h.calls.scripts.some((script) => script.src.includes("gsi/client")), false);
   }
 
-  // 15. r-c18 review: a grant issuance that answers after a deliberate
-  // sign-out writes nothing, directly or through google's callback; a
-  // session that ends in another tab or by expiry, or turns into another,
-  // takes a held grant with it; a first session keeps the google-first grant
+  // 15. the flow stops as soon as its clerk session ends or changes: a late
+  // pairing answer is not approved, and a click from an ended session asks
+  // for nothing
   {
     const deferred = () => { let resolve; const promise = new Promise((r) => { resolve = r; }); return { promise, resolve }; };
     let pending = deferred();
     const responses = {
       "users:claimInvite": refused("Confirm that Google account first, then sign in again."),
-      "users:beginIdentityMigration": () => pending.promise,
+      "users:requestIdentityMigration": () => pending.promise,
+      "users:approveIdentityMigration": ok({ approved: true, expires_at: Date.now() + 600000 }),
     };
-    const h = harness({ session: { id: "sess_r", email: "guy@example.org" }, cookie: "__client_uat=1", responses });
+    const h = harness({ session: { id: "sess_s", email: "guy@example.org" }, cookie: "__client_uat=1", responses });
     const client = new h.Client({ ...config, googleMigrationClientId: "google-client-id" });
-    await client.restoreSession();
-    // direct: begin, sign out, then the answer arrives
-    const direct = client.beginIdentityMigration("google-id-token");
-    await client.signOut({ deliberate: true });
-    pending.resolve(ok({ grant: "late-grant", expires_at: Date.now() + 600000 }));
-    await assert.rejects(direct, (error) => error.staleGrant === true);
-    assert.equal(client.heldMigrationGrant, null, "no grant in memory");
-    assert.equal(h.sessionValues.size, 0, "nor in the tab");
-    assert.equal(client.migrationGrant(), "");
-
-    // through google's button: the step is mounted in one session, the
-    // member signs out, and the late answer is dropped with no status text
-    h.clerk.setSession(h.makeSession("sess_r2", "guy@example.org"));
-    await tick();
     const host = container();
     await client.renderSignInButton(host, {});
     await tick();
-    assert.match(host.innerHTML, /Confirm your existing account/);
-    pending = deferred();
-    const callback = h.calls.gsiInit.callback({ credential: "google-id-token" });
-    await client.signOut({ deliberate: true });
-    pending.resolve(ok({ grant: "late-grant-2", expires_at: Date.now() + 600000 }));
-    await callback;
-    assert.equal(client.heldMigrationGrant, null, "the late callback writes no grant");
-    assert.doesNotMatch(host.parts["migration-status"]?.textContent || "", /Confirmed/);
-    // a click on a button from the ended session asks for nothing
-    const asked = h.calls.fetches.filter((fetch) => fetch.body.path === "users:beginIdentityMigration").length;
-    await h.calls.gsiInit.callback({ credential: "google-id-token" });
-    assert.equal(h.calls.fetches.filter((fetch) => fetch.body.path === "users:beginIdentityMigration").length, asked);
-
-    // a session that ends elsewhere (another tab, expiry) clears a held grant
-    h.clerk.setSession(h.makeSession("sess_r3", "guy@example.org"));
-    await tick();
-    client.heldMigrationGrant = { grant: "held", expires_at: Date.now() + 600000, issuedAt: Date.now(), sessionId: "sess_r3" };
+    const callback = h.calls.gsiInit.callback;
+    const flow = callback({ credential: "google-id-token" });
     h.clerk.setSession(null);
-    assert.equal(client.heldMigrationGrant, null, "ended elsewhere: grant cleared");
-    assert.equal(client.migrationGrant(), "");
-    // and an issuance in flight when the session ends elsewhere is dropped
-    h.clerk.setSession(h.makeSession("sess_r4", "guy@example.org"));
-    await tick();
-    pending = deferred();
-    const inFlight = client.beginIdentityMigration("google-id-token");
-    h.clerk.setSession(null);
-    pending.resolve(ok({ grant: "late-grant-3", expires_at: Date.now() + 600000 }));
-    await assert.rejects(inFlight, (error) => error.staleGrant === true);
-    assert.equal(client.heldMigrationGrant, null);
-    // a session that changes to another user's takes it too
-    h.clerk.setSession(h.makeSession("sess_r5", "guy@example.org"));
-    await tick();
-    client.heldMigrationGrant = { grant: "held-2", expires_at: Date.now() + 600000, issuedAt: Date.now(), sessionId: "sess_r5" };
+    pending.resolve(ok({ nonce: "n-late", expires_at: Date.now() + 600000 }));
+    assert.equal(await flow, false);
+    assert.equal(h.calls.fetches.some((fetch) => fetch.body.path === "users:approveIdentityMigration"), false, "no approval for an ended session");
+    // the button from the ended session: nothing is asked
+    const asked = h.calls.fetches.filter((fetch) => fetch.body.path === "users:requestIdentityMigration").length;
+    assert.equal(await callback({ credential: "google-id-token" }), false);
+    assert.equal(h.calls.fetches.filter((fetch) => fetch.body.path === "users:requestIdentityMigration").length, asked);
+    // a session changed to another account: the old step's click does nothing
     h.clerk.setSession(h.makeSession("sess_other", "other@example.org"));
-    assert.equal(client.heldMigrationGrant, null, "changed session: grant cleared");
-  }
-
-  // 16. greptile 4093166052: a grant confirmed before sign-in passes only to
-  // a session begun with this page's own form after the grant was issued.
-  // a session that arrives from another tab (no local sign-in), or one begun
-  // with the form before the grant, drops it; nothing survives a reload
-  {
-    const grantResponse = () => ok({ grant: `g-${Math.random()}`, expires_at: Date.now() + 600000 });
-    const build = () => {
-      const h = harness({ responses: { "users:claimInvite": ok("user_1"), "users:me": ok(member), "users:beginIdentityMigration": grantResponse } });
-      return { h, client: new h.Client({ ...config, googleMigrationClientId: "google-client-id" }) };
-    };
-    const claimOf = (h) => h.calls.fetches.filter((fetch) => fetch.body.path === "users:claimInvite").at(-1)?.body.args[0];
-
-    // local sign-in after the grant: presented
-    let { h, client } = build();
-    await client.renderSignInButton(container(), {});
-    await client.beginIdentityMigration("google-id-token");
-    client.markSignInStarted();
-    h.clerk.setSession(h.makeSession("sess_local", "guy@example.org"));
     await tick();
-    assert.ok(claimOf(h).migrationGrant, "the page's own sign-in presents it");
-
-    // a session that arrives from another tab: not presented, and dropped
-    ({ h, client } = build());
-    await client.renderSignInButton(container(), {});
-    await client.beginIdentityMigration("google-id-token");
-    h.clerk.setSession(h.makeSession("sess_elsewhere", "someone@example.org"));
-    await tick();
-    assert.equal(claimOf(h).migrationGrant, undefined, "a session from elsewhere never receives it");
-    assert.equal(client.heldMigrationGrant, null, "and the grant is gone");
-
-    // the form used before the grant was issued does not count
-    ({ h, client } = build());
-    await client.renderSignInButton(container(), {});
-    client.markSignInStarted();
-    await new Promise((resolve) => setTimeout(resolve, 2));
-    await client.beginIdentityMigration("google-id-token");
-    h.clerk.setSession(h.makeSession("sess_earlier", "guy@example.org"));
-    await tick();
-    assert.equal(claimOf(h).migrationGrant, undefined);
-    assert.equal(client.heldMigrationGrant, null);
-
-    // a reload starts with no grant, and an earlier build's tab copy is removed
-    ({ h, client } = build());
-    h.sessionValues.set("powMigrationGrant:v1", JSON.stringify({ grant: "tab-copy", expires_at: Date.now() + 600000 }));
-    const reloaded = new h.Client({ ...config, googleMigrationClientId: "google-client-id" });
-    assert.equal(reloaded.migrationGrant(), "");
-    assert.equal(h.sessionValues.has("powMigrationGrant:v1"), false);
+    assert.equal(await callback({ credential: "google-id-token" }), false);
+    assert.equal(h.calls.fetches.some((fetch) => fetch.body.path === "users:approveIdentityMigration"), false);
   }
 
   console.log("convex-task-client: clerk sessions ok");

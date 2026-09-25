@@ -10,7 +10,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 registerHooks({ resolve(specifier, context, nextResolve) { if (specifier.startsWith(".") && !/\.[a-z]+$/i.test(specifier)) { for (const ext of [".js", ".ts"]) { const candidate = new URL(`${specifier}${ext}`, context.parentURL); if (fs.existsSync(fileURLToPath(candidate))) return nextResolve(candidate.href, context); } } return nextResolve(specifier, context); } });
-const { claimInvite, me, inviteUser, adminUpsertUser, adminResetAuthSubject, beginIdentityMigration } = await import("./users.ts");
+const { claimInvite, me, inviteUser, adminUpsertUser, adminResetAuthSubject, requestIdentityMigration, approveIdentityMigration } = await import("./users.ts");
 const { requireUser, migrationSourceIssuers, allowlistedSourceIssuer } = await import("./lib/auth.ts");
 
 const GOOGLE = "https://accounts.google.com";
@@ -24,7 +24,7 @@ function identity(issuer, subject, email, { verified = true, name } = {}) {
 function world({ allowlist = "", destination = CLERK } = {}) {
   process.env.CLERK_JWT_ISSUER_DOMAIN = destination ?? "";
   process.env.AUTH_MIGRATION_SOURCE_ISSUERS = allowlist;
-  const rows = { users: [], user_identities: [], role_events: [], identity_migration_grants: [] };
+  const rows = { users: [], user_identities: [], role_events: [], identity_migration_pairings: [] };
   let caller = null;
   let counter = 0;
   const db = {
@@ -68,9 +68,16 @@ function world({ allowlist = "", destination = CLERK } = {}) {
   return { rows, ctx, as, addUser };
 }
 
-const claim = (ctx, migrationGrant) => claimInvite._handler(ctx, migrationGrant ? { migrationGrant } : {});
-// r-c18: the member's google sign-in asks for a grant for its own row
-const grantFor = async (w, google) => (await beginIdentityMigration._handler(w.as(google), {})).grant;
+const claim = (ctx) => claimInvite._handler(ctx, {});
+// r-c18: the clerk sign-in requests a pairing, the row's current google
+// sign-in approves it by its nonce; returns the nonce
+const requestPairing = async (w, clerk) => (await requestIdentityMigration._handler(w.as(clerk), {})).nonce;
+const approvePairing = (w, google, nonce) => approveIdentityMigration._handler(w.as(google), { nonce });
+const pair = async (w, clerk, google) => {
+  const nonce = await requestPairing(w, clerk);
+  await approvePairing(w, google, nonce);
+  return nonce;
+};
 const lastEvent = (rows) => rows.role_events.at(-1);
 
 test("a pending invitation activates on a verified clerk sign-in and records the claim", async () => {
@@ -131,8 +138,8 @@ test("an allowlisted google member re-keys to clerk, and the google identifier s
   const w = world({ allowlist: GOOGLE });
   const member = w.addUser({ email: "guy@example.org", roles: ["ra", "reviewer"], status: "active", auth_subject: `${GOOGLE}|g-guy` });
   const clerk = identity(CLERK, "user_guy", "guy@example.org");
-  const grant = await grantFor(w, identity(GOOGLE, "g-guy", "guy@example.org"));
-  assert.equal(await claim(w.as(clerk), grant), member._id);
+  const nonce = await pair(w, clerk, identity(GOOGLE, "g-guy", "guy@example.org"));
+  assert.equal(await claim(w.as(clerk)), member._id);
   assert.equal(member.auth_subject, clerk.tokenIdentifier);
   assert.deepEqual(member.roles, ["ra", "reviewer"]);
   assert.equal(member.status, "active");
@@ -143,9 +150,10 @@ test("an allowlisted google member re-keys to clerk, and the google identifier s
   assert.equal(link.linked_reason, "auth_provider_migration");
   assert.equal(link.user_id, member._id);
   const event = lastEvent(w.rows);
-  assert.deepEqual(w.rows.role_events.map((row) => row.reason), ["migration_grant_issued", "migration_grant_consumed", "auth_provider_migration"]);
-  assert.ok(w.rows.role_events.every((row) => !String(row.note || "").includes(grant)), "no secret in any event");
-  assert.ok(w.rows.identity_migration_grants[0].consumed_at, "the grant is spent");
+  assert.deepEqual(w.rows.role_events.map((row) => row.reason), ["pairing_requested", "pairing_approved", "pairing_consumed", "auth_provider_migration"]);
+  assert.ok(w.rows.role_events.every((row) => !String(row.note || "").includes(nonce)), "no nonce in any event");
+  assert.ok(!JSON.stringify(w.rows).includes(nonce), "the nonce is stored nowhere");
+  assert.ok(w.rows.identity_migration_pairings[0].consumed_at, "the pairing is spent");
   assert.equal(event.reason, "auth_provider_migration");
   assert.equal(event.from_status, "active");
   assert.equal(event.to_status, "active");
@@ -159,7 +167,7 @@ test("an allowlisted google member re-keys to clerk, and the google identifier s
   // a second claim changes nothing
   assert.equal(await claim(w.as(clerk)), member._id);
   assert.equal(w.rows.user_identities.length, 1);
-  assert.equal(w.rows.role_events.length, 3);
+  assert.equal(w.rows.role_events.length, 4);
 });
 
 test("re-keying needs the exact destination issuer and an allowlisted source", async () => {
@@ -178,8 +186,8 @@ test("re-keying needs the exact destination issuer and an allowlisted source", a
   // a trailing slash on either value does not matter
   const slashed = world({ allowlist: `${GOOGLE}/`, destination: `${CLERK}/` });
   const member = slashed.addUser({ email: "guy@example.org", roles: ["ra"], status: "active", auth_subject: `${GOOGLE}|g-guy` });
-  const slashedGrant = await grantFor(slashed, identity(GOOGLE, "g-guy", "guy@example.org"));
-  assert.equal(await claim(slashed.as(identity(CLERK, "u", "guy@example.org")), slashedGrant), member._id);
+  await pair(slashed, identity(CLERK, "u", "guy@example.org"), identity(GOOGLE, "g-guy", "guy@example.org"));
+  assert.equal(await claim(slashed.as(identity(CLERK, "u", "guy@example.org"))), member._id);
 
   // an unverified clerk email never re-keys
   const unverified = world({ allowlist: GOOGLE });
@@ -200,8 +208,8 @@ test("an identifier already held by a link does not re-key another row", async (
 test("the admin reset retires links, so the old google identifier resolves nothing; the member claims again", async () => {
   const w = world({ allowlist: GOOGLE });
   const member = w.addUser({ email: "guy@example.org", roles: ["ra", "reviewer"], status: "active", auth_subject: `${GOOGLE}|g-guy` });
-  const grant = await grantFor(w, identity(GOOGLE, "g-guy", "guy@example.org"));
-  assert.equal(await claim(w.as(identity(CLERK, "user_guy", "guy@example.org")), grant), member._id);
+  await pair(w, identity(CLERK, "user_guy", "guy@example.org"), identity(GOOGLE, "g-guy", "guy@example.org"));
+  assert.equal(await claim(w.as(identity(CLERK, "user_guy", "guy@example.org"))), member._id);
   assert.equal(member.auth_subject, `${CLERK}|user_guy`);
   const reset = await adminResetAuthSubject._handler(w.ctx, { email: "guy@example.org", note: "stuck after device change" });
   assert.deepEqual(reset, { user_id: member._id, retired_links: 1 });
@@ -269,8 +277,8 @@ test("a pending row still bound to another identifier moves only on the re-keyin
   const moved = open.addUser({ email: "guy@example.org", roles: ["ra"], status: "pending", auth_subject: `${GOOGLE}|g-guy` });
   // with the move open, the clerk sign-in is asked for the google confirmation
   await assert.rejects(claim(open.as(identity(CLERK, "user_guy", "guy@example.org"))), /Confirm that Google account first/);
-  const pendingGrant = await grantFor(open, identity(GOOGLE, "g-guy", "guy@example.org"));
-  assert.equal(await claim(open.as(identity(CLERK, "user_guy", "guy@example.org")), pendingGrant), moved._id);
+  await pair(open, identity(CLERK, "user_guy", "guy@example.org"), identity(GOOGLE, "g-guy", "guy@example.org"));
+  assert.equal(await claim(open.as(identity(CLERK, "user_guy", "guy@example.org"))), moved._id);
   assert.equal(moved.status, "active");
   assert.equal(moved.auth_subject, `${CLERK}|user_guy`);
   assert.equal(open.rows.user_identities[0].token_identifier, `${GOOGLE}|g-guy`);
@@ -302,8 +310,8 @@ test("the allowlist parses separators and an empty value disables re-keying", ()
 test("a caller already bound to a row is resolved without writes, verified or not (greptile 4091515504)", async () => {
   const w = world({ allowlist: GOOGLE });
   const member = w.addUser({ email: "guy@example.org", roles: ["ra"], status: "active", auth_subject: `${GOOGLE}|g-guy` });
-  const grant = await grantFor(w, identity(GOOGLE, "g-guy", "guy@example.org"));
-  assert.equal(await claim(w.as(identity(CLERK, "user_guy", "guy@example.org")), grant), member._id);
+  await pair(w, identity(CLERK, "user_guy", "guy@example.org"), identity(GOOGLE, "g-guy", "guy@example.org"));
+  assert.equal(await claim(w.as(identity(CLERK, "user_guy", "guy@example.org"))), member._id);
   assert.equal(member.auth_subject, `${CLERK}|user_guy`);
   const before = JSON.stringify(w.rows);
   // the linked google identifier, now presenting an unverified email
@@ -320,110 +328,129 @@ test("a caller already bound to a row is resolved without writes, verified or no
   await assert.rejects(requireUser(w.as(goneWho), ["ra"]), /not active/);
 });
 
-// r-c18 (jb 2026-09-24, option 1): a grant issued to the member's google
-// sign-in is the only way a google-bound row re-keys to clerk
-test("r-c18: a verified email alone never re-keys a google-bound row, even with the allowlist set", async () => {
+// r-c18 (jb 2026-09-24, option 1), bound on the server: a clerk sign-in
+// requests a pairing for the google-bound row its verified email matches;
+// only that row's current google sign-in can approve it; only that clerk
+// identifier can spend it, once, within ten minutes
+const googleGuy = identity(GOOGLE, "g-guy", "guy@example.org");
+const clerkGuy = identity(CLERK, "user_guy", "guy@example.org");
+const googleMember = (w, fields = {}) => w.addUser({ email: "guy@example.org", roles: ["ra", "pi"], status: "active", auth_subject: `${GOOGLE}|g-guy`, ...fields });
+
+test("r-c18: a verified email alone never re-keys: a clerk sign-in with no approved pairing is refused", async () => {
   const w = world({ allowlist: GOOGLE });
-  const member = w.addUser({ email: "guy@example.org", roles: ["ra", "pi"], status: "active", auth_subject: `${GOOGLE}|g-guy` });
-  await assert.rejects(claim(w.as(identity(CLERK, "mailbox_holder", "guy@example.org"))), /Confirm that Google account first/);
-  await assert.rejects(claim(w.as(identity(CLERK, "mailbox_holder", "guy@example.org")), "not-a-grant"), /expired or was already used/);
+  const member = googleMember(w);
+  await assert.rejects(claim(w.as(clerkGuy)), /Confirm that Google account first/);
+  // a requested but unapproved pairing is not enough either
+  await requestPairing(w, clerkGuy);
+  await assert.rejects(claim(w.as(clerkGuy)), /Confirm that Google account first/);
   assert.equal(member.auth_subject, `${GOOGLE}|g-guy`);
   assert.equal(w.rows.user_identities.length, 0);
-  assert.equal(w.rows.role_events.length, 0);
 });
 
-test("r-c18: only a google sign-in that is the row's current identifier can ask for a grant", async () => {
+test("r-c18: an approved pairing cannot be spent by a different clerk sign-in with the same verified email", async () => {
   const w = world({ allowlist: GOOGLE });
-  w.addUser({ email: "guy@example.org", roles: ["ra"], status: "active", auth_subject: `${GOOGLE}|g-guy` });
-  w.addUser({ email: "gone@example.org", roles: ["ra"], status: "disabled", auth_subject: `${GOOGLE}|g-gone` });
-  w.addUser({ email: "agent@service.local", roles: ["service"], status: "active", auth_subject: `${GOOGLE}|g-agent` });
-  const ask = (who) => beginIdentityMigration._handler(w.as(who), {});
-  await assert.rejects(ask(identity(CLERK, "user_guy", "guy@example.org")), /Only a Google sign-in/, "a clerk caller is refused");
-  await assert.rejects(ask(identity(OTHER_CLERK, "x", "guy@example.org")), /Only a Google sign-in/);
-  await assert.rejects(ask(identity(GOOGLE, "g-stranger", "guy@example.org")), /not a project member's current sign-in/, "another google account with the same email is refused");
-  await assert.rejects(ask(identity(GOOGLE, "g-gone", "gone@example.org")), /not a project member's current sign-in/);
-  await assert.rejects(ask(identity(GOOGLE, "g-agent", "agent@service.local")), /not a project member's current sign-in/);
-  const unauthenticated = { ...w.ctx, auth: { async getUserIdentity() { return null; } } };
-  await assert.rejects(beginIdentityMigration._handler(unauthenticated, {}), /Authentication required/);
-  // closed window: no grants at all
-  const closed = world({ allowlist: "" });
-  closed.addUser({ email: "guy@example.org", roles: ["ra"], status: "active", auth_subject: `${GOOGLE}|g-guy` });
-  await assert.rejects(beginIdentityMigration._handler(closed.as(identity(GOOGLE, "g-guy", "guy@example.org")), {}), /only while the move is open/);
-  const unconfigured = world({ allowlist: GOOGLE, destination: "" });
-  unconfigured.addUser({ email: "guy@example.org", roles: ["ra"], status: "active", auth_subject: `${GOOGLE}|g-guy` });
-  await assert.rejects(beginIdentityMigration._handler(unconfigured.as(identity(GOOGLE, "g-guy", "guy@example.org")), {}), /not configured/);
+  const member = googleMember(w);
+  await pair(w, clerkGuy, googleGuy);
+  const other = identity(CLERK, "mailbox_holder", "guy@example.org");
+  await assert.rejects(claim(w.as(other)), /Confirm that Google account first/);
+  assert.equal(member.auth_subject, `${GOOGLE}|g-guy`);
+  // the approved pairing still belongs to the clerk sign-in that asked
+  assert.equal(await claim(w.as(clerkGuy)), member._id);
 });
 
-test("r-c18: the grant stores only a hash, expires in ten minutes, and records its issue", async () => {
+test("r-c18: approval by any google account other than the row's current one is refused", async () => {
   const w = world({ allowlist: GOOGLE });
-  const member = w.addUser({ email: "guy@example.org", roles: ["ra"], status: "active", auth_subject: `${GOOGLE}|g-guy` });
-  const before = Date.now();
-  const issued = await beginIdentityMigration._handler(w.as(identity(GOOGLE, "g-guy", "guy@example.org")), {});
-  assert.match(issued.grant, /^[0-9a-f]{60,}$/);
-  const row = w.rows.identity_migration_grants[0];
-  assert.equal(row.user_id, member._id);
-  assert.equal(row.source_token_identifier, `${GOOGLE}|g-guy`);
-  assert.notEqual(row.secret_hash, issued.grant);
-  assert.ok(!JSON.stringify(w.rows).includes(issued.grant), "the secret is stored nowhere");
-  assert.ok(row.expires_at - before >= 10 * 60 * 1000 - 50 && row.expires_at - before <= 10 * 60 * 1000 + 1000);
-  assert.equal(issued.expires_at, row.expires_at);
-  assert.equal(lastEvent(w.rows).reason, "migration_grant_issued");
+  googleMember(w);
+  const jw = w.addUser({ email: "jw@example.org", roles: ["pi"], status: "active", auth_subject: `${GOOGLE}|g-jw` });
+  const nonce = await requestPairing(w, clerkGuy);
+  // another member's google account
+  await assert.rejects(approvePairing(w, identity(GOOGLE, "g-jw", "jw@example.org"), nonce), /does not belong to this Google account/);
+  // a google account with the same email that is nobody's sign-in
+  await assert.rejects(approvePairing(w, identity(GOOGLE, "g-stranger", "guy@example.org"), nonce), /not a project member's current sign-in/);
+  // a clerk sign-in cannot approve at all
+  await assert.rejects(approvePairing(w, clerkGuy, nonce), /Only a Google sign-in/);
+  assert.equal(w.rows.identity_migration_pairings[0].approved_at, undefined);
+  assert.equal(jw.auth_subject, `${GOOGLE}|g-jw`);
 });
 
-test("r-c18: an expired grant is refused", async () => {
+test("r-c18: a linked, earlier google identifier cannot approve (resolved through resolveUser, greptile 4093249238)", async () => {
   const w = world({ allowlist: GOOGLE });
-  const member = w.addUser({ email: "guy@example.org", roles: ["ra"], status: "active", auth_subject: `${GOOGLE}|g-guy` });
-  const grant = await grantFor(w, identity(GOOGLE, "g-guy", "guy@example.org"));
-  w.rows.identity_migration_grants[0].expires_at = Date.now() - 1;
-  await assert.rejects(claim(w.as(identity(CLERK, "user_guy", "guy@example.org")), grant), /expired or was already used/);
+  const member = googleMember(w, { auth_subject: `${GOOGLE}|g-guy-new` });
+  w.rows.user_identities.push({ _id: "user_identities_old", user_id: member._id, token_identifier: `${GOOGLE}|g-guy`, issuer: GOOGLE, linked_at: 1, linked_reason: "auth_provider_migration" });
+  const nonce = await requestPairing(w, clerkGuy);
+  assert.equal((await me._handler(w.as(googleGuy), {}))._id, member._id, "the helper resolves the linked identifier");
+  await assert.rejects(approvePairing(w, googleGuy, nonce), /not a project member's current sign-in/);
+  w.rows.user_identities[0].retired_at = 2;
+  await assert.rejects(approvePairing(w, googleGuy, nonce), /not a project member's current sign-in/);
+  assert.equal(w.rows.identity_migration_pairings[0].approved_at, undefined);
+});
+
+test("r-c18: an expired pairing can be neither approved nor spent", async () => {
+  const w = world({ allowlist: GOOGLE });
+  const member = googleMember(w);
+  const nonce = await requestPairing(w, clerkGuy);
+  w.rows.identity_migration_pairings[0].expires_at = Date.now() - 1;
+  await assert.rejects(approvePairing(w, googleGuy, nonce), /expired/);
+  const fresh = await pair(w, clerkGuy, googleGuy);
+  assert.ok(fresh);
+  w.rows.identity_migration_pairings[1].expires_at = Date.now() - 1;
+  await assert.rejects(claim(w.as(clerkGuy)), /Confirm that Google account first/);
   assert.equal(member.auth_subject, `${GOOGLE}|g-guy`);
 });
 
-test("r-c18: a grant is single use, and a newer grant revokes the older", async () => {
+test("r-c18: a pairing is single use, and a newer request revokes the older", async () => {
   const w = world({ allowlist: GOOGLE });
-  const member = w.addUser({ email: "guy@example.org", roles: ["ra"], status: "active", auth_subject: `${GOOGLE}|g-guy` });
-  const google = identity(GOOGLE, "g-guy", "guy@example.org");
-  const first = await grantFor(w, google);
-  const second = await grantFor(w, google);
-  assert.ok(w.rows.identity_migration_grants[0].revoked_at, "the older grant is revoked");
-  await assert.rejects(claim(w.as(identity(CLERK, "user_guy", "guy@example.org")), first), /expired or was already used/);
-  assert.equal(await claim(w.as(identity(CLERK, "user_guy", "guy@example.org")), second), member._id);
-  // the same grant cannot move the row again, e.g. to a second clerk account
-  const again = world({ allowlist: GOOGLE });
-  const other = again.addUser({ email: "guy@example.org", roles: ["ra"], status: "active", auth_subject: `${GOOGLE}|g-guy` });
-  const once = await grantFor(again, identity(GOOGLE, "g-guy", "guy@example.org"));
-  assert.equal(await claim(again.as(identity(CLERK, "user_guy", "guy@example.org")), once), other._id);
-  other.auth_subject = `${GOOGLE}|g-guy`; // as if restored by hand; the grant is still spent
-  await assert.rejects(claim(again.as(identity(CLERK, "user_guy_2", "guy@example.org")), once), /expired or was already used/);
+  const member = googleMember(w);
+  const first = await requestPairing(w, clerkGuy);
+  const second = await requestPairing(w, clerkGuy);
+  assert.ok(w.rows.identity_migration_pairings[0].revoked_at, "the older pairing is revoked");
+  await assert.rejects(approvePairing(w, googleGuy, first), /expired or does not belong/);
+  await approvePairing(w, googleGuy, second);
+  assert.equal(await claim(w.as(clerkGuy)), member._id);
+  // spent: it cannot approve or move anything again
+  await assert.rejects(approvePairing(w, googleGuy, second), /not a project member's current sign-in|expired or does not belong/);
+  member.auth_subject = `${GOOGLE}|g-guy`; // as if restored by hand; the pairing is still spent
+  await assert.rejects(claim(w.as(identity(CLERK, "user_guy_2", "guy@example.org"))), /Confirm that Google account first/);
 });
 
-test("r-c18: a grant for one row never re-keys another", async () => {
+test("r-c18: a pairing request comes only from a verified clerk sign-in for a google-bound member", async () => {
   const w = world({ allowlist: GOOGLE });
-  w.addUser({ email: "guy@example.org", roles: ["ra"], status: "active", auth_subject: `${GOOGLE}|g-guy` });
-  const victim = w.addUser({ email: "jw@example.org", roles: ["pi"], status: "active", auth_subject: `${GOOGLE}|g-jw` });
-  const guysGrant = await grantFor(w, identity(GOOGLE, "g-guy", "guy@example.org"));
-  await assert.rejects(claim(w.as(identity(CLERK, "attacker", "jw@example.org")), guysGrant), /expired or was already used/);
-  assert.equal(victim.auth_subject, `${GOOGLE}|g-jw`);
-  // nor a row whose identifier changed after the grant was issued
-  const moved = world({ allowlist: GOOGLE });
-  const row = moved.addUser({ email: "guy@example.org", roles: ["ra"], status: "active", auth_subject: `${GOOGLE}|g-guy` });
-  const grant = await grantFor(moved, identity(GOOGLE, "g-guy", "guy@example.org"));
-  row.auth_subject = `${GOOGLE}|g-guy-new`;
-  await assert.rejects(claim(moved.as(identity(CLERK, "user_guy", "guy@example.org")), grant), /expired or was already used/);
+  googleMember(w);
+  w.addUser({ email: "gone@example.org", roles: ["ra"], status: "disabled", auth_subject: `${GOOGLE}|g-gone` });
+  w.addUser({ email: "agent@service.local", roles: ["service"], status: "active", auth_subject: `${GOOGLE}|g-agent` });
+  w.addUser({ email: "moved@example.org", roles: ["ra"], status: "active", auth_subject: `${CLERK}|already` });
+  const ask = (who) => requestIdentityMigration._handler(w.as(who), {});
+  await assert.rejects(ask(googleGuy), /Only the new sign-in/);
+  await assert.rejects(ask(identity(OTHER_CLERK, "x", "guy@example.org")), /Only the new sign-in/);
+  await assert.rejects(ask(identity(CLERK, "u", "guy@example.org", { verified: false })), /Verify this email address/);
+  await assert.rejects(ask(identity(CLERK, "u", "gone@example.org")), /No pending project invitation/);
+  await assert.rejects(ask(identity(CLERK, "u", "agent@service.local")), /No pending project invitation/);
+  await assert.rejects(ask(identity(CLERK, "u", "moved@example.org")), /No pending project invitation/);
+  await assert.rejects(ask(identity(CLERK, "already", "moved@example.org")), /already belongs to a project member/);
+  await assert.rejects(ask(identity(CLERK, "u", "nobody@example.org")), /No pending project invitation/);
+  const unauthenticated = { ...w.ctx, auth: { async getUserIdentity() { return null; } } };
+  await assert.rejects(requestIdentityMigration._handler(unauthenticated, {}), /Authentication required/);
+  // the move closed: nothing to request, and nothing to approve
+  const closed = world({ allowlist: "" });
+  googleMember(closed);
+  await assert.rejects(requestIdentityMigration._handler(closed.as(clerkGuy), {}), /No pending project invitation/);
+  await assert.rejects(approveIdentityMigration._handler(closed.as(googleGuy), { nonce: "x" }), /only while the move is open/);
+  assert.equal(w.rows.identity_migration_pairings.length, 0);
 });
 
-test("r-c18: grant issuance resolves the caller through resolveUser and refuses a linked, earlier identifier (greptile 4093249238)", async () => {
+test("r-c18: the stored pairing holds only the nonce's hash and ten minutes", async () => {
   const w = world({ allowlist: GOOGLE });
-  const member = w.addUser({ email: "guy@example.org", roles: ["ra"], status: "active", auth_subject: `${CLERK}|user_guy` });
-  // an earlier google identifier still linked to the row: resolveUser finds
-  // the row through user_identities, but it is not the row's current sign-in
-  w.rows.user_identities.push({ _id: "user_identities_old", user_id: member._id, token_identifier: `${GOOGLE}|g-guy`, issuer: GOOGLE, linked_at: 1, linked_reason: "auth_provider_migration" });
-  const google = identity(GOOGLE, "g-guy", "guy@example.org");
-  assert.equal((await me._handler(w.as(google), {}))._id, member._id, "the helper resolves the linked identifier");
-  await assert.rejects(beginIdentityMigration._handler(w.as(google), {}), /not a project member's current sign-in/);
-  assert.equal(w.rows.identity_migration_grants.length, 0);
-  // a link that resolveUser treats as retired resolves nothing, and is refused the same way
-  w.rows.user_identities[0].retired_at = 2;
-  await assert.rejects(beginIdentityMigration._handler(w.as(google), {}), /not a project member's current sign-in/);
-  assert.equal(w.rows.role_events.length, 0);
+  const member = googleMember(w);
+  const before = Date.now();
+  const issued = await requestIdentityMigration._handler(w.as(clerkGuy), {});
+  assert.match(issued.nonce, /^[0-9a-f]{60,}$/);
+  const row = w.rows.identity_migration_pairings[0];
+  assert.equal(row.user_id, member._id);
+  assert.equal(row.clerk_token_identifier, clerkGuy.tokenIdentifier);
+  assert.equal(row.source_token_identifier, `${GOOGLE}|g-guy`);
+  assert.ok(!JSON.stringify(w.rows).includes(issued.nonce));
+  assert.ok(row.expires_at - before >= 10 * 60 * 1000 - 50 && row.expires_at - before <= 10 * 60 * 1000 + 1000);
+  const approved = await approvePairing(w, googleGuy, issued.nonce);
+  assert.equal(approved.approved, true);
+  assert.equal(JSON.stringify(approved).includes("user_guy"), false, "the google sign-in never learns the clerk identifier");
 });
