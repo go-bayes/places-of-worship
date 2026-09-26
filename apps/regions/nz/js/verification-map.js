@@ -2486,6 +2486,24 @@ class NzVerificationMap {
         return Boolean(ticket) && ticket.epoch === (this.sessionEpoch || 0) && Boolean(userId) && ticket.userId === userId;
     }
 
+    // the session a restored user was admitted under: the page's session
+    // epoch, the clerk session id and the user itself
+    restoreTicket(user) {
+        return { epoch: this.sessionEpoch || 0, sessionId: this.backend?.sessionId || "", user };
+    }
+
+    // true only while nothing has changed since the restore: no sign-out or
+    // ended session (the epoch), the same clerk session, and that session
+    // still names the same user on the page and in the client
+    restoreStillCurrent(ticket) {
+        return Boolean(ticket?.user)
+            && ticket.epoch === (this.sessionEpoch || 0)
+            && Boolean(ticket.sessionId)
+            && ticket.sessionId === (this.backend?.sessionId || "")
+            && this.backend?.user === ticket.user
+            && this.backendUser === ticket.user;
+    }
+
     // what a signed-in person leaves on the page goes on every sign-out, so
     // the next person at the screen finds none of it. a deliberate sign-out
     // also deletes the device copies and forgets the activity; an ended
@@ -2516,6 +2534,19 @@ class NzVerificationMap {
         this.myWorkItems = [];
         this.myNominationItems = [];
         this.revisionDraftIdsByTaskId.clear();
+        // what was drawn from that work goes with it, synchronously, so a
+        // later account whose own refresh fails never sees it (#153 round 2):
+        // the my-work panel (with reviewers' notes), the past-submissions
+        // list (names and addresses) and whether it was open
+        this.myWorkShowAll = false;
+        this.pastSubmissionsOpen = false;
+        const nominationsPanel = document.getElementById("nominationsPanel");
+        if (nominationsPanel) {
+            nominationsPanel.innerHTML = "";
+            nominationsPanel.classList?.remove("open");
+        }
+        document.getElementById("pastSubmissionsButton")?.setAttribute("aria-expanded", "false");
+        this.renderSessionPanel();
         // the form leaves with the panel; a lingering dirty flag would fire
         // beforeunload against a page showing no form at all
         this.clearFormDirty();
@@ -2563,13 +2594,20 @@ class NzVerificationMap {
         // the file button hides the native input, so the chosen count is shown beside it
         document.addEventListener("change", event => this.syncFilePickCount(event.target));
         const restoredUser = await this.restoreBackendSession();
+        // the session the restored user belongs to: if clerk ends or
+        // replaces it while tasks load, the restored user is never admitted
+        // (#153 round 2), so a later session's page cannot be handed back to
+        // them, nor their device drafts read under their id
+        const restoredTicket = restoredUser ? this.restoreTicket(restoredUser) : null;
         this.renderBackendPanel();
         await this.loadTasks();
         await this.refreshBackendTasks();
         this.applyFilters();
         this.renderSessionPanel();
         this.maybeOpenIssueDeepLink();
-        if (restoredUser) await this.onBackendSignedIn(restoredUser, { refreshTasks: false });
+        if (restoredUser && this.restoreStillCurrent(restoredTicket)) {
+            await this.onBackendSignedIn(restoredUser, { refreshTasks: false });
+        }
         if (DEMO_MODE && !ASSIGNMENT_MODE) {
             this.renderRaInitialsBadge();
             // Defer the initials prompt so the map paints first.
