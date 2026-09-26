@@ -45,35 +45,12 @@ const NANP_PHONE = /\+1[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b|\(\d{3}\)\s?
 // otherwise read as unseparated phone numbers
 const OSM_REFERENCE = /^(?:https:\/\/(?:www\.)?openstreetmap\.org\/)?(?:node|way|relation)\/[1-9]\d{0,15}$/;
 const OSM_REFERENCE_FIELD = /^candidate_links\[\d+\]\.(?:osm_ref|candidate_ref)$/;
-// screening forms of a string: each round decodes percent-escapes as UTF-8, applies
-// compatibility normalisation (full-width digits and percent signs become ASCII) and maps
-// every other decimal digit to an ASCII digit, which keeps a number's shape for the
-// pattern. rounds repeat until the form stops changing; every intermediate form is
-// screened, and an encoding still changing after the bound is refused rather than passed.
-const SCREENING_ROUNDS = 16;
-const utf8 = new TextDecoder("utf-8");
-function screeningRound(text: string): string {
-  const decoded = text.replace(/(?:%[0-9a-fA-F]{2})+/g, run => utf8.decode(Uint8Array.from(run.slice(1).split("%"), hex => parseInt(hex, 16))));
-  return decoded.normalize("NFKC").replace(/(?![0-9])\p{Nd}/gu, "0");
-}
-function screeningForms(text: string, path: string): string[] {
-  const forms = [text];
-  let current = text;
-  for (let round = 0; round < SCREENING_ROUNDS; round += 1) {
-    const next = screeningRound(current);
-    if (next === current) return forms;
-    forms.push(next);
-    current = next;
-  }
-  throw new Error(`potential personal details in ${path} require human handling`);
-}
 function assertNoNanpPhone(value: unknown, schema: any): void {
   // source locators are validated URLs whose record ids can look like local numbers, and so are
-  // exact OSM references in candidate links; the shared screen still covers both, the NANP pattern does not.
-  // the exemption applies to the raw value only; every other value is screened raw and in its screening form
+  // exact OSM references in candidate links; the shared screen still covers both, the NANP pattern does not
   for (const [path, text] of screenedStrings(value, schema, schema)) {
     if (/\.locator$/.test(path) || (OSM_REFERENCE_FIELD.test(path) && OSM_REFERENCE.test(text))) continue;
-    if (screeningForms(text, path).some(form => NANP_PHONE.test(form))) throw new Error(`potential personal details in ${path} require human handling`);
+    if (NANP_PHONE.test(text)) throw new Error(`potential personal details in ${path} require human handling`);
   }
 }
 
