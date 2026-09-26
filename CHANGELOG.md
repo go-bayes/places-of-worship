@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-26 (confidence standard 0.3.1)
+
+- Version 0.3.1 of the [confidence standard](docs/confidence-standard.md), snapshot at `docs/development/confidence-standard-2026-09-26-v0.3.1.md`: a clarification from the project lead that the pseudonym rule covers living persons named in the project's records, and that contributors may be credited by their name or a chosen avatar. The [summary of AI assistance](docs/ai-assisted-research.md) states the same.
+
 ### 2026-09-26 (confidence standard 0.3.0; methods log moved)
 
 - Version 0.3.0 of the [confidence standard](docs/confidence-standard.md), snapshot at `docs/development/confidence-standard-2026-09-26-v0.3.0.md`, on the project lead's ruling of 2026-09-26: living persons appear on published surfaces only under pseudonyms, clergy and church-office holders included, with the key from pseudonym to name held privately. The public scope of the cited clergy-name rule `public_source_cited.v1` is withdrawn for living persons; its internal scope in the review layer is unchanged. The layer-families design marks its earlier name rule as superseded. The [summary of AI assistance](docs/ai-assisted-research.md) states the same rule.
