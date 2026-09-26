@@ -63,6 +63,11 @@ test("exact OSM references in candidate links pass the phone screen; phone numbe
     ["osm_ref", "node/\uFF12\uFF14\uFF12\uFF15\uFF15\uFF15\uFF10\uFF11\uFF19\uFF19"], ["candidate_ref", "\uFF12\uFF14\uFF12 \uFF15\uFF15\uFF15 \uFF10\uFF11\uFF19\uFF19"],
     ["osm_ref", "https://www.openstreetmap.org/node/1234567890?phone=2425550199"], ["osm_ref", "https://www.openstreetmap.org/node/1234567890#2425550199"],
     ["osm_ref", "https://user:2425550199@www.openstreetmap.org/node/1234567890"], ["osm_ref", " node/1234567890"], ["osm_ref", "node/1234567890 "],
+    ["osm_ref", "node/" + encodeURIComponent("\uFF12\uFF14\uFF12\uFF15\uFF15\uFF15\uFF10\uFF11\uFF19\uFF19")],
+    // UTF-8 encoded full-width digits, and six layers of percent-encoding
+    ["osm_ref", "node/" + [1, 2, 3, 4, 5].reduce(text => encodeURIComponent(text), "2425550199".split("").map(digit => "%" + digit.charCodeAt(0).toString(16)).join(""))],
+    // twenty layers of encoding exceed the decoding bound and are refused, not passed
+    ["candidate_ref", [...Array(20)].reduce(text => text.replace(/%/g, "%25"), "%32%34%32%35%35%35%30%31%39%39")],
     ["osm_ref", "NODE/2425550199"], ["candidate_ref", "HTTPS://WWW.OPENSTREETMAP.ORG/node/2425550199"],
   ];
   for (const [field, text] of refused) {

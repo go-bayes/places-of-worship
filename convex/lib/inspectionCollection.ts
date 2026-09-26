@@ -45,16 +45,23 @@ const NANP_PHONE = /\+1[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b|\(\d{3}\)\s?
 // otherwise read as unseparated phone numbers
 const OSM_REFERENCE = /^(?:https:\/\/(?:www\.)?openstreetmap\.org\/)?(?:node|way|relation)\/[1-9]\d{0,15}$/;
 const OSM_REFERENCE_FIELD = /^candidate_links\[\d+\]\.(?:osm_ref|candidate_ref)$/;
-// a screening form of a string: compatibility-normalised (full-width and other digit forms
-// become ASCII) and percent-decoded, repeatedly, so an encoded number cannot pass as text
-function screeningForm(text: string): string {
-  let current = text.normalize("NFKC");
-  for (let round = 0; round < 3; round += 1) {
-    const decoded = current.replace(/%([0-9a-fA-F]{2})/g, (_, hex: string) => String.fromCharCode(parseInt(hex, 16))).normalize("NFKC");
-    if (decoded === current) break;
+// a screening form of a string: percent-escapes decoded as UTF-8 until the value stops
+// changing, then compatibility-normalised (full-width and other digit forms become ASCII),
+// so an encoded or full-width number cannot pass as text. an encoding still unresolved
+// after the bound is refused rather than passed.
+const SCREENING_DECODE_ROUNDS = 16;
+const utf8 = new TextDecoder("utf-8");
+function decodePercentRuns(text: string): string {
+  return text.replace(/(?:%[0-9a-fA-F]{2})+/g, run => utf8.decode(Uint8Array.from(run.slice(1).split("%"), hex => parseInt(hex, 16))));
+}
+function screeningForm(text: string, path: string): string {
+  let current = text;
+  for (let round = 0; round < SCREENING_DECODE_ROUNDS; round += 1) {
+    const decoded = decodePercentRuns(current);
+    if (decoded === current) return current.normalize("NFKC");
     current = decoded;
   }
-  return current;
+  throw new Error(`potential personal details in ${path} require human handling`);
 }
 function assertNoNanpPhone(value: unknown, schema: any): void {
   // source locators are validated URLs whose record ids can look like local numbers, and so are
@@ -62,7 +69,7 @@ function assertNoNanpPhone(value: unknown, schema: any): void {
   // the exemption applies to the raw value only; every other value is screened raw and in its screening form
   for (const [path, text] of screenedStrings(value, schema, schema)) {
     if (/\.locator$/.test(path) || (OSM_REFERENCE_FIELD.test(path) && OSM_REFERENCE.test(text))) continue;
-    if (NANP_PHONE.test(text) || NANP_PHONE.test(screeningForm(text))) throw new Error(`potential personal details in ${path} require human handling`);
+    if (NANP_PHONE.test(text) || NANP_PHONE.test(screeningForm(text, path))) throw new Error(`potential personal details in ${path} require human handling`);
   }
 }
 
