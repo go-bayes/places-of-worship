@@ -948,11 +948,13 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
     # quarantined values become hashes in the private dossier copy; the reviewer and the bundle
     # see only the kind of each withheld detail and its claim, never a value or a hash.
     # values the quarantine caught; nothing transported may contain one of them or its hash.
-    known_map = lib.known_values(dossier["personal_details_quarantine"]["items"])
+    quarantine_items = dossier["personal_details_quarantine"]["items"]
+    known_map = lib.known_values(quarantine_items, include_admitted=True)
     known_values = list(known_map)
     lib.redact_quarantine(dossier)
     private_dossier = json.loads(json.dumps(dossier))
     lib.bundle_quarantine(dossier)
+    admission = intake.cited_name_coverage(dossier)[0]
     try:
         violations = intake.allowlist_violations(dossier)
     except ValueError:
@@ -970,9 +972,9 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
         if not research_manifest.get("model_id_reported"):
             dossier_errors.append("research provider reported no model id")
         dossier_schema, dossier_root = lib.dossier_screen_schema()
-        leaked = lib.known_value_findings(dossier, known_values, dossier_schema, dossier_root, "dossier")
+        leaked = lib.known_value_findings(dossier, known_values, dossier_schema, dossier_root, "dossier", admission)
         if leaked:
-            findings = [f for f in lib.screen_spans(dossier, dossier_schema, dossier_root, frozenset(), known_map, "dossier")
+            findings = [f for f in lib.screen_spans(dossier, dossier_schema, dossier_root, frozenset(), known_map, "dossier", admission)
                         if f["detector"].startswith("known_value")]
             raise RunRejected("dossier rejected before review: a quarantined value or its hash remains",
                               counters, _refusal("dossier", findings))
@@ -983,12 +985,12 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
         review_system, review_user = _review_prompt(dossier)
         bundle_schema = json.loads(intake.BUNDLE_SCHEMA.read_text(encoding="utf-8"))
 
-        # contaminated reviewer output is refused, never silently redacted, since redaction could
+        # unadmitted reviewer details are refused, never silently redacted, since redaction could
         # change what the reviewer said; the original stays in this private run directory. the
         # screen runs before any schema check, so a detail in an invalid field is still refused
         # as a personal detail and no schema message can carry it.
         def refuse_if_contaminated(review, subject, schema, root, prefix, stage):
-            findings = lib.screen_spans(subject, schema, root, intake.BUNDLE_HASH_FIELDS, known_map, prefix)
+            findings = lib.screen_spans(subject, schema, root, intake.BUNDLE_HASH_FIELDS, known_map, prefix, admission)
             if findings:
                 refused_path = out / "review.refused.json"
                 refused_path.write_text(json.dumps(review, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

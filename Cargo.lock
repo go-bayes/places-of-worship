@@ -835,6 +835,7 @@ dependencies = [
  "chrono",
  "clap",
  "csv",
+ "icu_normalizer",
  "jsonschema",
  "regex",
  "rusqlite",

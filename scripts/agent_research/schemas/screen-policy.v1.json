@@ -1,6 +1,6 @@
 {
   "schema_version": "screen-policy.v1",
-  "description": "Personal-detail screening policy shared by lib.py, convex/lib/agentIntake.ts and pow-cli. Every string value and every undeclared object key of an outgoing record is screened for phone numbers, email addresses and honorific-led names, whatever its schema says. Any 40- or 64-digit hex token (a maximal run of ASCII letters and digits, compared without regard to case) is refused wherever it appears, including inside longer text, unless the whole value of a designated hash field below is that digest, since a hash of a personal detail is itself a pseudonymous personal detail. Paths join object keys with dots and write every array index as []. Each designated field states its provenance: 'recomputed' fields are recomputed from their inputs in the same record and refused on mismatch; 'server_lookup' fields must name a stored object the backend finds before accepting the record; 'private_input' fields are digests of bytes the record does not carry (the operator's raw trace, prompt, instruction or definition text, or a source revision), kept in the private run directory or the repository, and are accepted on the operator's attestation because they cannot be recomputed here.",
+  "description": "Personal-detail screening policy shared by lib.py, convex/lib/agentIntake.ts and pow-cli. Every string value and every undeclared object key of an outgoing record is screened for phone numbers, email addresses and honorific-led names, whatever its schema says. Any 40- or 64-digit hex token (a maximal run of ASCII letters and digits, compared without regard to case) is refused wherever it appears, including inside longer text, unless the whole value of a designated hash field below is that digest, since a hash of a personal detail is itself a pseudonymous personal detail. Paths join object keys with dots and write every array index as []. Each designated field states its provenance: 'recomputed' fields are recomputed from their inputs in the same record and refused on mismatch; 'server_lookup' fields must name a stored object the backend finds before accepting the record; 'private_input' fields are digests of bytes the record does not carry (the operator's raw trace, prompt, instruction or definition text, or a source revision), kept in the private run directory or the repository, and are accepted on the operator's attestation because they cannot be recomputed here. The internal cited-name exception is defined in cited_name_rules.",
   "hash_fields": {
     "agent-review-bundle.v1": {
       "submission_key": {
@@ -64,6 +64,50 @@
         "provenance": "recomputed",
         "from": "sha256(dossier.place.place_ref | dossier.run_manifest.prompt_version | dossier.run_manifest.model_id_requested | dossier.place.seed_source)"
       }
+    }
+  },
+  "cited_name_rules": {
+    "public_source_cited.v1": {
+      "scope": "internal",
+      "kind": "person_name",
+      "honorifics": [
+        "Rev'd",
+        "Reverend",
+        "Revd",
+        "Fr",
+        "Father",
+        "Pastor",
+        "Vicar",
+        "Archdeacon",
+        "Bishop",
+        "Canon",
+        "Dean"
+      ],
+      "claim_fields": [
+        "value",
+        "quoted_support",
+        "note",
+        "source.source_name"
+      ],
+      "description": "An item admits one exact parsed clergy-name span in a qualifying claim field when the claim quotation contains the bounded name key. Exact parsed occurrences of admitted names are masked only in claim-field values; every other recurrence, including bare names and embedded known values, is refused. Explicit title search supplements existing detectors and invalid spans refuse the record.",
+      "stop_titles": [
+        "Rev'd",
+        "Reverend",
+        "Revd",
+        "Rev",
+        "Fr",
+        "Father",
+        "Pastor",
+        "Vicar",
+        "Archdeacon",
+        "Bishop",
+        "Canon",
+        "Dean",
+        "Mr",
+        "Mrs",
+        "Ms",
+        "Dr"
+      ]
     }
   }
 }

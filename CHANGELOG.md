@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-26 (cited clergy names at internal scope)
+
+- Agent research can now keep a clergy name inside a claim when the claim quotes the whole name verbatim from a public source on the project's allowlist, so the advisory reviewer and a human reviewer can check the name against the cited page. The rule, `public_source_cited.v1`, applies the project lead's relaxation of 2026-09-24 at internal scope only, and it is off on every deployment until `POW_CITED_NAME_RULE_ENABLED` is set; the next stage's export and public gates come first. Public use of an admitted name waits for a source-backed verification and, for a living person, the pseudonym rendering under decision D24 of 2026-09-26. The rule covers names led by `Rev'd`, `Reverend`, `Revd`, `Fr`, `Father`, `Pastor`, `Vicar`, `Archdeacon`, `Bishop`, `Canon` or `Dean`. The same name outside the claims (in the place name, the status assessment or the reviewer's text), names led by `Mr`, `Mrs`, `Ms` or `Dr`, telephone numbers and email addresses stay withheld. The quarantine block records each admission as its own item naming the claim, the field and the name's position, and the Python, TypeScript and Rust validators re-check each one from the record, held to agreement by shared test cases. The backend change widens the intake validator and adds optional fields, so every bundle accepted before stays accepted.
+
 ### 2026-09-26 (confidence standard 0.3.0; methods log moved)
 
 - Version 0.3.0 of the [confidence standard](docs/confidence-standard.md), snapshot at `docs/development/confidence-standard-2026-09-26-v0.3.0.md`, on the project lead's ruling of 2026-09-26: living persons appear on published surfaces only under pseudonyms, clergy and church-office holders included, with the key from pseudonym to name held privately. The public scope of the cited clergy-name rule `public_source_cited.v1` is withdrawn for living persons; its internal scope in the review layer is unchanged. The layer-families design marks its earlier name rule as superseded. The [summary of AI assistance](docs/ai-assisted-research.md) states the same rule.

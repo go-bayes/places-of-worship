@@ -194,6 +194,29 @@ def host_allowed(host, domains):
     return bool(host) and any(host == domain or host.endswith('.' + domain) for domain in domains)
 
 
+def citable_locator_check(dossier):
+    try:
+        allowlist = load_allowlist(dossier.get('run_manifest', {}).get('allowlist_version'))
+        if allowlist.get('country_code') != dossier.get('place', {}).get('country_code'):
+            raise ValueError('source allowlist belongs to another country')
+        domains = [domain.lower().removesuffix('.') for domain in allowlist['domains']]
+    except (ValueError, KeyError, TypeError):
+        return lambda locator: False
+
+    def citable(locator):
+        if not public_url(locator):
+            return False
+        try:
+            return host_allowed(locator_host(locator), domains)
+        except ValueError:
+            return False
+    return citable
+
+
+def cited_name_coverage(dossier):
+    return lib.cited_name_coverage(dossier, citable_locator_check(dossier))
+
+
 # list claims whose source host is absent from the dossier's pinned allowlist.
 def allowlist_violations(dossier):
     allowlist = load_allowlist(dossier['run_manifest'].get('allowlist_version'))
@@ -235,10 +258,12 @@ def validate_dossier(dossier):
         return errors
     if dossier['place']['country_code'] != 'NZ':
         errors.append('internal pilot permits only operator-cleared NZ sources')
+    admission, declaration_errors = cited_name_coverage(dossier)
+    errors += declaration_errors
     # every free-text string of the dossier, not only claim text: a detail the runner's
     # redaction missed must not reach reviewers or Convex.
     screen_schema, screen_root = lib.dossier_screen_schema()
-    errors += lib.screen_errors(lib.screen_findings(dossier, screen_schema, screen_root, BUNDLE_HASH_FIELDS, prefix='dossier'))
+    errors += lib.screen_errors(lib.screen_findings(dossier, screen_schema, screen_root, BUNDLE_HASH_FIELDS, prefix='dossier', admitted=admission))
     quarantine = dossier['personal_details_quarantine']
     if quarantine['item_count'] != len(quarantine['items']):
         errors.append('personal-details quarantine count does not match its items')
@@ -372,7 +397,8 @@ def validate_bundle(bundle):
     errors += validate_dossier(bundle['dossier'])
     errors += validate_review(bundle['review'], bundle['dossier'])
     # the reviewer's text and both run manifests travel too; the dossier was screened above.
-    errors += lib.screen_errors(lib.screen_findings(bundle, schema, schema, BUNDLE_HASH_FIELDS, skip=('dossier',)))
+    admission, _ = cited_name_coverage(bundle['dossier'])
+    errors += lib.screen_errors(lib.screen_findings(bundle, schema, schema, BUNDLE_HASH_FIELDS, skip=('dossier',), admitted=admission))
     research, review = bundle['research_run'], bundle['review_run']
     if research['backend'] == review['backend']:
         errors.append('research and review must use different providers')

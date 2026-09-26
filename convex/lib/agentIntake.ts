@@ -2,6 +2,7 @@ import { canonicalJson, sha256 } from "./sha256.ts";
 import bundleSchema from "../../scripts/agent_research/schemas/agent-review-bundle.v1.json" with { type: "json" };
 import allowlistNzV1 from "../../scripts/agent_research/fixtures/allowlist-nz-v1.json" with { type: "json" };
 import screenPolicy from "../../scripts/agent_research/schemas/screen-policy.v1.json" with { type: "json" };
+import { canonicalWireJson } from "./wireJson.ts";
 
 // pinned source allowlists by version; a dossier naming any other version is refused.
 const ALLOWLISTS: Record<string, { allowlist_version: string; country_code: string; domains: string[] }> = { "nz-v1": allowlistNzV1 };
@@ -120,6 +121,210 @@ export function hasPersonalDetails(text: string): boolean {
     || /\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'-]+\s?){1,3}/.test(text);
 }
 
+const CITED_NAME_RULE = "public_source_cited.v1";
+const citedNameRule = screenPolicy.cited_name_rules[CITED_NAME_RULE];
+const HONORIFIC_NAME = /\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'-]+\s?){1,3}/g;
+
+export function ruleNormalForm(text: string): string {
+  let out = "";
+  for (const char of text) {
+    const code = char.codePointAt(0)!;
+    const whitespace = (code >= 9 && code <= 13) || code === 0x20 || code === 0x85 || code === 0xa0 || code === 0x1680 || (code >= 0x2000 && code <= 0x200a) || [0x2028, 0x2029, 0x202f, 0x205f, 0x3000].includes(code);
+    if (whitespace) { if (out && !out.endsWith(" ")) out += " "; }
+    else if (code === 0x2018 || code === 0x2019) out += "'";
+    else if (code >= 65 && code <= 90) out += String.fromCharCode(code + 32);
+    else out += char;
+  }
+  return out.replace(/^ +| +$/g, "");
+}
+
+const RULE_WHITESPACE = (code: number): boolean => (code >= 9 && code <= 13) || [0x20, 0x85, 0xa0, 0x1680, 0x2028, 0x2029, 0x202f, 0x205f, 0x3000].includes(code) || (code >= 0x2000 && code <= 0x200a);
+const DETECTOR_WHITESPACE = (char: string): boolean => RULE_WHITESPACE(char.codePointAt(0)!) || char === "\ufeff";
+const NAME_CHAR = (char: string | undefined): boolean => char !== undefined && /^[A-Za-z'-]$/.test(char);
+const ASCII_WORD = (char: string): boolean => /^[A-Za-z0-9_]$/.test(char);
+const LEFT_BOUNDARY = new Set([" ", "\t", "\n", "\r", "(", '"']);
+const RIGHT_BOUNDARY = new Set([" ", "\t", "\n", "\r", ".", ",", ";", ":", "!", "?", ")", '"']);
+const QUOTE_BOUNDARY = new Set([" ", ".", ",", ";", ":", "!", "?", "(", ")", "[", "]", '"', "'"]);
+const nameKey = (text: string): string => text.replace(/[A-Z]/g, char => String.fromCharCode(char.charCodeAt(0) + 32));
+type ParsedName = { start: number; end: number; text: string; key: string; bare: string; bareKey: string };
+
+const STOP_TITLES: string[][] = [...citedNameRule.stop_titles].sort((a, b) => b.length - a.length).map(title => Array.from(title));
+const CLERGY_TITLES: string[][] = [...citedNameRule.honorifics].sort((a, b) => b.length - a.length).map(title => Array.from(title));
+const startsWithAt = (chars: string[], at: number, title: string[]): boolean => title.every((char, i) => chars[at + i] === char);
+
+export function explicitTitleHits(text: string): Array<{ start: number; end: number; text: string }> {
+  const chars = Array.from(text);
+  const hits = [];
+  for (let start = 0; start < chars.length; start++) {
+    if (start > 0 && ASCII_WORD(chars[start - 1])) continue;
+    for (const title of STOP_TITLES) {
+      if (!startsWithAt(chars, start, title)) continue;
+      let pos = start + title.length;
+      if (chars[pos] === ".") pos++;
+      if (pos >= chars.length || !DETECTOR_WHITESPACE(chars[pos])) continue;
+      while (pos < chars.length && DETECTOR_WHITESPACE(chars[pos])) pos++;
+      if (pos >= chars.length || !/^[A-Z]$/.test(chars[pos])) continue;
+      while (NAME_CHAR(chars[pos])) pos++;
+      hits.push({ start, end: pos, text: chars.slice(start, pos).join("") });
+      break;
+    }
+  }
+  return hits;
+}
+
+// the admissible-name parser over a code-point array, so a scan of every position stays linear in practice
+function parseNameAt(chars: string[], start: number): ParsedName | null {
+  if (start < 0 || start >= chars.length || (start > 0 && !LEFT_BOUNDARY.has(chars[start - 1]))) return null;
+  const title = CLERGY_TITLES.find(t => startsWithAt(chars, start, t));
+  if (!title) return null;
+  let pos = start + title.length;
+  if (chars[pos] === ".") pos++;
+  if (chars[pos] !== " ") return null;
+  pos++;
+  const tokens: string[] = [];
+  const tokenAt = (at: number): { text: string; end: number } | null => {
+    let end = at;
+    while (NAME_CHAR(chars[end])) end++;
+    const token = chars.slice(at, end).join("");
+    return token.length >= 2 && /^[A-Z]$/.test(token[0]) && !citedNameRule.stop_titles.includes(token) ? { text: token, end } : null;
+  };
+  while (tokens.length < 3) {
+    const token = tokenAt(pos);
+    if (!token) break;
+    tokens.push(token.text); pos = token.end;
+    if (tokens.length === 3 || chars[pos] !== " " || !tokenAt(pos + 1)) break;
+    pos++;
+  }
+  if (!tokens.length || tokens.join(" ").length < 3 || (tokens.length === 3 && chars[pos] === " " && tokenAt(pos + 1))) return null;
+  if (pos < chars.length && !RIGHT_BOUNDARY.has(chars[pos])) return null;
+  const value = chars.slice(start, pos).join(""), bare = tokens.join(" ");
+  return { start, end: pos, text: value, key: nameKey(value), bare, bareKey: nameKey(bare) };
+}
+
+export function parseName(text: string, start: number): ParsedName | null {
+  return parseNameAt(Array.from(text), start);
+}
+
+export function parsedNames(text: string): ParsedName[] {
+  const chars = Array.from(text);
+  const names: ParsedName[] = [];
+  for (let at = 0; at < chars.length; at++) {
+    const name = parseNameAt(chars, at);
+    if (name) names.push(name);
+  }
+  return names;
+}
+
+
+function admittedKnownKeys(admitted: ReadonlySet<string>): Set<string> {
+  const keys = new Set(admitted);
+  for (const key of admitted) {
+    const at = key.indexOf(" ");
+    if (at >= 0) keys.add(key.slice(at + 1));
+  }
+  return keys;
+}
+export function recurrenceForm(text: string): string {
+  return ruleNormalForm(text.normalize("NFKC"));
+}
+
+export type NameAdmission = { admitted: Set<string>; spans: Map<string, Array<[number, number]>> };
+export function maskDeclaredSpans(text: string, path: string, admission: NameAdmission): string {
+  const spans = admission.spans.get(path.replace(/^dossier\./, "")) ?? [];
+  if (!spans.length) return text;
+  const chars = Array.from(text);
+  for (const [start, end] of spans) chars.fill(" ", start, end);
+  return chars.join("");
+}
+export function quoteContainsName(quote: string, key: string): boolean {
+  const form = ruleNormalForm(quote);
+  for (let at = form.indexOf(key); at >= 0; at = form.indexOf(key, at + 1)) {
+    const end = at + key.length;
+    if ((at === 0 || QUOTE_BOUNDARY.has(form[at - 1])) && (end === form.length || QUOTE_BOUNDARY.has(form[end]))) return true;
+  }
+  return false;
+}
+
+export function honorificNameMatches(text: string): Array<{ start: number; end: number; text: string; clergy: boolean }> {
+  const chars = Array.from(text);
+  return [...text.matchAll(HONORIFIC_NAME)].map(match => {
+    const start = Array.from(text.slice(0, match.index)).length;
+    let end = start + Array.from(match[0]).length;
+    while (end > start && RULE_WHITESPACE(chars[end - 1].codePointAt(0)!)) end--;
+    const value = chars.slice(start, end).join("");
+    const clergy = parseName(text, start)?.end === end;
+    return { start, end, text: value, clergy };
+  });
+}
+
+function coveredClaimNames(claim: Record<string, any>, domains: string[] | null): Set<string> {
+  const covered = new Set<string>();
+  const quote = claim?.quoted_support;
+  const locator = claim?.source?.locator;
+  if (typeof quote !== "string" || !ruleNormalForm(quote) || typeof locator !== "string" || !domains) return covered;
+  try { publicUrl(locator); canonicalHost(locator); } catch { return covered; }
+  if (!hostAllowed(locator, domains)) return covered;
+  for (const path of citedNameRule.claim_fields) {
+    let field: any = claim;
+    for (const part of path.split(".")) field = field?.[part];
+    if (typeof field !== "string") continue;
+    for (const name of parsedNames(field)) {
+      if (quoteContainsName(quote, name.key)) covered.add(name.key);
+    }
+  }
+  return covered;
+}
+
+export function hasRuleItems(dossier: unknown): boolean {
+  const items = (dossier as any)?.personal_details_quarantine?.items;
+  return Array.isArray(items) && items.some(item => item !== null && typeof item === "object" && Object.hasOwn(item, "admitted_by_rule"));
+}
+
+export function citedNameCoverage(d: Record<string, any>, domains: string[] | null, floats: ReadonlySet<string> = new Set()): NameAdmission & { errors: string[] } {
+  const firstClaims = new Map<string, { index: number; claim: Record<string, any> }>();
+  (d.claims ?? []).forEach((claim: any, index: number) => { if (typeof claim?.claim_id === "string" && !firstClaims.has(claim.claim_id)) firstClaims.set(claim.claim_id, { index, claim }); });
+  const admitted = new Set<string>(), spans = new Map<string, Array<[number, number]>>(), errors: string[] = [];
+  (d.personal_details_quarantine?.items ?? []).forEach((item: any, index: number) => {
+    if (!item || typeof item !== "object") return;
+    if (!Object.hasOwn(item, "admitted_by_rule")) {
+      if (["field", "start", "end"].some(field => Object.hasOwn(item, field))) errors.push(`personal_details_quarantine.items[${index}]: span requires a rule`);
+      return;
+    }
+    const located = typeof item.context_claim_id === "string" ? firstClaims.get(item.context_claim_id) : undefined;
+    const claim = located?.claim;
+    let field: any = claim;
+    if (typeof item.field === "string" && citedNameRule.claim_fields.includes(item.field)) for (const part of item.field.split(".")) field = field?.[part];
+    else field = undefined;
+    const quote = claim?.quoted_support;
+    const locator = claim?.source?.locator;
+    let citable = false;
+    if (typeof locator === "string" && domains) try { publicUrl(locator); canonicalHost(locator); citable = hostAllowed(locator, domains); } catch { /* refuse */ }
+    const match = item.admitted_by_rule === CITED_NAME_RULE && item.kind === citedNameRule.kind
+      && typeof quote === "string" && !!ruleNormalForm(quote) && citable && typeof field === "string"
+      && Number.isInteger(item.start) && Number.isInteger(item.end) && item.start >= 0 && item.start < item.end && item.end <= Array.from(field).length
+      && !floats.has(`$.dossier.personal_details_quarantine.items[${index}].start`)
+      && !floats.has(`$.dossier.personal_details_quarantine.items[${index}].end`)
+      ? parsedNames(field).find(hit => hit.start === item.start && hit.end === item.end) : undefined;
+    if (!match || !quoteContainsName(quote, match.key))
+      errors.push(`personal_details_quarantine.items[${index}]: rule ${CITED_NAME_RULE} does not cover its claim`);
+    else {
+      admitted.add(match.key);
+      const path = `claims[${located!.index}].${item.field}`;
+      spans.set(path, [...(spans.get(path) ?? []), [item.start, item.end]]);
+    }
+  });
+  return { admitted, spans, errors };
+}
+
+function hasUnadmittedDetail(text: string, admission: NameAdmission, path: string): boolean {
+  const checked = maskDeclaredSpans(text, path, admission);
+  // with no admitted names this is exactly main's detector; a record carrying valid cited-name
+  // rule items also gets the explicit title search and the refusal of admitted-name recurrences
+  return hasPersonalDetails(checked)
+    || (admission.admitted.size > 0 && (explicitTitleHits(checked).length > 0
+      || [...admittedKnownKeys(admission.admitted)].some(key => recurrenceForm(checked).includes(key))));
+}
+
 const DIGEST = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/;
 
 // the audited fields of each record type that may hold a hex digest (screen-policy.v1).
@@ -200,11 +405,11 @@ export function screenedStrings(value: unknown, schemaNode: any, root: any, over
 // the first screen failure as an error message naming only the path: a phone number, email
 // address or honorific-led name anywhere, or a hex-hash-shaped value outside a designated hash
 // field. paths under a skipped prefix are left to another check. lib.py screen_findings mirrors it.
-export function assertScreened(value: unknown, schemaNode: any, root: any, hashFields: ReadonlySet<string>, options: { overrides?: Record<string, [any, any]>; prefix?: string; skip?: string[] } = {}): void {
+export function assertScreened(value: unknown, schemaNode: any, root: any, hashFields: ReadonlySet<string>, options: { overrides?: Record<string, [any, any]>; prefix?: string; skip?: string[]; admission?: NameAdmission } = {}): void {
   const skip = options.skip ?? [];
   for (const { path, norm, text, isKey } of walkScreened(value, schemaNode, root, options.overrides ?? {}, options.prefix ?? "")) {
     if (skip.some(s => norm === s || norm.startsWith(`${s}.`) || norm.startsWith(`${s}[`))) continue;
-    if (hasPersonalDetails(text)) throw new Error(`potential personal details in ${path} require human handling`);
+    if (hasUnadmittedDetail(text, options.admission ?? { admitted: new Set(), spans: new Map() }, isKey ? "" : path)) throw new Error(`potential personal details in ${path} require human handling`);
     const exempt = !isKey && hashFields.has(norm) && DIGEST.test(text);
     if (!exempt && hasHashToken(text)) throw new Error(`hash-shaped value in ${path} is outside a designated hash field`);
   }
@@ -246,7 +451,12 @@ export function validateAgentReviewBundle(value: unknown, bundleJson: string): {
   const parsed = JSON.parse(bundleJson);
   guard(parsed); guard(value);
   if (canonicalJson(parsed) !== canonicalJson(value)) throw new Error("parsed bundle differs from supplied bytes");
-  schemaCheck(value, bundleSchema);
+  // a record carrying cited-name rule items has its float-written numbers collected from the raw
+  // bytes, so a float where the schema requires an integer (a span coordinate, for instance) is
+  // refused as python refuses it; every other record is checked exactly as on main
+  const floats = new Set<string>();
+  if (hasRuleItems((value as any)?.dossier)) canonicalWireJson(bundleJson, floats);
+  schemaCheck(value, bundleSchema, "$", bundleSchema, floats);
   const bundle = value as AgentReviewBundle;
   const d = bundle.dossier;
   if (d.place.country_code !== "NZ") throw new Error("internal pilot requires NZ");
@@ -264,9 +474,9 @@ export function validateAgentReviewBundle(value: unknown, bundleJson: string): {
   if (d.run_manifest.model_id_reported !== bundle.research_run.model_id_reported) throw new Error("dossier and research manifest disagree on the reported model");
   // designated hash fields must equal the digests of their inputs in this record (screen-policy.v1)
   if (bundle.submission_key !== sha256(d.dossier_id)) throw new Error("submission_key does not match the dossier id");
-  const locators = validateDossierRecord(d);
+  const { locators, admission } = validateDossierRecordWithRule(d, floats);
   // the reviewer's text and both run manifests travel too; the dossier was screened above.
-  assertScreened(value, bundleSchema, bundleSchema, SCREEN_HASH_FIELDS["agent-review-bundle.v1"], { skip: ["dossier"] });
+  assertScreened(value, bundleSchema, bundleSchema, SCREEN_HASH_FIELDS["agent-review-bundle.v1"], { skip: ["dossier"], admission });
   const checked = new Set<string>();
   for (const check of bundle.review.claim_checks) {
     if (checked.has(check.claim_id) || locators.get(check.claim_id) !== check.source_url) throw new Error("review must cover every claim uniquely at its source_url");
@@ -284,17 +494,23 @@ export function validateAgentReviewBundle(value: unknown, bundleJson: string): {
 // reader provenance, dates, status and osm references. returns each claim id with its source locator. the caller has
 // already schema-checked the dossier and applied its own provenance checks.
 export function validateDossierRecord(d: Record<string, any>): Map<string, string> {
+  return validateDossierRecordWithRule(d).locators;
+}
+
+export function validateDossierRecordWithRule(d: Record<string, any>, floats: ReadonlySet<string> = new Set()): { locators: Map<string, string>; admission: NameAdmission } {
   // the pinned source allowlist, as intake.py validate_dossier applies it
   const allowlist = typeof d.run_manifest.allowlist_version === "string" && Object.hasOwn(ALLOWLISTS, d.run_manifest.allowlist_version) ? ALLOWLISTS[d.run_manifest.allowlist_version] : undefined;
   if (!allowlist) throw new Error("dossier names no known source allowlist version");
   if (allowlist.country_code !== d.place.country_code) throw new Error("source allowlist belongs to another country");
   const domains = allowlist.domains.map(domain => domain.toLowerCase().replace(/\.$/, ""));
+  const { errors: declarationErrors, ...admission } = citedNameCoverage(d, domains, floats);
+  if (declarationErrors.length) throw new Error(declarationErrors[0]);
   dateBounds(d.run_manifest.started_at.split("T")[0]); dateBounds(d.run_manifest.ended_at.split("T")[0]);
   const manifestStart = Date.parse(d.run_manifest.started_at), manifestEnd = Date.parse(d.run_manifest.ended_at);
   if (!Number.isFinite(manifestStart) || !Number.isFinite(manifestEnd) || manifestEnd < manifestStart) throw new Error("invalid dossier run timestamp");
   // every free-text string of the dossier, not only claim text: a detail the runner's redaction
   // missed must not reach reviewers or Convex.
-  assertScreened(d, (bundleSchema as any).$defs.dossier, bundleSchema, SCREEN_HASH_FIELDS["agent-review-bundle.v1"], { prefix: "dossier" });
+  assertScreened(d, (bundleSchema as any).$defs.dossier, bundleSchema, SCREEN_HASH_FIELDS["agent-review-bundle.v1"], { prefix: "dossier", admission });
   if (d.run_manifest.idempotency_key !== sha256([d.place.place_ref, d.run_manifest.prompt_version, d.run_manifest.model_id_requested, d.place.seed_source].join("|"))) throw new Error("dossier run manifest idempotency_key does not match its inputs");
   const locators = new Map<string, string>();
   for (const claim of d.claims) {
@@ -318,7 +534,7 @@ export function validateDossierRecord(d: Record<string, any>): Map<string, strin
   dateBounds(d.status_assessment.asof_date);
   for (const id of d.status_assessment.supporting_claim_ids) if (!locators.has(id)) throw new Error("unknown status claim");
   for (const row of d.osm_version_chain) { publicUrl(row.locator); canonicalHost(row.locator); }
-  return locators;
+  return { locators, admission };
 }
 
 // a dossier carried without a review bundle (inside a first-pass record):

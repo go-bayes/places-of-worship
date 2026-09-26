@@ -55,6 +55,35 @@ test("enabled intake writes one provisional receipt and is idempotent", async ()
   assert.equal(second.created, false); assert.equal(second.receipt_id, first.receipt_id); assert.equal(ctx.rows.tasks.length, 1);
 });
 
+test("cited-name admissions require the deployment flag before any write", async () => {
+  const value = structuredClone(bundle);
+  const claim = value.dossier.claims[0];
+  claim.value = "opened 1891 under Rev'd Pat Example";
+  claim.quoted_support = "built in 1891 under Rev'd Pat Example";
+  value.dossier.personal_details_quarantine.items = [
+    { kind: "person_name", context_claim_id: claim.claim_id, admitted_by_rule: "public_source_cited.v1", field: "value", start: 18, end: 35 },
+    { kind: "person_name", context_claim_id: claim.claim_id, admitted_by_rule: "public_source_cited.v1", field: "quoted_support", start: 20, end: 37 },
+  ];
+  value.dossier.personal_details_quarantine.item_count = 2;
+  const text = JSON.stringify(value), hash = sha256(text);
+  const ctx = context();
+  process.env.POW_INTERNAL_AGENT_INGEST_ENABLED = "true";
+  try {
+    delete process.env.POW_CITED_NAME_RULE_ENABLED;
+    await assert.rejects(ingestBundle._handler(ctx, { bundleJson: text, bundleHash: hash }), /Cited-name admissions are disabled/);
+    assert.equal(ctx.rows.tasks.length, 0);
+    assert.equal(ctx.rows.agent_intake_receipts.length, 0);
+    process.env.POW_CITED_NAME_RULE_ENABLED = "1";
+    const receipt = await ingestBundle._handler(ctx, { bundleJson: text, bundleHash: hash });
+    assert.equal(receipt.created, true);
+    assert.equal(ctx.rows.tasks.length, 1);
+    delete process.env.POW_CITED_NAME_RULE_ENABLED;
+    await assert.rejects(ingestBundle._handler(ctx, { bundleJson: text, bundleHash: hash }), /Cited-name admissions are disabled/);
+  } finally {
+    delete process.env.POW_CITED_NAME_RULE_ENABLED;
+  }
+});
+
 test("an exact retry of receipted bytes returns the receipt even when current rules refuse them", async () => {
   process.env.POW_INTERNAL_AGENT_INGEST_ENABLED = "true";
   const ctx = context();

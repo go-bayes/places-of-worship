@@ -8,7 +8,7 @@ import { assertNoDuplicateJsonKeys, validateAgentReviewBundle } from "./lib/agen
 import { recordEvidenceVersion } from "./evidenceVersions";
 import { costBasisOf, recordJudgments, type JudgmentInput } from "./lib/agentJudgments";
 
-import { assertInternalAgentIngestEnabled as enabled, internalAgentServiceUser } from "./lib/agentServiceUser";
+import { assertCitedNameRuleAllowed, assertInternalAgentIngestEnabled as enabled, internalAgentServiceUser } from "./lib/agentServiceUser";
 
 // find a receipt whose stored bytes equal the submitted bytes exactly; never validates or writes.
 async function receiptForBytes(ctx: QueryCtx, bundleJson: string, bundleHash: string) {
@@ -47,6 +47,10 @@ export const ingestBundle = internalMutation({
   returns: v.object({ receipt_id: v.string(), task_id: v.string(), evidence_draft_id: v.string(), agent_review_id: v.string(), created: v.boolean() }),
   handler: async (ctx, args) => {
     enabled();
+    try { assertCitedNameRuleAllowed(JSON.parse(args.bundleJson)?.dossier ?? null); } catch (error) {
+      if (error instanceof SyntaxError) { /* existing validation reports malformed JSON */ }
+      else throw error;
+    }
     // an exact retry of bytes already receipted returns that receipt without writing. It runs before
     // validation so a rule tightened after the first ingest cannot turn an idempotent retry into an error;
     // the stored bytes must equal the submitted bytes, so nothing unvalidated is admitted.
@@ -55,6 +59,7 @@ export const ingestBundle = internalMutation({
     let parsed: unknown;
     try { assertNoDuplicateJsonKeys(args.bundleJson); parsed = JSON.parse(args.bundleJson); } catch (error) { throw new Error(error instanceof Error ? error.message : "bundleJson must be valid JSON"); }
     const checked = validateAgentReviewBundle(parsed, args.bundleJson);
+    assertCitedNameRuleAllowed(checked.bundle.dossier);
     if (checked.bundleHash !== args.bundleHash) throw new Error("bundleHash does not match bundleJson");
     const existing = await ctx.db.query("agent_intake_receipts").withIndex("by_submission_key", (q) => q.eq("submission_key", checked.bundle.submission_key)).unique();
     if (existing !== null) {

@@ -589,6 +589,21 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
     let screen_root: Value =
         serde_json::from_str(AGENT_BUNDLE_SCHEMA).expect("pinned bundle schema is valid JSON");
     let policy: Value = serde_json::from_str(SCREEN_POLICY).expect("screen policy is valid JSON");
+    let rule = &policy["cited_name_rules"]["public_source_cited.v1"];
+    let admission = cited_name_coverage(
+        dossier,
+        allowlist.as_ref().and_then(|(version, domains)| {
+            let country = dossier.get("place")?.get("country_code")?.as_str()?;
+            let source = AGENT_ALLOWLISTS
+                .iter()
+                .find(|(known, _)| *known == version)?
+                .1;
+            let pinned: Value = serde_json::from_str(source).ok()?;
+            (pinned["country_code"].as_str() == Some(country)).then_some(domains.as_slice())
+        }),
+        rule,
+        errors,
+    );
     let hash_fields: BTreeSet<String> = policy["hash_fields"]["agent-review-bundle.v1"]
         .as_object()
         .map(|fields| fields.keys().cloned().collect())
@@ -596,7 +611,12 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
     let mut screened = Vec::new();
     screened_strings(value, &screen_root, &screen_root, "", "", &mut screened);
     for item in screened {
-        if contains_personal_details(&item.text) {
+        if contains_unadmitted_detail(
+            &item.text,
+            &admission,
+            rule,
+            if item.is_key { "" } else { &item.path },
+        ) {
             errors.push(format!(
                 "/{}: potential personal details require human handling",
                 item.path
@@ -663,7 +683,14 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
             if claim_object
                 .get(field)
                 .and_then(Value::as_str)
-                .is_some_and(contains_personal_details)
+                .is_some_and(|text| {
+                    contains_unadmitted_detail(
+                        text,
+                        &admission,
+                        rule,
+                        &format!("dossier.claims[{index}].{field}"),
+                    )
+                })
             {
                 errors.push(format!(
                     "{path}/{field}: potential personal details require human handling"
@@ -974,7 +1001,12 @@ fn agent_allowlist(
             domains
                 .iter()
                 .filter_map(Value::as_str)
-                .map(|domain| domain.trim_end_matches('.').to_ascii_lowercase())
+                .map(|domain| {
+                    domain
+                        .strip_suffix('.')
+                        .unwrap_or(domain)
+                        .to_ascii_lowercase()
+                })
                 .collect()
         })
         .unwrap_or_default();
@@ -1243,6 +1275,447 @@ fn contains_personal_details(text: &str) -> bool {
     contains_email(text) || contains_nz_phone(text) || contains_honorific_name(text)
 }
 
+fn rule_normal_form(text: &str) -> String {
+    let mut out = String::new();
+    for character in text.chars() {
+        let code = character as u32;
+        let whitespace = (9..=13).contains(&code)
+            || matches!(
+                code,
+                0x20 | 0x85 | 0xA0 | 0x1680 | 0x2028 | 0x2029 | 0x202F | 0x205F | 0x3000
+            )
+            || (0x2000..=0x200A).contains(&code);
+        if whitespace {
+            if !out.is_empty() && !out.ends_with(' ') {
+                out.push(' ');
+            }
+        } else if matches!(code, 0x2018 | 0x2019) {
+            out.push('\'');
+        } else if character.is_ascii_uppercase() {
+            out.push(character.to_ascii_lowercase());
+        } else {
+            out.push(character);
+        }
+    }
+    out.trim_matches(' ').to_owned()
+}
+
+fn recurrence_form(text: &str) -> String {
+    let normalised = icu_normalizer::ComposingNormalizerBorrowed::new_nfkc().normalize(text);
+    rule_normal_form(&normalised)
+}
+
+fn rule_whitespace(character: char) -> bool {
+    let code = character as u32;
+    (9..=13).contains(&code)
+        || matches!(
+            code,
+            0x20 | 0x85 | 0xA0 | 0x1680 | 0x2028 | 0x2029 | 0x202F | 0x205F | 0x3000
+        )
+        || (0x2000..=0x200A).contains(&code)
+}
+
+fn name_key(text: &str) -> String {
+    text.chars()
+        .map(|c| {
+            if c.is_ascii_uppercase() {
+                c.to_ascii_lowercase()
+            } else {
+                c
+            }
+        })
+        .collect()
+}
+
+fn quote_contains_name(quote: &str, key: &str) -> bool {
+    let form: Vec<char> = rule_normal_form(quote).chars().collect();
+    let needle: Vec<char> = key.chars().collect();
+    if needle.is_empty() || needle.len() > form.len() {
+        return false;
+    }
+    for at in 0..=form.len() - needle.len() {
+        let end = at + needle.len();
+        if form[at..end] == needle
+            && (at == 0 || " .,;:!?()[]\"'".contains(form[at - 1]))
+            && (end == form.len() || " .,;:!?()[]\"'".contains(form[end]))
+        {
+            return true;
+        }
+    }
+    false
+}
+
+fn detector_whitespace(character: char) -> bool {
+    rule_whitespace(character) || character == '\u{feff}'
+}
+
+fn name_char(character: char) -> bool {
+    character.is_ascii_alphabetic() || matches!(character, '\'' | '-')
+}
+
+fn explicit_title_hits(text: &str, rule: &Value) -> Vec<(usize, usize, String)> {
+    let chars: Vec<char> = text.chars().collect();
+    let mut titles: Vec<&str> = rule["stop_titles"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+        .collect();
+    titles.sort_by_key(|title| std::cmp::Reverse(title.chars().count()));
+    let mut hits = Vec::new();
+    for start in 0..chars.len() {
+        if start > 0 && (chars[start - 1].is_ascii_alphanumeric() || chars[start - 1] == '_') {
+            continue;
+        }
+        for title in &titles {
+            let title_chars: Vec<char> = title.chars().collect();
+            if !chars[start..].starts_with(&title_chars) {
+                continue;
+            }
+            let mut pos = start + title_chars.len();
+            if chars.get(pos) == Some(&'.') {
+                pos += 1;
+            }
+            if !chars.get(pos).is_some_and(|c| detector_whitespace(*c)) {
+                continue;
+            }
+            while chars.get(pos).is_some_and(|c| detector_whitespace(*c)) {
+                pos += 1;
+            }
+            if !chars.get(pos).is_some_and(char::is_ascii_uppercase) {
+                continue;
+            }
+            while chars.get(pos).is_some_and(|c| name_char(*c)) {
+                pos += 1;
+            }
+            hits.push((start, pos, chars[start..pos].iter().collect()));
+            break;
+        }
+    }
+    hits
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct ParsedName {
+    start: usize,
+    end: usize,
+    text: String,
+    key: String,
+    bare: String,
+    bare_key: String,
+}
+
+#[cfg(test)]
+fn parse_name(text: &str, start: usize, rule: &Value) -> Option<ParsedName> {
+    let chars: Vec<char> = text.chars().collect();
+    parse_name_at(&chars, start, rule)
+}
+
+/// The admissible-name parser over a code-point slice, so a scan of every position does not
+/// re-collect the string.
+fn parse_name_at(chars: &[char], start: usize, rule: &Value) -> Option<ParsedName> {
+    if start >= chars.len() || (start > 0 && !" \t\n\r(\"".contains(chars[start - 1])) {
+        return None;
+    }
+    let mut titles: Vec<&str> = rule["honorifics"]
+        .as_array()?
+        .iter()
+        .filter_map(Value::as_str)
+        .collect();
+    titles.sort_by_key(|title| std::cmp::Reverse(title.chars().count()));
+    let title = titles
+        .into_iter()
+        .find(|title| chars[start..].starts_with(&title.chars().collect::<Vec<_>>()))?;
+    let mut pos = start + title.chars().count();
+    if chars.get(pos) == Some(&'.') {
+        pos += 1;
+    }
+    if chars.get(pos) != Some(&' ') {
+        return None;
+    }
+    pos += 1;
+    let mut tokens = Vec::new();
+    let token_at = |at: usize| -> Option<(String, usize)> {
+        let mut end = at;
+        while chars.get(end).is_some_and(|c| name_char(*c)) {
+            end += 1;
+        }
+        let token: String = chars.get(at..end)?.iter().collect();
+        if token.chars().count() < 2
+            || !token.chars().next()?.is_ascii_uppercase()
+            || rule["stop_titles"]
+                .as_array()?
+                .iter()
+                .any(|v| v.as_str() == Some(&token))
+        {
+            return None;
+        }
+        Some((token, end))
+    };
+    while tokens.len() < 3 {
+        let Some((token, end)) = token_at(pos) else {
+            break;
+        };
+        tokens.push(token);
+        pos = end;
+        if tokens.len() == 3 || chars.get(pos) != Some(&' ') || token_at(pos + 1).is_none() {
+            break;
+        }
+        pos += 1;
+    }
+    if tokens.is_empty()
+        || tokens.join(" ").chars().count() < 3
+        || (tokens.len() == 3 && chars.get(pos) == Some(&' ') && token_at(pos + 1).is_some())
+    {
+        return None;
+    }
+    if chars
+        .get(pos)
+        .is_some_and(|c| !" \t\n\r.,;:!?)\"".contains(*c))
+    {
+        return None;
+    }
+    let value: String = chars[start..pos].iter().collect();
+    let bare = tokens.join(" ");
+    Some(ParsedName {
+        start,
+        end: pos,
+        key: name_key(&value),
+        text: value,
+        bare_key: name_key(&bare),
+        bare,
+    })
+}
+
+fn parsed_names(text: &str, rule: &Value) -> Vec<ParsedName> {
+    let chars: Vec<char> = text.chars().collect();
+    (0..chars.len())
+        .filter_map(|at| parse_name_at(&chars, at, rule))
+        .collect()
+}
+
+fn admitted_known_keys(admitted: &BTreeSet<String>) -> BTreeSet<String> {
+    let mut keys = admitted.clone();
+    for key in admitted {
+        if let Some((_, bare)) = key.split_once(' ') {
+            keys.insert(bare.to_owned());
+        }
+    }
+    keys
+}
+
+fn honorific_name_pattern() -> &'static regex::Regex {
+    static PATTERN: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+    PATTERN.get_or_init(|| regex::Regex::new(
+        r"\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'\-]+\s?){1,3}"
+    ).expect("valid honorific pattern"))
+}
+
+#[cfg(test)]
+fn clergy_match(
+    text: &str,
+    hit: &regex::Match<'_>,
+    rule: &Value,
+) -> Option<(usize, usize, String)> {
+    let start = text[..hit.start()].chars().count();
+    let name = parse_name(text, start, rule)?;
+    let mut end = start + hit.as_str().chars().count();
+    let chars: Vec<char> = text.chars().collect();
+    while end > start && rule_whitespace(chars[end - 1]) {
+        end -= 1;
+    }
+    (name.end == end).then_some((name.start, name.end, name.text))
+}
+
+fn covered_claim_names(
+    claim: &Value,
+    domains: Option<&[String]>,
+    rule: &Value,
+) -> BTreeSet<String> {
+    let mut covered = BTreeSet::new();
+    let Some(quote) = claim.get("quoted_support").and_then(Value::as_str) else {
+        return covered;
+    };
+    let quote_form = rule_normal_form(quote);
+    if quote_form.is_empty() {
+        return covered;
+    }
+    let Some(locator) = claim
+        .get("source")
+        .and_then(|source| source.get("locator"))
+        .and_then(Value::as_str)
+    else {
+        return covered;
+    };
+    let Some(domains) = domains else {
+        return covered;
+    };
+    if validate_source_locator(locator).is_err()
+        || !canonical_locator_host(locator).is_ok_and(|host| host_allowed(&host, domains))
+    {
+        return covered;
+    }
+    if let Some(fields) = rule["claim_fields"].as_array() {
+        for field in fields.iter().filter_map(Value::as_str) {
+            let mut node = Some(claim);
+            for part in field.split('.') {
+                node = node.and_then(|value| value.get(part));
+            }
+            if let Some(text) = node.and_then(Value::as_str) {
+                for name in parsed_names(text, rule) {
+                    if quote_contains_name(quote, &name.key) {
+                        covered.insert(name.key);
+                    }
+                }
+            }
+        }
+    }
+    covered
+}
+
+#[derive(Default)]
+struct NameAdmission {
+    keys: BTreeSet<String>,
+    spans: BTreeMap<String, Vec<(usize, usize)>>,
+}
+
+fn mask_declared_spans(text: &str, path: &str, admission: &NameAdmission) -> String {
+    let mut chars: Vec<char> = text.chars().collect();
+    let path = path.strip_prefix("dossier.").unwrap_or(path);
+    if let Some(spans) = admission.spans.get(path) {
+        for &(start, end) in spans {
+            chars[start..end].fill(' ');
+        }
+    }
+    chars.iter().collect()
+}
+
+fn cited_name_coverage(
+    dossier: &serde_json::Map<String, Value>,
+    domains: Option<&[String]>,
+    rule: &Value,
+    errors: &mut Vec<String>,
+) -> NameAdmission {
+    let claims = dossier.get("claims").and_then(Value::as_array);
+    let mut first = BTreeMap::new();
+    if let Some(claims) = claims {
+        for (claim_index, claim) in claims.iter().enumerate() {
+            if let Some(id) = claim.get("claim_id").and_then(Value::as_str) {
+                first.entry(id).or_insert((claim_index, claim));
+            }
+        }
+    }
+    let mut admission = NameAdmission::default();
+    if let Some(items) = dossier
+        .get("personal_details_quarantine")
+        .and_then(|q| q.get("items"))
+        .and_then(Value::as_array)
+    {
+        for (index, item) in items.iter().enumerate() {
+            if item.get("admitted_by_rule").is_none() {
+                if ["field", "start", "end"]
+                    .iter()
+                    .any(|field| item.get(field).is_some())
+                {
+                    errors.push(format!(
+                        "/dossier/personal_details_quarantine/items/{index}: span requires a rule"
+                    ));
+                }
+                continue;
+            }
+            let claim = item
+                .get("context_claim_id")
+                .and_then(Value::as_str)
+                .and_then(|id| first.get(id))
+                .copied();
+            let claim_index = claim.map(|(index, _)| index);
+            let claim = claim.map(|(_, claim)| claim);
+            let field = item.get("field").and_then(Value::as_str);
+            let node = claim
+                .and_then(|claim| {
+                    field.and_then(|field| {
+                        if !matches!(
+                            field,
+                            "value" | "quoted_support" | "note" | "source.source_name"
+                        ) {
+                            return None;
+                        }
+                        field.split('.').fold(Some(claim), |node, part| {
+                            node.and_then(|value| value.get(part))
+                        })
+                    })
+                })
+                .and_then(Value::as_str);
+            let quote = claim
+                .and_then(|claim| claim.get("quoted_support"))
+                .and_then(Value::as_str);
+            let locator = claim
+                .and_then(|claim| claim.get("source"))
+                .and_then(|source| source.get("locator"))
+                .and_then(Value::as_str);
+            let valid_locator = locator.zip(domains).is_some_and(|(locator, domains)| {
+                validate_source_locator(locator).is_ok()
+                    && canonical_locator_host(locator)
+                        .is_ok_and(|host| host_allowed(&host, domains))
+            });
+            let span = item
+                .get("start")
+                .and_then(Value::as_u64)
+                .zip(item.get("end").and_then(Value::as_u64));
+            let matched = node.zip(span).and_then(|(node, (start, end))| {
+                if start >= end || end > node.chars().count() as u64 {
+                    return None;
+                }
+                parsed_names(node, rule)
+                    .into_iter()
+                    .find(|name| name.start as u64 == start && name.end as u64 == end)
+            });
+            if item.get("admitted_by_rule").and_then(Value::as_str)
+                != Some("public_source_cited.v1")
+                || item.get("kind").and_then(Value::as_str) != Some("person_name")
+                || !valid_locator
+                || !quote.is_some_and(|quote| !rule_normal_form(quote).is_empty())
+                || !matched
+                    .as_ref()
+                    .zip(quote)
+                    .is_some_and(|(value, quote)| quote_contains_name(quote, &value.key))
+                || !claim.zip(matched.as_ref()).is_some_and(|(claim, value)| {
+                    covered_claim_names(claim, domains, rule).contains(&value.key)
+                })
+            {
+                errors.push(format!("/dossier/personal_details_quarantine/items/{index}/admitted_by_rule: rule public_source_cited.v1 does not cover its claim"));
+            } else {
+                let matched = matched.unwrap();
+                admission.keys.insert(matched.key);
+                let path = format!("claims[{}].{}", claim_index.unwrap(), field.unwrap());
+                admission
+                    .spans
+                    .entry(path)
+                    .or_default()
+                    .push((matched.start, matched.end));
+            }
+        }
+    }
+    admission
+}
+
+fn contains_unadmitted_detail(
+    text: &str,
+    admission: &NameAdmission,
+    rule: &Value,
+    path: &str,
+) -> bool {
+    let checked = mask_declared_spans(text, path, admission);
+    // with no admitted names this is exactly main's detector; a record carrying valid cited-name
+    // rule items also gets the explicit title search and the refusal of admitted-name recurrences
+    contains_personal_details(&checked)
+        || (!admission.keys.is_empty()
+            && (!explicit_title_hits(&checked, rule).is_empty()
+                || admitted_known_keys(&admission.keys)
+                    .iter()
+                    .any(|key| recurrence_form(&checked).contains(key))))
+}
+
 /// Email addresses, with the pattern lib.py `_EMAIL` and agentIntake.ts use, so a trailing
 /// full stop or bracket does not hide an address from one validator alone.
 fn contains_email(text: &str) -> bool {
@@ -1265,15 +1738,7 @@ fn contains_nz_phone(text: &str) -> bool {
 /// Honorific-led names, with the pattern lib.py `_HONORIFIC_NAME` and agentIntake.ts use,
 /// so the three validators agree on forms such as "Rev'd".
 fn contains_honorific_name(text: &str) -> bool {
-    static PATTERN: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
-    PATTERN
-        .get_or_init(|| {
-            regex::Regex::new(
-                r"\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'\-]+\s?){1,3}",
-            )
-            .expect("valid honorific pattern")
-        })
-        .is_match(text)
+    honorific_name_pattern().is_match(text)
 }
 
 #[derive(Clone, Copy)]
@@ -4776,6 +5241,120 @@ mod tests {
     use super::*;
     use serde_json::json;
 
+    #[test]
+    fn cited_name_normal_form_and_clergy() {
+        assert_eq!(
+            rule_normal_form(" REV’D\u{a0}PAT\t EXAMPLE "),
+            "rev'd pat example"
+        );
+        assert_eq!(rule_normal_form("ÄABC"), "Äabc");
+        let policy: Value = serde_json::from_str(SCREEN_POLICY).unwrap();
+        let rule = &policy["cited_name_rules"]["public_source_cited.v1"];
+        for (text, expected) in [
+            ("Rev. Pat Example", false),
+            ("Fr. Pat Example", true),
+            ("Dr Pat Example", false),
+        ] {
+            let hit = honorific_name_pattern().find(text).unwrap();
+            assert_eq!(clergy_match(text, &hit, rule).is_some(), expected);
+        }
+        for text in ["Rev'd Pat Example.", "(Rev'd Pat Example)"] {
+            let hit = honorific_name_pattern().find(text).unwrap();
+            assert!(clergy_match(text, &hit, rule).is_some());
+        }
+        for text in [
+            "Rev'd\u{85}Pat Example",
+            "Rev'd\u{feff}Pat Example",
+            "Rev'd  Pat Example",
+            "Rev'd Pat Example\u{85}",
+            "Rev'd Pat Example/",
+        ] {
+            if let Some(hit) = honorific_name_pattern().find(text) {
+                assert!(clergy_match(text, &hit, rule).is_none());
+            }
+        }
+        assert!(!quote_contains_name(
+            "Rev'd Pat Examples",
+            "rev'd pat example"
+        ));
+        assert!(!quote_contains_name(
+            "Rev'd Pat Example-Smith",
+            "rev'd pat example"
+        ));
+    }
+
+    #[test]
+    fn cited_name_parser_detector_mask_and_quote() {
+        let policy: Value = serde_json::from_str(SCREEN_POLICY).unwrap();
+        let rule = &policy["cited_name_rules"]["public_source_cited.v1"];
+        assert_eq!(
+            parsed_names("Rev'd Pat Example Dr Jo Sample", rule)
+                .iter()
+                .map(|n| (n.start, n.end))
+                .collect::<Vec<_>>(),
+            vec![(0, 17)]
+        );
+        assert_eq!(
+            parsed_names("Rev'd Pat Example Bishop Jo Sample", rule)
+                .iter()
+                .map(|n| (n.start, n.end))
+                .collect::<Vec<_>>(),
+            vec![(0, 17), (18, 34)]
+        );
+        assert!(parsed_names("éRev'd Pat Example", rule).is_empty());
+        assert!(parsed_names("Rev'd\u{85}Pat Example", rule).is_empty());
+        assert!(parsed_names("Rev'd Pat Jo Lee Example", rule).is_empty());
+        assert!(parsed_names("Rev'd Jo", rule).is_empty());
+        assert_eq!(
+            recurrence_form("Ｐａｔ\u{3000}Ｅｘａｍｐｌｅ"),
+            "pat example"
+        );
+        assert_eq!(recurrence_form("ＲＥＶ’Ｄ\tＰＡＴ"), "rev'd pat");
+        let admission = NameAdmission {
+            keys: BTreeSet::from(["rev'd pat example".to_owned()]),
+            spans: BTreeMap::from([("claims[0].value".to_owned(), vec![(0, 17)])]),
+        };
+        assert_eq!(
+            mask_declared_spans(
+                "Rev'd Pat Example Rev'd Pat Example",
+                "dossier.claims[0].value",
+                &admission
+            ),
+            format!("{} Rev'd Pat Example", " ".repeat(17))
+        );
+        assert_eq!(
+            mask_declared_spans(
+                "Rev'd Pat Example",
+                "dossier.claims[0].quoted_support",
+                &admission
+            ),
+            "Rev'd Pat Example"
+        );
+        assert_eq!(
+            explicit_title_hits("éRev'd Pat Example", rule)
+                .iter()
+                .map(|n| n.2.as_str())
+                .collect::<Vec<_>>(),
+            vec!["Rev'd Pat"]
+        );
+        assert_eq!(
+            explicit_title_hits("Rev'd\u{85}Pat Example", rule)
+                .iter()
+                .map(|n| n.2.as_str())
+                .collect::<Vec<_>>(),
+            vec!["Rev'd\u{85}Pat"]
+        );
+        assert!(explicit_title_hits("xRev'd Pat", rule).is_empty());
+        assert!(quote_contains_name(
+            "(Rev'd Pat Example)",
+            "rev'd pat example"
+        ));
+        assert!(!quote_contains_name(
+            "Rev'd Pat Examples",
+            "rev'd pat example"
+        ));
+    }
+
     fn validators() -> SchemaValidators {
         let schema_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../schemas");
         SchemaValidators::load(&schema_dir).expect("schemas load")
@@ -5513,6 +6092,48 @@ mod tests {
             );
         }
         assert_eq!(terminal_safe("bad\u{1b}[2J\rnext"), r"bad\u{1b}[2J\rnext");
+    }
+
+    #[test]
+    fn cited_name_float_written_span_is_invalid() {
+        let root = repo_root_path();
+        let mut bundle: Value = serde_json::from_slice(
+            &fs::read(root.join("scripts/agent_research/fixtures/internal-review-bundle.json"))
+                .unwrap(),
+        )
+        .unwrap();
+        bundle["dossier"]["claims"][0]["value"] = json!("opened 1891 under Rev'd Pat Example");
+        bundle["dossier"]["claims"][0]["quoted_support"] =
+            json!("built in 1891 under Rev'd Pat Example");
+        let claim_id = bundle["dossier"]["claims"][0]["claim_id"].clone();
+        bundle["dossier"]["personal_details_quarantine"]["items"] = json!([
+            {"kind":"person_name","context_claim_id":claim_id,"admitted_by_rule":"public_source_cited.v1","field":"value","start":18,"end":35},
+            {"kind":"person_name","context_claim_id":claim_id,"admitted_by_rule":"public_source_cited.v1","field":"quoted_support","start":20,"end":37}
+        ]);
+        bundle["dossier"]["personal_details_quarantine"]["item_count"] = json!(2);
+        let raw = serde_json::to_string(&bundle).unwrap();
+        let changed = raw.replacen("\"start\":18", "\"start\":18.0", 1);
+        assert_ne!(raw, changed);
+        let integer_path = temp_db_path("agent-cited-name-integer");
+        fs::write(&integer_path, &raw).unwrap();
+        let integer_report = validate_agent(ValidateAgentArgs {
+            input: integer_path.clone(),
+            schema: root.join("scripts/agent_research/schemas/agent-review-bundle.v1.json"),
+            report: ReportFormat::Json,
+        })
+        .unwrap();
+        fs::remove_file(integer_path).unwrap();
+        assert!(integer_report.valid, "{:?}", integer_report.errors);
+        let path = temp_db_path("agent-cited-name-float");
+        fs::write(&path, changed).unwrap();
+        let report = validate_agent(ValidateAgentArgs {
+            input: path.clone(),
+            schema: root.join("scripts/agent_research/schemas/agent-review-bundle.v1.json"),
+            report: ReportFormat::Json,
+        })
+        .unwrap();
+        fs::remove_file(path).unwrap();
+        assert!(!report.valid);
     }
 
     #[test]

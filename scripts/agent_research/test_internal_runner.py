@@ -261,7 +261,8 @@ class ValidationAndAuditTest(unittest.TestCase):
     def _run_pair(self, tmp: Path, source_url: str, research_manifest: dict, review_manifest: dict,
                   research_backend: str = "claude", review_error: Exception | None = None,
                   review_source_url: str | None = None, claim_note: str = "", source_name: str = "Test source",
-                  prompts: list[str] | None = None, review_changes: dict | None = None) -> tuple[list[str], dict | None]:
+                  prompts: list[str] | None = None, review_changes: dict | None = None,
+                  research_value: str = "Test Church", research_quote: str = "Test Church") -> tuple[list[str], dict | None]:
         """Run the runner with mocked providers; return the stages invoked and the run() result."""
         review_backend = "codex" if research_backend == "claude" else "claude"
         reader_output = {
@@ -269,10 +270,10 @@ class ValidationAndAuditTest(unittest.TestCase):
             "candidate_location": {"latitude": -43.0, "longitude": 172.0, "basis": "osm_object", "basis_note": "",
                                     "uncertainty_radius_m": 10, "address": None},
             "claims": [{
-                "claim_type": "name", "value": "Test Church", "date_start": None, "date_end": None,
+                "claim_type": "name", "value": research_value, "date_start": None, "date_end": None,
                 "date_precision": "unknown", "source": {"locator": source_url, "source_name": source_name,
                 "source_type": "church_website", "source_date": None, "source_date_basis": "not_stated"},
-                "quoted_support": "Test Church", "evidential_weight": "primary_institutional", "confidence": "high", "note": claim_note,
+                "quoted_support": research_quote, "evidential_weight": "primary_institutional", "confidence": "high", "note": claim_note,
             }],
             "status_assessment": {"current_status": "unknown", "basis": "test", "asof_date": "2026-09-11",
                                   "osm_stale": None, "osm_stale_basis": ""},
@@ -330,6 +331,33 @@ class ValidationAndAuditTest(unittest.TestCase):
             self.assertEqual(bundle["research_run"]["usage"]["per_model"]["web_search_requests"], 2)
             self.assertEqual(bundle["research_run"]["model_id_reported"], "claude-sonnet-5")
             self.assertEqual(bundle["review_run"]["model_id_reported"], "gpt-5.6-luna")
+
+    def test_cited_name_reaches_review_and_unadmitted_name_is_refused(self):
+        for reasoning, expected in [
+            ("The cited name is named on the page.", "completed"),
+            ("Rev'd Pat Example is named on the page.", "failed"),
+            ("Pat Example is named on the page.", "failed"),
+            ("Rev'd Jo Sample also served.", "failed"),
+        ]:
+            with self.subTest(reasoning), tempfile.TemporaryDirectory() as tmp:
+                out = Path(tmp) / "out"
+                stages, result = self._run_pair(Path(tmp), "https://nzhistory.govt.nz/history",
+                                                self._claude_manifest("research"),
+                                                self._codex_manifest("review", "gpt-5.6-luna"),
+                                                research_value="Test Church under Rev'd Pat Example",
+                                                research_quote="Test Church under Rev'd Pat Example",
+                                                review_changes={"reasoning": reasoning})
+                self.assertEqual(stages, ["research", "review"])
+                self.assertEqual(result["status"], expected, result.get("error"))
+                if expected == "completed":
+                    bundle = json.loads((out / "bundle.json").read_text())
+                    self.assertIn("Rev'd Pat Example", bundle['dossier']['claims'][0]['value'])
+                    self.assertEqual(bundle['dossier']['personal_details_quarantine']['items'][0]['admitted_by_rule'],
+                                     'public_source_cited.v1')
+                    self.assertEqual(bundle["research_run"]["model_id_reported"], "claude-sonnet-5")
+                    self.assertEqual(bundle["review_run"]["model_id_reported"], "gpt-5.6-luna")
+                else:
+                    self.assertFalse((out / 'bundle.json').exists())
 
     def test_quarantine_hashes_stay_in_the_private_dossier_copy(self):
         prompts: list[str] = []

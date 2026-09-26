@@ -9,13 +9,51 @@ const { ingestFirstPass, getFirstPassRecord, getFirstPassReceipt, listFirstPassR
 const { sha256 } = await import("./lib/sha256.ts");
 const { verifyObjectBytes, objectReceiptId } = await import("./lib/objectReceipts.ts");
 const { canonicalWireJson } = await import("./lib/wireJson.ts");
-const { screenedText } = await import("./lib/firstPass.ts");
+const { screenedText, validateFirstPassRecord } = await import("./lib/firstPass.ts");
 const { keyRef } = await import("./lib/agentIntake.ts");
 
 const fixtureText = (name) => fs.readFileSync(new URL(`../scripts/agent_research/fixtures/${name}`, import.meta.url), "utf8");
 const fixture = (name) => JSON.parse(fixtureText(name));
 const partial = () => fixture("first-pass.json");
 const researched = () => fixture("first-pass-researched.json");
+
+test("cited clergy rule never admits a first-pass record with either deployment flag", async () => {
+  const record = researched();
+  const claim = record.dossier.claims[0];
+  claim.value += " under Rev'd Pat Example";
+  claim.quoted_support += " under Rev'd Pat Example";
+  const start = Array.from(claim.value).join("").indexOf("Rev'd Pat Example");
+  record.dossier.personal_details_quarantine.items = [{ kind: "person_name", context_claim_id: claim.claim_id, admitted_by_rule: "public_source_cited.v1", field: "value", start, end: start + 17 }];
+  record.dossier.personal_details_quarantine.item_count = 1;
+  const { recordJson, recordHash } = args(record);
+  process.env.POW_INTERNAL_AGENT_INGEST_ENABLED = "true";
+  try {
+    for (const setting of [undefined, "1"]) {
+      if (setting === undefined) delete process.env.POW_CITED_NAME_RULE_ENABLED;
+      else process.env.POW_CITED_NAME_RULE_ENABLED = setting;
+      assert.throws(() => validateFirstPassRecord(recordJson, recordHash), /personal details/);
+      const ctx = context();
+      await assert.rejects(ingestFirstPass._handler(ctx, { recordJson, recordHash }), setting === undefined ? /Cited-name admissions are disabled/ : /personal details/);
+      assert.equal(ctx.rows.agent_first_pass_receipts.length, 0);
+    }
+  } finally { delete process.env.POW_CITED_NAME_RULE_ENABLED; }
+});
+
+test("a receipted rule item cannot retry with the cited-name flag disabled", async () => {
+  const record = partial();
+  record.dossier = { personal_details_quarantine: { items: [{ admitted_by_rule: "public_source_cited.v1" }] } };
+  const recordJson = JSON.stringify(record), recordHash = sha256(recordJson);
+  const ctx = context();
+  ctx.rows.agent_first_pass_receipts.push({ receipt_id: "stored", record_hash: recordHash, record_json: recordJson,
+    storage: { tier: "convex" }, judgment_ids: [] });
+  process.env.POW_INTERNAL_AGENT_INGEST_ENABLED = "true";
+  try {
+    process.env.POW_CITED_NAME_RULE_ENABLED = "1";
+    assert.equal((await ingestFirstPass._handler(ctx, { recordJson, recordHash })).created, false);
+    delete process.env.POW_CITED_NAME_RULE_ENABLED;
+    await assert.rejects(ingestFirstPass._handler(ctx, { recordJson, recordHash }), /Cited-name admissions are disabled/);
+  } finally { delete process.env.POW_CITED_NAME_RULE_ENABLED; }
+});
 
 // the archive's version-1 wire format (python json.dumps, sorted, compact,
 // ascii, final newline). a fixture's own text keeps python's float spellings
