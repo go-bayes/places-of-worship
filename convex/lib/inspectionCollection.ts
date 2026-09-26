@@ -45,21 +45,25 @@ const NANP_PHONE = /\+1[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b|\(\d{3}\)\s?
 // otherwise read as unseparated phone numbers
 const OSM_REFERENCE = /^(?:https:\/\/(?:www\.)?openstreetmap\.org\/)?(?:node|way|relation)\/[1-9]\d{0,15}$/;
 const OSM_REFERENCE_FIELD = /^candidate_links\[\d+\]\.(?:osm_ref|candidate_ref)$/;
-// a screening form of a string: percent-escapes decoded as UTF-8 until the value stops
-// changing, then compatibility-normalised (full-width and other digit forms become ASCII),
-// so an encoded or full-width number cannot pass as text. an encoding still unresolved
-// after the bound is refused rather than passed.
-const SCREENING_DECODE_ROUNDS = 16;
+// screening forms of a string: each round decodes percent-escapes as UTF-8, applies
+// compatibility normalisation (full-width digits and percent signs become ASCII) and maps
+// every other decimal digit to an ASCII digit, which keeps a number's shape for the
+// pattern. rounds repeat until the form stops changing; every intermediate form is
+// screened, and an encoding still changing after the bound is refused rather than passed.
+const SCREENING_ROUNDS = 16;
 const utf8 = new TextDecoder("utf-8");
-function decodePercentRuns(text: string): string {
-  return text.replace(/(?:%[0-9a-fA-F]{2})+/g, run => utf8.decode(Uint8Array.from(run.slice(1).split("%"), hex => parseInt(hex, 16))));
+function screeningRound(text: string): string {
+  const decoded = text.replace(/(?:%[0-9a-fA-F]{2})+/g, run => utf8.decode(Uint8Array.from(run.slice(1).split("%"), hex => parseInt(hex, 16))));
+  return decoded.normalize("NFKC").replace(/(?![0-9])\p{Nd}/gu, "0");
 }
-function screeningForm(text: string, path: string): string {
+function screeningForms(text: string, path: string): string[] {
+  const forms = [text];
   let current = text;
-  for (let round = 0; round < SCREENING_DECODE_ROUNDS; round += 1) {
-    const decoded = decodePercentRuns(current);
-    if (decoded === current) return current.normalize("NFKC");
-    current = decoded;
+  for (let round = 0; round < SCREENING_ROUNDS; round += 1) {
+    const next = screeningRound(current);
+    if (next === current) return forms;
+    forms.push(next);
+    current = next;
   }
   throw new Error(`potential personal details in ${path} require human handling`);
 }
@@ -69,7 +73,7 @@ function assertNoNanpPhone(value: unknown, schema: any): void {
   // the exemption applies to the raw value only; every other value is screened raw and in its screening form
   for (const [path, text] of screenedStrings(value, schema, schema)) {
     if (/\.locator$/.test(path) || (OSM_REFERENCE_FIELD.test(path) && OSM_REFERENCE.test(text))) continue;
-    if (NANP_PHONE.test(text) || NANP_PHONE.test(screeningForm(text, path))) throw new Error(`potential personal details in ${path} require human handling`);
+    if (screeningForms(text, path).some(form => NANP_PHONE.test(form))) throw new Error(`potential personal details in ${path} require human handling`);
   }
 }
 
