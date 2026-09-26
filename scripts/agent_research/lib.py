@@ -189,10 +189,11 @@ _HONORIFIC_NAME = re.compile(
 )
 
 
-def find_personal_details(text: str) -> list[dict]:
+def find_personal_details(text: str, explicit: bool = False) -> list[dict]:
     """phones, emails and honorific-led names in free text; the caller decides
     which are living people. every hit is quarantined, since the pipeline
-    cannot tell a living vicar from a dead one at capture."""
+    cannot tell a living vicar from a dead one at capture. explicit adds the
+    explicit title search, which only a record carrying cited-name rule items uses."""
     found: list[dict] = []
     for match in _PHONE.finditer(text or ""):
         found.append({"kind": "phone", "value": match.group(0).strip()})
@@ -201,7 +202,7 @@ def find_personal_details(text: str) -> list[dict]:
     regex_spans = [match.span() for match in _HONORIFIC_NAME.finditer(text or "")]
     for match in _HONORIFIC_NAME.finditer(text or ""):
         found.append({"kind": "person_name", "value": match.group(0).strip()})
-    for start, end, value in explicit_title_hits(text or ""):
+    for start, end, value in (explicit_title_hits(text or "") if explicit else []):
         if not any(left <= start and end <= right for left, right in regex_spans):
             found.append({"kind": "person_name", "value": value})
     return found
@@ -470,10 +471,14 @@ def cited_name_coverage(dossier, citable) -> tuple[frozenset[str], list[str]]:
 
 
 def has_unadmitted_detail(text: str, admitted=frozenset(), should_mask=False) -> bool:
+    """the screen's personal-detail test. with no admitted names it is exactly the detector of
+    main; a record carrying valid cited-name rule items also gets the explicit title search and
+    the refusal of any recurrence of an admitted name or its bare form."""
     masked = mask_names(text, admitted) if should_mask else text
     return (bool(_PHONE.search(masked) or _EMAIL.search(masked)) or
-            bool(_HONORIFIC_NAME.search(masked)) or bool(explicit_title_hits(masked)) or
-            bool(admitted and any(key in rule_normal_form(masked) for key in admitted_known_keys(admitted))))
+            bool(_HONORIFIC_NAME.search(masked)) or
+            bool(admitted and (explicit_title_hits(masked)
+                               or any(key in rule_normal_form(masked) for key in admitted_known_keys(admitted)))))
 
 
 def _digest_exempt(norm: str, text: str, is_key: bool, hash_fields) -> bool:
@@ -605,7 +610,7 @@ def screen_spans(value, schema, root, hash_fields, known: dict[str, str] | None 
         spans += [("email", m.span()) for m in _EMAIL.finditer(checked)]
         regex_spans = [m.span() for m in _HONORIFIC_NAME.finditer(checked)]
         spans += [("person_name", span) for span in regex_spans]
-        spans += [("person_name", (start, end)) for start, end, _ in explicit_title_hits(checked)
+        spans += [("person_name", (start, end)) for start, end, _ in (explicit_title_hits(checked) if admitted else [])
                   if not any(left <= start and end <= right for left, right in regex_spans)]
         if not _digest_exempt(norm, checked, is_key, hash_fields):
             spans += [("hash_outside_field", span) for span in hash_token_spans(checked)]
@@ -677,7 +682,7 @@ def quarantine_dossier(dossier: dict, extra_names: list[str] | None = None, cita
             if parent is None or path.startswith("personal_details_quarantine"):
                 return None
             checked = mask_names(text, admitted) if not is_key and claim_field_path(norm) else text
-            details = find_personal_details(checked)
+            details = find_personal_details(checked, explicit=bool(admitted))
             details += [e for e in extra if e["value"] in text]
             if not details:
                 return None

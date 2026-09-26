@@ -118,8 +118,7 @@ export function publicUrl(value: string): void {
 export function hasPersonalDetails(text: string): boolean {
   return /(?:\+64|\b0)[\s-]?\d{1,2}[\s-]?\d{3,4}[\s-]?\d{3,5}\b/.test(text)
     || /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(text)
-    || /\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'-]+\s?){1,3}/.test(text)
-    || explicitTitleHits(text).length > 0;
+    || /\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'-]+\s?){1,3}/.test(text);
 }
 
 const CITED_NAME_RULE = "public_source_cited.v1";
@@ -272,6 +271,11 @@ function coveredClaimNames(claim: Record<string, any>, domains: string[] | null)
   return covered;
 }
 
+export function hasRuleItems(dossier: unknown): boolean {
+  const items = (dossier as any)?.personal_details_quarantine?.items;
+  return Array.isArray(items) && items.some(item => item !== null && typeof item === "object" && Object.hasOwn(item, "admitted_by_rule"));
+}
+
 export function citedNameCoverage(d: Record<string, any>, domains: string[] | null, floats: ReadonlySet<string> = new Set()): { admitted: Set<string>; errors: string[] } {
   const firstClaims = new Map<string, Record<string, any>>();
   for (const claim of d.claims ?? []) if (typeof claim?.claim_id === "string" && !firstClaims.has(claim.claim_id)) firstClaims.set(claim.claim_id, claim);
@@ -305,8 +309,11 @@ export function citedNameCoverage(d: Record<string, any>, domains: string[] | nu
 
 function hasUnadmittedDetail(text: string, admitted: ReadonlySet<string>, shouldMask: boolean): boolean {
   const checked = shouldMask ? maskNames(text, admitted) : text;
+  // with no admitted names this is exactly main's detector; a record carrying valid cited-name
+  // rule items also gets the explicit title search and the refusal of admitted-name recurrences
   return hasPersonalDetails(checked)
-    || (admitted.size > 0 && [...admittedKnownKeys(admitted)].some(key => ruleNormalForm(checked).includes(key)));
+    || (admitted.size > 0 && (explicitTitleHits(checked).length > 0
+      || [...admittedKnownKeys(admitted)].some(key => ruleNormalForm(checked).includes(key))));
 }
 
 const DIGEST = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/;
@@ -433,10 +440,13 @@ export function hostAllowed(locator: string, domains: string[]): boolean {
 export function validateAgentReviewBundle(value: unknown, bundleJson: string): { bundle: AgentReviewBundle; bundleHash: string; claimLocators: Map<string, string> } {
   assertNoDuplicateJsonKeys(bundleJson);
   const parsed = JSON.parse(bundleJson);
-  const floats = new Set<string>();
-  canonicalWireJson(bundleJson, floats);
   guard(parsed); guard(value);
   if (canonicalJson(parsed) !== canonicalJson(value)) throw new Error("parsed bundle differs from supplied bytes");
+  // a record carrying cited-name rule items has its float-written numbers collected from the raw
+  // bytes, so a float where the schema requires an integer (a span coordinate, for instance) is
+  // refused as python refuses it; every other record is checked exactly as on main
+  const floats = new Set<string>();
+  if (hasRuleItems((value as any)?.dossier)) canonicalWireJson(bundleJson, floats);
   schemaCheck(value, bundleSchema, "$", bundleSchema, floats);
   const bundle = value as AgentReviewBundle;
   const d = bundle.dossier;

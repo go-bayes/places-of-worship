@@ -2602,12 +2602,37 @@
     ]
   },
   {
-    "name": "cited name: nonascii prefix title detector",
+    "name": "cited name: nonascii prefix title search with a rule item",
     "valid": false,
     "changes": [
       [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ],
+      [
         "/dossier/status_assessment/basis",
-        "Built by éRev'd Pat Example."
+        "Built by éRev'd Jo Sample."
       ]
     ]
   },

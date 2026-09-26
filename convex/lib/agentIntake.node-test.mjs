@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
-import { assertNoDuplicateJsonKeys, hostAllowed, ruleNormalForm, honorificNameMatches, explicitTitleHits, parsedNames, maskNames, quoteContainsName, validateAgentReviewBundle } from "./agentIntake.ts";
+import { assertNoDuplicateJsonKeys, hasPersonalDetails, hostAllowed, ruleNormalForm, honorificNameMatches, explicitTitleHits, parsedNames, maskNames, quoteContainsName, validateAgentReviewBundle } from "./agentIntake.ts";
 import { sha256 } from "./sha256.ts";
 const fixturePath = new URL("../../scripts/agent_research/fixtures/internal-review-bundle.json", import.meta.url);
 const fixture = JSON.parse(fs.readFileSync(fixturePath, "utf8"));
@@ -31,6 +31,22 @@ test("explicit cited-name parser, detector, mask and quote", () => {
   assert.equal(maskNames("Rev'd Pat Example Dr Jo Sample", new Set(["rev'd pat example"])), " ".repeat(17) + " Dr Jo Sample");
   assert.equal(quoteContainsName("(Rev'd Pat Example)", "rev'd pat example"), true);
   assert.equal(quoteContainsName("Rev'd Pat Examples", "rev'd pat example"), false);
+});
+
+// records without cited-name rule items validate exactly as on main: the explicit title search
+// and the raw-bytes float check apply only to records that carry rule items (D22: additive only)
+test("records without rule items keep main's intake behaviour", () => {
+  const nel = bundle();
+  nel.dossier.claims[0].value = "opened 1891 under Rev'd\u0085Pat Example";
+  assert.doesNotThrow(() => validateAgentReviewBundle(nel, JSON.stringify(nel)));
+  const plain = bundle();
+  const raw = JSON.stringify(plain).replace('"item_count":0', '"item_count":0.0');
+  assert.notEqual(raw, JSON.stringify(plain));
+  assert.doesNotThrow(() => validateAgentReviewBundle(JSON.parse(raw), raw));
+  const accented = bundle();
+  accented.dossier.status_assessment.basis = "Built by éRev'd Pat Example.";
+  assert.throws(() => validateAgentReviewBundle(accented, JSON.stringify(accented)), /personal details/);
+  assert.equal(hasPersonalDetails("Rev'd\u0085Pat Example"), false);
 });
 
 test("float-written cited-name span is refused from raw JSON", () => {

@@ -145,3 +145,17 @@ class CitedNameTests(unittest.TestCase):
         self.assertNotEqual(raw, json.dumps(bundle))
         self.assertEqual(intake.validate_bundle(intake.parse_json(json.dumps(bundle))), [])
         self.assertTrue(intake.validate_bundle(intake.parse_json(raw)))
+
+
+class NoRuleRecordsTest(unittest.TestCase):
+    """records without cited-name rule items keep main's detection, including its known
+    cross-language gaps (docs/development/internal-agent-review.md, left to H1)."""
+
+    def test_no_rule_bundle_keeps_main_detection(self):
+        bundle = fixture('internal-review-bundle.json')
+        bundle['dossier']['status_assessment']['basis'] = "Built by éRev'd Pat Example."
+        self.assertEqual(intake.validate_bundle(bundle), [])
+        self.assertEqual(lib.find_personal_details("Built by éRev'd Pat Example."), [])
+        bundle = fixture('internal-review-bundle.json')
+        bundle['dossier']['claims'][0]['value'] = "opened 1891 under Rev'd\u0085Pat Example"
+        self.assertTrue(intake.validate_bundle(bundle))

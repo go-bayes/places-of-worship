@@ -1693,11 +1693,14 @@ fn contains_unadmitted_detail(
     } else {
         text.to_owned()
     };
+    // with no admitted names this is exactly main's detector; a record carrying valid cited-name
+    // rule items also gets the explicit title search and the refusal of admitted-name recurrences
     contains_personal_details(&checked)
         || (!admitted.is_empty()
-            && admitted_known_keys(admitted)
-                .iter()
-                .any(|key| rule_normal_form(&checked).contains(key)))
+            && (!explicit_title_hits(&checked, rule).is_empty()
+                || admitted_known_keys(admitted)
+                    .iter()
+                    .any(|key| rule_normal_form(&checked).contains(key))))
 }
 
 /// Email addresses, with the pattern lib.py `_EMAIL` and agentIntake.ts use, so a trailing
@@ -1722,12 +1725,7 @@ fn contains_nz_phone(text: &str) -> bool {
 /// Honorific-led names, with the pattern lib.py `_HONORIFIC_NAME` and agentIntake.ts use,
 /// so the three validators agree on forms such as "Rev'd".
 fn contains_honorific_name(text: &str) -> bool {
-    static POLICY: std::sync::LazyLock<Value> = std::sync::LazyLock::new(|| {
-        serde_json::from_str(SCREEN_POLICY).expect("valid screen policy")
-    });
     honorific_name_pattern().is_match(text)
-        || !explicit_title_hits(text, &POLICY["cited_name_rules"]["public_source_cited.v1"])
-            .is_empty()
 }
 
 #[derive(Clone, Copy)]
