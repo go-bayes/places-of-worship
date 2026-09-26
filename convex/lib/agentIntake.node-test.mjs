@@ -1,11 +1,18 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
-import { assertNoDuplicateJsonKeys, hostAllowed, validateAgentReviewBundle } from "./agentIntake.ts";
+import { assertNoDuplicateJsonKeys, hostAllowed, ruleNormalForm, honorificNameMatches, validateAgentReviewBundle } from "./agentIntake.ts";
 import { sha256 } from "./sha256.ts";
 const fixturePath = new URL("../../scripts/agent_research/fixtures/internal-review-bundle.json", import.meta.url);
 const fixture = JSON.parse(fs.readFileSync(fixturePath, "utf8"));
 const bundle = () => structuredClone(fixture);
+
+test("cited-name normal form and clergy honorific", () => {
+  assert.equal(ruleNormalForm(" REV’D\u00a0PAT\t EXAMPLE "), "rev'd pat example");
+  assert.equal(ruleNormalForm("ÄABC"), "Äabc");
+  for (const [honorific, clergy] of [["Rev.", false], ["Fr.", true], ["Dr", false]])
+    assert.equal(honorificNameMatches(`${honorific} Pat Example`)[0].clergy, clergy);
+});
 
 test("valid bundle validates and hashes", () => {
   const json = JSON.stringify(bundle());

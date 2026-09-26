@@ -953,6 +953,7 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
     lib.redact_quarantine(dossier)
     private_dossier = json.loads(json.dumps(dossier))
     lib.bundle_quarantine(dossier)
+    admitted_names = intake.cited_name_coverage(dossier)[0]
     try:
         violations = intake.allowlist_violations(dossier)
     except ValueError:
@@ -983,12 +984,12 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
         review_system, review_user = _review_prompt(dossier)
         bundle_schema = json.loads(intake.BUNDLE_SCHEMA.read_text(encoding="utf-8"))
 
-        # contaminated reviewer output is refused, never silently redacted, since redaction could
+        # unadmitted reviewer details are refused, never silently redacted, since redaction could
         # change what the reviewer said; the original stays in this private run directory. the
         # screen runs before any schema check, so a detail in an invalid field is still refused
         # as a personal detail and no schema message can carry it.
         def refuse_if_contaminated(review, subject, schema, root, prefix, stage):
-            findings = lib.screen_spans(subject, schema, root, intake.BUNDLE_HASH_FIELDS, known_map, prefix)
+            findings = lib.screen_spans(subject, schema, root, intake.BUNDLE_HASH_FIELDS, known_map, prefix, admitted_names)
             if findings:
                 refused_path = out / "review.refused.json"
                 refused_path.write_text(json.dumps(review, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

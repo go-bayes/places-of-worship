@@ -9,10 +9,12 @@ minLength, maxLength); it is not a general implementation.
 from __future__ import annotations
 
 import hashlib
+import copy
 import json
 import math
 import re
 import unicodedata
+from functools import lru_cache
 from datetime import date, datetime, timezone
 from pathlib import Path
 
@@ -210,6 +212,7 @@ def redact_text(text: str, details: list[dict]) -> str:
 
 BUNDLE_SCHEMA_PATH = HERE / "schemas" / "agent-review-bundle.v1.json"
 SCREEN_POLICY_PATH = HERE / "schemas" / "screen-policy.v1.json"
+CITED_NAME_RULE = "public_source_cited.v1"
 _DIGEST = re.compile(r"[0-9a-f]{40}|[0-9a-f]{64}")
 _ASCII_TOKEN = re.compile(r"[0-9A-Za-z]+")
 _HEX_DIGITS = frozenset("0123456789abcdefABCDEF")
@@ -251,6 +254,93 @@ def screen_hash_fields(schema_version: str) -> frozenset[str]:
     """the audited fields of a record type that may hold a hex digest (screen-policy.v1)."""
     policy = json.loads(SCREEN_POLICY_PATH.read_text(encoding="utf-8"))
     return frozenset(policy["hash_fields"][schema_version])
+
+
+@lru_cache(maxsize=1)
+def cited_name_rule() -> dict:
+    return json.loads(SCREEN_POLICY_PATH.read_text(encoding="utf-8"))["cited_name_rules"][CITED_NAME_RULE]
+
+
+_RULE_WHITESPACE = frozenset(chr(n) for n in (*range(9, 14), 0x20, 0x85, 0xA0, 0x1680,
+                                                *range(0x2000, 0x200B), 0x2028, 0x2029,
+                                                0x202F, 0x205F, 0x3000))
+
+
+def rule_normal_form(text: str) -> str:
+    out = []
+    for char in text:
+        if char in _RULE_WHITESPACE:
+            if out and out[-1] != ' ':
+                out.append(' ')
+        elif char in '‘’':
+            out.append("'")
+        elif 'A' <= char <= 'Z':
+            out.append(chr(ord(char) + 32))
+        else:
+            out.append(char)
+    return ''.join(out).strip(' ')
+
+
+def honorific_name_matches(text: str) -> list[tuple[int, int, str, bool]]:
+    honorifics = frozenset(cited_name_rule()['honorifics'])
+    matches = []
+    for match in _HONORIFIC_NAME.finditer(text):
+        value = match.group(0)
+        prefix = value.split(maxsplit=1)[0].removesuffix('.')
+        matches.append((match.start(), match.end(), value, prefix in honorifics))
+    return matches
+
+
+def _claim_fields(claim):
+    for path in cited_name_rule()['claim_fields']:
+        node = claim
+        for part in path.split('.'):
+            node = node.get(part) if isinstance(node, dict) else None
+        if isinstance(node, str):
+            yield node
+
+
+def covered_claim_names(claim, citable) -> dict[str, str]:
+    quote = claim.get('quoted_support') if isinstance(claim, dict) else None
+    source = claim.get('source') if isinstance(claim, dict) else None
+    locator = source.get('locator') if isinstance(source, dict) else None
+    if not isinstance(quote, str) or not rule_normal_form(quote) or not isinstance(locator, str) or not citable(locator):
+        return {}
+    quote_form = rule_normal_form(quote)
+    covered = {}
+    for field in _claim_fields(claim):
+        for _, _, value, clergy in honorific_name_matches(field):
+            form = rule_normal_form(value)
+            if clergy and form and form in quote_form:
+                covered.setdefault(form, value)
+    return covered
+
+
+def cited_name_coverage(dossier, citable) -> tuple[frozenset[str], list[str]]:
+    claims = {}
+    for claim in dossier.get('claims', []):
+        if isinstance(claim, dict) and isinstance(claim.get('claim_id'), str):
+            claims.setdefault(claim['claim_id'], claim)
+    admitted = set()
+    errors = []
+    items = dossier.get('personal_details_quarantine', {}).get('items', [])
+    for index, item in enumerate(items):
+        if not isinstance(item, dict) or 'admitted_by_rule' not in item:
+            continue
+        claim_id = item.get('context_claim_id')
+        claim = claims.get(claim_id) if isinstance(claim_id, str) else None
+        covered = covered_claim_names(claim, citable) if claim else {}
+        if (item['admitted_by_rule'] != CITED_NAME_RULE or item.get('kind') != 'person_name' or not covered):
+            errors.append(f'personal_details_quarantine.items[{index}]: rule {CITED_NAME_RULE} does not cover its claim')
+        else:
+            admitted.update(covered)
+    return frozenset(admitted), errors
+
+
+def has_unadmitted_detail(text: str, admitted=frozenset()) -> bool:
+    return (bool(_PHONE.search(text) or _EMAIL.search(text)) or
+            any(not (clergy and rule_normal_form(value) in admitted)
+                for _, _, value, clergy in honorific_name_matches(text)))
 
 
 def _digest_exempt(norm: str, text: str, is_key: bool, hash_fields) -> bool:
@@ -301,7 +391,7 @@ def screened_strings(value, schema, root, overrides=None, prefix="") -> list[tup
     return found
 
 
-def screen_findings(value, schema, root, hash_fields, overrides=None, prefix="", skip=()) -> list[tuple[str, str]]:
+def screen_findings(value, schema, root, hash_fields, overrides=None, prefix="", skip=(), admitted=frozenset()) -> list[tuple[str, str]]:
     """(path, reason) for every string or undeclared key that carries a phone number, email
     address or honorific-led name ("personal"), or is shaped as a hex hash outside a designated
     hash field ("hash"). paths under a skipped prefix are left to another check."""
@@ -310,7 +400,7 @@ def screen_findings(value, schema, root, hash_fields, overrides=None, prefix="",
     def check(parent, key, path, norm, text, is_key):
         if any(norm == s or norm.startswith(s + ".") or norm.startswith(s + "[") for s in skip):
             return None
-        if find_personal_details(text):
+        if has_unadmitted_detail(text, admitted if not is_key else frozenset()):
             findings.append((path, "personal"))
         elif not _digest_exempt(norm, text, is_key, hash_fields) and hash_token_spans(text):
             findings.append((path, "hash"))
@@ -354,6 +444,8 @@ def known_values(items) -> dict[str, str]:
     withheld without it too, so "Rev'd Pat Example" also withholds "Pat Example"."""
     known: dict[str, str] = {}
     for item in items:
+        if 'admitted_by_rule' in item:
+            continue
         value = item.get("value")
         if not isinstance(value, str) or not value.strip():
             continue
@@ -364,7 +456,7 @@ def known_values(items) -> dict[str, str]:
     return known
 
 
-def screen_spans(value, schema, root, hash_fields, known: dict[str, str] | None = None, prefix: str = "") -> list[dict]:
+def screen_spans(value, schema, root, hash_fields, known: dict[str, str] | None = None, prefix: str = "", admitted=frozenset()) -> list[dict]:
     """every screen finding as {path, detector, start, end}, never the text: a structured record
     that the later flag-and-hold review can reuse to propose redactions. offsets are Unicode
     code-point indices into the string at path. detectors: phone, email, person_name (patterns),
@@ -376,7 +468,8 @@ def screen_spans(value, schema, root, hash_fields, known: dict[str, str] | None 
     def check(parent, key, path, norm, text, is_key):
         spans = [("phone", m.span()) for m in _PHONE.finditer(text)]
         spans += [("email", m.span()) for m in _EMAIL.finditer(text)]
-        spans += [("person_name", m.span()) for m in _HONORIFIC_NAME.finditer(text)]
+        spans += [("person_name", (start, end)) for start, end, value, clergy in honorific_name_matches(text)
+                  if is_key or not (clergy and rule_normal_form(value) in admitted)]
         if not _digest_exempt(norm, text, is_key, hash_fields):
             spans += [("hash_outside_field", span) for span in hash_token_spans(text)]
         for value_, pattern, digest in needles:
@@ -411,51 +504,96 @@ def _claim_context(claims, path):
     return None
 
 
-def quarantine_dossier(dossier: dict, extra_names: list[str] | None = None) -> dict:
+def quarantine_dossier(dossier: dict, extra_names: list[str] | None = None, citable=None) -> dict:
     """move personal details out of every string of the dossier into the quarantine block,
-    values kept (redacted=false). call redact_quarantine before committing. two passes: the
-    pattern pass finds phones, emails and honorific-led names; the known-value pass then removes
-    every recurrence of each quarantined value (case, width and whitespace normalised), so a name
-    caught once is withheld wherever it repeats. an undeclared object key cannot be redacted and
-    stays refusable."""
-    items = list(dossier.get("personal_details_quarantine", {}).get("items", []))
+    values kept (redacted=false). call redact_quarantine before committing. three passes: the
+    cited-name pass (rule public_source_cited.v1) first marks each clergy-honorific name that a
+    qualifying claim quotes from an allowlisted public source, and those names stay in place;
+    the pattern pass then withholds phones, emails and every other honorific-led name; the
+    known-value pass removes every recurrence of each withheld value (case, width and whitespace
+    normalised), so a name caught once is withheld wherever it repeats. when a withheld value or
+    an extra name removes the evidence for a cited name, that name is demoted and the passes are
+    repeated without it. an undeclared object key cannot be redacted and stays refusable."""
+    if citable is None:
+        # intake imports lib at module load; defer this import to avoid a cycle.
+        try:
+            from . import intake
+        except ImportError:
+            import intake
+        citable = intake.citable_locator_check(dossier)
     extra = [{"kind": "person_name", "value": n} for n in (extra_names or [])]
-    claims = dossier.get("claims", [])
     schema, root = dossier_screen_schema()
 
-    def redact(parent, key, path, norm, text, is_key):
-        if parent is None or path.startswith("personal_details_quarantine"):
-            return None
-        details = find_personal_details(text) + [e for e in extra if e["value"] in text]
-        if not details:
-            return None
-        claim_id = _claim_context(claims, path)
-        for d in details:
-            items.append({"kind": d["kind"], "context_claim_id": claim_id, "value": d["value"]})
-        return redact_text(text, details)
+    def covered_names(target) -> set[str]:
+        covered: set[str] = set()
+        for claim in target.get("claims", []):
+            covered.update(covered_claim_names(claim, citable))
+        return covered
 
-    _walk_screened(dossier, schema, root, redact)
-    ordered = sorted(known_values(items + extra).items(), key=lambda pair: -len(pair[0]))
+    def redact_passes(target, admitted) -> list[dict]:
+        """the pattern and known-value passes over target, in place; returns the withheld items."""
+        items = [item for item in target.get("personal_details_quarantine", {}).get("items", [])
+                 if "admitted_by_rule" not in item]
+        claims = target.get("claims", [])
 
-    def redact_known(parent, key, path, norm, text, is_key):
-        if parent is None or path.startswith("personal_details_quarantine"):
-            return None
-        out = text
-        for value, kind in ordered:
-            if normalise_detail(value) not in normalise_detail(out):
-                continue
-            replaced = _known_pattern(value).sub(f"[{kind} withheld]", out)
-            # a width or compatibility variant the pattern cannot see withholds the whole string
-            out = replaced if normalise_detail(value) not in normalise_detail(replaced) else f"[{kind} withheld]"
-            items.append({"kind": kind, "context_claim_id": _claim_context(claims, path), "value": value})
-        return out if out != text else None
+        def cited(detail) -> bool:
+            return detail["kind"] == "person_name" and any(
+                clergy and rule_normal_form(value) in admitted
+                for _, _, value, clergy in honorific_name_matches(detail["value"]))
 
-    _walk_screened(dossier, schema, root, redact_known)
-    # dedupe by (kind, value, claim)
+        def redact(parent, key, path, norm, text, is_key):
+            if parent is None or path.startswith("personal_details_quarantine"):
+                return None
+            details = [d for d in find_personal_details(text) if not cited(d)]
+            details += [e for e in extra if e["value"] in text]
+            if not details:
+                return None
+            claim_id = _claim_context(claims, path)
+            for d in details:
+                items.append({"kind": d["kind"], "context_claim_id": claim_id, "value": d["value"]})
+            return redact_text(text, details)
+
+        _walk_screened(target, schema, root, redact)
+        ordered = sorted(known_values(items + extra).items(), key=lambda pair: -len(pair[0]))
+
+        def redact_known(parent, key, path, norm, text, is_key):
+            if parent is None or path.startswith("personal_details_quarantine"):
+                return None
+            out = text
+            for value, kind in ordered:
+                if normalise_detail(value) not in normalise_detail(out):
+                    continue
+                replaced = _known_pattern(value).sub(f"[{kind} withheld]", out)
+                # a width or compatibility variant the pattern cannot see withholds the whole string
+                out = replaced if normalise_detail(value) not in normalise_detail(replaced) else f"[{kind} withheld]"
+                items.append({"kind": kind, "context_claim_id": _claim_context(claims, path), "value": value})
+            return out if out != text else None
+
+        _walk_screened(target, schema, root, redact_known)
+        return items
+
+    # find the stable set of cited names on copies; admissions only shrink, so this ends.
+    admitted = covered_names(dossier)
+    while admitted:
+        trial = copy.deepcopy(dossier)
+        redact_passes(trial, admitted)
+        demoted = admitted - covered_names(trial)
+        if not demoted:
+            break
+        admitted -= demoted
+    # the final passes run on the dossier itself, so callers' references stay valid.
+    items = redact_passes(dossier, admitted)
+    rule_items = []
+    for claim in dossier.get("claims", []):
+        for form, value in covered_claim_names(claim, citable).items():
+            if form in admitted:
+                rule_items.append({"kind": "person_name", "context_claim_id": claim.get("claim_id"),
+                                   "value": value, "admitted_by_rule": CITED_NAME_RULE})
+    # dedupe by (kind, value, claim, rule)
     seen = set()
     unique = []
-    for item in items:
-        key = (item["kind"], item.get("value"), item.get("context_claim_id"))
+    for item in rule_items + items:
+        key = (item["kind"], item.get("value"), item.get("context_claim_id"), item.get("admitted_by_rule"))
         if key in seen:
             continue
         seen.add(key)
@@ -476,6 +614,8 @@ def redact_quarantine(dossier: dict) -> dict:
     stripped = []
     for item in block.get("items", []):
         entry = {"kind": item["kind"], "context_claim_id": item.get("context_claim_id")}
+        if 'admitted_by_rule' in item:
+            entry['admitted_by_rule'] = item['admitted_by_rule']
         if "value" in item:
             entry["value_sha256"] = sha256(item["value"])
         elif re.fullmatch(r"[0-9a-f]{64}", str(item.get("value_sha256", ""))):
@@ -493,12 +633,14 @@ def redact_quarantine(dossier: dict) -> dict:
 
 
 def bundle_quarantine(dossier: dict) -> dict:
-    """reduce a redacted quarantine block to the form a review bundle carries: the kind of
-    detail and its claim only. no value and no hash of a value leaves the private copy."""
+    """reduce a redacted quarantine block to the review form: kind, claim and any rule flag.
+    no value and no hash of a value leaves the private copy."""
     block = dossier.get("personal_details_quarantine", {"items": []})
     if not block.get("redacted") or any("value" in item for item in block.get("items", [])):
         raise ValueError("quarantine block must be redacted before it enters a bundle")
-    items = [{"kind": item["kind"], "context_claim_id": item.get("context_claim_id")} for item in block.get("items", [])]
+    items = [{**{"kind": item["kind"], "context_claim_id": item.get("context_claim_id")},
+              **({'admitted_by_rule': item['admitted_by_rule']} if 'admitted_by_rule' in item else {})}
+             for item in block.get("items", [])]
     dossier["personal_details_quarantine"] = {
         "redacted": True,
         "item_count": len(items),

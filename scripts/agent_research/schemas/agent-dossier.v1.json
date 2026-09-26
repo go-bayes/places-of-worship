@@ -104,6 +104,7 @@
     },
     "personal_details_quarantine": {
       "type": "object",
+      "description": "An optional admitted_by_rule marks a cited clergy name retained at internal scope.",
       "additionalProperties": false,
       "required": ["redacted", "item_count", "items"],
       "properties": {
@@ -122,6 +123,7 @@
               "kind": { "type": "string", "enum": ["person_name", "phone", "email", "other"] },
               "context_claim_id": { "type": ["string", "null"] },
               "value": { "type": "string", "description": "Present only before redaction; never committed." },
+              "admitted_by_rule": { "type": "string", "enum": ["public_source_cited.v1"], "description": "Internal cited clergy-name exception; the named claim must cover the name." },
               "value_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$", "description": "SHA-256 of the stripped value so a later run can tell whether the same detail recurred. Kept in the private dossier copy only; a review bundle carries neither value nor hash." }
             }
           }

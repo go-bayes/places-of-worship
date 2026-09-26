@@ -284,7 +284,7 @@
         "personal_details_quarantine": {
           "type": "object",
           "additionalProperties": false,
-          "description": "Redacted quarantine block. Each item records only the kind of personal detail withheld and the claim it came from; no value and no hash of a value enters a bundle. Hashes stay in the private dossier copy.",
+          "description": "Redacted quarantine block. Each item records only the kind of personal detail withheld and the claim it came from; no value and no hash of a value enters a bundle. Hashes stay in the private dossier copy. An optional admitted_by_rule marks a cited clergy name retained at internal scope.",
           "required": [
             "redacted",
             "item_count",
@@ -326,6 +326,11 @@
                     ],
                     "maxLength": 8000,
                     "description": "The claim whose text held the withheld detail, or null for the status assessment or OSM version chain."
+                  },
+                  "admitted_by_rule": {
+                    "type": "string",
+                    "enum": ["public_source_cited.v1"],
+                    "description": "Internal cited clergy-name exception; the named claim must cover the name."
                   }
                 }
               },

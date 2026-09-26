@@ -9,13 +9,24 @@ const { ingestFirstPass, getFirstPassRecord, getFirstPassReceipt, listFirstPassR
 const { sha256 } = await import("./lib/sha256.ts");
 const { verifyObjectBytes, objectReceiptId } = await import("./lib/objectReceipts.ts");
 const { canonicalWireJson } = await import("./lib/wireJson.ts");
-const { screenedText } = await import("./lib/firstPass.ts");
+const { screenedText, validateFirstPassRecord } = await import("./lib/firstPass.ts");
 const { keyRef } = await import("./lib/agentIntake.ts");
 
 const fixtureText = (name) => fs.readFileSync(new URL(`../scripts/agent_research/fixtures/${name}`, import.meta.url), "utf8");
 const fixture = (name) => JSON.parse(fixtureText(name));
 const partial = () => fixture("first-pass.json");
 const researched = () => fixture("first-pass-researched.json");
+
+test("cited clergy rule never admits a first-pass record", () => {
+  const record = researched();
+  const claim = record.dossier.claims[0];
+  claim.value += " under Rev'd Pat Example";
+  claim.quoted_support += " under Rev'd Pat Example";
+  record.dossier.personal_details_quarantine.items = [{ kind: "person_name", context_claim_id: claim.claim_id, admitted_by_rule: "public_source_cited.v1" }];
+  record.dossier.personal_details_quarantine.item_count = 1;
+  const { recordJson, recordHash } = args(record);
+  assert.throws(() => validateFirstPassRecord(recordJson, recordHash), /personal details/);
+});
 
 // the archive's version-1 wire format (python json.dumps, sorted, compact,
 // ascii, final newline). a fixture's own text keeps python's float spellings

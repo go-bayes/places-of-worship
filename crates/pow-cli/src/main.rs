@@ -589,14 +589,38 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
     let screen_root: Value =
         serde_json::from_str(AGENT_BUNDLE_SCHEMA).expect("pinned bundle schema is valid JSON");
     let policy: Value = serde_json::from_str(SCREEN_POLICY).expect("screen policy is valid JSON");
+    let rule = &policy["cited_name_rules"]["public_source_cited.v1"];
+    let admitted = cited_name_coverage(
+        dossier,
+        allowlist.as_ref().and_then(|(version, domains)| {
+            let country = dossier.get("place")?.get("country_code")?.as_str()?;
+            let source = AGENT_ALLOWLISTS
+                .iter()
+                .find(|(known, _)| *known == version)?
+                .1;
+            let pinned: Value = serde_json::from_str(source).ok()?;
+            (pinned["country_code"].as_str() == Some(country)).then_some(domains.as_slice())
+        }),
+        rule,
+        errors,
+    );
     let hash_fields: BTreeSet<String> = policy["hash_fields"]["agent-review-bundle.v1"]
         .as_object()
         .map(|fields| fields.keys().cloned().collect())
         .unwrap_or_default();
     let mut screened = Vec::new();
     screened_strings(value, &screen_root, &screen_root, "", "", &mut screened);
+    let none_admitted = BTreeSet::new();
     for item in screened {
-        if contains_personal_details(&item.text) {
+        if contains_unadmitted_detail(
+            &item.text,
+            if item.is_key {
+                &none_admitted
+            } else {
+                &admitted
+            },
+            rule,
+        ) {
             errors.push(format!(
                 "/{}: potential personal details require human handling",
                 item.path
@@ -663,7 +687,7 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
             if claim_object
                 .get(field)
                 .and_then(Value::as_str)
-                .is_some_and(contains_personal_details)
+                .is_some_and(|text| contains_unadmitted_detail(text, &admitted, rule))
             {
                 errors.push(format!(
                     "{path}/{field}: potential personal details require human handling"
@@ -974,7 +998,12 @@ fn agent_allowlist(
             domains
                 .iter()
                 .filter_map(Value::as_str)
-                .map(|domain| domain.trim_end_matches('.').to_ascii_lowercase())
+                .map(|domain| {
+                    domain
+                        .strip_suffix('.')
+                        .unwrap_or(domain)
+                        .to_ascii_lowercase()
+                })
                 .collect()
         })
         .unwrap_or_default();
@@ -1243,6 +1272,155 @@ fn contains_personal_details(text: &str) -> bool {
     contains_email(text) || contains_nz_phone(text) || contains_honorific_name(text)
 }
 
+fn rule_normal_form(text: &str) -> String {
+    let mut out = String::new();
+    for character in text.chars() {
+        let code = character as u32;
+        let whitespace = (9..=13).contains(&code)
+            || matches!(
+                code,
+                0x20 | 0x85 | 0xA0 | 0x1680 | 0x2028 | 0x2029 | 0x202F | 0x205F | 0x3000
+            )
+            || (0x2000..=0x200A).contains(&code);
+        if whitespace {
+            if !out.is_empty() && !out.ends_with(' ') {
+                out.push(' ');
+            }
+        } else if matches!(code, 0x2018 | 0x2019) {
+            out.push('\'');
+        } else if character.is_ascii_uppercase() {
+            out.push(character.to_ascii_lowercase());
+        } else {
+            out.push(character);
+        }
+    }
+    out.trim_matches(' ').to_owned()
+}
+
+fn honorific_name_pattern() -> &'static regex::Regex {
+    static PATTERN: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+    PATTERN.get_or_init(|| regex::Regex::new(
+        r"\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'\-]+\s?){1,3}"
+    ).expect("valid honorific pattern"))
+}
+
+fn clergy_match(text: &str, rule: &Value) -> bool {
+    let honorific = text
+        .split(char::is_whitespace)
+        .next()
+        .unwrap_or("")
+        .trim_end_matches('.');
+    rule["honorifics"]
+        .as_array()
+        .is_some_and(|values| values.iter().any(|value| value.as_str() == Some(honorific)))
+}
+
+fn covered_claim_names(
+    claim: &Value,
+    domains: Option<&[String]>,
+    rule: &Value,
+) -> BTreeSet<String> {
+    let mut covered = BTreeSet::new();
+    let Some(quote) = claim.get("quoted_support").and_then(Value::as_str) else {
+        return covered;
+    };
+    let quote_form = rule_normal_form(quote);
+    if quote_form.is_empty() {
+        return covered;
+    }
+    let Some(locator) = claim
+        .get("source")
+        .and_then(|source| source.get("locator"))
+        .and_then(Value::as_str)
+    else {
+        return covered;
+    };
+    let Some(domains) = domains else {
+        return covered;
+    };
+    if validate_source_locator(locator).is_err()
+        || !canonical_locator_host(locator).is_ok_and(|host| host_allowed(&host, domains))
+    {
+        return covered;
+    }
+    if let Some(fields) = rule["claim_fields"].as_array() {
+        for field in fields.iter().filter_map(Value::as_str) {
+            let mut node = Some(claim);
+            for part in field.split('.') {
+                node = node.and_then(|value| value.get(part));
+            }
+            if let Some(text) = node.and_then(Value::as_str) {
+                for hit in honorific_name_pattern().find_iter(text) {
+                    let form = rule_normal_form(hit.as_str());
+                    if clergy_match(hit.as_str(), rule)
+                        && !form.is_empty()
+                        && quote_form.contains(&form)
+                    {
+                        covered.insert(form);
+                    }
+                }
+            }
+        }
+    }
+    covered
+}
+
+fn cited_name_coverage(
+    dossier: &serde_json::Map<String, Value>,
+    domains: Option<&[String]>,
+    rule: &Value,
+    errors: &mut Vec<String>,
+) -> BTreeSet<String> {
+    let claims = dossier.get("claims").and_then(Value::as_array);
+    let mut first = BTreeMap::new();
+    if let Some(claims) = claims {
+        for claim in claims {
+            if let Some(id) = claim.get("claim_id").and_then(Value::as_str) {
+                first.entry(id).or_insert(claim);
+            }
+        }
+    }
+    let mut admitted = BTreeSet::new();
+    if let Some(items) = dossier
+        .get("personal_details_quarantine")
+        .and_then(|q| q.get("items"))
+        .and_then(Value::as_array)
+    {
+        for (index, item) in items.iter().enumerate() {
+            if item.get("admitted_by_rule").is_none() {
+                continue;
+            }
+            let covered = item
+                .get("context_claim_id")
+                .and_then(Value::as_str)
+                .and_then(|id| first.get(id))
+                .map(|claim| covered_claim_names(claim, domains, rule))
+                .unwrap_or_default();
+            if item.get("admitted_by_rule").and_then(Value::as_str)
+                != Some("public_source_cited.v1")
+                || item.get("kind").and_then(Value::as_str) != Some("person_name")
+                || covered.is_empty()
+            {
+                errors.push(format!("/dossier/personal_details_quarantine/items/{index}/admitted_by_rule: rule public_source_cited.v1 does not cover its claim"));
+            } else {
+                admitted.extend(covered);
+            }
+        }
+    }
+    admitted
+}
+
+fn contains_unadmitted_detail(text: &str, admitted: &BTreeSet<String>, rule: &Value) -> bool {
+    if !contains_personal_details(text) {
+        return false;
+    }
+    contains_email(text)
+        || contains_nz_phone(text)
+        || honorific_name_pattern().find_iter(text).any(|hit| {
+            !clergy_match(hit.as_str(), rule) || !admitted.contains(&rule_normal_form(hit.as_str()))
+        })
+}
+
 /// Email addresses, with the pattern lib.py `_EMAIL` and agentIntake.ts use, so a trailing
 /// full stop or bracket does not hide an address from one validator alone.
 fn contains_email(text: &str) -> bool {
@@ -1265,15 +1443,7 @@ fn contains_nz_phone(text: &str) -> bool {
 /// Honorific-led names, with the pattern lib.py `_HONORIFIC_NAME` and agentIntake.ts use,
 /// so the three validators agree on forms such as "Rev'd".
 fn contains_honorific_name(text: &str) -> bool {
-    static PATTERN: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
-    PATTERN
-        .get_or_init(|| {
-            regex::Regex::new(
-                r"\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'\-]+\s?){1,3}",
-            )
-            .expect("valid honorific pattern")
-        })
-        .is_match(text)
+    honorific_name_pattern().is_match(text)
 }
 
 #[derive(Clone, Copy)]
@@ -4775,6 +4945,25 @@ fn print_stage_json_summary(summary: &StageSummary) -> Result<()> {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn cited_name_normal_form_and_clergy() {
+        assert_eq!(
+            rule_normal_form(" REV’D\u{a0}PAT\t EXAMPLE "),
+            "rev'd pat example"
+        );
+        assert_eq!(rule_normal_form("ÄABC"), "Äabc");
+        let policy: Value = serde_json::from_str(SCREEN_POLICY).unwrap();
+        let rule = &policy["cited_name_rules"]["public_source_cited.v1"];
+        for (text, expected) in [
+            ("Rev. Pat Example", false),
+            ("Fr. Pat Example", true),
+            ("Dr Pat Example", false),
+        ] {
+            let hit = honorific_name_pattern().find(text).unwrap();
+            assert_eq!(clergy_match(hit.as_str(), rule), expected);
+        }
+    }
 
     fn validators() -> SchemaValidators {
         let schema_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../schemas");
