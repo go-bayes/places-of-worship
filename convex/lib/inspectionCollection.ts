@@ -45,12 +45,24 @@ const NANP_PHONE = /\+1[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b|\(\d{3}\)\s?
 // otherwise read as unseparated phone numbers
 const OSM_REFERENCE = /^(?:https:\/\/(?:www\.)?openstreetmap\.org\/)?(?:node|way|relation)\/[1-9]\d{0,15}$/;
 const OSM_REFERENCE_FIELD = /^candidate_links\[\d+\]\.(?:osm_ref|candidate_ref)$/;
+// a screening form of a string: compatibility-normalised (full-width and other digit forms
+// become ASCII) and percent-decoded, repeatedly, so an encoded number cannot pass as text
+function screeningForm(text: string): string {
+  let current = text.normalize("NFKC");
+  for (let round = 0; round < 3; round += 1) {
+    const decoded = current.replace(/%([0-9a-fA-F]{2})/g, (_, hex: string) => String.fromCharCode(parseInt(hex, 16))).normalize("NFKC");
+    if (decoded === current) break;
+    current = decoded;
+  }
+  return current;
+}
 function assertNoNanpPhone(value: unknown, schema: any): void {
   // source locators are validated URLs whose record ids can look like local numbers, and so are
-  // exact OSM references in candidate links; the shared screen still covers both, the NANP pattern does not
+  // exact OSM references in candidate links; the shared screen still covers both, the NANP pattern does not.
+  // the exemption applies to the raw value only; every other value is screened raw and in its screening form
   for (const [path, text] of screenedStrings(value, schema, schema)) {
     if (/\.locator$/.test(path) || (OSM_REFERENCE_FIELD.test(path) && OSM_REFERENCE.test(text))) continue;
-    if (NANP_PHONE.test(text)) throw new Error(`potential personal details in ${path} require human handling`);
+    if (NANP_PHONE.test(text) || NANP_PHONE.test(screeningForm(text))) throw new Error(`potential personal details in ${path} require human handling`);
   }
 }
 

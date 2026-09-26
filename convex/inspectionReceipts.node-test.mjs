@@ -44,7 +44,7 @@ test("unsupported fields, restricted extracts, broken links and personal details
 });
 
 test("exact OSM references in candidate links pass the phone screen; phone numbers there and ten-digit numbers elsewhere do not", () => {
-  const osmRefs = ["node/1189557282", "way/1496210931", "relation/2425550199", "https://www.openstreetmap.org/node/13639618601", "https://openstreetmap.org/way/1189557282"];
+  const osmRefs = ["node/1234567890", "way/2345678901", "relation/2425550199", "https://www.openstreetmap.org/node/12345678901", "https://openstreetmap.org/way/1234567890"];
   for (const reference of osmRefs) {
     const value = input();
     value.candidate_links[0].osm_ref = reference;
@@ -56,19 +56,25 @@ test("exact OSM references in candidate links pass the phone screen; phone numbe
     assert.deepEqual(validateInspectionCase(object.objectJson, object.objectHash), projection);
   }
   const refused = [
-    ["osm_ref", "2425550199"], ["osm_ref", "+1 242 555 0199"], ["osm_ref", "node/1189557282 call 242-555-0199"], ["osm_ref", "nodes/1189557282"], ["osm_ref", "https://example.org/node/1189557282"], ["osm_ref", "node/0189557282"],
-    ["candidate_ref", "2425550199"], ["candidate_ref", "synthetic:osm:node/1189557282"], ["candidate_ref", "node/1189557282/2425550199"],
+    ["osm_ref", "2425550199"], ["osm_ref", "+1 242 555 0199"], ["osm_ref", "node/1234567890 call 242-555-0199"], ["osm_ref", "nodes/1234567890"], ["osm_ref", "https://example.org/node/1234567890"], ["osm_ref", "node/0189557282"],
+    ["candidate_ref", "2425550199"], ["candidate_ref", "synthetic:osm:node/1234567890"], ["candidate_ref", "node/1234567890/2425550199"],
+    // encoded, compatibility-form and decorated variants never take the exemption
+    ["osm_ref", "node/%32%34%32%35%35%35%30%31%39%39"], ["osm_ref", "%32%34%32%35%35%35%30%31%39%39"], ["osm_ref", "node/%2532%2534%2532%2535%2535%2535%2530%2531%2539%2539"],
+    ["osm_ref", "node/\uFF12\uFF14\uFF12\uFF15\uFF15\uFF15\uFF10\uFF11\uFF19\uFF19"], ["candidate_ref", "\uFF12\uFF14\uFF12 \uFF15\uFF15\uFF15 \uFF10\uFF11\uFF19\uFF19"],
+    ["osm_ref", "https://www.openstreetmap.org/node/1234567890?phone=2425550199"], ["osm_ref", "https://www.openstreetmap.org/node/1234567890#2425550199"],
+    ["osm_ref", "https://user:2425550199@www.openstreetmap.org/node/1234567890"], ["osm_ref", " node/1234567890"], ["osm_ref", "node/1234567890 "],
+    ["osm_ref", "NODE/2425550199"], ["candidate_ref", "HTTPS://WWW.OPENSTREETMAP.ORG/node/2425550199"],
   ];
   for (const [field, text] of refused) {
     const value = input();
     value.candidate_links[0][field] = text;
     assert.throws(() => adaptInspectionCase(value), error => {
       assert.match(error.message, new RegExp(`candidate_links\\[0\\]\\.${field}`));
-      assert.doesNotMatch(error.message, /555|1189557282/);
+      assert.doesNotMatch(error.message, /555|1234567890/);
       return true;
     });
   }
-  for (const text of ["node/1189557282", "2425550199"]) {
+  for (const text of ["node/1234567890", "2425550199"]) {
     const elsewhere = input();
     elsewhere.claims[0].wording = text;
     assert.throws(() => adaptInspectionCase(elsewhere), /potential personal details in claims\[0\]\.wording/);

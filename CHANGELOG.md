@@ -4,7 +4,7 @@
 
 ### 2026-09-26 (inspection phone screen admits OSM references)
 
-- The Bahamas inspection adapter's North American telephone screen no longer refuses an OpenStreetMap element reference with a ten-digit id, such as `node/1189557282`, in a candidate link's `osm_ref` or `candidate_ref`. The exemption covers only the exact reference shape, bare or as an `openstreetmap.org` URL; a telephone number in those fields and a ten-digit number anywhere else are still refused, and the shared personal-detail screen still applies to both fields.
+- The Bahamas inspection adapter's North American telephone screen no longer refuses an OpenStreetMap element reference with a ten-digit id, such as `node/1234567890`, in a candidate link's `osm_ref` or `candidate_ref`. The exemption covers only the exact reference shape, bare or as an `openstreetmap.org` URL; a telephone number in those fields and a ten-digit number anywhere else are still refused, and the shared personal-detail screen still applies to both fields.
 
 ### 2026-09-26 (confidence standard 0.3.0; methods log moved)
 
