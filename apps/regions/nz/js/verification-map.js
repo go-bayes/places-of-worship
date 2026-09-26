@@ -774,6 +774,9 @@ const RAPID_PIN_PERIODS_KEY = "rapid-pin-periods";
 // owner-scoped device drafts (c1) and the pre-c1 prefixes kept in quarantine
 const FORM_SNAPSHOT_PREFIX = "powFormSnapshot2:";
 const RAPID_DRAFT_PREFIX = "powRapidDraft2:";
+// periods of an observation recorded after its session ended, parked for the
+// submitter's next sign-in (#153 round 6)
+const PENDING_PERIODS_PREFIX = "powPendingPeriods1:";
 const LEGACY_DEVICE_DRAFT_PREFIXES = ["powFormSnapshot:", "powRapidDraft:"];
 const LEGACY_DRAFT_NOTICE_KEY = "powLegacyDraftNoticeDismissed:v1";
 const RAPID_STATUS_LABELS = {
@@ -2413,6 +2416,8 @@ class NzVerificationMap {
         }
         this.applyPendingDeepLink();
         this.resumeRapidPinFromDevice();
+        // periods left unsent by a session change go to their own task
+        this.resumePendingPeriods().catch(() => {});
     }
 
     // a sign-in kept on the device from before a reload (a phone discards
@@ -8028,6 +8033,7 @@ class NzVerificationMap {
     persistRapidDraft(prefix, key, extraValues = {}) {
         if (!this.draftOwnerId()) return;
         try {
+            const previous = this.readRapidDraft(key);
             const record = {
                 saved_at: Date.now(),
                 owner: this.draftOwnerId(),
@@ -8036,15 +8042,36 @@ class NzVerificationMap {
             };
             // the form's submission id travels with the draft, so a retry of
             // an entry whose answer never arrived reuses it and the server
-            // records it once (#153 round 5)
-            const submissionId = document.getElementById(`${prefix}RapidCurrentForm`)?.dataset?.submissionId;
+            // records it once (#153 round 5). the id belongs to the content
+            // it was sent with: once an entry has been sent, an edit mints a
+            // fresh id, so the edited content is recorded rather than
+            // deduplicated into the earlier submission (#153 round 6)
+            const form = document.getElementById(`${prefix}RapidCurrentForm`);
+            let submissionId = form?.dataset?.submissionId;
+            if (submissionId && previous?.sent_submission_id === submissionId && window.PowRapidEntry?.secureSubmissionId) {
+                submissionId = window.PowRapidEntry.secureSubmissionId();
+                form.dataset.submissionId = submissionId;
+            }
             if (submissionId) record.submission_id = submissionId;
             // the confirmed pin rides on the record while the entry is open
-            const previous = this.readRapidDraft(key);
             if (previous?.pin) record.pin = previous.pin;
             window.localStorage.setItem(this.rapidDraftStorageKey(key), JSON.stringify(record));
         } catch (error) {
             // private windows or blocked storage lose autosave only
+        }
+    }
+
+    // the draft's current content was sent under this id: kept on the
+    // record without changing its version, so an unedited retry reuses the
+    // id and any edit after it mints a new one (persistRapidDraft)
+    markRapidDraftSent(key, submissionId) {
+        const record = this.readRapidDraft(key);
+        if (!record || !submissionId) return;
+        record.sent_submission_id = submissionId;
+        try {
+            window.localStorage.setItem(this.rapidDraftStorageKey(key), JSON.stringify(record));
+        } catch (error) {
+            // storage unavailable: nothing is kept to resend
         }
     }
 
@@ -8604,9 +8631,15 @@ class NzVerificationMap {
             // are deleted once it is recorded (astra m4)
             const draftVersion = options.draftKey ? this.rapidDraftVersion(options.draftKey) : null;
             const snapshotVersion = options.props?.task_id ? this.formSnapshotVersion(options.props.task_id) : null;
-            const clearSent = () => {
+            if (options.draftKey) this.markRapidDraftSent(options.draftKey, form.dataset.submissionId);
+            const clearSent = (recordedResult) => {
                 if (options.draftKey) this.clearSubmittedRapidDraft(options.draftKey, draftVersion);
                 if (options.props?.task_id) this.deleteSubmittedFormSnapshot(options.props.task_id, snapshotVersion);
+                // the periods ride on this observation; if the session has
+                // already changed they cannot be recorded now, so they are
+                // parked against the recorded task and never left under the
+                // entry's key for the next place (#153 round 6)
+                if (periodsPlan && !alive()) this.parkPendingPeriods(periodsPlan, recordedResult, options.periodsKey);
             };
             const result = await this.recordedReceipt(this.backend.submitCurrentObservation({
                 clientSubmissionId: form.dataset.submissionId,
@@ -11751,12 +11784,17 @@ class NzVerificationMap {
                 selected_target_year: this.targetYear,
                 page_path: window.location.pathname,
             };
-            const saved = await this.backend.saveEvidenceDraft({
+            // the exact device snapshot this save carries goes once the save
+            // is recorded, even if the session changed while it was out, so
+            // a stale snapshot never reappears over the saved draft (#153
+            // round 6); a later edit has a newer version and is kept
+            const snapshotVersion = this.formSnapshotVersion(props.task_id);
+            const saved = await this.recordedReceipt(this.backend.saveEvidenceDraft({
                 taskId: props.task_id,
                 evidenceDraftId: revisionDraftId || undefined,
                 draft,
                 clientContext,
-            });
+            }), () => this.deleteSubmittedFormSnapshot(props.task_id, snapshotVersion));
             if (!alive()) return;
             let periods = null;
             if (unresolved) {
@@ -11990,6 +12028,90 @@ class NzVerificationMap {
         };
     }
 
+    // ---- periods parked after a session change (#153 round 6) ----
+    // an observation recorded after its session ended leaves its periods
+    // unsent. they are kept under the submitter's id and the recorded task,
+    // with the parent evidence id and the plan's submission id, removed from
+    // the entry's own key, and sent at the submitter's next sign-in (the
+    // same submission id, so the server records them once)
+
+    pendingPeriodsStorageKey(owner, taskId = "") {
+        return `${PENDING_PERIODS_PREFIX}${COUNTRY_CONFIG.countryCode}:${owner}:${taskId}`;
+    }
+
+    parkPendingPeriods(plan, result, periodsKey) {
+        const owner = plan?.version?.owner;
+        if (!owner || !plan.segments?.length || !result?.task_id || !result?.evidence_draft_id || !window.PowOccupancy) return;
+        try {
+            window.localStorage.setItem(this.pendingPeriodsStorageKey(owner, result.task_id), JSON.stringify({
+                owner,
+                saved_at: Date.now(),
+                taskId: result.task_id,
+                parentEvidenceDraftId: result.evidence_draft_id,
+                submissionId: plan.submissionId,
+                segments: plan.segments.map(values => window.PowOccupancy.payload(values)),
+                ...(plan.chain ? { chain: plan.chain } : {}),
+            }));
+        } catch (error) {
+            // storage unavailable: the periods cannot be kept for later
+        }
+        // off the entry's key either way, so they never reach another place
+        this.clearSubmittedGuidedPeriods(periodsKey, plan.version);
+    }
+
+    // at sign-in: the signed-in person's parked periods are sent against
+    // their own task, once each; a refusal from the server drops them with
+    // a notice, and a network fault keeps them for the next sign-in
+    async resumePendingPeriods() {
+        const owner = this.draftOwnerId();
+        if (!owner || !this.backend?.signedIn) return;
+        const alive = this.sessionGuard();
+        const prefix = this.pendingPeriodsStorageKey(owner);
+        let keys = [];
+        try {
+            for (let index = 0; index < window.localStorage.length; index += 1) {
+                const key = window.localStorage.key(index);
+                if (key && key.startsWith(prefix)) keys.push(key);
+            }
+        } catch (error) {
+            return;
+        }
+        for (const key of keys) {
+            let record = null;
+            try {
+                record = JSON.parse(window.localStorage.getItem(key) || "null");
+            } catch (error) {
+                record = null;
+            }
+            if (!record || record.owner !== owner) continue;
+            const drop = () => {
+                try {
+                    window.localStorage.removeItem(key);
+                } catch (error) {
+                    // nothing to remove
+                }
+            };
+            try {
+                await this.recordedReceipt(this.backend.submitOccupancies({
+                    clientSubmissionId: record.submissionId,
+                    taskId: record.taskId,
+                    parentEvidenceDraftId: record.parentEvidenceDraftId,
+                    segments: record.segments,
+                    ...(record.chain ? { chain: record.chain } : {}),
+                    clientContext: { portal_version: "occupancy-v2-resumed-after-session-change" },
+                }), drop);
+                if (!alive()) return;
+                this.taskHistoryByTaskId?.delete(record.taskId);
+                this.setBackendTransientStatus("The periods of your earlier entry were recorded.");
+            } catch (error) {
+                if (!alive()) return;
+                if (error?.authExpired || error?.sessionChanged || /network|fetch|failed to fetch/i.test(String(error?.message || ""))) return;
+                drop();
+                this.setBackendTransientStatus(`The periods of an earlier entry could not be recorded: ${error.message || "refused"}. Add them again from that place.`, { error: true, durationMs: 15000 });
+            }
+        }
+    }
+
     // records the planned cards against the observation just submitted;
     // a failure keeps them for the pane's retry
     async recordRapidPeriods(plan, result, periodsKey) {
@@ -12013,7 +12135,13 @@ class NzVerificationMap {
             this.taskHistoryByTaskId.delete(result.task_id);
             return { periodsRecorded: { result: recorded, count: plan.count } };
         } catch (error) {
-            if (!alive()) return;
+            // the session changed before these periods were recorded: they
+            // are parked against their task for the submitter's next
+            // sign-in, never left to attach to another place (#153 round 6)
+            if (!alive()) {
+                if (!error?.committed) this.parkPendingPeriods(plan, result, periodsKey);
+                return;
+            }
             const state = plan.state;
             this.occupancyDraft = {
                 taskId: result.task_id,
