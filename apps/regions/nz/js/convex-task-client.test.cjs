@@ -102,7 +102,7 @@ function harness({ session = null, cookie = "", responses = {}, failLoads = 0, f
       calls.fetches.push({ url, headers: init.headers, body });
       const response = responses[body.path] ?? { status: 200, body: { status: "success", value: null } };
       const resolved = await (typeof response === "function" ? response(body) : response);
-      return { status: resolved.status, ok: resolved.status < 400, text: async () => JSON.stringify(resolved.body) };
+      return { status: resolved.status, ok: resolved.status < 400, text: async () => (typeof resolved.raw === "string" ? resolved.raw : JSON.stringify(resolved.body)) };
     },
   });
   vm.runInContext(fs.readFileSync(path.join(__dirname, "convex-task-client.js"), "utf8"), context, { filename: "convex-task-client.js" });
@@ -608,6 +608,38 @@ const container = () => ({
     assert.deepEqual(ended, []);
     assert.equal(h.calls.fetches.filter((fetch) => fetch.body.path === "users:claimInvite").length, 1);
     assert.match(errors[0] || "", /sign-in expired/);
+  }
+
+  // 20. #153 round 2 (sol): a successful answer whose data mentions
+  // "token" is data, not a refused sign-in; a 401 whose body is not json
+  // still clears the page before the caller hears of it
+  {
+    const responses = {
+      "users:claimInvite": ok("user_1"),
+      "users:me": ok(member),
+      "evidence:listTaskEvidence": ok([{ evidence_note: "the parish token box and the JWT-shaped plaque" }]),
+      "tasks:listTasks": { status: 401, raw: "<html>401 Unauthorized</html>" },
+      "tasks:listMyTasks": refused("Invalid token: JWT expired"),
+    };
+    const h = harness({ session: { id: "sess_t", email: "guy@example.org" }, cookie: "__client_uat=1", responses });
+    const client = new h.Client(config);
+    const order = [];
+    client.setLifecycle({ onSignedOut: () => order.push("page cleared") });
+    await client.renderSignInButton(container(), {});
+    await tick();
+    assert.equal(client.signedIn, true);
+    const rows = await client.listTaskEvidence({ taskId: "t" });
+    assert.equal(rows[0].evidence_note, "the parish token box and the JWT-shaped plaque");
+    assert.equal(client.signedIn, true, "data containing 'token' ends nothing");
+    assert.deepEqual(order, []);
+    await assert.rejects(client.listTasks({}).catch((error) => { order.push("caller told"); throw error; }), (error) => error.authExpired === true);
+    assert.deepEqual(order, ["page cleared", "caller told"], "a non-json 401 clears the page first");
+    assert.equal(client.user, null);
+    // an actual error response with sign-in wording still ends the session
+    await client.restoreSession();
+    assert.equal(client.signedIn, true);
+    await assert.rejects(client.listMyTasks({}), (error) => error.authExpired === true);
+    assert.deepEqual(order, ["page cleared", "caller told", "page cleared"]);
   }
 
   console.log("convex-task-client: clerk sessions ok");

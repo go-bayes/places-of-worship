@@ -501,6 +501,120 @@ async function roundThree() {
   await other.app.signOutBackend();
   assert.equal(other.app.backendLastError, "Clerk is unreachable.");
   assert.equal(other.app.signedOutDeliberately, false, "an unexplained failure shows as an error");
+  // #153 round 2 (astra): the panels drawn from a's work leave with a's
+  // session. a's my-work panel (a reviewer's note) and past-submissions list
+  // (names and addresses) are rendered and open; clerk replaces a with b;
+  // b's own refresh fails, so nothing redraws them for b
+  {
+    const fakeElement = (id) => {
+      const classes = new Set();
+      return {
+        id, innerHTML: "", attributes: {},
+        classList: {
+          add(name) { classes.add(name); }, remove(name) { classes.delete(name); },
+          toggle(name, force) { const on = force === undefined ? !classes.has(name) : Boolean(force); if (on) classes.add(name); else classes.delete(name); return on; },
+          contains(name) { return classes.has(name); },
+        },
+        setAttribute(name, value) { this.attributes[name] = String(value); },
+        querySelectorAll() { return []; },
+        addEventListener() {},
+        scrollIntoView() {},
+      };
+    };
+    const elements = { sessionPanel: fakeElement("sessionPanel"), nominationsPanel: fakeElement("nominationsPanel"), pastSubmissionsButton: fakeElement("pastSubmissionsButton") };
+    const getElementById = document.getElementById;
+    document.getElementById = (id) => elements[id] || null;
+    try {
+      const { app } = signedInApp("user_a");
+      app.backend = { configured: true, user: app.backendUser, signOut: async () => {} };
+      app.myWorkItems = [{ task: { task_id: "task_1", name: "Te Aro Chapel", status: "changes_requested" }, latestReview: { decision_note: "private reviewer note for member A" } }];
+      app.myNominationItems = [{ task: { task_id: "task_2", name: "Nominated hall of member A", status: "needs_review", address: "12 A Street" } }];
+      app.portalMode = "assigned";
+      app.renderMyWorkPanel(elements.sessionPanel);
+      app.pastSubmissionsOpen = true;
+      app.renderNominationList();
+      elements.pastSubmissionsButton.setAttribute("aria-expanded", "true");
+      assert.match(elements.sessionPanel.innerHTML, /private reviewer note for member A/, "a's panel was drawn");
+      assert.match(elements.nominationsPanel.innerHTML, /Nominated hall of member A/);
+      assert.ok(elements.nominationsPanel.classList.contains("open"));
+
+      // clerk replaces a's session with b's
+      app.onBackendSessionEnded({ deliberate: false, replaced: true });
+      app.backendUser = { _id: "user_b" };
+      app.backend.user = app.backendUser;
+      // b's refresh fails before anything is redrawn
+      app.refreshBackendTasks = async () => { throw new Error("network down"); };
+      await app.refreshBackendTasks().catch(() => {});
+
+      for (const [name, element] of Object.entries(elements)) {
+        assert.doesNotMatch(element.innerHTML, /private reviewer note for member A|Nominated hall of member A|12 A Street|Te Aro Chapel/, `${name} keeps nothing of a's`);
+      }
+      assert.equal(elements.nominationsPanel.classList.contains("open"), false, "the list is closed");
+      assert.equal(app.pastSubmissionsOpen, false);
+      assert.equal(elements.pastSubmissionsButton.attributes["aria-expanded"], "false");
+    } finally {
+      document.getElementById = getElementById;
+    }
+  }
+
+  // #153 round 2 (sol): a user restored on load is admitted only if the
+  // session it was restored under is still the page's once tasks have
+  // loaded. clerk replacing a with b during the load must never hand b's
+  // page back to a
+  {
+    const listeners = { window: window.addEventListener, document: document.addEventListener };
+    window.addEventListener = () => {};
+    document.addEventListener = () => {};
+    const bootApp = ({ switchDuringLoad }) => {
+      const { app } = signedInApp("user_a");
+      const userA = { _id: "user_a", initials: "A" };
+      const userB = { _id: "user_b", initials: "B" };
+      app.backendUser = null;
+      app.backend = {
+        configured: true, mayHaveSession: true, sessionId: "sess_a", user: null,
+        async restoreSession() { this.user = userA; return userA; },
+        signOut: async () => {},
+      };
+      const admitted = [];
+      for (const name of ["setupMap", "setupPageMode", "setupFilters", "setupPaneDivider", "renderBackendPanel", "applyFilters", "renderSessionPanel", "maybeOpenIssueDeepLink", "setTransportBusy", "refreshBackendTasks", "renderRaInitialsBadge", "promptForRaInitials"]) {
+        app[name] = async () => {};
+      }
+      app.loadTasks = async () => {
+        if (!switchDuringLoad) return;
+        // clerk reports a's session replaced by b's; the card admits b
+        app.onBackendSessionEnded({ deliberate: false, replaced: true });
+        app.backend.sessionId = "sess_b";
+        app.backend.user = userB;
+        app.backendUser = userB;
+      };
+      app.onBackendSignedIn = async (user) => { admitted.push(user._id); app.backendUser = user; };
+      return { app, admitted, userA, userB };
+    };
+    try {
+      const steady = bootApp({ switchDuringLoad: false });
+      await steady.app.init();
+      assert.deepEqual(steady.admitted, ["user_a"], "an unchanged restore is admitted");
+
+      const switched = bootApp({ switchDuringLoad: true });
+      await switched.app.init();
+      assert.deepEqual(switched.admitted, [], "a is not admitted after the switch");
+      assert.equal(switched.app.backendUser, switched.userB, "b's page stays b's");
+      // device drafts are read under b's id, never a's
+      values.set("powFormSnapshot2:NZ:user_a:task_9", JSON.stringify({ owner: "user_a", saved_at: 1, values: { evidence_note: "a's unsent" } }));
+      assert.equal(switched.app.getFormSnapshot("task_9"), undefined);
+
+      // a sign-out during the load is refused the same way
+      const ended = bootApp({ switchDuringLoad: false });
+      ended.app.loadTasks = async () => { ended.app.onBackendSessionEnded({ deliberate: false }); ended.app.backend.sessionId = ""; ended.app.backend.user = null; };
+      await ended.app.init();
+      assert.deepEqual(ended.admitted, []);
+      assert.equal(ended.app.backendUser, null);
+    } finally {
+      window.addEventListener = listeners.window;
+      document.addEventListener = listeners.document;
+    }
+  }
+
   console.log("session end dom test passed");
 })().catch((error) => {
   console.error(error);

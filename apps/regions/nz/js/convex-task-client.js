@@ -690,6 +690,16 @@
                     args: [compactObject(args)],
                 }),
             });
+            // a refused sign-in ends the page's session before anything
+            // else, whatever the body holds (it may not be json at all)
+            const authEnded = () => {
+                // the page clears before the caller hears of it
+                if (this.sessionId === sessionId) this.endProjectUser();
+                const authError = new Error("Your sign-in expired. Sign in again, then retry.");
+                authError.authExpired = true;
+                return authError;
+            };
+            if (!overrideToken && response.status === 401) throw authEnded();
             const text = await response.text();
             let payload;
             try {
@@ -697,24 +707,15 @@
             } catch (error) {
                 throw new Error(text || `Convex ${kind} failed.`);
             }
+            const failed = (!response.ok && response.status !== 560) || payload.status === "error";
+            if (!failed) return payload.value;
+            // only an actual error response is read for authentication
+            // wording; data that happens to contain "token" is data
             const message = payload.errorMessage || text || `Convex ${kind} failed.`;
-            if (
-                !overrideToken
-                && (response.status === 401 || /Authentication required|Unauthenticated|JWT|token/i.test(message))
-            ) {
-                // the page clears before the caller hears of it
-                if (this.sessionId === sessionId) this.endProjectUser();
-                const authError = new Error("Your sign-in expired. Sign in again, then retry.");
-                authError.authExpired = true;
-                throw authError;
+            if (!overrideToken && /Authentication required|Unauthenticated|JWT|token/i.test(message)) {
+                throw authEnded();
             }
-            if (!response.ok && response.status !== 560) {
-                throw new Error(message);
-            }
-            if (payload.status === "error") {
-                throw new Error(message);
-            }
-            return payload.value;
+            throw new Error(message);
         }
 
         async me() {
