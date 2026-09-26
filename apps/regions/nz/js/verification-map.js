@@ -997,6 +997,9 @@ const PIN_PROXIMITY_METRES = 150;
 // a mouse held still on the pin opens its menu after this long, as a
 // held touch does on a phone (jb 2026-09-23)
 const PIN_HOLD_MS = 600;
+// the release click follows its mouseup in the same turn; the catch for it
+// ends this long after the mouseup whether it came or not
+const HOLD_RELEASE_CLICK_MS = 100;
 // quick photo (jb 2026-09-22): the photo types attachment storage takes,
 // its 10 MB cap, and the location contract's radius bounds
 const QUICK_PHOTO_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -12344,6 +12347,8 @@ class NzVerificationMap {
         this.map.on("click", this._pinClickHandler);
         this._pinKeyHandler = (event) => {
             if (event.key === "Escape") {
+                // with the pin's menu open, escape closes the menu alone
+                if (this.closePinHoldMenu()) return;
                 this.exitPinMode();
                 return;
             }
@@ -12429,10 +12434,55 @@ class NzVerificationMap {
             clear();
             this._pinHoldTimer = window.setTimeout(() => {
                 this._pinHoldTimer = null;
-                if (this.pinMarker === marker) this.openPinHoldMenu();
+                if (this.pinMarker !== marker) return;
+                this.openPinHoldMenu({ fromHold: true });
+                this.swallowHoldRelease();
             }, PIN_HOLD_MS);
         });
         ["mouseup", "dragstart", "mouseout", "remove"].forEach(name => marker.on(name, clear));
+    }
+
+    // the release that ends a hold is not a click on the map (jb 2026-09-24:
+    // "as you mouse up to hit it, it disappears"): the browser turns the
+    // release into a click, on the pin or, if the mouse has moved, on the
+    // map, and leaflet's preclick then closes the menu the hold has just
+    // opened (on the map a click also moves the pin). that one click is held
+    // back in the capture phase, and only that one: the catch ends
+    // HOLD_RELEASE_CLICK_MS after the mouseup that ends the hold, whether a
+    // click came or not, and a click on the menu itself always passes, so a
+    // keyboard press on Remove pin or on a map control is never eaten.
+    // closing the menu, a fresh press, lifting the pin and leaving the entry
+    // all disarm it too
+    swallowHoldRelease() {
+        const container = this.map?.getContainer();
+        this.disarmHoldRelease?.();
+        const popup = this.pinHoldPopup;
+        if (!container || !popup || !this.map.hasLayer(popup)) return;
+        let expiry = null;
+        const disarm = () => {
+            window.removeEventListener("click", swallow, true);
+            window.removeEventListener("mousedown", disarm, true);
+            window.removeEventListener("mouseup", released, true);
+            if (expiry) window.clearTimeout(expiry);
+            expiry = null;
+            if (this.disarmHoldRelease === disarm) this.disarmHoldRelease = null;
+        };
+        const released = () => {
+            window.removeEventListener("mouseup", released, true);
+            expiry = window.setTimeout(disarm, HOLD_RELEASE_CLICK_MS);
+        };
+        const swallow = event => {
+            disarm();
+            const target = event.target;
+            if (!container.contains(target)) return;
+            if (popup.getElement?.()?.contains(target)) return;
+            event.stopPropagation();
+            event.preventDefault();
+        };
+        window.addEventListener("click", swallow, true);
+        window.addEventListener("mousedown", disarm, true);
+        window.addEventListener("mouseup", released, true);
+        this.disarmHoldRelease = disarm;
     }
 
     // the pin's own menu: before the location is confirmed, Remove pin
@@ -12452,9 +12502,28 @@ class NzVerificationMap {
         `;
     }
 
-    openPinHoldMenu() {
+    openPinHoldMenu(options = {}) {
         if (!this.map || !this.pinMarker) return;
-        const popup = L.popup({ minWidth: 200, maxWidth: 260, offset: [0, -6] }).setLatLng(this.pinMarker.getLatLng()).setContent(this.pinHoldMenuHtml());
+        // a menu already open closes first, so its thaw runs before this
+        // one decides whether to freeze the pin
+        this.closePinHoldMenu();
+        const marker = this.pinMarker;
+        // escape belongs to the portal's key handler, which closes this menu
+        // before it would leave the entry
+        const popup = L.popup({ minWidth: 200, maxWidth: 260, offset: [0, -6], closeOnEscapeKey: false }).setLatLng(marker.getLatLng()).setContent(this.pinHoldMenuHtml());
+        // a mouse hold leaves the button down on the pin: while its menu is
+        // open the pin does not follow the pointer up to the menu, and it
+        // drags again once the menu closes (a confirmed pin stays frozen)
+        const freeze = options.fromHold && marker.dragging?.enabled();
+        if (freeze) marker.dragging.disable();
+        popup.on("remove", () => {
+            if (this.pinHoldPopup === popup) {
+                this.pinHoldPopup = null;
+                this.disarmHoldRelease?.();
+            }
+            if (freeze && this.pinMarker === marker && !this.pinConfirmed) marker.dragging.enable();
+        });
+        this.pinHoldPopup = popup;
         popup.openOn(this.map);
         const el = popup.getElement();
         if (!el) return;
@@ -12467,6 +12536,14 @@ class NzVerificationMap {
             this.map.closePopup();
             this.discardEntryAttempt();
         });
+    }
+
+    // closes the pin's menu when it is open; true when it was
+    closePinHoldMenu() {
+        const popup = this.pinHoldPopup;
+        if (!popup || !this.map || !this.map.hasLayer(popup)) return false;
+        this.map.closePopup(popup);
+        return true;
     }
 
     // lifts an unconfirmed pin and keeps the entry armed for another drop;
@@ -12482,6 +12559,7 @@ class NzVerificationMap {
     // takes the pending pin off the map with its circle and zoom handler;
     // placement stays armed
     liftPendingPin(statusText) {
+        this.disarmHoldRelease?.();
         if (!this.pinMarker) return;
         this.map.closePopup();
         this.map.removeLayer(this.pinMarker);
@@ -13090,6 +13168,7 @@ class NzVerificationMap {
     }
 
     exitPinMode() {
+        this.disarmHoldRelease?.();
         if (this.formDirtyTaskId === "rapid-pin" || this.formDirtyTaskId === "location-pin") {
             this.clearFormDirty();
         }
