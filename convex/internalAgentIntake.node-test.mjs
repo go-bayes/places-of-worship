@@ -74,6 +74,8 @@ test("cited-name admissions require the deployment flag before any write", async
     const receipt = await ingestBundle._handler(ctx, { bundleJson: text, bundleHash: hash });
     assert.equal(receipt.created, true);
     assert.equal(ctx.rows.tasks.length, 1);
+    delete process.env.POW_CITED_NAME_RULE_ENABLED;
+    await assert.rejects(ingestBundle._handler(ctx, { bundleJson: text, bundleHash: hash }), /Cited-name admissions are disabled/);
   } finally {
     delete process.env.POW_CITED_NAME_RULE_ENABLED;
   }

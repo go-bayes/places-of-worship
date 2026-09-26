@@ -329,6 +329,8 @@ class ValidationAndAuditTest(unittest.TestCase):
             self.assertAlmostEqual(manifest["cost_usd_reported"], 0.4, places=7)
             self.assertEqual(manifest["cost_basis"], "tool_list_price")
             self.assertEqual(bundle["research_run"]["usage"]["per_model"]["web_search_requests"], 2)
+            self.assertEqual(bundle["research_run"]["model_id_reported"], "claude-sonnet-5")
+            self.assertEqual(bundle["review_run"]["model_id_reported"], "gpt-5.6-luna")
 
     def test_cited_name_reaches_review_and_unadmitted_name_is_refused(self):
         for reasoning, expected in [
@@ -352,10 +354,10 @@ class ValidationAndAuditTest(unittest.TestCase):
                     self.assertIn("Rev'd Pat Example", bundle['dossier']['claims'][0]['value'])
                     self.assertEqual(bundle['dossier']['personal_details_quarantine']['items'][0]['admitted_by_rule'],
                                      'public_source_cited.v1')
-                else:
-                    self.assertFalse((out / 'bundle.json').exists())
                     self.assertEqual(bundle["research_run"]["model_id_reported"], "claude-sonnet-5")
                     self.assertEqual(bundle["review_run"]["model_id_reported"], "gpt-5.6-luna")
+                else:
+                    self.assertFalse((out / 'bundle.json').exists())
 
     def test_quarantine_hashes_stay_in_the_private_dossier_copy(self):
         prompts: list[str] = []

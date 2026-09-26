@@ -89,7 +89,25 @@
         "note",
         "source.source_name"
       ],
-      "description": "A rule item names one exact code-point span in one of the four claim fields of its claim. The detected name must use strict ASCII token spacing and boundaries, and its ASCII-lowercase key must occur at bounded positions in the claim quotation. A valid rule item admits recurrences of that key only inside claim fields. Other dossier fields, object keys, review text, manifests, phones, emails, and first-pass records retain their existing refusal rules."
+      "description": "An item admits one exact parsed clergy-name span in a qualifying claim field when the claim quotation contains the bounded name key. Exact parsed occurrences of admitted names are masked only in claim-field values; every other recurrence, including bare names and embedded known values, is refused. Explicit title search supplements existing detectors and invalid spans refuse the record.",
+      "stop_titles": [
+        "Rev'd",
+        "Reverend",
+        "Revd",
+        "Rev",
+        "Fr",
+        "Father",
+        "Pastor",
+        "Vicar",
+        "Archdeacon",
+        "Bishop",
+        "Canon",
+        "Dean",
+        "Mr",
+        "Mrs",
+        "Ms",
+        "Dr"
+      ]
     }
   }
 }

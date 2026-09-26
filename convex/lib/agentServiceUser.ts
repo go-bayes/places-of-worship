@@ -14,8 +14,9 @@ export function assertInternalAgentIngestEnabled(): void {
   }
 }
 
-export function assertCitedNameRuleAllowed(dossier: { personal_details_quarantine?: { items?: Array<{ admitted_by_rule?: string }> } } | null): void {
-  if (dossier?.personal_details_quarantine?.items?.some(item => item.admitted_by_rule !== undefined)
+export function assertCitedNameRuleAllowed(dossier: unknown): void {
+  const items = (dossier as any)?.personal_details_quarantine?.items;
+  if (Array.isArray(items) && items.some(item => item !== null && typeof item === "object" && Object.hasOwn(item, "admitted_by_rule"))
       && process.env.POW_CITED_NAME_RULE_ENABLED !== "1") {
     throw new Error("Cited-name admissions are disabled on this deployment.");
   }

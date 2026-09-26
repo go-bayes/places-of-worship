@@ -2,6 +2,7 @@ import { canonicalJson, sha256 } from "./sha256.ts";
 import bundleSchema from "../../scripts/agent_research/schemas/agent-review-bundle.v1.json" with { type: "json" };
 import allowlistNzV1 from "../../scripts/agent_research/fixtures/allowlist-nz-v1.json" with { type: "json" };
 import screenPolicy from "../../scripts/agent_research/schemas/screen-policy.v1.json" with { type: "json" };
+import { canonicalWireJson } from "./wireJson.ts";
 
 // pinned source allowlists by version; a dossier naming any other version is refused.
 const ALLOWLISTS: Record<string, { allowlist_version: string; country_code: string; domains: string[] }> = { "nz-v1": allowlistNzV1 };
@@ -117,7 +118,8 @@ export function publicUrl(value: string): void {
 export function hasPersonalDetails(text: string): boolean {
   return /(?:\+64|\b0)[\s-]?\d{1,2}[\s-]?\d{3,4}[\s-]?\d{3,5}\b/.test(text)
     || /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(text)
-    || /\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'-]+\s?){1,3}/.test(text);
+    || /\b(?:Rev(?:'d|erend|d)?\.?|Fr\.?|Father|Pastor|Vicar|Archdeacon|Bishop|Canon|Dean|Mr|Mrs|Ms|Dr)\s+(?:[A-Z][a-zA-Z'-]+\s?){1,3}/.test(text)
+    || explicitTitleHits(text).length > 0;
 }
 
 const CITED_NAME_RULE = "public_source_cited.v1";
@@ -138,6 +140,9 @@ export function ruleNormalForm(text: string): string {
 }
 
 const RULE_WHITESPACE = (code: number): boolean => (code >= 9 && code <= 13) || [0x20, 0x85, 0xa0, 0x1680, 0x2028, 0x2029, 0x202f, 0x205f, 0x3000].includes(code) || (code >= 0x2000 && code <= 0x200a);
+const DETECTOR_WHITESPACE = (char: string): boolean => RULE_WHITESPACE(char.codePointAt(0)!) || char === "\ufeff";
+const NAME_CHAR = (char: string | undefined): boolean => char !== undefined && /^[A-Za-z'-]$/.test(char);
+const ASCII_WORD = (char: string): boolean => /^[A-Za-z0-9_]$/.test(char);
 const LEFT_BOUNDARY = new Set([" ", "\t", "\n", "\r", "(", '"']);
 const RIGHT_BOUNDARY = new Set([" ", "\t", "\n", "\r", ".", ",", ";", ":", "!", "?", ")", '"']);
 const QUOTE_BOUNDARY = new Set([" ", ".", ",", ";", ":", "!", "?", "(", ")", "[", "]", '"', "'"]);
@@ -145,7 +150,90 @@ export function claimFieldPath(norm: string): boolean {
   return citedNameRule.claim_fields.some((field: string) => norm.replace(/^dossier\./, "") === `claims[].${field}`);
 }
 const nameKey = (text: string): string => text.replace(/[A-Z]/g, char => String.fromCharCode(char.charCodeAt(0) + 32));
-function quoteContainsName(quote: string, key: string): boolean {
+type ParsedName = { start: number; end: number; text: string; key: string; bare: string; bareKey: string };
+
+const STOP_TITLES: string[][] = [...citedNameRule.stop_titles].sort((a, b) => b.length - a.length).map(title => Array.from(title));
+const CLERGY_TITLES: string[][] = [...citedNameRule.honorifics].sort((a, b) => b.length - a.length).map(title => Array.from(title));
+const startsWithAt = (chars: string[], at: number, title: string[]): boolean => title.every((char, i) => chars[at + i] === char);
+
+export function explicitTitleHits(text: string): Array<{ start: number; end: number; text: string }> {
+  const chars = Array.from(text);
+  const hits = [];
+  for (let start = 0; start < chars.length; start++) {
+    if (start > 0 && ASCII_WORD(chars[start - 1])) continue;
+    for (const title of STOP_TITLES) {
+      if (!startsWithAt(chars, start, title)) continue;
+      let pos = start + title.length;
+      if (chars[pos] === ".") pos++;
+      if (pos >= chars.length || !DETECTOR_WHITESPACE(chars[pos])) continue;
+      while (pos < chars.length && DETECTOR_WHITESPACE(chars[pos])) pos++;
+      if (pos >= chars.length || !/^[A-Z]$/.test(chars[pos])) continue;
+      while (NAME_CHAR(chars[pos])) pos++;
+      hits.push({ start, end: pos, text: chars.slice(start, pos).join("") });
+      break;
+    }
+  }
+  return hits;
+}
+
+// the admissible-name parser over a code-point array, so a scan of every position stays linear in practice
+function parseNameAt(chars: string[], start: number): ParsedName | null {
+  if (start < 0 || start >= chars.length || (start > 0 && !LEFT_BOUNDARY.has(chars[start - 1]))) return null;
+  const title = CLERGY_TITLES.find(t => startsWithAt(chars, start, t));
+  if (!title) return null;
+  let pos = start + title.length;
+  if (chars[pos] === ".") pos++;
+  if (chars[pos] !== " ") return null;
+  pos++;
+  const tokens: string[] = [];
+  const tokenAt = (at: number): { text: string; end: number } | null => {
+    let end = at;
+    while (NAME_CHAR(chars[end])) end++;
+    const token = chars.slice(at, end).join("");
+    return token.length >= 2 && /^[A-Z]$/.test(token[0]) && !citedNameRule.stop_titles.includes(token) ? { text: token, end } : null;
+  };
+  while (tokens.length < 3) {
+    const token = tokenAt(pos);
+    if (!token) break;
+    tokens.push(token.text); pos = token.end;
+    if (tokens.length === 3 || chars[pos] !== " " || !tokenAt(pos + 1)) break;
+    pos++;
+  }
+  if (!tokens.length || (tokens.length === 3 && chars[pos] === " " && tokenAt(pos + 1))) return null;
+  if (pos < chars.length && !RIGHT_BOUNDARY.has(chars[pos])) return null;
+  const value = chars.slice(start, pos).join(""), bare = tokens.join(" ");
+  return { start, end: pos, text: value, key: nameKey(value), bare, bareKey: nameKey(bare) };
+}
+
+export function parseName(text: string, start: number): ParsedName | null {
+  return parseNameAt(Array.from(text), start);
+}
+
+export function parsedNames(text: string): ParsedName[] {
+  const chars = Array.from(text);
+  const names: ParsedName[] = [];
+  for (let at = 0; at < chars.length; at++) {
+    const name = parseNameAt(chars, at);
+    if (name) names.push(name);
+  }
+  return names;
+}
+
+export function maskNames(text: string, admitted: ReadonlySet<string>): string {
+  const chars = Array.from(text);
+  for (const name of parsedNames(text)) if (admitted.has(name.key)) chars.fill(" ", name.start, name.end);
+  return chars.join("");
+}
+
+function admittedKnownKeys(admitted: ReadonlySet<string>): Set<string> {
+  const keys = new Set(admitted);
+  for (const key of admitted) {
+    const at = key.indexOf(" ");
+    if (at >= 0 && key.length - at - 1 >= 3) keys.add(key.slice(at + 1));
+  }
+  return keys;
+}
+export function quoteContainsName(quote: string, key: string): boolean {
   const form = ruleNormalForm(quote);
   for (let at = form.indexOf(key); at >= 0; at = form.indexOf(key, at + 1)) {
     const end = at + key.length;
@@ -161,13 +249,7 @@ export function honorificNameMatches(text: string): Array<{ start: number; end: 
     let end = start + Array.from(match[0]).length;
     while (end > start && RULE_WHITESPACE(chars[end - 1].codePointAt(0)!)) end--;
     const value = chars.slice(start, end).join("");
-    const parts = value.split(" ");
-    const clergy = parts.length >= 2 && parts.length <= 4 && parts.every(Boolean)
-      && !Array.from(value).some(char => RULE_WHITESPACE(char.codePointAt(0)!) && char !== " ")
-      && citedNameRule.honorifics.includes(parts[0].replace(/\.$/, ""))
-      && parts.slice(1).every(part => /^[A-Z][A-Za-z'-]+$/.test(part))
-      && (start === 0 || LEFT_BOUNDARY.has(chars[start - 1]))
-      && (end === chars.length || RIGHT_BOUNDARY.has(chars[end]));
+    const clergy = parseName(text, start)?.end === end;
     return { start, end, text: value, clergy };
   });
 }
@@ -183,19 +265,19 @@ function coveredClaimNames(claim: Record<string, any>, domains: string[] | null)
     let field: any = claim;
     for (const part of path.split(".")) field = field?.[part];
     if (typeof field !== "string") continue;
-    for (const match of honorificNameMatches(field)) {
-      const normal = nameKey(match.text);
-      if (match.clergy && quoteContainsName(quote, normal)) covered.add(normal);
+    for (const name of parsedNames(field)) {
+      if (quoteContainsName(quote, name.key)) covered.add(name.key);
     }
   }
   return covered;
 }
 
-export function citedNameCoverage(d: Record<string, any>, domains: string[] | null): { admitted: Set<string>; errors: string[] } {
+export function citedNameCoverage(d: Record<string, any>, domains: string[] | null, floats: ReadonlySet<string> = new Set()): { admitted: Set<string>; errors: string[] } {
   const firstClaims = new Map<string, Record<string, any>>();
   for (const claim of d.claims ?? []) if (typeof claim?.claim_id === "string" && !firstClaims.has(claim.claim_id)) firstClaims.set(claim.claim_id, claim);
   const admitted = new Set<string>(), errors: string[] = [];
   (d.personal_details_quarantine?.items ?? []).forEach((item: any, index: number) => {
+    if (!item || typeof item !== "object") return;
     if (!Object.hasOwn(item, "admitted_by_rule")) {
       if (["field", "start", "end"].some(field => Object.hasOwn(item, field))) errors.push(`personal_details_quarantine.items[${index}]: span requires a rule`);
       return;
@@ -211,18 +293,20 @@ export function citedNameCoverage(d: Record<string, any>, domains: string[] | nu
     const match = item.admitted_by_rule === CITED_NAME_RULE && item.kind === citedNameRule.kind
       && typeof quote === "string" && !!ruleNormalForm(quote) && citable && typeof field === "string"
       && Number.isInteger(item.start) && Number.isInteger(item.end) && item.start >= 0 && item.start < item.end && item.end <= Array.from(field).length
-      ? honorificNameMatches(field).find(hit => hit.clergy && hit.start === item.start && hit.end === item.end) : undefined;
-    if (!match || !quoteContainsName(quote, nameKey(match.text)))
+      && !floats.has(`$.dossier.personal_details_quarantine.items[${index}].start`)
+      && !floats.has(`$.dossier.personal_details_quarantine.items[${index}].end`)
+      ? parsedNames(field).find(hit => hit.start === item.start && hit.end === item.end) : undefined;
+    if (!match || !quoteContainsName(quote, match.key))
       errors.push(`personal_details_quarantine.items[${index}]: rule ${CITED_NAME_RULE} does not cover its claim`);
-    else admitted.add(nameKey(match.text));
+    else admitted.add(match.key);
   });
   return { admitted, errors };
 }
 
-function hasUnadmittedDetail(text: string, admitted: ReadonlySet<string>): boolean {
-  return /(?:\+64|\b0)[\s-]?\d{1,2}[\s-]?\d{3,4}[\s-]?\d{3,5}\b/.test(text)
-    || /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(text)
-    || honorificNameMatches(text).some(match => !(match.clergy && admitted.has(nameKey(match.text))));
+function hasUnadmittedDetail(text: string, admitted: ReadonlySet<string>, shouldMask: boolean): boolean {
+  const checked = shouldMask ? maskNames(text, admitted) : text;
+  return hasPersonalDetails(checked)
+    || (admitted.size > 0 && [...admittedKnownKeys(admitted)].some(key => ruleNormalForm(checked).includes(key)));
 }
 
 const DIGEST = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/;
@@ -309,7 +393,7 @@ export function assertScreened(value: unknown, schemaNode: any, root: any, hashF
   const skip = options.skip ?? [];
   for (const { path, norm, text, isKey } of walkScreened(value, schemaNode, root, options.overrides ?? {}, options.prefix ?? "")) {
     if (skip.some(s => norm === s || norm.startsWith(`${s}.`) || norm.startsWith(`${s}[`))) continue;
-    if (hasUnadmittedDetail(text, !isKey && claimFieldPath(norm) ? options.admitted ?? new Set() : new Set())) throw new Error(`potential personal details in ${path} require human handling`);
+    if (hasUnadmittedDetail(text, options.admitted ?? new Set(), !isKey && claimFieldPath(norm))) throw new Error(`potential personal details in ${path} require human handling`);
     const exempt = !isKey && hashFields.has(norm) && DIGEST.test(text);
     if (!exempt && hasHashToken(text)) throw new Error(`hash-shaped value in ${path} is outside a designated hash field`);
   }
@@ -349,9 +433,11 @@ export function hostAllowed(locator: string, domains: string[]): boolean {
 export function validateAgentReviewBundle(value: unknown, bundleJson: string): { bundle: AgentReviewBundle; bundleHash: string; claimLocators: Map<string, string> } {
   assertNoDuplicateJsonKeys(bundleJson);
   const parsed = JSON.parse(bundleJson);
+  const floats = new Set<string>();
+  canonicalWireJson(bundleJson, floats);
   guard(parsed); guard(value);
   if (canonicalJson(parsed) !== canonicalJson(value)) throw new Error("parsed bundle differs from supplied bytes");
-  schemaCheck(value, bundleSchema);
+  schemaCheck(value, bundleSchema, "$", bundleSchema, floats);
   const bundle = value as AgentReviewBundle;
   const d = bundle.dossier;
   if (d.place.country_code !== "NZ") throw new Error("internal pilot requires NZ");
@@ -369,7 +455,7 @@ export function validateAgentReviewBundle(value: unknown, bundleJson: string): {
   if (d.run_manifest.model_id_reported !== bundle.research_run.model_id_reported) throw new Error("dossier and research manifest disagree on the reported model");
   // designated hash fields must equal the digests of their inputs in this record (screen-policy.v1)
   if (bundle.submission_key !== sha256(d.dossier_id)) throw new Error("submission_key does not match the dossier id");
-  const { locators, admitted } = validateDossierRecordWithRule(d);
+  const { locators, admitted } = validateDossierRecordWithRule(d, floats);
   // the reviewer's text and both run manifests travel too; the dossier was screened above.
   assertScreened(value, bundleSchema, bundleSchema, SCREEN_HASH_FIELDS["agent-review-bundle.v1"], { skip: ["dossier"], admitted });
   const checked = new Set<string>();
@@ -392,13 +478,13 @@ export function validateDossierRecord(d: Record<string, any>): Map<string, strin
   return validateDossierRecordWithRule(d).locators;
 }
 
-export function validateDossierRecordWithRule(d: Record<string, any>): { locators: Map<string, string>; admitted: Set<string> } {
+export function validateDossierRecordWithRule(d: Record<string, any>, floats: ReadonlySet<string> = new Set()): { locators: Map<string, string>; admitted: Set<string> } {
   // the pinned source allowlist, as intake.py validate_dossier applies it
   const allowlist = typeof d.run_manifest.allowlist_version === "string" && Object.hasOwn(ALLOWLISTS, d.run_manifest.allowlist_version) ? ALLOWLISTS[d.run_manifest.allowlist_version] : undefined;
   if (!allowlist) throw new Error("dossier names no known source allowlist version");
   if (allowlist.country_code !== d.place.country_code) throw new Error("source allowlist belongs to another country");
   const domains = allowlist.domains.map(domain => domain.toLowerCase().replace(/\.$/, ""));
-  const { admitted, errors: declarationErrors } = citedNameCoverage(d, domains);
+  const { admitted, errors: declarationErrors } = citedNameCoverage(d, domains, floats);
   if (declarationErrors.length) throw new Error(declarationErrors[0]);
   dateBounds(d.run_manifest.started_at.split("T")[0]); dateBounds(d.run_manifest.ended_at.split("T")[0]);
   const manifestStart = Date.parse(d.run_manifest.started_at), manifestEnd = Date.parse(d.run_manifest.ended_at);

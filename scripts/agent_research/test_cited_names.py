@@ -51,7 +51,7 @@ class CitedNameTests(unittest.TestCase):
         cases = [
             self.dossier(value='opened under Dr Pat Example', quote='built under Dr Pat Example'),
             self.dossier(quote='built in 1891'),
-            self.dossier(quote="built in 1891 under Rev'd Pat Examples"),
+            self.dossier(quote="built in 1891 under Pat Examples"),
             self.dossier(locator='https://www.example-parish.nz/history'),
         ]
         for dossier in cases:
@@ -95,16 +95,53 @@ class CitedNameTests(unittest.TestCase):
         lib.quarantine_dossier(dossier)
         items = dossier['personal_details_quarantine']['items']
         known = lib.known_values(items, include_admitted=True)
-        admitted_known = frozenset(known)
+        admitted_names = frozenset({lib.name_key(NAME)})
         lib.redact_quarantine(dossier)
         lib.bundle_quarantine(dossier)
         schema, root = lib.dossier_screen_schema()
-        self.assertEqual(lib.known_value_findings(dossier, known, schema, root, 'dossier', admitted_known), [])
+        self.assertEqual(lib.known_value_findings(dossier, known, schema, root, 'dossier', admitted_names), [])
         dossier['place']['name'] = 'Pat Example chapel'
         dossier['status_assessment']['basis'] = NAME
-        self.assertEqual(set(lib.known_value_findings(dossier, known, schema, root, 'dossier', admitted_known)),
+        self.assertEqual(set(lib.known_value_findings(dossier, known, schema, root, 'dossier', admitted_names)),
                          {'dossier.place.name', 'dossier.status_assessment.basis'})
-        findings = lib.screen_spans(dossier, schema, root, frozenset(), known, 'dossier',
-                                    frozenset({lib.name_key(NAME)}), admitted_known)
+        findings = lib.screen_spans(dossier, schema, root, frozenset(), known, 'dossier', admitted_names)
         self.assertTrue(any(f['path'] == 'dossier.place.name' and f['detector'] == 'known_value' for f in findings))
         self.assertTrue(any(f['path'] == 'dossier.status_assessment.basis' for f in findings))
+
+    def test_parser_detector_mask_and_quote(self):
+        rule = lib.cited_name_rule()
+        self.assertIn('Dr', rule['stop_titles'])
+        self.assertEqual([(n['start'], n['end']) for n in lib.parsed_names("Rev'd Pat Example Dr Jo Sample")], [(0, 17)])
+        self.assertEqual([(n['start'], n['end']) for n in lib.parsed_names("Rev'd Pat Example Bishop Jo Sample")], [(0, 17), (18, 34)])
+        self.assertEqual(lib.parsed_names("éRev'd Pat Example"), [])
+        self.assertEqual(lib.parsed_names("Rev'd\u0085Pat Example"), [])
+        self.assertEqual(lib.parsed_names("Rev'd Pat Jo Lee Example"), [])
+        self.assertEqual([x[2] for x in lib.explicit_title_hits("éRev'd Pat Example")], ["Rev'd Pat"])
+        self.assertEqual([x[2] for x in lib.explicit_title_hits("Rev'd\u0085Pat Example")], ["Rev'd\u0085Pat"])
+        self.assertEqual(lib.explicit_title_hits("xRev'd Pat"), [])
+        self.assertEqual(lib.mask_names("Rev'd Pat Example Dr Jo Sample", {"rev'd pat example"}), ' ' * 17 + ' Dr Jo Sample')
+        self.assertTrue(lib.quote_contains_name("(Rev'd Pat Example)", "rev'd pat example"))
+        self.assertFalse(lib.quote_contains_name("Rev'd Pat Examples", "rev'd pat example"))
+
+    def test_producer_withholds_embedded_and_nonclaim_recurrences(self):
+        dossier = self.dossier()
+        dossier['claims'][1]['note'] = 'Pat Examples wrote the history.'
+        dossier['place']['name'] = 'Pat Example chapel'
+        dossier['status_assessment']['basis'] = "REV'D PAT EXAMPLE signed."
+        lib.quarantine_dossier(dossier)
+        self.assertIn(NAME, dossier['claims'][0]['value'])
+        self.assertNotIn('Pat Example', dossier['claims'][1]['note'])
+        self.assertNotIn('Pat Example', dossier['place']['name'])
+        self.assertNotIn("REV'D PAT EXAMPLE", dossier['status_assessment']['basis'])
+
+    def test_float_written_span_is_invalid(self):
+        bundle = fixture('internal-review-bundle.json')
+        dossier = self.dossier()
+        lib.quarantine_dossier(dossier)
+        lib.redact_quarantine(dossier)
+        lib.bundle_quarantine(dossier)
+        bundle['dossier'] = dossier
+        raw = json.dumps(bundle).replace('"start": 18,', '"start": 18.0,', 1)
+        self.assertNotEqual(raw, json.dumps(bundle))
+        self.assertEqual(intake.validate_bundle(intake.parse_json(json.dumps(bundle))), [])
+        self.assertTrue(intake.validate_bundle(intake.parse_json(raw)))

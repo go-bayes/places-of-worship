@@ -173,6 +173,10 @@ export const ingestFirstPass = internalMutation({
   returns: receiptResult,
   handler: async (ctx, args) => {
     assertInternalAgentIngestEnabled();
+    try { assertCitedNameRuleAllowed(JSON.parse(args.recordJson)?.dossier ?? null); } catch (error) {
+      if (error instanceof SyntaxError) { /* existing validation reports malformed JSON */ }
+      else throw error;
+    }
     // an exact retry of bytes already receipted returns that receipt without
     // writing, before validation, so a rule tightened after the first ingest
     // cannot turn an idempotent retry into an error. the stored bytes must

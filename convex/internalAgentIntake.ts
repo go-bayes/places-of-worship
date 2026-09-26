@@ -47,6 +47,10 @@ export const ingestBundle = internalMutation({
   returns: v.object({ receipt_id: v.string(), task_id: v.string(), evidence_draft_id: v.string(), agent_review_id: v.string(), created: v.boolean() }),
   handler: async (ctx, args) => {
     enabled();
+    try { assertCitedNameRuleAllowed(JSON.parse(args.bundleJson)?.dossier ?? null); } catch (error) {
+      if (error instanceof SyntaxError) { /* existing validation reports malformed JSON */ }
+      else throw error;
+    }
     // an exact retry of bytes already receipted returns that receipt without writing. It runs before
     // validation so a rule tightened after the first ingest cannot turn an idempotent retry into an error;
     // the stored bytes must equal the submitted bytes, so nothing unvalidated is admitted.

@@ -198,8 +198,12 @@ def find_personal_details(text: str) -> list[dict]:
         found.append({"kind": "phone", "value": match.group(0).strip()})
     for match in _EMAIL.finditer(text or ""):
         found.append({"kind": "email", "value": match.group(0)})
+    regex_spans = [match.span() for match in _HONORIFIC_NAME.finditer(text or "")]
     for match in _HONORIFIC_NAME.finditer(text or ""):
         found.append({"kind": "person_name", "value": match.group(0).strip()})
+    for start, end, value in explicit_title_hits(text or ""):
+        if not any(left <= start and end <= right for left, right in regex_spans):
+            found.append({"kind": "person_name", "value": value})
     return found
 
 
@@ -264,6 +268,33 @@ def cited_name_rule() -> dict:
 _RULE_WHITESPACE = frozenset(chr(n) for n in (*range(9, 14), 0x20, 0x85, 0xA0, 0x1680,
                                                 *range(0x2000, 0x200B), 0x2028, 0x2029,
                                                 0x202F, 0x205F, 0x3000))
+_DETECTOR_WHITESPACE = _RULE_WHITESPACE | {'\ufeff'}
+_NAME_CHARS = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'-")
+
+
+def explicit_title_hits(text: str) -> list[tuple[int, int, str]]:
+    titles = sorted(cited_name_rule()['stop_titles'], key=len, reverse=True)
+    hits = []
+    for start in range(len(text)):
+        if start and (text[start - 1] in _NAME_CHARS and text[start - 1] not in "'-" or '0' <= text[start - 1] <= '9' or text[start - 1] == '_'):
+            continue
+        for title in titles:
+            if not text.startswith(title, start):
+                continue
+            pos = start + len(title)
+            if pos < len(text) and text[pos] == '.':
+                pos += 1
+            if pos >= len(text) or text[pos] not in _DETECTOR_WHITESPACE:
+                continue
+            while pos < len(text) and text[pos] in _DETECTOR_WHITESPACE:
+                pos += 1
+            if pos >= len(text) or not 'A' <= text[pos] <= 'Z':
+                continue
+            while pos < len(text) and text[pos] in _NAME_CHARS:
+                pos += 1
+            hits.append((start, pos, text[start:pos]))
+            break
+    return hits
 
 
 def rule_normal_form(text: str) -> str:
@@ -284,7 +315,62 @@ def rule_normal_form(text: str) -> str:
 _LEFT_BOUNDARY = frozenset(' \t\n\r("')
 _RIGHT_BOUNDARY = frozenset(' \t\n\r.,;:!?)"')
 _QUOTE_BOUNDARY = frozenset(' .,;:!?()[]"\'')
-_NAME_TOKEN = re.compile(r"[A-Z][A-Za-z'-]+\Z")
+def parse_name(text: str, start: int) -> dict | None:
+    if start < 0 or start >= len(text) or (start and text[start - 1] not in _LEFT_BOUNDARY):
+        return None
+    titles = sorted(cited_name_rule()['honorifics'], key=len, reverse=True)
+    title = next((title for title in titles if text.startswith(title, start)), None)
+    if title is None:
+        return None
+    pos = start + len(title)
+    if pos < len(text) and text[pos] == '.':
+        pos += 1
+    if pos >= len(text) or text[pos] != ' ':
+        return None
+    pos += 1
+    tokens = []
+    stops = cited_name_rule()['stop_titles']
+
+    def token_at(at):
+        end = at
+        while end < len(text) and text[end] in _NAME_CHARS:
+            end += 1
+        token = text[at:end]
+        return (token, end) if len(token) >= 2 and 'A' <= token[0] <= 'Z' and token not in stops else None
+
+    while len(tokens) < 3:
+        token = token_at(pos)
+        if token is None:
+            break
+        tokens.append(token[0])
+        pos = token[1]
+        if len(tokens) == 3 or pos >= len(text) or text[pos] != ' ' or token_at(pos + 1) is None:
+            break
+        pos += 1
+    if not tokens or (len(tokens) == 3 and pos < len(text) and text[pos] == ' ' and token_at(pos + 1) is not None):
+        return None
+    if pos < len(text) and text[pos] not in _RIGHT_BOUNDARY:
+        return None
+    value = text[start:pos]
+    bare = ' '.join(tokens)
+    return {'start': start, 'end': pos, 'text': value, 'key': name_key(value), 'bare': bare, 'bare_key': name_key(bare)}
+
+
+def parsed_names(text: str) -> list[dict]:
+    return [name for start in range(len(text)) if (name := parse_name(text, start)) is not None]
+
+
+def mask_names(text: str, admitted) -> str:
+    chars = list(text)
+    for name in parsed_names(text):
+        if name['key'] in admitted:
+            chars[name['start']:name['end']] = [' '] * (name['end'] - name['start'])
+    return ''.join(chars)
+
+
+def admitted_known_keys(admitted) -> frozenset[str]:
+    bare = {key[key.index(' ') + 1:] for key in admitted if ' ' in key and len(key[key.index(' ') + 1:]) >= 3}
+    return frozenset(admitted | bare)
 
 
 def claim_field_path(norm: str) -> bool:
@@ -309,20 +395,14 @@ def quote_contains_name(quote: str, key: str) -> bool:
 
 
 def honorific_name_matches(text: str) -> list[tuple[int, int, str, bool]]:
-    honorifics = frozenset(cited_name_rule()['honorifics'])
     matches = []
     for match in _HONORIFIC_NAME.finditer(text):
         start, end = match.span()
         while end > start and text[end - 1] in _RULE_WHITESPACE:
             end -= 1
         value = text[start:end]
-        parts = value.split(' ')
-        valid = (2 <= len(parts) <= 4 and all(parts)
-                 and not any(c in _RULE_WHITESPACE and c != ' ' for c in value)
-                 and parts[0].removesuffix('.') in honorifics
-                 and all(_NAME_TOKEN.fullmatch(part) for part in parts[1:])
-                 and (start == 0 or text[start - 1] in _LEFT_BOUNDARY)
-                 and (end == len(text) or text[end] in _RIGHT_BOUNDARY))
+        parsed = parse_name(text, start)
+        valid = parsed is not None and parsed['end'] == end
         matches.append((start, end, value, valid))
     return matches
 
@@ -344,10 +424,9 @@ def covered_claim_names(claim, citable) -> dict[str, str]:
         return {}
     covered = {}
     for _, field in _claim_fields(claim):
-        for _, _, value, clergy in honorific_name_matches(field):
-            form = name_key(value)
-            if clergy and quote_contains_name(quote, form):
-                covered.setdefault(form, value)
+        for name in parsed_names(field):
+            if quote_contains_name(quote, name['key']):
+                covered.setdefault(name['key'], name['text'])
     return covered
 
 
@@ -382,19 +461,19 @@ def cited_name_coverage(dossier, citable) -> tuple[frozenset[str], list[str]]:
                  and isinstance(quote, str) and bool(rule_normal_form(quote))
                  and isinstance(locator, str) and citable(locator) and isinstance(node, str)
                  and type(start) is int and type(end) is int and 0 <= start < end <= len(node))
-        match = next(((value, name_key(value)) for s, e, value, admissible in honorific_name_matches(node)
-                      if admissible and s == start and e == end), None) if valid else None
-        if not match or not quote_contains_name(quote, match[1]):
+        match = next((name for name in parsed_names(node) if name['start'] == start and name['end'] == end), None) if valid else None
+        if not match or not quote_contains_name(quote, match['key']):
             errors.append(f'personal_details_quarantine.items[{index}]: rule {CITED_NAME_RULE} does not cover its claim')
         else:
-            admitted.add(match[1])
+            admitted.add(match['key'])
     return frozenset(admitted), errors
 
 
-def has_unadmitted_detail(text: str, admitted=frozenset()) -> bool:
-    return (bool(_PHONE.search(text) or _EMAIL.search(text)) or
-            any(not (clergy and name_key(value) in admitted)
-                for _, _, value, clergy in honorific_name_matches(text)))
+def has_unadmitted_detail(text: str, admitted=frozenset(), should_mask=False) -> bool:
+    masked = mask_names(text, admitted) if should_mask else text
+    return (bool(_PHONE.search(masked) or _EMAIL.search(masked)) or
+            bool(_HONORIFIC_NAME.search(masked)) or bool(explicit_title_hits(masked)) or
+            bool(admitted and any(key in rule_normal_form(masked) for key in admitted_known_keys(admitted))))
 
 
 def _digest_exempt(norm: str, text: str, is_key: bool, hash_fields) -> bool:
@@ -454,7 +533,7 @@ def screen_findings(value, schema, root, hash_fields, overrides=None, prefix="",
     def check(parent, key, path, norm, text, is_key):
         if any(norm == s or norm.startswith(s + ".") or norm.startswith(s + "[") for s in skip):
             return None
-        if has_unadmitted_detail(text, admitted if not is_key and claim_field_path(norm) else frozenset()):
+        if has_unadmitted_detail(text, admitted, not is_key and claim_field_path(norm)):
             findings.append((path, "personal"))
         elif not _digest_exempt(norm, text, is_key, hash_fields) and hash_token_spans(text):
             findings.append((path, "hash"))
@@ -476,16 +555,16 @@ def normalise_detail(text: str) -> str:
     return re.sub(r"\s+", " ", unicodedata.normalize("NFKC", text or "").casefold()).strip()
 
 
-def known_value_findings(value, known_values, schema=None, root=None, prefix="", claim_field_values=frozenset()) -> list[str]:
+def known_value_findings(value, known_values, schema=None, root=None, prefix="", admitted=frozenset()) -> list[str]:
     """paths of strings or keys, anywhere in value, that contain a known quarantined value
     (normalised) or the sha256 of one. the runner applies this to everything it transports."""
     needles = [(v, normalise_detail(v), sha256(v)) for v in known_values if isinstance(v, str) and v.strip()]
     found: list[str] = []
 
     def check(parent, key, path, norm, text, is_key):
-        plain, lowered = normalise_detail(text), text.lower()
-        if any((needle and needle in plain and not (not is_key and claim_field_path(norm) and v in claim_field_values))
-               or digest in lowered for v, needle, digest in needles):
+        checked = mask_names(text, admitted) if not is_key and claim_field_path(norm) else text
+        plain, lowered = normalise_detail(checked), checked.lower()
+        if any((needle and needle in plain) or digest in lowered for _, needle, digest in needles):
             found.append(path)
         return None
 
@@ -511,7 +590,7 @@ def known_values(items, include_admitted=False) -> dict[str, str]:
     return known
 
 
-def screen_spans(value, schema, root, hash_fields, known: dict[str, str] | None = None, prefix: str = "", admitted=frozenset(), claim_field_values=frozenset()) -> list[dict]:
+def screen_spans(value, schema, root, hash_fields, known: dict[str, str] | None = None, prefix: str = "", admitted=frozenset()) -> list[dict]:
     """every screen finding as {path, detector, start, end}, never the text: a structured record
     that the later flag-and-hold review can reuse to propose redactions. offsets are Unicode
     code-point indices into the string at path. detectors: phone, email, person_name (patterns),
@@ -521,17 +600,20 @@ def screen_spans(value, schema, root, hash_fields, known: dict[str, str] | None 
     found: list[dict] = []
 
     def check(parent, key, path, norm, text, is_key):
-        spans = [("phone", m.span()) for m in _PHONE.finditer(text)]
-        spans += [("email", m.span()) for m in _EMAIL.finditer(text)]
-        spans += [("person_name", (start, end)) for start, end, value, clergy in honorific_name_matches(text)
-                  if is_key or not (claim_field_path(norm) and clergy and name_key(value) in admitted)]
-        if not _digest_exempt(norm, text, is_key, hash_fields):
-            spans += [("hash_outside_field", span) for span in hash_token_spans(text)]
+        checked = mask_names(text, admitted) if not is_key and claim_field_path(norm) else text
+        spans = [("phone", m.span()) for m in _PHONE.finditer(checked)]
+        spans += [("email", m.span()) for m in _EMAIL.finditer(checked)]
+        regex_spans = [m.span() for m in _HONORIFIC_NAME.finditer(checked)]
+        spans += [("person_name", span) for span in regex_spans]
+        spans += [("person_name", (start, end)) for start, end, _ in explicit_title_hits(checked)
+                  if not any(left <= start and end <= right for left, right in regex_spans)]
+        if not _digest_exempt(norm, checked, is_key, hash_fields):
+            spans += [("hash_outside_field", span) for span in hash_token_spans(checked)]
         for value_, pattern, digest in needles:
-            if normalise_detail(value_) in normalise_detail(text) and not (not is_key and claim_field_path(norm) and value_ in claim_field_values):
-                match = pattern.search(text)
-                spans.append(("known_value", match.span() if match else (0, len(text))))
-            at = text.lower().find(digest)
+            if normalise_detail(value_) in normalise_detail(checked):
+                match = pattern.search(checked)
+                spans.append(("known_value", match.span() if match else (0, len(checked))))
+            at = checked.lower().find(digest)
             if at >= 0:
                 spans.append(("known_value_hash", (at, at + len(digest))))
         for detector, (start, end) in sorted(set(spans), key=lambda s: (s[1], s[0])):
@@ -589,19 +671,13 @@ def quarantine_dossier(dossier: dict, extra_names: list[str] | None = None, cita
         """the pattern and known-value passes over target, in place; returns the withheld items."""
         items = [item for item in target.get("personal_details_quarantine", {}).get("items", [])
                  if "admitted_by_rule" not in item]
-        derived_admitted_items = set()
         claims = target.get("claims", [])
-
-        def cited(detail, norm, text) -> bool:
-            matching = [(value, valid) for _, _, value, valid in honorific_name_matches(text)
-                        if value == detail['value']]
-            return (detail["kind"] == "person_name" and claim_field_path(norm) and bool(matching)
-                    and all(valid and name_key(value) in admitted for value, valid in matching))
 
         def redact(parent, key, path, norm, text, is_key):
             if parent is None or path.startswith("personal_details_quarantine"):
                 return None
-            details = [d for d in find_personal_details(text) if not cited(d, norm, text)]
+            checked = mask_names(text, admitted) if not is_key and claim_field_path(norm) else text
+            details = find_personal_details(checked)
             details += [e for e in extra if e["value"] in text]
             if not details:
                 return None
@@ -609,37 +685,37 @@ def quarantine_dossier(dossier: dict, extra_names: list[str] | None = None, cita
             for d in details:
                 item = {"kind": d["kind"], "context_claim_id": claim_id, "value": d["value"]}
                 items.append(item)
-                if not claim_field_path(norm) and d["kind"] == "person_name" and any(valid and name_key(value) in admitted
-                      for _, _, value, valid in honorific_name_matches(d["value"])):
-                    derived_admitted_items.add(id(item))
             return redact_text(text, details)
 
         _walk_screened(target, schema, root, redact)
-        nonadmitted = known_values([item for item in items if id(item) not in derived_admitted_items] + extra)
-        ordered = sorted(nonadmitted.items(), key=lambda pair: -len(pair[0]))
-        admitted_values = set(known_values([{'kind': 'person_name', 'value': value, 'admitted_by_rule': CITED_NAME_RULE}
-                                            for claim in target.get('claims', [])
-                                            for _, field in _claim_fields(claim)
-                                            for _, _, value, valid in honorific_name_matches(field)
-                                            if valid and name_key(value) in admitted], include_admitted=True))
-        for value, kind in known_values([{'kind': 'person_name', 'value': value} for value in admitted_values]).items():
-            if value not in dict(ordered):
-                ordered.append((value, kind))
-        ordered.sort(key=lambda pair: -len(pair[0]))
+        admitted_items = [{'kind': 'person_name', 'value': name['text'], 'admitted_by_rule': CITED_NAME_RULE}
+                          for claim in target.get('claims', []) for _, field in _claim_fields(claim)
+                          for name in parsed_names(field) if name['key'] in admitted]
+        ordered = sorted(known_values(items + admitted_items + extra, include_admitted=True).items(),
+                         key=lambda pair: -len(pair[0]))
+
+        def replace_segment(segment, path):
+            out = segment
+            for value, kind in ordered:
+                if normalise_detail(value) not in normalise_detail(out):
+                    continue
+                replaced = _known_pattern(value).sub(f"[{kind} withheld]", out)
+                out = replaced if normalise_detail(value) not in normalise_detail(replaced) else f"[{kind} withheld]"
+                items.append({"kind": kind, "context_claim_id": _claim_context(claims, path), "value": value})
+            return out
 
         def redact_known(parent, key, path, norm, text, is_key):
             if parent is None or path.startswith("personal_details_quarantine"):
                 return None
-            out = text
-            for value, kind in ordered:
-                if claim_field_path(norm) and value in admitted_values and value not in nonadmitted:
-                    continue
-                if normalise_detail(value) not in normalise_detail(out):
-                    continue
-                replaced = _known_pattern(value).sub(f"[{kind} withheld]", out)
-                # a width or compatibility variant the pattern cannot see withholds the whole string
-                out = replaced if normalise_detail(value) not in normalise_detail(replaced) else f"[{kind} withheld]"
-                items.append({"kind": kind, "context_claim_id": _claim_context(claims, path), "value": value})
+            names = [name for name in parsed_names(text) if name['key'] in admitted] if not is_key and claim_field_path(norm) else []
+            parts = []
+            pos = 0
+            for name in names:
+                parts.append(replace_segment(text[pos:name['start']], path))
+                parts.append(name['text'])
+                pos = name['end']
+            parts.append(replace_segment(text[pos:], path))
+            out = ''.join(parts)
             return out if out != text else None
 
         _walk_screened(target, schema, root, redact_known)
@@ -664,12 +740,12 @@ def quarantine_dossier(dossier: dict, extra_names: list[str] | None = None, cita
             continue
         seen_names = set()
         for field, value_text in _claim_fields(claim):
-            for start, end, value, valid in honorific_name_matches(value_text):
-                key = name_key(value)
-                if valid and key in admitted and key not in seen_names and quote_contains_name(quote, key):
+            for name in parsed_names(value_text):
+                key = name['key']
+                if key in admitted and key not in seen_names and quote_contains_name(quote, key):
                     rule_items.append({"kind": "person_name", "context_claim_id": claim.get("claim_id"),
-                                       "value": value, "admitted_by_rule": CITED_NAME_RULE,
-                                       "field": field, "start": start, "end": end})
+                                       "value": name['text'], "admitted_by_rule": CITED_NAME_RULE,
+                                       "field": field, "start": name['start'], "end": name['end']})
                     seen_names.add(key)
     # dedupe by (kind, value, claim, rule)
     seen = set()

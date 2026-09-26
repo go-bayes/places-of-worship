@@ -33,9 +33,25 @@ test("cited clergy rule never admits a first-pass record with either deployment 
       else process.env.POW_CITED_NAME_RULE_ENABLED = setting;
       assert.throws(() => validateFirstPassRecord(recordJson, recordHash), /personal details/);
       const ctx = context();
-      await assert.rejects(ingestFirstPass._handler(ctx, { recordJson, recordHash }), /personal details/);
+      await assert.rejects(ingestFirstPass._handler(ctx, { recordJson, recordHash }), setting === undefined ? /Cited-name admissions are disabled/ : /personal details/);
       assert.equal(ctx.rows.agent_first_pass_receipts.length, 0);
     }
+  } finally { delete process.env.POW_CITED_NAME_RULE_ENABLED; }
+});
+
+test("a receipted rule item cannot retry with the cited-name flag disabled", async () => {
+  const record = partial();
+  record.dossier = { personal_details_quarantine: { items: [{ admitted_by_rule: "public_source_cited.v1" }] } };
+  const recordJson = JSON.stringify(record), recordHash = sha256(recordJson);
+  const ctx = context();
+  ctx.rows.agent_first_pass_receipts.push({ receipt_id: "stored", record_hash: recordHash, record_json: recordJson,
+    storage: { tier: "convex" }, judgment_ids: [] });
+  process.env.POW_INTERNAL_AGENT_INGEST_ENABLED = "true";
+  try {
+    process.env.POW_CITED_NAME_RULE_ENABLED = "1";
+    assert.equal((await ingestFirstPass._handler(ctx, { recordJson, recordHash })).created, false);
+    delete process.env.POW_CITED_NAME_RULE_ENABLED;
+    await assert.rejects(ingestFirstPass._handler(ctx, { recordJson, recordHash }), /Cited-name admissions are disabled/);
   } finally { delete process.env.POW_CITED_NAME_RULE_ENABLED; }
 });
 
