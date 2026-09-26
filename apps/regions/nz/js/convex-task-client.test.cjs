@@ -482,6 +482,34 @@ const container = () => ({
     assert.equal(h.calls.fetches.some((fetch) => fetch.body.path === "users:approveIdentityMigration"), false);
   }
 
+  // 16. a google account the server will not accept (another member's, or
+  // one that is nobody's sign-in): the step says why and stays; the claim is
+  // not retried and the account is not moved
+  {
+    const wrong = "[Request ID: 2] Server Error Uncaught Error: This Google account is not a project member's current sign-in. at handler (x)";
+    const responses = {
+      "users:claimInvite": refused("Confirm that Google account first, then sign in again."),
+      "users:requestIdentityMigration": ok({ nonce: "n-2", expires_at: Date.now() + 600000 }),
+      "users:approveIdentityMigration": refused(wrong),
+    };
+    const h = harness({ session: { id: "sess_w", email: "guy@example.org" }, cookie: "__client_uat=1", responses });
+    const client = new h.Client({ ...config, googleMigrationClientId: "google-client-id" });
+    const host = container();
+    const seen = [];
+    await client.renderSignInButton(host, { onSignedIn: (user) => seen.push(user._id) });
+    await tick();
+    const claimsBefore = h.calls.fetches.filter((fetch) => fetch.body.path === "users:claimInvite").length;
+    assert.equal(await h.calls.gsiInit.callback({ credential: "someone-elses-google-token" }), false);
+    assert.equal(host.parts["migration-status"].textContent, "This Google account is not a project member's current sign-in.");
+    assert.equal(h.calls.fetches.filter((fetch) => fetch.body.path === "users:claimInvite").length, claimsBefore, "no claim after a refused approval");
+    assert.match(host.innerHTML, /Confirm your existing account for the new sign-in/);
+    assert.equal(client.signedIn, false);
+    assert.deepEqual(seen, []);
+    // the refusal of the google token never signs the clerk session out
+    assert.equal(h.calls.signOut, 0);
+    assert.equal(client.sessionId, "sess_w");
+  }
+
   console.log("convex-task-client: clerk sessions ok");
 })().catch((error) => {
   console.error(error);

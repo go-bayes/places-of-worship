@@ -398,6 +398,34 @@ test("r-c18: an expired pairing can be neither approved nor spent", async () => 
   assert.equal(member.auth_subject, `${GOOGLE}|g-guy`);
 });
 
+test("r-c18: an approved pairing binds the google identifier it was approved from, and the row's state at the claim", async () => {
+  // the row moved to another identifier after the approval: the pairing no
+  // longer matches it, whoever holds the verified email
+  const moved = world({ allowlist: GOOGLE });
+  const member = googleMember(moved);
+  await pair(moved, clerkGuy, googleGuy);
+  member.auth_subject = `${GOOGLE}|g-guy-new`;
+  await assert.rejects(claim(moved.as(clerkGuy)), /Confirm that Google account first/);
+  assert.equal(member.auth_subject, `${GOOGLE}|g-guy-new`);
+  assert.equal(moved.rows.user_identities.length, 0);
+  assert.equal(moved.rows.identity_migration_pairings[0].consumed_at, undefined);
+  // the row was disabled after the approval: rule 2 still refuses
+  const disabled = world({ allowlist: GOOGLE });
+  const gone = googleMember(disabled);
+  await pair(disabled, clerkGuy, googleGuy);
+  gone.status = "disabled";
+  await assert.rejects(claim(disabled.as(clerkGuy)), /No pending project invitation/);
+  assert.equal(gone.auth_subject, `${GOOGLE}|g-guy`);
+  // the move closed after the approval: nothing re-keys
+  const closed = world({ allowlist: GOOGLE });
+  const kept = googleMember(closed);
+  await pair(closed, clerkGuy, googleGuy);
+  process.env.AUTH_MIGRATION_SOURCE_ISSUERS = "";
+  await assert.rejects(claim(closed.as(clerkGuy)), /No pending project invitation/);
+  assert.equal(kept.auth_subject, `${GOOGLE}|g-guy`);
+  assert.equal(closed.rows.identity_migration_pairings[0].consumed_at, undefined);
+});
+
 test("r-c18: a pairing is single use, and a newer request revokes the older", async () => {
   const w = world({ allowlist: GOOGLE });
   const member = googleMember(w);
