@@ -12,12 +12,15 @@ const vm = require("node:vm");
 const PUBLISHABLE_KEY = "pk_test_c3VyZS1saXphcmQtNTAuY2xlcmsuYWNjb3VudHMuZGV2JA";
 const HOST = "sure-lizard-50.clerk.accounts.dev";
 
-function harness({ session = null, cookie = "", responses = {}, failLoads = 0, failSignOuts = 0, networkFailSignOuts = 0, offlineReloads = 0, storage } = {}) {
+function harness({ session = null, cookie = "", responses = {}, failLoads = 0, failSignOuts = 0, networkFailSignOuts = 0, offlineReloads = 0, storage, storageFails = "" } = {}) {
   const values = storage || new Map([["powConvexAuth:v1", JSON.stringify({ token: "old-google-token" })]]);
+  // storageFails: "all" throws on every call (blocked storage), "writes"
+  // throws on writes only (a full or read-only store)
+  const refuse = (kind) => { if (storageFails === "all" || (storageFails === "writes" && kind === "write")) throw new Error("storage refused"); };
   const localStorage = {
-    getItem(key) { return values.has(key) ? values.get(key) : null; },
-    setItem(key, value) { values.set(key, String(value)); },
-    removeItem(key) { values.delete(key); },
+    getItem(key) { refuse("read"); return values.has(key) ? values.get(key) : null; },
+    setItem(key, value) { refuse("write"); values.set(key, String(value)); },
+    removeItem(key) { refuse("write"); values.delete(key); },
   };
   const calls = { scripts: [], load: [], getToken: [], mountSignIn: [], unmountSignIn: 0, signOut: 0, reload: 0, fetches: [] };
   // the sessions clerk's server still holds for this browser
@@ -697,6 +700,66 @@ const container = () => ({
     assert.deepEqual(admitted, [], "b is never admitted on a's page");
     assert.notEqual(client.user?._id, "user_b");
     assert.ok(ended.length >= 2, "each change away from a cleared the page");
+  }
+
+  // 22. #153 round 5 (sol): a failed sign-out's marker cannot be kept when
+  // storage refuses it. a reload then restores nothing: the session found
+  // on load is signed out first, and if clerk still refuses, the card shows
+  // the failure and its retry, never the portal
+  for (const storageFails of ["all", "writes"]) {
+    // the reload: a live clerk session is found, and storage cannot hold
+    // or confirm a marker
+    const h = harness({ session: { id: "sess_s", email: "shared@example.org" }, cookie: "__client_uat=1", storageFails, responses: { "users:claimInvite": ok("user_1"), "users:me": ok(member) } });
+    const client = new h.Client(config);
+    assert.equal(await client.restoreSession(), null, `nothing restored when storage fails (${storageFails})`);
+    assert.equal(h.calls.signOut, 1, "the restored session is signed out first");
+    assert.equal(h.calls.fetches.some((fetch) => fetch.body.path === "users:claimInvite"), false, "no claim for it");
+    const host = container();
+    await client.renderSignInButton(host, {});
+    assert.equal(host.children.length, 1, "the card shows the sign-in form");
+    assert.equal(client.signedIn, false);
+
+    // clerk refuses the retried sign-out: the failure and retry, no portal
+    const refused = harness({ session: { id: "sess_r", email: "shared@example.org" }, cookie: "__client_uat=1", storageFails, failSignOuts: 2, responses: { "users:claimInvite": ok("user_1"), "users:me": ok(member) } });
+    const refusedClient = new refused.Client(config);
+    const refusedHost = container();
+    await refusedClient.renderSignInButton(refusedHost, {});
+    assert.match(refusedHost.innerHTML, /Sign-out did not finish/);
+    assert.equal(refused.calls.fetches.some((fetch) => fetch.body.path === "users:claimInvite"), false);
+    assert.equal(refusedClient.signedIn, false);
+  }
+  // a fresh sign-in in the page is not held back by unusable storage
+  {
+    const h = harness({ storageFails: "all", responses: { "users:claimInvite": ok("user_1"), "users:me": ok(member) } });
+    const client = new h.Client(config);
+    const host = container();
+    const admitted = [];
+    await client.renderSignInButton(host, { onSignedIn: (user) => admitted.push(user._id) });
+    h.clerk.setSession(h.makeSession("sess_new", "guy@example.org"));
+    await tick();
+    assert.deepEqual(admitted, ["user_1"]);
+    assert.equal(h.calls.signOut, 0);
+  }
+
+  // 23. #153 round 5 (astra): a write the server recorded after the session
+  // changed is reported as committed, with its value, so the caller can
+  // clean up what it owns; a query's late answer is only dropped
+  {
+    const later = () => { let resolve; const promise = new Promise((r) => { resolve = r; }); return { promise, resolve }; };
+    const recorded = later();
+    const responses = {
+      "users:claimInvite": ok("user_a"),
+      "users:me": ok({ ...member, _id: "user_a" }),
+      "rapidEntry:submitCurrentObservation": () => recorded.promise,
+    };
+    const h = harness({ session: { id: "sess_a", email: "a@example.org" }, cookie: "__client_uat=1", responses });
+    const client = new h.Client(config);
+    await client.restoreSession();
+    const submitting = client.submitCurrentObservation({ clientSubmissionId: "sub_a" });
+    await tick();
+    h.clerk.setSession(h.makeSession("sess_b", "b@example.org"));
+    recorded.resolve(ok({ task_id: "t_a", evidence_draft_id: "d_a" }));
+    await assert.rejects(submitting, (error) => error.sessionChanged === true && error.committed === true && error.value.task_id === "t_a");
   }
 
   console.log("convex-task-client: clerk sessions ok");

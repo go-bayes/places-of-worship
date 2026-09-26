@@ -71,20 +71,34 @@
         }
     }
 
+    // the marker of a sign-out clerk has not confirmed, and whether this
+    // browser's storage can hold one at all. storage that cannot be written
+    // and read back cannot prove there is no unfinished sign-out, so a
+    // session restored on load is then treated as one (#153 round 5)
     function readPendingSignOut() {
+        const probeKey = `${SIGN_OUT_PENDING_KEY}:probe`;
         try {
-            return window.localStorage?.getItem(SIGN_OUT_PENDING_KEY) || "";
+            const storage = window.localStorage;
+            if (!storage) return { usable: false, sessionId: "" };
+            storage.setItem(probeKey, "1");
+            const usable = storage.getItem(probeKey) === "1";
+            storage.removeItem(probeKey);
+            return { usable, sessionId: usable ? (storage.getItem(SIGN_OUT_PENDING_KEY) || "") : "" };
         } catch (error) {
-            return "";
+            return { usable: false, sessionId: "" };
         }
     }
 
+    // true when the marker was written (or removed) as asked
     function writePendingSignOut(sessionId) {
         try {
             if (sessionId) window.localStorage?.setItem(SIGN_OUT_PENDING_KEY, sessionId);
             else window.localStorage?.removeItem(SIGN_OUT_PENDING_KEY);
+            return (window.localStorage?.getItem(SIGN_OUT_PENDING_KEY) || "") === (sessionId || "");
         } catch (error) {
-            // blocked storage: the retry lives in this page only
+            // blocked storage: the retry lives in this page only, and a
+            // reload restores nothing (readPendingSignOut reports it unusable)
+            return false;
         }
     }
 
@@ -284,6 +298,9 @@
                 });
                 this.clerk = clerk;
                 this.sessionId = clerk.session?.id || "";
+                // the session found on load, the only one a pending sign-out
+                // can belong to
+                this.loadedSessionId = this.sessionId;
                 clerk.addListener((resources) => this.onClerkChange(resources));
                 return clerk;
             })();
@@ -450,6 +467,16 @@
             if (hadUser) this.lifecycle.onSignedOut?.({ deliberate: false });
         }
 
+        // a sign-out must be finished before this session is admitted: the
+        // marker names it, or storage cannot say and this is the session the
+        // page found on load (a new sign-in in this page never has one)
+        mustFinishSignOut(sessionId = this.sessionId) {
+            if (!sessionId) return false;
+            const marker = readPendingSignOut();
+            if (marker.sessionId === sessionId) return true;
+            return !marker.usable && sessionId === this.loadedSessionId;
+        }
+
         // the server's view after a sign-out: clerk.client.reload() fetches
         // this browser's sessions; the ended one must not be live. a reload
         // that fails (offline) confirms nothing
@@ -473,8 +500,9 @@
                 await this.ensureClerkLoaded();
                 if (!this.sessionId) return null;
                 // a sign-out that never finished is finished first, never
-                // silently undone by a reload
-                if (readPendingSignOut() === this.sessionId) {
+                // silently undone by a reload; without usable storage the
+                // restored session is signed out rather than trusted
+                if (this.mustFinishSignOut()) {
                     await this.signOut({ deliberate: true }).catch(() => {});
                     return null;
                 }
@@ -511,8 +539,16 @@
                 return;
             }
             if (this.user) return;
-            if (this.signOutFailure?.sessionId === this.sessionId || readPendingSignOut() === this.sessionId) {
+            if (this.signOutFailure?.sessionId === this.sessionId) {
                 this.renderSignOutFailure(container);
+                return;
+            }
+            // an unfinished sign-out (or storage that cannot rule one out)
+            // is retried before anything is admitted; the card then shows
+            // the form, or the failure and its retry
+            if (this.mustFinishSignOut()) {
+                await this.signOut({ deliberate: true }).catch(() => {});
+                if (this.signInHost === container) await this.renderSignInButton(container, options);
                 return;
             }
             if (this.claimFailure?.sessionId !== this.sessionId) {
@@ -729,17 +765,32 @@
                 return authError;
             };
             // an answer for a session that has since changed is not handed
-            // back as if it were the current session's
-            if (!overrideToken && !this.isCurrent(mark)) throw sessionChanged();
-            if (!overrideToken && response.status === 401) throw authEnded();
+            // back as if it were the current session's. a query's answer is
+            // simply dropped; a write the server recorded is reported as
+            // committed, with its value, so the caller can still clean up
+            // what it owns (the exact device draft it sent) while leaving
+            // the page alone (#153 round 5)
+            const stale = !overrideToken && !this.isCurrent(mark);
+            if (stale && kind === "query") throw sessionChanged();
+            if (!overrideToken && response.status === 401) throw stale ? sessionChanged() : authEnded();
             const text = await response.text();
             let payload;
             try {
                 payload = text ? JSON.parse(text) : {};
             } catch (error) {
+                if (stale || (!overrideToken && !this.isCurrent(mark))) throw sessionChanged();
                 throw new Error(text || `Convex ${kind} failed.`);
             }
             const failed = (!response.ok && response.status !== 560) || payload.status === "error";
+            // the session may also have changed while the body was read
+            if (stale || (!overrideToken && !this.isCurrent(mark))) {
+                const changed = sessionChanged();
+                if (!failed) {
+                    changed.committed = true;
+                    changed.value = payload.value;
+                }
+                throw changed;
+            }
             if (!failed) return payload.value;
             // only an actual error response is read for authentication
             // wording; data that happens to contain "token" is data

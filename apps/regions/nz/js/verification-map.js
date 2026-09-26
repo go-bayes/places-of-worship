@@ -2486,6 +2486,24 @@ class NzVerificationMap {
         return Boolean(ticket) && ticket.epoch === (this.sessionEpoch || 0) && Boolean(userId) && ticket.userId === userId;
     }
 
+    // a write's receipt, kept apart from the page: onRecorded runs whenever
+    // the server recorded the write, even if the session changed while it
+    // was out (the client then rejects with committed and the value), so the
+    // submitter's own device copy of what was sent is always removed and the
+    // entry never comes back to be sent twice. onRecorded touches only
+    // owner-scoped device records captured before the send; the page itself
+    // stays behind the caller's session guard (#153 round 5)
+    async recordedReceipt(write, onRecorded) {
+        try {
+            const value = await write;
+            onRecorded(value);
+            return value;
+        } catch (error) {
+            if (error?.committed) onRecorded(error.value);
+            throw error;
+        }
+    }
+
     // a check for work begun inside one pin entry (a position fix, an
     // address search): true only while that entry is still open in the
     // same session. entering or leaving pin mode, and every session end,
@@ -8016,6 +8034,11 @@ class NzVerificationMap {
                 values: this.rapidObservationValues(prefix),
                 extra: extraValues,
             };
+            // the form's submission id travels with the draft, so a retry of
+            // an entry whose answer never arrived reuses it and the server
+            // records it once (#153 round 5)
+            const submissionId = document.getElementById(`${prefix}RapidCurrentForm`)?.dataset?.submissionId;
+            if (submissionId) record.submission_id = submissionId;
             // the confirmed pin rides on the record while the entry is open
             const previous = this.readRapidDraft(key);
             if (previous?.pin) record.pin = previous.pin;
@@ -8126,6 +8149,13 @@ class NzVerificationMap {
         const record = this.readRapidDraft(key);
         if (!record?.values) return null;
         const values = record.values;
+        // a restored draft is sent under the submission id it was typed
+        // under, so a draft whose submission did reach the server is
+        // recorded once, not twice
+        const restoredForm = document.getElementById(`${prefix}RapidCurrentForm`);
+        if (restoredForm?.dataset && typeof record.submission_id === "string" && record.submission_id) {
+            restoredForm.dataset.submissionId = record.submission_id;
+        }
         const setValue = (id, value) => {
             const el = document.getElementById(`${prefix}${id}`);
             if (el && value !== undefined && value !== "") el.value = value;
@@ -8574,7 +8604,11 @@ class NzVerificationMap {
             // are deleted once it is recorded (astra m4)
             const draftVersion = options.draftKey ? this.rapidDraftVersion(options.draftKey) : null;
             const snapshotVersion = options.props?.task_id ? this.formSnapshotVersion(options.props.task_id) : null;
-            const result = await this.backend.submitCurrentObservation({
+            const clearSent = () => {
+                if (options.draftKey) this.clearSubmittedRapidDraft(options.draftKey, draftVersion);
+                if (options.props?.task_id) this.deleteSubmittedFormSnapshot(options.props.task_id, snapshotVersion);
+            };
+            const result = await this.recordedReceipt(this.backend.submitCurrentObservation({
                 clientSubmissionId: form.dataset.submissionId,
                 countryCode: entryCountry.code,
                 ...(options.props?.task_id
@@ -8592,15 +8626,14 @@ class NzVerificationMap {
                     } : {}),
                     portal_version: "rapid-current-v1-multicountry",
                 },
-            });
-            // the observation is recorded, so the exact draft it sent goes,
-            // whatever happens next: the key carries the submitter's id and
-            // the version must match, so a later edit or another
-            // contributor's draft is never touched, and the sent entry never
-            // comes back to be sent twice. then, if the session ended while
-            // this was in flight, nothing else lands on the page
-            if (options.draftKey) this.clearSubmittedRapidDraft(options.draftKey, draftVersion);
-            if (options.props?.task_id) this.deleteSubmittedFormSnapshot(options.props.task_id, snapshotVersion);
+            }), clearSent);
+            // the observation is recorded, so the exact draft it sent went,
+            // whatever happens next (recordedReceipt, even after a session
+            // change): the key carries the submitter's id and the version
+            // must match, so a later edit or another contributor's draft is
+            // never touched, and the sent entry never comes back to be sent
+            // twice. then, if the session ended while this was in flight,
+            // nothing else lands on the page
             if (!alive()) return;
             this.clearFormDirty();
             const periodsOutcome = await this.recordRapidPeriods(periodsPlan, result, options.periodsKey);
@@ -11733,17 +11766,16 @@ class NzVerificationMap {
                 });
                 if (!alive()) return;
             } else if (submit) {
-                const result = await this.backend.submitEvidenceDraftWithOccupancies({
+                // recorded: the submitter's device copy of the periods goes,
+                // even if the session ended meanwhile (recordedReceipt)
+                const result = await this.recordedReceipt(this.backend.submitEvidenceDraftWithOccupancies({
                     evidenceDraftId: saved.evidence_draft_id,
                     note: values.note || undefined,
                     clientSubmissionId: guidedSubmission.clientSubmissionId,
                     segments: guidedSubmission.segments,
                     ...(guidedSubmission.chain ? { chain: guidedSubmission.chain } : {}),
                     clientContext: { ...clientContext, portal_version: "assigned-periods-atomic-v2" },
-                });
-                // recorded: the submitter's device copy of the periods goes,
-                // even if the session ended meanwhile
-                this.clearSubmittedGuidedPeriods(props.task_id, periodsVersion);
+                }), () => this.clearSubmittedGuidedPeriods(props.task_id, periodsVersion));
                 if (!alive()) return;
                 periods = result.period_count > 0 ? { ok: true, result, count: result.period_count } : null;
             }
@@ -11966,17 +11998,17 @@ class NzVerificationMap {
         if (!alive()) return;
         if (!plan || plan.problem || !result?.task_id || !result?.evidence_draft_id) return {};
         try {
-            const recorded = await this.backend.submitOccupancies({
+            // recorded: the submitter's device copy of these periods goes,
+            // even if the session ended meanwhile, so they are never sent
+            // twice (recordedReceipt)
+            const recorded = await this.recordedReceipt(this.backend.submitOccupancies({
                 clientSubmissionId: plan.submissionId,
                 taskId: result.task_id,
                 parentEvidenceDraftId: result.evidence_draft_id,
                 segments: plan.segments.map(values => window.PowOccupancy.payload(values)),
                 ...(plan.chain ? { chain: plan.chain } : {}),
                 clientContext: { portal_version: "occupancy-v2-with-observation" },
-            });
-            // recorded: the submitter's device copy of these periods goes,
-            // even if the session ended meanwhile, so they are never sent twice
-            this.clearSubmittedGuidedPeriods(periodsKey, plan.version);
+            }), () => this.clearSubmittedGuidedPeriods(periodsKey, plan.version));
             if (!alive()) return;
             this.taskHistoryByTaskId.delete(result.task_id);
             return { periodsRecorded: { result: recorded, count: plan.count } };

@@ -742,6 +742,98 @@ async function roundThree() {
     assert.deepEqual(moved, ["ring", [2, 2]]);
   }
 
+  // #153 round 5 (astra), integrated: the real client and the real rapid
+  // submission. a submits a nomination, clerk replaces a with b, and the
+  // server's success arrives afterwards. a's sent draft is still removed
+  // from the device (so it never returns to be sent again under a new id),
+  // b's page is untouched, and a draft's submission id survives a reload
+  {
+    if (!window.PowConvexTaskClient) {
+      Object.assign(context, { URL, atob: (value) => Buffer.from(value, "base64").toString("binary") });
+      vm.runInContext(fs.readFileSync(path.join(__dirname, "convex-task-client.js"), "utf8"), context, { filename: "convex-task-client.js" });
+    }
+    values.clear();
+    const draftKey = "powRapidDraft2:NZ:user_a:rapid-pin";
+    values.set(draftKey, JSON.stringify({ saved_at: 111, owner: "user_a", submission_id: "sub_a", values: { directObservation: "a's hall" } }));
+    const sent = [];
+    const answer = later();
+    const previousFetch = context.fetch;
+    context.fetch = async (url, init) => {
+      const body = JSON.parse(init.body);
+      sent.push({ path: body.path, auth: init.headers.Authorization, args: body.args[0] });
+      const value = body.path === "rapidEntry:submitCurrentObservation" ? await answer.promise : null;
+      return { status: 200, ok: true, text: async () => JSON.stringify({ status: "success", value }) };
+    };
+    const client = new window.PowConvexTaskClient({ enabled: true, url: "https://example.convex.cloud", clerkPublishableKey: "pk_test_c3VyZS1saXphcmQtNTAuY2xlcmsuYWNjb3VudHMuZGV2JA" });
+    const sessionFor = (id) => ({ id, async getToken() { return `jwt-${id}`; } });
+    client.clerk = { session: sessionFor("sess_a"), user: null, unmountSignIn() {} };
+    client.sessionId = "sess_a";
+    const { app, calls } = signedInApp("user_a");
+    client.user = app.backendUser;
+    app.backend = client;
+    client.setLifecycle({ onSignedOut: (event) => app.onBackendSessionEnded(event) });
+
+    const form = { dataset: { submissionId: "sub_a" } };
+    const button = { disabled: false };
+    const getElementById = document.getElementById;
+    document.getElementById = (id) => ({ pinRapidCurrentForm: form, pinRapidSubmit: button }[id] || null);
+    window.PowRapidEntry = { localIsoDate: () => "2026-09-26", validateObservationDetailed: () => null, observationPayload: (x) => x };
+    let recordedScreens = 0;
+    Object.assign(app, {
+      rapidObservationValues: () => ({ flagForDiscussion: false, directObservation: "a's hall" }),
+      rapidPeriodsPlan: () => null,
+      pendingEvidenceFiles: () => null,
+      entryCountry: () => ({ code: "NZ", config: { targetYears: [2026] } }),
+      pinConfirmed: { latitude: -41.29, longitude: 174.78, zoom: 17 },
+      pinNearbyCount: 0,
+      manualTasksById: new Map(),
+      showRapidFieldError: () => {},
+      renderSubmissionRecordedDetail: () => { recordedScreens += 1; },
+    });
+    const submitting = app.submitRapidObservation("pin", {
+      draftKey: "rapid-pin",
+      getCandidate: () => ({ name: "A's hall", latitude: -41.29, longitude: 174.78 }),
+    });
+    await new Promise((r) => setTimeout(r, 0));
+    assert.equal(sent.at(-1)?.path, "rapidEntry:submitCurrentObservation");
+    assert.equal(sent.at(-1).args.clientSubmissionId, "sub_a", "sent under the draft's submission id");
+    assert.equal(sent.at(-1).auth, "Bearer jwt-sess_a");
+
+    // clerk replaces a with b; the page clears; b is admitted
+    client.clerk.session = sessionFor("sess_b");
+    client.onClerkChange({ session: client.clerk.session });
+    app.backendUser = { _id: "user_b" };
+    client.user = app.backendUser;
+    const detailBefore = calls.detail;
+
+    // the server's success for a's submission arrives now
+    answer.resolve({ task_id: "t_a", evidence_draft_id: "d_a", candidate_site_id: "c_a", task_status: "needs_review" });
+    await submitting;
+    assert.equal(values.has(draftKey), false, "a's sent draft is gone from the device");
+    assert.equal(recordedScreens, 0, "no recorded screen on b's page");
+    assert.equal(calls.detail, detailBefore, "b's detail pane is untouched");
+    assert.equal(app.manualTasksById.size, 0, "a's task is not added to b's page");
+    assert.equal(sent.filter((request) => request.path === "rapidEntry:submitCurrentObservation").length, 1);
+
+    // a draft keeps its submission id across a reload: persisting stores it,
+    // restoring puts it back on the new form
+    app.backendUser = { _id: "user_a" };
+    const typedForm = { dataset: { submissionId: "sub_kept" } };
+    document.getElementById = (id) => (id === "pinRapidCurrentForm" ? typedForm : null);
+    app.rapidObservationValues = () => ({ directObservation: "typed, unsent" });
+    app.persistRapidDraft("pin", "rapid-pin");
+    assert.equal(JSON.parse(values.get(draftKey)).submission_id, "sub_kept");
+    const reloadedForm = { dataset: { submissionId: "fresh_after_reload" } };
+    document.getElementById = (id) => (id === "pinRapidCurrentForm" ? reloadedForm : null);
+    document.querySelector = () => null;
+    for (const name of ["updateRapidSourceFields", "updateRapidDiscussionFields", "updateRapidUncertaintyField", "updateSourceLocatorField"]) app[name] = () => {};
+    app.restoreRapidDraft("pin", "rapid-pin");
+    assert.equal(reloadedForm.dataset.submissionId, "sub_kept", "a retry reuses the draft's submission id");
+
+    document.getElementById = getElementById;
+    context.fetch = previousFetch;
+  }
+
   console.log("session end dom test passed");
 })().catch((error) => {
   console.error(error);
