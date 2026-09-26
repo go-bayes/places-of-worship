@@ -89,7 +89,7 @@
         "note",
         "source.source_name"
       ],
-      "description": "A clergy-honorific name is admitted at internal scope, never public, when a valid rule item names a claim whose non-empty quoted_support contains the name in rule normal form and whose locator is public and on the dossier pinned allowlist. Every recurrence of that normal form is admitted; object keys, civil honorifics, phones and emails are never admitted, and first-pass and inspection records do not apply the rule."
+      "description": "A rule item names one exact code-point span in one of the four claim fields of its claim. The detected name must use strict ASCII token spacing and boundaries, and its ASCII-lowercase key must occur at bounded positions in the claim quotation. A valid rule item admits recurrences of that key only inside claim fields. Other dossier fields, object keys, review text, manifests, phones, emails, and first-pass records retain their existing refusal rules."
     }
   }
 }

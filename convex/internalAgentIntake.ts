@@ -8,7 +8,7 @@ import { assertNoDuplicateJsonKeys, validateAgentReviewBundle } from "./lib/agen
 import { recordEvidenceVersion } from "./evidenceVersions";
 import { costBasisOf, recordJudgments, type JudgmentInput } from "./lib/agentJudgments";
 
-import { assertInternalAgentIngestEnabled as enabled, internalAgentServiceUser } from "./lib/agentServiceUser";
+import { assertCitedNameRuleAllowed, assertInternalAgentIngestEnabled as enabled, internalAgentServiceUser } from "./lib/agentServiceUser";
 
 // find a receipt whose stored bytes equal the submitted bytes exactly; never validates or writes.
 async function receiptForBytes(ctx: QueryCtx, bundleJson: string, bundleHash: string) {
@@ -55,6 +55,7 @@ export const ingestBundle = internalMutation({
     let parsed: unknown;
     try { assertNoDuplicateJsonKeys(args.bundleJson); parsed = JSON.parse(args.bundleJson); } catch (error) { throw new Error(error instanceof Error ? error.message : "bundleJson must be valid JSON"); }
     const checked = validateAgentReviewBundle(parsed, args.bundleJson);
+    assertCitedNameRuleAllowed(checked.bundle.dossier);
     if (checked.bundleHash !== args.bundleHash) throw new Error("bundleHash does not match bundleJson");
     const existing = await ctx.db.query("agent_intake_receipts").withIndex("by_submission_key", (q) => q.eq("submission_key", checked.bundle.submission_key)).unique();
     if (existing !== null) {

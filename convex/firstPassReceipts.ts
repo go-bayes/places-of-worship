@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { internalMutation, internalQuery, query } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireUser } from "./lib/auth";
-import { assertInternalAgentIngestEnabled, internalAgentServiceUser } from "./lib/agentServiceUser";
+import { assertCitedNameRuleAllowed, assertInternalAgentIngestEnabled, internalAgentServiceUser } from "./lib/agentServiceUser";
 import { validateStandaloneDossier } from "./lib/agentIntake";
 import { FIRST_PASS_SCHEMA_VERSION, validateFirstPassRecord, type FirstPassRecord } from "./lib/firstPass";
 import { costBasisOf, recordJudgments, type JudgmentContext, type JudgmentInput } from "./lib/agentJudgments";
@@ -186,6 +186,7 @@ export const ingestFirstPass = internalMutation({
       }
     }
     const { record, byteLength } = validateFirstPassRecord(args.recordJson, args.recordHash);
+    assertCitedNameRuleAllowed(record.dossier);
     // predecessors must already hold receipts for the same place, so the
     // backend never holds a revision whose history it cannot return
     // lookup failures name the parent by position, never by the supplied hash

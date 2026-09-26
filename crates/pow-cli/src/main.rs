@@ -614,7 +614,7 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
     for item in screened {
         if contains_unadmitted_detail(
             &item.text,
-            if item.is_key {
+            if item.is_key || !claim_field_path(&item.norm) {
                 &none_admitted
             } else {
                 &admitted
@@ -1297,6 +1297,59 @@ fn rule_normal_form(text: &str) -> String {
     out.trim_matches(' ').to_owned()
 }
 
+fn rule_whitespace(character: char) -> bool {
+    let code = character as u32;
+    (9..=13).contains(&code)
+        || matches!(
+            code,
+            0x20 | 0x85 | 0xA0 | 0x1680 | 0x2028 | 0x2029 | 0x202F | 0x205F | 0x3000
+        )
+        || (0x2000..=0x200A).contains(&code)
+}
+
+fn claim_field_path(norm: &str) -> bool {
+    matches!(
+        norm.strip_prefix("dossier.").unwrap_or(norm),
+        "claims[].value"
+            | "claims[].quoted_support"
+            | "claims[].note"
+            | "claims[].source.source_name"
+    )
+}
+
+fn name_key(text: &str) -> String {
+    text.chars()
+        .map(|c| {
+            if c.is_ascii_uppercase() {
+                c.to_ascii_lowercase()
+            } else {
+                c
+            }
+        })
+        .collect()
+}
+
+fn quote_contains_name(quote: &str, key: &str) -> bool {
+    let form = rule_normal_form(quote);
+    for (at, _) in form.match_indices(key) {
+        let end = at + key.len();
+        if (at == 0
+            || form[..at]
+                .chars()
+                .next_back()
+                .is_some_and(|c| " .,;:!?()[]\"'".contains(c)))
+            && (end == form.len()
+                || form[end..]
+                    .chars()
+                    .next()
+                    .is_some_and(|c| " .,;:!?()[]\"'".contains(c)))
+        {
+            return true;
+        }
+    }
+    false
+}
+
 fn honorific_name_pattern() -> &'static regex::Regex {
     static PATTERN: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
     PATTERN.get_or_init(|| regex::Regex::new(
@@ -1304,15 +1357,43 @@ fn honorific_name_pattern() -> &'static regex::Regex {
     ).expect("valid honorific pattern"))
 }
 
-fn clergy_match(text: &str, rule: &Value) -> bool {
-    let honorific = text
-        .split(char::is_whitespace)
-        .next()
-        .unwrap_or("")
-        .trim_end_matches('.');
-    rule["honorifics"]
-        .as_array()
-        .is_some_and(|values| values.iter().any(|value| value.as_str() == Some(honorific)))
+fn clergy_match(
+    text: &str,
+    hit: &regex::Match<'_>,
+    rule: &Value,
+) -> Option<(usize, usize, String)> {
+    let chars: Vec<char> = text.chars().collect();
+    let start = text[..hit.start()].chars().count();
+    let mut end = start + hit.as_str().chars().count();
+    while end > start && rule_whitespace(chars[end - 1]) {
+        end -= 1;
+    }
+    let value: String = chars[start..end].iter().collect();
+    let parts: Vec<&str> = value.split(' ').collect();
+    if !(2..=4).contains(&parts.len())
+        || parts.iter().any(|part| part.is_empty())
+        || value.chars().any(|c| rule_whitespace(c) && c != ' ')
+        || !rule["honorifics"].as_array().is_some_and(|values| {
+            values
+                .iter()
+                .any(|v| v.as_str() == Some(parts[0].strip_suffix('.').unwrap_or(parts[0])))
+        })
+        || parts[1..].iter().any(|part| {
+            let mut chars = part.chars();
+            !chars.next().is_some_and(|c| c.is_ascii_uppercase())
+                || !chars.clone().next().is_some()
+                || !chars.all(|c| c.is_ascii_alphabetic() || matches!(c, '\'' | '-'))
+        })
+        || (start > 0 && !matches!(chars[start - 1], ' ' | '\t' | '\n' | '\r' | '(' | '"'))
+        || (end < chars.len()
+            && !matches!(
+                chars[end],
+                ' ' | '\t' | '\n' | '\r' | '.' | ',' | ';' | ':' | '!' | '?' | ')' | '"'
+            ))
+    {
+        return None;
+    }
+    Some((start, end, value))
 }
 
 fn covered_claim_names(
@@ -1351,12 +1432,11 @@ fn covered_claim_names(
             }
             if let Some(text) = node.and_then(Value::as_str) {
                 for hit in honorific_name_pattern().find_iter(text) {
-                    let form = rule_normal_form(hit.as_str());
-                    if clergy_match(hit.as_str(), rule)
-                        && !form.is_empty()
-                        && quote_form.contains(&form)
-                    {
-                        covered.insert(form);
+                    if let Some((_, _, value)) = clergy_match(text, &hit, rule) {
+                        let key = name_key(&value);
+                        if quote_contains_name(quote, &key) {
+                            covered.insert(key);
+                        }
                     }
                 }
             }
@@ -1388,22 +1468,82 @@ fn cited_name_coverage(
     {
         for (index, item) in items.iter().enumerate() {
             if item.get("admitted_by_rule").is_none() {
+                if ["field", "start", "end"]
+                    .iter()
+                    .any(|field| item.get(field).is_some())
+                {
+                    errors.push(format!(
+                        "/dossier/personal_details_quarantine/items/{index}: span requires a rule"
+                    ));
+                }
                 continue;
             }
-            let covered = item
+            let claim = item
                 .get("context_claim_id")
                 .and_then(Value::as_str)
                 .and_then(|id| first.get(id))
-                .map(|claim| covered_claim_names(claim, domains, rule))
-                .unwrap_or_default();
+                .copied();
+            let field = item.get("field").and_then(Value::as_str);
+            let node = claim
+                .and_then(|claim| {
+                    field.and_then(|field| {
+                        if !matches!(
+                            field,
+                            "value" | "quoted_support" | "note" | "source.source_name"
+                        ) {
+                            return None;
+                        }
+                        field.split('.').fold(Some(claim), |node, part| {
+                            node.and_then(|value| value.get(part))
+                        })
+                    })
+                })
+                .and_then(Value::as_str);
+            let quote = claim
+                .and_then(|claim| claim.get("quoted_support"))
+                .and_then(Value::as_str);
+            let locator = claim
+                .and_then(|claim| claim.get("source"))
+                .and_then(|source| source.get("locator"))
+                .and_then(Value::as_str);
+            let valid_locator = locator.zip(domains).is_some_and(|(locator, domains)| {
+                validate_source_locator(locator).is_ok()
+                    && canonical_locator_host(locator)
+                        .is_ok_and(|host| host_allowed(&host, domains))
+            });
+            let span = item
+                .get("start")
+                .and_then(Value::as_u64)
+                .zip(item.get("end").and_then(Value::as_u64));
+            let matched = node.zip(span).and_then(|(node, (start, end))| {
+                if start >= end || end > node.chars().count() as u64 {
+                    return None;
+                }
+                honorific_name_pattern()
+                    .find_iter(node)
+                    .filter_map(|hit| clergy_match(node, &hit, rule))
+                    .find(|(s, e, _)| *s as u64 == start && *e as u64 == end)
+            });
             if item.get("admitted_by_rule").and_then(Value::as_str)
                 != Some("public_source_cited.v1")
                 || item.get("kind").and_then(Value::as_str) != Some("person_name")
-                || covered.is_empty()
+                || !valid_locator
+                || !quote.is_some_and(|quote| !rule_normal_form(quote).is_empty())
+                || !matched
+                    .as_ref()
+                    .zip(quote)
+                    .is_some_and(|((_, _, value), quote)| {
+                        quote_contains_name(quote, &name_key(value))
+                    })
+                || !claim
+                    .zip(matched.as_ref())
+                    .is_some_and(|(claim, (_, _, value))| {
+                        covered_claim_names(claim, domains, rule).contains(&name_key(value))
+                    })
             {
                 errors.push(format!("/dossier/personal_details_quarantine/items/{index}/admitted_by_rule: rule public_source_cited.v1 does not cover its claim"));
             } else {
-                admitted.extend(covered);
+                admitted.insert(name_key(&matched.unwrap().2));
             }
         }
     }
@@ -1417,7 +1557,8 @@ fn contains_unadmitted_detail(text: &str, admitted: &BTreeSet<String>, rule: &Va
     contains_email(text)
         || contains_nz_phone(text)
         || honorific_name_pattern().find_iter(text).any(|hit| {
-            !clergy_match(hit.as_str(), rule) || !admitted.contains(&rule_normal_form(hit.as_str()))
+            !clergy_match(text, &hit, rule)
+                .is_some_and(|(_, _, value)| admitted.contains(&name_key(&value)))
         })
 }
 
@@ -4961,8 +5102,31 @@ mod tests {
             ("Dr Pat Example", false),
         ] {
             let hit = honorific_name_pattern().find(text).unwrap();
-            assert_eq!(clergy_match(hit.as_str(), rule), expected);
+            assert_eq!(clergy_match(text, &hit, rule).is_some(), expected);
         }
+        for text in ["Rev'd Pat Example.", "(Rev'd Pat Example)"] {
+            let hit = honorific_name_pattern().find(text).unwrap();
+            assert!(clergy_match(text, &hit, rule).is_some());
+        }
+        for text in [
+            "Rev'd\u{85}Pat Example",
+            "Rev'd\u{feff}Pat Example",
+            "Rev'd  Pat Example",
+            "Rev'd Pat Example\u{85}",
+            "Rev'd Pat Example/",
+        ] {
+            if let Some(hit) = honorific_name_pattern().find(text) {
+                assert!(clergy_match(text, &hit, rule).is_none());
+            }
+        }
+        assert!(!quote_contains_name(
+            "Rev'd Pat Examples",
+            "rev'd pat example"
+        ));
+        assert!(!quote_contains_name(
+            "Rev'd Pat Example-Smith",
+            "rev'd pat example"
+        ));
     }
 
     fn validators() -> SchemaValidators {

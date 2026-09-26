@@ -14,6 +14,13 @@ export function assertInternalAgentIngestEnabled(): void {
   }
 }
 
+export function assertCitedNameRuleAllowed(dossier: { personal_details_quarantine?: { items?: Array<{ admitted_by_rule?: string }> } } | null): void {
+  if (dossier?.personal_details_quarantine?.items?.some(item => item.admitted_by_rule !== undefined)
+      && process.env.POW_CITED_NAME_RULE_ENABLED !== "1") {
+    throw new Error("Cited-name admissions are disabled on this deployment.");
+  }
+}
+
 export async function internalAgentServiceUser(ctx: MutationCtx, now: number): Promise<Doc<"users">> {
   let service = await ctx.db.query("users").withIndex("by_email", (q) => q.eq("email", INTERNAL_AGENT_SERVICE_EMAIL)).unique();
   if (service === null) {

@@ -12,6 +12,11 @@ test("cited-name normal form and clergy honorific", () => {
   assert.equal(ruleNormalForm("ÄABC"), "Äabc");
   for (const [honorific, clergy] of [["Rev.", false], ["Fr.", true], ["Dr", false]])
     assert.equal(honorificNameMatches(`${honorific} Pat Example`)[0].clergy, clergy);
+  for (const value of ["Rev'd Pat Example.", "(Rev'd Pat Example)"])
+    assert.equal(honorificNameMatches(value)[0].clergy, true);
+  for (const value of ["Rev'd\u0085Pat Example", "Rev'd\ufeffPat Example", "Rev'd  Pat Example", "Rev'd Pat Example\u0085", "Rev'd Pat Example/"])
+    assert.equal(honorificNameMatches(value).some(hit => hit.clergy), false);
+  assert.deepEqual(honorificNameMatches("😀 Rev'd Pat Example.")[0], { start: 2, end: 19, text: "Rev'd Pat Example", clergy: true });
 });
 
 test("valid bundle validates and hashes", () => {

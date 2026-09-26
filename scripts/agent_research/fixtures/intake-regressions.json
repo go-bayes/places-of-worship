@@ -1017,7 +1017,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1045,7 +1048,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1077,7 +1083,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1109,7 +1118,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1145,7 +1157,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1181,7 +1196,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1201,7 +1219,7 @@
   },
   {
     "name": "cited name: review recurrence",
-    "valid": true,
+    "valid": false,
     "changes": [
       [
         "/dossier/claims/0/value",
@@ -1217,7 +1235,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1259,7 +1280,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c02",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1287,7 +1311,10 @@
           {
             "kind": "phone",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1315,7 +1342,10 @@
           {
             "kind": "person_name",
             "context_claim_id": null,
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1343,7 +1373,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v2"
+            "admitted_by_rule": "public_source_cited.v2",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1371,7 +1404,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1403,7 +1439,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1435,7 +1474,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1467,7 +1509,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1503,7 +1548,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 33
           }
         ]
       ],
@@ -1539,7 +1587,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1571,7 +1622,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "quoted_support",
+            "start": 20,
+            "end": 38
           }
         ]
       ],
@@ -1607,7 +1661,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1623,7 +1680,7 @@
   },
   {
     "name": "cited name: status basis recurrence",
-    "valid": true,
+    "valid": false,
     "changes": [
       [
         "/dossier/claims/0/value",
@@ -1639,7 +1696,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1671,7 +1731,10 @@
           {
             "kind": "person_name",
             "context_claim_id": "osm:way/1:codex:c01",
-            "admitted_by_rule": "public_source_cited.v1"
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
           }
         ]
       ],
@@ -1682,6 +1745,577 @@
       [
         "/review/reasoning",
         "Dr Pat Example also appears on the page."
+      ]
+    ]
+  },
+  {
+    "name": "cited name: place recurrence",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ],
+      [
+        "/dossier/place/name",
+        "Rev'd Pat Example chapel"
+      ]
+    ]
+  },
+  {
+    "name": "cited name: quote plural suffix",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Examples"
+      ]
+    ]
+  },
+  {
+    "name": "cited name: nel whitespace",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ],
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'dPat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'dPat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          }
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "cited name: zero width no break",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ],
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd﻿Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd﻿Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          }
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "cited name: two names one item",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ],
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Pat Example and Bishop Jo Sample"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example and Bishop Jo Sample"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ]
+    ]
+  },
+  {
+    "name": "cited name: two names two items",
+    "valid": true,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ],
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Pat Example and Bishop Jo Sample"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example and Bishop Jo Sample"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          },
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 40,
+            "end": 56
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        2
+      ]
+    ]
+  },
+  {
+    "name": "cited name: span off by one",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 34
+          }
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "cited name: missing field",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "start": 18,
+            "end": 35
+          }
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "cited name: span points to Dr",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ],
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Dr Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Dr Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 32
+          }
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "cited name: nonrule item with start",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "start": 18
+          }
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "cited name: claim check recurrence",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ],
+      [
+        "/review/claim_checks/0/note",
+        "Rev'd Pat Example is named."
+      ]
+    ]
+  },
+  {
+    "name": "cited name: code-point span after an astral character",
+    "valid": true,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "😀 opened 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 20,
+            "end": 37
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ]
+    ]
+  },
+  {
+    "name": "cited name: UTF-16 span after an astral character",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "😀 opened 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 21,
+            "end": 38
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
       ]
     ]
   }

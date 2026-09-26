@@ -17,15 +17,26 @@ const fixture = (name) => JSON.parse(fixtureText(name));
 const partial = () => fixture("first-pass.json");
 const researched = () => fixture("first-pass-researched.json");
 
-test("cited clergy rule never admits a first-pass record", () => {
+test("cited clergy rule never admits a first-pass record with either deployment flag", async () => {
   const record = researched();
   const claim = record.dossier.claims[0];
   claim.value += " under Rev'd Pat Example";
   claim.quoted_support += " under Rev'd Pat Example";
-  record.dossier.personal_details_quarantine.items = [{ kind: "person_name", context_claim_id: claim.claim_id, admitted_by_rule: "public_source_cited.v1" }];
+  const start = Array.from(claim.value).join("").indexOf("Rev'd Pat Example");
+  record.dossier.personal_details_quarantine.items = [{ kind: "person_name", context_claim_id: claim.claim_id, admitted_by_rule: "public_source_cited.v1", field: "value", start, end: start + 17 }];
   record.dossier.personal_details_quarantine.item_count = 1;
   const { recordJson, recordHash } = args(record);
-  assert.throws(() => validateFirstPassRecord(recordJson, recordHash), /personal details/);
+  process.env.POW_INTERNAL_AGENT_INGEST_ENABLED = "true";
+  try {
+    for (const setting of [undefined, "1"]) {
+      if (setting === undefined) delete process.env.POW_CITED_NAME_RULE_ENABLED;
+      else process.env.POW_CITED_NAME_RULE_ENABLED = setting;
+      assert.throws(() => validateFirstPassRecord(recordJson, recordHash), /personal details/);
+      const ctx = context();
+      await assert.rejects(ingestFirstPass._handler(ctx, { recordJson, recordHash }), /personal details/);
+      assert.equal(ctx.rows.agent_first_pass_receipts.length, 0);
+    }
+  } finally { delete process.env.POW_CITED_NAME_RULE_ENABLED; }
 });
 
 // the archive's version-1 wire format (python json.dumps, sorted, compact,

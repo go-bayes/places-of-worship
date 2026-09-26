@@ -137,11 +137,38 @@ export function ruleNormalForm(text: string): string {
   return out.replace(/^ +| +$/g, "");
 }
 
+const RULE_WHITESPACE = (code: number): boolean => (code >= 9 && code <= 13) || [0x20, 0x85, 0xa0, 0x1680, 0x2028, 0x2029, 0x202f, 0x205f, 0x3000].includes(code) || (code >= 0x2000 && code <= 0x200a);
+const LEFT_BOUNDARY = new Set([" ", "\t", "\n", "\r", "(", '"']);
+const RIGHT_BOUNDARY = new Set([" ", "\t", "\n", "\r", ".", ",", ";", ":", "!", "?", ")", '"']);
+const QUOTE_BOUNDARY = new Set([" ", ".", ",", ";", ":", "!", "?", "(", ")", "[", "]", '"', "'"]);
+export function claimFieldPath(norm: string): boolean {
+  return citedNameRule.claim_fields.some((field: string) => norm.replace(/^dossier\./, "") === `claims[].${field}`);
+}
+const nameKey = (text: string): string => text.replace(/[A-Z]/g, char => String.fromCharCode(char.charCodeAt(0) + 32));
+function quoteContainsName(quote: string, key: string): boolean {
+  const form = ruleNormalForm(quote);
+  for (let at = form.indexOf(key); at >= 0; at = form.indexOf(key, at + 1)) {
+    const end = at + key.length;
+    if ((at === 0 || QUOTE_BOUNDARY.has(form[at - 1])) && (end === form.length || QUOTE_BOUNDARY.has(form[end]))) return true;
+  }
+  return false;
+}
+
 export function honorificNameMatches(text: string): Array<{ start: number; end: number; text: string; clergy: boolean }> {
+  const chars = Array.from(text);
   return [...text.matchAll(HONORIFIC_NAME)].map(match => {
-    const value = match[0];
-    const honorific = value.slice(0, value.search(/\s/)).replace(/\.$/, "");
-    return { start: match.index, end: match.index + value.length, text: value, clergy: citedNameRule.honorifics.includes(honorific) };
+    const start = Array.from(text.slice(0, match.index)).length;
+    let end = start + Array.from(match[0]).length;
+    while (end > start && RULE_WHITESPACE(chars[end - 1].codePointAt(0)!)) end--;
+    const value = chars.slice(start, end).join("");
+    const parts = value.split(" ");
+    const clergy = parts.length >= 2 && parts.length <= 4 && parts.every(Boolean)
+      && !Array.from(value).some(char => RULE_WHITESPACE(char.codePointAt(0)!) && char !== " ")
+      && citedNameRule.honorifics.includes(parts[0].replace(/\.$/, ""))
+      && parts.slice(1).every(part => /^[A-Z][A-Za-z'-]+$/.test(part))
+      && (start === 0 || LEFT_BOUNDARY.has(chars[start - 1]))
+      && (end === chars.length || RIGHT_BOUNDARY.has(chars[end]));
+    return { start, end, text: value, clergy };
   });
 }
 
@@ -157,8 +184,8 @@ function coveredClaimNames(claim: Record<string, any>, domains: string[] | null)
     for (const part of path.split(".")) field = field?.[part];
     if (typeof field !== "string") continue;
     for (const match of honorificNameMatches(field)) {
-      const normal = ruleNormalForm(match.text);
-      if (match.clergy && normal && ruleNormalForm(quote).includes(normal)) covered.add(normal);
+      const normal = nameKey(match.text);
+      if (match.clergy && quoteContainsName(quote, normal)) covered.add(normal);
     }
   }
   return covered;
@@ -169,12 +196,25 @@ export function citedNameCoverage(d: Record<string, any>, domains: string[] | nu
   for (const claim of d.claims ?? []) if (typeof claim?.claim_id === "string" && !firstClaims.has(claim.claim_id)) firstClaims.set(claim.claim_id, claim);
   const admitted = new Set<string>(), errors: string[] = [];
   (d.personal_details_quarantine?.items ?? []).forEach((item: any, index: number) => {
-    if (!Object.hasOwn(item, "admitted_by_rule")) return;
+    if (!Object.hasOwn(item, "admitted_by_rule")) {
+      if (["field", "start", "end"].some(field => Object.hasOwn(item, field))) errors.push(`personal_details_quarantine.items[${index}]: span requires a rule`);
+      return;
+    }
     const claim = typeof item.context_claim_id === "string" ? firstClaims.get(item.context_claim_id) : undefined;
-    const covered = claim ? coveredClaimNames(claim, domains) : new Set<string>();
-    if (item.admitted_by_rule !== CITED_NAME_RULE || item.kind !== citedNameRule.kind || !covered.size)
+    let field: any = claim;
+    if (typeof item.field === "string" && citedNameRule.claim_fields.includes(item.field)) for (const part of item.field.split(".")) field = field?.[part];
+    else field = undefined;
+    const quote = claim?.quoted_support;
+    const locator = claim?.source?.locator;
+    let citable = false;
+    if (typeof locator === "string" && domains) try { publicUrl(locator); canonicalHost(locator); citable = hostAllowed(locator, domains); } catch { /* refuse */ }
+    const match = item.admitted_by_rule === CITED_NAME_RULE && item.kind === citedNameRule.kind
+      && typeof quote === "string" && !!ruleNormalForm(quote) && citable && typeof field === "string"
+      && Number.isInteger(item.start) && Number.isInteger(item.end) && item.start >= 0 && item.start < item.end && item.end <= Array.from(field).length
+      ? honorificNameMatches(field).find(hit => hit.clergy && hit.start === item.start && hit.end === item.end) : undefined;
+    if (!match || !quoteContainsName(quote, nameKey(match.text)))
       errors.push(`personal_details_quarantine.items[${index}]: rule ${CITED_NAME_RULE} does not cover its claim`);
-    else for (const name of covered) admitted.add(name);
+    else admitted.add(nameKey(match.text));
   });
   return { admitted, errors };
 }
@@ -182,7 +222,7 @@ export function citedNameCoverage(d: Record<string, any>, domains: string[] | nu
 function hasUnadmittedDetail(text: string, admitted: ReadonlySet<string>): boolean {
   return /(?:\+64|\b0)[\s-]?\d{1,2}[\s-]?\d{3,4}[\s-]?\d{3,5}\b/.test(text)
     || /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(text)
-    || honorificNameMatches(text).some(match => !(match.clergy && admitted.has(ruleNormalForm(match.text))));
+    || honorificNameMatches(text).some(match => !(match.clergy && admitted.has(nameKey(match.text))));
 }
 
 const DIGEST = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/;
@@ -269,7 +309,7 @@ export function assertScreened(value: unknown, schemaNode: any, root: any, hashF
   const skip = options.skip ?? [];
   for (const { path, norm, text, isKey } of walkScreened(value, schemaNode, root, options.overrides ?? {}, options.prefix ?? "")) {
     if (skip.some(s => norm === s || norm.startsWith(`${s}.`) || norm.startsWith(`${s}[`))) continue;
-    if (hasUnadmittedDetail(text, isKey ? new Set() : options.admitted ?? new Set())) throw new Error(`potential personal details in ${path} require human handling`);
+    if (hasUnadmittedDetail(text, !isKey && claimFieldPath(norm) ? options.admitted ?? new Set() : new Set())) throw new Error(`potential personal details in ${path} require human handling`);
     const exempt = !isKey && hashFields.has(norm) && DIGEST.test(text);
     if (!exempt && hasHashToken(text)) throw new Error(`hash-shaped value in ${path} is outside a designated hash field`);
   }

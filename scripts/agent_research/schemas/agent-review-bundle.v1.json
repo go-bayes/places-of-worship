@@ -331,6 +331,26 @@
                     "type": "string",
                     "enum": ["public_source_cited.v1"],
                     "description": "Internal cited clergy-name exception; the named claim must cover the name."
+                  },
+                  "field": {
+                    "type": "string",
+                    "enum": [
+                      "value",
+                      "quoted_support",
+                      "note",
+                      "source.source_name"
+                    ],
+                    "description": "The claim field that holds an admitted name; rule items only."
+                  },
+                  "start": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Code-point offset of the admitted name in the transported field; rule items only."
+                  },
+                  "end": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Code-point offset just past the admitted name; rule items only."
                   }
                 }
               },

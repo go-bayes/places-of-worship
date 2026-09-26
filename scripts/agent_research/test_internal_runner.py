@@ -332,7 +332,9 @@ class ValidationAndAuditTest(unittest.TestCase):
 
     def test_cited_name_reaches_review_and_unadmitted_name_is_refused(self):
         for reasoning, expected in [
-            ("Rev'd Pat Example is named on the page.", "completed"),
+            ("The cited name is named on the page.", "completed"),
+            ("Rev'd Pat Example is named on the page.", "failed"),
+            ("Pat Example is named on the page.", "failed"),
             ("Rev'd Jo Sample also served.", "failed"),
         ]:
             with self.subTest(reasoning), tempfile.TemporaryDirectory() as tmp:
@@ -347,13 +349,13 @@ class ValidationAndAuditTest(unittest.TestCase):
                 self.assertEqual(result["status"], expected, result.get("error"))
                 if expected == "completed":
                     bundle = json.loads((out / "bundle.json").read_text())
-                    self.assertIn("Rev'd Pat Example", bundle['review']['reasoning'])
+                    self.assertIn("Rev'd Pat Example", bundle['dossier']['claims'][0]['value'])
                     self.assertEqual(bundle['dossier']['personal_details_quarantine']['items'][0]['admitted_by_rule'],
                                      'public_source_cited.v1')
                 else:
                     self.assertFalse((out / 'bundle.json').exists())
-            self.assertEqual(bundle["research_run"]["model_id_reported"], "claude-sonnet-5")
-            self.assertEqual(bundle["review_run"]["model_id_reported"], "gpt-5.6-luna")
+                    self.assertEqual(bundle["research_run"]["model_id_reported"], "claude-sonnet-5")
+                    self.assertEqual(bundle["review_run"]["model_id_reported"], "gpt-5.6-luna")
 
     def test_quarantine_hashes_stay_in_the_private_dossier_copy(self):
         prompts: list[str] = []
