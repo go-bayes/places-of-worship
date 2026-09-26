@@ -288,6 +288,9 @@ In force:
 
 - A name reaches a public surface only where a death is recorded, or where the
   person has given permission. Otherwise initials, a role, or a count.
+  *Superseded on 2026-09-26:* the project lead ruled that living persons appear
+  on published surfaces only under pseudonyms; the current rule is in the
+  [confidence standard](../confidence-standard.md), section "Published names".
 - `person_names_public` in `collection.v1` governs **publication, not
   retention**. Names stay in private, access-controlled feeds for audit; the
   consuming page drops them at load, so no render path can reach one. Stripping

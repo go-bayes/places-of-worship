@@ -4,7 +4,7 @@
 
 ### 2026-09-26 (confidence standard 0.3.0; methods log moved)
 
-- Version 0.3.0 of the [confidence standard](docs/confidence-standard.md), snapshot at `docs/development/confidence-standard-2026-09-26-v0.3.0.md`, on the project lead's ruling of 2026-09-26: living persons appear on published surfaces only under pseudonyms, clergy and church-office holders included, with the key from pseudonym to name held privately; a person with a death date recorded from a cited source may be named. The public scope of the cited clergy-name rule `public_source_cited.v1` is withdrawn; its internal scope in the review layer is unchanged. The [summary of AI assistance](docs/ai-assisted-research.md) states the same rule.
+- Version 0.3.0 of the [confidence standard](docs/confidence-standard.md), snapshot at `docs/development/confidence-standard-2026-09-26-v0.3.0.md`, on the project lead's ruling of 2026-09-26: living persons appear on published surfaces only under pseudonyms, clergy and church-office holders included, with the key from pseudonym to name held privately. The public scope of the cited clergy-name rule `public_source_cited.v1` is withdrawn for living persons; its internal scope in the review layer is unchanged. The layer-families design marks its earlier name rule as superseded. The [summary of AI assistance](docs/ai-assisted-research.md) states the same rule.
 - The development methods log moves to the project's private research repository on the project lead's instruction; `docs/development/methods-log.md` is removed and the contributor guidance points to the new location.
 
 ### 2026-09-24 (the pin's menu stays open after a mouse hold)
