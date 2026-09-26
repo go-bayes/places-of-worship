@@ -284,7 +284,12 @@ names and his `From Vanuatu` flag, and so likely resident and locally known.
 A dataset's historical framing establishes nothing about whether its persons
 are alive; **only a recorded death date is positive evidence of decease.**
 
-In force:
+*Superseded on 2026-09-26:* the project lead ruled that living persons appear
+on published surfaces only under pseudonyms; the current rule is in the
+[confidence standard](../confidence-standard.md), section "Published names".
+The first item below records the policy of 2026-08-29 as history.
+
+In force on 2026-08-29:
 
 - A name reaches a public surface only where a death is recorded, or where the
   person has given permission. Otherwise initials, a role, or a count.
