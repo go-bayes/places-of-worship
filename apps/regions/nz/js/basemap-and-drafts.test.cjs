@@ -46,7 +46,9 @@ const context = vm.createContext({
 for (const file of ["occupancy-contract.js", "function-chain-contract.js", "task-presentation.js", "verification-map.js"]) {
   vm.runInContext(fs.readFileSync(path.join(__dirname, file), "utf8"), context, { filename: file });
 }
-const fresh = () => Object.create(window.NzVerificationMap.prototype);
+// device drafts are owner-scoped since c1: every instance here is the
+// same signed-in contributor unless a case says otherwise
+const fresh = (userId = "ra_1") => Object.assign(Object.create(window.NzVerificationMap.prototype), { backendUser: userId ? { _id: userId } : null });
 
 // 1. basemap swap order
 {
@@ -85,21 +87,35 @@ const fresh = () => Object.create(window.NzVerificationMap.prototype);
   const app = fresh();
   app.formSnapshotsByTaskId = new Map();
   app.setFormSnapshot("task-1", { action: "closed", source_title: "Parish notice" });
-  assert.ok(localStorage.getItem("powFormSnapshot:NZ:task-1"), "snapshot written to the device");
+  assert.ok(localStorage.getItem("powFormSnapshot2:NZ:ra_1:task-1"), "snapshot written to the device");
   const reloaded = fresh();
   reloaded.formSnapshotsByTaskId = new Map();
   assert.deepEqual(reloaded.getFormSnapshot("task-1"), { action: "closed", source_title: "Parish notice" }, "a fresh instance reads the device copy");
   assert.equal(reloaded.getFormSnapshot("task-none"), undefined);
   reloaded.deleteFormSnapshot("task-1");
-  assert.equal(localStorage.getItem("powFormSnapshot:NZ:task-1"), null, "delete clears the device copy");
+  assert.equal(localStorage.getItem("powFormSnapshot2:NZ:ra_1:task-1"), null, "delete clears the device copy");
   assert.equal(reloaded.getFormSnapshot("task-1"), undefined);
   app.setFormSnapshot("task-2", { action: "needs_review" });
   app.setFormSnapshot("task-3", { action: "needs_review" });
-  localStorage.setItem("powRapidDraft:NZ:rapid-pin", JSON.stringify({ saved_at: 1, values: { sourceTitle: "Sign" }, extra: {} }));
-  app.clearFormSnapshots();
-  assert.equal(localStorage.getItem("powFormSnapshot:NZ:task-2"), null, "sign-out clears every snapshot");
-  assert.equal(localStorage.getItem("powFormSnapshot:NZ:task-3"), null);
-  assert.ok(localStorage.getItem("powRapidDraft:NZ:rapid-pin"), "and leaves the rapid draft alone");
+  localStorage.setItem("powRapidDraft2:NZ:ra_1:rapid-pin", JSON.stringify({ saved_at: 1, owner: "ra_1", values: { sourceTitle: "Sign" }, extra: {} }));
+  const other = fresh("ra_2");
+  other.formSnapshotsByTaskId = new Map();
+  other.setFormSnapshot("task-2", { action: "someone else's" });
+  app.clearFormSnapshots("ra_1");
+  assert.equal(localStorage.getItem("powFormSnapshot2:NZ:ra_1:task-2"), null, "sign-out clears the contributor's snapshots");
+  assert.ok(localStorage.getItem("powFormSnapshot2:NZ:ra_2:task-2"), "and not another contributor's");
+  const reader = fresh("ra_2");
+  reader.formSnapshotsByTaskId = new Map();
+  app.setFormSnapshot("task-4", { action: "ra_1's" });
+  assert.equal(reader.getFormSnapshot("task-4"), undefined, "nobody reads another owner's snapshot");
+  // signed out, nothing reaches the device
+  const signedOut = fresh(null);
+  signedOut.formSnapshotsByTaskId = new Map();
+  const before = localStorage.length;
+  signedOut.setFormSnapshot("task-9", { action: "typed signed out" });
+  assert.equal(localStorage.length, before, "a signed-out snapshot stays in memory");
+  assert.equal(localStorage.getItem("powFormSnapshot2:NZ:ra_1:task-3"), null);
+  assert.ok(localStorage.getItem("powRapidDraft2:NZ:ra_1:rapid-pin"), "and leaves the rapid draft alone");
 }
 
 // 3. the confirmed pin rides on the rapid draft while the entry is open
@@ -109,23 +125,23 @@ const fresh = () => Object.create(window.NzVerificationMap.prototype);
   app.occupancyPinContext = null;
   app.pinConfirmed = { latitude: -17.74, longitude: 168.31, zoom: 18, locationMode: "building_identified" };
   app.keepRapidPinOnDevice();
-  const kept = JSON.parse(localStorage.getItem("powRapidDraft:NZ:rapid-pin"));
+  const kept = JSON.parse(localStorage.getItem("powRapidDraft2:NZ:ra_1:rapid-pin"));
   assert.equal(kept.values.sourceTitle, "Sign", "the typed values stay");
   assert.equal(kept.pin.latitude, -17.74, "the confirmed pin joins the record");
   // the autosave after a later keystroke carries the pin through
   app.persistRapidDraft("pin", "rapid-pin", { pinNameInput: "Vila prayer hall" });
-  const autosaved = JSON.parse(localStorage.getItem("powRapidDraft:NZ:rapid-pin"));
+  const autosaved = JSON.parse(localStorage.getItem("powRapidDraft2:NZ:ra_1:rapid-pin"));
   assert.equal(autosaved.extra.pinNameInput, "Vila prayer hall");
   assert.equal(autosaved.pin.longitude, 168.31, "autosave keeps the pin");
   // leaving the flow by choice drops the pin and keeps the text
   app.dropRapidPinFromDevice();
-  const left = JSON.parse(localStorage.getItem("powRapidDraft:NZ:rapid-pin"));
+  const left = JSON.parse(localStorage.getItem("powRapidDraft2:NZ:ra_1:rapid-pin"));
   assert.equal(left.pin, undefined, "back to map drops the pin");
   assert.equal(left.extra.pinNameInput, "Vila prayer hall", "and keeps the typed name");
   // a revision or a period's location never writes a pin
   app.reviseContext = { taskId: "t9" };
   app.keepRapidPinOnDevice();
-  assert.equal(JSON.parse(localStorage.getItem("powRapidDraft:NZ:rapid-pin")).pin, undefined, "a revision keeps no pin");
+  assert.equal(JSON.parse(localStorage.getItem("powRapidDraft2:NZ:ra_1:rapid-pin")).pin, undefined, "a revision keeps no pin");
   // resume is a no-op away from add mode, with no map, or with no pin
   app.reviseContext = null;
   app.portalMode = "assigned";

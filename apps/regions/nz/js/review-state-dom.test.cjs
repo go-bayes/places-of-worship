@@ -47,7 +47,7 @@ const window = {
     localStorage: { getItem: () => null, setItem() {} },
     POW_CONVEX_CONFIG: { url: "https://example.convex.cloud" },
     POW_COUNTRY_REGISTRY: { countries: [] },
-    PowConvexTaskClient: class { constructor() { this.configured = true; this.authToken = null; } },
+    PowConvexTaskClient: class { constructor() { this.configured = true; this.authToken = null; } setLifecycle(handlers) { window.__lifecycle = handlers; } },
 };
 window.window = window;
 const context = vm.createContext({ window, document, URLSearchParams, Map, Set, Number, String, Boolean, Array, Object, Promise, console, setTimeout, clearTimeout });
@@ -124,4 +124,206 @@ assert.equal(elements.get("transportDot").className, "transport-dot tone-broken"
 portal.setTransport("ready");
 assert.equal(elements.get("transportDot").textContent, "Connected");
 
-console.log("review state dom test passed");
+// a queue response that arrives after the session ended lands nowhere (c1
+// review, sol m1): the sign-out bumps the session epoch, and a response for
+// another reviewer is dropped as well
+(async () => {
+    const deferred = () => { let resolve; const promise = new Promise((r) => { resolve = r; }); return { promise, resolve }; };
+    portal.client.renderSignInButton = () => Promise.resolve();
+    portal.state.busy = false;
+    portal.state.user = { _id: "reviewer_1", display_name: "Reviewer", roles: ["reviewer"] };
+    portal.state.queue = [];
+    let pending = deferred();
+    portal.client.listReviewQueue = () => pending.promise;
+    const inFlight = portal.loadQueue();
+    portal.showSignedOut("Your sign-in ended.");
+    pending.resolve([row("secret", "needs_review")]);
+    await inFlight;
+    assert.equal(portal.state.queue.length, 0, "the ended session's queue is not restored");
+    assert.doesNotMatch(elements.get("queueList").innerHTML, /Task secret/);
+
+    portal.state.user = { _id: "reviewer_1", display_name: "Reviewer", roles: ["reviewer"] };
+    pending = deferred();
+    const second = portal.loadQueue();
+    portal.showSignedOut("Signed out.");
+    portal.state.user = { _id: "reviewer_2", display_name: "Other", roles: ["reviewer"] };
+    pending.resolve([row("secret", "needs_review")]);
+    await second;
+    assert.equal(portal.state.queue.length, 0, "nor handed to the next reviewer");
+
+    pending = deferred();
+    const third = portal.loadQueue();
+    pending.resolve([row("mine", "needs_review")]);
+    await third;
+    assert.equal(portal.state.queue.length, 1, "a current response still lands");
+
+    // round 4: every other review action checks its session after each
+    // await, in success and error paths alike
+    const signIn = (id) => { portal.state.user = { _id: id, display_name: id, roles: ["reviewer"] }; };
+    const detail = elements.get("detailPanel");
+
+    // a private attachment url that arrives after sign-out is never opened
+    signIn("reviewer_1");
+    pending = deferred();
+    portal.client.requestAttachmentView = () => pending.promise;
+    const opened = [];
+    window.open = (url) => opened.push(url);
+    const button = { dataset: { attachmentId: "att_1" }, disabled: false, textContent: "Open" };
+    const opening = portal.openAttachment(button);
+    portal.showSignedOut("Signed out.");
+    pending.resolve({ view_url: "https://r2.example/signed" });
+    await opening;
+    assert.deepEqual(opened, [], "the url is not opened after sign-out");
+    signIn("reviewer_1");
+    pending = deferred();
+    const current = portal.openAttachment(button);
+    pending.resolve({ view_url: "https://r2.example/current" });
+    await current;
+    assert.deepEqual(opened, ["https://r2.example/current"], "a current request still opens");
+
+    // an occupancy load for a task that the next reviewer has since opened
+    element("occupancyPanelHost");
+    window.PowOccupancyReview = {};
+    signIn("reviewer_1");
+    const task = row("occ", "needs_review").task;
+    portal.state.selected = { task };
+    pending = deferred();
+    portal.client.listTaskOccupancies = () => pending.promise;
+    portal.client.listDerivedStates = async () => ({ presence: [], locations: [], events: [] });
+    const occupancy = portal.loadOccupancyPanel(task);
+    portal.showSignedOut("Signed out.");
+    signIn("reviewer_2");
+    portal.state.selected = { task };
+    pending.resolve([{ private: "reviewer_1's view" }]);
+    await occupancy;
+    assert.equal(portal.state.occupancy, null, "reviewer 1's occupancy load never reaches reviewer 2's view of the same task");
+
+    // a derived-year decision whose answer arrives after sign-out
+    signIn("reviewer_1");
+    portal.state.selected = { task };
+    pending = deferred();
+    let panelLoads = 0;
+    portal.client.decideDerivedYear = () => pending.promise;
+    portal.client.listTaskOccupancies = async () => { panelLoads += 1; return []; };
+    const deciding = portal.decideOccupancyYear(task, "d1", 2000, "confirm");
+    portal.showSignedOut("Signed out.");
+    signIn("reviewer_2");
+    portal.state.selected = { task };
+    pending.resolve({ target_year: 2000, review_state: "confirmed" });
+    await deciding;
+    assert.equal(panelLoads, 0, "no panel reload after sign-out");
+    assert.equal(portal.state.occupancyBusy, false, "the sign-out reset the busy flag");
+
+    // claim, release, extra opinion and return for comment share one runner
+    const claimButton = { disabled: false, handlers: {}, addEventListener(type, fn) { this.handlers[type] = fn; } };
+    const statusLine = element("claimStatusText");
+    elements.set("claimReviewButton", claimButton);
+    signIn("reviewer_1");
+    portal.state.queue = [row("claim", "needs_review")];
+    portal.wireClaimControls(row("claim", "needs_review").task);
+    pending = deferred();
+    let queueLoads = 0;
+    portal.client.claimReviewTask = () => pending.promise;
+    portal.client.listReviewQueue = async () => { queueLoads += 1; return []; };
+    const claiming = claimButton.handlers.click({ currentTarget: claimButton });
+    portal.showSignedOut("Signed out.");
+    signIn("reviewer_2");
+    statusLine.textContent = "reviewer 2's status";
+    pending.resolve({});
+    await claiming;
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    assert.equal(queueLoads, 0, "no queue reload for the ended session");
+    assert.equal(statusLine.textContent, "reviewer 2's status", "the next reviewer's status line is untouched");
+
+    // a recorded decision whose answer arrives after sign-out
+    const decisionStatusText = element("decisionStatusText");
+    signIn("reviewer_1");
+    portal.state.busy = false;
+    portal.state.selected = { task: row("dec", "needs_review").task, latestDraft: { evidence_draft_id: "d9" } };
+    portal.state.content = null;
+    pending = deferred();
+    portal.client.recordReviewDecision = () => pending.promise;
+    const form = {
+        decisionStatus: { value: "needs_more_evidence" },
+        decisionNote: { value: "please add the source" },
+        acceptedAction: { value: "" },
+        identityDecision: { value: "" },
+        requiredFollowUp: { value: "" },
+        querySelector: () => null,
+    };
+    const deciding2 = portal.submitDecision({ preventDefault() {}, currentTarget: form });
+    portal.showSignedOut("Signed out.");
+    signIn("reviewer_2");
+    portal.state.selected = { task: row("other", "needs_review").task };
+    decisionStatusText.textContent = "reviewer 2's form";
+    pending.resolve({ task_status: "changes_requested" });
+    await deciding2;
+    assert.equal(decisionStatusText.textContent, "reviewer 2's form", "no confirmation lands on the next reviewer's page");
+    assert.equal(portal.state.selected.task.task_id, "other", "and their selection stands");
+
+    // the stale-snapshot reload of an ended session does nothing
+    signIn("reviewer_1");
+    pending = deferred();
+    portal.client.recordReviewDecision = () => pending.promise;
+    portal.state.busy = false;
+    portal.state.selected = { task: row("dec", "needs_review").task, latestDraft: { evidence_draft_id: "d9" } };
+    queueLoads = 0;
+    const stale = portal.submitDecision({ preventDefault() {}, currentTarget: form });
+    portal.showSignedOut("Signed out.");
+    pending.resolve(Promise.reject(new Error("Stale review snapshot.")));
+    await stale.catch(() => {});
+    assert.equal(queueLoads, 0, "no reload for an ended session");
+
+    // the client reports a session replaced by another account, or a
+    // refused token, through the lifecycle handler the portal registered
+    // before any restore: the previous reviewer's queue and task leave, and
+    // their outstanding guards go stale (#153 round 1)
+    assert.equal(typeof window.__lifecycle?.onSignedOut, "function", "the portal registers its lifecycle");
+    signIn("reviewer_1");
+    portal.state.queue = [row("q1", "needs_review")];
+    portal.state.selected = { task: row("q1", "needs_review").task };
+    const reviewerOneGuard = portal.sessionGuard();
+    window.__lifecycle.onSignedOut({ deliberate: false, replaced: true });
+    assert.equal(portal.state.user, null);
+    assert.equal(portal.state.queue.length, 0);
+    assert.equal(portal.state.selected, null);
+    assert.equal(reviewerOneGuard(), false, "reviewer 1's late answers land nowhere");
+    signIn("reviewer_2");
+    assert.equal(reviewerOneGuard(), false, "nor on reviewer 2's page");
+    // #153 round 3 (sol): startup's restore of reviewer a is still out when
+    // clerk replaces a's session and the card admits reviewer b. a's late
+    // answer must not overwrite b, whether it names a or nobody
+    element("signOut");
+    element("transportDot");
+    for (const lateAnswer of ["nobody", "reviewer a"]) {
+        portal.showSignedOut("Signed out.");
+        const restore = deferred();
+        const reviewerA = { _id: "reviewer_a", display_name: "A", roles: ["reviewer"] };
+        portal.client.mayHaveSession = true;
+        portal.client.restoreSession = () => restore.promise;
+        portal.client.renderSignInButton = async () => {};
+        portal.client.listReviewQueue = async () => [];
+        portal.client.user = null;
+        const starting = portal.init();
+        // clerk replaces a's session; the card admits b
+        window.__lifecycle.onSignedOut({ deliberate: false, replaced: true });
+        const reviewerB = { _id: "reviewer_b", display_name: "B", roles: ["reviewer"] };
+        portal.state.user = reviewerB;
+        portal.client.user = reviewerB;
+        restore.resolve(lateAnswer === "nobody" ? null : reviewerA);
+        await starting;
+        assert.equal(portal.state.user, reviewerB, `a's late restore (${lateAnswer}) leaves b in place`);
+    }
+    // an unchanged restore still admits the restored reviewer
+    {
+        portal.showSignedOut("Signed out.");
+        const reviewerA = { _id: "reviewer_a", display_name: "A", roles: ["reviewer"] };
+        portal.client.restoreSession = async () => { portal.client.user = reviewerA; return reviewerA; };
+        await portal.init();
+        assert.equal(portal.state.user, reviewerA);
+    }
+    console.log("review state dom test passed");
+})().catch((error) => {
+    console.error(error);
+    process.exit(1);
+});

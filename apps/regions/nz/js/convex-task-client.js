@@ -2,24 +2,109 @@
     const DEFAULT_CONFIG = {
         enabled: false,
         url: "",
-        googleClientId: "",
+        clerkPublishableKey: "",
+        // set only while existing google members are being moved to clerk
+        // (r-c18): the public google client id for the confirmation step
+        googleMigrationClientId: "",
         countryCode: "NZ",
     };
-    const AUTH_REFRESH_MARGIN_MS = 5 * 60 * 1000;
-    const AUTH_REFRESH_TIMEOUT_MS = 30 * 1000;
-    // the sign-in token stays on the device between page loads (jb
-    // 2026-09-05, after guy's phone reloaded the tab each time he checked a
-    // photo): a bearer token of at most an hour, on the device that signed
-    // in, cleared by the sign-out button and by expiry
-    const AUTH_STORAGE_KEY = "powConvexAuth:v1";
+    // clerk sessions (contributor-access brief 4.4): clerk keeps the person
+    // signed in (seven days, refreshed silently) and mints a short-lived
+    // convex token per request from the "convex" jwt template. nothing of
+    // ours holds a token; the google-era copy on the device is removed
+    const CLERK_JWT_TEMPLATE = "convex";
+    const CLERK_JS_MAJOR = "6";
+    const CLERK_UI_MAJOR = "1";
+    const LEGACY_AUTH_STORAGE_KEY = "powConvexAuth:v1";
     const GSI_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
+    const MIGRATION_NEEDED = /Confirm that Google account first/i;
+    // a sign-out clerk has not confirmed, by session id: a reload retries it
+    // rather than restoring the session (shared devices)
+    const SIGN_OUT_PENDING_KEY = "powSignOutPending:v1";
+    const SIGN_OUT_FAILED = "Sign-out did not finish, so this browser may still be signed in. Try again before you leave the device.";
+    // the clerk frontend api hosts this project loads scripts from; a key
+    // naming any other host is refused. add the production instance's host
+    // (for example clerk.religionmap.org) when it is activated
+    const CLERK_FRONTEND_API_HOSTS = ["sure-lizard-50.clerk.accounts.dev"];
+    const NO_ACCESS_HELP = "This address has no project access yet. Sign out and use the invited address, or ask the project lead to invite this one.";
+    // the claimInvite refusals a person can act on (brief 4.3.2)
+    const ACCESS_REFUSED = /No pending project invitation|Verify this email address|bound to another sign-in method|requires a verified email|Confirm that Google account first/i;
     const scriptLoads = new Map();
+
+    // convex wraps a thrown error as "[Request ID: …] Server Error Uncaught
+    // Error: <message> at handler (…)"; the card shows only the message
+    function serverMessage(error) {
+        const raw = String(error?.message || "Could not sign in to the project.");
+        const match = raw.match(/Uncaught Error:\s*([\s\S]*?)(?:\s+at\s+\S+\s+\(|$)/);
+        return (match ? match[1] : raw).trim();
+    }
 
     function normaliseConfig(config) {
         return { ...DEFAULT_CONFIG, ...(config || {}) };
     }
 
-    function loadScriptOnce(src) {
+    function compactObject(value) {
+        return Object.fromEntries(
+            Object.entries(value || {}).filter(([, entry]) => entry !== undefined && entry !== ""),
+        );
+    }
+
+    function escapeText(value) {
+        return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+            "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;",
+        })[char]);
+    }
+
+    // a publishable key is pk_test_ or pk_live_ and the base64 of the
+    // instance's frontend api host followed by "$". the host must be one
+    // this project approved, since clerk's scripts load from it
+    function clerkFrontendApi(publishableKey) {
+        const match = /^pk_(test|live)_([A-Za-z0-9+/]+={0,2})$/.exec(String(publishableKey || ""));
+        if (!match) return "";
+        try {
+            const decoded = atob(match[2]);
+            if (!decoded.endsWith("$") || decoded.indexOf("$") !== decoded.length - 1) return "";
+            const host = decoded.slice(0, -1).toLowerCase();
+            return CLERK_FRONTEND_API_HOSTS.includes(host) ? host : "";
+        } catch (error) {
+            return "";
+        }
+    }
+
+    // the marker of a sign-out clerk has not confirmed, and whether this
+    // browser's storage can hold one at all. storage that cannot be written
+    // and read back cannot prove there is no unfinished sign-out, so a
+    // session restored on load is then treated as one (#153 round 5)
+    function readPendingSignOut() {
+        const probeKey = `${SIGN_OUT_PENDING_KEY}:probe`;
+        try {
+            const storage = window.localStorage;
+            if (!storage) return { usable: false, sessionId: "" };
+            storage.setItem(probeKey, "1");
+            const usable = storage.getItem(probeKey) === "1";
+            storage.removeItem(probeKey);
+            return { usable, sessionId: usable ? (storage.getItem(SIGN_OUT_PENDING_KEY) || "") : "" };
+        } catch (error) {
+            return { usable: false, sessionId: "" };
+        }
+    }
+
+    // true when the marker was written (or removed) as asked
+    function writePendingSignOut(sessionId) {
+        try {
+            if (sessionId) window.localStorage?.setItem(SIGN_OUT_PENDING_KEY, sessionId);
+            else window.localStorage?.removeItem(SIGN_OUT_PENDING_KEY);
+            return (window.localStorage?.getItem(SIGN_OUT_PENDING_KEY) || "") === (sessionId || "");
+        } catch (error) {
+            // blocked storage: the retry lives in this page only, and a
+            // reload restores nothing (readPendingSignOut reports it unusable)
+            return false;
+        }
+    }
+
+    // clerk's bundles are loaded as cors scripts; google's gsi client is not
+    // served with cors headers, so it loads as a plain script
+    function loadScriptOnce(src, attributes = {}, { cors = true } = {}) {
         if (scriptLoads.has(src)) return scriptLoads.get(src);
         const existing = document.querySelector(`script[src="${src}"]`);
         if (existing) {
@@ -29,268 +114,637 @@
             const script = document.createElement("script");
             script.src = src;
             script.async = true;
-            script.defer = true;
+            if (cors) script.crossOrigin = "anonymous";
+            Object.entries(attributes).forEach(([name, value]) => script.setAttribute?.(name, value));
             script.onload = () => resolve();
-            script.onerror = () => reject(new Error(`Could not load ${src}`));
+            script.onerror = () => {
+                scriptLoads.delete(src);
+                script.remove?.();
+                reject(new Error(`Could not load ${src}`));
+            };
             document.head.appendChild(script);
         });
         scriptLoads.set(src, load);
         return load;
     }
 
-    function readStoredAuthToken() {
+    // clerk's session cookie on this site: __client_uat (and a suffixed
+    // twin) holds the time of the last sign-in, or 0 once signed out. it
+    // lets a reload name the user before the page paints without loading
+    // clerk for someone who was never signed in
+    function sessionCookieHint() {
         try {
-            const raw = window.localStorage.getItem(AUTH_STORAGE_KEY);
-            const record = raw ? JSON.parse(raw) : null;
-            return typeof record?.token === "string" ? record.token : "";
+            return String(document.cookie || "")
+                .split(";")
+                .map((part) => part.trim())
+                .some((part) => /^__client_uat(_[^=]*)?=/.test(part) && Number(part.split("=")[1]) > 0);
         } catch (error) {
-            return "";
+            return false;
         }
     }
 
-    function writeStoredAuthToken(token) {
+    function removeLegacyToken() {
         try {
-            if (token) {
-                window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ token, saved_at: Date.now() }));
-            } else {
-                window.localStorage.removeItem(AUTH_STORAGE_KEY);
-            }
+            window.localStorage?.removeItem(LEGACY_AUTH_STORAGE_KEY);
         } catch (error) {
-            // private windows or blocked storage: the session lives in memory only
+            // blocked storage: nothing to remove
         }
     }
 
-    function compactObject(value) {
-        return Object.fromEntries(
-            Object.entries(value || {}).filter(([, entry]) => entry !== undefined && entry !== ""),
-        );
+    // the portal's own tokens, so the clerk card reads as part of the dark
+    // page (docs/ui-style-guide.md, theme table)
+    function themeToken(name, fallback) {
+        try {
+            const value = window.getComputedStyle?.(document.documentElement)?.getPropertyValue(name)?.trim();
+            return value || fallback;
+        } catch (error) {
+            return fallback;
+        }
     }
 
-    function jwtExpiryMs(token) {
-        const payload = String(token || "").split(".")[1];
-        if (!payload) return 0;
-        try {
-            const normalised = payload.replaceAll("-", "+").replaceAll("_", "/");
-            const decoded = JSON.parse(atob(normalised.padEnd(Math.ceil(normalised.length / 4) * 4, "=")));
-            return Number(decoded.exp) ? Number(decoded.exp) * 1000 : 0;
-        } catch (error) {
-            return 0;
-        }
+    function clerkAppearance() {
+        return {
+            variables: {
+                colorBackground: themeToken("--panel", "#17202a"),
+                colorForeground: themeToken("--ink", "#e8edf3"),
+                colorMutedForeground: themeToken("--muted", "#a7b3c2"),
+                colorPrimary: themeToken("--action", "#7fb3e6"),
+                colorPrimaryForeground: themeToken("--panel", "#17202a"),
+                colorInput: themeToken("--panel-2", "#1e2a36"),
+                colorInputForeground: themeToken("--ink", "#e8edf3"),
+                colorBorder: themeToken("--control-line", "#5b6b7d"),
+                colorNeutral: themeToken("--ink", "#e8edf3"),
+                colorDanger: themeToken("--danger", "#f28b82"),
+                colorRing: themeToken("--action", "#7fb3e6"),
+                fontFamily: "inherit",
+                fontFamilyButtons: "inherit",
+                fontSize: "1rem",
+                borderRadius: "6px",
+            },
+            elements: {
+                // the card's frame is ours; clerk's header stays, since its
+                // later steps name the address a code went to
+                rootBox: { width: "100%" },
+                cardBox: { width: "100%", boxShadow: "none", border: "none" },
+                card: { boxShadow: "none", border: "none", padding: "0", background: "transparent" },
+                headerTitle: { fontSize: "1rem" },
+                // 44 px targets on a first-time contributor's path (r-u6)
+                socialButtonsBlockButton: {
+                    minHeight: "44px",
+                    backgroundColor: themeToken("--panel-2", "#1e2a36"),
+                    boxShadow: `0 0 0 1px ${themeToken("--control-line", "#5b6b7d")}`,
+                    color: themeToken("--ink", "#e8edf3"),
+                },
+                socialButtonsBlockButtonText: { color: themeToken("--ink", "#e8edf3"), fontWeight: "600" },
+                formButtonPrimary: { minHeight: "44px", width: "100%", fontSize: "1rem" },
+                otpCodeFieldInput: { minHeight: "44px", boxShadow: `0 0 0 1px ${themeToken("--control-line", "#5b6b7d")}` },
+                formFieldInput: { minHeight: "44px", fontSize: "1rem", boxShadow: `0 0 0 1px ${themeToken("--control-line", "#5b6b7d")}` },
+                formResendCodeLink: { minHeight: "40px" },
+                footerActionLink: { minHeight: "40px", display: "inline-flex", alignItems: "center" },
+            },
+        };
     }
 
     class PowConvexTaskClient {
         constructor(config) {
             this.config = normaliseConfig(config);
-            this.authToken = "";
-            this.authExpiresAt = 0;
-            this.authRefreshTimer = 0;
-            this.authRefreshPromise = null;
-            this.credentialWaiters = [];
-            this.signInOptions = {};
             this.user = null;
-            // a token kept from before a reload comes back with its refresh
-            // timer; restoreSession() then names the user again. a token
-            // inside its refresh margin is dropped rather than restored
-            // into a session that ends mid-entry
-            const stored = readStoredAuthToken();
-            if (stored && jwtExpiryMs(stored) - Date.now() > AUTH_REFRESH_MARGIN_MS) {
-                this.setAuthToken(stored);
-            } else if (stored) {
-                writeStoredAuthToken("");
-            }
+            this.clerk = null;
+            this.clerkLoad = null;
+            this.sessionId = "";
+            this.signInOptions = {};
+            this.signInHost = null;
+            this.signInNode = null;
+            this.completion = null;
+            this.signOutPromise = null;
+            this.signOutFailure = null;
+            // lifecycle callbacks the page registers once, whether the user
+            // came back through restoreSession or the sign-in card
+            this.lifecycle = {};
+            // the session whose claim the backend refused, and why: the card
+            // then says so rather than asking again on every render
+            this.claimFailure = null;
+            // advanced on every session change, so work begun under a session
+            // is recognised as stale even when the same session id comes back
+            // (a to b to a); every chain captures a mark and checks it
+            this.sessionGeneration = 0;
+            removeLegacyToken();
+        }
+
+        // the session a piece of work belongs to: its id and generation
+        sessionMark() {
+            return { sessionId: this.sessionId, generation: this.sessionGeneration };
+        }
+
+        isCurrent(mark) {
+            return Boolean(mark?.sessionId)
+                && mark.sessionId === this.sessionId
+                && mark.generation === this.sessionGeneration;
+        }
+
+        // onSignedOut({ deliberate }): the session ended, in another tab, by
+        // expiry, or by a sign-out this client completed
+        setLifecycle(handlers = {}) {
+            this.lifecycle = { ...handlers };
         }
 
         get configured() {
-            return Boolean(this.config.enabled && this.config.url && this.config.googleClientId);
+            return Boolean(this.config.enabled && this.config.url && this.clerkFrontendApi);
+        }
+
+        get clerkFrontendApi() {
+            return clerkFrontendApi(this.config.clerkPublishableKey);
         }
 
         get signedIn() {
-            return Boolean(this.authToken && this.user);
+            return Boolean(this.user && this.sessionId);
         }
 
-        // deliberate: the sign-out button. google's auto-select cooldown is
-        // for a chosen sign-out only; an expiry must not make the next
-        // automatic re-selection less likely
-        signOut({ deliberate = false } = {}) {
-            this.clearAuth();
-            if (deliberate && window.google?.accounts?.id?.disableAutoSelect) {
-                window.google.accounts.id.disableAutoSelect();
-            }
+        // whether a reload may find a clerk session worth restoring
+        get mayHaveSession() {
+            return Boolean(this.configured && (this.sessionId || sessionCookieHint()));
         }
 
-        clearAuth() {
-            this.authToken = "";
-            this.authExpiresAt = 0;
-            this.user = null;
-            this.clearAuthRefreshTimer();
-            writeStoredAuthToken("");
+        // the move of google members to clerk is open on this page
+        get migrationOpen() {
+            return Boolean(this.configured && this.config.googleMigrationClientId);
         }
 
-        clearAuthRefreshTimer() {
-            if (this.authRefreshTimer) {
-                window.clearTimeout(this.authRefreshTimer);
-                this.authRefreshTimer = 0;
-            }
+        // the address clerk verified for this session, shown on the card
+        get accountEmail() {
+            return this.clerk?.user?.primaryEmailAddress?.emailAddress || "";
         }
 
-        setAuthToken(token) {
-            this.authToken = token || "";
-            this.authExpiresAt = jwtExpiryMs(this.authToken);
-            writeStoredAuthToken(this.authToken);
-            this.scheduleAuthRefresh();
-        }
-
-        scheduleAuthRefresh() {
-            this.clearAuthRefreshTimer();
-            if (!this.authExpiresAt) return;
-            const delay = Math.max(this.authExpiresAt - Date.now() - AUTH_REFRESH_MARGIN_MS, 0);
-            this.authRefreshTimer = window.setTimeout(() => {
-                this.refreshAuthToken().catch(() => {
-                    // The next backend request will surface the expired session
-                    // with a sign-in prompt if Google cannot refresh quietly.
+        async ensureClerkLoaded() {
+            if (!this.configured) return null;
+            if (this.clerkLoad) return this.clerkLoad;
+            this.clerkLoad = (async () => {
+                const host = this.clerkFrontendApi;
+                await loadScriptOnce(`https://${host}/npm/@clerk/ui@${CLERK_UI_MAJOR}/dist/ui.browser.js`);
+                await loadScriptOnce(`https://${host}/npm/@clerk/clerk-js@${CLERK_JS_MAJOR}/dist/clerk.browser.js`, {
+                    "data-clerk-publishable-key": this.config.clerkPublishableKey,
                 });
-            }, delay);
+                const clerk = window.Clerk;
+                if (!clerk || typeof clerk.load !== "function") {
+                    throw new Error("Sign-in did not initialise. Reload the page, then try again.");
+                }
+                await clerk.load({
+                    ui: { ClerkUI: window.__internal_ClerkUICtor },
+                    appearance: clerkAppearance(),
+                    // clerk navigates after sign-in and sign-out; the portal
+                    // stays on its own page so typed work is never reloaded
+                    routerPush: (to) => this.navigate(to),
+                    routerReplace: (to) => this.navigate(to),
+                });
+                this.clerk = clerk;
+                this.sessionId = clerk.session?.id || "";
+                // the session found on load, the only one a pending sign-out
+                // can belong to
+                this.loadedSessionId = this.sessionId;
+                clerk.addListener((resources) => this.onClerkChange(resources));
+                return clerk;
+            })();
+            this.clerkLoad.catch(() => {
+                this.clerkLoad = null;
+            });
+            return this.clerkLoad;
         }
 
-        async handleCredentialResponse(response, options = this.signInOptions) {
+        navigate(to) {
             try {
-                this.setAuthToken(response.credential || "");
-                if (!this.authToken) {
-                    throw new Error("Google did not return an identity token.");
+                const target = new URL(to, window.location.href);
+                if (target.origin === window.location.origin && target.pathname === window.location.pathname) {
+                    return;
                 }
-                await this.claimInvite(options.initials || "");
-                this.user = await this.me();
-                this.resolveCredentialWaiters();
-                if (options.onSignedIn) {
-                    await options.onSignedIn(this.user);
-                }
+                window.location.assign(target.href);
             } catch (error) {
-                this.clearAuth();
-                this.rejectCredentialWaiters(error);
-                if (options.onError) {
-                    options.onError(error);
-                }
+                // an unreadable target: stay on the page
             }
         }
 
-        resolveCredentialWaiters() {
-            const waiters = this.credentialWaiters.splice(0);
-            waiters.forEach(({ resolve }) => resolve(this.user));
-        }
-
-        rejectCredentialWaiters(error) {
-            const waiters = this.credentialWaiters.splice(0);
-            waiters.forEach(({ reject }) => reject(error));
-        }
-
-        async refreshAuthToken() {
-            if (!this.configured || !window.google?.accounts?.id || !this.authToken) {
-                throw new Error("Sign in again before saving.");
+        // clerk reports every session change here: a sign-in finished in
+        // the card, a sign-out in another tab, a session that ended, or one
+        // session replaced by another (a different account signed in
+        // elsewhere). every change away from an established session ends
+        // it for the page first, synchronously, so the portal clears what
+        // the previous person left and advances its session epoch before
+        // the replacement is admitted (#153 round 1)
+        onClerkChange(resources) {
+            const nextSessionId = resources?.session?.id || "";
+            // a deliberate sign-out owns the session state until clerk
+            // confirms it (its confirming reload may report changes)
+            if (this.signOutPromise) return;
+            if (nextSessionId === this.sessionId) return;
+            const hadSession = Boolean(this.sessionId);
+            this.sessionGeneration += 1;
+            this.sessionId = nextSessionId;
+            this.user = null;
+            this.claimFailure = null;
+            this.completion = null;
+            this.releaseSignInElement();
+            if (hadSession) this.lifecycle.onSignedOut?.({ deliberate: false, replaced: Boolean(nextSessionId) });
+            if (!nextSessionId || this.sessionId !== nextSessionId) return;
+            if (this.signInHost) {
+                this.signInHost.innerHTML = `<p class="pow-account-note">Checking project access…</p>`;
+                this.completeSignIn(this.signInOptions).catch(() => {});
             }
-            if (this.authRefreshPromise) return this.authRefreshPromise;
-            this.authRefreshPromise = new Promise((resolve, reject) => {
-                const timeout = window.setTimeout(() => {
-                    reject(new Error("Google sign-in refresh timed out. Sign in again, then retry."));
-                }, AUTH_REFRESH_TIMEOUT_MS);
-                this.credentialWaiters.push({
-                    resolve: (user) => {
-                        window.clearTimeout(timeout);
-                        resolve(user);
-                    },
-                    reject: (error) => {
-                        window.clearTimeout(timeout);
-                        reject(error);
-                    },
-                });
-                window.google.accounts.id.prompt((notification) => {
-                    if (
-                        notification.isNotDisplayed?.()
-                        || notification.isSkippedMoment?.()
-                    ) {
-                        const error = new Error("Google could not refresh your sign-in. Sign in again, then retry.");
-                        this.rejectCredentialWaiters(error);
-                    }
-                });
-            }).finally(() => {
-                this.authRefreshPromise = null;
-            });
-            return this.authRefreshPromise;
         }
 
-        async ensureFreshToken() {
-            if (
-                this.authToken
-                && this.authExpiresAt
-                && Date.now() >= this.authExpiresAt - AUTH_REFRESH_MARGIN_MS
-            ) {
+        // a clerk session becomes a project user: claimInvite activates an
+        // invitation or re-keys an existing member (brief 4.3.2), then me
+        // names the row. one attempt per session at a time
+        async completeSignIn(options = this.signInOptions) {
+            const mark = this.sessionMark();
+            const { sessionId } = mark;
+            if (!sessionId) return null;
+            if (this.completion?.sessionId === sessionId && this.completion.generation === mark.generation) {
+                return this.completion.promise;
+            }
+            const current = () => this.isCurrent(mark);
+            const promise = (async () => {
+                let user;
                 try {
-                    await this.refreshAuthToken();
+                    await this.claimInvite(options.initials || "");
+                    // a chain whose session changed, even to b and back to
+                    // a, stops here: nothing is asked or admitted for it
+                    if (!current()) return null;
+                    user = await this.me();
+                    if (!current()) return null;
+                    if (!user) throw new Error("No pending project invitation found for this email.");
                 } catch (error) {
-                    if (Date.now() >= this.authExpiresAt) {
-                        this.signOut();
-                        error.authExpired = true;
-                        throw error;
+                    // an ended chain's failure is nobody's: it names nobody
+                    if (!current()) return null;
+                    const message = serverMessage(error);
+                    this.user = null;
+                    this.claimFailure = { sessionId, message };
+                    // the backend refused this address: the card says so
+                    // itself; anything else (a network fault) goes to the page
+                    if (ACCESS_REFUSED.test(message)) {
+                        error.accessRefused = true;
+                        if (this.signInHost) this.renderAccountNote(this.signInHost);
+                    } else if (options.onError) {
+                        options.onError(error);
                     }
+                    throw error;
+                } finally {
+                    if (this.completion?.promise === promise) this.completion = null;
                 }
-            }
+                if (!current()) return null;
+                this.user = user;
+                this.claimFailure = null;
+                if (options.onSignedIn) await options.onSignedIn(user);
+                return user;
+            })();
+            this.completion = { sessionId, generation: mark.generation, promise };
+            return promise;
         }
 
-        // google identity services loaded and pointed at this client; the
-        // hour-end refresh (prompt) needs this even when no button renders
-        async ensureGoogleInitialised() {
-            if (!this.configured) return false;
-            await loadScriptOnce(GSI_SCRIPT_SRC);
-            if (!window.google?.accounts?.id) {
-                throw new Error("Google sign-in did not initialise.");
+        // deliberate: the sign-out button, which ends the clerk session and
+        // resolves only once clerk confirms it; a refusal rejects, the card
+        // then offers the retry and a reload retries before restoring.
+        // otherwise only the project user is forgotten, and the card asks
+        // the backend again with the session clerk still holds
+        signOut({ deliberate = false } = {}) {
+            if (!deliberate) {
+                this.endProjectUser();
+                return Promise.resolve();
             }
-            window.google.accounts.id.initialize({
-                client_id: this.config.googleClientId,
-                auto_select: true,
-                callback: async (response) => this.handleCredentialResponse(response),
+            this.user = null;
+            this.claimFailure = null;
+            if (this.signOutPromise) return this.signOutPromise;
+            const clerk = this.clerk;
+            const sessionId = this.sessionId || clerk?.session?.id || "";
+            // the page may repaint its card at once; the card waits for this
+            // so it never re-admits the session being ended
+            this.sessionGeneration += 1;
+            this.sessionId = "";
+            this.signOutFailure = null;
+            this.releaseSignInElement();
+            if (sessionId) writePendingSignOut(sessionId);
+            this.signOutPromise = (async () => {
+                if (!clerk || !sessionId) {
+                    writePendingSignOut("");
+                    return;
+                }
+                try {
+                    await clerk.signOut({ redirectUrl: window.location.href });
+                    // clerk resolves even when the revocation never reached
+                    // its server (it swallows network_error); only the
+                    // server's own list of this browser's sessions confirms it
+                    if (!(await this.confirmSignedOut(clerk, sessionId))) {
+                        throw new Error("sign-out unconfirmed");
+                    }
+                } catch (error) {
+                    // clerk drops its local copy of the session even when the
+                    // server refuses to end it (seen 2026-09-24 with a 422)
+                    // or never hears of it (an aborted request), and a reload
+                    // would bring the session back; so any refusal or
+                    // unconfirmed revocation is a failure, whatever
+                    // clerk.session says now
+                    this.sessionId = clerk.session?.id || sessionId;
+                    this.signOutFailure = { sessionId: this.sessionId };
+                    const failure = new Error(SIGN_OUT_FAILED);
+                    failure.signOutFailed = true;
+                    throw failure;
+                }
+                writePendingSignOut("");
+            })().finally(() => {
+                this.signOutPromise = null;
             });
-            return true;
+            return this.signOutPromise;
         }
 
-        // after a reload: the kept token names the user again, or is
-        // dropped so the sign-in card shows
+        // the backend refused this session's token (a 401, a revoked or
+        // expired session): the project user is forgotten and the page is
+        // told at once, before anything asks the backend again, so nothing
+        // the person loaded stays on screen (#153 round 1). only an admitted
+        // user is announced: a refused claim has shown nothing, and
+        // announcing it would repaint the card into another claim
+        endProjectUser() {
+            const hadUser = Boolean(this.user);
+            this.user = null;
+            this.claimFailure = null;
+            if (hadUser) this.lifecycle.onSignedOut?.({ deliberate: false });
+        }
+
+        // a sign-out must be finished before this session is admitted: the
+        // marker names it, or storage cannot say and this is the session the
+        // page found on load (a new sign-in in this page never has one)
+        mustFinishSignOut(sessionId = this.sessionId) {
+            if (!sessionId) return false;
+            const marker = readPendingSignOut();
+            if (marker.sessionId === sessionId) return true;
+            return !marker.usable && sessionId === this.loadedSessionId;
+        }
+
+        // the server's view after a sign-out: clerk.client.reload() fetches
+        // this browser's sessions; the ended one must not be live. a reload
+        // that fails (offline) confirms nothing
+        async confirmSignedOut(clerk, sessionId) {
+            try {
+                const client = await clerk.client?.reload?.();
+                if (!client) return false;
+                return !(client.sessions || []).some((session) => session?.id === sessionId
+                    && (session.status === "active" || session.status === "pending"));
+            } catch (error) {
+                return false;
+            }
+        }
+
+        // after a reload: a live clerk session names the user again, else
+        // null so the sign-in card shows
         async restoreSession() {
-            if (!this.configured || !this.authToken) return null;
+            if (!this.configured) return null;
             if (this.user) return this.user;
             try {
-                await this.ensureGoogleInitialised().catch(() => false);
-                this.user = (await this.me()) || null;
-                if (!this.user) this.clearAuth();
-                return this.user;
+                await this.ensureClerkLoaded();
+                if (!this.sessionId) return null;
+                // a sign-out that never finished is finished first, never
+                // silently undone by a reload; without usable storage the
+                // restored session is signed out rather than trusted
+                if (this.mustFinishSignOut()) {
+                    await this.signOut({ deliberate: true }).catch(() => {});
+                    return null;
+                }
+                const user = await this.completeSignIn({ ...this.signInOptions, onSignedIn: undefined, onError: undefined });
+                // a session replaced while the claim was out names nobody
+                return user && this.user === user ? user : null;
             } catch (error) {
-                this.clearAuth();
                 return null;
             }
         }
 
+        // the sign-in card: clerk's sign-in (google or an email code) when
+        // nobody is signed in; the account and a sign-out button when a
+        // session exists that the project has not admitted
         async renderSignInButton(container, options = {}) {
             if (!this.configured || !container) return;
             this.signInOptions = options;
-            await this.ensureGoogleInitialised();
-            window.google.accounts.id.renderButton(container, {
-                theme: "outline",
-                size: "large",
-                text: "signin_with",
-                width: 300,
+            this.signInHost = container;
+            let clerk;
+            try {
+                clerk = await this.ensureClerkLoaded();
+            } catch (error) {
+                // a slow or blocked network: say so in the card and offer a
+                // retry, rather than failing back to the page, which would
+                // repaint the card and ask again at once
+                if (this.signInHost === container) this.renderLoadFailure(container, options);
+                return;
+            }
+            if (this.signOutPromise) await this.signOutPromise.catch(() => {});
+            // the page repaints its card often; only the newest host counts
+            if (this.signInHost !== container) return;
+            if (!this.sessionId) {
+                container.replaceChildren(this.signInElement(clerk));
+                return;
+            }
+            if (this.user) return;
+            if (this.signOutFailure?.sessionId === this.sessionId) {
+                this.renderSignOutFailure(container);
+                return;
+            }
+            // an unfinished sign-out (or storage that cannot rule one out)
+            // is retried before anything is admitted; the card then shows
+            // the form, or the failure and its retry
+            if (this.mustFinishSignOut()) {
+                await this.signOut({ deliberate: true }).catch(() => {});
+                if (this.signInHost === container) await this.renderSignInButton(container, options);
+                return;
+            }
+            if (this.claimFailure?.sessionId !== this.sessionId) {
+                container.innerHTML = `<p class="pow-account-note">Checking project access…</p>`;
+                try {
+                    await this.completeSignIn(options);
+                    return;
+                } catch (error) {
+                    // a refusal the card explains was drawn by completeSignIn
+                    if (error.accessRefused && this.signInHost === container) return;
+                    // anything else falls through to the account note below
+                }
+            }
+            if (this.signInHost !== container || this.user) return;
+            this.renderAccountNote(container);
+        }
+
+        // clerk's sign-in lives in one element for a whole signed-out spell
+        // and moves between the page's repainted cards, so a half-typed
+        // address or code survives a repaint. a new spell gets a fresh form
+        signInElement(clerk) {
+            if (!this.signInNode) {
+                this.signInNode = document.createElement("div");
+                this.signInNode.className = "clerk-sign-in-mount";
+                clerk.mountSignIn(this.signInNode, {
+                    appearance: clerkAppearance(),
+                    withSignUp: true,
+                    forceRedirectUrl: window.location.href,
+                    signUpForceRedirectUrl: window.location.href,
+                });
+            }
+            return this.signInNode;
+        }
+
+        releaseSignInElement() {
+            if (!this.signInNode) return;
+            try {
+                this.clerk?.unmountSignIn(this.signInNode);
+            } catch (error) {
+                // already gone with its page
+            }
+            this.signInNode = null;
+        }
+
+        renderLoadFailure(container, options) {
+            container.innerHTML = `
+                <div class="pow-account-note" role="alert">
+                    <span>Sign-in could not load. Check the connection, then try again.</span>
+                    <button type="button" data-pow-retry>Try again</button>
+                </div>
+            `;
+            container.querySelector("[data-pow-retry]")?.addEventListener("click", () => {
+                this.renderSignInButton(container, options);
             });
         }
 
-        async request(kind, path, args = {}) {
+        renderAccountNote(container) {
+            const failure = this.claimFailure?.message || "";
+            if (this.migrationOpen && MIGRATION_NEEDED.test(failure)) {
+                this.renderMigrationStep(container);
+                return;
+            }
+            const noInvitation = /No pending project invitation/i.test(failure);
+            container.innerHTML = `
+                <div class="pow-account-note" role="status">
+                    <span>Signed in as <strong>${escapeText(this.accountEmail || "this account")}</strong></span>
+                    <span>${escapeText(noInvitation ? NO_ACCESS_HELP : failure)}</span>
+                    <button type="button" data-pow-sign-out>Sign out</button>
+                </div>
+            `;
+            container.querySelector("[data-pow-sign-out]")?.addEventListener("click", () => this.retrySignOut(container));
+        }
+
+        // r-c18 (jb 2026-09-24, option 1), bound on the server: signed in to
+        // clerk but not yet admitted, the member confirms the google account
+        // they used before. the clerk sign-in requests a pairing, the google
+        // sign-in approves exactly that pairing, and the claim is retried;
+        // the nonce lives only inside this one flow
+        renderMigrationStep(container) {
+            container.innerHTML = `
+                <div class="pow-account-note pow-migration-step" role="status">
+                    <strong class="inline">Confirm your existing account for the new sign-in</strong>
+                    <span>Signed in as <strong class="inline">${escapeText(this.accountEmail || "this account")}</strong>.</span>
+                    <span>This address belongs to a project member who used Google sign-in before. Continue with that Google account once, and your roles and work move to the new sign-in.</span>
+                    <div class="pow-google-confirm" data-pow-google-confirm></div>
+                    <span class="pow-migration-status" data-pow-migration-status aria-live="polite"></span>
+                    <button type="button" data-pow-sign-out>Sign out</button>
+                </div>
+            `;
+            container.querySelector("[data-pow-sign-out]")?.addEventListener("click", () => this.retrySignOut(container));
+            this.mountGoogleConfirm(container);
+        }
+
+        async mountGoogleConfirm(container) {
+            const host = container.querySelector?.("[data-pow-google-confirm]");
+            const status = container.querySelector?.("[data-pow-migration-status]");
+            if (!host || !this.migrationOpen || !this.sessionId) return;
+            // the clerk session this step belongs to; a click that lands after
+            // it ended or changed does nothing
+            const mark = this.sessionMark();
+            try {
+                await loadScriptOnce(GSI_SCRIPT_SRC, {}, { cors: false });
+                if (!this.isCurrent(mark)) return;
+                const google = window.google?.accounts?.id;
+                if (!google) throw new Error("Google sign-in did not load.");
+                google.initialize({
+                    client_id: this.config.googleMigrationClientId,
+                    auto_select: false,
+                    callback: (response) => this.confirmExistingAccount(mark, response?.credential || "", container, status),
+                });
+                host.innerHTML = "";
+                google.renderButton(host, { theme: "filled_black", size: "large", text: "continue_with", width: 300 });
+            } catch (error) {
+                if (status && this.isCurrent(mark)) status.textContent = "Google sign-in could not load. Check the connection, then try again.";
+            }
+        }
+
+        async confirmExistingAccount(mark, googleCredential, container, status) {
+            const current = () => this.isCurrent(mark);
+            if (!current()) return false;
+            if (status) status.textContent = "Confirming…";
+            try {
+                // 1. the clerk sign-in asks; the server binds the pairing to it
+                const { nonce } = await this.request("mutation", "users:requestIdentityMigration", {});
+                if (!current()) return false;
+                // 2. the google sign-in approves that pairing, and only that
+                await this.request("mutation", "users:approveIdentityMigration", { nonce }, { overrideToken: googleCredential });
+                if (!current()) return false;
+            } catch (error) {
+                if (current() && status) status.textContent = serverMessage(error);
+                return false;
+            }
+            // 3. the clerk sign-in claims; the server spends the pairing
+            if (status) status.textContent = "Confirmed. Moving your account…";
+            this.claimFailure = null;
+            await this.renderSignInButton(container, this.signInOptions);
+            return true;
+        }
+
+        renderSignOutFailure(container) {
+            container.innerHTML = `
+                <div class="pow-account-note" role="alert">
+                    <span>${escapeText(SIGN_OUT_FAILED)}</span>
+                    <button type="button" data-pow-sign-out>Try sign-out again</button>
+                </div>
+            `;
+            container.querySelector("[data-pow-sign-out]")?.addEventListener("click", () => this.retrySignOut(container));
+        }
+
+        async retrySignOut(container) {
+            try {
+                await this.signOut({ deliberate: true });
+            } catch (error) {
+                if (this.signInHost === container) this.renderSignOutFailure(container);
+                return;
+            }
+            this.lifecycle.onSignedOut?.({ deliberate: true });
+        }
+
+        // a fresh short-lived convex token per request; clerk caches it for
+        // about its sixty-second life and refreshes the session silently
+        async getToken() {
+            if (!this.sessionId || !this.clerk?.session) return "";
+            try {
+                return (await this.clerk.session.getToken({ template: CLERK_JWT_TEMPLATE })) || "";
+            } catch (error) {
+                return "";
+            }
+        }
+
+        // overrideToken: a google id token for the one r-c18 call that must
+        // be made as the member's google sign-in, never stored
+        async request(kind, path, args = {}, { overrideToken = "" } = {}) {
             if (!this.configured) {
                 throw new Error("Convex is not configured for this map.");
             }
-            await this.ensureFreshToken();
+            // a request belongs to the session current when it was made: if
+            // clerk switches sessions while its token is fetched, it is not
+            // sent under the next person's token
+            const mark = this.sessionMark();
+            const sessionChanged = () => {
+                const changed = new Error("Your sign-in changed. Sign in again, then retry.");
+                changed.sessionChanged = true;
+                return changed;
+            };
+            const token = overrideToken || await this.getToken();
+            // checked on the generation, so a to b to a while the token was
+            // fetched still counts as a change
+            if (!overrideToken && !this.isCurrent(mark)) throw sessionChanged();
             const endpoint = kind === "query" ? "query" : kind === "action" ? "action" : "mutation";
             const headers = {
                 "Content-Type": "application/json",
                 "Convex-Client": "placesmap-static-workbench",
             };
-            if (this.authToken) {
-                headers.Authorization = `Bearer ${this.authToken}`;
+            if (token) {
+                headers.Authorization = `Bearer ${token}`;
             }
             const response = await fetch(`${this.config.url}/api/${endpoint}`, {
                 method: "POST",
@@ -301,30 +755,50 @@
                     args: [compactObject(args)],
                 }),
             });
+            // a refused sign-in ends the page's session before anything
+            // else, whatever the body holds (it may not be json at all)
+            const authEnded = () => {
+                // the page clears before the caller hears of it
+                if (this.isCurrent(mark)) this.endProjectUser();
+                const authError = new Error("Your sign-in expired. Sign in again, then retry.");
+                authError.authExpired = true;
+                return authError;
+            };
+            // an answer for a session that has since changed is not handed
+            // back as if it were the current session's. a query's answer is
+            // simply dropped; a write the server recorded is reported as
+            // committed, with its value, so the caller can still clean up
+            // what it owns (the exact device draft it sent) while leaving
+            // the page alone (#153 round 5)
+            const stale = !overrideToken && !this.isCurrent(mark);
+            if (stale && kind === "query") throw sessionChanged();
+            if (!overrideToken && response.status === 401) throw stale ? sessionChanged() : authEnded();
             const text = await response.text();
             let payload;
             try {
                 payload = text ? JSON.parse(text) : {};
             } catch (error) {
+                if (stale || (!overrideToken && !this.isCurrent(mark))) throw sessionChanged();
                 throw new Error(text || `Convex ${kind} failed.`);
             }
+            const failed = (!response.ok && response.status !== 560) || payload.status === "error";
+            // the session may also have changed while the body was read
+            if (stale || (!overrideToken && !this.isCurrent(mark))) {
+                const changed = sessionChanged();
+                if (!failed) {
+                    changed.committed = true;
+                    changed.value = payload.value;
+                }
+                throw changed;
+            }
+            if (!failed) return payload.value;
+            // only an actual error response is read for authentication
+            // wording; data that happens to contain "token" is data
             const message = payload.errorMessage || text || `Convex ${kind} failed.`;
-            if (
-                response.status === 401
-                || /Authentication required|Unauthenticated|JWT|token/i.test(message)
-            ) {
-                this.signOut();
-                const authError = new Error("Your sign-in expired. Sign in again, then retry.");
-                authError.authExpired = true;
-                throw authError;
+            if (!overrideToken && /Authentication required|Unauthenticated|JWT|token/i.test(message)) {
+                throw authEnded();
             }
-            if (!response.ok && response.status !== 560) {
-                throw new Error(message);
-            }
-            if (payload.status === "error") {
-                throw new Error(message);
-            }
-            return payload.value;
+            throw new Error(message);
         }
 
         async me() {
