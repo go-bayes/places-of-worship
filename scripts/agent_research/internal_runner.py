@@ -954,7 +954,7 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
     lib.redact_quarantine(dossier)
     private_dossier = json.loads(json.dumps(dossier))
     lib.bundle_quarantine(dossier)
-    admitted_names = intake.cited_name_coverage(dossier)[0]
+    admission = intake.cited_name_coverage(dossier)[0]
     try:
         violations = intake.allowlist_violations(dossier)
     except ValueError:
@@ -972,9 +972,9 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
         if not research_manifest.get("model_id_reported"):
             dossier_errors.append("research provider reported no model id")
         dossier_schema, dossier_root = lib.dossier_screen_schema()
-        leaked = lib.known_value_findings(dossier, known_values, dossier_schema, dossier_root, "dossier", admitted_names)
+        leaked = lib.known_value_findings(dossier, known_values, dossier_schema, dossier_root, "dossier", admission)
         if leaked:
-            findings = [f for f in lib.screen_spans(dossier, dossier_schema, dossier_root, frozenset(), known_map, "dossier", admitted_names)
+            findings = [f for f in lib.screen_spans(dossier, dossier_schema, dossier_root, frozenset(), known_map, "dossier", admission)
                         if f["detector"].startswith("known_value")]
             raise RunRejected("dossier rejected before review: a quarantined value or its hash remains",
                               counters, _refusal("dossier", findings))
@@ -990,7 +990,7 @@ def run(seed: dict, backend: str, review_backend: str, out: Path, timeout_s: int
         # screen runs before any schema check, so a detail in an invalid field is still refused
         # as a personal detail and no schema message can carry it.
         def refuse_if_contaminated(review, subject, schema, root, prefix, stage):
-            findings = lib.screen_spans(subject, schema, root, intake.BUNDLE_HASH_FIELDS, known_map, prefix, admitted_names)
+            findings = lib.screen_spans(subject, schema, root, intake.BUNDLE_HASH_FIELDS, known_map, prefix, admission)
             if findings:
                 refused_path = out / "review.refused.json"
                 refused_path.write_text(json.dumps(review, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

@@ -1021,12 +1021,20 @@
             "field": "value",
             "start": 18,
             "end": 35
+          },
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "quoted_support",
+            "start": 20,
+            "end": 37
           }
         ]
       ],
       [
         "/dossier/personal_details_quarantine/item_count",
-        1
+        2
       ]
     ]
   },
@@ -1388,7 +1396,7 @@
   },
   {
     "name": "cited name: second claim recurrence",
-    "valid": true,
+    "valid": false,
     "changes": [
       [
         "/dossier/claims/0/value",
@@ -1552,12 +1560,20 @@
             "field": "value",
             "start": 18,
             "end": 33
+          },
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "quoted_support",
+            "start": 20,
+            "end": 35
           }
         ]
       ],
       [
         "/dossier/personal_details_quarantine/item_count",
-        1
+        2
       ],
       [
         "/dossier/claims/0/value",
@@ -2000,12 +2016,36 @@
             "field": "value",
             "start": 18,
             "end": 35
+          },
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 40,
+            "end": 56
+          },
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "quoted_support",
+            "start": 20,
+            "end": 37
+          },
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "quoted_support",
+            "start": 42,
+            "end": 58
           }
         ]
       ],
       [
         "/dossier/personal_details_quarantine/item_count",
-        1
+        4
       ],
       [
         "/dossier/claims/0/value",
@@ -2033,12 +2073,28 @@
             "field": "value",
             "start": 40,
             "end": 56
+          },
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "quoted_support",
+            "start": 20,
+            "end": 37
+          },
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "quoted_support",
+            "start": 42,
+            "end": 58
           }
         ]
       ],
       [
         "/dossier/personal_details_quarantine/item_count",
-        2
+        4
       ]
     ]
   },
@@ -2279,12 +2335,20 @@
             "field": "value",
             "start": 20,
             "end": 37
+          },
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "quoted_support",
+            "start": 20,
+            "end": 37
           }
         ]
       ],
       [
         "/dossier/personal_details_quarantine/item_count",
-        1
+        2
       ]
     ]
   },
@@ -2520,12 +2584,36 @@
             "field": "value",
             "start": 18,
             "end": 35
+          },
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 36,
+            "end": 52
+          },
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "quoted_support",
+            "start": 20,
+            "end": 37
+          },
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "quoted_support",
+            "start": 38,
+            "end": 54
           }
         ]
       ],
       [
         "/dossier/personal_details_quarantine/item_count",
-        1
+        4
       ],
       [
         "/dossier/claims/0/value",
@@ -2553,12 +2641,28 @@
             "field": "value",
             "start": 36,
             "end": 52
+          },
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "quoted_support",
+            "start": 20,
+            "end": 37
+          },
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "quoted_support",
+            "start": 38,
+            "end": 54
           }
         ]
       ],
       [
         "/dossier/personal_details_quarantine/item_count",
-        2
+        4
       ]
     ]
   },
@@ -2737,6 +2841,205 @@
             "end": 33
           }
         ]
+      ]
+    ]
+  },
+  {
+    "name": "cited name: uncited second claim note",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          },
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "quoted_support",
+            "start": 20,
+            "end": 37
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        2
+      ],
+      [
+        "/dossier/claims/1/note",
+        "See also Rev'd Pat Example."
+      ]
+    ]
+  },
+  {
+    "name": "cited name: value item only misses quotation",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        1
+      ]
+    ]
+  },
+  {
+    "name": "cited name: fullwidth place recurrence",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          },
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "quoted_support",
+            "start": 20,
+            "end": 37
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        2
+      ],
+      [
+        "/dossier/place/name",
+        "Ｐａｔ Ｅｘａｍｐｌｅ chapel"
+      ]
+    ]
+  },
+  {
+    "name": "cited name: short bare Jo refused",
+    "valid": false,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Jo"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Jo"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 26
+          },
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "quoted_support",
+            "start": 20,
+            "end": 28
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        2
+      ]
+    ]
+  },
+  {
+    "name": "cited name: unrelated short word in place",
+    "valid": true,
+    "changes": [
+      [
+        "/dossier/claims/0/value",
+        "opened 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/claims/0/quoted_support",
+        "built in 1891 under Rev'd Pat Example"
+      ],
+      [
+        "/dossier/personal_details_quarantine/items",
+        [
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "value",
+            "start": 18,
+            "end": 35
+          },
+          {
+            "kind": "person_name",
+            "context_claim_id": "osm:way/1:codex:c01",
+            "admitted_by_rule": "public_source_cited.v1",
+            "field": "quoted_support",
+            "start": 20,
+            "end": 37
+          }
+        ]
+      ],
+      [
+        "/dossier/personal_details_quarantine/item_count",
+        2
+      ],
+      [
+        "/dossier/place/name",
+        "Jo chapel"
       ]
     ]
   }

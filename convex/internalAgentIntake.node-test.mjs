@@ -60,8 +60,11 @@ test("cited-name admissions require the deployment flag before any write", async
   const claim = value.dossier.claims[0];
   claim.value = "opened 1891 under Rev'd Pat Example";
   claim.quoted_support = "built in 1891 under Rev'd Pat Example";
-  value.dossier.personal_details_quarantine.items = [{ kind: "person_name", context_claim_id: claim.claim_id, admitted_by_rule: "public_source_cited.v1", field: "value", start: 18, end: 35 }];
-  value.dossier.personal_details_quarantine.item_count = 1;
+  value.dossier.personal_details_quarantine.items = [
+    { kind: "person_name", context_claim_id: claim.claim_id, admitted_by_rule: "public_source_cited.v1", field: "value", start: 18, end: 35 },
+    { kind: "person_name", context_claim_id: claim.claim_id, admitted_by_rule: "public_source_cited.v1", field: "quoted_support", start: 20, end: 37 },
+  ];
+  value.dossier.personal_details_quarantine.item_count = 2;
   const text = JSON.stringify(value), hash = sha256(text);
   const ctx = context();
   process.env.POW_INTERNAL_AGENT_INGEST_ENABLED = "true";

@@ -258,12 +258,12 @@ def validate_dossier(dossier):
         return errors
     if dossier['place']['country_code'] != 'NZ':
         errors.append('internal pilot permits only operator-cleared NZ sources')
-    admitted, declaration_errors = cited_name_coverage(dossier)
+    admission, declaration_errors = cited_name_coverage(dossier)
     errors += declaration_errors
     # every free-text string of the dossier, not only claim text: a detail the runner's
     # redaction missed must not reach reviewers or Convex.
     screen_schema, screen_root = lib.dossier_screen_schema()
-    errors += lib.screen_errors(lib.screen_findings(dossier, screen_schema, screen_root, BUNDLE_HASH_FIELDS, prefix='dossier', admitted=admitted))
+    errors += lib.screen_errors(lib.screen_findings(dossier, screen_schema, screen_root, BUNDLE_HASH_FIELDS, prefix='dossier', admitted=admission))
     quarantine = dossier['personal_details_quarantine']
     if quarantine['item_count'] != len(quarantine['items']):
         errors.append('personal-details quarantine count does not match its items')
@@ -397,8 +397,8 @@ def validate_bundle(bundle):
     errors += validate_dossier(bundle['dossier'])
     errors += validate_review(bundle['review'], bundle['dossier'])
     # the reviewer's text and both run manifests travel too; the dossier was screened above.
-    admitted, _ = cited_name_coverage(bundle['dossier'])
-    errors += lib.screen_errors(lib.screen_findings(bundle, schema, schema, BUNDLE_HASH_FIELDS, skip=('dossier',), admitted=admitted))
+    admission, _ = cited_name_coverage(bundle['dossier'])
+    errors += lib.screen_errors(lib.screen_findings(bundle, schema, schema, BUNDLE_HASH_FIELDS, skip=('dossier',), admitted=admission))
     research, review = bundle['research_run'], bundle['review_run']
     if research['backend'] == review['backend']:
         errors.append('research and review must use different providers')

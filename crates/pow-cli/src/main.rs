@@ -590,7 +590,7 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
         serde_json::from_str(AGENT_BUNDLE_SCHEMA).expect("pinned bundle schema is valid JSON");
     let policy: Value = serde_json::from_str(SCREEN_POLICY).expect("screen policy is valid JSON");
     let rule = &policy["cited_name_rules"]["public_source_cited.v1"];
-    let admitted = cited_name_coverage(
+    let admission = cited_name_coverage(
         dossier,
         allowlist.as_ref().and_then(|(version, domains)| {
             let country = dossier.get("place")?.get("country_code")?.as_str()?;
@@ -613,9 +613,9 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
     for item in screened {
         if contains_unadmitted_detail(
             &item.text,
-            &admitted,
+            &admission,
             rule,
-            !item.is_key && claim_field_path(&item.norm),
+            if item.is_key { "" } else { &item.path },
         ) {
             errors.push(format!(
                 "/{}: potential personal details require human handling",
@@ -683,7 +683,14 @@ fn validate_agent_semantics(value: &Value, errors: &mut Vec<String>) {
             if claim_object
                 .get(field)
                 .and_then(Value::as_str)
-                .is_some_and(|text| contains_unadmitted_detail(text, &admitted, rule, true))
+                .is_some_and(|text| {
+                    contains_unadmitted_detail(
+                        text,
+                        &admission,
+                        rule,
+                        &format!("dossier.claims[{index}].{field}"),
+                    )
+                })
             {
                 errors.push(format!(
                     "{path}/{field}: potential personal details require human handling"
@@ -1293,6 +1300,11 @@ fn rule_normal_form(text: &str) -> String {
     out.trim_matches(' ').to_owned()
 }
 
+fn recurrence_form(text: &str) -> String {
+    let normalised = icu_normalizer::ComposingNormalizerBorrowed::new_nfkc().normalize(text);
+    rule_normal_form(&normalised)
+}
+
 fn rule_whitespace(character: char) -> bool {
     let code = character as u32;
     (9..=13).contains(&code)
@@ -1301,16 +1313,6 @@ fn rule_whitespace(character: char) -> bool {
             0x20 | 0x85 | 0xA0 | 0x1680 | 0x2028 | 0x2029 | 0x202F | 0x205F | 0x3000
         )
         || (0x2000..=0x200A).contains(&code)
-}
-
-fn claim_field_path(norm: &str) -> bool {
-    matches!(
-        norm.strip_prefix("dossier.").unwrap_or(norm),
-        "claims[].value"
-            | "claims[].quoted_support"
-            | "claims[].note"
-            | "claims[].source.source_name"
-    )
 }
 
 fn name_key(text: &str) -> String {
@@ -1462,6 +1464,7 @@ fn parse_name_at(chars: &[char], start: usize, rule: &Value) -> Option<ParsedNam
         pos += 1;
     }
     if tokens.is_empty()
+        || tokens.join(" ").chars().count() < 3
         || (tokens.len() == 3 && chars.get(pos) == Some(&' ') && token_at(pos + 1).is_some())
     {
         return None;
@@ -1491,23 +1494,11 @@ fn parsed_names(text: &str, rule: &Value) -> Vec<ParsedName> {
         .collect()
 }
 
-fn mask_names(text: &str, admitted: &BTreeSet<String>, rule: &Value) -> String {
-    let mut chars: Vec<char> = text.chars().collect();
-    for name in parsed_names(text, rule) {
-        if admitted.contains(&name.key) {
-            chars[name.start..name.end].fill(' ');
-        }
-    }
-    chars.iter().collect()
-}
-
 fn admitted_known_keys(admitted: &BTreeSet<String>) -> BTreeSet<String> {
     let mut keys = admitted.clone();
     for key in admitted {
         if let Some((_, bare)) = key.split_once(' ') {
-            if bare.chars().count() >= 3 {
-                keys.insert(bare.to_owned());
-            }
+            keys.insert(bare.to_owned());
         }
     }
     keys
@@ -1582,22 +1573,39 @@ fn covered_claim_names(
     covered
 }
 
+#[derive(Default)]
+struct NameAdmission {
+    keys: BTreeSet<String>,
+    spans: BTreeMap<String, Vec<(usize, usize)>>,
+}
+
+fn mask_declared_spans(text: &str, path: &str, admission: &NameAdmission) -> String {
+    let mut chars: Vec<char> = text.chars().collect();
+    let path = path.strip_prefix("dossier.").unwrap_or(path);
+    if let Some(spans) = admission.spans.get(path) {
+        for &(start, end) in spans {
+            chars[start..end].fill(' ');
+        }
+    }
+    chars.iter().collect()
+}
+
 fn cited_name_coverage(
     dossier: &serde_json::Map<String, Value>,
     domains: Option<&[String]>,
     rule: &Value,
     errors: &mut Vec<String>,
-) -> BTreeSet<String> {
+) -> NameAdmission {
     let claims = dossier.get("claims").and_then(Value::as_array);
     let mut first = BTreeMap::new();
     if let Some(claims) = claims {
-        for claim in claims {
+        for (claim_index, claim) in claims.iter().enumerate() {
             if let Some(id) = claim.get("claim_id").and_then(Value::as_str) {
-                first.entry(id).or_insert(claim);
+                first.entry(id).or_insert((claim_index, claim));
             }
         }
     }
-    let mut admitted = BTreeSet::new();
+    let mut admission = NameAdmission::default();
     if let Some(items) = dossier
         .get("personal_details_quarantine")
         .and_then(|q| q.get("items"))
@@ -1620,6 +1628,8 @@ fn cited_name_coverage(
                 .and_then(Value::as_str)
                 .and_then(|id| first.get(id))
                 .copied();
+            let claim_index = claim.map(|(index, _)| index);
+            let claim = claim.map(|(_, claim)| claim);
             let field = item.get("field").and_then(Value::as_str);
             let node = claim
                 .and_then(|claim| {
@@ -1675,32 +1685,35 @@ fn cited_name_coverage(
             {
                 errors.push(format!("/dossier/personal_details_quarantine/items/{index}/admitted_by_rule: rule public_source_cited.v1 does not cover its claim"));
             } else {
-                admitted.insert(matched.unwrap().key);
+                let matched = matched.unwrap();
+                admission.keys.insert(matched.key);
+                let path = format!("claims[{}].{}", claim_index.unwrap(), field.unwrap());
+                admission
+                    .spans
+                    .entry(path)
+                    .or_default()
+                    .push((matched.start, matched.end));
             }
         }
     }
-    admitted
+    admission
 }
 
 fn contains_unadmitted_detail(
     text: &str,
-    admitted: &BTreeSet<String>,
+    admission: &NameAdmission,
     rule: &Value,
-    should_mask: bool,
+    path: &str,
 ) -> bool {
-    let checked = if should_mask {
-        mask_names(text, admitted, rule)
-    } else {
-        text.to_owned()
-    };
+    let checked = mask_declared_spans(text, path, admission);
     // with no admitted names this is exactly main's detector; a record carrying valid cited-name
     // rule items also gets the explicit title search and the refusal of admitted-name recurrences
     contains_personal_details(&checked)
-        || (!admitted.is_empty()
+        || (!admission.keys.is_empty()
             && (!explicit_title_hits(&checked, rule).is_empty()
-                || admitted_known_keys(admitted)
+                || admitted_known_keys(&admission.keys)
                     .iter()
-                    .any(|key| rule_normal_form(&checked).contains(key))))
+                    .any(|key| recurrence_form(&checked).contains(key))))
 }
 
 /// Email addresses, with the pattern lib.py `_EMAIL` and agentIntake.ts use, so a trailing
@@ -5291,6 +5304,32 @@ mod tests {
         assert!(parsed_names("éRev'd Pat Example", rule).is_empty());
         assert!(parsed_names("Rev'd\u{85}Pat Example", rule).is_empty());
         assert!(parsed_names("Rev'd Pat Jo Lee Example", rule).is_empty());
+        assert!(parsed_names("Rev'd Jo", rule).is_empty());
+        assert_eq!(
+            recurrence_form("Ｐａｔ\u{3000}Ｅｘａｍｐｌｅ"),
+            "pat example"
+        );
+        assert_eq!(recurrence_form("ＲＥＶ’Ｄ\tＰＡＴ"), "rev'd pat");
+        let admission = NameAdmission {
+            keys: BTreeSet::from(["rev'd pat example".to_owned()]),
+            spans: BTreeMap::from([("claims[0].value".to_owned(), vec![(0, 17)])]),
+        };
+        assert_eq!(
+            mask_declared_spans(
+                "Rev'd Pat Example Rev'd Pat Example",
+                "dossier.claims[0].value",
+                &admission
+            ),
+            format!("{} Rev'd Pat Example", " ".repeat(17))
+        );
+        assert_eq!(
+            mask_declared_spans(
+                "Rev'd Pat Example",
+                "dossier.claims[0].quoted_support",
+                &admission
+            ),
+            "Rev'd Pat Example"
+        );
         assert_eq!(
             explicit_title_hits("éRev'd Pat Example", rule)
                 .iter()
@@ -5306,14 +5345,6 @@ mod tests {
             vec!["Rev'd\u{85}Pat"]
         );
         assert!(explicit_title_hits("xRev'd Pat", rule).is_empty());
-        assert_eq!(
-            mask_names(
-                "Rev'd Pat Example Dr Jo Sample",
-                &BTreeSet::from(["rev'd pat example".to_owned()]),
-                rule
-            ),
-            format!("{} Dr Jo Sample", " ".repeat(17))
-        );
         assert!(quote_contains_name(
             "(Rev'd Pat Example)",
             "rev'd pat example"
@@ -6075,8 +6106,11 @@ mod tests {
         bundle["dossier"]["claims"][0]["quoted_support"] =
             json!("built in 1891 under Rev'd Pat Example");
         let claim_id = bundle["dossier"]["claims"][0]["claim_id"].clone();
-        bundle["dossier"]["personal_details_quarantine"]["items"] = json!([{"kind":"person_name","context_claim_id":claim_id,"admitted_by_rule":"public_source_cited.v1","field":"value","start":18,"end":35}]);
-        bundle["dossier"]["personal_details_quarantine"]["item_count"] = json!(1);
+        bundle["dossier"]["personal_details_quarantine"]["items"] = json!([
+            {"kind":"person_name","context_claim_id":claim_id,"admitted_by_rule":"public_source_cited.v1","field":"value","start":18,"end":35},
+            {"kind":"person_name","context_claim_id":claim_id,"admitted_by_rule":"public_source_cited.v1","field":"quoted_support","start":20,"end":37}
+        ]);
+        bundle["dossier"]["personal_details_quarantine"]["item_count"] = json!(2);
         let raw = serde_json::to_string(&bundle).unwrap();
         let changed = raw.replacen("\"start\":18", "\"start\":18.0", 1);
         assert_ne!(raw, changed);

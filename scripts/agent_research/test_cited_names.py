@@ -62,7 +62,7 @@ class CitedNameTests(unittest.TestCase):
 
     def test_extra_name_demotes_cover(self):
         dossier = self.dossier()
-        lib.quarantine_dossier(dossier, extra_names=['Pat Example'])
+        lib.quarantine_dossier(dossier, extra_names=['pat example'])
         self.assertNotIn('Pat Example', json.dumps({k: v for k, v in dossier.items() if k != 'personal_details_quarantine'}))
         self.assertFalse(any('admitted_by_rule' in item for item in dossier['personal_details_quarantine']['items']))
 
@@ -95,7 +95,8 @@ class CitedNameTests(unittest.TestCase):
         lib.quarantine_dossier(dossier)
         items = dossier['personal_details_quarantine']['items']
         known = lib.known_values(items, include_admitted=True)
-        admitted_names = frozenset({lib.name_key(NAME)})
+        admitted_names, errors = intake.cited_name_coverage(dossier)
+        self.assertEqual(errors, [])
         lib.redact_quarantine(dossier)
         lib.bundle_quarantine(dossier)
         schema, root = lib.dossier_screen_schema()
@@ -119,7 +120,10 @@ class CitedNameTests(unittest.TestCase):
         self.assertEqual([x[2] for x in lib.explicit_title_hits("éRev'd Pat Example")], ["Rev'd Pat"])
         self.assertEqual([x[2] for x in lib.explicit_title_hits("Rev'd\u0085Pat Example")], ["Rev'd\u0085Pat"])
         self.assertEqual(lib.explicit_title_hits("xRev'd Pat"), [])
-        self.assertEqual(lib.mask_names("Rev'd Pat Example Dr Jo Sample", {"rev'd pat example"}), ' ' * 17 + ' Dr Jo Sample')
+        admission = lib.Admission(frozenset({"rev'd pat example"}), {'claims[0].value': ((0, 17),)})
+        self.assertEqual(lib.mask_spans("Rev'd Pat Example Dr Jo Sample", 'dossier.claims[0].value', admission),
+                         ' ' * 17 + ' Dr Jo Sample')
+        self.assertEqual(lib.mask_spans("Rev'd Pat Example", 'dossier.claims[1].value', admission), "Rev'd Pat Example")
         self.assertTrue(lib.quote_contains_name("(Rev'd Pat Example)", "rev'd pat example"))
         self.assertFalse(lib.quote_contains_name("Rev'd Pat Examples", "rev'd pat example"))
 
@@ -145,6 +149,77 @@ class CitedNameTests(unittest.TestCase):
         self.assertNotEqual(raw, json.dumps(bundle))
         self.assertEqual(intake.validate_bundle(intake.parse_json(json.dumps(bundle))), [])
         self.assertTrue(intake.validate_bundle(intake.parse_json(raw)))
+
+
+    def test_recurrence_form_and_short_name(self):
+        self.assertEqual(lib.recurrence_form('Ｐａｔ\u3000Ｅｘａｍｐｌｅ'), 'pat example')
+        self.assertEqual(lib.recurrence_form('ＲＥＶ’Ｄ\tＰＡＴ'), "rev'd pat")
+        self.assertEqual(lib.parsed_names("Rev'd Jo"), [])
+        self.assertTrue(lib.find_personal_details("Rev'd Jo"))
+
+    def test_declared_spans_only(self):
+        admission = lib.Admission(frozenset({lib.name_key(NAME)}), {'claims[0].value': ((0, 17),)})
+        self.assertEqual(lib.mask_spans(NAME + ' ' + NAME, 'dossier.claims[0].value', admission), ' ' * 17 + ' ' + NAME)
+        self.assertEqual(lib.mask_spans(NAME, 'dossier.claims[0].quoted_support', admission), NAME)
+
+    def test_independently_withheld_civil_name_demotes_cover(self):
+        dossier = self.dossier()
+        dossier['claims'][1]['note'] = 'Dr Pat Example wrote the history.'
+        lib.quarantine_dossier(dossier)
+        self.assertNotIn('Pat Example', json.dumps({k: v for k, v in dossier.items() if k != 'personal_details_quarantine'}))
+        self.assertFalse(any('admitted_by_rule' in item for item in dossier['personal_details_quarantine']['items']))
+
+    def test_existing_quarantine_value_demotes_cover(self):
+        dossier = self.dossier()
+        dossier['personal_details_quarantine']['items'] = [
+            {'kind': 'person_name', 'context_claim_id': None, 'value': 'Pat Example'}]
+        dossier['personal_details_quarantine']['item_count'] = 1
+        lib.quarantine_dossier(dossier)
+        self.assertNotIn(NAME, dossier['claims'][0]['value'])
+        self.assertFalse(any('admitted_by_rule' in item for item in dossier['personal_details_quarantine']['items']))
+
+    def test_uncited_second_claim_recurrence_is_withheld(self):
+        dossier = self.dossier()
+        dossier['claims'][1]['note'] = "See also Rev'd Pat Example."
+        lib.quarantine_dossier(dossier)
+        self.assertIn(NAME, dossier['claims'][0]['value'])
+        self.assertIn(NAME, dossier['claims'][0]['quoted_support'])
+        self.assertNotIn(NAME, dossier['claims'][1]['note'])
+        rule_items = [item for item in dossier['personal_details_quarantine']['items'] if 'admitted_by_rule' in item]
+        self.assertEqual([(item['field'], item['start'], item['end']) for item in rule_items],
+                         [('value', 18, 35), ('quoted_support', 20, 37)])
+
+    def test_rule_items_cover_each_occurrence_and_source_name(self):
+        dossier = self.dossier(value=f'opened under {NAME} and {NAME}', quote=f'built under {NAME}')
+        dossier['claims'][0]['source']['source_name'] = NAME
+        lib.quarantine_dossier(dossier)
+        rule_items = [item for item in dossier['personal_details_quarantine']['items'] if 'admitted_by_rule' in item]
+        self.assertEqual([(item['field'], item['start']) for item in rule_items],
+                         [('value', 13), ('value', 35), ('quoted_support', 12), ('source.source_name', 0)])
+        lib.redact_quarantine(dossier)
+        lib.bundle_quarantine(dossier)
+        bundle = fixture('internal-review-bundle.json')
+        bundle['dossier'] = dossier
+        self.assertEqual(intake.validate_bundle(bundle), [])
+
+    def test_fullwidth_recurrence_is_withheld_and_refused(self):
+        dossier = self.dossier()
+        dossier['place']['name'] = 'Ｐａｔ Ｅｘａｍｐｌｅ chapel'
+        lib.quarantine_dossier(dossier)
+        self.assertNotIn('Ｐａｔ Ｅｘａｍｐｌｅ', dossier['place']['name'])
+        lib.redact_quarantine(dossier)
+        lib.bundle_quarantine(dossier)
+        bundle = fixture('internal-review-bundle.json')
+        bundle['dossier'] = dossier
+        self.assertEqual(intake.validate_bundle(bundle), [])
+        bundle['dossier']['place']['name'] = 'Ｐａｔ Ｅｘａｍｐｌｅ chapel'
+        self.assertTrue(intake.validate_bundle(bundle))
+
+    def test_short_bare_name_is_not_admitted(self):
+        dossier = self.dossier(value="opened 1891 under Rev'd Jo", quote="built in 1891 under Rev'd Jo")
+        lib.quarantine_dossier(dossier)
+        self.assertNotIn("Rev'd Jo", dossier['claims'][0]['value'])
+        self.assertFalse(any('admitted_by_rule' in item for item in dossier['personal_details_quarantine']['items']))
 
 
 class NoRuleRecordsTest(unittest.TestCase):

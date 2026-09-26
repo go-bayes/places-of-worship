@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
-import { assertNoDuplicateJsonKeys, hasPersonalDetails, hostAllowed, ruleNormalForm, honorificNameMatches, explicitTitleHits, parsedNames, maskNames, quoteContainsName, validateAgentReviewBundle } from "./agentIntake.ts";
+import { assertNoDuplicateJsonKeys, hasPersonalDetails, hostAllowed, ruleNormalForm, recurrenceForm, honorificNameMatches, explicitTitleHits, parsedNames, maskDeclaredSpans, quoteContainsName, validateAgentReviewBundle } from "./agentIntake.ts";
 import { sha256 } from "./sha256.ts";
 const fixturePath = new URL("../../scripts/agent_research/fixtures/internal-review-bundle.json", import.meta.url);
 const fixture = JSON.parse(fs.readFileSync(fixturePath, "utf8"));
@@ -28,7 +28,14 @@ test("explicit cited-name parser, detector, mask and quote", () => {
   assert.deepEqual(explicitTitleHits("éRev'd Pat Example").map(n => n.text), ["Rev'd Pat"]);
   assert.deepEqual(explicitTitleHits("Rev'd\u0085Pat Example").map(n => n.text), ["Rev'd\u0085Pat"]);
   assert.deepEqual(explicitTitleHits("xRev'd Pat"), []);
-  assert.equal(maskNames("Rev'd Pat Example Dr Jo Sample", new Set(["rev'd pat example"])), " ".repeat(17) + " Dr Jo Sample");
+  const admission = { admitted: new Set(["rev'd pat example"]), spans: new Map([["claims[0].value", [[0, 17]]]]) };
+  assert.equal(maskDeclaredSpans("Rev'd Pat Example Dr Jo Sample", "dossier.claims[0].value", admission), " ".repeat(17) + " Dr Jo Sample");
+  assert.equal(maskDeclaredSpans("Rev'd Pat Example", "dossier.claims[1].value", admission), "Rev'd Pat Example");
+  assert.deepEqual(parsedNames("Rev'd Jo"), []);
+  assert.equal(recurrenceForm("Ｐａｔ\u3000Ｅｘａｍｐｌｅ"), "pat example");
+  assert.equal(recurrenceForm("ＲＥＶ’Ｄ\tＰＡＴ"), "rev'd pat");
+  assert.equal(maskDeclaredSpans("Rev'd Pat Example Rev'd Pat Example", "dossier.claims[0].value", admission), " ".repeat(17) + " Rev'd Pat Example");
+  assert.equal(maskDeclaredSpans("Rev'd Pat Example", "dossier.claims[0].quoted_support", admission), "Rev'd Pat Example");
   assert.equal(quoteContainsName("(Rev'd Pat Example)", "rev'd pat example"), true);
   assert.equal(quoteContainsName("Rev'd Pat Examples", "rev'd pat example"), false);
 });
@@ -54,8 +61,10 @@ test("float-written cited-name span is refused from raw JSON", () => {
   b.dossier.claims[0].value = "opened 1891 under Rev'd Pat Example";
   b.dossier.claims[0].quoted_support = "built in 1891 under Rev'd Pat Example";
   b.dossier.personal_details_quarantine.items = [{ kind: "person_name", context_claim_id: b.dossier.claims[0].claim_id,
-    admitted_by_rule: "public_source_cited.v1", field: "value", start: 18, end: 35 }];
-  b.dossier.personal_details_quarantine.item_count = 1;
+    admitted_by_rule: "public_source_cited.v1", field: "value", start: 18, end: 35 },
+    { kind: "person_name", context_claim_id: b.dossier.claims[0].claim_id,
+      admitted_by_rule: "public_source_cited.v1", field: "quoted_support", start: 20, end: 37 }];
+  b.dossier.personal_details_quarantine.item_count = 2;
   const raw = JSON.stringify(b).replace('"start":18,', '"start":18.0,');
   assert.notEqual(raw, JSON.stringify(b));
   assert.doesNotThrow(() => validateAgentReviewBundle(b, JSON.stringify(b)));
