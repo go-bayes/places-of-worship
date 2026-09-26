@@ -642,6 +642,63 @@ const container = () => ({
     assert.deepEqual(order, ["page cleared", "caller told", "page cleared"]);
   }
 
+  // 21. #153 round 4 (sol): a switch from a to b and back to the same a
+  // session while work is out still counts as a change. a request whose
+  // token arrives after a -> b -> a is not sent; an answer that arrives
+  // after it is not handed back; a sign-in chain whose me answer was asked
+  // under b never admits b on a's page
+  {
+    const later = () => { let resolve; const promise = new Promise((r) => { resolve = r; }); return { promise, resolve }; };
+    const myTasks = later();
+    const meAnswer = later();
+    let meCalls = 0;
+    const responses = {
+      "users:claimInvite": ok("user_a"),
+      "users:me": () => { meCalls += 1; return meCalls === 1 ? ok({ ...member, _id: "user_a" }) : meAnswer.promise; },
+      "tasks:listTasks": ok([]),
+      "tasks:listMyTasks": () => myTasks.promise,
+    };
+    const h = harness({ session: { id: "sess_a", email: "a@example.org" }, cookie: "__client_uat=1", responses });
+    const client = new h.Client(config);
+    const ended = [];
+    client.setLifecycle({ onSignedOut: () => ended.push("ended") });
+    assert.equal((await client.restoreSession())._id, "user_a");
+    const sessionA = h.clerk.session;
+    const bounce = () => { h.clerk.setSession(h.makeSession("sess_b", "b@example.org")); h.clerk.setSession(sessionA); };
+
+    // (a) the token arrives after a -> b -> a: nothing is sent
+    let releaseToken;
+    const slow = new Promise((r) => { releaseToken = r; });
+    const getToken = sessionA.getToken;
+    sessionA.getToken = async (options) => { await slow; return getToken(options); };
+    const sent = h.calls.fetches.length;
+    const late = client.listTasks({});
+    bounce();
+    releaseToken();
+    await assert.rejects(late, (error) => error.sessionChanged === true);
+    assert.equal(h.calls.fetches.slice(sent).some((fetch) => fetch.body.path === "tasks:listTasks"), false, "the old request is not sent after a -> b -> a");
+    sessionA.getToken = getToken;
+
+    // (b) the answer arrives after a -> b -> a: it is not handed back
+    const pendingAnswer = client.listMyTasks({});
+    await tick();
+    bounce();
+    myTasks.resolve(ok([{ task_id: "a_private_task" }]));
+    await assert.rejects(pendingAnswer, (error) => error.sessionChanged === true);
+
+    // (c) a sign-in chain whose me was asked while b held the browser
+    const admitted = [];
+    const chain = client.completeSignIn({ onSignedIn: (user) => admitted.push(user._id) });
+    await tick();
+    h.clerk.setSession(h.makeSession("sess_b2", "b@example.org"));
+    h.clerk.setSession(sessionA);
+    meAnswer.resolve(ok({ ...member, _id: "user_b", email: "b@example.org" }));
+    assert.equal(await chain, null, "the old chain admits nobody");
+    assert.deepEqual(admitted, [], "b is never admitted on a's page");
+    assert.notEqual(client.user?._id, "user_b");
+    assert.ok(ended.length >= 2, "each change away from a cleared the page");
+  }
+
   console.log("convex-task-client: clerk sessions ok");
 })().catch((error) => {
   console.error(error);

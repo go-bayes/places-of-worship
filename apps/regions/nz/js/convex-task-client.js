@@ -210,7 +210,22 @@
             // the session whose claim the backend refused, and why: the card
             // then says so rather than asking again on every render
             this.claimFailure = null;
+            // advanced on every session change, so work begun under a session
+            // is recognised as stale even when the same session id comes back
+            // (a to b to a); every chain captures a mark and checks it
+            this.sessionGeneration = 0;
             removeLegacyToken();
+        }
+
+        // the session a piece of work belongs to: its id and generation
+        sessionMark() {
+            return { sessionId: this.sessionId, generation: this.sessionGeneration };
+        }
+
+        isCurrent(mark) {
+            return Boolean(mark?.sessionId)
+                && mark.sessionId === this.sessionId
+                && mark.generation === this.sessionGeneration;
         }
 
         // onSignedOut({ deliberate }): the session ended, in another tab, by
@@ -304,6 +319,7 @@
             if (this.signOutPromise) return;
             if (nextSessionId === this.sessionId) return;
             const hadSession = Boolean(this.sessionId);
+            this.sessionGeneration += 1;
             this.sessionId = nextSessionId;
             this.user = null;
             this.claimFailure = null;
@@ -321,40 +337,48 @@
         // invitation or re-keys an existing member (brief 4.3.2), then me
         // names the row. one attempt per session at a time
         async completeSignIn(options = this.signInOptions) {
-            const sessionId = this.sessionId;
+            const mark = this.sessionMark();
+            const { sessionId } = mark;
             if (!sessionId) return null;
-            if (this.completion?.sessionId === sessionId) return this.completion.promise;
+            if (this.completion?.sessionId === sessionId && this.completion.generation === mark.generation) {
+                return this.completion.promise;
+            }
+            const current = () => this.isCurrent(mark);
             const promise = (async () => {
                 let user;
                 try {
                     await this.claimInvite(options.initials || "");
+                    // a chain whose session changed, even to b and back to
+                    // a, stops here: nothing is asked or admitted for it
+                    if (!current()) return null;
                     user = await this.me();
+                    if (!current()) return null;
                     if (!user) throw new Error("No pending project invitation found for this email.");
                 } catch (error) {
+                    // an ended chain's failure is nobody's: it names nobody
+                    if (!current()) return null;
                     const message = serverMessage(error);
-                    if (this.sessionId === sessionId) {
-                        this.user = null;
-                        this.claimFailure = { sessionId, message };
-                    }
+                    this.user = null;
+                    this.claimFailure = { sessionId, message };
                     // the backend refused this address: the card says so
                     // itself; anything else (a network fault) goes to the page
                     if (ACCESS_REFUSED.test(message)) {
                         error.accessRefused = true;
-                        if (this.signInHost && this.sessionId === sessionId) this.renderAccountNote(this.signInHost);
-                    } else if (options.onError && this.sessionId === sessionId) {
+                        if (this.signInHost) this.renderAccountNote(this.signInHost);
+                    } else if (options.onError) {
                         options.onError(error);
                     }
                     throw error;
                 } finally {
-                    if (this.completion?.sessionId === sessionId) this.completion = null;
+                    if (this.completion?.promise === promise) this.completion = null;
                 }
-                if (this.sessionId !== sessionId) return null;
+                if (!current()) return null;
                 this.user = user;
                 this.claimFailure = null;
                 if (options.onSignedIn) await options.onSignedIn(user);
                 return user;
             })();
-            this.completion = { sessionId, promise };
+            this.completion = { sessionId, generation: mark.generation, promise };
             return promise;
         }
 
@@ -375,6 +399,7 @@
             const sessionId = this.sessionId || clerk?.session?.id || "";
             // the page may repaint its card at once; the card waits for this
             // so it never re-admits the session being ended
+            this.sessionGeneration += 1;
             this.sessionId = "";
             this.signOutFailure = null;
             this.releaseSignInElement();
@@ -587,25 +612,26 @@
             if (!host || !this.migrationOpen || !this.sessionId) return;
             // the clerk session this step belongs to; a click that lands after
             // it ended or changed does nothing
-            const sessionId = this.sessionId;
+            const mark = this.sessionMark();
             try {
                 await loadScriptOnce(GSI_SCRIPT_SRC, {}, { cors: false });
+                if (!this.isCurrent(mark)) return;
                 const google = window.google?.accounts?.id;
                 if (!google) throw new Error("Google sign-in did not load.");
                 google.initialize({
                     client_id: this.config.googleMigrationClientId,
                     auto_select: false,
-                    callback: (response) => this.confirmExistingAccount(sessionId, response?.credential || "", container, status),
+                    callback: (response) => this.confirmExistingAccount(mark, response?.credential || "", container, status),
                 });
                 host.innerHTML = "";
                 google.renderButton(host, { theme: "filled_black", size: "large", text: "continue_with", width: 300 });
             } catch (error) {
-                if (status) status.textContent = "Google sign-in could not load. Check the connection, then try again.";
+                if (status && this.isCurrent(mark)) status.textContent = "Google sign-in could not load. Check the connection, then try again.";
             }
         }
 
-        async confirmExistingAccount(sessionId, googleCredential, container, status) {
-            const current = () => Boolean(sessionId) && this.sessionId === sessionId;
+        async confirmExistingAccount(mark, googleCredential, container, status) {
+            const current = () => this.isCurrent(mark);
             if (!current()) return false;
             if (status) status.textContent = "Confirming…";
             try {
@@ -666,13 +692,16 @@
             // a request belongs to the session current when it was made: if
             // clerk switches sessions while its token is fetched, it is not
             // sent under the next person's token
-            const sessionId = this.sessionId;
-            const token = overrideToken || await this.getToken();
-            if (!overrideToken && this.sessionId !== sessionId) {
+            const mark = this.sessionMark();
+            const sessionChanged = () => {
                 const changed = new Error("Your sign-in changed. Sign in again, then retry.");
                 changed.sessionChanged = true;
-                throw changed;
-            }
+                return changed;
+            };
+            const token = overrideToken || await this.getToken();
+            // checked on the generation, so a to b to a while the token was
+            // fetched still counts as a change
+            if (!overrideToken && !this.isCurrent(mark)) throw sessionChanged();
             const endpoint = kind === "query" ? "query" : kind === "action" ? "action" : "mutation";
             const headers = {
                 "Content-Type": "application/json",
@@ -694,11 +723,14 @@
             // else, whatever the body holds (it may not be json at all)
             const authEnded = () => {
                 // the page clears before the caller hears of it
-                if (this.sessionId === sessionId) this.endProjectUser();
+                if (this.isCurrent(mark)) this.endProjectUser();
                 const authError = new Error("Your sign-in expired. Sign in again, then retry.");
                 authError.authExpired = true;
                 return authError;
             };
+            // an answer for a session that has since changed is not handed
+            // back as if it were the current session's
+            if (!overrideToken && !this.isCurrent(mark)) throw sessionChanged();
             if (!overrideToken && response.status === 401) throw authEnded();
             const text = await response.text();
             let payload;

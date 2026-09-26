@@ -2486,6 +2486,18 @@ class NzVerificationMap {
         return Boolean(ticket) && ticket.epoch === (this.sessionEpoch || 0) && Boolean(userId) && ticket.userId === userId;
     }
 
+    // a check for work begun inside one pin entry (a position fix, an
+    // address search): true only while that entry is still open in the
+    // same session. entering or leaving pin mode, and every session end,
+    // advance pinEntryGeneration (#153 round 4)
+    pinEntryGuard() {
+        const epoch = this.sessionEpoch || 0;
+        const generation = this.pinEntryGeneration || 0;
+        return () => Boolean(this.pinMode)
+            && epoch === (this.sessionEpoch || 0)
+            && generation === (this.pinEntryGeneration || 0);
+    }
+
     // the session a restored user was admitted under: the page's session
     // epoch, the clerk session id and the user itself
     restoreTicket(user) {
@@ -2519,6 +2531,8 @@ class NzVerificationMap {
         this.pinLinkedRefs = [];
         this.pinSubmissionId = null;
         this.pinHistory = [];
+        this.pinSearchRows = [];
+        this.pinEntryGeneration = (this.pinEntryGeneration || 0) + 1;
         this.occupancyDraft = null;
         this.occupancyPinContext = null;
         this.issueFormOpenTaskId = null;
@@ -3523,8 +3537,12 @@ class NzVerificationMap {
         const button = document.getElementById("locateMeButton");
         if (button) button.disabled = true;
         this.locateNote("Finding your position…");
+        // a late fix after a session change does not move the next
+        // person's map
+        const epoch = this.sessionEpoch || 0;
         try {
             const fix = await this.requestPosition();
+            if (epoch !== (this.sessionEpoch || 0)) return;
             this.lastPositionFix = fix;
             this.showPositionOnMap(fix);
             this.map.setView([fix.latitude, fix.longitude], Math.max(this.map.getZoom(), POSITION_ZOOM));
@@ -3547,8 +3565,12 @@ class NzVerificationMap {
         }
         if (button) button.disabled = true;
         if (status) status.textContent = "Finding your position…";
+        // the fix serves only the pin entry that asked for it, in the same
+        // session; a later entry, or another person's, is never moved
+        const current = this.pinEntryGuard();
         try {
             const fix = await this.requestPosition();
+            if (!current()) return false;
             this.lastPositionFix = fix;
             this.showPositionOnMap(fix);
             this.setPendingPin(fix.latitude, fix.longitude, { zoom: POSITION_ZOOM });
@@ -3560,10 +3582,10 @@ class NzVerificationMap {
             }
             return true;
         } catch (error) {
-            if (status) status.textContent = error.message;
+            if (current() && status) status.textContent = error.message;
             return false;
         } finally {
-            if (button) button.disabled = false;
+            if (button && current()) button.disabled = false;
         }
     }
 
@@ -12423,6 +12445,7 @@ class NzVerificationMap {
         this.selectedTask = null;
         this.issueFormOpenTaskId = null;
         this.pinSearchRows = [];
+        this.pinEntryGeneration = (this.pinEntryGeneration || 0) + 1;
         this.setEntryOpen(true);
         document.body?.classList?.add("pin-open");
         // cards saved with an earlier entry belong to that place only
@@ -12759,6 +12782,9 @@ class NzVerificationMap {
             return;
         }
         this.lastNominatimRequestAt = Date.now();
+        // the results serve only the pin entry that asked, in the same
+        // session (#153 round 4)
+        const current = this.pinEntryGuard();
         if (button) button.disabled = true;
         if (status) status.textContent = "Searching…";
         if (resultsEl) {
@@ -12775,8 +12801,10 @@ class NzVerificationMap {
             const response = await fetch(`${NOMINATIM_SEARCH_URL}?${params.toString()}`, {
                 headers: { Accept: "application/json" },
             });
+            if (!current()) return;
             if (!response.ok) throw new Error(`Search failed (${response.status}). Try again shortly or click the map instead.`);
             const rows = await response.json();
+            if (!current()) return;
             if (!Array.isArray(rows) || rows.length === 0) {
                 if (status) status.textContent = "No match found. Add the town or island to the search, or click the map instead.";
                 return;
@@ -12791,6 +12819,7 @@ class NzVerificationMap {
                 `).join("");
                 resultsEl.querySelectorAll("button").forEach(resultButton => {
                     resultButton.addEventListener("click", () => {
+                        if (!current()) return;
                         const row = rows[Number(resultButton.dataset.resultIndex)];
                         const lat = Number(row?.lat);
                         const lng = Number(row?.lon);
@@ -12801,9 +12830,10 @@ class NzVerificationMap {
                 });
             }
         } catch (error) {
+            if (!current()) return;
             if (status) status.textContent = error.message || "Search failed — check the connection or click the map instead.";
         } finally {
-            if (button) button.disabled = false;
+            if (button && current()) button.disabled = false;
         }
     }
 
@@ -13294,6 +13324,8 @@ class NzVerificationMap {
         this.occupancyPinContext = null;
         const wasRevision = Boolean(this.reviseContext);
         this.pinMode = false;
+        this.pinEntryGeneration = (this.pinEntryGeneration || 0) + 1;
+        this.pinSearchRows = [];
         this.reviseContext = null;
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;

@@ -688,6 +688,60 @@ async function roundThree() {
     assert.equal(refreshedLists, 0, "no attachment list is redrawn for a");
   }
 
+  // #153 round 4 (astra): a's pending position fix and address search
+  // serve only a's pin entry. a asks, clerk replaces a with b, b opens a new
+  // pin entry, then a's answers arrive: b's pin and search rows are untouched
+  {
+    const { app } = signedInApp("user_a");
+    const fix = later();
+    const moved = [];
+    Object.assign(app, { pinMode: true, pinConfirmed: null, pinEntryGeneration: 1, pinSearchRows: [] });
+    app.requestPosition = () => fix.promise;
+    app.showPositionOnMap = () => { moved.push("ring"); };
+    app.setPendingPin = (lat, lng) => { moved.push([lat, lng]); };
+    const locating = app.dropPinAtMyLocation();
+
+    const search = later();
+    const previousFetch = context.fetch;
+    context.fetch = () => search.promise;
+    const getElementById = document.getElementById;
+    document.getElementById = (id) => (id === "pinSearchInput" ? { value: "St Mary's" } : null);
+    app.lastNominatimRequestAt = 0;
+    const searching = app.submitPinSearch();
+
+    app.onBackendSessionEnded({ deliberate: false, replaced: true });
+    assert.equal(app.pinSearchRows.length, 0, "a's search rows go with the session");
+    // b signs in and opens a new pin entry
+    app.backendUser = { _id: "user_b" };
+    app.backend.user = app.backendUser;
+    app.pinMode = true;
+    app.pinEntryGeneration += 1;
+    app.pinSearchRows = [];
+
+    fix.resolve({ latitude: -41.3, longitude: 174.8, accuracyM: 8 });
+    assert.equal(await locating, false);
+    assert.deepEqual(moved, [], "a's fix neither moves b's pin nor draws a ring");
+    search.resolve({ ok: true, json: async () => [{ lat: "-41.29", lon: "174.78", display_name: "A's searched address" }] });
+    await searching;
+    assert.equal(app.pinSearchRows.length, 0, "a's results never reach b's entry");
+    context.fetch = previousFetch;
+    document.getElementById = getElementById;
+
+    // within one session, a fix for an entry that was closed and reopened
+    // does not move the new entry's pin either
+    const again = later();
+    app.requestPosition = () => again.promise;
+    const second = app.dropPinAtMyLocation();
+    app.pinEntryGeneration += 1; // the entry closed and a new one opened
+    again.resolve({ latitude: 1, longitude: 1, accuracyM: 5 });
+    assert.equal(await second, false);
+    assert.deepEqual(moved, []);
+    // and an unchanged entry still takes its fix
+    app.requestPosition = async () => ({ latitude: 2, longitude: 2, accuracyM: 5 });
+    assert.equal(await app.dropPinAtMyLocation(), true);
+    assert.deepEqual(moved, ["ring", [2, 2]]);
+  }
+
   console.log("session end dom test passed");
 })().catch((error) => {
   console.error(error);
