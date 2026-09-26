@@ -27,14 +27,17 @@ const NO_INVITATION = "No pending project invitation found for this email.";
 // email alone never re-keys a row
 const GOOGLE_ISSUER = "https://accounts.google.com";
 const PAIRING_TTL_MS = 10 * 60 * 1000;
-// a server-side window on pairing requests, per member row and per clerk
-// sign-in (#153 round 1): at most PAIRING_REQUEST_LIMIT in any hour. it
-// also bounds every pairing read, since only requests inside the ten-minute
-// lifetime can be open and each read takes at most PAIRING_READ_BOUND rows
+// a server-side window on pairing requests, per clerk sign-in (#153 rounds
+// 1 and 6): at most PAIRING_REQUEST_LIMIT in any hour. it is not counted
+// per member row, so another sign-in holding the mailbox cannot use up the
+// member's own requests. every pairing read is bounded: the sign-in's last
+// hour (PAIRING_READ_BOUND rows) or the row's ten-minute lifetime
+// (PAIRING_OPEN_READ_BOUND rows)
 const PAIRING_REQUEST_WINDOW_MS = 60 * 60 * 1000;
 const PAIRING_REQUEST_LIMIT = 6;
 const PAIRING_READ_BOUND = PAIRING_REQUEST_LIMIT + 1;
-const PAIRING_RATE_LIMITED = "Too many requests to move this account in the last hour. Wait an hour, then try again, or ask a project admin.";
+const PAIRING_OPEN_READ_BOUND = 25;
+const PAIRING_RATE_LIMITED = "Too many requests to move this account from this sign-in in the last hour. Wait an hour, then try again, or ask a project admin.";
 const MIGRATION_CONFIRM = "This address belongs to an existing member who signed in with Google. Confirm that Google account first, then sign in again.";
 const VERIFY_EMAIL = "Verify this email address with the sign-in provider, then sign in again.";
 
@@ -414,28 +417,31 @@ export const requestIdentityMigration = mutation({
     }
     const row = await migrationTarget(ctx, identity);
     const now = Date.now();
-    // the request window, per row and per clerk sign-in: bounded reads of
-    // the last hour only, never the whole history
+    // the request window, per clerk sign-in: a bounded read of its last
+    // hour only, never the whole history
     const windowStart = now - PAIRING_REQUEST_WINDOW_MS;
-    const recentForRow = await ctx.db
-      .query("identity_migration_pairings")
-      .withIndex("by_user", (q) => q.eq("user_id", row._id).gt("requested_at", windowStart))
-      .order("desc")
-      .take(PAIRING_READ_BOUND);
     const recentForSignIn = await ctx.db
       .query("identity_migration_pairings")
       .withIndex("by_clerk_identifier", (q) => q
         .eq("clerk_token_identifier", identity.tokenIdentifier)
         .gt("requested_at", windowStart))
       .take(PAIRING_READ_BOUND);
-    if (recentForRow.length >= PAIRING_REQUEST_LIMIT || recentForSignIn.length >= PAIRING_REQUEST_LIMIT) {
+    if (recentForSignIn.length >= PAIRING_REQUEST_LIMIT) {
       throw new Error(PAIRING_RATE_LIMITED);
     }
-    // a newer request revokes the row's open pairings; only those inside
-    // the pairing lifetime can be open, and all of them are in this read
-    for (const pairing of recentForRow) {
+    // a newer request revokes the row's open, unapproved pairings. an
+    // approved pairing is kept until it is spent or expires: only the
+    // member's google sign-in could approve it, and a later request from
+    // anyone does not undo that (#153 round 6). only requests inside the
+    // pairing lifetime can be open
+    const openForRow = await ctx.db
+      .query("identity_migration_pairings")
+      .withIndex("by_user", (q) => q.eq("user_id", row._id).gt("requested_at", now - PAIRING_TTL_MS))
+      .order("desc")
+      .take(PAIRING_OPEN_READ_BOUND);
+    for (const pairing of openForRow) {
       if (
-        pairing.requested_at > now - PAIRING_TTL_MS
+        pairing.approved_at === undefined
         && pairing.consumed_at === undefined
         && pairing.revoked_at === undefined
       ) {

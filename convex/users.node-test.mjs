@@ -480,31 +480,46 @@ test("r-c18: a pairing request comes only from a verified clerk sign-in for a go
   assert.equal(w.rows.identity_migration_pairings.length, 0);
 });
 
-test("r-c18: pairing requests are limited per member row and per clerk sign-in in any hour (#153 round 1)", async () => {
+test("r-c18: pairing requests are limited per clerk sign-in in any hour, not per member row (#153 rounds 1 and 6)", async () => {
   const w = world({ allowlist: GOOGLE });
   const member = googleMember(w);
-  for (let i = 0; i < 6; i += 1) await requestPairing(w, clerkGuy);
+  const mailboxHolder = identity(CLERK, "mailbox_holder", "guy@example.org");
+  for (let i = 0; i < 6; i += 1) await requestPairing(w, mailboxHolder);
   const events = w.rows.role_events.length;
-  await assert.rejects(requestPairing(w, clerkGuy), /Too many requests to move this account/);
+  await assert.rejects(requestPairing(w, mailboxHolder), /Too many requests to move this account/);
   assert.equal(w.rows.identity_migration_pairings.length, 6, "a refused request writes nothing");
   assert.equal(w.rows.role_events.length, events);
-  // the row's quota holds whichever clerk sign-in asks
-  await assert.rejects(requestPairing(w, identity(CLERK, "user_guy_2", "guy@example.org")), /Too many requests/);
-  // an hour on, the window has moved
-  for (const pairing of w.rows.identity_migration_pairings) {
-    pairing.requested_at -= 61 * 60 * 1000;
-    pairing.expires_at -= 61 * 60 * 1000;
-  }
+  // the member's own sign-in is not held back by another sign-in's requests
   const nonce = await requestPairing(w, clerkGuy);
   await approvePairing(w, googleGuy, nonce);
   assert.equal(await claim(w.as(clerkGuy)), member._id);
-  // and the clerk sign-in's own quota holds across rows
+  // an hour on, the refused sign-in's window has moved
   const v = world({ allowlist: GOOGLE });
-  v.addUser({ email: "guy@example.org", roles: ["ra"], status: "active", auth_subject: `${GOOGLE}|g-guy` });
-  for (let i = 0; i < 6; i += 1) {
-    v.rows.identity_migration_pairings.push({ _id: `p${i}`, user_id: "users_elsewhere", clerk_token_identifier: clerkGuy.tokenIdentifier, source_token_identifier: `${GOOGLE}|g-x`, nonce_hash: `h${i}`, requested_at: Date.now() - 1000, expires_at: Date.now() + 1000 });
-  }
+  googleMember(v);
+  for (let i = 0; i < 6; i += 1) await requestPairing(v, clerkGuy);
   await assert.rejects(requestPairing(v, clerkGuy), /Too many requests/);
+  for (const pairing of v.rows.identity_migration_pairings) {
+    pairing.requested_at -= 61 * 60 * 1000;
+    pairing.expires_at -= 61 * 60 * 1000;
+  }
+  assert.ok(await requestPairing(v, clerkGuy));
+});
+
+test("r-c18: an approved pairing survives later unapproved requests (#153 round 6)", async () => {
+  const w = world({ allowlist: GOOGLE });
+  const member = googleMember(w);
+  await pair(w, clerkGuy, googleGuy);
+  // another sign-in holding the mailbox keeps asking
+  const mailboxHolder = identity(CLERK, "mailbox_holder", "guy@example.org");
+  for (let i = 0; i < 6; i += 1) await requestPairing(w, mailboxHolder);
+  const approved = w.rows.identity_migration_pairings[0];
+  assert.equal(approved.revoked_at, undefined, "the approved pairing is not revoked");
+  // their unapproved requests still revoke each other
+  assert.equal(w.rows.identity_migration_pairings.filter((p) => p.clerk_token_identifier === mailboxHolder.tokenIdentifier && p.revoked_at === undefined).length, 1);
+  // the member claims with the approved pairing; the mailbox holder cannot
+  await assert.rejects(claim(w.as(mailboxHolder)), /Confirm that Google account first/);
+  assert.equal(await claim(w.as(clerkGuy)), member._id);
+  assert.ok(approved.consumed_at);
 });
 
 test("r-c18: every pairing read is bounded, however long the history (#153 round 1)", async () => {
