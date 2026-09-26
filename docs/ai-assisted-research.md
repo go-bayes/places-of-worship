@@ -20,7 +20,7 @@ Two things stay outside the record. Whether a claim is true is a human decision.
 
 ## Privacy screening
 
-The personal-details policy binds every published surface: a living person appears there only under a pseudonym, whether or not the name is already public, and only a recorded death date establishes that a person has died. Every text field of an outgoing model record, an advisory reviewer's comments included, is screened for telephone numbers, email addresses and names led by a title, and for strings shaped like cryptographic digests outside the few fields that hold the pipeline's own digests. Screening is applied by three validators in three languages, held to agreement by shared test cases.
+The personal-details policy binds every published surface: a living person named in the project's records appears there only under a pseudonym, whether or not the name is already public (contributors may be credited by their name or a chosen avatar), and only a recorded death date establishes that a person has died. Every text field of an outgoing model record, an advisory reviewer's comments included, is screened for telephone numbers, email addresses and names led by a title, and for strings shaped like cryptographic digests outside the few fields that hold the pipeline's own digests. Screening is applied by three validators in three languages, held to agreement by shared test cases.
 
 The interim behaviour (built 2026-09-24) refuses a record that still contains a personal detail before it leaves the operator's machine; the operator's private copy keeps the original, and the record of the refusal names fields and positions and never the text. The adopted design (ruled 2026-09-24) withholds each detail behind a placeholder, holds the original in a restricted, deletable store that only curators and the principal investigator can open, and shows the item to the human review layer as inadmissible in its current form with suggested redactions, for a person to accept, edit, rule admissible with a recorded reason, or reject. Decisions are kept as one current record per group, deletable, with no store that retains values across submissions; an undecided hold expires on a time limit, and an expired hold still blocks every outbound path until a person decides it. The published-name rule in the confidence standard (version 0.3.0, ruled 2026-09-26) shows a living person on a published surface only under a pseudonym, clergy included, with the key from pseudonym to name held privately; only a recorded death date establishes that a person has died. The 0.3.0 published-name rule replaces the cited clergy-name relaxation of 2026-09-24.
 
@@ -51,11 +51,11 @@ Joseph Watts (Joseph W), who leads the project's Christchurch validation study, 
 | Source allowlist refusal, reported model id, per-model cost | adopted 2026-09-24, built |
 | Content-addressed receipts and hash-identified judgments | built 2026-09-19 and 2026-09-24 |
 | Measurement run before any build; canary set | adopted 2026-09-24 |
-| Confidence standard version 0.3.0 | adopted 2026-09-26 |
+| Confidence standard version 0.3.1 | adopted 2026-09-26 |
 | Joseph W as blinded adjudicator | invited 2026-09-24; his agreement is outstanding |
 | Interim refusal of records with personal details | built 2026-09-24 |
 | Withhold-and-hold review of personal details | adopted 2026-09-24; built in stages |
-| Living persons on published surfaces | pseudonyms only, ruled 2026-09-26; replaces the cited clergy-name relaxation of 2026-09-24 |
+| Living persons named in records, on published surfaces | pseudonyms only, ruled 2026-09-26 (contributors may be credited by name or avatar); replaces the cited clergy-name relaxation of 2026-09-24 |
 | Institutional data-governance approval before sending public place content overseas | ruled unnecessary 2026-09-24 |
 | Vanuatu submissions in the closure measurement | declined until a machine-verified cultural clearance exists |
 | Reader set, dispatcher, proposer, provider credentials in the backend, reader isolation, run ledger, collaborator channel | adopted 2026-09-24; built in bounded steps |

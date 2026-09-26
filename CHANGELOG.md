@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-26 (confidence standard 0.3.1)
+
+- Version 0.3.1 of the [confidence standard](docs/confidence-standard.md), snapshot at `docs/development/confidence-standard-2026-09-26-v0.3.1.md`: a clarification from the project lead that the pseudonym rule covers living persons named in the project's records, and that contributors may be credited by their name or a chosen avatar. The [summary of AI assistance](docs/ai-assisted-research.md) states the same.
+
 ### 2026-09-26 (inspection phone screen admits OSM references)
 
 - The Bahamas inspection adapter's North American telephone screen no longer refuses an OpenStreetMap element reference with a ten-digit id, such as `node/1234567890`, in a candidate link's `osm_ref` or `candidate_ref`. The exemption covers only the exact reference shape, bare or as an `openstreetmap.org` URL; a telephone number in those fields and a ten-digit number anywhere else are still refused, and the shared personal-detail screen still applies to both fields.
