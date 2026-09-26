@@ -25,18 +25,32 @@ function world({ allowlist = "", destination = CLERK } = {}) {
   process.env.CLERK_JWT_ISSUER_DOMAIN = destination ?? "";
   process.env.AUTH_MIGRATION_SOURCE_ISSUERS = allowlist;
   const rows = { users: [], user_identities: [], role_events: [], identity_migration_pairings: [] };
+  // documents each table handed back, and whether any read was unbounded
+  const reads = { returned: {}, collected: new Set() };
   let caller = null;
   let counter = 0;
   const db = {
     query(table) {
       const filters = [];
-      const q = { eq(key, value) { filters.push([key, value]); return q; } };
-      const selected = () => rows[table].filter((row) => filters.every(([k, v]) => row[k] === v));
+      let descending = false;
+      const q = {
+        eq(key, value) { filters.push((row) => row[key] === value); return q; },
+        gt(key, value) { filters.push((row) => row[key] > value); return q; },
+        gte(key, value) { filters.push((row) => row[key] >= value); return q; },
+        lt(key, value) { filters.push((row) => row[key] < value); return q; },
+      };
+      const selected = () => {
+        const found = rows[table].filter((row) => filters.every((keep) => keep(row)));
+        return descending ? found.reverse() : found;
+      };
+      const count = (found) => { reads.returned[table] = (reads.returned[table] || 0) + found.length; return found; };
       const chain = {
         withIndex(_name, select) { if (select) select(q); return chain; },
-        async unique() { const found = selected(); if (found.length > 1) throw new Error("unique() found several rows"); return found[0] ?? null; },
-        async collect() { return selected(); },
-        async first() { return selected()[0] ?? null; },
+        order(direction) { descending = direction === "desc"; return chain; },
+        async unique() { const found = selected(); if (found.length > 1) throw new Error("unique() found several rows"); return count(found.slice(0, 1))[0] ?? null; },
+        async collect() { reads.collected.add(table); return count(selected()); },
+        async take(n) { return count(selected().slice(0, n)); },
+        async first() { return count(selected().slice(0, 1))[0] ?? null; },
       };
       return chain;
     },
@@ -65,7 +79,7 @@ function world({ allowlist = "", destination = CLERK } = {}) {
     rows.users.push(row);
     return row;
   };
-  return { rows, ctx, as, addUser };
+  return { rows, ctx, as, addUser, reads };
 }
 
 const claim = (ctx) => claimInvite._handler(ctx, {});
@@ -464,6 +478,48 @@ test("r-c18: a pairing request comes only from a verified clerk sign-in for a go
   await assert.rejects(requestIdentityMigration._handler(closed.as(clerkGuy), {}), /No pending project invitation/);
   await assert.rejects(approveIdentityMigration._handler(closed.as(googleGuy), { nonce: "x" }), /only while the move is open/);
   assert.equal(w.rows.identity_migration_pairings.length, 0);
+});
+
+test("r-c18: pairing requests are limited per member row and per clerk sign-in in any hour (#153 round 1)", async () => {
+  const w = world({ allowlist: GOOGLE });
+  const member = googleMember(w);
+  for (let i = 0; i < 6; i += 1) await requestPairing(w, clerkGuy);
+  const events = w.rows.role_events.length;
+  await assert.rejects(requestPairing(w, clerkGuy), /Too many requests to move this account/);
+  assert.equal(w.rows.identity_migration_pairings.length, 6, "a refused request writes nothing");
+  assert.equal(w.rows.role_events.length, events);
+  // the row's quota holds whichever clerk sign-in asks
+  await assert.rejects(requestPairing(w, identity(CLERK, "user_guy_2", "guy@example.org")), /Too many requests/);
+  // an hour on, the window has moved
+  for (const pairing of w.rows.identity_migration_pairings) {
+    pairing.requested_at -= 61 * 60 * 1000;
+    pairing.expires_at -= 61 * 60 * 1000;
+  }
+  const nonce = await requestPairing(w, clerkGuy);
+  await approvePairing(w, googleGuy, nonce);
+  assert.equal(await claim(w.as(clerkGuy)), member._id);
+  // and the clerk sign-in's own quota holds across rows
+  const v = world({ allowlist: GOOGLE });
+  v.addUser({ email: "guy@example.org", roles: ["ra"], status: "active", auth_subject: `${GOOGLE}|g-guy` });
+  for (let i = 0; i < 6; i += 1) {
+    v.rows.identity_migration_pairings.push({ _id: `p${i}`, user_id: "users_elsewhere", clerk_token_identifier: clerkGuy.tokenIdentifier, source_token_identifier: `${GOOGLE}|g-x`, nonce_hash: `h${i}`, requested_at: Date.now() - 1000, expires_at: Date.now() + 1000 });
+  }
+  await assert.rejects(requestPairing(v, clerkGuy), /Too many requests/);
+});
+
+test("r-c18: every pairing read is bounded, however long the history (#153 round 1)", async () => {
+  const w = world({ allowlist: GOOGLE });
+  const member = googleMember(w);
+  const old = Date.now() - 2 * 60 * 60 * 1000;
+  for (let i = 0; i < 1000; i += 1) {
+    w.rows.identity_migration_pairings.push({ _id: `old_${i}`, user_id: member._id, clerk_token_identifier: clerkGuy.tokenIdentifier, source_token_identifier: `${GOOGLE}|g-guy`, nonce_hash: `old-${i}`, requested_at: old + i, expires_at: old + i + 10 * 60 * 1000, revoked_at: old + i + 1 });
+  }
+  w.reads.returned.identity_migration_pairings = 0;
+  const nonce = await requestPairing(w, clerkGuy);
+  await approvePairing(w, googleGuy, nonce);
+  assert.equal(await claim(w.as(clerkGuy)), member._id);
+  assert.equal(w.reads.collected.has("identity_migration_pairings"), false, "no unbounded read of pairings");
+  assert.ok(w.reads.returned.identity_migration_pairings <= 3 * 7 + 1, `pairing documents read: ${w.reads.returned.identity_migration_pairings}`);
 });
 
 test("r-c18: the stored pairing holds only the nonce's hash and ten minutes", async () => {

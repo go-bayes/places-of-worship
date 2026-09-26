@@ -291,7 +291,12 @@
         }
 
         // clerk reports every session change here: a sign-in finished in
-        // the card, a sign-out in another tab, a session that ended
+        // the card, a sign-out in another tab, a session that ended, or one
+        // session replaced by another (a different account signed in
+        // elsewhere). every change away from an established session ends
+        // it for the page first, synchronously, so the portal clears what
+        // the previous person left and advances its session epoch before
+        // the replacement is admitted (#153 round 1)
         onClerkChange(resources) {
             const nextSessionId = resources?.session?.id || "";
             // a deliberate sign-out owns the session state until clerk
@@ -302,11 +307,10 @@
             this.sessionId = nextSessionId;
             this.user = null;
             this.claimFailure = null;
+            this.completion = null;
             this.releaseSignInElement();
-            if (!nextSessionId) {
-                if (hadSession) this.lifecycle.onSignedOut?.({ deliberate: false });
-                return;
-            }
+            if (hadSession) this.lifecycle.onSignedOut?.({ deliberate: false, replaced: Boolean(nextSessionId) });
+            if (!nextSessionId || this.sessionId !== nextSessionId) return;
             if (this.signInHost) {
                 this.signInHost.innerHTML = `<p class="pow-account-note">Checking project access…</p>`;
                 this.completeSignIn(this.signInOptions).catch(() => {});
@@ -337,7 +341,7 @@
                     if (ACCESS_REFUSED.test(message)) {
                         error.accessRefused = true;
                         if (this.signInHost && this.sessionId === sessionId) this.renderAccountNote(this.signInHost);
-                    } else if (options.onError) {
+                    } else if (options.onError && this.sessionId === sessionId) {
                         options.onError(error);
                     }
                     throw error;
@@ -360,9 +364,12 @@
         // otherwise only the project user is forgotten, and the card asks
         // the backend again with the session clerk still holds
         signOut({ deliberate = false } = {}) {
+            if (!deliberate) {
+                this.endProjectUser();
+                return Promise.resolve();
+            }
             this.user = null;
             this.claimFailure = null;
-            if (!deliberate) return Promise.resolve();
             if (this.signOutPromise) return this.signOutPromise;
             const clerk = this.clerk;
             const sessionId = this.sessionId || clerk?.session?.id || "";
@@ -405,6 +412,19 @@
             return this.signOutPromise;
         }
 
+        // the backend refused this session's token (a 401, a revoked or
+        // expired session): the project user is forgotten and the page is
+        // told at once, before anything asks the backend again, so nothing
+        // the person loaded stays on screen (#153 round 1). only an admitted
+        // user is announced: a refused claim has shown nothing, and
+        // announcing it would repaint the card into another claim
+        endProjectUser() {
+            const hadUser = Boolean(this.user);
+            this.user = null;
+            this.claimFailure = null;
+            if (hadUser) this.lifecycle.onSignedOut?.({ deliberate: false });
+        }
+
         // the server's view after a sign-out: clerk.client.reload() fetches
         // this browser's sessions; the ended one must not be live. a reload
         // that fails (offline) confirms nothing
@@ -433,7 +453,9 @@
                     await this.signOut({ deliberate: true }).catch(() => {});
                     return null;
                 }
-                return await this.completeSignIn({ ...this.signInOptions, onSignedIn: undefined, onError: undefined });
+                const user = await this.completeSignIn({ ...this.signInOptions, onSignedIn: undefined, onError: undefined });
+                // a session replaced while the claim was out names nobody
+                return user && this.user === user ? user : null;
             } catch (error) {
                 return null;
             }
@@ -641,7 +663,16 @@
             if (!this.configured) {
                 throw new Error("Convex is not configured for this map.");
             }
+            // a request belongs to the session current when it was made: if
+            // clerk switches sessions while its token is fetched, it is not
+            // sent under the next person's token
+            const sessionId = this.sessionId;
             const token = overrideToken || await this.getToken();
+            if (!overrideToken && this.sessionId !== sessionId) {
+                const changed = new Error("Your sign-in changed. Sign in again, then retry.");
+                changed.sessionChanged = true;
+                throw changed;
+            }
             const endpoint = kind === "query" ? "query" : kind === "action" ? "action" : "mutation";
             const headers = {
                 "Content-Type": "application/json",
@@ -671,7 +702,8 @@
                 !overrideToken
                 && (response.status === 401 || /Authentication required|Unauthenticated|JWT|token/i.test(message))
             ) {
-                this.signOut();
+                // the page clears before the caller hears of it
+                if (this.sessionId === sessionId) this.endProjectUser();
                 const authError = new Error("Your sign-in expired. Sign in again, then retry.");
                 authError.authExpired = true;
                 throw authError;

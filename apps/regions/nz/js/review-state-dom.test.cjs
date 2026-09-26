@@ -47,7 +47,7 @@ const window = {
     localStorage: { getItem: () => null, setItem() {} },
     POW_CONVEX_CONFIG: { url: "https://example.convex.cloud" },
     POW_COUNTRY_REGISTRY: { countries: [] },
-    PowConvexTaskClient: class { constructor() { this.configured = true; this.authToken = null; } },
+    PowConvexTaskClient: class { constructor() { this.configured = true; this.authToken = null; } setLifecycle(handlers) { window.__lifecycle = handlers; } },
 };
 window.window = window;
 const context = vm.createContext({ window, document, URLSearchParams, Map, Set, Number, String, Boolean, Array, Object, Promise, console, setTimeout, clearTimeout });
@@ -273,6 +273,23 @@ assert.equal(elements.get("transportDot").textContent, "Connected");
     pending.resolve(Promise.reject(new Error("Stale review snapshot.")));
     await stale.catch(() => {});
     assert.equal(queueLoads, 0, "no reload for an ended session");
+
+    // the client reports a session replaced by another account, or a
+    // refused token, through the lifecycle handler the portal registered
+    // before any restore: the previous reviewer's queue and task leave, and
+    // their outstanding guards go stale (#153 round 1)
+    assert.equal(typeof window.__lifecycle?.onSignedOut, "function", "the portal registers its lifecycle");
+    signIn("reviewer_1");
+    portal.state.queue = [row("q1", "needs_review")];
+    portal.state.selected = { task: row("q1", "needs_review").task };
+    const reviewerOneGuard = portal.sessionGuard();
+    window.__lifecycle.onSignedOut({ deliberate: false, replaced: true });
+    assert.equal(portal.state.user, null);
+    assert.equal(portal.state.queue.length, 0);
+    assert.equal(portal.state.selected, null);
+    assert.equal(reviewerOneGuard(), false, "reviewer 1's late answers land nowhere");
+    signIn("reviewer_2");
+    assert.equal(reviewerOneGuard(), false, "nor on reviewer 2's page");
     console.log("review state dom test passed");
 })().catch((error) => {
     console.error(error);

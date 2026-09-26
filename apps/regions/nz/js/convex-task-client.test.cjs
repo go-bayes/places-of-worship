@@ -255,7 +255,9 @@ const container = () => ({
   }
 
   // 6. the sign-out button ends the clerk session without a second signal;
-  // an automatic sign-out (a refused token) keeps clerk's session
+  // an automatic sign-out (a refused token) keeps clerk's session, but the
+  // page hears of it before the caller does, so it clears what the person
+  // loaded (#153 round 1, sol 2)
   {
     const h = harness({ session: { id: "sess_5", email: "guy@example.org" }, cookie: "__client_uat=1", responses: { "users:claimInvite": ok("user_1"), "users:me": ok(member), "tasks:listTasks": { status: 401, body: { errorMessage: "Authentication required." } } } });
     const client = new h.Client(config);
@@ -263,15 +265,19 @@ const container = () => ({
     client.setLifecycle({ onSignedOut: (event) => ended.push(event?.deliberate ? "deliberate" : "ended") });
     await client.renderSignInButton(container(), {});
     await tick();
-    await assert.rejects(client.listTasks({}), (error) => error.authExpired === true);
+    const order = [];
+    client.setLifecycle({ onSignedOut: (event) => { order.push("page cleared"); ended.push(event?.deliberate ? "deliberate" : "ended"); } });
+    await assert.rejects(client.listTasks({}).catch((error) => { order.push("caller told"); throw error; }), (error) => error.authExpired === true);
     assert.equal(client.user, null);
+    assert.deepEqual(ended, ["ended"], "a refused token ends the page's session");
+    assert.deepEqual(order, ["page cleared", "caller told"]);
     assert.equal(h.calls.signOut, 0, "an expiry does not end the clerk session");
     const reclaimed = await client.restoreSession();
     assert.equal(reclaimed?._id, "user_1", "the held session admits the user again");
     await client.signOut({ deliberate: true });
     assert.equal(h.calls.signOut, 1);
     assert.equal(client.signedIn, false);
-    assert.equal(ended.length, 0, "a deliberate sign-out is not reported as a session ending elsewhere");
+    assert.deepEqual(ended, ["ended"], "a deliberate sign-out is not reported as a session ending elsewhere");
     await client.renderSignInButton(container(), {});
     assert.equal(h.calls.mountSignIn.length, 1, "the card offers sign-in again");
   }
@@ -508,6 +514,100 @@ const container = () => ({
     // the refusal of the google token never signs the clerk session out
     assert.equal(h.calls.signOut, 0);
     assert.equal(client.sessionId, "sess_w");
+  }
+
+  // 17. clerk replaces session a with session b directly (another account
+  // signed in elsewhere): the page is told a's session ended, synchronously
+  // and before b's claim is sent, then b is admitted (#153 round 1, both 1)
+  {
+    const claims = [];
+    const responses = {
+      "users:claimInvite": (body) => ok(claims.length ? "user_b" : "user_a"),
+      "users:me": () => ok(claims.at(-1)),
+    };
+    const h = harness({ session: { id: "sess_a", email: "a@example.org" }, cookie: "__client_uat=1", responses });
+    const origFetch = h.calls.fetches;
+    const client = new h.Client(config);
+    const log = [];
+    client.setLifecycle({ onSignedOut: (event) => log.push(`ended(${event.replaced ? "replaced" : "gone"}) user=${client.user?._id || "none"} session=${client.sessionId}`) });
+    // restored on load, as after a reload
+    responses["users:me"] = () => ok({ ...member, _id: "user_a", email: "a@example.org" });
+    const restored = await client.restoreSession();
+    assert.equal(restored._id, "user_a");
+    responses["users:me"] = () => ok({ ...member, _id: "user_b", email: "b@example.org" });
+    claims.push("user_b");
+    const host = container();
+    const admitted = [];
+    client.signInOptions = { onSignedIn: (user) => { admitted.push(user._id); log.push(`admitted ${user._id}`); } };
+    client.signInHost = host;
+    const claimsBefore = origFetch.filter((fetch) => fetch.body.path === "users:claimInvite").length;
+    h.clerk.setSession(h.makeSession("sess_b", "b@example.org"));
+    // synchronous: the page was cleared before anything was sent for b
+    assert.deepEqual(log, ["ended(replaced) user=none session=sess_b"]);
+    assert.equal(client.user, null);
+    await tick();
+    assert.equal(origFetch.filter((fetch) => fetch.body.path === "users:claimInvite").length, claimsBefore + 1);
+    assert.match(origFetch.filter((fetch) => fetch.body.path === "users:claimInvite").at(-1).headers.Authorization, /^Bearer jwt-for-sess_b-/);
+    assert.deepEqual(admitted, ["user_b"]);
+    assert.equal(client.user._id, "user_b");
+  }
+
+  // 18. a's answers that land after the switch to b name nobody: a's claim
+  // in flight neither admits a nor reports a's failure, a request made under
+  // a whose token arrives after the switch is not sent under b's token, and
+  // a restore racing the switch returns nobody
+  {
+    const deferred = () => { let resolve; const promise = new Promise((r) => { resolve = r; }); return { promise, resolve }; };
+    const aClaim = deferred();
+    const responses = {
+      "users:claimInvite": (body) => (h.calls.fetches.filter((fetch) => fetch.body.path === "users:claimInvite").length === 1 ? aClaim.promise : ok("user_b")),
+      "users:me": ok({ ...member, _id: "user_b" }),
+      "tasks:listTasks": ok([]),
+    };
+    const h = harness({ session: { id: "sess_a", email: "a@example.org" }, cookie: "__client_uat=1", responses });
+    const client = new h.Client(config);
+    const admitted = [];
+    const errors = [];
+    const ended = [];
+    client.setLifecycle({ onSignedOut: () => ended.push("ended") });
+    const restoring = client.restoreSession();
+    await tick();
+    const host = container();
+    client.signInHost = host;
+    client.signInOptions = { onSignedIn: (user) => admitted.push(user._id), onError: (error) => errors.push(error.message) };
+    h.clerk.setSession(h.makeSession("sess_b", "b@example.org"));
+    aClaim.resolve({ status: 200, body: { status: "error", errorMessage: "network trouble for a" } });
+    assert.equal(await restoring, null, "a's restore names nobody");
+    await tick();
+    assert.deepEqual(errors, [], "a's late failure is not reported on b's page");
+    assert.deepEqual(admitted, ["user_b"]);
+    assert.deepEqual(ended, ["ended"], "every change away from a session is announced, admitted or not");
+    // a request asked for under b, whose token arrives after a switch to c
+    let release;
+    const slowToken = new Promise((r) => { release = r; });
+    h.clerk.session.getToken = async () => { await slowToken; return "jwt-late"; };
+    const sent = h.calls.fetches.length;
+    const late = client.listTasks({});
+    h.clerk.setSession(h.makeSession("sess_c", "c@example.org"));
+    release();
+    await assert.rejects(late, (error) => error.sessionChanged === true);
+    assert.equal(h.calls.fetches.slice(sent).some((fetch) => fetch.body.path === "tasks:listTasks"), false, "nothing sent under the next session");
+    assert.deepEqual(ended, ["ended", "ended"], "b's session ending cleared the page");
+  }
+
+  // 19. a refused token while a claim is out (no user admitted yet) does not
+  // announce an ending, so the card never loops into another claim
+  {
+    const h = harness({ session: { id: "sess_x", email: "x@example.org" }, cookie: "__client_uat=1", responses: { "users:claimInvite": { status: 401, body: { errorMessage: "Authentication required." } } } });
+    const client = new h.Client(config);
+    const ended = [];
+    client.setLifecycle({ onSignedOut: () => ended.push("ended") });
+    const errors = [];
+    await client.renderSignInButton(container(), { onError: (error) => errors.push(error.message) });
+    await tick();
+    assert.deepEqual(ended, []);
+    assert.equal(h.calls.fetches.filter((fetch) => fetch.body.path === "users:claimInvite").length, 1);
+    assert.match(errors[0] || "", /sign-in expired/);
   }
 
   console.log("convex-task-client: clerk sessions ok");

@@ -27,6 +27,14 @@ const NO_INVITATION = "No pending project invitation found for this email.";
 // email alone never re-keys a row
 const GOOGLE_ISSUER = "https://accounts.google.com";
 const PAIRING_TTL_MS = 10 * 60 * 1000;
+// a server-side window on pairing requests, per member row and per clerk
+// sign-in (#153 round 1): at most PAIRING_REQUEST_LIMIT in any hour. it
+// also bounds every pairing read, since only requests inside the ten-minute
+// lifetime can be open and each read takes at most PAIRING_READ_BOUND rows
+const PAIRING_REQUEST_WINDOW_MS = 60 * 60 * 1000;
+const PAIRING_REQUEST_LIMIT = 6;
+const PAIRING_READ_BOUND = PAIRING_REQUEST_LIMIT + 1;
+const PAIRING_RATE_LIMITED = "Too many requests to move this account in the last hour. Wait an hour, then try again, or ask a project admin.";
 const MIGRATION_CONFIRM = "This address belongs to an existing member who signed in with Google. Confirm that Google account first, then sign in again.";
 const VERIFY_EMAIL = "Verify this email address with the sign-in provider, then sign in again.";
 
@@ -355,10 +363,15 @@ async function approvedPairing(
   row: Doc<"users">,
   now: number,
 ): Promise<Doc<"identity_migration_pairings"> | null> {
+  // only a request inside the pairing lifetime can still be live; the
+  // request window keeps these few, and the read is bounded regardless
   const pairings = await ctx.db
     .query("identity_migration_pairings")
-    .withIndex("by_clerk_identifier", (q) => q.eq("clerk_token_identifier", clerkTokenIdentifier))
-    .collect();
+    .withIndex("by_clerk_identifier", (q) => q
+      .eq("clerk_token_identifier", clerkTokenIdentifier)
+      .gt("requested_at", now - PAIRING_TTL_MS))
+    .order("desc")
+    .take(PAIRING_READ_BOUND);
   return pairings.find((pairing) => pairing.user_id === row._id
     && pairing.source_token_identifier === row.auth_subject
     && pairing.approved_at !== undefined
@@ -401,12 +414,31 @@ export const requestIdentityMigration = mutation({
     }
     const row = await migrationTarget(ctx, identity);
     const now = Date.now();
-    const open = await ctx.db
+    // the request window, per row and per clerk sign-in: bounded reads of
+    // the last hour only, never the whole history
+    const windowStart = now - PAIRING_REQUEST_WINDOW_MS;
+    const recentForRow = await ctx.db
       .query("identity_migration_pairings")
-      .withIndex("by_user", (q) => q.eq("user_id", row._id))
-      .collect();
-    for (const pairing of open) {
-      if (pairing.consumed_at === undefined && pairing.revoked_at === undefined) {
+      .withIndex("by_user", (q) => q.eq("user_id", row._id).gt("requested_at", windowStart))
+      .order("desc")
+      .take(PAIRING_READ_BOUND);
+    const recentForSignIn = await ctx.db
+      .query("identity_migration_pairings")
+      .withIndex("by_clerk_identifier", (q) => q
+        .eq("clerk_token_identifier", identity.tokenIdentifier)
+        .gt("requested_at", windowStart))
+      .take(PAIRING_READ_BOUND);
+    if (recentForRow.length >= PAIRING_REQUEST_LIMIT || recentForSignIn.length >= PAIRING_REQUEST_LIMIT) {
+      throw new Error(PAIRING_RATE_LIMITED);
+    }
+    // a newer request revokes the row's open pairings; only those inside
+    // the pairing lifetime can be open, and all of them are in this read
+    for (const pairing of recentForRow) {
+      if (
+        pairing.requested_at > now - PAIRING_TTL_MS
+        && pairing.consumed_at === undefined
+        && pairing.revoked_at === undefined
+      ) {
         await ctx.db.patch(pairing._id, { revoked_at: now });
       }
     }

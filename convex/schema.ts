@@ -144,7 +144,9 @@ export default defineSchema({
   // matches); the row's current google sign-in approves it by the nonce it
   // is shown; claimInvite re-keys only for that clerk identifier and row,
   // spending the pairing in the same transaction. only the nonce's sha-256
-  // is stored; ten minutes; one open pairing per row
+  // is stored; ten minutes; one open pairing per row; at most six requests
+  // per row and per clerk sign-in in any hour, and every read of this table
+  // is bounded to the last hour or the pairing lifetime
   identity_migration_pairings: defineTable({
     user_id: v.id("users"),
     clerk_token_identifier: v.string(),
