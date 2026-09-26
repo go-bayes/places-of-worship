@@ -405,6 +405,12 @@ function human(value) {
     function showSignedOut(message) {
         // a response asked for by the ended session lands nowhere (c1)
         state.sessionEpoch = (state.sessionEpoch || 0) + 1;
+        // a task load in flight is superseded, and the reviewer's stance on
+        // the ai recommendation and any snapshot error go with the task
+        // (#153 round 3 audit)
+        state.selectionToken = (state.selectionToken || 0) + 1;
+        state.agentAgreementChoice = null;
+        state.reviewSnapshotError = "";
         state.busy = false;
         state.occupancyBusy = false;
         state.user = null;
@@ -2078,8 +2084,14 @@ function human(value) {
         setupPageLabel();
         setupBoundary();
         // a sign-in kept on the device from before a reload (jb 2026-09-05)
+        // the answer counts only for the session it was asked under: if clerk
+        // ends or replaces that session meanwhile, the answer is dropped and
+        // a user the replacement session admitted is kept (#153 round 3)
         if (client.mayHaveSession) {
-            state.user = await client.restoreSession().catch(() => null);
+            const epoch = state.sessionEpoch || 0;
+            const restored = await client.restoreSession().catch(() => null);
+            const sessionUnchanged = (state.sessionEpoch || 0) === epoch && client.user === restored;
+            if (restored && sessionUnchanged && !state.user) state.user = restored;
         }
         els.refreshQueue.addEventListener("click", loadQueue);
         els.queueStatus.addEventListener("change", () => {
@@ -2097,7 +2109,7 @@ function human(value) {
     // the dom tests load this file with the flag set and drive the pure-ish
     // renderers directly; the page itself boots as before
     if (window.__POW_TEST_NO_BOOTSTRAP__) {
-        window.__PowReviewPortalTest = { state, els, client, loadQueue, showSignedOut, sessionGuard, openAttachment, loadOccupancyPanel, decideOccupancyYear, wireClaimControls, reloadSelectedTask, submitDecision, renderQueue, renderQueueRollup, renderDetail, renderEmptyDetail, decisionForm, wireDecisionForm, setDecisionFormValues, setTransport, renderAuth };
+        window.__PowReviewPortalTest = { init, state, els, client, loadQueue, showSignedOut, sessionGuard, openAttachment, loadOccupancyPanel, decideOccupancyYear, wireClaimControls, reloadSelectedTask, submitDecision, renderQueue, renderQueueRollup, renderDetail, renderEmptyDetail, decisionForm, wireDecisionForm, setDecisionFormValues, setTransport, renderAuth };
     } else {
         init();
     }

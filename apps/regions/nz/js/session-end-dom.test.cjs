@@ -434,7 +434,7 @@ async function roundThree() {
     values.clear();
     const { app } = signedInApp("user_a");
     Object.assign(app.backend, { configured: true, signedIn: true, user: { _id: "user_a" } });
-    app.quickPhoto = { fix: { latitude: -41.29, longitude: 174.78, accuracyM: 10 }, submissionId: "sub_1", file: null, nearbyShown: true };
+    app.quickPhoto = { fix: { latitude: -41.29, longitude: 174.78, accuracyM: 10 }, submissionId: "sub_1", file: null, nearbyShown: true, epoch: app.sessionEpoch || 0, ownerId: "user_a" };
     const refreshing = deferred();
     let recorded = 0;
     app.refreshBackendTasks = () => refreshing.promise;
@@ -613,6 +613,79 @@ async function roundThree() {
       window.addEventListener = listeners.window;
       document.addEventListener = listeners.document;
     }
+  }
+
+  const later = () => { let resolve; const promise = new Promise((r) => { resolve = r; }); return { promise, resolve }; };
+  // #153 round 3 audit: every entry and transient the person had open is
+  // reset on a session end, and late continuations of a's work leave b's
+  // page alone
+  {
+    const { app } = signedInApp("user_a");
+    let popups = 0;
+    Object.assign(app, {
+      map: { closePopup() { popups += 1; } },
+      reviseContext: { taskId: "task_1" },
+      pinConfirmed: { latitude: 1, longitude: 1 },
+      pinLinkedRefs: [{ ref: "osm:1" }],
+      pinSubmissionId: "sub_a",
+      pinHistory: [{}],
+      occupancyDraft: { segments: [{ start: "2001", note: "a's period note" }] },
+      occupancyPinContext: { context: {}, index: 0 },
+      issueFormOpenTaskId: "task_1",
+      pendingEvidenceAttachTaskId: "task_1",
+      attachmentUploadInFlight: true,
+      rapidCorrectionTaskIds: new Set(["task_1"]),
+      selectedContextFeature: { properties: { name: "context" } },
+      quickPhotoCarry: { files: [{}], caption: "Quick photo capture" },
+      backendTransientStatus: "Saved a's draft for St Mary's",
+    });
+    app.onBackendSessionEnded({ deliberate: false, replaced: true });
+    for (const field of ["reviseContext", "pinConfirmed", "pinSubmissionId", "occupancyDraft", "occupancyPinContext", "issueFormOpenTaskId", "pendingEvidenceAttachTaskId", "selectedContextFeature", "quickPhotoCarry"]) {
+      assert.equal(app[field], null, `${field} is reset`);
+    }
+    assert.equal(app.pinLinkedRefs.length, 0);
+    assert.equal(app.pinHistory.length, 0);
+    assert.equal(app.attachmentUploadInFlight, false);
+    assert.equal(app.rapidCorrectionTaskIds.size, 0);
+    assert.equal(app.backendTransientStatus, "");
+    assert.ok(popups >= 1, "an open map popup closes");
+  }
+  {
+    // a's draft load fails with a refused token after b is in: b stays in
+    const { app } = signedInApp("user_a");
+    const pending = later();
+    Object.assign(app.backend, { signedIn: true, user: app.backendUser, listTaskEvidence: () => pending.promise });
+    const loading = app.loadLatestDraftForTask("task_1");
+    app.onBackendSessionEnded({ deliberate: false, replaced: true });
+    const userB = { _id: "user_b" };
+    app.backendUser = userB;
+    app.backend.user = userB;
+    const refused = new Error("Your sign-in expired.");
+    refused.authExpired = true;
+    pending.resolve(Promise.reject(refused));
+    assert.equal(await loading, null);
+    assert.equal(app.backendUser, userB, "a's late refusal does not sign b out of the page");
+  }
+  {
+    // a's upload finishes after b is in: b's flags and panels are untouched
+    const { app } = signedInApp("user_a");
+    const grant = later();
+    let refreshedLists = 0;
+    Object.assign(app.backend, { signedIn: true, user: app.backendUser, requestAttachmentUpload: () => grant.promise });
+    app.refreshAttachmentList = () => { refreshedLists += 1; };
+    const uploading = app.uploadFiles("task_1", null, [{ name: "a.jpg", type: "image/jpeg", size: 1 }], "");
+    assert.equal(app.attachmentUploadInFlight, true);
+    app.onBackendSessionEnded({ deliberate: false, replaced: true });
+    const userB = { _id: "user_b" };
+    app.backendUser = userB;
+    app.backend.user = userB;
+    app.attachmentUploadInFlight = true; // b's own upload has started
+    app.pendingEvidenceAttachTaskId = "task_b";
+    grant.resolve({ upload_url: "https://upload.invalid", attachment_id: "att_1" });
+    await uploading;
+    assert.equal(app.attachmentUploadInFlight, true, "b's upload flag is b's");
+    assert.equal(app.pendingEvidenceAttachTaskId, "task_b");
+    assert.equal(refreshedLists, 0, "no attachment list is redrawn for a");
   }
 
   console.log("session end dom test passed");

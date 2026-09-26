@@ -2504,6 +2504,33 @@ class NzVerificationMap {
             && this.backendUser === ticket.user;
     }
 
+    closeSignedInEntries() {
+        if (this.quickPhoto) this.closeQuickPhoto({ keepEntry: true });
+        // quickPhotoArmed stays: its epoch is now stale, so a photo picked
+        // in the chooser the ended session opened is refused
+        this.quickPhotoFix = null;
+        this.quickPhotoCarry = null;
+        for (const id of ["quickPhotoInput", "pinEvidenceFiles"]) {
+            const input = document.getElementById(id);
+            if (input) input.value = "";
+        }
+        this.reviseContext = null;
+        this.pinConfirmed = null;
+        this.pinLinkedRefs = [];
+        this.pinSubmissionId = null;
+        this.pinHistory = [];
+        this.occupancyDraft = null;
+        this.occupancyPinContext = null;
+        this.issueFormOpenTaskId = null;
+        this.pendingEvidenceAttachTaskId = null;
+        this.attachmentUploadInFlight = false;
+        this.rapidCorrectionTaskIds?.clear();
+        this.selectedContextFeature = null;
+        this.map?.closePopup?.();
+        clearTimeout(this._backendStatusTimer);
+        this.backendTransientStatus = "";
+    }
+
     // what a signed-in person leaves on the page goes on every sign-out, so
     // the next person at the screen finds none of it. a deliberate sign-out
     // also deletes the device copies and forgets the activity; an ended
@@ -2518,6 +2545,13 @@ class NzVerificationMap {
         this.backendUser = null;
         this.signedOutDeliberately = deliberate;
         if (this.pinMode) this.exitPinMode();
+        // every entry and transient the person had open goes too (#153
+        // round 3 audit; the table is in the pr body): a quick photo (its
+        // preview url revoked, the file input emptied, a pending pick or
+        // position answer dropped), the occupancy and issue forms, a pin's
+        // leftovers, a pending evidence reminder, an open map popup and a
+        // status line that may name their task
+        this.closeSignedInEntries();
         if (deliberate) {
             this.portalMode = null;
             try {
@@ -4241,6 +4275,9 @@ class NzVerificationMap {
         this.quickPhotoFix = this.geolocationAvailable()
             ? this.requestPosition().then(fix => ({ fix }), error => ({ error: error.message }))
             : Promise.resolve({ error: "This browser offers no location here." });
+        // the pick belongs to this session: a photo chosen after it ended
+        // opens nothing (#153 round 3)
+        this.quickPhotoArmed = { epoch: this.sessionEpoch || 0 };
         input.value = "";
         input.click();
     }
@@ -4248,6 +4285,14 @@ class NzVerificationMap {
     quickPhotoChosen(file) {
         const hint = document.getElementById("quickPhotoHint");
         if (!file || this.quickPhoto) return;
+        const armed = this.quickPhotoArmed;
+        this.quickPhotoArmed = null;
+        if (armed && armed.epoch !== (this.sessionEpoch || 0)) {
+            this.quickPhotoFix = null;
+            const input = document.getElementById("quickPhotoInput");
+            if (input) input.value = "";
+            return;
+        }
         if (!QUICK_PHOTO_TYPES.has(file.type)) {
             if (hint) hint.textContent = "That file is not a JPEG, PNG or WebP photo. Take the photo again.";
             return;
@@ -4264,7 +4309,12 @@ class NzVerificationMap {
             // one id per card so a retry of a failed send never lands twice
             submissionId: window.PowRapidEntry?.secureSubmissionId?.() || "",
             previewUrl: window.URL?.createObjectURL?.(file) || "",
+            // the session the capture belongs to: it is sent only by that
+            // session and closed when it ends
+            epoch: this.sessionEpoch || 0,
+            ownerId: this.backendUser?._id || this.backend?.user?._id || "",
         };
+        const capture = this.quickPhoto;
         // a new entry starts from a clean slate, as the pin flow does
         this.selectedTask = null;
         this.issueFormOpenTaskId = null;
@@ -4280,7 +4330,10 @@ class NzVerificationMap {
         document.addEventListener?.("keydown", this._quickPhotoKeyHandler);
         const fix = this.quickPhotoFix || Promise.resolve({ error: "Your position was not requested." });
         this.quickPhotoFix = null;
-        fix.then(result => this.quickPhotoPositioned(result));
+        // a position answer serves only the capture that asked for it
+        fix.then(result => {
+            if (this.quickPhoto === capture) this.quickPhotoPositioned(result);
+        });
     }
 
     quickPhotoCardHtml() {
@@ -4437,6 +4490,12 @@ class NzVerificationMap {
         const capture = this.quickPhoto;
         const status = document.getElementById("quickPhotoStatus");
         const send = document.getElementById("quickPhotoSendButton");
+        // a capture from another session is never sent under this one
+        if (capture && (capture.epoch !== (this.sessionEpoch || 0)
+            || (capture.ownerId && capture.ownerId !== (this.backendUser?._id || this.backend?.user?._id || "")))) {
+            this.closeQuickPhoto();
+            return;
+        }
         const refuse = text => {
             if (!status) return;
             status.textContent = text;
@@ -6017,8 +6076,9 @@ class NzVerificationMap {
         this.renderNominationList();
         this.renderDetailPreservingForm(feature);
         if (this.backend?.signedIn && props.task_id && !this.latestDraftsByTaskId.has(props.task_id)) {
+            const alive = this.sessionGuard();
             this.loadLatestDraftForTask(props.task_id).then(() => {
-                if (this.selectedTask?.properties?.task_id === props.task_id) {
+                if (alive() && this.selectedTask?.properties?.task_id === props.task_id) {
                     // async draft load re-renders; keep anything typed meanwhile
                     this.renderDetailPreservingForm(this.selectedTask);
                     if (options.focusDetail) {
@@ -6051,6 +6111,8 @@ class NzVerificationMap {
             }
             return latestDraft;
         } catch (error) {
+            // an ended session's failure lands nowhere
+            if (!this.sessionCurrent(sessionTicket)) return null;
             if (error.authExpired) {
                 this.backendUser = null;
                 this.backendLastError = error.message;
@@ -6249,8 +6311,11 @@ class NzVerificationMap {
             const files = pendingFiles?.files || [];
             // the files chosen in the form upload now, against the task the
             // save just created, once the block has confirmed storage is on
+            // the files belong to the session that saved them: if it ends
+            // before storage answers, they are never uploaded under the next
+            const alive = this.sessionGuard();
             this.initAttachmentsBlock(props, block, { prominent: nomination || files.length > 0 }).then(() => {
-                if (files.length && block && !block.hidden) {
+                if (alive() && files.length && block && !block.hidden) {
                     this.uploadFiles(props.task_id, block, files, pendingFiles.caption || "");
                 }
             });
@@ -8319,7 +8384,11 @@ class NzVerificationMap {
         const markDirty = () => {
             this.markFormDirty(options.props?.task_id || `rapid-${prefix}`);
             window.clearTimeout(persistTimer);
-            persistTimer = window.setTimeout(persist, 400);
+            // the device copy is written only in the session that typed it
+            const epoch = this.sessionEpoch || 0;
+            persistTimer = window.setTimeout(() => {
+                if (epoch === (this.sessionEpoch || 0)) persist();
+            }, 400);
         };
         form.addEventListener("input", markDirty);
         form.addEventListener("change", markDirty);
@@ -10664,7 +10733,11 @@ class NzVerificationMap {
         const markDirty = () => {
             this.markFormDirty(props.task_id);
             window.clearTimeout(snapshotTimer);
-            snapshotTimer = window.setTimeout(() => this.snapshotFormForTask(props.task_id), 400);
+            // the device copy is written only in the session that typed it
+            const epoch = this.sessionEpoch || 0;
+            snapshotTimer = window.setTimeout(() => {
+                if (epoch === (this.sessionEpoch || 0)) this.snapshotFormForTask(props.task_id);
+            }, 400);
         };
         actionSelect?.addEventListener("change", () => {
             markDirty();
@@ -11542,13 +11615,17 @@ class NzVerificationMap {
             const base = error.message || "Upload failed.";
             if (status) status.textContent = added > 0 ? `${base} ${added} file(s) were added before the failure.` : base;
         } finally {
-            this.attachmentUploadInFlight = false;
-            // a successful upload settles the promised-files reminder
-            if (added > 0 && this.pendingEvidenceAttachTaskId === taskId) {
-                this.pendingEvidenceAttachTaskId = null;
+            // an ended session's upload leaves the next session's flags
+            // and panels alone (clearSignedInState reset them)
+            if (alive()) {
+                this.attachmentUploadInFlight = false;
+                // a successful upload settles the promised-files reminder
+                if (added > 0 && this.pendingEvidenceAttachTaskId === taskId) {
+                    this.pendingEvidenceAttachTaskId = null;
+                }
+                if (button) button.disabled = false;
+                this.refreshAttachmentList(taskId, block);
             }
-            if (button) button.disabled = false;
-            this.refreshAttachmentList(taskId, block);
         }
     }
 

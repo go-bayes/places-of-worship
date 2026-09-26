@@ -290,6 +290,38 @@ assert.equal(elements.get("transportDot").textContent, "Connected");
     assert.equal(reviewerOneGuard(), false, "reviewer 1's late answers land nowhere");
     signIn("reviewer_2");
     assert.equal(reviewerOneGuard(), false, "nor on reviewer 2's page");
+    // #153 round 3 (sol): startup's restore of reviewer a is still out when
+    // clerk replaces a's session and the card admits reviewer b. a's late
+    // answer must not overwrite b, whether it names a or nobody
+    element("signOut");
+    element("transportDot");
+    for (const lateAnswer of ["nobody", "reviewer a"]) {
+        portal.showSignedOut("Signed out.");
+        const restore = deferred();
+        const reviewerA = { _id: "reviewer_a", display_name: "A", roles: ["reviewer"] };
+        portal.client.mayHaveSession = true;
+        portal.client.restoreSession = () => restore.promise;
+        portal.client.renderSignInButton = async () => {};
+        portal.client.listReviewQueue = async () => [];
+        portal.client.user = null;
+        const starting = portal.init();
+        // clerk replaces a's session; the card admits b
+        window.__lifecycle.onSignedOut({ deliberate: false, replaced: true });
+        const reviewerB = { _id: "reviewer_b", display_name: "B", roles: ["reviewer"] };
+        portal.state.user = reviewerB;
+        portal.client.user = reviewerB;
+        restore.resolve(lateAnswer === "nobody" ? null : reviewerA);
+        await starting;
+        assert.equal(portal.state.user, reviewerB, `a's late restore (${lateAnswer}) leaves b in place`);
+    }
+    // an unchanged restore still admits the restored reviewer
+    {
+        portal.showSignedOut("Signed out.");
+        const reviewerA = { _id: "reviewer_a", display_name: "A", roles: ["reviewer"] };
+        portal.client.restoreSession = async () => { portal.client.user = reviewerA; return reviewerA; };
+        await portal.init();
+        assert.equal(portal.state.user, reviewerA);
+    }
     console.log("review state dom test passed");
 })().catch((error) => {
     console.error(error);
