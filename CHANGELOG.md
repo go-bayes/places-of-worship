@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-09-26 (inspection phone screen admits OSM references)
+
+- The Bahamas inspection adapter's North American telephone screen no longer refuses an OpenStreetMap element reference with a ten-digit id, such as `node/1189557282`, in a candidate link's `osm_ref` or `candidate_ref`. The exemption covers only the exact reference shape, bare or as an `openstreetmap.org` URL; a telephone number in those fields and a ten-digit number anywhere else are still refused, and the shared personal-detail screen still applies to both fields.
+
 ### 2026-09-26 (confidence standard 0.3.0; methods log moved)
 
 - Version 0.3.0 of the [confidence standard](docs/confidence-standard.md), snapshot at `docs/development/confidence-standard-2026-09-26-v0.3.0.md`, on the project lead's ruling of 2026-09-26: living persons appear on published surfaces only under pseudonyms, clergy and church-office holders included, with the key from pseudonym to name held privately. The public scope of the cited clergy-name rule `public_source_cited.v1` is withdrawn for living persons; its internal scope in the review layer is unchanged. The layer-families design marks its earlier name rule as superseded. The [summary of AI assistance](docs/ai-assisted-research.md) states the same rule.

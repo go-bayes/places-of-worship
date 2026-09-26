@@ -43,6 +43,41 @@ test("unsupported fields, restricted extracts, broken links and personal details
   for (const [value, message] of cases) assert.throws(() => adaptInspectionCase(value), message);
 });
 
+test("exact OSM references in candidate links pass the phone screen; phone numbers there and ten-digit numbers elsewhere do not", () => {
+  const osmRefs = ["node/1189557282", "way/1496210931", "relation/2425550199", "https://www.openstreetmap.org/node/13639618601", "https://openstreetmap.org/way/1189557282"];
+  for (const reference of osmRefs) {
+    const value = input();
+    value.candidate_links[0].osm_ref = reference;
+    value.candidate_links[0].candidate_ref = reference;
+    const { projection } = adaptInspectionCase(value);
+    assert.equal(projection.candidate_links[0].osm_ref, reference);
+    assert.equal(projection.candidate_links[0].candidate_ref, reference);
+    const object = addressed(projection, "case");
+    assert.deepEqual(validateInspectionCase(object.objectJson, object.objectHash), projection);
+  }
+  const refused = [
+    ["osm_ref", "2425550199"], ["osm_ref", "+1 242 555 0199"], ["osm_ref", "node/1189557282 call 242-555-0199"], ["osm_ref", "nodes/1189557282"], ["osm_ref", "https://example.org/node/1189557282"], ["osm_ref", "node/0189557282"],
+    ["candidate_ref", "2425550199"], ["candidate_ref", "synthetic:osm:node/1189557282"], ["candidate_ref", "node/1189557282/2425550199"],
+  ];
+  for (const [field, text] of refused) {
+    const value = input();
+    value.candidate_links[0][field] = text;
+    assert.throws(() => adaptInspectionCase(value), error => {
+      assert.match(error.message, new RegExp(`candidate_links\\[0\\]\\.${field}`));
+      assert.doesNotMatch(error.message, /555|1189557282/);
+      return true;
+    });
+  }
+  for (const text of ["node/1189557282", "2425550199"]) {
+    const elsewhere = input();
+    elsewhere.claims[0].wording = text;
+    assert.throws(() => adaptInspectionCase(elsewhere), /potential personal details in claims\[0\]\.wording/);
+    const basis = input();
+    basis.candidate_links[0].basis = text;
+    assert.throws(() => adaptInspectionCase(basis), /potential personal details in candidate_links\[0\]\.basis/);
+  }
+});
+
 test("extracts require both copy and display permission", () => {
   for (const copyPermission of ["needs_review", "restricted"]) {
     const value = input();
