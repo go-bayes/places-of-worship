@@ -392,6 +392,8 @@
                 }
                 if (!current()) return null;
                 this.user = user;
+                // the session this user was admitted under (#153 round 12)
+                this.userSessionId = sessionId;
                 this.claimFailure = null;
                 if (options.onSignedIn) await options.onSignedIn(user);
                 return user;

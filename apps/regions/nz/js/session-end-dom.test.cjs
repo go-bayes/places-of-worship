@@ -52,7 +52,7 @@ function signedInApp(userId = "user_a") {
   const app = Object.create(window.NzVerificationMap.prototype);
   const calls = { detail: 0, panel: 0, exitPin: 0 };
   Object.assign(app, {
-    backend: { user: null, sessionId: "sess_a", currentOrEndingSessionId() { return this.sessionId || ""; }, signOut: async () => {} },
+    backend: { user: null, sessionId: "sess_a", userSessionId: "sess_a", currentOrEndingSessionId() { return this.sessionId || ""; }, signOut: async () => {} },
     backendUser: { _id: userId, initials: "GL" },
     backendLastError: "",
     signedOutDeliberately: false,
@@ -1163,6 +1163,47 @@ async function roundThree() {
     values.set("powDeliberateSignOut1:user_a", String(Date.now() + 5));
     app.persistRapidDraft("pin", "rapid-pin");
     assert.equal(values.has("powRapidDraft2:NZ:user_a:rapid-pin"), false, "no draft is written after another tab signed out");
+  }
+  // round 12: a replacement session is installed before the departing
+  // member's page state is cleared; an uninvited account's sign-out then
+  // names nobody, so the member's drafts stay
+  {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    const key = "powRapidDraft2:NZ:user_a:rapid-pin";
+    values.set(key, JSON.stringify({ saved_at: 100, owner: "user_a", values: { directObservation: "a's text" } }));
+    app.backend.sessionId = "sess_b";
+    app.onBackendSessionEnded({ deliberate: false });
+    app.backendUser = null;
+    app.onBackendSessionEnded({ deliberate: true });
+    assert.equal(values.has(key), true, "the replacing account's sign-out leaves the previous member's draft");
+  }
+  // round 12: a sign-out in another tab reaches this page as a session end;
+  // the same member's next session writes drafts again
+  {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    app.draftOwnerId();
+    values.set("powDeliberateSignOut1:user_a", String(Date.now()));
+    app.onBackendSessionEnded({ deliberate: false });
+    app.backendUser = null;
+    await new Promise((r) => setTimeout(r, 5));
+    app.backendUser = { _id: "user_a", initials: "GL" };
+    app.rapidObservationValues = () => ({ directObservation: "typed again", flagForDiscussion: false });
+    app.persistRapidDraft("pin", "rapid-pin");
+    assert.equal(values.has("powRapidDraft2:NZ:user_a:rapid-pin"), true, "the new session's draft is written");
+  }
+  // round 12: an unedited period retry fingerprints alike whether the
+  // provenance is the whole first segment or the source fields alone
+  {
+    const { app } = signedInApp("user_a");
+    const savedPayload = window.PowOccupancy?.payload;
+    window.PowOccupancy = window.PowOccupancy || {};
+    if (!savedPayload) window.PowOccupancy.payload = (values) => ({ start: values.start, source: values.source });
+    const segments = [{ start: "1900", source: "x", segmentIndex: 0 }];
+    const inflated = [{ start: "1900", source: "x", segmentIndex: 0, extra: "first-segment-only field" }];
+    assert.equal(app.occupancyDraftFingerprint(segments, null), app.occupancyDraftFingerprint(inflated, null), "the payload, not the draft shape, is compared");
+    if (!savedPayload) delete window.PowOccupancy.payload;
   }
   // round 11: two tabs can stamp different saves alike; a receipt deletes a
   // copy only when the revision token matches too

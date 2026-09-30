@@ -2665,10 +2665,12 @@ class NzVerificationMap {
             this.markDeliberateSignOut(signedOutUserId);
             this.lastSessionOwnerId = "";
             this.lastSessionOwnerSessionId = "";
-            // the next session, even the same member's, begins after the mark
-            this.ownerSeenId = "";
-            this.ownerSeenAt = 0;
         }
+        // the next session, even the same member's, begins after any mark,
+        // including one made in another tab that reached this page as a
+        // session end (#153 round 12)
+        this.ownerSeenId = "";
+        this.ownerSeenAt = 0;
         if (ASSIGNMENT_MODE) {
             this.tasks = [];
             this.filteredTasks = [];
@@ -7023,7 +7025,10 @@ class NzVerificationMap {
         // deliberate sign-out still purges that person's device copies
         if (owner) {
             this.lastSessionOwnerId = owner;
-            this.lastSessionOwnerSessionId = this.backend?.sessionId || this.lastSessionOwnerSessionId || "";
+            // the session the member was admitted under, never the current
+            // one: a replacement session may already be installed while the
+            // departing member's page state is cleared (#153 round 12)
+            this.lastSessionOwnerSessionId = this.backend?.userSessionId || this.lastSessionOwnerSessionId || "";
         }
         // when this page first saw the owner: a deliberate sign-out in
         // another tab at or after that time ended this session's device
@@ -10509,13 +10514,15 @@ class NzVerificationMap {
 
     // the content a pane submission sends, for comparing one attempt with the
     // next: an id that was sent is reused only for the same content
-    occupancyDraftFingerprint(draft) {
+    // taken from the normalised payload the server receives (the merged
+    // segments and the chain payload), so a draft handed over from the
+    // guided periods and the same content read back from the pane form
+    // compare equal (#153 round 12)
+    occupancyDraftFingerprint(segments, chainPayload) {
         try {
             return JSON.stringify({
-                segments: draft.segments,
-                provenance: draft.provenance,
-                gapNote: draft.gapNote || "",
-                chain: draft.chain || null,
+                segments: segments.map(values => window.PowOccupancy.payload(values)),
+                chain: chainPayload || null,
             });
         } catch (error) {
             return "";
@@ -10557,7 +10564,7 @@ class NzVerificationMap {
         // an id already sent is kept only for unchanged content; an edit
         // made after a failed or ambiguous send goes under a fresh id, or the
         // server would deduplicate it into the earlier periods
-        const fingerprint = this.occupancyDraftFingerprint(draft);
+        const fingerprint = this.occupancyDraftFingerprint(segments, chainTouched ? window.PowFunctionChain.payload(chainToSend) : null);
         if (draft.sentSubmissionId && draft.sentSubmissionId === draft.submissionId
             && draft.sentFingerprint !== fingerprint && window.PowRapidEntry?.secureSubmissionId) {
             draft.submissionId = window.PowRapidEntry.secureSubmissionId();
@@ -12375,7 +12382,7 @@ class NzVerificationMap {
             // pane rotate it before a retry (#153 round 11)
             if (this.occupancyDraft.submissionId === plan.submissionId) {
                 this.occupancyDraft.sentSubmissionId = plan.submissionId;
-                this.occupancyDraft.sentFingerprint = this.occupancyDraftFingerprint(this.occupancyDraft);
+                this.occupancyDraft.sentFingerprint = this.occupancyDraftFingerprint(plan.segments, plan.chain);
             }
             // the cards now live on the pane's draft; the form's key must not
             // hand them to the next place the ra opens
