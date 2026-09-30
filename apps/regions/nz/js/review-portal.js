@@ -45,6 +45,11 @@
     // ended in another tab, by expiry, or by the card's retried sign-out
     // clears the queue and the open task (c1)
     client.setLifecycle?.({
+        // a retried sign-out from the card removes the reviewer's device
+        // copies when it starts, as the first attempt does (#153 round 10)
+        onSignOutStarted: () => {
+            window.PowConvexTaskClient?.purgeOwnerDeviceWork?.(state.user?._id || state.lastOwnerId || "");
+        },
         onSignedOut: ({ deliberate } = {}) => {
             // a deliberate sign-out from the card after a token refusal finds
             // no signed-in user; the last admitted reviewer is named so their

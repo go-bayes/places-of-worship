@@ -774,6 +774,15 @@ const RAPID_PIN_PERIODS_KEY = "rapid-pin-periods";
 // owner-scoped device drafts (c1) and the pre-c1 prefixes kept in quarantine
 const FORM_SNAPSHOT_PREFIX = "powFormSnapshot2:";
 const RAPID_DRAFT_PREFIX = "powRapidDraft2:";
+// a strictly increasing version stamp for device copies: two saves in one
+// millisecond still differ, so a receipt deletes only the version it sent
+// (#153 round 10)
+let lastSavedAtStamp = 0;
+function nextSavedAt() {
+    lastSavedAtStamp = Math.max(Date.now(), lastSavedAtStamp + 1);
+    return lastSavedAtStamp;
+}
+
 // periods of an observation recorded after its session ended, parked for the
 // submitter's next sign-in (#153 round 6)
 const PENDING_PERIODS_PREFIX = "powPendingPeriods1:";
@@ -1938,6 +1947,9 @@ class NzVerificationMap {
         // then ended in another tab still clears the page (c1)
         this.backend?.setLifecycle?.({
             onSignedOut: ({ deliberate } = {}) => this.onBackendSessionEnded({ deliberate }),
+            // a retried sign-out from the account card removes the member's
+            // device copies when it starts, as the first attempt does
+            onSignOutStarted: () => window.PowConvexTaskClient?.purgeOwnerDeviceWork?.(this.draftOwnerId() || this.lastSessionOwnerId || ""),
         });
         this.backendUser = null;
         this.backendTasksById = new Map();
@@ -2632,6 +2644,8 @@ class NzVerificationMap {
             // pr-e: period cards leave with the session; on a shared
             // computer the next user must not find them
             this.clearAllGuidedPeriods(signedOutUserId);
+            // and the owner's cards on every other country on this device
+            window.PowConvexTaskClient?.purgeOwnerDeviceWork?.(signedOutUserId);
             // parked periods of an earlier entry leave too, and a receipt
             // that arrives after this sign-out may not park new ones for
             // this owner (#153 round 8)
@@ -7047,7 +7061,7 @@ class NzVerificationMap {
         // signed out, the snapshot lives in memory only
         if (!owner) return;
         try {
-            window.localStorage.setItem(this.formSnapshotStorageKey(taskId), JSON.stringify({ saved_at: Date.now(), owner, snapshot }));
+            window.localStorage.setItem(this.formSnapshotStorageKey(taskId), JSON.stringify({ saved_at: nextSavedAt(), owner, snapshot }));
         } catch (error) {
             // private windows or blocked storage keep the snapshot in memory only
         }
@@ -8046,7 +8060,7 @@ class NzVerificationMap {
         try {
             const previous = this.readRapidDraft(key);
             const record = {
-                saved_at: Date.now(),
+                saved_at: nextSavedAt(),
                 owner: this.draftOwnerId(),
                 values: this.rapidObservationValues(prefix),
                 extra: extraValues,
@@ -8059,7 +8073,10 @@ class NzVerificationMap {
             // deduplicated into the earlier submission (#153 round 6)
             const form = document.getElementById(`${prefix}RapidCurrentForm`);
             let submissionId = form?.dataset?.submissionId;
-            if (submissionId && previous?.sent_submission_id === submissionId && window.PowRapidEntry?.secureSubmissionId) {
+            // the form's own sent marker counts as well as the stored one: receipt
+            // cleanup may already have deleted the stored draft (#153 round 10)
+            const sentHere = form?.dataset?.sentSubmissionId === submissionId || previous?.sent_submission_id === submissionId;
+            if (submissionId && sentHere && window.PowRapidEntry?.secureSubmissionId) {
                 submissionId = window.PowRapidEntry.secureSubmissionId();
                 form.dataset.submissionId = submissionId;
             }
@@ -8104,7 +8121,7 @@ class NzVerificationMap {
     keepRapidPinOnDevice() {
         if (!RAPID_NOMINATION_ENTRY || this.reviseContext || this.occupancyPinContext || !this.pinConfirmed) return;
         if (!this.draftOwnerId()) return;
-        const record = this.readRapidDraft("rapid-pin") || { saved_at: Date.now() };
+        const record = this.readRapidDraft("rapid-pin") || { saved_at: nextSavedAt() };
         record.owner = this.draftOwnerId();
         record.pin = { ...this.pinConfirmed, linkedRefs: this.pinLinkedRefs || [] };
         try {
@@ -9359,7 +9376,7 @@ class NzVerificationMap {
         }
         try {
             window.localStorage.setItem(this.guidedPeriodsStorageKey(taskId), JSON.stringify({
-                saved_at: Date.now(),
+                saved_at: nextSavedAt(),
                 submissionId: state.submissionId || "",
                 ...(state.sentSubmissionId ? { sentSubmissionId: state.sentSubmissionId, sentDigest: state.sentDigest || "", sentSourceDigest: state.sentSourceDigest || "" } : {}),
                 segments: state.segments,
@@ -12149,7 +12166,7 @@ class NzVerificationMap {
         try {
             window.localStorage.setItem(this.pendingPeriodsStorageKey(owner, plan.submissionId), JSON.stringify({
                 owner,
-                saved_at: Date.now(),
+                saved_at: nextSavedAt(),
                 taskId: result.task_id,
                 parentEvidenceDraftId: result.evidence_draft_id,
                 submissionId: plan.submissionId,
@@ -12257,7 +12274,13 @@ class NzVerificationMap {
             this.occupancyDraft = {
                 taskId: result.task_id,
                 context: { taskId: result.task_id, parentEvidenceDraftId: result.evidence_draft_id },
-                submissionId: plan.submissionId,
+                // the id stays with the content it was sent with: cards edited
+                // while the request was in flight go under a fresh id, so a
+                // retry is not deduplicated into the earlier send (#153 round 10)
+                submissionId: state.submissionId === plan.submissionId
+                    && state.sentDigest === this.guidedPeriodsContentDigest(state)
+                    ? plan.submissionId
+                    : window.PowRapidEntry.secureSubmissionId(),
                 segments: state.segments,
                 provenance: state.sameSource ? plan.segments[0] : state.provenance,
                 gapAnswer: state.gapAnswer,

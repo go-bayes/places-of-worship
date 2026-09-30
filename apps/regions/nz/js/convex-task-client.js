@@ -699,6 +699,7 @@
         }
 
         async retrySignOut(container) {
+            this.lifecycle.onSignOutStarted?.();
             try {
                 await this.signOut({ deliberate: true });
             } catch (error) {

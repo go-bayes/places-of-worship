@@ -1249,6 +1249,32 @@ async function roundThree() {
     assert.equal(values.has("powPendingPeriods1:NZ:user_b:s") && values.has("powGuidedPeriods:NZ:user_b:t"), true);
   }
 
+  // round 10: saves in one millisecond still carry distinct versions; the
+  // form's own sent marker rotates an id after receipt cleanup deleted the
+  // draft; edited retry cards do not keep the sent id
+  {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    window.PowRapidEntry = { secureSubmissionId: (() => { let n = 0; return () => `sub_t${(n += 1)}`; })() };
+    const realNow = Date.now;
+    Date.now = () => 5000;
+    const form = { dataset: { submissionId: "sub_sent", sentSubmissionId: "sub_sent" } };
+    const previousGet = document.getElementById;
+    document.getElementById = (id) => (id === "pinRapidCurrentForm" ? form : null);
+    app.persistRapidDraft("pin", "rapid-pin");
+    const first = app.readRapidDraft("rapid-pin");
+    assert.notEqual(form.dataset.submissionId, "sub_sent", "an edit after receipt cleanup mints a new id");
+    app.persistRapidDraft("pin", "rapid-pin");
+    assert.ok(app.readRapidDraft("rapid-pin").saved_at > first.saved_at, "same-millisecond saves differ");
+    Date.now = realNow;
+    document.getElementById = previousGet;
+    const state = { submissionId: "sub_1", segments: [{ startDate: "1990" }], chain: null, sameSource: true, provenance: null, gapAnswer: "", gapNote: "" };
+    app.guidedPeriodsByTaskId.set("k", state);
+    app.persistGuidedPeriods("k", { sending: true, provenance: null });
+    state.segments[0].startDate = "1991";
+    assert.notEqual(state.sentDigest, app.guidedPeriodsContentDigest(state), "edited cards differ from the sent digest");
+  }
+
   document.getElementById = getElementByIdR6;
   context.fetch = previousFetchR6;
 
