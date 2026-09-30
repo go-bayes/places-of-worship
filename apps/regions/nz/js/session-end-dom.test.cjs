@@ -1152,6 +1152,56 @@ async function roundThree() {
     assert.equal(sentArgs[0].clientSubmissionId, "sub_sent", "the send keeps the id of the content it carries");
     assert.equal(JSON.parse(values.get("powRapidDraft2:NZ:user_a:rapid-pin")).values.directObservation, "v2, edited", "the edit stays on the device");
   }
+  // round 8 review: a deliberate sign-out after the token was refused still
+  // purges the departing owner's parked periods and writes the mark
+  {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    app.draftOwnerId();
+    app.parkPendingPeriods(planFor("user_a", "sub_1"), { task_id: "t_a", evidence_draft_id: "d_a" }, "k");
+    app.parkPendingPeriods(planFor("user_b", "sub_b"), { task_id: "t_b", evidence_draft_id: "d_b" }, "k");
+    app.onBackendSessionEnded({ deliberate: false });
+    assert.equal(values.has("powPendingPeriods1:NZ:user_a:sub_1"), true, "an ended session keeps them");
+    app.clearSignedInState({ deliberate: true });
+    assert.equal(values.has("powPendingPeriods1:NZ:user_a:sub_1"), false, "the later deliberate sign-out purges the departing owner's");
+    assert.equal(values.has("powPendingPeriods1:NZ:user_b:sub_b"), true, "another member's stay");
+    assert.ok(values.has("powDeliberateSignOut1:user_a"), "the mark is written for the departing owner");
+  }
+
+  // round 8 review: edited periods get a new submission id; an unedited
+  // retry keeps the sent one
+  {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    window.PowRapidEntry = { secureSubmissionId: (() => { let n = 0; return () => `sub_n${(n += 1)}`; })() };
+    const state = { submissionId: "sub_1", segments: [{ startDate: "1990" }], chain: null, sameSource: true, provenance: null, gapAnswer: "", gapNote: "" };
+    app.guidedPeriodsByTaskId.set("k", state);
+    app.persistGuidedPeriods("k", { sending: true });
+    app.persistGuidedPeriods("k");
+    assert.equal(state.submissionId, "sub_1", "an unedited retry keeps the sent id");
+    state.segments[0].startDate = "1991";
+    app.persistGuidedPeriods("k");
+    assert.notEqual(state.submissionId, "sub_1", "an edit after sending rotates the id");
+    assert.equal(JSON.parse(values.get("powGuidedPeriods:NZ:user_a:k")).submissionId, state.submissionId);
+  }
+
+  // round 8 review: the review portal's shared purge removes the named
+  // member's device work only, in every country
+  {
+    values.clear();
+    const clientContext = vm.createContext({ window: { localStorage, location: { search: "", hostname: "x" }, setTimeout, clearTimeout }, document, localStorage, sessionStorage: localStorage, console, setTimeout, clearTimeout, Promise, Error, Map, Set, Date, JSON, URLSearchParams, Object, Array, String, Number, Boolean, Math, RegExp });
+    vm.runInContext(fs.readFileSync(path.join(__dirname, "convex-task-client.js"), "utf8"), clientContext, { filename: "convex-task-client.js" });
+    values.set("powPendingPeriods1:NZ:user_a:s", JSON.stringify({ owner: "user_a" }));
+    values.set("powRapidDraft2:AU:user_a:k", JSON.stringify({ owner: "user_a" }));
+    values.set("powFormSnapshot2:NZ:user_a:t", JSON.stringify({ owner: "user_a" }));
+    values.set("powGuidedPeriods:NZ:user_a:t", "{}");
+    values.set("powPendingPeriods1:NZ:user_b:s", JSON.stringify({ owner: "user_b" }));
+    values.set("powGuidedPeriods:NZ:user_b:t", "{}");
+    clientContext.window.PowConvexTaskClient.purgeOwnerDeviceWork("user_a");
+    assert.deepEqual([...values.keys()].filter((key) => key.includes("user_a")), ["powDeliberateSignOut1:user_a"]);
+    assert.equal(values.has("powPendingPeriods1:NZ:user_b:s") && values.has("powGuidedPeriods:NZ:user_b:t"), true);
+  }
+
   document.getElementById = getElementByIdR6;
   context.fetch = previousFetchR6;
 

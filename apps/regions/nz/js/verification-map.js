@@ -2574,7 +2574,7 @@ class NzVerificationMap {
     // also deletes the device copies and forgets the activity; an ended
     // session keeps the device copies, which carry their owner's id
     clearSignedInState({ deliberate }) {
-        const signedOutUserId = this.backendUser?._id || this.backend?.user?._id || "";
+        const signedOutUserId = this.draftOwnerId() || (deliberate ? this.lastSessionOwnerId : "") || "";
         this.sessionEpoch = (this.sessionEpoch || 0) + 1;
         this.refreshGeneration = (this.refreshGeneration || 0) + 1;
         // a deliberate exit drops the kept pin while the owner is still known;
@@ -2637,6 +2637,7 @@ class NzVerificationMap {
             // this owner (#153 round 8)
             this.clearOwnedDeviceRecords(PENDING_PERIODS_PREFIX, signedOutUserId);
             this.markDeliberateSignOut(signedOutUserId);
+            this.lastSessionOwnerId = "";
         }
         if (ASSIGNMENT_MODE) {
             this.tasks = [];
@@ -6987,7 +6988,11 @@ class NzVerificationMap {
     // unsent work on the device carries its owner's user id and is read
     // back only for that user (c1: a session can end with the page open)
     draftOwnerId() {
-        return this.backendUser?._id || this.backend?.user?._id || "";
+        const owner = this.backendUser?._id || this.backend?.user?._id || "";
+        // the last owner seen is kept after the session ends, so a later
+        // deliberate sign-out still purges that person's device copies
+        if (owner) this.lastSessionOwnerId = owner;
+        return owner;
     }
 
     // a device draft is read back only for the signed-in user who wrote it;
@@ -8454,6 +8459,9 @@ class NzVerificationMap {
         const draftKey = options.props?.task_id || `rapid-${prefix}`;
         const extraIds = options.draftExtraIds || [];
         const persist = () => {
+            // a form already replaced by the receipt holds nothing to keep;
+            // a late timer must not write its empty values (#153 round 8)
+            if (!form.isConnected) return;
             const extra = Object.fromEntries(
                 extraIds.map(id => [id, document.getElementById(id)?.value || ""]).filter(([, value]) => value),
             );
@@ -8473,6 +8481,13 @@ class NzVerificationMap {
             // the device copy is written only in the session that typed it
             const epoch = this.sessionEpoch || 0;
             persistEpoch = epoch;
+            // an edit after the entry was sent is kept at once, under a new
+            // id, so a receipt arriving before the timer cannot take it
+            if (form.dataset.sentSubmissionId && form.dataset.sentSubmissionId === form.dataset.submissionId) {
+                persistTimer = 0;
+                persist();
+                return;
+            }
             persistTimer = window.setTimeout(() => {
                 persistTimer = 0;
                 if (epoch === (this.sessionEpoch || 0)) persist();
@@ -8628,6 +8643,7 @@ class NzVerificationMap {
         const draftVersion = options.draftKey ? this.rapidDraftVersion(options.draftKey) : null;
         const snapshotVersion = options.props?.task_id ? this.formSnapshotVersion(options.props.task_id) : null;
         if (options.draftKey) this.markRapidDraftSent(options.draftKey, sentSubmissionId);
+        form.dataset.sentSubmissionId = sentSubmissionId || "";
         submitButton.disabled = true;
         if (status) status.textContent = values.flagForDiscussion ? "Flagging securely for discussion..." : "Submitting securely for review...";
         // the form's chosen files travel to the confirmation screen, where
@@ -9313,13 +9329,28 @@ class NzVerificationMap {
         return `${prefix}${taskId}`;
     }
 
-    persistGuidedPeriods(taskId) {
+    // what a submission id stands for: the periods and chain as sent. a
+    // sent id is kept for an exact retry and rotated once the content
+    // changes, so a later entry never reuses it (#153 round 8)
+    guidedPeriodsContentDigest(state) {
+        return JSON.stringify([state.segments, state.chain || null, state.sameSource, state.provenance || null, state.gapAnswer || "", state.gapNote || ""]);
+    }
+
+    persistGuidedPeriods(taskId, { sending = false } = {}) {
         const state = this.guidedPeriodsByTaskId.get(taskId);
         if (!state) return;
+        if (sending) {
+            state.sentSubmissionId = state.submissionId || "";
+            state.sentDigest = this.guidedPeriodsContentDigest(state);
+        } else if (state.sentSubmissionId && state.submissionId === state.sentSubmissionId
+            && state.sentDigest !== this.guidedPeriodsContentDigest(state) && window.PowRapidEntry?.secureSubmissionId) {
+            state.submissionId = window.PowRapidEntry.secureSubmissionId();
+        }
         try {
             window.localStorage.setItem(this.guidedPeriodsStorageKey(taskId), JSON.stringify({
                 saved_at: Date.now(),
                 submissionId: state.submissionId || "",
+                ...(state.sentSubmissionId ? { sentSubmissionId: state.sentSubmissionId, sentDigest: state.sentDigest || "" } : {}),
                 segments: state.segments,
                 gapAnswer: state.gapAnswer,
                 gapNote: state.gapNote,
@@ -9416,7 +9447,7 @@ class NzVerificationMap {
             const referenceDate = this.guidedReferenceDate(taskId);
             const blankChain = () => (window.PowFunctionChain ? window.PowFunctionChain.blankChain() : null);
             state = stored
-                ? { submissionId: stored.submissionId || "", segments: stored.segments, gapAnswer: stored.gapAnswer || "", sameSource: stored.sameSource !== false, provenance: stored.provenance || this.occupancyBlankProvenance(), gapNote: stored.gapNote || "", referenceDate, loadedFrom: "", chain: stored.chain || blankChain(), ...(stored.placeKey ? { placeKey: stored.placeKey } : {}) }
+                ? { submissionId: stored.submissionId || "", ...(stored.sentSubmissionId ? { sentSubmissionId: stored.sentSubmissionId, sentDigest: stored.sentDigest || "" } : {}), segments: stored.segments, gapAnswer: stored.gapAnswer || "", sameSource: stored.sameSource !== false, provenance: stored.provenance || this.occupancyBlankProvenance(), gapNote: stored.gapNote || "", referenceDate, loadedFrom: "", chain: stored.chain || blankChain(), ...(stored.placeKey ? { placeKey: stored.placeKey } : {}) }
                 : { submissionId: "", segments: [this.occupancyBlankSegment({ referenceDate, referenceDateFromParent: true })], gapAnswer: "", sameSource: this.guidedPeriodsDefaultSameSource(taskId), provenance: this.occupancyBlankProvenance(), gapNote: "", referenceDate, loadedFrom: "", chain: blankChain() };
             this.guidedPeriodsByTaskId.set(taskId, state);
         }
@@ -10102,7 +10133,7 @@ class NzVerificationMap {
         const state = this.guidedPeriodsState(taskId);
         const submissionId = state.submissionId || window.PowRapidEntry.secureSubmissionId();
         state.submissionId = submissionId;
-        this.persistGuidedPeriods(taskId);
+        this.persistGuidedPeriods(taskId, { sending: true });
         if (!this.guidedPeriodsTouched(taskId)) return { clientSubmissionId: submissionId, segments: [] };
         const provenance = this.guidedPeriodsProvenance(taskId, values).provenance;
         const segments = state.segments.map((segment, index) => ({ ...segment, ...provenance, segmentIndex: index }));
@@ -12024,7 +12055,7 @@ class NzVerificationMap {
             if (chainProblem) return { problem: `Chain: ${chainProblem}` };
         }
         state.submissionId = state.submissionId || window.PowRapidEntry.secureSubmissionId();
-        this.persistGuidedPeriods(periodsKey);
+        this.persistGuidedPeriods(periodsKey, { sending: true });
         return {
             // the exact device copy this plan sends, deleted once recorded
             version: this.guidedPeriodsVersion(periodsKey) && { ...this.guidedPeriodsVersion(periodsKey), epoch: this.sessionEpoch || 0 },

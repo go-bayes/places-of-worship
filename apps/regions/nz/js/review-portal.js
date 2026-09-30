@@ -380,7 +380,11 @@ function human(value) {
             </div>
         `;
         document.getElementById("signOut").addEventListener("click", async () => {
+            // the member is named before the state clears, then their unsent
+            // device copies go, as on the verification page (#153 round 8)
+            const signedOutUserId = state.user?._id || "";
             const signingOut = client.signOut({ deliberate: true });
+            window.PowConvexTaskClient?.purgeOwnerDeviceWork?.(signedOutUserId);
             showSignedOut("Signing out…");
             try {
                 await signingOut;

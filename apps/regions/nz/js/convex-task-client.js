@@ -1044,5 +1044,35 @@
         }
     }
 
+    // a deliberate sign-out from any portal removes the signing-out member's
+    // unsent device copies (every country) and records the time, so a late
+    // receipt in another tab parks nothing for them (#153 round 8). other
+    // members' records are never touched
+    PowConvexTaskClient.purgeOwnerDeviceWork = function purgeOwnerDeviceWork(ownerId) {
+        if (!ownerId) return;
+        try {
+            const storage = window.localStorage;
+            const recordPrefixes = ["powFormSnapshot2:", "powRapidDraft2:", "powPendingPeriods1:"];
+            const keys = [];
+            for (let index = 0; index < storage.length; index += 1) {
+                const key = storage.key(index);
+                if (!key) continue;
+                if (key.startsWith("powGuidedPeriods:") && key.split(":")[2] === ownerId) {
+                    keys.push(key);
+                } else if (recordPrefixes.some(prefix => key.startsWith(prefix))) {
+                    try {
+                        if (JSON.parse(storage.getItem(key) || "null")?.owner === ownerId) keys.push(key);
+                    } catch (error) {
+                        // an unreadable record is not this member's to delete
+                    }
+                }
+            }
+            keys.forEach(key => storage.removeItem(key));
+            storage.setItem(`powDeliberateSignOut1:${ownerId}`, String(Date.now()));
+        } catch (error) {
+            // storage unavailable: nothing kept on this device
+        }
+    };
+
     window.PowConvexTaskClient = PowConvexTaskClient;
 })();
