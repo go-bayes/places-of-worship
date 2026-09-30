@@ -777,6 +777,7 @@ const RAPID_DRAFT_PREFIX = "powRapidDraft2:";
 // periods of an observation recorded after its session ended, parked for the
 // submitter's next sign-in (#153 round 6)
 const PENDING_PERIODS_PREFIX = "powPendingPeriods1:";
+const SIGN_OUT_MARK_PREFIX = "powDeliberateSignOut1:";
 const LEGACY_DEVICE_DRAFT_PREFIXES = ["powFormSnapshot:", "powRapidDraft:"];
 const LEGACY_DRAFT_NOTICE_KEY = "powLegacyDraftNoticeDismissed:v1";
 const RAPID_STATUS_LABELS = {
@@ -2631,6 +2632,11 @@ class NzVerificationMap {
             // pr-e: period cards leave with the session; on a shared
             // computer the next user must not find them
             this.clearAllGuidedPeriods(signedOutUserId);
+            // parked periods of an earlier entry leave too, and a receipt
+            // that arrives after this sign-out may not park new ones for
+            // this owner (#153 round 8)
+            this.clearOwnedDeviceRecords(PENDING_PERIODS_PREFIX, signedOutUserId);
+            this.markDeliberateSignOut(signedOutUserId);
         }
         if (ASSIGNMENT_MODE) {
             this.tasks = [];
@@ -8460,14 +8466,26 @@ class NzVerificationMap {
             }
         };
         let persistTimer = 0;
+        let persistEpoch = 0;
         const markDirty = () => {
             this.markFormDirty(options.props?.task_id || `rapid-${prefix}`);
             window.clearTimeout(persistTimer);
             // the device copy is written only in the session that typed it
             const epoch = this.sessionEpoch || 0;
+            persistEpoch = epoch;
             persistTimer = window.setTimeout(() => {
+                persistTimer = 0;
                 if (epoch === (this.sessionEpoch || 0)) persist();
             }, 400);
+        };
+        // a submit writes any queued autosave now and cancels the timer, so
+        // no later autosave can mint a new submission id for content that
+        // has already been sent (#153 round 8)
+        const flushDraft = () => {
+            if (!persistTimer) return;
+            window.clearTimeout(persistTimer);
+            persistTimer = 0;
+            if (persistEpoch === (this.sessionEpoch || 0)) persist();
         };
         form.addEventListener("input", markDirty);
         form.addEventListener("change", markDirty);
@@ -8518,7 +8536,7 @@ class NzVerificationMap {
         }
         form.addEventListener("submit", event => {
             event.preventDefault();
-            this.submitRapidObservation(prefix, { ...options, draftKey });
+            this.submitRapidObservation(prefix, { ...options, draftKey, flushDraft });
         });
         this.syncInlineEvidenceFiles(prefix);
     }
@@ -8597,6 +8615,19 @@ class NzVerificationMap {
             }
             return;
         }
+        // the queued autosave is written and cancelled first, then the exact
+        // device records this submission sends are captured and the draft's
+        // id is marked sent, in one step with the values read above, so
+        // only they are deleted once it is recorded (astra m4) and no edit
+        // or autosave after this point is taken for the sent content
+        options.flushDraft?.();
+        // the id travels with the values captured above: an edit during a
+        // prerequisite request may mint a new id on the form for the edit,
+        // and must not change the id this submission is sent under
+        const sentSubmissionId = form.dataset.submissionId;
+        const draftVersion = options.draftKey ? this.rapidDraftVersion(options.draftKey) : null;
+        const snapshotVersion = options.props?.task_id ? this.formSnapshotVersion(options.props.task_id) : null;
+        if (options.draftKey) this.markRapidDraftSent(options.draftKey, sentSubmissionId);
         submitButton.disabled = true;
         if (status) status.textContent = values.flagForDiscussion ? "Flagging securely for discussion..." : "Submitting securely for review...";
         // the form's chosen files travel to the confirmation screen, where
@@ -8627,11 +8658,6 @@ class NzVerificationMap {
             if (!alive()) return;
             // the entry's country is the pin's (entry follows the pin)
             const entryCountry = this.entryCountry();
-            // the exact device records this submission sends, so only they
-            // are deleted once it is recorded (astra m4)
-            const draftVersion = options.draftKey ? this.rapidDraftVersion(options.draftKey) : null;
-            const snapshotVersion = options.props?.task_id ? this.formSnapshotVersion(options.props.task_id) : null;
-            if (options.draftKey) this.markRapidDraftSent(options.draftKey, form.dataset.submissionId);
             const clearSent = (recordedResult) => {
                 if (options.draftKey) this.clearSubmittedRapidDraft(options.draftKey, draftVersion);
                 if (options.props?.task_id) this.deleteSubmittedFormSnapshot(options.props.task_id, snapshotVersion);
@@ -8642,7 +8668,7 @@ class NzVerificationMap {
                 if (periodsPlan && !alive()) this.parkPendingPeriods(periodsPlan, recordedResult, options.periodsKey);
             };
             const result = await this.recordedReceipt(this.backend.submitCurrentObservation({
-                clientSubmissionId: form.dataset.submissionId,
+                clientSubmissionId: sentSubmissionId,
                 countryCode: entryCountry.code,
                 ...(options.props?.task_id
                     ? { taskId: options.props.task_id }
@@ -12007,6 +12033,8 @@ class NzVerificationMap {
             chain: chainToSend ? window.PowFunctionChain.payload(chainToSend) : undefined,
             count: segments.length,
             state,
+            // when this submission began, against a later deliberate sign-out
+            startedAt: Date.now(),
         };
     }
 
@@ -12035,15 +12063,47 @@ class NzVerificationMap {
     // the entry's own key, and sent at the submitter's next sign-in (the
     // same submission id, so the server records them once)
 
-    pendingPeriodsStorageKey(owner, taskId = "") {
-        return `${PENDING_PERIODS_PREFIX}${COUNTRY_CONFIG.countryCode}:${owner}:${taskId}`;
+    // the time of an owner's last deliberate sign-out, kept in memory and
+    // on the device so every tab sees it. a plan begun at or before that
+    // time belongs to a purged session and may not park (#153 round 8)
+    markDeliberateSignOut(owner) {
+        if (!owner) return;
+        const at = Date.now();
+        this.deliberateSignOutAt = this.deliberateSignOutAt || new Map();
+        this.deliberateSignOutAt.set(owner, at);
+        try {
+            window.localStorage.setItem(`${SIGN_OUT_MARK_PREFIX}${owner}`, String(at));
+        } catch (error) {
+            // storage unavailable: this page still refuses
+        }
+    }
+
+    endedByDeliberateSignOut(owner, startedAt) {
+        let at = this.deliberateSignOutAt?.get(owner) || 0;
+        try {
+            at = Math.max(at, Number(window.localStorage.getItem(`${SIGN_OUT_MARK_PREFIX}${owner}`)) || 0);
+        } catch (error) {
+            // the in-memory time stands
+        }
+        return at > 0 && !(Number(startedAt) > at);
+    }
+
+    // keyed by the plan's submission id, so two entries for one task keep
+    // separate records and a recovery removes only its own (#153 round 8)
+    pendingPeriodsStorageKey(owner, submissionId = "") {
+        return `${PENDING_PERIODS_PREFIX}${COUNTRY_CONFIG.countryCode}:${owner}:${submissionId}`;
     }
 
     parkPendingPeriods(plan, result, periodsKey) {
         const owner = plan?.version?.owner;
         if (!owner || !plan.segments?.length || !result?.task_id || !result?.evidence_draft_id || !window.PowOccupancy) return;
+        // off the entry's key either way, so they never reach another place
+        this.clearSubmittedGuidedPeriods(periodsKey, plan.version);
+        // a deliberate sign-out ended this owner's device copies: a late
+        // receipt must not write a new one afterwards
+        if (!plan.submissionId || this.endedByDeliberateSignOut(owner, plan.startedAt)) return;
         try {
-            window.localStorage.setItem(this.pendingPeriodsStorageKey(owner, result.task_id), JSON.stringify({
+            window.localStorage.setItem(this.pendingPeriodsStorageKey(owner, plan.submissionId), JSON.stringify({
                 owner,
                 saved_at: Date.now(),
                 taskId: result.task_id,
@@ -12055,8 +12115,6 @@ class NzVerificationMap {
         } catch (error) {
             // storage unavailable: the periods cannot be kept for later
         }
-        // off the entry's key either way, so they never reach another place
-        this.clearSubmittedGuidedPeriods(periodsKey, plan.version);
     }
 
     // at sign-in: the signed-in person's parked periods are sent against
@@ -12084,9 +12142,14 @@ class NzVerificationMap {
                 record = null;
             }
             if (!record || record.owner !== owner) continue;
+            // removes the record read above and no other: a record stored
+            // under the key since (a later park) is left alone
             const drop = () => {
                 try {
-                    window.localStorage.removeItem(key);
+                    const current = JSON.parse(window.localStorage.getItem(key) || "null");
+                    if (current && current.saved_at === record.saved_at && current.submissionId === record.submissionId) {
+                        window.localStorage.removeItem(key);
+                    }
                 } catch (error) {
                     // nothing to remove
                 }
@@ -12105,7 +12168,11 @@ class NzVerificationMap {
                 this.setBackendTransientStatus("The periods of your earlier entry were recorded.");
             } catch (error) {
                 if (!alive()) return;
-                if (error?.authExpired || error?.sessionChanged || /network|fetch|failed to fetch/i.test(String(error?.message || ""))) return;
+                if (error?.authExpired || error?.sessionChanged) return;
+                // kept unless the server explicitly and permanently refused
+                // them: a network fault, HTTP 408/425/429/5xx or an error
+                // that says nothing of retry may pass on the next sign-in
+                if (error?.retryable !== false) return;
                 drop();
                 this.setBackendTransientStatus(`The periods of an earlier entry could not be recorded: ${error.message || "refused"}. Add them again from that place.`, { error: true, durationMs: 15000 });
             }

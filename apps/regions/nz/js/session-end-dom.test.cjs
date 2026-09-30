@@ -943,7 +943,7 @@ async function roundThree() {
     recorded.resolve({ task_id: "t_a", evidence_draft_id: "d_a", candidate_site_id: "c_a", task_status: "needs_review" });
     await submitting;
     assert.equal(values.has(periodsKey), false, "the periods are off the entry's key, so they cannot reach the next place");
-    const parkedKey = "powPendingPeriods1:NZ:user_a:t_a";
+    const parkedKey = "powPendingPeriods1:NZ:user_a:sub_periods";
     const parked = JSON.parse(values.get(parkedKey));
     assert.equal(parked.taskId, "t_a");
     assert.equal(parked.parentEvidenceDraftId, "d_a");
@@ -996,6 +996,161 @@ async function roundThree() {
     // the late receipt of the sent version leaves the edit alone
     app.clearSubmittedRapidDraft("rapid-pin", sentVersion);
     assert.equal(JSON.parse(values.get(draftKey)).values.directObservation, "v2, edited");
+  }
+  // round 8 (#153 known issues 1 to 4)
+  const planFor = (owner, submissionId, savedAt = 1) => ({
+    version: { owner, savedAt, epoch: 0 },
+    submissionId,
+    segments: [{ segmentIndex: 0, startMode: "known", startDate: "1990", startBasis: "source", endMode: "open" }],
+    count: 1,
+  });
+
+  // issue 1: a deliberate sign-out removes the owner's parked periods, and
+  // a receipt that arrives afterwards cannot park new ones
+  {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    app.parkPendingPeriods(planFor("user_a", "sub_1"), { task_id: "t_a", evidence_draft_id: "d_a" }, "rapid-pin-periods");
+    app.parkPendingPeriods(planFor("user_b", "sub_b"), { task_id: "t_b", evidence_draft_id: "d_b" }, "rapid-pin-periods");
+    assert.equal(values.has("powPendingPeriods1:NZ:user_a:sub_1"), true);
+    const begunBefore = { ...planFor("user_a", "sub_early"), startedAt: Date.now() };
+    await new Promise((r) => setTimeout(r, 3));
+    app.clearSignedInState({ deliberate: true });
+    await new Promise((r) => setTimeout(r, 3));
+    assert.equal(values.has("powPendingPeriods1:NZ:user_a:sub_1"), false, "a's parked periods go with a deliberate sign-out");
+    assert.equal(values.has("powPendingPeriods1:NZ:user_b:sub_b"), true, "b's stay");
+    app.parkPendingPeriods(begunBefore, { task_id: "t_a", evidence_draft_id: "d_a" }, "rapid-pin-periods");
+    assert.equal(values.has("powPendingPeriods1:NZ:user_a:sub_early"), false, "a late receipt cannot recreate one");
+    // another tab has no memory of the sign-out, only the device's mark
+    const { app: otherTab } = signedInApp("user_a");
+    otherTab.parkPendingPeriods(begunBefore, { task_id: "t_a", evidence_draft_id: "d_a" }, "rapid-pin-periods");
+    assert.equal(values.has("powPendingPeriods1:NZ:user_a:sub_early"), false, "nor can another tab's late receipt");
+    // signing in again does not reopen the purged session's receipts
+    await app.onBackendSignedIn({ _id: "user_a" }, { refreshTasks: false }).catch(() => {});
+    app.parkPendingPeriods(begunBefore, { task_id: "t_a", evidence_draft_id: "d_a" }, "rapid-pin-periods");
+    assert.equal(values.has("powPendingPeriods1:NZ:user_a:sub_early"), false, "a receipt from before the sign-out stays refused after sign-in");
+    // a submission begun after the sign-out may park
+    app.parkPendingPeriods({ ...planFor("user_a", "sub_3"), startedAt: Date.now() }, { task_id: "t_a", evidence_draft_id: "d_a" }, "rapid-pin-periods");
+    assert.equal(values.has("powPendingPeriods1:NZ:user_a:sub_3"), true);
+  }
+
+  // issue 2: records are keyed by submission id, and a recovery removes
+  // only the record whose receipt arrived
+  {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    app.parkPendingPeriods(planFor("user_a", "sub_1", 10), { task_id: "t_a", evidence_draft_id: "d_a" }, "k");
+    app.parkPendingPeriods(planFor("user_a", "sub_2", 11), { task_id: "t_a", evidence_draft_id: "d_a2" }, "k");
+    assert.equal([...values.keys()].filter((key) => key.startsWith("powPendingPeriods1:")).length, 2, "two entries for one task keep two records");
+    const inFlight = later();
+    const { sent } = realClientFor(app, { "occupancies:submitOccupancies": () => inFlight.promise });
+    app.backend.signedIn = true;
+    app.setBackendTransientStatus = () => {};
+    const resuming = app.resumePendingPeriods();
+    await new Promise((r) => setTimeout(r, 0));
+    // while the first send is out, a later park replaces its record's content
+    values.set("powPendingPeriods1:NZ:user_a:sub_1", JSON.stringify({ owner: "user_a", saved_at: 99, taskId: "t_a", parentEvidenceDraftId: "d_new", submissionId: "sub_1", segments: [{}] }));
+    inFlight.resolve({ recorded: 1 });
+    await resuming;
+    assert.equal(sent.filter((request) => request.path === "occupancies:submitOccupancies").length >= 1, true);
+    assert.equal(JSON.parse(values.get("powPendingPeriods1:NZ:user_a:sub_1") || "null")?.saved_at, 99, "the later record survives the earlier receipt");
+  }
+
+  // issue 4: a transient failure keeps the parked copy; an explicit
+  // permanent refusal discards it
+  {
+    for (const [label, respond, kept] of [
+      ["http 503", () => ({ status: 503, ok: false, text: async () => "Service Unavailable" }), true],
+      ["http 429", () => ({ status: 429, ok: false, text: async () => JSON.stringify({ status: "error", errorMessage: "slow down" }) }), true],
+      ["network fault", () => { throw new TypeError("Failed to fetch"); }, true],
+      ["rate limit", () => ({ status: 560, ok: false, text: async () => JSON.stringify({ status: "error", errorMessage: "Uncaught ConvexError", errorData: { kind: "RateLimited", retryAfter: 5000 } }) }), true],
+      ["function error", () => ({ status: 560, ok: false, text: async () => JSON.stringify({ status: "error", errorMessage: "Not allowed for this task." }) }), false],
+      ["http 403", () => ({ status: 403, ok: false, text: async () => "Forbidden" }), false],
+    ]) {
+      values.clear();
+      const { app } = signedInApp("user_a");
+      app.parkPendingPeriods(planFor("user_a", "sub_1"), { task_id: "t_a", evidence_draft_id: "d_a" }, "k");
+      realClientFor(app, {});
+      app.backend.signedIn = true;
+      app.setBackendTransientStatus = () => {};
+      context.fetch = async () => respond();
+      await app.resumePendingPeriods();
+      assert.equal(values.has("powPendingPeriods1:NZ:user_a:sub_1"), kept, `${label}: ${kept ? "kept" : "discarded"}`);
+    }
+  }
+
+  // issue 3: a queued autosave cannot mint a new id for a sent, unedited
+  // observation
+  {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    const listeners = {};
+    const form = {
+      dataset: { submissionId: "sub_sent" },
+      addEventListener(type, fn) { (listeners[type] = listeners[type] || []).push(fn); },
+      querySelectorAll: () => [],
+    };
+    document.getElementById = (id) => (id === "pinRapidCurrentForm" ? form : id === "pinRapidSubmit" ? { disabled: false } : null);
+    document.querySelector = () => null;
+    window.PowRapidEntry = { localIsoDate: () => "2026-09-30", validateObservationDetailed: () => null, observationPayload: (x) => x, secureSubmissionId: () => "sub_fresh" };
+    for (const name of ["updateRapidSourceFields", "updateRapidDiscussionFields", "updateRapidUncertaintyField", "updateSourceLocatorField", "bindSourceTypeahead", "renderRapidSourceLinks", "syncInlineEvidenceFiles", "showRapidFieldError", "renderSubmissionRecordedDetail", "focusDetailPanel", "applyFilters", "markFormDirty", "clearFormDirty"]) app[name] = () => {};
+    app.refreshBackendTasks = async () => {};
+    const receipt = later();
+    Object.assign(app, {
+      backend: { configured: true, signedIn: true, user: { _id: "user_a" }, submitCurrentObservation: () => receipt.promise },
+      rapidObservationValues: () => ({ directObservation: "v1", flagForDiscussion: false }),
+      rapidPeriodsPlan: () => null,
+      pendingEvidenceFiles: () => null,
+      entryCountry: () => ({ code: "NZ" }),
+    });
+    app.bindRapidObservationForm("pin", { props: { task_id: "t_1", name: "St Mary's" }, periodsKey: "t_1" });
+    // an earlier autosave is on the device; the last keystroke's autosave
+    // is queued when the entry is submitted, before it fires
+    app.persistRapidDraft("pin", "t_1");
+    // typed, autosave queued; then submitted before it fires
+    for (const fn of listeners.input) fn({ target: null });
+    for (const fn of listeners.submit) fn({ preventDefault() {} });
+    await new Promise((r) => setTimeout(r, 600));
+    assert.equal(form.dataset.submissionId, "sub_sent", "the queued autosave did not re-mint the sent id");
+    receipt.resolve({ task_id: "t_1", evidence_draft_id: "d_1" });
+    await new Promise((r) => setTimeout(r, 20));
+    assert.equal(form.dataset.submissionId, "sub_sent");
+  }
+  // issue 2b: an edit during a prerequisite request mints a new id for
+  // the edit; the send keeps the id captured with its own values
+  {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    const form = { dataset: { submissionId: "sub_sent" }, addEventListener() {}, querySelectorAll: () => [] };
+    document.getElementById = (id) => (id === "pinRapidCurrentForm" ? form : id === "pinRapidSubmit" ? { disabled: false } : null);
+    window.PowRapidEntry = { localIsoDate: () => "2026-09-30", validateObservationDetailed: () => null, observationPayload: (x) => x, secureSubmissionId: () => "sub_fresh" };
+    for (const name of ["showRapidFieldError", "renderSubmissionRecordedDetail", "applyFilters", "clearFormDirty", "exitPinMode", "focusDetailPanel"]) app[name] = () => {};
+    app.refreshBackendTasks = async () => {};
+    const sentArgs = [];
+    const gate = later();
+    Object.assign(app, {
+      backend: { configured: true, signedIn: true, user: { _id: "user_a" }, submitCurrentObservation: async (args) => { sentArgs.push(args); return { task_id: "t_1", evidence_draft_id: "d_1" }; } },
+      rapidObservationValues: () => ({ directObservation: "v1", flagForDiscussion: false }),
+      rapidPeriodsPlan: () => null,
+      pendingEvidenceFiles: () => null,
+      entryCountry: () => ({ code: "NZ" }),
+      pinConfirmed: { latitude: -41.3, longitude: 174.8 },
+    });
+    app.persistRapidDraft("pin", "rapid-pin");
+    const submitting = app.submitRapidObservation("pin", {
+      draftKey: "rapid-pin",
+      createTask: async () => { await gate.promise; return { task_id: "t_1", name: "St Mary's" }; },
+    });
+    await new Promise((r) => setTimeout(r, 0));
+    // the contributor edits while the task is being opened
+    await new Promise((r) => setTimeout(r, 2));
+    app.rapidObservationValues = () => ({ directObservation: "v2, edited", flagForDiscussion: false });
+    app.persistRapidDraft("pin", "rapid-pin");
+    assert.equal(form.dataset.submissionId, "sub_fresh");
+    gate.resolve();
+    await submitting;
+    assert.equal(sentArgs[0].clientSubmissionId, "sub_sent", "the send keeps the id of the content it carries");
+    assert.equal(JSON.parse(values.get("powRapidDraft2:NZ:user_a:rapid-pin")).values.directObservation, "v2, edited", "the edit stays on the device");
   }
   document.getElementById = getElementByIdR6;
   context.fetch = previousFetchR6;
