@@ -52,7 +52,7 @@ function signedInApp(userId = "user_a") {
   const app = Object.create(window.NzVerificationMap.prototype);
   const calls = { detail: 0, panel: 0, exitPin: 0 };
   Object.assign(app, {
-    backend: { user: null, signOut: async () => {} },
+    backend: { user: null, sessionId: "sess_a", currentOrEndingSessionId() { return this.sessionId || ""; }, signOut: async () => {} },
     backendUser: { _id: userId, initials: "GL" },
     backendLastError: "",
     signedOutDeliberately: false,
@@ -344,7 +344,7 @@ async function roundThree() {
     app.backend.user = { _id: "user_a" };
     values.set("powRapidDraft2:NZ:user_a:rapid-pin", JSON.stringify({ saved_at: 100, owner: "user_a", values: { directObservation: "a's sent text" } }));
     const sent = app.rapidDraftVersion("rapid-pin");
-    assert.deepEqual({ ...sent }, { owner: "user_a", savedAt: 100 });
+    assert.deepEqual({ ...sent }, { owner: "user_a", savedAt: 100, rev: null });
     // a signs out while the submission is in flight; b signs in and types
     app.onBackendSessionEnded({ deliberate: false });
     app.backendUser = { _id: "user_b" };
@@ -1151,6 +1151,31 @@ async function roundThree() {
     await submitting;
     assert.equal(sentArgs[0].clientSubmissionId, "sub_sent", "the send keeps the id of the content it carries");
     assert.equal(JSON.parse(values.get("powRapidDraft2:NZ:user_a:rapid-pin")).values.directObservation, "v2, edited", "the edit stays on the device");
+  }
+  // round 11: a deliberate sign-out in another tab ends this page's device
+  // writes before clerk reports the change here; a queued autosave cannot
+  // recreate the purged draft
+  {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    app.draftOwnerId();
+    app.rapidObservationValues = () => ({ directObservation: "typed", flagForDiscussion: false });
+    values.set("powDeliberateSignOut1:user_a", String(Date.now() + 5));
+    app.persistRapidDraft("pin", "rapid-pin");
+    assert.equal(values.has("powRapidDraft2:NZ:user_a:rapid-pin"), false, "no draft is written after another tab signed out");
+  }
+  // round 11: two tabs can stamp different saves alike; a receipt deletes a
+  // copy only when the revision token matches too
+  {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    app.backend.user = { _id: "user_a" };
+    const key = "powRapidDraft2:NZ:user_a:rapid-pin";
+    values.set(key, JSON.stringify({ saved_at: 100, rev: "tab_one", owner: "user_a", values: {} }));
+    const sent = app.rapidDraftVersion("rapid-pin");
+    values.set(key, JSON.stringify({ saved_at: 100, rev: "tab_two", owner: "user_a", values: { directObservation: "newer" } }));
+    app.clearSubmittedRapidDraft("rapid-pin", sent);
+    assert.equal(values.has(key), true, "the other tab's edit under the same stamp stays");
   }
   // round 8 review: a deliberate sign-out after the token was refused still
   // purges the departing owner's parked periods and writes the mark

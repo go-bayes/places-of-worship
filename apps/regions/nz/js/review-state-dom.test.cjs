@@ -330,12 +330,29 @@ assert.equal(elements.get("transportDot").textContent, "Connected");
         portal.showSignedOut("Signed out.");
         portal.state.user = { _id: "reviewer_refused", display_name: "R", roles: ["reviewer"] };
         portal.state.lastOwnerId = "";
+        portal.client.currentOrEndingSessionId = function () { return this.sessionId || ""; };
+        portal.state.userSessionId = "session_r";
+        portal.client.sessionId = "session_r";
         window.__lifecycle.onSignedOut({ deliberate: false });
         assert.equal(portal.state.user, null, "the refusal clears the reviewer");
         window.__lifecycle.onSignedOut({ deliberate: true });
         assert.deepEqual(purged, ["reviewer_refused"], "the card's sign-out purges the refused reviewer");
         window.__lifecycle.onSignedOut({ deliberate: true });
         assert.deepEqual(purged, ["reviewer_refused", ""], "the named owner is spent once");
+    }
+    // #153 round 11: an account that replaces the reviewer's session and is
+    // refused does not inherit the reviewer's device work when it signs out
+    {
+        const purged = [];
+        window.PowConvexTaskClient.purgeOwnerDeviceWork = (owner) => purged.push(owner);
+        portal.showSignedOut("Signed out.");
+        portal.state.user = { _id: "reviewer_a2", display_name: "A", roles: ["reviewer"] };
+        portal.state.userSessionId = "session_a";
+        portal.client.sessionId = "session_a";
+        window.__lifecycle.onSignedOut({ deliberate: false, replaced: true });
+        portal.client.sessionId = "session_b";
+        window.__lifecycle.onSignedOut({ deliberate: true });
+        assert.deepEqual(purged, [""], "the replacing account's sign-out names nobody");
     }
     console.log("review state dom test passed");
 })().catch((error) => {

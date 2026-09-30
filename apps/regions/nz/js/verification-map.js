@@ -782,6 +782,18 @@ function nextSavedAt() {
     lastSavedAtStamp = Math.max(Date.now(), lastSavedAtStamp + 1);
     return lastSavedAtStamp;
 }
+// a token unique to one write, across tabs: the stamp above orders saves in
+// one page only, so two tabs can share a stamp; a receipt deletes a device
+// copy only when stamp and token both match (#153 round 11)
+function newRevisionToken() {
+    try {
+        const bytes = new Uint8Array(8);
+        window.crypto.getRandomValues(bytes);
+        return Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
+    } catch (error) {
+        return `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
+    }
+}
 
 // periods of an observation recorded after its session ended, parked for the
 // submitter's next sign-in (#153 round 6)
@@ -1949,7 +1961,7 @@ class NzVerificationMap {
             onSignedOut: ({ deliberate } = {}) => this.onBackendSessionEnded({ deliberate }),
             // a retried sign-out from the account card removes the member's
             // device copies when it starts, as the first attempt does
-            onSignOutStarted: () => window.PowConvexTaskClient?.purgeOwnerDeviceWork?.(this.draftOwnerId() || this.lastSessionOwnerId || ""),
+            onSignOutStarted: () => window.PowConvexTaskClient?.purgeOwnerDeviceWork?.(this.departingOwnerId()),
         });
         this.backendUser = null;
         this.backendTasksById = new Map();
@@ -2586,7 +2598,7 @@ class NzVerificationMap {
     // also deletes the device copies and forgets the activity; an ended
     // session keeps the device copies, which carry their owner's id
     clearSignedInState({ deliberate }) {
-        const signedOutUserId = this.draftOwnerId() || (deliberate ? this.lastSessionOwnerId : "") || "";
+        const signedOutUserId = (deliberate ? this.departingOwnerId() : this.draftOwnerId()) || "";
         this.sessionEpoch = (this.sessionEpoch || 0) + 1;
         this.refreshGeneration = (this.refreshGeneration || 0) + 1;
         // a deliberate exit drops the kept pin while the owner is still known;
@@ -2652,6 +2664,10 @@ class NzVerificationMap {
             this.clearOwnedDeviceRecords(PENDING_PERIODS_PREFIX, signedOutUserId);
             this.markDeliberateSignOut(signedOutUserId);
             this.lastSessionOwnerId = "";
+            this.lastSessionOwnerSessionId = "";
+            // the next session, even the same member's, begins after the mark
+            this.ownerSeenId = "";
+            this.ownerSeenAt = 0;
         }
         if (ASSIGNMENT_MODE) {
             this.tasks = [];
@@ -7005,8 +7021,36 @@ class NzVerificationMap {
         const owner = this.backendUser?._id || this.backend?.user?._id || "";
         // the last owner seen is kept after the session ends, so a later
         // deliberate sign-out still purges that person's device copies
-        if (owner) this.lastSessionOwnerId = owner;
+        if (owner) {
+            this.lastSessionOwnerId = owner;
+            this.lastSessionOwnerSessionId = this.backend?.sessionId || this.lastSessionOwnerSessionId || "";
+        }
+        // when this page first saw the owner: a deliberate sign-out in
+        // another tab at or after that time ended this session's device
+        // copies (#153 round 11)
+        if (owner !== (this.ownerSeenId || "")) {
+            this.ownerSeenId = owner;
+            this.ownerSeenAt = owner ? Date.now() : 0;
+        }
         return owner;
+    }
+
+    // the member whose device copies a sign-out removes: the signed-in one,
+    // or the last one seen only while the session being ended is the one
+    // that member held (#153 round 11)
+    departingOwnerId() {
+        const owner = this.draftOwnerId();
+        if (owner) return owner;
+        const ending = this.backend?.currentOrEndingSessionId?.() || "";
+        return this.lastSessionOwnerId && this.lastSessionOwnerSessionId && this.lastSessionOwnerSessionId === ending ? this.lastSessionOwnerId : "";
+    }
+
+    // true when a deliberate sign-out by this owner, in any tab, came after
+    // this page began the session: no device write may follow it, or a
+    // queued autosave would recreate the purged drafts
+    deviceWritesEnded() {
+        const owner = this.draftOwnerId();
+        return Boolean(owner) && this.endedByDeliberateSignOut(owner, this.ownerSeenAt);
     }
 
     // a device draft is read back only for the signed-in user who wrote it;
@@ -7059,9 +7103,9 @@ class NzVerificationMap {
         this.formSnapshotsByTaskId.set(taskId, snapshot);
         const owner = this.draftOwnerId();
         // signed out, the snapshot lives in memory only
-        if (!owner) return;
+        if (!owner || this.deviceWritesEnded()) return;
         try {
-            window.localStorage.setItem(this.formSnapshotStorageKey(taskId), JSON.stringify({ saved_at: nextSavedAt(), owner, snapshot }));
+            window.localStorage.setItem(this.formSnapshotStorageKey(taskId), JSON.stringify({ saved_at: nextSavedAt(), rev: newRevisionToken(), owner, snapshot }));
         } catch (error) {
             // private windows or blocked storage keep the snapshot in memory only
         }
@@ -7104,9 +7148,9 @@ class NzVerificationMap {
         if (!key) return null;
         try {
             const record = JSON.parse(window.localStorage.getItem(key) || "null");
-            return record?.owner === owner ? { owner, savedAt: record.saved_at } : { owner, savedAt: null };
+            return record?.owner === owner ? { owner, savedAt: record.saved_at, rev: record.rev ?? null } : { owner, savedAt: null, rev: null };
         } catch (error) {
-            return { owner, savedAt: null };
+            return { owner, savedAt: null, rev: null };
         }
     }
 
@@ -7117,7 +7161,7 @@ class NzVerificationMap {
         const key = this.formSnapshotStorageKey(taskId, version.owner);
         try {
             const record = JSON.parse(window.localStorage.getItem(key) || "null");
-            if (record && record.owner === version.owner && record.saved_at === version.savedAt) {
+            if (record && record.owner === version.owner && record.saved_at === version.savedAt && (record.rev ?? null) === (version.rev ?? null)) {
                 window.localStorage.removeItem(key);
             }
         } catch (error) {
@@ -8036,7 +8080,9 @@ class NzVerificationMap {
 
     rapidDraftVersion(key) {
         const owner = this.draftOwnerId();
-        return owner ? { owner, savedAt: this.readRapidDraft(key)?.saved_at ?? null } : null;
+        if (!owner) return null;
+        const stored = this.readRapidDraft(key);
+        return { owner, savedAt: stored?.saved_at ?? null, rev: stored?.rev ?? null };
     }
 
     // deletes the owner's rapid draft only if it is still the submitted
@@ -8047,7 +8093,7 @@ class NzVerificationMap {
         const storageKey = this.rapidDraftStorageKey(key, version.owner);
         try {
             const record = JSON.parse(window.localStorage.getItem(storageKey) || "null");
-            if (record && record.owner === version.owner && record.saved_at === version.savedAt) {
+            if (record && record.owner === version.owner && record.saved_at === version.savedAt && (record.rev ?? null) === (version.rev ?? null)) {
                 window.localStorage.removeItem(storageKey);
             }
         } catch (error) {
@@ -8056,11 +8102,12 @@ class NzVerificationMap {
     }
 
     persistRapidDraft(prefix, key, extraValues = {}) {
-        if (!this.draftOwnerId()) return;
+        if (!this.draftOwnerId() || this.deviceWritesEnded()) return;
         try {
             const previous = this.readRapidDraft(key);
             const record = {
                 saved_at: nextSavedAt(),
+                rev: newRevisionToken(),
                 owner: this.draftOwnerId(),
                 values: this.rapidObservationValues(prefix),
                 extra: extraValues,
@@ -8120,7 +8167,7 @@ class NzVerificationMap {
     // 2026-09-05); a revision or a period's location has its own record
     keepRapidPinOnDevice() {
         if (!RAPID_NOMINATION_ENTRY || this.reviseContext || this.occupancyPinContext || !this.pinConfirmed) return;
-        if (!this.draftOwnerId()) return;
+        if (!this.draftOwnerId() || this.deviceWritesEnded()) return;
         const record = this.readRapidDraft("rapid-pin") || { saved_at: nextSavedAt() };
         record.owner = this.draftOwnerId();
         record.pin = { ...this.pinConfirmed, linkedRefs: this.pinLinkedRefs || [] };
@@ -8210,6 +8257,11 @@ class NzVerificationMap {
         const restoredForm = document.getElementById(`${prefix}RapidCurrentForm`);
         if (restoredForm?.dataset && typeof record.submission_id === "string" && record.submission_id) {
             restoredForm.dataset.submissionId = record.submission_id;
+            // the sent marker returns with the id: an edit then rotates the
+            // id and is kept at once (#153 round 11)
+            if (typeof record.sent_submission_id === "string" && record.sent_submission_id === record.submission_id) {
+                restoredForm.dataset.sentSubmissionId = record.sent_submission_id;
+            }
         }
         const setValue = (id, value) => {
             const el = document.getElementById(`${prefix}${id}`);
@@ -9374,9 +9426,11 @@ class NzVerificationMap {
             state.sentDigest = this.guidedPeriodsContentDigest(state);
             state.sentSourceDigest = sourceDigest;
         }
+        if (this.deviceWritesEnded()) return;
         try {
             window.localStorage.setItem(this.guidedPeriodsStorageKey(taskId), JSON.stringify({
                 saved_at: nextSavedAt(),
+                rev: newRevisionToken(),
                 submissionId: state.submissionId || "",
                 ...(state.sentSubmissionId ? { sentSubmissionId: state.sentSubmissionId, sentDigest: state.sentDigest || "", sentSourceDigest: state.sentSourceDigest || "" } : {}),
                 segments: state.segments,
@@ -9418,12 +9472,16 @@ class NzVerificationMap {
         const owner = this.draftOwnerId();
         if (!taskId || !owner) return null;
         let savedAt = null;
+        let rev = null;
         try {
-            savedAt = JSON.parse(window.localStorage.getItem(this.guidedPeriodsStorageKey(taskId, owner)) || "null")?.saved_at ?? null;
+            const stored = JSON.parse(window.localStorage.getItem(this.guidedPeriodsStorageKey(taskId, owner)) || "null");
+            savedAt = stored?.saved_at ?? null;
+            rev = stored?.rev ?? null;
         } catch (error) {
             savedAt = null;
+            rev = null;
         }
-        return { owner, savedAt };
+        return { owner, savedAt, rev };
     }
 
     // after a recorded submission: the submitter's periods go only if the
@@ -9439,7 +9497,7 @@ class NzVerificationMap {
         } catch (error) {
             current = null;
         }
-        if ((current?.saved_at ?? null) !== version.savedAt) return;
+        if ((current?.saved_at ?? null) !== version.savedAt || (current?.rev ?? null) !== (version.rev ?? null)) return;
         try {
             if (current) window.localStorage.removeItem(key);
         } catch (error) {
@@ -10449,6 +10507,21 @@ class NzVerificationMap {
         }
     }
 
+    // the content a pane submission sends, for comparing one attempt with the
+    // next: an id that was sent is reused only for the same content
+    occupancyDraftFingerprint(draft) {
+        try {
+            return JSON.stringify({
+                segments: draft.segments,
+                provenance: draft.provenance,
+                gapNote: draft.gapNote || "",
+                chain: draft.chain || null,
+            });
+        } catch (error) {
+            return "";
+        }
+    }
+
     async submitOccupancies(context) {
         const alive = this.sessionGuard();
         const form = document.getElementById("occupancyForm");
@@ -10481,6 +10554,16 @@ class NzVerificationMap {
                 return;
             }
         }
+        // an id already sent is kept only for unchanged content; an edit
+        // made after a failed or ambiguous send goes under a fresh id, or the
+        // server would deduplicate it into the earlier periods
+        const fingerprint = this.occupancyDraftFingerprint(draft);
+        if (draft.sentSubmissionId && draft.sentSubmissionId === draft.submissionId
+            && draft.sentFingerprint !== fingerprint && window.PowRapidEntry?.secureSubmissionId) {
+            draft.submissionId = window.PowRapidEntry.secureSubmissionId();
+        }
+        draft.sentSubmissionId = draft.submissionId;
+        draft.sentFingerprint = fingerprint;
         submitButton.disabled = true;
         if (status) status.textContent = "Recording these periods for review...";
         try {
@@ -12288,6 +12371,12 @@ class NzVerificationMap {
                 chain: state.chain,
                 referenceDate: state.referenceDate,
             };
+            // an id that was sent stays marked as sent, so edits made in the
+            // pane rotate it before a retry (#153 round 11)
+            if (this.occupancyDraft.submissionId === plan.submissionId) {
+                this.occupancyDraft.sentSubmissionId = plan.submissionId;
+                this.occupancyDraft.sentFingerprint = this.occupancyDraftFingerprint(this.occupancyDraft);
+            }
             // the cards now live on the pane's draft; the form's key must not
             // hand them to the next place the ra opens
             this.clearGuidedPeriods(periodsKey);

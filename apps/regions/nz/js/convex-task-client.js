@@ -335,6 +335,7 @@
             // confirms it (its confirming reload may report changes)
             if (this.signOutPromise) return;
             if (nextSessionId === this.sessionId) return;
+            this.endingSessionId = "";
             const hadSession = Boolean(this.sessionId);
             this.sessionGeneration += 1;
             this.sessionId = nextSessionId;
@@ -414,6 +415,7 @@
             if (this.signOutPromise) return this.signOutPromise;
             const clerk = this.clerk;
             const sessionId = this.sessionId || clerk?.session?.id || "";
+            this.endingSessionId = sessionId;
             // the page may repaint its card at once; the card waits for this
             // so it never re-admits the session being ended
             this.sessionGeneration += 1;
@@ -470,6 +472,12 @@
         // a sign-out must be finished before this session is admitted: the
         // marker names it, or storage cannot say and this is the session the
         // page found on load (a new sign-in in this page never has one)
+        // the session now current, or the one a deliberate sign-out is ending;
+        // a page binds its remembered owner to this id (#153 round 11)
+        currentOrEndingSessionId() {
+            return this.sessionId || this.endingSessionId || "";
+        }
+
         mustFinishSignOut(sessionId = this.sessionId) {
             if (!sessionId) return false;
             const marker = readPendingSignOut();
