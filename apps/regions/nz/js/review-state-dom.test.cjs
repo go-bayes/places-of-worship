@@ -322,6 +322,21 @@ assert.equal(elements.get("transportDot").textContent, "Connected");
         await portal.init();
         assert.equal(portal.state.user, reviewerA);
     }
+    // #153 round 9: a token refusal clears the reviewer; the card's later
+    // deliberate sign-out still purges that reviewer's device work
+    {
+        const purged = [];
+        window.PowConvexTaskClient.purgeOwnerDeviceWork = (owner) => purged.push(owner);
+        portal.showSignedOut("Signed out.");
+        portal.state.user = { _id: "reviewer_refused", display_name: "R", roles: ["reviewer"] };
+        portal.state.lastOwnerId = "";
+        window.__lifecycle.onSignedOut({ deliberate: false });
+        assert.equal(portal.state.user, null, "the refusal clears the reviewer");
+        window.__lifecycle.onSignedOut({ deliberate: true });
+        assert.deepEqual(purged, ["reviewer_refused"], "the card's sign-out purges the refused reviewer");
+        window.__lifecycle.onSignedOut({ deliberate: true });
+        assert.deepEqual(purged, ["reviewer_refused", ""], "the named owner is spent once");
+    }
     console.log("review state dom test passed");
 })().catch((error) => {
     console.error(error);

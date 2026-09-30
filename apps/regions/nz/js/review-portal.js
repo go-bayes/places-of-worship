@@ -45,11 +45,20 @@
     // ended in another tab, by expiry, or by the card's retried sign-out
     // clears the queue and the open task (c1)
     client.setLifecycle?.({
-        onSignedOut: ({ deliberate } = {}) => showSignedOut(deliberate
-            ? "Signed out. Sign in again to review submitted evidence."
-            : state.user
-                ? "Your sign-in ended. Sign in again to review submitted evidence."
-                : "Sign in to review submitted evidence."),
+        onSignedOut: ({ deliberate } = {}) => {
+            // a deliberate sign-out from the card after a token refusal finds
+            // no signed-in user; the last admitted reviewer is named so their
+            // device copies still go (#153 round 9)
+            if (deliberate) {
+                window.PowConvexTaskClient?.purgeOwnerDeviceWork?.(state.user?._id || state.lastOwnerId || "");
+                state.lastOwnerId = "";
+            }
+            showSignedOut(deliberate
+                ? "Signed out. Sign in again to review submitted evidence."
+                : state.user
+                    ? "Your sign-in ended. Sign in again to review submitted evidence."
+                    : "Sign in to review submitted evidence.");
+        },
     });
     const state = {
         user: null,
@@ -357,6 +366,7 @@ function human(value) {
             client.renderSignInButton(els.signInButton, {
                 onSignedIn: async (user) => {
                     state.user = user;
+                    state.lastOwnerId = "";
                     renderAuth();
                     await loadQueue();
                 },
@@ -417,6 +427,7 @@ function human(value) {
         state.reviewSnapshotError = "";
         state.busy = false;
         state.occupancyBusy = false;
+        if (state.user?._id) state.lastOwnerId = state.user._id;
         state.user = null;
         state.queue = [];
         state.selected = null;
@@ -2095,7 +2106,10 @@ function human(value) {
             const epoch = state.sessionEpoch || 0;
             const restored = await client.restoreSession().catch(() => null);
             const sessionUnchanged = (state.sessionEpoch || 0) === epoch && client.user === restored;
-            if (restored && sessionUnchanged && !state.user) state.user = restored;
+            if (restored && sessionUnchanged && !state.user) {
+                state.user = restored;
+                state.lastOwnerId = "";
+            }
         }
         els.refreshQueue.addEventListener("click", loadQueue);
         els.queueStatus.addEventListener("change", () => {

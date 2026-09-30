@@ -1185,6 +1185,53 @@ async function roundThree() {
     assert.equal(JSON.parse(values.get("powGuidedPeriods:NZ:user_a:k")).submissionId, state.submissionId);
   }
 
+  // round 9: every edit after a send is kept at once, not only the first,
+  // so a receipt that replaces the form cannot take the later ones
+  {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    const listeners = {};
+    const form = {
+      isConnected: true,
+      dataset: { submissionId: "sub_sent", sentSubmissionId: "sub_sent" },
+      addEventListener(type, fn) { (listeners[type] = listeners[type] || []).push(fn); },
+      querySelectorAll: () => [],
+    };
+    document.getElementById = (id) => (id === "pinRapidCurrentForm" ? form : null);
+    document.querySelector = () => null;
+    window.PowRapidEntry = { secureSubmissionId: (() => { let n = 0; return () => `sub_m${(n += 1)}`; })() };
+    for (const name of ["updateRapidSourceFields", "updateRapidDiscussionFields", "updateRapidUncertaintyField", "bindSourceTypeahead", "renderRapidSourceLinks", "markFormDirty"]) app[name] = () => {};
+    let typed = "v1";
+    app.rapidObservationValues = () => ({ directObservation: typed });
+    app.markRapidDraftSent("t_1", "sub_sent");
+    app.bindRapidObservationForm("pin", { props: { task_id: "t_1" } });
+    for (const edit of ["v2", "v3"]) {
+      typed = edit;
+      for (const fn of listeners.input) fn({ target: null });
+    }
+    const kept = JSON.parse(values.get(app.rapidDraftStorageKey("t_1")));
+    assert.equal(kept.values.directObservation, "v3", "the latest edit is on the device without waiting for a timer");
+  }
+
+  // round 9: content the cards inherit from the parent observation, and a
+  // removed card, each rotate a sent id before the next send
+  {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    window.PowRapidEntry = { secureSubmissionId: (() => { let n = 0; return () => `sub_r${(n += 1)}`; })() };
+    const state = { submissionId: "sub_1", segments: [{ startDate: "1990" }, { startDate: "2000" }], chain: null, sameSource: true, provenance: null, gapAnswer: "", gapNote: "" };
+    app.guidedPeriodsByTaskId.set("k", state);
+    app.persistGuidedPeriods("k", { sending: true, provenance: { sourceTitle: "a" } });
+    app.persistGuidedPeriods("k", { sending: true, provenance: { sourceTitle: "a" } });
+    assert.equal(state.submissionId, "sub_1", "an exact retry keeps the id");
+    app.persistGuidedPeriods("k", { sending: true, provenance: { sourceTitle: "b" } });
+    assert.notEqual(state.submissionId, "sub_1", "an inherited-source edit rotates the id");
+    const afterSource = state.submissionId;
+    state.segments.splice(1, 1);
+    app.persistGuidedPeriods("k", { sending: true, provenance: { sourceTitle: "b" } });
+    assert.notEqual(state.submissionId, afterSource, "a removed card rotates the id before the send records its digest");
+  }
+
   // round 8 review: the review portal's shared purge removes the named
   // member's device work only, in every country
   {

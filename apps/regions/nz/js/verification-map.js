@@ -8483,7 +8483,9 @@ class NzVerificationMap {
             persistEpoch = epoch;
             // an edit after the entry was sent is kept at once, under a new
             // id, so a receipt arriving before the timer cannot take it
-            if (form.dataset.sentSubmissionId && form.dataset.sentSubmissionId === form.dataset.submissionId) {
+            // (every edit, not only the first: each rotates the id, and a
+            // receipt may replace the form before any timer fires)
+            if (form.dataset.sentSubmissionId) {
                 persistTimer = 0;
                 persist();
                 return;
@@ -9336,21 +9338,30 @@ class NzVerificationMap {
         return JSON.stringify([state.segments, state.chain || null, state.sameSource, state.provenance || null, state.gapAnswer || "", state.gapNote || ""]);
     }
 
-    persistGuidedPeriods(taskId, { sending = false } = {}) {
+    // a send also compares the provenance the cards inherit from the parent
+    // observation, which the cards themselves do not hold; an id already
+    // sent is rotated when the content or that provenance has changed, before
+    // the send records its own digests (#153 round 9)
+    persistGuidedPeriods(taskId, { sending = false, provenance = null } = {}) {
         const state = this.guidedPeriodsByTaskId.get(taskId);
         if (!state) return;
+        const sourceDigest = sending ? JSON.stringify(provenance || null) : "";
+        const changed = state.sentSubmissionId && state.submissionId === state.sentSubmissionId
+            && (state.sentDigest !== this.guidedPeriodsContentDigest(state)
+                || (sending && (state.sentSourceDigest || "") !== sourceDigest));
+        if (changed && window.PowRapidEntry?.secureSubmissionId) {
+            state.submissionId = window.PowRapidEntry.secureSubmissionId();
+        }
         if (sending) {
             state.sentSubmissionId = state.submissionId || "";
             state.sentDigest = this.guidedPeriodsContentDigest(state);
-        } else if (state.sentSubmissionId && state.submissionId === state.sentSubmissionId
-            && state.sentDigest !== this.guidedPeriodsContentDigest(state) && window.PowRapidEntry?.secureSubmissionId) {
-            state.submissionId = window.PowRapidEntry.secureSubmissionId();
+            state.sentSourceDigest = sourceDigest;
         }
         try {
             window.localStorage.setItem(this.guidedPeriodsStorageKey(taskId), JSON.stringify({
                 saved_at: Date.now(),
                 submissionId: state.submissionId || "",
-                ...(state.sentSubmissionId ? { sentSubmissionId: state.sentSubmissionId, sentDigest: state.sentDigest || "" } : {}),
+                ...(state.sentSubmissionId ? { sentSubmissionId: state.sentSubmissionId, sentDigest: state.sentDigest || "", sentSourceDigest: state.sentSourceDigest || "" } : {}),
                 segments: state.segments,
                 gapAnswer: state.gapAnswer,
                 gapNote: state.gapNote,
@@ -9447,7 +9458,7 @@ class NzVerificationMap {
             const referenceDate = this.guidedReferenceDate(taskId);
             const blankChain = () => (window.PowFunctionChain ? window.PowFunctionChain.blankChain() : null);
             state = stored
-                ? { submissionId: stored.submissionId || "", ...(stored.sentSubmissionId ? { sentSubmissionId: stored.sentSubmissionId, sentDigest: stored.sentDigest || "" } : {}), segments: stored.segments, gapAnswer: stored.gapAnswer || "", sameSource: stored.sameSource !== false, provenance: stored.provenance || this.occupancyBlankProvenance(), gapNote: stored.gapNote || "", referenceDate, loadedFrom: "", chain: stored.chain || blankChain(), ...(stored.placeKey ? { placeKey: stored.placeKey } : {}) }
+                ? { submissionId: stored.submissionId || "", ...(stored.sentSubmissionId ? { sentSubmissionId: stored.sentSubmissionId, sentDigest: stored.sentDigest || "", sentSourceDigest: stored.sentSourceDigest || "" } : {}), segments: stored.segments, gapAnswer: stored.gapAnswer || "", sameSource: stored.sameSource !== false, provenance: stored.provenance || this.occupancyBlankProvenance(), gapNote: stored.gapNote || "", referenceDate, loadedFrom: "", chain: stored.chain || blankChain(), ...(stored.placeKey ? { placeKey: stored.placeKey } : {}) }
                 : { submissionId: "", segments: [this.occupancyBlankSegment({ referenceDate, referenceDateFromParent: true })], gapAnswer: "", sameSource: this.guidedPeriodsDefaultSameSource(taskId), provenance: this.occupancyBlankProvenance(), gapNote: "", referenceDate, loadedFrom: "", chain: blankChain() };
             this.guidedPeriodsByTaskId.set(taskId, state);
         }
@@ -10005,6 +10016,7 @@ class NzVerificationMap {
                 this.enterOccupancyPin(this.occupancyDraft.context, index);
             } else if (button.dataset.action === "remove" && state.segments.length > 1) {
                 state.segments.splice(index, 1);
+                this.persistGuidedPeriods(taskId);
                 this.markFormDirty(taskId);
                 this.rerenderGuidedPeriods(taskId);
             }
@@ -10131,11 +10143,12 @@ class NzVerificationMap {
     guidedPeriodsSubmission(taskId, values) {
         if (!window.PowOccupancy) return { clientSubmissionId: window.PowRapidEntry.secureSubmissionId(), segments: [] };
         const state = this.guidedPeriodsState(taskId);
-        const submissionId = state.submissionId || window.PowRapidEntry.secureSubmissionId();
-        state.submissionId = submissionId;
-        this.persistGuidedPeriods(taskId, { sending: true });
-        if (!this.guidedPeriodsTouched(taskId)) return { clientSubmissionId: submissionId, segments: [] };
-        const provenance = this.guidedPeriodsProvenance(taskId, values).provenance;
+        state.submissionId = state.submissionId || window.PowRapidEntry.secureSubmissionId();
+        const touched = this.guidedPeriodsTouched(taskId);
+        const provenance = touched ? this.guidedPeriodsProvenance(taskId, values).provenance : null;
+        this.persistGuidedPeriods(taskId, { sending: true, provenance });
+        const submissionId = state.submissionId;
+        if (!touched) return { clientSubmissionId: submissionId, segments: [] };
         const segments = state.segments.map((segment, index) => ({ ...segment, ...provenance, segmentIndex: index }));
         const chain = this.guidedChainTouched(taskId) && window.PowFunctionChain ? window.PowFunctionChain.payload(this.chainWithDefaultStart(state.chain, state.segments)) : undefined;
         return {
@@ -12055,7 +12068,7 @@ class NzVerificationMap {
             if (chainProblem) return { problem: `Chain: ${chainProblem}` };
         }
         state.submissionId = state.submissionId || window.PowRapidEntry.secureSubmissionId();
-        this.persistGuidedPeriods(periodsKey, { sending: true });
+        this.persistGuidedPeriods(periodsKey, { sending: true, provenance: prov.provenance });
         return {
             // the exact device copy this plan sends, deleted once recorded
             version: this.guidedPeriodsVersion(periodsKey) && { ...this.guidedPeriodsVersion(periodsKey), epoch: this.sessionEpoch || 0 },
