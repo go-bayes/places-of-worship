@@ -8173,9 +8173,24 @@ class NzVerificationMap {
     keepRapidPinOnDevice() {
         if (!RAPID_NOMINATION_ENTRY || this.reviseContext || this.occupancyPinContext || !this.pinConfirmed) return;
         if (!this.draftOwnerId() || this.deviceWritesEnded()) return;
-        const record = this.readRapidDraft("rapid-pin") || { saved_at: nextSavedAt() };
+        const record = this.readRapidDraft("rapid-pin") || {};
         record.owner = this.draftOwnerId();
-        record.pin = { ...this.pinConfirmed, linkedRefs: this.pinLinkedRefs || [] };
+        // a pin change is a new version of the device copy, so a receipt for
+        // an earlier send cannot delete it (#153 round 13)
+        record.saved_at = nextSavedAt();
+        record.rev = newRevisionToken();
+        const pin = { ...this.pinConfirmed, linkedRefs: this.pinLinkedRefs || [] };
+        // the candidate changed after a send: the id it was sent under
+        // belongs to the earlier content, so the form takes a fresh one
+        if (record.pin && JSON.stringify(record.pin) !== JSON.stringify(pin)) {
+            const form = document.getElementById("pinRapidCurrentForm");
+            const current = form?.dataset?.submissionId;
+            if (current && (form.dataset.sentSubmissionId === current || record.sent_submission_id === current) && window.PowRapidEntry?.secureSubmissionId) {
+                form.dataset.submissionId = window.PowRapidEntry.secureSubmissionId();
+                record.submission_id = form.dataset.submissionId;
+            }
+        }
+        record.pin = pin;
         try {
             window.localStorage.setItem(this.rapidDraftStorageKey("rapid-pin"), JSON.stringify(record));
         } catch (error) {
@@ -12184,8 +12199,10 @@ class NzVerificationMap {
             chain: chainToSend ? window.PowFunctionChain.payload(chainToSend) : undefined,
             count: segments.length,
             state,
-            // when this submission began, against a later deliberate sign-out
-            startedAt: Date.now(),
+            // when the originating session began on this page, against a
+            // deliberate sign-out: a submission started after another tab
+            // signed out still belongs to the purged session (#153 round 13)
+            startedAt: this.ownerSeenAt || Date.now(),
         };
     }
 
@@ -12374,7 +12391,11 @@ class NzVerificationMap {
                 segments: state.segments,
                 provenance: state.sameSource ? plan.segments[0] : state.provenance,
                 gapAnswer: state.gapAnswer,
-                gapNote: state.gapNote,
+                // the handed-over provenance already carries the gap note when
+                // the cards share the observation's source; the pane appends
+                // the note once, so it is kept only for separate provenance
+                // (#153 round 13)
+                gapNote: state.sameSource ? "" : state.gapNote,
                 chain: state.chain,
                 referenceDate: state.referenceDate,
             };

@@ -152,4 +152,20 @@ const fresh = (userId = "ra_1") => Object.assign(Object.create(window.NzVerifica
   assert.equal(app.resumeRapidPinFromDevice(), false, "nothing to resume without a kept pin");
 }
 
+// 4. a pin change is a new version, so an earlier receipt cannot delete it (#153 round 13)
+{
+  const app = fresh();
+  app.reviseContext = null;
+  app.occupancyPinContext = null;
+  app.pinConfirmed = { latitude: -17.74, longitude: 168.31, zoom: 18, locationMode: "building_identified" };
+  app.keepRapidPinOnDevice();
+  const version = app.rapidDraftVersion("rapid-pin");
+  app.pinConfirmed = { latitude: -17.75, longitude: 168.32, zoom: 18, locationMode: "building_identified" };
+  app.keepRapidPinOnDevice();
+  app.clearSubmittedRapidDraft("rapid-pin", version);
+  const after = JSON.parse(localStorage.getItem("powRapidDraft2:NZ:ra_1:rapid-pin"));
+  assert.ok(after, "a late receipt leaves the edited pin");
+  assert.equal(after.pin.latitude, -17.75);
+}
+
 console.log("basemap swap order, device snapshots, and the kept pin ok");
