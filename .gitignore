@@ -260,3 +260,6 @@ local/
 
 # agent research pilot: unredacted run directories stay local
 scripts/agent_research/runs/
+
+# vendored third-party builds (apps/vendor) are tracked
+!apps/vendor/**/dist/

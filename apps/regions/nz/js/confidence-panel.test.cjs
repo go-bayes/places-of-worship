@@ -76,7 +76,7 @@ test("AI-generated and deterministic-uncalibrated pills, and provenance with sta
     assert.match(html, /<span class="pill">AI-generated<\/span>/);
     assert.match(html, /<span class="pill">Deterministic, uncalibrated<\/span>/);
     assert.match(html, /osm-confidence-scorer p2-heuristic-0\.2\.0/);
-    assert.match(html, /confidence-standard\/0\.3\.1/);
+    assert.match(html, /confidence-standard\/0\.4\.0/);
     assert.match(html, /edition 2026-09-01/);
     assert.match(html, /vectors b5937e6c0ac0/);
     assert.match(html, /code a1b2c3d4e5f6/);

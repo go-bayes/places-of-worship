@@ -4,6 +4,8 @@
 // exact arguments of the internal mutation agentJudgments:ingestDeterministicJudgments;
 // running that mutation against a deployment is a data import that needs the
 // project lead's instruction.
+// rows name confidence-standard/0.4.0, under which the categorical mapping is
+// made; signal vectors may name any confidence-standard 0.3.x or 0.4.x patch.
 //
 //   node scripts/osm_confidence_judgments.mjs --vectors <signal-vectors.jsonl> --manifest <data-manifest.json> --out <dry-run.json> [--limit N] [--osm-key way/123 ...] [--summary-only]
 //   node scripts/osm_confidence_judgments.mjs --check          # fixture currency, run in CI
@@ -34,9 +36,10 @@ registerHooks({
 });
 
 const { JUDGMENTS_PER_CALL_MAX, JUDGMENT_SCHEMA_VERSION_1_1, judgmentIdFor } = await import("../convex/lib/agentJudgments.ts");
-const { SCORER_AGENT_NAME, SCORER_SIGNAL_VALUE_KEYS, scorerBasisNote, scorerCategories, validateScorerJudgment } = await import("../convex/lib/scorerJudgments.ts");
+const { SCORER_AGENT_NAME, SCORER_SIGNAL_VALUE_KEYS, SCORER_STANDARD_VERSION_PATTERN, scorerBasisNote, scorerCategories, validateScorerJudgment } = await import("../convex/lib/scorerJudgments.ts");
 
-export const CONVERTER_VERSION = "0.2.0";
+export const CONVERTER_VERSION = "0.3.0";
+export const STANDARD_VERSION = "confidence-standard/0.4.0";
 const VECTOR_SCHEMA = "osm-confidence-signal-vector.v0.1";
 const TIERS = ["screened", "review", "escalate"];
 const CROSS_SOURCE = ["not_computed", "no_match", "match"];
@@ -107,6 +110,7 @@ function readManifest(manifestPath, vectorsSha) {
     cut_points: parameters.cut_points,
   };
   for (const [name, value] of Object.entries(required)) if (value === undefined || value === null) fail(`manifest lacks ${name}`);
+  if (!SCORER_STANDARD_VERSION_PATTERN.test(required.standard_version)) fail("manifest standard_version must be confidence-standard/0.3.x or 0.4.x, with a patch number without leading zeros");
   if (!/^[0-9a-f]{64}$/.test(required.config_sha256)) fail("manifest config_sha256 is not a sha256");
   const edition = required.edition_id.split(":");
   if (edition.length < 5 || edition[1].toUpperCase() !== countries[0]) fail("manifest edition_id is not in the manifest country");
@@ -177,7 +181,7 @@ function featureRows(m, vectorsSha, record) {
       prompt_version: m.scorer_version,
       code_revision: record.code_revision,
       signal_vector_sha256: vectorsSha,
-      standard_version: m.standard_version,
+      standard_version: STANDARD_VERSION,
     },
     run: { agent_run_id: `osm-confidence:${record.edition_id}:${vectorsSha.slice(0, 12)}:${CONVERTER_VERSION}`, attempt: 1, cost_basis: "no_model_call" },
     context: { place_ref: ref, country_code: m.country },

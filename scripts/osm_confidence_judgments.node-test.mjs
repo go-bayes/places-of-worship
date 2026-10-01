@@ -82,10 +82,22 @@ test("conversion requires fired positive status support, even above the floor", 
   }
 });
 
-test("conversion retains a matching 0.3 patch version from the vectors and manifest", () => {
+test("conversion maps matching 0.3.0 vectors and manifest under standard 0.4.0", () => {
   const v = variant("standard-patch", (lines) => { for (const line of lines) line.standard_version = "confidence-standard/0.3.0"; },
     (m) => { m.pipeline.parameters.standard_version = "confidence-standard/0.3.0"; });
-  assert.ok(convert(v).batches.flat().every((row) => row.judge.standard_version === "confidence-standard/0.3.0"));
+  assert.ok(convert(v).batches.flat().every((row) => row.judge.standard_version === "confidence-standard/0.4.0"));
+});
+
+test("conversion maps matching 0.4.2 vectors and manifest under standard 0.4.0", () => {
+  const v = variant("standard-patch-0.4.2", (lines) => { for (const line of lines) line.standard_version = "confidence-standard/0.4.2"; },
+    (m) => { m.pipeline.parameters.standard_version = "confidence-standard/0.4.2"; });
+  assert.ok(convert(v).batches.flat().every((row) => row.judge.standard_version === "confidence-standard/0.4.0"));
+});
+
+test("conversion refuses matching 0.5.0 vectors and manifest", () => {
+  const v = variant("standard-patch-0.5.0", (lines) => { for (const line of lines) line.standard_version = "confidence-standard/0.5.0"; },
+    (m) => { m.pipeline.parameters.standard_version = "confidence-standard/0.5.0"; });
+  assert.throws(() => convert(v), /manifest standard_version must be confidence-standard\/0\.3\.x or 0\.4\.x/);
 });
 
 test("planted personal strings appear in no output string", () => {
