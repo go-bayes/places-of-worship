@@ -977,6 +977,104 @@ async function roundThree() {
   const previousFetchR6 = context.fetch;
   const getElementByIdR6 = document.getElementById;
 
+  // blocked device storage still permits a fresh sign-in. after a recorded
+  // send loses its response, an unedited retry deduplicates; an edit to an
+  // extra field or the observation must instead record the corrected content
+  for (const editedId of ["pinNameInput", "pinAddressInput", "pinLocalityInput", "pinDirectObservation"]) {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    const listeners = {};
+    const form = {
+      dataset: { submissionId: "sub_original" },
+      isConnected: true,
+      addEventListener(type, fn) { (listeners[type] = listeners[type] || []).push(fn); },
+      querySelectorAll: () => [],
+    };
+    const fields = Object.fromEntries([
+      ["pinNameInput", "Original hall"], ["pinAddressInput", "1 Original Street"],
+      ["pinLocalityInput", "Original locality"], ["pinDirectObservation", "Original observation"],
+    ].map(([id, value]) => [id, {
+      value,
+      listeners: {},
+      addEventListener(type, fn) { (this.listeners[type] = this.listeners[type] || []).push(fn); },
+    }]));
+    const button = { disabled: false };
+    document.getElementById = (id) => ({ pinRapidCurrentForm: form, pinRapidSubmit: button, ...fields }[id] || null);
+    document.querySelector = () => null;
+    window.PowRapidEntry = {
+      localIsoDate: () => "2026-10-02", validateObservationDetailed: () => null,
+      observationPayload: (x) => x, secureSubmissionId: () => "sub_corrected",
+    };
+    for (const name of ["updateRapidSourceFields", "updateRapidDiscussionFields", "updateRapidUncertaintyField", "updateSourceLocatorField", "bindSourceTypeahead", "renderRapidSourceLinks", "syncInlineEvidenceFiles", "showRapidFieldError", "focusDetailPanel", "applyFilters", "markFormDirty", "clearFormDirty", "exitPinMode"]) app[name] = () => {};
+    let recordedTask;
+    Object.assign(app, {
+      rapidObservationValues: () => ({ directObservation: fields.pinDirectObservation.value, flagForDiscussion: false }),
+      rapidPeriodsPlan: () => null,
+      pendingEvidenceFiles: () => null,
+      entryCountry: () => ({ code: "NZ", config: { targetYears: [2026] } }),
+      entryCountryNoteText: () => "",
+      manualTasksById: new Map(),
+      refreshBackendTasks: async () => {},
+      renderSubmissionRecordedDetail: (props) => { recordedTask = props.task_id; },
+    });
+    const records = new Map();
+    let requests = 0;
+    const { sent } = realClientFor(app, {
+      "rapidEntry:submitCurrentObservation": (args) => {
+        const earlier = records.get(args.clientSubmissionId);
+        if (!earlier) records.set(args.clientSubmissionId, {
+          args,
+          receipt: { task_id: `t_${records.size + 1}`, evidence_draft_id: `d_${records.size + 1}`, task_status: "needs_review" },
+        });
+        // the first send and its unchanged retry both lose their response
+        if (++requests <= 2) throw new Error("Response lost after server recording");
+        return { ...records.get(args.clientSubmissionId).receipt, deduped: Boolean(earlier) };
+      },
+    });
+    const originalStorage = window.localStorage;
+    let storageWrites = 0;
+    window.localStorage = {
+      getItem() { throw new Error("Device storage blocked"); },
+      setItem() { storageWrites += 1; throw new Error("Device storage blocked"); },
+      removeItem() { storageWrites += 1; throw new Error("Device storage blocked"); },
+    };
+    try {
+      assert.equal(app.deviceWritable(), false, "the real device-owner guard refuses blocked storage");
+      const options = {
+        draftExtraIds: ["pinNameInput", "pinAddressInput", "pinLocalityInput"],
+        getCandidate: () => ({
+          name: fields.pinNameInput.value, address: fields.pinAddressInput.value,
+          locality: fields.pinLocalityInput.value, latitude: -41.29, longitude: 174.78,
+        }),
+      };
+      app.bindRapidObservationForm("pin", options);
+      const submit = () => app.submitRapidObservation("pin", { ...options, draftKey: "rapid-pin" });
+      await submit();
+      assert.equal(form.dataset.sentSubmissionId, "sub_original");
+      assert.equal(button.disabled, false, "the lost response leaves the form available for a retry");
+      await submit();
+      assert.equal(sent[1].args.clientSubmissionId, "sub_original", "an unedited retry reuses the sent id");
+      assert.equal(records.size, 1, "the server deduplicates the unedited retry");
+      fields[editedId].value = "Corrected content";
+      const editListeners = editedId === "pinDirectObservation" ? listeners.input : fields[editedId].listeners.input;
+      for (const fn of editListeners) fn({ target: fields[editedId] });
+      assert.equal(form.dataset.submissionId, "sub_corrected", `${editedId} rotates the live id with storage blocked`);
+      await submit();
+      assert.equal(sent[2].args.clientSubmissionId, "sub_corrected", "the edited retry sends a new id");
+      assert.equal(records.size, 2, "the correction is recorded separately from the earlier content");
+      const corrected = records.get("sub_corrected").args;
+      assert.equal(corrected.candidate.name, fields.pinNameInput.value);
+      assert.equal(corrected.candidate.address, fields.pinAddressInput.value);
+      assert.equal(corrected.candidate.locality, fields.pinLocalityInput.value);
+      assert.equal(corrected.observation.directObservation, fields.pinDirectObservation.value);
+      assert.equal(recordedTask, "t_2", "the page shows the correction's receipt");
+      assert.equal(storageWrites, 0, "device writes remain behind the session-owner guard");
+    } finally {
+      window.localStorage = originalStorage;
+      document.getElementById = getElementByIdR6;
+    }
+  }
+
   // a guided save recorded in the same session removes the exact device
   // snapshot it carried and keeps a newer one; one recorded after the
   // session changed writes nothing to the device

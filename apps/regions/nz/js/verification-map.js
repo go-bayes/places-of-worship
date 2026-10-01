@@ -8044,29 +8044,30 @@ class NzVerificationMap {
     }
 
     persistRapidDraft(prefix, key, extraValues = {}) {
+        const previous = this.readRapidDraft(key);
+        // the form's submission id travels with the draft, so a retry of
+        // an entry whose answer never arrived reuses it and the server
+        // records it once (#153 round 5). the id belongs to the content
+        // it was sent with: once an entry has been sent, an edit mints a
+        // fresh id, even when device storage is blocked
+        const form = document.getElementById(`${prefix}RapidCurrentForm`);
+        let submissionId = form?.dataset?.submissionId;
+        // the form's own sent marker counts as well as the stored one: receipt
+        // cleanup may already have deleted the stored draft (#153 round 10)
+        const sentHere = form?.dataset?.sentSubmissionId === submissionId || previous?.sent_submission_id === submissionId;
+        if (submissionId && sentHere && window.PowRapidEntry?.secureSubmissionId) {
+            submissionId = window.PowRapidEntry.secureSubmissionId();
+            form.dataset.submissionId = submissionId;
+        }
+        // live id rotation is independent of autosave; device writes still
+        // require the signed-in member's current session to hold the device
         if (!this.deviceWritable()) return;
         try {
-            const previous = this.readRapidDraft(key);
             const record = {
                 saved_at: nextSavedAt(),
                 values: this.rapidObservationValues(prefix),
                 extra: extraValues,
             };
-            // the form's submission id travels with the draft, so a retry of
-            // an entry whose answer never arrived reuses it and the server
-            // records it once (#153 round 5). the id belongs to the content
-            // it was sent with: once an entry has been sent, an edit mints a
-            // fresh id, so the edited content is recorded rather than
-            // deduplicated into the earlier submission (#153 round 6)
-            const form = document.getElementById(`${prefix}RapidCurrentForm`);
-            let submissionId = form?.dataset?.submissionId;
-            // the form's own sent marker counts as well as the stored one: receipt
-            // cleanup may already have deleted the stored draft (#153 round 10)
-            const sentHere = form?.dataset?.sentSubmissionId === submissionId || previous?.sent_submission_id === submissionId;
-            if (submissionId && sentHere && window.PowRapidEntry?.secureSubmissionId) {
-                submissionId = window.PowRapidEntry.secureSubmissionId();
-                form.dataset.submissionId = submissionId;
-            }
             if (submissionId) record.submission_id = submissionId;
             // the confirmed pin rides on the record while the entry is open
             if (previous?.pin) record.pin = previous.pin;
