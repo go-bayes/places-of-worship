@@ -1,0 +1,1589 @@
+{
+  "converter_version": "0.2.0",
+  "source": {
+    "path": "sample-signal-vectors.jsonl",
+    "sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+    "rows": 5,
+    "dataset_version_id": "osm-confidence:nz:signal-vectors-sample:2026-09-01:b5937e6c0ac0",
+    "country_code": "NZ",
+    "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567"
+  },
+  "counts": {
+    "features": 5,
+    "in_scope": 4,
+    "out_of_scope": 1,
+    "rows_by_kind": {
+      "duplicate": 1,
+      "location": 4,
+      "registration_confidence": 4,
+      "status_assessment": 4
+    },
+    "tiers": {
+      "escalate": 1,
+      "review": 2,
+      "screened": 1
+    }
+  },
+  "batches": [
+    [
+      {
+        "schema_version": "agent-judgment.v1.1",
+        "subject": {
+          "kind": "place",
+          "ref": "osm:way/1001"
+        },
+        "score": {
+          "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
+          "composite": 0.9126,
+          "components": {
+            "identity": 0.97,
+            "location": 0.98,
+            "status": 0.96,
+            "denomination": 0.93
+          },
+          "tier": "screened",
+          "tier_reasons": [],
+          "tier_pending": [],
+          "cut_points": {
+            "screened_min_composite": 0.9,
+            "review_min_composite": 0.6,
+            "component_floor": 0.7
+          },
+          "calibrated": false,
+          "signals_fired": {
+            "identity": [
+              "name_specific",
+              "religion_present",
+              "building_worship_specific"
+            ],
+            "location": [
+              "area_small"
+            ],
+            "status": [
+              "check_recent",
+              "edit_recent"
+            ],
+            "denomination": [
+              "name_consistent"
+            ]
+          },
+          "signal_values": {
+            "tag_completeness.score": 0.857,
+            "tag_count": 9,
+            "has_name": true,
+            "has_religion": true,
+            "has_denomination": true,
+            "has_building": true,
+            "has_address": false,
+            "has_website_or_contact": false,
+            "has_opening_or_service_times": false,
+            "has_wikidata": false,
+            "has_start_date": false,
+            "has_check_date": true,
+            "has_operator": false,
+            "has_historic": false,
+            "has_heritage": false,
+            "has_tourism": false,
+            "footprint_area_m2": 412.5,
+            "building_worship_specific": true,
+            "building_generic": false,
+            "node_in_building": null,
+            "node_in_worship_building": null,
+            "node_containing_building": null,
+            "node_in_religious_landuse": null,
+            "lifecycle_neighbour_60m": false,
+            "days_since_last_edit": 941,
+            "years_as_pow": 14.5,
+            "n_versions": 4,
+            "n_contributors": 3,
+            "deleted_and_recreated": false,
+            "pow_created_in_bulk_or_import": false,
+            "name_lifecycle_word": false,
+            "name_old_prefix": false,
+            "own_lifecycle_tag": false,
+            "end_date_passed": false,
+            "ruins": false,
+            "nearest_pow_m": 220.4,
+            "n_pow_within_50m_same_or_unknown_religion": 0,
+            "n_pow_coincident_1m": 0,
+            "n_same_name_within_500m": 0,
+            "node_area_pair": false,
+            "cross_source_agreement.n_sources_matched": 2
+          },
+          "indicators": {
+            "duplicate": false,
+            "conflict": false,
+            "conflict_reasons": [],
+            "generic_name": false,
+            "missing_name": false,
+            "cross_source_match": "match",
+            "cross_source_sources_matched": 2
+          }
+        },
+        "judge": {
+          "agent_name": "osm-confidence-scorer",
+          "kind": "deterministic",
+          "prompt_version": "p2-heuristic-0.2.0",
+          "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
+        },
+        "run": {
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
+          "attempt": 1,
+          "cost_basis": "no_model_call"
+        },
+        "context": {
+          "place_ref": "osm:way/1001",
+          "country_code": "NZ"
+        },
+        "judgment_kind": "registration_confidence",
+        "outcome": "screened",
+        "confidence": "high",
+        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (until calibration replaces it); outcome screened; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.2.0"
+      },
+      {
+        "schema_version": "agent-judgment.v1.1",
+        "subject": {
+          "kind": "place",
+          "ref": "osm:way/1001"
+        },
+        "score": {
+          "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
+          "composite": 0.9126,
+          "components": {
+            "identity": 0.97,
+            "location": 0.98,
+            "status": 0.96,
+            "denomination": 0.93
+          },
+          "tier": "screened",
+          "tier_reasons": [],
+          "tier_pending": [],
+          "cut_points": {
+            "screened_min_composite": 0.9,
+            "review_min_composite": 0.6,
+            "component_floor": 0.7
+          },
+          "calibrated": false,
+          "signals_fired": {
+            "identity": [
+              "name_specific",
+              "religion_present",
+              "building_worship_specific"
+            ],
+            "location": [
+              "area_small"
+            ],
+            "status": [
+              "check_recent",
+              "edit_recent"
+            ],
+            "denomination": [
+              "name_consistent"
+            ]
+          },
+          "signal_values": {
+            "tag_completeness.score": 0.857,
+            "tag_count": 9,
+            "has_name": true,
+            "has_religion": true,
+            "has_denomination": true,
+            "has_building": true,
+            "has_address": false,
+            "has_website_or_contact": false,
+            "has_opening_or_service_times": false,
+            "has_wikidata": false,
+            "has_start_date": false,
+            "has_check_date": true,
+            "has_operator": false,
+            "has_historic": false,
+            "has_heritage": false,
+            "has_tourism": false,
+            "footprint_area_m2": 412.5,
+            "building_worship_specific": true,
+            "building_generic": false,
+            "node_in_building": null,
+            "node_in_worship_building": null,
+            "node_containing_building": null,
+            "node_in_religious_landuse": null,
+            "lifecycle_neighbour_60m": false,
+            "days_since_last_edit": 941,
+            "years_as_pow": 14.5,
+            "n_versions": 4,
+            "n_contributors": 3,
+            "deleted_and_recreated": false,
+            "pow_created_in_bulk_or_import": false,
+            "name_lifecycle_word": false,
+            "name_old_prefix": false,
+            "own_lifecycle_tag": false,
+            "end_date_passed": false,
+            "ruins": false,
+            "nearest_pow_m": 220.4,
+            "n_pow_within_50m_same_or_unknown_religion": 0,
+            "n_pow_coincident_1m": 0,
+            "n_same_name_within_500m": 0,
+            "node_area_pair": false,
+            "cross_source_agreement.n_sources_matched": 2
+          },
+          "indicators": {
+            "duplicate": false,
+            "conflict": false,
+            "conflict_reasons": [],
+            "generic_name": false,
+            "missing_name": false,
+            "cross_source_match": "match",
+            "cross_source_sources_matched": 2
+          }
+        },
+        "judge": {
+          "agent_name": "osm-confidence-scorer",
+          "kind": "deterministic",
+          "prompt_version": "p2-heuristic-0.2.0",
+          "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
+        },
+        "run": {
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
+          "attempt": 1,
+          "cost_basis": "no_model_call"
+        },
+        "context": {
+          "place_ref": "osm:way/1001",
+          "country_code": "NZ"
+        },
+        "judgment_kind": "status_assessment",
+        "facet": "status",
+        "outcome": "likely_active",
+        "confidence": "high",
+        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (until calibration replaces it); outcome likely_active; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.2.0"
+      },
+      {
+        "schema_version": "agent-judgment.v1.1",
+        "subject": {
+          "kind": "place",
+          "ref": "osm:way/1001"
+        },
+        "score": {
+          "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
+          "composite": 0.9126,
+          "components": {
+            "identity": 0.97,
+            "location": 0.98,
+            "status": 0.96,
+            "denomination": 0.93
+          },
+          "tier": "screened",
+          "tier_reasons": [],
+          "tier_pending": [],
+          "cut_points": {
+            "screened_min_composite": 0.9,
+            "review_min_composite": 0.6,
+            "component_floor": 0.7
+          },
+          "calibrated": false,
+          "signals_fired": {
+            "identity": [
+              "name_specific",
+              "religion_present",
+              "building_worship_specific"
+            ],
+            "location": [
+              "area_small"
+            ],
+            "status": [
+              "check_recent",
+              "edit_recent"
+            ],
+            "denomination": [
+              "name_consistent"
+            ]
+          },
+          "signal_values": {
+            "tag_completeness.score": 0.857,
+            "tag_count": 9,
+            "has_name": true,
+            "has_religion": true,
+            "has_denomination": true,
+            "has_building": true,
+            "has_address": false,
+            "has_website_or_contact": false,
+            "has_opening_or_service_times": false,
+            "has_wikidata": false,
+            "has_start_date": false,
+            "has_check_date": true,
+            "has_operator": false,
+            "has_historic": false,
+            "has_heritage": false,
+            "has_tourism": false,
+            "footprint_area_m2": 412.5,
+            "building_worship_specific": true,
+            "building_generic": false,
+            "node_in_building": null,
+            "node_in_worship_building": null,
+            "node_containing_building": null,
+            "node_in_religious_landuse": null,
+            "lifecycle_neighbour_60m": false,
+            "days_since_last_edit": 941,
+            "years_as_pow": 14.5,
+            "n_versions": 4,
+            "n_contributors": 3,
+            "deleted_and_recreated": false,
+            "pow_created_in_bulk_or_import": false,
+            "name_lifecycle_word": false,
+            "name_old_prefix": false,
+            "own_lifecycle_tag": false,
+            "end_date_passed": false,
+            "ruins": false,
+            "nearest_pow_m": 220.4,
+            "n_pow_within_50m_same_or_unknown_religion": 0,
+            "n_pow_coincident_1m": 0,
+            "n_same_name_within_500m": 0,
+            "node_area_pair": false,
+            "cross_source_agreement.n_sources_matched": 2
+          },
+          "indicators": {
+            "duplicate": false,
+            "conflict": false,
+            "conflict_reasons": [],
+            "generic_name": false,
+            "missing_name": false,
+            "cross_source_match": "match",
+            "cross_source_sources_matched": 2
+          }
+        },
+        "judge": {
+          "agent_name": "osm-confidence-scorer",
+          "kind": "deterministic",
+          "prompt_version": "p2-heuristic-0.2.0",
+          "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
+        },
+        "run": {
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
+          "attempt": 1,
+          "cost_basis": "no_model_call"
+        },
+        "context": {
+          "place_ref": "osm:way/1001",
+          "country_code": "NZ"
+        },
+        "judgment_kind": "location",
+        "facet": "location",
+        "outcome": "plausible",
+        "confidence": "high",
+        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (until calibration replaces it); outcome plausible; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.2.0"
+      },
+      {
+        "schema_version": "agent-judgment.v1.1",
+        "subject": {
+          "kind": "place",
+          "ref": "osm:way/1002"
+        },
+        "score": {
+          "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
+          "composite": 0.6567,
+          "components": {
+            "identity": 0.91,
+            "location": 0.88,
+            "status": 0.82,
+            "denomination": 0.74
+          },
+          "tier": "review",
+          "tier_reasons": [
+            "composite_0.6_to_0.9",
+            "duplicate"
+          ],
+          "tier_pending": [],
+          "cut_points": {
+            "screened_min_composite": 0.9,
+            "review_min_composite": 0.6,
+            "component_floor": 0.7
+          },
+          "calibrated": false,
+          "signals_fired": {
+            "identity": [
+              "name_specific",
+              "religion_present",
+              "duplicate_within_radius"
+            ],
+            "location": [
+              "area_small"
+            ],
+            "status": [
+              "check_older"
+            ],
+            "denomination": [
+              "name_consistent"
+            ]
+          },
+          "signal_values": {
+            "tag_completeness.score": 0.857,
+            "tag_count": 9,
+            "has_name": true,
+            "has_religion": true,
+            "has_denomination": true,
+            "has_building": true,
+            "has_address": false,
+            "has_website_or_contact": false,
+            "has_opening_or_service_times": false,
+            "has_wikidata": false,
+            "has_start_date": false,
+            "has_check_date": true,
+            "has_operator": false,
+            "has_historic": false,
+            "has_heritage": false,
+            "has_tourism": false,
+            "footprint_area_m2": 412.5,
+            "building_worship_specific": true,
+            "building_generic": false,
+            "node_in_building": null,
+            "node_in_worship_building": null,
+            "node_containing_building": null,
+            "node_in_religious_landuse": null,
+            "lifecycle_neighbour_60m": false,
+            "days_since_last_edit": 941,
+            "years_as_pow": 14.5,
+            "n_versions": 4,
+            "n_contributors": 3,
+            "deleted_and_recreated": false,
+            "pow_created_in_bulk_or_import": false,
+            "name_lifecycle_word": false,
+            "name_old_prefix": false,
+            "own_lifecycle_tag": false,
+            "end_date_passed": false,
+            "ruins": false,
+            "nearest_pow_m": 220.4,
+            "n_pow_within_50m_same_or_unknown_religion": 1,
+            "n_pow_coincident_1m": 1,
+            "n_same_name_within_500m": 0,
+            "node_area_pair": false,
+            "cross_source_agreement.n_sources_matched": 0
+          },
+          "indicators": {
+            "duplicate": true,
+            "conflict": false,
+            "conflict_reasons": [],
+            "generic_name": false,
+            "missing_name": false,
+            "cross_source_match": "no_match",
+            "cross_source_sources_matched": 0
+          }
+        },
+        "judge": {
+          "agent_name": "osm-confidence-scorer",
+          "kind": "deterministic",
+          "prompt_version": "p2-heuristic-0.2.0",
+          "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
+        },
+        "run": {
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
+          "attempt": 1,
+          "cost_basis": "no_model_call"
+        },
+        "context": {
+          "place_ref": "osm:way/1002",
+          "country_code": "NZ"
+        },
+        "judgment_kind": "registration_confidence",
+        "outcome": "review",
+        "confidence": "medium",
+        "basis_note": "standard confidence-standard/0.3.1; confidence medium is provisional and uncalibrated (until calibration replaces it); outcome review; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.2.0"
+      },
+      {
+        "schema_version": "agent-judgment.v1.1",
+        "subject": {
+          "kind": "place",
+          "ref": "osm:way/1002"
+        },
+        "score": {
+          "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
+          "composite": 0.6567,
+          "components": {
+            "identity": 0.91,
+            "location": 0.88,
+            "status": 0.82,
+            "denomination": 0.74
+          },
+          "tier": "review",
+          "tier_reasons": [
+            "composite_0.6_to_0.9",
+            "duplicate"
+          ],
+          "tier_pending": [],
+          "cut_points": {
+            "screened_min_composite": 0.9,
+            "review_min_composite": 0.6,
+            "component_floor": 0.7
+          },
+          "calibrated": false,
+          "signals_fired": {
+            "identity": [
+              "name_specific",
+              "religion_present",
+              "duplicate_within_radius"
+            ],
+            "location": [
+              "area_small"
+            ],
+            "status": [
+              "check_older"
+            ],
+            "denomination": [
+              "name_consistent"
+            ]
+          },
+          "signal_values": {
+            "tag_completeness.score": 0.857,
+            "tag_count": 9,
+            "has_name": true,
+            "has_religion": true,
+            "has_denomination": true,
+            "has_building": true,
+            "has_address": false,
+            "has_website_or_contact": false,
+            "has_opening_or_service_times": false,
+            "has_wikidata": false,
+            "has_start_date": false,
+            "has_check_date": true,
+            "has_operator": false,
+            "has_historic": false,
+            "has_heritage": false,
+            "has_tourism": false,
+            "footprint_area_m2": 412.5,
+            "building_worship_specific": true,
+            "building_generic": false,
+            "node_in_building": null,
+            "node_in_worship_building": null,
+            "node_containing_building": null,
+            "node_in_religious_landuse": null,
+            "lifecycle_neighbour_60m": false,
+            "days_since_last_edit": 941,
+            "years_as_pow": 14.5,
+            "n_versions": 4,
+            "n_contributors": 3,
+            "deleted_and_recreated": false,
+            "pow_created_in_bulk_or_import": false,
+            "name_lifecycle_word": false,
+            "name_old_prefix": false,
+            "own_lifecycle_tag": false,
+            "end_date_passed": false,
+            "ruins": false,
+            "nearest_pow_m": 220.4,
+            "n_pow_within_50m_same_or_unknown_religion": 1,
+            "n_pow_coincident_1m": 1,
+            "n_same_name_within_500m": 0,
+            "node_area_pair": false,
+            "cross_source_agreement.n_sources_matched": 0
+          },
+          "indicators": {
+            "duplicate": true,
+            "conflict": false,
+            "conflict_reasons": [],
+            "generic_name": false,
+            "missing_name": false,
+            "cross_source_match": "no_match",
+            "cross_source_sources_matched": 0
+          }
+        },
+        "judge": {
+          "agent_name": "osm-confidence-scorer",
+          "kind": "deterministic",
+          "prompt_version": "p2-heuristic-0.2.0",
+          "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
+        },
+        "run": {
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
+          "attempt": 1,
+          "cost_basis": "no_model_call"
+        },
+        "context": {
+          "place_ref": "osm:way/1002",
+          "country_code": "NZ"
+        },
+        "judgment_kind": "status_assessment",
+        "facet": "status",
+        "outcome": "likely_active",
+        "confidence": "medium",
+        "basis_note": "standard confidence-standard/0.3.1; confidence medium is provisional and uncalibrated (until calibration replaces it); outcome likely_active; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.2.0"
+      },
+      {
+        "schema_version": "agent-judgment.v1.1",
+        "subject": {
+          "kind": "place",
+          "ref": "osm:way/1002"
+        },
+        "score": {
+          "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
+          "composite": 0.6567,
+          "components": {
+            "identity": 0.91,
+            "location": 0.88,
+            "status": 0.82,
+            "denomination": 0.74
+          },
+          "tier": "review",
+          "tier_reasons": [
+            "composite_0.6_to_0.9",
+            "duplicate"
+          ],
+          "tier_pending": [],
+          "cut_points": {
+            "screened_min_composite": 0.9,
+            "review_min_composite": 0.6,
+            "component_floor": 0.7
+          },
+          "calibrated": false,
+          "signals_fired": {
+            "identity": [
+              "name_specific",
+              "religion_present",
+              "duplicate_within_radius"
+            ],
+            "location": [
+              "area_small"
+            ],
+            "status": [
+              "check_older"
+            ],
+            "denomination": [
+              "name_consistent"
+            ]
+          },
+          "signal_values": {
+            "tag_completeness.score": 0.857,
+            "tag_count": 9,
+            "has_name": true,
+            "has_religion": true,
+            "has_denomination": true,
+            "has_building": true,
+            "has_address": false,
+            "has_website_or_contact": false,
+            "has_opening_or_service_times": false,
+            "has_wikidata": false,
+            "has_start_date": false,
+            "has_check_date": true,
+            "has_operator": false,
+            "has_historic": false,
+            "has_heritage": false,
+            "has_tourism": false,
+            "footprint_area_m2": 412.5,
+            "building_worship_specific": true,
+            "building_generic": false,
+            "node_in_building": null,
+            "node_in_worship_building": null,
+            "node_containing_building": null,
+            "node_in_religious_landuse": null,
+            "lifecycle_neighbour_60m": false,
+            "days_since_last_edit": 941,
+            "years_as_pow": 14.5,
+            "n_versions": 4,
+            "n_contributors": 3,
+            "deleted_and_recreated": false,
+            "pow_created_in_bulk_or_import": false,
+            "name_lifecycle_word": false,
+            "name_old_prefix": false,
+            "own_lifecycle_tag": false,
+            "end_date_passed": false,
+            "ruins": false,
+            "nearest_pow_m": 220.4,
+            "n_pow_within_50m_same_or_unknown_religion": 1,
+            "n_pow_coincident_1m": 1,
+            "n_same_name_within_500m": 0,
+            "node_area_pair": false,
+            "cross_source_agreement.n_sources_matched": 0
+          },
+          "indicators": {
+            "duplicate": true,
+            "conflict": false,
+            "conflict_reasons": [],
+            "generic_name": false,
+            "missing_name": false,
+            "cross_source_match": "no_match",
+            "cross_source_sources_matched": 0
+          }
+        },
+        "judge": {
+          "agent_name": "osm-confidence-scorer",
+          "kind": "deterministic",
+          "prompt_version": "p2-heuristic-0.2.0",
+          "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
+        },
+        "run": {
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
+          "attempt": 1,
+          "cost_basis": "no_model_call"
+        },
+        "context": {
+          "place_ref": "osm:way/1002",
+          "country_code": "NZ"
+        },
+        "judgment_kind": "location",
+        "facet": "location",
+        "outcome": "plausible",
+        "confidence": "medium",
+        "basis_note": "standard confidence-standard/0.3.1; confidence medium is provisional and uncalibrated (until calibration replaces it); outcome plausible; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.2.0"
+      },
+      {
+        "schema_version": "agent-judgment.v1.1",
+        "subject": {
+          "kind": "place",
+          "ref": "osm:way/1002"
+        },
+        "score": {
+          "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
+          "composite": 0.6567,
+          "components": {
+            "identity": 0.91,
+            "location": 0.88,
+            "status": 0.82,
+            "denomination": 0.74
+          },
+          "tier": "review",
+          "tier_reasons": [
+            "composite_0.6_to_0.9",
+            "duplicate"
+          ],
+          "tier_pending": [],
+          "cut_points": {
+            "screened_min_composite": 0.9,
+            "review_min_composite": 0.6,
+            "component_floor": 0.7
+          },
+          "calibrated": false,
+          "signals_fired": {
+            "identity": [
+              "name_specific",
+              "religion_present",
+              "duplicate_within_radius"
+            ],
+            "location": [
+              "area_small"
+            ],
+            "status": [
+              "check_older"
+            ],
+            "denomination": [
+              "name_consistent"
+            ]
+          },
+          "signal_values": {
+            "tag_completeness.score": 0.857,
+            "tag_count": 9,
+            "has_name": true,
+            "has_religion": true,
+            "has_denomination": true,
+            "has_building": true,
+            "has_address": false,
+            "has_website_or_contact": false,
+            "has_opening_or_service_times": false,
+            "has_wikidata": false,
+            "has_start_date": false,
+            "has_check_date": true,
+            "has_operator": false,
+            "has_historic": false,
+            "has_heritage": false,
+            "has_tourism": false,
+            "footprint_area_m2": 412.5,
+            "building_worship_specific": true,
+            "building_generic": false,
+            "node_in_building": null,
+            "node_in_worship_building": null,
+            "node_containing_building": null,
+            "node_in_religious_landuse": null,
+            "lifecycle_neighbour_60m": false,
+            "days_since_last_edit": 941,
+            "years_as_pow": 14.5,
+            "n_versions": 4,
+            "n_contributors": 3,
+            "deleted_and_recreated": false,
+            "pow_created_in_bulk_or_import": false,
+            "name_lifecycle_word": false,
+            "name_old_prefix": false,
+            "own_lifecycle_tag": false,
+            "end_date_passed": false,
+            "ruins": false,
+            "nearest_pow_m": 220.4,
+            "n_pow_within_50m_same_or_unknown_religion": 1,
+            "n_pow_coincident_1m": 1,
+            "n_same_name_within_500m": 0,
+            "node_area_pair": false,
+            "cross_source_agreement.n_sources_matched": 0
+          },
+          "indicators": {
+            "duplicate": true,
+            "conflict": false,
+            "conflict_reasons": [],
+            "generic_name": false,
+            "missing_name": false,
+            "cross_source_match": "no_match",
+            "cross_source_sources_matched": 0
+          }
+        },
+        "judge": {
+          "agent_name": "osm-confidence-scorer",
+          "kind": "deterministic",
+          "prompt_version": "p2-heuristic-0.2.0",
+          "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
+        },
+        "run": {
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
+          "attempt": 1,
+          "cost_basis": "no_model_call"
+        },
+        "context": {
+          "place_ref": "osm:way/1002",
+          "country_code": "NZ"
+        },
+        "judgment_kind": "duplicate",
+        "facet": "duplicate",
+        "outcome": "unclear",
+        "confidence": "low",
+        "basis_note": "standard confidence-standard/0.3.1; confidence low is provisional and uncalibrated (until calibration replaces it); outcome unclear; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.2.0"
+      },
+      {
+        "schema_version": "agent-judgment.v1.1",
+        "subject": {
+          "kind": "place",
+          "ref": "osm:node/2001"
+        },
+        "score": {
+          "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
+          "composite": 0.0716,
+          "components": {
+            "identity": 0.42,
+            "location": 0.55,
+            "status": 0.31,
+            "denomination": 0.5
+          },
+          "tier": "escalate",
+          "tier_reasons": [
+            "composite_below_0.6",
+            "conflict",
+            "identity_below_0.7",
+            "location_below_0.7",
+            "status_below_0.7",
+            "denomination_below_0.7"
+          ],
+          "tier_pending": [],
+          "cut_points": {
+            "screened_min_composite": 0.9,
+            "review_min_composite": 0.6,
+            "component_floor": 0.7
+          },
+          "calibrated": false,
+          "signals_fired": {
+            "identity": [
+              "name_missing",
+              "religion_present"
+            ],
+            "location": [],
+            "status": [
+              "ruins",
+              "end_date_passed"
+            ],
+            "denomination": []
+          },
+          "signal_values": {
+            "tag_completeness.score": 0.857,
+            "tag_count": 9,
+            "has_name": false,
+            "has_religion": true,
+            "has_denomination": false,
+            "has_building": true,
+            "has_address": false,
+            "has_website_or_contact": false,
+            "has_opening_or_service_times": false,
+            "has_wikidata": false,
+            "has_start_date": false,
+            "has_check_date": true,
+            "has_operator": false,
+            "has_historic": false,
+            "has_heritage": false,
+            "has_tourism": false,
+            "footprint_area_m2": 412.5,
+            "building_worship_specific": true,
+            "building_generic": false,
+            "node_in_building": null,
+            "node_in_worship_building": null,
+            "node_containing_building": null,
+            "node_in_religious_landuse": null,
+            "lifecycle_neighbour_60m": false,
+            "days_since_last_edit": 941,
+            "years_as_pow": 14.5,
+            "n_versions": 4,
+            "n_contributors": 3,
+            "deleted_and_recreated": false,
+            "pow_created_in_bulk_or_import": false,
+            "name_lifecycle_word": false,
+            "name_old_prefix": false,
+            "own_lifecycle_tag": false,
+            "end_date_passed": true,
+            "ruins": true,
+            "nearest_pow_m": 220.4,
+            "n_pow_within_50m_same_or_unknown_religion": 0,
+            "n_pow_coincident_1m": 0,
+            "n_same_name_within_500m": 0,
+            "node_area_pair": false
+          },
+          "indicators": {
+            "duplicate": false,
+            "conflict": true,
+            "conflict_reasons": [
+              "ruins_with_active_amenity",
+              "end_date_passed_with_active_amenity"
+            ],
+            "generic_name": false,
+            "missing_name": true,
+            "cross_source_match": "not_computed",
+            "cross_source_sources_matched": null
+          }
+        },
+        "judge": {
+          "agent_name": "osm-confidence-scorer",
+          "kind": "deterministic",
+          "prompt_version": "p2-heuristic-0.2.0",
+          "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
+        },
+        "run": {
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
+          "attempt": 1,
+          "cost_basis": "no_model_call"
+        },
+        "context": {
+          "place_ref": "osm:node/2001",
+          "country_code": "NZ"
+        },
+        "judgment_kind": "registration_confidence",
+        "outcome": "escalate",
+        "confidence": "low",
+        "basis_note": "standard confidence-standard/0.3.1; confidence low is provisional and uncalibrated (until calibration replaces it); outcome escalate; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
+      },
+      {
+        "schema_version": "agent-judgment.v1.1",
+        "subject": {
+          "kind": "place",
+          "ref": "osm:node/2001"
+        },
+        "score": {
+          "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
+          "composite": 0.0716,
+          "components": {
+            "identity": 0.42,
+            "location": 0.55,
+            "status": 0.31,
+            "denomination": 0.5
+          },
+          "tier": "escalate",
+          "tier_reasons": [
+            "composite_below_0.6",
+            "conflict",
+            "identity_below_0.7",
+            "location_below_0.7",
+            "status_below_0.7",
+            "denomination_below_0.7"
+          ],
+          "tier_pending": [],
+          "cut_points": {
+            "screened_min_composite": 0.9,
+            "review_min_composite": 0.6,
+            "component_floor": 0.7
+          },
+          "calibrated": false,
+          "signals_fired": {
+            "identity": [
+              "name_missing",
+              "religion_present"
+            ],
+            "location": [],
+            "status": [
+              "ruins",
+              "end_date_passed"
+            ],
+            "denomination": []
+          },
+          "signal_values": {
+            "tag_completeness.score": 0.857,
+            "tag_count": 9,
+            "has_name": false,
+            "has_religion": true,
+            "has_denomination": false,
+            "has_building": true,
+            "has_address": false,
+            "has_website_or_contact": false,
+            "has_opening_or_service_times": false,
+            "has_wikidata": false,
+            "has_start_date": false,
+            "has_check_date": true,
+            "has_operator": false,
+            "has_historic": false,
+            "has_heritage": false,
+            "has_tourism": false,
+            "footprint_area_m2": 412.5,
+            "building_worship_specific": true,
+            "building_generic": false,
+            "node_in_building": null,
+            "node_in_worship_building": null,
+            "node_containing_building": null,
+            "node_in_religious_landuse": null,
+            "lifecycle_neighbour_60m": false,
+            "days_since_last_edit": 941,
+            "years_as_pow": 14.5,
+            "n_versions": 4,
+            "n_contributors": 3,
+            "deleted_and_recreated": false,
+            "pow_created_in_bulk_or_import": false,
+            "name_lifecycle_word": false,
+            "name_old_prefix": false,
+            "own_lifecycle_tag": false,
+            "end_date_passed": true,
+            "ruins": true,
+            "nearest_pow_m": 220.4,
+            "n_pow_within_50m_same_or_unknown_religion": 0,
+            "n_pow_coincident_1m": 0,
+            "n_same_name_within_500m": 0,
+            "node_area_pair": false
+          },
+          "indicators": {
+            "duplicate": false,
+            "conflict": true,
+            "conflict_reasons": [
+              "ruins_with_active_amenity",
+              "end_date_passed_with_active_amenity"
+            ],
+            "generic_name": false,
+            "missing_name": true,
+            "cross_source_match": "not_computed",
+            "cross_source_sources_matched": null
+          }
+        },
+        "judge": {
+          "agent_name": "osm-confidence-scorer",
+          "kind": "deterministic",
+          "prompt_version": "p2-heuristic-0.2.0",
+          "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
+        },
+        "run": {
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
+          "attempt": 1,
+          "cost_basis": "no_model_call"
+        },
+        "context": {
+          "place_ref": "osm:node/2001",
+          "country_code": "NZ"
+        },
+        "judgment_kind": "status_assessment",
+        "facet": "status",
+        "outcome": "unknown",
+        "confidence": "low",
+        "basis_note": "standard confidence-standard/0.3.1; confidence low is provisional and uncalibrated (until calibration replaces it); outcome unknown; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
+      },
+      {
+        "schema_version": "agent-judgment.v1.1",
+        "subject": {
+          "kind": "place",
+          "ref": "osm:node/2001"
+        },
+        "score": {
+          "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
+          "composite": 0.0716,
+          "components": {
+            "identity": 0.42,
+            "location": 0.55,
+            "status": 0.31,
+            "denomination": 0.5
+          },
+          "tier": "escalate",
+          "tier_reasons": [
+            "composite_below_0.6",
+            "conflict",
+            "identity_below_0.7",
+            "location_below_0.7",
+            "status_below_0.7",
+            "denomination_below_0.7"
+          ],
+          "tier_pending": [],
+          "cut_points": {
+            "screened_min_composite": 0.9,
+            "review_min_composite": 0.6,
+            "component_floor": 0.7
+          },
+          "calibrated": false,
+          "signals_fired": {
+            "identity": [
+              "name_missing",
+              "religion_present"
+            ],
+            "location": [],
+            "status": [
+              "ruins",
+              "end_date_passed"
+            ],
+            "denomination": []
+          },
+          "signal_values": {
+            "tag_completeness.score": 0.857,
+            "tag_count": 9,
+            "has_name": false,
+            "has_religion": true,
+            "has_denomination": false,
+            "has_building": true,
+            "has_address": false,
+            "has_website_or_contact": false,
+            "has_opening_or_service_times": false,
+            "has_wikidata": false,
+            "has_start_date": false,
+            "has_check_date": true,
+            "has_operator": false,
+            "has_historic": false,
+            "has_heritage": false,
+            "has_tourism": false,
+            "footprint_area_m2": 412.5,
+            "building_worship_specific": true,
+            "building_generic": false,
+            "node_in_building": null,
+            "node_in_worship_building": null,
+            "node_containing_building": null,
+            "node_in_religious_landuse": null,
+            "lifecycle_neighbour_60m": false,
+            "days_since_last_edit": 941,
+            "years_as_pow": 14.5,
+            "n_versions": 4,
+            "n_contributors": 3,
+            "deleted_and_recreated": false,
+            "pow_created_in_bulk_or_import": false,
+            "name_lifecycle_word": false,
+            "name_old_prefix": false,
+            "own_lifecycle_tag": false,
+            "end_date_passed": true,
+            "ruins": true,
+            "nearest_pow_m": 220.4,
+            "n_pow_within_50m_same_or_unknown_religion": 0,
+            "n_pow_coincident_1m": 0,
+            "n_same_name_within_500m": 0,
+            "node_area_pair": false
+          },
+          "indicators": {
+            "duplicate": false,
+            "conflict": true,
+            "conflict_reasons": [
+              "ruins_with_active_amenity",
+              "end_date_passed_with_active_amenity"
+            ],
+            "generic_name": false,
+            "missing_name": true,
+            "cross_source_match": "not_computed",
+            "cross_source_sources_matched": null
+          }
+        },
+        "judge": {
+          "agent_name": "osm-confidence-scorer",
+          "kind": "deterministic",
+          "prompt_version": "p2-heuristic-0.2.0",
+          "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
+        },
+        "run": {
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
+          "attempt": 1,
+          "cost_basis": "no_model_call"
+        },
+        "context": {
+          "place_ref": "osm:node/2001",
+          "country_code": "NZ"
+        },
+        "judgment_kind": "location",
+        "facet": "location",
+        "outcome": "unclear",
+        "confidence": "low",
+        "basis_note": "standard confidence-standard/0.3.1; confidence low is provisional and uncalibrated (until calibration replaces it); outcome unclear; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
+      },
+      {
+        "schema_version": "agent-judgment.v1.1",
+        "subject": {
+          "kind": "place",
+          "ref": "osm:way/1004"
+        },
+        "score": {
+          "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
+          "composite": 0.6294,
+          "components": {
+            "identity": 0.72,
+            "location": 0.93,
+            "status": 0.94,
+            "denomination": 0.9
+          },
+          "tier": "review",
+          "tier_reasons": [
+            "composite_0.6_to_0.9",
+            "generic_name_cross_source_pending"
+          ],
+          "tier_pending": [
+            "cross_source_match"
+          ],
+          "cut_points": {
+            "screened_min_composite": 0.9,
+            "review_min_composite": 0.6,
+            "component_floor": 0.7
+          },
+          "calibrated": false,
+          "signals_fired": {
+            "identity": [
+              "name_generic",
+              "religion_present"
+            ],
+            "location": [
+              "area_medium"
+            ],
+            "status": [
+              "check_older"
+            ],
+            "denomination": [
+              "denomination_missing"
+            ]
+          },
+          "signal_values": {
+            "tag_completeness.score": 0.857,
+            "tag_count": 9,
+            "has_name": true,
+            "has_religion": true,
+            "has_denomination": true,
+            "has_building": true,
+            "has_address": false,
+            "has_website_or_contact": false,
+            "has_opening_or_service_times": false,
+            "has_wikidata": false,
+            "has_start_date": false,
+            "has_check_date": true,
+            "has_operator": false,
+            "has_historic": false,
+            "has_heritage": false,
+            "has_tourism": false,
+            "footprint_area_m2": 412.5,
+            "building_worship_specific": true,
+            "building_generic": false,
+            "node_in_building": null,
+            "node_in_worship_building": null,
+            "node_containing_building": null,
+            "node_in_religious_landuse": null,
+            "lifecycle_neighbour_60m": false,
+            "days_since_last_edit": 941,
+            "years_as_pow": 14.5,
+            "n_versions": 4,
+            "n_contributors": 3,
+            "deleted_and_recreated": false,
+            "pow_created_in_bulk_or_import": false,
+            "name_lifecycle_word": false,
+            "name_old_prefix": false,
+            "own_lifecycle_tag": false,
+            "end_date_passed": false,
+            "ruins": false,
+            "nearest_pow_m": 220.4,
+            "n_pow_within_50m_same_or_unknown_religion": 0,
+            "n_pow_coincident_1m": 0,
+            "n_same_name_within_500m": 0,
+            "node_area_pair": false
+          },
+          "indicators": {
+            "duplicate": false,
+            "conflict": false,
+            "conflict_reasons": [],
+            "generic_name": true,
+            "missing_name": false,
+            "cross_source_match": "not_computed",
+            "cross_source_sources_matched": null
+          }
+        },
+        "judge": {
+          "agent_name": "osm-confidence-scorer",
+          "kind": "deterministic",
+          "prompt_version": "p2-heuristic-0.2.0",
+          "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
+        },
+        "run": {
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
+          "attempt": 1,
+          "cost_basis": "no_model_call"
+        },
+        "context": {
+          "place_ref": "osm:way/1004",
+          "country_code": "NZ"
+        },
+        "judgment_kind": "registration_confidence",
+        "outcome": "review",
+        "confidence": "medium",
+        "basis_note": "standard confidence-standard/0.3.1; confidence medium is provisional and uncalibrated (until calibration replaces it); outcome review; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
+      },
+      {
+        "schema_version": "agent-judgment.v1.1",
+        "subject": {
+          "kind": "place",
+          "ref": "osm:way/1004"
+        },
+        "score": {
+          "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
+          "composite": 0.6294,
+          "components": {
+            "identity": 0.72,
+            "location": 0.93,
+            "status": 0.94,
+            "denomination": 0.9
+          },
+          "tier": "review",
+          "tier_reasons": [
+            "composite_0.6_to_0.9",
+            "generic_name_cross_source_pending"
+          ],
+          "tier_pending": [
+            "cross_source_match"
+          ],
+          "cut_points": {
+            "screened_min_composite": 0.9,
+            "review_min_composite": 0.6,
+            "component_floor": 0.7
+          },
+          "calibrated": false,
+          "signals_fired": {
+            "identity": [
+              "name_generic",
+              "religion_present"
+            ],
+            "location": [
+              "area_medium"
+            ],
+            "status": [
+              "check_older"
+            ],
+            "denomination": [
+              "denomination_missing"
+            ]
+          },
+          "signal_values": {
+            "tag_completeness.score": 0.857,
+            "tag_count": 9,
+            "has_name": true,
+            "has_religion": true,
+            "has_denomination": true,
+            "has_building": true,
+            "has_address": false,
+            "has_website_or_contact": false,
+            "has_opening_or_service_times": false,
+            "has_wikidata": false,
+            "has_start_date": false,
+            "has_check_date": true,
+            "has_operator": false,
+            "has_historic": false,
+            "has_heritage": false,
+            "has_tourism": false,
+            "footprint_area_m2": 412.5,
+            "building_worship_specific": true,
+            "building_generic": false,
+            "node_in_building": null,
+            "node_in_worship_building": null,
+            "node_containing_building": null,
+            "node_in_religious_landuse": null,
+            "lifecycle_neighbour_60m": false,
+            "days_since_last_edit": 941,
+            "years_as_pow": 14.5,
+            "n_versions": 4,
+            "n_contributors": 3,
+            "deleted_and_recreated": false,
+            "pow_created_in_bulk_or_import": false,
+            "name_lifecycle_word": false,
+            "name_old_prefix": false,
+            "own_lifecycle_tag": false,
+            "end_date_passed": false,
+            "ruins": false,
+            "nearest_pow_m": 220.4,
+            "n_pow_within_50m_same_or_unknown_religion": 0,
+            "n_pow_coincident_1m": 0,
+            "n_same_name_within_500m": 0,
+            "node_area_pair": false
+          },
+          "indicators": {
+            "duplicate": false,
+            "conflict": false,
+            "conflict_reasons": [],
+            "generic_name": true,
+            "missing_name": false,
+            "cross_source_match": "not_computed",
+            "cross_source_sources_matched": null
+          }
+        },
+        "judge": {
+          "agent_name": "osm-confidence-scorer",
+          "kind": "deterministic",
+          "prompt_version": "p2-heuristic-0.2.0",
+          "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
+        },
+        "run": {
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
+          "attempt": 1,
+          "cost_basis": "no_model_call"
+        },
+        "context": {
+          "place_ref": "osm:way/1004",
+          "country_code": "NZ"
+        },
+        "judgment_kind": "status_assessment",
+        "facet": "status",
+        "outcome": "likely_active",
+        "confidence": "high",
+        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (until calibration replaces it); outcome likely_active; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
+      },
+      {
+        "schema_version": "agent-judgment.v1.1",
+        "subject": {
+          "kind": "place",
+          "ref": "osm:way/1004"
+        },
+        "score": {
+          "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
+          "composite": 0.6294,
+          "components": {
+            "identity": 0.72,
+            "location": 0.93,
+            "status": 0.94,
+            "denomination": 0.9
+          },
+          "tier": "review",
+          "tier_reasons": [
+            "composite_0.6_to_0.9",
+            "generic_name_cross_source_pending"
+          ],
+          "tier_pending": [
+            "cross_source_match"
+          ],
+          "cut_points": {
+            "screened_min_composite": 0.9,
+            "review_min_composite": 0.6,
+            "component_floor": 0.7
+          },
+          "calibrated": false,
+          "signals_fired": {
+            "identity": [
+              "name_generic",
+              "religion_present"
+            ],
+            "location": [
+              "area_medium"
+            ],
+            "status": [
+              "check_older"
+            ],
+            "denomination": [
+              "denomination_missing"
+            ]
+          },
+          "signal_values": {
+            "tag_completeness.score": 0.857,
+            "tag_count": 9,
+            "has_name": true,
+            "has_religion": true,
+            "has_denomination": true,
+            "has_building": true,
+            "has_address": false,
+            "has_website_or_contact": false,
+            "has_opening_or_service_times": false,
+            "has_wikidata": false,
+            "has_start_date": false,
+            "has_check_date": true,
+            "has_operator": false,
+            "has_historic": false,
+            "has_heritage": false,
+            "has_tourism": false,
+            "footprint_area_m2": 412.5,
+            "building_worship_specific": true,
+            "building_generic": false,
+            "node_in_building": null,
+            "node_in_worship_building": null,
+            "node_containing_building": null,
+            "node_in_religious_landuse": null,
+            "lifecycle_neighbour_60m": false,
+            "days_since_last_edit": 941,
+            "years_as_pow": 14.5,
+            "n_versions": 4,
+            "n_contributors": 3,
+            "deleted_and_recreated": false,
+            "pow_created_in_bulk_or_import": false,
+            "name_lifecycle_word": false,
+            "name_old_prefix": false,
+            "own_lifecycle_tag": false,
+            "end_date_passed": false,
+            "ruins": false,
+            "nearest_pow_m": 220.4,
+            "n_pow_within_50m_same_or_unknown_religion": 0,
+            "n_pow_coincident_1m": 0,
+            "n_same_name_within_500m": 0,
+            "node_area_pair": false
+          },
+          "indicators": {
+            "duplicate": false,
+            "conflict": false,
+            "conflict_reasons": [],
+            "generic_name": true,
+            "missing_name": false,
+            "cross_source_match": "not_computed",
+            "cross_source_sources_matched": null
+          }
+        },
+        "judge": {
+          "agent_name": "osm-confidence-scorer",
+          "kind": "deterministic",
+          "prompt_version": "p2-heuristic-0.2.0",
+          "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
+        },
+        "run": {
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
+          "attempt": 1,
+          "cost_basis": "no_model_call"
+        },
+        "context": {
+          "place_ref": "osm:way/1004",
+          "country_code": "NZ"
+        },
+        "judgment_kind": "location",
+        "facet": "location",
+        "outcome": "plausible",
+        "confidence": "high",
+        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (until calibration replaces it); outcome plausible; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
+      }
+    ]
+  ],
+  "judgment_ids": [
+    "41be6a41d6d570ead0c32813000be55b43331e9804677e3f2124f4ecd38929e4",
+    "1e1c3913189f39501500e9b2b6c1aff5613c9d8c73b38994955a596edfc6c229",
+    "b767cd366ee660e25486661ccb6cd448157f9dc49cd143fb3b8439730e8fe146",
+    "62053245aaf6bf3c38139e00625b6d682273fe2ba1d15a3ed85257ca8de19036",
+    "66380a96d5563405f655808df59122fc4138e57786eba4f9d878f9b4ed0d4c3a",
+    "35e87894d4e0274fd86b1b2cab1bcaad95075ea58cf2aff6127cc511d07d31a7",
+    "7475d33e3864a407a26e606d47e43dd7c0a5643f8e83846c6ea929daa2868cd3",
+    "c7d5e73ba653c7af5a37b7fefebad1c67dcfe376a934caa573588675480432c5",
+    "4a5f7fd30a9d634ddae89fa19086e13cbe3fb06d365c91cf35d8d472f74fad88",
+    "d2690900022f90fca3191f0bad47142988c53efa8908d50c4059eee9367f626c",
+    "dc64172c452a7c1f36494d34c417ee62fd3369c9558ba99908623808fb13e0a8",
+    "604d609615b0b11649fda28980c08b3a5b066ec74c5ce1e88872553900dc766e",
+    "8767a63551fbe9ab17b5cbff360fec296431dbabb95e0c1efc2280926513c190"
+  ]
+}

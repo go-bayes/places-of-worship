@@ -273,6 +273,7 @@ Use pill or badge components for short machine states:
 - `.skip-badge`: skipped task.
 - `.closed-badge`: local tentative closure or completion cue.
 - `.ra-initials`: RA initials or session count.
+- `.confidence-panel .pill` (2026-10-01): the provisional tier of a recorded scorer judgment, `screened`, `review` or `escalate`, first in the pill row of the review portal's `Recorded confidence` panel, beside `AI-generated` and `Deterministic, uncalibrated`. Amber (`.pill.amber`) for `escalate` alone, the open-case colour; uncoloured (`.pill.grey`) otherwise; never green, because no tier accepts ([confidence standard](confidence-standard.md)). Each deterministic judgment also carries a `provisional` pill beside its categorical assessment. One muted line under the panel's pills says what the tier means; a further sentence explains scorer confidence once per panel. The numbers sit in a `.field-grid` beside their cut points, and no bar or percentage is drawn.
 
 Do not put long explanations inside status pills. Pair a short pill with nearby
 plain-language help text when the state needs explanation.

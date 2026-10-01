@@ -64,9 +64,10 @@
     // to null, and the caller writes nothing, so a slow response for an
     // earlier selection can never replace the displayed task's snapshot
     // (which would have sent that task's hash with a decision on this one).
-    // fetchRows(taskId) -> { drafts, historicalClaims, events, attachments };
-    // fetchSnapshot(taskId, evidenceDraftId) -> getReviewSnapshot result
-    async function loadSelection({ taskId, queueRow, isCurrent, fetchRows, fetchSnapshot }) {
+    // fetchRows(taskId) -> { drafts, historicalClaims, events, attachments,
+    // judgments }; fetchSnapshot(taskId, evidenceDraftId) -> getReviewSnapshot
+    // result. opted-in snapshots supply the displayed judgments and dispositions.
+    async function loadSelection({ taskId, queueRow, isCurrent, fetchRows, fetchSnapshot, fetchJudgments }) {
         const rows = await fetchRows(taskId);
         if (!isCurrent()) return null;
         const fetched = {
@@ -85,15 +86,31 @@
             }
             if (!isCurrent()) return null;
         }
+        // a present empty array is authoritative; only older deployments or
+        // missing snapshots need the separate place read.
+        let judgments = snapshot?.displayed_judgments;
+        if (!Array.isArray(judgments)) {
+            judgments = fetchJudgments ? await fetchJudgments(taskId) : rows?.judgments || [];
+            if (!isCurrent()) return null;
+        }
         return {
             content: contentFromSnapshot({ snapshot, queueRow, fetched }),
             snapshot,
             snapshotError,
             attachments: rows?.attachments || [],
+            judgments,
         };
     }
 
-    const api = { contentFromSnapshot, loadSelection };
+    // a disposition refresh may advance only the judgment part. any other
+    // changed evidence requires the full selection to be inspected again.
+    function canRefreshJudgments(previous, next) {
+        return Boolean(previous?.base_snapshot_hash && previous.base_snapshot_hash === next?.base_snapshot_hash
+            && Array.isArray(previous?.snapshot?.recorded_judgments) && Array.isArray(next?.snapshot?.recorded_judgments)
+            && Array.isArray(next?.displayed_judgments));
+    }
+
+    const api = { contentFromSnapshot, loadSelection, canRefreshJudgments };
     if (typeof window !== "undefined") window.PowReviewSnapshotContent = api;
     if (typeof module !== "undefined" && module.exports) module.exports = api;
 })();
