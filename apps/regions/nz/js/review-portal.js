@@ -1646,9 +1646,16 @@ function human(value) {
             }
             const token = state.selectionToken;
             const isCurrent = () => state.selectionToken === token && state.selected?.task?.task_id === task.task_id;
-            const buttons = block.querySelectorAll("button[data-disposition]");
             const label = window.PowConfidencePanel.dispositionLabel(disposition).toLowerCase();
-            buttons.forEach((entry) => { entry.disabled = true; });
+            // one write at a time: every disposition control in the panel,
+            // and the note being sent, stay off until the round trip ends,
+            // so no second press and no rebuild can overlap a write
+            const locked = Array.from(panel.querySelectorAll("button[data-disposition]"));
+            const lock = (on) => {
+                locked.forEach((entry) => { entry.disabled = on; });
+                if (noteField) noteField.disabled = on;
+            };
+            lock(true);
             say("Recording...");
             setTransport("saving");
             // the write and the re-read are reported apart: a write that
@@ -1668,12 +1675,13 @@ function human(value) {
                 const message = `Recorded: ${label}.`;
                 // a disposition changes no judgment row, so the list holds
                 // the same rows under the same lead and the disposed block
-                // is replaced alone; a different set (a scorer run ingested
-                // meanwhile, a row pushed past the read's cap) rebuilds the
-                // whole panel so its header never shows a lead the list
-                // has left behind
+                // is replaced alone, the other rows' controls coming back
+                // on; a different set (a scorer run ingested meanwhile, a
+                // row pushed past the read's cap) rebuilds the whole panel
+                // so its header never shows a lead the list has left behind
                 if (sameJudgmentSet(before, state.judgments)) {
                     rerenderJudgmentBlock(judgmentId, message);
+                    lock(false);
                 } else {
                     rerenderConfidencePanel(task, judgmentId, message);
                 }
@@ -1686,7 +1694,7 @@ function human(value) {
                     // so a second press cannot append a second row
                     say(`Recorded: ${label}. The list could not be refreshed (${error.message || "unknown error"}); select the task again to see it.`, "done");
                 } else {
-                    buttons.forEach((entry) => { entry.disabled = false; });
+                    lock(false);
                     say(error.message || "Could not record the disposition.", "broken");
                 }
             }
