@@ -8756,7 +8756,7 @@ class NzVerificationMap {
                 await this.refreshBackendTasks();
                 if (!alive()) return;
                 this.applyFilters();
-                this.exitPinMode();
+                this.exitPinMode({ afterSubmit: true });
                 const revisedProps = { task_id: revision.task_id, name: revision.name };
                 this.renderSubmissionRecordedDetail(revisedProps, {
                     deduped: Boolean(result.deduped),
@@ -8811,7 +8811,7 @@ class NzVerificationMap {
             await this.refreshBackendTasks();
             if (!alive()) return;
             this.applyFilters();
-            this.exitPinMode();
+            this.exitPinMode({ afterSubmit: true });
             const submittedProps = {
                 task_id: result.task_id,
                 name: candidate.name || "Unknown place of worship",
@@ -13490,12 +13490,15 @@ class NzVerificationMap {
         }
     }
 
-    exitPinMode() {
+    // afterSubmit: a receipt's own cleanup has already removed the device
+    // copy it sent; a newer pin saved since (another tab) is not this
+    // receipt's to drop
+    exitPinMode({ afterSubmit = false } = {}) {
         this.disarmHoldRelease?.();
         if (this.formDirtyTaskId === "rapid-pin" || this.formDirtyTaskId === "location-pin") {
             this.clearFormDirty();
         }
-        this.dropRapidPinFromDevice();
+        if (!afterSubmit) this.dropRapidPinFromDevice();
         this.paneSnap("rest");
         // a cancelled period placement returns to the pane with its cards
         const occupancyPin = this.occupancyPinContext;

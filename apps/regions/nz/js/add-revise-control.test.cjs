@@ -691,7 +691,7 @@ const dot = { type: "Feature", properties: { name: "St Mary's", osm_id: "1", osm
   app.pinMarker = marker;
   hold();
   const source = fs.readFileSync(path.join(__dirname, "verification-map.js"), "utf8");
-  assert.match(source, /exitPinMode\(\) \{\n\s*this\.disarmHoldRelease\?\.\(\);/);
+  assert.match(source, /exitPinMode\((?:\{ afterSubmit = false \} = \{\})?\) \{\n\s*this\.disarmHoldRelease\?\.\(\);/);
   app.disarmHoldRelease();
   assert.equal(listeners.length, 0);
   delete context.L;

@@ -263,8 +263,10 @@ async function signOutQuestion() {
   buttons["sign-out"].click();
   assert.equal(await first, true);
   first = realConfirmSignOut({});
-  keyListeners.at(-1)({ key: "Escape" });
+  const escape = { key: "Escape", stopped: false, prevented: false, preventDefault() { this.prevented = true; }, stopImmediatePropagation() { this.stopped = true; } };
+  keyListeners.at(-1)(escape);
   assert.equal(await first, false, "Escape cancels");
+  assert.equal(escape.stopped && escape.prevented, true, "the dialog consumes Escape, so the entry behind it is not cancelled too");
   document.createElement = realCreate;
   document.body.appendChild = realAppend;
   window.PowConvexTaskClient.confirmSignOut = answerYes;

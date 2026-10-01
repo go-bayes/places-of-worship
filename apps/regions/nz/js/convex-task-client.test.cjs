@@ -705,16 +705,26 @@ const container = () => ({
   }
 
   // 21b. a sign-out begun in another tab names the session in the shared
-  // marker; a late me() response admits nobody and recreates no device owner
+  // marker while this page's me() answer is out; the late answer admits
+  // nobody and recreates no device owner
   {
     const storage = new Map();
-    const responses = { "users:claimInvite": ok("user_1"), "users:me": ok(member) };
+    let releaseMe;
+    const meAnswer = new Promise((resolve) => { releaseMe = resolve; });
+    const responses = { "users:claimInvite": ok("user_1"), "users:me": () => meAnswer };
     const h = harness({ session: { id: "sess_late", email: "guy@example.org" }, cookie: "__client_uat=1", responses, storage });
     const client = new h.Client(config);
     const admitted = [];
+    const restoring = client.restoreSession().catch(() => null);
+    await tick();
+    const asked = h.calls.fetches.some((fetch) => fetch.body.path === "users:me");
+    assert.equal(asked, true, "the admission is in flight when the marker appears");
     storage.set("powSignOutPending:v1", "sess_late");
-    assert.equal(await client.completeSignIn({ onSignedIn: (user) => admitted.push(user._id) }), null);
+    releaseMe(ok(member));
+    await restoring;
+    await tick();
     assert.deepEqual(admitted, []);
+    assert.equal(client.user, null, "the late answer admits nobody");
     assert.equal(storage.has("powDeviceOwner1"), false, "no device owner is recreated");
   }
 

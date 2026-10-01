@@ -1151,7 +1151,13 @@
                 resolve(answer);
             };
             const onKey = (event) => {
-                if (event.key === "Escape") finish(false);
+                if (event.key !== "Escape") return;
+                // the dialog consumes Escape: the entry behind it (pin mode,
+                // quick photo) must not also treat it as its own cancel
+                event.preventDefault?.();
+                event.stopImmediatePropagation?.();
+                event.stopPropagation?.();
+                finish(false);
             };
             overlay.querySelector('[data-pow-confirm="cancel"]').addEventListener("click", () => finish(false));
             overlay.querySelector('[data-pow-confirm="sign-out"]').addEventListener("click", () => finish(true));

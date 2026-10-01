@@ -159,3 +159,22 @@ const fresh = (userId = "ra_1") => Object.assign(Object.create(window.NzVerifica
 }
 
 console.log("basemap swap order, device snapshots, and the kept pin ok");
+
+// 5. a receipt's leaving the pin flow keeps a newer pin saved since the send
+// (another tab of the same member), while a deliberate exit still drops it
+{
+  const app = fresh();
+  app.reviseContext = null;
+  app.occupancyPinContext = null;
+  app.pinConfirmed = { latitude: -17.74, longitude: 168.31, zoom: 18, locationMode: "building_identified" };
+  app.keepRapidPinOnDevice();
+  const version = app.rapidDraftVersion("rapid-pin");
+  app.pinConfirmed = { latitude: -17.75, longitude: 168.32, zoom: 18, locationMode: "building_identified" };
+  app.keepRapidPinOnDevice();
+  app.clearSubmittedRapidDraft("rapid-pin", version);
+  app.exitPinMode({ afterSubmit: true });
+  const kept = JSON.parse(localStorage.getItem("powRapidDraft2:NZ:rapid-pin"));
+  assert.equal(kept?.pin?.latitude, -17.75, "the receipt's exit keeps the newer pin");
+  app.exitPinMode();
+  assert.equal(JSON.parse(localStorage.getItem("powRapidDraft2:NZ:rapid-pin")).pin, undefined, "a deliberate exit drops it");
+}
