@@ -183,17 +183,38 @@ export function validateScorerJudgment(input: JudgmentInput): void {
   for (const term of score.tier_reasons) if (!SCORER_TIER_REASONS.includes(term)) throw new Error(`Tier reason ${term} is not in the scorer's vocabulary.`);
   for (const term of score.tier_pending) if (!SCORER_TIER_PENDING.includes(term)) throw new Error(`Pending condition ${term} is not in the scorer's vocabulary.`);
   for (const term of score.indicators.conflict_reasons) if (!SCORER_CONFLICT_REASONS.includes(term)) throw new Error(`Conflict reason ${term} is not in the scorer's vocabulary.`);
-  // the composite is the rounded product of three components, and the screened tier admits no reason, pending condition or flag
+  // the composite is the rounded product of three components
   const parts = score.components;
   if (Math.abs(score.composite - Math.round(parts.identity * parts.location * parts.status * 10000) / 10000) > 1.0001e-4) {
     throw new Error("A scorer composite is the product of the identity, location and status components, to four decimal places.");
   }
-  if (score.tier === "screened") {
-    if (score.tier_reasons.length > 0 || score.tier_pending.length > 0 || score.indicators.duplicate || score.indicators.conflict
-      || score.composite < score.cut_points.screened_min_composite) {
-      throw new Error("A screened tier needs a composite at the screened cut point, no tier reason or pending condition, and no duplicate or conflict indicator.");
-    }
+  // the tier, its reasons and its pending condition follow from the components, indicators and cut points
+  // (assign_tiers in the scorer). the sensitivity indicator is not carried in the score block, so a
+  // sensitivity reason is admitted as an escalate reason but cannot be checked against a flag.
+  const cut = score.cut_points;
+  const ind = score.indicators;
+  const expectedEscalate: string[] = [];
+  if (score.composite < cut.review_min_composite) expectedEscalate.push("composite_below_0.6");
+  if (ind.generic_name && ind.cross_source_match === "no_match") expectedEscalate.push("generic_name_no_cross_source_match");
+  const expectedReview: string[] = [];
+  if (score.composite < cut.screened_min_composite && score.composite >= cut.review_min_composite) expectedReview.push("composite_0.6_to_0.9");
+  if (ind.conflict) expectedReview.push("conflict");
+  if (ind.duplicate) expectedReview.push("duplicate");
+  if (parts.identity < cut.component_floor) expectedReview.push("identity_below_0.7");
+  if (parts.location < cut.component_floor) expectedReview.push("location_below_0.7");
+  if (parts.status < cut.component_floor) expectedReview.push("status_below_0.7");
+  if (parts.denomination < cut.component_floor) expectedReview.push("denomination_below_0.7");
+  const genericPending = ind.generic_name && ind.cross_source_match === "not_computed";
+  if (genericPending) expectedReview.push("generic_name_cross_source_pending");
+  const hasSensitivity = score.tier_reasons.includes("sensitivity");
+  const expectedReasons = [...expectedEscalate, ...(hasSensitivity ? ["sensitivity"] : []), ...expectedReview].sort();
+  const givenReasons = [...score.tier_reasons].sort();
+  const expectedTier = expectedEscalate.length > 0 || hasSensitivity ? "escalate" : expectedReview.length > 0 ? "review" : "screened";
+  if (givenReasons.length !== expectedReasons.length || givenReasons.some((term, index) => term !== expectedReasons[index])) {
+    throw new Error("A scorer judgment's tier reasons are those its components, indicators and cut points give.");
   }
+  if (score.tier_pending.length !== (genericPending ? 1 : 0)) throw new Error("A scorer judgment's pending condition is the undecided generic-name cross-source match, and only that.");
+  if (score.tier !== expectedTier) throw new Error(`A scorer judgment's tier is ${expectedTier} for its components, indicators and cut points.`);
   if (input.basis_note === undefined || input.basis_note === "") throw new Error("A scorer judgment carries a basis note.");
   if (!BASIS_ALPHABET.test(input.basis_note)) throw new Error("A scorer basis note uses only the closed character set.");
   // the generated text is built from validated fields only (hex digests, bounded numbers, closed vocabularies), so an exact

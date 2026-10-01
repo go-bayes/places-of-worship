@@ -76,7 +76,7 @@ test("score terms come from the scorer's closed vocabularies", () => {
   assert.throws(() => validateScorerJudgment(edit((sc) => { sc.tier_reasons.push("st.andrews"); })), /Tier reason/);
   assert.throws(() => validateScorerJudgment(edit((sc) => { sc.tier_pending.push("st.andrews"); })), /Pending condition/);
   assert.throws(() => validateScorerJudgment(edit((sc) => { sc.indicators.conflict_reasons.push("st.andrews"); })), /Conflict reason/);
-  assert.throws(() => validateScorerJudgment(edit((sc) => { sc.tier_reasons.push("duplicate"); })), /screened tier/);
+  assert.throws(() => validateScorerJudgment(edit((sc) => { sc.tier_reasons.push("duplicate"); })), /tier/);
 });
 
 test("the basis note is exactly the generated text", () => {
@@ -135,6 +135,10 @@ test("digit runs inside valid digests and scores do not trip the personal-detail
   low.score.composite = 0.0123;
   low.score.components = { ...low.score.components, identity: 0.3, location: 0.41, status: 0.1 };
   low.score.tier = "escalate";
+  low.score.tier_reasons = ["composite_below_0.6", "identity_below_0.7", "location_below_0.7", "status_below_0.7"];
+  low.score.tier_pending = [];
+  low.score.components.denomination = 0.9;
+  low.score.indicators = { ...low.score.indicators, duplicate: false, conflict: false, generic_name: false };
   low.outcome = "escalate";
   low.basis_note = scorerBasisNote(low);
   validateScorerJudgment(low);
@@ -149,5 +153,15 @@ test("composite and screened tier are consistent with their fields", () => {
   bad.score.components = { identity: 0.1, location: 0.1, status: 1, denomination: 0.1 };
   bad.score.indicators.duplicate = true;
   bad.outcome = "screened";
-  assert.throws(() => validateScorerJudgment(bad), /screened tier/);
+  assert.throws(() => validateScorerJudgment(bad), /tier/);
+});
+
+test("the tier, its reasons and its pending condition follow from the fields", () => {
+  const edit = (change) => { const row = clone(tier); change(row.score); row.outcome = row.score.tier; row.basis_note = scorerBasisNote(row); return row; };
+  const screened = (sc) => { Object.assign(sc, { tier: "screened", tier_reasons: [], tier_pending: [], composite: 0.95 }); sc.components = { identity: 1, location: 0.95, status: 1, denomination: 0.95 }; };
+  assert.throws(() => validateScorerJudgment(edit((sc) => { screened(sc); sc.components.denomination = 0.1; })), /tier/);
+  assert.throws(() => validateScorerJudgment(edit((sc) => { screened(sc); sc.indicators.generic_name = true; sc.indicators.cross_source_match = "no_match"; })), /tier/);
+  assert.throws(() => validateScorerJudgment(edit((sc) => { screened(sc); sc.indicators.generic_name = true; sc.indicators.cross_source_match = "not_computed"; })), /tier/);
+  assert.throws(() => validateScorerJudgment(edit((sc) => { Object.assign(sc, { tier: "review", tier_reasons: ["composite_0.6_to_0.9"], tier_pending: [], composite: 0.06 }); sc.components = { identity: 0.4, location: 0.5, status: 0.3, denomination: 1 }; })), /tier/);
+  assert.throws(() => validateScorerJudgment(edit((sc) => { Object.assign(sc, { tier: "review", tier_reasons: ["conflict"] }); })), /tier/);
 });
