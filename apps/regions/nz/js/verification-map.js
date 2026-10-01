@@ -8083,6 +8083,9 @@ class NzVerificationMap {
         const record = this.readRapidDraft(key);
         if (!record || !submissionId || !this.deviceWritable()) return;
         record.sent_submission_id = submissionId;
+        // the pin the id was sent with outlives a cancel that drops the
+        // resume pin, so a different pin confirmed later takes a fresh id
+        if (key === "rapid-pin" && record.pin) record.sent_pin = record.pin;
         try {
             window.localStorage.setItem(this.rapidDraftStorageKey(key), JSON.stringify(record));
         } catch (error) {
@@ -8115,7 +8118,8 @@ class NzVerificationMap {
         const pin = { ...this.pinConfirmed, linkedRefs: this.pinLinkedRefs || [] };
         // the candidate changed after a send: the id it was sent under
         // belongs to the earlier content, so the form takes a fresh one
-        if (record.pin && JSON.stringify(record.pin) !== JSON.stringify(pin)) {
+        const earlier = record.pin || record.sent_pin;
+        if (!earlier || JSON.stringify(earlier) !== JSON.stringify(pin)) {
             const form = document.getElementById("pinRapidCurrentForm");
             const current = form?.dataset?.submissionId;
             if (current && (form.dataset.sentSubmissionId === current || record.sent_submission_id === current) && window.PowRapidEntry?.secureSubmissionId) {

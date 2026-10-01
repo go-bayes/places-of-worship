@@ -178,3 +178,35 @@ console.log("basemap swap order, device snapshots, and the kept pin ok");
   app.exitPinMode();
   assert.equal(JSON.parse(localStorage.getItem("powRapidDraft2:NZ:rapid-pin")).pin, undefined, "a deliberate exit drops it");
 }
+
+// 6. a sent draft whose pin was dropped by Cancel takes a fresh submission id
+// when a different pin is confirmed, so the server cannot deduplicate the new
+// location into the earlier send (#153 round 16)
+{
+  const app = fresh();
+  app.reviseContext = null;
+  app.occupancyPinContext = null;
+  let counter = 0;
+  window.PowRapidEntry = { secureSubmissionId: () => `fresh-${++counter}` };
+  const form = { dataset: { submissionId: "sent-1" } };
+  const realGet = document.getElementById;
+  document.getElementById = (id) => (id === "pinRapidCurrentForm" ? form : null);
+  try {
+    app.pinConfirmed = { latitude: -17.74, longitude: 168.31, zoom: 18, locationMode: "building_identified" };
+    app.keepRapidPinOnDevice();
+    app.markRapidDraftSent("rapid-pin", "sent-1");
+    form.dataset.sentSubmissionId = "sent-1";
+    app.dropRapidPinFromDevice();
+    // the same pin again is the same content: the id stands
+    app.keepRapidPinOnDevice();
+    assert.equal(form.dataset.submissionId, "sent-1", "an unchanged pin reuses the sent id");
+    app.dropRapidPinFromDevice();
+    app.pinConfirmed = { latitude: -17.75, longitude: 168.32, zoom: 18, locationMode: "building_identified" };
+    app.keepRapidPinOnDevice();
+    assert.equal(form.dataset.submissionId, "fresh-1", "a different pin after Cancel takes a fresh id");
+    assert.equal(JSON.parse(localStorage.getItem("powRapidDraft2:NZ:rapid-pin")).submission_id, "fresh-1");
+  } finally {
+    document.getElementById = realGet;
+    delete window.PowRapidEntry;
+  }
+}
