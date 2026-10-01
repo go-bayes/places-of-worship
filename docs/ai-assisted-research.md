@@ -10,7 +10,7 @@ People take the decisions. Research assistants prepare evidence and close tasks,
 
 ## Model tiers
 
-The project lead assigned models to tiers on 2026-09-24 (adopted). The *reserved* tier, `gpt-6-astra`, Claude Fable 5.1 and Claude Opus 5.5, is for planning, design and security-sensitive judgment. The *intelligence* tier, `gpt-6-sol`, does pull-request review, implementation and repairs. The *bulk* tier, `gpt-6-luna`, handles cheap passes such as the confidence screen. Interface work uses Fable 5.1 or Opus 5.5 or a later release. For the confidence pipeline, the screen runs on the bulk tier and the judge on Fable 5.1, or on Claude Sonnet 5 where spend must be limited (adopted). The standing reader set for the research runner (adopted) is two cheap models from different model families, with a stronger model through the batch interface on disagreement and a named substitute; each is pinned by its plain model id, and the served endpoint is recorded in every dossier.
+The project lead assigned models to tiers on 2026-09-24 and revised the assignment on 2026-10-01 (adopted). The *reserved* tier, `gpt-6-astra`, Claude Fable 5.1 and Claude Opus 5.5, is for judgment in software design, planning and security-sensitive work. The *routine* tier, `gpt-6.1-sol` and Claude Sonnet 5.5, does pull-request review, research, implementation and repairs. Claude Opus 5.5 also does writing and orchestration. The *bulk* tier, `gpt-6-luna`, handles cheap passes such as the confidence screen. Interface design goes to Fable 5.1 or Opus 5.5, followed by the standard review. For the confidence pipeline, the screen runs on the bulk tier and the judge on Fable 5.1, or on Claude Sonnet 5 where spend must be limited (adopted). The standing reader set for the research runner (adopted) is two cheap models from different model families, with a stronger model through the batch interface on disagreement and a named substitute; each is pinned by its plain model id, and the served endpoint is recorded in every dossier.
 
 ## Audit-trail guarantees
 
@@ -28,7 +28,7 @@ Two further gates apply before any content reaches a model provider. Content und
 
 ## Review gates
 
-Code and documents merge only after review (adopted 2026-09-24). The merge review runs on `gpt-6-sol` at reasoning effort medium or above; a design brief, a security- or privacy-sensitive change, or a finding that the review and the author dispute needs, in addition, a review by a reserved model, and both must clear. Continuous integration must pass on the final head, every review thread must be answered, and every pull-request body, review and comment an agent writes ends with the model's name and version so that a reader of the thread later knows which model produced it. An agent takes its own pull request to closure, including any backend deployment, under written authority given per pull request.
+Code and documents merge only after review (adopted 2026-09-24). The merge review runs on `gpt-6.1-sol` or Claude Sonnet 5.5 at reasoning effort medium or above; a design brief, a security- or privacy-sensitive change, or a finding that the review and the author dispute needs, in addition, a review by a reserved model, and both must clear. Continuous integration must pass on the final head, every review thread must be answered, and every pull-request body, review and comment an agent writes ends with the model's name and version so that a reader of the thread later knows which model produced it. An agent takes its own pull request to closure, including any backend deployment, under written authority given per pull request.
 
 Data pass three human gates. A reviewer disposes of each model judgment as agreed, disagreed, corrected or not considered. A reviewer's decision binds to the evidence as reviewed, byte for byte, and retired evidence stays restorable, subject to the privacy exception above: evidence restricted for a withheld personal detail is recoverable only through audited recovery, and a decision that rested on it returns to review. The principal investigator accepts a batch for release, and export batches are recorded byte for byte under a hash. Nothing a model wrote reaches a public product without passing all three.
 
@@ -47,7 +47,7 @@ Joseph Watts (Joseph W), who leads the project's Christchurch validation study, 
 | Item | Status |
 | --- | --- |
 | Models recommend, people decide; no model output changes a task, draft or decision | standing rule |
-| Model tiers (reserved, intelligence, bulk; interface work on Fable 5.1 or Opus 5.5) | adopted 2026-09-24 |
+| Model tiers (reserved, routine, bulk; interface design on Fable 5.1 or Opus 5.5) | adopted 2026-09-24, revised 2026-10-01 |
 | Source allowlist refusal, reported model id, per-model cost | adopted 2026-09-24, built |
 | Content-addressed receipts and hash-identified judgments | built 2026-09-19 and 2026-09-24 |
 | Measurement run before any build; canary set | adopted 2026-09-24 |
