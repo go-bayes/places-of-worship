@@ -4647,14 +4647,16 @@ class NzVerificationMap {
             locationAssertion,
         };
         const zoom = Number.isFinite(this.map?.getZoom?.()) ? this.map.getZoom() : POSITION_ZOOM;
+        const observation = window.PowRapidEntry.observationPayload(values, flagOptions);
+        const submissionId = this.submissionIdForContent(capture, { countryCode: entryCountry.code, candidate, observation });
         if (send) send.disabled = true;
         if (status) status.textContent = "Sending securely for review...";
         try {
             const result = await this.backend.submitCurrentObservation({
-                clientSubmissionId: capture.submissionId,
+                clientSubmissionId: submissionId,
                 countryCode: entryCountry.code,
                 candidate,
-                observation: window.PowRapidEntry.observationPayload(values, flagOptions),
+                observation,
                 flagForDiscussion: true,
                 clientContext: {
                     placement_zoom: zoom,
@@ -8022,6 +8024,20 @@ class NzVerificationMap {
 
     // ---- unsubmitted rapid drafts, kept on this device only ----
 
+    // compare live content before each send, including changes made without
+    // an input event. retries of unchanged content retain their id; device
+    // storage has no part in deciding which content an id belongs to
+    submissionIdForContent(state, content) {
+        const fingerprint = JSON.stringify(content);
+        if (state.submissionId && state.sentSubmissionId === state.submissionId
+            && typeof state.sentFingerprint === "string" && state.sentFingerprint !== fingerprint) {
+            state.submissionId = window.PowRapidEntry.secureSubmissionId();
+        }
+        state.sentSubmissionId = state.submissionId || "";
+        state.sentFingerprint = fingerprint;
+        return state.submissionId;
+    }
+
     rapidDraftStorageKey(key) {
         return this.deviceWritable() ? `${RAPID_DRAFT_PREFIX}${COUNTRY_CONFIG.countryCode}:${key}` : "";
     }
@@ -8080,10 +8096,11 @@ class NzVerificationMap {
     // the draft's current content was sent under this id: kept on the
     // record without changing its version, so an unedited retry reuses the
     // id and any edit after it mints a new one (persistRapidDraft)
-    markRapidDraftSent(key, submissionId) {
+    markRapidDraftSent(key, submissionId, fingerprint) {
         const record = this.readRapidDraft(key);
         if (!record || !submissionId || !this.deviceWritable()) return;
         record.sent_submission_id = submissionId;
+        if (typeof fingerprint === "string") record.sent_fingerprint = fingerprint;
         // the pin the id was sent with outlives a cancel that drops the
         // resume pin, so a different pin confirmed later takes a fresh id
         if (key === "rapid-pin" && record.pin) record.sent_pin = record.pin;
@@ -8111,23 +8128,27 @@ class NzVerificationMap {
     // 2026-09-05); a revision or a period's location has its own record
     keepRapidPinOnDevice() {
         if (!RAPID_NOMINATION_ENTRY || this.reviseContext || this.occupancyPinContext || !this.pinConfirmed) return;
-        if (!this.deviceWritable()) return;
         const record = this.readRapidDraft("rapid-pin") || {};
-        // a pin change is a new version of the device copy, so a receipt for
-        // an earlier send cannot delete it (#153 round 13)
-        record.saved_at = nextSavedAt();
         const pin = { ...this.pinConfirmed, linkedRefs: this.pinLinkedRefs || [] };
+        const form = document.getElementById("pinRapidCurrentForm");
+        const fingerprint = JSON.stringify(pin);
         // the candidate changed after a send: the id it was sent under
-        // belongs to the earlier content, so the form takes a fresh one
+        // belongs to the earlier content, so the form takes a fresh one.
+        // the live pin comparison also works when storage is blocked
         const earlier = record.pin || record.sent_pin;
-        if (!earlier || JSON.stringify(earlier) !== JSON.stringify(pin)) {
-            const form = document.getElementById("pinRapidCurrentForm");
+        const previousFingerprint = form?.dataset?.pinFingerprint || (earlier ? JSON.stringify(earlier) : "");
+        if (previousFingerprint !== fingerprint) {
             const current = form?.dataset?.submissionId;
             if (current && (form.dataset.sentSubmissionId === current || record.sent_submission_id === current) && window.PowRapidEntry?.secureSubmissionId) {
                 form.dataset.submissionId = window.PowRapidEntry.secureSubmissionId();
-                record.submission_id = form.dataset.submissionId;
             }
         }
+        if (form?.dataset) form.dataset.pinFingerprint = fingerprint;
+        if (!this.deviceWritable()) return;
+        // a pin change is a new version of the device copy, so a receipt for
+        // an earlier send cannot delete it (#153 round 13)
+        record.saved_at = nextSavedAt();
+        if (form?.dataset?.submissionId) record.submission_id = form.dataset.submissionId;
         record.pin = pin;
         try {
             window.localStorage.setItem(this.rapidDraftStorageKey("rapid-pin"), JSON.stringify(record));
@@ -8219,6 +8240,7 @@ class NzVerificationMap {
             // id and is kept at once (#153 round 11)
             if (typeof record.sent_submission_id === "string" && record.sent_submission_id === record.submission_id) {
                 restoredForm.dataset.sentSubmissionId = record.sent_submission_id;
+                if (typeof record.sent_fingerprint === "string") restoredForm.dataset.sentFingerprint = record.sent_fingerprint;
             }
         }
         const setValue = (id, value) => {
@@ -8459,6 +8481,9 @@ class NzVerificationMap {
                         if (idEl) idEl.value = rowEl.dataset.sourceId;
                         hideList();
                         this.updateSourceLocatorField(prefix);
+                        // register picks assign values directly; use the same
+                        // edit path as typing so a sent id rotates at once
+                        reference?.dispatchEvent(new Event("input", { bubbles: true }));
                     });
                 });
             }, 300);
@@ -8675,11 +8700,27 @@ class NzVerificationMap {
         // the id travels with the values captured above: an edit during a
         // prerequisite request may mint a new id on the form for the edit,
         // and must not change the id this submission is sent under
-        const sentSubmissionId = form.dataset.submissionId;
+        const sentSubmissionId = this.submissionIdForContent(form.dataset, {
+            countryCode: this.entryCountry().code,
+            taskId: options.props?.task_id,
+            candidate,
+            values,
+            ...(prefix === "pin" ? {
+                pin: this.pinConfirmed,
+                linkedRefs: this.pinLinkedRefs || [],
+                revision: this.reviseContext || null,
+                name: document.getElementById("pinNameInput")?.value || "",
+                address: document.getElementById("pinAddressInput")?.value || "",
+                locality: document.getElementById("pinLocalityInput")?.value || "",
+                issueType: document.getElementById("pinIssueType")?.value || "",
+            } : {}),
+        });
+        if (prefix === "pin" && this.pinConfirmed) {
+            form.dataset.pinFingerprint = JSON.stringify({ ...this.pinConfirmed, linkedRefs: this.pinLinkedRefs || [] });
+        }
         const draftVersion = options.draftKey ? this.rapidDraftVersion(options.draftKey) : null;
         const snapshotVersion = options.props?.task_id ? this.formSnapshotVersion(options.props.task_id) : null;
-        if (options.draftKey) this.markRapidDraftSent(options.draftKey, sentSubmissionId);
-        form.dataset.sentSubmissionId = sentSubmissionId || "";
+        if (options.draftKey) this.markRapidDraftSent(options.draftKey, sentSubmissionId, form.dataset.sentFingerprint);
         submitButton.disabled = true;
         if (status) status.textContent = values.flagForDiscussion ? "Flagging securely for discussion..." : "Submitting securely for review...";
         // the form's chosen files travel to the confirmation screen, where
@@ -9054,14 +9095,18 @@ class NzVerificationMap {
             if (status) status.textContent = inputError;
             return;
         }
+        const claim = window.PowHistoricalClaim.historicalClaimPayload(values);
+        const submissionId = this.submissionIdForContent(form.dataset, {
+            taskId: context.taskId, parentEvidenceDraftId: context.parentEvidenceDraftId, claim,
+        });
         submitButton.disabled = true;
         if (status) status.textContent = "Recording this historical claim for review...";
         try {
             const result = await this.backend.submitHistoricalClaim({
-                clientSubmissionId: form.dataset.submissionId,
+                clientSubmissionId: submissionId,
                 taskId: context.taskId,
                 parentEvidenceDraftId: context.parentEvidenceDraftId,
-                claim: window.PowHistoricalClaim.historicalClaimPayload(values),
+                claim,
                 clientContext: {
                     portal_version: "historical-claim-v1",
                 },

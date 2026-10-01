@@ -39,6 +39,7 @@ jobs:
         run: |
           node apps/regions/nz/js/convex-task-client.test.cjs
           node apps/regions/nz/js/session-end-dom.test.cjs
+          node apps/regions/nz/js/rapid-submission-storage-dom.test.cjs
           node apps/regions/nz/js/basemap-and-drafts.test.cjs
           node apps/regions/nz/js/claude-review-panel.test.cjs
           node apps/regions/nz/js/confidence-panel.test.cjs
