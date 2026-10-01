@@ -54,14 +54,14 @@ const window = {
   matchMedia: () => ({ matches: false }),
   isSecureContext: true,
   confirm: () => confirmAnswer,
-  crypto: { subtle: require("node:crypto").webcrypto.subtle, getRandomValues: (bytes) => bytes.fill(7), randomUUID: () => "11111111-2222-4333-8444-555555555555" },
+  crypto: { getRandomValues: (bytes) => bytes.fill(7), randomUUID: () => "11111111-2222-4333-8444-555555555555" },
   URL: { createObjectURL: () => "blob:photo", revokeObjectURL() {} },
 };
 const navigator = { geolocation: { getCurrentPosition() {} } };
 // leaflet's latLng is only used for the nearby check here
 // leaflet's latLng, with a flat-earth distance good enough for the nearby check
 const L = { latLng: (lat, lng) => ({ lat, lng, distanceTo(other) { const dy = (other.lat - lat) * 111320; const dx = (other.lng - lng) * 111320 * Math.cos(lat * Math.PI / 180); return Math.sqrt(dx * dx + dy * dy); } }) };
-const context = vm.createContext({ TextEncoder,
+const context = vm.createContext({
   window, document, localStorage, sessionStorage: localStorage, navigator, L,
   URLSearchParams, Map, Set, Date, Number, String, Boolean, Object, Array, Math, JSON, RegExp, Intl, console, setTimeout, clearTimeout, Promise, Error, Uint8Array,
 });

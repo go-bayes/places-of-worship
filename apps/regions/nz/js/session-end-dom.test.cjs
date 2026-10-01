@@ -313,7 +313,7 @@ async function signOutQuestion() {
   window.PowConvexTaskClient.adoptDeviceFor("user_b", "sess_a");
   asB.setFormSnapshot("task_b", { evidence_note: "b's" });
   assert.equal(app.getFormSnapshot("task_b"), undefined, "a's page reads nothing of b's");
-  app.deleteSubmittedFormSnapshot("task_b", { savedAt: JSON.parse(values.get("powFormSnapshot2:NZ:task_b")).saved_at });
+  app.deleteFormSnapshot("task_b");
   app.clearRapidDraft("task_b");
   assert.ok(values.has("powFormSnapshot2:NZ:task_b"), "nor deletes it");
   // the same member signed out and in again elsewhere: the old session's page writes nothing
@@ -380,7 +380,7 @@ async function lateResponses() {
 
 // 3b. round 3: every signed-in async path checks its session after each
 // await; the task-history cache is per user and cleared at session end; a
-// late submission deletes only the exact record it sent
+// late submission writes nothing to the device
 async function roundThree() {
   const deferred = () => { let resolve; const promise = new Promise((r) => { resolve = r; }); return { promise, resolve }; };
   const bodies = new Map();
@@ -466,59 +466,7 @@ async function roundThree() {
     assert.equal(rendered, 0, "and none opens while signed out");
   }
 
-  // a recorded submission deletes only the exact draft it sent: the member's
-  // own later edit is kept
-  {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    app.backend.user = { _id: "user_a" };
-    values.set("powRapidDraft2:NZ:rapid-pin", JSON.stringify({ saved_at: 100, values: { directObservation: "a's sent text" } }));
-    const sent = app.rapidDraftVersion("rapid-pin");
-    assert.deepEqual({ ...sent }, { savedAt: 100 });
-    // a newer edit of the same key is not the sent version
-    values.set("powRapidDraft2:NZ:rapid-pin", JSON.stringify({ saved_at: 300, values: { directObservation: "a typed more" } }));
-    app.clearSubmittedRapidDraft("rapid-pin", sent);
-    assert.ok(values.has("powRapidDraft2:NZ:rapid-pin"), "a later edit stays");
-    values.set("powRapidDraft2:NZ:rapid-pin", JSON.stringify({ saved_at: 100, values: {} }));
-    app.clearSubmittedRapidDraft("rapid-pin", sent);
-    assert.equal(values.has("powRapidDraft2:NZ:rapid-pin"), false, "the sent version goes, so it is never sent twice");
-    // the same for a guided form snapshot
-    values.set("powFormSnapshot2:NZ:task_1", JSON.stringify({ saved_at: 400, snapshot: {} }));
-    const snap = app.formSnapshotVersion("task_1");
-    values.set("powFormSnapshot2:NZ:task_1", JSON.stringify({ saved_at: 500, snapshot: {} }));
-    app.deleteSubmittedFormSnapshot("task_1", snap);
-    assert.ok(values.has("powFormSnapshot2:NZ:task_1"), "a later snapshot stays");
-    values.set("powFormSnapshot2:NZ:task_1", JSON.stringify({ saved_at: 400, snapshot: {} }));
-    app.deleteSubmittedFormSnapshot("task_1", snap);
-    assert.equal(values.has("powFormSnapshot2:NZ:task_1"), false);
-  }
-
-  // guided periods: a recorded submission deletes the periods only if the
-  // device copy is still the version it sent (round 4)
-  {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    app.backend.user = { _id: "user_a" };
-    const key = window.PowOccupancy.guidedPeriodsStoragePrefix("NZ", "user_a") + "task_p";
-    values.set(key, JSON.stringify({ saved_at: 100, segments: [{ start: "1990" }] }));
-    app.guidedPeriodsByTaskId.set("task_p", { segments: [{ start: "1990" }] });
-    const sent = { ...app.guidedPeriodsVersion("task_p"), epoch: app.sessionEpoch || 0 };
-    assert.equal(sent.savedAt, 100);
-    // the member edits the periods while the submission is in flight
-    values.set(key, JSON.stringify({ saved_at: 200, segments: [{ start: "1991" }] }));
-    app.guidedPeriodsByTaskId.set("task_p", { segments: [{ start: "1991" }] });
-    app.clearSubmittedGuidedPeriods("task_p", sent);
-    assert.equal(JSON.parse(values.get(key)).saved_at, 200, "the newer device copy stays");
-    assert.ok(app.guidedPeriodsByTaskId.has("task_p"), "and so does the new working copy");
-    // the sent version itself goes, and the working copy with it
-    values.set(key, JSON.stringify({ saved_at: 300, segments: [{ start: "1992" }] }));
-    const mine = { ...app.guidedPeriodsVersion("task_p"), epoch: app.sessionEpoch || 0 };
-    app.clearSubmittedGuidedPeriods("task_p", mine);
-    assert.equal(values.has(key), false);
-    assert.equal(app.guidedPeriodsByTaskId.has("task_p"), false);
-  }
-
-  // the rapid path: recordRapidPeriods deletes by the plan's version
+  // a periods receipt from an ended session writes nothing to the device
   {
     values.clear();
     const { app } = signedInApp("user_a");
@@ -526,7 +474,7 @@ async function roundThree() {
     window.PowOccupancy.payload = window.PowOccupancy.payload || ((x) => x);
     const key = window.PowOccupancy.guidedPeriodsStoragePrefix("NZ", "user_a") + "rapid-pin-periods";
     values.set(key, JSON.stringify({ saved_at: 10, segments: [{}] }));
-    const plan = { version: { ...app.guidedPeriodsVersion("rapid-pin-periods"), epoch: app.sessionEpoch || 0 }, submissionId: "s", segments: [{}], count: 1, state: { segments: [{}] } };
+    const plan = { submissionId: "s", segments: [{}], count: 1, state: { segments: [{}] } };
     const pending = deferred();
     app.backend.submitOccupancies = () => pending.promise;
     const recording = app.recordRapidPeriods(plan, { task_id: "t", evidence_draft_id: "d" }, "rapid-pin-periods");
@@ -858,7 +806,7 @@ async function roundThree() {
   // submission. a submits a nomination, clerk replaces a with b, and the
   // server's success arrives afterwards. the receipt may have recorded on
   // the server but writes nothing to the device; b's page is untouched, and
-  // a draft's submission id survives a reload
+  // late device writes are refused
   {
     if (!window.PowConvexTaskClient) {
       Object.assign(context, { URL, atob: (value) => Buffer.from(value, "base64").toString("binary") });
@@ -928,21 +876,6 @@ async function roundThree() {
     assert.equal(app.manualTasksById.size, 0, "a's task is not added to b's page");
     assert.equal(sent.filter((request) => request.path === "rapidEntry:submitCurrentObservation").length, 1);
 
-    // restore fills values only; the send helper reads persisted metadata.
-    const keptSend = JSON.parse(values.get(draftKey)).last_send;
-    app.backendUser = { _id: "user_a" };
-    client.user = app.backendUser;
-    window.PowConvexTaskClient.adoptDeviceFor("user_a", client.sessionId);
-    const typedForm = { dataset: {} };
-    document.getElementById = id => id === "pinRapidCurrentForm" ? typedForm : null;
-    app.rapidObservationValues = () => ({ directObservation: "typed, unsent" });
-    app.persistRapidDraft("pin", "rapid-pin");
-    assert.deepEqual(JSON.parse(values.get(draftKey)).last_send, keptSend);
-    document.querySelector = () => null;
-    for (const name of ["updateRapidSourceFields", "updateRapidDiscussionFields", "updateRapidUncertaintyField", "updateSourceLocatorField"]) app[name] = () => {};
-    app.restoreRapidDraft("pin", "rapid-pin");
-    assert.equal(typedForm.dataset.submissionId, undefined);
-
     document.getElementById = getElementById;
     context.fetch = previousFetch;
   }
@@ -975,109 +908,7 @@ async function roundThree() {
   const previousFetchR6 = context.fetch;
   const getElementByIdR6 = document.getElementById;
 
-  // blocked device storage still permits a fresh sign-in. after a recorded
-  // send loses its response, an unedited retry deduplicates; an edit to an
-  // extra field or the observation must instead record the corrected content
-  for (const editedId of ["pinNameInput", "pinAddressInput", "pinLocalityInput", "pinDirectObservation"]) {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    const listeners = {};
-    const form = {
-      dataset: { submissionId: "sub_original" },
-      isConnected: true,
-      addEventListener(type, fn) { (listeners[type] = listeners[type] || []).push(fn); },
-      querySelectorAll: () => [],
-    };
-    const fields = Object.fromEntries([
-      ["pinNameInput", "Original hall"], ["pinAddressInput", "1 Original Street"],
-      ["pinLocalityInput", "Original locality"], ["pinDirectObservation", "Original observation"],
-    ].map(([id, value]) => [id, {
-      value,
-      listeners: {},
-      addEventListener(type, fn) { (this.listeners[type] = this.listeners[type] || []).push(fn); },
-    }]));
-    const button = { disabled: false };
-    document.getElementById = (id) => ({ pinRapidCurrentForm: form, pinRapidSubmit: button, ...fields }[id] || null);
-    document.querySelector = () => null;
-    window.PowRapidEntry = {
-      localIsoDate: () => "2026-10-02", validateObservationDetailed: () => null,
-      observationPayload: (x) => x, secureSubmissionId: (() => { let n = 0; return () => ++n === 1 ? "sub_original" : "sub_corrected"; })(),
-    };
-    for (const name of ["updateRapidSourceFields", "updateRapidDiscussionFields", "updateRapidUncertaintyField", "updateSourceLocatorField", "bindSourceTypeahead", "renderRapidSourceLinks", "syncInlineEvidenceFiles", "showRapidFieldError", "focusDetailPanel", "applyFilters", "markFormDirty", "clearFormDirty", "exitPinMode"]) app[name] = () => {};
-    let recordedTask;
-    Object.assign(app, {
-      rapidObservationValues: () => ({ directObservation: fields.pinDirectObservation.value, flagForDiscussion: false }),
-      rapidPeriodsPlan: () => null,
-      pendingEvidenceFiles: () => null,
-      entryCountry: () => ({ code: "NZ", config: { targetYears: [2026] } }),
-      entryCountryNoteText: () => "",
-      manualTasksById: new Map(),
-      refreshBackendTasks: async () => {},
-      renderSubmissionRecordedDetail: (props) => { recordedTask = props.task_id; },
-    });
-    const records = new Map();
-    let requests = 0;
-    const { sent } = realClientFor(app, {
-      "rapidEntry:submitCurrentObservation": (args) => {
-        const earlier = records.get(args.clientSubmissionId);
-        if (!earlier) records.set(args.clientSubmissionId, {
-          args,
-          receipt: { task_id: `t_${records.size + 1}`, evidence_draft_id: `d_${records.size + 1}`, task_status: "needs_review" },
-        });
-        // the first send and its unchanged retry both lose their response
-        if (++requests <= 2) throw new Error("Response lost after server recording");
-        return { ...records.get(args.clientSubmissionId).receipt, deduped: Boolean(earlier) };
-      },
-    });
-    const originalStorage = window.localStorage;
-    let storageWrites = 0;
-    window.localStorage = {
-      getItem() { throw new Error("Device storage blocked"); },
-      setItem() { storageWrites += 1; throw new Error("Device storage blocked"); },
-      removeItem() { storageWrites += 1; throw new Error("Device storage blocked"); },
-    };
-    try {
-      assert.equal(app.deviceWritable(), false, "the real device-owner guard refuses blocked storage");
-      const options = {
-        draftExtraIds: ["pinNameInput", "pinAddressInput", "pinLocalityInput"],
-        getCandidate: () => ({
-          name: fields.pinNameInput.value, address: fields.pinAddressInput.value,
-          locality: fields.pinLocalityInput.value, latitude: -41.29, longitude: 174.78,
-        }),
-      };
-      app.bindRapidObservationForm("pin", options);
-      const submit = () => app.submitRapidObservation("pin", { ...options, draftKey: "rapid-pin" });
-      await submit();
-      assert.equal(form.lastSend.submission_id, "sub_original");
-      assert.equal(button.disabled, false, "the lost response leaves the form available for a retry");
-      await submit();
-      assert.equal(sent[1].args.clientSubmissionId, "sub_original", "an unedited retry reuses the sent id");
-      assert.equal(records.size, 1, "the server deduplicates the unedited retry");
-      for (const fn of listeners.input) fn({ target: fields.pinDirectObservation });
-      assert.equal(form.lastSend.submission_id, "sub_original", "listeners leave the send record alone");
-      fields[editedId].value = "Corrected content";
-      const editListeners = editedId === "pinDirectObservation" ? listeners.input : fields[editedId].listeners.input;
-      for (const fn of editListeners) fn({ target: fields[editedId] });
-      assert.equal(form.lastSend.submission_id, "sub_original", `${editedId} waits for send-time comparison`);
-      await submit();
-      assert.equal(sent[2].args.clientSubmissionId, "sub_corrected", "the edited retry sends a new id");
-      assert.equal(records.size, 2, "the correction is recorded separately from the earlier content");
-      const corrected = records.get("sub_corrected").args;
-      assert.equal(corrected.candidate.name, fields.pinNameInput.value);
-      assert.equal(corrected.candidate.address, fields.pinAddressInput.value);
-      assert.equal(corrected.candidate.locality, fields.pinLocalityInput.value);
-      assert.equal(corrected.observation.directObservation, fields.pinDirectObservation.value);
-      assert.equal(recordedTask, "t_2", "the page shows the correction's receipt");
-      assert.equal(storageWrites, 0, "device writes remain behind the session-owner guard");
-    } finally {
-      window.localStorage = originalStorage;
-      document.getElementById = getElementByIdR6;
-    }
-  }
-
-  // a guided save recorded in the same session removes the exact device
-  // snapshot it carried and keeps a newer one; one recorded after the
-  // session changed writes nothing to the device
+  // a guided save recorded after the session changed writes nothing to the device
   {
     values.clear();
     const stubs = (app) => Object.assign(app, {
@@ -1106,49 +937,6 @@ async function roundThree() {
     await saving;
     assert.equal(values.get(snapshotKey), before, "a late receipt from the ended session writes nothing to the device");
 
-    // same session: the sent version goes
-    values.clear();
-    const { app: same } = signedInApp("user_a");
-    values.set(snapshotKey, JSON.stringify({ saved_at: 300, snapshot: { evidence_note: "v1" } }));
-    const savedSame = later();
-    realClientFor(same, { "evidence:saveEvidenceDraft": () => savedSame.promise });
-    stubs(same);
-    same.backendTasksById.set("task_1", { task_id: "task_1" });
-    const savingSame = same.saveEvidenceToBackend({ task_id: "task_1" });
-    await new Promise((r) => setTimeout(r, 0));
-    savedSame.resolve({ evidence_draft_id: "d_saved" });
-    await savingSame;
-    assert.equal(values.has(snapshotKey), false, "the saved snapshot goes, so it never reappears over the saved draft");
-
-    // a snapshot edited after the save began is newer, and is kept
-    const { app: again } = signedInApp("user_a");
-    values.set(snapshotKey, JSON.stringify({ saved_at: 333, snapshot: { evidence_note: "v1" } }));
-    const saved2 = later();
-    realClientFor(again, { "evidence:saveEvidenceDraft": () => saved2.promise });
-    stubs(again);
-    again.backendTasksById.set("task_1", { task_id: "task_1" });
-    const saving2 = again.saveEvidenceToBackend({ task_id: "task_1" });
-    await new Promise((r) => setTimeout(r, 0));
-    values.set(snapshotKey, JSON.stringify({ saved_at: 444, snapshot: { evidence_note: "v2, typed after" } }));
-    saved2.resolve({ evidence_draft_id: "d_saved" });
-    await saving2;
-    assert.equal(JSON.parse(values.get(snapshotKey)).saved_at, 444, "the newer snapshot stays");
-  }
-
-  // autosave retains the last send metadata while versioning every edit.
-  {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    const draftKey = "powRapidDraft2:NZ:rapid-pin";
-    values.set(draftKey, JSON.stringify({ saved_at: 1, last_send: { submission_id: "sent", payload_digest: "digest" } }));
-    app.rapidObservationValues = () => ({ directObservation: "v1" });
-    app.persistRapidDraft("pin", "rapid-pin");
-    const version = app.rapidDraftVersion("rapid-pin");
-    app.rapidObservationValues = () => ({ directObservation: "v2" });
-    app.persistRapidDraft("pin", "rapid-pin");
-    app.clearSubmittedRapidDraft("rapid-pin", version);
-    assert.equal(JSON.parse(values.get(draftKey)).values.directObservation, "v2");
-    assert.equal(JSON.parse(values.get(draftKey)).last_send.submission_id, "sent");
   }
 
   document.getElementById = getElementByIdR6;

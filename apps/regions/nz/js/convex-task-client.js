@@ -756,32 +756,15 @@
             if (token) {
                 headers.Authorization = `Bearer ${token}`;
             }
-            let response;
-            try {
-                response = await fetch(`${this.config.url}/api/${endpoint}`, {
-                    method: "POST",
-                    headers,
-                    body: JSON.stringify({
-                        path,
-                        format: "convex_encoded_json",
-                        args: [compactObject(args)],
-                    }),
-                });
-            } catch (error) {
-                // no answer arrived: a later attempt may succeed
-                if (error && typeof error === "object") error.retryable = true;
-                throw error;
-            }
-            // a failed answer says whether a retry can help: HTTP 408, 425,
-            // 429 and 5xx (other than Convex's 560 function error) may pass;
-            // any other refusal is permanent (#153 round 8)
-            const refusal = (error, retryable) => {
-                error.status = response.status;
-                error.retryable = retryable;
-                return error;
-            };
-            const transientStatus = response.status === 408 || response.status === 425
-                || response.status === 429 || (response.status >= 500 && response.status !== 560);
+            const response = await fetch(`${this.config.url}/api/${endpoint}`, {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                    path,
+                    format: "convex_encoded_json",
+                    args: [compactObject(args)],
+                }),
+            });
             // a refused sign-in ends the page's session before anything
             // else, whatever the body holds (it may not be json at all)
             const authEnded = () => {
@@ -804,7 +787,7 @@
                 payload = text ? JSON.parse(text) : {};
             } catch (error) {
                 if (stale || (!overrideToken && !this.isCurrent(mark))) throw sessionChanged();
-                throw refusal(new Error(text || `Convex ${kind} failed.`), response.ok ? undefined : transientStatus);
+                throw new Error(text || `Convex ${kind} failed.`);
             }
             const failed = (!response.ok && response.status !== 560) || payload.status === "error";
             // the session may also have changed while the body was read
@@ -818,10 +801,7 @@
             if (!overrideToken && /Authentication required|Unauthenticated|JWT|token/i.test(message)) {
                 throw authEnded();
             }
-            // a rate limit answers as a function error but passes with time
-            const limited = payload.errorData?.kind === "RateLimited"
-                || /RateLimited|rate.?limit|retryAfter|too many requests|overloaded|try again later/i.test(message);
-            throw refusal(new Error(message), transientStatus || limited);
+            throw new Error(message);
         }
 
         async me() {

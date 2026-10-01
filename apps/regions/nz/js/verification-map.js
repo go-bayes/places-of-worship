@@ -775,13 +775,6 @@ const RAPID_PIN_PERIODS_KEY = "rapid-pin-periods";
 // sign-out deletes every draft on the device (PowConvexTaskClient.clearDeviceWork)
 const FORM_SNAPSHOT_PREFIX = "powFormSnapshot2:";
 const RAPID_DRAFT_PREFIX = "powRapidDraft2:";
-// a strictly increasing version stamp for device copies: two saves in one
-// millisecond still differ, so a receipt deletes only the version it sent
-let lastSavedAtStamp = 0;
-function nextSavedAt() {
-    lastSavedAtStamp = Math.max(Date.now(), lastSavedAtStamp + 1);
-    return lastSavedAtStamp;
-}
 
 const LEGACY_DEVICE_DRAFT_PREFIXES = ["powFormSnapshot:", "powRapidDraft:"];
 const LEGACY_DRAFT_NOTICE_KEY = "powLegacyDraftNoticeDismissed:v1";
@@ -2000,6 +1993,7 @@ class NzVerificationMap {
         // nearby tasks the contributor linked as probably this same place
         // while keeping the new pin (guy, 2026-09-07)
         this.pinLinkedRefs = [];
+        this.pinSubmissionId = null;
         // occupancy lane: the period cards under entry, and the card whose
         // location the pin flow is currently placing
         this.occupancyDraft = null;
@@ -2542,6 +2536,7 @@ class NzVerificationMap {
         this.reviseContext = null;
         this.pinConfirmed = null;
         this.pinLinkedRefs = [];
+        this.pinSubmissionId = null;
         this.pinHistory = [];
         this.pinSearchRows = [];
         this.pinEntryGeneration = (this.pinEntryGeneration || 0) + 1;
@@ -4386,6 +4381,7 @@ class NzVerificationMap {
             file,
             fix: null,
             positionError: "",
+            submissionId: window.PowRapidEntry?.secureSubmissionId?.() || "",
             previewUrl: window.URL?.createObjectURL?.(file) || "",
             // the session the capture belongs to: it is sent only by that
             // session and closed when it ends
@@ -4453,8 +4449,7 @@ class NzVerificationMap {
         document.getElementById("quickPhotoDropPinButton")?.addEventListener("click", () => this.quickPhotoDropPinInstead());
         document.getElementById("quickPhotoCancelButton")?.addEventListener("click", () => this.cancelQuickPhoto());
         ["quickPhotoName", "quickPhotoNote"].forEach(id => {
-            const field = document.getElementById(id);
-            field?.addEventListener("keydown", event => {
+            document.getElementById(id)?.addEventListener("keydown", event => {
                 if (event.key === "Enter") {
                     event.preventDefault();
                     this.sendQuickPhoto();
@@ -4562,32 +4557,17 @@ class NzVerificationMap {
         block.innerHTML = `Already recorded near here: ${shown.map(row => `<strong>${escapeHtml(row.name)}</strong> (${row.distance} m, ${escapeHtml(row.status)})`).join(", ")}${rows.length > shown.length ? ` and ${rows.length - shown.length} more` : ""}. If your photo is one of these, cancel and revise it from its dot; otherwise press <em>Send for review</em> again.`;
     }
 
-    quickPhotoLocationAssertion(fix) {
-        return window.PowLocationAssertion.payload({
-            mode: "approximate_area",
-            basis: "local_investigator_account",
-            latitude: fix.latitude,
-            longitude: fix.longitude,
-            uncertaintyRadiusM: this.quickPhotoRadius(fix),
-            sourceWording: `Phone position while photographing the place, accuracy about ${fix.accuracyM} m.`,
-            confidence: fix.accuracyM <= 50 ? "moderate" : "low",
-            contributorConfirmed: true,
-        });
-    }
-
     async sendQuickPhoto() {
         const alive = this.sessionGuard();
-        // signed-in work only: nothing starts for an ended session
         if (!alive()) return;
         const capture = this.quickPhoto;
-        const status = document.getElementById("quickPhotoStatus");
-        const send = document.getElementById("quickPhotoSendButton");
-        // a capture from another session is never sent under this one
         if (capture && (capture.epoch !== (this.sessionEpoch || 0)
-            || (capture.ownerId && capture.ownerId !== (this.backendUser?._id || this.backend?.user?._id || "")))) {
+            || (capture.ownerId && capture.ownerId !== this.signedInUserId()))) {
             this.closeQuickPhoto();
             return;
         }
+        const status = document.getElementById("quickPhotoStatus");
+        const send = document.getElementById("quickPhotoSendButton");
         const refuse = text => {
             if (!status) return;
             status.textContent = text;
@@ -4621,7 +4601,16 @@ class NzVerificationMap {
         }
         let locationAssertion;
         try {
-            locationAssertion = this.quickPhotoLocationAssertion(fix);
+            locationAssertion = window.PowLocationAssertion.payload({
+                mode: "approximate_area",
+                basis: "local_investigator_account",
+                latitude: fix.latitude,
+                longitude: fix.longitude,
+                uncertaintyRadiusM: radius,
+                sourceWording: `Phone position while photographing the place, accuracy about ${fix.accuracyM} m.`,
+                confidence: fix.accuracyM <= 50 ? "moderate" : "low",
+                contributorConfirmed: true,
+            });
         } catch (error) {
             if (!alive()) return;
             refuse(error.message || "The position could not be recorded.");
@@ -4648,14 +4637,14 @@ class NzVerificationMap {
             locationAssertion,
         };
         const zoom = Number.isFinite(this.map?.getZoom?.()) ? this.map.getZoom() : POSITION_ZOOM;
-        const observation = window.PowRapidEntry.observationPayload(values, flagOptions);
         if (send) send.disabled = true;
         if (status) status.textContent = "Sending securely for review...";
         try {
-            const args = {
+            const result = await this.backend.submitCurrentObservation({
+                clientSubmissionId: capture.submissionId,
                 countryCode: entryCountry.code,
                 candidate,
-                observation,
+                observation: window.PowRapidEntry.observationPayload(values, flagOptions),
                 flagForDiscussion: true,
                 clientContext: {
                     placement_zoom: zoom,
@@ -4663,12 +4652,8 @@ class NzVerificationMap {
                     nearby_count: nearby.length,
                     portal_version: "rapid-current-v1-multicountry",
                 },
-            };
-            const request = await this.submissionRequest(capture, args, this.rapidDraftStorageKey("send:quick-photo"), alive);
+            });
             if (!alive()) return;
-            const result = await this.backend.submitCurrentObservation(request);
-            if (!alive()) return;
-            this.clearSubmissionRequest("send:quick-photo", request);
             // synthesise the backend-task shape locally so the entry is on
             // the map and in the list before the batch queries catch up
             const manualTask = {
@@ -6858,6 +6843,7 @@ class NzVerificationMap {
         this.occupancyDraft = {
             taskId,
             context,
+            submissionId: window.PowRapidEntry.secureSubmissionId(),
             segments: mine.map(row => {
                 const segment = window.PowOccupancy.segmentFromRow(row);
                 segment.locationSummary = segment.location ? this.occupancyLocationSummary(segment.location) : "";
@@ -7089,7 +7075,7 @@ class NzVerificationMap {
         const key = this.formSnapshotStorageKey(taskId);
         if (!key || !this.deviceWritable()) return;
         try {
-            window.localStorage.setItem(key, JSON.stringify({ saved_at: nextSavedAt(), snapshot }));
+            window.localStorage.setItem(key, JSON.stringify({ saved_at: Date.now(), snapshot }));
         } catch (error) {
             // private windows or blocked storage keep the snapshot in memory only
         }
@@ -7122,32 +7108,6 @@ class NzVerificationMap {
         } catch (error) {
             // nothing to clear when storage is unavailable
         }
-    }
-
-    // the stored snapshot as it stands, to delete exactly that version once
-    // its submission is recorded
-    formSnapshotVersion(taskId) {
-        const key = this.formSnapshotStorageKey(taskId);
-        if (!key) return null;
-        try {
-            return { savedAt: JSON.parse(window.localStorage.getItem(key) || "null")?.saved_at ?? null };
-        } catch (error) {
-            return { savedAt: null };
-        }
-    }
-
-    // deletes the record only if it is still the submitted version; a later
-    // edit is never touched
-    deleteSubmittedFormSnapshot(taskId, version) {
-        const key = this.formSnapshotStorageKey(taskId);
-        if (!key || !version) return;
-        try {
-            const record = JSON.parse(window.localStorage.getItem(key) || "null");
-            if (record && record.saved_at === version.savedAt) window.localStorage.removeItem(key);
-        } catch (error) {
-            // nothing to clear when storage is unavailable
-        }
-        this.formSnapshotsByTaskId.delete(taskId);
     }
 
     // snapshot the typed form as a draft-shaped object so applyDraftToForm
@@ -7791,6 +7751,7 @@ class NzVerificationMap {
     // use, never an uncertain one
     rapidObservationFieldsHtml(prefix, options = {}) {
         const submitLabel = options.submitLabel || "Submit for review";
+        const submissionId = options.submissionId || window.PowRapidEntry.secureSubmissionId();
         const pre = options.prefill || {};
         const checked = value => pre.current_observation_status === value ? " checked" : "";
         const preBasis = pre.current_observation_basis || "direct_field_observation";
@@ -7798,7 +7759,7 @@ class NzVerificationMap {
         const optionalOpen = Boolean(pre.denomination_or_tradition_raw || pre.evidence_note || pre.uncertainty_note
             || pre.current_observation_status === "could_not_determine");
         return `
-            <form id="${prefix}RapidCurrentForm" class="rapid-current-form">
+            <form id="${prefix}RapidCurrentForm" class="rapid-current-form" data-submission-id="${escapeHtml(submissionId)}">
                 <fieldset class="rapid-choice-group" id="${prefix}CurrentStatusGroup">
                     <legend>What can you confirm at the observation date? <span class="req-chip">required</span></legend>
                     <label class="rapid-choice">
@@ -8025,102 +7986,20 @@ class NzVerificationMap {
 
     // ---- unsubmitted rapid drafts, kept on this device only ----
 
-    // only send helpers call this, with the final outgoing arguments.
-    async submissionRequest(record, args, storageKey = "", alive = this.sessionGuard()) {
-        const { clientSubmissionId: ignored, ...payload } = args;
-        const json = JSON.stringify(payload, (key, value) => value && typeof value === "object" && !Array.isArray(value)
-            ? Object.fromEntries(Object.keys(value).sort().map(name => [name, value[name]])) : value);
-        const bytes = await window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(json));
-        if (!alive()) throw new Error("Your sign-in changed before sending.");
-        const payloadDigest = Array.from(new Uint8Array(bytes), byte => byte.toString(16).padStart(2, "0")).join("");
-        let stored = null;
-        if (storageKey && this.deviceWritable()) {
-            try { stored = JSON.parse(window.localStorage.getItem(storageKey) || "null"); } catch (error) { /* memory retry remains available */ }
-        }
-        const previous = record.lastSend || stored?.last_send;
-        const lastSend = {
-            submission_id: previous?.payload_digest === payloadDigest && previous.submission_id
-                ? previous.submission_id : window.PowRapidEntry.secureSubmissionId(),
-            payload_digest: payloadDigest,
-        };
-        record.lastSend = lastSend;
-        // preserve the draft version: a receipt may delete only its own copy.
-        if (storageKey && this.deviceWritable() && alive()) {
-            try { window.localStorage.setItem(storageKey, JSON.stringify({ ...stored, last_send: lastSend })); } catch (error) { /* keep the live record */ }
-        }
-        return { ...JSON.parse(json), clientSubmissionId: lastSend.submission_id };
-    }
-
-    // retain prerequisite receipts separately from the final send pair.
-    // exact arguments decide reuse; an ended session cannot retain a receipt.
-    async resolveSendPrerequisite(record, name, args, storageKey, resolve, alive = this.sessionGuard()) {
-        const json = JSON.stringify(args, (key, value) => value && typeof value === "object" && !Array.isArray(value)
-            ? Object.fromEntries(Object.keys(value).sort().map(field => [field, value[field]])) : value);
-        if (!alive()) throw new Error("Your sign-in changed before sending.");
-        let stored = null;
-        if (storageKey && this.deviceWritable()) {
-            try { stored = JSON.parse(window.localStorage.getItem(storageKey) || "null"); } catch (error) { /* retain the live receipt */ }
-        }
-        const previous = record.sendPrerequisites?.[name] || stored?.send_prerequisites?.[name];
-        if (previous?.arguments_json === json) {
-            record.sendPrerequisites = { ...record.sendPrerequisites, [name]: previous };
-            return previous.result;
-        }
-        const result = await resolve(JSON.parse(json));
-        if (!alive()) throw new Error("Your sign-in changed before sending.");
-        const receipt = { arguments_json: json, result };
-        record.sendPrerequisites = { ...record.sendPrerequisites, [name]: receipt };
-        if (storageKey && this.deviceWritable()) {
-            // reread after the await so a newer autosave is preserved.
-            try {
-                const current = JSON.parse(window.localStorage.getItem(storageKey) || "null");
-                window.localStorage.setItem(storageKey, JSON.stringify({
-                    ...current, send_prerequisites: { ...current?.send_prerequisites, [name]: receipt },
-                }));
-            } catch (error) { /* retain the live receipt */ }
-        }
-        return result;
-    }
-
-    clearSubmissionRequest(key, request) {
-        if (!this.deviceWritable()) return;
-        const record = this.readRapidDraft(key);
-        if (record?.last_send?.submission_id === request.clientSubmissionId) this.clearRapidDraft(key);
-    }
-
     rapidDraftStorageKey(key) {
         return this.deviceWritable() ? `${RAPID_DRAFT_PREFIX}${COUNTRY_CONFIG.countryCode}:${key}` : "";
     }
 
-    rapidDraftVersion(key) {
-        if (!this.deviceWritable()) return null;
-        return { savedAt: this.readRapidDraft(key)?.saved_at ?? null };
-    }
-
-    // deletes the rapid draft only if it is still the submitted version
-    clearSubmittedRapidDraft(key, version) {
-        const storageKey = this.rapidDraftStorageKey(key);
-        if (!storageKey || !version) return;
-        try {
-            const record = JSON.parse(window.localStorage.getItem(storageKey) || "null");
-            if (record && record.saved_at === version.savedAt) window.localStorage.removeItem(storageKey);
-        } catch (error) {
-            // nothing to clear when storage is unavailable
-        }
-    }
-
     persistRapidDraft(prefix, key, extraValues = {}) {
-        const previous = this.readRapidDraft(key);
-        // device writes require the signed-in member's current session
         if (!this.deviceWritable()) return;
         try {
             const record = {
-                ...previous,
-                saved_at: nextSavedAt(),
+                saved_at: Date.now(),
                 values: this.rapidObservationValues(prefix),
                 extra: extraValues,
             };
             // the confirmed pin rides on the record while the entry is open
+            const previous = this.readRapidDraft(key);
             if (previous?.pin) record.pin = previous.pin;
             window.localStorage.setItem(this.rapidDraftStorageKey(key), JSON.stringify(record));
         } catch (error) {
@@ -8144,14 +8023,10 @@ class NzVerificationMap {
     // entry is open, so a reload mid-entry returns to the same spot (guy,
     // 2026-09-05); a revision or a period's location has its own record
     keepRapidPinOnDevice() {
-        if (!RAPID_NOMINATION_ENTRY || this.occupancyPinContext || !this.pinConfirmed) return;
-        if (this.reviseContext || !this.deviceWritable()) return;
-        const record = this.readRapidDraft("rapid-pin") || {};
-        const pin = { ...this.pinConfirmed, linkedRefs: this.pinLinkedRefs || [] };
-        // a pin change is a new version of the device copy, so a receipt for
-        // an earlier send cannot delete it (#153 round 13)
-        record.saved_at = nextSavedAt();
-        record.pin = pin;
+        if (!this.deviceWritable()) return;
+        if (!RAPID_NOMINATION_ENTRY || this.reviseContext || this.occupancyPinContext || !this.pinConfirmed) return;
+        const record = this.readRapidDraft("rapid-pin") || { saved_at: Date.now() };
+        record.pin = { ...this.pinConfirmed, linkedRefs: this.pinLinkedRefs || [] };
         try {
             window.localStorage.setItem(this.rapidDraftStorageKey("rapid-pin"), JSON.stringify(record));
         } catch (error) {
@@ -8262,10 +8137,6 @@ class NzVerificationMap {
             const optional = document.querySelector(`#${prefix}RapidCurrentForm .optional-block`);
             if (optional) optional.open = true;
         }
-        Object.entries(record.extra || {}).forEach(([id, value]) => {
-            const el = document.getElementById(id);
-            if (el) el.value = value;
-        });
         return record;
     }
 
@@ -8474,9 +8345,6 @@ class NzVerificationMap {
                         if (idEl) idEl.value = rowEl.dataset.sourceId;
                         hideList();
                         this.updateSourceLocatorField(prefix);
-                        // register picks assign values directly; persist the
-                        // selected source through the normal edit path
-                        reference?.dispatchEvent(new Event("input", { bubbles: true }));
                     });
                 });
             }, 300);
@@ -8502,11 +8370,10 @@ class NzVerificationMap {
         const form = document.getElementById(`${prefix}RapidCurrentForm`);
         if (!form || !window.PowRapidEntry) return;
         const draftKey = options.props?.task_id || `rapid-${prefix}`;
-        const extraIds = [...new Set([...(options.draftExtraIds || []), ...(prefix === "pin" ? ["pinIssueType"] : [])])];
+        const extraIds = options.draftExtraIds || [];
+        const alive = this.sessionGuard();
         const persist = () => {
-            // a form already replaced by the receipt holds nothing to keep;
-            // a late timer must not write its empty values (#153 round 8)
-            if (!form.isConnected) return;
+            if (!alive() || !form.isConnected) return;
             const extra = Object.fromEntries(
                 extraIds.map(id => [id, document.getElementById(id)?.value || ""]).filter(([, value]) => value),
             );
@@ -8518,25 +8385,14 @@ class NzVerificationMap {
                 status.textContent = "Draft kept on this device until you submit.";
             }
         };
+        let persistTimer = 0;
         const markDirty = () => {
             this.markFormDirty(options.props?.task_id || `rapid-${prefix}`);
-            if (options.periodsKey && this.guidedPeriodsByTaskId?.has(options.periodsKey)) this.persistGuidedPeriods(options.periodsKey);
-            persist();
-        };
-        // capture the device draft version before starting prerequisites.
-        const flushDraft = () => {
-            persist();
+            window.clearTimeout(persistTimer);
+            persistTimer = window.setTimeout(persist, 400);
         };
         form.addEventListener("input", markDirty);
         form.addEventListener("change", markDirty);
-        // the extra fields sit outside the form; persist their edits too.
-        extraIds.forEach(id => {
-            const el = document.getElementById(id);
-            if (el && !form.contains?.(el)) {
-                el.addEventListener("input", markDirty);
-                el.addEventListener("change", markDirty);
-            }
-        });
         form.addEventListener("input", event => {
             event.target?.closest?.("label, fieldset")?.classList?.remove("field-invalid");
         });
@@ -8584,7 +8440,7 @@ class NzVerificationMap {
         }
         form.addEventListener("submit", event => {
             event.preventDefault();
-            this.submitRapidObservation(prefix, { ...options, draftKey, flushDraft });
+            this.submitRapidObservation(prefix, { ...options, draftKey });
         });
         this.syncInlineEvidenceFiles(prefix);
     }
@@ -8637,7 +8493,6 @@ class NzVerificationMap {
             if (status) status.textContent = "Sign in before recording this observation.";
             return;
         }
-        this.rapidFormOptions = { ...(this.rapidFormOptions || {}), [prefix]: options };
         const values = this.rapidObservationValues(prefix);
         const flagOptions = { flagForDiscussion: values.flagForDiscussion };
         const inputError = window.PowRapidEntry.validateObservationDetailed(values, flagOptions);
@@ -8664,10 +8519,6 @@ class NzVerificationMap {
             }
             return;
         }
-        // capture the device versions before prerequisites; later edits stay.
-        options.flushDraft?.();
-        const draftVersion = options.draftKey ? this.rapidDraftVersion(options.draftKey) : null;
-        const snapshotVersion = options.props?.task_id ? this.formSnapshotVersion(options.props.task_id) : null;
         submitButton.disabled = true;
         if (status) status.textContent = values.flagForDiscussion ? "Flagging securely for discussion..." : "Submitting securely for review...";
         // the form's chosen files travel to the confirmation screen, where
@@ -8679,33 +8530,27 @@ class NzVerificationMap {
             if (!values.sourceId && values.saveSourceToRegister
                 && values.sourceTitle?.trim() && values.sourceReference?.trim()) {
                 try {
-                    const created = await this.resolveSendPrerequisite(form, "source", {
+                    const created = await this.backend.createSource({
                         countryCode: this.entryCountry().code,
                         sourceType: "other",
                         title: values.sourceTitle.trim(),
                         url: values.sourceReference.trim(),
-                    }, options.draftKey ? this.rapidDraftStorageKey(options.draftKey) : "", async args => {
-                        try { return await this.backend.createSource(args); }
-                        catch (error) {
-                            // an optional register failure keeps the same citation-only retry.
-                            if (error.authExpired) throw error;
-                            return null;
-                        }
-                    }, alive);
+                    });
                     if (!alive()) return;
-                    if (created) values.sourceId = created.source_id;
+                    values.sourceId = created.source_id;
                 } catch (error) {
-                    if (!alive()) return;
+            if (!alive()) return;
                     // the register is optional; the citation strings still land
                 }
             }
             // a revision first opens (or claims) its task in the issue
             // batch, then submits the observation against that task
-            const revision = options.createTask ? await options.createTask(form, options.draftKey) : null;
+            const revision = options.createTask ? await options.createTask() : null;
             if (!alive()) return;
             // the entry's country is the pin's (entry follows the pin)
             const entryCountry = this.entryCountry();
-            const args = {
+            const result = await this.backend.submitCurrentObservation({
+                clientSubmissionId: form.dataset.submissionId,
                 countryCode: entryCountry.code,
                 ...(options.props?.task_id
                     ? { taskId: options.props.task_id }
@@ -8722,23 +8567,16 @@ class NzVerificationMap {
                     } : {}),
                     portal_version: "rapid-current-v1-multicountry",
                 },
-            };
-            const request = await this.submissionRequest(form, args, options.draftKey ? this.rapidDraftStorageKey(options.draftKey) : "", alive);
+            });
             if (!alive()) return;
-            const result = await this.backend.submitCurrentObservation(request);
-            // a receipt from an ended session may have recorded on the
-            // server; it writes nothing to the device and nothing to the page
-            if (!alive()) return;
-            // the exact draft this send carried goes; a later edit has a
-            // newer version and stays
-            if (options.draftKey) this.clearSubmittedRapidDraft(options.draftKey, draftVersion);
-            if (options.props?.task_id) this.deleteSubmittedFormSnapshot(options.props.task_id, snapshotVersion);
             this.clearFormDirty();
+            if (options.draftKey) this.clearRapidDraft(options.draftKey);
             const periodsOutcome = await this.recordRapidPeriods(periodsPlan, result, options.periodsKey);
             if (!alive()) return;
             if (options.props?.task_id) {
                 const taskId = options.props.task_id;
                 this.rapidCorrectionTaskIds.delete(taskId);
+                this.deleteFormSnapshot(taskId);
                 this.latestDraftsByTaskId.delete(taskId);
                 this.taskHistoryByTaskId.delete(taskId);
                 await this.refreshBackendTasks();
@@ -8765,7 +8603,7 @@ class NzVerificationMap {
                 await this.refreshBackendTasks();
                 if (!alive()) return;
                 this.applyFilters();
-                this.exitPinMode({ afterSubmit: true });
+                this.exitPinMode();
                 const revisedProps = { task_id: revision.task_id, name: revision.name };
                 this.renderSubmissionRecordedDetail(revisedProps, {
                     deduped: Boolean(result.deduped),
@@ -8820,7 +8658,7 @@ class NzVerificationMap {
             await this.refreshBackendTasks();
             if (!alive()) return;
             this.applyFilters();
-            this.exitPinMode({ afterSubmit: true });
+            this.exitPinMode();
             const submittedProps = {
                 task_id: result.task_id,
                 name: candidate.name || "Unknown place of worship",
@@ -8857,7 +8695,7 @@ class NzVerificationMap {
 
     // renders one repeatable claim form linked to submitted rapid or guided evidence.
     historicalClaimFormHtml(context, { recordedCount = 0, statusMessage = "" } = {}) {
-
+        const submissionId = window.PowRapidEntry.secureSubmissionId();
         const referenceDateLabel = context.referenceDateFromParent
             ? context.referenceDate
             : `the claim-recording date (${context.referenceDate})`;
@@ -8868,7 +8706,7 @@ class NzVerificationMap {
             </div>
             ${statusMessage ? `<div class="copy-status" role="status">${escapeHtml(statusMessage)}</div>` : ""}
             ${recordedCount ? `<div class="history-count">${recordedCount} historical claim${recordedCount === 1 ? "" : "s"} recorded in this entry sequence.</div>` : ""}
-            <form id="historicalClaimForm" class="rapid-current-form historical-claim-form">
+            <form id="historicalClaimForm" class="rapid-current-form historical-claim-form" data-submission-id="${escapeHtml(submissionId)}">
                 <div class="field-grid">
                     <label>
                         What does this claim concern?
@@ -8983,7 +8821,7 @@ class NzVerificationMap {
     }
 
     // keeps open-state controls consistent with the selected temporal object.
-    updateHistoricalTimingControls(context) {
+    updateHistoricalTimingControls() {
         const timing = document.getElementById("historicalClaimTiming")?.value || "";
         const continues = document.getElementById("historicalContinues");
         const latest = document.getElementById("historicalLatestDate");
@@ -9006,14 +8844,12 @@ class NzVerificationMap {
         if (!panel || !context || !window.PowHistoricalClaim) return;
         panel.innerHTML = this.historicalClaimFormHtml(context, options);
         const form = document.getElementById("historicalClaimForm");
-        const markDirty = () => {
-            this.markFormDirty(`history-${context.taskId}`);
-        };
+        const markDirty = () => this.markFormDirty(`history-${context.taskId}`);
         form?.addEventListener("input", markDirty);
         form?.addEventListener("change", markDirty);
-        document.getElementById("historicalClaimTiming")?.addEventListener("change", () => this.updateHistoricalTimingControls(context));
-        document.getElementById("historicalContinues")?.addEventListener("change", () => this.updateHistoricalTimingControls(context));
-        this.updateHistoricalTimingControls(context);
+        document.getElementById("historicalClaimTiming")?.addEventListener("change", () => this.updateHistoricalTimingControls());
+        document.getElementById("historicalContinues")?.addEventListener("change", () => this.updateHistoricalTimingControls());
+        this.updateHistoricalTimingControls();
         form?.addEventListener("submit", event => {
             event.preventDefault();
             this.submitHistoricalClaim(context, options.recordedCount || 0);
@@ -9053,23 +8889,19 @@ class NzVerificationMap {
             if (status) status.textContent = inputError;
             return;
         }
-        const claim = window.PowHistoricalClaim.historicalClaimPayload(values);
         submitButton.disabled = true;
         if (status) status.textContent = "Recording this historical claim for review...";
         try {
-            const args = {
+            const result = await this.backend.submitHistoricalClaim({
+                clientSubmissionId: form.dataset.submissionId,
                 taskId: context.taskId,
                 parentEvidenceDraftId: context.parentEvidenceDraftId,
-                claim,
+                claim: window.PowHistoricalClaim.historicalClaimPayload(values),
                 clientContext: {
                     portal_version: "historical-claim-v1",
                 },
-            };
-            const request = await this.submissionRequest(form, args, this.rapidDraftStorageKey(`send:history:${context.taskId}:${context.parentEvidenceDraftId}`), alive);
+            });
             if (!alive()) return;
-            const result = await this.backend.submitHistoricalClaim(request);
-            if (!alive()) return;
-            this.clearSubmissionRequest(`send:history:${context.taskId}:${context.parentEvidenceDraftId}`, request);
             this.clearFormDirty();
             this.taskHistoryByTaskId.delete(context.taskId);
             this.renderHistoricalClaimEntry(context, {
@@ -9258,7 +9090,7 @@ class NzVerificationMap {
                 One card per period at one location. Bounds are fine. The portal derives a proposal for each census year; a reviewer confirms it.
             </div>
             ${statusMessage ? `<div class="copy-status" role="status">${escapeHtml(statusMessage)}</div>` : ""}
-            <form id="occupancyForm" class="rapid-current-form occupancy-form">
+            <form id="occupancyForm" class="rapid-current-form occupancy-form" data-submission-id="${escapeHtml(draft.submissionId)}">
                 <div id="occupancyCards" class="occupancy-cards">
                     ${draft.segments.map((segment, index) => this.occupancyCardHtml(segment, index, draft.segments.length)).join("")}
                 </div>
@@ -9359,12 +9191,13 @@ class NzVerificationMap {
     }
 
     persistGuidedPeriods(taskId) {
+        if (!this.deviceWritable()) return;
         const state = this.guidedPeriodsByTaskId.get(taskId);
-        if (!state || !this.deviceWritable()) return;
+        if (!state) return;
         try {
             window.localStorage.setItem(this.guidedPeriodsStorageKey(taskId), JSON.stringify({
-                ...this.readGuidedPeriodsStorage(taskId),
-                saved_at: nextSavedAt(),
+                saved_at: Date.now(),
+                submissionId: state.submissionId || "",
                 segments: state.segments,
                 gapAnswer: state.gapAnswer,
                 gapNote: state.gapNote,
@@ -9398,42 +9231,6 @@ class NzVerificationMap {
         }
     }
 
-    // the stored periods as they stand when a submission is sent: the
-    // saved_at of the device copy (null when nothing is stored)
-    guidedPeriodsVersion(taskId) {
-        if (!taskId || !this.deviceWritable()) return null;
-        let savedAt = null;
-        try {
-            savedAt = JSON.parse(window.localStorage.getItem(this.guidedPeriodsStorageKey(taskId)) || "null")?.saved_at ?? null;
-        } catch (error) {
-            savedAt = null;
-        }
-        return { savedAt };
-    }
-
-    // after a recorded submission: the periods go only if the device copy
-    // is still the version that was sent (same rule as the rapid and form
-    // drafts); a newer edit stays
-    clearSubmittedGuidedPeriods(taskId, version) {
-        if (!taskId || !version) return;
-        const key = this.guidedPeriodsStorageKey(taskId);
-        if (!key) return;
-        let current = null;
-        try {
-            current = JSON.parse(window.localStorage.getItem(key) || "null");
-        } catch (error) {
-            current = null;
-        }
-        if ((current?.saved_at ?? null) !== version.savedAt) return;
-        try {
-            if (current) window.localStorage.removeItem(key);
-        } catch (error) {
-            // nothing to clear when storage is unavailable
-        }
-        // the working copy goes with it, in the session that sent it
-        if (version.epoch === (this.sessionEpoch || 0)) this.guidedPeriodsByTaskId.delete(taskId);
-    }
-
     guidedPeriodsState(taskId) {
         let state = this.guidedPeriodsByTaskId.get(taskId);
         if (!state) {
@@ -9441,8 +9238,8 @@ class NzVerificationMap {
             const referenceDate = this.guidedReferenceDate(taskId);
             const blankChain = () => (window.PowFunctionChain ? window.PowFunctionChain.blankChain() : null);
             state = stored
-                ? { segments: stored.segments, gapAnswer: stored.gapAnswer || "", sameSource: stored.sameSource !== false, provenance: stored.provenance || this.occupancyBlankProvenance(), gapNote: stored.gapNote || "", referenceDate, loadedFrom: "", chain: stored.chain || blankChain(), ...(stored.placeKey ? { placeKey: stored.placeKey } : {}) }
-                : { segments: [this.occupancyBlankSegment({ referenceDate, referenceDateFromParent: true })], gapAnswer: "", sameSource: this.guidedPeriodsDefaultSameSource(taskId), provenance: this.occupancyBlankProvenance(), gapNote: "", referenceDate, loadedFrom: "", chain: blankChain() };
+                ? { submissionId: stored.submissionId || "", segments: stored.segments, gapAnswer: stored.gapAnswer || "", sameSource: stored.sameSource !== false, provenance: stored.provenance || this.occupancyBlankProvenance(), gapNote: stored.gapNote || "", referenceDate, loadedFrom: "", chain: stored.chain || blankChain(), ...(stored.placeKey ? { placeKey: stored.placeKey } : {}) }
+                : { submissionId: "", segments: [this.occupancyBlankSegment({ referenceDate, referenceDateFromParent: true })], gapAnswer: "", sameSource: this.guidedPeriodsDefaultSameSource(taskId), provenance: this.occupancyBlankProvenance(), gapNote: "", referenceDate, loadedFrom: "", chain: blankChain() };
             this.guidedPeriodsByTaskId.set(taskId, state);
         }
         return state;
@@ -9840,7 +9637,6 @@ class NzVerificationMap {
     // rebuilds only the cards, keeping the rest of the form as typed
     rerenderGuidedPeriods(taskId, { focusIndex } = {}) {
         const state = this.guidedPeriodsState(taskId);
-        this.persistGuidedPeriods(taskId);
         const host = document.getElementById("guidedPeriodsCards");
         if (!host) return;
         host.innerHTML = state.segments.map((segment, index) => this.occupancyCardHtml(segment, index, state.segments.length)).join("");
@@ -9993,13 +9789,13 @@ class NzVerificationMap {
                 this.occupancyDraft = {
                     taskId,
                     context: { inline: true, taskId, referenceDate: state.segments[0].stillActiveAsof || "" },
+                    submissionId: "",
                     segments: state.segments,
                     provenance: state.provenance,
                 };
                 this.enterOccupancyPin(this.occupancyDraft.context, index);
             } else if (button.dataset.action === "remove" && state.segments.length > 1) {
                 state.segments.splice(index, 1);
-                this.persistGuidedPeriods(taskId);
                 this.markFormDirty(taskId);
                 this.rerenderGuidedPeriods(taskId);
             }
@@ -10035,7 +9831,7 @@ class NzVerificationMap {
         // pr-f: the chain recorded with that set comes back with it
         const storedChain = this.latestDraftsByTaskId.get(taskId)?.function_chain
             || (await this.backend.listTaskEvidence?.({ taskId }).catch(() => null))?.find?.(draft => draft.evidence_draft_id === latestParent)?.function_chain;
-            if (!alive()) return;
+        if (!alive()) return;
         if (storedChain && window.PowFunctionChain) state.chain = window.PowFunctionChain.chainFromPayload(storedChain);
         state.sameSource = false;
         state.gapAnswer = state.segments.length > 1 ? "yes" : "no";
@@ -10124,15 +9920,17 @@ class NzVerificationMap {
     // An empty set is intentional only for the server-checked duplicate or
     // hand-grid exception; the browser guard has already applied that rule.
     guidedPeriodsSubmission(taskId, values) {
-        if (!window.PowOccupancy) return { segments: [] };
+        if (!window.PowOccupancy) return { clientSubmissionId: window.PowRapidEntry.secureSubmissionId(), segments: [] };
         const state = this.guidedPeriodsState(taskId);
-        const touched = this.guidedPeriodsTouched(taskId);
-        const provenance = touched ? this.guidedPeriodsProvenance(taskId, values).provenance : null;
+        const submissionId = state.submissionId || window.PowRapidEntry.secureSubmissionId();
+        state.submissionId = submissionId;
         this.persistGuidedPeriods(taskId);
-        if (!touched) return { segments: [] };
+        if (!this.guidedPeriodsTouched(taskId)) return { clientSubmissionId: submissionId, segments: [] };
+        const provenance = this.guidedPeriodsProvenance(taskId, values).provenance;
         const segments = state.segments.map((segment, index) => ({ ...segment, ...provenance, segmentIndex: index }));
         const chain = this.guidedChainTouched(taskId) && window.PowFunctionChain ? window.PowFunctionChain.payload(this.chainWithDefaultStart(state.chain, state.segments)) : undefined;
         return {
+            clientSubmissionId: submissionId,
             segments: segments.map(segment => window.PowOccupancy.payload(segment)),
             ...(chain ? { chain } : {}),
         };
@@ -10148,6 +9946,7 @@ class NzVerificationMap {
             this.occupancyDraft = {
                 taskId: context.taskId,
                 context,
+                submissionId: window.PowRapidEntry.secureSubmissionId(),
                 segments: [this.occupancyBlankSegment(context)],
                 provenance: this.occupancyBlankProvenance(),
                 gapAnswer: "",
@@ -10447,18 +10246,15 @@ class NzVerificationMap {
         submitButton.disabled = true;
         if (status) status.textContent = "Recording these periods for review...";
         try {
-            const args = {
+            const result = await this.backend.submitOccupancies({
+                clientSubmissionId: draft.submissionId,
                 taskId: context.taskId,
                 parentEvidenceDraftId: context.parentEvidenceDraftId,
                 segments: segments.map(values => window.PowOccupancy.payload(values)),
                 ...(chainTouched ? { chain: window.PowFunctionChain.payload(chainToSend) } : {}),
                 clientContext: { portal_version: "occupancy-v2" },
-            };
-            const request = await this.submissionRequest(draft, args, this.rapidDraftStorageKey(`send:occupancy:${context.taskId}:${context.parentEvidenceDraftId}`), alive);
+            });
             if (!alive()) return;
-            const result = await this.backend.submitOccupancies(request);
-            if (!alive()) return;
-            this.clearSubmissionRequest(`send:occupancy:${context.taskId}:${context.parentEvidenceDraftId}`, request);
             this.clearFormDirty();
             this.taskHistoryByTaskId.delete(context.taskId);
             this.occupancyDraft = null;
@@ -11804,10 +11600,6 @@ class NzVerificationMap {
         const guidedSubmission = submit && !unresolved
             ? this.guidedPeriodsSubmission(props.task_id, values)
             : null;
-        // the compiler persists the cards before capturing their version.
-        const periodsVersion = submit && !unresolved && this.guidedPeriodsVersion(props.task_id)
-            ? { ...this.guidedPeriodsVersion(props.task_id), epoch: this.sessionEpoch || 0 }
-            : null;
         // prefer the tracked revision draft; otherwise continue the latest
         // editable draft. the fallback covers a reload after a server-side
         // revision start (task in_progress, clone loaded), where the default
@@ -11836,24 +11628,13 @@ class NzVerificationMap {
                 selected_target_year: this.targetYear,
                 page_path: window.location.pathname,
             };
-            // the exact device snapshot this save carries goes once the save
-            // is recorded in this session, so a stale snapshot never
-            // reappears over the saved draft; a later edit has a newer
-            // version and is kept. a receipt from an ended session writes
-            // nothing to the device
-            const snapshotVersion = this.formSnapshotVersion(props.task_id);
-            const saveArgs = {
+            const saved = await this.backend.saveEvidenceDraft({
                 taskId: props.task_id,
                 evidenceDraftId: revisionDraftId || undefined,
                 draft,
                 clientContext,
-            };
-            const saved = submit && !unresolved
-                ? await this.resolveSendPrerequisite(this.guidedPeriodsState(props.task_id), "parent_evidence", saveArgs,
-                    this.guidedPeriodsStorageKey(props.task_id), args => this.backend.saveEvidenceDraft(args), alive)
-                : await this.backend.saveEvidenceDraft(saveArgs);
+            });
             if (!alive()) return;
-            this.deleteSubmittedFormSnapshot(props.task_id, snapshotVersion);
             let periods = null;
             if (unresolved) {
                 await this.backend.submitUnresolvedNote({
@@ -11862,21 +11643,18 @@ class NzVerificationMap {
                 });
                 if (!alive()) return;
             } else if (submit) {
-                const args = {
+                const result = await this.backend.submitEvidenceDraftWithOccupancies({
                     evidenceDraftId: saved.evidence_draft_id,
                     note: values.note || undefined,
+                    clientSubmissionId: guidedSubmission.clientSubmissionId,
                     segments: guidedSubmission.segments,
                     ...(guidedSubmission.chain ? { chain: guidedSubmission.chain } : {}),
                     clientContext: { ...clientContext, portal_version: "assigned-periods-atomic-v2" },
-                };
-                const request = await this.submissionRequest(this.guidedPeriodsState(props.task_id), args, this.guidedPeriodsStorageKey(props.task_id), alive);
+                });
                 if (!alive()) return;
-                const result = await this.backend.submitEvidenceDraftWithOccupancies(request);
-                if (!alive()) return;
-                this.clearSubmittedGuidedPeriods(props.task_id, periodsVersion);
                 periods = result.period_count > 0 ? { ok: true, result, count: result.period_count } : null;
+                this.clearGuidedPeriods(props.task_id);
             }
-            if (!alive()) return;
             this.latestDraftsByTaskId.set(props.task_id, {
                 ...draft,
                 task_id: props.task_id,
@@ -12056,10 +11834,10 @@ class NzVerificationMap {
             const chainProblem = window.PowFunctionChain.validateChain(chainToSend, referenceDate);
             if (chainProblem) return { problem: `Chain: ${chainProblem}` };
         }
+        state.submissionId = state.submissionId || window.PowRapidEntry.secureSubmissionId();
         this.persistGuidedPeriods(periodsKey);
         return {
-            // the exact device copy this plan sends, deleted once recorded
-            version: this.guidedPeriodsVersion(periodsKey) && { ...this.guidedPeriodsVersion(periodsKey), epoch: this.sessionEpoch || 0 },
+            submissionId: state.submissionId,
             segments,
             chain: chainToSend ? window.PowFunctionChain.payload(chainToSend) : undefined,
             count: segments.length,
@@ -12089,46 +11867,32 @@ class NzVerificationMap {
     // a failure keeps them for the pane's retry
     async recordRapidPeriods(plan, result, periodsKey) {
         const alive = this.sessionGuard();
-        // signed-in work only: nothing starts for an ended session
         if (!alive()) return;
         if (!plan || plan.problem || !result?.task_id || !result?.evidence_draft_id) return {};
         try {
-            const args = {
+            const recorded = await this.backend.submitOccupancies({
+                clientSubmissionId: plan.submissionId,
                 taskId: result.task_id,
                 parentEvidenceDraftId: result.evidence_draft_id,
                 segments: plan.segments.map(values => window.PowOccupancy.payload(values)),
                 ...(plan.chain ? { chain: plan.chain } : {}),
-                clientContext: { portal_version: "occupancy-v2" },
-            };
-            const sendKey = `send:occupancy:${result.task_id}:${result.evidence_draft_id}`;
-            const request = await this.submissionRequest(plan.state, args, this.rapidDraftStorageKey(sendKey), alive);
+                clientContext: { portal_version: "occupancy-v2-with-observation" },
+            });
             if (!alive()) return;
-            const recorded = await this.backend.submitOccupancies(request);
-            // a receipt from an ended session writes nothing to the device
-            if (!alive()) return;
-            this.clearSubmissionRequest(sendKey, request);
-            this.clearSubmittedGuidedPeriods(periodsKey, plan.version);
+            this.clearGuidedPeriods(periodsKey);
             this.taskHistoryByTaskId.delete(result.task_id);
             return { periodsRecorded: { result: recorded, count: plan.count } };
         } catch (error) {
-            // the session ended before these periods were recorded: nothing
-            // is kept or shown for it
             if (!alive()) return;
             const state = plan.state;
             this.occupancyDraft = {
                 taskId: result.task_id,
                 context: { taskId: result.task_id, parentEvidenceDraftId: result.evidence_draft_id },
-                lastSend: state.lastSend,
+                submissionId: plan.submissionId,
                 segments: state.segments,
-                provenance: state.sameSource
-                    ? Object.fromEntries(Object.keys(this.occupancyBlankProvenance()).map(key => [key, plan.segments[0][key]]))
-                    : state.provenance,
+                provenance: state.sameSource ? plan.segments[0] : state.provenance,
                 gapAnswer: state.gapAnswer,
-                // the handed-over provenance already carries the gap note when
-                // the cards share the observation's source; the pane appends
-                // the note once, so it is kept only for separate provenance
-                // (#153 round 13)
-                gapNote: state.sameSource ? "" : state.gapNote,
+                gapNote: state.gapNote,
                 chain: state.chain,
                 referenceDate: state.referenceDate,
             };
@@ -12190,6 +11954,7 @@ class NzVerificationMap {
         const formFields = RAPID_NOMINATION_ENTRY
             ? this.rapidObservationFieldsHtml("pin", {
                 submitLabel: "Save and add another",
+                submissionId: this.pinSubmissionId,
                 showCancel: true,
                 attachmentsHint: true,
                 beforeButtons: this.pinPeriodsBlockHtml(Boolean(this.reviseContext)),
@@ -12415,7 +12180,7 @@ class NzVerificationMap {
             this.bindRapidObservationForm("pin", {
                 draftExtraIds: ["pinNameInput", "pinAddressInput", "pinLocalityInput"],
                 periodsKey: RAPID_PIN_PERIODS_KEY,
-                ...(reviseTarget ? { createTask: (record, draftKey) => this.createRevisionTask(reviseTarget, record, draftKey) } : {}),
+                ...(reviseTarget ? { createTask: () => this.createRevisionTask(reviseTarget) } : {}),
                 getCandidate: reviseTarget ? undefined : () => {
                     if (!this.pinConfirmed) return null;
                     const approximate = this.pinConfirmed.locationMode === "approximate_area";
@@ -12520,9 +12285,8 @@ class NzVerificationMap {
 
     // opens (or claims) the revision task for the record, carrying the
     // confirmed location; returns the task id the observation submits to
-    async createRevisionTask(target, record = document.getElementById("pinRapidCurrentForm") || {}, draftKey = "rapid-pin") {
+    async createRevisionTask(target) {
         const alive = this.sessionGuard();
-        // signed-in work only: nothing starts for an ended session
         if (!alive()) return;
         const confirmed = this.pinConfirmed;
         if (!confirmed) throw new Error("Confirm the map location before recording this observation.");
@@ -12546,7 +12310,7 @@ class NzVerificationMap {
             ? `Revision with evidence: the pin was moved from the record's point ${target.latitude.toFixed(5)}, ${target.longitude.toFixed(5)}.`
             : "Revision with evidence recorded against the existing record.";
         const entryCountry = this.entryCountry();
-        const args = {
+        const result = await this.backend.createIssueTask({
             countryCode: entryCountry.code,
             name,
             issueType: document.getElementById("pinIssueType")?.value || "verify_existing_site",
@@ -12568,9 +12332,7 @@ class NzVerificationMap {
                 placement_zoom: confirmed.zoom,
                 location_mode: confirmed.locationMode,
             },
-        };
-        const result = await this.resolveSendPrerequisite(record, "revision_task", args,
-            this.rapidDraftStorageKey(draftKey), resolved => this.backend.createIssueTask(resolved), alive);
+        });
         if (!alive()) return;
         return { task_id: result.task_id, name, deduped: Boolean(result.deduped) };
     }
@@ -12592,6 +12354,7 @@ class NzVerificationMap {
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
         this.pinLinkedRefs = [];
+        this.pinSubmissionId = RAPID_NOMINATION_ENTRY ? window.PowRapidEntry.secureSubmissionId() : null;
         this.mountPinCards();
         this.map.getContainer().classList.add("pin-placement");
         // the one control becomes the way out while the entry is open
@@ -13450,15 +13213,12 @@ class NzVerificationMap {
         }
     }
 
-    // afterSubmit: a receipt's own cleanup has already removed the device
-    // copy it sent; a newer pin saved since (another tab) is not this
-    // receipt's to drop
-    exitPinMode({ afterSubmit = false } = {}) {
+    exitPinMode() {
         this.disarmHoldRelease?.();
         if (this.formDirtyTaskId === "rapid-pin" || this.formDirtyTaskId === "location-pin") {
             this.clearFormDirty();
         }
-        if (!afterSubmit) this.dropRapidPinFromDevice();
+        this.dropRapidPinFromDevice();
         this.paneSnap("rest");
         // a cancelled period placement returns to the pane with its cards
         const occupancyPin = this.occupancyPinContext;
@@ -13471,6 +13231,7 @@ class NzVerificationMap {
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
         this.pinLinkedRefs = [];
+        this.pinSubmissionId = null;
         this.pinHistory = [];
         this.quickPhotoCarry = null;
         this.pinCountry = null;
