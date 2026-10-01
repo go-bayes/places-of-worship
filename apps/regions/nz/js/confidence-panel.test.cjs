@@ -114,7 +114,7 @@ test("signals: fired terms per component, allowlisted values with nulls omitted,
     assert.match(html, /<div>footprint area m2<\/div><div>412\.5<\/div>/);
     // a way carries null node signals; they are counted, not listed
     assert.doesNotMatch(html, /<div>node in building<\/div>/);
-    assert.match(html, /4 signals not applicable to this geometry/);
+    assert.match(html, /4 signals unknown or not applicable/);
     assert.match(html, /<div>Cross-source<\/div><div>match, 2 sources<\/div>/);
     assert.match(html, /<div>Duplicate<\/div><div>no<\/div>/);
     const conflict = panel.panelHtml(escalate);

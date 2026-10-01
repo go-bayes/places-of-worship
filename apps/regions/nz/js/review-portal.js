@@ -1679,7 +1679,7 @@ function human(value) {
                 // on; a different set (a scorer run ingested meanwhile, a
                 // row pushed past the read's cap) rebuilds the whole panel
                 // so its header never shows a lead the list has left behind
-                if (sameJudgmentSet(before, state.judgments)) {
+                if (sameJudgmentSet(before, state.judgments, judgmentId)) {
                     rerenderJudgmentBlock(judgmentId, message);
                     lock(false);
                 } else {
@@ -1701,10 +1701,18 @@ function human(value) {
         });
     }
 
-    function sameJudgmentSet(before, after) {
+    function sameJudgmentSet(before, after, disposedId) {
         const ids = (rows) => rows.map((row) => row?.judgment_id).sort().join("\n");
         const leadOf = (rows) => window.PowConfidencePanel.leadJudgment(rows)?.judgment_id;
-        return ids(before) === ids(after) && leadOf(before) === leadOf(after);
+        // dispositions embedded in the rows count too: another reviewer may
+        // have disposed of a different row meanwhile, and only the row just
+        // disposed of is replaced alone
+        const marks = (rows) => rows.map((row) => `${row?.judgment_id}:${(Array.isArray(row?.dispositions) ? row.dispositions : []).map((entry) => String(entry?.disposition_id)).sort().join(",")}`).sort().join("\n");
+        const unchangedElsewhere = (judgmentId) => {
+            const rest = (rows) => marks(rows.filter((row) => row?.judgment_id !== judgmentId));
+            return rest(before) === rest(after);
+        };
+        return ids(before) === ids(after) && leadOf(before) === leadOf(after) && unchangedElsewhere(disposedId);
     }
 
     function showJudgmentStatus(panel, judgmentId, message) {

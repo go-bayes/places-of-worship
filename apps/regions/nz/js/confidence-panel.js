@@ -186,7 +186,7 @@
                 ${present.length > 0
                     ? grid(present.map(([key, value]) => [escapeHtml(words(key)), typeof value === "boolean" ? (value ? "yes" : "no") : num(value)]))
                     : `<p class="muted">No signal values recorded.</p>`}
-                ${omitted > 0 ? `<p class="muted">${omitted} signal${omitted === 1 ? "" : "s"} not applicable to this geometry.</p>` : ""}
+                ${omitted > 0 ? `<p class="muted">${omitted} signal${omitted === 1 ? "" : "s"} unknown or not applicable.</p>` : ""}
                 <h4>Indicators</h4>
                 ${grid([
                     ["Duplicate", flag(indicators.duplicate)],
