@@ -2,9 +2,9 @@
   "converter_version": "0.1.0",
   "source": {
     "path": "sample-signal-vectors.jsonl",
-    "sha256": "a80098d67daf78b055e59eaa3c5ad19ba565d3e6ef7c3d7a6d8c79a9951186a8",
+    "sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
     "rows": 5,
-    "dataset_version_id": "osm-confidence:nz:signal-vectors-sample:2026-09-01:a80098d67daf",
+    "dataset_version_id": "osm-confidence:nz:signal-vectors-sample:2026-09-01:c75c006384ac",
     "country_code": "NZ",
     "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567"
   },
@@ -32,7 +32,6 @@
           "kind": "place",
           "ref": "osm:way/1001"
         },
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; config ffffffffffff; vectors a80098d67daf; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.1.0",
         "score": {
           "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
           "composite": 0.9126,
@@ -53,19 +52,19 @@
           "calibrated": false,
           "signals_fired": {
             "identity": [
-              "has_name",
-              "has_religion",
-              "worship_specific_building"
+              "name_specific",
+              "religion_present",
+              "building_worship_specific"
             ],
             "location": [
-              "area_geometry"
+              "area_small"
             ],
             "status": [
-              "recent_edit",
-              "long_history"
+              "check_recent",
+              "edit_recent"
             ],
             "denomination": [
-              "denomination_tag"
+              "name_consistent"
             ]
           },
           "signal_values": {
@@ -126,11 +125,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "a80098d67daf78b055e59eaa3c5ad19ba565d3e6ef7c3d7a6d8c79a9951186a8",
+          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
           "standard_version": "confidence-standard/0.3.0"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:a80098d67daf:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -139,7 +138,8 @@
           "country_code": "NZ"
         },
         "judgment_kind": "registration_confidence",
-        "outcome": "screened"
+        "outcome": "screened",
+        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.1.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -147,7 +147,6 @@
           "kind": "place",
           "ref": "osm:way/1001"
         },
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; config ffffffffffff; vectors a80098d67daf; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.1.0",
         "score": {
           "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
           "composite": 0.9126,
@@ -168,19 +167,19 @@
           "calibrated": false,
           "signals_fired": {
             "identity": [
-              "has_name",
-              "has_religion",
-              "worship_specific_building"
+              "name_specific",
+              "religion_present",
+              "building_worship_specific"
             ],
             "location": [
-              "area_geometry"
+              "area_small"
             ],
             "status": [
-              "recent_edit",
-              "long_history"
+              "check_recent",
+              "edit_recent"
             ],
             "denomination": [
-              "denomination_tag"
+              "name_consistent"
             ]
           },
           "signal_values": {
@@ -241,11 +240,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "a80098d67daf78b055e59eaa3c5ad19ba565d3e6ef7c3d7a6d8c79a9951186a8",
+          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
           "standard_version": "confidence-standard/0.3.0"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:a80098d67daf:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -255,7 +254,8 @@
         },
         "judgment_kind": "status_assessment",
         "facet": "status",
-        "outcome": "unknown"
+        "outcome": "unknown",
+        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.1.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -263,7 +263,6 @@
           "kind": "place",
           "ref": "osm:way/1001"
         },
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; config ffffffffffff; vectors a80098d67daf; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.1.0",
         "score": {
           "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
           "composite": 0.9126,
@@ -284,19 +283,19 @@
           "calibrated": false,
           "signals_fired": {
             "identity": [
-              "has_name",
-              "has_religion",
-              "worship_specific_building"
+              "name_specific",
+              "religion_present",
+              "building_worship_specific"
             ],
             "location": [
-              "area_geometry"
+              "area_small"
             ],
             "status": [
-              "recent_edit",
-              "long_history"
+              "check_recent",
+              "edit_recent"
             ],
             "denomination": [
-              "denomination_tag"
+              "name_consistent"
             ]
           },
           "signal_values": {
@@ -357,11 +356,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "a80098d67daf78b055e59eaa3c5ad19ba565d3e6ef7c3d7a6d8c79a9951186a8",
+          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
           "standard_version": "confidence-standard/0.3.0"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:a80098d67daf:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -371,7 +370,8 @@
         },
         "judgment_kind": "location",
         "facet": "location",
-        "outcome": "unclear"
+        "outcome": "unclear",
+        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.1.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -379,7 +379,6 @@
           "kind": "place",
           "ref": "osm:way/1002"
         },
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; config ffffffffffff; vectors a80098d67daf; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.1.0",
         "score": {
           "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
           "composite": 0.6567,
@@ -403,17 +402,18 @@
           "calibrated": false,
           "signals_fired": {
             "identity": [
-              "has_name",
-              "has_religion"
+              "name_specific",
+              "religion_present",
+              "duplicate_within_radius"
             ],
             "location": [
-              "area_geometry"
+              "area_small"
             ],
             "status": [
-              "long_history"
+              "check_older"
             ],
             "denomination": [
-              "denomination_tag"
+              "name_consistent"
             ]
           },
           "signal_values": {
@@ -474,11 +474,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "a80098d67daf78b055e59eaa3c5ad19ba565d3e6ef7c3d7a6d8c79a9951186a8",
+          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
           "standard_version": "confidence-standard/0.3.0"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:a80098d67daf:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -487,7 +487,8 @@
           "country_code": "NZ"
         },
         "judgment_kind": "registration_confidence",
-        "outcome": "review"
+        "outcome": "review",
+        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.1.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -495,7 +496,6 @@
           "kind": "place",
           "ref": "osm:way/1002"
         },
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; config ffffffffffff; vectors a80098d67daf; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.1.0",
         "score": {
           "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
           "composite": 0.6567,
@@ -519,17 +519,18 @@
           "calibrated": false,
           "signals_fired": {
             "identity": [
-              "has_name",
-              "has_religion"
+              "name_specific",
+              "religion_present",
+              "duplicate_within_radius"
             ],
             "location": [
-              "area_geometry"
+              "area_small"
             ],
             "status": [
-              "long_history"
+              "check_older"
             ],
             "denomination": [
-              "denomination_tag"
+              "name_consistent"
             ]
           },
           "signal_values": {
@@ -590,11 +591,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "a80098d67daf78b055e59eaa3c5ad19ba565d3e6ef7c3d7a6d8c79a9951186a8",
+          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
           "standard_version": "confidence-standard/0.3.0"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:a80098d67daf:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -604,7 +605,8 @@
         },
         "judgment_kind": "status_assessment",
         "facet": "status",
-        "outcome": "unknown"
+        "outcome": "unknown",
+        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.1.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -612,7 +614,6 @@
           "kind": "place",
           "ref": "osm:way/1002"
         },
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; config ffffffffffff; vectors a80098d67daf; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.1.0",
         "score": {
           "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
           "composite": 0.6567,
@@ -636,17 +637,18 @@
           "calibrated": false,
           "signals_fired": {
             "identity": [
-              "has_name",
-              "has_religion"
+              "name_specific",
+              "religion_present",
+              "duplicate_within_radius"
             ],
             "location": [
-              "area_geometry"
+              "area_small"
             ],
             "status": [
-              "long_history"
+              "check_older"
             ],
             "denomination": [
-              "denomination_tag"
+              "name_consistent"
             ]
           },
           "signal_values": {
@@ -707,11 +709,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "a80098d67daf78b055e59eaa3c5ad19ba565d3e6ef7c3d7a6d8c79a9951186a8",
+          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
           "standard_version": "confidence-standard/0.3.0"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:a80098d67daf:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -721,7 +723,8 @@
         },
         "judgment_kind": "location",
         "facet": "location",
-        "outcome": "unclear"
+        "outcome": "unclear",
+        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.1.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -729,7 +732,6 @@
           "kind": "place",
           "ref": "osm:way/1002"
         },
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; config ffffffffffff; vectors a80098d67daf; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.1.0",
         "score": {
           "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
           "composite": 0.6567,
@@ -753,17 +755,18 @@
           "calibrated": false,
           "signals_fired": {
             "identity": [
-              "has_name",
-              "has_religion"
+              "name_specific",
+              "religion_present",
+              "duplicate_within_radius"
             ],
             "location": [
-              "area_geometry"
+              "area_small"
             ],
             "status": [
-              "long_history"
+              "check_older"
             ],
             "denomination": [
-              "denomination_tag"
+              "name_consistent"
             ]
           },
           "signal_values": {
@@ -824,11 +827,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "a80098d67daf78b055e59eaa3c5ad19ba565d3e6ef7c3d7a6d8c79a9951186a8",
+          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
           "standard_version": "confidence-standard/0.3.0"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:a80098d67daf:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -838,7 +841,8 @@
         },
         "judgment_kind": "duplicate",
         "facet": "duplicate",
-        "outcome": "unclear"
+        "outcome": "unclear",
+        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.1.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -846,7 +850,6 @@
           "kind": "place",
           "ref": "osm:node/2001"
         },
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; config ffffffffffff; vectors a80098d67daf; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.1.0",
         "score": {
           "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
           "composite": 0.0716,
@@ -874,10 +877,14 @@
           "calibrated": false,
           "signals_fired": {
             "identity": [
-              "has_religion"
+              "name_missing",
+              "religion_present"
             ],
             "location": [],
-            "status": [],
+            "status": [
+              "ruins",
+              "end_date_passed"
+            ],
             "denomination": []
           },
           "signal_values": {
@@ -940,11 +947,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "a80098d67daf78b055e59eaa3c5ad19ba565d3e6ef7c3d7a6d8c79a9951186a8",
+          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
           "standard_version": "confidence-standard/0.3.0"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:a80098d67daf:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -953,7 +960,8 @@
           "country_code": "NZ"
         },
         "judgment_kind": "registration_confidence",
-        "outcome": "escalate"
+        "outcome": "escalate",
+        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.1.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -961,7 +969,6 @@
           "kind": "place",
           "ref": "osm:node/2001"
         },
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; config ffffffffffff; vectors a80098d67daf; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.1.0",
         "score": {
           "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
           "composite": 0.0716,
@@ -989,10 +996,14 @@
           "calibrated": false,
           "signals_fired": {
             "identity": [
-              "has_religion"
+              "name_missing",
+              "religion_present"
             ],
             "location": [],
-            "status": [],
+            "status": [
+              "ruins",
+              "end_date_passed"
+            ],
             "denomination": []
           },
           "signal_values": {
@@ -1055,11 +1066,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "a80098d67daf78b055e59eaa3c5ad19ba565d3e6ef7c3d7a6d8c79a9951186a8",
+          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
           "standard_version": "confidence-standard/0.3.0"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:a80098d67daf:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -1069,7 +1080,8 @@
         },
         "judgment_kind": "status_assessment",
         "facet": "status",
-        "outcome": "unknown"
+        "outcome": "unknown",
+        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.1.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -1077,7 +1089,6 @@
           "kind": "place",
           "ref": "osm:node/2001"
         },
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; config ffffffffffff; vectors a80098d67daf; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.1.0",
         "score": {
           "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
           "composite": 0.0716,
@@ -1105,10 +1116,14 @@
           "calibrated": false,
           "signals_fired": {
             "identity": [
-              "has_religion"
+              "name_missing",
+              "religion_present"
             ],
             "location": [],
-            "status": [],
+            "status": [
+              "ruins",
+              "end_date_passed"
+            ],
             "denomination": []
           },
           "signal_values": {
@@ -1171,11 +1186,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "a80098d67daf78b055e59eaa3c5ad19ba565d3e6ef7c3d7a6d8c79a9951186a8",
+          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
           "standard_version": "confidence-standard/0.3.0"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:a80098d67daf:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -1185,7 +1200,8 @@
         },
         "judgment_kind": "location",
         "facet": "location",
-        "outcome": "unclear"
+        "outcome": "unclear",
+        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.1.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -1193,7 +1209,6 @@
           "kind": "place",
           "ref": "osm:way/1004"
         },
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; config ffffffffffff; vectors a80098d67daf; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.1.0",
         "score": {
           "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
           "composite": 0.6294,
@@ -1219,17 +1234,17 @@
           "calibrated": false,
           "signals_fired": {
             "identity": [
-              "has_name",
-              "has_religion"
+              "name_generic",
+              "religion_present"
             ],
             "location": [
-              "area_geometry"
+              "area_medium"
             ],
             "status": [
-              "long_history"
+              "check_older"
             ],
             "denomination": [
-              "denomination_tag"
+              "denomination_missing"
             ]
           },
           "signal_values": {
@@ -1289,11 +1304,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "a80098d67daf78b055e59eaa3c5ad19ba565d3e6ef7c3d7a6d8c79a9951186a8",
+          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
           "standard_version": "confidence-standard/0.3.0"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:a80098d67daf:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -1302,7 +1317,8 @@
           "country_code": "NZ"
         },
         "judgment_kind": "registration_confidence",
-        "outcome": "review"
+        "outcome": "review",
+        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.1.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -1310,7 +1326,6 @@
           "kind": "place",
           "ref": "osm:way/1004"
         },
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; config ffffffffffff; vectors a80098d67daf; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.1.0",
         "score": {
           "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
           "composite": 0.6294,
@@ -1336,17 +1351,17 @@
           "calibrated": false,
           "signals_fired": {
             "identity": [
-              "has_name",
-              "has_religion"
+              "name_generic",
+              "religion_present"
             ],
             "location": [
-              "area_geometry"
+              "area_medium"
             ],
             "status": [
-              "long_history"
+              "check_older"
             ],
             "denomination": [
-              "denomination_tag"
+              "denomination_missing"
             ]
           },
           "signal_values": {
@@ -1406,11 +1421,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "a80098d67daf78b055e59eaa3c5ad19ba565d3e6ef7c3d7a6d8c79a9951186a8",
+          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
           "standard_version": "confidence-standard/0.3.0"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:a80098d67daf:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -1420,7 +1435,8 @@
         },
         "judgment_kind": "status_assessment",
         "facet": "status",
-        "outcome": "unknown"
+        "outcome": "unknown",
+        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.1.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -1428,7 +1444,6 @@
           "kind": "place",
           "ref": "osm:way/1004"
         },
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; config ffffffffffff; vectors a80098d67daf; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.1.0",
         "score": {
           "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
           "composite": 0.6294,
@@ -1454,17 +1469,17 @@
           "calibrated": false,
           "signals_fired": {
             "identity": [
-              "has_name",
-              "has_religion"
+              "name_generic",
+              "religion_present"
             ],
             "location": [
-              "area_geometry"
+              "area_medium"
             ],
             "status": [
-              "long_history"
+              "check_older"
             ],
             "denomination": [
-              "denomination_tag"
+              "denomination_missing"
             ]
           },
           "signal_values": {
@@ -1524,11 +1539,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "a80098d67daf78b055e59eaa3c5ad19ba565d3e6ef7c3d7a6d8c79a9951186a8",
+          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
           "standard_version": "confidence-standard/0.3.0"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:a80098d67daf:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -1538,23 +1553,24 @@
         },
         "judgment_kind": "location",
         "facet": "location",
-        "outcome": "unclear"
+        "outcome": "unclear",
+        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.1.0"
       }
     ]
   ],
   "judgment_ids": [
-    "2b7f21f48d3b5ce472c128e0d634482e202d971e6e68c36f29568e6a2108cbae",
-    "0d37d1203d430b42908bafff7f72655dc337b455c8d05108ce46d7c99a3b7bfc",
-    "ac1d102e4d6b61811cbfa404a637c818798b7a735bf2def317a712d8fe8cafb1",
-    "6dbafbc9e2e019324dabb6b20388cfca34624a06407acf42c6e2f84e20f52623",
-    "027325392e16c0b4f5338e3a027a055638c8078e39866a04bf0ea37c80174c6f",
-    "674211e6f913dff9e249246e7fa62b2b81299b2d8ad0cc8b71339a16adc5cd1c",
-    "b214578dff39f06ec953f08c41e08b6d1076dedc2cfb8225e9b3aa7a762bb57c",
-    "ed1650d2694ec8ec8bc382df80b2899c72822f466cdc4b0ee6bb9c3f016f45ff",
-    "6c5f73f86b40bd73edb6374936083d35fb1ad5e82f270936cd4163d9ff2b74f9",
-    "df854146ba919f495c511a535c2243c5eb567bfe914696acd6668beff33e0730",
-    "b96264608f78b0836dc2e391594cbdb9f650ca3bcdfa9c86829ee890e7eef826",
-    "b9f7ab69af51d46c43875b9b14ef93e427e14d72a37e0442486796918ab51f3a",
-    "5994bbf2985c27be88a32fc4b6d0d2c8360651a89696955988f1dcc6a8d29526"
+    "1813d1b1e6757e524b7681be3b53b7c44534fa7a1590692e3f97db33b20ce15c",
+    "a66bba97328e0e4dbb7b51f3876f0fa3176a9bfafa74f2ffd60841b02f6dfe70",
+    "8eaf02f1c24ace6c8d05ca8ea6e779f69fb7579c83f7d8e8873790d4136da4bc",
+    "b95b14a28a4c73346042747c574f44103220621c0275fa56733b66cd928be949",
+    "c111070260ce2e93ea300ee053492937eb9ed66d23c26775522f8d61e9bc77e4",
+    "32fc3bb9c5537ea68fcf22cf140eff39a4f4dc5e1fb697fcdd4011fc4302590f",
+    "f0584e0a148588288029b65ecd7881bb09c3c9326d39156ba923e13581192c53",
+    "3deef75cb345156a955f65d84a969dcad4005e32140fd22f010b4d9fa4376778",
+    "eabade2f9b4b08f99d1148b1b69ebf6bfa96f09c55dc1612085bd5d1e2339243",
+    "e07c160b310270914e9c781c70ed224f655634219c607e6ac8f48ca026e7d8f7",
+    "8eb41323dc13183c94757cf0aadaafbee61bcc96cc4a85ba6468ad3bb5d68912",
+    "2b6f0a6f01467513120f3bc810e81b0373683e485604fafd8e9f8a5ecd13ccc1",
+    "7c7616c22f4e7f0efb821ebc879f3f0ac2501963aa7cdfe920a7a3eaa97e0171"
   ]
 }

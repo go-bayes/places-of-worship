@@ -5,7 +5,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 registerHooks({ resolve(specifier, context, nextResolve) { if (specifier.startsWith(".") && !/\.[a-z]+$/i.test(specifier)) { for (const ext of [".js", ".ts"]) { const candidate = new URL(`${specifier}${ext}`, context.parentURL); if (fs.existsSync(fileURLToPath(candidate))) return nextResolve(candidate.href, context); } } return nextResolve(specifier, context); } });
-const { validateScorerJudgment, SCORER_AGENT_NAME } = await import("./scorerJudgments.ts");
+const { validateScorerJudgment, scorerBasisNote, SCORER_AGENT_NAME } = await import("./scorerJudgments.ts");
 
 const expected = JSON.parse(fs.readFileSync(new URL("../../schemas/fixtures/agent-judgment-v1-1/expected-judgments.json", import.meta.url), "utf8"));
 const rows = expected.batches.flat();
@@ -54,4 +54,33 @@ test("the basis note is required, personal-detail free and in a closed alphabet"
   assert.throws(() => validateScorerJudgment({ ...clone(tier), basis_note: `${tier.basis_note}; call 021 555 0188` }), /personal details/);
   assert.throws(() => validateScorerJudgment({ ...clone(tier), basis_note: `${tier.basis_note}; <b>` }), /closed character set/);
   assert.throws(() => validateScorerJudgment({ ...clone(tier), basis_note: `${tier.basis_note}\nnext` }), /closed character set/);
+});
+
+test("scorer metadata has exact formats and no unused free-text field", () => {
+  const revised = (patch) => ({ ...clone(tier), judge: { ...tier.judge, ...patch } });
+  assert.throws(() => validateScorerJudgment(revised({ code_revision: `${tier.judge.code_revision} Rev John Smith john.smith@example.org` })), /code revision/);
+  assert.throws(() => validateScorerJudgment(revised({ code_revision: "abc" })), /code revision/);
+  assert.throws(() => validateScorerJudgment({ ...clone(tier), run: { ...tier.run, batch_id: "call 021 555 0188" } }), /batch id/);
+  const edition = clone(tier);
+  edition.score.edition_id = "osm-pow:nz:edition:2026-09-01:john.smith";
+  assert.throws(() => validateScorerJudgment(edition), /edition/);
+  assert.throws(() => validateScorerJudgment({ ...clone(tier), run: { ...tier.run, agent_run_id: `${tier.run.agent_run_id}:extra` } }), /run id/);
+  assert.throws(() => validateScorerJudgment({ ...clone(tier), run: { ...tier.run, agent_run_id: tier.run.agent_run_id.replace(tier.judge.signal_vector_sha256.slice(0, 12), "c".repeat(12)) } }), /run id/);
+  assert.throws(() => validateScorerJudgment(revised({ prompt_version: "john-smith" })), /configuration version/);
+});
+
+test("score terms come from the scorer's closed vocabularies", () => {
+  const edit = (change) => { const row = clone(tier); change(row.score); row.basis_note = scorerBasisNote(row); return row; };
+  assert.throws(() => validateScorerJudgment(edit((sc) => { sc.signals_fired.identity.push("john.smith"); })), /identity vocabulary/);
+  assert.throws(() => validateScorerJudgment(edit((sc) => { sc.signals_fired.status.push("name_specific"); })), /status vocabulary/);
+  assert.throws(() => validateScorerJudgment(edit((sc) => { sc.tier_reasons.push("st.andrews"); })), /Tier reason/);
+  assert.throws(() => validateScorerJudgment(edit((sc) => { sc.tier_pending.push("st.andrews"); })), /Pending condition/);
+  assert.throws(() => validateScorerJudgment(edit((sc) => { sc.indicators.conflict_reasons.push("st.andrews"); })), /Conflict reason/);
+  validateScorerJudgment(edit((sc) => { sc.tier_reasons.push("duplicate"); }));
+});
+
+test("the basis note is exactly the generated text", () => {
+  assert.equal(tier.basis_note, scorerBasisNote(tier));
+  assert.throws(() => validateScorerJudgment({ ...clone(tier), basis_note: `${tier.basis_note}; John Smith` }), /generated text/);
+  assert.throws(() => validateScorerJudgment({ ...clone(tier), basis_note: tier.basis_note.replace("tier screened", "tier review") }), /generated text/);
 });

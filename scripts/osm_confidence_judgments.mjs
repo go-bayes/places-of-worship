@@ -34,10 +34,9 @@ registerHooks({
 });
 
 const { JUDGMENTS_PER_CALL_MAX, JUDGMENT_SCHEMA_VERSION_1_1, judgmentIdFor } = await import("../convex/lib/agentJudgments.ts");
-const { SCORER_AGENT_NAME, SCORER_SIGNAL_VALUE_KEYS, validateScorerJudgment } = await import("../convex/lib/scorerJudgments.ts");
+const { SCORER_AGENT_NAME, SCORER_SIGNAL_VALUE_KEYS, scorerBasisNote, validateScorerJudgment } = await import("../convex/lib/scorerJudgments.ts");
 
 export const CONVERTER_VERSION = "0.1.0";
-const MAPPING = `osm-confidence-judgments/${CONVERTER_VERSION}`;
 const VECTOR_SCHEMA = "osm-confidence-signal-vector.v0.1";
 const TIERS = ["screened", "review", "escalate"];
 const CROSS_SOURCE = ["not_computed", "no_match", "match"];
@@ -108,29 +107,11 @@ function readManifest(manifestPath, vectorsSha) {
     cut_points: parameters.cut_points,
   };
   for (const [name, value] of Object.entries(required)) if (value === undefined || value === null) fail(`manifest lacks ${name}`);
+  if (!/^[0-9a-f]{64}$/.test(required.config_sha256)) fail("manifest config_sha256 is not a sha256");
   const edition = required.edition_id.split(":");
   if (edition.length < 5 || edition[1].toUpperCase() !== countries[0]) fail("manifest edition_id is not in the manifest country");
   if (edition[3] !== required.snapshot_date) fail("manifest edition_id date differs from scope.snapshot_date");
   return { manifest, entry, country: countries[0], ...required, dataset_version_id: manifest.dataset_version_id ?? null };
-}
-
-function basisNote(m, vectorsSha, record, score) {
-  const c = score.components;
-  const reasons = score.tier_reasons.length > 0 ? score.tier_reasons.join(", ") : "none";
-  const pending = score.tier_pending.length > 0 ? score.tier_pending.join(", ") : "none";
-  const i = score.indicators;
-  return [
-    `standard ${m.standard_version}`,
-    `scorer ${m.scorer_version} (uncalibrated heuristic, not a probability)`,
-    `code ${record.code_revision.slice(0, 12)}`,
-    `config ${m.config_sha256.slice(0, 12)}`,
-    `vectors ${vectorsSha.slice(0, 12)}`,
-    `edition ${m.edition_id}`,
-    `composite = identity × location × status = ${score.composite} (identity ${c.identity}, location ${c.location}, status ${c.status}; denomination ${c.denomination} is reported beside it)`,
-    `tier ${score.tier} (reasons ${reasons}; pending ${pending})`,
-    `indicators duplicate=${i.duplicate} conflict=${i.conflict} generic_name=${i.generic_name} missing_name=${i.missing_name} cross_source=${i.cross_source_match}`,
-    `mapping ${MAPPING}`,
-  ].join("; ");
 }
 
 function featureRows(m, vectorsSha, record) {
@@ -189,7 +170,6 @@ function featureRows(m, vectorsSha, record) {
   const common = {
     schema_version: JUDGMENT_SCHEMA_VERSION_1_1,
     subject: { kind: "place", ref },
-    basis_note: basisNote(m, vectorsSha, record, score),
     score,
     judge: {
       agent_name: SCORER_AGENT_NAME,
@@ -211,7 +191,8 @@ function featureRows(m, vectorsSha, record) {
     { ...common, judgment_kind: "location", facet: "location", outcome: "unclear" },
   ];
   if (score.indicators.duplicate) rows.push({ ...common, judgment_kind: "duplicate", facet: "duplicate", outcome: "unclear" });
-  return rows;
+  // the note is generated from the row's own validated fields (the validator requires exactly this text)
+  return rows.map((row) => ({ ...row, basis_note: scorerBasisNote(row) }));
 }
 
 export function convert({ vectorsPath, manifestPath, limit, osmKeys = [] }) {

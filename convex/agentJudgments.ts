@@ -173,15 +173,13 @@ export const ingestDeterministicJudgments = internalMutation({
     }
     if (!/^[0-9a-f]{64}$/.test(args.signalVectorSha256)) throw new Error("The signal-vector hash is a sha256.");
     const inputs = args.judgments as unknown as JudgmentInput[];
-    const countries = new Set<string>();
+    if (new Set(inputs.map((input) => input.context.country_code)).size > 1) throw new Error("One call carries one country.");
     for (const input of inputs) {
       validateScorerJudgment(input);
       if (input.judge.signal_vector_sha256 !== args.signalVectorSha256) {
         throw new Error("Every judgment names the signal-vector hash the call names.");
       }
-      countries.add(input.context.country_code);
     }
-    if (countries.size > 1) throw new Error("One call carries one country.");
     const now = Date.now();
     const service = await internalAgentServiceUser(ctx, now);
     return await recordJudgments(ctx, { actorUserId: service._id, judgments: inputs, now });
