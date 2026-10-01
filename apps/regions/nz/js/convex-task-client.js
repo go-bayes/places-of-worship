@@ -335,7 +335,6 @@
             // confirms it (its confirming reload may report changes)
             if (this.signOutPromise) return;
             if (nextSessionId === this.sessionId) return;
-            this.endingSessionId = "";
             const hadSession = Boolean(this.sessionId);
             this.sessionGeneration += 1;
             this.sessionId = nextSessionId;
@@ -392,8 +391,9 @@
                 }
                 if (!current()) return null;
                 this.user = user;
-                // the session this user was admitted under (#153 round 12)
-                this.userSessionId = sessionId;
+                // a device holding another member's unsent work gives it up
+                // before this member's page reads anything from it
+                PowConvexTaskClient.adoptDeviceFor(user._id);
                 this.claimFailure = null;
                 if (options.onSignedIn) await options.onSignedIn(user);
                 return user;
@@ -414,10 +414,12 @@
             }
             this.user = null;
             this.claimFailure = null;
+            // every portal's unsent work on this device goes, whoever began
+            // it (the pages ask first, when there is any)
+            PowConvexTaskClient.clearDeviceWork();
             if (this.signOutPromise) return this.signOutPromise;
             const clerk = this.clerk;
             const sessionId = this.sessionId || clerk?.session?.id || "";
-            this.endingSessionId = sessionId;
             // the page may repaint its card at once; the card waits for this
             // so it never re-admits the session being ended
             this.sessionGeneration += 1;
@@ -474,12 +476,6 @@
         // a sign-out must be finished before this session is admitted: the
         // marker names it, or storage cannot say and this is the session the
         // page found on load (a new sign-in in this page never has one)
-        // the session now current, or the one a deliberate sign-out is ending;
-        // a page binds its remembered owner to this id (#153 round 11)
-        currentOrEndingSessionId() {
-            return this.sessionId || this.endingSessionId || "";
-        }
-
         mustFinishSignOut(sessionId = this.sessionId) {
             if (!sessionId) return false;
             const marker = readPendingSignOut();
@@ -709,7 +705,6 @@
         }
 
         async retrySignOut(container) {
-            this.lifecycle.onSignOutStarted?.();
             try {
                 await this.signOut({ deliberate: true });
             } catch (error) {
@@ -793,11 +788,9 @@
                 return authError;
             };
             // an answer for a session that has since changed is not handed
-            // back as if it were the current session's. a query's answer is
-            // simply dropped; a write the server recorded is reported as
-            // committed, with its value, so the caller can still clean up
-            // what it owns (the exact device draft it sent) while leaving
-            // the page alone (#153 round 5)
+            // back as if it were the current session's: it is dropped. a
+            // write the server recorded stays recorded; the page writes
+            // nothing to the device for it
             const stale = !overrideToken && !this.isCurrent(mark);
             if (stale && kind === "query") throw sessionChanged();
             if (!overrideToken && response.status === 401) throw stale ? sessionChanged() : authEnded();
@@ -812,12 +805,7 @@
             const failed = (!response.ok && response.status !== 560) || payload.status === "error";
             // the session may also have changed while the body was read
             if (stale || (!overrideToken && !this.isCurrent(mark))) {
-                const changed = sessionChanged();
-                if (!failed) {
-                    changed.committed = true;
-                    changed.value = payload.value;
-                }
-                throw changed;
+                throw sessionChanged();
             }
             if (!failed) return payload.value;
             // only an actual error response is read for authentication
@@ -1067,34 +1055,87 @@
         }
     }
 
-    // a deliberate sign-out from any portal removes the signing-out member's
-    // unsent device copies (every country) and records the time, so a late
-    // receipt in another tab parks nothing for them (#153 round 8). other
-    // members' records are never touched
-    PowConvexTaskClient.purgeOwnerDeviceWork = function purgeOwnerDeviceWork(ownerId) {
-        if (!ownerId) return;
+    // unsent work the portals keep on this device: form snapshots, rapid
+    // drafts and guided periods, every country and member. drafts written
+    // before c1 (powFormSnapshot:, powRapidDraft:) are quarantined, never
+    // read or deleted here
+    const DEVICE_WORK_PREFIXES = ["powFormSnapshot2:", "powRapidDraft2:", "powGuidedPeriods:"];
+    // the member whose work the device holds, so a different member signing
+    // in never finds it (an expired session, a shared device)
+    const DEVICE_OWNER_KEY = "powDeviceOwner1";
+
+    function deviceWorkKeys() {
+        const keys = [];
         try {
             const storage = window.localStorage;
-            const recordPrefixes = ["powFormSnapshot2:", "powRapidDraft2:", "powPendingPeriods1:"];
-            const keys = [];
             for (let index = 0; index < storage.length; index += 1) {
                 const key = storage.key(index);
-                if (!key) continue;
-                if (key.startsWith("powGuidedPeriods:") && key.split(":")[2] === ownerId) {
-                    keys.push(key);
-                } else if (recordPrefixes.some(prefix => key.startsWith(prefix))) {
-                    try {
-                        if (JSON.parse(storage.getItem(key) || "null")?.owner === ownerId) keys.push(key);
-                    } catch (error) {
-                        // an unreadable record is not this member's to delete
-                    }
-                }
+                if (key && DEVICE_WORK_PREFIXES.some(prefix => key.startsWith(prefix))) keys.push(key);
             }
-            keys.forEach(key => storage.removeItem(key));
-            storage.setItem(`powDeliberateSignOut1:${ownerId}`, String(Date.now()));
+        } catch (error) {
+            // storage unavailable: nothing is held
+        }
+        return keys;
+    }
+
+    PowConvexTaskClient.hasUnsentDeviceWork = function hasUnsentDeviceWork() {
+        return deviceWorkKeys().length > 0;
+    };
+
+    // a deliberate sign-out: all device work goes, whatever its owner
+    PowConvexTaskClient.clearDeviceWork = function clearDeviceWork() {
+        try {
+            deviceWorkKeys().forEach(key => window.localStorage.removeItem(key));
+            window.localStorage.removeItem(DEVICE_OWNER_KEY);
         } catch (error) {
             // storage unavailable: nothing kept on this device
         }
+    };
+
+    // admission: work held for a different member is deleted first
+    PowConvexTaskClient.adoptDeviceFor = function adoptDeviceFor(userId) {
+        if (!userId) return;
+        try {
+            if (window.localStorage.getItem(DEVICE_OWNER_KEY) !== userId) {
+                PowConvexTaskClient.clearDeviceWork();
+                window.localStorage.setItem(DEVICE_OWNER_KEY, userId);
+            }
+        } catch (error) {
+            // storage unavailable: nothing is kept
+        }
+    };
+
+    // the one question before a deliberate sign-out: resolves true at once
+    // when nothing is unsent (the page may name typed work it has not yet
+    // saved), else after the person chooses
+    PowConvexTaskClient.confirmSignOut = function confirmSignOut({ pageHasUnsent = false } = {}) {
+        if (!pageHasUnsent && !PowConvexTaskClient.hasUnsentDeviceWork()) return Promise.resolve(true);
+        return new Promise((resolve) => {
+            const overlay = document.createElement("div");
+            overlay.className = "pow-signout-confirm";
+            overlay.innerHTML = `
+                <div class="pow-signout-confirm-box" role="alertdialog" aria-modal="true" aria-labelledby="powSignOutConfirmText">
+                    <p id="powSignOutConfirmText">Unsent work on this device will be deleted. Sign out?</p>
+                    <div class="pow-signout-confirm-actions">
+                        <button type="button" data-pow-confirm="cancel">Cancel</button>
+                        <button type="button" data-pow-confirm="sign-out">Sign out</button>
+                    </div>
+                </div>
+            `;
+            const finish = (answer) => {
+                document.removeEventListener("keydown", onKey, true);
+                overlay.remove();
+                resolve(answer);
+            };
+            const onKey = (event) => {
+                if (event.key === "Escape") finish(false);
+            };
+            overlay.querySelector('[data-pow-confirm="cancel"]').addEventListener("click", () => finish(false));
+            overlay.querySelector('[data-pow-confirm="sign-out"]').addEventListener("click", () => finish(true));
+            document.addEventListener("keydown", onKey, true);
+            document.body.appendChild(overlay);
+            overlay.querySelector('[data-pow-confirm="cancel"]').focus?.();
+        });
     };
 
     window.PowConvexTaskClient = PowConvexTaskClient;

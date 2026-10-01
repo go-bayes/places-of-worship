@@ -322,37 +322,28 @@ assert.equal(elements.get("transportDot").textContent, "Connected");
         await portal.init();
         assert.equal(portal.state.user, reviewerA);
     }
-    // #153 round 9: a token refusal clears the reviewer; the card's later
-    // deliberate sign-out still purges that reviewer's device work
+    // sign-out button: the question comes first, and Cancel keeps the
+    // session; Sign out ends it deliberately (the client then deletes every
+    // portal's device work)
     {
-        const purged = [];
-        window.PowConvexTaskClient.purgeOwnerDeviceWork = (owner) => purged.push(owner);
+        const signOuts = [];
+        let asked = 0;
+        let answer = false;
+        window.PowConvexTaskClient.confirmSignOut = async () => { asked += 1; return answer; };
+        portal.client.signOut = async (options) => { signOuts.push(options); };
         portal.showSignedOut("Signed out.");
-        portal.state.user = { _id: "reviewer_refused", display_name: "R", roles: ["reviewer"] };
-        portal.state.lastOwnerId = "";
-        portal.client.currentOrEndingSessionId = function () { return this.sessionId || ""; };
-        portal.state.userSessionId = "session_r";
-        portal.client.sessionId = "session_r";
-        window.__lifecycle.onSignedOut({ deliberate: false });
-        assert.equal(portal.state.user, null, "the refusal clears the reviewer");
-        window.__lifecycle.onSignedOut({ deliberate: true });
-        assert.deepEqual(purged, ["reviewer_refused"], "the card's sign-out purges the refused reviewer");
-        window.__lifecycle.onSignedOut({ deliberate: true });
-        assert.deepEqual(purged, ["reviewer_refused", ""], "the named owner is spent once");
-    }
-    // #153 round 11: an account that replaces the reviewer's session and is
-    // refused does not inherit the reviewer's device work when it signs out
-    {
-        const purged = [];
-        window.PowConvexTaskClient.purgeOwnerDeviceWork = (owner) => purged.push(owner);
-        portal.showSignedOut("Signed out.");
-        portal.state.user = { _id: "reviewer_a2", display_name: "A", roles: ["reviewer"] };
-        portal.state.userSessionId = "session_a";
-        portal.client.sessionId = "session_a";
-        window.__lifecycle.onSignedOut({ deliberate: false, replaced: true });
-        portal.client.sessionId = "session_b";
-        window.__lifecycle.onSignedOut({ deliberate: true });
-        assert.deepEqual(purged, [""], "the replacing account's sign-out names nobody");
+        const reviewer = { _id: "reviewer_s", display_name: "S", roles: ["reviewer"] };
+        portal.state.user = reviewer;
+        portal.renderAuth();
+        const click = () => elements.get("signOut").listeners.click.at(-1)();
+        await click();
+        assert.equal(asked, 1);
+        assert.deepEqual(signOuts, [], "Cancel does not sign out");
+        assert.equal(portal.state.user, reviewer, "and the reviewer stays signed in");
+        answer = true;
+        await click();
+        assert.equal(JSON.stringify(signOuts), JSON.stringify([{ deliberate: true }]));
+        assert.equal(portal.state.user, null);
     }
     console.log("review state dom test passed");
 })().catch((error) => {

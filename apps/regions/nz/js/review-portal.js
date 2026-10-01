@@ -44,30 +44,8 @@
     // registered before any restore: a session restored on load and then
     // ended in another tab, by expiry, or by the card's retried sign-out
     // clears the queue and the open task (c1)
-    // the reviewer whose device copies a sign-out removes: the signed-in one,
-    // or the last admitted reviewer only while the session being ended is
-    // the one that reviewer held. a different account's session (an
-    // uninvited sign-in that replaced it) never names them (#153 round 11)
-    function departingOwnerId() {
-        if (state.user?._id) return state.user._id;
-        const ending = client.currentOrEndingSessionId?.() || "";
-        return state.lastOwnerId && state.lastOwnerSessionId && state.lastOwnerSessionId === ending ? state.lastOwnerId : "";
-    }
     client.setLifecycle?.({
-        // a retried sign-out from the card removes the reviewer's device
-        // copies when it starts, as the first attempt does (#153 round 10)
-        onSignOutStarted: () => {
-            window.PowConvexTaskClient?.purgeOwnerDeviceWork?.(departingOwnerId());
-        },
         onSignedOut: ({ deliberate } = {}) => {
-            // a deliberate sign-out from the card after a token refusal finds
-            // no signed-in user; the last admitted reviewer is named so their
-            // device copies still go (#153 round 9)
-            if (deliberate) {
-                window.PowConvexTaskClient?.purgeOwnerDeviceWork?.(departingOwnerId());
-                state.lastOwnerId = "";
-                state.lastOwnerSessionId = "";
-            }
             showSignedOut(deliberate
                 ? "Signed out. Sign in again to review submitted evidence."
                 : state.user
@@ -386,9 +364,6 @@ function human(value) {
             client.renderSignInButton(els.signInButton, {
                 onSignedIn: async (user) => {
                     state.user = user;
-                    state.userSessionId = client.sessionId || "";
-                    state.lastOwnerId = "";
-                    state.lastOwnerSessionId = "";
                     renderAuth();
                     await loadQueue();
                 },
@@ -412,11 +387,11 @@ function human(value) {
             </div>
         `;
         document.getElementById("signOut").addEventListener("click", async () => {
-            // the member is named before the state clears, then their unsent
-            // device copies go, as on the verification page (#153 round 8)
-            const signedOutUserId = state.user?._id || "";
+            // unsent contributor work on this device is deleted by a sign-out
+            // (client.signOut): ask once, only when there is some
+            const confirmed = await (window.PowConvexTaskClient?.confirmSignOut?.() ?? true);
+            if (!confirmed) return;
             const signingOut = client.signOut({ deliberate: true });
-            window.PowConvexTaskClient?.purgeOwnerDeviceWork?.(signedOutUserId);
             showSignedOut("Signing out…");
             try {
                 await signingOut;
@@ -449,10 +424,6 @@ function human(value) {
         state.reviewSnapshotError = "";
         state.busy = false;
         state.occupancyBusy = false;
-        if (state.user?._id) {
-            state.lastOwnerId = state.user._id;
-            state.lastOwnerSessionId = state.userSessionId || "";
-        }
         state.user = null;
         state.queue = [];
         state.selected = null;
@@ -2340,9 +2311,6 @@ function human(value) {
             const sessionUnchanged = (state.sessionEpoch || 0) === epoch && client.user === restored;
             if (restored && sessionUnchanged && !state.user) {
                 state.user = restored;
-                state.userSessionId = client.sessionId || "";
-                state.lastOwnerId = "";
-                state.lastOwnerSessionId = "";
             }
         }
         els.refreshQueue.addEventListener("click", loadQueue);

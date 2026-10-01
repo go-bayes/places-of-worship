@@ -161,12 +161,6 @@ if (!localStorage.getItem("powGuidedPeriods:NZ:user_1:task_1")) {
   throw new Error("The edited cards and retry id were not persisted for this user and task.");
 }
 
-localStorage.setItem("powGuidedPeriods:NZ:user_2:task_2", "other user");
-app.clearAllGuidedPeriods("user_1");
-if (localStorage.getItem("powGuidedPeriods:NZ:user_1:task_1") !== null || localStorage.getItem("powGuidedPeriods:NZ:user_2:task_2") !== "other user") {
-  throw new Error("Sign-out storage cleanup crossed the user namespace.");
-}
-
 // pr-f: the function chain renders under the cards, a change is added
 // through the actual click handler, a complete desacralisation and
 // intermittent-use change write the cards (the ra never types the date

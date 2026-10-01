@@ -21,6 +21,8 @@ function harness({ session = null, cookie = "", responses = {}, failLoads = 0, f
     getItem(key) { refuse("read"); return values.has(key) ? values.get(key) : null; },
     setItem(key, value) { refuse("write"); values.set(key, String(value)); },
     removeItem(key) { refuse("write"); values.delete(key); },
+    get length() { return values.size; },
+    key(index) { return [...values.keys()][index] ?? null; },
   };
   const calls = { scripts: [], load: [], getToken: [], mountSignIn: [], unmountSignIn: 0, signOut: 0, reload: 0, fetches: [] };
   // the sessions clerk's server still holds for this browser
@@ -741,9 +743,9 @@ const container = () => ({
     assert.equal(h.calls.signOut, 0);
   }
 
-  // 23. #153 round 5 (astra): a write the server recorded after the session
-  // changed is reported as committed, with its value, so the caller can
-  // clean up what it owns; a query's late answer is only dropped
+  // 23. a write the server recorded after the session changed is rejected
+  // as a changed session, with no value handed back: the page writes
+  // nothing to the device for it
   {
     const later = () => { let resolve; const promise = new Promise((r) => { resolve = r; }); return { promise, resolve }; };
     const recorded = later();
@@ -759,7 +761,45 @@ const container = () => ({
     await tick();
     h.clerk.setSession(h.makeSession("sess_b", "b@example.org"));
     recorded.resolve(ok({ task_id: "t_a", evidence_draft_id: "d_a" }));
-    await assert.rejects(submitting, (error) => error.sessionChanged === true && error.committed === true && error.value.task_id === "t_a");
+    await assert.rejects(submitting, (error) => error.sessionChanged === true && error.committed === undefined && error.value === undefined);
+  }
+
+  // 24. device work: a deliberate sign-out deletes every member's unsent
+  // work, whatever its owner; an ended session leaves it, and only a
+  // different member's admission deletes it; the quarantined
+  // pre-c1 drafts are never touched
+  {
+    const responses = { "users:claimInvite": ok("user_a"), "users:me": ok({ ...member, _id: "user_a" }) };
+    const h = harness({ session: { id: "sess_a", email: "a@example.org" }, cookie: "__client_uat=1", responses });
+    const work = () => [...h.values.keys()].filter((key) => /^(powFormSnapshot2|powRapidDraft2|powGuidedPeriods):/.test(key));
+    h.values.set("powFormSnapshot:NZ:t", "pre-c1");
+    // a reload while signed in as the member who owns the device keeps it
+    h.values.set("powDeviceOwner1", "user_a");
+    h.values.set("powFormSnapshot2:NZ:t1", "{}");
+    h.values.set("powRapidDraft2:NZ:rapid-pin", "{}");
+    h.values.set("powGuidedPeriods:NZ:user_a:t1", "{}");
+    h.values.set("powGuidedPeriods:NZ:user_b:t2", "{}");
+    const client = new h.Client(config);
+    assert.equal(h.Client.hasUnsentDeviceWork(), true);
+    await client.restoreSession();
+    assert.equal(work().length, 4, "the owner's reload keeps the device work");
+    await client.signOut({ deliberate: true });
+    assert.deepEqual(work(), [], "a deliberate sign-out deletes every owner's device work");
+    assert.equal(h.values.has("powDeviceOwner1"), false);
+    assert.equal(h.values.get("powFormSnapshot:NZ:t"), "pre-c1", "quarantined pre-c1 drafts stay");
+    assert.equal(h.Client.hasUnsentDeviceWork(), false);
+    assert.equal(await h.Client.confirmSignOut(), true, "no prompt without unsent work");
+  }
+  {
+    // an ended session leaves the work; a different member's sign-in deletes it
+    const responses = { "users:claimInvite": ok("user_b"), "users:me": ok({ ...member, _id: "user_b" }) };
+    const h = harness({ session: { id: "sess_b", email: "b@example.org" }, cookie: "__client_uat=1", responses });
+    h.values.set("powDeviceOwner1", "user_a");
+    h.values.set("powFormSnapshot2:NZ:t1", "{}");
+    const client = new h.Client(config);
+    await client.restoreSession();
+    assert.equal(h.values.has("powFormSnapshot2:NZ:t1"), false, "a different member never finds the earlier member's work");
+    assert.equal(h.values.get("powDeviceOwner1"), "user_b");
   }
 
   console.log("convex-task-client: clerk sessions ok");

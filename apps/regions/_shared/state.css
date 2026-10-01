@@ -263,6 +263,39 @@ button.state-pill:focus-visible { outline: 2px solid var(--action); outline-offs
     min-height: 44px;
 }
 
+/* the question before a deliberate sign-out that would delete unsent work */
+.pow-signout-confirm {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.5);
+}
+.pow-signout-confirm-box {
+    display: grid;
+    gap: 14px;
+    width: min(100%, 360px);
+    padding: 16px;
+    border: 1px solid var(--control-line);
+    border-radius: var(--r-sm, 6px);
+    background: var(--panel);
+    color: var(--ink);
+}
+.pow-signout-confirm-box p {
+    margin: 0;
+    line-height: 1.45;
+}
+.pow-signout-confirm-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+.pow-signout-confirm-actions button {
+    min-height: 44px;
+}
+
 /* pre-c1 device drafts held in quarantine: a note to every signed-in user
    on the device, dismissible for the session; it never shows their content */
 .legacy-draft-notice {

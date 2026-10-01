@@ -1,8 +1,11 @@
 // a clerk session that ends with the portal open (c1 review, astra m2):
 // the page keeps nothing of the person on screen, exactly as on the sign-out
-// button, while their unsent drafts stay on the device keyed to their user
-// id and come back only for them. the sign-out button reports completion
-// only once clerk confirms it (sol m2, astra m3)
+// button. an ended session leaves the member's unsent drafts on the device
+// for a reload or the same member's return; a deliberate sign-out deletes
+// every portal's device work, whoever began it, after one question when
+// there is unsent work; a late receipt from an ended session writes nothing
+// to the device. the sign-out button reports completion only once clerk
+// confirms it (sol m2, astra m3)
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -44,15 +47,21 @@ const context = vm.createContext({
   window, document, localStorage, sessionStorage: localStorage, navigator: { geolocation: null },
   URLSearchParams, Map, Set, Date, Number, String, Boolean, Object, Array, Math, JSON, RegExp, Intl, console, setTimeout, clearTimeout, Promise, Error,
 });
-for (const file of ["occupancy-contract.js", "function-chain-contract.js", "task-presentation.js", "verification-map.js"]) {
+Object.assign(context, { URL, atob: (value) => Buffer.from(value, "base64").toString("binary") });
+for (const file of ["occupancy-contract.js", "function-chain-contract.js", "task-presentation.js", "verification-map.js", "convex-task-client.js"]) {
   vm.runInContext(fs.readFileSync(path.join(__dirname, file), "utf8"), context, { filename: file });
 }
+
+// the sign-out question is tested on its own below; elsewhere it answers yes
+const realConfirmSignOut = window.PowConvexTaskClient.confirmSignOut;
+const answerYes = async () => true;
+window.PowConvexTaskClient.confirmSignOut = answerYes;
 
 function signedInApp(userId = "user_a") {
   const app = Object.create(window.NzVerificationMap.prototype);
   const calls = { detail: 0, panel: 0, exitPin: 0 };
   Object.assign(app, {
-    backend: { user: null, sessionId: "sess_a", userSessionId: "sess_a", currentOrEndingSessionId() { return this.sessionId || ""; }, signOut: async () => {} },
+    backend: { user: null, sessionId: "sess_a", signOut: async () => {} },
     backendUser: { _id: userId, initials: "GL" },
     backendLastError: "",
     signedOutDeliberately: false,
@@ -80,18 +89,18 @@ function signedInApp(userId = "user_a") {
   return { app, calls };
 }
 
-// device drafts live under owner-scoped keys since c1
-const snapshotKey = "powFormSnapshot2:NZ:user_a:task_1";
-const rapidKey = "powRapidDraft2:NZ:user_a:rapid-pin";
+// device drafts: written only while signed in
+const snapshotKey = "powFormSnapshot2:NZ:task_1";
+const rapidKey = "powRapidDraft2:NZ:rapid-pin";
 
 // 1. an ended session empties the page but keeps the owner's device drafts
 {
   values.clear();
   const { app, calls } = signedInApp("user_a");
   app.setFormSnapshot("task_1", { evidence_note: "typed, unsent" });
-  assert.equal(JSON.parse(values.get(snapshotKey)).owner, "user_a", "the device copy names its owner");
+  assert.ok(values.has(snapshotKey), "the snapshot reaches the device");
   app.pinConfirmed = { latitude: -41.29, longitude: 174.78 };
-  values.set(rapidKey, JSON.stringify({ saved_at: 1, owner: "user_a", values: { directObservation: "a church hall" }, pin: { latitude: -41.29, longitude: 174.78 } }));
+  values.set(rapidKey, JSON.stringify({ saved_at: 1, values: { directObservation: "a church hall" }, pin: { latitude: -41.29, longitude: 174.78 } }));
   const periodsPrefix = window.PowOccupancy.guidedPeriodsStoragePrefix("NZ", "user_a");
   values.set(`${periodsPrefix}task_1`, JSON.stringify({ segments: [{ start: "2001" }] }));
   app.pinMode = true;
@@ -118,15 +127,11 @@ const rapidKey = "powRapidDraft2:NZ:user_a:rapid-pin";
   assert.ok(JSON.parse(values.get(rapidKey)).pin, "the kept pin survives an ended session");
   assert.ok(values.has(`${periodsPrefix}task_1`));
 
-  // another person signing in on the same device sees none of it
-  app.backendUser = { _id: "user_b" };
-  assert.equal(app.getFormSnapshot("task_1"), undefined);
-  assert.equal(app.readRapidDraft("rapid-pin"), null);
-  // nor does a signed-out page
+  // a signed-out page reads nothing from the device
   app.backendUser = null;
   assert.equal(app.getFormSnapshot("task_1"), undefined);
   assert.equal(app.readRapidDraft("rapid-pin"), null);
-  // the owner gets it back
+  // the member's return (or a reload while signed in) gets it back
   app.backendUser = { _id: "user_a" };
   assert.equal(app.getFormSnapshot("task_1").evidence_note, "typed, unsent");
   assert.equal(app.readRapidDraft("rapid-pin").values.directObservation, "a church hall");
@@ -176,22 +181,103 @@ const rapidKey = "powRapidDraft2:NZ:user_a:rapid-pin";
   assert.equal(values.size, 0, "nothing ownerless is written");
 }
 
-// 1c. a deliberate sign-out deletes the departing user's snapshots and
-// rapid drafts, text and pin, on every country, and nobody else's
+// 1c. (a) a deliberate sign-out deletes every owner's device work: form
+// snapshots, rapid drafts (text and pin), guided periods, on every country,
+// and the page's own activity; the quarantined pre-c1 drafts stay
 {
   values.clear();
   const { app } = signedInApp("user_b");
-  values.set("powFormSnapshot2:NZ:user_a:task_a", JSON.stringify({ saved_at: 1, owner: "user_a", snapshot: {} }));
-  values.set("powFormSnapshot2:NZ:user_b:task_b", JSON.stringify({ saved_at: 1, owner: "user_b", snapshot: {} }));
-  values.set("powRapidDraft2:NZ:user_a:rapid-pin", JSON.stringify({ saved_at: 1, owner: "user_a", values: { directObservation: "a's text" } }));
-  values.set("powRapidDraft2:NZ:user_b:rapid-pin", JSON.stringify({ saved_at: 1, owner: "user_b", values: { directObservation: "b's text" } }));
-  values.set("powRapidDraft2:VU:user_b:quick", JSON.stringify({ saved_at: 1, owner: "user_b", values: {} }));
+  values.set("powFormSnapshot2:NZ:task_a", JSON.stringify({ saved_at: 1, snapshot: {} }));
+  values.set("powFormSnapshot2:VU:task_b", JSON.stringify({ saved_at: 1, snapshot: {} }));
+  values.set("powRapidDraft2:NZ:rapid-pin", JSON.stringify({ saved_at: 1, values: { directObservation: "text" }, pin: { latitude: 1, longitude: 2 } }));
+  values.set("powGuidedPeriods:NZ:user_a:task_a", "{}");
+  values.set("powGuidedPeriods:NZ:user_b:task_b", "{}");
+  values.set("powDeviceOwner1", "user_b");
+  values.set("powFormSnapshot:NZ:legacy", "pre-c1");
   app.onBackendSessionEnded({ deliberate: true });
-  assert.ok(values.has("powFormSnapshot2:NZ:user_a:task_a"), "another contributor's kept work stays (greptile 4091758537)");
-  assert.ok(values.has("powRapidDraft2:NZ:user_a:rapid-pin"));
-  assert.equal(values.has("powFormSnapshot2:NZ:user_b:task_b"), false);
-  assert.equal(values.has("powRapidDraft2:NZ:user_b:rapid-pin"), false, "the departing user's rapid text goes too");
-  assert.equal(values.has("powRapidDraft2:VU:user_b:quick"), false, "on every country");
+  assert.deepEqual([...values.keys()], ["powFormSnapshot:NZ:legacy"], "every owner's device work goes; the quarantined draft stays");
+  assert.equal(app.portalMode, null, "and the activity is forgotten");
+  assert.match(app.backendLastError, /^Signed out\./);
+}
+
+// 1c. (b) the question appears only with unsent work, once, and Cancel
+// keeps the session and the work
+async function signOutQuestion() {
+  values.clear();
+  const { app, calls } = signedInApp("user_a");
+  app.formDirty = false;
+  const asked = [];
+  let answer = false;
+  window.PowConvexTaskClient.confirmSignOut = async (options) => { asked.push(options?.pageHasUnsent ?? false); return answer; };
+  let signedOut = 0;
+  app.backend.signOut = async () => { signedOut += 1; };
+  await app.signOutBackend();
+  assert.equal(asked.length, 1, "the page asks once");
+  assert.equal(signedOut, 0, "Cancel does not sign out");
+  assert.ok(app.backendUser, "the member stays signed in");
+  answer = true;
+  app.formDirty = true;
+  await app.signOutBackend();
+  assert.equal(asked.at(-1), true, "typed work not yet saved counts as unsent");
+  assert.equal(signedOut, 1);
+  window.PowConvexTaskClient.confirmSignOut = realConfirmSignOut;
+
+  // the real question: no dialog without unsent work; with some, a Cancel
+  // and a Sign out button, and Escape cancels
+  values.clear();
+  assert.equal(await realConfirmSignOut({ pageHasUnsent: false }), true, "no unsent work, no dialog");
+  values.set("powFormSnapshot2:NZ:task_1", "{}");
+  const buttons = {};
+  const overlay = {
+    className: "", innerHTML: "", removed: false,
+    remove() { this.removed = true; },
+    querySelector(selector) {
+      const name = /data-pow-confirm="([^"]+)"/.exec(selector)?.[1];
+      return buttons[name] ||= { addEventListener(_type, fn) { this.click = fn; }, focus() {} };
+    },
+  };
+  const realCreate = document.createElement;
+  const realAppend = document.body.appendChild;
+  const keyListeners = [];
+  document.createElement = () => overlay;
+  document.body.appendChild = (node) => { overlay.mounted = node === overlay; };
+  document.addEventListener = (type, fn) => { if (type === "keydown") keyListeners.push(fn); };
+  document.removeEventListener = () => {};
+  let first = realConfirmSignOut({ pageHasUnsent: false });
+  assert.match(overlay.innerHTML, /Unsent work on this device will be deleted\. Sign out\?/);
+  assert.match(overlay.innerHTML, />Cancel</);
+  assert.match(overlay.innerHTML, />Sign out</);
+  buttons["cancel"].click();
+  assert.equal(await first, false);
+  assert.equal(overlay.removed, true);
+  overlay.removed = false;
+  first = realConfirmSignOut({});
+  buttons["sign-out"].click();
+  assert.equal(await first, true);
+  first = realConfirmSignOut({});
+  keyListeners.at(-1)({ key: "Escape" });
+  assert.equal(await first, false, "Escape cancels");
+  document.createElement = realCreate;
+  document.body.appendChild = realAppend;
+  window.PowConvexTaskClient.confirmSignOut = answerYes;
+}
+
+// 1d. a reload while signed in keeps the member's own drafts: a fresh page
+// admits the same member, reads the snapshot, rapid draft and periods back;
+// a different member's admission deletes them first
+{
+  values.clear();
+  const { app } = signedInApp("user_a");
+  window.PowConvexTaskClient.adoptDeviceFor("user_a");
+  app.setFormSnapshot("task_1", { evidence_note: "typed, unsent" });
+  app.persistRapidDraft("pin", "rapid-pin");
+  const reloaded = signedInApp("user_a").app;
+  window.PowConvexTaskClient.adoptDeviceFor("user_a");
+  assert.equal(reloaded.getFormSnapshot("task_1").evidence_note, "typed, unsent", "the reload keeps the member's own draft");
+  assert.ok(reloaded.readRapidDraft("rapid-pin"));
+  window.PowConvexTaskClient.adoptDeviceFor("user_b");
+  assert.equal(signedInApp("user_b").app.getFormSnapshot("task_1"), undefined, "another member's admission deletes it");
+  assert.equal(values.has(snapshotKey), false);
 }
 
 // 2. a deliberate sign-out also deletes the device copies and the activity
@@ -335,43 +421,35 @@ async function roundThree() {
     assert.equal(rendered, 0, "and none opens while signed out");
   }
 
-  // a late rapid submission deletes only the exact draft it sent: another
-  // contributor who signed in meanwhile keeps theirs, and the submitter's own
-  // later edit is kept too (astra m4)
+  // a recorded submission deletes only the exact draft it sent: the member's
+  // own later edit is kept
   {
     values.clear();
     const { app } = signedInApp("user_a");
     app.backend.user = { _id: "user_a" };
-    values.set("powRapidDraft2:NZ:user_a:rapid-pin", JSON.stringify({ saved_at: 100, owner: "user_a", values: { directObservation: "a's sent text" } }));
+    values.set("powRapidDraft2:NZ:rapid-pin", JSON.stringify({ saved_at: 100, values: { directObservation: "a's sent text" } }));
     const sent = app.rapidDraftVersion("rapid-pin");
-    assert.deepEqual({ ...sent }, { owner: "user_a", savedAt: 100, rev: null });
-    // a signs out while the submission is in flight; b signs in and types
-    app.onBackendSessionEnded({ deliberate: false });
-    app.backendUser = { _id: "user_b" };
-    app.backend.user = { _id: "user_b" };
-    values.set("powRapidDraft2:NZ:user_b:rapid-pin", JSON.stringify({ saved_at: 200, owner: "user_b", values: { directObservation: "b's unsent text" } }));
-    app.clearSubmittedRapidDraft("rapid-pin", sent);
-    assert.equal(values.has("powRapidDraft2:NZ:user_a:rapid-pin"), false, "a's sent draft goes, so it is never sent twice");
-    assert.ok(values.has("powRapidDraft2:NZ:user_b:rapid-pin"), "b's draft is untouched");
+    assert.deepEqual({ ...sent }, { savedAt: 100 });
     // a newer edit of the same key is not the sent version
-    values.set("powRapidDraft2:NZ:user_a:rapid-pin", JSON.stringify({ saved_at: 300, owner: "user_a", values: { directObservation: "a typed more" } }));
+    values.set("powRapidDraft2:NZ:rapid-pin", JSON.stringify({ saved_at: 300, values: { directObservation: "a typed more" } }));
     app.clearSubmittedRapidDraft("rapid-pin", sent);
-    assert.ok(values.has("powRapidDraft2:NZ:user_a:rapid-pin"), "a later edit stays");
+    assert.ok(values.has("powRapidDraft2:NZ:rapid-pin"), "a later edit stays");
+    values.set("powRapidDraft2:NZ:rapid-pin", JSON.stringify({ saved_at: 100, values: {} }));
+    app.clearSubmittedRapidDraft("rapid-pin", sent);
+    assert.equal(values.has("powRapidDraft2:NZ:rapid-pin"), false, "the sent version goes, so it is never sent twice");
     // the same for a guided form snapshot
-    values.set("powFormSnapshot2:NZ:user_a:task_1", JSON.stringify({ saved_at: 400, owner: "user_a", snapshot: {} }));
-    app.backendUser = { _id: "user_a" };
-    app.backend.user = { _id: "user_a" };
+    values.set("powFormSnapshot2:NZ:task_1", JSON.stringify({ saved_at: 400, snapshot: {} }));
     const snap = app.formSnapshotVersion("task_1");
-    app.backendUser = { _id: "user_b" };
-    app.backend.user = { _id: "user_b" };
-    values.set("powFormSnapshot2:NZ:user_b:task_1", JSON.stringify({ saved_at: 500, owner: "user_b", snapshot: {} }));
+    values.set("powFormSnapshot2:NZ:task_1", JSON.stringify({ saved_at: 500, snapshot: {} }));
     app.deleteSubmittedFormSnapshot("task_1", snap);
-    assert.equal(values.has("powFormSnapshot2:NZ:user_a:task_1"), false);
-    assert.ok(values.has("powFormSnapshot2:NZ:user_b:task_1"), "b's snapshot is untouched");
+    assert.ok(values.has("powFormSnapshot2:NZ:task_1"), "a later snapshot stays");
+    values.set("powFormSnapshot2:NZ:task_1", JSON.stringify({ saved_at: 400, snapshot: {} }));
+    app.deleteSubmittedFormSnapshot("task_1", snap);
+    assert.equal(values.has("powFormSnapshot2:NZ:task_1"), false);
   }
 
-  // guided periods: a recorded submission deletes the submitter's periods
-  // only if the device copy is still the version it sent (round 4)
+  // guided periods: a recorded submission deletes the periods only if the
+  // device copy is still the version it sent (round 4)
   {
     values.clear();
     const { app } = signedInApp("user_a");
@@ -380,31 +458,19 @@ async function roundThree() {
     values.set(key, JSON.stringify({ saved_at: 100, segments: [{ start: "1990" }] }));
     app.guidedPeriodsByTaskId.set("task_p", { segments: [{ start: "1990" }] });
     const sent = { ...app.guidedPeriodsVersion("task_p"), epoch: app.sessionEpoch || 0 };
-    assert.deepEqual({ owner: sent.owner, savedAt: sent.savedAt }, { owner: "user_a", savedAt: 100 });
-    // the session ends while the submission is in flight; the same
-    // contributor signs back in and edits the periods
-    app.onBackendSessionEnded({ deliberate: false });
-    app.backendUser = { _id: "user_a" };
-    app.backend.user = { _id: "user_a" };
+    assert.equal(sent.savedAt, 100);
+    // the member edits the periods while the submission is in flight
     values.set(key, JSON.stringify({ saved_at: 200, segments: [{ start: "1991" }] }));
     app.guidedPeriodsByTaskId.set("task_p", { segments: [{ start: "1991" }] });
     app.clearSubmittedGuidedPeriods("task_p", sent);
     assert.equal(JSON.parse(values.get(key)).saved_at, 200, "the newer device copy stays");
     assert.ok(app.guidedPeriodsByTaskId.has("task_p"), "and so does the new working copy");
-    // the sent version itself goes; in its own session, the working copy too
-    const { app: same } = signedInApp("user_a");
-    same.backend.user = { _id: "user_a" };
+    // the sent version itself goes, and the working copy with it
     values.set(key, JSON.stringify({ saved_at: 300, segments: [{ start: "1992" }] }));
-    same.guidedPeriodsByTaskId.set("task_p", { segments: [{ start: "1992" }] });
-    const mine = { ...same.guidedPeriodsVersion("task_p"), epoch: same.sessionEpoch || 0 };
-    same.clearSubmittedGuidedPeriods("task_p", mine);
+    const mine = { ...app.guidedPeriodsVersion("task_p"), epoch: app.sessionEpoch || 0 };
+    app.clearSubmittedGuidedPeriods("task_p", mine);
     assert.equal(values.has(key), false);
-    assert.equal(same.guidedPeriodsByTaskId.has("task_p"), false);
-    // another contributor's periods are never reached
-    const otherKey = window.PowOccupancy.guidedPeriodsStoragePrefix("NZ", "user_b") + "task_p";
-    values.set(otherKey, JSON.stringify({ saved_at: 300, segments: [{}] }));
-    same.clearSubmittedGuidedPeriods("task_p", mine);
-    assert.ok(values.has(otherKey));
+    assert.equal(app.guidedPeriodsByTaskId.has("task_p"), false);
   }
 
   // the rapid path: recordRapidPeriods deletes by the plan's version
@@ -473,6 +539,7 @@ async function roundThree() {
 // 3. the sign-out button waits for clerk: success says signed out, a
 // refusal says the sign-out did not finish
 (async () => {
+  await signOutQuestion();
   await roundThree();
   await lateResponses();
   values.clear();
@@ -480,6 +547,7 @@ async function roundThree() {
   let resolveSignOut;
   ok.app.backend.signOut = () => new Promise((resolve) => { resolveSignOut = resolve; });
   const pending = ok.app.signOutBackend();
+  await new Promise((r) => setTimeout(r, 0));
   assert.equal(ok.app.backendLastError, "Signing out…", "no success before clerk confirms");
   assert.equal(ok.app.latestDraftsByTaskId.size, 0, "the page is cleared at once");
   resolveSignOut();
@@ -600,7 +668,7 @@ async function roundThree() {
       assert.deepEqual(switched.admitted, [], "a is not admitted after the switch");
       assert.equal(switched.app.backendUser, switched.userB, "b's page stays b's");
       // device drafts are read under b's id, never a's
-      values.set("powFormSnapshot2:NZ:user_a:task_9", JSON.stringify({ owner: "user_a", saved_at: 1, values: { evidence_note: "a's unsent" } }));
+      values.set("powFormSnapshot2:NZ:task_9", JSON.stringify({ saved_at: 1, values: { evidence_note: "a's unsent" } }));
       assert.equal(switched.app.getFormSnapshot("task_9"), undefined);
 
       // a sign-out during the load is refused the same way
@@ -744,17 +812,17 @@ async function roundThree() {
 
   // #153 round 5 (astra), integrated: the real client and the real rapid
   // submission. a submits a nomination, clerk replaces a with b, and the
-  // server's success arrives afterwards. a's sent draft is still removed
-  // from the device (so it never returns to be sent again under a new id),
-  // b's page is untouched, and a draft's submission id survives a reload
+  // server's success arrives afterwards. the receipt may have recorded on
+  // the server but writes nothing to the device; b's page is untouched, and
+  // a draft's submission id survives a reload
   {
     if (!window.PowConvexTaskClient) {
       Object.assign(context, { URL, atob: (value) => Buffer.from(value, "base64").toString("binary") });
       vm.runInContext(fs.readFileSync(path.join(__dirname, "convex-task-client.js"), "utf8"), context, { filename: "convex-task-client.js" });
     }
     values.clear();
-    const draftKey = "powRapidDraft2:NZ:user_a:rapid-pin";
-    values.set(draftKey, JSON.stringify({ saved_at: 111, owner: "user_a", submission_id: "sub_a", values: { directObservation: "a's hall" } }));
+    const draftKey = "powRapidDraft2:NZ:rapid-pin";
+    values.set(draftKey, JSON.stringify({ saved_at: 111, submission_id: "sub_a", values: { directObservation: "a's hall" } }));
     const sent = [];
     const answer = later();
     const previousFetch = context.fetch;
@@ -807,9 +875,10 @@ async function roundThree() {
     const detailBefore = calls.detail;
 
     // the server's success for a's submission arrives now
+    const draftBefore = values.get(draftKey);
     answer.resolve({ task_id: "t_a", evidence_draft_id: "d_a", candidate_site_id: "c_a", task_status: "needs_review" });
     await submitting;
-    assert.equal(values.has(draftKey), false, "a's sent draft is gone from the device");
+    assert.equal(values.get(draftKey), draftBefore, "a late receipt writes nothing to the device, and deletes nothing");
     assert.equal(recordedScreens, 0, "no recorded screen on b's page");
     assert.equal(calls.detail, detailBefore, "b's detail pane is untouched");
     assert.equal(app.manualTasksById.size, 0, "a's task is not added to b's page");
@@ -862,108 +931,64 @@ async function roundThree() {
   const previousFetchR6 = context.fetch;
   const getElementByIdR6 = document.getElementById;
 
-  // round 6 (sol): a guided save recorded after a session change still
-  // removes the exact device snapshot it carried; a newer snapshot is kept
+  // a guided save recorded in the same session removes the exact device
+  // snapshot it carried and keeps a newer one; one recorded after the
+  // session changed writes nothing to the device
   {
     values.clear();
-    const { app } = signedInApp("user_a");
-    const snapshotKey = "powFormSnapshot2:NZ:user_a:task_1";
-    values.set(snapshotKey, JSON.stringify({ saved_at: 222, owner: "user_a", snapshot: { evidence_note: "typed, being saved" } }));
-    const saved = later();
-    const { switchTo } = realClientFor(app, { "evidence:saveEvidenceDraft": () => saved.promise });
-    document.getElementById = () => null;
-    Object.assign(app, {
+    const stubs = (app) => Object.assign(app, {
       currentFormValues: () => ({ note: "" }),
       evidenceInputError: () => "",
       guidedPeriodsError: () => "",
       buildWideEvidenceRow: () => ({}),
       buildEvidenceDraft: () => ({ evidence_note: "typed, being saved" }),
       setTransportBusy: () => {},
+      refreshBackendTasks: async () => {},
+      renderDetailPreservingForm: () => {},
     });
+    const snapshotKey = "powFormSnapshot2:NZ:task_1";
+    const { app } = signedInApp("user_a");
+    values.set(snapshotKey, JSON.stringify({ saved_at: 222, snapshot: { evidence_note: "typed, being saved" } }));
+    const saved = later();
+    const { switchTo } = realClientFor(app, { "evidence:saveEvidenceDraft": () => saved.promise });
+    document.getElementById = () => null;
+    stubs(app);
     app.backendTasksById.set("task_1", { task_id: "task_1" });
     const saving = app.saveEvidenceToBackend({ task_id: "task_1", name: "St Mary's" });
     await new Promise((r) => setTimeout(r, 0));
     switchTo("sess_b", { _id: "user_b" });
+    const before = values.get(snapshotKey);
     saved.resolve({ evidence_draft_id: "d_saved" });
     await saving;
-    assert.equal(values.has(snapshotKey), false, "the saved snapshot is gone, so it never reappears over the saved draft");
+    assert.equal(values.get(snapshotKey), before, "a late receipt from the ended session writes nothing to the device");
+
+    // same session: the sent version goes
+    values.clear();
+    const { app: same } = signedInApp("user_a");
+    values.set(snapshotKey, JSON.stringify({ saved_at: 300, snapshot: { evidence_note: "v1" } }));
+    const savedSame = later();
+    realClientFor(same, { "evidence:saveEvidenceDraft": () => savedSame.promise });
+    stubs(same);
+    same.backendTasksById.set("task_1", { task_id: "task_1" });
+    const savingSame = same.saveEvidenceToBackend({ task_id: "task_1" });
+    await new Promise((r) => setTimeout(r, 0));
+    savedSame.resolve({ evidence_draft_id: "d_saved" });
+    await savingSame;
+    assert.equal(values.has(snapshotKey), false, "the saved snapshot goes, so it never reappears over the saved draft");
 
     // a snapshot edited after the save began is newer, and is kept
     const { app: again } = signedInApp("user_a");
-    values.set(snapshotKey, JSON.stringify({ saved_at: 333, owner: "user_a", snapshot: { evidence_note: "v1" } }));
+    values.set(snapshotKey, JSON.stringify({ saved_at: 333, snapshot: { evidence_note: "v1" } }));
     const saved2 = later();
-    const r2 = realClientFor(again, { "evidence:saveEvidenceDraft": () => saved2.promise });
-    Object.assign(again, { currentFormValues: () => ({}), evidenceInputError: () => "", guidedPeriodsError: () => "", buildWideEvidenceRow: () => ({}), buildEvidenceDraft: () => ({}), setTransportBusy: () => {} });
+    realClientFor(again, { "evidence:saveEvidenceDraft": () => saved2.promise });
+    stubs(again);
     again.backendTasksById.set("task_1", { task_id: "task_1" });
     const saving2 = again.saveEvidenceToBackend({ task_id: "task_1" });
     await new Promise((r) => setTimeout(r, 0));
-    values.set(snapshotKey, JSON.stringify({ saved_at: 444, owner: "user_a", snapshot: { evidence_note: "v2, typed after" } }));
-    r2.switchTo("sess_b", { _id: "user_b" });
+    values.set(snapshotKey, JSON.stringify({ saved_at: 444, snapshot: { evidence_note: "v2, typed after" } }));
     saved2.resolve({ evidence_draft_id: "d_saved" });
     await saving2;
     assert.equal(JSON.parse(values.get(snapshotKey)).saved_at, 444, "the newer snapshot stays");
-  }
-
-  // round 6 (astra): periods of an observation recorded after its session
-  // ended are parked against that task, off the entry's key, and sent at
-  // the submitter's next sign-in under the same submission id
-  {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    const periodsKey = "powGuidedPeriods:NZ:user_a:rapid-pin-periods";
-    values.set(periodsKey, JSON.stringify({ saved_at: 555, segments: [{ start: "1990" }], placeKey: "new-place" }));
-    const recorded = later();
-    const { sent, switchTo } = realClientFor(app, {
-      "rapidEntry:submitCurrentObservation": () => recorded.promise,
-      "occupancies:submitOccupancies": { recorded: 1 },
-    });
-    const form = { dataset: { submissionId: "sub_obs" } };
-    document.getElementById = (id) => ({ pinRapidCurrentForm: form, pinRapidSubmit: { disabled: false } }[id] || null);
-    window.PowRapidEntry = { localIsoDate: () => "2026-09-26", validateObservationDetailed: () => null, observationPayload: (x) => x, secureSubmissionId: () => "fresh" };
-    const plan = { version: { owner: "user_a", savedAt: 555, epoch: app.sessionEpoch || 0 }, submissionId: "sub_periods", segments: [{ segmentIndex: 0, startMode: "known", startDate: "1990", startBasis: "source", endMode: "open" }], count: 1, state: { segments: [] } };
-    Object.assign(app, {
-      rapidObservationValues: () => ({ flagForDiscussion: false }),
-      rapidPeriodsPlan: () => plan,
-      pendingEvidenceFiles: () => null,
-      entryCountry: () => ({ code: "NZ", config: { targetYears: [2026] } }),
-      pinConfirmed: { latitude: -41.29, longitude: 174.78, zoom: 17 },
-      pinNearbyCount: 0,
-      manualTasksById: new Map(),
-      showRapidFieldError: () => {},
-      renderSubmissionRecordedDetail: () => {},
-      setBackendTransientStatus: (text) => { app.lastNotice = text; },
-    });
-    const submitting = app.submitRapidObservation("pin", {
-      draftKey: "rapid-pin",
-      periodsKey: "rapid-pin-periods",
-      getCandidate: () => ({ name: "A's hall", latitude: -41.29, longitude: 174.78 }),
-    });
-    await new Promise((r) => setTimeout(r, 0));
-    switchTo("sess_b", { _id: "user_b" });
-    recorded.resolve({ task_id: "t_a", evidence_draft_id: "d_a", candidate_site_id: "c_a", task_status: "needs_review" });
-    await submitting;
-    assert.equal(values.has(periodsKey), false, "the periods are off the entry's key, so they cannot reach the next place");
-    const parkedKey = "powPendingPeriods1:NZ:user_a:sub_periods";
-    const parked = JSON.parse(values.get(parkedKey));
-    assert.equal(parked.taskId, "t_a");
-    assert.equal(parked.parentEvidenceDraftId, "d_a");
-    assert.equal(parked.submissionId, "sub_periods");
-    assert.equal(sent.some((request) => request.path === "occupancies:submitOccupancies"), false, "nothing is sent under b");
-
-    // b signing in does not send a's periods
-    await app.resumePendingPeriods();
-    assert.equal(sent.some((request) => request.path === "occupancies:submitOccupancies"), false);
-    // a signs back in: the parked periods go to their own task, once
-    switchTo("sess_a2", { _id: "user_a" });
-    await app.resumePendingPeriods();
-    const periodsSent = sent.filter((request) => request.path === "occupancies:submitOccupancies");
-    assert.equal(periodsSent.length, 1);
-    assert.equal(periodsSent[0].args.taskId, "t_a");
-    assert.equal(periodsSent[0].args.parentEvidenceDraftId, "d_a");
-    assert.equal(periodsSent[0].args.clientSubmissionId, "sub_periods");
-    assert.equal(periodsSent[0].auth, "Bearer jwt-sess_a2");
-    assert.equal(values.has(parkedKey), false, "sent once, then removed");
-    assert.match(app.lastNotice, /periods of your earlier entry were recorded/);
   }
 
   // round 6 (astra): a submission id belongs to the content it was sent
@@ -972,7 +997,7 @@ async function roundThree() {
   {
     values.clear();
     const { app } = signedInApp("user_a");
-    const draftKey = "powRapidDraft2:NZ:user_a:rapid-pin";
+    const draftKey = "powRapidDraft2:NZ:rapid-pin";
     window.PowRapidEntry = { secureSubmissionId: () => "sub_fresh" };
     const form = { dataset: { submissionId: "sub_sent" } };
     document.getElementById = (id) => (id === "pinRapidCurrentForm" ? form : null);
@@ -997,88 +1022,6 @@ async function roundThree() {
     app.clearSubmittedRapidDraft("rapid-pin", sentVersion);
     assert.equal(JSON.parse(values.get(draftKey)).values.directObservation, "v2, edited");
   }
-  // round 8 (#153 known issues 1 to 4)
-  const planFor = (owner, submissionId, savedAt = 1) => ({
-    version: { owner, savedAt, epoch: 0 },
-    submissionId,
-    segments: [{ segmentIndex: 0, startMode: "known", startDate: "1990", startBasis: "source", endMode: "open" }],
-    count: 1,
-  });
-
-  // issue 1: a deliberate sign-out removes the owner's parked periods, and
-  // a receipt that arrives afterwards cannot park new ones
-  {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    app.parkPendingPeriods(planFor("user_a", "sub_1"), { task_id: "t_a", evidence_draft_id: "d_a" }, "rapid-pin-periods");
-    app.parkPendingPeriods(planFor("user_b", "sub_b"), { task_id: "t_b", evidence_draft_id: "d_b" }, "rapid-pin-periods");
-    assert.equal(values.has("powPendingPeriods1:NZ:user_a:sub_1"), true);
-    const begunBefore = { ...planFor("user_a", "sub_early"), startedAt: Date.now() };
-    await new Promise((r) => setTimeout(r, 3));
-    app.clearSignedInState({ deliberate: true });
-    await new Promise((r) => setTimeout(r, 3));
-    assert.equal(values.has("powPendingPeriods1:NZ:user_a:sub_1"), false, "a's parked periods go with a deliberate sign-out");
-    assert.equal(values.has("powPendingPeriods1:NZ:user_b:sub_b"), true, "b's stay");
-    app.parkPendingPeriods(begunBefore, { task_id: "t_a", evidence_draft_id: "d_a" }, "rapid-pin-periods");
-    assert.equal(values.has("powPendingPeriods1:NZ:user_a:sub_early"), false, "a late receipt cannot recreate one");
-    // another tab has no memory of the sign-out, only the device's mark
-    const { app: otherTab } = signedInApp("user_a");
-    otherTab.parkPendingPeriods(begunBefore, { task_id: "t_a", evidence_draft_id: "d_a" }, "rapid-pin-periods");
-    assert.equal(values.has("powPendingPeriods1:NZ:user_a:sub_early"), false, "nor can another tab's late receipt");
-    // signing in again does not reopen the purged session's receipts
-    await app.onBackendSignedIn({ _id: "user_a" }, { refreshTasks: false }).catch(() => {});
-    app.parkPendingPeriods(begunBefore, { task_id: "t_a", evidence_draft_id: "d_a" }, "rapid-pin-periods");
-    assert.equal(values.has("powPendingPeriods1:NZ:user_a:sub_early"), false, "a receipt from before the sign-out stays refused after sign-in");
-    // a submission begun after the sign-out may park
-    app.parkPendingPeriods({ ...planFor("user_a", "sub_3"), startedAt: Date.now() }, { task_id: "t_a", evidence_draft_id: "d_a" }, "rapid-pin-periods");
-    assert.equal(values.has("powPendingPeriods1:NZ:user_a:sub_3"), true);
-  }
-
-  // issue 2: records are keyed by submission id, and a recovery removes
-  // only the record whose receipt arrived
-  {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    app.parkPendingPeriods(planFor("user_a", "sub_1", 10), { task_id: "t_a", evidence_draft_id: "d_a" }, "k");
-    app.parkPendingPeriods(planFor("user_a", "sub_2", 11), { task_id: "t_a", evidence_draft_id: "d_a2" }, "k");
-    assert.equal([...values.keys()].filter((key) => key.startsWith("powPendingPeriods1:")).length, 2, "two entries for one task keep two records");
-    const inFlight = later();
-    const { sent } = realClientFor(app, { "occupancies:submitOccupancies": () => inFlight.promise });
-    app.backend.signedIn = true;
-    app.setBackendTransientStatus = () => {};
-    const resuming = app.resumePendingPeriods();
-    await new Promise((r) => setTimeout(r, 0));
-    // while the first send is out, a later park replaces its record's content
-    values.set("powPendingPeriods1:NZ:user_a:sub_1", JSON.stringify({ owner: "user_a", saved_at: 99, taskId: "t_a", parentEvidenceDraftId: "d_new", submissionId: "sub_1", segments: [{}] }));
-    inFlight.resolve({ recorded: 1 });
-    await resuming;
-    assert.equal(sent.filter((request) => request.path === "occupancies:submitOccupancies").length >= 1, true);
-    assert.equal(JSON.parse(values.get("powPendingPeriods1:NZ:user_a:sub_1") || "null")?.saved_at, 99, "the later record survives the earlier receipt");
-  }
-
-  // issue 4: a transient failure keeps the parked copy; an explicit
-  // permanent refusal discards it
-  {
-    for (const [label, respond, kept] of [
-      ["http 503", () => ({ status: 503, ok: false, text: async () => "Service Unavailable" }), true],
-      ["http 429", () => ({ status: 429, ok: false, text: async () => JSON.stringify({ status: "error", errorMessage: "slow down" }) }), true],
-      ["network fault", () => { throw new TypeError("Failed to fetch"); }, true],
-      ["rate limit", () => ({ status: 560, ok: false, text: async () => JSON.stringify({ status: "error", errorMessage: "Uncaught ConvexError", errorData: { kind: "RateLimited", retryAfter: 5000 } }) }), true],
-      ["function error", () => ({ status: 560, ok: false, text: async () => JSON.stringify({ status: "error", errorMessage: "Not allowed for this task." }) }), false],
-      ["http 403", () => ({ status: 403, ok: false, text: async () => "Forbidden" }), false],
-    ]) {
-      values.clear();
-      const { app } = signedInApp("user_a");
-      app.parkPendingPeriods(planFor("user_a", "sub_1"), { task_id: "t_a", evidence_draft_id: "d_a" }, "k");
-      realClientFor(app, {});
-      app.backend.signedIn = true;
-      app.setBackendTransientStatus = () => {};
-      context.fetch = async () => respond();
-      await app.resumePendingPeriods();
-      assert.equal(values.has("powPendingPeriods1:NZ:user_a:sub_1"), kept, `${label}: ${kept ? "kept" : "discarded"}`);
-    }
-  }
-
   // issue 3: a queued autosave cannot mint a new id for a sent, unedited
   // observation
   {
@@ -1150,48 +1093,7 @@ async function roundThree() {
     gate.resolve();
     await submitting;
     assert.equal(sentArgs[0].clientSubmissionId, "sub_sent", "the send keeps the id of the content it carries");
-    assert.equal(JSON.parse(values.get("powRapidDraft2:NZ:user_a:rapid-pin")).values.directObservation, "v2, edited", "the edit stays on the device");
-  }
-  // round 11: a deliberate sign-out in another tab ends this page's device
-  // writes before clerk reports the change here; a queued autosave cannot
-  // recreate the purged draft
-  {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    app.draftOwnerId();
-    app.rapidObservationValues = () => ({ directObservation: "typed", flagForDiscussion: false });
-    values.set("powDeliberateSignOut1:user_a", String(Date.now() + 5));
-    app.persistRapidDraft("pin", "rapid-pin");
-    assert.equal(values.has("powRapidDraft2:NZ:user_a:rapid-pin"), false, "no draft is written after another tab signed out");
-  }
-  // round 12: a replacement session is installed before the departing
-  // member's page state is cleared; an uninvited account's sign-out then
-  // names nobody, so the member's drafts stay
-  {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    const key = "powRapidDraft2:NZ:user_a:rapid-pin";
-    values.set(key, JSON.stringify({ saved_at: 100, owner: "user_a", values: { directObservation: "a's text" } }));
-    app.backend.sessionId = "sess_b";
-    app.onBackendSessionEnded({ deliberate: false });
-    app.backendUser = null;
-    app.onBackendSessionEnded({ deliberate: true });
-    assert.equal(values.has(key), true, "the replacing account's sign-out leaves the previous member's draft");
-  }
-  // round 12: a sign-out in another tab reaches this page as a session end;
-  // the same member's next session writes drafts again
-  {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    app.draftOwnerId();
-    values.set("powDeliberateSignOut1:user_a", String(Date.now()));
-    app.onBackendSessionEnded({ deliberate: false });
-    app.backendUser = null;
-    await new Promise((r) => setTimeout(r, 5));
-    app.backendUser = { _id: "user_a", initials: "GL" };
-    app.rapidObservationValues = () => ({ directObservation: "typed again", flagForDiscussion: false });
-    app.persistRapidDraft("pin", "rapid-pin");
-    assert.equal(values.has("powRapidDraft2:NZ:user_a:rapid-pin"), true, "the new session's draft is written");
+    assert.equal(JSON.parse(values.get("powRapidDraft2:NZ:rapid-pin")).values.directObservation, "v2, edited", "the edit stays on the device");
   }
   // round 12: an unedited period retry fingerprints alike whether the
   // provenance is the whole first segment or the source fields alone
@@ -1205,35 +1107,6 @@ async function roundThree() {
     assert.equal(app.occupancyDraftFingerprint(segments, null), app.occupancyDraftFingerprint(inflated, null), "the payload, not the draft shape, is compared");
     if (!savedPayload) delete window.PowOccupancy.payload;
   }
-  // round 11: two tabs can stamp different saves alike; a receipt deletes a
-  // copy only when the revision token matches too
-  {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    app.backend.user = { _id: "user_a" };
-    const key = "powRapidDraft2:NZ:user_a:rapid-pin";
-    values.set(key, JSON.stringify({ saved_at: 100, rev: "tab_one", owner: "user_a", values: {} }));
-    const sent = app.rapidDraftVersion("rapid-pin");
-    values.set(key, JSON.stringify({ saved_at: 100, rev: "tab_two", owner: "user_a", values: { directObservation: "newer" } }));
-    app.clearSubmittedRapidDraft("rapid-pin", sent);
-    assert.equal(values.has(key), true, "the other tab's edit under the same stamp stays");
-  }
-  // round 8 review: a deliberate sign-out after the token was refused still
-  // purges the departing owner's parked periods and writes the mark
-  {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    app.draftOwnerId();
-    app.parkPendingPeriods(planFor("user_a", "sub_1"), { task_id: "t_a", evidence_draft_id: "d_a" }, "k");
-    app.parkPendingPeriods(planFor("user_b", "sub_b"), { task_id: "t_b", evidence_draft_id: "d_b" }, "k");
-    app.onBackendSessionEnded({ deliberate: false });
-    assert.equal(values.has("powPendingPeriods1:NZ:user_a:sub_1"), true, "an ended session keeps them");
-    app.clearSignedInState({ deliberate: true });
-    assert.equal(values.has("powPendingPeriods1:NZ:user_a:sub_1"), false, "the later deliberate sign-out purges the departing owner's");
-    assert.equal(values.has("powPendingPeriods1:NZ:user_b:sub_b"), true, "another member's stay");
-    assert.ok(values.has("powDeliberateSignOut1:user_a"), "the mark is written for the departing owner");
-  }
-
   // round 8 review: edited periods get a new submission id; an unedited
   // retry keeps the sent one
   {
@@ -1296,23 +1169,6 @@ async function roundThree() {
     state.segments.splice(1, 1);
     app.persistGuidedPeriods("k", { sending: true, provenance: { sourceTitle: "b" } });
     assert.notEqual(state.submissionId, afterSource, "a removed card rotates the id before the send records its digest");
-  }
-
-  // round 8 review: the review portal's shared purge removes the named
-  // member's device work only, in every country
-  {
-    values.clear();
-    const clientContext = vm.createContext({ window: { localStorage, location: { search: "", hostname: "x" }, setTimeout, clearTimeout }, document, localStorage, sessionStorage: localStorage, console, setTimeout, clearTimeout, Promise, Error, Map, Set, Date, JSON, URLSearchParams, Object, Array, String, Number, Boolean, Math, RegExp });
-    vm.runInContext(fs.readFileSync(path.join(__dirname, "convex-task-client.js"), "utf8"), clientContext, { filename: "convex-task-client.js" });
-    values.set("powPendingPeriods1:NZ:user_a:s", JSON.stringify({ owner: "user_a" }));
-    values.set("powRapidDraft2:AU:user_a:k", JSON.stringify({ owner: "user_a" }));
-    values.set("powFormSnapshot2:NZ:user_a:t", JSON.stringify({ owner: "user_a" }));
-    values.set("powGuidedPeriods:NZ:user_a:t", "{}");
-    values.set("powPendingPeriods1:NZ:user_b:s", JSON.stringify({ owner: "user_b" }));
-    values.set("powGuidedPeriods:NZ:user_b:t", "{}");
-    clientContext.window.PowConvexTaskClient.purgeOwnerDeviceWork("user_a");
-    assert.deepEqual([...values.keys()].filter((key) => key.includes("user_a")), ["powDeliberateSignOut1:user_a"]);
-    assert.equal(values.has("powPendingPeriods1:NZ:user_b:s") && values.has("powGuidedPeriods:NZ:user_b:t"), true);
   }
 
   // round 10: saves in one millisecond still carry distinct versions; the

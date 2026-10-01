@@ -771,34 +771,18 @@ const REVISION_AUTO_ATTACH_STATUSES = new Set(["needs_review", "unresolved_note"
 // (nominations and revisions) so dates are entered before submission; the
 // cards persist under this key until they are recorded or discarded
 const RAPID_PIN_PERIODS_KEY = "rapid-pin-periods";
-// owner-scoped device drafts (c1) and the pre-c1 prefixes kept in quarantine
+// device drafts (c1); the pre-c1 prefixes are kept in quarantine. a deliberate
+// sign-out deletes every draft on the device (PowConvexTaskClient.clearDeviceWork)
 const FORM_SNAPSHOT_PREFIX = "powFormSnapshot2:";
 const RAPID_DRAFT_PREFIX = "powRapidDraft2:";
 // a strictly increasing version stamp for device copies: two saves in one
 // millisecond still differ, so a receipt deletes only the version it sent
-// (#153 round 10)
 let lastSavedAtStamp = 0;
 function nextSavedAt() {
     lastSavedAtStamp = Math.max(Date.now(), lastSavedAtStamp + 1);
     return lastSavedAtStamp;
 }
-// a token unique to one write, across tabs: the stamp above orders saves in
-// one page only, so two tabs can share a stamp; a receipt deletes a device
-// copy only when stamp and token both match (#153 round 11)
-function newRevisionToken() {
-    try {
-        const bytes = new Uint8Array(8);
-        window.crypto.getRandomValues(bytes);
-        return Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
-    } catch (error) {
-        return `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
-    }
-}
 
-// periods of an observation recorded after its session ended, parked for the
-// submitter's next sign-in (#153 round 6)
-const PENDING_PERIODS_PREFIX = "powPendingPeriods1:";
-const SIGN_OUT_MARK_PREFIX = "powDeliberateSignOut1:";
 const LEGACY_DEVICE_DRAFT_PREFIXES = ["powFormSnapshot:", "powRapidDraft:"];
 const LEGACY_DRAFT_NOTICE_KEY = "powLegacyDraftNoticeDismissed:v1";
 const RAPID_STATUS_LABELS = {
@@ -1959,9 +1943,6 @@ class NzVerificationMap {
         // then ended in another tab still clears the page (c1)
         this.backend?.setLifecycle?.({
             onSignedOut: ({ deliberate } = {}) => this.onBackendSessionEnded({ deliberate }),
-            // a retried sign-out from the account card removes the member's
-            // device copies when it starts, as the first attempt does
-            onSignOutStarted: () => window.PowConvexTaskClient?.purgeOwnerDeviceWork?.(this.departingOwnerId()),
         });
         this.backendUser = null;
         this.backendTasksById = new Map();
@@ -2441,8 +2422,6 @@ class NzVerificationMap {
         }
         this.applyPendingDeepLink();
         this.resumeRapidPinFromDevice();
-        // periods left unsent by a session change go to their own task
-        this.resumePendingPeriods().catch(() => {});
     }
 
     // a sign-in kept on the device from before a reload (a phone discards
@@ -2463,8 +2442,8 @@ class NzVerificationMap {
     // the clerk session ended elsewhere (another tab signed out, or the
     // session expired): the page keeps nothing of the person on screen, as
     // on a deliberate sign-out, but their unsent drafts stay on the device
-    // keyed to them and come back only when they sign in again; the chosen
-    // activity is kept for the return
+    // and come back when the same member signs in again (a different member's
+    // sign-in deletes them); the chosen activity is kept for the return
     onBackendSessionEnded({ deliberate = false } = {}) {
         const wasSignedIn = Boolean(this.backendUser);
         this.clearSignedInState({ deliberate });
@@ -2478,6 +2457,10 @@ class NzVerificationMap {
     }
 
     async signOutBackend() {
+        // unsent work on the device is deleted by a sign-out: ask once, only
+        // when there is some (typed work not yet saved counts)
+        const confirmed = await (window.PowConvexTaskClient?.confirmSignOut?.({ pageHasUnsent: Boolean(this.formDirty) }) ?? true);
+        if (!confirmed) return;
         // started first, so the repainted card waits for clerk's answer
         // rather than re-admitting the session being ended
         const signingOut = this.backend?.signOut({ deliberate: true });
@@ -2514,24 +2497,6 @@ class NzVerificationMap {
     sessionCurrent(ticket) {
         const userId = this.backendUser?._id || this.backend?.user?._id || "";
         return Boolean(ticket) && ticket.epoch === (this.sessionEpoch || 0) && Boolean(userId) && ticket.userId === userId;
-    }
-
-    // a write's receipt, kept apart from the page: onRecorded runs whenever
-    // the server recorded the write, even if the session changed while it
-    // was out (the client then rejects with committed and the value), so the
-    // submitter's own device copy of what was sent is always removed and the
-    // entry never comes back to be sent twice. onRecorded touches only
-    // owner-scoped device records captured before the send; the page itself
-    // stays behind the caller's session guard (#153 round 5)
-    async recordedReceipt(write, onRecorded) {
-        try {
-            const value = await write;
-            onRecorded(value);
-            return value;
-        } catch (error) {
-            if (error?.committed) onRecorded(error.value);
-            throw error;
-        }
     }
 
     // a check for work begun inside one pin entry (a position fix, an
@@ -2595,15 +2560,12 @@ class NzVerificationMap {
 
     // what a signed-in person leaves on the page goes on every sign-out, so
     // the next person at the screen finds none of it. a deliberate sign-out
-    // also deletes the device copies and forgets the activity; an ended
-    // session keeps the device copies, which carry their owner's id
+    // also forgets the activity (the client has already deleted every device
+    // draft); an ended session keeps the device drafts, which a different
+    // member's sign-in deletes (PowConvexTaskClient.adoptDeviceFor)
     clearSignedInState({ deliberate }) {
-        const signedOutUserId = (deliberate ? this.departingOwnerId() : this.draftOwnerId()) || "";
         this.sessionEpoch = (this.sessionEpoch || 0) + 1;
         this.refreshGeneration = (this.refreshGeneration || 0) + 1;
-        // a deliberate exit drops the kept pin while the owner is still known;
-        // after a session ends the owner is gone first, so the pin stays
-        if (deliberate && this.pinMode) this.exitPinMode();
         this.backendUser = null;
         this.signedOutDeliberately = deliberate;
         if (this.pinMode) this.exitPinMode();
@@ -2649,28 +2611,10 @@ class NzVerificationMap {
         this.formSnapshotsByTaskId.clear();
         this.guidedPeriodsByTaskId.clear();
         if (deliberate) {
-            this.clearFormSnapshots(signedOutUserId);
-            // the departing user's rapid drafts, text and pin, on every
-            // country; nobody else's
-            this.clearOwnedDeviceRecords(RAPID_DRAFT_PREFIX, signedOutUserId);
-            // pr-e: period cards leave with the session; on a shared
-            // computer the next user must not find them
-            this.clearAllGuidedPeriods(signedOutUserId);
-            // and the owner's cards on every other country on this device
-            window.PowConvexTaskClient?.purgeOwnerDeviceWork?.(signedOutUserId);
-            // parked periods of an earlier entry leave too, and a receipt
-            // that arrives after this sign-out may not park new ones for
-            // this owner (#153 round 8)
-            this.clearOwnedDeviceRecords(PENDING_PERIODS_PREFIX, signedOutUserId);
-            this.markDeliberateSignOut(signedOutUserId);
-            this.lastSessionOwnerId = "";
-            this.lastSessionOwnerSessionId = "";
+            // timers queued before the sign-out write nothing: every device
+            // write needs a signed-in page session (signedInUserId)
+            window.PowConvexTaskClient?.clearDeviceWork?.();
         }
-        // the next session, even the same member's, begins after any mark,
-        // including one made in another tab that reached this page as a
-        // session end (#153 round 12)
-        this.ownerSeenId = "";
-        this.ownerSeenAt = 0;
         if (ASSIGNMENT_MODE) {
             this.tasks = [];
             this.filteredTasks = [];
@@ -7066,61 +7010,19 @@ class NzVerificationMap {
     // the in-memory map is the working copy; the device copy is what a
     // reload mid-entry comes back to (jb 2026-09-05)
 
-    // device drafts live under owner-scoped keys (c1): the owner's user id
-    // is part of the key and of the record, so two contributors on one
-    // device never share a key. the keys written before c1
+    // device drafts are written and read only while a member is signed in;
+    // signed out, they live in memory only. the device holds one member's
+    // work at a time: a deliberate sign-out deletes all of it, and a
+    // different member's sign-in deletes what an earlier session left
+    // (PowConvexTaskClient.adoptDeviceFor). the keys written before c1
     // (powFormSnapshot:, powRapidDraft:) are never read or written again;
     // see legacyDeviceDraftCount
-    formSnapshotStorageKey(taskId, owner = this.draftOwnerId()) {
-        return owner ? `${FORM_SNAPSHOT_PREFIX}${COUNTRY_CONFIG.countryCode}:${owner}:${taskId}` : "";
+    signedInUserId() {
+        return this.backendUser?._id || this.backend?.user?._id || "";
     }
 
-    // unsent work on the device carries its owner's user id and is read
-    // back only for that user (c1: a session can end with the page open)
-    draftOwnerId() {
-        const owner = this.backendUser?._id || this.backend?.user?._id || "";
-        // the last owner seen is kept after the session ends, so a later
-        // deliberate sign-out still purges that person's device copies
-        if (owner) {
-            this.lastSessionOwnerId = owner;
-            // the session the member was admitted under, never the current
-            // one: a replacement session may already be installed while the
-            // departing member's page state is cleared (#153 round 12)
-            this.lastSessionOwnerSessionId = this.backend?.userSessionId || this.lastSessionOwnerSessionId || "";
-        }
-        // when this page first saw the owner: a deliberate sign-out in
-        // another tab at or after that time ended this session's device
-        // copies (#153 round 11)
-        if (owner !== (this.ownerSeenId || "")) {
-            this.ownerSeenId = owner;
-            this.ownerSeenAt = owner ? Date.now() : 0;
-        }
-        return owner;
-    }
-
-    // the member whose device copies a sign-out removes: the signed-in one,
-    // or the last one seen only while the session being ended is the one
-    // that member held (#153 round 11)
-    departingOwnerId() {
-        const owner = this.draftOwnerId();
-        if (owner) return owner;
-        const ending = this.backend?.currentOrEndingSessionId?.() || "";
-        return this.lastSessionOwnerId && this.lastSessionOwnerSessionId && this.lastSessionOwnerSessionId === ending ? this.lastSessionOwnerId : "";
-    }
-
-    // true when a deliberate sign-out by this owner, in any tab, came after
-    // this page began the session: no device write may follow it, or a
-    // queued autosave would recreate the purged drafts
-    deviceWritesEnded() {
-        const owner = this.draftOwnerId();
-        return Boolean(owner) && this.endedByDeliberateSignOut(owner, this.ownerSeenAt);
-    }
-
-    // a device draft is read back only for the signed-in user who wrote it;
-    // a draft without an owner is never granted to anyone
-    ownsDeviceDraft(record) {
-        const owner = this.draftOwnerId();
-        return Boolean(owner) && Boolean(record?.owner) && record.owner === owner;
+    formSnapshotStorageKey(taskId) {
+        return this.signedInUserId() ? `${FORM_SNAPSHOT_PREFIX}${COUNTRY_CONFIG.countryCode}:${taskId}` : "";
     }
 
     // drafts written before c1 carry no owner and cannot be attributed to
@@ -7164,11 +7066,11 @@ class NzVerificationMap {
 
     setFormSnapshot(taskId, snapshot) {
         this.formSnapshotsByTaskId.set(taskId, snapshot);
-        const owner = this.draftOwnerId();
         // signed out, the snapshot lives in memory only
-        if (!owner || this.deviceWritesEnded()) return;
+        const key = this.formSnapshotStorageKey(taskId);
+        if (!key) return;
         try {
-            window.localStorage.setItem(this.formSnapshotStorageKey(taskId), JSON.stringify({ saved_at: nextSavedAt(), rev: newRevisionToken(), owner, snapshot }));
+            window.localStorage.setItem(key, JSON.stringify({ saved_at: nextSavedAt(), snapshot }));
         } catch (error) {
             // private windows or blocked storage keep the snapshot in memory only
         }
@@ -7182,7 +7084,7 @@ class NzVerificationMap {
         try {
             const raw = window.localStorage.getItem(key);
             const record = raw ? JSON.parse(raw) : null;
-            if (record?.snapshot && typeof record.snapshot === "object" && this.ownsDeviceDraft(record)) {
+            if (record?.snapshot && typeof record.snapshot === "object") {
                 this.formSnapshotsByTaskId.set(taskId, record.snapshot);
                 return record.snapshot;
             }
@@ -7206,59 +7108,27 @@ class NzVerificationMap {
     // the stored snapshot as it stands, to delete exactly that version once
     // its submission is recorded
     formSnapshotVersion(taskId) {
-        const owner = this.draftOwnerId();
-        const key = this.formSnapshotStorageKey(taskId, owner);
+        const key = this.formSnapshotStorageKey(taskId);
         if (!key) return null;
         try {
-            const record = JSON.parse(window.localStorage.getItem(key) || "null");
-            return record?.owner === owner ? { owner, savedAt: record.saved_at, rev: record.rev ?? null } : { owner, savedAt: null, rev: null };
+            return { savedAt: JSON.parse(window.localStorage.getItem(key) || "null")?.saved_at ?? null };
         } catch (error) {
-            return { owner, savedAt: null, rev: null };
+            return { savedAt: null };
         }
     }
 
-    // deletes the owner's record only if it is still the submitted version;
-    // a later edit, or another contributor's record, is never touched
+    // deletes the record only if it is still the submitted version; a later
+    // edit is never touched
     deleteSubmittedFormSnapshot(taskId, version) {
-        if (!version?.owner) return;
-        const key = this.formSnapshotStorageKey(taskId, version.owner);
+        const key = this.formSnapshotStorageKey(taskId);
+        if (!key || !version) return;
         try {
             const record = JSON.parse(window.localStorage.getItem(key) || "null");
-            if (record && record.owner === version.owner && record.saved_at === version.savedAt && (record.rev ?? null) === (version.rev ?? null)) {
-                window.localStorage.removeItem(key);
-            }
+            if (record && record.saved_at === version.savedAt) window.localStorage.removeItem(key);
         } catch (error) {
             // nothing to clear when storage is unavailable
         }
-        if (this.draftOwnerId() === version.owner) this.formSnapshotsByTaskId.delete(taskId);
-    }
-
-    // a deliberate sign-out deletes the signing-out user's snapshots only;
-    // another contributor's kept work on the same device stays theirs
-    clearFormSnapshots(ownerId) {
-        this.formSnapshotsByTaskId.clear();
-        this.clearOwnedDeviceRecords(FORM_SNAPSHOT_PREFIX, ownerId);
-    }
-
-    // every country's records of one owner under one prefix; other owners'
-    // records and the quarantined legacy drafts are never touched
-    clearOwnedDeviceRecords(prefix, ownerId) {
-        if (!ownerId) return;
-        try {
-            const keys = [];
-            for (let index = 0; index < window.localStorage.length; index += 1) {
-                const key = window.localStorage.key(index);
-                if (!key || !key.startsWith(prefix)) continue;
-                try {
-                    if (JSON.parse(window.localStorage.getItem(key) || "null")?.owner === ownerId) keys.push(key);
-                } catch (error) {
-                    // an unreadable record is not this user's to delete
-                }
-            }
-            keys.forEach(key => window.localStorage.removeItem(key));
-        } catch (error) {
-            // nothing to clear when storage is unavailable
-        }
+        this.formSnapshotsByTaskId.delete(taskId);
     }
 
     // snapshot the typed form as a draft-shaped object so applyDraftToForm
@@ -7501,7 +7371,7 @@ class NzVerificationMap {
         }
         // history is filtered for the caller on the server, so a cached copy
         // serves only the user it was fetched for (c1 review round 3)
-        const userId = this.draftOwnerId();
+        const userId = this.signedInUserId();
         const cached = this.taskHistoryByTaskId.get(taskId);
         if (cached && cached.userId === userId) {
             body.innerHTML = this.taskHistoryHtml(cached.history);
@@ -8137,41 +8007,33 @@ class NzVerificationMap {
 
     // ---- unsubmitted rapid drafts, kept on this device only ----
 
-    rapidDraftStorageKey(key, owner = this.draftOwnerId()) {
-        return owner ? `${RAPID_DRAFT_PREFIX}${COUNTRY_CONFIG.countryCode}:${owner}:${key}` : "";
+    rapidDraftStorageKey(key) {
+        return this.signedInUserId() ? `${RAPID_DRAFT_PREFIX}${COUNTRY_CONFIG.countryCode}:${key}` : "";
     }
 
     rapidDraftVersion(key) {
-        const owner = this.draftOwnerId();
-        if (!owner) return null;
-        const stored = this.readRapidDraft(key);
-        return { owner, savedAt: stored?.saved_at ?? null, rev: stored?.rev ?? null };
+        if (!this.signedInUserId()) return null;
+        return { savedAt: this.readRapidDraft(key)?.saved_at ?? null };
     }
 
-    // deletes the owner's rapid draft only if it is still the submitted
-    // version (astra m4): a response arriving after another contributor
-    // signed in cannot reach their draft, whose key carries their id
+    // deletes the rapid draft only if it is still the submitted version
     clearSubmittedRapidDraft(key, version) {
-        if (!version?.owner) return;
-        const storageKey = this.rapidDraftStorageKey(key, version.owner);
+        const storageKey = this.rapidDraftStorageKey(key);
+        if (!storageKey || !version) return;
         try {
             const record = JSON.parse(window.localStorage.getItem(storageKey) || "null");
-            if (record && record.owner === version.owner && record.saved_at === version.savedAt && (record.rev ?? null) === (version.rev ?? null)) {
-                window.localStorage.removeItem(storageKey);
-            }
+            if (record && record.saved_at === version.savedAt) window.localStorage.removeItem(storageKey);
         } catch (error) {
             // nothing to clear when storage is unavailable
         }
     }
 
     persistRapidDraft(prefix, key, extraValues = {}) {
-        if (!this.draftOwnerId() || this.deviceWritesEnded()) return;
+        if (!this.signedInUserId()) return;
         try {
             const previous = this.readRapidDraft(key);
             const record = {
                 saved_at: nextSavedAt(),
-                rev: newRevisionToken(),
-                owner: this.draftOwnerId(),
                 values: this.rapidObservationValues(prefix),
                 extra: extraValues,
             };
@@ -8219,7 +8081,7 @@ class NzVerificationMap {
         try {
             const raw = window.localStorage.getItem(storageKey);
             const record = raw ? JSON.parse(raw) : null;
-            return this.ownsDeviceDraft(record) ? record : null;
+            return record && typeof record === "object" ? record : null;
         } catch (error) {
             return null;
         }
@@ -8230,13 +8092,11 @@ class NzVerificationMap {
     // 2026-09-05); a revision or a period's location has its own record
     keepRapidPinOnDevice() {
         if (!RAPID_NOMINATION_ENTRY || this.reviseContext || this.occupancyPinContext || !this.pinConfirmed) return;
-        if (!this.draftOwnerId() || this.deviceWritesEnded()) return;
+        if (!this.signedInUserId()) return;
         const record = this.readRapidDraft("rapid-pin") || {};
-        record.owner = this.draftOwnerId();
         // a pin change is a new version of the device copy, so a receipt for
         // an earlier send cannot delete it (#153 round 13)
         record.saved_at = nextSavedAt();
-        record.rev = newRevisionToken();
         const pin = { ...this.pinConfirmed, linkedRefs: this.pinLinkedRefs || [] };
         // the candidate changed after a send: the id it was sent under
         // belongs to the earlier content, so the form takes a fresh one
@@ -8823,16 +8683,7 @@ class NzVerificationMap {
             if (!alive()) return;
             // the entry's country is the pin's (entry follows the pin)
             const entryCountry = this.entryCountry();
-            const clearSent = (recordedResult) => {
-                if (options.draftKey) this.clearSubmittedRapidDraft(options.draftKey, draftVersion);
-                if (options.props?.task_id) this.deleteSubmittedFormSnapshot(options.props.task_id, snapshotVersion);
-                // the periods ride on this observation; if the session has
-                // already changed they cannot be recorded now, so they are
-                // parked against the recorded task and never left under the
-                // entry's key for the next place (#153 round 6)
-                if (periodsPlan && !alive()) this.parkPendingPeriods(periodsPlan, recordedResult, options.periodsKey);
-            };
-            const result = await this.recordedReceipt(this.backend.submitCurrentObservation({
+            const result = await this.backend.submitCurrentObservation({
                 clientSubmissionId: sentSubmissionId,
                 countryCode: entryCountry.code,
                 ...(options.props?.task_id
@@ -8850,15 +8701,14 @@ class NzVerificationMap {
                     } : {}),
                     portal_version: "rapid-current-v1-multicountry",
                 },
-            }), clearSent);
-            // the observation is recorded, so the exact draft it sent went,
-            // whatever happens next (recordedReceipt, even after a session
-            // change): the key carries the submitter's id and the version
-            // must match, so a later edit or another contributor's draft is
-            // never touched, and the sent entry never comes back to be sent
-            // twice. then, if the session ended while this was in flight,
-            // nothing else lands on the page
+            });
+            // a receipt from an ended session may have recorded on the
+            // server; it writes nothing to the device and nothing to the page
             if (!alive()) return;
+            // the exact draft this send carried goes; a later edit has a
+            // newer version and stays
+            if (options.draftKey) this.clearSubmittedRapidDraft(options.draftKey, draftVersion);
+            if (options.props?.task_id) this.deleteSubmittedFormSnapshot(options.props.task_id, snapshotVersion);
             this.clearFormDirty();
             const periodsOutcome = await this.recordRapidPeriods(periodsPlan, result, options.periodsKey);
             if (!alive()) return;
@@ -9469,10 +9319,9 @@ class NzVerificationMap {
         return taskId !== RAPID_PIN_PERIODS_KEY;
     }
 
-    // device persistence, keyed by country, user, and task, so a shared
-    // browser never shows one user's cards to another
-    guidedPeriodsStorageKey(taskId, owner) {
-        const user = owner || this.backendUser?._id || this.backend?.user?._id || "anon";
+    // device persistence, keyed by country, user, and task
+    guidedPeriodsStorageKey(taskId) {
+        const user = this.signedInUserId() || "anon";
         const prefix = window.PowOccupancy?.guidedPeriodsStoragePrefix(COUNTRY_CONFIG.countryCode, user)
             || `powGuidedPeriods:${COUNTRY_CONFIG.countryCode}:${user}:`;
         return `${prefix}${taskId}`;
@@ -9504,11 +9353,10 @@ class NzVerificationMap {
             state.sentDigest = this.guidedPeriodsContentDigest(state);
             state.sentSourceDigest = sourceDigest;
         }
-        if (this.deviceWritesEnded()) return;
+        if (!this.signedInUserId()) return;
         try {
             window.localStorage.setItem(this.guidedPeriodsStorageKey(taskId), JSON.stringify({
                 saved_at: nextSavedAt(),
-                rev: newRevisionToken(),
                 submissionId: state.submissionId || "",
                 ...(state.sentSubmissionId ? { sentSubmissionId: state.sentSubmissionId, sentDigest: state.sentDigest || "", sentSourceDigest: state.sentSourceDigest || "" } : {}),
                 segments: state.segments,
@@ -9544,64 +9392,39 @@ class NzVerificationMap {
         }
     }
 
-    // the stored periods as they stand when a submission is sent: the owner
-    // and the saved_at of the device copy (null when nothing is stored)
+    // the stored periods as they stand when a submission is sent: the
+    // saved_at of the device copy (null when nothing is stored)
     guidedPeriodsVersion(taskId) {
-        const owner = this.draftOwnerId();
-        if (!taskId || !owner) return null;
+        if (!taskId || !this.signedInUserId()) return null;
         let savedAt = null;
-        let rev = null;
         try {
-            const stored = JSON.parse(window.localStorage.getItem(this.guidedPeriodsStorageKey(taskId, owner)) || "null");
-            savedAt = stored?.saved_at ?? null;
-            rev = stored?.rev ?? null;
+            savedAt = JSON.parse(window.localStorage.getItem(this.guidedPeriodsStorageKey(taskId)) || "null")?.saved_at ?? null;
         } catch (error) {
             savedAt = null;
-            rev = null;
         }
-        return { owner, savedAt, rev };
+        return { savedAt };
     }
 
-    // after a recorded submission: the submitter's periods go only if the
-    // device copy is still the version that was sent (same rule as the
-    // rapid and form drafts). a newer edit, made after the same person
-    // signed back in, or another contributor's periods, stay
+    // after a recorded submission: the periods go only if the device copy
+    // is still the version that was sent (same rule as the rapid and form
+    // drafts); a newer edit stays
     clearSubmittedGuidedPeriods(taskId, version) {
-        if (!taskId || !version?.owner) return;
-        const key = this.guidedPeriodsStorageKey(taskId, version.owner);
+        if (!taskId || !version) return;
+        const key = this.guidedPeriodsStorageKey(taskId);
         let current = null;
         try {
             current = JSON.parse(window.localStorage.getItem(key) || "null");
         } catch (error) {
             current = null;
         }
-        if ((current?.saved_at ?? null) !== version.savedAt || (current?.rev ?? null) !== (version.rev ?? null)) return;
+        if ((current?.saved_at ?? null) !== version.savedAt) return;
         try {
             if (current) window.localStorage.removeItem(key);
         } catch (error) {
             // nothing to clear when storage is unavailable
         }
-        // the working copy goes with it only on the submitter's own session
-        // that sent it; a later session reloads its own copy from the device
-        if (this.draftOwnerId() === version.owner && version.epoch === (this.sessionEpoch || 0)) {
-            this.guidedPeriodsByTaskId.delete(taskId);
-        }
-    }
-
-    clearAllGuidedPeriods(userId) {
-        this.guidedPeriodsByTaskId.clear();
-        try {
-            const prefix = window.PowOccupancy?.guidedPeriodsStoragePrefix(COUNTRY_CONFIG.countryCode, userId);
-            if (!prefix) return;
-            const keys = [];
-            for (let i = 0; i < window.localStorage.length; i += 1) {
-                const key = window.localStorage.key(i);
-                if (key && key.startsWith(prefix)) keys.push(key);
-            }
-            keys.forEach(key => window.localStorage.removeItem(key));
-        } catch (error) {
-            // storage unavailable: nothing persisted to clear
-        }
+        // the working copy goes with it, in the session that sent it
+        if (version.epoch === (this.sessionEpoch || 0)) this.guidedPeriodsByTaskId.delete(taskId);
     }
 
     guidedPeriodsState(taskId) {
@@ -12035,17 +11858,19 @@ class NzVerificationMap {
                 page_path: window.location.pathname,
             };
             // the exact device snapshot this save carries goes once the save
-            // is recorded, even if the session changed while it was out, so
-            // a stale snapshot never reappears over the saved draft (#153
-            // round 6); a later edit has a newer version and is kept
+            // is recorded in this session, so a stale snapshot never
+            // reappears over the saved draft; a later edit has a newer
+            // version and is kept. a receipt from an ended session writes
+            // nothing to the device
             const snapshotVersion = this.formSnapshotVersion(props.task_id);
-            const saved = await this.recordedReceipt(this.backend.saveEvidenceDraft({
+            const saved = await this.backend.saveEvidenceDraft({
                 taskId: props.task_id,
                 evidenceDraftId: revisionDraftId || undefined,
                 draft,
                 clientContext,
-            }), () => this.deleteSubmittedFormSnapshot(props.task_id, snapshotVersion));
+            });
             if (!alive()) return;
+            this.deleteSubmittedFormSnapshot(props.task_id, snapshotVersion);
             let periods = null;
             if (unresolved) {
                 await this.backend.submitUnresolvedNote({
@@ -12054,17 +11879,16 @@ class NzVerificationMap {
                 });
                 if (!alive()) return;
             } else if (submit) {
-                // recorded: the submitter's device copy of the periods goes,
-                // even if the session ended meanwhile (recordedReceipt)
-                const result = await this.recordedReceipt(this.backend.submitEvidenceDraftWithOccupancies({
+                const result = await this.backend.submitEvidenceDraftWithOccupancies({
                     evidenceDraftId: saved.evidence_draft_id,
                     note: values.note || undefined,
                     clientSubmissionId: guidedSubmission.clientSubmissionId,
                     segments: guidedSubmission.segments,
                     ...(guidedSubmission.chain ? { chain: guidedSubmission.chain } : {}),
                     clientContext: { ...clientContext, portal_version: "assigned-periods-atomic-v2" },
-                }), () => this.clearSubmittedGuidedPeriods(props.task_id, periodsVersion));
+                });
                 if (!alive()) return;
+                this.clearSubmittedGuidedPeriods(props.task_id, periodsVersion);
                 periods = result.period_count > 0 ? { ok: true, result, count: result.period_count } : null;
             }
             if (!alive()) return;
@@ -12257,10 +12081,6 @@ class NzVerificationMap {
             chain: chainToSend ? window.PowFunctionChain.payload(chainToSend) : undefined,
             count: segments.length,
             state,
-            // when the originating session began on this page, against a
-            // deliberate sign-out: a submission started after another tab
-            // signed out still belongs to the purged session (#153 round 13)
-            startedAt: this.ownerSeenAt || Date.now(),
         };
     }
 
@@ -12282,129 +12102,6 @@ class NzVerificationMap {
         };
     }
 
-    // ---- periods parked after a session change (#153 round 6) ----
-    // an observation recorded after its session ended leaves its periods
-    // unsent. they are kept under the submitter's id and the recorded task,
-    // with the parent evidence id and the plan's submission id, removed from
-    // the entry's own key, and sent at the submitter's next sign-in (the
-    // same submission id, so the server records them once)
-
-    // the time of an owner's last deliberate sign-out, kept in memory and
-    // on the device so every tab sees it. a plan begun at or before that
-    // time belongs to a purged session and may not park (#153 round 8)
-    markDeliberateSignOut(owner) {
-        if (!owner) return;
-        const at = Date.now();
-        this.deliberateSignOutAt = this.deliberateSignOutAt || new Map();
-        this.deliberateSignOutAt.set(owner, at);
-        try {
-            window.localStorage.setItem(`${SIGN_OUT_MARK_PREFIX}${owner}`, String(at));
-        } catch (error) {
-            // storage unavailable: this page still refuses
-        }
-    }
-
-    endedByDeliberateSignOut(owner, startedAt) {
-        let at = this.deliberateSignOutAt?.get(owner) || 0;
-        try {
-            at = Math.max(at, Number(window.localStorage.getItem(`${SIGN_OUT_MARK_PREFIX}${owner}`)) || 0);
-        } catch (error) {
-            // the in-memory time stands
-        }
-        return at > 0 && !(Number(startedAt) > at);
-    }
-
-    // keyed by the plan's submission id, so two entries for one task keep
-    // separate records and a recovery removes only its own (#153 round 8)
-    pendingPeriodsStorageKey(owner, submissionId = "") {
-        return `${PENDING_PERIODS_PREFIX}${COUNTRY_CONFIG.countryCode}:${owner}:${submissionId}`;
-    }
-
-    parkPendingPeriods(plan, result, periodsKey) {
-        const owner = plan?.version?.owner;
-        if (!owner || !plan.segments?.length || !result?.task_id || !result?.evidence_draft_id || !window.PowOccupancy) return;
-        // off the entry's key either way, so they never reach another place
-        this.clearSubmittedGuidedPeriods(periodsKey, plan.version);
-        // a deliberate sign-out ended this owner's device copies: a late
-        // receipt must not write a new one afterwards
-        if (!plan.submissionId || this.endedByDeliberateSignOut(owner, plan.startedAt)) return;
-        try {
-            window.localStorage.setItem(this.pendingPeriodsStorageKey(owner, plan.submissionId), JSON.stringify({
-                owner,
-                saved_at: nextSavedAt(),
-                taskId: result.task_id,
-                parentEvidenceDraftId: result.evidence_draft_id,
-                submissionId: plan.submissionId,
-                segments: plan.segments.map(values => window.PowOccupancy.payload(values)),
-                ...(plan.chain ? { chain: plan.chain } : {}),
-            }));
-        } catch (error) {
-            // storage unavailable: the periods cannot be kept for later
-        }
-    }
-
-    // at sign-in: the signed-in person's parked periods are sent against
-    // their own task, once each; a refusal from the server drops them with
-    // a notice, and a network fault keeps them for the next sign-in
-    async resumePendingPeriods() {
-        const owner = this.draftOwnerId();
-        if (!owner || !this.backend?.signedIn) return;
-        const alive = this.sessionGuard();
-        const prefix = this.pendingPeriodsStorageKey(owner);
-        let keys = [];
-        try {
-            for (let index = 0; index < window.localStorage.length; index += 1) {
-                const key = window.localStorage.key(index);
-                if (key && key.startsWith(prefix)) keys.push(key);
-            }
-        } catch (error) {
-            return;
-        }
-        for (const key of keys) {
-            let record = null;
-            try {
-                record = JSON.parse(window.localStorage.getItem(key) || "null");
-            } catch (error) {
-                record = null;
-            }
-            if (!record || record.owner !== owner) continue;
-            // removes the record read above and no other: a record stored
-            // under the key since (a later park) is left alone
-            const drop = () => {
-                try {
-                    const current = JSON.parse(window.localStorage.getItem(key) || "null");
-                    if (current && current.saved_at === record.saved_at && current.submissionId === record.submissionId) {
-                        window.localStorage.removeItem(key);
-                    }
-                } catch (error) {
-                    // nothing to remove
-                }
-            };
-            try {
-                await this.recordedReceipt(this.backend.submitOccupancies({
-                    clientSubmissionId: record.submissionId,
-                    taskId: record.taskId,
-                    parentEvidenceDraftId: record.parentEvidenceDraftId,
-                    segments: record.segments,
-                    ...(record.chain ? { chain: record.chain } : {}),
-                    clientContext: { portal_version: "occupancy-v2-resumed-after-session-change" },
-                }), drop);
-                if (!alive()) return;
-                this.taskHistoryByTaskId?.delete(record.taskId);
-                this.setBackendTransientStatus("The periods of your earlier entry were recorded.");
-            } catch (error) {
-                if (!alive()) return;
-                if (error?.authExpired || error?.sessionChanged) return;
-                // kept unless the server explicitly and permanently refused
-                // them: a network fault, HTTP 408/425/429/5xx or an error
-                // that says nothing of retry may pass on the next sign-in
-                if (error?.retryable !== false) return;
-                drop();
-                this.setBackendTransientStatus(`The periods of an earlier entry could not be recorded: ${error.message || "refused"}. Add them again from that place.`, { error: true, durationMs: 15000 });
-            }
-        }
-    }
-
     // records the planned cards against the observation just submitted;
     // a failure keeps them for the pane's retry
     async recordRapidPeriods(plan, result, periodsKey) {
@@ -12413,28 +12110,23 @@ class NzVerificationMap {
         if (!alive()) return;
         if (!plan || plan.problem || !result?.task_id || !result?.evidence_draft_id) return {};
         try {
-            // recorded: the submitter's device copy of these periods goes,
-            // even if the session ended meanwhile, so they are never sent
-            // twice (recordedReceipt)
-            const recorded = await this.recordedReceipt(this.backend.submitOccupancies({
+            const recorded = await this.backend.submitOccupancies({
                 clientSubmissionId: plan.submissionId,
                 taskId: result.task_id,
                 parentEvidenceDraftId: result.evidence_draft_id,
                 segments: plan.segments.map(values => window.PowOccupancy.payload(values)),
                 ...(plan.chain ? { chain: plan.chain } : {}),
                 clientContext: { portal_version: "occupancy-v2-with-observation" },
-            }), () => this.clearSubmittedGuidedPeriods(periodsKey, plan.version));
+            });
+            // a receipt from an ended session writes nothing to the device
             if (!alive()) return;
+            this.clearSubmittedGuidedPeriods(periodsKey, plan.version);
             this.taskHistoryByTaskId.delete(result.task_id);
             return { periodsRecorded: { result: recorded, count: plan.count } };
         } catch (error) {
-            // the session changed before these periods were recorded: they
-            // are parked against their task for the submitter's next
-            // sign-in, never left to attach to another place (#153 round 6)
-            if (!alive()) {
-                if (!error?.committed) this.parkPendingPeriods(plan, result, periodsKey);
-                return;
-            }
+            // the session ended before these periods were recorded: nothing
+            // is kept or shown for it
+            if (!alive()) return;
             const state = plan.state;
             this.occupancyDraft = {
                 taskId: result.task_id,
