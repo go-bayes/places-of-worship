@@ -1,8 +1,12 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
+import type { Doc } from "./_generated/dataModel";
 import { requireUser } from "./lib/auth";
+import { assertInternalAgentIngestEnabled, internalAgentServiceUser } from "./lib/agentServiceUser";
 import { MEDIUM_TEXT_MAX, assertMaxString } from "./lib/limits";
-import { judgmentDisposition } from "./lib/agentJudgments";
+import { JUDGMENTS_PER_CALL_MAX, judgmentDisposition, recordJudgments, type JudgmentInput } from "./lib/agentJudgments";
+import { taskPlaceRefs } from "./lib/placeRefs";
+import { deterministicJudgmentInput, validateScorerJudgment } from "./lib/scorerJudgments";
 
 // reviewer-facing reads and the human disposition write for agent
 // judgments (docs/development/agent-judgments.md). humans decide; ai
@@ -11,6 +15,8 @@ import { judgmentDisposition } from "./lib/agentJudgments";
 
 // bounded reads walk each index newest first, so the cap drops the oldest
 const LIST_MAX = 200;
+// dispositions embedded per judgment in the place read
+const EMBEDDED_DISPOSITIONS_MAX = 10;
 
 export const listJudgmentsForTask = query({
   args: { taskId: v.string() },
@@ -37,6 +43,43 @@ export const listJudgmentsForSubject = query({
       .order("desc")
       .take(LIST_MAX);
     return rows;
+  },
+});
+
+// the judgments about the place a task is about, with each row's newest
+// dispositions embedded, so the reviewer panel needs one round trip. the place
+// refs are the task's matched osm object and its source record id.
+export const listJudgmentsForTaskPlace = query({
+  args: { taskId: v.string() },
+  returns: v.array(v.any()),
+  handler: async (ctx, args) => {
+    await requireUser(ctx, ["reviewer", "curator", "admin", "pi"]);
+    const task: Doc<"tasks"> | null = await ctx.db
+      .query("tasks")
+      .withIndex("by_task_id", (q) => q.eq("task_id", args.taskId))
+      .unique();
+    if (task === null) return [];
+    const collected: Doc<"agent_judgments">[] = [];
+    for (const ref of taskPlaceRefs(task)) {
+      const rows = await ctx.db
+        .query("agent_judgments")
+        .withIndex("by_subject", (q) => q.eq("subject_ref", ref))
+        .order("desc")
+        .take(LIST_MAX);
+      collected.push(...rows);
+    }
+    collected.sort((a, b) => b.created_at - a.created_at);
+    const capped = collected.slice(0, LIST_MAX);
+    const out = [];
+    for (const row of capped) {
+      const dispositions = await ctx.db
+        .query("judgment_dispositions")
+        .withIndex("by_judgment", (q) => q.eq("judgment_id", row.judgment_id))
+        .order("desc")
+        .take(EMBEDDED_DISPOSITIONS_MAX);
+      out.push({ ...row, dispositions });
+    }
+    return out;
   },
 });
 
@@ -111,5 +154,36 @@ export const recordJudgmentDisposition = mutation({
       created_at: now,
     });
     return { disposition_id: dispositionId };
+  },
+});
+
+// writes deterministic scorer judgments (agent-judgment.v1.1), as converted by
+// scripts/osm_confidence_judgments.mjs, on the firstPassReceipts.ingestFirstPass
+// pattern: internal, gated by POW_INTERNAL_AGENT_INGEST_ENABLED, attributed to
+// the internal agent service user. it creates no task, draft, version, event
+// or decision. running it against a deployment is a data import that needs the
+// project lead's instruction.
+export const ingestDeterministicJudgments = internalMutation({
+  args: { judgments: v.array(deterministicJudgmentInput), signalVectorSha256: v.string() },
+  returns: v.array(v.object({ judgment_id: v.string(), created: v.boolean() })),
+  handler: async (ctx, args) => {
+    assertInternalAgentIngestEnabled();
+    if (args.judgments.length > JUDGMENTS_PER_CALL_MAX) {
+      throw new Error(`At most ${JUDGMENTS_PER_CALL_MAX} judgments per call.`);
+    }
+    if (!/^[0-9a-f]{64}$/.test(args.signalVectorSha256)) throw new Error("The signal-vector hash is a sha256.");
+    const inputs = args.judgments as unknown as JudgmentInput[];
+    const countries = new Set<string>();
+    for (const input of inputs) {
+      validateScorerJudgment(input);
+      if (input.judge.signal_vector_sha256 !== args.signalVectorSha256) {
+        throw new Error("Every judgment names the signal-vector hash the call names.");
+      }
+      countries.add(input.context.country_code);
+    }
+    if (countries.size > 1) throw new Error("One call carries one country.");
+    const now = Date.now();
+    const service = await internalAgentServiceUser(ctx, now);
+    return await recordJudgments(ctx, { actorUserId: service._id, judgments: inputs, now });
   },
 });
