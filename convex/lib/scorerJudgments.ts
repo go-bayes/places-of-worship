@@ -183,9 +183,18 @@ export function validateScorerJudgment(input: JudgmentInput): void {
   for (const term of score.tier_reasons) if (!SCORER_TIER_REASONS.includes(term)) throw new Error(`Tier reason ${term} is not in the scorer's vocabulary.`);
   for (const term of score.tier_pending) if (!SCORER_TIER_PENDING.includes(term)) throw new Error(`Pending condition ${term} is not in the scorer's vocabulary.`);
   for (const term of score.indicators.conflict_reasons) if (!SCORER_CONFLICT_REASONS.includes(term)) throw new Error(`Conflict reason ${term} is not in the scorer's vocabulary.`);
-  // the composite is the rounded product of three components
+  // match R's round(product, 4): compare adjacent decimal values, with ties to even
   const parts = score.components;
-  if (Math.abs(score.composite - Math.round(parts.identity * parts.location * parts.status * 10000) / 10000) > 1.0001e-4) {
+  const product = parts.identity * parts.location * parts.status;
+  const scaled = product * 10000;
+  const lowerUnits = Math.floor(scaled);
+  const lower = lowerUnits / 10000;
+  const upper = Math.ceil(scaled) / 10000;
+  const distanceDown = product - lower;
+  const distanceUp = upper - product;
+  const verifiedComposite = distanceUp < distanceDown || (distanceUp === distanceDown && lowerUnits % 2 === 1) ? upper : lower;
+  // scores are in [0, 1]; epsilon allows representation error, never a decimal unit
+  if (Math.abs(score.composite - verifiedComposite) > Number.EPSILON) {
     throw new Error("A scorer composite is the product of the identity, location and status components, to four decimal places.");
   }
   // the tier, its reasons and its pending condition follow from the components, indicators and cut points
@@ -194,10 +203,10 @@ export function validateScorerJudgment(input: JudgmentInput): void {
   const cut = score.cut_points;
   const ind = score.indicators;
   const expectedEscalate: string[] = [];
-  if (score.composite < cut.review_min_composite) expectedEscalate.push("composite_below_0.6");
+  if (verifiedComposite < cut.review_min_composite) expectedEscalate.push("composite_below_0.6");
   if (ind.generic_name && ind.cross_source_match === "no_match") expectedEscalate.push("generic_name_no_cross_source_match");
   const expectedReview: string[] = [];
-  if (score.composite < cut.screened_min_composite && score.composite >= cut.review_min_composite) expectedReview.push("composite_0.6_to_0.9");
+  if (verifiedComposite < cut.screened_min_composite && verifiedComposite >= cut.review_min_composite) expectedReview.push("composite_0.6_to_0.9");
   if (ind.conflict) expectedReview.push("conflict");
   if (ind.duplicate) expectedReview.push("duplicate");
   if (parts.identity < cut.component_floor) expectedReview.push("identity_below_0.7");

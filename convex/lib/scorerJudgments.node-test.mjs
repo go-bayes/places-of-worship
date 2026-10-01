@@ -156,6 +156,57 @@ test("composite and screened tier are consistent with their fields", () => {
   assert.throws(() => validateScorerJudgment(bad), /tier/);
 });
 
+const compositeRow = (components, composite, expectedTier, reasons) => {
+  const row = clone(tier);
+  Object.assign(row.score, {
+    components: { denomination: 1, ...components }, composite,
+    tier: expectedTier, tier_reasons: reasons, tier_pending: [],
+  });
+  Object.assign(row.score.indicators, { duplicate: false, conflict: false, generic_name: false });
+  row.outcome = expectedTier;
+  row.basis_note = scorerBasisNote(row);
+  return row;
+};
+
+test("a supplied composite cannot cross the 0.9 or 0.6 tier cut point by one decimal unit", () => {
+  const cases = [
+    { components: { identity: 0.9, location: 0.9999, status: 1 }, rounded: 0.8999, cut: 0.9, expectedTier: "review", reasons: ["composite_0.6_to_0.9"], raisedTier: "screened", raisedReasons: [] },
+    { components: { identity: 0.965, location: 0.965, status: 0.9664 }, rounded: 0.8999, cut: 0.9, expectedTier: "review", reasons: ["composite_0.6_to_0.9"], raisedTier: "screened", raisedReasons: [] },
+    { components: { identity: 0.6, location: 0.9999, status: 1 }, rounded: 0.5999, cut: 0.6, expectedTier: "escalate", reasons: ["composite_below_0.6", "identity_below_0.7"], raisedTier: "review", raisedReasons: ["composite_0.6_to_0.9", "identity_below_0.7"] },
+  ];
+  for (const c of cases) {
+    assert.doesNotThrow(() => validateScorerJudgment(compositeRow(c.components, c.rounded, c.expectedTier, c.reasons)));
+    assert.throws(() => validateScorerJudgment(compositeRow(c.components, c.cut, c.raisedTier, c.raisedReasons)), /product/);
+  }
+});
+
+test("composite rounding matches R's nearest-value and ties-to-even rule", () => {
+  // expected values checked with round(x, 4) in the scorer's R runtime
+  for (const [identity, rounded] of [[0.78125, 0.7812], [0.84375, 0.8438], [0.90005, 0.9]]) {
+    const components = { identity, location: 1, status: 1 };
+    const expectedTier = rounded < 0.9 ? "review" : "screened";
+    const reasons = expectedTier === "review" ? ["composite_0.6_to_0.9"] : [];
+    assert.doesNotThrow(() => validateScorerJudgment(compositeRow(components, rounded, expectedTier, reasons)));
+    const wrong = rounded === 0.7812 ? 0.7813 : rounded === 0.8438 ? 0.8437 : 0.9001;
+    assert.throws(() => validateScorerJudgment(compositeRow(components, wrong, expectedTier, reasons)), /product/);
+  }
+});
+
+test("only representation error is accepted and tiers use the verified composite", () => {
+  for (const [components, composite, expectedTier, reasons, lowerTier, lowerReasons] of [
+    [{ identity: 0.9, location: 1, status: 1 }, 0.9, "screened", [], "review", ["composite_0.6_to_0.9"]],
+    [{ identity: 0.8, location: 0.75, status: 1 }, 0.6, "review", ["composite_0.6_to_0.9"], "escalate", ["composite_below_0.6"]],
+  ]) {
+    for (const delta of [-Number.EPSILON, Number.EPSILON]) {
+      assert.doesNotThrow(() => validateScorerJudgment(compositeRow(components, composite + delta, expectedTier, reasons)));
+    }
+    assert.throws(() => validateScorerJudgment(compositeRow(components, composite - Number.EPSILON, lowerTier, lowerReasons)), /tier/);
+    for (const delta of [-1e-8, 1e-8]) {
+      assert.throws(() => validateScorerJudgment(compositeRow(components, composite + delta, expectedTier, reasons)), /product/);
+    }
+  }
+});
+
 test("the tier, its reasons and its pending condition follow from the fields", () => {
   const edit = (change) => { const row = clone(tier); change(row.score); row.outcome = row.score.tier; row.basis_note = scorerBasisNote(row); return row; };
   const screened = (sc) => { Object.assign(sc, { tier: "screened", tier_reasons: [], tier_pending: [], composite: 0.95 }); sc.components = { identity: 1, location: 0.95, status: 1, denomination: 0.95 }; };
