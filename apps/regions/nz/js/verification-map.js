@@ -8532,6 +8532,13 @@ class NzVerificationMap {
         };
         form.addEventListener("input", markDirty);
         form.addEventListener("change", markDirty);
+        // the extra fields (name, address, locality) sit outside the form: an
+        // edit there after a send persists and rotates the id as well, so
+        // the correction is recorded rather than deduplicated (#153 round 17)
+        extraIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && !form.contains?.(el)) el.addEventListener("input", markDirty);
+        });
         form.addEventListener("input", event => {
             event.target?.closest?.("label, fieldset")?.classList?.remove("field-invalid");
         });

@@ -1198,6 +1198,37 @@ async function roundThree() {
     assert.equal(kept.values.directObservation, "v3", "the latest edit is on the device without waiting for a timer");
   }
 
+  // round 17: an edit to a field outside the form (name, address, locality)
+  // after a send persists at once and rotates the sent id
+  {
+    values.clear();
+    const { app } = signedInApp("user_a");
+    const formListeners = {};
+    const extraListeners = {};
+    const form = {
+      isConnected: true,
+      dataset: { submissionId: "sub_sent", sentSubmissionId: "sub_sent" },
+      addEventListener(type, fn) { (formListeners[type] = formListeners[type] || []).push(fn); },
+      querySelectorAll: () => [],
+      contains: () => false,
+    };
+    const nameInput = { value: "Old name", addEventListener(type, fn) { (extraListeners[type] = extraListeners[type] || []).push(fn); } };
+    document.getElementById = (id) => (id === "pinRapidCurrentForm" ? form : id === "pinNameInput" ? nameInput : null);
+    document.querySelector = () => null;
+    window.PowRapidEntry = { secureSubmissionId: (() => { let n = 0; return () => `sub_x${(n += 1)}`; })() };
+    for (const name of ["updateRapidSourceFields", "updateRapidDiscussionFields", "updateRapidUncertaintyField", "bindSourceTypeahead", "renderRapidSourceLinks", "markFormDirty"]) app[name] = () => {};
+    app.rapidObservationValues = () => ({ directObservation: "v1" });
+    app.markRapidDraftSent("t_1", "sub_sent");
+    app.bindRapidObservationForm("pin", { props: { task_id: "t_1" }, draftExtraIds: ["pinNameInput"] });
+    assert.ok(extraListeners.input?.length, "the outside field is listened to");
+    nameInput.value = "Corrected name";
+    for (const fn of extraListeners.input) fn({ target: nameInput });
+    const kept = JSON.parse(values.get(app.rapidDraftStorageKey("t_1")));
+    assert.equal(kept.extra.pinNameInput, "Corrected name", "the correction is on the device at once");
+    assert.notEqual(form.dataset.submissionId, "sub_sent", "and the sent id is replaced");
+    assert.equal(kept.submission_id, form.dataset.submissionId);
+  }
+
   // round 9: content the cards inherit from the parent observation, and a
   // removed card, each rotate a sent id before the next send
   {
