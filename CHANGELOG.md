@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-10-02 (submission retry safety design brief)
+
+- Added a [design brief for server-side submission retry safety](docs/development/submission-idempotency-brief-2026-10-02.md), following JB's selected direction. It specifies request digests, receipts, atomic prerequisites, client retries, legacy handling, C1 sign-out, abuse limits and regressions from PR #153 rounds 19–24, with six proposed rulings for JB. The brief adopts no contract or implementation.
+
 ### 2026-10-02 (vendored Leaflet and VectorGrid for the portals)
 
 - Both portals (`apps/regions/nz/verification.html`, `apps/regions/nz/review.html`) now load Leaflet 1.9.4 and Leaflet.VectorGrid 1.3.0 from `apps/vendor/` instead of unpkg.com, on JB's go-ahead of 2026-10-02. The files are byte-for-byte copies of the npm packages at the versions the pages loaded, checked against the registry's published SHA-512 integrity (and, for Leaflet, the SHA-256 values the pages already pinned); `apps/vendor/<package>@<version>/` holds each package's licence, the images `leaflet.css` references, and a README naming source, version, licence and SHA-384. Script order is unchanged and the unpkg `integrity` attributes are dropped, as the files are same-origin. `.gitignore` gains an exception so the vendored `dist/` folders are tracked. In headless Chromium with Convex blocked, both maps render, zoom and recentre work, and no request goes to unpkg.com; `DOMContentLoaded` was 0.87 to 1.10 s (contributor portal) and 0.32 to 0.39 s (review portal) before, and 0.04 to 0.05 s on both after, two runs each on a fast network. The other pages under `apps/` that load from unpkg.com load MapLibre GL 3.6.1 (104 `index.html` pages, including `apps/global/index.html`), not Leaflet; they are unchanged and vendoring MapLibre is a later step. The RA guide is unaffected: no portal UI changed.
