@@ -4,7 +4,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 const test = require("node:test");
 
-function fixture() {
+function fixture({ storage, records = new Map(), sent = [], realContract = false } = {}) {
   let writes = 0;
   let nextId = 0;
   const form = { dataset: { submissionId: "original" }, isConnected: true };
@@ -16,7 +16,7 @@ function fixture() {
   const window = {
     __POW_TEST_NO_BOOTSTRAP__: true,
     location: { search: "?batch=nz-temporal-ra-workpack-001", pathname: "/apps/regions/nz/verification.html" },
-    localStorage: {
+    localStorage: storage || {
       getItem() { throw new Error("Device storage blocked"); },
       setItem() { writes += 1; throw new Error("Device storage blocked"); },
       removeItem() { writes += 1; throw new Error("Device storage blocked"); },
@@ -28,11 +28,13 @@ function fixture() {
     },
   };
   const context = vm.createContext({ window, document, localStorage: window.localStorage, URLSearchParams, Event, console });
+  if (realContract) {
+    vm.runInContext(fs.readFileSync(path.join(__dirname, "rapid-entry-contract.js"), "utf8"), context);
+    window.PowRapidEntry.secureSubmissionId = () => `corrected-${++nextId}`;
+  }
   vm.runInContext(fs.readFileSync(path.join(__dirname, "verification-map.js"), "utf8"), context);
   vm.runInContext(fs.readFileSync(path.join(__dirname, "convex-task-client.js"), "utf8"), context);
   const app = Object.create(window.NzVerificationMap.prototype);
-  const records = new Map();
-  const sent = [];
   let recordedTask;
   Object.assign(app, {
     backendUser: { _id: "member" },
@@ -67,9 +69,77 @@ function fixture() {
     getCandidate: () => ({ name: "Hall", latitude: app.pinConfirmed.latitude, longitude: app.pinConfirmed.longitude,
       ...(app.probableSameAsPayload() ? { probableSameAs: app.probableSameAsPayload() } : {}) }),
   };
-  app.keepRapidPinOnDevice();
+  if (!storage) app.keepRapidPinOnDevice();
   return { app, form, document, window, records, sent, submit: () => app.submitRapidObservation("pin", options),
     writes: () => writes, recordedTask: () => recordedTask };
+}
+
+for (const withEvidenceFiles of [false, true]) {
+  test(`lost response, reload and unchanged retry ${withEvidenceFiles ? "with" : "without"} evidence files`, async () => {
+    const stored = new Map([["powDeviceOwner1", "member|session"]]);
+    const storage = {
+      getItem: key => stored.get(key) ?? null,
+      setItem: (key, value) => stored.set(key, String(value)),
+      removeItem: key => stored.delete(key),
+    };
+    const records = new Map();
+    const sent = [];
+    const page = () => {
+      const f = fixture({ storage, records, sent, realContract: true });
+      const fields = Object.fromEntries([
+        "ObservationBasis", "ObservedOn", "SourceTitle", "SourceReference", "SourceId", "SourceLocator",
+        "DenominationRaw", "DenominationBasis", "DirectObservation", "UncertaintyNote", "PrivacyFlag", "DiscussionNote",
+      ].map(name => [`pin${name}`, { value: "" }]));
+      fields.pinFlagForDiscussion = { checked: false };
+      fields.pinSaveSourceToRegister = { checked: false };
+      fields.pinEvidenceFiles = { files: [] };
+      const radio = { value: "confirmed_active", checked: false };
+      const get = f.document.getElementById;
+      f.document.getElementById = id => fields[id] || get(id);
+      f.document.querySelector = selector => selector.startsWith('input[name="pinCurrentStatus"]')
+        ? (selector.includes(":checked") && !radio.checked ? null : radio) : null;
+      delete f.app.rapidObservationValues;
+      delete f.app.pendingEvidenceFiles;
+      for (const name of ["updateRapidSourceFields", "updateRapidDiscussionFields", "updateRapidUncertaintyField", "updateSourceLocatorField"]) f.app[name] = () => {};
+      return { ...f, fields, radio };
+    };
+    const first = page();
+    first.radio.checked = true;
+    first.fields.pinObservationBasis.value = "direct_field_observation";
+    first.fields.pinObservedOn.value = "2026-09-30";
+    first.fields.pinDirectObservation.value = "Hall seen today";
+    first.fields.pinPrivacyFlag.value = "needs_review";
+    if (withEvidenceFiles) first.fields.pinEvidenceFiles.files = [{ name: "hall.jpg" }];
+    first.app.persistRapidDraft("pin", "rapid-pin");
+    first.app.keepRapidPinOnDevice();
+    await first.submit();
+    assert.equal(records.size, 1, "the server records before the response is lost");
+    assert.equal(first.form.dataset.submissionId, "original");
+
+    // a fresh page restores the sent draft, but the browser file input is empty
+    const reloaded = page();
+    reloaded.form.dataset.submissionId = "minted-after-reload";
+    const record = reloaded.app.restoreRapidDraft("pin", "rapid-pin");
+    const { linkedRefs, ...pin } = record.pin;
+    reloaded.app.pinConfirmed = pin;
+    reloaded.app.pinLinkedRefs = linkedRefs;
+    assert.equal(record.values.hasEvidenceFiles, withEvidenceFiles);
+    assert.equal(reloaded.app.rapidObservationValues("pin").hasEvidenceFiles, false);
+    assert.equal(reloaded.form.dataset.submissionId, "original");
+    assert.equal(reloaded.form.dataset.sentFingerprint, record.sent_fingerprint);
+    await reloaded.submit();
+    assert.equal(sent.length, 2, "the unchanged retry reaches the server");
+    assert.equal(sent[1].clientSubmissionId, sent[0].clientSubmissionId, "reload retains the sent id");
+    assert.equal(JSON.stringify(sent[1].observation), JSON.stringify(sent[0].observation), "the submitted text is unchanged");
+    assert.equal(records.size, 1, "the unchanged retry creates no duplicate nomination");
+
+    // a real edit after reload still rotates, even without an input event
+    reloaded.fields.pinDirectObservation.value = "Corrected observation";
+    await reloaded.submit();
+    assert.notEqual(sent[2].clientSubmissionId, sent[0].clientSubmissionId);
+    assert.equal(records.size, 2, "the changed content records separately");
+    assert.equal(sent[2].observation.direct_observation, "Corrected observation");
+  });
 }
 
 for (const change of ["candidate", "observation"]) {
@@ -128,15 +198,16 @@ test("blocked storage: quick-photo edits rotate an ambiguously sent id", async (
   f.window.PowRapidEntry.localIsoDate = () => "2026-10-02";
   f.window.PowLocationAssertion = { payload: values => values };
   Object.assign(f.app, {
-    quickPhoto: { submissionId: "original", epoch: 0, ownerId: "member", file: {},
+    quickPhoto: { submissionId: "original", epoch: 0, ownerId: "member", file: {}, previewUrl: "blob:first-preview",
       fix: { latitude: -41.29, longitude: 174.78, accuracyM: 30 }, country: f.app.entryCountry() },
     quickPhotoRadius: () => 30, quickPhotoNearby: () => [],
     quickPhotoDiscussionNote: note => note,
     closeQuickPhoto: () => { f.app.quickPhoto = null; },
   });
   await f.app.sendQuickPhoto();
+  f.app.quickPhoto.previewUrl = "blob:replacement-preview";
   await f.app.sendQuickPhoto();
-  assert.equal(f.records.size, 1, "the unchanged photo retry deduplicates");
+  assert.equal(f.records.size, 1, "the unchanged photo retry deduplicates across a preview URL change");
   fields.quickPhotoName.value = "Corrected name";
   fields.quickPhotoNote.value = "Corrected note";
   await f.app.sendQuickPhoto();

@@ -8704,7 +8704,11 @@ class NzVerificationMap {
             countryCode: this.entryCountry().code,
             taskId: options.props?.task_id,
             candidate,
-            values,
+            // compare the recorded observation, excluding file-picker state
+            // and source-register controls. files upload after recording and
+            // the browser empties the picker on reload
+            observation: window.PowRapidEntry.observationPayload(values, flagOptions),
+            flagForDiscussion: Boolean(values.flagForDiscussion),
             ...(prefix === "pin" ? {
                 pin: this.pinConfirmed,
                 linkedRefs: this.pinLinkedRefs || [],
