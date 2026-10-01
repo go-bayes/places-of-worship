@@ -1,10 +1,10 @@
 {
-  "converter_version": "0.1.0",
+  "converter_version": "0.2.0",
   "source": {
     "path": "sample-signal-vectors.jsonl",
-    "sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
+    "sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
     "rows": 5,
-    "dataset_version_id": "osm-confidence:nz:signal-vectors-sample:2026-09-01:c75c006384ac",
+    "dataset_version_id": "osm-confidence:nz:signal-vectors-sample:2026-09-01:b5937e6c0ac0",
     "country_code": "NZ",
     "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567"
   },
@@ -125,11 +125,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
-          "standard_version": "confidence-standard/0.3.0"
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -139,7 +139,8 @@
         },
         "judgment_kind": "registration_confidence",
         "outcome": "screened",
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.1.0"
+        "confidence": "high",
+        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (P5 replaces it); outcome screened; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -240,11 +241,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
-          "standard_version": "confidence-standard/0.3.0"
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -254,8 +255,9 @@
         },
         "judgment_kind": "status_assessment",
         "facet": "status",
-        "outcome": "unknown",
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.1.0"
+        "outcome": "active",
+        "confidence": "high",
+        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (P5 replaces it); outcome active; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -356,11 +358,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
-          "standard_version": "confidence-standard/0.3.0"
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -370,8 +372,9 @@
         },
         "judgment_kind": "location",
         "facet": "location",
-        "outcome": "unclear",
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.1.0"
+        "outcome": "plausible",
+        "confidence": "high",
+        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (P5 replaces it); outcome plausible; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -474,11 +477,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
-          "standard_version": "confidence-standard/0.3.0"
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -488,7 +491,8 @@
         },
         "judgment_kind": "registration_confidence",
         "outcome": "review",
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.1.0"
+        "confidence": "medium",
+        "basis_note": "standard confidence-standard/0.3.1; confidence medium is provisional and uncalibrated (P5 replaces it); outcome review; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -591,11 +595,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
-          "standard_version": "confidence-standard/0.3.0"
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -605,8 +609,9 @@
         },
         "judgment_kind": "status_assessment",
         "facet": "status",
-        "outcome": "unknown",
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.1.0"
+        "outcome": "likely_active",
+        "confidence": "medium",
+        "basis_note": "standard confidence-standard/0.3.1; confidence medium is provisional and uncalibrated (P5 replaces it); outcome likely_active; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -709,11 +714,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
-          "standard_version": "confidence-standard/0.3.0"
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -723,8 +728,9 @@
         },
         "judgment_kind": "location",
         "facet": "location",
-        "outcome": "unclear",
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.1.0"
+        "outcome": "plausible",
+        "confidence": "medium",
+        "basis_note": "standard confidence-standard/0.3.1; confidence medium is provisional and uncalibrated (P5 replaces it); outcome plausible; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -827,11 +833,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
-          "standard_version": "confidence-standard/0.3.0"
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -842,7 +848,8 @@
         "judgment_kind": "duplicate",
         "facet": "duplicate",
         "outcome": "unclear",
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.1.0"
+        "confidence": "low",
+        "basis_note": "standard confidence-standard/0.3.1; confidence low is provisional and uncalibrated (P5 replaces it); outcome unclear; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -947,11 +954,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
-          "standard_version": "confidence-standard/0.3.0"
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -961,7 +968,8 @@
         },
         "judgment_kind": "registration_confidence",
         "outcome": "escalate",
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.1.0"
+        "confidence": "low",
+        "basis_note": "standard confidence-standard/0.3.1; confidence low is provisional and uncalibrated (P5 replaces it); outcome escalate; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -1066,11 +1074,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
-          "standard_version": "confidence-standard/0.3.0"
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -1081,7 +1089,8 @@
         "judgment_kind": "status_assessment",
         "facet": "status",
         "outcome": "unknown",
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.1.0"
+        "confidence": "low",
+        "basis_note": "standard confidence-standard/0.3.1; confidence low is provisional and uncalibrated (P5 replaces it); outcome unknown; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -1186,11 +1195,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
-          "standard_version": "confidence-standard/0.3.0"
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -1201,7 +1210,8 @@
         "judgment_kind": "location",
         "facet": "location",
         "outcome": "unclear",
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.1.0"
+        "confidence": "low",
+        "basis_note": "standard confidence-standard/0.3.1; confidence low is provisional and uncalibrated (P5 replaces it); outcome unclear; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -1304,11 +1314,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
-          "standard_version": "confidence-standard/0.3.0"
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -1318,7 +1328,8 @@
         },
         "judgment_kind": "registration_confidence",
         "outcome": "review",
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.1.0"
+        "confidence": "medium",
+        "basis_note": "standard confidence-standard/0.3.1; confidence medium is provisional and uncalibrated (P5 replaces it); outcome review; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -1421,11 +1432,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
-          "standard_version": "confidence-standard/0.3.0"
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -1435,8 +1446,9 @@
         },
         "judgment_kind": "status_assessment",
         "facet": "status",
-        "outcome": "unknown",
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.1.0"
+        "outcome": "active",
+        "confidence": "high",
+        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (P5 replaces it); outcome active; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -1539,11 +1551,11 @@
           "kind": "deterministic",
           "prompt_version": "p2-heuristic-0.2.0",
           "code_revision": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
-          "signal_vector_sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
-          "standard_version": "confidence-standard/0.3.0"
+          "signal_vector_sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
+          "standard_version": "confidence-standard/0.3.1"
         },
         "run": {
-          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:c75c006384ac:0.1.0",
+          "agent_run_id": "osm-confidence:osm-pow:nz:edition:2026-09-01:0123abcd4567:b5937e6c0ac0:0.2.0",
           "attempt": 1,
           "cost_basis": "no_model_call"
         },
@@ -1553,24 +1565,25 @@
         },
         "judgment_kind": "location",
         "facet": "location",
-        "outcome": "unclear",
-        "basis_note": "standard confidence-standard/0.3.0; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors c75c006384ac; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.1.0"
+        "outcome": "plausible",
+        "confidence": "high",
+        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (P5 replaces it); outcome plausible; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
       }
     ]
   ],
   "judgment_ids": [
-    "1813d1b1e6757e524b7681be3b53b7c44534fa7a1590692e3f97db33b20ce15c",
-    "a66bba97328e0e4dbb7b51f3876f0fa3176a9bfafa74f2ffd60841b02f6dfe70",
-    "8eaf02f1c24ace6c8d05ca8ea6e779f69fb7579c83f7d8e8873790d4136da4bc",
-    "b95b14a28a4c73346042747c574f44103220621c0275fa56733b66cd928be949",
-    "c111070260ce2e93ea300ee053492937eb9ed66d23c26775522f8d61e9bc77e4",
-    "32fc3bb9c5537ea68fcf22cf140eff39a4f4dc5e1fb697fcdd4011fc4302590f",
-    "f0584e0a148588288029b65ecd7881bb09c3c9326d39156ba923e13581192c53",
-    "3deef75cb345156a955f65d84a969dcad4005e32140fd22f010b4d9fa4376778",
-    "eabade2f9b4b08f99d1148b1b69ebf6bfa96f09c55dc1612085bd5d1e2339243",
-    "e07c160b310270914e9c781c70ed224f655634219c607e6ac8f48ca026e7d8f7",
-    "8eb41323dc13183c94757cf0aadaafbee61bcc96cc4a85ba6468ad3bb5d68912",
-    "2b6f0a6f01467513120f3bc810e81b0373683e485604fafd8e9f8a5ecd13ccc1",
-    "7c7616c22f4e7f0efb821ebc879f3f0ac2501963aa7cdfe920a7a3eaa97e0171"
+    "50b0391f9bdfe0979d03313b64bb7a77c26bc5f8a7215477ab42367d4485f496",
+    "ab34216c889a57deffe4eaca35afa61036404271d774a4a750fca4c1e7c3bf6c",
+    "ef7cbfaeaf9594b27fd3954b94ab71c8f172e152f0723ec5acff8060b2ec4a8f",
+    "f60932ae7269980f9e3fa25bddada24c66693c6c818bad806903a424c830b323",
+    "c63b29081fe8e185b3539294201926e0986646cd6e072c3ff6c420140e2fe57f",
+    "b4ece66309ecefbda95cc3d6fc05337cf9e6a4e434542e6e391df281dfea48af",
+    "38e65ad3575d0cae3429c99b9ba76408b88c43e4c1e7da1c6799929d71ca1d20",
+    "722543a2bb519c4ceb74b48cdb6adfcbaf5116e9d9f3e3d5ec9f93a6b49a618b",
+    "5157c2ca4c6ddf099991d147e646895f224808407f821849ae81f4ff2c16f9b4",
+    "8e39f53cef3fd4fd2285f0cc940c30fea60b960adce62e86d0ec9a962a57c62b",
+    "b94c81ca057d74694c6cfa5eeed936654d6054503c98244cfa31b06d7b903289",
+    "9a5e430245cef01b7565f24ca6e95e560d70aa6880f8df4f1bf6c35b7b23f5fd",
+    "d9fb0278a5e3ed11a0bd1422366d801839b2c75645b9b99fc50214c930799b4b"
   ]
 }

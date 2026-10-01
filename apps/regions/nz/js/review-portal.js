@@ -71,8 +71,7 @@
         content: null,
         // recorded agent judgments about the task's place (p4, 2026-10-01),
         // each with its newest dispositions, from
-        // agentJudgments:listJudgmentsForTaskPlace; outside the snapshot and
-        // its hash. the error message when that read failed, else ""
+        // the opted-in review snapshot. the error message when loading failed, else ""
         judgments: [],
         judgmentsError: "",
         // incremented by every selectTask; a load compares its own token
@@ -557,7 +556,7 @@ function human(value) {
                     ]);
                     return { drafts, historicalClaims, events, attachments, judgments };
                 },
-                fetchSnapshot: (id, evidenceDraftId) => client.getReviewSnapshot({ taskId: id, evidenceDraftId }),
+                fetchSnapshot: (id, evidenceDraftId) => client.getReviewSnapshot({ taskId: id, evidenceDraftId, includeJudgments: true }),
             });
             if (loaded === null) return;
             const content = loaded.content;
@@ -565,7 +564,7 @@ function human(value) {
             state.reviewSnapshotError = loaded.snapshotError;
             state.attachments = loaded.attachments;
             state.judgments = loaded.judgments;
-            state.judgmentsError = judgmentsError;
+            state.judgmentsError = loaded.snapshot?.snapshot?.recorded_judgments ? "" : judgmentsError;
             state.content = content;
             state.drafts = content.drafts;
             state.historicalClaims = content.historicalClaims;
@@ -981,7 +980,7 @@ function human(value) {
                 · decisions ${s.review_decisions ?? 0}, events ${s.task_events ?? 0}, agent reviews ${s.agent_reviews ?? 0},
                 claims ${s.historical_claims ?? 0}, periods ${s.site_occupancies ?? 0},
                 derived states ${s.derived_states ?? 0}, locations ${s.derived_locations ?? 0}, functions ${s.derived_functions ?? 0}.
-                The task, evidence, events, and claims on this page are rendered from this snapshot.
+                The task, evidence, events, claims and recorded judgments on this page are rendered from this snapshot.
             </p>
         `;
     }
@@ -1667,8 +1666,20 @@ function human(value) {
                 recorded = true;
                 if (!isCurrent()) return;
                 const before = state.judgments;
-                const rows = await client.listJudgmentsForTaskPlace({ taskId: task.task_id });
+                const bound = Array.isArray(state.reviewSnapshot?.snapshot?.recorded_judgments);
+                const refreshed = bound ? await client.getReviewSnapshot({ taskId: task.task_id, evidenceDraftId: currentDraft().evidence_draft_id, includeJudgments: true }) : null;
                 if (!isCurrent()) return;
+                if (bound && !window.PowReviewSnapshotContent.canRefreshJudgments(state.reviewSnapshot, refreshed)) {
+                    setTransport("ready");
+                    say(`Recorded: ${label}. The evidence also changed; select the task again to review it before deciding.`, "done");
+                    return;
+                }
+                const rows = bound ? refreshed.snapshot.recorded_judgments : await client.listJudgmentsForTaskPlace({ taskId: task.task_id });
+                if (!isCurrent()) return;
+                if (bound) {
+                    state.reviewSnapshot = refreshed;
+                    renderReviewSnapshot(refreshed);
+                }
                 state.judgments = Array.isArray(rows) ? rows : [];
                 state.judgmentsError = "";
                 setTransport("ready");
@@ -2140,6 +2151,7 @@ function human(value) {
                 // sent whenever a snapshot is held, whatever the decision
                 // status; the server requires it only for accepted_for_export
                 snapshotHash: state.reviewSnapshot ? state.reviewSnapshot.snapshot_hash : undefined,
+                includeJudgments: Array.isArray(state.reviewSnapshot?.snapshot?.recorded_judgments) ? true : undefined,
             });
             statusText.textContent = `Recorded. Task is now ${presentRow({ status: result.task_status }).label.toLowerCase()}.`;
             statusText.className = "state-banner tone-done";

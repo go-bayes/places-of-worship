@@ -204,6 +204,8 @@
         const parts = [];
         if (judge.kind === "deterministic") {
             parts.push(judge.agent_name);
+            parts.push(row.confidence ? `confidence ${row.confidence} · provisional and uncalibrated (P5 replaces it)` : "legacy row: categorical confidence unrecorded");
+            parts.push(judge.standard_version);
         } else {
             const model = judge.model_reported
                 ? judge.model_reported
@@ -230,7 +232,6 @@
     // them by data-judgment-id and data-disposition
     function judgmentBlockHtml(row, lead, viewerId) {
         const deterministic = row.judge?.kind === "deterministic";
-        const openOutcome = deterministic && row.judgment_kind !== "registration_confidence";
         const earlier = row.score && lead && !sameScore(row, lead)
             ? `<p class="muted">Scored under edition ${escapeHtml(editionDate(row.score.edition_id))}: composite ${num(row.score.composite)}, tier ${escapeHtml(row.score.tier)}.</p>`
             : "";
@@ -242,7 +243,6 @@
         return `
             <div class="judgment-block" data-judgment-id="${escapeHtml(row.judgment_id)}">
                 <p><strong>${escapeHtml(kindLabel(row.judgment_kind))}: ${escapeHtml(words(row.outcome))}</strong> <span class="muted">· ${rowMetaHtml(row)}</span></p>
-                ${openOutcome ? `<p class="muted">Outcome left open: no ruling maps the uncalibrated score to a status.</p>` : ""}
                 ${earlier}
                 ${basis}
                 ${dispositionsHtml(row, viewerId)}

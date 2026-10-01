@@ -207,3 +207,25 @@ test("judgments pass through the load untouched, outside the snapshot", async ()
     const bare = await loadSelection({ taskId: "B", queueRow: { task: { task_id: "B" } }, isCurrent: () => true, fetchRows: async () => ({ drafts: [] }), fetchSnapshot: async () => null });
     assert.deepEqual(bare.judgments, []);
 });
+
+test("opted-in snapshots supply the displayed judgments, including an empty set", async () => {
+    for (const bound of [[], [{ judgment_id: "bound", dispositions: [{ disposition_id: "d" }] }]]) {
+        const snapshot = { snapshot_hash: "bound-hash", base_snapshot_hash: "base", snapshot: { task: { task_id: "A" }, draft: { evidence_draft_id: "A:d" }, recorded_judgments: bound } };
+        const loaded = await loadSelection({ taskId: "A", queueRow: {}, isCurrent: () => true,
+            fetchRows: async () => ({ drafts: [{ evidence_draft_id: "A:d" }], judgments: [{ judgment_id: "unbound" }] }),
+            fetchSnapshot: async () => snapshot });
+        assert.deepEqual(loaded.judgments, bound);
+        assert.equal(loaded.snapshot, snapshot);
+    }
+});
+
+test("judgment refresh advances only when the displayed evidence is unchanged", () => {
+    const canRefresh = window.PowReviewSnapshotContent.canRefreshJudgments;
+    const before = { base_snapshot_hash: "base", snapshot: { recorded_judgments: [{ judgment_id: "j" }] } };
+    const after = { base_snapshot_hash: "base", snapshot: { recorded_judgments: [] } };
+    assert.equal(canRefresh(before, after), true);
+    assert.equal(canRefresh(before, { ...after, base_snapshot_hash: "changed" }), false);
+    assert.equal(canRefresh(before, { ...after, snapshot: {} }), false);
+    assert.equal(canRefresh(null, after), false);
+    assert.equal(canRefresh({}, {}), false);
+});

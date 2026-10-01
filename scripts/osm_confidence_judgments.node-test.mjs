@@ -49,8 +49,8 @@ test("out-of-scope features are skipped and counted; component rows follow the i
   assert.deepEqual(result.counts.rows_by_kind, { duplicate: 1, location: 4, registration_confidence: 4, status_assessment: 4 });
   const rows = result.batches.flat();
   assert.ok(!rows.some((row) => row.subject.ref === "osm:relation/3001"));
-  assert.ok(rows.filter((row) => row.judgment_kind === "status_assessment").every((row) => row.outcome === "unknown" && row.confidence === undefined));
-  assert.ok(rows.filter((row) => row.judgment_kind === "location").every((row) => row.outcome === "unclear"));
+  assert.ok(rows.filter((row) => row.judgment_kind === "status_assessment").every((row) => ["active", "likely_active", "unknown"].includes(row.outcome) && ["high", "medium", "low"].includes(row.confidence)));
+  assert.ok(rows.filter((row) => row.judgment_kind === "location").every((row) => ["plausible", "unclear"].includes(row.outcome)));
 });
 
 test("every row passes the scorer validator, ids equal judgmentIdFor, and batches stay within 100", () => {

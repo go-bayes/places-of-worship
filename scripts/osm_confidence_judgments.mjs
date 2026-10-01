@@ -34,9 +34,9 @@ registerHooks({
 });
 
 const { JUDGMENTS_PER_CALL_MAX, JUDGMENT_SCHEMA_VERSION_1_1, judgmentIdFor } = await import("../convex/lib/agentJudgments.ts");
-const { SCORER_AGENT_NAME, SCORER_SIGNAL_VALUE_KEYS, scorerBasisNote, validateScorerJudgment } = await import("../convex/lib/scorerJudgments.ts");
+const { SCORER_AGENT_NAME, SCORER_SIGNAL_VALUE_KEYS, scorerBasisNote, scorerCategories, validateScorerJudgment } = await import("../convex/lib/scorerJudgments.ts");
 
-export const CONVERTER_VERSION = "0.1.0";
+export const CONVERTER_VERSION = "0.2.0";
 const VECTOR_SCHEMA = "osm-confidence-signal-vector.v0.1";
 const TIERS = ["screened", "review", "escalate"];
 const CROSS_SOURCE = ["not_computed", "no_match", "match"];
@@ -182,17 +182,13 @@ function featureRows(m, vectorsSha, record) {
     run: { agent_run_id: `osm-confidence:${record.edition_id}:${vectorsSha.slice(0, 12)}:${CONVERTER_VERSION}`, attempt: 1, cost_basis: "no_model_call" },
     context: { place_ref: ref, country_code: m.country },
   };
-  // component outcomes are the vocabulary's non-committal values: the ruled
-  // cut points make a review trigger, not a verdict on one component. the
-  // numeric values travel in the score block.
-  const rows = [
-    { ...common, judgment_kind: "registration_confidence", outcome: score.tier },
-    { ...common, judgment_kind: "status_assessment", facet: "status", outcome: "unknown" },
-    { ...common, judgment_kind: "location", facet: "location", outcome: "unclear" },
-  ];
-  if (score.indicators.duplicate) rows.push({ ...common, judgment_kind: "duplicate", facet: "duplicate", outcome: "unclear" });
-  // the note is generated from the row's own validated fields (the validator requires exactly this text)
-  return rows.map((row) => ({ ...row, basis_note: scorerBasisNote(row) }));
+  const kinds = ["registration_confidence", "status_assessment", "location"];
+  if (score.indicators.duplicate) kinds.push("duplicate");
+  const facets = { status_assessment: "status", location: "location", duplicate: "duplicate" };
+  return kinds.map((kind) => {
+    const row = { ...common, judgment_kind: kind, ...(facets[kind] ? { facet: facets[kind] } : {}), ...scorerCategories(kind, score) };
+    return { ...row, basis_note: scorerBasisNote(row) };
+  });
 }
 
 export function convert({ vectorsPath, manifestPath, limit, osmKeys = [] }) {

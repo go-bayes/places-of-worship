@@ -1,6 +1,6 @@
 {
   "schema_version": "data-manifest.v2",
-  "dataset_version_id": "osm-confidence:nz:signal-vectors-sample:2026-09-01:c75c006384ac",
+  "dataset_version_id": "osm-confidence:nz:signal-vectors-sample:2026-09-01:b5937e6c0ac0",
   "scope": {
     "country_codes": [
       "NZ"
@@ -12,7 +12,7 @@
     "parameters": {
       "edition_id": "osm-pow:nz:edition:2026-09-01:0123abcd4567",
       "scorer_version": "p2-heuristic-0.2.0",
-      "standard_version": "confidence-standard/0.3.0",
+      "standard_version": "confidence-standard/0.3.1",
       "config_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
       "cut_points": {
         "screened_min_composite": 0.9,
@@ -24,7 +24,7 @@
   "durable_files": [
     {
       "format": "jsonl",
-      "sha256": "c75c006384ac1014b28cdc0507fa802ac8f3e675dcad87749dccdd4758ebedaa",
+      "sha256": "b5937e6c0ac0178fc9e7f635868cda2ba973e2f20dc9a58f35b3efbb6daa6292",
       "row_count": 5
     }
   ]

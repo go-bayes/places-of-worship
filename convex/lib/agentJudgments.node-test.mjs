@@ -145,7 +145,7 @@ test("a deterministic judge is refused where it breaks the contract", () => {
   assert.throws(() => validateJudgmentInput(judge({ model_unreported_reason: "none" })), /no model fields/);
   assert.throws(() => validateJudgmentInput(judge({ instruction_sha256: "c".repeat(64) })), /no model fields/);
   assert.throws(() => validateJudgmentInput({ ...deterministic, access_method: "not_checked" }), /no access method/);
-  assert.throws(() => validateJudgmentInput({ ...deterministic, confidence: "high" }), /no access method/);
+  validateJudgmentInput({ ...deterministic, confidence: "high" });
   assert.throws(() => validateJudgmentInput(judge({ code_revision: undefined })), /code revision/);
   assert.throws(() => validateJudgmentInput(judge({ signal_vector_sha256: undefined })), /signal vectors/);
   assert.throws(() => validateJudgmentInput(judge({ signal_vector_sha256: "B".repeat(64) })), /signal vectors/);

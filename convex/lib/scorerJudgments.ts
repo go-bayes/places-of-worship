@@ -13,6 +13,7 @@ import {
   judgmentSubjectKind,
   validateJudgmentInput,
   type JudgmentInput,
+  type JudgmentScore,
 } from "./agentJudgments";
 
 // the deterministic osm confidence scorer's judgments (agent-judgment.v1.1;
@@ -31,8 +32,21 @@ export const SCORER_FACET_BY_KIND: Readonly<Record<string, string | undefined>> 
   duplicate: "duplicate",
 };
 
-// component outcomes are the non-committal values; the registration_confidence outcome is the tier
-const SCORER_OUTCOME_BY_KIND: Readonly<Record<string, string | undefined>> = { status_assessment: "unknown", location: "unclear", duplicate: "unclear" };
+// R-S4 supplies routing cut points; this provisional mapping uses the
+// component floor for positive component support. low support is unresolved,
+// never inverted into a negative claim or a pairwise duplicate probability.
+export const SCORER_STANDARD_VERSION = "confidence-standard/0.3.1";
+export function scorerCategories(kind: string, score: JudgmentScore): { outcome: string; confidence: "high" | "medium" | "low" } {
+  if (kind === "registration_confidence") {
+    return { outcome: score.tier, confidence: score.tier === "screened" ? "high" : score.tier === "review" ? "medium" : "low" };
+  }
+  if (kind === "duplicate") return { outcome: "unclear", confidence: "low" };
+  const value = kind === "status_assessment" ? score.components.status : score.components.location;
+  const confidence = value >= score.cut_points.screened_min_composite ? "high" : value >= score.cut_points.component_floor ? "medium" : "low";
+  if (kind === "status_assessment") return { outcome: confidence === "high" ? "active" : confidence === "medium" ? "likely_active" : "unknown", confidence };
+  if (kind === "location") return { outcome: confidence === "low" ? "unclear" : "plausible", confidence };
+  throw new Error(`Unsupported scorer judgment kind ${kind}.`);
+}
 
 // a closed Convex object: a key outside it is refused before any handler runs
 export const deterministicJudgmentInput = v.object({
@@ -76,6 +90,8 @@ export function scorerBasisNote(input: JudgmentInput): string {
   const converter = (input.run.agent_run_id ?? "").split(":").pop();
   return [
     `standard ${input.judge.standard_version}`,
+    `confidence ${input.confidence} is provisional and uncalibrated (P5 replaces it)`,
+    `outcome ${input.outcome}`,
     `scorer ${input.judge.prompt_version} (uncalibrated heuristic, not a probability)`,
     `code ${(input.judge.code_revision ?? "").slice(0, 12)}`,
     `vectors ${(input.judge.signal_vector_sha256 ?? "").slice(0, 12)}`,
@@ -170,10 +186,6 @@ export function validateScorerJudgment(input: JudgmentInput): void {
     throw new Error("A scorer run id is osm-confidence:<edition>:<vector hash prefix>:<converter version>.");
   }
   if (score.calibrated !== false) throw new Error("A scorer score is an uncalibrated heuristic: calibrated is false.");
-  const fixedOutcome = SCORER_OUTCOME_BY_KIND[input.judgment_kind];
-  if (fixedOutcome !== undefined && input.outcome !== fixedOutcome) {
-    throw new Error(`A ${input.judgment_kind} scorer judgment has outcome ${fixedOutcome}.`);
-  }
   if (input.judgment_kind === "duplicate" && score.indicators.duplicate !== true) throw new Error("A duplicate scorer judgment requires the duplicate indicator.");
   for (const component of ["identity", "location", "status", "denomination"] as const) {
     for (const term of score.signals_fired[component]) {
@@ -224,6 +236,14 @@ export function validateScorerJudgment(input: JudgmentInput): void {
   }
   if (score.tier_pending.length !== (genericPending ? 1 : 0)) throw new Error("A scorer judgment's pending condition is the undecided generic-name cross-source match, and only that.");
   if (score.tier !== expectedTier) throw new Error(`A scorer judgment's tier is ${expectedTier} for its components, indicators and cut points.`);
+  if (input.judge.standard_version !== SCORER_STANDARD_VERSION) throw new Error(`The provisional mapping requires ${SCORER_STANDARD_VERSION}.`);
+  if (cut.screened_min_composite !== 0.9 || cut.review_min_composite !== 0.6 || cut.component_floor !== 0.7) {
+    throw new Error("The provisional mapping requires R-S4 cut points 0.9, 0.6 and 0.7; P5 replacements need a versioned mapping.");
+  }
+  const categorical = scorerCategories(input.judgment_kind, score);
+  if (input.outcome !== categorical.outcome || input.confidence !== categorical.confidence) {
+    throw new Error(`A ${input.judgment_kind} scorer judgment requires outcome ${categorical.outcome} and confidence ${categorical.confidence} for its score.`);
+  }
   if (input.basis_note === undefined || input.basis_note === "") throw new Error("A scorer judgment carries a basis note.");
   if (!BASIS_ALPHABET.test(input.basis_note)) throw new Error("A scorer basis note uses only the closed character set.");
   // the generated text is built from validated fields only (hex digests, bounded numbers, closed vocabularies), so an exact

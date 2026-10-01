@@ -343,8 +343,8 @@ function validateJudgeAndScore(input: JudgmentInput): void {
       || judge.model_unreported_reason !== undefined || judge.instruction_sha256 !== undefined) {
       throw new Error("A deterministic judge carries no model fields or instruction hash.");
     }
-    if (input.access_method !== undefined || input.confidence !== undefined) {
-      throw new Error("A deterministic judgment carries no access method or categorical confidence.");
+    if (input.access_method !== undefined) {
+      throw new Error("A deterministic judgment carries no access method.");
     }
     if (input.run.cost_basis !== "no_model_call") throw new Error("A deterministic judge has cost basis no_model_call.");
     if (input.score === undefined) throw new Error("A deterministic judgment carries its score block.");

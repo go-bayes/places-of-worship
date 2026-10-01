@@ -75,9 +75,9 @@ test("AI-generated and deterministic-uncalibrated pills, and provenance with sta
     assert.match(html, /<span class="pill">AI-generated<\/span>/);
     assert.match(html, /<span class="pill">Deterministic, uncalibrated<\/span>/);
     assert.match(html, /osm-confidence-scorer p2-heuristic-0\.2\.0/);
-    assert.match(html, /confidence-standard\/0\.3\.0/);
+    assert.match(html, /confidence-standard\/0\.3\.1/);
     assert.match(html, /edition 2026-09-01/);
-    assert.match(html, /vectors c75c006384ac/);
+    assert.match(html, /vectors b5937e6c0ac0/);
     assert.match(html, /code a1b2c3d4e5f6/);
     assert.match(html, /recorded 2026-10-01/);
     assert.equal(panel.editionDate("osm-pow:nz:edition:2026-09-01:0123abcd4567"), "2026-09-01");
@@ -134,9 +134,9 @@ test("one block per judgment row, each with four disposition controls and a note
     assert.equal((html.match(/class="judgment-note"/g) || []).length, review.length);
     assert.match(html, /<strong>Registration confidence: review<\/strong>/);
     assert.match(html, /<strong>Duplicate: unclear<\/strong>/);
-    // the scorer's component rows say why their outcome is left open
-    assert.match(html, /<strong>Status: unknown<\/strong>/);
-    assert.match(html, /Outcome left open: no ruling maps the uncalibrated score to a status\./);
+    // each categorical assessment carries its provisional status
+    assert.match(html, /<strong>Status: likely active<\/strong>/);
+    assert.match(html, /confidence medium · provisional and uncalibrated \(P5 replaces it\)/);
     // the long generated basis note folds away
     assert.match(html, /<summary>Basis note<\/summary>/);
 });

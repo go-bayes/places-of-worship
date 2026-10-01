@@ -1,3 +1,4 @@
+import { judgmentsForTaskPlace } from "./lib/judgmentReads";
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
@@ -431,7 +432,7 @@ export async function applyReviewDecision(ctx: MutationCtx, args: { taskId: stri
 }
 
 export const recordReviewDecision = mutation({
-  args: { taskId: v.string(), decision: reviewDecisionInput, snapshotHash: v.optional(v.string()) },
+  args: { taskId: v.string(), decision: reviewDecisionInput, snapshotHash: v.optional(v.string()), includeJudgments: v.optional(v.boolean()) },
   returns: v.object({ task_id: v.string(), review_decision_id: v.string(), task_status: taskStatus }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["reviewer", "curator", "admin"]);
@@ -447,14 +448,14 @@ export const recordReviewDecision = mutation({
       if (args.decision.evidence_draft_id === undefined) {
         throw new Error("A snapshot-linked decision requires its evidence draft.");
       }
-      const { snapshotJson } = await verifySnapshot(ctx, args.taskId, args.decision.evidence_draft_id, args.snapshotHash);
+      const { snapshotJson } = await verifySnapshot(ctx, args.taskId, args.decision.evidence_draft_id, args.snapshotHash, args.includeJudgments);
       await recordSnapshot(ctx, args.snapshotHash, snapshotJson, user._id);
     }
     return applyReviewDecision(ctx, { taskId: args.taskId, decision: args.decision, snapshotHash: args.snapshotHash }, user);
   },
 });
 
-async function reviewSnapshot(ctx: MutationCtx | QueryCtx, taskId: string, evidenceDraftId: string) {
+async function reviewSnapshot(ctx: MutationCtx | QueryCtx, taskId: string, evidenceDraftId: string, includeJudgments?: boolean) {
   const task = await getTaskOrThrow(ctx, taskId);
   const draft = await getDraft(ctx, evidenceDraftId);
   if (draft === null || draft.task_id !== taskId) throw new Error("Evidence draft not found for task.");
@@ -467,17 +468,20 @@ async function reviewSnapshot(ctx: MutationCtx | QueryCtx, taskId: string, evide
   const yearLocations = await ctx.db.query("derived_year_locations").withIndex("by_task", (q: any) => q.eq("task_id", taskId)).collect();
   const targetYearFunctions = await ctx.db.query("derived_target_year_functions").withIndex("by_task", (q: any) => q.eq("task_id", taskId)).collect();
   const derivedEvents = await ctx.db.query("derived_state_events").withIndex("by_task_and_created_at", (q: any) => q.eq("task_id", taskId)).collect();
-  const snapshot = { task, draft, review_decisions: decisions, task_events: taskEvents, agent_reviews: agentReviews, historical_claims: historicalClaims, site_occupancies: occupancies, derived_target_year_states: targetYearStates, derived_year_locations: yearLocations, derived_target_year_functions: targetYearFunctions, derived_state_events: derivedEvents };
-  return { task, draft, snapshot, hash: sha256(canonicalJson(snapshot)) };
+  const base = { task, draft, review_decisions: decisions, task_events: taskEvents, agent_reviews: agentReviews, historical_claims: historicalClaims, site_occupancies: occupancies, derived_target_year_states: targetYearStates, derived_year_locations: yearLocations, derived_target_year_functions: targetYearFunctions, derived_state_events: derivedEvents };
+  // absence retains the exact historical hash input. opted-in snapshots
+  // store the displayed rows, including dispositions, inside snapshot_json.
+  const snapshot = { ...base, ...(includeJudgments ? { recorded_judgments: await judgmentsForTaskPlace(ctx, task) } : {}) };
+  return { task, draft, snapshot, hash: sha256(canonicalJson(snapshot)), baseHash: sha256(canonicalJson(base)) };
 }
 
 export const getReviewSnapshot = query({
-  args: { taskId: v.string(), evidenceDraftId: v.string() },
+  args: { taskId: v.string(), evidenceDraftId: v.string(), includeJudgments: v.optional(v.boolean()) },
   returns: v.any(),
   handler: async (ctx, args) => {
     await requireUser(ctx, ["reviewer", "curator", "admin"]);
-    const row = await reviewSnapshot(ctx, args.taskId, args.evidenceDraftId);
-    return { task_id: args.taskId, evidence_draft_id: args.evidenceDraftId, snapshot_hash: row.hash, summary: { task_status: row.task.status, draft_status: row.draft.draft_status, review_decisions: row.snapshot.review_decisions.length, task_events: row.snapshot.task_events.length, agent_reviews: row.snapshot.agent_reviews.length, historical_claims: row.snapshot.historical_claims.length, site_occupancies: row.snapshot.site_occupancies.length, derived_states: row.snapshot.derived_target_year_states.length, derived_locations: row.snapshot.derived_year_locations.length, derived_functions: row.snapshot.derived_target_year_functions.length }, snapshot: row.snapshot };
+    const row = await reviewSnapshot(ctx, args.taskId, args.evidenceDraftId, args.includeJudgments);
+    return { task_id: args.taskId, evidence_draft_id: args.evidenceDraftId, snapshot_hash: row.hash, ...(args.includeJudgments ? { base_snapshot_hash: row.baseHash } : {}), summary: { task_status: row.task.status, draft_status: row.draft.draft_status, review_decisions: row.snapshot.review_decisions.length, task_events: row.snapshot.task_events.length, agent_reviews: row.snapshot.agent_reviews.length, historical_claims: row.snapshot.historical_claims.length, site_occupancies: row.snapshot.site_occupancies.length, derived_states: row.snapshot.derived_target_year_states.length, derived_locations: row.snapshot.derived_year_locations.length, derived_functions: row.snapshot.derived_target_year_functions.length }, snapshot: row.snapshot };
   },
 });
 
@@ -501,14 +505,15 @@ async function verifySnapshot(
   taskId: string,
   evidenceDraftId: string,
   snapshotHash: string,
+  includeJudgments?: boolean,
 ): Promise<{ row: Awaited<ReturnType<typeof reviewSnapshot>>; snapshotJson: string }> {
   if (!/^[0-9a-f]{64}$/.test(snapshotHash)) {
     throw new Error("Invalid review snapshot hash.");
   }
-  const row = await reviewSnapshot(ctx, taskId, evidenceDraftId);
+  const row = await reviewSnapshot(ctx, taskId, evidenceDraftId, includeJudgments);
   if (row.hash !== snapshotHash) {
     throw new Error(
-      "Review snapshot is stale: the task or its evidence changed since you loaded it. Reload and review the changes before deciding.",
+      "Review snapshot is stale: the task, evidence or recorded judgments changed since you loaded it. Reload and review the changes before deciding.",
     );
   }
   const snapshotJson = canonicalJson(row.snapshot);
@@ -535,7 +540,7 @@ async function recordSnapshot(
 
 export const batchRecordReviewDecisions = mutation({
   args: {
-    items: v.array(v.object({ task_id: v.string(), evidence_draft_id: v.string(), snapshot_hash: v.string(), decision: reviewDecisionInput })),
+    items: v.array(v.object({ task_id: v.string(), evidence_draft_id: v.string(), snapshot_hash: v.string(), include_judgments: v.optional(v.boolean()), decision: reviewDecisionInput })),
   },
   returns: v.object({ count: v.number() }),
   handler: async (ctx, args) => {
@@ -549,7 +554,7 @@ export const batchRecordReviewDecisions = mutation({
       seen.add(item.task_id);
       if (item.decision.decision_status !== "accepted_for_export") throw new Error("This batch endpoint is for accepted-for-export decisions only.");
       if (item.decision.evidence_draft_id !== item.evidence_draft_id) throw new Error("Decision draft does not match snapshot draft.");
-      const { row, snapshotJson } = await verifySnapshot(ctx, item.task_id, item.evidence_draft_id, item.snapshot_hash);
+      const { row, snapshotJson } = await verifySnapshot(ctx, item.task_id, item.evidence_draft_id, item.snapshot_hash, item.include_judgments);
       if (!REVIEW_OPEN_STATUSES.has(row.task.status)) throw new Error(`Task ${item.task_id} is not open for review.`);
       if (row.draft.draft_status !== "submitted" && row.draft.draft_status !== "unresolved_note") throw new Error(`Draft ${item.evidence_draft_id} is not submitted.`);
       if (row.draft.agent_intake_only === true) throw new Error("Internal agent intake drafts require ordinary human evidence submission before acceptance for export.");

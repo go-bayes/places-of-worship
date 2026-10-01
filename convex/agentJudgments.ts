@@ -5,7 +5,7 @@ import { requireUser } from "./lib/auth";
 import { assertInternalAgentIngestEnabled, internalAgentServiceUser } from "./lib/agentServiceUser";
 import { MEDIUM_TEXT_MAX, assertMaxString } from "./lib/limits";
 import { JUDGMENTS_PER_CALL_MAX, judgmentDisposition, recordJudgments, type JudgmentInput } from "./lib/agentJudgments";
-import { taskPlaceRefs } from "./lib/placeRefs";
+import { judgmentsForTaskPlace } from "./lib/judgmentReads";
 import { deterministicJudgmentInput, validateScorerJudgment } from "./lib/scorerJudgments";
 
 // reviewer-facing reads and the human disposition write for agent
@@ -15,8 +15,6 @@ import { deterministicJudgmentInput, validateScorerJudgment } from "./lib/scorer
 
 // bounded reads walk each index newest first, so the cap drops the oldest
 const LIST_MAX = 200;
-// dispositions embedded per judgment in the place read
-const EMBEDDED_DISPOSITIONS_MAX = 10;
 
 export const listJudgmentsForTask = query({
   args: { taskId: v.string() },
@@ -59,27 +57,7 @@ export const listJudgmentsForTaskPlace = query({
       .withIndex("by_task_id", (q) => q.eq("task_id", args.taskId))
       .unique();
     if (task === null) return [];
-    const collected: Doc<"agent_judgments">[] = [];
-    for (const ref of taskPlaceRefs(task)) {
-      const rows = await ctx.db
-        .query("agent_judgments")
-        .withIndex("by_subject", (q) => q.eq("subject_ref", ref))
-        .order("desc")
-        .take(LIST_MAX);
-      collected.push(...rows);
-    }
-    collected.sort((a, b) => b.created_at - a.created_at);
-    const capped = collected.slice(0, LIST_MAX);
-    const out = [];
-    for (const row of capped) {
-      const dispositions = await ctx.db
-        .query("judgment_dispositions")
-        .withIndex("by_judgment", (q) => q.eq("judgment_id", row.judgment_id))
-        .order("desc")
-        .take(EMBEDDED_DISPOSITIONS_MAX);
-      out.push({ ...row, dispositions });
-    }
-    return out;
+    return await judgmentsForTaskPlace(ctx, task);
   },
 });
 

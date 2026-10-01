@@ -5,7 +5,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 registerHooks({ resolve(specifier, context, nextResolve) { if (specifier.startsWith(".") && !/\.[a-z]+$/i.test(specifier)) { for (const ext of [".js", ".ts"]) { const candidate = new URL(`${specifier}${ext}`, context.parentURL); if (fs.existsSync(fileURLToPath(candidate))) return nextResolve(candidate.href, context); } } return nextResolve(specifier, context); } });
-const { validateScorerJudgment, scorerBasisNote, SCORER_AGENT_NAME } = await import("./scorerJudgments.ts");
+const { validateScorerJudgment, scorerBasisNote, scorerCategories, SCORER_AGENT_NAME } = await import("./scorerJudgments.ts");
 
 const expected = JSON.parse(fs.readFileSync(new URL("../../schemas/fixtures/agent-judgment-v1-1/expected-judgments.json", import.meta.url), "utf8"));
 const rows = expected.batches.flat();
@@ -115,13 +115,13 @@ test("the cross-source indicator count is a bounded integer", () => {
   }
 });
 
-test("calibration and component outcomes cannot be asserted", () => {
+test("calibration and mismatched component outcomes are refused", () => {
   const put = (row, patch) => { const copy = clone(row); patch(copy); return copy; };
   assert.throws(() => validateScorerJudgment(put(tier, (r) => { r.score.calibrated = true; })), /uncalibrated/);
   const status = rows.find((row) => row.judgment_kind === "status_assessment");
   const location = rows.find((row) => row.judgment_kind === "location");
-  assert.throws(() => validateScorerJudgment(put(status, (r) => { r.outcome = "likely_active"; })), /outcome unknown/);
-  assert.throws(() => validateScorerJudgment(put(location, (r) => { r.outcome = "implausible"; })), /outcome unclear/);
+  assert.throws(() => validateScorerJudgment(put(status, (r) => { r.outcome = "inactive"; })), /requires outcome active/);
+  assert.throws(() => validateScorerJudgment(put(location, (r) => { r.outcome = "implausible"; })), /requires outcome plausible/);
   const duplicate = rows.find((row) => row.judgment_kind === "duplicate");
   if (duplicate !== undefined) assert.throws(() => validateScorerJudgment(put(duplicate, (r) => { r.score.indicators.duplicate = false; })), /duplicate indicator/);
 });
@@ -140,6 +140,7 @@ test("digit runs inside valid digests and scores do not trip the personal-detail
   low.score.components.denomination = 0.9;
   low.score.indicators = { ...low.score.indicators, duplicate: false, conflict: false, generic_name: false };
   low.outcome = "escalate";
+  low.confidence = "low";
   low.basis_note = scorerBasisNote(low);
   validateScorerJudgment(low);
 });
@@ -163,7 +164,7 @@ const compositeRow = (components, composite, expectedTier, reasons) => {
     tier: expectedTier, tier_reasons: reasons, tier_pending: [],
   });
   Object.assign(row.score.indicators, { duplicate: false, conflict: false, generic_name: false });
-  row.outcome = expectedTier;
+  Object.assign(row, scorerCategories(row.judgment_kind, row.score));
   row.basis_note = scorerBasisNote(row);
   return row;
 };
@@ -215,4 +216,45 @@ test("the tier, its reasons and its pending condition follow from the fields", (
   assert.throws(() => validateScorerJudgment(edit((sc) => { screened(sc); sc.indicators.generic_name = true; sc.indicators.cross_source_match = "not_computed"; })), /tier/);
   assert.throws(() => validateScorerJudgment(edit((sc) => { Object.assign(sc, { tier: "review", tier_reasons: ["composite_0.6_to_0.9"], tier_pending: [], composite: 0.06 }); sc.components = { identity: 0.4, location: 0.5, status: 0.3, denomination: 1 }; })), /tier/);
   assert.throws(() => validateScorerJudgment(edit((sc) => { Object.assign(sc, { tier: "review", tier_reasons: ["conflict"] }); })), /tier/);
+});
+
+
+test("provisional component categories use the exact 0.7 and 0.9 boundaries", () => {
+  for (const [value, status, location, confidence] of [
+    [0, "unknown", "unclear", "low"], [0.6, "unknown", "unclear", "low"],
+    [0.7 - Number.EPSILON, "unknown", "unclear", "low"],
+    [0.7, "likely_active", "plausible", "medium"],
+    [0.9 - Number.EPSILON, "likely_active", "plausible", "medium"],
+    [0.9, "active", "plausible", "high"], [1, "active", "plausible", "high"],
+  ]) {
+    const score = clone(tier.score);
+    Object.assign(score.components, { status: value, location: value, identity: value });
+    assert.deepEqual(scorerCategories("status_assessment", score), { outcome: status, confidence });
+    assert.deepEqual(scorerCategories("location", score), { outcome: location, confidence });
+    assert.deepEqual(scorerCategories("duplicate", score), { outcome: "unclear", confidence: "low" });
+  }
+  for (const [outcome, confidence] of [["screened", "high"], ["review", "medium"], ["escalate", "low"]]) {
+    assert.deepEqual(scorerCategories("registration_confidence", { ...tier.score, tier: outcome }), { outcome, confidence });
+  }
+});
+
+test("every scorer row requires the mapped confidence and outcome", () => {
+  for (const row of rows) {
+    assert.match(row.basis_note, /confidence (high|medium|low) is provisional and uncalibrated \(P5 replaces it\)/);
+    assert.match(row.basis_note, /standard confidence-standard\/0\.3\.1/);
+    for (const confidence of [undefined, ...["high", "medium", "low"].filter((c) => c !== row.confidence)]) {
+      const changed = { ...clone(row), confidence };
+      changed.basis_note = scorerBasisNote(changed);
+      assert.throws(() => validateScorerJudgment(changed), /requires outcome/);
+    }
+    const changed = { ...clone(row), outcome: row.outcome === "unclear" ? "same_place" : row.judgment_kind === "registration_confidence" ? "escalate" : "unknown" };
+    if (changed.outcome !== row.outcome) assert.throws(() => validateScorerJudgment(changed));
+  }
+});
+
+test("the mapping refuses unreviewed standard versions and cut points", () => {
+  const version = clone(tier); version.judge.standard_version = "confidence-standard/0.4.0";
+  assert.throws(() => validateScorerJudgment(version), /requires confidence-standard/);
+  const cuts = clone(tier); cuts.score.cut_points.component_floor = 0.5;
+  assert.throws(() => validateScorerJudgment(cuts), /requires R-S4/);
 });
