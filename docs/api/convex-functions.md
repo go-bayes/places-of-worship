@@ -14,9 +14,9 @@ The inventory also lists internal functions (kind `internal query`,
 Internal functions are not part of the public API: they are callable only with
 the deployment admin key, from the CLI, dashboard, or a scheduled job.
 
-Last reviewed: 2026-08-28, against the exported Convex functions in
+Last reviewed: 2026-08-28 (`agentJudgments.ts` section added 2026-10-01), against the exported Convex functions in
 `users.ts`, `tasks.ts`, `evidence.ts`, `batchImport.ts`, `reviews.ts`,
-`rapidEntry.ts`, `historicalClaims.ts`, `claudeReviews.ts`, `exports.ts`, `devSeed.ts`, `revisionSeed.ts`, and
+`rapidEntry.ts`, `historicalClaims.ts`, `claudeReviews.ts`, `exports.ts`, `agentJudgments.ts`, `devSeed.ts`, `revisionSeed.ts`, and
 `trainingSeed.ts`.
 Exports from `model.ts` and `convex/lib/` are internal validators and helpers,
 not public workflow functions.
@@ -231,6 +231,19 @@ See [frozen-exports.md](../development/frozen-exports.md) for the full
 bundle contract, freeze orchestration, retrieval, and withdrawal/supersession
 rules.
 
+## `agentJudgments.ts`
+
+Reviewer-facing reads, the human disposition write and the gated ingest for agent judgments ([agent judgments](../development/agent-judgments.md)). Humans decide; AI recommends. Nothing here changes a task, an evidence draft, a review decision or a task event.
+
+| Function | Kind | Roles | Purpose | Writes |
+| --- | --- | --- | --- | --- |
+| `listJudgmentsForTask` | query | `reviewer`, `curator`, `admin`, `pi` | List the judgments whose context names a task, newest first, at most 200. | None |
+| `listJudgmentsForSubject` | query | `reviewer`, `curator`, `admin`, `pi` | List the judgments about one subject reference, newest first, at most 200. | None |
+| `listDispositionsForJudgment` | query | `reviewer`, `curator`, `admin`, `pi` | List the dispositions recorded for one judgment, newest first. | None |
+| `listJudgmentsForTaskPlace` | query | `reviewer`, `curator`, `admin`, `pi` | List the judgments about the place a task is about (its matched OSM object and source record id), newest first, at most 200, each with its newest ten dispositions embedded. Returns an empty list for a task that names no place. | None |
+| `recordJudgmentDisposition` | mutation | `reviewer`, `curator`, `admin`, `pi` | Append one disposition (`agreed`, `disagreed`, `corrected`, `not_considered`) to a judgment; a disagreement or correction needs a note of at least eight characters. A place-level judgment names no task, so it takes no review decision. | `judgment_dispositions` |
+| `ingestDeterministicJudgments` | internal mutation | `admin key`; `POW_INTERNAL_AGENT_INGEST_ENABLED=true` | Write at most 100 `agent-judgment.v1.1` scorer judgments, as converted by `scripts/osm_confidence_judgments.mjs`, through the internal agent service user. Every row passes the strict scorer validator, names the call's signal-vector hash and one country. Idempotent by judgment id. Creates no task, draft, version, event or decision. | `agent_judgments`, and the service user on first use |
+
 ## `devSeed.ts`
 
 Dev-only seeding for local and dev deployments; never intended for the
@@ -238,7 +251,7 @@ production project.
 
 | Function | Kind | Roles | Purpose | Writes |
 | --- | --- | --- | --- | --- |
-| `seedReviewQueueFixture` | internal mutation | `admin key` | Seed one reviewable task with a submitted draft so the batch-review dry run has a queue to triage. Idempotent per task id. | `users`, `task_batches`, `tasks`, `evidence_drafts` |
+| `seedReviewQueueFixture` | internal mutation | `admin key` | Seed one reviewable task with a submitted draft so the batch-review dry run has a queue to triage. Optional `osmObjectType` and `matchedOsmId` link the task to an OSM place. Idempotent per task id. | `users`, `task_batches`, `tasks`, `evidence_drafts` |
 
 ## `revisionSeed.ts`
 

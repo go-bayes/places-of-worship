@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### 2026-10-01 (agent-judgment.v1.1: deterministic scorer judgments)
+
+- Contract `agent-judgment.v1.1` widens `agent-judgment.v1` for a deterministic scorer: `judge.kind`, a required `judge.standard_version` on every v1.1 row, `judge.signal_vector_sha256`, a `registration_confidence` kind (`screened`, `review`, `escalate`), the cost basis `no_model_call` and an optional `score` block with the components, tier, cut points, fired signals and an allowlist of numeric and boolean signals. Version 1 stays the default and its ids are unchanged (a regression test pins one). Additive schema change; no existing writer changes.
+- New converter `scripts/osm_confidence_judgments.mjs` (dry run only; it reads local files and writes one JSON file) with a synthetic fixture, a shared strict validator, a gated internal ingest `agentJudgments:ingestDeterministicJudgments` and a read `agentJudgments:listJudgmentsForTaskPlace` for reviewers. Component rows carry non-committal outcomes and their numbers. No import was run and nothing was deployed.
+
 ### 2026-09-26 (confidence standard 0.3.1)
 
 - Version 0.3.1 of the [confidence standard](docs/confidence-standard.md), snapshot at `docs/development/confidence-standard-2026-09-26-v0.3.1.md`: a clarification from the project lead that the pseudonym rule covers living persons named in the project's records, and that contributors may be credited by their name or a chosen avatar. The [summary of AI assistance](docs/ai-assisted-research.md) states the same.
