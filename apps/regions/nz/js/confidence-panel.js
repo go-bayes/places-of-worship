@@ -243,7 +243,6 @@
         return `
             <div class="judgment-block" data-judgment-id="${escapeHtml(row.judgment_id)}">
                 <p><strong>${escapeHtml(kindLabel(row.judgment_kind))}: ${escapeHtml(words(row.outcome))}</strong>${deterministic ? ' <span class="pill">provisional</span>' : ""} <span class="muted">· ${rowMetaHtml(row)}</span></p>
-                ${deterministic ? `<p class="muted">Confidence on scorer rows is the scorer's support for each component (worship continues; pin within 75 m), not a calibrated probability; low support reads as unknown or unclear, never as a negative finding.</p>` : ""}
                 ${earlier}
                 ${basis}
                 ${dispositionsHtml(row, viewerId)}
@@ -276,12 +275,16 @@
         if (rows.length > 0) pills.push(`<span class="pill">AI-generated</span>`);
         if (lead?.judge?.kind === "deterministic") pills.push(`<span class="pill">Deterministic, ${score?.calibrated ? "calibrated" : "uncalibrated"}</span>`);
         const hint = score && TIER_HINTS[score.tier] ? `<p class="muted tier-hint">${escapeHtml(TIER_HINTS[score.tier])}</p>` : "";
+        const scorerHint = rows.some((row) => row.judge?.kind === "deterministic")
+            ? `<p class="muted">Confidence on scorer rows is the scorer's support for each component (worship continues; pin within 75 m), not a calibrated probability; low support reads as unknown or unclear, never as a negative finding.</p>`
+            : "";
         return `
             <section class="panel confidence-panel" id="confidencePanel">
                 <h3>Recorded confidence</h3>
                 ${error}
                 ${pills.length > 0 ? `<div class="pill-row">${pills.join("")}</div>` : ""}
                 ${hint}
+                ${scorerHint}
                 ${lead ? `<p class="muted">${provenanceHtml(lead)}</p>` : ""}
                 ${score ? scoreHtml(score) : ""}
                 ${score ? reasonsHtml(score) : ""}

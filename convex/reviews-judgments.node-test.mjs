@@ -27,6 +27,8 @@ async function decide(w, snapshot, batch, include = true) {
 test("omitting the optional binding retains the historical snapshot input, even with judgments", async () => {
   const w = await scene();
   const legacy = await getReviewSnapshot._handler(w.ctx, w.args);
+  // pin the legacy hash from head 453abff6 before the digest repair
+  assert.equal(legacy.snapshot_hash, "fb22a1f191edf7d043621a06e9b9a047e80b9483fa6923b87202c440eb98d06d");
   assert.equal("recorded_judgments" in legacy.snapshot, false);
   assert.equal("base_snapshot_hash" in legacy, false);
   assert.equal("displayed_judgments" in legacy, false);
@@ -35,7 +37,7 @@ test("omitting the optional binding retains the historical snapshot input, even 
   assert.equal(sha256(canonicalJson(oldInput)), legacy.snapshot_hash);
   assert.equal(bound.base_snapshot_hash, legacy.snapshot_hash);
   assert.deepEqual(bound.displayed_judgments, await listJudgmentsForTaskPlace._handler(w.ctx, { taskId: "t" }));
-  assert.deepEqual(recorded_judgments, [{ judgment_id: "j", created_at: 1, dispositions: [] }]);
+  assert.deepEqual(recorded_judgments, [{ judgment_id: "j", created_at: 1, dispositions_sha256: sha256(canonicalJson([])) }]);
   assert.equal("displayed_judgments" in bound.snapshot, false);
   assert.equal(sha256(canonicalJson(bound.snapshot)), bound.snapshot_hash);
   assert.deepEqual(recorded_judgments.map((row) => row.judgment_id), ["j"]);
@@ -70,7 +72,7 @@ test("an opted-in hash cannot be submitted through the legacy path", async () =>
   await assert.rejects(decide(w, bound, false, false), /stale/);
 });
 
-test("many large displayed rows stay well below the snapshot cap on both decision routes", async () => {
+test("200 displayed rows with ten maximum-length disposition notes stay well below the snapshot cap on both decision routes", async (t) => {
   for (const batch of [false, true]) {
     const w = await scene();
     w.rows.agent_judgments = [];
@@ -79,19 +81,28 @@ test("many large displayed rows stay well below the snapshot cap on both decisio
     assert.deepEqual(empty.displayed_judgments, []);
     for (let i = 0; i < 200; i += 1) {
       const judgment_id = sha256(`judgment-${i}`);
-      await w.db.insert("agent_judgments", { judgment_id, subject_ref: "osm:way/1001", basis_note: "x".repeat(4000), score: { signal_values: { tag_count: 9 } }, created_at: i });
-      await w.db.insert("judgment_dispositions", { disposition_id: sha256(`disposition-${i}`), judgment_id, reviewer_user_id: "reviewer", disposition: "agreed", note: "Checked the source.", created_at: i });
+      await w.db.insert("agent_judgments", { judgment_id, subject_ref: "osm:way/1001", judge: { kind: "deterministic" }, score: { signal_values: { tag_count: 9 } }, created_at: i });
+      for (let j = 0; j < 10; j += 1) {
+        await w.db.insert("judgment_dispositions", { disposition_id: sha256(`disposition-${i}-${j}`), judgment_id, reviewer_user_id: "reviewer", disposition: "agreed", note: "x".repeat(700), created_at: i * 10 + j });
+      }
     }
     await assert.rejects(decide(w, empty, false), /stale/);
     const large = await getReviewSnapshot._handler(w.ctx, { ...w.args, includeJudgments: true });
     assert.equal(large.displayed_judgments.length, 200);
     assert.ok(Buffer.byteLength(canonicalJson(large.displayed_judgments)) > 128 * 1024);
     assert.ok(Buffer.byteLength(canonicalJson(large.snapshot)) < 80 * 1024);
-    for (const binding of large.snapshot.recorded_judgments) {
-      assert.deepEqual(Object.keys(binding), ["judgment_id", "created_at", "dispositions"]);
-      assert.deepEqual(Object.keys(binding.dispositions[0]), ["disposition_id", "reviewer_user_id", "disposition", "note", "created_at"]);
+    t.diagnostic(`${batch ? "batch" : "single"} route: snapshot ${Buffer.byteLength(canonicalJson(large.snapshot))} bytes; displayed rows ${Buffer.byteLength(canonicalJson(large.displayed_judgments))} bytes`);
+    for (const [index, binding] of large.snapshot.recorded_judgments.entries()) {
+      assert.deepEqual(Object.keys(binding), ["judgment_id", "created_at", "dispositions_sha256"]);
+      const displayed = large.displayed_judgments[index].dispositions;
+      assert.equal(displayed.length, 10);
+      assert.ok(displayed.every((entry) => entry.note.length === 700));
+      const projection = displayed.map(({ disposition_id, reviewer_user_id, disposition, note, created_at }) => ({ disposition_id, reviewer_user_id, disposition, note, created_at }));
+      assert.equal(binding.dispositions_sha256, sha256(canonicalJson(projection)));
     }
     await decide(w, large, batch);
     assert.deepEqual(JSON.parse(w.rows.review_snapshots[0].snapshot_json).recorded_judgments, large.snapshot.recorded_judgments);
+    w.rows.judgment_dispositions[0].note = "Changed after decision.";
+    await assertDecisionSnapshotConsistent(w.ctx, w.rows.review_decisions[0]);
   }
 });

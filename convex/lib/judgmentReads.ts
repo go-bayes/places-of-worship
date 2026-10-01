@@ -1,6 +1,7 @@
 import type { Doc } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { taskPlaceRefs } from "./placeRefs";
+import { canonicalJson, sha256 } from "./sha256";
 
 // the panel and its optional snapshot binding must read exactly the same
 // bounded set, including the disposition contents shown to the reviewer.
@@ -31,17 +32,18 @@ export async function judgmentsForTaskPlace(ctx: MutationCtx | QueryCtx, task: D
 }
 
 // judgment_id addresses the immutable canonical envelope. bind only that
-// address and the displayed disposition fields, independent of row size.
+// address, time and a digest of the displayed disposition fields, so note
+// length cannot enlarge the snapshot binding. retain display order.
 export function judgmentSnapshotBindings(rows: Awaited<ReturnType<typeof judgmentsForTaskPlace>>) {
   return rows.map((row) => ({
     judgment_id: row.judgment_id,
     created_at: row.created_at,
-    dispositions: row.dispositions.map((entry) => ({
+    dispositions_sha256: sha256(canonicalJson(row.dispositions.map((entry) => ({
       disposition_id: entry.disposition_id,
       reviewer_user_id: entry.reviewer_user_id,
       disposition: entry.disposition,
       ...(entry.note === undefined ? {} : { note: entry.note }),
       created_at: entry.created_at,
-    })),
+    })))),
   }));
 }

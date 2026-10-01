@@ -35,7 +35,6 @@ export const SCORER_FACET_BY_KIND: Readonly<Record<string, string | undefined>> 
 // R-S4 supplies routing cut points; this provisional mapping uses the
 // component floor for positive component support. low support is unresolved,
 // never inverted into a negative claim or a pairwise duplicate probability.
-export const SCORER_STANDARD_VERSION = "confidence-standard/0.3.1";
 const SCORER_STANDARD_PATCH_VERSION = /^confidence-standard\/0\.3\.(0|[1-9][0-9]*)$/;
 export const SCORER_POSITIVE_STATUS_SIGNALS: readonly string[] = [
   "check_recent", "check_older", "website_or_contact", "opening_or_service_times",

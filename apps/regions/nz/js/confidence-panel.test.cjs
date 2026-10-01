@@ -141,6 +141,7 @@ test("one block per judgment row, each with four disposition controls and a note
     assert.equal((html.match(/<span class="pill">provisional<\/span>/g) || []).length, review.length);
     assert.match(html, /<strong>Status: likely active<\/strong> <span class="pill">provisional<\/span>/);
     assert.match(html, /<p class="muted">Confidence on scorer rows is the scorer's support for each component \(worship continues; pin within 75 m\), not a calibrated probability; low support reads as unknown or unclear, never as a negative finding\.<\/p>/);
+    assert.equal((html.match(/Confidence on scorer rows/g) || []).length, 1);
     // the long generated basis note folds away
     assert.match(html, /<summary>Basis note<\/summary>/);
 });
