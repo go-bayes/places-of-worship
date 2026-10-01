@@ -8051,6 +8051,37 @@ class NzVerificationMap {
         return { ...JSON.parse(json), clientSubmissionId: lastSend.submission_id };
     }
 
+    // retain prerequisite receipts separately from the final send pair.
+    // exact arguments decide reuse; an ended session cannot retain a receipt.
+    async resolveSendPrerequisite(record, name, args, storageKey, resolve, alive = this.sessionGuard()) {
+        const json = JSON.stringify(args, (key, value) => value && typeof value === "object" && !Array.isArray(value)
+            ? Object.fromEntries(Object.keys(value).sort().map(field => [field, value[field]])) : value);
+        if (!alive()) throw new Error("Your sign-in changed before sending.");
+        let stored = null;
+        if (storageKey && this.deviceWritable()) {
+            try { stored = JSON.parse(window.localStorage.getItem(storageKey) || "null"); } catch (error) { /* retain the live receipt */ }
+        }
+        const previous = record.sendPrerequisites?.[name] || stored?.send_prerequisites?.[name];
+        if (previous?.arguments_json === json) {
+            record.sendPrerequisites = { ...record.sendPrerequisites, [name]: previous };
+            return previous.result;
+        }
+        const result = await resolve(JSON.parse(json));
+        if (!alive()) throw new Error("Your sign-in changed before sending.");
+        const receipt = { arguments_json: json, result };
+        record.sendPrerequisites = { ...record.sendPrerequisites, [name]: receipt };
+        if (storageKey && this.deviceWritable()) {
+            // reread after the await so a newer autosave is preserved.
+            try {
+                const current = JSON.parse(window.localStorage.getItem(storageKey) || "null");
+                window.localStorage.setItem(storageKey, JSON.stringify({
+                    ...current, send_prerequisites: { ...current?.send_prerequisites, [name]: receipt },
+                }));
+            } catch (error) { /* retain the live receipt */ }
+        }
+        return result;
+    }
+
     clearSubmissionRequest(key, request) {
         if (!this.deviceWritable()) return;
         const record = this.readRapidDraft(key);
@@ -8648,14 +8679,21 @@ class NzVerificationMap {
             if (!values.sourceId && values.saveSourceToRegister
                 && values.sourceTitle?.trim() && values.sourceReference?.trim()) {
                 try {
-                    const created = await this.backend.createSource({
+                    const created = await this.resolveSendPrerequisite(form, "source", {
                         countryCode: this.entryCountry().code,
                         sourceType: "other",
                         title: values.sourceTitle.trim(),
                         url: values.sourceReference.trim(),
-                    });
+                    }, options.draftKey ? this.rapidDraftStorageKey(options.draftKey) : "", async args => {
+                        try { return await this.backend.createSource(args); }
+                        catch (error) {
+                            // an optional register failure keeps the same citation-only retry.
+                            if (error.authExpired) throw error;
+                            return null;
+                        }
+                    }, alive);
                     if (!alive()) return;
-                    values.sourceId = created.source_id;
+                    if (created) values.sourceId = created.source_id;
                 } catch (error) {
                     if (!alive()) return;
                     // the register is optional; the citation strings still land
@@ -8663,7 +8701,7 @@ class NzVerificationMap {
             }
             // a revision first opens (or claims) its task in the issue
             // batch, then submits the observation against that task
-            const revision = options.createTask ? await options.createTask() : null;
+            const revision = options.createTask ? await options.createTask(form, options.draftKey) : null;
             if (!alive()) return;
             // the entry's country is the pin's (entry follows the pin)
             const entryCountry = this.entryCountry();
@@ -11804,12 +11842,16 @@ class NzVerificationMap {
             // version and is kept. a receipt from an ended session writes
             // nothing to the device
             const snapshotVersion = this.formSnapshotVersion(props.task_id);
-            const saved = await this.backend.saveEvidenceDraft({
+            const saveArgs = {
                 taskId: props.task_id,
                 evidenceDraftId: revisionDraftId || undefined,
                 draft,
                 clientContext,
-            });
+            };
+            const saved = submit && !unresolved
+                ? await this.resolveSendPrerequisite(this.guidedPeriodsState(props.task_id), "parent_evidence", saveArgs,
+                    this.guidedPeriodsStorageKey(props.task_id), args => this.backend.saveEvidenceDraft(args), alive)
+                : await this.backend.saveEvidenceDraft(saveArgs);
             if (!alive()) return;
             this.deleteSubmittedFormSnapshot(props.task_id, snapshotVersion);
             let periods = null;
@@ -12058,11 +12100,13 @@ class NzVerificationMap {
                 ...(plan.chain ? { chain: plan.chain } : {}),
                 clientContext: { portal_version: "occupancy-v2" },
             };
-            const request = await this.submissionRequest(plan.state, args, this.guidedPeriodsStorageKey(periodsKey), alive);
+            const sendKey = `send:occupancy:${result.task_id}:${result.evidence_draft_id}`;
+            const request = await this.submissionRequest(plan.state, args, this.rapidDraftStorageKey(sendKey), alive);
             if (!alive()) return;
             const recorded = await this.backend.submitOccupancies(request);
             // a receipt from an ended session writes nothing to the device
             if (!alive()) return;
+            this.clearSubmissionRequest(sendKey, request);
             this.clearSubmittedGuidedPeriods(periodsKey, plan.version);
             this.taskHistoryByTaskId.delete(result.task_id);
             return { periodsRecorded: { result: recorded, count: plan.count } };
@@ -12371,7 +12415,7 @@ class NzVerificationMap {
             this.bindRapidObservationForm("pin", {
                 draftExtraIds: ["pinNameInput", "pinAddressInput", "pinLocalityInput"],
                 periodsKey: RAPID_PIN_PERIODS_KEY,
-                ...(reviseTarget ? { createTask: () => this.createRevisionTask(reviseTarget) } : {}),
+                ...(reviseTarget ? { createTask: (record, draftKey) => this.createRevisionTask(reviseTarget, record, draftKey) } : {}),
                 getCandidate: reviseTarget ? undefined : () => {
                     if (!this.pinConfirmed) return null;
                     const approximate = this.pinConfirmed.locationMode === "approximate_area";
@@ -12476,7 +12520,7 @@ class NzVerificationMap {
 
     // opens (or claims) the revision task for the record, carrying the
     // confirmed location; returns the task id the observation submits to
-    async createRevisionTask(target) {
+    async createRevisionTask(target, record = document.getElementById("pinRapidCurrentForm") || {}, draftKey = "rapid-pin") {
         const alive = this.sessionGuard();
         // signed-in work only: nothing starts for an ended session
         if (!alive()) return;
@@ -12502,7 +12546,7 @@ class NzVerificationMap {
             ? `Revision with evidence: the pin was moved from the record's point ${target.latitude.toFixed(5)}, ${target.longitude.toFixed(5)}.`
             : "Revision with evidence recorded against the existing record.";
         const entryCountry = this.entryCountry();
-        const result = await this.backend.createIssueTask({
+        const args = {
             countryCode: entryCountry.code,
             name,
             issueType: document.getElementById("pinIssueType")?.value || "verify_existing_site",
@@ -12524,7 +12568,9 @@ class NzVerificationMap {
                 placement_zoom: confirmed.zoom,
                 location_mode: confirmed.locationMode,
             },
-        });
+        };
+        const result = await this.resolveSendPrerequisite(record, "revision_task", args,
+            this.rapidDraftStorageKey(draftKey), resolved => this.backend.createIssueTask(resolved), alive);
         if (!alive()) return;
         return { task_id: result.task_id, name, deduped: Boolean(result.deduped) };
     }

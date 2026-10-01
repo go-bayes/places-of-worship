@@ -429,7 +429,10 @@ for (const edit of ["period date", "source", "chain", "remove period", "gap note
     }
     if (edit === "remove period") f.state.segments.shift();
     if (edit === "gap note") f.state.gapNote = "The gap has not been established.";
-    if (edit === "parent evidence id") f.app.backend.saveEvidenceDraft = async () => ({ evidence_draft_id: "different-parent" });
+    if (edit === "parent evidence id") {
+      f.app.revisionDraftIdsByTaskId.set("task", "different-parent");
+      f.app.backend.saveEvidenceDraft = async () => ({ evidence_draft_id: "different-parent" });
+    }
     const earlier = f.state.lastSend;
     f.app.persistGuidedPeriods("task");
     assert.equal(f.state.lastSend, earlier, "autosave never changes the submission id");
@@ -463,5 +466,227 @@ for (const scenario of ["blank parent during restore", "trailing whitespace in g
     await reloaded.app.saveEvidenceToBackend({ task_id: "task" }, { submit: true });
     assert.equal(reloaded.requests.length, 1);
     assert.deepEqual(JSON.parse(JSON.stringify(reloaded.requests[0])), JSON.parse(JSON.stringify(first.requests[0])));
+  });
+}
+
+// Exercise the registered handlers, including task status changes, evidence
+// receipts, supersession and reviewer confirmations, rather than token stubs.
+let handlersPromise;
+function actualHandlers() {
+  return handlersPromise ||= (async () => {
+    const harness = await import("../../../../convex/testing/exportWorld.node-test.mjs");
+    // the shared harness defaults to September; these cards are dated October.
+    let clock = Date.UTC(2026, 9, 3);
+    Date.now = () => ++clock;
+    const [tasks, rapid, occupancies, sources, evidence] = await Promise.all([
+      import("../../../../convex/tasks.ts"), import("../../../../convex/rapidEntry.ts"),
+      import("../../../../convex/occupancies.ts"), import("../../../../convex/sources.ts"),
+      import("../../../../convex/evidence.ts"),
+    ]);
+    return { ...harness, ...tasks, ...rapid, ...occupancies, ...sources, ...evidence };
+  })();
+}
+
+function deviceStorage(user) {
+  const stored = new Map([["powDeviceOwner1", `${user._id}|session`]]);
+  return {
+    getItem: key => stored.get(key) ?? null,
+    setItem: (key, value) => stored.set(key, String(value)),
+    removeItem: key => stored.delete(key),
+  };
+}
+
+const realObservationValues = () => ({ currentStatus: "currently_used_for_worship", observationBasis: "direct_field_observation",
+  observedOn: "2026-10-02", directObservation: "Weekly services were in progress at the building when visited.", privacyFlag: "clear" });
+
+for (const mode of ["live", "reload", "blocked storage"]) {
+  test(`actual handlers: revision lost response and identical ${mode} retry retain one observation`, async () => {
+    const h = await actualHandlers();
+    const w = h.world();
+    const user = await w.addUser("revision-ra", ["ra"]);
+    const storage = mode === "blocked storage" ? undefined : deviceStorage(user);
+    const sent = [];
+    const resolutions = [];
+    const target = { siteId: "existing-site", name: "Existing hall", latitude: -41.29, longitude: 174.78 };
+    const page = () => {
+      const f = fixture({ storage, realContract: true });
+      f.window.PowRapidEntry.secureSubmissionId = require("node:crypto").randomUUID;
+      f.app.backendUser = user;
+      f.app.rapidObservationValues = realObservationValues;
+      f.app.backend.createIssueTask = async args => {
+        resolutions.push(args);
+        return h.createIssueTask._handler(w.as(user), args);
+      };
+      f.app.backend.submitCurrentObservation = async args => {
+        sent.push(args);
+        const receipt = await h.submitCurrentObservation._handler(w.as(user), args);
+        if (sent.length === 1) throw new Error("Response lost after observation recorded");
+        return receipt;
+      };
+      const options = { draftKey: "rapid-pin", flushDraft: () => f.app.persistRapidDraft("pin", "rapid-pin"),
+        createTask: (record, key) => f.app.createRevisionTask(target, record, key) };
+      return { ...f, submit: () => f.app.submitRapidObservation("pin", options) };
+    };
+    const first = page();
+    await first.submit();
+    assert.equal(w.rows.evidence_drafts.length, 1, "the first observation really records before its reply is lost");
+    assert.equal(w.rows.tasks[0].status, "needs_review", "task creation can no longer reuse this issue as open");
+    const retry = mode === "reload" ? page() : first;
+    await retry.submit();
+    assert.equal(sent.length, 2, "retry reaches the actual observation handler");
+    assert.deepEqual(JSON.parse(JSON.stringify(sent[1])), JSON.parse(JSON.stringify(sent[0])), "task, content and id stay identical");
+    assert.equal(w.rows.tasks.length, 1);
+    assert.equal(w.rows.evidence_drafts.length, 1, "no duplicate submitted observation");
+    assert.equal(w.rows.evidence_submission_receipts.length, 1);
+    assert.equal(resolutions.length, 1, "the resolved prerequisite survives the task's status change");
+    assert.equal(retry.recordedTask(), w.rows.tasks[0].task_id);
+    assert.equal(retry.app.readRapidDraft("rapid-pin"), null, "matching successful receipt clears its stored prerequisite");
+  });
+}
+
+test("actual handlers: rapid-period lost response, handover, reload and blocked-storage retries preserve reviewed rows", async () => {
+  const h = await actualHandlers();
+  for (const blocked of [false, true]) {
+    const w = h.world();
+    const user = await w.addUser("period-ra", ["ra"]);
+    const reviewer = await w.addUser("period-reviewer", ["reviewer"]);
+    const storage = blocked ? undefined : deviceStorage(user);
+    await w.addTask({ task_id: "task", batch_id: "manual-nz", assigned_to: user._id });
+    const parent = await h.submitCurrentObservation._handler(w.as(user), {
+      taskId: "task", clientSubmissionId: require("node:crypto").randomUUID(),
+      observation: { current_status: "currently_used_for_worship", observation_basis: "direct_field_observation",
+        observed_on: "2026-10-02", direct_observation: realObservationValues().directObservation, privacy_flag: "clear" },
+    });
+    const sent = [];
+    const page = () => {
+      const f = periodsFixture({ storage });
+      f.app.backendUser = user;
+      f.window.PowRapidEntry.secureSubmissionId = require("node:crypto").randomUUID;
+      f.app.backend.submitOccupancies = async args => {
+        sent.push(args);
+        const receipt = await h.submitOccupancies._handler(w.as(user), args);
+        if (sent.length <= 2) throw new Error("Response lost after periods recorded");
+        return receipt;
+      };
+      return f;
+    };
+    const first = page();
+    const plan = first.app.rapidPeriodsPlan("rapid-pin-periods", { observedOn: "2026-10-02", observationBasis: "named_public_source",
+      sourceTitle: "Directory", sourceReference: "https://example.org/source", directObservation: first.parent.note, privacyFlag: "clear" });
+    const outcome = await first.app.recordRapidPeriods(plan, parent, "rapid-pin-periods");
+    assert.match(outcome.periodsError, /Response lost/);
+    assert.equal(w.rows.site_occupancies.length, 2);
+    await h.confirmAllDerived._handler(w.as(reviewer), { taskId: "task", parentEvidenceDraftId: parent.evidence_draft_id });
+    assert.ok(w.rows.derived_target_year_states.some(row => row.review_state === "reviewer_confirmed"));
+    const before = JSON.stringify({ periods: w.rows.site_occupancies, states: w.rows.derived_target_year_states,
+      locations: w.rows.derived_year_locations, events: w.rows.derived_state_events, versions: w.rows.evidence_versions });
+    // With storage blocked the live handover is retained. With writable
+    // storage a fresh page reconstructs the same cards against the same parent.
+    const retry = blocked ? first : page();
+    if (!blocked) {
+      retry.app.occupancyDraft = JSON.parse(JSON.stringify(first.app.occupancyDraft));
+      delete retry.app.occupancyDraft.lastSend;
+    }
+    await retry.app.submitOccupancies(retry.app.occupancyDraft.context);
+    await retry.app.submitOccupancies(retry.app.occupancyDraft.context);
+    assert.equal(sent.length, 3, "both pane retries reach the handler");
+    assert.deepEqual(JSON.parse(JSON.stringify(sent[1])), JSON.parse(JSON.stringify(sent[0])), "handover and reload retain the same request");
+    assert.deepEqual(JSON.parse(JSON.stringify(sent[2])), JSON.parse(JSON.stringify(sent[0])));
+    assert.equal(JSON.stringify({ periods: w.rows.site_occupancies, states: w.rows.derived_target_year_states,
+      locations: w.rows.derived_year_locations, events: w.rows.derived_state_events, versions: w.rows.evidence_versions }), before,
+      "retry neither replaces periods nor resets confirmed derived states");
+    assert.equal(retry.app.readRapidDraft(`send:occupancy:task:${parent.evidence_draft_id}`), null, "successful matching receipt clears only its send pair");
+  }
+});
+
+for (const mode of ["live", "reload", "blocked storage"]) {
+  test(`actual handlers: optional source reply lost before observation, identical ${mode} retry keeps citation-only request`, async () => {
+    const h = await actualHandlers();
+    const w = h.world();
+    const user = await w.addUser("source-ra", ["ra"]);
+    const storage = mode === "blocked storage" ? undefined : deviceStorage(user);
+    const sent = [];
+    let registrations = 0;
+    const page = () => {
+      const f = fixture({ storage, realContract: true });
+      f.app.backendUser = user;
+      f.window.PowRapidEntry.secureSubmissionId = require("node:crypto").randomUUID;
+      f.app.pinLinkedRefs = [];
+      f.app.pinNearbyCount = 0;
+      const status = { textContent: "", classList: { add() {}, remove() {} } };
+      const get = f.document.getElementById;
+      f.document.getElementById = id => id === "pinRapidStatus" ? status : get(id);
+      f.app.rapidObservationValues = () => ({ ...realObservationValues(), observationBasis: "named_public_source",
+        sourceTitle: "Directory", sourceReference: "https://example.org/source", saveSourceToRegister: true });
+      f.app.backend.createSource = async args => {
+        const result = await h.createSource._handler(w.as(user), args);
+        if (++registrations === 1) throw new Error("Source registration reply lost");
+        return result;
+      };
+      f.app.backend.submitCurrentObservation = async args => {
+        sent.push(args);
+        const result = await h.submitCurrentObservation._handler(w.as(user), args);
+        if (sent.length === 1) throw new Error("Observation reply lost");
+        return result;
+      };
+      const options = { ...f.app.rapidFormOptions.pin, flushDraft: () => f.app.persistRapidDraft("pin", "rapid-pin") };
+      return { ...f, status, submit: () => f.app.submitRapidObservation("pin", options) };
+    };
+    const first = page();
+    await first.submit();
+    assert.equal(w.rows.sources.length, 1, "registration records despite the lost source reply");
+    assert.equal(w.rows.evidence_drafts.length, 1, first.status.textContent);
+    const retry = mode === "reload" ? page() : first;
+    await retry.submit();
+    assert.equal(sent.length, 2);
+    assert.deepEqual(JSON.parse(JSON.stringify(sent[1])), JSON.parse(JSON.stringify(sent[0])));
+    assert.equal(w.rows.evidence_drafts.length, 1, "a register retry cannot duplicate a citation-only observation");
+    assert.equal(registrations, 1);
+  });
+}
+
+for (const mode of ["live", "reload", "blocked storage"]) {
+  test(`actual handlers: guided atomic lost response and identical ${mode} retry reuse immutable parent`, async () => {
+    const h = await actualHandlers();
+    const w = h.world();
+    const user = await w.addUser("guided-ra", ["ra"]);
+    const storage = mode === "blocked storage" ? undefined : deviceStorage(user);
+    await w.addTask({ task_id: "task", assigned_to: user._id });
+    const saves = [];
+    const sent = [];
+    const page = () => {
+      const f = periodsFixture({ storage });
+      f.app.backendUser = user;
+      f.window.PowRapidEntry.secureSubmissionId = require("node:crypto").randomUUID;
+      f.app.buildEvidenceDraft = () => h.draftContent({ source_date_or_capture_date: f.parent.sourceDate,
+        source_title: f.parent.sourceTitle, evidence_note: f.parent.note });
+      f.app.backend.saveEvidenceDraft = async args => {
+        saves.push(args);
+        return h.saveEvidenceDraft._handler(w.as(user), args);
+      };
+      f.app.backend.submitEvidenceDraftWithOccupancies = async args => {
+        sent.push(args);
+        const result = await h.submitEvidenceDraftWithOccupancies._handler(w.as(user), args);
+        if (sent.length === 1) throw new Error("Atomic submission reply lost");
+        return result;
+      };
+      return { ...f, submit: () => f.app.saveEvidenceToBackend({ task_id: "task" }, { submit: true }) };
+    };
+    const first = page();
+    await first.submit();
+    assert.equal(w.rows.evidence_drafts[0].draft_status, "submitted");
+    assert.equal(w.rows.site_occupancies.length, 2);
+    const retry = mode === "reload" ? page() : first;
+    if (mode === "reload") {
+      retry.app.guidedPeriodsByTaskId.delete("task");
+      retry.app.guidedPeriodsState("task");
+    }
+    await retry.submit();
+    assert.equal(sent.length, 2, "retry reaches atomic handler without trying to edit the submitted parent");
+    assert.deepEqual(JSON.parse(JSON.stringify(sent[1])), JSON.parse(JSON.stringify(sent[0])));
+    assert.equal(saves.length, 1);
+    assert.equal(w.rows.site_occupancies.length, 2);
+    assert.equal(w.rows.evidence_drafts.length, 1);
+    assert.equal(w.rows.evidence_submission_receipts.length, 1);
   });
 }
