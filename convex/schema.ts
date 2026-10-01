@@ -79,6 +79,8 @@ import {
   judgmentDisposition,
   judgmentJudge,
   judgmentKind,
+  judgmentSchemaVersion,
+  judgmentScore,
   judgmentRun,
   judgmentSubjectKind,
 } from "./lib/agentJudgments";
@@ -684,7 +686,7 @@ export default defineSchema({
   // review decision.
   agent_judgments: defineTable({
     judgment_id: v.string(),
-    schema_version: v.literal("agent-judgment.v1"),
+    schema_version: judgmentSchemaVersion,
     subject_kind: judgmentSubjectKind,
     subject_ref: v.string(),
     judgment_kind: judgmentKind,
@@ -695,6 +697,8 @@ export default defineSchema({
     access_method: v.optional(judgmentAccessMethod),
     source_locator: v.optional(v.string()),
     basis_note: v.optional(v.string()),
+    // the deterministic scorer's numbers and fired signals (agent-judgment.v1.1)
+    score: v.optional(judgmentScore),
     judge: judgmentJudge,
     run: judgmentRun,
     context: judgmentContext,

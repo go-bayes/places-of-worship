@@ -27,6 +27,7 @@
     <ol>
       <li><a href="#review-queue">Review a submitted task and record a decision</a></li>
       <li><a href="#ai-review-panel">Read the AI review panel before deciding</a></li>
+      <li><a href="#recorded-confidence">Read the recorded confidence before deciding</a></li>
       <li><a href="#ai-evidence-checks">How the AI evidence checks work</a></li>
       <li><a href="#decision-records-and-hashes">How decisions are recorded and hashed</a></li>
       <li><a href="#change-class">Genuine change versus map correction</a></li>
@@ -111,6 +112,16 @@
   </ol>
 </section>
 
+<section class="guide-section prose-section" id="recorded-confidence">
+  <h2>Read the recorded confidence before deciding</h2>
+  <p>Some tasks carry a <strong>Recorded confidence</strong> panel above the AI recommendation. The panel lists the judgments recorded about the place the task is about: the rows the OSM confidence scorer wrote, and any judgment a model made about the same place. A judgment recommends; it accepts nothing, and the decision form below it stays the only path to a review decision.</p>
+  <p>The first pill is the tier: <em>screened</em>, <em>review</em> or <em>escalate</em>. The tier sets how much attention the place receives and nothing else. <em>Screened</em> means the scorer found no review trigger, not that the place is confirmed. The pills beside the tier say that the score is AI-generated and that the scorer is deterministic and uncalibrated: the numbers are a heuristic, not probabilities, until calibration under the <a href="https://github.com/go-bayes/places-of-worship/blob/main/docs/confidence-standard.md">confidence standard</a>. The line under the pills names the scorer version, the standard version, the edition date, the signal-vector hash and the code revision, so the row can be recomputed from its record.</p>
+  <p class="section-note">Confidence on scorer rows is the scorer's support for each component (worship continues; pin within 75 m), not a calibrated probability; low support reads as unknown or unclear, never as a negative finding.</p>
+  <p>The composite and its identity, location and status components appear beside the cut points that set the tier; denomination is reported outside the composite, and a component under its floor is marked. The reasons line names the conditions that set the tier and any condition still pending, such as a cross-source match not yet computed. <em>Signals</em> opens the fired terms per component, the recorded numeric and boolean signal values, and the indicator flags for duplicate, conflict, generic name, missing name and cross-source match. No bar or percentage is drawn: a number without its basis invites acceptance by number.</p>
+  <p>Under <strong>Judgments</strong>, each recorded row has its own controls. <em>Agree</em>, <em>Disagree</em>, <em>Correct</em> and <em>Not considered</em> each append one disposition row, with your note where you write one; a disagreement or correction needs a note of at least eight characters. Dispositions are append-only and change nothing else: not the judgment, not the task, not your decision. Every new scorer row shows high, medium or low confidence, marked provisional and uncalibrated, with the standard version. A small <em>provisional</em> pill sits beside each scorer outcome. The mapping stays provisional until calibration replaces it. A status row requires at least one positive fired signal: a recent or older check, a website or contact, opening or service times, a recent edit, at least three contributors, or a cross-source active listing. With positive support, scores at or above 0.9 read <em>likely active</em> with high confidence; scores from 0.7 to below 0.9 read <em>likely active</em> with medium confidence. A lower score or an absence of positive signals reads <em>unknown</em> with low confidence. The intercept alone supplies no status finding. The asymmetry with negative evidence is deliberate: negative signals reduce support or trigger review; an inactivity finding requires reviewed evidence. Location scores at or above 0.7 read <em>plausible</em>; lower scores read <em>unclear</em>. Duplicate candidates read <em>unclear</em> with low confidence. The numeric scores remain visible above the rows. The review snapshot binds the displayed judgments and dispositions. After a disposition, changed evidence requires reloading the task before deciding. Record your own decision in the form below as before.</p>
+  <p class="section-note">Contributors see no scorer output in the field portal.</p>
+</section>
+
 <section class="guide-section prose-section" id="ai-evidence-checks">
   <h2>How the AI evidence checks work</h2>
   <p>Some tasks in the review queue carry an AI recommendation beside the human controls. Here is what that recommendation is, and what it is not.</p>
@@ -169,7 +180,7 @@
 </section>
   </main>
   <footer>
-    <p>Places of Worship research project · guides updated 2026-08-25 · screenshots: demonstration data only</p>
+    <p>Places of Worship research project · guides updated 2026-10-01 · screenshots: demonstration data only</p>
   </footer>
 </body>
 </html>

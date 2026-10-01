@@ -11,6 +11,9 @@ export const seedReviewQueueFixture = internalMutation({
     taskId: v.optional(v.string()),
     countryCode: v.optional(v.string()),
     sourceUrl: v.optional(v.string()),
+    // optional place link, so a local check can attach place-level judgments
+    osmObjectType: v.optional(v.union(v.literal("node"), v.literal("way"), v.literal("relation"))),
+    matchedOsmId: v.optional(v.string()),
   },
   returns: v.object({ task_id: v.string(), evidence_draft_id: v.string(), created: v.boolean() }),
   handler: async (ctx, args) => {
@@ -55,6 +58,8 @@ export const seedReviewQueueFixture = internalMutation({
       name: "St Andrew's on The Terrace",
       locality: "Wellington",
       geometry: { type: "Point", coordinates: [174.7772, -41.2846] },
+      osm_object_type: args.osmObjectType,
+      matched_osm_id: args.matchedOsmId,
       task_brief: "Dev-seed fixture: verify this church's current worship use from the linked source.",
       created_at: now,
       updated_at: now,

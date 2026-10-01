@@ -41,10 +41,17 @@ const inputHashFields = new Set([...SCREEN_HASH_FIELDS[INSPECTION_SCHEMA]].map(p
 // follow the North American plan: +1 or (242) forms, 10-digit groups, and
 // the 7-digit local form. hits are named by path, never by value.
 const NANP_PHONE = /\+1[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b|\(\d{3}\)\s?\d{3}[\s.-]\d{4}\b|\b(?:\d{10}|\d{3}[\s.-]\d{3}[\s.-]\d{4}|\d{3}[\s.-]\d{4})\b/;
+// an OSM element reference, bare or as an openstreetmap.org URL; ten-digit element ids
+// otherwise read as unseparated phone numbers
+const OSM_REFERENCE = /^(?:https:\/\/(?:www\.)?openstreetmap\.org\/)?(?:node|way|relation)\/[1-9]\d{0,15}$/;
+const OSM_REFERENCE_FIELD = /^candidate_links\[\d+\]\.(?:osm_ref|candidate_ref)$/;
 function assertNoNanpPhone(value: unknown, schema: any): void {
-  // source locators are validated URLs whose record ids can look like local numbers; the shared
-  // screen still covers them, the NANP pattern does not
-  for (const [path, text] of screenedStrings(value, schema, schema)) if (!/\.locator$/.test(path) && NANP_PHONE.test(text)) throw new Error(`potential personal details in ${path} require human handling`);
+  // source locators are validated URLs whose record ids can look like local numbers, and so are
+  // exact OSM references in candidate links; the shared screen still covers both, the NANP pattern does not
+  for (const [path, text] of screenedStrings(value, schema, schema)) {
+    if (/\.locator$/.test(path) || (OSM_REFERENCE_FIELD.test(path) && OSM_REFERENCE.test(text))) continue;
+    if (NANP_PHONE.test(text)) throw new Error(`potential personal details in ${path} require human handling`);
+  }
 }
 
 export function screenInspectionCase(value: unknown, adapterInput = false): void {

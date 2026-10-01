@@ -88,30 +88,63 @@
         // imagery never darkens
         const streetsDarkUrl = key ? `https://api.maptiler.com/maps/streets-v2-dark/{z}/{x}/{y}.png?key=${encodeURIComponent(key)}` : "";
         let streetsCurrentUrl = streetsUrl;
+        // a key maptiler refuses (an origin it does not allow, an exhausted
+        // plan) must not leave the reviewer on a map of "invalid key"
+        // notices: img tiles render even on 403, so one fetch probe reads
+        // the real status the first time imagery is used, and a refusal
+        // drops the map to the openstreetmap tiles under the dark filter
+        // and retires the imagery buttons, as the ra portal does
+        let imageryBroken = false;
+        let imageryProbe = null;
+        function probeImagery() {
+            if (imageryProbe || !key) return imageryProbe;
+            const url = `https://api.maptiler.com/maps/hybrid/1/1/1.jpg?key=${encodeURIComponent(key)}`;
+            imageryProbe = fetch(url)
+                .then(response => { if (!response.ok) markImageryBroken(); })
+                .catch(() => markImageryBroken());
+            return imageryProbe;
+        }
+        function markImageryBroken() {
+            if (imageryBroken) return;
+            imageryBroken = true;
+            syncStreetsTheme();
+            setBasemap("streets");
+            container.querySelectorAll(".basemap-toggle button").forEach(button => {
+                if (button.dataset.basemap !== "streets") {
+                    button.setAttribute("disabled", "true");
+                    button.title = "Imagery is unavailable right now";
+                }
+            });
+        }
         function syncStreetsTheme() {
             const dark = document.documentElement?.getAttribute?.("data-theme-effective") === "dark";
             const tileContainer = streets.getContainer?.();
-            if (streetsDarkUrl) {
-                const url = dark ? streetsDarkUrl : streetsUrl;
-                if (url !== streetsCurrentUrl) {
-                    streetsCurrentUrl = url;
-                    streets.setUrl?.(url);
-                    // the attribution lives on the layer, so a later add
-                    // reads the right one; a layer on the map swaps it now
-                    const previous = streets.options.attribution;
-                    const next = dark ? imageryAttribution : attribution;
-                    streets.options.attribution = next;
-                    if (map.attributionControl && map.hasLayer(streets) && previous !== next) {
-                        map.attributionControl.removeAttribution(previous);
-                        map.attributionControl.addAttribution(next);
-                    }
+            // a refused key takes the no-key path: the openstreetmap tiles
+            // back on the layer, filtered in the dark
+            const useDark = Boolean(streetsDarkUrl) && !imageryBroken && dark;
+            const url = useDark ? streetsDarkUrl : streetsUrl;
+            // the dark raster is served on the same key as the imagery,
+            // and a refusal shows only to the probe
+            if (useDark) probeImagery();
+            if (streetsDarkUrl && url !== streetsCurrentUrl) {
+                streetsCurrentUrl = url;
+                streets.setUrl?.(url);
+                // the attribution lives on the layer, so a later add
+                // reads the right one; a layer on the map swaps it now
+                const previous = streets.options.attribution;
+                const next = useDark ? imageryAttribution : attribution;
+                streets.options.attribution = next;
+                if (map.attributionControl && map.hasLayer(streets) && previous !== next) {
+                    map.attributionControl.removeAttribution(previous);
+                    map.attributionControl.addAttribution(next);
                 }
-                tileContainer?.classList?.remove("streets-tiles-filtered");
-            } else {
-                tileContainer?.classList?.toggle("streets-tiles-filtered", dark);
             }
+            tileContainer?.classList?.toggle("streets-tiles-filtered", dark && !useDark);
         }
         syncStreetsTheme();
+        // the layer's container is made anew each time a basemap swap puts
+        // it back, so the filter class is set again on each add
+        streets.on("add", syncStreetsTheme);
         window.addEventListener?.("pow-theme-change", syncStreetsTheme);
         const layers = { streets };
         if (key) {
@@ -122,7 +155,8 @@
         let basemapUserChosen = false;
 
         function setBasemap(name) {
-            const next = layers[name] ? name : "streets";
+            const next = layers[name] && !(imageryBroken && name !== "streets") ? name : "streets";
+            if (next !== "streets") probeImagery();
             if (next !== basemap) {
                 // the incoming tiles go on before the outgoing come off: with
                 // only the country-scale dots layer left for a moment, leaflet
@@ -225,6 +259,26 @@
         const tasksByTaskId = new Map();
         let rows = [];
         let selectedTaskId = "";
+
+        // the recentre button (jb 2026-10-01): back to the selected case,
+        // else the queue as its first load framed it, else the country's
+        // opening view. it sits under the basemap pill at the top right:
+        // this map is short (440 px by default, 200 px at the least) and
+        // the legend at the bottom left reaches the column under the zoom
+        // buttons
+        function recentreTarget() {
+            const selected = markersByTaskId.get(selectedTaskId);
+            if (selected) {
+                const at = selected.getLatLng();
+                return { latlng: [at.lat, at.lng], minZoom: 16, label: "Recentre the map on the selected case" };
+            }
+            if (markersByTaskId.size) {
+                const bounds = L.latLngBounds([...markersByTaskId.values()].map(marker => marker.getLatLng()));
+                if (bounds.isValid()) return { bounds: bounds.pad(0.2), maxZoom: 12, label: "Recentre the map on the queue" };
+            }
+            return { centre, zoom, label: `Recentre the map on ${countryName || "the country"}` };
+        }
+        window.PowRecentreControl?.create(L, map, { position: "topright", id: "reviewRecentreButton", resolve: recentreTarget });
 
         function popupHtml(task) {
             const coords = task.geometry?.coordinates || [];

@@ -141,13 +141,36 @@ page on the first pinch, 2026-09-22); at zooms 5 to 7 only the portal's
 own country draws, and from zoom 8 every place, a neighbour's dot with
 its own portal named in the popup.
 
+Under the zoom buttons at the top left of the map are two icon buttons of
+one shape (`.map-icon-control` in `apps/regions/_shared/theme.css`: 44 px,
+the panel face, an 18 px line icon): the crosshair centres the map on the
+contributor, and `Recentre` (four corner brackets around a dot; ruled
+2026-10-01: "needs a recentre map button, as if you scroll off it won't
+work") returns the view to the work after a pan or a zoom away. Its
+destination, first match wins: the open entry's pin (zoom 17 or the
+reader's own), the open task's point (zoom 16 or the reader's own) or its
+uncertainty area when the location is approximate, the record being
+revised with its pin lifted, the dot whose popup is open, else the
+country's opening view. The accessible name stays `Recentre the map`; the
+tooltip names the destination as the pointer or the focus arrives. The
+review portal has the same button under the basemap pill at the top
+right, since its short map's legend reaches the column under the zoom
+buttons: the selected case, else the framed queue, else the country. One
+shared module,
+`apps/regions/nz/js/recentre-control.js`, draws the button and moves the
+map, and each page supplies the resolver that names the target.
+
 The map offers `Streets` (OSM standard tiles), `Hybrid` (MapTiler imagery
 with street and place labels), and `Satellite` (bare MapTiler imagery)
 basemaps through a small pill control. The map lands on `Hybrid` wherever
 imagery is configured (ruled 2026-09-19) and returns there when an activity
 ends; pin placement lifts a streets map to hybrid so the pin can be guided
 onto the actual building without losing street-name orientation; a manual
-toggle choice wins for the rest of the session. The map data panel (the
+toggle choice wins for the rest of the session. A key MapTiler refuses (an
+origin it does not allow, or an exhausted plan) drops both portals to the
+OpenStreetMap tiles under the dark filter, the same map as without a key,
+and retires the imagery buttons for the session (2026-10-01); the dark
+Streets raster is MapTiler's too and is refused with the imagery. The map data panel (the
 unreviewed-places switch and the marker legend) keeps its drag grip and
 folds to its `Map data` bar; both the spot and the fold are remembered on
 the device. The imagery options hide when no MapTiler key is configured, and
@@ -260,6 +283,7 @@ Use pill or badge components for short machine states:
 - `.skip-badge`: skipped task.
 - `.closed-badge`: local tentative closure or completion cue.
 - `.ra-initials`: RA initials or session count.
+- `.confidence-panel .pill` (2026-10-01): the provisional tier of a recorded scorer judgment, `screened`, `review` or `escalate`, first in the pill row of the review portal's `Recorded confidence` panel, beside `AI-generated` and `Deterministic, uncalibrated`. Amber (`.pill.amber`) for `escalate` alone, the open-case colour; uncoloured (`.pill.grey`) otherwise; never green, because no tier accepts ([confidence standard](confidence-standard.md)). Each deterministic judgment also carries a `provisional` pill beside its categorical assessment. One muted line under the panel's pills says what the tier means; a further sentence explains scorer confidence once per panel. The numbers sit in a `.field-grid` beside their cut points, and no bar or percentage is drawn.
 
 Do not put long explanations inside status pills. Pair a short pill with nearby
 plain-language help text when the state needs explanation.
@@ -273,7 +297,7 @@ One convention on both portals (R-U6, applied 2026-09-21): an unclassed `button`
 - `.tertiary`: a small supporting action, such as sign out, a quick-fill chip, or an attachment view, at 40 px on both pages.
 - Destructive or clearing actions use a danger style, not the primary colour. `Cancel` on the open entry is the primary control's own slot in the danger outline (`.primary-action.cancelling`), full width and 48 px, never a keyboard-only exit.
 
-Targets (R-U6): every control on a first-time RA's path is at least 44 px tall (Search, the search results, Move pin, Refresh task list, Sign out, the Streets / Hybrid / Satellite toggle, the locate button, the decision menu, the review page's inputs, the derived-year buttons). Secondary inline controls sit at 40 px (`.tertiary`, `.link-button`, skip chips, the session and attachment rows, the points select, every disclosure summary, the legend grip and fold). A native `select` takes its 44 px (40 px for the points select) as an explicit `height`, because Safari ignores an author's padding and min-height on a select. The one exception the ruling allows: popup links stay at 36 px where the popup's own width would otherwise break (`.popup-link`, `.popup-report-issue`); the popup's primary revise entry is 44 px. The drag bars draw at 18 px wide (28 px tall when stacked) and take the pointer across 44 px through a pseudo-element, so the drawn bar and the hit area are two numbers. Focus rings are 3 px on both pages.
+Targets (R-U6): every control on a first-time RA's path is at least 44 px tall (Search, the search results, Move pin, Refresh task list, Sign out, the Streets / Hybrid / Satellite toggle, the locate and recentre buttons, the decision menu, the review page's inputs, the derived-year buttons). Secondary inline controls sit at 40 px (`.tertiary`, `.link-button`, skip chips, the session and attachment rows, the points select, every disclosure summary, the legend grip and fold). A native `select` takes its 44 px (40 px for the points select) as an explicit `height`, because Safari ignores an author's padding and min-height on a select. The one exception the ruling allows: popup links stay at 36 px where the popup's own width would otherwise break (`.popup-link`, `.popup-report-issue`); the popup's primary revise entry is 44 px. The drag bars draw at 18 px wide (28 px tall when stacked) and take the pointer across 44 px through a pseudo-element, so the drawn bar and the hit area are two numbers. Focus rings are 3 px on both pages.
 
 ## Forms
 

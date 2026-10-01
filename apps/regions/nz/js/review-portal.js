@@ -103,6 +103,11 @@
         // above, so the reviewer decides on exactly what the hash covers;
         // PowReviewSnapshotContent.contentFromSnapshot, or null while loading
         content: null,
+        // recorded agent judgments about the task's place (p4, 2026-10-01),
+        // each with its newest dispositions, from
+        // the opted-in review snapshot. the error message when loading failed, else ""
+        judgments: [],
+        judgmentsError: "",
         // incremented by every selectTask; a load compares its own token
         // after each await so a superseded load writes nothing
         selectionToken: 0,
@@ -606,6 +611,11 @@ function human(value) {
         state.reviewSnapshot = null;
         state.reviewSnapshotError = "";
         state.content = null;
+        state.judgments = [];
+        state.judgmentsError = "";
+        // held in the closure until the load proves current, so a failed
+        // read for an abandoned selection never marks the displayed task
+        let judgmentsError = "";
         renderQueue();
         renderDetail(true);
         try {
@@ -629,13 +639,21 @@ function human(value) {
                     ]);
                     return { drafts, historicalClaims, events, attachments };
                 },
-                fetchSnapshot: (id, evidenceDraftId) => client.getReviewSnapshot({ taskId: id, evidenceDraftId }),
+                fetchSnapshot: (id, evidenceDraftId) => client.getReviewSnapshot({ taskId: id, evidenceDraftId, includeJudgments: true }),
+                // the bound snapshot supplies full rows in the same response;
+                // fall back only when that response has no display field.
+                fetchJudgments: (id) => client.listJudgmentsForTaskPlace({ taskId: id }).catch((error) => {
+                    judgmentsError = (error && error.message) || "unknown error";
+                    return [];
+                }),
             });
             if (loaded === null) return;
             const content = loaded.content;
             state.reviewSnapshot = loaded.snapshot;
             state.reviewSnapshotError = loaded.snapshotError;
             state.attachments = loaded.attachments;
+            state.judgments = loaded.judgments;
+            state.judgmentsError = Array.isArray(loaded.snapshot?.displayed_judgments) ? "" : judgmentsError;
             state.content = content;
             state.drafts = content.drafts;
             state.historicalClaims = content.historicalClaims;
@@ -910,6 +928,8 @@ function human(value) {
                     `).join("")}
             </section>
 
+            ${confidencePanelHtml()}
+
             ${window.PowAgentReviewPanel ? window.PowAgentReviewPanel.panelHtml(agentReview) : ""}
 
             <section class="panel decision-panel">
@@ -958,6 +978,7 @@ function human(value) {
             form.addEventListener("submit", submitDecision);
         }
         wireClaimControls(task);
+        wireConfidencePanel(task);
         wireAgentReviewPanel(form, agentReview);
         // evidence files open through a fresh short-lived url per click —
         // nothing in the page holds a durable link to the private bucket
@@ -1060,7 +1081,7 @@ function human(value) {
                 · decisions ${s.review_decisions ?? 0}, events ${s.task_events ?? 0}, agent reviews ${s.agent_reviews ?? 0},
                 claims ${s.historical_claims ?? 0}, periods ${s.site_occupancies ?? 0},
                 derived states ${s.derived_states ?? 0}, locations ${s.derived_locations ?? 0}, functions ${s.derived_functions ?? 0}.
-                The task, evidence, events, and claims on this page are rendered from this snapshot.
+                The task, evidence, events, claims and recorded judgments on this page are rendered from this snapshot.
             </p>
         `;
     }
@@ -1703,6 +1724,196 @@ function human(value) {
         });
     }
 
+    // the recorded-confidence panel (p4, 2026-10-01): the agent judgments
+    // about the task's place, rendered above the AI recommendation. a tier
+    // orders review and decides nothing; the decision form below stays the
+    // only path to a review decision
+    function confidencePanelHtml() {
+        if (!window.PowConfidencePanel) return "";
+        return window.PowConfidencePanel.panelHtml(state.judgments, {
+            viewerId: state.user?._id,
+            error: state.judgmentsError,
+        });
+    }
+
+    // a disposition press appends one row and changes nothing else. the
+    // selection token guards both awaits: a response for a task the
+    // reviewer has left writes nothing and re-renders nothing
+    function wireConfidencePanel(task) {
+        const panel = document.getElementById("confidencePanel");
+        if (!panel || !window.PowConfidencePanel || !task) return;
+        panel.addEventListener("click", async (event) => {
+            const button = event.target.closest("button[data-disposition]");
+            if (!button || !panel.contains(button)) return;
+            const block = button.closest("[data-judgment-id]");
+            const judgmentId = block?.dataset.judgmentId;
+            if (!judgmentId) return;
+            const disposition = button.dataset.disposition;
+            const noteField = block.querySelector(".judgment-note");
+            const note = noteField ? noteField.value.trim() : "";
+            const status = block.querySelector(".judgment-status");
+            const say = (text, tone) => {
+                if (!status) return;
+                status.textContent = text;
+                status.className = tone ? `judgment-status state-banner tone-${tone}` : "judgment-status muted";
+            };
+            // the server's rule, applied before the round trip
+            if (window.PowConfidencePanel.needsNote(disposition) && note.length < 8) {
+                say("Add a note of at least eight characters to disagree or correct.", "broken");
+                noteField?.focus();
+                return;
+            }
+            const token = state.selectionToken;
+            const isCurrent = () => state.selectionToken === token && state.selected?.task?.task_id === task.task_id;
+            const label = window.PowConfidencePanel.dispositionLabel(disposition).toLowerCase();
+            // one write at a time: every disposition control in the panel,
+            // and the note being sent, stay off until the round trip ends,
+            // so no second press and no rebuild can overlap a write
+            const locked = Array.from(panel.querySelectorAll("button[data-disposition]"));
+            const lock = (on) => {
+                locked.forEach((entry) => { entry.disabled = on; });
+                if (noteField) noteField.disabled = on;
+            };
+            lock(true);
+            say("Recording...");
+            setTransport("saving");
+            // the write and the re-read are reported apart: a write that
+            // stood is never shown as a failure, so no retry appends a
+            // second row
+            let recorded = false;
+            try {
+                await client.recordJudgmentDisposition({ judgmentId, disposition, note: note || undefined });
+                recorded = true;
+                if (!isCurrent()) return;
+                const before = state.judgments;
+                const bound = Array.isArray(state.reviewSnapshot?.snapshot?.recorded_judgments);
+                const refreshed = bound ? await client.getReviewSnapshot({ taskId: task.task_id, evidenceDraftId: currentDraft().evidence_draft_id, includeJudgments: true }) : null;
+                if (!isCurrent()) return;
+                if (bound && !window.PowReviewSnapshotContent.canRefreshJudgments(state.reviewSnapshot, refreshed)) {
+                    setTransport("ready");
+                    say(`Recorded: ${label}. The evidence also changed; select the task again to review it before deciding.`, "done");
+                    return;
+                }
+                const rows = bound ? refreshed.displayed_judgments : await client.listJudgmentsForTaskPlace({ taskId: task.task_id });
+                if (!isCurrent()) return;
+                if (bound) {
+                    state.reviewSnapshot = refreshed;
+                    renderReviewSnapshot(refreshed);
+                }
+                state.judgments = Array.isArray(rows) ? rows : [];
+                state.judgmentsError = "";
+                setTransport("ready");
+                const message = `Recorded: ${label}.`;
+                // a disposition changes no judgment row, so the list holds
+                // the same rows under the same lead and the disposed block
+                // is replaced alone, the other rows' controls coming back
+                // on; a different set (a scorer run ingested meanwhile, a
+                // row pushed past the read's cap) rebuilds the whole panel
+                // so its header never shows a lead the list has left behind
+                if (sameJudgmentSet(before, state.judgments, judgmentId)) {
+                    rerenderJudgmentBlock(judgmentId, message);
+                    lock(false);
+                } else {
+                    rerenderConfidencePanel(task, judgmentId, message);
+                }
+            } catch (error) {
+                if (!isCurrent()) return;
+                setTransport("ready");
+                if (recorded) {
+                    // the write stood and the row cannot be refreshed: the
+                    // controls stay off until the task is selected again,
+                    // so a second press cannot append a second row
+                    say(`Recorded: ${label}. The list could not be refreshed (${error.message || "unknown error"}); select the task again to see it.`, "done");
+                } else {
+                    lock(false);
+                    say(error.message || "Could not record the disposition.", "broken");
+                }
+            }
+        });
+    }
+
+    function sameJudgmentSet(before, after, disposedId) {
+        const ids = (rows) => rows.map((row) => row?.judgment_id).sort().join("\n");
+        const leadOf = (rows) => window.PowConfidencePanel.leadJudgment(rows)?.judgment_id;
+        // dispositions embedded in the rows count too: another reviewer may
+        // have disposed of a different row meanwhile, and only the row just
+        // disposed of is replaced alone
+        const marks = (rows) => rows.map((row) => `${row?.judgment_id}:${(Array.isArray(row?.dispositions) ? row.dispositions : []).map((entry) => String(entry?.disposition_id)).sort().join(",")}`).sort().join("\n");
+        const unchangedElsewhere = (judgmentId) => {
+            const rest = (rows) => marks(rows.filter((row) => row?.judgment_id !== judgmentId));
+            return rest(before) === rest(after);
+        };
+        return ids(before) === ids(after) && leadOf(before) === leadOf(after) && unchangedElsewhere(disposedId);
+    }
+
+    function showJudgmentStatus(panel, judgmentId, message) {
+        const escaped = window.CSS?.escape ? window.CSS.escape(judgmentId) : judgmentId;
+        const status = panel.querySelector(`[data-judgment-id="${escaped}"] .judgment-status`);
+        if (status && message) {
+            status.textContent = message;
+            status.className = "judgment-status state-banner tone-done";
+        }
+    }
+
+    // replaces the disposed row's block alone: the listener sits on the
+    // panel, so nothing is rewired; a note typed under another row, every
+    // open disclosure (this row's included) and the decision form below
+    // all stay as they were
+    function rerenderJudgmentBlock(judgmentId, message) {
+        const panel = document.getElementById("confidencePanel");
+        const escaped = window.CSS?.escape ? window.CSS.escape(judgmentId) : judgmentId;
+        const old = panel?.querySelector(`[data-judgment-id="${escaped}"]`);
+        const row = state.judgments.find((entry) => entry?.judgment_id === judgmentId);
+        if (!panel || !old || !row) return;
+        const template = document.createElement("template");
+        template.innerHTML = window.PowConfidencePanel.judgmentBlockHtml(
+            row,
+            window.PowConfidencePanel.leadJudgment(state.judgments),
+            state.user?._id,
+        ).trim();
+        const fresh = template.content.firstElementChild;
+        if (!fresh) return;
+        if (old.querySelector("details")?.open) fresh.querySelector("details")?.setAttribute("open", "");
+        old.replaceWith(fresh);
+        showJudgmentStatus(panel, judgmentId, message);
+    }
+
+    // rebuilds the whole panel from the refreshed list, carrying over every
+    // note typed under another row and every open disclosure, then rewires
+    // it; the decision form below is untouched
+    function rerenderConfidencePanel(task, judgmentId, message) {
+        const old = document.getElementById("confidencePanel");
+        if (!old) return;
+        const notes = new Map();
+        const open = new Set();
+        old.querySelectorAll("[data-judgment-id]").forEach((block) => {
+            const id = block.dataset.judgmentId;
+            const note = block.querySelector(".judgment-note");
+            if (note && note.value && id !== judgmentId) notes.set(id, note.value);
+            if (block.querySelector("details")?.open) open.add(id);
+        });
+        const signalsOpen = Boolean(old.querySelector("details.confidence-signals")?.open);
+        const html = confidencePanelHtml();
+        if (!html) {
+            old.remove();
+            return;
+        }
+        const template = document.createElement("template");
+        template.innerHTML = html.trim();
+        const fresh = template.content.firstElementChild;
+        if (!fresh) return;
+        old.replaceWith(fresh);
+        wireConfidencePanel(task);
+        if (signalsOpen) fresh.querySelector("details.confidence-signals")?.setAttribute("open", "");
+        fresh.querySelectorAll("[data-judgment-id]").forEach((block) => {
+            const id = block.dataset.judgmentId;
+            const note = block.querySelector(".judgment-note");
+            if (note && notes.has(id)) note.value = notes.get(id);
+            if (open.has(id)) block.querySelector("details")?.setAttribute("open", "");
+        });
+        showJudgmentStatus(fresh, judgmentId, message);
+    }
+
     // the explicit affordances on the AI recommendation: prefill-and-agree
     // or record disagreement. Neither submits; the decision note and the
     // Record button remain the human act.
@@ -2062,6 +2273,7 @@ function human(value) {
                 // sent whenever a snapshot is held, whatever the decision
                 // status; the server requires it only for accepted_for_export
                 snapshotHash: state.reviewSnapshot ? state.reviewSnapshot.snapshot_hash : undefined,
+                includeJudgments: Array.isArray(state.reviewSnapshot?.snapshot?.recorded_judgments) ? true : undefined,
             });
             // the decision is recorded on the server either way; the page
             // shows it only to the session that made it

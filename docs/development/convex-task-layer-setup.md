@@ -456,3 +456,7 @@ Council's September 2026 list of Port Vila churches; generator
 pow-research `data/raw/vu_council_list_2026/`). Re-run on 2026-09-14 after Guy's
 rulings: the three "(VCC)" entries take the point of his own conference-room record,
 and the citation credits the list as a personal communication of the council.
+
+## Scorer Judgments (Dry Run Only)
+
+`scripts/osm_confidence_judgments.mjs` converts the OSM confidence scorer's signal vectors and their data manifest into `agent-judgment.v1.1` rows and writes a dry-run JSON file under `exports/` (git-ignored). It reads two local files and talks to no backend; the vectors stay in the private tier. The file's batches, of at most 100 rows each, are the exact arguments of the internal mutation `agentJudgments:ingestDeterministicJudgments` (with the file's `source.sha256` as `signalVectorSha256`), which also needs `POW_INTERNAL_AGENT_INGEST_ENABLED=true` on the target deployment. Running that mutation on `dev:pastel-goshawk-398` is a data import: it needs the project lead's instruction after the change is deployed, and a dry run is never a reason to run it. To exercise the path on a local backend, use `npx convex dev --local`, set the gate there, seed a task with `devSeed:seedReviewQueueFixture` (optional `osmObjectType` and `matchedOsmId` link it to a place), and run the mutation against the committed fixture's batch.

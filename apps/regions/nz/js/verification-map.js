@@ -3084,6 +3084,9 @@ class NzVerificationMap {
             className: "streets-tiles",
         }).addTo(this.map);
         this.syncStreetsTheme();
+        // the layer's container is made anew each time a basemap swap puts
+        // it back, so the filter class is set again on each add
+        this.streetsLayer.on("add", () => this.syncStreetsTheme());
         window.addEventListener?.("pow-theme-change", () => this.syncStreetsTheme());
         if (SATELLITE_TILE_URL) {
             // imagery so the pin can be steered onto the real building;
@@ -3114,6 +3117,7 @@ class NzVerificationMap {
         this.map.addLayer(this.markerLayer);
         this.addPointsLegendControl();
         this.addLocateControl();
+        this.addRecentreControl();
     }
 
     // ---- phone panes (jb 2026-09-05) ----
@@ -3571,7 +3575,7 @@ class NzVerificationMap {
         if (!this.map || !this.geolocationAvailable()) return;
         const control = L.control({ position: "topleft" });
         control.onAdd = () => {
-            const div = L.DomUtil.create("div", "leaflet-bar locate-control");
+            const div = L.DomUtil.create("div", "leaflet-bar map-icon-control locate-control");
             div.innerHTML = `
                 <button type="button" id="locateMeButton" title="Centre the map on my location" aria-label="Centre the map on my location">
                     <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
@@ -3614,6 +3618,52 @@ class NzVerificationMap {
         } finally {
             if (button) button.disabled = false;
         }
+    }
+
+    // the map button under locate: back to the work after a pan or a zoom
+    // away (jb 2026-10-01: "as if you scroll off it won't work"). the
+    // shared control draws the button and moves the map; this page says
+    // where, afresh at each press
+    addRecentreControl() {
+        if (!this.map || !window.PowRecentreControl) return;
+        window.PowRecentreControl.create(L, this.map, {
+            position: "topleft",
+            id: "recentreButton",
+            resolve: () => this.recentreTarget(),
+        });
+    }
+
+    // where recentre goes, first match wins: the pin of the open entry, the
+    // open task's place (its area when the location is approximate, as
+    // selectTask frames it), the record being revised with its pin lifted,
+    // the dot whose popup is open, else the country's opening view. plain
+    // data, so the choice is testable without leaflet
+    recentreTarget() {
+        const pin = this.pinMarker?.getLatLng?.();
+        if (Number.isFinite(pin?.lat) && Number.isFinite(pin?.lng)) {
+            return { latlng: [pin.lat, pin.lng], minZoom: 17, label: "Recentre the map on your pin" };
+        }
+        const task = this.selectedTask;
+        const taskCoordinates = task?.geometry?.coordinates || [];
+        if (taskCoordinates.length >= 2 && Number.isFinite(taskCoordinates[0]) && Number.isFinite(taskCoordinates[1])) {
+            const [lng, lat] = taskCoordinates;
+            const props = task.properties || {};
+            const assertion = props.initial_location_assertion
+                || this.backendTasksById?.get?.(props.task_id)?.initial_location_assertion;
+            if (assertion?.mode === "approximate_area" && Number.isFinite(assertion.uncertainty_radius_m) && assertion.uncertainty_radius_m > 0) {
+                return { latlng: [lat, lng], radiusM: assertion.uncertainty_radius_m, maxZoom: 14, label: "Recentre the map on the open task's area" };
+            }
+            return { latlng: [lat, lng], minZoom: 16, label: "Recentre the map on the open task" };
+        }
+        const revise = this.reviseContext;
+        if (Number.isFinite(revise?.latitude) && Number.isFinite(revise?.longitude)) {
+            return { latlng: [revise.latitude, revise.longitude], minZoom: 17, label: "Recentre the map on the place you are revising" };
+        }
+        const dotCoordinates = this.selectedContextFeature?.geometry?.coordinates || [];
+        if (dotCoordinates.length >= 2 && Number.isFinite(dotCoordinates[0]) && Number.isFinite(dotCoordinates[1])) {
+            return { latlng: [dotCoordinates[1], dotCoordinates[0]], minZoom: 16, label: "Recentre the map on the selected place" };
+        }
+        return { centre: COUNTRY_CONFIG.mapCentre, zoom: COUNTRY_CONFIG.mapZoom, label: `Recentre the map on ${COUNTRY_CONFIG.countryName}` };
     }
 
     // the card button: the pending pin lands where the contributor stands
@@ -3660,28 +3710,30 @@ class NzVerificationMap {
         if (!layer) return;
         const dark = document.documentElement?.getAttribute?.("data-theme-effective") === "dark";
         const container = layer.getContainer?.();
-        if (STREETS_DARK_TILE_URL) {
-            const url = dark ? STREETS_DARK_TILE_URL : STREETS_TILE_URL;
-            if (this.streetsUrl !== url) {
-                this.streetsUrl = url;
-                layer.setUrl?.(url);
-                // the attribution lives on the layer, so a later add reads
-                // the right one; a layer on the map swaps it at once
-                const osm = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-                const maptiler = `&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> ${osm}`;
-                const previous = layer.options?.attribution;
-                const next = dark ? maptiler : osm;
-                if (layer.options) layer.options.attribution = next;
-                const control = this.map?.attributionControl;
-                if (control && this.map.hasLayer(layer) && previous !== next) {
-                    control.removeAttribution(previous);
-                    control.addAttribution(next);
-                }
+        // a refused key takes the no-key path: the openstreetmap tiles
+        // back on the layer, filtered in the dark
+        const useDark = Boolean(STREETS_DARK_TILE_URL) && !this.imageryBroken && dark;
+        const url = useDark ? STREETS_DARK_TILE_URL : STREETS_TILE_URL;
+        // the dark raster is served on the same key as the imagery, and a
+        // refusal shows only to the probe
+        if (useDark) this.probeImagery();
+        if (STREETS_DARK_TILE_URL && this.streetsUrl !== url) {
+            this.streetsUrl = url;
+            layer.setUrl?.(url);
+            // the attribution lives on the layer, so a later add reads
+            // the right one; a layer on the map swaps it at once
+            const osm = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+            const maptiler = `&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> ${osm}`;
+            const previous = layer.options?.attribution;
+            const next = useDark ? maptiler : osm;
+            if (layer.options) layer.options.attribution = next;
+            const control = this.map?.attributionControl;
+            if (control && this.map.hasLayer(layer) && previous !== next) {
+                control.removeAttribution(previous);
+                control.addAttribution(next);
             }
-            container?.classList?.remove("streets-tiles-filtered");
-        } else {
-            container?.classList?.toggle("streets-tiles-filtered", dark);
         }
+        container?.classList?.toggle("streets-tiles-filtered", dark && !useDark);
     }
 
     // "drop pin on map": the map takes the screen and the status says to
@@ -5440,6 +5492,12 @@ class NzVerificationMap {
     markImageryBroken() {
         if (this.imageryBroken) return;
         this.imageryBroken = true;
+        // the dark streets raster is maptiler's too, refused by the same
+        // key: the streets layer drops to the openstreetmap tiles under the
+        // css filter, as it does without a key (measured 2026-10-01: from
+        // an origin the key does not allow, both layers filled the map with
+        // "invalid key" notices and no map ever painted)
+        this.syncStreetsTheme();
         this.setBasemap("streets");
         document.querySelectorAll(".basemap-toggle button").forEach(button => {
             if (button.dataset.basemap !== "streets") {
