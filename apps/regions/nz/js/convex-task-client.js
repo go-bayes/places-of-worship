@@ -13,6 +13,8 @@
     // in, cleared by the sign-out button and by expiry
     const AUTH_STORAGE_KEY = "powConvexAuth:v1";
     const GSI_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
+    // how long a session restore waits for google's script before going on
+    const GSI_RESTORE_WAIT_MS = 2500;
     const scriptLoads = new Map();
 
     function normaliseConfig(config) {
@@ -257,7 +259,17 @@
             if (!this.configured || !this.authToken) return null;
             if (this.user) return this.user;
             try {
-                await this.ensureGoogleInitialised().catch(() => false);
+                // the backend vouches for the kept token; google's script
+                // serves the hour-end refresh and keeps loading in the
+                // background past this wait (measured 2026-10-01: 4 s to
+                // over 30 s from accounts.google.com, with the task load
+                // and the signed-in landing held behind it). a refresh
+                // before it lands fails as it does when the script never
+                // loads, and is retried until the token expires
+                await Promise.race([
+                    this.ensureGoogleInitialised().catch(() => false),
+                    new Promise((resolve) => window.setTimeout(resolve, GSI_RESTORE_WAIT_MS)),
+                ]);
                 this.user = (await this.me()) || null;
                 if (!this.user) this.clearAuth();
                 return this.user;

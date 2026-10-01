@@ -81,6 +81,42 @@
   color: var(--muted);
 }
 
+/* the map's icon buttons (locate, recentre): one 44 px target on the
+   panel face, shared by the ra portal and the review portal */
+.leaflet-bar.map-icon-control button {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.leaflet-bar.map-icon-control button:hover {
+  background: var(--panel-2);
+}
+
+.leaflet-bar.map-icon-control button:focus-visible {
+  outline: 3px solid var(--action);
+  outline-offset: -3px;
+}
+
+.leaflet-bar.map-icon-control button:disabled {
+  color: var(--muted);
+  cursor: progress;
+}
+
+.leaflet-bar.map-icon-control button svg {
+  width: 18px;
+  height: 18px;
+}
+
 .leaflet-control-attribution {
   background: var(--veil);
   color: var(--muted);

@@ -58,6 +58,7 @@ jobs:
           node apps/regions/nz/js/unvalidated-places.test.cjs
           node apps/regions/nz/js/review-state-dom.test.cjs
           node apps/regions/nz/js/review-panes.test.cjs
+          node apps/regions/nz/js/recentre-control.test.cjs
           node apps/regions/nz/js/osm-history.test.cjs
           node apps/regions/nz/js/deep-link-context.test.cjs
           node apps/regions/nz/js/country-config.test.cjs
