@@ -106,3 +106,11 @@ test("each signal value stays in its own domain", () => {
   assert.throws(() => validateScorerJudgment(put({ footprint_area_m2: -1 })), /domain/);
   validateScorerJudgment(put({ has_name: null, tag_count: 9, footprint_area_m2: 412.5, "tag_completeness.score": 0.857 }));
 });
+
+test("the cross-source indicator count is a bounded integer", () => {
+  for (const bad of [64215550188, -3, 0.5]) {
+    const row = clone(tier);
+    row.score.indicators.cross_source_sources_matched = bad;
+    assert.throws(() => validateScorerJudgment(row), /count from 0 to 100/);
+  }
+});

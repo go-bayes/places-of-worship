@@ -305,6 +305,10 @@ function validateScoreBlock(input: JudgmentInput, score: JudgmentScore): void {
   assertTerms("Score tier_reasons", score.tier_reasons);
   assertTerms("Score tier_pending", score.tier_pending);
   assertTerms("Score conflict_reasons", score.indicators.conflict_reasons);
+  const matched = score.indicators.cross_source_sources_matched;
+  if (matched !== null && (!Number.isInteger(matched) || matched < 0 || matched > 100)) {
+    throw new Error("Score cross_source_sources_matched is a count from 0 to 100, or null.");
+  }
   for (const component of ["identity", "location", "status", "denomination"] as const) {
     assertTerms(`Score signals_fired.${component}`, score.signals_fired[component]);
   }
