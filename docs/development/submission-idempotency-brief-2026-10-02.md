@@ -104,7 +104,7 @@ Add `getClientSubmissionReceipt({ clientSubmissionId })`, returning the authenti
 
 ## C1 keeps simple sign-out
 
-PR #153 at `6a054f5bcefc21a72010b8d7c688955d9f1f3970` removes the attempted client fingerprint machinery and retains simple sign-out. This design assigns content comparison to the server protocol. Cancelling sign-out retains the current work. Confirmed sign-out clears member-owned forms, files, retry records and timers, and prevents a stale callback from writing storage, repainting a signed-out view, or sending a replacement under a later member's session.
+PR #153 removed the attempted client fingerprint machinery at `6a054f5b` and retains simple sign-out; at `f2c505ca` it also binds every device record to the admitted member and bounds Clerk startup. This design assigns content comparison to the server protocol. Cancelling sign-out retains the current work. Confirmed sign-out clears member-owned forms, files, retry records and timers, and prevents a stale callback from writing storage, repainting a signed-out view, or sending a replacement under a later member's session.
 
 An in-flight mutation can commit despite local sign-out. Its server receipt remains attached to the original project user. Subsequent sign-in uses submission history to recover a cleared identifier and `getClientSubmissionReceipt` to inspect the result. Server commit and local sign-out have separate lifecycles. Session expiry may retain a record only under C1's ownership guards and may resume only after authentication as the same project member. Linked Google/Clerk credentials must resolve to that same member. Reject requests by a different member to replay, inspect or adopt the pending request.
 
