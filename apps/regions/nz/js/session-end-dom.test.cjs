@@ -222,6 +222,12 @@ async function signOutQuestion() {
   await app.signOutBackend();
   assert.equal(asked.at(-1), true, "typed work not yet saved counts as unsent");
   assert.equal(signedOut, 1);
+  // an open quick photo is unsent work too: neither dirty nor on the device
+  app.formDirty = false;
+  app.quickPhoto = { file: null, epoch: app.sessionEpoch || 0 };
+  await app.signOutBackend();
+  assert.equal(asked.at(-1), true, "an open quick photo counts as unsent");
+  app.quickPhoto = null;
   window.PowConvexTaskClient.confirmSignOut = realConfirmSignOut;
 
   // the real question: no dialog without unsent work; with some, a Cancel

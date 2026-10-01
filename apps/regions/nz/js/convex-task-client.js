@@ -390,6 +390,10 @@
                     if (this.completion?.promise === promise) this.completion = null;
                 }
                 if (!current()) return null;
+                // a sign-out begun in another tab names this session in the
+                // shared marker before clerk's notice reaches this page: a
+                // late response admits nobody and recreates no device owner
+                if (readPendingSignOut().sessionId === sessionId) return null;
                 this.user = user;
                 // a device holding another member's unsent work gives it up
                 // before this member's page reads anything from it

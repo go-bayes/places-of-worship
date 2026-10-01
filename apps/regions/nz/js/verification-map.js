@@ -2458,8 +2458,9 @@ class NzVerificationMap {
 
     async signOutBackend() {
         // unsent work on the device is deleted by a sign-out: ask once, only
-        // when there is some (typed work not yet saved counts)
-        const confirmed = await (window.PowConvexTaskClient?.confirmSignOut?.({ pageHasUnsent: Boolean(this.formDirty) }) ?? true);
+        // when there is some (typed work not yet saved, and an open quick
+        // photo, which a sign-out discards, count)
+        const confirmed = await (window.PowConvexTaskClient?.confirmSignOut?.({ pageHasUnsent: Boolean(this.formDirty || this.quickPhoto) }) ?? true);
         if (!confirmed) return;
         // started first, so the repainted card waits for clerk's answer
         // rather than re-admitting the session being ended

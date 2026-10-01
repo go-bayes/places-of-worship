@@ -704,6 +704,20 @@ const container = () => ({
     assert.ok(ended.length >= 2, "each change away from a cleared the page");
   }
 
+  // 21b. a sign-out begun in another tab names the session in the shared
+  // marker; a late me() response admits nobody and recreates no device owner
+  {
+    const storage = new Map();
+    const responses = { "users:claimInvite": ok("user_1"), "users:me": ok(member) };
+    const h = harness({ session: { id: "sess_late", email: "guy@example.org" }, cookie: "__client_uat=1", responses, storage });
+    const client = new h.Client(config);
+    const admitted = [];
+    storage.set("powSignOutPending:v1", "sess_late");
+    assert.equal(await client.completeSignIn({ onSignedIn: (user) => admitted.push(user._id) }), null);
+    assert.deepEqual(admitted, []);
+    assert.equal(storage.has("powDeviceOwner1"), false, "no device owner is recreated");
+  }
+
   // 22. #153 round 5 (sol): a failed sign-out's marker cannot be kept when
   // storage refuses it. a reload then restores nothing: the session found
   // on load is signed out first, and if clerk still refuses, the card shows
