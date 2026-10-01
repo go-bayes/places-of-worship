@@ -106,6 +106,13 @@ test("manifest hash, country and edition faults are refused", () => {
   assert.throws(() => convert(dup), /appears twice/);
 });
 
+test("a missing, null or non-boolean in_scope is refused", () => {
+  for (const [name, value] of [["missing", undefined], ["null", null], ["string", "true"]]) {
+    const v = variant(`scope-${name}`, (lines) => { if (value === undefined) delete lines[1].in_scope; else lines[1].in_scope = value; });
+    assert.throws(() => convert(v), /in_scope is a boolean/);
+  }
+});
+
 test("--limit and --osm-key narrow the run", () => {
   assert.equal(convert({ vectorsPath: vectors, manifestPath: manifest, limit: 1 }).counts.in_scope, 1);
   const one = convert({ vectorsPath: vectors, manifestPath: manifest, osmKeys: ["way/1002"] });

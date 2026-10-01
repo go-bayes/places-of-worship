@@ -183,6 +183,17 @@ export function validateScorerJudgment(input: JudgmentInput): void {
   for (const term of score.tier_reasons) if (!SCORER_TIER_REASONS.includes(term)) throw new Error(`Tier reason ${term} is not in the scorer's vocabulary.`);
   for (const term of score.tier_pending) if (!SCORER_TIER_PENDING.includes(term)) throw new Error(`Pending condition ${term} is not in the scorer's vocabulary.`);
   for (const term of score.indicators.conflict_reasons) if (!SCORER_CONFLICT_REASONS.includes(term)) throw new Error(`Conflict reason ${term} is not in the scorer's vocabulary.`);
+  // the composite is the rounded product of three components, and the screened tier admits no reason, pending condition or flag
+  const parts = score.components;
+  if (Math.abs(score.composite - Math.round(parts.identity * parts.location * parts.status * 10000) / 10000) > 1.0001e-4) {
+    throw new Error("A scorer composite is the product of the identity, location and status components, to four decimal places.");
+  }
+  if (score.tier === "screened") {
+    if (score.tier_reasons.length > 0 || score.tier_pending.length > 0 || score.indicators.duplicate || score.indicators.conflict
+      || score.composite < score.cut_points.screened_min_composite) {
+      throw new Error("A screened tier needs a composite at the screened cut point, no tier reason or pending condition, and no duplicate or conflict indicator.");
+    }
+  }
   if (input.basis_note === undefined || input.basis_note === "") throw new Error("A scorer judgment carries a basis note.");
   if (!BASIS_ALPHABET.test(input.basis_note)) throw new Error("A scorer basis note uses only the closed character set.");
   // the generated text is built from validated fields only (hex digests, bounded numbers, closed vocabularies), so an exact

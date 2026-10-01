@@ -189,6 +189,18 @@ test("a model judgment about the place renders its provider, model and confidenc
     assert.doesNotMatch(alone, /Outcome left open/);
 });
 
+test("a model judgment with an unreported returned model says so", () => {
+    const unknown = {
+        judgment_id: "cd".repeat(32), schema_version: "agent-judgment.v1.1", subject_kind: "place", subject_ref: "osm:way/1001",
+        judgment_kind: "status_assessment", outcome: "likely_active", confidence: "low", access_method: "model_assessment",
+        judge: { agent_name: "first-pass-researcher", model_provider: "anthropic", model_requested: "claude-x", model_unreported_reason: "provider omitted it", prompt_version: "first-pass-v1" },
+        run: { attempt: 1, cost_basis: "unknown" }, context: { place_ref: "osm:way/1001", country_code: "NZ" },
+        ai_generated: true, created_at: BASE + 10_000, dispositions: [],
+    };
+    const html = panel.panelHtml([unknown]);
+    assert.match(html, /claude-x requested, returned model not reported \(provider omitted it\)/);
+});
+
 test("one block renders alone with the same markup the panel uses, so a disposed row can be replaced in place", () => {
     const row = stored(inputs[0], 0, {
         dispositions: [{ disposition_id: "d1", judgment_id: fixture.judgment_ids[0], reviewer_user_id: "users:me", disposition: "corrected", note: "Footprint is the hall next door.", created_at: BASE + 1000 }],

@@ -205,7 +205,10 @@
         if (judge.kind === "deterministic") {
             parts.push(judge.agent_name);
         } else {
-            parts.push([judge.agent_name, judge.model_provider, judge.model_reported || judge.model_requested].filter(Boolean).join(" · "));
+            const model = judge.model_reported
+                ? judge.model_reported
+                : (judge.model_requested ? `${judge.model_requested} requested, returned model not reported${judge.model_unreported_reason ? ` (${judge.model_unreported_reason})` : ""}` : "");
+            parts.push([judge.agent_name, judge.model_provider, model].filter(Boolean).join(" · "));
             if (row.confidence) parts.push(`confidence ${row.confidence}`);
         }
         if (stamp(row)) parts.push(isoDate(stamp(row)));

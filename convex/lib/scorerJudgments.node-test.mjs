@@ -76,7 +76,7 @@ test("score terms come from the scorer's closed vocabularies", () => {
   assert.throws(() => validateScorerJudgment(edit((sc) => { sc.tier_reasons.push("st.andrews"); })), /Tier reason/);
   assert.throws(() => validateScorerJudgment(edit((sc) => { sc.tier_pending.push("st.andrews"); })), /Pending condition/);
   assert.throws(() => validateScorerJudgment(edit((sc) => { sc.indicators.conflict_reasons.push("st.andrews"); })), /Conflict reason/);
-  validateScorerJudgment(edit((sc) => { sc.tier_reasons.push("duplicate"); }));
+  assert.throws(() => validateScorerJudgment(edit((sc) => { sc.tier_reasons.push("duplicate"); })), /screened tier/);
 });
 
 test("the basis note is exactly the generated text", () => {
@@ -132,7 +132,22 @@ test("digit runs inside valid digests and scores do not trip the personal-detail
   row.basis_note = scorerBasisNote(row);
   validateScorerJudgment(row);
   const low = clone(tier);
-  low.score.composite = 0.0123456789;
+  low.score.composite = 0.0123;
+  low.score.components = { ...low.score.components, identity: 0.3, location: 0.41, status: 0.1 };
+  low.score.tier = "escalate";
+  low.outcome = "escalate";
   low.basis_note = scorerBasisNote(low);
   validateScorerJudgment(low);
+});
+
+test("composite and screened tier are consistent with their fields", () => {
+  const off = clone(tier);
+  off.score.composite = 0.5;
+  assert.throws(() => validateScorerJudgment(off), /product/);
+  const bad = clone(tier);
+  Object.assign(bad.score, { tier: "screened", composite: 0.01, tier_reasons: [], tier_pending: [] });
+  bad.score.components = { identity: 0.1, location: 0.1, status: 1, denomination: 0.1 };
+  bad.score.indicators.duplicate = true;
+  bad.outcome = "screened";
+  assert.throws(() => validateScorerJudgment(bad), /screened tier/);
 });

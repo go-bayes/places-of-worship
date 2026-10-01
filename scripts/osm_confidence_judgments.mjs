@@ -214,7 +214,8 @@ export function convert({ vectorsPath, manifestPath, limit, osmKeys = [] }) {
     if (seen.has(record.osm_key)) fail(`${record.osm_key}: appears twice`);
     seen.add(record.osm_key);
     counts.features += 1;
-    if (record.in_scope !== true) { counts.out_of_scope += 1; continue; }
+    if (typeof record.in_scope !== "boolean") fail(`line ${index + 1}: in_scope is a boolean`);
+    if (record.in_scope === false) { counts.out_of_scope += 1; continue; }
     if (osmKeys.length > 0 && !osmKeys.includes(record.osm_key)) continue;
     if (limit !== undefined && counts.in_scope >= limit) continue;
     counts.in_scope += 1;
