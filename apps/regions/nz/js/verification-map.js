@@ -7022,17 +7022,21 @@ class NzVerificationMap {
         return this.backendUser?._id || this.backend?.user?._id || "";
     }
 
-    // a device write needs a signed-in member the device is held for: after
-    // another tab's deliberate sign-out (the marker is gone) or a different
-    // member's admission, a queued autosave in this page writes nothing
+    // a device read or write needs a signed-in member the device is held
+    // for under this page's session: after another tab's deliberate sign-out
+    // (the marker is gone), a different member's admission, or a newer
+    // session, this page's queued autosaves write nothing and it reads
+    // nothing. every storage key below is empty unless this holds
     deviceWritable() {
         const user = this.signedInUserId();
         if (!user) return false;
-        return window.PowConvexTaskClient?.deviceHeldBy ? window.PowConvexTaskClient.deviceHeldBy(user) : true;
+        return window.PowConvexTaskClient?.deviceHeldBy
+            ? window.PowConvexTaskClient.deviceHeldBy(user, this.backend?.sessionId || "")
+            : true;
     }
 
     formSnapshotStorageKey(taskId) {
-        return this.signedInUserId() ? `${FORM_SNAPSHOT_PREFIX}${COUNTRY_CONFIG.countryCode}:${taskId}` : "";
+        return this.deviceWritable() ? `${FORM_SNAPSHOT_PREFIX}${COUNTRY_CONFIG.countryCode}:${taskId}` : "";
     }
 
     // drafts written before c1 carry no owner and cannot be attributed to
@@ -8018,11 +8022,11 @@ class NzVerificationMap {
     // ---- unsubmitted rapid drafts, kept on this device only ----
 
     rapidDraftStorageKey(key) {
-        return this.signedInUserId() ? `${RAPID_DRAFT_PREFIX}${COUNTRY_CONFIG.countryCode}:${key}` : "";
+        return this.deviceWritable() ? `${RAPID_DRAFT_PREFIX}${COUNTRY_CONFIG.countryCode}:${key}` : "";
     }
 
     rapidDraftVersion(key) {
-        if (!this.signedInUserId()) return null;
+        if (!this.deviceWritable()) return null;
         return { savedAt: this.readRapidDraft(key)?.saved_at ?? null };
     }
 
@@ -9331,7 +9335,8 @@ class NzVerificationMap {
 
     // device persistence, keyed by country, user, and task
     guidedPeriodsStorageKey(taskId) {
-        const user = this.signedInUserId() || "anon";
+        if (!this.deviceWritable()) return "";
+        const user = this.signedInUserId();
         const prefix = window.PowOccupancy?.guidedPeriodsStoragePrefix(COUNTRY_CONFIG.countryCode, user)
             || `powGuidedPeriods:${COUNTRY_CONFIG.countryCode}:${user}:`;
         return `${prefix}${taskId}`;
@@ -9405,7 +9410,7 @@ class NzVerificationMap {
     // the stored periods as they stand when a submission is sent: the
     // saved_at of the device copy (null when nothing is stored)
     guidedPeriodsVersion(taskId) {
-        if (!taskId || !this.signedInUserId()) return null;
+        if (!taskId || !this.deviceWritable()) return null;
         let savedAt = null;
         try {
             savedAt = JSON.parse(window.localStorage.getItem(this.guidedPeriodsStorageKey(taskId)) || "null")?.saved_at ?? null;
@@ -9421,6 +9426,7 @@ class NzVerificationMap {
     clearSubmittedGuidedPeriods(taskId, version) {
         if (!taskId || !version) return;
         const key = this.guidedPeriodsStorageKey(taskId);
+        if (!key) return;
         let current = null;
         try {
             current = JSON.parse(window.localStorage.getItem(key) || "null");

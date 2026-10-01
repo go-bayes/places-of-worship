@@ -774,7 +774,7 @@ const container = () => ({
     const work = () => [...h.values.keys()].filter((key) => /^(powFormSnapshot2|powRapidDraft2|powGuidedPeriods):/.test(key));
     h.values.set("powFormSnapshot:NZ:t", "pre-c1");
     // a reload while signed in as the member who owns the device keeps it
-    h.values.set("powDeviceOwner1", "user_a");
+    h.values.set("powDeviceOwner1", "user_a|sess_a");
     h.values.set("powFormSnapshot2:NZ:t1", "{}");
     h.values.set("powRapidDraft2:NZ:rapid-pin", "{}");
     h.values.set("powGuidedPeriods:NZ:user_a:t1", "{}");
@@ -794,12 +794,12 @@ const container = () => ({
     // an ended session leaves the work; a different member's sign-in deletes it
     const responses = { "users:claimInvite": ok("user_b"), "users:me": ok({ ...member, _id: "user_b" }) };
     const h = harness({ session: { id: "sess_b", email: "b@example.org" }, cookie: "__client_uat=1", responses });
-    h.values.set("powDeviceOwner1", "user_a");
+    h.values.set("powDeviceOwner1", "user_a|sess_a");
     h.values.set("powFormSnapshot2:NZ:t1", "{}");
     const client = new h.Client(config);
     await client.restoreSession();
     assert.equal(h.values.has("powFormSnapshot2:NZ:t1"), false, "a different member never finds the earlier member's work");
-    assert.equal(h.values.get("powDeviceOwner1"), "user_b");
+    assert.equal(h.values.get("powDeviceOwner1"), "user_b|sess_b");
   }
 
   // 25. the card's own sign-out (no-access note, retry) asks first when it
@@ -808,7 +808,7 @@ const container = () => ({
     const responses = { "users:claimInvite": refused("No pending project invitation found for this email."), "users:me": ok(null) };
     const h = harness({ session: { id: "sess_x", email: "x@example.org" }, cookie: "__client_uat=1", responses });
     h.values.set("powFormSnapshot2:NZ:t1", "{}");
-    h.values.set("powDeviceOwner1", "user_a");
+    h.values.set("powDeviceOwner1", "user_a|sess_a");
     const host = container();
     const client = new h.Client(config);
     await client.renderSignInButton(host, {});

@@ -393,7 +393,7 @@
                 this.user = user;
                 // a device holding another member's unsent work gives it up
                 // before this member's page reads anything from it
-                PowConvexTaskClient.adoptDeviceFor(user._id);
+                PowConvexTaskClient.adoptDeviceFor(user._id, sessionId);
                 this.claimFailure = null;
                 if (options.onSignedIn) await options.onSignedIn(user);
                 return user;
@@ -1061,18 +1061,23 @@
     // drafts and guided periods, every country and member. drafts written
     // before c1 (powFormSnapshot:, powRapidDraft:) are quarantined, never
     // read or deleted here
-    const DEVICE_WORK_PREFIXES = ["powFormSnapshot2:", "powRapidDraft2:", "powGuidedPeriods:"];
-    // the member whose work the device holds, so a different member signing
-    // in never finds it (an expired session, a shared device)
+    // (powPendingPeriods1: and powDeliberateSignOut1: belong to earlier
+    // builds of this branch and are removed with the rest)
+    const DEVICE_WORK_PREFIXES = ["powFormSnapshot2:", "powRapidDraft2:", "powGuidedPeriods:", "powPendingPeriods1:"];
+    const OBSOLETE_DEVICE_PREFIXES = ["powDeliberateSignOut1:"];
+    // "member|session": the member whose work the device holds and the
+    // session that admitted them, so a different member's sign-in never
+    // finds the work, and a page whose session ended (even if the same
+    // member signed in again elsewhere) writes nothing
     const DEVICE_OWNER_KEY = "powDeviceOwner1";
 
-    function deviceWorkKeys() {
+    function deviceKeys(prefixes) {
         const keys = [];
         try {
             const storage = window.localStorage;
             for (let index = 0; index < storage.length; index += 1) {
                 const key = storage.key(index);
-                if (key && DEVICE_WORK_PREFIXES.some(prefix => key.startsWith(prefix))) keys.push(key);
+                if (key && prefixes.some(prefix => key.startsWith(prefix))) keys.push(key);
             }
         } catch (error) {
             // storage unavailable: nothing is held
@@ -1081,38 +1086,39 @@
     }
 
     PowConvexTaskClient.hasUnsentDeviceWork = function hasUnsentDeviceWork() {
-        return deviceWorkKeys().length > 0;
+        return deviceKeys(DEVICE_WORK_PREFIXES).length > 0;
     };
 
     // a deliberate sign-out: all device work goes, whatever its owner
     PowConvexTaskClient.clearDeviceWork = function clearDeviceWork() {
         try {
-            deviceWorkKeys().forEach(key => window.localStorage.removeItem(key));
+            deviceKeys([...DEVICE_WORK_PREFIXES, ...OBSOLETE_DEVICE_PREFIXES]).forEach(key => window.localStorage.removeItem(key));
             window.localStorage.removeItem(DEVICE_OWNER_KEY);
         } catch (error) {
             // storage unavailable: nothing kept on this device
         }
     };
 
-    // admission: work held for a different member is deleted first
-    PowConvexTaskClient.adoptDeviceFor = function adoptDeviceFor(userId) {
+    // admission: work held for a different member is deleted first; the same
+    // member keeps theirs under the new session
+    PowConvexTaskClient.adoptDeviceFor = function adoptDeviceFor(userId, sessionId = "") {
         if (!userId) return;
         try {
-            if (window.localStorage.getItem(DEVICE_OWNER_KEY) !== userId) {
-                PowConvexTaskClient.clearDeviceWork();
-                window.localStorage.setItem(DEVICE_OWNER_KEY, userId);
-            }
+            const heldUser = (window.localStorage.getItem(DEVICE_OWNER_KEY) || "").split("|")[0];
+            if (heldUser !== userId) PowConvexTaskClient.clearDeviceWork();
+            window.localStorage.setItem(DEVICE_OWNER_KEY, `${userId}|${sessionId}`);
         } catch (error) {
             // storage unavailable: nothing is kept
         }
     };
 
-    // true while the device is held for this member: every device write
-    // checks it, so a page whose session another tab ended (the marker is
-    // gone) or replaced (the marker names someone else) writes nothing
-    PowConvexTaskClient.deviceHeldBy = function deviceHeldBy(userId) {
+    // true while the device is held for this member under this session:
+    // every device read and write checks it, so a page whose session
+    // another tab ended or replaced (the marker is gone or names another
+    // member or session) reads and writes nothing
+    PowConvexTaskClient.deviceHeldBy = function deviceHeldBy(userId, sessionId = "") {
         try {
-            return Boolean(userId) && window.localStorage.getItem(DEVICE_OWNER_KEY) === userId;
+            return Boolean(userId) && window.localStorage.getItem(DEVICE_OWNER_KEY) === `${userId}|${sessionId}`;
         } catch (error) {
             return false;
         }

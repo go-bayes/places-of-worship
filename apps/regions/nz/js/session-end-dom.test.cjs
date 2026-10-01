@@ -83,7 +83,7 @@ function signedInApp(userId = "user_a") {
     formDirtyTaskId: "task_1",
   });
   // the device is held for this member, as the client records on admission
-  values.set("powDeviceOwner1", userId);
+  values.set("powDeviceOwner1", `${userId}|sess_a`);
   app.renderBackendPanel = () => { calls.panel += 1; };
   app.renderInitialDetail = () => { calls.detail += 1; };
   app.applyFilters = () => {};
@@ -194,7 +194,7 @@ const rapidKey = "powRapidDraft2:NZ:rapid-pin";
   values.set("powRapidDraft2:NZ:rapid-pin", JSON.stringify({ saved_at: 1, values: { directObservation: "text" }, pin: { latitude: 1, longitude: 2 } }));
   values.set("powGuidedPeriods:NZ:user_a:task_a", "{}");
   values.set("powGuidedPeriods:NZ:user_b:task_b", "{}");
-  values.set("powDeviceOwner1", "user_b");
+  values.set("powDeviceOwner1", "user_b|sess_a");
   values.set("powFormSnapshot:NZ:legacy", "pre-c1");
   app.onBackendSessionEnded({ deliberate: true });
   assert.deepEqual([...values.keys()], ["powFormSnapshot:NZ:legacy"], "every owner's device work goes; the quarantined draft stays");
@@ -270,14 +270,14 @@ async function signOutQuestion() {
 {
   values.clear();
   const { app } = signedInApp("user_a");
-  window.PowConvexTaskClient.adoptDeviceFor("user_a");
+  window.PowConvexTaskClient.adoptDeviceFor("user_a", "sess_a");
   app.setFormSnapshot("task_1", { evidence_note: "typed, unsent" });
   app.persistRapidDraft("pin", "rapid-pin");
   const reloaded = signedInApp("user_a").app;
-  window.PowConvexTaskClient.adoptDeviceFor("user_a");
+  window.PowConvexTaskClient.adoptDeviceFor("user_a", "sess_a");
   assert.equal(reloaded.getFormSnapshot("task_1").evidence_note, "typed, unsent", "the reload keeps the member's own draft");
   assert.ok(reloaded.readRapidDraft("rapid-pin"));
-  window.PowConvexTaskClient.adoptDeviceFor("user_b");
+  window.PowConvexTaskClient.adoptDeviceFor("user_b", "sess_b");
   assert.equal(signedInApp("user_b").app.getFormSnapshot("task_1"), undefined, "another member's admission deletes it");
   assert.equal(values.has(snapshotKey), false);
 }
@@ -296,9 +296,24 @@ async function signOutQuestion() {
   app.persistRapidDraft("pin", "rapid-pin");
   assert.deepEqual([...values.keys()], [], "no write after the other tab's sign-out");
   // another member signs in on the device: the first page still writes nothing
-  window.PowConvexTaskClient.adoptDeviceFor("user_b");
+  window.PowConvexTaskClient.adoptDeviceFor("user_b", "sess_b");
   app.setFormSnapshot("task_3", { evidence_note: "a's queued autosave" });
   assert.deepEqual([...values.keys()], ["powDeviceOwner1"], "nothing of a's reaches b's device");
+  // b's own work is neither read nor deleted by a's page
+  const asB = signedInApp("user_b").app;
+  window.PowConvexTaskClient.adoptDeviceFor("user_b", "sess_a");
+  asB.setFormSnapshot("task_b", { evidence_note: "b's" });
+  assert.equal(app.getFormSnapshot("task_b"), undefined, "a's page reads nothing of b's");
+  app.deleteSubmittedFormSnapshot("task_b", { savedAt: JSON.parse(values.get("powFormSnapshot2:NZ:task_b")).saved_at });
+  app.clearRapidDraft("task_b");
+  assert.ok(values.has("powFormSnapshot2:NZ:task_b"), "nor deletes it");
+  // the same member signed out and in again elsewhere: the old session's page writes nothing
+  values.clear();
+  const old = signedInApp("user_a").app;
+  window.PowConvexTaskClient.clearDeviceWork();
+  window.PowConvexTaskClient.adoptDeviceFor("user_a", "sess_new");
+  old.setFormSnapshot("task_1", { evidence_note: "queued in the ended session" });
+  assert.deepEqual([...values.keys()], ["powDeviceOwner1"], "the ended session cannot recreate deleted work");
 }
 
 // 2. a deliberate sign-out also deletes the device copies and the activity
@@ -908,6 +923,8 @@ async function roundThree() {
     // a draft keeps its submission id across a reload: persisting stores it,
     // restoring puts it back on the new form
     app.backendUser = { _id: "user_a" };
+    client.user = app.backendUser;
+    window.PowConvexTaskClient.adoptDeviceFor("user_a", client.sessionId);
     const typedForm = { dataset: { submissionId: "sub_kept" } };
     document.getElementById = (id) => (id === "pinRapidCurrentForm" ? typedForm : null);
     app.rapidObservationValues = () => ({ directObservation: "typed, unsent" });
@@ -1061,7 +1078,7 @@ async function roundThree() {
     app.refreshBackendTasks = async () => {};
     const receipt = later();
     Object.assign(app, {
-      backend: { configured: true, signedIn: true, user: { _id: "user_a" }, submitCurrentObservation: () => receipt.promise },
+      backend: { configured: true, signedIn: true, sessionId: "sess_a", user: { _id: "user_a" }, submitCurrentObservation: () => receipt.promise },
       rapidObservationValues: () => ({ directObservation: "v1", flagForDiscussion: false }),
       rapidPeriodsPlan: () => null,
       pendingEvidenceFiles: () => null,
@@ -1093,7 +1110,7 @@ async function roundThree() {
     const sentArgs = [];
     const gate = later();
     Object.assign(app, {
-      backend: { configured: true, signedIn: true, user: { _id: "user_a" }, submitCurrentObservation: async (args) => { sentArgs.push(args); return { task_id: "t_1", evidence_draft_id: "d_1" }; } },
+      backend: { configured: true, signedIn: true, sessionId: "sess_a", user: { _id: "user_a" }, submitCurrentObservation: async (args) => { sentArgs.push(args); return { task_id: "t_1", evidence_draft_id: "d_1" }; } },
       rapidObservationValues: () => ({ directObservation: "v1", flagForDiscussion: false }),
       rapidPeriodsPlan: () => null,
       pendingEvidenceFiles: () => null,
