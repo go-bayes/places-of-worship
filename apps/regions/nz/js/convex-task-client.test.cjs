@@ -12,7 +12,7 @@ const vm = require("node:vm");
 const PUBLISHABLE_KEY = "pk_test_c3VyZS1saXphcmQtNTAuY2xlcmsuYWNjb3VudHMuZGV2JA";
 const HOST = "sure-lizard-50.clerk.accounts.dev";
 
-function harness({ session = null, cookie = "", responses = {}, failLoads = 0, failSignOuts = 0, networkFailSignOuts = 0, offlineReloads = 0, storage, storageFails = "" } = {}) {
+function harness({ session = null, cookie = "", responses = {}, failLoads = 0, failSignOuts = 0, networkFailSignOuts = 0, offlineReloads = 0, storage, storageFails = "", startupTimers = false } = {}) {
   const values = storage || new Map([["powConvexAuth:v1", JSON.stringify({ token: "old-google-token" })]]);
   // storageFails: "all" throws on every call (blocked storage), "writes"
   // throws on writes only (a full or read-only store)
@@ -98,9 +98,21 @@ function harness({ session = null, cookie = "", responses = {}, failLoads = 0, f
       },
     },
   };
+  const timers = new Map();
+  let timerId = 0;
+  const startupSetTimeout = (callback, ms) => {
+    if (!startupTimers || ms !== 2500) return setTimeout(callback, ms);
+    const id = ++timerId;
+    timers.set(id, { callback, ms });
+    return id;
+  };
+  const startupClearTimeout = (id) => {
+    if (startupTimers && timers.has(id)) timers.delete(id);
+    else clearTimeout(id);
+  };
   const context = vm.createContext({
     window, document, URL,
-    setTimeout, clearTimeout, Date, JSON, Map, Set, Number, String, Boolean, Object, Math, Promise, Error, RegExp, console,
+    setTimeout: startupSetTimeout, clearTimeout: startupClearTimeout, Date, JSON, Map, Set, Number, String, Boolean, Object, Math, Promise, Error, RegExp, console,
     atob: (value) => Buffer.from(value, "base64").toString("binary"),
     fetch: async (url, init) => {
       const body = JSON.parse(init.body);
@@ -111,7 +123,7 @@ function harness({ session = null, cookie = "", responses = {}, failLoads = 0, f
     },
   });
   vm.runInContext(fs.readFileSync(path.join(__dirname, "convex-task-client.js"), "utf8"), context, { filename: "convex-task-client.js" });
-  return { Client: window.PowConvexTaskClient, window, document, clerk, calls, values, sessionValues, makeSession };
+  return { Client: window.PowConvexTaskClient, window, document, clerk, calls, values, sessionValues, makeSession, timers };
 }
 
 const config = { enabled: true, url: "https://example.convex.cloud", clerkPublishableKey: PUBLISHABLE_KEY };
@@ -848,6 +860,42 @@ const container = () => ({
     await host.click();
     assert.equal(h.calls.signOut, 1);
     assert.equal(h.values.has("powFormSnapshot2:NZ:t1"), false);
+  }
+
+  // a stalled clerk load releases startup at 2.5 seconds. the retry card
+  // remains usable and the same load admits the session when it arrives.
+  for (const session of [{ id: "slow_session", email: "guy@example.org" }, null]) {
+    const h = harness({ session, cookie: "__client_uat=1", startupTimers: true,
+      responses: { "users:claimInvite": ok("user_1"), "users:me": ok(member) } });
+    const client = new h.Client(config);
+    let finishLoad;
+    h.clerk.load = () => new Promise((resolve) => { finishLoad = resolve; });
+    const restoring = client.restoreSession();
+    while (!finishLoad) await tick();
+    assert.equal(h.timers.size, 1);
+    const startupTimer = [...h.timers.values()][0];
+    assert.equal(startupTimer.ms, 2500);
+    startupTimer.callback();
+    assert.equal(await restoring, null, "startup proceeds while clerk is still loading");
+    assert.equal(client.user, null);
+    const host = container();
+    let admitted;
+    const rendering = client.renderSignInButton(host, { onSignedIn: (user) => { admitted = user; } });
+    assert.equal(h.timers.size, 1);
+    [...h.timers.values()][0].callback();
+    await rendering;
+    assert.match(host.innerHTML, /Try again/, "the bounded card offers retry while loading continues");
+    finishLoad();
+    await client.ensureClerkLoaded();
+    await tick();
+    if (session) {
+      assert.equal(admitted?._id, "user_1", "late clerk arrival admits through the current card");
+      assert.equal(client.user?._id, "user_1");
+    } else {
+      assert.equal(h.calls.mountSignIn.length, 1, "late signed-out clerk arrival mounts sign-in");
+      assert.equal(client.user, null);
+    }
+    assert.equal(h.timers.size, 0, "completed waits release their timers");
   }
 
   console.log("convex-task-client: clerk sessions ok");

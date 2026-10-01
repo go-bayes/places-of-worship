@@ -7026,6 +7026,26 @@ class NzVerificationMap {
             : true;
     }
 
+    deviceRecordOwner() {
+        return { ownerId: this.signedInUserId(), sessionId: this.backend?.sessionId || "" };
+    }
+
+    // storage operations in another tab can run after our marker check.
+    // validate the record itself against this tab's admitted identity.
+    readOwnedDeviceRecord(key) {
+        if (!key) return null;
+        try {
+            const raw = window.localStorage.getItem(key);
+            const record = raw ? JSON.parse(raw) : null;
+            const owner = this.deviceRecordOwner();
+            if (!this.deviceWritable() || !owner.ownerId || record?.ownerId !== owner.ownerId) return null;
+            if ((record.sessionId || owner.sessionId) && record.sessionId !== owner.sessionId) return null;
+            return record;
+        } catch (error) {
+            return null;
+        }
+    }
+
     formSnapshotStorageKey(taskId) {
         return this.deviceWritable() ? `${FORM_SNAPSHOT_PREFIX}${COUNTRY_CONFIG.countryCode}:${taskId}` : "";
     }
@@ -7075,7 +7095,7 @@ class NzVerificationMap {
         const key = this.formSnapshotStorageKey(taskId);
         if (!key || !this.deviceWritable()) return;
         try {
-            window.localStorage.setItem(key, JSON.stringify({ saved_at: Date.now(), snapshot }));
+            window.localStorage.setItem(key, JSON.stringify({ ...this.deviceRecordOwner(), saved_at: Date.now(), snapshot }));
         } catch (error) {
             // private windows or blocked storage keep the snapshot in memory only
         }
@@ -7087,8 +7107,7 @@ class NzVerificationMap {
         const key = this.formSnapshotStorageKey(taskId);
         if (!key) return undefined;
         try {
-            const raw = window.localStorage.getItem(key);
-            const record = raw ? JSON.parse(raw) : null;
+            const record = this.readOwnedDeviceRecord(key);
             if (record?.snapshot && typeof record.snapshot === "object") {
                 this.formSnapshotsByTaskId.set(taskId, record.snapshot);
                 return record.snapshot;
@@ -7994,6 +8013,7 @@ class NzVerificationMap {
         if (!this.deviceWritable()) return;
         try {
             const record = {
+                ...this.deviceRecordOwner(),
                 saved_at: Date.now(),
                 values: this.rapidObservationValues(prefix),
                 extra: extraValues,
@@ -8008,15 +8028,7 @@ class NzVerificationMap {
     }
 
     readRapidDraft(key) {
-        const storageKey = this.rapidDraftStorageKey(key);
-        if (!storageKey) return null;
-        try {
-            const raw = window.localStorage.getItem(storageKey);
-            const record = raw ? JSON.parse(raw) : null;
-            return record && typeof record === "object" ? record : null;
-        } catch (error) {
-            return null;
-        }
+        return this.readOwnedDeviceRecord(this.rapidDraftStorageKey(key));
     }
 
     // the confirmed pin of a new place rides on the device draft while the
@@ -8025,7 +8037,7 @@ class NzVerificationMap {
     keepRapidPinOnDevice() {
         if (!this.deviceWritable()) return;
         if (!RAPID_NOMINATION_ENTRY || this.reviseContext || this.occupancyPinContext || !this.pinConfirmed) return;
-        const record = this.readRapidDraft("rapid-pin") || { saved_at: Date.now() };
+        const record = this.readRapidDraft("rapid-pin") || { ...this.deviceRecordOwner(), saved_at: Date.now() };
         record.pin = { ...this.pinConfirmed, linkedRefs: this.pinLinkedRefs || [] };
         try {
             window.localStorage.setItem(this.rapidDraftStorageKey("rapid-pin"), JSON.stringify(record));
@@ -9196,6 +9208,7 @@ class NzVerificationMap {
         if (!state) return;
         try {
             window.localStorage.setItem(this.guidedPeriodsStorageKey(taskId), JSON.stringify({
+                ...this.deviceRecordOwner(),
                 saved_at: Date.now(),
                 submissionId: state.submissionId || "",
                 segments: state.segments,
@@ -9213,8 +9226,7 @@ class NzVerificationMap {
 
     readGuidedPeriodsStorage(taskId) {
         try {
-            const raw = window.localStorage.getItem(this.guidedPeriodsStorageKey(taskId));
-            const record = raw ? JSON.parse(raw) : null;
+            const record = this.readOwnedDeviceRecord(this.guidedPeriodsStorageKey(taskId));
             return record && Array.isArray(record.segments) && record.segments.length ? record : null;
         } catch (error) {
             return null;

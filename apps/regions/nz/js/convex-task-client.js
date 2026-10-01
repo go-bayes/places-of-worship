@@ -501,13 +501,26 @@
             }
         }
 
+        // let the portal initialise while clerk's script continues loading.
+        async waitForClerkAtStartup() {
+            let timer;
+            try {
+                return await Promise.race([
+                    this.ensureClerkLoaded(),
+                    new Promise((resolve) => { timer = setTimeout(() => resolve(null), 2500); }),
+                ]);
+            } finally {
+                clearTimeout(timer);
+            }
+        }
+
         // after a reload: a live clerk session names the user again, else
         // null so the sign-in card shows
         async restoreSession() {
             if (!this.configured) return null;
             if (this.user) return this.user;
             try {
-                await this.ensureClerkLoaded();
+                if (!(await this.waitForClerkAtStartup())) return null;
                 if (!this.sessionId) return null;
                 // a sign-out that never finished is finished first, never
                 // silently undone by a reload; without usable storage the
@@ -533,7 +546,16 @@
             this.signInHost = container;
             let clerk;
             try {
-                clerk = await this.ensureClerkLoaded();
+                clerk = await this.waitForClerkAtStartup();
+                if (!clerk) {
+                    if (this.signInHost === container) this.renderLoadFailure(container, options);
+                    // the same load continues; only the current card may admit
+                    // its session once clerk arrives.
+                    this.ensureClerkLoaded().then(() => {
+                        if (this.signInHost === container) return this.renderSignInButton(container, options);
+                    }).catch(() => {});
+                    return;
+                }
             } catch (error) {
                 // a slow or blocked network: say so in the card and offer a
                 // retry, rather than failing back to the page, which would

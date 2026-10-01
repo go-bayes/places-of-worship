@@ -103,7 +103,7 @@ const rapidKey = "powRapidDraft2:NZ:rapid-pin";
   app.setFormSnapshot("task_1", { evidence_note: "typed, unsent" });
   assert.ok(values.has(snapshotKey), "the snapshot reaches the device");
   app.pinConfirmed = { latitude: -41.29, longitude: 174.78 };
-  values.set(rapidKey, JSON.stringify({ saved_at: 1, values: { directObservation: "a church hall" }, pin: { latitude: -41.29, longitude: 174.78 } }));
+  values.set(rapidKey, JSON.stringify({ ownerId: "user_a", sessionId: "sess_a", saved_at: 1, values: { directObservation: "a church hall" }, pin: { latitude: -41.29, longitude: 174.78 } }));
   const periodsPrefix = window.PowOccupancy.guidedPeriodsStoragePrefix("NZ", "user_a");
   values.set(`${periodsPrefix}task_1`, JSON.stringify({ segments: [{ start: "2001" }] }));
   app.pinMode = true;

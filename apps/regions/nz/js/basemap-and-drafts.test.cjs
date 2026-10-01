@@ -96,7 +96,7 @@ const fresh = (userId = "ra_1") => Object.assign(Object.create(window.NzVerifica
   assert.equal(reloaded.getFormSnapshot("task-1"), undefined);
   app.setFormSnapshot("task-2", { action: "needs_review" });
   app.setFormSnapshot("task-3", { action: "needs_review" });
-  localStorage.setItem("powRapidDraft2:NZ:rapid-pin", JSON.stringify({ saved_at: 1, values: { sourceTitle: "Sign" }, extra: {} }));
+  localStorage.setItem("powRapidDraft2:NZ:rapid-pin", JSON.stringify({ ownerId: "ra_1", sessionId: "", saved_at: 1, values: { sourceTitle: "Sign" }, extra: {} }));
   // signed out, nothing reaches the device
   const signedOut = fresh(null);
   signedOut.formSnapshotsByTaskId = new Map();
