@@ -69,6 +69,12 @@
         // above, so the reviewer decides on exactly what the hash covers;
         // PowReviewSnapshotContent.contentFromSnapshot, or null while loading
         content: null,
+        // recorded agent judgments about the task's place (p4, 2026-10-01),
+        // each with its newest dispositions, from
+        // agentJudgments:listJudgmentsForTaskPlace; outside the snapshot and
+        // its hash. the error message when that read failed, else ""
+        judgments: [],
+        judgmentsError: "",
         // incremented by every selectTask; a load compares its own token
         // after each await so a superseded load writes nothing
         selectionToken: 0,
@@ -516,6 +522,11 @@ function human(value) {
         state.reviewSnapshot = null;
         state.reviewSnapshotError = "";
         state.content = null;
+        state.judgments = [];
+        state.judgmentsError = "";
+        // held in the closure until the load proves current, so a failed
+        // read for an abandoned selection never marks the displayed task
+        let judgmentsError = "";
         renderQueue();
         renderDetail(true);
         try {
@@ -530,14 +541,21 @@ function human(value) {
                 queueRow: row,
                 isCurrent,
                 fetchRows: async (id) => {
-                    const [drafts, historicalClaims, events, attachments] = await Promise.all([
+                    const [drafts, historicalClaims, events, attachments, judgments] = await Promise.all([
                         client.listTaskEvidence({ taskId: id, limit: 20 }),
                         client.listTaskHistoricalClaims({ taskId: id, limit: 100 }),
                         client.getTaskEvents({ taskId: id, limit: 50 }),
                         // deployments without a bucket simply show no files section
                         client.listTaskAttachments({ taskId: id }).catch(() => []),
+                        // the judgments about the task's place (p4); a failed
+                        // read keeps the rest of the task reviewable and the
+                        // panel states the reason
+                        client.listJudgmentsForTaskPlace({ taskId: id }).catch((error) => {
+                            judgmentsError = (error && error.message) || "unknown error";
+                            return [];
+                        }),
                     ]);
-                    return { drafts, historicalClaims, events, attachments };
+                    return { drafts, historicalClaims, events, attachments, judgments };
                 },
                 fetchSnapshot: (id, evidenceDraftId) => client.getReviewSnapshot({ taskId: id, evidenceDraftId }),
             });
@@ -546,6 +564,8 @@ function human(value) {
             state.reviewSnapshot = loaded.snapshot;
             state.reviewSnapshotError = loaded.snapshotError;
             state.attachments = loaded.attachments;
+            state.judgments = loaded.judgments;
+            state.judgmentsError = judgmentsError;
             state.content = content;
             state.drafts = content.drafts;
             state.historicalClaims = content.historicalClaims;
@@ -820,6 +840,8 @@ function human(value) {
                     `).join("")}
             </section>
 
+            ${confidencePanelHtml()}
+
             ${window.PowAgentReviewPanel ? window.PowAgentReviewPanel.panelHtml(agentReview) : ""}
 
             <section class="panel decision-panel">
@@ -868,6 +890,7 @@ function human(value) {
             form.addEventListener("submit", submitDecision);
         }
         wireClaimControls(task);
+        wireConfidencePanel(task);
         wireAgentReviewPanel(form, agentReview);
         // evidence files open through a fresh short-lived url per click —
         // nothing in the page holds a durable link to the private bucket
@@ -1580,6 +1603,93 @@ function human(value) {
                 "Returned to the contributor for comment; the task comes back to the queue when they answer.",
             );
         });
+    }
+
+    // the recorded-confidence panel (p4, 2026-10-01): the agent judgments
+    // about the task's place, rendered above the AI recommendation. a tier
+    // orders review and decides nothing; the decision form below stays the
+    // only path to a review decision
+    function confidencePanelHtml() {
+        if (!window.PowConfidencePanel) return "";
+        return window.PowConfidencePanel.panelHtml(state.judgments, {
+            viewerId: state.user?._id,
+            error: state.judgmentsError,
+        });
+    }
+
+    // a disposition press appends one row and changes nothing else. the
+    // selection token guards both awaits: a response for a task the
+    // reviewer has left writes nothing and re-renders nothing
+    function wireConfidencePanel(task) {
+        const panel = document.getElementById("confidencePanel");
+        if (!panel || !window.PowConfidencePanel || !task) return;
+        panel.addEventListener("click", async (event) => {
+            const button = event.target.closest("button[data-disposition]");
+            if (!button || !panel.contains(button)) return;
+            const block = button.closest("[data-judgment-id]");
+            const judgmentId = block?.dataset.judgmentId;
+            if (!judgmentId) return;
+            const disposition = button.dataset.disposition;
+            const noteField = block.querySelector(".judgment-note");
+            const note = noteField ? noteField.value.trim() : "";
+            const status = block.querySelector(".judgment-status");
+            const say = (text, tone) => {
+                if (!status) return;
+                status.textContent = text;
+                status.className = tone ? `judgment-status state-banner tone-${tone}` : "judgment-status muted";
+            };
+            // the server's rule, applied before the round trip
+            if (window.PowConfidencePanel.needsNote(disposition) && note.length < 8) {
+                say("Add a note of at least eight characters to disagree or correct.", "broken");
+                noteField?.focus();
+                return;
+            }
+            const token = state.selectionToken;
+            const isCurrent = () => state.selectionToken === token && state.selected?.task?.task_id === task.task_id;
+            const buttons = block.querySelectorAll("button[data-disposition]");
+            buttons.forEach((entry) => { entry.disabled = true; });
+            say("Recording...");
+            setTransport("saving");
+            try {
+                await client.recordJudgmentDisposition({ judgmentId, disposition, note: note || undefined });
+                if (!isCurrent()) return;
+                const rows = await client.listJudgmentsForTaskPlace({ taskId: task.task_id });
+                if (!isCurrent()) return;
+                state.judgments = Array.isArray(rows) ? rows : [];
+                state.judgmentsError = "";
+                setTransport("ready");
+                rerenderConfidencePanel(task, judgmentId, `Recorded: ${window.PowConfidencePanel.dispositionLabel(disposition).toLowerCase()}.`);
+            } catch (error) {
+                if (!isCurrent()) return;
+                setTransport("ready");
+                buttons.forEach((entry) => { entry.disabled = false; });
+                say(error.message || "Could not record the disposition.", "broken");
+            }
+        });
+    }
+
+    // replaces the panel alone, so the decision form in progress below it
+    // keeps its values; the status line names the row just disposed of
+    function rerenderConfidencePanel(task, judgmentId, message) {
+        const old = document.getElementById("confidencePanel");
+        if (!old) return;
+        const html = confidencePanelHtml();
+        if (!html) {
+            old.remove();
+            return;
+        }
+        const template = document.createElement("template");
+        template.innerHTML = html.trim();
+        const fresh = template.content.firstElementChild;
+        if (!fresh) return;
+        old.replaceWith(fresh);
+        wireConfidencePanel(task);
+        const block = fresh.querySelector(`[data-judgment-id="${window.CSS?.escape ? window.CSS.escape(judgmentId) : judgmentId}"]`);
+        const status = block?.querySelector(".judgment-status");
+        if (status && message) {
+            status.textContent = message;
+            status.className = "judgment-status state-banner tone-done";
+        }
     }
 
     // the explicit affordances on the AI recommendation: prefill-and-agree

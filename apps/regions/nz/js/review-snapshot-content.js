@@ -64,8 +64,11 @@
     // to null, and the caller writes nothing, so a slow response for an
     // earlier selection can never replace the displayed task's snapshot
     // (which would have sent that task's hash with a decision on this one).
-    // fetchRows(taskId) -> { drafts, historicalClaims, events, attachments };
-    // fetchSnapshot(taskId, evidenceDraftId) -> getReviewSnapshot result
+    // fetchRows(taskId) -> { drafts, historicalClaims, events, attachments,
+    // judgments }; fetchSnapshot(taskId, evidenceDraftId) -> getReviewSnapshot
+    // result. the judgments (agent rows about the task's place, p4) pass
+    // through beside the attachments: they are not part of the snapshot and
+    // never enter its hash
     async function loadSelection({ taskId, queueRow, isCurrent, fetchRows, fetchSnapshot }) {
         const rows = await fetchRows(taskId);
         if (!isCurrent()) return null;
@@ -90,6 +93,7 @@
             snapshot,
             snapshotError,
             attachments: rows?.attachments || [],
+            judgments: rows?.judgments || [],
         };
     }
 

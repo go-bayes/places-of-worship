@@ -185,3 +185,25 @@ test("a current load whose snapshot fails still applies, carrying the error and 
     assert.equal(z.content.draft, null);
     assert.equal(h2.calls.snapshots.length, 0);
 });
+
+// p4 (2026-10-01): the judgments about the task's place travel beside the
+// attachments and never enter the snapshot or its hash
+test("judgments pass through the load untouched, outside the snapshot", async () => {
+    const judgments = [{ judgment_id: "j1", judgment_kind: "registration_confidence", outcome: "review", dispositions: [] }];
+    const snapshotSeen = { snapshot_hash: "hash-A", snapshot: { task: { task_id: "A" }, draft: { evidence_draft_id: "A:d" } } };
+    const loaded = await loadSelection({
+        taskId: "A",
+        queueRow: { task: { task_id: "A" } },
+        isCurrent: () => true,
+        fetchRows: async () => ({ drafts: [{ evidence_draft_id: "A:d" }], judgments }),
+        fetchSnapshot: async () => snapshotSeen,
+    });
+    assert.deepEqual(loaded.judgments, judgments);
+    assert.equal(loaded.snapshot, snapshotSeen);
+    assert.equal(loaded.snapshot.snapshot_hash, "hash-A");
+    assert.equal("judgments" in loaded.snapshot.snapshot, false);
+    assert.equal("judgments" in loaded.content, false);
+    // rows without the field yield an empty list, never undefined
+    const bare = await loadSelection({ taskId: "B", queueRow: { task: { task_id: "B" } }, isCurrent: () => true, fetchRows: async () => ({ drafts: [] }), fetchSnapshot: async () => null });
+    assert.deepEqual(bare.judgments, []);
+});

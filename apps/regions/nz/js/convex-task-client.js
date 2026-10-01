@@ -529,6 +529,18 @@
             return await this.request("query", "acceptances:listPrincipalInvestigators", {});
         }
 
+        // recorded agent judgments about the place a task is about, each
+        // with its newest dispositions embedded (convex/agentJudgments.ts)
+        async listJudgmentsForTaskPlace(args) {
+            return await this.request("query", "agentJudgments:listJudgmentsForTaskPlace", args);
+        }
+
+        // appends one disposition row; the judgment, task and decision are
+        // untouched
+        async recordJudgmentDisposition(args) {
+            return await this.request("mutation", "agentJudgments:recordJudgmentDisposition", args);
+        }
+
         async claimReviewTask(args) {
             return await this.request("mutation", "reviews:claimReviewTask", args);
         }
