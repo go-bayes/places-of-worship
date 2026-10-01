@@ -1,4 +1,4 @@
-import { judgmentsForTaskPlace } from "./lib/judgmentReads";
+import { judgmentsForTaskPlace, judgmentSnapshotBindings } from "./lib/judgmentReads";
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
@@ -470,9 +470,11 @@ async function reviewSnapshot(ctx: MutationCtx | QueryCtx, taskId: string, evide
   const derivedEvents = await ctx.db.query("derived_state_events").withIndex("by_task_and_created_at", (q: any) => q.eq("task_id", taskId)).collect();
   const base = { task, draft, review_decisions: decisions, task_events: taskEvents, agent_reviews: agentReviews, historical_claims: historicalClaims, site_occupancies: occupancies, derived_target_year_states: targetYearStates, derived_year_locations: yearLocations, derived_target_year_functions: targetYearFunctions, derived_state_events: derivedEvents };
   // absence retains the exact historical hash input. opted-in snapshots
-  // store the displayed rows, including dispositions, inside snapshot_json.
-  const snapshot = { ...base, ...(includeJudgments ? { recorded_judgments: await judgmentsForTaskPlace(ctx, task) } : {}) };
-  return { task, draft, snapshot, hash: sha256(canonicalJson(snapshot)), baseHash: sha256(canonicalJson(base)) };
+  // bind content addresses and displayed dispositions, keeping full rows
+  // outside snapshot_json. one read supplies the binding and the display.
+  const displayedJudgments = includeJudgments ? await judgmentsForTaskPlace(ctx, task) : undefined;
+  const snapshot = { ...base, ...(displayedJudgments ? { recorded_judgments: judgmentSnapshotBindings(displayedJudgments) } : {}) };
+  return { task, draft, snapshot, displayedJudgments, hash: sha256(canonicalJson(snapshot)), baseHash: sha256(canonicalJson(base)) };
 }
 
 export const getReviewSnapshot = query({
@@ -481,7 +483,7 @@ export const getReviewSnapshot = query({
   handler: async (ctx, args) => {
     await requireUser(ctx, ["reviewer", "curator", "admin"]);
     const row = await reviewSnapshot(ctx, args.taskId, args.evidenceDraftId, args.includeJudgments);
-    return { task_id: args.taskId, evidence_draft_id: args.evidenceDraftId, snapshot_hash: row.hash, ...(args.includeJudgments ? { base_snapshot_hash: row.baseHash } : {}), summary: { task_status: row.task.status, draft_status: row.draft.draft_status, review_decisions: row.snapshot.review_decisions.length, task_events: row.snapshot.task_events.length, agent_reviews: row.snapshot.agent_reviews.length, historical_claims: row.snapshot.historical_claims.length, site_occupancies: row.snapshot.site_occupancies.length, derived_states: row.snapshot.derived_target_year_states.length, derived_locations: row.snapshot.derived_year_locations.length, derived_functions: row.snapshot.derived_target_year_functions.length }, snapshot: row.snapshot };
+    return { task_id: args.taskId, evidence_draft_id: args.evidenceDraftId, snapshot_hash: row.hash, ...(args.includeJudgments ? { base_snapshot_hash: row.baseHash, displayed_judgments: row.displayedJudgments } : {}), summary: { task_status: row.task.status, draft_status: row.draft.draft_status, review_decisions: row.snapshot.review_decisions.length, task_events: row.snapshot.task_events.length, agent_reviews: row.snapshot.agent_reviews.length, historical_claims: row.snapshot.historical_claims.length, site_occupancies: row.snapshot.site_occupancies.length, derived_states: row.snapshot.derived_target_year_states.length, derived_locations: row.snapshot.derived_year_locations.length, derived_functions: row.snapshot.derived_target_year_functions.length }, snapshot: row.snapshot };
   },
 });
 

@@ -186,6 +186,8 @@ function featureRows(m, vectorsSha, record) {
   if (score.indicators.duplicate) kinds.push("duplicate");
   const facets = { status_assessment: "status", location: "location", duplicate: "duplicate" };
   return kinds.map((kind) => {
+    // share the ingest mapping: status needs a fired positive signal and
+    // reaches at most likely_active until calibration.
     const row = { ...common, judgment_kind: kind, ...(facets[kind] ? { facet: facets[kind] } : {}), ...scorerCategories(kind, score) };
     return { ...row, basis_note: scorerBasisNote(row) };
   });

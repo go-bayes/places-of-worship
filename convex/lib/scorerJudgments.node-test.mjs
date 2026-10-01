@@ -120,7 +120,7 @@ test("calibration and mismatched component outcomes are refused", () => {
   assert.throws(() => validateScorerJudgment(put(tier, (r) => { r.score.calibrated = true; })), /uncalibrated/);
   const status = rows.find((row) => row.judgment_kind === "status_assessment");
   const location = rows.find((row) => row.judgment_kind === "location");
-  assert.throws(() => validateScorerJudgment(put(status, (r) => { r.outcome = "inactive"; })), /requires outcome active/);
+  assert.throws(() => validateScorerJudgment(put(status, (r) => { r.outcome = "inactive"; })), /requires outcome likely_active/);
   assert.throws(() => validateScorerJudgment(put(location, (r) => { r.outcome = "implausible"; })), /requires outcome plausible/);
   const duplicate = rows.find((row) => row.judgment_kind === "duplicate");
   if (duplicate !== undefined) assert.throws(() => validateScorerJudgment(put(duplicate, (r) => { r.score.indicators.duplicate = false; })), /duplicate indicator/);
@@ -225,7 +225,7 @@ test("provisional component categories use the exact 0.7 and 0.9 boundaries", ()
     [0.7 - Number.EPSILON, "unknown", "unclear", "low"],
     [0.7, "likely_active", "plausible", "medium"],
     [0.9 - Number.EPSILON, "likely_active", "plausible", "medium"],
-    [0.9, "active", "plausible", "high"], [1, "active", "plausible", "high"],
+    [0.9, "likely_active", "plausible", "high"], [1, "likely_active", "plausible", "high"],
   ]) {
     const score = clone(tier.score);
     Object.assign(score.components, { status: value, location: value, identity: value });
@@ -240,7 +240,7 @@ test("provisional component categories use the exact 0.7 and 0.9 boundaries", ()
 
 test("every scorer row requires the mapped confidence and outcome", () => {
   for (const row of rows) {
-    assert.match(row.basis_note, /confidence (high|medium|low) is provisional and uncalibrated \(P5 replaces it\)/);
+    assert.match(row.basis_note, /confidence (high|medium|low) is provisional and uncalibrated \(until calibration replaces it\)/);
     assert.match(row.basis_note, /standard confidence-standard\/0\.3\.1/);
     for (const confidence of [undefined, ...["high", "medium", "low"].filter((c) => c !== row.confidence)]) {
       const changed = { ...clone(row), confidence };
@@ -249,6 +249,35 @@ test("every scorer row requires the mapped confidence and outcome", () => {
     }
     const changed = { ...clone(row), outcome: row.outcome === "unclear" ? "same_place" : row.judgment_kind === "registration_confidence" ? "escalate" : "unknown" };
     if (changed.outcome !== row.outcome) assert.throws(() => validateScorerJudgment(changed));
+  }
+});
+
+test("status needs a fired positive signal and never exceeds likely_active", () => {
+  const status = rows.find((row) => row.judgment_kind === "status_assessment");
+  const positives = ["check_recent", "check_older", "website_or_contact", "opening_or_service_times", "edit_recent", "contributors_three_plus", "cross_source_active_listing"];
+  for (const signals of [[], ["historic_tag"], ["edit_stale", "own_lifecycle_tag"], ...positives.map((signal) => [signal])]) {
+    const row = clone(status);
+    row.score.signals_fired.status = signals;
+    const expected = signals.some((signal) => positives.includes(signal))
+      ? { outcome: "likely_active", confidence: "high" } : { outcome: "unknown", confidence: "low" };
+    assert.deepEqual(scorerCategories("status_assessment", row.score), expected);
+    Object.assign(row, expected);
+    row.basis_note = scorerBasisNote(row);
+    validateScorerJudgment(row);
+    for (const outcome of ["active", "inactive", ...(expected.outcome === "unknown" ? ["likely_active"] : [])]) {
+      const wrong = { ...row, outcome };
+      wrong.basis_note = scorerBasisNote(wrong);
+      assert.throws(() => validateScorerJudgment(wrong), /requires outcome/);
+    }
+  }
+});
+
+test("the mapping accepts every confidence-standard 0.3 patch", () => {
+  for (const patch of [0, 1, 2, 10, 123]) {
+    const row = clone(tier);
+    row.judge.standard_version = `confidence-standard/0.3.${patch}`;
+    row.basis_note = scorerBasisNote(row);
+    validateScorerJudgment(row);
   }
 });
 

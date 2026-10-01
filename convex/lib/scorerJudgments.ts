@@ -36,6 +36,11 @@ export const SCORER_FACET_BY_KIND: Readonly<Record<string, string | undefined>> 
 // component floor for positive component support. low support is unresolved,
 // never inverted into a negative claim or a pairwise duplicate probability.
 export const SCORER_STANDARD_VERSION = "confidence-standard/0.3.1";
+const SCORER_STANDARD_PATCH_VERSION = /^confidence-standard\/0\.3\.(0|[1-9][0-9]*)$/;
+export const SCORER_POSITIVE_STATUS_SIGNALS: readonly string[] = [
+  "check_recent", "check_older", "website_or_contact", "opening_or_service_times",
+  "edit_recent", "contributors_three_plus", "cross_source_active_listing",
+];
 export function scorerCategories(kind: string, score: JudgmentScore): { outcome: string; confidence: "high" | "medium" | "low" } {
   if (kind === "registration_confidence") {
     return { outcome: score.tier, confidence: score.tier === "screened" ? "high" : score.tier === "review" ? "medium" : "low" };
@@ -43,7 +48,13 @@ export function scorerCategories(kind: string, score: JudgmentScore): { outcome:
   if (kind === "duplicate") return { outcome: "unclear", confidence: "low" };
   const value = kind === "status_assessment" ? score.components.status : score.components.location;
   const confidence = value >= score.cut_points.screened_min_composite ? "high" : value >= score.cut_points.component_floor ? "medium" : "low";
-  if (kind === "status_assessment") return { outcome: confidence === "high" ? "active" : confidence === "medium" ? "likely_active" : "unknown", confidence };
+  if (kind === "status_assessment") {
+    // the intercept alone supplies no positive evidence; even strong support
+    // remains likely_active until calibration. negative evidence stays unresolved.
+    const positive = score.signals_fired.status.some((signal) => SCORER_POSITIVE_STATUS_SIGNALS.includes(signal));
+    if (!positive || confidence === "low") return { outcome: "unknown", confidence: "low" };
+    return { outcome: "likely_active", confidence };
+  }
   if (kind === "location") return { outcome: confidence === "low" ? "unclear" : "plausible", confidence };
   throw new Error(`Unsupported scorer judgment kind ${kind}.`);
 }
@@ -90,7 +101,7 @@ export function scorerBasisNote(input: JudgmentInput): string {
   const converter = (input.run.agent_run_id ?? "").split(":").pop();
   return [
     `standard ${input.judge.standard_version}`,
-    `confidence ${input.confidence} is provisional and uncalibrated (P5 replaces it)`,
+    `confidence ${input.confidence} is provisional and uncalibrated (until calibration replaces it)`,
     `outcome ${input.outcome}`,
     `scorer ${input.judge.prompt_version} (uncalibrated heuristic, not a probability)`,
     `code ${(input.judge.code_revision ?? "").slice(0, 12)}`,
@@ -236,7 +247,7 @@ export function validateScorerJudgment(input: JudgmentInput): void {
   }
   if (score.tier_pending.length !== (genericPending ? 1 : 0)) throw new Error("A scorer judgment's pending condition is the undecided generic-name cross-source match, and only that.");
   if (score.tier !== expectedTier) throw new Error(`A scorer judgment's tier is ${expectedTier} for its components, indicators and cut points.`);
-  if (input.judge.standard_version !== SCORER_STANDARD_VERSION) throw new Error(`The provisional mapping requires ${SCORER_STANDARD_VERSION}.`);
+  if (!SCORER_STANDARD_PATCH_VERSION.test(input.judge.standard_version ?? "")) throw new Error("The provisional mapping requires confidence-standard/0.3.x.");
   if (cut.screened_min_composite !== 0.9 || cut.review_min_composite !== 0.6 || cut.component_floor !== 0.7) {
     throw new Error("The provisional mapping requires R-S4 cut points 0.9, 0.6 and 0.7; P5 replacements need a versioned mapping.");
   }

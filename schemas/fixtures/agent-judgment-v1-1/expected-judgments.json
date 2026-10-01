@@ -140,7 +140,7 @@
         "judgment_kind": "registration_confidence",
         "outcome": "screened",
         "confidence": "high",
-        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (P5 replaces it); outcome screened; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.2.0"
+        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (until calibration replaces it); outcome screened; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -255,9 +255,9 @@
         },
         "judgment_kind": "status_assessment",
         "facet": "status",
-        "outcome": "active",
+        "outcome": "likely_active",
         "confidence": "high",
-        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (P5 replaces it); outcome active; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.2.0"
+        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (until calibration replaces it); outcome likely_active; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -374,7 +374,7 @@
         "facet": "location",
         "outcome": "plausible",
         "confidence": "high",
-        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (P5 replaces it); outcome plausible; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.2.0"
+        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (until calibration replaces it); outcome plausible; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.9126 (identity 0.97, location 0.98, status 0.96; denomination 0.93 is reported beside it); tier screened (reasons none; pending none); indicators duplicate=false conflict=false generic_name=false missing_name=false cross_source=match; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -492,7 +492,7 @@
         "judgment_kind": "registration_confidence",
         "outcome": "review",
         "confidence": "medium",
-        "basis_note": "standard confidence-standard/0.3.1; confidence medium is provisional and uncalibrated (P5 replaces it); outcome review; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.2.0"
+        "basis_note": "standard confidence-standard/0.3.1; confidence medium is provisional and uncalibrated (until calibration replaces it); outcome review; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -611,7 +611,7 @@
         "facet": "status",
         "outcome": "likely_active",
         "confidence": "medium",
-        "basis_note": "standard confidence-standard/0.3.1; confidence medium is provisional and uncalibrated (P5 replaces it); outcome likely_active; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.2.0"
+        "basis_note": "standard confidence-standard/0.3.1; confidence medium is provisional and uncalibrated (until calibration replaces it); outcome likely_active; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -730,7 +730,7 @@
         "facet": "location",
         "outcome": "plausible",
         "confidence": "medium",
-        "basis_note": "standard confidence-standard/0.3.1; confidence medium is provisional and uncalibrated (P5 replaces it); outcome plausible; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.2.0"
+        "basis_note": "standard confidence-standard/0.3.1; confidence medium is provisional and uncalibrated (until calibration replaces it); outcome plausible; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -849,7 +849,7 @@
         "facet": "duplicate",
         "outcome": "unclear",
         "confidence": "low",
-        "basis_note": "standard confidence-standard/0.3.1; confidence low is provisional and uncalibrated (P5 replaces it); outcome unclear; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.2.0"
+        "basis_note": "standard confidence-standard/0.3.1; confidence low is provisional and uncalibrated (until calibration replaces it); outcome unclear; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6567 (identity 0.91, location 0.88, status 0.82; denomination 0.74 is reported beside it); tier review (reasons composite_0.6_to_0.9, duplicate; pending none); indicators duplicate=true conflict=false generic_name=false missing_name=false cross_source=no_match; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -969,7 +969,7 @@
         "judgment_kind": "registration_confidence",
         "outcome": "escalate",
         "confidence": "low",
-        "basis_note": "standard confidence-standard/0.3.1; confidence low is provisional and uncalibrated (P5 replaces it); outcome escalate; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
+        "basis_note": "standard confidence-standard/0.3.1; confidence low is provisional and uncalibrated (until calibration replaces it); outcome escalate; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -1090,7 +1090,7 @@
         "facet": "status",
         "outcome": "unknown",
         "confidence": "low",
-        "basis_note": "standard confidence-standard/0.3.1; confidence low is provisional and uncalibrated (P5 replaces it); outcome unknown; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
+        "basis_note": "standard confidence-standard/0.3.1; confidence low is provisional and uncalibrated (until calibration replaces it); outcome unknown; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -1211,7 +1211,7 @@
         "facet": "location",
         "outcome": "unclear",
         "confidence": "low",
-        "basis_note": "standard confidence-standard/0.3.1; confidence low is provisional and uncalibrated (P5 replaces it); outcome unclear; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
+        "basis_note": "standard confidence-standard/0.3.1; confidence low is provisional and uncalibrated (until calibration replaces it); outcome unclear; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.0716 (identity 0.42, location 0.55, status 0.31; denomination 0.5 is reported beside it); tier escalate (reasons composite_below_0.6, conflict, identity_below_0.7, location_below_0.7, status_below_0.7, denomination_below_0.7; pending none); indicators duplicate=false conflict=true generic_name=false missing_name=true cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -1329,7 +1329,7 @@
         "judgment_kind": "registration_confidence",
         "outcome": "review",
         "confidence": "medium",
-        "basis_note": "standard confidence-standard/0.3.1; confidence medium is provisional and uncalibrated (P5 replaces it); outcome review; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
+        "basis_note": "standard confidence-standard/0.3.1; confidence medium is provisional and uncalibrated (until calibration replaces it); outcome review; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -1446,9 +1446,9 @@
         },
         "judgment_kind": "status_assessment",
         "facet": "status",
-        "outcome": "active",
+        "outcome": "likely_active",
         "confidence": "high",
-        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (P5 replaces it); outcome active; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
+        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (until calibration replaces it); outcome likely_active; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
       },
       {
         "schema_version": "agent-judgment.v1.1",
@@ -1567,23 +1567,23 @@
         "facet": "location",
         "outcome": "plausible",
         "confidence": "high",
-        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (P5 replaces it); outcome plausible; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
+        "basis_note": "standard confidence-standard/0.3.1; confidence high is provisional and uncalibrated (until calibration replaces it); outcome plausible; scorer p2-heuristic-0.2.0 (uncalibrated heuristic, not a probability); code a1b2c3d4e5f6; vectors b5937e6c0ac0; edition osm-pow:nz:edition:2026-09-01:0123abcd4567; composite = identity × location × status = 0.6294 (identity 0.72, location 0.93, status 0.94; denomination 0.9 is reported beside it); tier review (reasons composite_0.6_to_0.9, generic_name_cross_source_pending; pending cross_source_match); indicators duplicate=false conflict=false generic_name=true missing_name=false cross_source=not_computed; mapping osm-confidence-judgments/0.2.0"
       }
     ]
   ],
   "judgment_ids": [
-    "50b0391f9bdfe0979d03313b64bb7a77c26bc5f8a7215477ab42367d4485f496",
-    "ab34216c889a57deffe4eaca35afa61036404271d774a4a750fca4c1e7c3bf6c",
-    "ef7cbfaeaf9594b27fd3954b94ab71c8f172e152f0723ec5acff8060b2ec4a8f",
-    "f60932ae7269980f9e3fa25bddada24c66693c6c818bad806903a424c830b323",
-    "c63b29081fe8e185b3539294201926e0986646cd6e072c3ff6c420140e2fe57f",
-    "b4ece66309ecefbda95cc3d6fc05337cf9e6a4e434542e6e391df281dfea48af",
-    "38e65ad3575d0cae3429c99b9ba76408b88c43e4c1e7da1c6799929d71ca1d20",
-    "722543a2bb519c4ceb74b48cdb6adfcbaf5116e9d9f3e3d5ec9f93a6b49a618b",
-    "5157c2ca4c6ddf099991d147e646895f224808407f821849ae81f4ff2c16f9b4",
-    "8e39f53cef3fd4fd2285f0cc940c30fea60b960adce62e86d0ec9a962a57c62b",
-    "b94c81ca057d74694c6cfa5eeed936654d6054503c98244cfa31b06d7b903289",
-    "9a5e430245cef01b7565f24ca6e95e560d70aa6880f8df4f1bf6c35b7b23f5fd",
-    "d9fb0278a5e3ed11a0bd1422366d801839b2c75645b9b99fc50214c930799b4b"
+    "41be6a41d6d570ead0c32813000be55b43331e9804677e3f2124f4ecd38929e4",
+    "1e1c3913189f39501500e9b2b6c1aff5613c9d8c73b38994955a596edfc6c229",
+    "b767cd366ee660e25486661ccb6cd448157f9dc49cd143fb3b8439730e8fe146",
+    "62053245aaf6bf3c38139e00625b6d682273fe2ba1d15a3ed85257ca8de19036",
+    "66380a96d5563405f655808df59122fc4138e57786eba4f9d878f9b4ed0d4c3a",
+    "35e87894d4e0274fd86b1b2cab1bcaad95075ea58cf2aff6127cc511d07d31a7",
+    "7475d33e3864a407a26e606d47e43dd7c0a5643f8e83846c6ea929daa2868cd3",
+    "c7d5e73ba653c7af5a37b7fefebad1c67dcfe376a934caa573588675480432c5",
+    "4a5f7fd30a9d634ddae89fa19086e13cbe3fb06d365c91cf35d8d472f74fad88",
+    "d2690900022f90fca3191f0bad47142988c53efa8908d50c4059eee9367f626c",
+    "dc64172c452a7c1f36494d34c417ee62fd3369c9558ba99908623808fb13e0a8",
+    "604d609615b0b11649fda28980c08b3a5b066ec74c5ce1e88872553900dc766e",
+    "8767a63551fbe9ab17b5cbff360fec296431dbabb95e0c1efc2280926513c190"
   ]
 }

@@ -49,7 +49,7 @@ test("out-of-scope features are skipped and counted; component rows follow the i
   assert.deepEqual(result.counts.rows_by_kind, { duplicate: 1, location: 4, registration_confidence: 4, status_assessment: 4 });
   const rows = result.batches.flat();
   assert.ok(!rows.some((row) => row.subject.ref === "osm:relation/3001"));
-  assert.ok(rows.filter((row) => row.judgment_kind === "status_assessment").every((row) => ["active", "likely_active", "unknown"].includes(row.outcome) && ["high", "medium", "low"].includes(row.confidence)));
+  assert.ok(rows.filter((row) => row.judgment_kind === "status_assessment").every((row) => ["likely_active", "unknown"].includes(row.outcome) && ["high", "medium", "low"].includes(row.confidence)));
   assert.ok(rows.filter((row) => row.judgment_kind === "location").every((row) => ["plausible", "unclear"].includes(row.outcome)));
 });
 
@@ -70,6 +70,22 @@ test("every row passes the scorer validator, ids equal judgmentIdFor, and batche
   assert.ok(big.batches.length > 1);
   assert.ok(big.batches.every((batch) => batch.length <= 100));
   assert.equal(big.batches.flat().length, big.judgment_ids.length);
+});
+
+test("conversion requires fired positive status support, even above the floor", () => {
+  for (const basis of ["", "edit_stale;historic_tag", "check_recent", "cross_source_active_listing"]) {
+    const v = variant(`status-${basis.replaceAll(";", "-") || "intercept"}`, (lines) => { lines[0].scores.basis.status = basis; });
+    const row = convert(v).batches.flat().find((row) => row.judgment_kind === "status_assessment");
+    const positive = ["check_recent", "cross_source_active_listing"].includes(basis);
+    assert.equal(row.outcome, positive ? "likely_active" : "unknown");
+    assert.equal(row.confidence, positive ? "high" : "low");
+  }
+});
+
+test("conversion retains a matching 0.3 patch version from the vectors and manifest", () => {
+  const v = variant("standard-patch", (lines) => { for (const line of lines) line.standard_version = "confidence-standard/0.3.0"; },
+    (m) => { m.pipeline.parameters.standard_version = "confidence-standard/0.3.0"; });
+  assert.ok(convert(v).batches.flat().every((row) => row.judge.standard_version === "confidence-standard/0.3.0"));
 });
 
 test("planted personal strings appear in no output string", () => {

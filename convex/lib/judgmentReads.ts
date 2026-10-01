@@ -29,3 +29,19 @@ export async function judgmentsForTaskPlace(ctx: MutationCtx | QueryCtx, task: D
   }
   return out;
 }
+
+// judgment_id addresses the immutable canonical envelope. bind only that
+// address and the displayed disposition fields, independent of row size.
+export function judgmentSnapshotBindings(rows: Awaited<ReturnType<typeof judgmentsForTaskPlace>>) {
+  return rows.map((row) => ({
+    judgment_id: row.judgment_id,
+    created_at: row.created_at,
+    dispositions: row.dispositions.map((entry) => ({
+      disposition_id: entry.disposition_id,
+      reviewer_user_id: entry.reviewer_user_id,
+      disposition: entry.disposition,
+      ...(entry.note === undefined ? {} : { note: entry.note }),
+      created_at: entry.created_at,
+    })),
+  }));
+}

@@ -540,23 +540,22 @@ function human(value) {
                 queueRow: row,
                 isCurrent,
                 fetchRows: async (id) => {
-                    const [drafts, historicalClaims, events, attachments, judgments] = await Promise.all([
+                    const [drafts, historicalClaims, events, attachments] = await Promise.all([
                         client.listTaskEvidence({ taskId: id, limit: 20 }),
                         client.listTaskHistoricalClaims({ taskId: id, limit: 100 }),
                         client.getTaskEvents({ taskId: id, limit: 50 }),
                         // deployments without a bucket simply show no files section
                         client.listTaskAttachments({ taskId: id }).catch(() => []),
-                        // the judgments about the task's place (p4); a failed
-                        // read keeps the rest of the task reviewable and the
-                        // panel states the reason
-                        client.listJudgmentsForTaskPlace({ taskId: id }).catch((error) => {
-                            judgmentsError = (error && error.message) || "unknown error";
-                            return [];
-                        }),
                     ]);
-                    return { drafts, historicalClaims, events, attachments, judgments };
+                    return { drafts, historicalClaims, events, attachments };
                 },
                 fetchSnapshot: (id, evidenceDraftId) => client.getReviewSnapshot({ taskId: id, evidenceDraftId, includeJudgments: true }),
+                // the bound snapshot supplies full rows in the same response;
+                // fall back only when that response has no display field.
+                fetchJudgments: (id) => client.listJudgmentsForTaskPlace({ taskId: id }).catch((error) => {
+                    judgmentsError = (error && error.message) || "unknown error";
+                    return [];
+                }),
             });
             if (loaded === null) return;
             const content = loaded.content;
@@ -564,7 +563,7 @@ function human(value) {
             state.reviewSnapshotError = loaded.snapshotError;
             state.attachments = loaded.attachments;
             state.judgments = loaded.judgments;
-            state.judgmentsError = loaded.snapshot?.snapshot?.recorded_judgments ? "" : judgmentsError;
+            state.judgmentsError = Array.isArray(loaded.snapshot?.displayed_judgments) ? "" : judgmentsError;
             state.content = content;
             state.drafts = content.drafts;
             state.historicalClaims = content.historicalClaims;
@@ -1674,7 +1673,7 @@ function human(value) {
                     say(`Recorded: ${label}. The evidence also changed; select the task again to review it before deciding.`, "done");
                     return;
                 }
-                const rows = bound ? refreshed.snapshot.recorded_judgments : await client.listJudgmentsForTaskPlace({ taskId: task.task_id });
+                const rows = bound ? refreshed.displayed_judgments : await client.listJudgmentsForTaskPlace({ taskId: task.task_id });
                 if (!isCurrent()) return;
                 if (bound) {
                     state.reviewSnapshot = refreshed;

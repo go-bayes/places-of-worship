@@ -1,6 +1,6 @@
 // recorded-confidence panel (p4, 2026-10-01): renders the agent judgments
-// about the place a task is about, as agentJudgments:listJudgmentsForTaskPlace
-// returns them (stored rows, each with its newest dispositions embedded),
+// about the place a task is about, from getReviewSnapshot.displayed_judgments
+// (stored rows, each with its newest dispositions embedded),
 // beside the human controls. pure rendering and pure mapping: nothing here
 // submits. the portal wires the disposition buttons, and the decision form
 // stays the only path to a review decision. a tier orders review and decides
@@ -55,7 +55,7 @@
     // one line under the pills; the pill itself carries the tier word alone
     const TIER_HINTS = {
         screened: "Machine-screened. No tier accepts; the decision stays yours.",
-        review: "A component or an indicator fell short of the cut points.",
+        review: "The composite, a component or an indicator fell short of the cut points.",
         escalate: "The scorer asks for a closer look before any decision.",
     };
 
@@ -204,7 +204,7 @@
         const parts = [];
         if (judge.kind === "deterministic") {
             parts.push(judge.agent_name);
-            parts.push(row.confidence ? `confidence ${row.confidence} · provisional and uncalibrated (P5 replaces it)` : "legacy row: categorical confidence unrecorded");
+            parts.push(row.confidence ? `confidence ${row.confidence} · provisional and uncalibrated (until calibration replaces it)` : "legacy row: categorical confidence unrecorded");
             parts.push(judge.standard_version);
         } else {
             const model = judge.model_reported
@@ -242,7 +242,8 @@
             : "";
         return `
             <div class="judgment-block" data-judgment-id="${escapeHtml(row.judgment_id)}">
-                <p><strong>${escapeHtml(kindLabel(row.judgment_kind))}: ${escapeHtml(words(row.outcome))}</strong> <span class="muted">· ${rowMetaHtml(row)}</span></p>
+                <p><strong>${escapeHtml(kindLabel(row.judgment_kind))}: ${escapeHtml(words(row.outcome))}</strong>${deterministic ? ' <span class="pill">provisional</span>' : ""} <span class="muted">· ${rowMetaHtml(row)}</span></p>
+                ${deterministic ? `<p class="muted">Confidence on scorer rows is the scorer's support for each component (worship continues; pin within 75 m), not a calibrated probability; low support reads as unknown or unclear, never as a negative finding.</p>` : ""}
                 ${earlier}
                 ${basis}
                 ${dispositionsHtml(row, viewerId)}

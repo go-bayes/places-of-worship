@@ -210,10 +210,11 @@ test("judgments pass through the load untouched, outside the snapshot", async ()
 
 test("opted-in snapshots supply the displayed judgments, including an empty set", async () => {
     for (const bound of [[], [{ judgment_id: "bound", dispositions: [{ disposition_id: "d" }] }]]) {
-        const snapshot = { snapshot_hash: "bound-hash", base_snapshot_hash: "base", snapshot: { task: { task_id: "A" }, draft: { evidence_draft_id: "A:d" }, recorded_judgments: bound } };
+        const snapshot = { snapshot_hash: "bound-hash", base_snapshot_hash: "base", displayed_judgments: bound, snapshot: { task: { task_id: "A" }, draft: { evidence_draft_id: "A:d" }, recorded_judgments: bound.map((row) => ({ judgment_id: row.judgment_id })) } };
         const loaded = await loadSelection({ taskId: "A", queueRow: {}, isCurrent: () => true,
             fetchRows: async () => ({ drafts: [{ evidence_draft_id: "A:d" }], judgments: [{ judgment_id: "unbound" }] }),
-            fetchSnapshot: async () => snapshot });
+            fetchSnapshot: async () => snapshot,
+            fetchJudgments: async () => { throw new Error("redundant judgment read"); } });
         assert.deepEqual(loaded.judgments, bound);
         assert.equal(loaded.snapshot, snapshot);
     }
@@ -222,10 +223,34 @@ test("opted-in snapshots supply the displayed judgments, including an empty set"
 test("judgment refresh advances only when the displayed evidence is unchanged", () => {
     const canRefresh = window.PowReviewSnapshotContent.canRefreshJudgments;
     const before = { base_snapshot_hash: "base", snapshot: { recorded_judgments: [{ judgment_id: "j" }] } };
-    const after = { base_snapshot_hash: "base", snapshot: { recorded_judgments: [] } };
+    const after = { base_snapshot_hash: "base", displayed_judgments: [], snapshot: { recorded_judgments: [] } };
     assert.equal(canRefresh(before, after), true);
     assert.equal(canRefresh(before, { ...after, base_snapshot_hash: "changed" }), false);
     assert.equal(canRefresh(before, { ...after, snapshot: {} }), false);
     assert.equal(canRefresh(null, after), false);
     assert.equal(canRefresh({}, {}), false);
+});
+
+test("a separate judgment read runs only when the snapshot has no displayed rows field", async () => {
+    for (const mode of ["legacy", "failed", "no-draft"]) {
+        const calls = [];
+        const rows = [{ judgment_id: "fallback", outcome: "unknown" }];
+        const loaded = await loadSelection({ taskId: "A", queueRow: {}, isCurrent: () => true,
+            fetchRows: async () => ({ drafts: mode === "no-draft" ? [] : [{ evidence_draft_id: "A:d" }] }),
+            fetchSnapshot: async () => {
+                if (mode === "failed") throw new Error("outage");
+                return { snapshot: { recorded_judgments: [{ judgment_id: "address-only" }] } };
+            },
+            fetchJudgments: async (taskId) => { calls.push(taskId); return rows; } });
+        assert.deepEqual(calls, ["A"]);
+        assert.equal(loaded.judgments, rows);
+    }
+});
+
+test("a superseded fallback judgment read cannot replace the selected task", async () => {
+    let current = true;
+    const loaded = await loadSelection({ taskId: "A", queueRow: {}, isCurrent: () => current,
+        fetchRows: async () => ({}), fetchSnapshot: async () => null,
+        fetchJudgments: async () => { current = false; return [{ judgment_id: "late" }]; } });
+    assert.equal(loaded, null);
 });

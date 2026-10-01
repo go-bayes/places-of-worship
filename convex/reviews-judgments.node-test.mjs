@@ -29,11 +29,15 @@ test("omitting the optional binding retains the historical snapshot input, even 
   const legacy = await getReviewSnapshot._handler(w.ctx, w.args);
   assert.equal("recorded_judgments" in legacy.snapshot, false);
   assert.equal("base_snapshot_hash" in legacy, false);
+  assert.equal("displayed_judgments" in legacy, false);
   const bound = await getReviewSnapshot._handler(w.ctx, { ...w.args, includeJudgments: true });
   const { recorded_judgments, ...oldInput } = bound.snapshot;
   assert.equal(sha256(canonicalJson(oldInput)), legacy.snapshot_hash);
   assert.equal(bound.base_snapshot_hash, legacy.snapshot_hash);
-  assert.deepEqual(recorded_judgments, await listJudgmentsForTaskPlace._handler(w.ctx, { taskId: "t" }));
+  assert.deepEqual(bound.displayed_judgments, await listJudgmentsForTaskPlace._handler(w.ctx, { taskId: "t" }));
+  assert.deepEqual(recorded_judgments, [{ judgment_id: "j", created_at: 1, dispositions: [] }]);
+  assert.equal("displayed_judgments" in bound.snapshot, false);
+  assert.equal(sha256(canonicalJson(bound.snapshot)), bound.snapshot_hash);
   assert.deepEqual(recorded_judgments.map((row) => row.judgment_id), ["j"]);
   assert.notEqual(bound.snapshot_hash, legacy.snapshot_hash);
   await recordReviewDecision._handler(w.ctx, { taskId: "t", snapshotHash: legacy.snapshot_hash, decision: w.decision });
@@ -43,10 +47,10 @@ test("omitting the optional binding retains the historical snapshot input, even 
 test("new judgments and dispositions invalidate opted-in snapshots on both decision routes", async () => {
   for (const batch of [false, true]) for (const change of ["judgment", "disposition", "note"]) {
     const w = await scene();
-    if (change === "note") await w.db.insert("judgment_dispositions", { disposition_id: "disp", judgment_id: "j", disposition: "agreed", note: "before", created_at: 3 });
+    if (change === "note") await w.db.insert("judgment_dispositions", { disposition_id: "disp", judgment_id: "j", reviewer_user_id: "reviewer", disposition: "agreed", note: "before", created_at: 3 });
     const before = await getReviewSnapshot._handler(w.ctx, { ...w.args, includeJudgments: true });
     if (change === "judgment") await w.db.insert("agent_judgments", { judgment_id: "j2", subject_ref: "osm:way/1001", outcome: "review", created_at: 4 });
-    else if (change === "disposition") await w.db.insert("judgment_dispositions", { disposition_id: "disp", judgment_id: "j", disposition: "agreed", created_at: 3 });
+    else if (change === "disposition") await w.db.insert("judgment_dispositions", { disposition_id: "disp", judgment_id: "j", reviewer_user_id: "reviewer", disposition: "agreed", created_at: 3 });
     else w.rows.judgment_dispositions[0].note = "after";
     const after = await getReviewSnapshot._handler(w.ctx, { ...w.args, includeJudgments: true });
     assert.equal(after.base_snapshot_hash, before.base_snapshot_hash);
@@ -66,13 +70,28 @@ test("an opted-in hash cannot be submitted through the legacy path", async () =>
   await assert.rejects(decide(w, bound, false, false), /stale/);
 });
 
-test("empty opted-in sets are bound and the existing snapshot size limit still applies", async () => {
-  const w = await scene();
-  w.rows.agent_judgments = [];
-  const empty = await getReviewSnapshot._handler(w.ctx, { ...w.args, includeJudgments: true });
-  assert.deepEqual(empty.snapshot.recorded_judgments, []);
-  await w.db.insert("agent_judgments", { judgment_id: "large", subject_ref: "osm:way/1001", basis_note: "x".repeat(128 * 1024), created_at: 4 });
-  await assert.rejects(decide(w, empty, false), /stale/);
-  const large = await getReviewSnapshot._handler(w.ctx, { ...w.args, includeJudgments: true });
-  await assert.rejects(decide(w, large, false), /exceeds 128 KiB/);
+test("many large displayed rows stay well below the snapshot cap on both decision routes", async () => {
+  for (const batch of [false, true]) {
+    const w = await scene();
+    w.rows.agent_judgments = [];
+    const empty = await getReviewSnapshot._handler(w.ctx, { ...w.args, includeJudgments: true });
+    assert.deepEqual(empty.snapshot.recorded_judgments, []);
+    assert.deepEqual(empty.displayed_judgments, []);
+    for (let i = 0; i < 200; i += 1) {
+      const judgment_id = sha256(`judgment-${i}`);
+      await w.db.insert("agent_judgments", { judgment_id, subject_ref: "osm:way/1001", basis_note: "x".repeat(4000), score: { signal_values: { tag_count: 9 } }, created_at: i });
+      await w.db.insert("judgment_dispositions", { disposition_id: sha256(`disposition-${i}`), judgment_id, reviewer_user_id: "reviewer", disposition: "agreed", note: "Checked the source.", created_at: i });
+    }
+    await assert.rejects(decide(w, empty, false), /stale/);
+    const large = await getReviewSnapshot._handler(w.ctx, { ...w.args, includeJudgments: true });
+    assert.equal(large.displayed_judgments.length, 200);
+    assert.ok(Buffer.byteLength(canonicalJson(large.displayed_judgments)) > 128 * 1024);
+    assert.ok(Buffer.byteLength(canonicalJson(large.snapshot)) < 80 * 1024);
+    for (const binding of large.snapshot.recorded_judgments) {
+      assert.deepEqual(Object.keys(binding), ["judgment_id", "created_at", "dispositions"]);
+      assert.deepEqual(Object.keys(binding.dispositions[0]), ["disposition_id", "reviewer_user_id", "disposition", "note", "created_at"]);
+    }
+    await decide(w, large, batch);
+    assert.deepEqual(JSON.parse(w.rows.review_snapshots[0].snapshot_json).recorded_judgments, large.snapshot.recorded_judgments);
+  }
 });

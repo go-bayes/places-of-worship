@@ -67,6 +67,7 @@ test("tier pill: the tier word, amber for escalate alone, with its one-line hint
     const screenedHtml = panel.panelHtml(screened);
     assert.match(screenedHtml, /<span class="pill grey">screened<\/span>/);
     assert.match(screenedHtml, /No tier accepts; the decision stays yours/);
+    assert.match(panel.panelHtml(review), /The composite, a component or an indicator fell short of the cut points\./);
     assert.doesNotMatch(screenedHtml, /pill green/);
 });
 
@@ -136,7 +137,10 @@ test("one block per judgment row, each with four disposition controls and a note
     assert.match(html, /<strong>Duplicate: unclear<\/strong>/);
     // each categorical assessment carries its provisional status
     assert.match(html, /<strong>Status: likely active<\/strong>/);
-    assert.match(html, /confidence medium · provisional and uncalibrated \(P5 replaces it\)/);
+    assert.match(html, /confidence medium · provisional and uncalibrated \(until calibration replaces it\)/);
+    assert.equal((html.match(/<span class="pill">provisional<\/span>/g) || []).length, review.length);
+    assert.match(html, /<strong>Status: likely active<\/strong> <span class="pill">provisional<\/span>/);
+    assert.match(html, /<p class="muted">Confidence on scorer rows is the scorer's support for each component \(worship continues; pin within 75 m\), not a calibrated probability; low support reads as unknown or unclear, never as a negative finding\.<\/p>/);
     // the long generated basis note folds away
     assert.match(html, /<summary>Basis note<\/summary>/);
 });
@@ -185,6 +189,7 @@ test("a model judgment about the place renders its provider, model and confidenc
     const alone = panel.panelHtml([model]);
     assert.doesNotMatch(alone, /pill grey|pill amber/);
     assert.doesNotMatch(alone, /Deterministic/);
+    assert.doesNotMatch(alone, /provisional|Confidence on scorer rows/);
     assert.match(alone, /<span class="pill">AI-generated<\/span>/);
     assert.doesNotMatch(alone, /Outcome left open/);
 });
