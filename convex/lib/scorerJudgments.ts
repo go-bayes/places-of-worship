@@ -31,6 +31,9 @@ export const SCORER_FACET_BY_KIND: Readonly<Record<string, string | undefined>> 
   duplicate: "duplicate",
 };
 
+// component outcomes are the non-committal values; the registration_confidence outcome is the tier
+const SCORER_OUTCOME_BY_KIND: Readonly<Record<string, string | undefined>> = { status_assessment: "unknown", location: "unclear", duplicate: "unclear" };
+
 // a closed Convex object: a key outside it is refused before any handler runs
 export const deterministicJudgmentInput = v.object({
   schema_version: v.literal(JUDGMENT_SCHEMA_VERSION_1_1),
@@ -166,6 +169,12 @@ export function validateScorerJudgment(input: JudgmentInput): void {
   if (input.run.agent_run_id === undefined || !input.run.agent_run_id.startsWith(runPrefix) || !CONVERTER_VERSION.test(input.run.agent_run_id.slice(runPrefix.length))) {
     throw new Error("A scorer run id is osm-confidence:<edition>:<vector hash prefix>:<converter version>.");
   }
+  if (score.calibrated !== false) throw new Error("A scorer score is an uncalibrated heuristic: calibrated is false.");
+  const fixedOutcome = SCORER_OUTCOME_BY_KIND[input.judgment_kind];
+  if (fixedOutcome !== undefined && input.outcome !== fixedOutcome) {
+    throw new Error(`A ${input.judgment_kind} scorer judgment has outcome ${fixedOutcome}.`);
+  }
+  if (input.judgment_kind === "duplicate" && score.indicators.duplicate !== true) throw new Error("A duplicate scorer judgment requires the duplicate indicator.");
   for (const component of ["identity", "location", "status", "denomination"] as const) {
     for (const term of score.signals_fired[component]) {
       if (!SCORER_SIGNALS_FIRED[component].includes(term)) throw new Error(`Signal ${term} is not in the scorer's ${component} vocabulary.`);
@@ -176,6 +185,10 @@ export function validateScorerJudgment(input: JudgmentInput): void {
   for (const term of score.indicators.conflict_reasons) if (!SCORER_CONFLICT_REASONS.includes(term)) throw new Error(`Conflict reason ${term} is not in the scorer's vocabulary.`);
   if (input.basis_note === undefined || input.basis_note === "") throw new Error("A scorer judgment carries a basis note.");
   if (!BASIS_ALPHABET.test(input.basis_note)) throw new Error("A scorer basis note uses only the closed character set.");
-  if (hasPersonalDetails(input.basis_note)) throw new Error("A scorer basis note may carry no personal details.");
-  if (input.basis_note !== scorerBasisNote(input)) throw new Error("A scorer basis note is the generated text for its fields.");
+  // the generated text is built from validated fields only (hex digests, bounded numbers, closed vocabularies), so an exact
+  // match needs no personal-detail screen, and a digit run inside a valid digest cannot trip the telephone pattern
+  if (input.basis_note !== scorerBasisNote(input)) {
+    if (hasPersonalDetails(input.basis_note)) throw new Error("A scorer basis note may carry no personal details.");
+    throw new Error("A scorer basis note is the generated text for its fields.");
+  }
 }

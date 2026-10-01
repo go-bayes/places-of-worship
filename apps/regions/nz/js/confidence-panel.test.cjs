@@ -88,9 +88,12 @@ test("composite and the four components beside the cut points; a component under
     const html = panel.panelHtml(screened);
     assert.match(html, /<div>Composite<\/div><div>0\.9126 <span class="muted score-note">screened ≥ 0\.9, review ≥ 0\.6<\/span><\/div>/);
     assert.match(html, /<div>Identity<\/div><div>0\.97 <span class="muted score-note">floor 0\.7<\/span><\/div>/);
-    assert.match(html, /<div>Denomination<\/div><div>0\.93 <span class="muted score-note">outside the composite<\/span><\/div>/);
+    assert.match(html, /<div>Denomination<\/div><div>0\.93 <span class="muted score-note">floor 0\.7<\/span> <span class="muted score-note">outside the composite<\/span><\/div>/);
     assert.doesNotMatch(html, /below floor/);
     const low = panel.panelHtml(escalate);
+    const denomination = JSON.parse(JSON.stringify(screened));
+    for (const row of denomination) if (row.score) row.score.components.denomination = 0.5;
+    assert.match(panel.panelHtml(denomination), /<div>Denomination<\/div><div>0\.5 <span class="pill amber">below floor<\/span> <span class="muted score-note">floor 0\.7<\/span> <span class="muted score-note">outside the composite<\/span><\/div>/);
     assert.match(low, /<div>Identity<\/div><div>[0-9.]+ <span class="pill amber">below floor<\/span> <span class="muted score-note">floor 0\.7<\/span><\/div>/);
 });
 

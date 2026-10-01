@@ -114,3 +114,25 @@ test("the cross-source indicator count is a bounded integer", () => {
     assert.throws(() => validateScorerJudgment(row), /count from 0 to 100/);
   }
 });
+
+test("calibration and component outcomes cannot be asserted", () => {
+  const put = (row, patch) => { const copy = clone(row); patch(copy); return copy; };
+  assert.throws(() => validateScorerJudgment(put(tier, (r) => { r.score.calibrated = true; })), /uncalibrated/);
+  const status = rows.find((row) => row.judgment_kind === "status_assessment");
+  const location = rows.find((row) => row.judgment_kind === "location");
+  assert.throws(() => validateScorerJudgment(put(status, (r) => { r.outcome = "likely_active"; })), /outcome unknown/);
+  assert.throws(() => validateScorerJudgment(put(location, (r) => { r.outcome = "implausible"; })), /outcome unclear/);
+  const duplicate = rows.find((row) => row.judgment_kind === "duplicate");
+  if (duplicate !== undefined) assert.throws(() => validateScorerJudgment(put(duplicate, (r) => { r.score.indicators.duplicate = false; })), /duplicate indicator/);
+});
+
+test("digit runs inside valid digests and scores do not trip the personal-detail screen", () => {
+  const row = clone(tier);
+  row.judge.code_revision = `012345678901${"a".repeat(28)}`;
+  row.basis_note = scorerBasisNote(row);
+  validateScorerJudgment(row);
+  const low = clone(tier);
+  low.score.composite = 0.0123456789;
+  low.basis_note = scorerBasisNote(low);
+  validateScorerJudgment(low);
+});

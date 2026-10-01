@@ -144,9 +144,9 @@
         const cut = score.cut_points || {};
         const components = score.components || {};
         const floor = Number.isFinite(cut.component_floor) ? cut.component_floor : null;
-        const component = (label, value) => [
+        const component = (label, value, note = "") => [
             label,
-            `${num(value)}${floor !== null && value < floor ? ` <span class="pill amber">below floor</span>` : ""}${floor !== null ? ` <span class="muted score-note">floor ${num(floor)}</span>` : ""}`,
+            `${num(value)}${floor !== null && value < floor ? ` <span class="pill amber">below floor</span>` : ""}${floor !== null ? ` <span class="muted score-note">floor ${num(floor)}</span>` : ""}${note}`,
         ];
         const composite = [
             Number.isFinite(cut.screened_min_composite) ? `screened ≥ ${num(cut.screened_min_composite)}` : "",
@@ -157,7 +157,7 @@
             component("Identity", components.identity),
             component("Location", components.location),
             component("Status", components.status),
-            ["Denomination", `${num(components.denomination)} <span class="muted score-note">outside the composite</span>`],
+            component("Denomination", components.denomination, ` <span class="muted score-note">outside the composite</span>`),
         ]);
     }
 

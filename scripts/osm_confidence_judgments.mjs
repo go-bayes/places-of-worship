@@ -48,8 +48,8 @@ function fail(message) {
   throw new Error(message);
 }
 
-function sha256File(file) {
-  return crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
+function sha256Bytes(bytes) {
+  return crypto.createHash("sha256").update(bytes).digest("hex");
 }
 
 function sameJson(a, b) {
@@ -196,9 +196,11 @@ function featureRows(m, vectorsSha, record) {
 }
 
 export function convert({ vectorsPath, manifestPath, limit, osmKeys = [] }) {
-  const vectorsSha = sha256File(vectorsPath);
+  // one read: the hash the manifest approves and the text converted are the same bytes
+  const bytes = fs.readFileSync(vectorsPath);
+  const vectorsSha = sha256Bytes(bytes);
   const m = readManifest(manifestPath, vectorsSha);
-  const text = fs.readFileSync(vectorsPath, "utf8");
+  const text = bytes.toString("utf8");
   const lines = text.split("\n").filter((line) => line.trim() !== "");
   if (m.entry.row_count !== undefined && m.entry.row_count !== lines.length) fail("the vector file's line count differs from the manifest row_count");
   const counts = { features: 0, in_scope: 0, out_of_scope: 0, rows_by_kind: {}, tiers: {} };
