@@ -1647,45 +1647,56 @@ function human(value) {
             const token = state.selectionToken;
             const isCurrent = () => state.selectionToken === token && state.selected?.task?.task_id === task.task_id;
             const buttons = block.querySelectorAll("button[data-disposition]");
+            const label = window.PowConfidencePanel.dispositionLabel(disposition).toLowerCase();
             buttons.forEach((entry) => { entry.disabled = true; });
             say("Recording...");
             setTransport("saving");
+            // the write and the re-read are reported apart: a write that
+            // stood is never shown as a failure, so no retry appends a
+            // second row
+            let recorded = false;
             try {
                 await client.recordJudgmentDisposition({ judgmentId, disposition, note: note || undefined });
+                recorded = true;
                 if (!isCurrent()) return;
                 const rows = await client.listJudgmentsForTaskPlace({ taskId: task.task_id });
                 if (!isCurrent()) return;
                 state.judgments = Array.isArray(rows) ? rows : [];
                 state.judgmentsError = "";
                 setTransport("ready");
-                rerenderConfidencePanel(task, judgmentId, `Recorded: ${window.PowConfidencePanel.dispositionLabel(disposition).toLowerCase()}.`);
+                rerenderJudgmentBlock(judgmentId, `Recorded: ${label}.`);
             } catch (error) {
                 if (!isCurrent()) return;
                 setTransport("ready");
                 buttons.forEach((entry) => { entry.disabled = false; });
-                say(error.message || "Could not record the disposition.", "broken");
+                if (recorded) {
+                    say(`Recorded: ${label}. The list could not be refreshed (${error.message || "unknown error"}); select the task again to see it.`, "done");
+                } else {
+                    say(error.message || "Could not record the disposition.", "broken");
+                }
             }
         });
     }
 
-    // replaces the panel alone, so the decision form in progress below it
-    // keeps its values; the status line names the row just disposed of
-    function rerenderConfidencePanel(task, judgmentId, message) {
-        const old = document.getElementById("confidencePanel");
-        if (!old) return;
-        const html = confidencePanelHtml();
-        if (!html) {
-            old.remove();
-            return;
-        }
+    // replaces the disposed row's block alone: the listener sits on the
+    // panel, so nothing is rewired, and a note typed under another row, an
+    // open disclosure and the decision form below all stay as they were
+    function rerenderJudgmentBlock(judgmentId, message) {
+        const panel = document.getElementById("confidencePanel");
+        const escaped = window.CSS?.escape ? window.CSS.escape(judgmentId) : judgmentId;
+        const old = panel?.querySelector(`[data-judgment-id="${escaped}"]`);
+        const row = state.judgments.find((entry) => entry?.judgment_id === judgmentId);
+        if (!panel || !old || !row) return;
         const template = document.createElement("template");
-        template.innerHTML = html.trim();
+        template.innerHTML = window.PowConfidencePanel.judgmentBlockHtml(
+            row,
+            window.PowConfidencePanel.leadJudgment(state.judgments),
+            state.user?._id,
+        ).trim();
         const fresh = template.content.firstElementChild;
         if (!fresh) return;
         old.replaceWith(fresh);
-        wireConfidencePanel(task);
-        const block = fresh.querySelector(`[data-judgment-id="${window.CSS?.escape ? window.CSS.escape(judgmentId) : judgmentId}"]`);
-        const status = block?.querySelector(".judgment-status");
+        const status = fresh.querySelector(".judgment-status");
         if (status && message) {
             status.textContent = message;
             status.className = "judgment-status state-banner tone-done";

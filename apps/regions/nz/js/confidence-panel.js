@@ -295,6 +295,9 @@
         needsNote,
         leadJudgment,
         sameScore,
+        // one block, so the portal can replace the disposed row alone and
+        // leave a note typed under another row where it is
+        judgmentBlockHtml,
         panelHtml,
     };
     if (typeof window !== "undefined") window.PowConfidencePanel = api;

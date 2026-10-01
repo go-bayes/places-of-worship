@@ -186,6 +186,18 @@ test("a model judgment about the place renders its provider, model and confidenc
     assert.doesNotMatch(alone, /Outcome left open/);
 });
 
+test("one block renders alone with the same markup the panel uses, so a disposed row can be replaced in place", () => {
+    const row = stored(inputs[0], 0, {
+        dispositions: [{ disposition_id: "d1", judgment_id: fixture.judgment_ids[0], reviewer_user_id: "users:me", disposition: "corrected", note: "Footprint is the hall next door.", created_at: BASE + 1000 }],
+    });
+    const block = panel.judgmentBlockHtml(row, panel.leadJudgment([row, ...screened.slice(1)]), "users:me").trim();
+    assert.match(block, /^<div class="judgment-block" data-judgment-id="[0-9a-f]{64}">/);
+    assert.match(block, /Corrected · you · 2026-10-01 · “Footprint is the hall next door\.”/);
+    assert.match(block, /<\/div>\s*$/);
+    const whole = panel.panelHtml([row, ...screened.slice(1)], { viewerId: "users:me" });
+    assert.ok(whole.includes(block), "the panel embeds exactly the block the block renderer returns");
+});
+
 test("a row scored under another edition says so in its block", () => {
     const earlier = {
         ...screened[1],
