@@ -1,7 +1,7 @@
 // the portal's first screen (jb 2026-09-19: "fewer words", "land on
 // hybrid", "keep the data sources buttons on the map with a fold"): the
-// sign-in card carries the google button, one way to ask for access and the
-// account help; the map lands on hybrid where imagery exists and returns
+// sign-in card carries the clerk sign-in (google or an email code, since
+// c1), one way to ask for access and the account help; the map lands on hybrid where imagery exists and returns
 // there when a mode ends; the map data panel folds to its bar and remembers
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -75,9 +75,10 @@ const fresh = () => Object.create(window.NzVerificationMap.prototype);
   app.renderBackendPanel();
   const html = panel.innerHTML;
   assert.match(html, /1\. Sign in to start/);
-  assert.match(html, /id="googleSignInButton"/);
+  assert.match(html, /id="clerkSignInHost"/);
+  assert.match(html, /Sign in with Google or an email code\./);
   assert.match(html, /class="join-button"[^>]*>Contact to join</, "one brief way to ask for access");
-  assert.match(html, /<summary>Wrong account showing\?<\/summary>/, "the account help stays, folded");
+  assert.match(html, /<summary>Which address\?<\/summary>/, "the account help stays, folded");
   assert.doesNotMatch(html, /Use the Google account JB invited/, "the invitation paragraph is gone");
   assert.doesNotMatch(html, /Assigned batch/, "the batch id lives in the header, not the card");
   assert.doesNotMatch(html, /Not a project member yet/, "the access paragraph became the button");

@@ -384,6 +384,90 @@ const mountElements = () => {
     assert.equal(document.getElementById("quickPhotoWrap").hidden, false);
   }
 
+  // #153 round 3 (astra): a's open capture does not survive into b's
+  // session. a opens a quick photo with a name and a note; clerk replaces
+  // a's session with b's; b signs in and presses send: nothing of a's is sent
+  {
+    const app = fresh();
+    mountElements();
+    app.attachmentsEnabledCache = true;
+    const revoked = [];
+    window.URL.revokeObjectURL = (url) => revoked.push(url);
+    element("quickPhotoInput", { click() {}, value: "C:\\fakepath\\IMG_1.jpg" });
+    element("pinEvidenceFiles", { value: "C:\\fakepath\\IMG_1.jpg" });
+    app.requestPosition = () => Promise.resolve({ latitude: -41.3, longitude: 174.8, accuracyM: 8 });
+    Object.assign(app, {
+      backendTasksById: new Map(), latestDraftsByTaskId: new Map(), myWorkItems: [], myNominationItems: [],
+      withdrawnNominationTaskIds: new Set(), revisionDraftIdsByTaskId: new Map(), formSnapshotsByTaskId: new Map(),
+      guidedPeriodsByTaskId: new Map(), taskHistoryByTaskId: new Map(), rapidCorrectionTaskIds: new Set(["task_a"]),
+      markerLayer: { clearLayers() {} }, filteredTasks: [], formDirty: false,
+    });
+    let popupsClosed = 0;
+    app.map.closePopup = () => { popupsClosed += 1; };
+    app.startQuickPhoto();
+    app.quickPhotoChosen(photo);
+    await tick();
+    document.getElementById("quickPhotoName").value = "Member A's chapel";
+    document.getElementById("quickPhotoNote").value = "A's private note";
+    assert.ok(app.quickPhoto?.fix, "a's capture is open with a fix");
+
+    // clerk replaces a's session with b's
+    app.onBackendSessionEnded({ deliberate: false, replaced: true });
+    assert.equal(app.quickPhoto, null, "the capture closes with the session");
+    assert.deepEqual(revoked, ["blob:photo"], "its preview url is revoked");
+    assert.equal(document.getElementById("pinCardHost").innerHTML, "", "the card leaves the screen");
+    assert.equal(document.getElementById("quickPhotoInput").value, "", "the file input is emptied");
+    assert.equal(document.getElementById("pinEvidenceFiles").value, "");
+    assert.equal(app.quickPhotoCarry, null);
+    assert.equal(app.rapidCorrectionTaskIds.size, 0);
+    assert.ok(popupsClosed >= 1, "an open map popup closes");
+
+    // b signs in and presses send: nothing is submitted
+    app.backendUser = { _id: "user_b", initials: "B" };
+    app.backend.user = app.backendUser;
+    let sent = 0;
+    app.backend.submitCurrentObservation = async () => { sent += 1; return {}; };
+    await app.sendQuickPhoto();
+    assert.equal(sent, 0, "nothing of a's is sent as b");
+
+    // even a capture that somehow outlived its session is refused and closed
+    app.quickPhoto = { fix: { latitude: -41.3, longitude: 174.8, accuracyM: 8 }, file: photo, submissionId: "s", epoch: (app.sessionEpoch || 0) - 1, ownerId: "user_1", nearbyShown: true };
+    await app.sendQuickPhoto();
+    assert.equal(sent, 0);
+    assert.equal(app.quickPhoto, null);
+
+    // a photo picked after the session that opened the picker ended opens
+    // nothing; a late position answer never reaches a newer capture
+    app.backendUser = { _id: "user_a", initials: "A" };
+    let resolveFix;
+    app.requestPosition = () => new Promise((resolve) => { resolveFix = resolve; });
+    app.startQuickPhoto();
+    app.onBackendSessionEnded({ deliberate: false });
+    app.backendUser = { _id: "user_b", initials: "B" };
+    app.quickPhotoChosen(photo);
+    assert.equal(app.quickPhoto, null, "a's pick does not open a capture for b");
+    // a capture opened by a whose position is still pending when b takes over
+    app.backendUser = { _id: "user_a", initials: "A" };
+    let resolveAFix;
+    app.requestPosition = () => new Promise((resolve) => { resolveAFix = resolve; });
+    app.startQuickPhoto();
+    app.quickPhotoChosen(photo);
+    assert.ok(app.quickPhoto, "a's capture is open, its position pending");
+    app.onBackendSessionEnded({ deliberate: false, replaced: true });
+    app.backendUser = { _id: "user_b", initials: "B" };
+    app.requestPosition = () => new Promise(() => {});
+    app.startQuickPhoto();
+    app.quickPhotoChosen(photo);
+    assert.ok(app.quickPhoto, "b's own pick opens b's capture");
+    resolveFix({ latitude: 1, longitude: 1, accuracyM: 5 });
+    resolveAFix({ latitude: 2, longitude: 2, accuracyM: 5 });
+    await tick();
+    await tick();
+    assert.equal(app.quickPhoto.fix, null, "a's late position answer is not b's");
+    app.closeQuickPhoto();
+    window.URL.revokeObjectURL = () => {};
+  }
+
   console.log("quick-photo: ok");
 })().catch(error => {
   console.error(error);
