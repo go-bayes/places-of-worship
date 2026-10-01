@@ -150,7 +150,7 @@ test("ingest refuses a mismatched hash, mixed countries, v1 and model rows, and 
     au.context.country_code = "AU";
     au.score.edition_id = "osm-pow:au:edition:2026-09-01:0123abcd4567";
     await assert.rejects(run([batch[0], au]), /one country/);
-    await assert.rejects(run([{ ...structuredClone(batch[0]), schema_version: "agent-judgment.v1" }]), /v1\.1/);
+    await assert.rejects(run([{ ...structuredClone(batch[0]), schema_version: "agent-judgment.v1" }]), /schema_version/);
     const model = { ...structuredClone(batch[0]), judge: { agent_name: "claude-batch-reviewer", model_provider: "claude", model_requested: "sonnet", model_unreported_reason: "none", prompt_version: "agent-review.v1", standard_version: "confidence-standard/0.3.0" }, run: { attempt: 1, cost_basis: "unknown" } };
     await assert.rejects(run([model]), /scorer judgment|model|score/i);
     await assert.rejects(run(Array.from({ length: 101 }, () => batch[0])), /At most 100/);
