@@ -36,6 +36,7 @@ const document = {
   querySelectorAll() { return []; },
 };
 const window = {
+  crypto: require("node:crypto").webcrypto,
   __POW_TEST_NO_BOOTSTRAP__: true,
   location: { search: "?batch=nz-temporal-ra-workpack-001", pathname: "/apps/regions/nz/verification.html" },
   localStorage, sessionStorage: localStorage,
@@ -43,7 +44,7 @@ const window = {
   matchMedia: () => ({ matches: false }),
   isSecureContext: true,
 };
-const context = vm.createContext({
+const context = vm.createContext({ TextEncoder,
   window, document, localStorage, sessionStorage: localStorage, navigator: { geolocation: null },
   URLSearchParams, Map, Set, Date, Number, String, Boolean, Object, Array, Math, JSON, RegExp, Intl, console, setTimeout, clearTimeout, Promise, Error,
 });
@@ -554,7 +555,7 @@ async function roundThree() {
     app.refreshBackendTasks = () => { refreshed += 1; return refreshing.promise; };
     app.backend.submitCurrentObservation = async () => { submitted += 1; return { task_id: "t_q", task_status: "needs_review", candidate_site_id: "c1" }; };
     // the contracts and helpers the send path reads, stubbed
-    window.PowRapidEntry = { localIsoDate: () => "2026-09-24", validateObservationDetailed: () => null, observationPayload: (x) => x };
+    window.PowRapidEntry = { localIsoDate: () => "2026-09-24", validateObservationDetailed: () => null, observationPayload: (x) => x, secureSubmissionId: () => "sub_a" };
     window.PowLocationAssertion = { payload: (x) => x };
     Object.assign(app, {
       entryCountryFor: () => ({ code: "NZ", config: { targetYears: [2026] } }),
@@ -739,7 +740,6 @@ async function roundThree() {
       reviseContext: { taskId: "task_1" },
       pinConfirmed: { latitude: 1, longitude: 1 },
       pinLinkedRefs: [{ ref: "osm:1" }],
-      pinSubmissionId: "sub_a",
       pinHistory: [{}],
       occupancyDraft: { segments: [{ start: "2001", note: "a's period note" }] },
       occupancyPinContext: { context: {}, index: 0 },
@@ -752,7 +752,7 @@ async function roundThree() {
       backendTransientStatus: "Saved a's draft for St Mary's",
     });
     app.onBackendSessionEnded({ deliberate: false, replaced: true });
-    for (const field of ["reviseContext", "pinConfirmed", "pinSubmissionId", "occupancyDraft", "occupancyPinContext", "issueFormOpenTaskId", "pendingEvidenceAttachTaskId", "selectedContextFeature", "quickPhotoCarry"]) {
+    for (const field of ["reviseContext", "pinConfirmed", "occupancyDraft", "occupancyPinContext", "issueFormOpenTaskId", "pendingEvidenceAttachTaskId", "selectedContextFeature", "quickPhotoCarry"]) {
       assert.equal(app[field], null, `${field} is reset`);
     }
     assert.equal(app.pinLinkedRefs.length, 0);
@@ -889,7 +889,7 @@ async function roundThree() {
     const button = { disabled: false };
     const getElementById = document.getElementById;
     document.getElementById = (id) => ({ pinRapidCurrentForm: form, pinRapidSubmit: button }[id] || null);
-    window.PowRapidEntry = { localIsoDate: () => "2026-09-26", validateObservationDetailed: () => null, observationPayload: (x) => x };
+    window.PowRapidEntry = { localIsoDate: () => "2026-09-26", validateObservationDetailed: () => null, observationPayload: (x) => x, secureSubmissionId: () => "sub_a" };
     let recordedScreens = 0;
     Object.assign(app, {
       rapidObservationValues: () => ({ flagForDiscussion: false, directObservation: "a's hall" }),
@@ -928,22 +928,20 @@ async function roundThree() {
     assert.equal(app.manualTasksById.size, 0, "a's task is not added to b's page");
     assert.equal(sent.filter((request) => request.path === "rapidEntry:submitCurrentObservation").length, 1);
 
-    // a draft keeps its submission id across a reload: persisting stores it,
-    // restoring puts it back on the new form
+    // restore fills values only; the send helper reads persisted metadata.
+    const keptSend = JSON.parse(values.get(draftKey)).last_send;
     app.backendUser = { _id: "user_a" };
     client.user = app.backendUser;
     window.PowConvexTaskClient.adoptDeviceFor("user_a", client.sessionId);
-    const typedForm = { dataset: { submissionId: "sub_kept" } };
-    document.getElementById = (id) => (id === "pinRapidCurrentForm" ? typedForm : null);
+    const typedForm = { dataset: {} };
+    document.getElementById = id => id === "pinRapidCurrentForm" ? typedForm : null;
     app.rapidObservationValues = () => ({ directObservation: "typed, unsent" });
     app.persistRapidDraft("pin", "rapid-pin");
-    assert.equal(JSON.parse(values.get(draftKey)).submission_id, "sub_kept");
-    const reloadedForm = { dataset: { submissionId: "fresh_after_reload" } };
-    document.getElementById = (id) => (id === "pinRapidCurrentForm" ? reloadedForm : null);
+    assert.deepEqual(JSON.parse(values.get(draftKey)).last_send, keptSend);
     document.querySelector = () => null;
     for (const name of ["updateRapidSourceFields", "updateRapidDiscussionFields", "updateRapidUncertaintyField", "updateSourceLocatorField"]) app[name] = () => {};
     app.restoreRapidDraft("pin", "rapid-pin");
-    assert.equal(reloadedForm.dataset.submissionId, "sub_kept", "a retry reuses the draft's submission id");
+    assert.equal(typedForm.dataset.submissionId, undefined);
 
     document.getElementById = getElementById;
     context.fetch = previousFetch;
@@ -1003,7 +1001,7 @@ async function roundThree() {
     document.querySelector = () => null;
     window.PowRapidEntry = {
       localIsoDate: () => "2026-10-02", validateObservationDetailed: () => null,
-      observationPayload: (x) => x, secureSubmissionId: () => "sub_corrected",
+      observationPayload: (x) => x, secureSubmissionId: (() => { let n = 0; return () => ++n === 1 ? "sub_original" : "sub_corrected"; })(),
     };
     for (const name of ["updateRapidSourceFields", "updateRapidDiscussionFields", "updateRapidUncertaintyField", "updateSourceLocatorField", "bindSourceTypeahead", "renderRapidSourceLinks", "syncInlineEvidenceFiles", "showRapidFieldError", "focusDetailPanel", "applyFilters", "markFormDirty", "clearFormDirty", "exitPinMode"]) app[name] = () => {};
     let recordedTask;
@@ -1050,17 +1048,17 @@ async function roundThree() {
       app.bindRapidObservationForm("pin", options);
       const submit = () => app.submitRapidObservation("pin", { ...options, draftKey: "rapid-pin" });
       await submit();
-      assert.equal(form.dataset.sentSubmissionId, "sub_original");
+      assert.equal(form.lastSend.submission_id, "sub_original");
       assert.equal(button.disabled, false, "the lost response leaves the form available for a retry");
       await submit();
       assert.equal(sent[1].args.clientSubmissionId, "sub_original", "an unedited retry reuses the sent id");
       assert.equal(records.size, 1, "the server deduplicates the unedited retry");
       for (const fn of listeners.input) fn({ target: fields.pinDirectObservation });
-      assert.equal(form.dataset.submissionId, "sub_original", "an unchanged input event keeps the sent id with storage blocked");
+      assert.equal(form.lastSend.submission_id, "sub_original", "listeners leave the send record alone");
       fields[editedId].value = "Corrected content";
       const editListeners = editedId === "pinDirectObservation" ? listeners.input : fields[editedId].listeners.input;
       for (const fn of editListeners) fn({ target: fields[editedId] });
-      assert.equal(form.dataset.submissionId, "sub_corrected", `${editedId} rotates the live id with storage blocked`);
+      assert.equal(form.lastSend.submission_id, "sub_original", `${editedId} waits for send-time comparison`);
       await submit();
       assert.equal(sent[2].args.clientSubmissionId, "sub_corrected", "the edited retry sends a new id");
       assert.equal(records.size, 2, "the correction is recorded separately from the earlier content");
@@ -1137,252 +1135,20 @@ async function roundThree() {
     assert.equal(JSON.parse(values.get(snapshotKey)).saved_at, 444, "the newer snapshot stays");
   }
 
-  // round 6 (astra): a submission id belongs to the content it was sent
-  // with. an unedited retry reuses it; an edit after sending mints a new one;
-  // a late receipt clears only the version it sent
+  // autosave retains the last send metadata while versioning every edit.
   {
     values.clear();
     const { app } = signedInApp("user_a");
     const draftKey = "powRapidDraft2:NZ:rapid-pin";
-    window.PowRapidEntry = { secureSubmissionId: () => "sub_fresh" };
-    const form = { dataset: { submissionId: "sub_sent" } };
-    document.getElementById = (id) => (id === "pinRapidCurrentForm" ? form : null);
-    document.querySelector = () => null;
-    for (const name of ["updateRapidSourceFields", "updateRapidDiscussionFields", "updateRapidUncertaintyField", "updateSourceLocatorField"]) app[name] = () => {};
+    values.set(draftKey, JSON.stringify({ saved_at: 1, last_send: { submission_id: "sent", payload_digest: "digest" } }));
     app.rapidObservationValues = () => ({ directObservation: "v1" });
     app.persistRapidDraft("pin", "rapid-pin");
-    const sentVersion = app.rapidDraftVersion("rapid-pin");
-    app.submissionIdForContent(form.dataset, app.rapidSubmittedContent("pin"));
-    app.markRapidDraftSent("rapid-pin", "sub_sent", form.dataset.sentFingerprint);
-    // a reload before any edit: the retry reuses the sent id (server dedup)
-    const reloaded = { dataset: { submissionId: "minted_on_render" } };
-    document.getElementById = (id) => (id === "pinRapidCurrentForm" ? reloaded : null);
-    app.restoreRapidDraft("pin", "rapid-pin");
-    assert.equal(reloaded.dataset.submissionId, "sub_sent");
-    // an edit after sending: a fresh id for the new content
-    await new Promise((r) => setTimeout(r, 2));
-    app.rapidObservationValues = () => ({ directObservation: "v2, edited" });
+    const version = app.rapidDraftVersion("rapid-pin");
+    app.rapidObservationValues = () => ({ directObservation: "v2" });
     app.persistRapidDraft("pin", "rapid-pin");
-    assert.equal(reloaded.dataset.submissionId, "sub_fresh", "the edited content gets its own id");
-    assert.equal(JSON.parse(values.get(draftKey)).submission_id, "sub_fresh");
-    // the late receipt of the sent version leaves the edit alone
-    app.clearSubmittedRapidDraft("rapid-pin", sentVersion);
-    assert.equal(JSON.parse(values.get(draftKey)).values.directObservation, "v2, edited");
-  }
-  // issue 3: a queued autosave cannot mint a new id for a sent, unedited
-  // observation
-  {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    const listeners = {};
-    const form = {
-      dataset: { submissionId: "sub_sent" },
-      addEventListener(type, fn) { (listeners[type] = listeners[type] || []).push(fn); },
-      querySelectorAll: () => [],
-    };
-    document.getElementById = (id) => (id === "pinRapidCurrentForm" ? form : id === "pinRapidSubmit" ? { disabled: false } : null);
-    document.querySelector = () => null;
-    window.PowRapidEntry = { localIsoDate: () => "2026-09-30", validateObservationDetailed: () => null, observationPayload: (x) => x, secureSubmissionId: () => "sub_fresh" };
-    for (const name of ["updateRapidSourceFields", "updateRapidDiscussionFields", "updateRapidUncertaintyField", "updateSourceLocatorField", "bindSourceTypeahead", "renderRapidSourceLinks", "syncInlineEvidenceFiles", "showRapidFieldError", "renderSubmissionRecordedDetail", "focusDetailPanel", "applyFilters", "markFormDirty", "clearFormDirty"]) app[name] = () => {};
-    app.refreshBackendTasks = async () => {};
-    const receipt = later();
-    Object.assign(app, {
-      backend: { configured: true, signedIn: true, sessionId: "sess_a", user: { _id: "user_a" }, submitCurrentObservation: () => receipt.promise },
-      rapidObservationValues: () => ({ directObservation: "v1", flagForDiscussion: false }),
-      rapidPeriodsPlan: () => null,
-      pendingEvidenceFiles: () => null,
-      entryCountry: () => ({ code: "NZ" }),
-    });
-    app.bindRapidObservationForm("pin", { props: { task_id: "t_1", name: "St Mary's" }, periodsKey: "t_1" });
-    // an earlier autosave is on the device; the last keystroke's autosave
-    // is queued when the entry is submitted, before it fires
-    app.persistRapidDraft("pin", "t_1");
-    // typed, autosave queued; then submitted before it fires
-    for (const fn of listeners.input) fn({ target: null });
-    for (const fn of listeners.submit) fn({ preventDefault() {} });
-    await new Promise((r) => setTimeout(r, 600));
-    assert.equal(form.dataset.submissionId, "sub_sent", "the queued autosave did not re-mint the sent id");
-    receipt.resolve({ task_id: "t_1", evidence_draft_id: "d_1" });
-    await new Promise((r) => setTimeout(r, 20));
-    assert.equal(form.dataset.submissionId, "sub_sent");
-  }
-  // issue 2b: an edit during a prerequisite request mints a new id for
-  // the edit; the send keeps the id captured with its own values
-  {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    const form = { dataset: { submissionId: "sub_sent" }, addEventListener() {}, querySelectorAll: () => [] };
-    document.getElementById = (id) => (id === "pinRapidCurrentForm" ? form : id === "pinRapidSubmit" ? { disabled: false } : null);
-    window.PowRapidEntry = { localIsoDate: () => "2026-09-30", validateObservationDetailed: () => null, observationPayload: (x) => x, secureSubmissionId: () => "sub_fresh" };
-    for (const name of ["showRapidFieldError", "renderSubmissionRecordedDetail", "applyFilters", "clearFormDirty", "exitPinMode", "focusDetailPanel"]) app[name] = () => {};
-    app.refreshBackendTasks = async () => {};
-    const sentArgs = [];
-    const gate = later();
-    Object.assign(app, {
-      backend: { configured: true, signedIn: true, sessionId: "sess_a", user: { _id: "user_a" }, submitCurrentObservation: async (args) => { sentArgs.push(args); return { task_id: "t_1", evidence_draft_id: "d_1" }; } },
-      rapidObservationValues: () => ({ directObservation: "v1", flagForDiscussion: false }),
-      rapidPeriodsPlan: () => null,
-      pendingEvidenceFiles: () => null,
-      entryCountry: () => ({ code: "NZ" }),
-      pinConfirmed: { latitude: -41.3, longitude: 174.8 },
-    });
-    app.persistRapidDraft("pin", "rapid-pin");
-    const submitting = app.submitRapidObservation("pin", {
-      draftKey: "rapid-pin",
-      createTask: async () => { await gate.promise; return { task_id: "t_1", name: "St Mary's" }; },
-    });
-    await new Promise((r) => setTimeout(r, 0));
-    // the contributor edits while the task is being opened
-    await new Promise((r) => setTimeout(r, 2));
-    app.rapidObservationValues = () => ({ directObservation: "v2, edited", flagForDiscussion: false });
-    app.persistRapidDraft("pin", "rapid-pin");
-    assert.equal(form.dataset.submissionId, "sub_fresh");
-    gate.resolve();
-    await submitting;
-    assert.equal(sentArgs[0].clientSubmissionId, "sub_sent", "the send keeps the id of the content it carries");
-    assert.equal(JSON.parse(values.get("powRapidDraft2:NZ:rapid-pin")).values.directObservation, "v2, edited", "the edit stays on the device");
-  }
-  // round 12: an unedited period retry fingerprints alike whether the
-  // provenance is the whole first segment or the source fields alone
-  {
-    const { app } = signedInApp("user_a");
-    const savedPayload = window.PowOccupancy?.payload;
-    window.PowOccupancy = window.PowOccupancy || {};
-    if (!savedPayload) window.PowOccupancy.payload = (values) => ({ start: values.start, source: values.source });
-    const segments = [{ start: "1900", source: "x", segmentIndex: 0 }];
-    const inflated = [{ start: "1900", source: "x", segmentIndex: 0, extra: "first-segment-only field" }];
-    assert.equal(app.occupancyDraftFingerprint(segments, null), app.occupancyDraftFingerprint(inflated, null), "the payload, not the draft shape, is compared");
-    if (!savedPayload) delete window.PowOccupancy.payload;
-  }
-  // round 8 review: edited periods get a new submission id; an unedited
-  // retry keeps the sent one
-  {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    window.PowRapidEntry = { secureSubmissionId: (() => { let n = 0; return () => `sub_n${(n += 1)}`; })() };
-    const state = { submissionId: "sub_1", segments: [{ startMode: "known", startDate: "1990" }], chain: null, sameSource: true, provenance: null, gapAnswer: "", gapNote: "" };
-    app.guidedPeriodsByTaskId.set("k", state);
-    app.persistGuidedPeriods("k", { sending: true });
-    app.persistGuidedPeriods("k");
-    assert.equal(state.submissionId, "sub_1", "an unedited retry keeps the sent id");
-    state.segments[0].startDate = "1991";
-    app.persistGuidedPeriods("k");
-    assert.notEqual(state.submissionId, "sub_1", "an edit after sending rotates the id");
-    assert.equal(JSON.parse(values.get("powGuidedPeriods:NZ:user_a:k")).submissionId, state.submissionId);
-  }
-
-  // round 9: every edit after a send is kept at once, not only the first,
-  // so a receipt that replaces the form cannot take the later ones
-  {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    const listeners = {};
-    const form = {
-      isConnected: true,
-      dataset: { submissionId: "sub_sent", sentSubmissionId: "sub_sent" },
-      addEventListener(type, fn) { (listeners[type] = listeners[type] || []).push(fn); },
-      querySelectorAll: () => [],
-    };
-    document.getElementById = (id) => (id === "pinRapidCurrentForm" ? form : null);
-    document.querySelector = () => null;
-    window.PowRapidEntry = { secureSubmissionId: (() => { let n = 0; return () => `sub_m${(n += 1)}`; })() };
-    for (const name of ["updateRapidSourceFields", "updateRapidDiscussionFields", "updateRapidUncertaintyField", "bindSourceTypeahead", "renderRapidSourceLinks", "markFormDirty"]) app[name] = () => {};
-    let typed = "v1";
-    app.rapidObservationValues = () => ({ directObservation: typed });
-    const options = { props: { task_id: "t_1" } };
-    app.rapidFormOptions = { pin: options };
-    app.submissionIdForContent(form.dataset, app.rapidSubmittedContent("pin"));
-    app.markRapidDraftSent("t_1", "sub_sent", form.dataset.sentFingerprint);
-    app.bindRapidObservationForm("pin", options);
-    for (const edit of ["v2", "v3"]) {
-      typed = edit;
-      for (const fn of listeners.input) fn({ target: null });
-    }
-    const kept = JSON.parse(values.get(app.rapidDraftStorageKey("t_1")));
-    assert.equal(kept.values.directObservation, "v3", "the latest edit is on the device without waiting for a timer");
-  }
-
-  // round 17: an edit to a field outside the form (name, address, locality)
-  // after a send persists at once and rotates the sent id
-  {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    const formListeners = {};
-    const extraListeners = {};
-    const form = {
-      isConnected: true,
-      dataset: { submissionId: "sub_sent", sentSubmissionId: "sub_sent" },
-      addEventListener(type, fn) { (formListeners[type] = formListeners[type] || []).push(fn); },
-      querySelectorAll: () => [],
-      contains: () => false,
-    };
-    const nameInput = { value: "Old name", addEventListener(type, fn) { (extraListeners[type] = extraListeners[type] || []).push(fn); } };
-    document.getElementById = (id) => (id === "pinRapidCurrentForm" ? form : id === "pinNameInput" ? nameInput : null);
-    document.querySelector = () => null;
-    window.PowRapidEntry = { secureSubmissionId: (() => { let n = 0; return () => `sub_x${(n += 1)}`; })() };
-    for (const name of ["updateRapidSourceFields", "updateRapidDiscussionFields", "updateRapidUncertaintyField", "bindSourceTypeahead", "renderRapidSourceLinks", "markFormDirty"]) app[name] = () => {};
-    app.rapidObservationValues = () => ({ directObservation: "v1" });
-    const options = { props: { task_id: "t_1" }, draftExtraIds: ["pinNameInput"],
-      getCandidate: () => ({ name: nameInput.value }) };
-    app.rapidFormOptions = { pin: options };
-    app.submissionIdForContent(form.dataset, app.rapidSubmittedContent("pin"));
-    app.markRapidDraftSent("t_1", "sub_sent", form.dataset.sentFingerprint);
-    app.bindRapidObservationForm("pin", options);
-    assert.ok(extraListeners.input?.length, "the outside field is listened to");
-    nameInput.value = "Corrected name";
-    for (const fn of extraListeners.input) fn({ target: nameInput });
-    const kept = JSON.parse(values.get(app.rapidDraftStorageKey("t_1")));
-    assert.equal(kept.extra.pinNameInput, "Corrected name", "the correction is on the device at once");
-    assert.notEqual(form.dataset.submissionId, "sub_sent", "and the sent id is replaced");
-    assert.equal(kept.submission_id, form.dataset.submissionId);
-  }
-
-  // round 9: content the cards inherit from the parent observation, and a
-  // removed card, each rotate a sent id before the next send
-  {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    window.PowRapidEntry = { secureSubmissionId: (() => { let n = 0; return () => `sub_r${(n += 1)}`; })() };
-    const state = { submissionId: "sub_1", segments: [{ startMode: "known", startDate: "1990" }, { startMode: "known", startDate: "2000" }], chain: null, sameSource: true, provenance: null, gapAnswer: "", gapNote: "" };
-    app.guidedPeriodsByTaskId.set("k", state);
-    app.persistGuidedPeriods("k", { sending: true, provenance: { sourceTitle: "a" } });
-    app.persistGuidedPeriods("k", { sending: true, provenance: { sourceTitle: "a" } });
-    assert.equal(state.submissionId, "sub_1", "an exact retry keeps the id");
-    app.persistGuidedPeriods("k", { sending: true, provenance: { sourceTitle: "b" } });
-    assert.notEqual(state.submissionId, "sub_1", "an inherited-source edit rotates the id");
-    const afterSource = state.submissionId;
-    state.segments.splice(1, 1);
-    app.persistGuidedPeriods("k", { sending: true, provenance: { sourceTitle: "b" } });
-    assert.notEqual(state.submissionId, afterSource, "a removed card rotates the id before the send records its digest");
-  }
-
-  // round 10: saves in one millisecond still carry distinct versions; the
-  // form's own sent marker rotates an id after receipt cleanup deleted the
-  // draft; edited retry cards do not keep the sent id
-  {
-    values.clear();
-    const { app } = signedInApp("user_a");
-    window.PowRapidEntry = { secureSubmissionId: (() => { let n = 0; return () => `sub_t${(n += 1)}`; })() };
-    const realNow = Date.now;
-    Date.now = () => 5000;
-    const form = { dataset: { submissionId: "sub_sent", sentSubmissionId: "sub_sent" } };
-    const previousGet = document.getElementById;
-    document.getElementById = (id) => (id === "pinRapidCurrentForm" ? form : null);
-    app.rapidObservationValues = () => ({ directObservation: "before cleanup" });
-    form.dataset.sentFingerprint = app.submittedContentFingerprint(app.rapidSubmittedContent("pin"));
-    app.rapidObservationValues = () => ({ directObservation: "edited after cleanup" });
-    app.persistRapidDraft("pin", "rapid-pin");
-    const first = app.readRapidDraft("rapid-pin");
-    assert.notEqual(form.dataset.submissionId, "sub_sent", "an edit after receipt cleanup mints a new id");
-    app.persistRapidDraft("pin", "rapid-pin");
-    assert.ok(app.readRapidDraft("rapid-pin").saved_at > first.saved_at, "same-millisecond saves differ");
-    Date.now = realNow;
-    document.getElementById = previousGet;
-    const state = { submissionId: "sub_1", segments: [{ startMode: "known", startDate: "1990" }], chain: null, sameSource: true, provenance: null, gapAnswer: "", gapNote: "" };
-    app.guidedPeriodsByTaskId.set("k", state);
-    app.persistGuidedPeriods("k", { sending: true, provenance: null });
-    state.segments[0].startDate = "1991";
-    assert.notEqual(state.sentDigest, app.guidedPeriodsContentDigest(state), "edited cards differ from the sent digest");
+    app.clearSubmittedRapidDraft("rapid-pin", version);
+    assert.equal(JSON.parse(values.get(draftKey)).values.directObservation, "v2");
+    assert.equal(JSON.parse(values.get(draftKey)).last_send.submission_id, "sent");
   }
 
   document.getElementById = getElementByIdR6;

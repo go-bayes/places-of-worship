@@ -610,9 +610,7 @@
                     <button type="button" data-pow-retry>Try again</button>
                 </div>
             `;
-            container.querySelector("[data-pow-retry]")?.addEventListener("click", () => {
-                this.renderSignInButton(container, options);
-            });
+            container.querySelector("[data-pow-retry]")?.addEventListener("click", () => this.renderSignInButton(container, options));
         }
 
         renderAccountNote(container) {

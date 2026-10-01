@@ -296,8 +296,7 @@ const container = () => ({
     await client.renderSignInButton(host, {});
     assert.match(host.innerHTML, /Sign-in could not load/);
     assert.equal(h.calls.mountSignIn.length, 0);
-    host.retry();
-    await tick();
+    await host.retry();
     assert.equal(h.calls.mountSignIn.length, 1, "the retry loads clerk and shows the form");
     assert.equal(host.children[0], h.calls.mountSignIn[0].node);
   }
@@ -711,12 +710,14 @@ const container = () => ({
     const storage = new Map();
     let releaseMe;
     const meAnswer = new Promise((resolve) => { releaseMe = resolve; });
-    const responses = { "users:claimInvite": ok("user_1"), "users:me": () => meAnswer };
+    let signalMe;
+    const meAsked = new Promise(resolve => { signalMe = resolve; });
+    const responses = { "users:claimInvite": ok("user_1"), "users:me": () => { signalMe(); return meAnswer; } };
     const h = harness({ session: { id: "sess_late", email: "guy@example.org" }, cookie: "__client_uat=1", responses, storage });
     const client = new h.Client(config);
     const admitted = [];
     const restoring = client.restoreSession().catch(() => null);
-    await tick();
+    await meAsked;
     const asked = h.calls.fetches.some((fetch) => fetch.body.path === "users:me");
     assert.equal(asked, true, "the admission is in flight when the marker appears");
     storage.set("powSignOutPending:v1", "sess_late");

@@ -29,6 +29,7 @@ const document = {
   querySelector() { return null; },
 };
 const window = {
+  crypto: require("node:crypto").webcrypto,
   __POW_TEST_NO_BOOTSTRAP__: true,
   location: { search: "", pathname: "/apps/regions/nz/verification.html" },
   localStorage,
@@ -38,7 +39,7 @@ const window = {
     localIsoDate: () => "2026-09-03",
   },
 };
-const context = vm.createContext({
+const context = vm.createContext({ TextEncoder,
   window, document, localStorage, sessionStorage: localStorage,
   URLSearchParams, Map, Set, Date, Number, String, Boolean, Object, Array, Math, JSON, RegExp, Intl, console, setTimeout, clearTimeout,
 });
@@ -140,7 +141,7 @@ state.provenance = {
   privacyFlag: "clear",
 };
 const plan = app.rapidPeriodsPlan(key, rapidValues);
-if (!plan || plan.problem || plan.count !== 1 || plan.segments[0].sourceAccount !== "The directory lists weekly services at this church." || !plan.submissionId) {
+if (!plan || plan.problem || plan.count !== 1 || plan.segments[0].sourceAccount !== "The directory lists weekly services at this church." || plan.submissionId !== undefined) {
   throw new Error(`A valid card with its own provenance did not compile to a plan: ${JSON.stringify(plan)}`);
 }
 if (!localStorage.getItem("powGuidedPeriods:NZ:user_1:rapid-pin-periods")) {
