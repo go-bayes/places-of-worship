@@ -241,7 +241,7 @@ test("provisional component categories use the exact 0.7 and 0.9 boundaries", ()
 test("every scorer row requires the mapped confidence and outcome", () => {
   for (const row of rows) {
     assert.match(row.basis_note, /confidence (high|medium|low) is provisional and uncalibrated \(until calibration replaces it\)/);
-    assert.match(row.basis_note, /standard confidence-standard\/0\.3\.1/);
+    assert.match(row.basis_note, /standard confidence-standard\/0\.4\.0/);
     for (const confidence of [undefined, ...["high", "medium", "low"].filter((c) => c !== row.confidence)]) {
       const changed = { ...clone(row), confidence };
       changed.basis_note = scorerBasisNote(changed);
@@ -272,18 +272,20 @@ test("status needs a fired positive signal and never exceeds likely_active", () 
   }
 });
 
-test("the mapping accepts every confidence-standard 0.3 patch", () => {
-  for (const patch of [0, 1, 2, 10, 123]) {
+test("the mapping accepts every confidence-standard 0.3 and 0.4 patch", () => {
+  for (const minor of [3, 4]) for (const patch of [0, 1, 2, 10, 123]) {
     const row = clone(tier);
-    row.judge.standard_version = `confidence-standard/0.3.${patch}`;
+    row.judge.standard_version = `confidence-standard/0.${minor}.${patch}`;
     row.basis_note = scorerBasisNote(row);
     validateScorerJudgment(row);
   }
 });
 
 test("the mapping refuses unreviewed standard versions and cut points", () => {
-  const version = clone(tier); version.judge.standard_version = "confidence-standard/0.4.0";
-  assert.throws(() => validateScorerJudgment(version), /requires confidence-standard/);
+  for (const standard of ["confidence-standard/0.5.0", "confidence-standard/0.2.0", "confidence-standard/1.0.0", "confidence-standard/0.4.01"]) {
+    const version = clone(tier); version.judge.standard_version = standard;
+    assert.throws(() => validateScorerJudgment(version), /requires confidence-standard\/0\.3\.x or 0\.4\.x/);
+  }
   const cuts = clone(tier); cuts.score.cut_points.component_floor = 0.5;
   assert.throws(() => validateScorerJudgment(cuts), /requires R-S4/);
 });

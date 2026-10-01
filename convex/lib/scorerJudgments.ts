@@ -32,10 +32,10 @@ export const SCORER_FACET_BY_KIND: Readonly<Record<string, string | undefined>> 
   duplicate: "duplicate",
 };
 
-// R-S4 supplies routing cut points; this provisional mapping uses the
+// confidence-standard 0.3.x and 0.4.x share R-S4 routing cut points; the mapping uses the
 // component floor for positive component support. low support is unresolved,
 // never inverted into a negative claim or a pairwise duplicate probability.
-const SCORER_STANDARD_PATCH_VERSION = /^confidence-standard\/0\.3\.(0|[1-9][0-9]*)$/;
+export const SCORER_STANDARD_VERSION_PATTERN = /^confidence-standard\/0\.[34]\.(0|[1-9][0-9]*)$/;
 export const SCORER_POSITIVE_STATUS_SIGNALS: readonly string[] = [
   "check_recent", "check_older", "website_or_contact", "opening_or_service_times",
   "edit_recent", "contributors_three_plus", "cross_source_active_listing",
@@ -246,7 +246,7 @@ export function validateScorerJudgment(input: JudgmentInput): void {
   }
   if (score.tier_pending.length !== (genericPending ? 1 : 0)) throw new Error("A scorer judgment's pending condition is the undecided generic-name cross-source match, and only that.");
   if (score.tier !== expectedTier) throw new Error(`A scorer judgment's tier is ${expectedTier} for its components, indicators and cut points.`);
-  if (!SCORER_STANDARD_PATCH_VERSION.test(input.judge.standard_version ?? "")) throw new Error("The provisional mapping requires confidence-standard/0.3.x.");
+  if (!SCORER_STANDARD_VERSION_PATTERN.test(input.judge.standard_version ?? "")) throw new Error("The provisional mapping requires confidence-standard/0.3.x or 0.4.x.");
   if (cut.screened_min_composite !== 0.9 || cut.review_min_composite !== 0.6 || cut.component_floor !== 0.7) {
     throw new Error("The provisional mapping requires R-S4 cut points 0.9, 0.6 and 0.7; P5 replacements need a versioned mapping.");
   }

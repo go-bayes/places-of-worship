@@ -51,7 +51,7 @@ Joseph Watts (Joseph W), who leads the project's Christchurch validation study, 
 | Source allowlist refusal, reported model id, per-model cost | adopted 2026-09-24, built |
 | Content-addressed receipts and hash-identified judgments | built 2026-09-19 and 2026-09-24 |
 | Measurement run before any build; canary set | adopted 2026-09-24 |
-| Confidence standard version 0.3.1 | adopted 2026-09-26 |
+| Confidence standard version 0.4.0 (provisional, uncalibrated categorical confidence for scorer rows) | adopted 2026-10-02 |
 | Joseph W as blinded adjudicator | invited 2026-09-24; his agreement is outstanding |
 | Interim refusal of records with personal details | built 2026-09-24 |
 | Withhold-and-hold review of personal details | adopted 2026-09-24; built in stages |
