@@ -18,7 +18,7 @@ test("the fixture's rows are accepted", () => {
 });
 
 test("a scorer row is closed and place-level", () => {
-  assert.throws(() => validateScorerJudgment({ ...clone(tier), extra: 1 }), /no field extra/);
+  assert.throws(() => validateScorerJudgment({ ...clone(tier), extra: 1 }), /no field input.extra/);
   assert.throws(() => validateScorerJudgment({ ...clone(tier), subject: { kind: "first_pass", ref: "a".repeat(64) } }), /osm place/);
   assert.throws(() => validateScorerJudgment({ ...clone(tier), subject: { kind: "place", ref: "place:1" }, context: { ...tier.context, place_ref: "place:1" } }), /osm place/);
   assert.throws(() => validateScorerJudgment({ ...clone(tier), context: { ...tier.context, place_ref: "osm:way/9" } }), /equals its subject/);
@@ -83,4 +83,26 @@ test("the basis note is exactly the generated text", () => {
   assert.equal(tier.basis_note, scorerBasisNote(tier));
   assert.throws(() => validateScorerJudgment({ ...clone(tier), basis_note: `${tier.basis_note}; John Smith` }), /generated text/);
   assert.throws(() => validateScorerJudgment({ ...clone(tier), basis_note: tier.basis_note.replace("tier screened", "tier review") }), /generated text/);
+});
+
+test("the standalone validator is closed below the root and checks types", () => {
+  const put = (patch) => { const row = clone(tier); patch(row); return row; };
+  assert.throws(() => validateScorerJudgment(put((r) => { r.judge.private_note = "Rev John Smith"; })), /no field input.judge.private_note/);
+  assert.throws(() => validateScorerJudgment(put((r) => { r.run.private_note = "x"; })), /input.run.private_note/);
+  assert.throws(() => validateScorerJudgment(put((r) => { r.context.private_note = "x"; })), /input.context.private_note/);
+  assert.throws(() => validateScorerJudgment(put((r) => { r.score.extra = 1; })), /input.score.extra/);
+  assert.throws(() => validateScorerJudgment(put((r) => { r.score.indicators.note = "x"; })), /input.score.indicators.note/);
+  assert.throws(() => validateScorerJudgment(put((r) => { r.score.calibrated = "Rev John Smith"; })), /wrong type/);
+  assert.throws(() => validateScorerJudgment(put((r) => { r.score.indicators.cross_source_sources_matched = "Rev John Smith"; })), /wrong type/);
+  assert.throws(() => validateScorerJudgment(put((r) => { r.score.signal_values.has_name = "x"; })), /wrong type/);
+});
+
+test("each signal value stays in its own domain", () => {
+  const put = (values) => { const row = clone(tier); row.score.signal_values = values; row.basis_note = scorerBasisNote(row); return row; };
+  assert.throws(() => validateScorerJudgment(put({ has_name: 64215550188 })), /boolean or null/);
+  assert.throws(() => validateScorerJudgment(put({ tag_count: 64215550188 })), /domain/);
+  assert.throws(() => validateScorerJudgment(put({ n_versions: 1.5 })), /domain/);
+  assert.throws(() => validateScorerJudgment(put({ "tag_completeness.score": 2 })), /domain/);
+  assert.throws(() => validateScorerJudgment(put({ footprint_area_m2: -1 })), /domain/);
+  validateScorerJudgment(put({ has_name: null, tag_count: 9, footprint_area_m2: 412.5, "tag_completeness.score": 0.857 }));
 });

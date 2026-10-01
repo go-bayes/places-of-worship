@@ -25,18 +25,29 @@ export const SCORE_ARRAY_MAX = 40;
 // numeric and boolean signals a scorer judgment may copy from its signal
 // vector. a fixed allowlist, so no string-valued tag content (names, editors,
 // dates, partner references) can travel into a judgment row.
-export const SCORER_SIGNAL_VALUE_KEYS: readonly string[] = [
-  "tag_completeness.score", "tag_count", "has_name", "has_religion", "has_denomination", "has_building",
-  "has_address", "has_website_or_contact", "has_opening_or_service_times", "has_wikidata", "has_start_date",
-  "has_check_date", "has_operator", "has_historic", "has_heritage", "has_tourism",
-  "footprint_area_m2", "building_worship_specific", "building_generic",
-  "node_in_building", "node_in_worship_building", "node_containing_building", "node_in_religious_landuse",
-  "lifecycle_neighbour_60m", "days_since_last_edit", "years_as_pow", "n_versions", "n_contributors",
-  "deleted_and_recreated", "pow_created_in_bulk_or_import", "name_lifecycle_word", "name_old_prefix",
-  "own_lifecycle_tag", "end_date_passed", "ruins", "nearest_pow_m",
-  "n_pow_within_50m_same_or_unknown_religion", "n_pow_coincident_1m", "n_same_name_within_500m",
-  "node_area_pair", "cross_source_agreement.n_sources_matched",
-];
+const FLAG = { kind: "flag" } as const;
+const count = (max: number) => ({ kind: "number", min: 0, max, integer: true }) as const;
+const measure = (max: number) => ({ kind: "number", min: 0, max, integer: false }) as const;
+export type SignalDomain = { kind: "flag" } | { kind: "number"; min: number; max: number; integer: boolean };
+// each allowlisted signal has its own domain (a flag is a boolean or null; a
+// count or measure is a bounded non-negative number or null), so a numeric
+// field cannot carry an arbitrary number such as a telephone number
+export const SCORER_SIGNAL_DOMAINS: Readonly<Record<string, SignalDomain>> = {
+  "tag_completeness.score": { kind: "number", min: 0, max: 1, integer: false },
+  tag_count: count(1_000),
+  has_name: FLAG, has_religion: FLAG, has_denomination: FLAG, has_building: FLAG, has_address: FLAG,
+  has_website_or_contact: FLAG, has_opening_or_service_times: FLAG, has_wikidata: FLAG, has_start_date: FLAG,
+  has_check_date: FLAG, has_operator: FLAG, has_historic: FLAG, has_heritage: FLAG, has_tourism: FLAG,
+  footprint_area_m2: measure(1e8), building_worship_specific: FLAG, building_generic: FLAG,
+  node_in_building: FLAG, node_in_worship_building: FLAG, node_containing_building: FLAG, node_in_religious_landuse: FLAG,
+  lifecycle_neighbour_60m: FLAG, days_since_last_edit: count(80_000), years_as_pow: measure(200),
+  n_versions: count(100_000), n_contributors: count(100_000), deleted_and_recreated: FLAG,
+  pow_created_in_bulk_or_import: FLAG, name_lifecycle_word: FLAG, name_old_prefix: FLAG, own_lifecycle_tag: FLAG,
+  end_date_passed: FLAG, ruins: FLAG, nearest_pow_m: measure(2e7),
+  n_pow_within_50m_same_or_unknown_religion: count(100_000), n_pow_coincident_1m: count(100_000),
+  n_same_name_within_500m: count(100_000), node_area_pair: FLAG, "cross_source_agreement.n_sources_matched": count(100),
+};
+export const SCORER_SIGNAL_VALUE_KEYS: readonly string[] = Object.keys(SCORER_SIGNAL_DOMAINS);
 export const JUDGMENTS_PER_CALL_MAX = 100;
 export const JUDGMENT_PARENTS_MAX = 10;
 export const JUDGMENT_SUBJECT_REF_MAX = 1_024;
@@ -298,9 +309,13 @@ function validateScoreBlock(input: JudgmentInput, score: JudgmentScore): void {
     assertTerms(`Score signals_fired.${component}`, score.signals_fired[component]);
   }
   for (const [key, value] of Object.entries(score.signal_values)) {
-    if (!SCORER_SIGNAL_VALUE_KEYS.includes(key)) throw new Error(`Score signal value ${key} is not in the allowlist.`);
-    if (value !== null && typeof value !== "boolean" && !(typeof value === "number" && Number.isFinite(value))) {
-      throw new Error(`Score signal value ${key} is a finite number, a boolean or null.`);
+    const domain = Object.prototype.hasOwnProperty.call(SCORER_SIGNAL_DOMAINS, key) ? SCORER_SIGNAL_DOMAINS[key] : undefined;
+    if (domain === undefined) throw new Error(`Score signal value ${key} is not in the allowlist.`);
+    if (value === null) continue;
+    if (domain.kind === "flag") {
+      if (typeof value !== "boolean") throw new Error(`Score signal value ${key} is a boolean or null.`);
+    } else if (typeof value !== "number" || !Number.isFinite(value) || value < domain.min || value > domain.max || (domain.integer && !Number.isInteger(value))) {
+      throw new Error(`Score signal value ${key} is a finite number in its domain, or null.`);
     }
   }
 }

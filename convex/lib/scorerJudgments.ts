@@ -91,10 +91,50 @@ const CONVERTER_VERSION = /^\d+\.\d+\.\d+$/;
 const SCORER_VERSION = /^p\d+-heuristic-\d+\.\d+\.\d+$/;
 const BASIS_ALPHABET = /^[A-Za-z0-9 ;:,.=×()\/#_-]+$/;
 
-export function validateScorerJudgment(input: JudgmentInput): void {
-  for (const key of Object.keys(input)) {
-    if (!Object.prototype.hasOwnProperty.call(deterministicJudgmentInput.fields, key)) throw new Error(`A scorer judgment has no field ${key}.`);
+// structural check of a value against a Convex validator, closed at every
+// level: the standalone validator enforces the same shape the ingest
+// argument validator does, so a caller other than the ingest (the converter)
+// cannot slip an unknown key or a wrongly typed value through
+function conforms(validator: any, value: unknown, where: string): void {
+  if (value === undefined) {
+    if (validator.isOptional === "optional") return;
+    throw new Error(`A scorer judgment lacks ${where}.`);
   }
+  const bad = () => new Error(`A scorer judgment's ${where} has the wrong type or an unknown value.`);
+  switch (validator.kind) {
+    case "string": if (typeof value !== "string") throw bad(); return;
+    case "float64": case "int64": if (typeof value !== "number" || !Number.isFinite(value)) throw bad(); return;
+    case "boolean": if (typeof value !== "boolean") throw bad(); return;
+    case "null": if (value !== null) throw bad(); return;
+    case "literal": if (value !== validator.value) throw bad(); return;
+    case "array":
+      if (!Array.isArray(value)) throw bad();
+      value.forEach((item, index) => conforms(validator.element, item, `${where}[${index}]`));
+      return;
+    case "record":
+      if (value === null || typeof value !== "object" || Array.isArray(value)) throw bad();
+      for (const [key, item] of Object.entries(value)) { conforms(validator.key, key, `${where} key`); conforms(validator.value, item, `${where}.${key}`); }
+      return;
+    case "object": {
+      if (value === null || typeof value !== "object" || Array.isArray(value)) throw bad();
+      for (const key of Object.keys(value)) {
+        if (!Object.prototype.hasOwnProperty.call(validator.fields, key) && (value as Record<string, unknown>)[key] !== undefined) throw new Error(`A scorer judgment has no field ${where}.${key}.`);
+      }
+      for (const [key, field] of Object.entries<any>(validator.fields)) conforms(field, (value as Record<string, unknown>)[key], `${where}.${key}`);
+      return;
+    }
+    case "union": {
+      for (const member of validator.members) {
+        try { conforms(member, value, where); return; } catch { /* try the next member */ }
+      }
+      throw bad();
+    }
+    default: throw new Error(`Unsupported validator kind ${validator.kind}.`);
+  }
+}
+
+export function validateScorerJudgment(input: JudgmentInput): void {
+  conforms(deterministicJudgmentInput, input, "input");
   validateJudgmentInput(input);
   if (input.schema_version !== JUDGMENT_SCHEMA_VERSION_1_1) throw new Error("A scorer judgment is agent-judgment.v1.1.");
   if (input.subject.kind !== "place" || !SUBJECT_REF.test(input.subject.ref)) {
