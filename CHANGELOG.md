@@ -4,7 +4,7 @@
 
 ### 2026-10-02 (submission retry safety design brief)
 
-- Added a [design brief for server-side submission retry safety](docs/development/submission-idempotency-brief-2026-10-02.md), following JB's selected direction. It specifies request digests, receipts, atomic prerequisites, client retries, legacy handling, C1 sign-out, abuse limits and regressions from PR #153 rounds 19–24, with four proposed rulings for JB. The revised brief returns conflicts as charged values, includes guided-revision intent and lineage in the request digest, and puts unsupported candidate corrections to JB as a scope decision. The brief adopts no contract or implementation.
+- Added a [design brief for server-side submission retry safety](docs/development/submission-idempotency-brief-2026-10-02.md), following JB's selected direction. It specifies request digests, receipts, atomic prerequisites, client retries, legacy handling, C1 sign-out, abuse limits and regressions from PR #153 rounds 19–24, with four proposed rulings for JB. The revised brief returns conflicts as charged values, hashes supplied guided-revision task and intent while pinning resolved lineage as transaction bindings, and puts unsupported candidate corrections to JB as a scope decision. The brief adopts no contract or implementation.
 
 ### 2026-10-02 (vendored Leaflet and VectorGrid for the portals)
 
