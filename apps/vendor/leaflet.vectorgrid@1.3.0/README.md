@@ -11,4 +11,4 @@ Byte-for-byte copy of the bundled build in the npm package `leaflet.vectorgrid@1
 | --- | --- |
 | `dist/Leaflet.VectorGrid.bundled.js` | `sha384-FON5fTjCTtPuBgUS1r2H/PGXstH0Rk23YKjZmB6qITkbFqBcqtey/rPo9eXwOWpx` |
 
-The licences of the packages the bundle inlines (pbf, vector-tile, ieee754, buffer, geojson-vt, point-geometry, topojson-client, whatwg-fetch) are reproduced in `THIRD-PARTY-NOTICES.md`. The source map is not vendored; the trailing `sourceMappingURL` comment is left as published, so a browser with developer tools open may report one missing map. Requires Leaflet 1.x (`../leaflet@1.9.4/`).
+The licences of the packages the bundle inlines (pbf, vector-tile, ieee754, buffer, geojson-vt, point-geometry, topojson-client, whatwg-fetch, and the buffer-more-ints code adapted in pbf) are reproduced in `THIRD-PARTY-NOTICES.md`. The source map is not vendored; the trailing `sourceMappingURL` comment is left as published, so a browser with developer tools open may report one missing map. Requires Leaflet 1.x (`../leaflet@1.9.4/`).
