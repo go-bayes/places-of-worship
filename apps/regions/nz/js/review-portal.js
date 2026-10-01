@@ -1659,28 +1659,59 @@ function human(value) {
                 await client.recordJudgmentDisposition({ judgmentId, disposition, note: note || undefined });
                 recorded = true;
                 if (!isCurrent()) return;
+                const before = state.judgments;
                 const rows = await client.listJudgmentsForTaskPlace({ taskId: task.task_id });
                 if (!isCurrent()) return;
                 state.judgments = Array.isArray(rows) ? rows : [];
                 state.judgmentsError = "";
                 setTransport("ready");
-                rerenderJudgmentBlock(judgmentId, `Recorded: ${label}.`);
+                const message = `Recorded: ${label}.`;
+                // a disposition changes no judgment row, so the list holds
+                // the same rows under the same lead and the disposed block
+                // is replaced alone; a different set (a scorer run ingested
+                // meanwhile, a row pushed past the read's cap) rebuilds the
+                // whole panel so its header never shows a lead the list
+                // has left behind
+                if (sameJudgmentSet(before, state.judgments)) {
+                    rerenderJudgmentBlock(judgmentId, message);
+                } else {
+                    rerenderConfidencePanel(task, judgmentId, message);
+                }
             } catch (error) {
                 if (!isCurrent()) return;
                 setTransport("ready");
-                buttons.forEach((entry) => { entry.disabled = false; });
                 if (recorded) {
+                    // the write stood and the row cannot be refreshed: the
+                    // controls stay off until the task is selected again,
+                    // so a second press cannot append a second row
                     say(`Recorded: ${label}. The list could not be refreshed (${error.message || "unknown error"}); select the task again to see it.`, "done");
                 } else {
+                    buttons.forEach((entry) => { entry.disabled = false; });
                     say(error.message || "Could not record the disposition.", "broken");
                 }
             }
         });
     }
 
+    function sameJudgmentSet(before, after) {
+        const ids = (rows) => rows.map((row) => row?.judgment_id).sort().join("\n");
+        const leadOf = (rows) => window.PowConfidencePanel.leadJudgment(rows)?.judgment_id;
+        return ids(before) === ids(after) && leadOf(before) === leadOf(after);
+    }
+
+    function showJudgmentStatus(panel, judgmentId, message) {
+        const escaped = window.CSS?.escape ? window.CSS.escape(judgmentId) : judgmentId;
+        const status = panel.querySelector(`[data-judgment-id="${escaped}"] .judgment-status`);
+        if (status && message) {
+            status.textContent = message;
+            status.className = "judgment-status state-banner tone-done";
+        }
+    }
+
     // replaces the disposed row's block alone: the listener sits on the
-    // panel, so nothing is rewired, and a note typed under another row, an
-    // open disclosure and the decision form below all stay as they were
+    // panel, so nothing is rewired; a note typed under another row, every
+    // open disclosure (this row's included) and the decision form below
+    // all stay as they were
     function rerenderJudgmentBlock(judgmentId, message) {
         const panel = document.getElementById("confidencePanel");
         const escaped = window.CSS?.escape ? window.CSS.escape(judgmentId) : judgmentId;
@@ -1695,12 +1726,45 @@ function human(value) {
         ).trim();
         const fresh = template.content.firstElementChild;
         if (!fresh) return;
+        if (old.querySelector("details")?.open) fresh.querySelector("details")?.setAttribute("open", "");
         old.replaceWith(fresh);
-        const status = fresh.querySelector(".judgment-status");
-        if (status && message) {
-            status.textContent = message;
-            status.className = "judgment-status state-banner tone-done";
+        showJudgmentStatus(panel, judgmentId, message);
+    }
+
+    // rebuilds the whole panel from the refreshed list, carrying over every
+    // note typed under another row and every open disclosure, then rewires
+    // it; the decision form below is untouched
+    function rerenderConfidencePanel(task, judgmentId, message) {
+        const old = document.getElementById("confidencePanel");
+        if (!old) return;
+        const notes = new Map();
+        const open = new Set();
+        old.querySelectorAll("[data-judgment-id]").forEach((block) => {
+            const id = block.dataset.judgmentId;
+            const note = block.querySelector(".judgment-note");
+            if (note && note.value && id !== judgmentId) notes.set(id, note.value);
+            if (block.querySelector("details")?.open) open.add(id);
+        });
+        const signalsOpen = Boolean(old.querySelector("details.confidence-signals")?.open);
+        const html = confidencePanelHtml();
+        if (!html) {
+            old.remove();
+            return;
         }
+        const template = document.createElement("template");
+        template.innerHTML = html.trim();
+        const fresh = template.content.firstElementChild;
+        if (!fresh) return;
+        old.replaceWith(fresh);
+        wireConfidencePanel(task);
+        if (signalsOpen) fresh.querySelector("details.confidence-signals")?.setAttribute("open", "");
+        fresh.querySelectorAll("[data-judgment-id]").forEach((block) => {
+            const id = block.dataset.judgmentId;
+            const note = block.querySelector(".judgment-note");
+            if (note && notes.has(id)) note.value = notes.get(id);
+            if (open.has(id)) block.querySelector("details")?.setAttribute("open", "");
+        });
+        showJudgmentStatus(fresh, judgmentId, message);
     }
 
     // the explicit affordances on the AI recommendation: prefill-and-agree
