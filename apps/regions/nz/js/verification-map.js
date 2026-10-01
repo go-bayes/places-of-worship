@@ -2612,7 +2612,8 @@ class NzVerificationMap {
         this.guidedPeriodsByTaskId.clear();
         if (deliberate) {
             // timers queued before the sign-out write nothing: every device
-            // write needs a signed-in page session (signedInUserId)
+            // write needs a signed-in member the device is held for
+            // (deviceWritable)
             window.PowConvexTaskClient?.clearDeviceWork?.();
         }
         if (ASSIGNMENT_MODE) {
@@ -7021,6 +7022,15 @@ class NzVerificationMap {
         return this.backendUser?._id || this.backend?.user?._id || "";
     }
 
+    // a device write needs a signed-in member the device is held for: after
+    // another tab's deliberate sign-out (the marker is gone) or a different
+    // member's admission, a queued autosave in this page writes nothing
+    deviceWritable() {
+        const user = this.signedInUserId();
+        if (!user) return false;
+        return window.PowConvexTaskClient?.deviceHeldBy ? window.PowConvexTaskClient.deviceHeldBy(user) : true;
+    }
+
     formSnapshotStorageKey(taskId) {
         return this.signedInUserId() ? `${FORM_SNAPSHOT_PREFIX}${COUNTRY_CONFIG.countryCode}:${taskId}` : "";
     }
@@ -7068,7 +7078,7 @@ class NzVerificationMap {
         this.formSnapshotsByTaskId.set(taskId, snapshot);
         // signed out, the snapshot lives in memory only
         const key = this.formSnapshotStorageKey(taskId);
-        if (!key) return;
+        if (!key || !this.deviceWritable()) return;
         try {
             window.localStorage.setItem(key, JSON.stringify({ saved_at: nextSavedAt(), snapshot }));
         } catch (error) {
@@ -8029,7 +8039,7 @@ class NzVerificationMap {
     }
 
     persistRapidDraft(prefix, key, extraValues = {}) {
-        if (!this.signedInUserId()) return;
+        if (!this.deviceWritable()) return;
         try {
             const previous = this.readRapidDraft(key);
             const record = {
@@ -8066,7 +8076,7 @@ class NzVerificationMap {
     // id and any edit after it mints a new one (persistRapidDraft)
     markRapidDraftSent(key, submissionId) {
         const record = this.readRapidDraft(key);
-        if (!record || !submissionId) return;
+        if (!record || !submissionId || !this.deviceWritable()) return;
         record.sent_submission_id = submissionId;
         try {
             window.localStorage.setItem(this.rapidDraftStorageKey(key), JSON.stringify(record));
@@ -8092,7 +8102,7 @@ class NzVerificationMap {
     // 2026-09-05); a revision or a period's location has its own record
     keepRapidPinOnDevice() {
         if (!RAPID_NOMINATION_ENTRY || this.reviseContext || this.occupancyPinContext || !this.pinConfirmed) return;
-        if (!this.signedInUserId()) return;
+        if (!this.deviceWritable()) return;
         const record = this.readRapidDraft("rapid-pin") || {};
         // a pin change is a new version of the device copy, so a receipt for
         // an earlier send cannot delete it (#153 round 13)
@@ -8120,7 +8130,7 @@ class NzVerificationMap {
     // ends the resume; the typed values stay as they always have
     dropRapidPinFromDevice() {
         const record = this.readRapidDraft("rapid-pin");
-        if (!record?.pin) return;
+        if (!record?.pin || !this.deviceWritable()) return;
         delete record.pin;
         try {
             window.localStorage.setItem(this.rapidDraftStorageKey("rapid-pin"), JSON.stringify(record));
@@ -9353,7 +9363,7 @@ class NzVerificationMap {
             state.sentDigest = this.guidedPeriodsContentDigest(state);
             state.sentSourceDigest = sourceDigest;
         }
-        if (!this.signedInUserId()) return;
+        if (!this.deviceWritable()) return;
         try {
             window.localStorage.setItem(this.guidedPeriodsStorageKey(taskId), JSON.stringify({
                 saved_at: nextSavedAt(),

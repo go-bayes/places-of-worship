@@ -705,6 +705,8 @@
         }
 
         async retrySignOut(container) {
+            // work the card's sign-out would delete is asked about first
+            if (!(await PowConvexTaskClient.confirmSignOut())) return;
             try {
                 await this.signOut({ deliberate: true });
             } catch (error) {
@@ -1102,6 +1104,17 @@
             }
         } catch (error) {
             // storage unavailable: nothing is kept
+        }
+    };
+
+    // true while the device is held for this member: every device write
+    // checks it, so a page whose session another tab ended (the marker is
+    // gone) or replaced (the marker names someone else) writes nothing
+    PowConvexTaskClient.deviceHeldBy = function deviceHeldBy(userId) {
+        try {
+            return Boolean(userId) && window.localStorage.getItem(DEVICE_OWNER_KEY) === userId;
+        } catch (error) {
+            return false;
         }
     };
 

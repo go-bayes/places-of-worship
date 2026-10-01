@@ -82,6 +82,8 @@ function signedInApp(userId = "user_a") {
     formDirty: true,
     formDirtyTaskId: "task_1",
   });
+  // the device is held for this member, as the client records on admission
+  values.set("powDeviceOwner1", userId);
   app.renderBackendPanel = () => { calls.panel += 1; };
   app.renderInitialDetail = () => { calls.detail += 1; };
   app.applyFilters = () => {};
@@ -278,6 +280,25 @@ async function signOutQuestion() {
   window.PowConvexTaskClient.adoptDeviceFor("user_b");
   assert.equal(signedInApp("user_b").app.getFormSnapshot("task_1"), undefined, "another member's admission deletes it");
   assert.equal(values.has(snapshotKey), false);
+}
+
+// 1e. a page whose session another tab ended, or whose device another
+// member now holds, writes nothing: the autosave queued before Clerk's
+// notice arrives cannot recreate deleted work
+{
+  values.clear();
+  const { app } = signedInApp("user_a");
+  app.setFormSnapshot("task_1", { evidence_note: "typed" });
+  assert.ok(values.has(snapshotKey));
+  // another tab signs out deliberately: the device is cleared
+  window.PowConvexTaskClient.clearDeviceWork();
+  app.setFormSnapshot("task_2", { evidence_note: "queued autosave" });
+  app.persistRapidDraft("pin", "rapid-pin");
+  assert.deepEqual([...values.keys()], [], "no write after the other tab's sign-out");
+  // another member signs in on the device: the first page still writes nothing
+  window.PowConvexTaskClient.adoptDeviceFor("user_b");
+  app.setFormSnapshot("task_3", { evidence_note: "a's queued autosave" });
+  assert.deepEqual([...values.keys()], ["powDeviceOwner1"], "nothing of a's reaches b's device");
 }
 
 // 2. a deliberate sign-out also deletes the device copies and the activity

@@ -802,6 +802,29 @@ const container = () => ({
     assert.equal(h.values.get("powDeviceOwner1"), "user_b");
   }
 
+  // 25. the card's own sign-out (no-access note, retry) asks first when it
+  // would delete unsent work, and signs out only on a yes
+  {
+    const responses = { "users:claimInvite": refused("No pending project invitation found for this email."), "users:me": ok(null) };
+    const h = harness({ session: { id: "sess_x", email: "x@example.org" }, cookie: "__client_uat=1", responses });
+    h.values.set("powFormSnapshot2:NZ:t1", "{}");
+    h.values.set("powDeviceOwner1", "user_a");
+    const host = container();
+    const client = new h.Client(config);
+    await client.renderSignInButton(host, {});
+    let answer = false;
+    let asked = 0;
+    h.Client.confirmSignOut = async () => { asked += 1; return answer; };
+    await host.click();
+    assert.equal(asked, 1);
+    assert.equal(h.calls.signOut, 0, "Cancel keeps the session");
+    assert.equal(h.values.has("powFormSnapshot2:NZ:t1"), true, "and the work");
+    answer = true;
+    await host.click();
+    assert.equal(h.calls.signOut, 1);
+    assert.equal(h.values.has("powFormSnapshot2:NZ:t1"), false);
+  }
+
   console.log("convex-task-client: clerk sessions ok");
 })().catch((error) => {
   console.error(error);
