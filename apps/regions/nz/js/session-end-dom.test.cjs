@@ -1055,6 +1055,8 @@ async function roundThree() {
       await submit();
       assert.equal(sent[1].args.clientSubmissionId, "sub_original", "an unedited retry reuses the sent id");
       assert.equal(records.size, 1, "the server deduplicates the unedited retry");
+      for (const fn of listeners.input) fn({ target: fields.pinDirectObservation });
+      assert.equal(form.dataset.submissionId, "sub_original", "an unchanged input event keeps the sent id with storage blocked");
       fields[editedId].value = "Corrected content";
       const editListeners = editedId === "pinDirectObservation" ? listeners.input : fields[editedId].listeners.input;
       for (const fn of editListeners) fn({ target: fields[editedId] });
@@ -1150,7 +1152,8 @@ async function roundThree() {
     app.rapidObservationValues = () => ({ directObservation: "v1" });
     app.persistRapidDraft("pin", "rapid-pin");
     const sentVersion = app.rapidDraftVersion("rapid-pin");
-    app.markRapidDraftSent("rapid-pin", "sub_sent");
+    app.submissionIdForContent(form.dataset, app.rapidSubmittedContent("pin"));
+    app.markRapidDraftSent("rapid-pin", "sub_sent", form.dataset.sentFingerprint);
     // a reload before any edit: the retry reuses the sent id (server dedup)
     const reloaded = { dataset: { submissionId: "minted_on_render" } };
     document.getElementById = (id) => (id === "pinRapidCurrentForm" ? reloaded : null);
@@ -1257,7 +1260,7 @@ async function roundThree() {
     values.clear();
     const { app } = signedInApp("user_a");
     window.PowRapidEntry = { secureSubmissionId: (() => { let n = 0; return () => `sub_n${(n += 1)}`; })() };
-    const state = { submissionId: "sub_1", segments: [{ startDate: "1990" }], chain: null, sameSource: true, provenance: null, gapAnswer: "", gapNote: "" };
+    const state = { submissionId: "sub_1", segments: [{ startMode: "known", startDate: "1990" }], chain: null, sameSource: true, provenance: null, gapAnswer: "", gapNote: "" };
     app.guidedPeriodsByTaskId.set("k", state);
     app.persistGuidedPeriods("k", { sending: true });
     app.persistGuidedPeriods("k");
@@ -1286,8 +1289,11 @@ async function roundThree() {
     for (const name of ["updateRapidSourceFields", "updateRapidDiscussionFields", "updateRapidUncertaintyField", "bindSourceTypeahead", "renderRapidSourceLinks", "markFormDirty"]) app[name] = () => {};
     let typed = "v1";
     app.rapidObservationValues = () => ({ directObservation: typed });
-    app.markRapidDraftSent("t_1", "sub_sent");
-    app.bindRapidObservationForm("pin", { props: { task_id: "t_1" } });
+    const options = { props: { task_id: "t_1" } };
+    app.rapidFormOptions = { pin: options };
+    app.submissionIdForContent(form.dataset, app.rapidSubmittedContent("pin"));
+    app.markRapidDraftSent("t_1", "sub_sent", form.dataset.sentFingerprint);
+    app.bindRapidObservationForm("pin", options);
     for (const edit of ["v2", "v3"]) {
       typed = edit;
       for (const fn of listeners.input) fn({ target: null });
@@ -1316,8 +1322,12 @@ async function roundThree() {
     window.PowRapidEntry = { secureSubmissionId: (() => { let n = 0; return () => `sub_x${(n += 1)}`; })() };
     for (const name of ["updateRapidSourceFields", "updateRapidDiscussionFields", "updateRapidUncertaintyField", "bindSourceTypeahead", "renderRapidSourceLinks", "markFormDirty"]) app[name] = () => {};
     app.rapidObservationValues = () => ({ directObservation: "v1" });
-    app.markRapidDraftSent("t_1", "sub_sent");
-    app.bindRapidObservationForm("pin", { props: { task_id: "t_1" }, draftExtraIds: ["pinNameInput"] });
+    const options = { props: { task_id: "t_1" }, draftExtraIds: ["pinNameInput"],
+      getCandidate: () => ({ name: nameInput.value }) };
+    app.rapidFormOptions = { pin: options };
+    app.submissionIdForContent(form.dataset, app.rapidSubmittedContent("pin"));
+    app.markRapidDraftSent("t_1", "sub_sent", form.dataset.sentFingerprint);
+    app.bindRapidObservationForm("pin", options);
     assert.ok(extraListeners.input?.length, "the outside field is listened to");
     nameInput.value = "Corrected name";
     for (const fn of extraListeners.input) fn({ target: nameInput });
@@ -1333,7 +1343,7 @@ async function roundThree() {
     values.clear();
     const { app } = signedInApp("user_a");
     window.PowRapidEntry = { secureSubmissionId: (() => { let n = 0; return () => `sub_r${(n += 1)}`; })() };
-    const state = { submissionId: "sub_1", segments: [{ startDate: "1990" }, { startDate: "2000" }], chain: null, sameSource: true, provenance: null, gapAnswer: "", gapNote: "" };
+    const state = { submissionId: "sub_1", segments: [{ startMode: "known", startDate: "1990" }, { startMode: "known", startDate: "2000" }], chain: null, sameSource: true, provenance: null, gapAnswer: "", gapNote: "" };
     app.guidedPeriodsByTaskId.set("k", state);
     app.persistGuidedPeriods("k", { sending: true, provenance: { sourceTitle: "a" } });
     app.persistGuidedPeriods("k", { sending: true, provenance: { sourceTitle: "a" } });
@@ -1358,6 +1368,9 @@ async function roundThree() {
     const form = { dataset: { submissionId: "sub_sent", sentSubmissionId: "sub_sent" } };
     const previousGet = document.getElementById;
     document.getElementById = (id) => (id === "pinRapidCurrentForm" ? form : null);
+    app.rapidObservationValues = () => ({ directObservation: "before cleanup" });
+    form.dataset.sentFingerprint = app.submittedContentFingerprint(app.rapidSubmittedContent("pin"));
+    app.rapidObservationValues = () => ({ directObservation: "edited after cleanup" });
     app.persistRapidDraft("pin", "rapid-pin");
     const first = app.readRapidDraft("rapid-pin");
     assert.notEqual(form.dataset.submissionId, "sub_sent", "an edit after receipt cleanup mints a new id");
@@ -1365,7 +1378,7 @@ async function roundThree() {
     assert.ok(app.readRapidDraft("rapid-pin").saved_at > first.saved_at, "same-millisecond saves differ");
     Date.now = realNow;
     document.getElementById = previousGet;
-    const state = { submissionId: "sub_1", segments: [{ startDate: "1990" }], chain: null, sameSource: true, provenance: null, gapAnswer: "", gapNote: "" };
+    const state = { submissionId: "sub_1", segments: [{ startMode: "known", startDate: "1990" }], chain: null, sameSource: true, provenance: null, gapAnswer: "", gapNote: "" };
     app.guidedPeriodsByTaskId.set("k", state);
     app.persistGuidedPeriods("k", { sending: true, provenance: null });
     state.segments[0].startDate = "1991";

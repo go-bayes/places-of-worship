@@ -193,9 +193,12 @@ console.log("basemap swap order, device snapshots, and the kept pin ok");
   document.getElementById = (id) => (id === "pinRapidCurrentForm" ? form : null);
   try {
     app.pinConfirmed = { latitude: -17.74, longitude: 168.31, zoom: 18, locationMode: "building_identified" };
+    app.rapidFormOptions = { pin: { getCandidate: () => ({
+      latitude: app.pinConfirmed.latitude, longitude: app.pinConfirmed.longitude,
+    }) } };
     app.keepRapidPinOnDevice();
-    app.markRapidDraftSent("rapid-pin", "sent-1");
-    form.dataset.sentSubmissionId = "sent-1";
+    app.submissionIdForContent(form.dataset, app.rapidSubmittedContent("pin"));
+    app.markRapidDraftSent("rapid-pin", "sent-1", form.dataset.sentFingerprint);
     app.dropRapidPinFromDevice();
     // the same pin again is the same content: the id stands
     app.keepRapidPinOnDevice();

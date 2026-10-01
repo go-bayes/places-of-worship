@@ -69,13 +69,14 @@ function fixture({ storage, records = new Map(), sent = [], realContract = false
     getCandidate: () => ({ name: "Hall", latitude: app.pinConfirmed.latitude, longitude: app.pinConfirmed.longitude,
       ...(app.probableSameAsPayload() ? { probableSameAs: app.probableSameAsPayload() } : {}) }),
   };
+  app.rapidFormOptions = { pin: options };
   if (!storage) app.keepRapidPinOnDevice();
   return { app, form, document, window, records, sent, submit: () => app.submitRapidObservation("pin", options),
     writes: () => writes, recordedTask: () => recordedTask };
 }
 
 for (const withEvidenceFiles of [false, true]) {
-  test(`lost response, reload and unchanged retry ${withEvidenceFiles ? "with" : "without"} evidence files`, async () => {
+  test(`lost response, reload and unchanged retry ${withEvidenceFiles ? "after reselecting evidence through bound listeners (previous stamp fingerprint)" : "without evidence files"}`, async () => {
     const stored = new Map([["powDeviceOwner1", "member|session"]]);
     const storage = {
       getItem: key => stored.get(key) ?? null,
@@ -93,6 +94,13 @@ for (const withEvidenceFiles of [false, true]) {
       fields.pinFlagForDiscussion = { checked: false };
       fields.pinSaveSourceToRegister = { checked: false };
       fields.pinEvidenceFiles = { files: [] };
+      fields.pinEvidenceFilesCaption = { value: "" };
+      const listeners = {};
+      f.form.addEventListener = (type, fn) => { (listeners[type] ||= []).push(fn); };
+      f.form.querySelectorAll = () => [];
+      f.window.clearTimeout = () => {};
+      f.window.setTimeout = () => { throw new Error("sent edits must persist immediately"); };
+      for (const field of Object.values(fields)) field.addEventListener = () => {};
       const radio = { value: "confirmed_active", checked: false };
       const get = f.document.getElementById;
       f.document.getElementById = id => fields[id] || get(id);
@@ -100,8 +108,8 @@ for (const withEvidenceFiles of [false, true]) {
         ? (selector.includes(":checked") && !radio.checked ? null : radio) : null;
       delete f.app.rapidObservationValues;
       delete f.app.pendingEvidenceFiles;
-      for (const name of ["updateRapidSourceFields", "updateRapidDiscussionFields", "updateRapidUncertaintyField", "updateSourceLocatorField"]) f.app[name] = () => {};
-      return { ...f, fields, radio };
+      for (const name of ["updateRapidSourceFields", "updateRapidDiscussionFields", "updateRapidUncertaintyField", "updateSourceLocatorField", "bindSourceTypeahead", "renderRapidSourceLinks", "syncInlineEvidenceFiles"]) f.app[name] = () => {};
+      return { ...f, fields, radio, listeners };
     };
     const first = page();
     first.radio.checked = true;
@@ -115,6 +123,15 @@ for (const withEvidenceFiles of [false, true]) {
     await first.submit();
     assert.equal(records.size, 1, "the server records before the response is lost");
     assert.equal(first.form.dataset.submissionId, "original");
+    if (withEvidenceFiles) {
+      // the lost send may have come from the preceding portal stamp, which
+      // also fingerprinted the raw pin and text controls.
+      const saved = first.app.readRapidDraft("rapid-pin");
+      saved.sent_fingerprint = JSON.stringify({ ...JSON.parse(saved.sent_fingerprint),
+        pin: first.app.pinConfirmed, linkedRefs: first.app.pinLinkedRefs, revision: null,
+        name: "", address: "", locality: "", issueType: "" });
+      storage.setItem(first.app.rapidDraftStorageKey("rapid-pin"), JSON.stringify(saved));
+    }
 
     // a fresh page restores the sent draft, but the browser file input is empty
     const reloaded = page();
@@ -123,10 +140,26 @@ for (const withEvidenceFiles of [false, true]) {
     const { linkedRefs, ...pin } = record.pin;
     reloaded.app.pinConfirmed = pin;
     reloaded.app.pinLinkedRefs = linkedRefs;
+    reloaded.app.bindRapidObservationForm("pin", reloaded.app.rapidFormOptions.pin);
     assert.equal(record.values.hasEvidenceFiles, withEvidenceFiles);
     assert.equal(reloaded.app.rapidObservationValues("pin").hasEvidenceFiles, false);
     assert.equal(reloaded.form.dataset.submissionId, "original");
     assert.equal(reloaded.form.dataset.sentFingerprint, record.sent_fingerprint);
+    // the file picker fires the real bound bubbling listeners after reload.
+    // caption changes also concern the later upload, not the nomination.
+    if (withEvidenceFiles) {
+      reloaded.fields.pinEvidenceFiles.files = [{ name: "hall.jpg" }];
+      for (const type of ["input", "change"]) {
+        for (const listener of reloaded.listeners[type]) listener({ target: reloaded.fields.pinEvidenceFiles });
+      }
+      assert.equal(reloaded.form.dataset.submissionId, "original", "reselecting the same file retains the sent id");
+      reloaded.fields.pinEvidenceFilesCaption.value = "The hall entrance";
+      for (const listener of reloaded.listeners.input) listener({ target: reloaded.fields.pinEvidenceFilesCaption });
+      assert.equal(reloaded.form.dataset.submissionId, "original", "an upload caption does not change the nomination");
+      const saved = reloaded.app.readRapidDraft("rapid-pin");
+      assert.equal(saved.sent_submission_id, "original", "unchanged autosave keeps the sent marker");
+      assert.equal(saved.sent_fingerprint, reloaded.form.dataset.sentFingerprint);
+    }
     await reloaded.submit();
     assert.equal(sent.length, 2, "the unchanged retry reaches the server");
     assert.equal(sent[1].clientSubmissionId, sent[0].clientSubmissionId, "reload retains the sent id");
@@ -245,7 +278,7 @@ test("blocked storage: historical-claim edits rotate an ambiguously sent id", as
 
 test("blocked storage: guided period, chain and inherited-source edits rotate live ids", () => {
   const f = fixture();
-  const state = { submissionId: "original", segments: [{ startDate: "1990" }], chain: null, sameSource: true, provenance: null, gapAnswer: "", gapNote: "" };
+  const state = { submissionId: "original", segments: [{ startMode: "known", startDate: "1990" }], chain: null, sameSource: true, provenance: null, gapAnswer: "", gapNote: "" };
   f.app.guidedPeriodsByTaskId = new Map([["periods", state]]);
   const send = () => f.app.persistGuidedPeriods("periods", { sending: true, provenance: { sourceTitle: "Original source" } });
   send();

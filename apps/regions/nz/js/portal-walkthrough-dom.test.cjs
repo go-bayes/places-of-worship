@@ -26,6 +26,7 @@ const bodyClasses = new Set();
 const document = {
   body: { classList: { toggle(name, force) { if (force) bodyClasses.add(name); else bodyClasses.delete(name); }, contains(name) { return bodyClasses.has(name); } } },
   getElementById(id) { return elements.get(id) || null; },
+  querySelector() { return null; },
 };
 const window = {
   __POW_TEST_NO_BOOTSTRAP__: true,
