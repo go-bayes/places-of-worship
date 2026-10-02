@@ -82,20 +82,21 @@ export const listTaskHistoricalClaims = query({
 });
 
 // records one confirmed historical claim while preserving its source account.
-export const submitHistoricalClaim = mutation({
-  args: {
+export const submitHistoricalClaimArgs = v.object({
     clientSubmissionId: v.string(),
     taskId: v.string(),
     parentEvidenceDraftId: v.string(),
     claim: historicalClaimInput,
     clientContext: v.optional(historicalClientContext),
-  },
-  returns: v.object({
+  });
+export const submitHistoricalClaimResult = v.object({
     historical_claim_id: v.string(),
     claim_status: historicalClaimStatus,
     deduped: v.boolean(),
-  }),
-  handler: async (ctx, args) => {
+  });
+
+// shared transaction body; the legacy endpoint retains its input and result contracts
+export async function submitHistoricalClaimHandler(ctx: MutationCtx, args: typeof submitHistoricalClaimArgs.type): Promise<typeof submitHistoricalClaimResult.type> {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     assertRapidSubmissionId(args.clientSubmissionId);
     assertMaxString("task id", args.taskId, MEDIUM_TEXT_MAX);
@@ -202,5 +203,10 @@ export const submitHistoricalClaim = mutation({
       claim_status: "submitted" as const,
       deduped: false,
     };
-  },
+  }
+
+export const submitHistoricalClaim = mutation({
+  args: submitHistoricalClaimArgs.fields,
+  returns: submitHistoricalClaimResult,
+  handler: submitHistoricalClaimHandler,
 });

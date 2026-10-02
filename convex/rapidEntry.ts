@@ -149,8 +149,7 @@ async function supersedeEarlierSubmissions(
   }
 }
 
-export const submitCurrentObservation = mutation({
-  args: {
+export const submitCurrentObservationArgs = v.object({
     clientSubmissionId: v.string(),
     countryCode: v.optional(v.string()),
     taskId: v.optional(v.string()),
@@ -160,8 +159,8 @@ export const submitCurrentObservation = mutation({
     // a partial entry the observer wants discussed rather than reviewed
     // as complete; it lands as an unresolved note instead of needs_review
     flagForDiscussion: v.optional(v.boolean()),
-  },
-  returns: v.object({
+  });
+export const submitCurrentObservationResult = v.object({
     task_id: v.string(),
     evidence_draft_id: v.string(),
     candidate_site_id: v.optional(v.string()),
@@ -173,8 +172,10 @@ export const submitCurrentObservation = mutation({
     // no version to return; the reason is stated rather than a hash invented
     evidence_version_unavailable: v.optional(v.literal("pre_contract")),
     superseded_evidence_draft_id: v.optional(v.string()),
-  }),
-  handler: async (ctx, args) => {
+  });
+
+// shared transaction body; the legacy endpoint retains its input and result contracts
+export async function submitCurrentObservationHandler(ctx: MutationCtx, args: typeof submitCurrentObservationArgs.type): Promise<typeof submitCurrentObservationResult.type> {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     assertRapidSubmissionId(args.clientSubmissionId);
     assertClientContext(args.clientContext);
@@ -552,7 +553,12 @@ export const submitCurrentObservation = mutation({
       evidence_version_hash: version.object_hash,
       ...(correctedDraft !== null ? { superseded_evidence_draft_id: correctedDraft.evidence_draft_id } : {}),
     };
-  },
+  }
+
+export const submitCurrentObservation = mutation({
+  args: submitCurrentObservationArgs.fields,
+  returns: submitCurrentObservationResult,
+  handler: submitCurrentObservationHandler,
 });
 
 // the deployed vanuatu portal still calls the release-one name; both

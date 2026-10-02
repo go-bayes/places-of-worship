@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import type { QueryCtx } from "./_generated/server";
+import type { MutationCtx, QueryCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireUser } from "./lib/auth";
 import { sourceType } from "./model";
@@ -51,8 +51,7 @@ async function summariseSource(ctx: QueryCtx, row: Doc<"sources">) {
 // find-or-create by normalised title within the country scope: a repeat
 // creation returns the existing row rather than erroring, and differing
 // metadata on a hit is ignored (the picker shows the stored row)
-export const createSource = mutation({
-  args: {
+export const createSourceArgs = v.object({
     countryCode: v.optional(v.string()),
     sourceType,
     title: v.string(),
@@ -64,13 +63,15 @@ export const createSource = mutation({
     consultedDate: v.optional(v.string()),
     accessLimits: v.optional(v.string()),
     notes: v.optional(v.string()),
-  },
-  returns: v.object({
+  });
+export const createSourceResult = v.object({
     source_id: v.string(),
     title: v.string(),
     existing: v.boolean(),
-  }),
-  handler: async (ctx, args) => {
+  });
+
+// shared transaction body; the legacy endpoint retains its input and result contracts
+export async function createSourceHandler(ctx: MutationCtx, args: typeof createSourceArgs.type): Promise<typeof createSourceResult.type> {
     const user = await requireUser(ctx, COLLABORATOR_ROLES);
     const title = args.title.trim();
     assertRealSourceTitle(title);
@@ -121,7 +122,12 @@ export const createSource = mutation({
       updated_at: now,
     });
     return { source_id: sourceId, title, existing: false };
-  },
+  }
+
+export const createSource = mutation({
+  args: createSourceArgs.fields,
+  returns: createSourceResult,
+  handler: createSourceHandler,
 });
 
 // typeahead lookup: active rows matching the search, scoped to the given

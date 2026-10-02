@@ -598,19 +598,20 @@ async function importSubmittedSpreadsheetDraft(
   return existing === null ? "inserted" : "updated";
 }
 
-export const saveEvidenceDraft = mutation({
-  args: {
+export const saveEvidenceDraftArgs = v.object({
     taskId: v.string(),
     evidenceDraftId: v.optional(v.string()),
     draft: evidenceDraftInput,
     clientContext: v.optional(v.any()),
-  },
-  returns: v.object({
+  });
+export const saveEvidenceDraftResult = v.object({
     evidence_draft_id: v.string(),
     task_id: v.string(),
     task_status: v.union(v.literal("needs_review"), v.literal("reviewed"), v.literal("draft_saved")),
-  }),
-  handler: async (ctx, args) => {
+  });
+
+// shared transaction body; the legacy endpoint retains its input and result contracts
+export async function saveEvidenceDraftHandler(ctx: MutationCtx, args: typeof saveEvidenceDraftArgs.type): Promise<typeof saveEvidenceDraftResult.type> {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
     assertOwnsOrCanReview(user._id, user.roles, task.assigned_to);
@@ -712,7 +713,12 @@ export const saveEvidenceDraft = mutation({
       clientContext: args.clientContext,
     });
     return { evidence_draft_id: draftId, task_id: args.taskId, task_status: newTaskStatus };
-  },
+  }
+
+export const saveEvidenceDraft = mutation({
+  args: saveEvidenceDraftArgs.fields,
+  returns: saveEvidenceDraftResult,
+  handler: saveEvidenceDraftHandler,
 });
 
 export const importSubmittedEvidenceDrafts = mutation({
@@ -772,14 +778,13 @@ const revisionTransitions = {
   unresolved_note: "unresolved_note",
 } as const;
 
-export const reviseEvidenceDraft = mutation({
-  args: {
+export const reviseEvidenceDraftArgs = v.object({
     taskId: v.string(),
     // evidence-version.v1: a correction joins the submission's version
     // family; a new dated observation starts a family that follows it
     intent: v.optional(revisionIntent),
-  },
-  returns: v.object({
+  });
+export const reviseEvidenceDraftResult = v.object({
     task_id: v.string(),
     previous_evidence_draft_id: v.string(),
     evidence_draft_id: v.string(),
@@ -788,8 +793,10 @@ export const reviseEvidenceDraft = mutation({
       v.literal("needs_review"),
       v.literal("unresolved_note"),
     ),
-  }),
-  handler: async (ctx, args) => {
+  });
+
+// shared transaction body; the legacy endpoint retains its input and result contracts
+export async function reviseEvidenceDraftHandler(ctx: MutationCtx, args: typeof reviseEvidenceDraftArgs.type): Promise<typeof reviseEvidenceDraftResult.type> {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
     const nextStatus = revisionTransitions[task.status as keyof typeof revisionTransitions];
@@ -935,26 +942,32 @@ export const reviseEvidenceDraft = mutation({
       evidence_draft_id: revisionDraftId,
       task_status: nextStatus,
     };
-  },
+  }
+
+export const reviseEvidenceDraft = mutation({
+  args: reviseEvidenceDraftArgs.fields,
+  returns: reviseEvidenceDraftResult,
+  handler: reviseEvidenceDraftHandler,
 });
 
-export const submitEvidenceDraft = mutation({
-  args: {
+export const submitEvidenceDraftArgs = v.object({
     evidenceDraftId: v.string(),
     note: v.optional(v.string()),
     // optional idempotency token; without it a retry of unchanged content
     // still returns the existing version because the version is content-
     // addressed (evidence-version.v1)
     clientSubmissionId: v.optional(v.string()),
-  },
-  returns: v.object({
+  });
+export const submitEvidenceDraftResult = v.object({
     task_id: v.string(),
     evidence_draft_id: v.string(),
     task_status: v.literal("needs_review"),
     evidence_version_hash: v.string(),
     deduped: v.boolean(),
-  }),
-  handler: async (ctx, args) => {
+  });
+
+// shared transaction body; the legacy endpoint retains its input and result contracts
+export async function submitEvidenceDraftHandler(ctx: MutationCtx, args: typeof submitEvidenceDraftArgs.type): Promise<typeof submitEvidenceDraftResult.type> {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     assertTaskReasonLimit("submission note", args.note);
     if (args.clientSubmissionId !== undefined) assertRapidSubmissionId(args.clientSubmissionId);
@@ -1007,7 +1020,12 @@ export const submitEvidenceDraft = mutation({
     }
     await markDraftSubmitted(ctx, draft, task, user, now, args.note, undefined, version.object_hash);
     return { task_id: draft.task_id, evidence_draft_id: args.evidenceDraftId, task_status: "needs_review" as const, evidence_version_hash: version.object_hash, deduped: false };
-  },
+  }
+
+export const submitEvidenceDraft = mutation({
+  args: submitEvidenceDraftArgs.fields,
+  returns: submitEvidenceDraftResult,
+  handler: submitEvidenceDraftHandler,
 });
 
 const guidedSubmissionClientContext = v.object({
@@ -1023,8 +1041,7 @@ const guidedSubmissionClientContext = v.object({
 // transition, period replacement, derived proposals, and events either all
 // commit or all roll back. Saved draft cards therefore remain recoverable
 // after any failed final submission.
-export const submitEvidenceDraftWithOccupancies = mutation({
-  args: {
+export const submitEvidenceDraftWithOccupanciesArgs = v.object({
     evidenceDraftId: v.string(),
     note: v.optional(v.string()),
     clientSubmissionId: v.string(),
@@ -1032,8 +1049,8 @@ export const submitEvidenceDraftWithOccupancies = mutation({
     // pr-f: the function chain recorded under the period cards
     chain: v.optional(functionChainInput),
     clientContext: v.optional(guidedSubmissionClientContext),
-  },
-  returns: v.object({
+  });
+export const submitEvidenceDraftWithOccupanciesResult = v.object({
     task_id: v.string(),
     evidence_draft_id: v.string(),
     task_status: v.literal("needs_review"),
@@ -1044,8 +1061,10 @@ export const submitEvidenceDraftWithOccupancies = mutation({
     period_count: v.number(),
     deduped: v.boolean(),
     evidence_version_hash: v.optional(v.string()),
-  }),
-  handler: async (ctx, args) => {
+  });
+
+// shared transaction body; the legacy endpoint retains its input and result contracts
+export async function submitEvidenceDraftWithOccupanciesHandler(ctx: MutationCtx, args: typeof submitEvidenceDraftWithOccupanciesArgs.type): Promise<typeof submitEvidenceDraftWithOccupanciesResult.type> {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     assertTaskReasonLimit("submission note", args.note);
     assertRapidSubmissionId(args.clientSubmissionId);
@@ -1187,7 +1206,12 @@ export const submitEvidenceDraftWithOccupancies = mutation({
       deduped: false,
       evidence_version_hash: version.object_hash,
     };
-  },
+  }
+
+export const submitEvidenceDraftWithOccupancies = mutation({
+  args: submitEvidenceDraftWithOccupanciesArgs.fields,
+  returns: submitEvidenceDraftWithOccupanciesResult,
+  handler: submitEvidenceDraftWithOccupanciesHandler,
 });
 
 export const submitUnresolvedNote = mutation({

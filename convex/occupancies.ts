@@ -876,23 +876,24 @@ export const listDerivedStates = query({
 
 // records the author's set of periods for a submitted evidence record and
 // derives the per-year proposals; a resubmission supersedes the earlier set
-export const submitOccupancies = mutation({
-  args: {
+export const submitOccupanciesArgs = v.object({
     clientSubmissionId: v.string(),
     taskId: v.string(),
     parentEvidenceDraftId: v.string(),
     segments: v.array(occupancySegmentInput),
     chain: v.optional(functionChainInput),
     clientContext: v.optional(occupancyClientContext),
-  },
-  returns: v.object({
+  });
+export const submitOccupanciesResult = v.object({
     occupancy_ids: v.array(v.string()),
     derived_years: v.array(v.number()),
     conflict_years: v.array(v.number()),
     derived_function_years: v.optional(v.array(v.number())),
     deduped: v.boolean(),
-  }),
-  handler: async (ctx, args) => {
+  });
+
+// shared transaction body; the legacy endpoint retains its input and result contracts
+export async function submitOccupanciesHandler(ctx: MutationCtx, args: typeof submitOccupanciesArgs.type): Promise<typeof submitOccupanciesResult.type> {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     assertRapidSubmissionId(args.clientSubmissionId);
     assertMaxString("task id", args.taskId, MEDIUM_TEXT_MAX);
@@ -994,7 +995,12 @@ export const submitOccupancies = mutation({
       derived_function_years: functionYears,
       deduped: false,
     };
-  },
+  }
+
+export const submitOccupancies = mutation({
+  args: submitOccupanciesArgs.fields,
+  returns: submitOccupanciesResult,
+  handler: submitOccupanciesHandler,
 });
 
 type DecisionAction = "confirm" | "override" | "reject";

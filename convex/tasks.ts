@@ -783,8 +783,7 @@ export const addTaskNote = mutation({
   },
 });
 
-export const createIssueTask = mutation({
-  args: {
+export const createIssueTaskArgs = v.object({
     countryCode: v.string(),
     name: v.string(),
     issueType: v.union(
@@ -817,8 +816,8 @@ export const createIssueTask = mutation({
     // from a task rather than a context dot (jb 2026-09-07): the issue
     // task names it and the task gets a note pointing at the revision
     sourceTaskId: v.optional(v.string()),
-  },
-  returns: v.union(
+  });
+export const createIssueTaskResult = v.union(
     v.object({
       task_id: v.string(),
       status: v.union(v.literal("open"), v.literal("in_progress")),
@@ -830,8 +829,10 @@ export const createIssueTask = mutation({
       status: v.union(v.literal("open"), v.literal("in_progress")),
       deduped: v.literal(false),
     }),
-  ),
-  handler: async (ctx, args) => {
+  );
+
+// shared transaction body; the legacy endpoint retains its input and result contracts
+export async function createIssueTaskHandler(ctx: MutationCtx, args: typeof createIssueTaskArgs.type): Promise<typeof createIssueTaskResult.type> {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     assertMaxString("issue country code", args.countryCode, SHORT_TEXT_MAX);
     assertMaxString("issue task name", args.name, TASK_NAME_MAX);
@@ -1030,11 +1031,15 @@ export const createIssueTask = mutation({
       status: assign ? ("in_progress" as const) : ("open" as const),
       deduped: false as const,
     };
-  },
+  }
+
+export const createIssueTask = mutation({
+  args: createIssueTaskArgs.fields,
+  returns: createIssueTaskResult,
+  handler: createIssueTaskHandler,
 });
 
-export const createManualCandidateTask = mutation({
-  args: {
+export const createManualCandidateTaskArgs = v.object({
     countryCode: v.string(),
     name: v.string(),
     address: v.optional(v.string()),
@@ -1051,13 +1056,15 @@ export const createManualCandidateTask = mutation({
     // the entry stays separate and both tasks carry the link
     probableSameAs: v.optional(v.array(probableSameAsInput)),
     clientContext: v.optional(v.any()),
-  },
-  returns: v.object({
+  });
+export const createManualCandidateTaskResult = v.object({
     task_id: v.string(),
     candidate_site_id: v.string(),
     status: v.literal("in_progress"),
-  }),
-  handler: async (ctx, args) => {
+  });
+
+// shared transaction body; the legacy endpoint retains its input and result contracts
+export async function createManualCandidateTaskHandler(ctx: MutationCtx, args: typeof createManualCandidateTaskArgs.type): Promise<typeof createManualCandidateTaskResult.type> {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     assertMaxString("nomination country code", args.countryCode, SHORT_TEXT_MAX);
     assertProbableSameAsInputs(args.probableSameAs);
@@ -1149,7 +1156,12 @@ export const createManualCandidateTask = mutation({
       clientContext: args.clientContext,
     });
     return { task_id: taskId, candidate_site_id: candidateSiteId, status: "in_progress" as const };
-  },
+  }
+
+export const createManualCandidateTask = mutation({
+  args: createManualCandidateTaskArgs.fields,
+  returns: createManualCandidateTaskResult,
+  handler: createManualCandidateTaskHandler,
 });
 
 // answers a reviewer's return-for-comment question (jb 2026-09-01): the
