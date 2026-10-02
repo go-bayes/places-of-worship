@@ -1581,6 +1581,44 @@ const { wideEvidenceFields } = await import("./lib/wideEvidenceFields.ts");
 const wideDraft = (row) => draftContent({
   generated_wide_row: { fields: wideEvidenceFields([2013, 2018, 2023]), row },
 });
+for (const [field, draft, message] of [
+  ["presence", draftContent({ target_year_statuses: { "2013": "absent" } }), /target year 2013.*compiled periods/],
+  ["wide-row presence", wideDraft({ target_year_2013_status: "absent" }), /target year 2013.*compiled periods/],
+  ["use level", wideDraft({ target_year_2013_use_level: "contradictory_level" }), /use level.*2013.*compiled periods/],
+  ...[
+    ["latitude", 0], ["longitude", 0], ["uncertainty_radius_m", 500],
+    ["location_basis", "contradictory_basis"], ["denomination", "Contradictory tradition"],
+  ].map(([field, value]) => [
+    field, wideDraft({ [`target_year_2013_${field}`]: value }),
+    field === "denomination" ? /denomination.*function chain/ : /location.*compiled periods/,
+  ]),
+]) {
+  test(`V1 resolves empty NZ target years and rejects contradictory ${field} uncharged with full rollback`, async () => {
+    const w = await scene({ task: { target_years: [] } });
+    const before = structuredClone(w.rows);
+    const request = guided(155, {
+      draft, chain: chain(),
+      source: { kind: "register", countryCode: "NZ", sourceType: "denominational_directory",
+        title: "Synthetic fallback-year directory", url: "https://example.org/fallback-years" },
+    });
+    await assert.rejects(invoke(w, api.submitEvidenceDraftWithOccupanciesV1, request), message);
+    assert.deepEqual(w.rows, before);
+    assert.deepEqual(w.ctx.charges, []);
+  });
+}
+
+test("V1 commits matching historical values using the empty-array NZ year fallback", async () => {
+  const w = await scene({ task: { target_years: [] } });
+  const result = await invoke(w, api.submitEvidenceDraftWithOccupanciesV1, guided(156, {
+    draft: wideDraft({ target_year_2013_latitude: -41.282,
+      target_year_2013_denomination: "Synthetic second tradition" }),
+    chain: chain(),
+  }));
+  assert.equal(result.outcome, "committed");
+  assert.ok(w.rows.derived_year_locations.some((row) => row.target_year === 2013 && row.latitude === -41.282));
+  assert.ok(w.rows.derived_target_year_functions.some((row) => row.target_year === 2013 && row.label === "Synthetic second tradition"));
+});
+
 for (const [field, value] of [
   ["latitude", 0], ["longitude", 0], ["uncertainty_radius_m", 500],
   ["location_basis", "contradictory_basis"], ["denomination", "Contradictory tradition"],
@@ -1702,6 +1740,37 @@ test("malformed candidate corrections throw uncharged after receipt comparison",
   assert.equal(refusal.outcome, "correction_required");
   assert.equal(w.ctx.charges.length, charges + 1);
 });
+
+for (const [field, comparison, message] of [
+  ["latitude", candidate({ latitude: 999 }), /candidate location|latitude/],
+  ["radius", candidate({ locationAssertion: {
+    contract_version: "location_assertion_v1", mode: "approximate_area",
+    basis: "named_source_description", latitude: -17.74, longitude: 168.31,
+    uncertainty_radius_m: -1, source_wording: "Synthetic approximate location",
+    confidence: "low", contributor_confirmed: true,
+  } }), /uncertainty radius/],
+  ["name", candidate({ name: "x".repeat(5_000) }), /candidate name/],
+  ["address", candidate({ address: "x".repeat(5_000) }), /candidate address/],
+  ["locality", candidate({ locality: "x".repeat(5_000) }), /candidate locality/],
+  ["assertion point", candidate({ locationAssertion: {
+    contract_version: "location_assertion_v1", mode: "building_identified",
+    basis: "map_placement", latitude: -17.741, longitude: 168.31,
+    confidence: "high", contributor_confirmed: true,
+  } }), /assertion.*task point/],
+]) {
+  test(`malformed candidate comparison ${field} throws before a typed refusal and rolls back accounting`, async () => {
+    const w = await scene();
+    const first = await invoke(w, api.submitCurrentObservationV1, rapid(157));
+    w.ctx.charges.length = 0;
+    const before = structuredClone(w.rows);
+    await assert.rejects(invoke(w, api.submitCurrentObservationV1, {
+      clientSubmissionId: submissionId(158), taskId: first.task_id,
+      candidateComparison: comparison, observation: observation(),
+    }), message);
+    assert.deepEqual(w.rows, before);
+    assert.deepEqual(w.ctx.charges, []);
+  });
+}
 
 
 test("fresh validation resolves a registered source locator before observation submission", async () => {

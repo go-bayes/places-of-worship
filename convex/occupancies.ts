@@ -99,7 +99,7 @@ export function taskPoint(task: Doc<"tasks">): { latitude: number; longitude: nu
   return { latitude: Number(coordinates[1]), longitude: Number(coordinates[0]) };
 }
 
-function taskTargetYears(task: Doc<"tasks">): number[] {
+export function taskTargetYears(task: Doc<"tasks">): number[] {
   return task.target_years && task.target_years.length > 0
     ? task.target_years
     : targetYearsOrEmpty(task.country_code);

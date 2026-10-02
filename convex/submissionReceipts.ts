@@ -15,6 +15,8 @@ import { intakeRateLimiter } from "./lib/rateLimits";
 import { assertRealSourceTitle, assertSourceRecordLimits, normalizeTitleKey, resolveCitedSource } from "./lib/sources";
 import { objectHash, withoutUndefined } from "./lib/canonicalJson";
 import { dateFloorYear } from "./lib/countryYears";
+import { assertAssertionMatchesTaskPoint, assertCountryAllowsAssertionMode } from "./lib/locationAssertions";
+import { assertProbableSameAsInputs } from "./lib/probableSameAs";
 import {
   assertOccupancySet,
   derivePresence,
@@ -30,6 +32,7 @@ import {
   assertMaxString,
   MEDIUM_TEXT_MAX,
   SHORT_TEXT_MAX,
+  TASK_NAME_MAX,
   URL_OR_FILE_MAX,
 } from "./lib/limits";
 import {
@@ -40,7 +43,7 @@ import {
   revisionIntent,
 } from "./model";
 import { submitCurrentObservationArgs, submitCurrentObservationHandler } from "./rapidEntry";
-import { submitOccupanciesArgs, submitOccupanciesHandler, taskPoint } from "./occupancies";
+import { submitOccupanciesArgs, submitOccupanciesHandler, taskPoint, taskTargetYears } from "./occupancies";
 import { submitHistoricalClaimArgs, submitHistoricalClaimHandler } from "./historicalClaims";
 import { createSourceArgs, createSourceHandler } from "./sources";
 import {
@@ -560,6 +563,16 @@ export const submitCurrentObservationV1 = mutation({
     if (args.candidateComparison !== undefined) {
       if (!args.taskId) throw new Error("Candidate comparison requires a task target.");
       const task = await taskById(ctx, args.taskId);
+      const candidate = args.candidateComparison;
+      assertMaxString("candidate name", candidate.name, TASK_NAME_MAX);
+      assertMaxString("candidate address", candidate.address, MEDIUM_TEXT_MAX);
+      assertMaxString("candidate locality", candidate.locality, MEDIUM_TEXT_MAX);
+      assertCountryIntakePoint(country, candidate.latitude, candidate.longitude);
+      assertProbableSameAsInputs(candidate.probableSameAs);
+      // normaliseCandidate supplies the creation path's default assertion
+      const assertion = candidate.locationAssertion!;
+      assertCountryAllowsAssertionMode(country, assertion.mode);
+      assertAssertionMatchesTaskPoint(assertion, candidate.latitude, candidate.longitude);
       const fields = candidateDifferences(task, args.candidateComparison);
       // author-only correction authority is enforced even for typed refusals
       const owned =
@@ -733,6 +746,7 @@ function assertDraftPeriods(
   chain: typeof functionChainInput.type | undefined,
 ) {
   const reference = occupancyReferenceDate(draft.source_date_or_capture_date, Date.now());
+  const targetYears = taskTargetYears(task);
   if (segments.length) {
     const point = taskPoint(task);
     assertOccupancySet(segments, reference, point, dateFloorYear(task.country_code));
@@ -741,8 +755,8 @@ function assertDraftPeriods(
       occupancy_id: String(segment.segment_index),
       ...resolveLocation(segment, point),
     }));
-    const presences = derivePresence(rows, task.target_years);
-    const locations = deriveLocations(rows, presences, task.target_years);
+    const presences = derivePresence(rows, targetYears);
+    const locations = deriveLocations(rows, presences, targetYears);
     for (const derived of presences) {
       const stated =
         draft.target_year_statuses?.[
@@ -782,8 +796,8 @@ function assertDraftPeriods(
     if (!segments.length) throw new Error("A function chain requires periods.");
     assertFunctionChain(chain, reference, dateFloorYear(task.country_code));
     assertChainAgreesWithPeriods(chain, segments);
-    const functions = deriveFunctions(chain, task.target_years);
-    for (const year of task.target_years) {
+    const functions = deriveFunctions(chain, targetYears);
+    for (const year of targetYears) {
       const label = draft.generated_wide_row?.row?.[`target_year_${year}_denomination`];
       if (label !== undefined && label !== null && label !== "" && !functions.some((row) =>
         row.target_year === year && row.candidate_labels.includes(label),

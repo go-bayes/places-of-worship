@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-10-02 (submission receipt round-2 repairs)
+
+- Guided V1 consistency checks reuse the committing helper's country fallback when a task has empty target years. Candidate comparisons apply the creation validators for text bounds, coordinates and location assertions before a correction refusal. Added regressions for thrown refusals, complete rollback and unchanged attempt accounting. Legacy endpoints retain their behaviour. The RA guide is unaffected because the portal UI is unchanged.
+
 ### 2026-10-02 (submission receipt review repairs)
 
 - V1 revision submissions now initialise lineage and intent when reusing an ordinary editable draft and retain established revision pins. Guided V1 submissions reject historical wide-row locations and denomination labels that contradict the periods and function chain. Rapid V1 comparisons normalise legacy location text without changing stored evidence, and malformed fresh requests throw before a charged candidate-correction refusal. Added handler and isolated local-backend regressions. Legacy endpoints retain their behaviour; their missing historical value-consistency check remains a follow-up. The RA guide is unaffected because portal behaviour remains unchanged.
