@@ -7,28 +7,36 @@ import {
   assertCountryIntakePoint,
   assertRapidCandidateContext,
   assertRapidSubmissionId,
+  deriveCurrentObservation,
   isRapidCurrentDraft,
+  sourceFieldsForObservationBasis,
 } from "./lib/rapidEntry";
 import { intakeRateLimiter } from "./lib/rateLimits";
-import { resolveCitedSource } from "./lib/sources";
+import { assertRealSourceTitle, assertSourceRecordLimits, normalizeTitleKey, resolveCitedSource } from "./lib/sources";
 import { objectHash, withoutUndefined } from "./lib/canonicalJson";
 import { dateFloorYear } from "./lib/countryYears";
 import {
   assertOccupancySet,
   derivePresence,
+  deriveLocations,
   occupancyReferenceDate,
   resolveLocation,
 } from "./lib/occupancies";
-import { assertChainAgreesWithPeriods, assertFunctionChain } from "./lib/functionChain";
+import { assertChainAgreesWithPeriods, assertFunctionChain, deriveFunctions } from "./lib/functionChain";
 import {
   assertClientContextLimit,
   assertEvidenceDraftLimits,
   assertEvidenceDraftSubmission,
+  assertMaxString,
+  MEDIUM_TEXT_MAX,
+  SHORT_TEXT_MAX,
+  URL_OR_FILE_MAX,
 } from "./lib/limits";
 import {
   evidenceDraftInput,
   functionChainInput,
   occupancySegmentInput,
+  locationAssertionInput,
   revisionIntent,
 } from "./model";
 import { submitCurrentObservationArgs, submitCurrentObservationHandler } from "./rapidEntry";
@@ -401,7 +409,10 @@ function candidateDifferences(
     locality: task.locality?.trim() || undefined,
     latitude: task.geometry.coordinates[1],
     longitude: task.geometry.coordinates[0],
-    locationAssertion: task.initial_location_assertion,
+    locationAssertion: normaliseInput(
+      v.optional(locationAssertionInput),
+      task.initial_location_assertion,
+    ),
     probableSameAs: (task.nearby_site_refs ?? [])
       .filter((ref) => ref.relation === "probable_same_place")
       .map((ref) => ({ task_id: ref.task_id! })),
@@ -412,6 +423,87 @@ function candidateDifferences(
       objectHash(withoutUndefined({ value: stored[field as keyof typeof stored] })) !==
       objectHash(withoutUndefined({ value: attempted[field as keyof typeof attempted] })),
   ) as (typeof correctionFields.type)[];
+}
+
+// validate fresh observation content before a returned candidate refusal;
+// receipt comparison and legacy recovery still precede these first-write gates
+async function assertFreshRapidObservation(
+  ctx: MutationCtx,
+  args: typeof rapidSubmissionInput.type,
+) {
+  assertClientContextLimit(args.clientContext);
+  const context = args.clientContext;
+  if (context?.placement_zoom !== undefined && (!Number.isFinite(context.placement_zoom) || context.placement_zoom < 0 || context.placement_zoom > 24))
+    throw new Error("The recorded map zoom is invalid.");
+  if (context?.nearby_count !== undefined && (!Number.isInteger(context.nearby_count) || context.nearby_count < 0 || context.nearby_count > 1_000))
+    throw new Error("The nearby-place count is invalid.");
+  assertMaxString("portal version", context?.portal_version, SHORT_TEXT_MAX);
+  const observation = args.observation;
+  assertMaxString("source title", observation.source_title, MEDIUM_TEXT_MAX);
+  assertMaxString("source reference", observation.source_reference, URL_OR_FILE_MAX);
+  assertMaxString("denomination or tradition label", observation.denomination_or_tradition_raw, MEDIUM_TEXT_MAX);
+  assertMaxString("direct observation", observation.direct_observation, 2_000);
+  assertMaxString("uncertainty or follow-up", observation.uncertainty_note, 2_000);
+  if (args.flagForDiscussion && (observation.uncertainty_note?.length ?? 0) < 12)
+    throw new Error("Explain what needs discussion before flagging this entry.");
+  if (args.source !== undefined && observation.source_id !== undefined)
+    throw new Error("Choose a source descriptor or source_id, not both.");
+  const descriptor = args.source?.kind === "register" ? args.source : undefined;
+  let cited: Doc<"sources"> | null;
+  if (descriptor !== undefined) {
+    if (descriptor.countryCode !== undefined && descriptor.countryCode !== args.countryCode)
+      throw new Error("The source country does not match the task.");
+    assertRealSourceTitle(descriptor.title);
+    if (!descriptor.url && !descriptor.archiveRef)
+      throw new Error("Every source needs either a URL or an archive reference.");
+    assertSourceRecordLimits({
+      title: descriptor.title, provider: descriptor.provider, url: descriptor.url,
+      archive_ref: descriptor.archiveRef, licence: descriptor.licence,
+      publication_date: descriptor.publicationDate, consulted_date: descriptor.consultedDate,
+      access_limits: descriptor.accessLimits, notes: descriptor.notes,
+    });
+    assertMaxString("source locator", observation.source_locator, SHORT_TEXT_MAX);
+    cited = (await ctx.db.query("sources")
+      .withIndex("by_title_key", (q) => q.eq("title_key", normalizeTitleKey(descriptor.title)))
+      .collect()).find((row) => row.status === "active" && row.country_code === descriptor.countryCode) ?? null;
+  } else {
+    const sourceId = args.source?.kind === "existing" ? args.source.sourceId : observation.source_id;
+    cited = await resolveCitedSource(ctx, sourceId, observation.source_locator);
+  }
+  if (cited?.country_code !== undefined && cited.country_code !== args.countryCode)
+    throw new Error("The cited source belongs to another country.");
+  const source = sourceFieldsForObservationBasis(
+    observation.observation_basis,
+    observation.source_title,
+    observation.source_reference,
+  );
+  const draft = {
+    observation_contract_version: "rapid_current_v1",
+    ...deriveCurrentObservation(observation.current_status, args.candidate !== undefined),
+    ...source,
+    source_title: source.source_title || cited?.title || descriptor?.title,
+    source_url_or_file: source.source_url_or_file ?? cited?.url ?? cited?.archive_ref ?? descriptor?.url ?? descriptor?.archiveRef,
+    source_date_or_capture_date: observation.observed_on,
+    evidence_note: observation.direct_observation,
+    uncertainty_note: observation.uncertainty_note,
+    current_observation_status: observation.current_status,
+    current_observation_basis: observation.observation_basis,
+  };
+  assertEvidenceDraftLimits(draft);
+  assertEvidenceDraftSubmission(draft, args.flagForDiscussion === true);
+  if (args.chain !== undefined && !args.segments?.length)
+    throw new Error("A function chain requires periods.");
+  if (args.segments?.length) {
+    const reference = occupancyReferenceDate(observation.observed_on, Date.now());
+    const point = args.taskId !== undefined
+      ? taskPoint(await taskById(ctx, args.taskId))
+      : (args.candidate ?? args.taskCreation)!;
+    assertOccupancySet(args.segments, reference, point, dateFloorYear(args.countryCode!));
+    if (args.chain !== undefined) {
+      assertFunctionChain(args.chain, reference, dateFloorYear(args.countryCode!));
+      assertChainAgreesWithPeriods(args.chain, args.segments);
+    }
+  }
 }
 
 export const submitCurrentObservationV1 = mutation({
@@ -464,6 +556,7 @@ export const submitCurrentObservationV1 = mutation({
         })),
         legacy_unverified: true,
       };
+    await assertFreshRapidObservation(ctx, args);
     if (args.candidateComparison !== undefined) {
       if (!args.taskId) throw new Error("Candidate comparison requires a task target.");
       const task = await taskById(ctx, args.taskId);
@@ -648,7 +741,9 @@ function assertDraftPeriods(
       occupancy_id: String(segment.segment_index),
       ...resolveLocation(segment, point),
     }));
-    for (const derived of derivePresence(rows, task.target_years)) {
+    const presences = derivePresence(rows, task.target_years);
+    const locations = deriveLocations(rows, presences, task.target_years);
+    for (const derived of presences) {
       const stated =
         draft.target_year_statuses?.[
           String(derived.target_year) as keyof typeof draft.target_year_statuses
@@ -667,12 +762,33 @@ function assertDraftPeriods(
         throw new Error(
           `Wide-row use level for ${derived.target_year} disagrees with its compiled periods.`,
         );
+      const wideRow = draft.generated_wide_row?.row;
+      const locationFields = ["latitude", "longitude", "uncertainty_radius_m", "location_basis"] as const;
+      const supplied = locationFields.filter((field) => {
+        const value = wideRow?.[`target_year_${derived.target_year}_${field}`];
+        return value !== undefined && value !== null && value !== "";
+      });
+      if (supplied.length && !locations.some((location) =>
+        location.target_year === derived.target_year && supplied.every((field) => {
+          const value = wideRow![`target_year_${derived.target_year}_${field}`];
+          if (field === "location_basis") return value === location[field];
+          return (typeof value === "number" || typeof value === "string")
+            && Number.isFinite(Number(value)) && Number(value) === location[field];
+        }),
+      )) throw new Error(`Wide-row location for ${derived.target_year} disagrees with its compiled periods.`);
     }
   }
   if (chain !== undefined) {
     if (!segments.length) throw new Error("A function chain requires periods.");
     assertFunctionChain(chain, reference, dateFloorYear(task.country_code));
     assertChainAgreesWithPeriods(chain, segments);
+    const functions = deriveFunctions(chain, task.target_years);
+    for (const year of task.target_years) {
+      const label = draft.generated_wide_row?.row?.[`target_year_${year}_denomination`];
+      if (label !== undefined && label !== null && label !== "" && !functions.some((row) =>
+        row.target_year === year && row.candidate_labels.includes(label),
+      )) throw new Error(`Wide-row denomination for ${year} disagrees with its function chain.`);
+    }
   }
 }
 async function writeDraft(
@@ -708,6 +824,20 @@ async function writeDraft(
     const revision = await reviseEvidenceDraftHandler(ctx, args.revision);
     draftId = revision.evidence_draft_id;
     const resolved = await draftById(ctx, draftId);
+    if (resolved === null) throw new Error("The editable revision could not be read.");
+    // the legacy helper can return an ordinary editable draft before pinning
+    // its lineage; only V1 initialises that draft in this transaction
+    if (resolved.revision_of_evidence_draft_id === undefined) {
+      const source = await draftById(ctx, revision.previous_evidence_draft_id);
+      if (source === null) throw new Error("The revision source could not be read.");
+      const lineage = {
+        revision_of_evidence_draft_id: source.evidence_draft_id,
+        revision_of_version_hash: source.evidence_version_hash,
+        revision_intent: args.revision.intent ?? "correction",
+      };
+      await ctx.db.patch(resolved._id, lineage);
+      Object.assign(resolved, lineage);
+    }
     if (
       args.evidenceDraftId !== undefined &&
       resolved?.revision_of_evidence_draft_id !== args.evidenceDraftId

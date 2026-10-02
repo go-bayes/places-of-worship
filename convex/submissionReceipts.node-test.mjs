@@ -1511,3 +1511,231 @@ test("an active member who changes project role still retrieves only their own r
     null,
   );
 });
+
+
+for (const intent of ["correction", "new_observation"]) {
+  for (const guidedRoute of [false, true]) {
+    test(`V1 ${guidedRoute ? "guided" : "general"} pins an ordinary editable draft as ${intent}`, async () => {
+      const w = await scene({ country: "VU" });
+      const first = await invoke(w, api.submitEvidenceDraftWithOccupanciesV1, guided(140));
+      const editableId = "task_1:ordinary-autosave";
+      await invoke(w, oldEvidence.saveEvidenceDraft, {
+        taskId: "task_1",
+        evidenceDraftId: editableId,
+        draft: draftContent({ evidence_note: "Ordinary autosaved content awaiting submission." }),
+      });
+      assert.equal(w.rows.tasks[0].status, "needs_review");
+      const editable = w.row("evidence_drafts", "evidence_draft_id", editableId);
+      assert.equal(editable.revision_of_evidence_draft_id, undefined);
+      // the legacy endpoint still returns the ordinary draft without pinning it
+      const beforeLegacy = structuredClone(w.rows);
+      const legacy = await invoke(w, oldEvidence.reviseEvidenceDraft, { taskId: "task_1", intent });
+      assert.equal(legacy.evidence_draft_id, editableId);
+      assert.deepEqual(w.rows, beforeLegacy);
+      const request = {
+        clientSubmissionId: submissionId(141),
+        revision: { taskId: "task_1", intent },
+        draft: draftContent({ evidence_note: "Complete intended revision content." }),
+        ...(guidedRoute ? { segments: [segment()] } : {}),
+      };
+      const endpoint = guidedRoute ? api.submitEvidenceDraftWithOccupanciesV1 : api.submitEvidenceDraftV1;
+      const sent = await invoke(w, endpoint, request);
+      assert.equal(sent.evidence_draft_id, editableId);
+      const stored = w.row("evidence_drafts", "evidence_draft_id", editableId);
+      assert.equal(stored.revision_of_evidence_draft_id, first.evidence_draft_id);
+      assert.equal(stored.revision_of_version_hash, first.evidence_version_hash);
+      assert.equal(stored.revision_intent, intent);
+      const bindings = w.rows.client_submission_receipts.at(-1).resolved_bindings;
+      assert.equal(bindings.source_draft_id, first.evidence_draft_id);
+      assert.equal(bindings.source_version_hash, first.evidence_version_hash);
+      assert.equal(bindings.revision_intent, intent);
+      assert.equal(bindings.revision_draft_id, editableId);
+      assert.equal(bindings.revision_reused, true);
+      const beforeRetry = structuredClone(w.rows);
+      assert.deepEqual(await invoke(w, endpoint, request), { ...sent, deduped: true });
+      assert.deepEqual(w.rows, beforeRetry);
+    });
+  }
+}
+
+test("ordinary revision lineage rolls back with a later validation refusal", async () => {
+  const w = await scene({ country: "VU" });
+  await invoke(w, api.submitEvidenceDraftWithOccupanciesV1, guided(142));
+  await invoke(w, oldEvidence.saveEvidenceDraft, {
+    taskId: "task_1",
+    evidenceDraftId: "task_1:ordinary-autosave",
+    draft: draftContent(),
+  });
+  const before = structuredClone(w.rows), charges = [...w.ctx.charges];
+  await assert.rejects(invoke(w, api.submitEvidenceDraftWithOccupanciesV1, {
+    clientSubmissionId: submissionId(143),
+    revision: { taskId: "task_1", intent: "new_observation" },
+    draft: draftContent({ evidence_note: "x" }),
+    segments: [segment()],
+  }), /direct observation/);
+  assert.deepEqual(w.rows, before);
+  assert.deepEqual(w.ctx.charges, charges);
+});
+
+const { wideEvidenceFields } = await import("./lib/wideEvidenceFields.ts");
+const wideDraft = (row) => draftContent({
+  generated_wide_row: { fields: wideEvidenceFields([2013, 2018, 2023]), row },
+});
+for (const [field, value] of [
+  ["latitude", 0], ["longitude", 0], ["uncertainty_radius_m", 500],
+  ["location_basis", "contradictory_basis"], ["denomination", "Contradictory tradition"],
+]) {
+  test(`V1 refuses contradictory wide-row historical ${field} with full rollback`, async () => {
+    const w = await scene();
+    const before = structuredClone(w.rows), charges = [...w.ctx.charges];
+    const request = guided(144, {
+      draft: wideDraft({ [`target_year_2013_${field}`]: value }),
+      chain: chain(),
+    });
+    await assert.rejects(invoke(w, api.submitEvidenceDraftWithOccupanciesV1, request),
+      field === "denomination" ? /denomination.*function chain/ : /location.*compiled periods/);
+    assert.deepEqual(w.rows, before);
+    assert.deepEqual(w.ctx.charges, charges);
+    // legacy save and submission retain their original, column-only gate
+    await invoke(w, oldEvidence.saveEvidenceDraft, {
+      taskId: "task_1", evidenceDraftId: "task_1:draft_a", draft: request.draft,
+    });
+    const legacy = await invoke(w, oldEvidence.submitEvidenceDraftWithOccupancies, {
+      evidenceDraftId: "task_1:draft_a", clientSubmissionId: request.clientSubmissionId,
+      segments: request.segments, chain: request.chain,
+    });
+    assert.equal(legacy.task_status, "needs_review");
+  });
+}
+
+test("V1 accepts matching historical coordinates as numbers or CSV text and chain denomination", async () => {
+  const w = await scene();
+  const request = guided(145, {
+    draft: wideDraft({
+      target_year_2013_latitude: "-41.282", target_year_2013_longitude: 174.768,
+      target_year_2013_location_basis: "map_placement",
+      target_year_2013_uncertainty_radius_m: "",
+      target_year_2013_denomination: "Synthetic second tradition",
+    }),
+    chain: chain(),
+  });
+  assert.equal((await invoke(w, api.submitEvidenceDraftWithOccupanciesV1, request)).outcome, "committed");
+});
+
+test("V1 refuses coordinates for an absent period and a denomination outside the chain", async () => {
+  for (const field of ["latitude", "denomination"]) {
+    const w = await scene();
+    const request = guided(146, {
+      draft: wideDraft({ [`target_year_2013_${field}`]: field === "latitude" ? -41.282 : "Synthetic second tradition" }),
+      segments: [segment(0, { start_date: "2015" })],
+      chain: { contract_version: "function_chain_v1", start: {
+        label: "Synthetic second tradition", label_basis: "named_documentary_source",
+        date: { mode: "known", date: "2015" },
+      }, changes: [] },
+    });
+    const before = structuredClone(w.rows);
+    await assert.rejects(invoke(w, api.submitEvidenceDraftWithOccupanciesV1, request), /Wide-row/);
+    assert.deepEqual(w.rows, before);
+  }
+});
+
+test("legacy assertion whitespace compares equally without changing stored evidence", async () => {
+  const w = await scene();
+  const locationAssertion = {
+    contract_version: "location_assertion_v1", mode: "approximate_area",
+    basis: "named_source_description", latitude: -17.74, longitude: 168.31,
+    uncertainty_radius_m: 100, source_wording: "  Near the village centre  ",
+    confidence: "moderate", contributor_confirmed: true,
+  };
+  const initial = rapid(147, { candidate: candidate({ locationAssertion }) });
+  const first = await invoke(w, oldRapid.submitCurrentObservation, initial);
+  const task = w.row("tasks", "task_id", first.task_id);
+  const storedAssertion = structuredClone(task.initial_location_assertion);
+  assert.equal(storedAssertion.source_wording, locationAssertion.source_wording);
+  const corrected = await invoke(w, api.submitCurrentObservationV1, {
+    clientSubmissionId: submissionId(148), taskId: first.task_id,
+    candidateComparison: initial.candidate,
+    observation: observation({ direct_observation: "Updated observation of the same place." }),
+  });
+  assert.equal(corrected.outcome, "committed");
+  assert.equal(corrected.corrected, true);
+  assert.deepEqual(task.initial_location_assertion, storedAssertion);
+  const refused = await invoke(w, api.submitCurrentObservationV1, {
+    clientSubmissionId: submissionId(149), taskId: first.task_id,
+    candidateComparison: candidate({ locationAssertion: { ...locationAssertion, source_wording: "Different evidence wording" } }),
+    observation: observation(),
+  });
+  assert.equal(refused.outcome, "correction_required");
+  assert.deepEqual(refused.fields, ["locationAssertion"]);
+  assert.deepEqual(task.initial_location_assertion, storedAssertion);
+});
+
+test("malformed candidate corrections throw uncharged after receipt comparison", async () => {
+  const w = await scene();
+  const initial = rapid(150), first = await invoke(w, api.submitCurrentObservationV1, initial);
+  for (const changed of [
+    { observed_on: "2026-02-30" },
+    { direct_observation: "x".repeat(23_000) },
+    { observed_on: "2026-02-30", direct_observation: "x".repeat(23_000) },
+    { direct_observation: "x" },
+  ]) {
+    const before = structuredClone(w.rows), charges = [...w.ctx.charges];
+    const request = {
+      clientSubmissionId: submissionId(151), taskId: first.task_id,
+      candidateComparison: candidate({ name: "Changed candidate" }),
+      observation: observation(changed),
+    };
+    await assert.rejects(invoke(w, api.submitCurrentObservationV1, request), /observation date|direct observation/);
+    assert.deepEqual(w.rows, before);
+    assert.deepEqual(w.ctx.charges, charges);
+  }
+  // a used id still returns a charged conflict before fresh observation validation
+  const conflict = await invoke(w, api.submitCurrentObservationV1, {
+    ...initial, observation: observation({ observed_on: "2026-02-30", direct_observation: "x".repeat(23_000) }),
+  });
+  assert.equal(conflict.outcome, "content_conflict");
+  const charges = w.ctx.charges.length;
+  const refusal = await invoke(w, api.submitCurrentObservationV1, {
+    clientSubmissionId: submissionId(151), taskId: first.task_id,
+    candidateComparison: candidate({ name: "Changed candidate" }), observation: observation(),
+  });
+  assert.equal(refusal.outcome, "correction_required");
+  assert.equal(w.ctx.charges.length, charges + 1);
+});
+
+
+test("fresh validation resolves a registered source locator before observation submission", async () => {
+  const w = await scene();
+  const request = rapid(152, {
+    source: { kind: "register", countryCode: "VU", sourceType: "denominational_directory",
+      title: "Synthetic register with locator", url: "https://example.org/located-source" },
+    observation: observation({ observation_basis: "named_public_source", source_locator: "page 2" }),
+  });
+  const result = await invoke(w, api.submitCurrentObservationV1, request);
+  assert.equal(result.outcome, "committed");
+  const stored = w.row("evidence_drafts", "evidence_draft_id", result.evidence_draft_id);
+  assert.equal(stored.source_locator, "page 2");
+  assert.equal(stored.source_title, request.source.title);
+  assert.equal(stored.source_url_or_file, request.source.url);
+});
+
+test("malformed fresh context, source descriptors and periods precede candidate refusals", async () => {
+  const w = await scene();
+  const first = await invoke(w, api.submitCurrentObservationV1, rapid(153));
+  for (const extra of [
+    { clientContext: { nearby_count: -1 } },
+    { source: { kind: "register", title: "N/A", sourceType: "other", url: "https://example.org/source" } },
+    { source: { kind: "register", title: "Synthetic source", sourceType: "other" } },
+    { source: { kind: "register", title: "Synthetic source", sourceType: "other", countryCode: "NZ", url: "https://example.org/source" } },
+    { segments: [segment(0, { still_active_asof: "2026-02-30" })] },
+    { chain: chain() },
+  ]) {
+    const before = structuredClone(w.rows), charges = [...w.ctx.charges];
+    await assert.rejects(invoke(w, api.submitCurrentObservationV1, {
+      clientSubmissionId: submissionId(154), taskId: first.task_id,
+      candidateComparison: candidate({ name: "Changed candidate" }), observation: observation(), ...extra,
+    }));
+    assert.deepEqual(w.rows, before);
+    assert.deepEqual(w.ctx.charges, charges);
+  }
+});

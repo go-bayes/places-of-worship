@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
 import { ConvexHttpClient } from "convex/browser";
+import { wideEvidenceFields } from "../../convex/lib/wideEvidenceFields.ts";
 
 // refuse hosted targets even if shell or .env.local names one
 const config = JSON.parse(fs.readFileSync(".convex/local/default/config.json", "utf8"));
@@ -221,6 +222,92 @@ const segment = {
   source_account: "Synthetic account for this period.",
   privacy_flag: "clear",
 };
+// round-1 repairs are exercised against real transactions and limiter state
+for (const intent of ["correction", "new_observation"]) {
+  const w = await scene();
+  const first = await call(w, "submitEvidenceDraftWithOccupanciesV1", {
+    clientSubmissionId: randomUUID(), taskId: w.taskId, draft, segments: [segment],
+  });
+  const editableId = `${w.taskId}:ordinary-autosave`;
+  await w.client.mutation("evidence:saveEvidenceDraft", {
+    taskId: w.taskId, evidenceDraftId: editableId, draft,
+  });
+  const args = {
+    clientSubmissionId: randomUUID(), revision: { taskId: w.taskId, intent },
+    draft: { ...draft, evidence_note: "Synthetic complete intended revision." }, segments: [segment],
+  };
+  const revised = await call(w, "submitEvidenceDraftWithOccupanciesV1", args);
+  assert.equal(revised.evidence_draft_id, editableId);
+  const receipt = await w.client.query("submissionReceipts:getClientSubmissionReceipt", {
+    clientSubmissionId: args.clientSubmissionId,
+  });
+  assert.equal(receipt.resolved_bindings.source_draft_id, first.evidence_draft_id);
+  assert.equal(receipt.resolved_bindings.source_version_hash, first.evidence_version_hash);
+  assert.equal(receipt.resolved_bindings.revision_intent, intent);
+  assert.equal(receipt.resolved_bindings.revision_reused, true);
+  assert.deepEqual(await call(w, "submitEvidenceDraftWithOccupanciesV1", args), { ...revised, deduped: true });
+  passed(`ordinary editable draft receives transactional ${intent} lineage`);
+}
+{
+  const w = await scene();
+  const chain = {
+    contract_version: "function_chain_v1", start: {
+      label: "Synthetic tradition", label_basis: "named_documentary_source",
+      date: { mode: "known", date: "2000" },
+    }, changes: [],
+  };
+  for (const [field, value] of [["latitude", 0], ["denomination", "Contradictory tradition"]]) {
+    const before = await inspect(w);
+    await assert.rejects(call(w, "submitEvidenceDraftWithOccupanciesV1", {
+      clientSubmissionId: randomUUID(), taskId: w.taskId,
+      draft: { ...draft, generated_wide_row: {
+        fields: wideEvidenceFields([2013, 2018, 2023]), row: { [`target_year_2013_${field}`]: value },
+      } }, segments: [segment], chain,
+    }), /Wide-row/);
+    const after = await inspect(w);
+    assert.deepEqual(after.counts, before.counts);
+    assert.deepEqual(after.allowance, before.allowance);
+  }
+  passed("historical location and denomination contradictions roll back all writes and real charges");
+}
+{
+  const w = await scene();
+  const locationAssertion = {
+    contract_version: "location_assertion_v1", mode: "approximate_area", basis: "named_source_description",
+    latitude: candidate.latitude, longitude: candidate.longitude, uncertainty_radius_m: 100,
+    source_wording: "  Near the village centre  ", confidence: "moderate", contributor_confirmed: true,
+  };
+  const legacyCandidate = { ...candidate, locationAssertion };
+  const first = await w.client.mutation("rapidEntry:submitCurrentObservation", {
+    ...rapid(), candidate: legacyCandidate,
+  });
+  const corrected = await call(w, "submitCurrentObservationV1", {
+    clientSubmissionId: randomUUID(), taskId: first.task_id,
+    candidateComparison: legacyCandidate, observation,
+  });
+  assert.equal(corrected.outcome, "committed");
+  assert.equal(corrected.corrected, true);
+  passed("legacy whitespace-equivalent location assertion permits an observation correction");
+}
+{
+  const w = await scene();
+  const first = await call(w, "submitCurrentObservationV1", rapid());
+  for (const changed of [
+    { observed_on: "2026-02-30" }, { direct_observation: "x".repeat(23_000) },
+    { observed_on: "2026-02-30", direct_observation: "x".repeat(23_000) },
+  ]) {
+    const before = await inspect(w);
+    await assert.rejects(call(w, "submitCurrentObservationV1", {
+      clientSubmissionId: randomUUID(), taskId: first.task_id,
+      candidateComparison: { ...candidate, name: "Changed candidate" }, observation: { ...observation, ...changed },
+    }), /observation date|direct observation/);
+    const after = await inspect(w);
+    assert.deepEqual(after.counts, before.counts);
+    assert.deepEqual(after.allowance, before.allowance);
+  }
+  passed("malformed candidate corrections throw without charging the real attempt bucket");
+}
+
 const claim = {
   claim_kind: "worship_function",
   claim_timing: "state",

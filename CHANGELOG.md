@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-10-02 (submission receipt review repairs)
+
+- V1 revision submissions now initialise lineage and intent when reusing an ordinary editable draft and retain established revision pins. Guided V1 submissions reject historical wide-row locations and denomination labels that contradict the periods and function chain. Rapid V1 comparisons normalise legacy location text without changing stored evidence, and malformed fresh requests throw before a charged candidate-correction refusal. Added handler and isolated local-backend regressions. Legacy endpoints retain their behaviour; their missing historical value-consistency check remains a follow-up. The RA guide is unaffected because portal behaviour remains unchanged.
+
 ### 2026-10-02 (server submission receipts and atomic entry points)
 
 - Implemented the additive server side of the [submission-idempotency brief](docs/development/submission-idempotency-brief-2026-10-02.md), under JB's R-I1–R-I4(a) rulings: member-owned immutable receipts, five versioned atomic entry points, canonical request digests, typed content conflicts and candidate correction refusals, legacy uncertainty markers, receipt lookup, and a 60-request/minute attempt allowance with burst 20. Original mutation validators and return shapes remain unchanged. Atomic rapid and guided requests resolve source/task prerequisites and revision intent in the committing transaction; replay returns the original result before writes or status gates.
