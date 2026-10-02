@@ -2,6 +2,45 @@
 
 **Status:** Implemented 2026-09-11 as the first two steps of the [content-addressed review contract](content-addressed-review.md): the canonicalisation contract with shared fixtures, and server-created immutable evidence versions. Frozen exports (byte-level freezing and bundle verification, D20 step two) are now also implemented; see [frozen-exports.md](frozen-exports.md). Proposal pinning, the export queue, PI batch release, and `pow` verification of releases remain later steps. Live Convex behaviour changes only where this document says it does.
 
+## Atomic client submission receipts
+
+The additive server API implements the [submission-idempotency brief](submission-idempotency-brief-2026-10-02.md) under JB's R-I1–R-I4(a) rulings of 2026-10-02. Implementation has been verified on an anonymous local backend. Hosted deployment and client adoption retain separate authority. The client switch follows PR #153; the RA guide and FAQ can describe the new retry messages when that switch is adopted.
+
+`submissionReceipts.ts` exports five versioned mutations and the member-owned `getClientSubmissionReceipt` query, listed in the [API inventory](../api/convex-functions.md#submissionreceiptsts). Every mutation requires a v4 UUID. The immutable `client_submission_receipts` table has a compound index on `member_id` and `client_submission_id`; its closed union binds each operation to its result validator. `request_contract` identifies the retained normaliser version, initially `submission-request.v1`. `request_digest` is SHA-256 over canonical JSON of `{ contract, operation, content }`. Existing evidence versions and operation-prefixed evidence-version receipts retain their own contracts.
+
+The server normalises the supplied request once for hashing and writing. Declared text is trimmed, empty optional text is omitted, country codes are uppercased, candidate defaults are applied, periods and selected links are sorted, and task target years form a set. Function-chain changes retain their order. Validated JSON extension strings retain their bytes. Client context, validation summaries, pending form cards and generated output identifiers are excluded. Pending cards must be compiled into explicit periods and a chain before submission. Unknown fields and incompatible date members receive validation refusals.
+
+Rapid requests choose a `candidate`, `taskId` or `taskCreation` descriptor. `taskCreation.kind` is `issue` or `manual`; the remaining fields follow the corresponding existing task-creation input, with client context supplied at the outer request. A `source` descriptor uses `kind: "register"` with the source-registration fields, `kind: "existing"` with `sourceId`, or `kind: "citation"`. A descriptor replaces `source_id` in observation or draft content. The supplied descriptor remains content on retries; the resolved source identifier and citation snapshot become audit bindings. Missing citation text is filled from the source snapshot during the first commit. Rapid requests can include initial `segments` and `chain`. Quick photo retains its observation date and location assertion in that rapid request; uploads retain their separate lifecycle. Generated nearby-place commentary can be recorded as `clientContext.nearby_place_commentary`, alongside the excluded placement and proximity metadata.
+
+General and guided requests contain the complete `draft`, a task binding, optional `evidenceDraftId`, optional `note`, and the prerequisite descriptors. A `revision` descriptor contains `taskId` and optional `intent`. An omitted intent remains omitted from the digest. New revisions default to correction and pin the current source version; reused editable revisions retain their original source, version and intent. An explicit intent mismatch throws. When supplied with a revision descriptor, `evidenceDraftId` identifies the intended source draft. The transaction replaces editable content with the supplied projection and clears inherited derivations before recording the supplied periods and chain. The transaction therefore submits restored A with A's periods, even when the saved row contains B.
+
+Receipt comparison precedes prerequisite writes and current task-status gates. Equal content returns the stored result, including the original status, arrays and version identifiers, with only `deduped` changed. A changed request returns `content_conflict` and the original committed result. A fresh rapid correction with `candidateComparison` compares name, address, locality, coordinates, location assertion and selected links with the candidate task. Differences return `correction_required` before evidence writes. The existing author and correction-status gates apply. Legacy lookup retains the operation's existing key convention, including the guided key on the supplied draft, and returns today's result with `legacy_unverified: true`.
+
+The attempt token bucket allows 60 requests per minute per member with capacity 20. Returned conflicts, correction refusals and successful replays commit the attempt charge. Thrown validation or rate-limit refusals roll back all writes and charges. Existing rapid, occupancy and historical creation quotas remain. Guided/general submissions, including empty-period submissions, additionally have member/global hourly limits of 240/1,000. Source creation uses 240/1,000 per hour; task creation uses 120/500. Reused sources or tasks avoid prerequisite creation charges. The brief's deployment-wide attempt ceiling awaits measured deployment capacity and a numerical allowance; existing global creation limits apply meanwhile.
+
+The handler suite covers the server cases from PR #153 rounds 19–24, projection fields, normalisation, legacy recovery, private lookup, review/PI state changes, source snapshots, draft restoration and guided revision lineage. Write-failure injection verifies the logic of rollback in the in-memory harness. The separate local run verifies actual transactions, concurrent calls for all five operations, conflicting content, correction races, response loss after commit and real rate-limit exhaustion. The unchanged portal suites remain the compatibility check. Provider-link end-to-end verification uses PR #153's shared member resolver after merge; this branch keys receipts by the resolved project member.
+
+### Reproduce the isolated local transaction checks
+
+Run the following commands from the implementation worktree. The fixture file exports internal functions and exists under `convex/` only for the local integration run. The runner refuses a configuration whose deployment name or ports differ from the anonymous local target, and uses the local admin key in memory.
+
+```sh
+cp scripts/tests/fixtures/submission-receipts-local.ts convex/receiptLocalTest.ts
+env -u CONVEX_DEPLOYMENT -u CONVEX_DEPLOY_KEY CONVEX_AGENT_MODE=anonymous npx convex dev --local-cloud-port 3260 --local-site-port 3261 --typecheck disable
+```
+
+After the CLI reports that the local functions are ready, run the integration script in another terminal in the same worktree:
+
+```sh
+node scripts/tests/submission-receipts-local.mjs
+node --test convex/lib/*.node-test.mjs convex/*.node-test.mjs
+npx tsc --noEmit
+node --test apps/regions/nz/js/*.test.cjs
+rm convex/receiptLocalTest.ts
+```
+
+Wait for the local watcher to remove the fixture functions. Stop the development process with Ctrl-C. The 2026-10-02 run used the installed `precompiled-2026-09-28-5c7cb5b` backend via `--local-backend-version` after the latest-version lookup failed. Synthetic data remains in the ignored worktree-local `.convex/` state. The integration run contacts the loopback backend; hosted deployments remain outside the test command.
+
 ## Canonicalisation Contract `pow-canonical-json.v1`
 
 The hash envelope of every content-addressed object is serialised with [RFC 8785, the JSON Canonicalization Scheme](https://www.rfc-editor.org/rfc/rfc8785), over the I-JSON domain. RFC 8785 is an informational RFC, not a standards-track document; the project adopts it because its rules are exact, it defers to ECMAScript for number and string serialisation, and maintained implementations exist in both project languages. The contract is named so that a later change in scheme requires a new contract name.

@@ -14,7 +14,7 @@ The inventory also lists internal functions (kind `internal query`,
 Internal functions are not part of the public API: they are callable only with
 the deployment admin key, from the CLI, dashboard, or a scheduled job.
 
-Last reviewed: 2026-08-28 (`agentJudgments.ts` section added 2026-10-01), against the exported Convex functions in
+Last reviewed: 2026-08-28 (`agentJudgments.ts` section added 2026-10-01; `submissionReceipts.ts` added 2026-10-02), against the exported Convex functions in
 `users.ts`, `tasks.ts`, `evidence.ts`, `batchImport.ts`, `reviews.ts`,
 `rapidEntry.ts`, `historicalClaims.ts`, `claudeReviews.ts`, `exports.ts`, `agentJudgments.ts`, `devSeed.ts`, `revisionSeed.ts`, and
 `trainingSeed.ts`.
@@ -101,6 +101,21 @@ change.
 | Function | Kind | Roles | Purpose | Writes |
 | --- | --- | --- | --- | --- |
 | `submitCurrentObservation` (alias: `submitVanuatuCurrentObservation`) | mutation | `ra`, `reviewer`, `curator`, `admin` | Atomically record one current observation against an authorised existing task or a newly pinned provisional candidate, for any country in the closed intake registry (VU and NZ today). A new candidate may carry a `location_assertion_v1` (building identified or approximate area with radius, basis, wording, confidence) that is written to the task as `initial_location_assertion`; absent, the pin is recorded as an identified building. The server validates controlled current-status and evidence fields, applies the country's intake bounds and transactional rate limits, restricts existing-task submissions to the country's manual nomination batch unless the country's assigned batch is rapid-designed (VU), derives provisional workflow classifications, leaves all historical target years unassessed, appends audit events, and moves the task to human review. A user-scoped UUID makes safe retries idempotent. While a task holding a rapid observation awaits review (`needs_review`, `unresolved_note`, `changes_requested`), only that observation's author may submit a corrected observation; the earlier record is marked `superseded`, never rewritten. This is the only route that can create or replace a `rapid_current_v1` draft. Each observation records a `rapid_current_observation` evidence version; a correction is a child version in the corrected observation's family, pinned to the version it corrects. A retry under the same submission id returns the version its receipt names (`evidence_version_hash`), with `corrected` and `superseded_evidence_draft_id` as originally reported; a retry of an observation recorded before the version contract returns `evidence_version_unavailable: "pre_contract"` instead of a hash. | `task_batches` when absent, `tasks`, `evidence_drafts`, `evidence_versions`, `task_events`, rate-limit component state |
+
+## `submissionReceipts.ts`
+
+The additive `submission-request.v1` API implements JB's R-I1–R-I4(a) rulings of 2026-10-02. The endpoints are implemented in source and verified against an anonymous local backend. Hosted deployment requires a separate instruction; the client switch follows PR #153. Existing mutation validators and return shapes remain unchanged. The [evidence-version notes](../development/evidence-versions.md#atomic-client-submission-receipts) describe request descriptors and local reproduction.
+
+| Function | Kind | Roles | Result and workflow position |
+| --- | --- | --- | --- |
+| `submitCurrentObservationV1` | mutation | RA, reviewer, curator, admin | Atomically resolves a candidate, task or issue/manual task descriptor, optional source registration, current observation, and optional initial periods/function chain. Quick photo uses the same entry point before separate attachment uploads. Candidate comparisons on an observation correction return `correction_required` when candidate fields differ. |
+| `submitOccupanciesV1` | mutation | RA, reviewer, curator, admin | Records a complete normalised period set and optional function chain against the supplied task and parent evidence. Replays retain the original derivation arrays. |
+| `submitHistoricalClaimV1` | mutation | RA, reviewer, curator, admin | Records a historical claim against the supplied task and parent evidence. A changed request returns the committed claim as a conflict result. |
+| `submitEvidenceDraftV1` | mutation | RA, reviewer, curator, admin | Resolves optional source/task creation and a guided-revision descriptor, then saves and submits the full intended draft in the transaction. The keyed contract requires a UUID. The legacy tokenless API retains its content-based behaviour. |
+| `submitEvidenceDraftWithOccupanciesV1` | mutation | RA, reviewer, curator, admin | Saves and submits the full intended draft with its periods and optional function chain, including source/task creation and revision creation or reuse. Rejects contradictions between draft target-year assertions and compiled periods. |
+| `getClientSubmissionReceipt` | query | All active project roles, own receipt | Returns the authenticated member's receipt for `clientSubmissionId`, or `null`. Receipt ownership uses the project member identifier resolved by the shared authentication helper. |
+
+The mutations return three outcomes as discriminated values: `committed`, `content_conflict` or `correction_required`. Equal-content replay returns the original result with `deduped: true`; a conflict includes the original operation and `committedResult`. Legacy hits return today's deduplicated result with `legacy_unverified: true`, and leave request equality unverified. Validation refusals throw and roll back the transaction. The member attempt allowance is 60 requests per minute with burst 20; replays, conflicts and candidate correction refusals consume attempts. Fresh writes also consume creation quotas. Client context and attachment state remain outside the digest. Receipts and content digests are private to the member.
 
 ## `historicalClaims.ts`
 

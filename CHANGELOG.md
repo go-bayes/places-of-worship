@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### 2026-10-02 (server submission receipts and atomic entry points)
+
+- Implemented the additive server side of the [submission-idempotency brief](docs/development/submission-idempotency-brief-2026-10-02.md), under JB's R-I1–R-I4(a) rulings: member-owned immutable receipts, five versioned atomic entry points, canonical request digests, typed content conflicts and candidate correction refusals, legacy uncertainty markers, receipt lookup, and a 60-request/minute attempt allowance with burst 20. Original mutation validators and return shapes remain unchanged. Atomic rapid and guided requests resolve source/task prerequisites and revision intent in the committing transaction; replay returns the original result before writes or status gates.
+- Added real-handler regression tests and an isolated anonymous local-backend suite for concurrent commits, rollback, response loss and the real limiter. Updated the API inventory and evidence-version notes. Hosted deployment requires a separate instruction; the client switch follows PR #153. The RA guide is unaffected because portal behaviour remains unchanged. A deployment-wide attempt ceiling awaits measured capacity.
+
 ### 2026-10-02 (submission retry safety design brief)
 
 - Added a [design brief for server-side submission retry safety](docs/development/submission-idempotency-brief-2026-10-02.md), following JB's selected direction. It specifies request digests, receipts, atomic prerequisites, client retries, legacy handling, C1 sign-out, abuse limits and regressions from PR #153 rounds 19–24, with four proposed rulings for JB. The revised brief returns conflicts as charged values, hashes supplied guided-revision task and intent while pinning resolved lineage as transaction bindings, and puts unsupported candidate corrections to JB as a scope decision. The brief adopts no contract or implementation.
