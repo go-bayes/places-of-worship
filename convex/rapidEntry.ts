@@ -1,3 +1,5 @@
+import { submitCurrentObservationResult } from "./lib/submissionReceiptModel";
+export { submitCurrentObservationResult } from "./lib/submissionReceiptModel";
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
@@ -160,19 +162,7 @@ export const submitCurrentObservationArgs = v.object({
     // as complete; it lands as an unresolved note instead of needs_review
     flagForDiscussion: v.optional(v.boolean()),
   });
-export const submitCurrentObservationResult = v.object({
-    task_id: v.string(),
-    evidence_draft_id: v.string(),
-    candidate_site_id: v.optional(v.string()),
-    task_status: taskStatus,
-    deduped: v.boolean(),
-    corrected: v.boolean(),
-    evidence_version_hash: v.optional(v.string()),
-    // a retry of an observation recorded before the version contract has
-    // no version to return; the reason is stated rather than a hash invented
-    evidence_version_unavailable: v.optional(v.literal("pre_contract")),
-    superseded_evidence_draft_id: v.optional(v.string()),
-  });
+
 
 // shared transaction body; the legacy endpoint retains its input and result contracts
 export async function submitCurrentObservationHandler(ctx: MutationCtx, args: typeof submitCurrentObservationArgs.type): Promise<typeof submitCurrentObservationResult.type> {

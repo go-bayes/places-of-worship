@@ -1,3 +1,5 @@
+import { submitOccupanciesResult } from "./lib/submissionReceiptModel";
+export { submitOccupanciesResult } from "./lib/submissionReceiptModel";
 // occupancy lane (docs/development/occupancy-build-brief-2026-09-02.md):
 // ras record where and when a place of worship was used; the server
 // derives per-census-year presence and location as proposals; reviewers
@@ -884,13 +886,7 @@ export const submitOccupanciesArgs = v.object({
     chain: v.optional(functionChainInput),
     clientContext: v.optional(occupancyClientContext),
   });
-export const submitOccupanciesResult = v.object({
-    occupancy_ids: v.array(v.string()),
-    derived_years: v.array(v.number()),
-    conflict_years: v.array(v.number()),
-    derived_function_years: v.optional(v.array(v.number())),
-    deduped: v.boolean(),
-  });
+
 
 // shared transaction body; the legacy endpoint retains its input and result contracts
 export async function submitOccupanciesHandler(ctx: MutationCtx, args: typeof submitOccupanciesArgs.type): Promise<typeof submitOccupanciesResult.type> {

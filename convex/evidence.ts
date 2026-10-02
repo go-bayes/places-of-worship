@@ -1,3 +1,5 @@
+import { submitEvidenceDraftResult, submitEvidenceDraftWithOccupanciesResult } from "./lib/submissionReceiptModel";
+export { submitEvidenceDraftResult, submitEvidenceDraftWithOccupanciesResult } from "./lib/submissionReceiptModel";
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
@@ -958,13 +960,7 @@ export const submitEvidenceDraftArgs = v.object({
     // addressed (evidence-version.v1)
     clientSubmissionId: v.optional(v.string()),
   });
-export const submitEvidenceDraftResult = v.object({
-    task_id: v.string(),
-    evidence_draft_id: v.string(),
-    task_status: v.literal("needs_review"),
-    evidence_version_hash: v.string(),
-    deduped: v.boolean(),
-  });
+
 
 // shared transaction body; the legacy endpoint retains its input and result contracts
 export async function submitEvidenceDraftHandler(ctx: MutationCtx, args: typeof submitEvidenceDraftArgs.type): Promise<typeof submitEvidenceDraftResult.type> {
@@ -1050,18 +1046,7 @@ export const submitEvidenceDraftWithOccupanciesArgs = v.object({
     chain: v.optional(functionChainInput),
     clientContext: v.optional(guidedSubmissionClientContext),
   });
-export const submitEvidenceDraftWithOccupanciesResult = v.object({
-    task_id: v.string(),
-    evidence_draft_id: v.string(),
-    task_status: v.literal("needs_review"),
-    occupancy_ids: v.array(v.string()),
-    derived_years: v.array(v.number()),
-    conflict_years: v.array(v.number()),
-    derived_function_years: v.optional(v.array(v.number())),
-    period_count: v.number(),
-    deduped: v.boolean(),
-    evidence_version_hash: v.optional(v.string()),
-  });
+
 
 // shared transaction body; the legacy endpoint retains its input and result contracts
 export async function submitEvidenceDraftWithOccupanciesHandler(ctx: MutationCtx, args: typeof submitEvidenceDraftWithOccupanciesArgs.type): Promise<typeof submitEvidenceDraftWithOccupanciesResult.type> {

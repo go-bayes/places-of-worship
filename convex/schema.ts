@@ -1,3 +1,4 @@
+import { receiptRow } from "./lib/submissionReceiptModel";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import {
@@ -108,6 +109,9 @@ const storedObjectEntry = v.object({
 });
 
 export default defineSchema({
+  client_submission_receipts: defineTable(receiptRow)
+    .index("by_member_submission", ["member_id", "client_submission_id"]),
+
   users: defineTable({
     auth_subject: v.optional(v.string()),
     email: v.optional(v.string()),

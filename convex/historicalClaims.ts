@@ -1,3 +1,5 @@
+import { submitHistoricalClaimResult } from "./lib/submissionReceiptModel";
+export { submitHistoricalClaimResult } from "./lib/submissionReceiptModel";
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
@@ -89,11 +91,7 @@ export const submitHistoricalClaimArgs = v.object({
     claim: historicalClaimInput,
     clientContext: v.optional(historicalClientContext),
   });
-export const submitHistoricalClaimResult = v.object({
-    historical_claim_id: v.string(),
-    claim_status: historicalClaimStatus,
-    deduped: v.boolean(),
-  });
+
 
 // shared transaction body; the legacy endpoint retains its input and result contracts
 export async function submitHistoricalClaimHandler(ctx: MutationCtx, args: typeof submitHistoricalClaimArgs.type): Promise<typeof submitHistoricalClaimResult.type> {
