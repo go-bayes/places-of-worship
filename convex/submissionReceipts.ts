@@ -17,6 +17,7 @@ import { objectHash, withoutUndefined } from "./lib/canonicalJson";
 import { dateFloorYear } from "./lib/countryYears";
 import { assertAssertionMatchesTaskPoint, assertCountryAllowsAssertionMode } from "./lib/locationAssertions";
 import { assertProbableSameAsInputs } from "./lib/probableSameAs";
+import { resolveProbableSameAsRefs } from "./lib/probableSameAsRecords";
 import {
   assertOccupancySet,
   derivePresence,
@@ -569,6 +570,7 @@ export const submitCurrentObservationV1 = mutation({
       assertMaxString("candidate locality", candidate.locality, MEDIUM_TEXT_MAX);
       assertCountryIntakePoint(country, candidate.latitude, candidate.longitude);
       assertProbableSameAsInputs(candidate.probableSameAs);
+      await resolveProbableSameAsRefs(ctx, candidate.probableSameAs, country, Date.now());
       // normaliseCandidate supplies the creation path's default assertion
       const assertion = candidate.locationAssertion!;
       assertCountryAllowsAssertionMode(country, assertion.mode);

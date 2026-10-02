@@ -1582,7 +1582,10 @@ const wideDraft = (row) => draftContent({
   generated_wide_row: { fields: wideEvidenceFields([2013, 2018, 2023]), row },
 });
 for (const [field, draft, message] of [
-  ["presence", draftContent({ target_year_statuses: { "2013": "absent" } }), /target year 2013.*compiled periods/],
+  ["presence", draftContent({
+    target_year_statuses: { "2013": "absent" },
+    target_year_entry_reason: "Synthetic contradiction with the compiled period.",
+  }), /target year 2013.*compiled periods/],
   ["wide-row presence", wideDraft({ target_year_2013_status: "absent" }), /target year 2013.*compiled periods/],
   ["use level", wideDraft({ target_year_2013_use_level: "contradictory_level" }), /use level.*2013.*compiled periods/],
   ...[
@@ -1772,6 +1775,27 @@ for (const [field, comparison, message] of [
   });
 }
 
+
+for (const [link, country, message] of [
+  ["missing task", undefined, /linked place.*no longer available/],
+  ["cross-country task", "NZ", /linked place must be in the same country/],
+]) {
+  test(`candidate comparison with a ${link} throws uncharged with full rollback`, async () => {
+    const w = await scene({ country: "VU" });
+    const first = await invoke(w, api.submitCurrentObservationV1, rapid(159));
+    if (country !== undefined)
+      await w.addTask({ task_id: "invalid_link", country_code: country });
+    w.ctx.charges.length = 0;
+    const before = structuredClone(w.rows);
+    await assert.rejects(invoke(w, api.submitCurrentObservationV1, {
+      clientSubmissionId: submissionId(160), taskId: first.task_id,
+      candidateComparison: candidate({ probableSameAs: [{ task_id: "invalid_link" }] }),
+      observation: observation(),
+    }), message);
+    assert.deepEqual(w.rows, before);
+    assert.deepEqual(w.ctx.charges, []);
+  });
+}
 
 test("fresh validation resolves a registered source locator before observation submission", async () => {
   const w = await scene();
