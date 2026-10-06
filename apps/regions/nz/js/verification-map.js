@@ -1013,19 +1013,48 @@ const SATELLITE_TILE_URL = MAPTILER_API_KEY
 // hybrid = the same imagery with street and place labels drawn over it, so
 // the contributor keeps orientation while steering the pin (JB 2026-08-31)
 const HYBRID_TILE_URL = MAPTILER_API_KEY
-    ? `https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+    ? `https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.webp?key=${encodeURIComponent(MAPTILER_API_KEY)}`
     : "";
 // r-u3 (confirmed 2026-09-19): in dark mode the streets basemap is
 // maptiler's dark streets raster where a key ships; without one the
 // openstreetmap tiles take a css filter. imagery is never darkened
 const STREETS_TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 const STREETS_DARK_TILE_URL = MAPTILER_API_KEY
-    ? `https://api.maptiler.com/maps/streets-v2-dark/{z}/{x}/{y}.png?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+    ? `https://api.maptiler.com/maps/streets-v2-dark/{z}/{x}/{y}.webp?key=${encodeURIComponent(MAPTILER_API_KEY)}`
     : "";
 // the map lands on hybrid (jb 2026-09-19): imagery for the buildings with
 // street and place labels for orientation; streets is the fallback when no
 // key ships or the key is refused. satellite stays on offer for a bare look
 const DEFAULT_BASEMAP = HYBRID_TILE_URL ? "hybrid" : "streets";
+// maptiler's raster styles come as 512 px tiles. below 1.5 device pixels per
+// css pixel a 512 px tile is drawn in a 512 css px slot one zoom lower
+// (tileSize 512, zoomOffset -1): a quarter of the tiles, and labels at full
+// size. from 1.5 up the default mapping already serves them as @2x. leaflet's
+// detectRetina stays off because it lowers maxZoom by one and would lose
+// z20; no maxNativeZoom is set, so z19 tiles serve map zoom 20
+const IMAGERY_RETINA_THRESHOLD = 1.5;
+function imageryTileOptions(minZoom) {
+    const ratio = Number(window.devicePixelRatio) || 1;
+    if (ratio >= IMAGERY_RETINA_THRESHOLD) return { tileSize: 256, zoomOffset: 0, minZoom };
+    // tile zoom is map zoom - 1, so the layer must not draw below map zoom 1
+    return { tileSize: 512, zoomOffset: -1, minZoom: Math.max(1, minZoom) };
+}
+// change a layer's tile mapping in place. leaflet works out the valid tile
+// range and the wrap from the tile size only when the grid is reset, so a
+// layer on the map needs the reset (leaflet 1.9.4, vendored) before setUrl
+// redraws it; a layer off the map is reset when it is next added
+function retileLayer(layer, tiles) {
+    Object.assign(layer.options, tiles);
+    if (layer._map && typeof layer._resetGrid === "function") layer._resetGrid();
+}
+// key probe: the style's tiles.json (about 0.5 KB, refused with the same 403
+// as a tile), fetched once the first imagery tile has painted
+const IMAGERY_PROBE_URL = MAPTILER_API_KEY
+    ? `https://api.maptiler.com/maps/hybrid/tiles.json?key=${encodeURIComponent(MAPTILER_API_KEY)}`
+    : "";
+const IMAGERY_PROBE_FALLBACK_MS = 8000;
+// search box: wait for a pause in typing before filtering
+const SEARCH_DEBOUNCE_MS = 150;
 // signed-in portal activity, kept per country and batch for the tab's life
 const PORTAL_MODES = new Set(["assigned", "add"]);
 const PORTAL_MODE_KEY = `pow_portal_mode_v1:${COUNTRY_CONFIG.countryCode.toLowerCase()}${ASSIGNMENT_SESSION_SEGMENT}`;
@@ -2830,6 +2859,7 @@ class NzVerificationMap {
         // keep the zoom-out floor at 5 for compact countries, but let
         // continental configs (au/br/ca/mx/us open below 5) take effect
         const minZoom = Math.min(5, Math.floor(COUNTRY_CONFIG.mapZoom));
+        this.streetsBaseMinZoom = minZoom;
         this.streetsLayer = L.tileLayer(STREETS_TILE_URL, {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             maxZoom: 19,
@@ -2837,6 +2867,10 @@ class NzVerificationMap {
             className: "streets-tiles",
         }).addTo(this.map);
         this.syncStreetsTheme();
+        // the dark raster is maptiler's too: its first tile releases the probe
+        this.streetsLayer.on("tileload", () => {
+            if (STREETS_DARK_TILE_URL && this.streetsUrl === STREETS_DARK_TILE_URL) this.noteImageryTilePainted();
+        });
         // the layer's container is made anew each time a basemap swap puts
         // it back, so the filter class is set again on each add
         this.streetsLayer.on("add", () => this.syncStreetsTheme());
@@ -2848,12 +2882,12 @@ class NzVerificationMap {
             this.satelliteLayer = L.tileLayer(SATELLITE_TILE_URL, {
                 attribution: imageryAttribution,
                 maxZoom: 20,
-                minZoom,
+                ...imageryTileOptions(minZoom),
             });
             this.hybridLayer = L.tileLayer(HYBRID_TILE_URL, {
                 attribution: imageryAttribution,
                 maxZoom: 20,
-                minZoom,
+                ...imageryTileOptions(minZoom),
             });
             this.watchImageryLayer(this.satelliteLayer);
             this.watchImageryLayer(this.hybridLayer);
@@ -3464,6 +3498,14 @@ class NzVerificationMap {
         if (useDark) this.probeImagery();
         if (STREETS_DARK_TILE_URL && this.streetsUrl !== url) {
             this.streetsUrl = url;
+            // the dark raster is maptiler's 512 px tile and the openstreetmap
+            // raster is 256 px, so the tile mapping follows the url
+            if (layer.options) {
+                const baseMinZoom = this.streetsBaseMinZoom ?? layer.options.minZoom;
+                retileLayer(layer, useDark
+                    ? imageryTileOptions(baseMinZoom)
+                    : { tileSize: 256, zoomOffset: 0, minZoom: baseMinZoom });
+            }
             layer.setUrl?.(url);
             // the attribution lives on the layer, so a later add reads
             // the right one; a layer on the map swaps it at once
@@ -5176,7 +5218,10 @@ class NzVerificationMap {
     watchImageryLayer(layer) {
         let errors = 0;
         let loaded = false;
-        layer.on("tileload", () => { loaded = true; });
+        layer.on("tileload", () => {
+            loaded = true;
+            this.noteImageryTilePainted();
+        });
         layer.on("tileerror", () => {
             errors += 1;
             if (loaded || errors < 3) return;
@@ -5186,16 +5231,33 @@ class NzVerificationMap {
 
     // img tiles render even on http 403 — maptiler ships a blocked-notice
     // image — so tileerror alone cannot detect a refused key. one fetch
-    // probe per session sees the real status the first time imagery is used
+    // probe per session sees the real status the first time imagery is used.
+    // the probe asks for the style's tiles.json rather than a tile, and waits
+    // for the first maptiler tile to paint so it never competes with the
+    // first view's tiles; a timer covers a layer that never paints
     probeImagery() {
         if (this._imageryProbe) return this._imageryProbe;
-        const url = (HYBRID_TILE_URL || SATELLITE_TILE_URL).replace("{z}/{x}/{y}", "1/1/1");
-        this._imageryProbe = fetch(url)
+        const firstTile = this._imageryTilePainted
+            ? Promise.resolve()
+            : new Promise(resolve => {
+                this._imageryProbeStart = resolve;
+                setTimeout(resolve, IMAGERY_PROBE_FALLBACK_MS);
+            });
+        this._imageryProbe = firstTile
+            .then(() => fetch(IMAGERY_PROBE_URL))
             .then(response => {
                 if (!response.ok) this.markImageryBroken();
             })
             .catch(() => this.markImageryBroken());
         return this._imageryProbe;
+    }
+
+    // a maptiler layer painted a tile: a waiting key probe may go
+    noteImageryTilePainted() {
+        this._imageryTilePainted = true;
+        const start = this._imageryProbeStart;
+        this._imageryProbeStart = null;
+        if (start) start();
     }
 
     markImageryBroken() {
@@ -5256,10 +5318,24 @@ class NzVerificationMap {
         this.applyFilters();
     }
 
+    applyFiltersSoon() {
+        clearTimeout(this._filterTimer);
+        this._filterTimer = setTimeout(() => {
+            this._filterTimer = null;
+            this.applyFilters();
+        }, SEARCH_DEBOUNCE_MS);
+    }
+
     setupFilters() {
+        // typing waits for a pause: with ?full=1 each applyFilters() rebuilds
+        // thousands of markers, so one rebuild per pause instead of per key.
+        // selects and a committed search (change, on enter or blur) run at once
         ["searchInput", "priorityFilter", "actionFilter", "statusFilter"].forEach(id => {
             const element = document.getElementById(id);
-            element?.addEventListener("input", () => this.applyFilters());
+            element?.addEventListener("input", () => {
+                if (id === "searchInput") this.applyFiltersSoon();
+                else this.applyFilters();
+            });
             element?.addEventListener("change", () => this.applyFilters());
         });
 
@@ -5476,6 +5552,11 @@ class NzVerificationMap {
     }
 
     applyFilters() {
+        // a run now supersedes a pending debounced one
+        if (this._filterTimer) {
+            clearTimeout(this._filterTimer);
+            this._filterTimer = null;
+        }
         const search = document.getElementById("searchInput")?.value.trim().toLowerCase() || "";
         const priority = document.getElementById("priorityFilter")?.value || "all";
         const action = document.getElementById("actionFilter")?.value || "all";
