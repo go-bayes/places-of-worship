@@ -35,8 +35,7 @@
     const RA_DOTS_MAX_NATIVE_ZOOM = 7;
     // the two-letter codes that have an ra-dots archive: the 210 archives in
     // manifest tiles-v2-20260722:0ce3c532af1e986d (tools/tiles-r2/manifests/
-    // tiles-v2-20260722-0ce3c532af1e.manifest.json, at commit 19eccadc3607f08fc6552b506d5571fd1c99eea2
-    // on branch data/tiles-v2-build-2026-10-07 until that branch merges). update this list with
+    // tiles-v2-20260722-0ce3c532af1e.manifest.json, on main at commit 8dae8c76). update this list with
     // TILES_VERSION whenever the archives are rebuilt. a country not listed
     // (and the world view, ZZ) falls back to the overview sample
     const RA_DOTS_COUNTRY_CODES = new Set((

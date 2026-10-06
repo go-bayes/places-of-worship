@@ -23,9 +23,9 @@ generation.
   - Tilesets: `places`, `places-overview`, `buildings`, `nz-polygons`.
   - Versioned tilesets (tiles v2, build 20260722; manifest
     `tools/tiles-r2/manifests/tiles-v2-20260722-0ce3c532af1e.manifest.json`,
-    which is on branch `data/tiles-v2-build-2026-10-07` at commit
-    `19eccadc3607f08fc6552b506d5571fd1c99eea2` and not yet on `main`; merge
-    that branch before release so this path resolves):
+    with its validation report beside it, on `main` at commit
+    `8dae8c76`; the unversioned `tiles-v2-20260722.manifest.json` there is the
+    superseded earlier build):
     `places-overview-v2-20260722` (a thinned sample of every place, z0 to 5,
     read by the public maps) and 210 `ra-dots-<cc>-20260722` archives (every
     place of one country, z3 to 7, read by the RA and review portals below
