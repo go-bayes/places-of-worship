@@ -66,11 +66,29 @@ function archive(env, name) {
 // reads a tile and returns the etag of the archive version it came from. every read
 // after the header is conditional on the header's etag, so the bytes belong to the
 // header's version; the header is read before and after, and a change between them
-// (a concurrent replacement) is retried rather than tagged with the wrong version
-async function readTile(env, name, z, x, y) {
-  const pmtiles = archive(env, name);
+// (a concurrent replacement) is retried rather than tagged with the wrong version.
+// an unversioned archive can be replaced in place, and a cached header or directory
+// that says a tile is absent (or a zoom outside the cached bounds) never reads r2, so
+// no conditional read would notice. each edge miss therefore compares the object's
+// current etag (one head call) with the handle's and reloads the handle on a change.
+// a versioned key is never overwritten and needs no check
+async function readTile(env, name, z, x, y, versioned) {
   for (let attempt = 0; attempt < 3; attempt++) {
+    let current;
+    if (!versioned) {
+      const head = await env.BUCKET.head(`${name}.pmtiles`);
+      if (!head) throw new ArchiveMissingError(`archive missing: ${name}.pmtiles`);
+      current = head.etag;
+      const held = archives.get(name);
+      if (held && (await held.getHeader()).etag !== current) archives.delete(name);
+    }
+    const pmtiles = archive(env, name);
     const before = (await pmtiles.getHeader()).etag;
+    if (current && before !== current) {
+      // replaced between the head call and the header read: start again
+      archives.delete(name);
+      continue;
+    }
     const tile = await pmtiles.getZxy(z, x, y);
     const after = (await pmtiles.getHeader()).etag;
     if (before === after) return { tile, archiveEtag: after };
@@ -148,7 +166,7 @@ export default {
     let tile;
     let etag;
     try {
-      const read = await readTile(env, name, Number(z), Number(x), Number(y));
+      const read = await readTile(env, name, Number(z), Number(x), Number(y), versioned);
       tile = read.tile;
       etag = tileEtag(read.archiveEtag, name, z, x, y);
     } catch (e) {

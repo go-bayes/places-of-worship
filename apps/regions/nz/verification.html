@@ -6,6 +6,14 @@
     <title>NZ OSM Verification Tasks</title>
     <link rel="icon" href="data:,">
 
+    <!-- connections opened early: the dots tiles (fetched by VectorGrid, so
+         crossorigin), maptiler imagery (img tags, no crossorigin), the
+         backend and Google sign-in -->
+    <link rel="preconnect" href="https://tiles.placemap.org" crossorigin>
+    <link rel="preconnect" href="https://api.maptiler.com">
+    <link rel="preconnect" href="https://pastel-goshawk-398.convex.cloud" crossorigin>
+    <link rel="preconnect" href="https://accounts.google.com">
+
     <link rel="stylesheet" href="../../vendor/leaflet@1.9.4/dist/leaflet.css"/>
 
     <!-- shared tokens, type stack, and hidden-attribute guard; this page
@@ -3573,6 +3581,6 @@
     <script src="js/unvalidated-places.js?v=20260922a"></script>
     <script src="js/task-presentation.js?v=20260919a"></script>
     <script src="js/recentre-control.js?v=20261001a"></script>
-    <script src="js/verification-map.js?v=20261001a"></script>
+    <script src="js/verification-map.js?v=20261006a"></script>
 </body>
 </html>

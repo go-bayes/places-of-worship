@@ -4,7 +4,7 @@ import { beforeEach, describe, it } from "node:test";
 import { zxyToTileId } from "pmtiles";
 
 // minimal pmtiles v3 archive: uncompressed root directory, one tile per entry
-function buildArchive(tiles) {
+function buildArchive(tiles, maxZoom = 14) {
   const entries = tiles
     .map((t) => ({ id: zxyToTileId(t.z, t.x, t.y), data: t.data }))
     .sort((a, b) => a.id - b.id);
@@ -55,7 +55,7 @@ function buildArchive(tiles) {
   header.setUint8(98, 1); // tile compression none
   header.setUint8(99, 1); // mvt
   header.setUint8(100, 0);
-  header.setUint8(101, 14);
+  header.setUint8(101, maxZoom);
   header.setInt32(102, -1800000000, true);
   header.setInt32(106, -850000000, true);
   header.setInt32(110, 1800000000, true);
@@ -74,6 +74,12 @@ function mockBucket(objects) {
   const calls = [];
   return {
     calls,
+    heads: [],
+    async head(key) {
+      this.heads.push(key);
+      const o = objects[key];
+      return o ? { etag: o.etag } : null;
+    },
     async get(key, opts) {
       calls.push(key);
       const o = objects[key];
@@ -247,6 +253,67 @@ describe("tile worker", () => {
     const revalidated = await get("/places-overview/5/31/19", { "If-None-Match": '"aaa111-5-31-19"' });
     assert.equal(revalidated.status, 200);
     assert.equal(revalidated.headers.get("ETag"), '"bbb222-5-31-19"');
+  });
+
+  it("detects an unversioned archive replaced in place when the cached directory says the tile is absent", async () => {
+    const objects = {
+      "places-overview.pmtiles": { bytes: buildArchive([{ z: 5, x: 31, y: 19, data: TILE }]), etag: "aaa111" },
+    };
+    bucket = mockBucket(objects);
+    const absent = await get("/places-overview/5/31/18");
+    assert.equal(absent.status, 204);
+    assert.equal(absent.headers.get("ETag"), '"aaa111-5-31-18"');
+    // the replacement adds the tile; the purge empties the edge cache; no other tile is requested first
+    const TILE_B = new Uint8Array([7, 7, 7]);
+    objects["places-overview.pmtiles"] = {
+      bytes: buildArchive([{ z: 5, x: 31, y: 19, data: TILE }, { z: 5, x: 31, y: 18, data: TILE_B }]),
+      etag: "bbb222",
+    };
+    cache.store.clear();
+    const conditional = await get("/places-overview/5/31/18", { "If-None-Match": '"aaa111-5-31-18"' });
+    assert.equal(conditional.status, 200, "the old validator no longer matches");
+    assert.equal(conditional.headers.get("ETag"), '"bbb222-5-31-18"');
+    assert.deepEqual([...new Uint8Array(await conditional.arrayBuffer())], [...TILE_B]);
+    cache.store.clear();
+    const plain = await get("/places-overview/5/31/18");
+    assert.equal(plain.status, 200);
+    assert.equal(plain.headers.get("ETag"), '"bbb222-5-31-18"');
+  });
+
+  it("detects a replacement that widens the zoom bounds", async () => {
+    // the cached header's max zoom is 5, so z9 is answered without any r2 read
+    const objects = {
+      "places-overview.pmtiles": { bytes: buildArchive([{ z: 5, x: 31, y: 19, data: TILE }], 5), etag: "aaa111" },
+    };
+    bucket = mockBucket(objects);
+    const first = await get("/places-overview/9/1/1");
+    assert.equal(first.status, 204);
+    const TILE_C = new Uint8Array([4, 4]);
+    objects["places-overview.pmtiles"] = {
+      bytes: buildArchive([{ z: 5, x: 31, y: 19, data: TILE }, { z: 9, x: 1, y: 1, data: TILE_C }], 9),
+      etag: "bbb222",
+    };
+    cache.store.clear();
+    const res = await get("/places-overview/9/1/1", { "If-None-Match": '"aaa111-9-1-1"' });
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get("ETag"), '"bbb222-9-1-1"');
+    assert.deepEqual([...new Uint8Array(await res.arrayBuffer())], [...TILE_C]);
+  });
+
+  it("checks the object's etag on unversioned edge misses only", async () => {
+    await get("/places-overview-v2-20261006/5/31/19");
+    assert.equal(bucket.heads.length, 0, "versioned names are immutable and skip the check");
+    await get("/places-overview/5/31/19");
+    assert.equal(bucket.heads.length, 1);
+    await get("/places-overview/5/31/19");
+    assert.equal(bucket.heads.length, 1, "an edge hit makes no r2 call");
+  });
+
+  it("returns 404 for an unversioned archive that is missing from r2", async () => {
+    bucket = mockBucket({});
+    const res = await get("/places-overview/5/31/19");
+    assert.equal(res.status, 404);
+    assert.equal(cache.puts, 0);
   });
 
   it("caches 204 empty tiles with the same headers as 200s", async () => {

@@ -51,6 +51,7 @@ jobs:
           node apps/regions/nz/js/phone-walkthrough-dom.test.cjs
           node apps/regions/nz/js/portal-first-screen.test.cjs
           node apps/regions/_shared/theme.test.cjs
+          node apps/regions/_shared/region-map-startup.test.cjs
           node apps/regions/nz/js/refresh-merge.test.cjs
           node apps/regions/nz/js/task-presentation.test.cjs
           node apps/regions/nz/js/task-state-dom.test.cjs
@@ -58,6 +59,7 @@ jobs:
           node apps/regions/nz/js/quick-photo.test.cjs
           node apps/regions/nz/js/entry-country.test.cjs
           node apps/regions/nz/js/unvalidated-places.test.cjs
+          node apps/regions/nz/js/map-loading.test.cjs
           node apps/regions/nz/js/review-state-dom.test.cjs
           node apps/regions/nz/js/review-panes.test.cjs
           node apps/regions/nz/js/recentre-control.test.cjs
