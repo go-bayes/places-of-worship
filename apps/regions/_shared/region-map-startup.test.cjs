@@ -47,10 +47,70 @@ ok(!/^\s*armOffers\(\);/m.test(arm) && !/addEventListener\("load", armOffers/.te
 // late arrival: each consumer of the manifest copes with null
 ok(/if \(!handoffRegions\) return null;/.test(runtime), "neighbour lookup tolerates a missing manifest");
 ok(/function updateBorderHandoff\(\) \{\n\s*if \(!handoffRegions\) return;/.test(runtime), "handoff refresh tolerates a missing manifest");
-ok(/if \(!handoffRegions \|\| !event \|\| !event\.coords\) return;/.test(runtime), "geolocate abroad check tolerates a missing manifest");
+ok(/if \(!handoffRegions \|\| !latestFix\) return;/.test(runtime), "geolocate abroad check tolerates a missing manifest");
 ok(/handoffRegions \? handoffRegions\.find/.test(runtime), "contribute decision tolerates a missing manifest");
 ok(/if \(handoffRegions\) setOffer\(/.test(runtime), "reset tolerates a missing manifest");
 ok(/\n\s+updateBorderHandoff\(\);\n\s+\}\)\n\s+\.catch/.test(runtime), "arrival re-derives the pill");
+
+// late arrival keeps the latest fix and judges it when the manifest lands
+ok(/handoffRegions = doc\.regions;\n[^\n]*\n\s*judgeFix\(\);/.test(runtime), "arrival judges a fix received earlier");
+ok(/if \(lastFixWasAbroad\) foldCensusForAbroad\(\);/.test(runtime), "the default census enable respects a foreign fix");
+{
+  // behavioural: run the real fix handler and judge function against stubs
+  const vm = require("node:vm");
+  const from = runtime.indexOf("let lastFixWasAbroad = false;");
+  const to = runtime.indexOf("if (offerGo && !RC.disableBorderHandoff) {");
+  const body = runtime.slice(from, to);
+  const make = () => {
+    const log = [];
+    const sandbox = {
+      HANDOFF_HOME: "nz", handoffRegions: null, censusPanelOpen: true,
+      censusState: { enabled: true },
+      normaliseLng: (x) => x,
+      setCensusEnabled: (on) => { log.push(`census:${on}`); sandbox.censusState.enabled = on; return Promise.resolve(); },
+      syncCensusPanel: () => log.push("panel"),
+      geolocate: { on: (name, fn) => { sandbox.handler = fn; } },
+      // longitude above zero counts as home in this stub
+      window: { RegionResolve: { regionHasPoint: (r, lng) => lng > 0, boxContains: () => false } },
+      handler: null,
+      log
+    };
+    vm.createContext(sandbox);
+    vm.runInContext(`${body}\nthis.arrive = () => { handoffRegions = [{ code: "nz", boxes: [] }]; judgeFix(); };`, sandbox);
+    return sandbox;
+  };
+  const foreign = (lng) => ({ coords: { longitude: lng, latitude: 50 } });
+  const home = (lng) => ({ coords: { longitude: lng, latitude: -40 } });
+  // a foreign fix before the manifest folds the census on arrival
+  let t = make();
+  t.handler(foreign(-10));
+  assert.deepEqual(t.log, [], "no judgement without a manifest");
+  t.arrive();
+  assert.deepEqual(t.log, ["census:false", "panel"], "a foreign fix received before the manifest folds the census on arrival");
+  assert.equal(t.censusPanelOpen, false, "the census panel closes");
+  checks += 3;
+  // a home fix before the manifest changes nothing
+  t = make();
+  t.handler(home(10));
+  t.arrive();
+  assert.deepEqual(t.log, [], "a home fix leaves the census alone");
+  checks += 1;
+  // the latest fix wins
+  t = make();
+  t.handler(foreign(-10));
+  t.handler(home(10));
+  t.arrive();
+  assert.deepEqual(t.log, [], "only the latest fix is judged");
+  checks += 1;
+  // after arrival only the crossing acts, and a re-enabled layer is not fought
+  t = make();
+  t.arrive();
+  t.handler(foreign(-10));
+  t.censusState.enabled = true;
+  t.handler(foreign(-11));
+  assert.deepEqual(t.log, ["census:false", "panel"], "only the crossing acts");
+  checks += 1;
+}
 
 // 3. the switcher's home warm waits for the overview source and honours saveData
 ok(/document\.addEventListener\("datamap:overview-loaded", markPrefetchReady/.test(switcher), "global map warms after the overview loads");

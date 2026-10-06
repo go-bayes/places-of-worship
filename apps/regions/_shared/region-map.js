@@ -1799,6 +1799,9 @@ map.on("load", () => {
   // beneath them rather than over the dots
   map.once("idle", async () => {
     if (HAS_CENSUS) await setCensusEnabled(true);
+    // a foreign fix judged before this default enable must still fold the
+    // census the default has just switched on
+    if (lastFixWasAbroad) foldCensusForAbroad();
     // navigation prefetch starts only after the default boundary and summary
     // have completed, so speculative requests never contend with map data
     window.__DATAMAP_FIRST_IDLE__ = true;
@@ -5796,22 +5799,32 @@ function updateBorderHandoff() {
 // re-enables the layer while abroad (to browse this map's data from
 // afar) is not fought on every subsequent watch fix.
 let lastFixWasAbroad = false;
-geolocate.on("geolocate", (event) => {
-  if (!handoffRegions || !event || !event.coords) return;
-  const lng = normaliseLng(event.coords.longitude);
-  const lat = event.coords.latitude;
+// the manifest now arrives after map load, so a fix can precede it. the
+// latest fix is kept and judged when the manifest lands
+let latestFix = null;
+function foldCensusForAbroad() {
+  if (!censusState.enabled) return;
+  void setCensusEnabled(false);
+  censusPanelOpen = false;
+  syncCensusPanel();
+}
+function judgeFix() {
+  if (!handoffRegions || !latestFix) return;
+  const lng = normaliseLng(latestFix.longitude);
+  const lat = latestFix.latitude;
   const home = handoffRegions.find((r) => r.code === HANDOFF_HOME);
   // home means on home land or over water inside the home rectangle —
   // the same nulls the handoff resolver treats as "not a neighbour"
   const abroad = Boolean(home) &&
     !window.RegionResolve.regionHasPoint(home, lng, lat) &&
     !home.boxes.some((b) => window.RegionResolve.boxContains(b, lng, lat, 0));
-  if (abroad && !lastFixWasAbroad && censusState.enabled) {
-    void setCensusEnabled(false);
-    censusPanelOpen = false;
-    syncCensusPanel();
-  }
+  if (abroad && !lastFixWasAbroad) foldCensusForAbroad();
   lastFixWasAbroad = abroad;
+}
+geolocate.on("geolocate", (event) => {
+  if (!event || !event.coords) return;
+  latestFix = event.coords;
+  judgeFix();
 });
 
 if (offerGo && !RC.disableBorderHandoff) {
@@ -5826,6 +5839,8 @@ if (offerGo && !RC.disableBorderHandoff) {
       .then((doc) => {
         if (!doc || !Array.isArray(doc.regions)) return;
         handoffRegions = doc.regions;
+        // a fix that arrived before the manifest is judged now
+        judgeFix();
         // the global map also learns the countries without a page, for
         // the contribute entry alone; deferred behind the page manifest
         if (!HANDOFF_HOME) {

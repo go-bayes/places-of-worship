@@ -7,7 +7,9 @@
 - The shared map runtime (`apps/regions/_shared/region-map.js`) now adds the polygon tile source and its layers only when the page's `REGION_CONFIG` sets `polygonsTileset`. The NZ page and the global map set it to `nz-polygons`, so both draw the NZ statistical-area outlines as before; every other country page no longer requests `nz-polygons` tiles (6 to 8 empty requests on a typical page, all 204s on the US and Vanuatu pages).
 - The border-handoff manifest (`region-bboxes.json`, 220 KB gzipped) now loads after the map's `load` event, in an idle slot (`requestIdleCallback`, or `setTimeout` where it is missing), and still revalidates with `cache: 'no-cache'` on country pages. The pill, contribute route and revise links tolerate its late arrival.
 - The data-maps switcher warms the guessed home country (NZ by default) on the global map only after the overview source has loaded, instead of at window load, and skips the warm under `saveData`. The runtime announces the load with a `datamap:overview-loaded` event.
+- A geolocation fix received before the deferred manifest arrives is kept and judged when the manifest lands, so a foreign fix still turns the home census off and folds its panel. The default census enable at first idle also respects a foreign fix already judged.
 - Added `apps/regions/_shared/region-map-startup.test.cjs`.
+- CI now runs `region-map-startup.test.cjs`, which includes a behavioural check of the fix-before-manifest ordering.
 
 ### 2026-10-02 (submission receipt round-2 repairs)
 
