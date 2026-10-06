@@ -133,7 +133,12 @@ def _tile_list(src, zoom):
 
 
 def _point_key(lon, lat, props):
-    return (round(lon, 7), round(lat, 7), props.get("osm_type"), props.get("osm_id"), props.get("name"),
+    # lon 180 and lon -180 are the same meridian: the east edge of the last tile column and the west edge of the
+    # first are one point (at z6 a far-edge point of a Fijian church was otherwise counted twice)
+    lon = round(lon, 7)
+    if lon >= 180.0:
+        lon -= 360.0
+    return (lon, round(lat, 7), props.get("osm_type"), props.get("osm_id"), props.get("name"),
             props.get("religion"), props.get("denomination"), props.get("country_code"), props.get("_country"))
 
 
