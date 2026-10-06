@@ -8,7 +8,7 @@
 #   SOURCE    places.mbtiles, opened read-only    ~/tiles-archive-2026-07/tiles-migration/places.mbtiles
 #   LIVE      live places-overview.pmtiles        ~/tiles-archive-2026-07/tiles-migration/places-overview.pmtiles
 #   STAGES    space-separated stages              "extract build validate manifest"
-#   EXTRA     extra flags, e.g. --country-fallback
+#   EXTRA     extra flags, e.g. --country-routing strict, --supersedes <manifest_id>
 #   MANIFESTS manifest directory                  <this folder>/manifests
 #   SCHEMA    data-manifest.schema.json            the repository's, when run from a checkout
 #   GIT_COMMIT commit of the committed script, recorded in the manifest
