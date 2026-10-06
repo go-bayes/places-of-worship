@@ -1,0 +1,2468 @@
+{
+  "generated_at": "2026-10-06T17:30:19.257294+00:00",
+  "problems": [],
+  "criteria_not_met": [
+    "overview z1: religion share deviates by 0.449 pp from the input (tolerance 0.3 pp)"
+  ],
+  "ra_dots": [
+    {
+      "file": "ra-dots-us-20260722.pmtiles",
+      "country": "US",
+      "expected": 342655,
+      "sizes": {
+        "3": {
+          "tiles": 9,
+          "max_bytes": 3130652,
+          "mean_bytes": 765870,
+          "total_bytes": 6892833
+        },
+        "4": {
+          "tiles": 21,
+          "max_bytes": 3007573,
+          "mean_bytes": 316561,
+          "total_bytes": 6647775
+        },
+        "5": {
+          "tiles": 44,
+          "max_bytes": 1855061,
+          "mean_bytes": 151686,
+          "total_bytes": 6674174
+        },
+        "6": {
+          "tiles": 100,
+          "max_bytes": 666213,
+          "mean_bytes": 69786,
+          "total_bytes": 6978610
+        },
+        "7": {
+          "tiles": 263,
+          "max_bytes": 311708,
+          "mean_bytes": 28075,
+          "total_bytes": 7383730
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 342631,
+          "osm_keys_in_any_tile": 342655,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 342655,
+          "osm_keys_in_any_tile": 342655,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 24
+    },
+    {
+      "file": "ra-dots-de-20260722.pmtiles",
+      "country": "DE",
+      "expected": 135242,
+      "sizes": {
+        "3": {
+          "tiles": 1,
+          "max_bytes": 2131599,
+          "mean_bytes": 2131599,
+          "total_bytes": 2131599
+        },
+        "4": {
+          "tiles": 1,
+          "max_bytes": 2187830,
+          "mean_bytes": 2187830,
+          "total_bytes": 2187830
+        },
+        "5": {
+          "tiles": 4,
+          "max_bytes": 1324691,
+          "mean_bytes": 620585,
+          "total_bytes": 2482340
+        },
+        "6": {
+          "tiles": 6,
+          "max_bytes": 1177843,
+          "mean_bytes": 410677,
+          "total_bytes": 2464062
+        },
+        "7": {
+          "tiles": 17,
+          "max_bytes": 410821,
+          "mean_bytes": 151696,
+          "total_bytes": 2578827
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 135242,
+          "osm_keys_in_any_tile": 135242,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 135242,
+          "osm_keys_in_any_tile": 135242,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-it-20260722.pmtiles",
+      "country": "IT",
+      "expected": 119721,
+      "sizes": {
+        "3": {
+          "tiles": 2,
+          "max_bytes": 1649600,
+          "mean_bytes": 1006619,
+          "total_bytes": 2013238
+        },
+        "4": {
+          "tiles": 2,
+          "max_bytes": 1656105,
+          "mean_bytes": 1004948,
+          "total_bytes": 2009895
+        },
+        "5": {
+          "tiles": 4,
+          "max_bytes": 1046588,
+          "mean_bytes": 548399,
+          "total_bytes": 2193595
+        },
+        "6": {
+          "tiles": 9,
+          "max_bytes": 612116,
+          "mean_bytes": 246238,
+          "total_bytes": 2216146
+        },
+        "7": {
+          "tiles": 20,
+          "max_bytes": 442320,
+          "mean_bytes": 112877,
+          "total_bytes": 2257538
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 119718,
+          "osm_keys_in_any_tile": 119721,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 119721,
+          "osm_keys_in_any_tile": 119721,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 3
+    },
+    {
+      "file": "ra-dots-jp-20260722.pmtiles",
+      "country": "JP",
+      "expected": 108829,
+      "sizes": {
+        "3": {
+          "tiles": 3,
+          "max_bytes": 1269970,
+          "mean_bytes": 656962,
+          "total_bytes": 1970885
+        },
+        "4": {
+          "tiles": 3,
+          "max_bytes": 1271307,
+          "mean_bytes": 588711,
+          "total_bytes": 1766132
+        },
+        "5": {
+          "tiles": 6,
+          "max_bytes": 1287793,
+          "mean_bytes": 294434,
+          "total_bytes": 1766603
+        },
+        "6": {
+          "tiles": 16,
+          "max_bytes": 1039018,
+          "mean_bytes": 115670,
+          "total_bytes": 1850716
+        },
+        "7": {
+          "tiles": 34,
+          "max_bytes": 544505,
+          "mean_bytes": 56188,
+          "total_bytes": 1910403
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 108827,
+          "osm_keys_in_any_tile": 108829,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 108829,
+          "osm_keys_in_any_tile": 108829,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 2
+    },
+    {
+      "file": "ra-dots-fr-20260722.pmtiles",
+      "country": "FR",
+      "expected": 90281,
+      "sizes": {
+        "3": {
+          "tiles": 11,
+          "max_bytes": 1119028,
+          "mean_bytes": 140594,
+          "total_bytes": 1546537
+        },
+        "4": {
+          "tiles": 15,
+          "max_bytes": 1104043,
+          "mean_bytes": 99556,
+          "total_bytes": 1493340
+        },
+        "5": {
+          "tiles": 22,
+          "max_bytes": 926877,
+          "mean_bytes": 72251,
+          "total_bytes": 1589526
+        },
+        "6": {
+          "tiles": 37,
+          "max_bytes": 414535,
+          "mean_bytes": 44306,
+          "total_bytes": 1639327
+        },
+        "7": {
+          "tiles": 62,
+          "max_bytes": 153647,
+          "mean_bytes": 27062,
+          "total_bytes": 1677846
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 90275,
+          "osm_keys_in_any_tile": 90281,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 90281,
+          "osm_keys_in_any_tile": 90281,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 6
+    },
+    {
+      "file": "ra-dots-pl-20260722.pmtiles",
+      "country": "PL",
+      "expected": 80529,
+      "sizes": {
+        "3": {
+          "tiles": 1,
+          "max_bytes": 1198321,
+          "mean_bytes": 1198321,
+          "total_bytes": 1198321
+        },
+        "4": {
+          "tiles": 2,
+          "max_bytes": 1151212,
+          "mean_bytes": 680222,
+          "total_bytes": 1360443
+        },
+        "5": {
+          "tiles": 4,
+          "max_bytes": 1146014,
+          "mean_bytes": 330834,
+          "total_bytes": 1323338
+        },
+        "6": {
+          "tiles": 6,
+          "max_bytes": 743077,
+          "mean_bytes": 233420,
+          "total_bytes": 1400521
+        },
+        "7": {
+          "tiles": 16,
+          "max_bytes": 262166,
+          "mean_bytes": 91742,
+          "total_bytes": 1467873
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 80529,
+          "osm_keys_in_any_tile": 80529,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 80529,
+          "osm_keys_in_any_tile": 80529,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-in-20260722.pmtiles",
+      "country": "IN",
+      "expected": 73869,
+      "sizes": {
+        "3": {
+          "tiles": 2,
+          "max_bytes": 1356785,
+          "mean_bytes": 692029,
+          "total_bytes": 1384058
+        },
+        "4": {
+          "tiles": 4,
+          "max_bytes": 1086967,
+          "mean_bytes": 355668,
+          "total_bytes": 1422672
+        },
+        "5": {
+          "tiles": 11,
+          "max_bytes": 521482,
+          "mean_bytes": 139395,
+          "total_bytes": 1533343
+        },
+        "6": {
+          "tiles": 26,
+          "max_bytes": 518705,
+          "mean_bytes": 59879,
+          "total_bytes": 1556852
+        },
+        "7": {
+          "tiles": 69,
+          "max_bytes": 503871,
+          "mean_bytes": 23767,
+          "total_bytes": 1639890
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 73869,
+          "osm_keys_in_any_tile": 73869,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 73869,
+          "osm_keys_in_any_tile": 73869,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-gb-20260722.pmtiles",
+      "country": "GB",
+      "expected": 56957,
+      "sizes": {
+        "3": {
+          "tiles": 2,
+          "max_bytes": 976469,
+          "mean_bytes": 646536,
+          "total_bytes": 1293072
+        },
+        "4": {
+          "tiles": 3,
+          "max_bytes": 914742,
+          "mean_bytes": 424930,
+          "total_bytes": 1274790
+        },
+        "5": {
+          "tiles": 3,
+          "max_bytes": 901410,
+          "mean_bytes": 405166,
+          "total_bytes": 1215498
+        },
+        "6": {
+          "tiles": 10,
+          "max_bytes": 459090,
+          "mean_bytes": 122247,
+          "total_bytes": 1222469
+        },
+        "7": {
+          "tiles": 25,
+          "max_bytes": 338763,
+          "mean_bytes": 50320,
+          "total_bytes": 1258001
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 56944,
+          "osm_keys_in_any_tile": 56957,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 56957,
+          "osm_keys_in_any_tile": 56957,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 13
+    },
+    {
+      "file": "ra-dots-es-20260722.pmtiles",
+      "country": "ES",
+      "expected": 53491,
+      "sizes": {
+        "3": {
+          "tiles": 4,
+          "max_bytes": 592466,
+          "mean_bytes": 303779,
+          "total_bytes": 1215115
+        },
+        "4": {
+          "tiles": 4,
+          "max_bytes": 529431,
+          "mean_bytes": 267634,
+          "total_bytes": 1070537
+        },
+        "5": {
+          "tiles": 5,
+          "max_bytes": 521198,
+          "mean_bytes": 205615,
+          "total_bytes": 1028077
+        },
+        "6": {
+          "tiles": 10,
+          "max_bytes": 273526,
+          "mean_bytes": 106403,
+          "total_bytes": 1064034
+        },
+        "7": {
+          "tiles": 25,
+          "max_bytes": 156989,
+          "mean_bytes": 45293,
+          "total_bytes": 1132317
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 53485,
+          "osm_keys_in_any_tile": 53491,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 53491,
+          "osm_keys_in_any_tile": 53491,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 6
+    },
+    {
+      "file": "ra-dots-gr-20260722.pmtiles",
+      "country": "GR",
+      "expected": 32256,
+      "sizes": {
+        "3": {
+          "tiles": 2,
+          "max_bytes": 464390,
+          "mean_bytes": 262096,
+          "total_bytes": 524193
+        },
+        "4": {
+          "tiles": 4,
+          "max_bytes": 340327,
+          "mean_bytes": 152575,
+          "total_bytes": 610299
+        },
+        "5": {
+          "tiles": 4,
+          "max_bytes": 318201,
+          "mean_bytes": 139188,
+          "total_bytes": 556750
+        },
+        "6": {
+          "tiles": 7,
+          "max_bytes": 225589,
+          "mean_bytes": 80024,
+          "total_bytes": 560168
+        },
+        "7": {
+          "tiles": 14,
+          "max_bytes": 117293,
+          "mean_bytes": 41137,
+          "total_bytes": 575919
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 32256,
+          "osm_keys_in_any_tile": 32256,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 32256,
+          "osm_keys_in_any_tile": 32256,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-at-20260722.pmtiles",
+      "country": "AT",
+      "expected": 31112,
+      "sizes": {
+        "3": {
+          "tiles": 1,
+          "max_bytes": 471071,
+          "mean_bytes": 471071,
+          "total_bytes": 471071
+        },
+        "4": {
+          "tiles": 1,
+          "max_bytes": 484764,
+          "mean_bytes": 484764,
+          "total_bytes": 484764
+        },
+        "5": {
+          "tiles": 3,
+          "max_bytes": 456214,
+          "mean_bytes": 178385,
+          "total_bytes": 535155
+        },
+        "6": {
+          "tiles": 4,
+          "max_bytes": 462360,
+          "mean_bytes": 134188,
+          "total_bytes": 536752
+        },
+        "7": {
+          "tiles": 8,
+          "max_bytes": 283079,
+          "mean_bytes": 72224,
+          "total_bytes": 577790
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 31112,
+          "osm_keys_in_any_tile": 31112,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 31112,
+          "osm_keys_in_any_tile": 31112,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-th-20260722.pmtiles",
+      "country": "TH",
+      "expected": 29013,
+      "sizes": {
+        "3": {
+          "tiles": 1,
+          "max_bytes": 465030,
+          "mean_bytes": 465030,
+          "total_bytes": 465030
+        },
+        "4": {
+          "tiles": 1,
+          "max_bytes": 477419,
+          "mean_bytes": 477419,
+          "total_bytes": 477419
+        },
+        "5": {
+          "tiles": 4,
+          "max_bytes": 265338,
+          "mean_bytes": 129034,
+          "total_bytes": 516137
+        },
+        "6": {
+          "tiles": 6,
+          "max_bytes": 166904,
+          "mean_bytes": 88613,
+          "total_bytes": 531680
+        },
+        "7": {
+          "tiles": 17,
+          "max_bytes": 103749,
+          "mean_bytes": 33260,
+          "total_bytes": 565424
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 29013,
+          "osm_keys_in_any_tile": 29013,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 29013,
+          "osm_keys_in_any_tile": 29013,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-cz-20260722.pmtiles",
+      "country": "CZ",
+      "expected": 28104,
+      "sizes": {
+        "3": {
+          "tiles": 1,
+          "max_bytes": 380461,
+          "mean_bytes": 380461,
+          "total_bytes": 380461
+        },
+        "4": {
+          "tiles": 1,
+          "max_bytes": 392320,
+          "mean_bytes": 392320,
+          "total_bytes": 392320
+        },
+        "5": {
+          "tiles": 2,
+          "max_bytes": 392851,
+          "mean_bytes": 231458,
+          "total_bytes": 462916
+        },
+        "6": {
+          "tiles": 4,
+          "max_bytes": 319677,
+          "mean_bytes": 116058,
+          "total_bytes": 464231
+        },
+        "7": {
+          "tiles": 8,
+          "max_bytes": 224440,
+          "mean_bytes": 59035,
+          "total_bytes": 472280
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 28104,
+          "osm_keys_in_any_tile": 28104,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 28104,
+          "osm_keys_in_any_tile": 28104,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-ph-20260722.pmtiles",
+      "country": "PH",
+      "expected": 23376,
+      "sizes": {
+        "3": {
+          "tiles": 1,
+          "max_bytes": 418446,
+          "mean_bytes": 418446,
+          "total_bytes": 418446
+        },
+        "4": {
+          "tiles": 1,
+          "max_bytes": 427538,
+          "mean_bytes": 427538,
+          "total_bytes": 427538
+        },
+        "5": {
+          "tiles": 4,
+          "max_bytes": 290753,
+          "mean_bytes": 123675,
+          "total_bytes": 494700
+        },
+        "6": {
+          "tiles": 8,
+          "max_bytes": 279539,
+          "mean_bytes": 61589,
+          "total_bytes": 492710
+        },
+        "7": {
+          "tiles": 20,
+          "max_bytes": 134949,
+          "mean_bytes": 27627,
+          "total_bytes": 552548
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 23376,
+          "osm_keys_in_any_tile": 23376,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 23376,
+          "osm_keys_in_any_tile": 23376,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-ro-20260722.pmtiles",
+      "country": "RO",
+      "expected": 21999,
+      "sizes": {
+        "3": {
+          "tiles": 1,
+          "max_bytes": 363290,
+          "mean_bytes": 363290,
+          "total_bytes": 363290
+        },
+        "4": {
+          "tiles": 2,
+          "max_bytes": 347597,
+          "mean_bytes": 205736,
+          "total_bytes": 411472
+        },
+        "5": {
+          "tiles": 2,
+          "max_bytes": 348675,
+          "mean_bytes": 199136,
+          "total_bytes": 398272
+        },
+        "6": {
+          "tiles": 6,
+          "max_bytes": 248057,
+          "mean_bytes": 70324,
+          "total_bytes": 421945
+        },
+        "7": {
+          "tiles": 11,
+          "max_bytes": 115402,
+          "mean_bytes": 39603,
+          "total_bytes": 435633
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 21999,
+          "osm_keys_in_any_tile": 21999,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 21999,
+          "osm_keys_in_any_tile": 21999,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-be-20260722.pmtiles",
+      "country": "BE",
+      "expected": 15305,
+      "sizes": {
+        "3": {
+          "tiles": 1,
+          "max_bytes": 254104,
+          "mean_bytes": 254104,
+          "total_bytes": 254104
+        },
+        "4": {
+          "tiles": 1,
+          "max_bytes": 260796,
+          "mean_bytes": 260796,
+          "total_bytes": 260796
+        },
+        "5": {
+          "tiles": 1,
+          "max_bytes": 266693,
+          "mean_bytes": 266693,
+          "total_bytes": 266693
+        },
+        "6": {
+          "tiles": 2,
+          "max_bytes": 249178,
+          "mean_bytes": 148088,
+          "total_bytes": 296176
+        },
+        "7": {
+          "tiles": 6,
+          "max_bytes": 152398,
+          "mean_bytes": 52113,
+          "total_bytes": 312677
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 15305,
+          "osm_keys_in_any_tile": 15305,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 15305,
+          "osm_keys_in_any_tile": 15305,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-kr-20260722.pmtiles",
+      "country": "KR",
+      "expected": 15152,
+      "sizes": {
+        "3": {
+          "tiles": 1,
+          "max_bytes": 250912,
+          "mean_bytes": 250912,
+          "total_bytes": 250912
+        },
+        "4": {
+          "tiles": 1,
+          "max_bytes": 257026,
+          "mean_bytes": 257026,
+          "total_bytes": 257026
+        },
+        "5": {
+          "tiles": 1,
+          "max_bytes": 262650,
+          "mean_bytes": 262650,
+          "total_bytes": 262650
+        },
+        "6": {
+          "tiles": 4,
+          "max_bytes": 143785,
+          "mean_bytes": 72122,
+          "total_bytes": 288490
+        },
+        "7": {
+          "tiles": 8,
+          "max_bytes": 141075,
+          "mean_bytes": 36898,
+          "total_bytes": 295188
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 15152,
+          "osm_keys_in_any_tile": 15152,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 15152,
+          "osm_keys_in_any_tile": 15152,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-hu-20260722.pmtiles",
+      "country": "HU",
+      "expected": 12713,
+      "sizes": {
+        "3": {
+          "tiles": 1,
+          "max_bytes": 195988,
+          "mean_bytes": 195988,
+          "total_bytes": 195988
+        },
+        "4": {
+          "tiles": 2,
+          "max_bytes": 201172,
+          "mean_bytes": 104944,
+          "total_bytes": 209889
+        },
+        "5": {
+          "tiles": 2,
+          "max_bytes": 205120,
+          "mean_bytes": 105266,
+          "total_bytes": 210533
+        },
+        "6": {
+          "tiles": 3,
+          "max_bytes": 196786,
+          "mean_bytes": 74028,
+          "total_bytes": 222084
+        },
+        "7": {
+          "tiles": 7,
+          "max_bytes": 85005,
+          "mean_bytes": 34597,
+          "total_bytes": 242180
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 12713,
+          "osm_keys_in_any_tile": 12713,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 12713,
+          "osm_keys_in_any_tile": 12713,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-my-20260722.pmtiles",
+      "country": "MY",
+      "expected": 12648,
+      "sizes": {
+        "3": {
+          "tiles": 1,
+          "max_bytes": 226386,
+          "mean_bytes": 226386,
+          "total_bytes": 226386
+        },
+        "4": {
+          "tiles": 2,
+          "max_bytes": 210122,
+          "mean_bytes": 116980,
+          "total_bytes": 233961
+        },
+        "5": {
+          "tiles": 3,
+          "max_bytes": 156155,
+          "mean_bytes": 87886,
+          "total_bytes": 263658
+        },
+        "6": {
+          "tiles": 9,
+          "max_bytes": 128939,
+          "mean_bytes": 29642,
+          "total_bytes": 266782
+        },
+        "7": {
+          "tiles": 16,
+          "max_bytes": 87399,
+          "mean_bytes": 16941,
+          "total_bytes": 271050
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 12648,
+          "osm_keys_in_any_tile": 12648,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 12648,
+          "osm_keys_in_any_tile": 12648,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-au-20260722.pmtiles",
+      "country": "AU",
+      "expected": 12342,
+      "sizes": {
+        "3": {
+          "tiles": 3,
+          "max_bytes": 212564,
+          "mean_bytes": 81349,
+          "total_bytes": 244048
+        },
+        "4": {
+          "tiles": 7,
+          "max_bytes": 209041,
+          "mean_bytes": 35634,
+          "total_bytes": 249437
+        },
+        "5": {
+          "tiles": 18,
+          "max_bytes": 86104,
+          "mean_bytes": 15433,
+          "total_bytes": 277792
+        },
+        "6": {
+          "tiles": 45,
+          "max_bytes": 83106,
+          "mean_bytes": 6678,
+          "total_bytes": 300525
+        },
+        "7": {
+          "tiles": 108,
+          "max_bytes": 60808,
+          "mean_bytes": 3032,
+          "total_bytes": 327491
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 12342,
+          "osm_keys_in_any_tile": 12342,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 12342,
+          "osm_keys_in_any_tile": 12342,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-nl-20260722.pmtiles",
+      "country": "NL",
+      "expected": 9892,
+      "sizes": {
+        "3": {
+          "tiles": 2,
+          "max_bytes": 168352,
+          "mean_bytes": 87495,
+          "total_bytes": 174990
+        },
+        "4": {
+          "tiles": 3,
+          "max_bytes": 172332,
+          "mean_bytes": 59875,
+          "total_bytes": 179624
+        },
+        "5": {
+          "tiles": 3,
+          "max_bytes": 176108,
+          "mean_bytes": 61169,
+          "total_bytes": 183508
+        },
+        "6": {
+          "tiles": 6,
+          "max_bytes": 96564,
+          "mean_bytes": 36773,
+          "total_bytes": 220639
+        },
+        "7": {
+          "tiles": 7,
+          "max_bytes": 93870,
+          "mean_bytes": 30565,
+          "total_bytes": 213957
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 9892,
+          "osm_keys_in_any_tile": 9892,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 9892,
+          "osm_keys_in_any_tile": 9892,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-vn-20260722.pmtiles",
+      "country": "VN",
+      "expected": 8444,
+      "sizes": {
+        "3": {
+          "tiles": 1,
+          "max_bytes": 154174,
+          "mean_bytes": 154174,
+          "total_bytes": 154174
+        },
+        "4": {
+          "tiles": 3,
+          "max_bytes": 156484,
+          "mean_bytes": 53502,
+          "total_bytes": 160505
+        },
+        "5": {
+          "tiles": 5,
+          "max_bytes": 86542,
+          "mean_bytes": 34752,
+          "total_bytes": 173760
+        },
+        "6": {
+          "tiles": 10,
+          "max_bytes": 62357,
+          "mean_bytes": 18832,
+          "total_bytes": 188322
+        },
+        "7": {
+          "tiles": 17,
+          "max_bytes": 60970,
+          "mean_bytes": 11003,
+          "total_bytes": 187048
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 8444,
+          "osm_keys_in_any_tile": 8444,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 8444,
+          "osm_keys_in_any_tile": 8444,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-hr-20260722.pmtiles",
+      "country": "HR",
+      "expected": 7487,
+      "sizes": {
+        "3": {
+          "tiles": 1,
+          "max_bytes": 122498,
+          "mean_bytes": 122498,
+          "total_bytes": 122498
+        },
+        "4": {
+          "tiles": 1,
+          "max_bytes": 125439,
+          "mean_bytes": 125439,
+          "total_bytes": 125439
+        },
+        "5": {
+          "tiles": 1,
+          "max_bytes": 128122,
+          "mean_bytes": 128122,
+          "total_bytes": 128122
+        },
+        "6": {
+          "tiles": 4,
+          "max_bytes": 57016,
+          "mean_bytes": 38772,
+          "total_bytes": 155088
+        },
+        "7": {
+          "tiles": 8,
+          "max_bytes": 49353,
+          "mean_bytes": 19806,
+          "total_bytes": 158449
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 7487,
+          "osm_keys_in_any_tile": 7487,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 7487,
+          "osm_keys_in_any_tile": 7487,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-se-20260722.pmtiles",
+      "country": "SE",
+      "expected": 7167,
+      "sizes": {
+        "3": {
+          "tiles": 2,
+          "max_bytes": 125553,
+          "mean_bytes": 64066,
+          "total_bytes": 128133
+        },
+        "4": {
+          "tiles": 5,
+          "max_bytes": 124931,
+          "mean_bytes": 28427,
+          "total_bytes": 142137
+        },
+        "5": {
+          "tiles": 7,
+          "max_bytes": 106831,
+          "mean_bytes": 20361,
+          "total_bytes": 142525
+        },
+        "6": {
+          "tiles": 15,
+          "max_bytes": 66300,
+          "mean_bytes": 10303,
+          "total_bytes": 154547
+        },
+        "7": {
+          "tiles": 38,
+          "max_bytes": 30014,
+          "mean_bytes": 4514,
+          "total_bytes": 171518
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 7167,
+          "osm_keys_in_any_tile": 7167,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 7167,
+          "osm_keys_in_any_tile": 7167,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-ng-20260722.pmtiles",
+      "country": "NG",
+      "expected": 7107,
+      "sizes": {
+        "3": {
+          "tiles": 1,
+          "max_bytes": 123582,
+          "mean_bytes": 123582,
+          "total_bytes": 123582
+        },
+        "4": {
+          "tiles": 1,
+          "max_bytes": 126572,
+          "mean_bytes": 126572,
+          "total_bytes": 126572
+        },
+        "5": {
+          "tiles": 4,
+          "max_bytes": 115184,
+          "mean_bytes": 34233,
+          "total_bytes": 136933
+        },
+        "6": {
+          "tiles": 8,
+          "max_bytes": 66225,
+          "mean_bytes": 20502,
+          "total_bytes": 164017
+        },
+        "7": {
+          "tiles": 18,
+          "max_bytes": 41762,
+          "mean_bytes": 9152,
+          "total_bytes": 164740
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 7107,
+          "osm_keys_in_any_tile": 7107,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 7107,
+          "osm_keys_in_any_tile": 7107,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-za-20260722.pmtiles",
+      "country": "ZA",
+      "expected": 4978,
+      "sizes": {
+        "3": {
+          "tiles": 1,
+          "max_bytes": 94350,
+          "mean_bytes": 94350,
+          "total_bytes": 94350
+        },
+        "4": {
+          "tiles": 2,
+          "max_bytes": 69616,
+          "mean_bytes": 50812,
+          "total_bytes": 101625
+        },
+        "5": {
+          "tiles": 4,
+          "max_bytes": 61540,
+          "mean_bytes": 26447,
+          "total_bytes": 105788
+        },
+        "6": {
+          "tiles": 10,
+          "max_bytes": 31699,
+          "mean_bytes": 12520,
+          "total_bytes": 125197
+        },
+        "7": {
+          "tiles": 28,
+          "max_bytes": 28028,
+          "mean_bytes": 4690,
+          "total_bytes": 131325
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 4978,
+          "osm_keys_in_any_tile": 4978,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 4978,
+          "osm_keys_in_any_tile": 4978,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-nz-20260722.pmtiles",
+      "country": "NZ",
+      "expected": 4718,
+      "sizes": {
+        "3": {
+          "tiles": 3,
+          "max_bytes": 75398,
+          "mean_bytes": 38147,
+          "total_bytes": 114441
+        },
+        "4": {
+          "tiles": 3,
+          "max_bytes": 75079,
+          "mean_bytes": 37322,
+          "total_bytes": 111966
+        },
+        "5": {
+          "tiles": 5,
+          "max_bytes": 70263,
+          "mean_bytes": 21808,
+          "total_bytes": 109038
+        },
+        "6": {
+          "tiles": 11,
+          "max_bytes": 63634,
+          "mean_bytes": 10747,
+          "total_bytes": 118220
+        },
+        "7": {
+          "tiles": 17,
+          "max_bytes": 49612,
+          "mean_bytes": 7134,
+          "total_bytes": 121274
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 4718,
+          "osm_keys_in_any_tile": 4718,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 4718,
+          "osm_keys_in_any_tile": 4718,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-gh-20260722.pmtiles",
+      "country": "GH",
+      "expected": 4683,
+      "sizes": {
+        "3": {
+          "tiles": 2,
+          "max_bytes": 81869,
+          "mean_bytes": 67118,
+          "total_bytes": 134236
+        },
+        "4": {
+          "tiles": 2,
+          "max_bytes": 79744,
+          "mean_bytes": 62552,
+          "total_bytes": 125104
+        },
+        "5": {
+          "tiles": 3,
+          "max_bytes": 79681,
+          "mean_bytes": 37443,
+          "total_bytes": 112328
+        },
+        "6": {
+          "tiles": 4,
+          "max_bytes": 72687,
+          "mean_bytes": 35144,
+          "total_bytes": 140576
+        },
+        "7": {
+          "tiles": 9,
+          "max_bytes": 57770,
+          "mean_bytes": 14475,
+          "total_bytes": 130272
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 4682,
+          "osm_keys_in_any_tile": 4683,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 4683,
+          "osm_keys_in_any_tile": 4683,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 1
+    },
+    {
+      "file": "ra-dots-ke-20260722.pmtiles",
+      "country": "KE",
+      "expected": 4502,
+      "sizes": {
+        "3": {
+          "tiles": 2,
+          "max_bytes": 77497,
+          "mean_bytes": 59350,
+          "total_bytes": 118699
+        },
+        "4": {
+          "tiles": 2,
+          "max_bytes": 75992,
+          "mean_bytes": 56458,
+          "total_bytes": 112917
+        },
+        "5": {
+          "tiles": 4,
+          "max_bytes": 75564,
+          "mean_bytes": 27104,
+          "total_bytes": 108418
+        },
+        "6": {
+          "tiles": 4,
+          "max_bytes": 66138,
+          "mean_bytes": 27006,
+          "total_bytes": 108022
+        },
+        "7": {
+          "tiles": 11,
+          "max_bytes": 48413,
+          "mean_bytes": 9878,
+          "total_bytes": 108658
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 4502,
+          "osm_keys_in_any_tile": 4502,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 4502,
+          "osm_keys_in_any_tile": 4502,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-fi-20260722.pmtiles",
+      "country": "FI",
+      "expected": 4270,
+      "sizes": {
+        "3": {
+          "tiles": 2,
+          "max_bytes": 79723,
+          "mean_bytes": 41771,
+          "total_bytes": 83542
+        },
+        "4": {
+          "tiles": 4,
+          "max_bytes": 73431,
+          "mean_bytes": 24466,
+          "total_bytes": 97863
+        },
+        "5": {
+          "tiles": 6,
+          "max_bytes": 37818,
+          "mean_bytes": 16556,
+          "total_bytes": 99338
+        },
+        "6": {
+          "tiles": 13,
+          "max_bytes": 35438,
+          "mean_bytes": 7879,
+          "total_bytes": 102422
+        },
+        "7": {
+          "tiles": 33,
+          "max_bytes": 20779,
+          "mean_bytes": 3554,
+          "total_bytes": 117275
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 4270,
+          "osm_keys_in_any_tile": 4270,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 4270,
+          "osm_keys_in_any_tile": 4270,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-dk-20260722.pmtiles",
+      "country": "DK",
+      "expected": 4081,
+      "sizes": {
+        "3": {
+          "tiles": 1,
+          "max_bytes": 69834,
+          "mean_bytes": 69834,
+          "total_bytes": 69834
+        },
+        "4": {
+          "tiles": 2,
+          "max_bytes": 47898,
+          "mean_bytes": 46696,
+          "total_bytes": 93393
+        },
+        "5": {
+          "tiles": 4,
+          "max_bytes": 34140,
+          "mean_bytes": 23665,
+          "total_bytes": 94661
+        },
+        "6": {
+          "tiles": 4,
+          "max_bytes": 33467,
+          "mean_bytes": 21511,
+          "total_bytes": 86043
+        },
+        "7": {
+          "tiles": 8,
+          "max_bytes": 29831,
+          "mean_bytes": 10915,
+          "total_bytes": 87317
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 4081,
+          "osm_keys_in_any_tile": 4081,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 4081,
+          "osm_keys_in_any_tile": 4081,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    },
+    {
+      "file": "ra-dots-ug-20260722.pmtiles",
+      "country": "UG",
+      "expected": 4078,
+      "sizes": {
+        "3": {
+          "tiles": 2,
+          "max_bytes": 68019,
+          "mean_bytes": 55860,
+          "total_bytes": 111719
+        },
+        "4": {
+          "tiles": 2,
+          "max_bytes": 64283,
+          "mean_bytes": 50006,
+          "total_bytes": 100012
+        },
+        "5": {
+          "tiles": 3,
+          "max_bytes": 59226,
+          "mean_bytes": 29900,
+          "total_bytes": 89699
+        },
+        "6": {
+          "tiles": 3,
+          "max_bytes": 59436,
+          "mean_bytes": 29390,
+          "total_bytes": 88170
+        },
+        "7": {
+          "tiles": 8,
+          "max_bytes": 36619,
+          "mean_bytes": 12787,
+          "total_bytes": 102299
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 4075,
+          "osm_keys_in_any_tile": 4078,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 4078,
+          "osm_keys_in_any_tile": 4078,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 3
+    },
+    {
+      "file": "ra-dots-no-20260722.pmtiles",
+      "country": "NO",
+      "expected": 3999,
+      "sizes": {
+        "3": {
+          "tiles": 3,
+          "max_bytes": 68753,
+          "mean_bytes": 27130,
+          "total_bytes": 81390
+        },
+        "4": {
+          "tiles": 5,
+          "max_bytes": 69826,
+          "mean_bytes": 16655,
+          "total_bytes": 83276
+        },
+        "5": {
+          "tiles": 10,
+          "max_bytes": 54867,
+          "mean_bytes": 9546,
+          "total_bytes": 95462
+        },
+        "6": {
+          "tiles": 22,
+          "max_bytes": 36772,
+          "mean_bytes": 4754,
+          "total_bytes": 104578
+        },
+        "7": {
+          "tiles": 47,
+          "max_bytes": 22793,
+          "mean_bytes": 2382,
+          "total_bytes": 111944
+        }
+      },
+      "attributes": [
+        "country_code",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "religion"
+      ],
+      "layers": [
+        "places_overview"
+      ],
+      "zooms": {
+        "3": {
+          "points_in_tile_proper": 3999,
+          "osm_keys_in_any_tile": 3999,
+          "foreign_country": {}
+        },
+        "7": {
+          "points_in_tile_proper": 3999,
+          "osm_keys_in_any_tile": 3999,
+          "foreign_country": {}
+        }
+      },
+      "problems": [],
+      "z3_shortfall_in_tile_proper": 0
+    }
+  ],
+  "ra_dots_summary": {
+    "archives": 33,
+    "points_expected": 1371000,
+    "points_found_z7": 1371000,
+    "points_found_z3": 1370942,
+    "archives_with_matching_counts": 33,
+    "points_without_valid_country_code": 701349,
+    "points_in_no_ra_archive": 701349,
+    "no_valid_country_code_values": {
+      "(absent)": 701349
+    },
+    "no_valid_country_code_but_country_attribute": 701349,
+    "country_fallback": false
+  },
+  "overview": {
+    "file": "places-overview-v2-20260722.pmtiles",
+    "bytes": 5442685,
+    "sizes": {
+      "0": {
+        "tiles": 1,
+        "max_bytes": 195968,
+        "mean_bytes": 195968,
+        "total_bytes": 195968
+      },
+      "1": {
+        "tiles": 4,
+        "max_bytes": 202436,
+        "mean_bytes": 82798,
+        "total_bytes": 331191
+      },
+      "2": {
+        "tiles": 12,
+        "max_bytes": 209209,
+        "mean_bytes": 37791,
+        "total_bytes": 453490
+      },
+      "3": {
+        "tiles": 37,
+        "max_bytes": 214666,
+        "mean_bytes": 19511,
+        "total_bytes": 721899
+      },
+      "4": {
+        "tiles": 117,
+        "max_bytes": 217111,
+        "mean_bytes": 7667,
+        "total_bytes": 897013
+      },
+      "5": {
+        "tiles": 327,
+        "max_bytes": 219315,
+        "mean_bytes": 8676,
+        "total_bytes": 2836890
+      }
+    },
+    "attributes": [
+      "country_code",
+      "denomination",
+      "name",
+      "osm_id",
+      "osm_type",
+      "religion"
+    ],
+    "layers": [
+      "places_overview"
+    ],
+    "shares": {
+      "0": {
+        "kept_features": 10172,
+        "fraction_kept": 0.004908439649885227,
+        "religions": {
+          "christian": {
+            "input_pct": 61.737,
+            "kept_pct": 61.571,
+            "diff_pp": -0.166
+          },
+          "muslim": {
+            "input_pct": 14.548,
+            "kept_pct": 14.697,
+            "diff_pp": 0.15
+          },
+          "unknown": {
+            "input_pct": 10.378,
+            "kept_pct": 10.342,
+            "diff_pp": -0.036
+          },
+          "buddhist": {
+            "input_pct": 6.88,
+            "kept_pct": 6.842,
+            "diff_pp": -0.038
+          },
+          "hindu": {
+            "input_pct": 2.561,
+            "kept_pct": 2.497,
+            "diff_pp": -0.064
+          },
+          "shinto": {
+            "input_pct": 2.441,
+            "kept_pct": 2.576,
+            "diff_pp": 0.134
+          },
+          "jewish": {
+            "input_pct": 0.55,
+            "kept_pct": 0.6,
+            "diff_pp": 0.049
+          }
+        },
+        "max_abs_diff_pp": 0.166,
+        "within_tolerance": true
+      },
+      "1": {
+        "kept_features": 15817,
+        "fraction_kept": 0.00763240168523738,
+        "religions": {
+          "christian": {
+            "input_pct": 61.737,
+            "kept_pct": 61.288,
+            "diff_pp": -0.449
+          },
+          "muslim": {
+            "input_pct": 14.548,
+            "kept_pct": 14.579,
+            "diff_pp": 0.032
+          },
+          "unknown": {
+            "input_pct": 10.378,
+            "kept_pct": 10.678,
+            "diff_pp": 0.3
+          },
+          "buddhist": {
+            "input_pct": 6.88,
+            "kept_pct": 6.841,
+            "diff_pp": -0.039
+          },
+          "hindu": {
+            "input_pct": 2.561,
+            "kept_pct": 2.535,
+            "diff_pp": -0.025
+          },
+          "shinto": {
+            "input_pct": 2.441,
+            "kept_pct": 2.624,
+            "diff_pp": 0.182
+          },
+          "jewish": {
+            "input_pct": 0.55,
+            "kept_pct": 0.582,
+            "diff_pp": 0.031
+          }
+        },
+        "max_abs_diff_pp": 0.449,
+        "within_tolerance": false
+      },
+      "2": {
+        "kept_features": 21715,
+        "fraction_kept": 0.010478447404370596,
+        "religions": {
+          "christian": {
+            "input_pct": 61.737,
+            "kept_pct": 61.57,
+            "diff_pp": -0.167
+          },
+          "muslim": {
+            "input_pct": 14.548,
+            "kept_pct": 14.501,
+            "diff_pp": -0.046
+          },
+          "unknown": {
+            "input_pct": 10.378,
+            "kept_pct": 10.555,
+            "diff_pp": 0.177
+          },
+          "buddhist": {
+            "input_pct": 6.88,
+            "kept_pct": 6.829,
+            "diff_pp": -0.05
+          },
+          "hindu": {
+            "input_pct": 2.561,
+            "kept_pct": 2.524,
+            "diff_pp": -0.037
+          },
+          "shinto": {
+            "input_pct": 2.441,
+            "kept_pct": 2.533,
+            "diff_pp": 0.091
+          },
+          "jewish": {
+            "input_pct": 0.55,
+            "kept_pct": 0.594,
+            "diff_pp": 0.044
+          }
+        },
+        "max_abs_diff_pp": 0.177,
+        "within_tolerance": true
+      },
+      "3": {
+        "kept_features": 33504,
+        "fraction_kept": 0.01616716103320435,
+        "religions": {
+          "christian": {
+            "input_pct": 61.737,
+            "kept_pct": 61.551,
+            "diff_pp": -0.186
+          },
+          "muslim": {
+            "input_pct": 14.548,
+            "kept_pct": 14.524,
+            "diff_pp": -0.024
+          },
+          "unknown": {
+            "input_pct": 10.378,
+            "kept_pct": 10.518,
+            "diff_pp": 0.14
+          },
+          "buddhist": {
+            "input_pct": 6.88,
+            "kept_pct": 6.874,
+            "diff_pp": -0.006
+          },
+          "hindu": {
+            "input_pct": 2.561,
+            "kept_pct": 2.582,
+            "diff_pp": 0.021
+          },
+          "shinto": {
+            "input_pct": 2.441,
+            "kept_pct": 2.471,
+            "diff_pp": 0.03
+          },
+          "jewish": {
+            "input_pct": 0.55,
+            "kept_pct": 0.582,
+            "diff_pp": 0.032
+          }
+        },
+        "max_abs_diff_pp": 0.186,
+        "within_tolerance": true
+      },
+      "4": {
+        "kept_features": 41222,
+        "fraction_kept": 0.01989143720483374,
+        "religions": {
+          "christian": {
+            "input_pct": 61.737,
+            "kept_pct": 61.523,
+            "diff_pp": -0.214
+          },
+          "muslim": {
+            "input_pct": 14.548,
+            "kept_pct": 14.621,
+            "diff_pp": 0.073
+          },
+          "unknown": {
+            "input_pct": 10.378,
+            "kept_pct": 10.47,
+            "diff_pp": 0.092
+          },
+          "buddhist": {
+            "input_pct": 6.88,
+            "kept_pct": 6.919,
+            "diff_pp": 0.039
+          },
+          "hindu": {
+            "input_pct": 2.561,
+            "kept_pct": 2.552,
+            "diff_pp": -0.009
+          },
+          "shinto": {
+            "input_pct": 2.441,
+            "kept_pct": 2.506,
+            "diff_pp": 0.065
+          },
+          "jewish": {
+            "input_pct": 0.55,
+            "kept_pct": 0.551,
+            "diff_pp": 0.0
+          }
+        },
+        "max_abs_diff_pp": 0.214,
+        "within_tolerance": true
+      },
+      "5": {
+        "kept_features": 138992,
+        "fraction_kept": 0.0670697840952465,
+        "religions": {
+          "christian": {
+            "input_pct": 61.737,
+            "kept_pct": 61.647,
+            "diff_pp": -0.09
+          },
+          "muslim": {
+            "input_pct": 14.548,
+            "kept_pct": 14.57,
+            "diff_pp": 0.022
+          },
+          "unknown": {
+            "input_pct": 10.378,
+            "kept_pct": 10.435,
+            "diff_pp": 0.057
+          },
+          "buddhist": {
+            "input_pct": 6.88,
+            "kept_pct": 6.877,
+            "diff_pp": -0.002
+          },
+          "hindu": {
+            "input_pct": 2.561,
+            "kept_pct": 2.574,
+            "diff_pp": 0.014
+          },
+          "shinto": {
+            "input_pct": 2.441,
+            "kept_pct": 2.439,
+            "diff_pp": -0.002
+          },
+          "jewish": {
+            "input_pct": 0.55,
+            "kept_pct": 0.568,
+            "diff_pp": 0.018
+          }
+        },
+        "max_abs_diff_pp": 0.09,
+        "within_tolerance": true
+      }
+    },
+    "metadata_vector_layers": [
+      {
+        "id": "places_overview",
+        "description": "",
+        "minzoom": 0,
+        "maxzoom": 5,
+        "fields": {
+          "country_code": "String",
+          "denomination": "String",
+          "name": "String",
+          "osm_id": "Number",
+          "osm_type": "String",
+          "religion": "String"
+        }
+      }
+    ],
+    "header_zoom": [
+      0,
+      5
+    ],
+    "z0_tile_bytes": 195968,
+    "z0_decodes_cleanly": true
+  },
+  "live_comparison": {
+    "live_file": "places-overview.pmtiles",
+    "live_bytes": 308496321,
+    "new_bytes": 5442685,
+    "seed": 20260722,
+    "zooms": {
+      "0": {
+        "sampled": 1,
+        "present_in_new": 1,
+        "live_bytes": 46977363,
+        "new_bytes": 195968,
+        "reduction": 0.9958,
+        "live_max_tile_bytes": 46977363
+      },
+      "1": {
+        "sampled": 4,
+        "present_in_new": 4,
+        "live_bytes": 51792891,
+        "new_bytes": 331191,
+        "reduction": 0.9936,
+        "live_max_tile_bytes": 32101317
+      },
+      "2": {
+        "sampled": 12,
+        "present_in_new": 12,
+        "live_bytes": 51365272,
+        "new_bytes": 453490,
+        "reduction": 0.9912,
+        "live_max_tile_bytes": 25108961
+      },
+      "3": {
+        "sampled": 37,
+        "present_in_new": 37,
+        "live_bytes": 53179264,
+        "new_bytes": 721899,
+        "reduction": 0.9864,
+        "live_max_tile_bytes": 18758670
+      },
+      "4": {
+        "sampled": 60,
+        "present_in_new": 60,
+        "live_bytes": 37766870,
+        "new_bytes": 596496,
+        "reduction": 0.9842,
+        "live_max_tile_bytes": 16360847
+      },
+      "5": {
+        "sampled": 60,
+        "present_in_new": 60,
+        "live_bytes": 14651745,
+        "new_bytes": 739958,
+        "reduction": 0.9495,
+        "live_max_tile_bytes": 4771078
+      }
+    }
+  },
+  "ra_dots_max_tile_bytes_by_zoom": {
+    "3": 3130652,
+    "4": 3007573,
+    "5": 1855061,
+    "6": 1177843,
+    "7": 544505
+  },
+  "status": "passed_with_warnings"
+}
