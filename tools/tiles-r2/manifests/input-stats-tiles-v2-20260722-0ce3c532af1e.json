@@ -4605,7 +4605,7 @@
     "features_in_tile_proper": 2072346,
     "edge_points_added": 3,
     "unique": 2072349,
-    "seconds": 9.7,
+    "seconds": 13.3,
     "expected": 2072349,
     "dedup_rule": "keep a feature only from the tile whose proper area holds it; add far-edge points no tile holds (per key, the largest single-tile far-edge multiplicity minus the tile-proper count)",
     "features_with_osm_key": 1371000,
@@ -4621,18 +4621,22 @@
         "features_in_tile_proper": 2072349,
         "edge_points_added": 0,
         "unique": 2072349,
-        "seconds": 12.5
+        "seconds": 13.1
       },
       "attribute_multiset_equal": true,
       "occurrences_only_at_extraction_zoom": 0,
       "occurrences_only_at_audit_zoom": 0,
-      "single_occurrence_keys_compared": 1637325,
-      "single_occurrence_keys_more_than_0_003_degrees_apart": 0,
+      "attribute_groups_differing": 0,
+      "coordinate_tolerance_degrees": 0.003,
+      "coordinate_groups_compared": 1667423,
+      "coordinate_occurrences_compared": 2072349,
+      "coordinate_occurrences_unmatched": 0,
+      "coordinate_groups_with_unmatched": 0,
+      "coordinate_unmatched_group_examples": [],
       "distinct_attribute_keys": 1667423,
       "keys_occurring_more_than_once": 30098,
-      "examples_only_at_extraction_zoom_omitted": true,
-      "examples_only_at_audit_zoom_omitted": true
+      "occurrences_in_repeated_groups": 435024
     },
-    "edge_points_added_detail_omitted": 0
+    "edge_points_added_detail_omitted": 3
   }
 }

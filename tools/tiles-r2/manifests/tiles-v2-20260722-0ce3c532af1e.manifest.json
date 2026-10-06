@@ -12,11 +12,11 @@
     "snapshot_date": "2026-07-22",
     "pipeline_stage": "staged"
   },
-  "created_at": "2026-10-06T18:02:52+00:00",
+  "created_at": "2026-10-06T19:41:41+00:00",
   "created_by": "claude-sonnet-5-5 (workflow agent)",
   "pipeline": {
     "script": "tools/tiles-r2/build_tiles_v2.py",
-    "git_commit": "46f07ce825c05ba517575feafbe4a6fe2b89d0fa",
+    "git_commit": "d260e9cd4021be2a16e5d74d8216602ea4521cdd",
     "command": "uv run tools/tiles-r2/build_tiles_v2.py all --work <dir> --source <places.mbtiles>",
     "parameters": {
       "extract_zoom": 10,
@@ -104,7 +104,7 @@
     "provider": "places.mbtiles, the live places tileset built 2026-07-22 (all_places.ndjson, no longer retained)",
     "licence": null,
     "local_cache_hint": "green:/Users/joseph/tiles-archive-2026-07/tiles-migration/places.mbtiles",
-    "citation": "sha256 eaa55c50971381cacca36ea08b1d4a68628b77d47a7156848cebb6a13eb2c406, 4373762048 bytes; mbtiles metadata: {\"name\": \"places.mbtiles\", \"description\": \"places.mbtiles\", \"version\": \"2\", \"minzoom\": \"0\", \"maxzoom\": \"18\", \"center\": \"18.103409,53.834296,18\", \"bounds\": \"-179.999658,-55.963309,179.990812,80.799860\", \"antimeridian_adjusted_bounds\": \"-179.999658,-55.963309,179.990812,80.799860\", \"type\": \"overlay\", \"format\": \"pbf\", \"generator\": \"tippecanoe v2.79.0\", \"generator_options\": \"tippecanoe -Z0 -z18 --drop-densest-as-needed --extend-zooms-if-still-dropping --no-feature-limit --no-tile-size-limit -r1 -l places --force -o places.mbtiles all_places.ndjson\", \"tippecanoe_decisions\": \"{\\\"basezoom\\\":18,\\\"droprate\\\":1,\\\"retain_points_multiplier\\\":1}\", \"json\": \"{\\\"vector_layers\\\":[{\\\"id\\\":\\\"places\\\",\\\"description\\\":\\\"\\\",\\\"minzoom\\\":0,\\\"maxzoom\\\":18,\\\"fields\\\":{\\\"address\\\":\\\"String\\\",\\\"amenity\\\":\\\"String\\\",\\\"building\\\":\\\"String\\\",\\\"confidence\\\":\\\"Number\\\",\\\"country\\\":\\\"String\\\",\\\"country_code\\\":\\\"String\\\",\\\"denomination\\\":\\\"String\\\",\\\"id\\\":\\\"String\\\",\\\"name\\\":\\\"String\\\",\\\"osm_id\\\":\\\"Number\\\",\\\"osm_type\\\":\\\"String\\\",\\\"phone\\\":\\\"String\\\",\\\"religion\\\":\\\"String\\\",\\\"start_date\\\":\\\"String\\\",\\\"tags_raw\\\":\\\"String\\\",\\\"type\\\":\\\"String\\\",\\\"website\\\":\\\"String\\\"}}],\\\"tilestats\\\":{\\\"layerCount\\\":1,\\\"layers\\\":[{\\\"layer\\\":\\\"places\\\",\\\"count\\\":2072349,\\\"geometry\\\":\\\"Point\\\",\\\"attributeCount\\\":17,\\\"attributes\\\":[{\\\"attribute\\\":\\\"address\\\",\\\"count\\\":1000,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"amenity\\\",\\\"count\\\":17,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"building\\\",\\\"count\\\":74,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"confidence\\\",\\\"count\\\":57,\\\"type\\\":\\\"number\\\",\\\"min\\\":0.5,\\\"max\\\":1},{\\\"attribute\\\":\\\"country\\\",\\\"count\\\":178,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"country_code\\\",\\\"count\\\":33,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"denomination\\\",\\\"count\\\":1000,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"id\\\",\\\"count\\\":1000,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"name\\\",\\\"count\\\":1000,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"osm_id\\\",\\\"count\\\":1000,\\\"type\\\":\\\"number\\\",\\\"min\\\":2987757,\\\"max\\\":13089586407},{\\\"attribute\\\":\\\"osm_type\\\",\\\"count\\\":2,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"phone\\\",\\\"count\\\":1000,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"religion\\\",\\\"count\\\":921,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"start_date\\\",\\\"count\\\":1000,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"tags_raw\\\",\\\"count\\\":1000,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"type\\\",\\\"count\\\":1,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"website\\\",\\\"count\\\":1000,\\\"type\\\":\\\"string\\\"}]}]}}\"}; tippecanoe tilestats count 2072349 features, layer places; decoded at z10: 2072346 features in tile proper plus 3 far-edge points no tile held = 2072349; 701349 features carry no osm_id, osm_type or id; 5 osm keys occur twice at identical coordinates in the source. Original dataset links and retrieval date are not recorded in the source archive.",
+    "citation": "sha256 eaa55c50971381cacca36ea08b1d4a68628b77d47a7156848cebb6a13eb2c406, 4373762048 bytes; mbtiles metadata (attribute-value samples omitted): {\"name\": \"places.mbtiles\", \"description\": \"places.mbtiles\", \"version\": \"2\", \"minzoom\": \"0\", \"maxzoom\": \"18\", \"center\": \"18.103409,53.834296,18\", \"bounds\": \"-179.999658,-55.963309,179.990812,80.799860\", \"antimeridian_adjusted_bounds\": \"-179.999658,-55.963309,179.990812,80.799860\", \"type\": \"overlay\", \"format\": \"pbf\", \"generator\": \"tippecanoe v2.79.0\", \"generator_options\": \"tippecanoe -Z0 -z18 --drop-densest-as-needed --extend-zooms-if-still-dropping --no-feature-limit --no-tile-size-limit -r1 -l places --force -o places.mbtiles all_places.ndjson\", \"tippecanoe_decisions\": \"{\\\"basezoom\\\":18,\\\"droprate\\\":1,\\\"retain_points_multiplier\\\":1}\", \"json\": \"{\\\"vector_layers\\\":[{\\\"id\\\":\\\"places\\\",\\\"description\\\":\\\"\\\",\\\"minzoom\\\":0,\\\"maxzoom\\\":18,\\\"fields\\\":{\\\"address\\\":\\\"String\\\",\\\"amenity\\\":\\\"String\\\",\\\"building\\\":\\\"String\\\",\\\"confidence\\\":\\\"Number\\\",\\\"country\\\":\\\"String\\\",\\\"country_code\\\":\\\"String\\\",\\\"denomination\\\":\\\"String\\\",\\\"id\\\":\\\"String\\\",\\\"name\\\":\\\"String\\\",\\\"osm_id\\\":\\\"Number\\\",\\\"osm_type\\\":\\\"String\\\",\\\"phone\\\":\\\"String\\\",\\\"religion\\\":\\\"String\\\",\\\"start_date\\\":\\\"String\\\",\\\"tags_raw\\\":\\\"String\\\",\\\"type\\\":\\\"String\\\",\\\"website\\\":\\\"String\\\"}}],\\\"tilestats\\\":{\\\"layerCount\\\":1,\\\"layers\\\":[{\\\"layer\\\":\\\"places\\\",\\\"count\\\":2072349,\\\"geometry\\\":\\\"Point\\\",\\\"attributeCount\\\":17,\\\"attributes\\\":[{\\\"attribute\\\":\\\"address\\\",\\\"count\\\":1000,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"amenity\\\",\\\"count\\\":17,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"building\\\",\\\"count\\\":74,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"confidence\\\",\\\"count\\\":57,\\\"type\\\":\\\"number\\\",\\\"min\\\":0.5,\\\"max\\\":1},{\\\"attribute\\\":\\\"country\\\",\\\"count\\\":178,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"country_code\\\",\\\"count\\\":33,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"denomination\\\",\\\"count\\\":1000,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"id\\\",\\\"count\\\":1000,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"name\\\",\\\"count\\\":1000,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"osm_id\\\",\\\"count\\\":1000,\\\"type\\\":\\\"number\\\",\\\"min\\\":2987757,\\\"max\\\":13089586407},{\\\"attribute\\\":\\\"osm_type\\\",\\\"count\\\":2,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"phone\\\",\\\"count\\\":1000,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"religion\\\",\\\"count\\\":921,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"start_date\\\",\\\"count\\\":1000,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"tags_raw\\\",\\\"count\\\":1000,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"type\\\",\\\"count\\\":1,\\\"type\\\":\\\"string\\\"},{\\\"attribute\\\":\\\"website\\\",\\\"count\\\":1000,\\\"type\\\":\\\"string\\\"}]}]}}\"}; tippecanoe tilestats count 2072349 features, layer places; decoded at z10: 2072346 features in tile proper plus 3 far-edge points no tile held = 2072349; 701349 features carry no osm_id, osm_type or id; 5 osm keys occur twice at identical coordinates in the source. Original dataset links and retrieval date are not recorded in the source archive.",
     "licence_todo": "licence and attribution of the 701,349 places without an OSM key are not established; publication gate (serving the archives) stays open until documented"
   },
   "durable_files": [
@@ -2456,17 +2456,21 @@
         "features_in_tile_proper": 2072349,
         "edge_points_added": 0,
         "unique": 2072349,
-        "seconds": 12.5
+        "seconds": 13.1
       },
       "attribute_multiset_equal": true,
       "occurrences_only_at_extraction_zoom": 0,
       "occurrences_only_at_audit_zoom": 0,
-      "examples_only_at_extraction_zoom": [],
-      "examples_only_at_audit_zoom": [],
-      "single_occurrence_keys_compared": 1637325,
-      "single_occurrence_keys_more_than_0_003_degrees_apart": 0,
+      "attribute_groups_differing": 0,
+      "coordinate_tolerance_degrees": 0.003,
+      "coordinate_groups_compared": 1667423,
+      "coordinate_occurrences_compared": 2072349,
+      "coordinate_occurrences_unmatched": 0,
+      "coordinate_groups_with_unmatched": 0,
+      "coordinate_unmatched_group_examples": [],
       "distinct_attribute_keys": 1667423,
-      "keys_occurring_more_than_once": 30098
+      "keys_occurring_more_than_once": 30098,
+      "occurrences_in_repeated_groups": 435024
     },
     "criteria_not_met": []
   },
