@@ -232,44 +232,46 @@ def _source_info(src):
 AUDIT_TOLERANCE_DEG = 0.003  # source-zoom quantisation is at most about 0.0014 degrees at z6; two zooms differ by less
 
 
-def _wrapped_dlon(a, b):
-    d = abs(a - b) % 360.0
-    return min(d, 360.0 - d)
+def _pair_points(a_pts, b_pts, tol, period):
+    """Pair points of a_pts with distinct points of b_pts within tol, in both coordinates.
 
-
-def _match_coordinates(a_pts, b_pts, tol=AUDIT_TOLERANCE_DEG):
-    """Number of points in a_pts that cannot be paired with a distinct point of b_pts within tol degrees.
-
-    Both lists hold (lon, lat) for one attribute group and are of equal length when the attribute
-    multisets agree. A pair needs |dlat| <= tol and a longitude difference, taken modulo 360, of at most
-    tol. The pairing is a maximum bipartite matching (greedy first, then augmenting paths), so
-    quantisation cannot produce a false mismatch inside a cluster of identical places, and a distant
-    occurrence replaced by a copy at another occurrence's location cannot be absorbed. Returns the
-    number of unmatched points of a_pts (equal to that of b_pts when the lists have equal length)."""
+    Points are (x, y); x is taken modulo period (360 for degrees, the world width for tile-grid units),
+    y is not wrapped. The pairing is a maximum bipartite matching (greedy first, then augmenting paths),
+    so quantisation cannot produce a false mismatch inside a cluster of identical places, and a point
+    absent from b_pts cannot be paired with a copy that another point already uses. Returns match_a,
+    the index in b_pts paired with each a point, or -1."""
     na, nb = len(a_pts), len(b_pts)
+    match_a = [-1] * na
     if na == 0 or nb == 0:
-        return na
+        return match_a
+
+    def close(p, q):
+        d = abs(p[0] - q[0]) % period
+        return min(d, period - d) <= tol and abs(p[1] - q[1]) <= tol
+
     if na == 1 and nb == 1:
-        ok = abs(a_pts[0][1] - b_pts[0][1]) <= tol and _wrapped_dlon(a_pts[0][0], b_pts[0][0]) <= tol
-        return 0 if ok else 1
-    ncell = max(1, int(360.0 // tol))
-    cell = lambda lon, lat: (int(((lon + 180.0) % 360.0) // tol) % ncell, int(math.floor(lat / tol)))
+        if close(a_pts[0], b_pts[0]):
+            match_a[0] = 0
+        return match_a
+    ncell = max(1, int(math.ceil(period / tol)))
+
+    def cell(pt):
+        return int((pt[0] % period) // tol) % ncell, int(math.floor(pt[1] / tol))
+
     grid = collections.defaultdict(list)
-    for j, (lon, lat) in enumerate(b_pts):
-        grid[cell(lon, lat)].append(j)
+    for j, pt in enumerate(b_pts):
+        grid[cell(pt)].append(j)
     adj = []
-    for lon, lat in a_pts:
-        cx, cy = cell(lon, lat)
-        near = []
+    for pt in a_pts:
+        cx, cy = cell(pt)
+        near = set()
         for dx in (-1, 0, 1):
             for dy in (-1, 0, 1):
                 for j in grid.get(((cx + dx) % ncell, cy + dy), ()):
-                    blon, blat = b_pts[j]
-                    if abs(lat - blat) <= tol and _wrapped_dlon(lon, blon) <= tol:
-                        near.append(j)
-        adj.append(sorted(set(near)))
+                    if close(pt, b_pts[j]):
+                        near.add(j)
+        adj.append(sorted(near))
     match_b = [-1] * nb
-    match_a = [-1] * na
     for i in range(na):
         for j in adj[i]:
             if match_b[j] < 0:
@@ -278,9 +280,8 @@ def _match_coordinates(a_pts, b_pts, tol=AUDIT_TOLERANCE_DEG):
     for i in range(na):
         if match_a[i] >= 0:
             continue
-        # breadth-first search for an augmenting path from the unmatched a point i
-        parent = {}
-        seen_b = set()
+        # breadth-first search for an augmenting path from the unmatched point i
+        parent, seen_b = {}, set()
         queue = collections.deque([i])
         found = None
         while queue and found is None:
@@ -304,7 +305,13 @@ def _match_coordinates(a_pts, b_pts, tol=AUDIT_TOLERANCE_DEG):
             if u == i:
                 break
             j = prev
-    return sum(1 for m in match_a if m < 0)
+    return match_a
+
+
+def _match_coordinates(a_pts, b_pts, tol=AUDIT_TOLERANCE_DEG):
+    """Number of (lon, lat) points of a_pts with no distinct partner in b_pts within tol degrees,
+    longitude taken modulo 360."""
+    return sum(1 for m in _pair_points(a_pts, b_pts, tol, 360.0) if m < 0)
 
 
 def _coordinate_audit(kept, other, tol=AUDIT_TOLERANCE_DEG):
@@ -630,7 +637,7 @@ def _decode_tile(args):
     religion, cc_counts = collections.Counter(), collections.Counter()
     attrs, core, pts_seen = set(), 0, set()
     core_keys = collections.Counter()
-    occ_all, occ_core = collections.Counter(), collections.Counter()
+    occ_buf, occ_core = collections.defaultdict(list), collections.Counter()
     for lname, lyr in d.items():
         ext = lyr["extent"]
         world = (1 << z) * ext
@@ -654,8 +661,8 @@ def _decode_tile(args):
                     # longitude and is not a second occurrence; coincident points share the raw position too
                     raw = x * ext + int(round(px))
                     pos = (raw % world, y * ext + int(round(py)))
-                    if raw_seen.setdefault(pos, raw) == raw:
-                        occ_all[(ak, pos)] += 1
+                    if raw_seen.setdefault(pos, raw) == raw and not inside:
+                        occ_buf[ak].append(pos)
                     if inside:
                         # the proper-area copy counts as held, whichever copy came first
                         occ_core[(ak, pos)] += 1
@@ -665,7 +672,7 @@ def _decode_tile(args):
                     cc_counts[p.get("country_code")] += 1
                     if want_keys and p.get("osm_id") is not None:
                         core_keys[(p.get("osm_type"), p.get("osm_id"))] += 1
-    return z, layers, core, religion, cc_counts, attrs, pts_seen, core_keys, occ_all, occ_core
+    return z, layers, core, religion, cc_counts, attrs, pts_seen, core_keys, (x, y), dict(occ_buf), occ_core
 
 
 def _open_pm(path):
@@ -695,17 +702,15 @@ def _archive_scan(path, decode_zooms, want_keys=False, pool=None, sample_sizes=F
     res = collections.defaultdict(lambda: {"core": 0, "religion": collections.Counter(),
                                            "cc": collections.Counter(), "keys": set(),
                                            "core_keys": collections.Counter(),
-                                           "occ_all": {}, "occ_core": collections.Counter()})
+                                           "occ_buf": {}, "occ_core": collections.Counter()})
     attrs, layers = set(), set()
     it = pool.imap_unordered(_decode_tile, jobs, chunksize=4) if pool else map(_decode_tile, jobs)
-    for z, lys, core, rel, cc, at, pts_seen, core_keys, occ_all, occ_core in it:
+    for z, lys, core, rel, cc, at, pts_seen, core_keys, tile, occ_buf, occ_core in it:
         e = res[z]
-        # a point may appear in several tiles (its tile proper and neighbours' buffers) and is one
-        # occurrence; coincident points in one tile are several, so take the largest count over tiles
-        oa = e["occ_all"]
-        for k, c in occ_all.items():
-            if c > oa.get(k, 0):
-                oa[k] = c
+        # the points each tile holds outside its proper area, kept per tile: copies of one point in
+        # neighbouring buffers are rounded separately, and the largest count in any one tile is the
+        # number of distinct points there
+        e["occ_buf"][tile] = occ_buf
         e["occ_core"].update(occ_core)
         e["core_keys"].update(core_keys)
         e["core"] += core
@@ -726,15 +731,20 @@ RA_ZOOMS = (3, 4, 5, 6, 7)
 
 
 def _expected_occurrences(ndjson_path):
-    """Occurrence multiset of one country's NDJSON, the file its archive was built from: attribute tuples over
-    the RA attributes, with multiplicities. The osm-key multiplicities are derived from it."""
+    """One country's NDJSON, the file its archive was built from: the occurrence multiset (attribute
+    tuples over the RA attributes) and, per attribute tuple, the (lon, lat) of each occurrence."""
     occ = collections.Counter()
+    pts = collections.defaultdict(list)
     if ndjson_path is None or not Path(ndjson_path).exists():
-        return occ
+        return occ, pts
     with Path(ndjson_path).open(encoding="utf-8") as fh:
         for line in fh:
-            occ[_occ_key(json.loads(line)["properties"])] += 1
-    return occ
+            f = json.loads(line)
+            ak = _occ_key(f["properties"])
+            occ[ak] += 1
+            lon, lat = f["geometry"]["coordinates"]
+            pts[ak].append((lon, lat))
+    return occ, pts
 
 
 def _key_multiplicities(occ):
@@ -746,28 +756,109 @@ def _key_multiplicities(occ):
     return keys
 
 
-def _reconcile_zoom(e, expected_occ, expected_keys, expected_religion, expected, cc, z, final_zoom):
-    """Compare one decoded RA zoom with the expected occurrences. Returns (row, problems).
+GRID_EXTENT = 4096
+BUFFER_COPY_TOLERANCE_UNITS = 2  # tile-grid units; a point is rounded separately in each tile that holds it
 
-    Every occurrence counts, keyed or not, whether a tile proper holds it or only a neighbour's
-    buffer does. present is the multiset of distinct (attributes, position) occurrences found in any
-    tile, buffer copies of one point counted once; it must equal the expected multiset at every zoom.
-    The occurrences held only in buffers are reported. At the final zoom every occurrence must also lie
-    in a tile proper, so counts, osm-key multiplicities and religion composition are exact there."""
-    present = collections.Counter()
-    for (ak, _pos), c in e["occ_all"].items():
-        present[ak] += c
-    held = collections.Counter()
-    for (ak, _pos), c in e["occ_core"].items():
-        held[ak] += c
-    buffer_only = collections.Counter()
-    for k, c in e["occ_all"].items():
-        extra = c - e["occ_core"].get(k, 0)
-        if extra > 0:
-            buffer_only[k[0]] += extra
-    missing = expected_occ - present
-    excess = present - expected_occ
+
+def _to_grid(lon, lat, z):
+    """Position of a point on the integer grid of zoom z (longitude modulo the world width)."""
+    world = (1 << z) * GRID_EXTENT
+    lat = max(-85.0511287798, min(85.0511287798, lat))
+    gx = ((lon + 180.0) / 360.0 * world) % world
+    gy = (1.0 - math.asinh(math.tan(math.radians(lat))) / math.pi) / 2.0 * world
+    return gx, gy
+
+
+def _observed_points(e, z, tol=BUFFER_COPY_TOLERANCE_UNITS):
+    """Per attribute tuple, the positions held in a tile proper (core) and the buffer positions that may
+    stand for a point no tile proper holds.
+
+    A point is rounded separately in every tile that holds it, so its copies in neighbouring buffers differ
+    by a grid unit or so. The buffer points of one attribute tuple are grouped into clusters of positions
+    within tol of one another; a cluster stands for as many distinct points as the largest number of
+    buffer points any single tile holds in it (so coincident or adjacent places remain several), and its
+    candidates are the positions that tile holds."""
+    world = (1 << z) * GRID_EXTENT
+    core = collections.defaultdict(list)
+    for (ak, pos), c in e["occ_core"].items():
+        core[ak].extend([pos] * c)
+    per_ak = collections.defaultdict(lambda: collections.defaultdict(list))
+    for tile, by_ak in e["occ_buf"].items():
+        for ak, positions in by_ak.items():
+            per_ak[ak][tile].extend(positions)
+    buffer = {}
+    for ak, tiles in per_ak.items():
+        allpos = sorted({pos for plist in tiles.values() for pos in plist})
+        parent = {pos: pos for pos in allpos}
+
+        def find(u):
+            while parent[u] != u:
+                parent[u] = parent[parent[u]]
+                u = parent[u]
+            return u
+
+        index = collections.defaultdict(list)
+        for pos in allpos:
+            index[(pos[0] // 4, pos[1] // 4)].append(pos)
+        cx_max = max(1, world // 4)
+        for pos in allpos:
+            cx, cy = pos[0] // 4, pos[1] // 4
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    for v in index.get(((cx + dx) % cx_max, cy + dy), ()):
+                        if v != pos and min(abs(pos[0] - v[0]), world - abs(pos[0] - v[0])) <= tol \
+                                and abs(pos[1] - v[1]) <= tol:
+                            ra, rb = find(pos), find(v)
+                            if ra != rb:
+                                parent[ra] = rb
+        best = {}
+        for tile, plist in tiles.items():
+            groups = collections.defaultdict(list)
+            for pos in plist:
+                groups[find(pos)].append(pos)
+            for root, members in groups.items():
+                if root not in best or len(members) > len(best[root]):
+                    best[root] = members
+        buffer[ak] = [pos for members in best.values() for pos in members]
+    return core, buffer
+
+
+def _reconcile_zoom(e, expected_grid, expected_keys, expected_religion, expected, cc, z, final_zoom):
+    """Compare one decoded RA zoom with the expected places. Returns (row, problems).
+
+    expected_grid maps each attribute tuple to the grid positions of its places at this zoom. Within
+    every attribute group, every expected place is paired one to one with a decoded point within
+    BUFFER_COPY_TOLERANCE_UNITS grid units (longitude modulo the world width), using tile-proper points
+    and, where they do not suffice, points that lie only in a tile buffer. The number of places a tile
+    proper holds is the size of a maximum matching against the tile-proper points alone; a place that
+    needs a buffer point to be paired is held only in a buffer; a place with no partner at all is missing;
+    a tile-proper point that no matching can pair with an expected place is in excess. Keyed and keyless places are treated alike. Two places of
+    one attribute group closer than the tolerance cannot be told apart, so a copy of one in a buffer can
+    stand for the other. At the final zoom every place must lie in a tile proper, so counts, osm-key
+    multiplicities and religion composition are exact there."""
+    core, buffer = _observed_points(e, z)
+    world = (1 << z) * GRID_EXTENT
+    tol = BUFFER_COPY_TOLERANCE_UNITS
     keyless_idx = RA_ATTRS.index("osm_id")
+    held = buffer_only = missing = excess = 0
+    keyless_buffer_only = keyless_missing = 0
+    for ak in set(expected_grid) | set(core):
+        ex = expected_grid.get(ak, [])
+        cr = core.get(ak, [])
+        # a maximum matching against the tile-proper points alone fixes how many places a tile proper holds;
+        # a maximum matching against proper and buffer points together fixes how many have any copy at all
+        # (a matching of the proper points alone could leave the wrong place unmatched)
+        n_core = sum(1 for m in _pair_points(ex, cr, tol, world) if m >= 0)
+        bf = buffer.get(ak, [])
+        n_all = sum(1 for m in _pair_points(ex, cr + bf, tol, world) if m >= 0) if bf else n_core
+        held += n_core
+        excess += len(cr) - n_core
+        got, lost = n_all - n_core, len(ex) - n_all
+        buffer_only += got
+        missing += lost
+        if ak[keyless_idx] is None:
+            keyless_buffer_only += got
+            keyless_missing += lost
     other = {k: v for k, v in e["cc"].items() if k is not None and str(k).upper() != cc.upper()}
     want_set = set(expected_keys)
     missing_keys = len(want_set - e["keys"])
@@ -780,12 +871,12 @@ def _reconcile_zoom(e, expected_occ, expected_keys, expected_religion, expected,
                  if e["religion"].get(k, 0) < expected_religion[k]}
     row = {
         "points_in_tile_proper": e["core"], "shortfall_in_tile_proper": expected - e["core"],
-        "occurrences_expected": expected, "occurrences_present_in_any_tile": sum(present.values()),
-        "occurrences_missing": sum(missing.values()), "occurrences_in_excess": sum(excess.values()),
-        "keyless_occurrences_missing": sum(c for k, c in missing.items() if k[keyless_idx] is None),
-        "occurrences_in_tile_proper_by_position": sum(held.values()),
-        "occurrences_only_in_tile_buffers": sum(buffer_only.values()),
-        "keyless_occurrences_only_in_tile_buffers": sum(c for k, c in buffer_only.items() if k[keyless_idx] is None),
+        "places_expected": expected,
+        "places_paired_with_a_tile_proper_point": held,
+        "places_held_only_in_tile_buffers": buffer_only,
+        "keyless_places_held_only_in_tile_buffers": keyless_buffer_only,
+        "places_missing": missing, "keyless_places_missing": keyless_missing,
+        "tile_proper_points_without_an_expected_place": excess,
         "osm_keys_in_any_tile": len(e["keys"]), "osm_keys_missing_from_every_tile": missing_keys,
         "osm_keys_not_expected": extra_keys, "osm_key_occurrences_short_in_tile_proper": short_key_mult,
         "religion_short_in_tile_proper": short_rel,
@@ -794,10 +885,10 @@ def _reconcile_zoom(e, expected_occ, expected_keys, expected_religion, expected,
     problems = []
     if e["core"] > expected:
         problems.append(f"z{z}: {e['core']} points in tile proper, more than {expected}")
-    if row["occurrences_missing"] or row["occurrences_in_excess"]:
+    if missing or excess:
         problems.append(
-            f"z{z}: occurrences differ from the expected multiset (missing {row['occurrences_missing']}, "
-            f"of which keyless {row['keyless_occurrences_missing']}; in excess {row['occurrences_in_excess']})")
+            f"z{z}: places and decoded points differ (places missing from every tile {missing}, "
+            f"of which keyless {keyless_missing}; tile-proper points without an expected place {excess})")
     if missing_keys or extra_keys:
         problems.append(f"z{z}: osm key sets differ (missing {missing_keys}, unexpected {extra_keys})")
     if excess_key_mult or excess_rel:
@@ -808,8 +899,8 @@ def _reconcile_zoom(e, expected_occ, expected_keys, expected_religion, expected,
         # the archive's maximum zoom: every point is held by the tile whose proper area contains it
         if e["core"] != expected:
             problems.append(f"z{z}: {e['core']} points in tile proper, expected {expected}")
-        if row["occurrences_only_in_tile_buffers"]:
-            problems.append(f"z{z}: {row['occurrences_only_in_tile_buffers']} occurrences held only in tile buffers")
+        if buffer_only:
+            problems.append(f"z{z}: {buffer_only} places held only in tile buffers")
         if short_key_mult:
             problems.append(f"z{z}: {short_key_mult} osm key occurrences short in tile proper")
         if short_rel:
@@ -819,7 +910,7 @@ def _reconcile_zoom(e, expected_occ, expected_keys, expected_religion, expected,
 
 def _validate_ra(args):
     path, cc, expected, ndjson_path, expected_religion = args
-    expected_occ = _expected_occurrences(ndjson_path)
+    expected_occ, expected_pts = _expected_occurrences(ndjson_path)
     expected_keys = _key_multiplicities(expected_occ)
     r = _archive_scan(path, set(RA_ZOOMS), want_keys=True)
     out = {"file": Path(path).name, "country": cc, "expected": expected, "sizes": r["sizes"],
@@ -831,7 +922,8 @@ def _validate_ra(args):
         if not sz or sz["tiles"] < 1:
             out["problems"].append(f"z{z}: no tiles")
         e = r["decoded"][z]
-        row, probs = _reconcile_zoom(e, expected_occ, expected_keys, expected_religion, expected, cc, z, RA_ZOOMS[-1])
+        grid = {ak: [_to_grid(lon, lat, z) for lon, lat in pts] for ak, pts in expected_pts.items()}
+        row, probs = _reconcile_zoom(e, grid, expected_keys, expected_religion, expected, cc, z, RA_ZOOMS[-1])
         out["zooms"][str(z)] = row
         out["problems"].extend(probs)
     out["shortfall_in_tile_proper_by_zoom"] = {str(z): out["zooms"][str(z)]["shortfall_in_tile_proper"]
@@ -922,14 +1014,14 @@ def cmd_validate(a):
         "points_found_by_zoom": {str(z): sum(r["zooms"][str(z)]["points_in_tile_proper"] for r in ra) for z in RA_ZOOMS},
         "shortfall_in_tile_proper_by_zoom": {str(z): sum(r["shortfall_in_tile_proper_by_zoom"][str(z)] for r in ra)
                                              for z in RA_ZOOMS},
-        "occurrences_missing_by_zoom": {str(z): sum(r["zooms"][str(z)]["occurrences_missing"] for r in ra)
-                                        for z in RA_ZOOMS},
-        "occurrences_in_excess_by_zoom": {str(z): sum(r["zooms"][str(z)]["occurrences_in_excess"] for r in ra)
-                                          for z in RA_ZOOMS},
-        "occurrences_only_in_tile_buffers_by_zoom": {
-            str(z): sum(r["zooms"][str(z)]["occurrences_only_in_tile_buffers"] for r in ra) for z in RA_ZOOMS},
-        "keyless_occurrences_only_in_tile_buffers_by_zoom": {
-            str(z): sum(r["zooms"][str(z)]["keyless_occurrences_only_in_tile_buffers"] for r in ra)
+        "places_missing_by_zoom": {str(z): sum(r["zooms"][str(z)]["places_missing"] for r in ra) for z in RA_ZOOMS},
+        "tile_proper_points_without_an_expected_place_by_zoom": {
+            str(z): sum(r["zooms"][str(z)]["tile_proper_points_without_an_expected_place"] for r in ra)
+            for z in RA_ZOOMS},
+        "places_held_only_in_tile_buffers_by_zoom": {
+            str(z): sum(r["zooms"][str(z)]["places_held_only_in_tile_buffers"] for r in ra) for z in RA_ZOOMS},
+        "keyless_places_held_only_in_tile_buffers_by_zoom": {
+            str(z): sum(r["zooms"][str(z)]["keyless_places_held_only_in_tile_buffers"] for r in ra)
             for z in RA_ZOOMS},
         "archives_with_matching_counts": sum(1 for r in ra if not r["problems"]),
         "points_without_valid_country_code": stats["no_valid_country_code_count"],

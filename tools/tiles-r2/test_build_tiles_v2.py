@@ -81,15 +81,15 @@ class CoordinateAudit(unittest.TestCase):
 
 def empty_zoom():
     return {"core": 0, "religion": collections.Counter(), "cc": collections.Counter(), "keys": set(),
-            "core_keys": collections.Counter(), "occ_all": {}, "occ_core": collections.Counter()}
+            "core_keys": collections.Counter(), "occ_buf": {}, "occ_core": collections.Counter()}
 
 
 def zoom_from(points, buffer_only=()):
-    """A decoded zoom from (props, (gx, gy)) points held in tile propers, plus buffer-only points."""
+    """A decoded zoom from (props, (gx, gy)) points held in tile propers, plus buffer points. A buffer point
+    may carry a tile as a third element, (props, (gx, gy), tile); the default tile is (0, 0)."""
     e = empty_zoom()
     for p, pos in points:
         ak = b._occ_key(p)
-        e["occ_all"][(ak, pos)] = e["occ_all"].get((ak, pos), 0) + 1
         e["occ_core"][(ak, pos)] += 1
         e["core"] += 1
         e["religion"][p.get("religion")] += 1
@@ -97,18 +97,24 @@ def zoom_from(points, buffer_only=()):
         if p.get("osm_id") is not None:
             e["keys"].add((p["osm_type"], p["osm_id"]))
             e["core_keys"][(p["osm_type"], p["osm_id"])] += 1
-    for p, pos in buffer_only:
+    for item in buffer_only:
+        p, pos = item[0], item[1]
+        tile = item[2] if len(item) > 2 else (len(e["occ_buf"]), 0)
         ak = b._occ_key(p)
-        e["occ_all"][(ak, pos)] = e["occ_all"].get((ak, pos), 0) + 1
+        e["occ_buf"].setdefault(tile, {}).setdefault(ak, []).append(pos)
         if p.get("osm_id") is not None:
             e["keys"].add((p["osm_type"], p["osm_id"]))
     return e
 
 
-def reconcile(e, places, z, final=7):
-    occ = collections.Counter(b._occ_key(p) for p in places)
-    rel = collections.Counter(p.get("religion") for p in places)
-    return b._reconcile_zoom(e, occ, b._key_multiplicities(occ), dict(rel), len(places), "NZ", z, final)
+def reconcile(e, placed, z, final=7):
+    """placed is a list of (props, (gx, gy)): the expected places and where the zoom's grid puts them."""
+    occ = collections.Counter(b._occ_key(p) for p, _ in placed)
+    grid = collections.defaultdict(list)
+    for p, pos in placed:
+        grid[b._occ_key(p)].append(pos)
+    rel = collections.Counter(p.get("religion") for p, _ in placed)
+    return b._reconcile_zoom(e, grid, b._key_multiplicities(occ), dict(rel), len(placed), "NZ", z, final)
 
 
 class RaReconciliation(unittest.TestCase):
@@ -116,50 +122,112 @@ class RaReconciliation(unittest.TestCase):
         self.keyed = props("keyed", osm_id=1)
         self.keyless = props("keyless")
         self.keyless2 = props("keyless two")
-        self.places = [self.keyed, self.keyless, self.keyless2]
+        self.placed = [(self.keyed, (1, 1)), (self.keyless, (2, 2)), (self.keyless2, (3, 3))]
 
     def test_complete_zoom_has_no_problems(self):
-        e = zoom_from([(self.keyed, (1, 1)), (self.keyless, (2, 2)), (self.keyless2, (3, 3))])
-        row, problems = reconcile(e, self.places, 7)
+        e = zoom_from(self.placed)
+        row, problems = reconcile(e, self.placed, 7)
         self.assertEqual(problems, [])
-        self.assertEqual(row["occurrences_missing"], 0)
+        self.assertEqual(row["places_missing"], 0)
 
     def test_removed_keyless_place_fails_at_z3(self):
-        e = zoom_from([(self.keyed, (1, 1)), (self.keyless2, (3, 3))])
-        row, problems = reconcile(e, self.places, 3)
+        e = zoom_from([self.placed[0], self.placed[2]])
+        row, problems = reconcile(e, self.placed, 3)
         self.assertTrue(problems)
-        self.assertEqual(row["occurrences_missing"], 1)
-        self.assertEqual(row["keyless_occurrences_missing"], 1)
+        self.assertEqual(row["places_missing"], 1)
+        self.assertEqual(row["keyless_places_missing"], 1)
 
-    def test_duplicate_at_another_place_fails_even_when_the_count_matches(self):
-        # one keyless place lost and another duplicated: the tile-proper count is unchanged
-        e = zoom_from([(self.keyed, (1, 1)), (self.keyless2, (3, 3)), (self.keyless2, (4, 4))])
-        row, problems = reconcile(e, self.places, 4)
+    def test_a_place_moved_onto_another_fails_even_when_the_count_matches(self):
+        # a keyless place lost and a second copy of another kept: the attribute multiset differs only
+        # in position, and the tile-proper count is unchanged
+        twin = props("twin")
+        placed = [(self.keyed, (1, 1)), (twin, (100, 100)), (twin, (900, 900))]
+        e = zoom_from([(self.keyed, (1, 1)), (twin, (100, 100)), (twin, (100, 100))])
+        row, problems = reconcile(e, placed, 4)
         self.assertEqual(row["points_in_tile_proper"], 3)
         self.assertTrue(problems)
-        self.assertEqual(row["occurrences_missing"], 1)
-        self.assertEqual(row["occurrences_in_excess"], 1)
+        self.assertEqual(row["places_missing"], 1)
+        self.assertEqual(row["tile_proper_points_without_an_expected_place"], 1)
+
+    def test_displaced_point_fails(self):
+        e = zoom_from([self.placed[0], self.placed[1], (self.keyless2, (300, 3))])
+        _row, problems = reconcile(e, self.placed, 5)
+        self.assertTrue(problems)
 
     def test_buffer_only_keyless_place_is_reported_below_the_final_zoom(self):
-        e = zoom_from([(self.keyed, (1, 1)), (self.keyless2, (3, 3))], buffer_only=[(self.keyless, (2, 2))])
-        row, problems = reconcile(e, self.places, 5)
+        e = zoom_from([self.placed[0], self.placed[2]], buffer_only=[(self.keyless, (2, 2))])
+        row, problems = reconcile(e, self.placed, 5)
         self.assertEqual(problems, [])
-        self.assertEqual(row["occurrences_only_in_tile_buffers"], 1)
-        self.assertEqual(row["keyless_occurrences_only_in_tile_buffers"], 1)
+        self.assertEqual(row["places_held_only_in_tile_buffers"], 1)
+        self.assertEqual(row["keyless_places_held_only_in_tile_buffers"], 1)
         self.assertEqual(row["shortfall_in_tile_proper"], 1)
 
     def test_buffer_only_place_fails_at_the_final_zoom(self):
-        e = zoom_from([(self.keyed, (1, 1)), (self.keyless2, (3, 3))], buffer_only=[(self.keyless, (2, 2))])
-        _row, problems = reconcile(e, self.places, 7)
+        e = zoom_from([self.placed[0], self.placed[2]], buffer_only=[(self.keyless, (2, 2))])
+        _row, problems = reconcile(e, self.placed, 7)
         self.assertTrue(problems)
 
-    def test_coincident_places_are_two_occurrences(self):
+    def test_buffer_copy_rounded_one_unit_away_is_not_a_second_place(self):
+        e = zoom_from([(self.keyed, (100, 100)), self.placed[1], self.placed[2]],
+                      buffer_only=[(self.keyed, (101, 100)), (self.keyless, (2, 1))])
+        placed = [(self.keyed, (100, 100)), self.placed[1], self.placed[2]]
+        row, problems = reconcile(e, placed, 7)
+        self.assertEqual(problems, [])
+        self.assertEqual(row["places_held_only_in_tile_buffers"], 0)
+        self.assertEqual(row["tile_proper_points_without_an_expected_place"], 0)
+
+    def test_buffer_only_copies_from_neighbouring_tiles_are_one_place(self):
+        placed = [self.placed[0], (self.keyless, (500, 500)), self.placed[2]]
+        e = zoom_from([self.placed[0], self.placed[2]],
+                      buffer_only=[(self.keyless, (500, 500)), (self.keyless, (501, 500)), (self.keyless, (500, 499))])
+        row, problems = reconcile(e, placed, 5)
+        self.assertEqual(problems, [])
+        self.assertEqual(row["places_held_only_in_tile_buffers"], 1)
+
+    def test_adjacent_buffer_only_places_with_copies_in_two_tiles_are_two_places(self):
+        # two places of one group within the tolerance of each other, each held in the buffers of two tiles
+        placed = [self.placed[0], (self.keyless, (500, 500)), (self.keyless, (500.5, 500)), self.placed[2]]
+        e = zoom_from([self.placed[0], self.placed[2]],
+                      buffer_only=[(self.keyless, (500, 500), (1, 1)), (self.keyless, (501, 500), (1, 1)),
+                                   (self.keyless, (500, 499), (1, 2)), (self.keyless, (501, 499), (1, 2))])
+        row, problems = reconcile(e, placed, 5)
+        self.assertEqual(problems, [])
+        self.assertEqual(row["places_held_only_in_tile_buffers"], 2)
+        # with one place lost, the same buffers cannot account for both
+        row1, problems1 = reconcile(zoom_from([self.placed[0], self.placed[2]],
+                                              buffer_only=[(self.keyless, (500, 500), (1, 1)),
+                                                           (self.keyless, (500, 499), (1, 2))]), placed, 5)
+        self.assertEqual(row1["places_missing"], 1)
+        self.assertTrue(problems1)
+
+    def test_a_copy_of_another_place_cannot_stand_in_for_a_lost_one(self):
+        # two places of one group far apart; the second is lost, and the first has a buffer copy elsewhere
         twin = props("twin")
-        places = [twin, twin]
-        e = zoom_from([(twin, (5, 5)), (twin, (5, 5))])
-        self.assertEqual(reconcile(e, places, 7)[1], [])
+        placed = [(twin, (100, 100)), (twin, (900, 900))]
+        e = zoom_from([(twin, (100, 100))], buffer_only=[(twin, (101, 100))])
+        row, problems = reconcile(e, placed, 5)
+        self.assertEqual(row["places_missing"], 1)
+        self.assertTrue(problems)
+
+    def test_buffer_copy_across_the_antimeridian(self):
+        world = (1 << 4) * 4096
+        placed = [(self.keyed, (0, 10)), self.placed[1], self.placed[2]]
+        e = zoom_from([(self.keyed, (0, 10)), self.placed[1], self.placed[2]],
+                      buffer_only=[(self.keyed, (world - 1, 10))])
+        row, problems = reconcile(e, placed, 4)
+        self.assertEqual(problems, [])
+        self.assertEqual(row["places_held_only_in_tile_buffers"], 0)
+        # a place at the far side of the antimeridian is paired with its wrapped position
+        placed2 = [(self.keyed, (world - 1, 10)), self.placed[1], self.placed[2]]
+        self.assertEqual(reconcile(e, placed2, 4)[1], [])
+
+    def test_coincident_places_are_two_places(self):
+        twin = props("twin")
+        placed = [(twin, (5, 5)), (twin, (5, 5))]
+        e = zoom_from(placed)
+        self.assertEqual(reconcile(e, placed, 7)[1], [])
         e1 = zoom_from([(twin, (5, 5))])
-        self.assertTrue(reconcile(e1, places, 7)[1])
+        self.assertTrue(reconcile(e1, placed, 7)[1])
 
 
 def overview(zooms, header=(0, 5)):
