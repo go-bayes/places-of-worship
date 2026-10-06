@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-10-06
+
+- RA maps (contributor portal `verification.html` and review portal `review.html`) load less imagery and start sooner, items R3, R5, R6 and R7 of the map-loading plan of 2026-10-06. On screens below 1.5 device pixels per css pixel, the hybrid, satellite and dark streets rasters are drawn as 512 px tiles one zoom lower (`tileSize: 512`, `zoomOffset: -1`), so a view needs about a quarter of the tiles, and labels on imagery draw at full size instead of half; from 1.5 up the mapping is unchanged. Hybrid and the dark streets raster are requested as WebP; satellite stays JPEG because MapTiler's satellite WebP returns the same bytes. No `maxNativeZoom` or `detectRetina` is set, so z20 still draws and pin placement at z18 to z20 is unchanged. A layer's minimum zoom is never below 1. The MapTiler key probe now fetches the style's `tiles.json` (481 B) after the first imagery tile paints, in place of a 25 KiB tile requested alongside the first view; the refused-key fallback is unchanged. Both pages preconnect to tiles.placemap.org (with `crossorigin`), api.maptiler.com, the Convex host and accounts.google.com. The contributor portal's search box waits 150 ms after the last keystroke before filtering. Measured numbers are in the pull request. The RA guide gains a sentence on the label size; `apps/regions/nz/js/map-loading.test.cjs` is new. R1, R2 and R4 are not part of this change, and nothing was deployed.
+
 ### 2026-10-02 (submission receipt round-2 repairs)
 
 - Guided V1 consistency checks reuse the committing helper's country fallback when a task has empty target years. Candidate comparisons apply the creation validators for text bounds, coordinates and location assertions before a correction refusal. Added regressions for thrown refusals, complete rollback and unchanged attempt accounting. Legacy endpoints retain their behaviour. The RA guide is unaffected because the portal UI is unchanged.
