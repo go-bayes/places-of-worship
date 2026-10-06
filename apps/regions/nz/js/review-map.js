@@ -259,9 +259,13 @@
         }
 
         // the unreviewed places: off by default on the review page (jb
-        // 2026-09-04: the reviewer's work is the queue, and the overview
-        // tier costs a few hundred kilobytes per tile), switchable on
-        let dotLayers = places ? places.createLayers(L) : null;
+        // 2026-09-04: the reviewer's work is the queue, and the dot
+        // tiles cost bandwidth), switchable on
+        // below zoom 8 the dots come from the page country's own ra-dots
+        // archive (the tiles name a country by iso code, gb where the project
+        // says uk); a country without one gets the slim overview sample
+        const tileIso = String(registry?.iso2 || options.countryCode || "").toLowerCase();
+        let dotLayers = places ? places.createLayers(L, { countryCode: tileIso }) : null;
         let pointsMode = "off";
         function syncDots() {
             if (!places || !dotLayers) return;
