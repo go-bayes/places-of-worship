@@ -4,5 +4,8 @@
   "type": "module",
   "dependencies": {
     "pmtiles": "^4.3.0"
+  },
+  "scripts": {
+    "test": "node --test test/"
   }
 }
