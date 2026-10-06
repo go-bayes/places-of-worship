@@ -111,8 +111,8 @@
         let imageryProbeStart = null;
         // the probe asks for the style's tiles.json (about 0.5 KB, refused
         // with the same 403 as a tile) once the first maptiler tile has
-        // painted, so it never competes with the first view's tiles; a timer
-        // covers a layer that never paints
+        // painted, or after eight seconds, so it starts after the first tile
+        // loads rather than alongside the first request
         function probeImagery() {
             if (imageryProbe || !key) return imageryProbe;
             const url = `https://api.maptiler.com/maps/hybrid/tiles.json?key=${encodeURIComponent(key)}`;
@@ -160,15 +160,21 @@
                 streetsCurrentUrl = url;
                 // the dark raster is a 512 px tile and the openstreetmap
                 // raster is 256 px, so the tile mapping follows the url
-                // leaflet works out the valid tile range and the wrap from
-                // the tile size only when the grid is reset, so a layer on
-                // the map needs the reset (leaflet 1.9.4, vendored) before
-                // setUrl redraws it; a layer off the map is reset when added
+                // setUrl()'s redraw ignores options.minZoom, so a layer on
+                // the map is not redrawn: the url is set without a redraw,
+                // the tiles are dropped, and _setView() (leaflet 1.9.4,
+                // vendored) resets the grid for the new tile size and draws
+                // only if the map zoom is within the layer's limits; a layer
+                // off the map is reset when added
                 Object.assign(streets.options, useDark
                     ? imageryTileOptions(minZoom)
                     : { tileSize: 256, zoomOffset: 0, minZoom });
-                if (streets._map && typeof streets._resetGrid === "function") streets._resetGrid();
-                streets.setUrl?.(url);
+                const canReset = Boolean(streets._map) && typeof streets._setView === "function" && typeof streets._removeAllTiles === "function";
+                streets.setUrl?.(url, canReset);
+                if (canReset) {
+                    streets._removeAllTiles();
+                    streets._setView(streets._map.getCenter(), streets._map.getZoom());
+                }
                 // the attribution lives on the layer, so a later add
                 // reads the right one; a layer on the map swaps it now
                 const previous = streets.options.attribution;

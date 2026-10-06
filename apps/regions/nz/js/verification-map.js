@@ -1039,13 +1039,22 @@ function imageryTileOptions(minZoom) {
     // tile zoom is map zoom - 1, so the layer must not draw below map zoom 1
     return { tileSize: 512, zoomOffset: -1, minZoom: Math.max(1, minZoom) };
 }
-// change a layer's tile mapping in place. leaflet works out the valid tile
-// range and the wrap from the tile size only when the grid is reset, so a
-// layer on the map needs the reset (leaflet 1.9.4, vendored) before setUrl
-// redraws it; a layer off the map is reset when it is next added
-function retileLayer(layer, tiles) {
+// change a layer's tile mapping and url in place. leaflet works out the valid
+// tile range and the wrap from the tile size only when the grid is reset, and
+// setUrl()'s own redraw() ignores options.minZoom, so a layer on the map is
+// not redrawn: the url is set without a redraw, the tiles are dropped, and
+// _setView() (leaflet 1.9.4, vendored) resets the grid and draws only if the
+// map zoom is within the layer's limits. a layer off the map is reset when it
+// is next added
+function retileLayer(layer, tiles, url) {
     Object.assign(layer.options, tiles);
-    if (layer._map && typeof layer._resetGrid === "function") layer._resetGrid();
+    const onMap = Boolean(layer._map);
+    const canReset = onMap && typeof layer._setView === "function" && typeof layer._removeAllTiles === "function";
+    if (url !== undefined) layer.setUrl?.(url, canReset);
+    if (canReset) {
+        layer._removeAllTiles();
+        layer._setView(layer._map.getCenter(), layer._map.getZoom());
+    }
 }
 // key probe: the style's tiles.json (about 0.5 KB, refused with the same 403
 // as a tile), fetched once the first imagery tile has painted
@@ -3504,9 +3513,10 @@ class NzVerificationMap {
                 const baseMinZoom = this.streetsBaseMinZoom ?? layer.options.minZoom;
                 retileLayer(layer, useDark
                     ? imageryTileOptions(baseMinZoom)
-                    : { tileSize: 256, zoomOffset: 0, minZoom: baseMinZoom });
+                    : { tileSize: 256, zoomOffset: 0, minZoom: baseMinZoom }, url);
+            } else {
+                layer.setUrl?.(url);
             }
-            layer.setUrl?.(url);
             // the attribution lives on the layer, so a later add reads
             // the right one; a layer on the map swaps it at once
             const osm = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
@@ -5233,8 +5243,8 @@ class NzVerificationMap {
     // image — so tileerror alone cannot detect a refused key. one fetch
     // probe per session sees the real status the first time imagery is used.
     // the probe asks for the style's tiles.json rather than a tile, and waits
-    // for the first maptiler tile to paint so it never competes with the
-    // first view's tiles; a timer covers a layer that never paints
+    // for the first maptiler tile to paint, or for eight seconds, so it starts
+    // after the first tile loads rather than alongside the first request
     probeImagery() {
         if (this._imageryProbe) return this._imageryProbe;
         const firstTile = this._imageryTilePainted

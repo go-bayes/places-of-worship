@@ -80,17 +80,23 @@ const settle = () => new Promise(resolve => setImmediate(resolve));
   assert.equal(options.detectRetina, undefined, "no detectRetina, which would lower maxZoom");
 }
 
-// retiling a layer on the map resets leaflet's grid (its tile range follows the tile size); off the map it does not
+// retiling a layer on the map sets the url without leaflet's redraw (which ignores minZoom), drops the tiles and re-views; off the map it sets options and url only
 {
-  const reset = [];
-  const onMap = { options: { tileSize: 512, zoomOffset: -1 }, _map: {}, _resetGrid() { reset.push("on"); } };
-  evaluate("retileLayer")(onMap, { tileSize: 256, zoomOffset: 0 });
+  const calls = [];
+  const onMap = {
+    options: { tileSize: 512, zoomOffset: -1 }, _map: { getCenter: () => "centre", getZoom: () => 7 },
+    setUrl(url, noRedraw) { calls.push(["setUrl", url, noRedraw]); },
+    _removeAllTiles() { calls.push(["removeAll"]); },
+    _setView(centre, zoom) { calls.push(["setView", centre, zoom]); },
+  };
+  evaluate("retileLayer")(onMap, { tileSize: 256, zoomOffset: 0 }, "u");
   assert.deepEqual({ ...onMap.options }, { tileSize: 256, zoomOffset: 0 });
-  assert.deepEqual(reset, ["on"], "a layer on the map has its grid reset");
-  const off = { options: { tileSize: 512 }, _map: null, _resetGrid() { reset.push("off"); } };
-  evaluate("retileLayer")(off, { tileSize: 256 });
+  assert.deepEqual(calls, [["setUrl", "u", true], ["removeAll"], ["setView", "centre", 7]], "no automatic redraw; tiles dropped; grid reset by the view");
+  calls.length = 0;
+  const off = { options: { tileSize: 512 }, _map: null, setUrl(url, noRedraw) { calls.push(["setUrl", url, noRedraw]); }, _removeAllTiles() { calls.push(["removeAll"]); }, _setView() { calls.push(["setView"]); } };
+  evaluate("retileLayer")(off, { tileSize: 256 }, "u");
   assert.equal(off.options.tileSize, 256);
-  assert.deepEqual(reset, ["on"], "a layer off the map is reset when it is next added");
+  assert.deepEqual(calls, [["setUrl", "u", false]], "a layer off the map is reset when it is next added");
 }
 
 // 2. webp only for hybrid and the dark streets raster; satellite stays jpeg
@@ -158,4 +164,103 @@ const settle = () => new Promise(resolve => setImmediate(resolve));
   assert.equal(applied, 3, "a committed search applies at once");
 
   console.log("map loading: imagery tile mapping, webp scope, tiles.json probe, search debounce ok");
+})().catch(error => { console.error(error); process.exit(1); });
+
+// 5. a theme change must not draw the streets layer below its zoom floor. leaflet's
+// setUrl() redraws without checking options.minZoom, so the real vendored leaflet 1.9.4
+// is loaded here (in a stub dom) and the real syncStreetsTheme of both portals is run
+(async () => {
+  const mk = () => ({
+    style: {}, classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } },
+    appendChild() {}, removeChild() {}, addEventListener() {}, removeEventListener() {},
+    setAttribute() {}, getAttribute() { return null; }, children: [], childNodes: [],
+    getBoundingClientRect() { return { left: 0, top: 0, width: 800, height: 600 }; },
+    clientWidth: 800, clientHeight: 600, parentNode: null, remove() {}, insertBefore() {},
+    querySelector() { return null; }, querySelectorAll() { return []; }, className: "", innerHTML: "",
+  });
+  let theme = "light";
+  const themeHandlers = [];
+  const leafletDocument = {
+    documentElement: { ...mk(), getAttribute: name => (name === "data-theme-effective" ? theme : null) },
+    createElement: () => mk(), createDocumentFragment: () => mk(), body: mk(), addEventListener() {}, removeEventListener() {},
+    getElementById: () => mk(), querySelector: () => null,
+  };
+  const leafletWindow = {
+    document: leafletDocument, navigator: { userAgent: "node", platform: "x", maxTouchPoints: 0 },
+    devicePixelRatio: 1, MAPTILER_API_KEY: "test-key",
+    addEventListener(type, fn) { if (type === "pow-theme-change") themeHandlers.push(fn); }, removeEventListener() {},
+    matchMedia: () => ({ matches: false }), requestAnimationFrame: fn => setTimeout(fn, 0), cancelAnimationFrame() {},
+    getComputedStyle: () => ({ getPropertyValue: () => "" }), screen: { width: 800, height: 600 }, location: { href: "" },
+    setTimeout, clearTimeout, fetch: fetchStub,
+  };
+  leafletWindow.window = leafletWindow;
+  const leafletContext = vm.createContext({
+    window: leafletWindow, document: leafletDocument, navigator: leafletWindow.navigator, setTimeout, clearTimeout, console,
+    Image: function () {}, HTMLElement: function () {}, XMLHttpRequest: function () {}, fetch: fetchStub,
+  });
+  vm.runInContext(fs.readFileSync(path.join(__dirname, "../../../vendor/leaflet@1.9.4/dist/leaflet.js"), "utf8"), leafletContext);
+  const L = leafletWindow.L;
+  assert.equal(L.version, "1.9.4", "the vendored leaflet is the one under test");
+  // tile zoom as the url sees it (coords.z is already the url zoom plus the offset)
+  const check = (layer, map, label) => {
+    const zooms = Object.values(layer._tiles).map(tile => tile.coords.z + layer.options.zoomOffset);
+    assert.ok(zooms.every(z => z >= 0), `${label}: no negative tile zoom (${zooms})`);
+    if (map.getZoom() < layer.options.minZoom) assert.equal(zooms.length, 0, `${label}: no tiles below the layer floor`);
+    return zooms;
+  };
+
+  // contributor portal: the real syncStreetsTheme
+  {
+    window.devicePixelRatio = 1;
+    document.documentElement = { getAttribute: name => (name === "data-theme-effective" ? theme : null) };
+    const map = L.map(mk(), { center: [-41, 174], zoom: 5, minZoom: 0 });
+    const layer = L.tileLayer(evaluate("STREETS_TILE_URL"), { minZoom: 5, maxZoom: 19 }).addTo(map);
+    const app = fresh();
+    app.map = map;
+    app.streetsLayer = layer;
+    app.streetsBaseMinZoom = 5;
+    app.streetsUrl = evaluate("STREETS_TILE_URL");
+    app.imageryBroken = false;
+    app.probeImagery = () => Promise.resolve();
+    for (const belowFloor of [0, 4]) {
+      map.setZoom(belowFloor, { animate: false });
+      theme = "dark"; app.syncStreetsTheme();
+      check(layer, map, `contributor, dark at z${belowFloor}`);
+      theme = "light"; app.syncStreetsTheme();
+      check(layer, map, `contributor, light at z${belowFloor}`);
+    }
+    // above the floor, tiles do load, at the 512 px mapping one zoom lower
+    map.setZoom(6, { animate: false });
+    theme = "dark"; app.syncStreetsTheme();
+    const zooms = check(layer, map, "contributor, dark at z6");
+    assert.ok(zooms.length > 0 && zooms.every(z => z === 5), `dark tiles at z6 are tile zoom 5 (${zooms})`);
+    assert.equal(layer.options.tileSize, 512);
+    theme = "light"; app.syncStreetsTheme();
+    assert.equal(layer.options.tileSize, 256, "back on the 256 px openstreetmap mapping");
+  }
+
+  // review portal: the real syncStreetsTheme, reached by the theme-change event
+  {
+    theme = "light";
+    vm.runInContext(fs.readFileSync(path.join(__dirname, "review-map.js"), "utf8"), leafletContext, { filename: "review-map.js" });
+    const portal = leafletWindow.PowReviewMap.create({ containerId: "reviewMap", countryCode: "nz", maptilerKey: "test-key", centre: [-41, 174], zoom: 5 });
+    assert.ok(portal && portal.map, "the review map is created");
+    const map = portal.map;
+    let streets = null;
+    map.eachLayer(layer => { if (layer.options && layer.options.className === "streets-tiles") streets = layer; });
+    assert.ok(streets, "the streets layer is on the map");
+    map.options.minZoom = 0;
+    for (const belowFloor of [0, 4]) {
+      map.setZoom(belowFloor, { animate: false });
+      theme = "dark"; themeHandlers.forEach(fn => fn());
+      check(streets, map, `review, dark at z${belowFloor}`);
+      theme = "light"; themeHandlers.forEach(fn => fn());
+      check(streets, map, `review, light at z${belowFloor}`);
+    }
+    map.setZoom(6, { animate: false });
+    theme = "dark"; themeHandlers.forEach(fn => fn());
+    const zooms = check(streets, map, "review, dark at z6");
+    assert.ok(zooms.length > 0 && zooms.every(z => z === 5), `dark tiles at z6 are tile zoom 5 (${zooms})`);
+  }
+  console.log("map loading: theme change keeps the imagery zoom floor in both portals ok");
 })().catch(error => { console.error(error); process.exit(1); });
