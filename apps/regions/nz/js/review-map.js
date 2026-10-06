@@ -86,8 +86,19 @@
         const imageryAttribution = '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
         // r-u3: dark streets raster with a key, a css filter without one;
         // imagery never darkens
-        const streetsDarkUrl = key ? `https://api.maptiler.com/maps/streets-v2-dark/{z}/{x}/{y}.png?key=${encodeURIComponent(key)}` : "";
+        const streetsDarkUrl = key ? `https://api.maptiler.com/maps/streets-v2-dark/{z}/{x}/{y}.webp?key=${encodeURIComponent(key)}` : "";
         let streetsCurrentUrl = streetsUrl;
+        // maptiler's raster styles are 512 px tiles. below 1.5 device pixels
+        // per css pixel they are drawn in a 512 css px slot one zoom lower
+        // (a quarter of the tiles, labels at full size); from 1.5 up the
+        // default mapping already serves them as @2x. no detectRetina (it
+        // lowers maxZoom) and no maxNativeZoom (z19 tiles serve map zoom 20)
+        function imageryTileOptions(baseMinZoom) {
+            const ratio = Number(window.devicePixelRatio) || 1;
+            if (ratio >= 1.5) return { tileSize: 256, zoomOffset: 0, minZoom: baseMinZoom };
+            // tile zoom is map zoom - 1, so the layer must not draw below map zoom 1
+            return { tileSize: 512, zoomOffset: -1, minZoom: Math.max(1, baseMinZoom) };
+        }
         // a key maptiler refuses (an origin it does not allow, an exhausted
         // plan) must not leave the reviewer on a map of "invalid key"
         // notices: img tiles render even on 403, so one fetch probe reads
@@ -96,13 +107,32 @@
         // and retires the imagery buttons, as the ra portal does
         let imageryBroken = false;
         let imageryProbe = null;
+        let imageryTilePainted = false;
+        let imageryProbeStart = null;
+        // the probe asks for the style's tiles.json (about 0.5 KB, refused
+        // with the same 403 as a tile) once the first maptiler tile has
+        // painted, or after eight seconds, so it starts after the first tile
+        // loads rather than alongside the first request
         function probeImagery() {
             if (imageryProbe || !key) return imageryProbe;
-            const url = `https://api.maptiler.com/maps/hybrid/1/1/1.jpg?key=${encodeURIComponent(key)}`;
-            imageryProbe = fetch(url)
+            const url = `https://api.maptiler.com/maps/hybrid/tiles.json?key=${encodeURIComponent(key)}`;
+            const firstTile = imageryTilePainted
+                ? Promise.resolve()
+                : new Promise(resolve => {
+                    imageryProbeStart = resolve;
+                    setTimeout(resolve, 8000);
+                });
+            imageryProbe = firstTile
+                .then(() => fetch(url))
                 .then(response => { if (!response.ok) markImageryBroken(); })
                 .catch(() => markImageryBroken());
             return imageryProbe;
+        }
+        function noteImageryTilePainted() {
+            imageryTilePainted = true;
+            const start = imageryProbeStart;
+            imageryProbeStart = null;
+            if (start) start();
         }
         function markImageryBroken() {
             if (imageryBroken) return;
@@ -128,7 +158,23 @@
             if (useDark) probeImagery();
             if (streetsDarkUrl && url !== streetsCurrentUrl) {
                 streetsCurrentUrl = url;
-                streets.setUrl?.(url);
+                // the dark raster is a 512 px tile and the openstreetmap
+                // raster is 256 px, so the tile mapping follows the url
+                // setUrl()'s redraw ignores options.minZoom, so a layer on
+                // the map is not redrawn: the url is set without a redraw,
+                // the tiles are dropped, and _setView() (leaflet 1.9.4,
+                // vendored) resets the grid for the new tile size and draws
+                // only if the map zoom is within the layer's limits; a layer
+                // off the map is reset when added
+                Object.assign(streets.options, useDark
+                    ? imageryTileOptions(minZoom)
+                    : { tileSize: 256, zoomOffset: 0, minZoom });
+                const canReset = Boolean(streets._map) && typeof streets._setView === "function" && typeof streets._removeAllTiles === "function";
+                streets.setUrl?.(url, canReset);
+                if (canReset) {
+                    streets._removeAllTiles();
+                    streets._setView(streets._map.getCenter(), streets._map.getZoom());
+                }
                 // the attribution lives on the layer, so a later add
                 // reads the right one; a layer on the map swaps it now
                 const previous = streets.options.attribution;
@@ -145,11 +191,18 @@
         // the layer's container is made anew each time a basemap swap puts
         // it back, so the filter class is set again on each add
         streets.on("add", syncStreetsTheme);
+        // the dark raster is maptiler's too: its first tile releases the probe
+        streets.on("tileload", () => {
+            if (streetsDarkUrl && streetsCurrentUrl === streetsDarkUrl) noteImageryTilePainted();
+        });
         window.addEventListener?.("pow-theme-change", syncStreetsTheme);
         const layers = { streets };
         if (key) {
-            layers.satellite = L.tileLayer(`https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=${encodeURIComponent(key)}`, { attribution: imageryAttribution, maxZoom: 20, minZoom });
-            layers.hybrid = L.tileLayer(`https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${encodeURIComponent(key)}`, { attribution: imageryAttribution, maxZoom: 20, minZoom });
+            // satellite-v2 stays .jpg: its .webp returns the same jpeg bytes
+            layers.satellite = L.tileLayer(`https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=${encodeURIComponent(key)}`, { attribution: imageryAttribution, maxZoom: 20, ...imageryTileOptions(minZoom) });
+            layers.hybrid = L.tileLayer(`https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.webp?key=${encodeURIComponent(key)}`, { attribution: imageryAttribution, maxZoom: 20, ...imageryTileOptions(minZoom) });
+            layers.satellite.on("tileload", noteImageryTilePainted);
+            layers.hybrid.on("tileload", noteImageryTilePainted);
         }
         let basemap = "streets";
         let basemapUserChosen = false;
