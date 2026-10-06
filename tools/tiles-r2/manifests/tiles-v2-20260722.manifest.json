@@ -455,5 +455,7 @@
     "input_features": 2072349,
     "ra_dots_points": 1371000
   },
-  "downstream_status": "staged"
+  "downstream_status": "staged",
+  "superseded_by_manifest_id": "manifest:tiles-v2-20260722-0ce3c532af1e",
+  "notes": "Superseded: the first build (strict country_code routing, 33 archives, overview built in one run). It was never uploaded. See manifest:tiles-v2-20260722-0ce3c532af1e."
 }

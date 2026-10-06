@@ -1,5 +1,7 @@
 # Tiles v2 validation report (input built 20260722)
 
+> **Superseded** by `validation-report-tiles-v2-20260722-0ce3c532af1e.md`. This report describes the first build (strict `country_code` routing, overview from one tippecanoe run), which was never uploaded. Its findings on completeness, coverage, the z1 religion share and the tile-size range were repaired in the second build.
+
 Built on green on 2026-10-07 by `tools/tiles-r2/build_tiles_v2.py` (commit 384b0dd6), tippecanoe v2.79.0. Source: `places.mbtiles` in `~/tiles-archive-2026-07/tiles-migration/` on green, opened read-only (tilestats count 2,072,349). Sizes are stored (gzip) tile bytes; 1 KB is 1,000 bytes.
 
 ## Verdict
