@@ -79,22 +79,26 @@ function mockBucket(objects) {
       const o = objects[key];
       if (!o) return null;
       const { offset, length } = opts.range;
+      // r2 returns the object's metadata without a body when the precondition fails
+      if (opts.onlyIf?.etagMatches && opts.onlyIf.etagMatches !== o.etag) return { etag: o.etag };
       const slice = o.bytes.slice(offset, offset + length);
       return { etag: o.etag, arrayBuffer: async () => slice.buffer };
     },
   };
 }
 
-// caches.default stand-in that, like the edge, adds Age to what it returns
+// caches.default stand-in that, like the edge, adds Age (and an old Date) to what it returns
 function installCache() {
   const store = new Map();
   const cache = {
+    store,
     puts: 0,
     async match(req) {
       const hit = store.get(req.url);
       if (!hit) return undefined;
       const headers = new Headers(hit.headers);
       headers.set("Age", "4000");
+      headers.set("Date", "Mon, 01 Jan 2024 00:00:00 GMT");
       return new Response(hit.body, { status: hit.status, headers });
     },
     async put(req, res) {
@@ -175,6 +179,24 @@ describe("tile worker", () => {
     assert.equal(res.status, 200);
     assert.equal(res.headers.get("Age"), null);
     assert.equal(res.headers.get("ETag"), '"aaa111-5-31-19"');
+    // the cached Date is old; the outgoing Date restarts the browser's freshness clock
+    const date = Date.parse(res.headers.get("Date"));
+    assert.ok(Math.abs(Date.now() - date) < 60_000, "Date restated as now");
+  });
+
+  it("treats a cached entry without an etag as a miss and replaces it", async () => {
+    // an entry stored by the previous worker version: no ETag
+    cache.store.set("https://tiles.test/places-overview/5/31/19", {
+      status: 200,
+      headers: new Headers({ "Cache-Control": "public, max-age=3600" }),
+      body: new Uint8Array([9, 9]).buffer,
+    });
+    const res = await get("/places-overview/5/31/19", { "If-None-Match": '"aaa111-5-31-19"' });
+    assert.equal(res.status, 304);
+    assert.equal(res.headers.get("ETag"), '"aaa111-5-31-19"');
+    const fresh = await get("/places-overview/5/31/19");
+    assert.equal(fresh.headers.get("ETag"), '"aaa111-5-31-19"');
+    assert.deepEqual([...new Uint8Array(await fresh.arrayBuffer())], [...TILE]);
   });
 
   it("answers If-None-Match with 304 on a miss and on a hit, keeping CORS", async () => {
@@ -195,13 +217,36 @@ describe("tile worker", () => {
     assert.equal(stale.status, 200);
   });
 
-  it("changes the etag when the archive changes", async () => {
-    const before = (await get("/places-overview/5/31/19")).headers.get("ETag");
-    bucket = mockBucket({ "places-overview.pmtiles": { bytes: ARCHIVE, etag: "zzz999" } });
-    worker = (await import(`../src/index.js?t=${Math.random()}`)).default;
-    cache = installCache();
-    const after = (await get("/places-overview/5/31/19")).headers.get("ETag");
-    assert.notEqual(before, after);
+  it("never tags one archive version's bytes with another's etag, in the same isolate", async () => {
+    const TILE_B = new Uint8Array([7, 7, 7]);
+    const ARCHIVE_B = buildArchive([
+      { z: 5, x: 31, y: 19, data: TILE_B },
+      { z: 5, x: 31, y: 18, data: TILE_B },
+    ]);
+    const objects = {
+      "places-overview.pmtiles": {
+        bytes: buildArchive([{ z: 5, x: 31, y: 19, data: TILE }, { z: 5, x: 31, y: 18, data: TILE }]),
+        etag: "aaa111",
+      },
+    };
+    bucket = mockBucket(objects);
+    const before = await get("/places-overview/5/31/19");
+    assert.equal(before.headers.get("ETag"), '"aaa111-5-31-19"');
+    // replace the object under the same name and empty the edge cache; the isolate
+    // keeps its handle, header and directory for the old version
+    objects["places-overview.pmtiles"] = { bytes: ARCHIVE_B, etag: "bbb222" };
+    cache.store.clear();
+    const [t19, t18] = await Promise.all([get("/places-overview/5/31/19"), get("/places-overview/5/31/18")]);
+    for (const res of [t19, t18]) {
+      assert.equal(res.status, 200);
+      assert.match(res.headers.get("ETag"), /^"bbb222-5-31-1[89]"$/);
+      assert.deepEqual([...new Uint8Array(await res.arrayBuffer())], [...TILE_B]);
+    }
+    // the old validator no longer matches, so a conditional request gets the new bytes
+    cache.store.clear();
+    const revalidated = await get("/places-overview/5/31/19", { "If-None-Match": '"aaa111-5-31-19"' });
+    assert.equal(revalidated.status, 200);
+    assert.equal(revalidated.headers.get("ETag"), '"bbb222-5-31-19"');
   });
 
   it("caches 204 empty tiles with the same headers as 200s", async () => {

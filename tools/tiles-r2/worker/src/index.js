@@ -1,6 +1,6 @@
 // serves z/x/y vector tiles straight from pmtiles archives in r2, preserving the
 // url shape martin used (/{tileset}/{z}/{x}/{y}), so the frontend needs no change
-import { PMTiles } from "pmtiles";
+import { EtagMismatch, PMTiles } from "pmtiles";
 
 const TILESETS = new Set(["places", "places-overview", "buildings", "nz-polygons"]);
 
@@ -31,22 +31,26 @@ const ALLOWED_ORIGINS = new Set([
 
 class ArchiveMissingError extends Error {}
 
-// range reads against the r2 object; pmtiles fetches only the byte spans it needs
+// range reads against the r2 object; pmtiles fetches only the byte spans it needs.
+// pmtiles pins the etag of the header it holds and passes it back on every later read,
+// so a read of a replaced object fails the r2 precondition and pmtiles reloads the
+// header and directories (EtagMismatch) instead of mixing bytes from two versions
 class R2Source {
   constructor(bucket, key) {
     this.bucket = bucket;
     this.key = key;
-    // etag of the r2 object behind the latest range read, used to build tile etags
-    this.etag = null;
   }
   getKey() {
     return this.key;
   }
-  async getBytes(offset, length) {
-    const obj = await this.bucket.get(this.key, { range: { offset, length } });
+  async getBytes(offset, length, signal, etag) {
+    const options = { range: { offset, length } };
+    if (etag) options.onlyIf = { etagMatches: etag };
+    const obj = await this.bucket.get(this.key, options);
     if (!obj) throw new ArchiveMissingError(`archive missing: ${this.key}`);
-    if (obj.etag) this.etag = obj.etag;
-    return { data: await obj.arrayBuffer() };
+    // a failed precondition returns the object's metadata without a body
+    if (typeof obj.arrayBuffer !== "function") throw new EtagMismatch(`archive changed: ${this.key}`);
+    return { data: await obj.arrayBuffer(), etag: obj.etag };
   }
 }
 
@@ -54,10 +58,24 @@ class R2Source {
 const archives = new Map();
 function archive(env, name) {
   if (!archives.has(name)) {
-    const source = new R2Source(env.BUCKET, `${name}.pmtiles`);
-    archives.set(name, { source, pmtiles: new PMTiles(source) });
+    archives.set(name, new PMTiles(new R2Source(env.BUCKET, `${name}.pmtiles`)));
   }
   return archives.get(name);
+}
+
+// reads a tile and returns the etag of the archive version it came from. every read
+// after the header is conditional on the header's etag, so the bytes belong to the
+// header's version; the header is read before and after, and a change between them
+// (a concurrent replacement) is retried rather than tagged with the wrong version
+async function readTile(env, name, z, x, y) {
+  const pmtiles = archive(env, name);
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const before = (await pmtiles.getHeader()).etag;
+    const tile = await pmtiles.getZxy(z, x, y);
+    const after = (await pmtiles.getHeader()).etag;
+    if (before === after) return { tile, archiveEtag: after };
+  }
+  throw new Error(`archive changed during read: ${name}`);
 }
 
 // strong etag from the archive's r2 etag plus z/x/y, without hashing the body. a
@@ -109,13 +127,17 @@ export default {
     // cache api is what keeps repeat requests off r2
     const cacheKey = new Request(`https://${url.hostname}${url.pathname}`);
     const cached = await caches.default.match(cacheKey);
-    if (cached) {
+    // an entry stored before etags were added has none; treating it as a miss rebuilds
+    // it with a validator, and the new put replaces it
+    if (cached && cached.headers.get("ETag")) {
       const cachedEtag = cached.headers.get("ETag");
       if (etagMatches(request, cachedEtag)) return notModified(cachedEtag);
-      // Age counts time since the edge stored the tile; a browser that adds it to
-      // max-age treats a tile it has just received as already stale
+      // Age counts time since the edge stored the tile, and a browser also derives an
+      // apparent age from the stored Date (RFC 9111 section 4.2.3); either makes a tile
+      // it has just received look stale, so drop Age and restate Date as now
       const headers = new Headers(cached.headers);
       headers.delete("Age");
+      headers.set("Date", new Date().toUTCString());
       if (headers.has(EMPTY_MARKER)) {
         headers.delete(EMPTY_MARKER);
         return withCors(new Response(null, { status: 204, headers }), request);
@@ -126,9 +148,9 @@ export default {
     let tile;
     let etag;
     try {
-      const { source, pmtiles } = archive(env, name);
-      tile = await pmtiles.getZxy(Number(z), Number(x), Number(y));
-      etag = tileEtag(source.etag, name, z, x, y);
+      const read = await readTile(env, name, Number(z), Number(x), Number(y));
+      tile = read.tile;
+      etag = tileEtag(read.archiveEtag, name, z, x, y);
     } catch (e) {
       // drop the handle so a missing or failed archive is retried and names do not accumulate
       archives.delete(name);
