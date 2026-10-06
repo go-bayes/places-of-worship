@@ -50,13 +50,17 @@ SHARE_TOLERANCE_PP = 0.3
 Z0_LIMIT_BYTES = 250_000
 
 OVERVIEW_FLAGS = ["-Z0", "-z5", "--drop-fraction-as-needed", "-M", "250000", "-l", OVERVIEW_LAYER]
-# the overview is built in three parts and joined: z0 and z2-5 as briefed, and z1 from a religion-stratified
-# uniform sample, because z1 has four tiles and per-tile drop fractions shift the religion shares by more than
-# the tolerance (0.449 pp measured with the briefed flags alone)
+# the overview is built in three parts and joined: z2-5 as briefed, and z0 and z1 each from a religion-stratified
+# uniform sample, because z0 and z1 have one and four tiles and drop fractions applied along the spatial index
+# shift the religion shares by more than the tolerance (0.449 pp at z1, 1.8 pp at z0 measured with the briefed
+# flags alone)
 OVERVIEW_PART_FLAGS = ["--drop-fraction-as-needed", "-M", "250000", "-l", OVERVIEW_LAYER]
-OVERVIEW_Z1_FLAGS = ["-Z1", "-z1", "-r1", "--no-feature-limit", "--no-tile-size-limit", "-l", OVERVIEW_LAYER]
+def overview_uniform_flags(zoom):
+    return [f"-Z{zoom}", f"-z{zoom}", "-r1", "--no-feature-limit", "--no-tile-size-limit", "-l", OVERVIEW_LAYER]
+
+
 Z1_SEED = 20260722
-Z1_TARGET_MAX_BYTES = (215_000, 245_000)
+UNIFORM_TARGET_MAX_BYTES = (215_000, 245_000)
 RA_FLAGS = ["-Z3", "-z7", "-r1", "--no-feature-limit", "--no-tile-size-limit", "-l", OVERVIEW_LAYER]
 
 
@@ -437,28 +441,30 @@ def cmd_build(a):
             sys.exit(rc)
         return o
 
-    z0 = tip("z0.pmtiles", ["-Z0", "-z0", *OVERVIEW_PART_FLAGS], slim)
     z25 = tip("z2-5.pmtiles", ["-Z2", "-z5", *OVERVIEW_PART_FLAGS], slim)
-    # z1: a seeded sample, stratified by religion, thinned to one global fraction so every religion keeps its
-    # share; the fraction is lowered until the largest z1 tile is under the cap
-    frac = 0.0075
-    z1 = None
-    z1_trace = []
-    for attempt in range(8):
-        sample = parts / "z1-sample.ndjson"
-        kept_n = _stratified_sample(slim, sample, frac, Z1_SEED)
-        z1 = tip("z1.pmtiles", OVERVIEW_Z1_FLAGS, str(sample))
-        mx = _max_tile_bytes(z1)
-        z1_trace.append({"fraction": round(frac, 6), "points": kept_n, "max_tile_bytes": mx})
-        print(f"z1 attempt {attempt}: fraction {frac:.5f}, {kept_n} points, max tile {mx} bytes", flush=True)
-        lo, hi = Z1_TARGET_MAX_BYTES
-        if lo <= mx <= hi:
-            break
-        frac *= (lo + hi) / 2 / mx
-        ov_cmds.pop()
-    else:
-        print("build: z1 fraction did not settle", file=sys.stderr)
+
+    # z0 and z1: a seeded sample, stratified by religion, thinned to one global fraction so every religion keeps
+    # its share; the fraction is adjusted until the largest tile is under the cap
+    def uniform_part(zoom, frac):
+        trace = []
+        for attempt in range(8):
+            sample = parts / f"z{zoom}-sample.ndjson"
+            kept_n = _stratified_sample(slim, sample, frac, Z1_SEED)
+            o = tip(f"z{zoom}.pmtiles", overview_uniform_flags(zoom), str(sample))
+            mx = _max_tile_bytes(o)
+            trace.append({"fraction": round(frac, 6), "points": kept_n, "max_tile_bytes": mx})
+            print(f"z{zoom} attempt {attempt}: fraction {frac:.5f}, {kept_n} points, max tile {mx} bytes", flush=True)
+            lo, hi = UNIFORM_TARGET_MAX_BYTES
+            if lo <= mx <= hi:
+                return o, trace
+            frac *= (lo + hi) / 2 / mx
+            ov_cmds.pop()
+        print(f"build: z{zoom} fraction did not settle", file=sys.stderr)
         sys.exit(4)
+
+    z0, z0_trace = uniform_part(0, 0.0050)
+    z1, uniform_trace = uniform_part(1, 0.0075)
+    uniform_trace = {"z0": z0_trace, "z1": uniform_trace}
     cmd = ["tile-join", "-pk", "-f", "-o", str(ov), str(z0), str(z1), str(z25)]
     ov_cmds.append(" ".join(cmd))
     print("join overview:", " ".join(cmd), flush=True)
@@ -488,7 +494,7 @@ def cmd_build(a):
                 failed.append(name)
             print(f"{name} rc={rc} {secs}s", flush=True)
     (work / "build-info.json").write_text(json.dumps(
-        {"tippecanoe": version, "commands": commands, "overview_z1_calibration": z1_trace,
+        {"tippecanoe": version, "commands": commands, "overview_uniform_calibration": uniform_trace,
          "built_at": datetime.now(timezone.utc).isoformat()},
         indent=2) + "\n")
     if failed:
@@ -839,7 +845,7 @@ def cmd_manifest(a):
         is_ov = p.name.startswith("places-overview")
         feats = None if is_ov else ra_counts.get(p.name)
         note = (f"public overview tier, z0-5, layer {OVERVIEW_LAYER}, fraction-preserving sample "
-                f"(z0 and z2-5 tippecanoe {' '.join(OVERVIEW_PART_FLAGS)}; z1 a religion-stratified uniform sample); "
+                f"(z2-5 tippecanoe {' '.join(OVERVIEW_PART_FLAGS)}; z0 and z1 religion-stratified uniform samples); "
                 f"commands: {_cmd_text(info['commands'][p.name])}"
                 if is_ov else
                 f"RA dots for one country, z3-7, every point kept; command: {_cmd_text(info['commands'][p.name])}")
@@ -855,8 +861,8 @@ def cmd_manifest(a):
     params = {
         "extract_zoom": ex["zoom"], "audit_zoom": a.audit_zoom, "country_routing": stats["country_routing"],
         "overview_flags": OVERVIEW_FLAGS, "overview_part_flags": OVERVIEW_PART_FLAGS,
-        "overview_z1_flags": OVERVIEW_Z1_FLAGS, "overview_z1_seed": Z1_SEED,
-        "overview_z1_calibration": info.get("overview_z1_calibration"), "ra_dots_flags": RA_FLAGS,
+        "overview_uniform_flags": "tippecanoe -Z<z> -z<z> -r1 --no-feature-limit --no-tile-size-limit, z in (0, 1)", "overview_uniform_seed": Z1_SEED,
+        "overview_uniform_calibration": info.get("overview_uniform_calibration"), "ra_dots_flags": RA_FLAGS,
         "overview_attributes": [k for k in OVERVIEW_ATTRS if k != "name:en" or stats["name_en_features"]],
         "ra_dots_attributes": RA_ATTRS, "name_en": stats["name_en_note"],
         "source_sha256": ex["source"]["sha256"], "source_bytes": ex["source"]["bytes"],
@@ -865,7 +871,7 @@ def cmd_manifest(a):
     # mode or different flags cannot share a version
     ident = hashlib.sha256(json.dumps(
         {"files": sorted((f["uri"].rsplit("/", 1)[-1], f["sha256"]) for f in files),
-         "params": {k: v for k, v in params.items() if k != "overview_z1_calibration"}},
+         "params": {k: v for k, v in params.items() if k != "overview_uniform_calibration"}},
         sort_keys=True).encode()).hexdigest()
     version_id = f"tiles-v2-{SNAPSHOT}:{ident[:16]}"
     manifest_id = f"manifest:tiles-v2-{SNAPSHOT}-{ident[:12]}"
