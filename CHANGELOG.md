@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-10-06
+
+- Tile Worker (`tools/tiles-r2/worker`) cache changes, not deployed: strong `ETag` from the archive's R2 etag plus z/x/y with `304` on `If-None-Match`; `Age` removed from responses served from the edge cache; empty `204` tiles cached with the same `s-maxage` as 200s; versioned tileset names (`places-overview-v2-<snapshot>`, `ra-dots-<cc>-<snapshot>`) accepted by an explicit pattern and sent as `public, max-age=31536000, immutable`, with 404 for a missing archive. Unversioned names keep their headers. Added a node test harness (`npm test`) and a README section stating that versioned R2 keys are never overwritten. Deploying the Worker needs Joseph's explicit instruction, and production cache behaviour must be confirmed with the curl checks in the README after deploy. The RA guide is unaffected: no portal UI changed.
+
 ### 2026-10-02 (submission receipt round-2 repairs)
 
 - Guided V1 consistency checks reuse the committing helper's country fallback when a task has empty target years. Candidate comparisons apply the creation validators for text bounds, coordinates and location assertions before a correction refusal. Added regressions for thrown refusals, complete rollback and unchanged attempt accounting. Legacy endpoints retain their behaviour. The RA guide is unaffected because the portal UI is unchanged.
