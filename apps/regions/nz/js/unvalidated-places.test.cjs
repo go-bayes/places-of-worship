@@ -72,6 +72,9 @@ made.length = 0;
 const nz = mod.createLayers(fakeL, { countryCode: "NZ" });
 assert.equal(nz.overview.url, "https://tiles.placemap.org/ra-dots-nz-20260722/{z}/{x}/{y}");
 assert.equal(nz.overview.opts.minNativeZoom, 3);
+// the zoom floor: no request below the archive's first zoom (minNativeZoom
+// alone clamps to z3 but still loads the layer at z1 and z2)
+assert.equal(nz.overview.opts.minZoom, 3);
 assert.equal(nz.overview.opts.maxNativeZoom, 7);
 assert.equal(nz.overview.opts.maxZoom, 7);
 assert.equal(Object.keys(nz.overview.opts.vectorTileLayerStyles).join(), "places_overview");
@@ -85,6 +88,7 @@ assert.ok(made.every(entry => !/places-overview/.test(entry.url)));
     const fallback = mod.createLayers(fakeL, { countryCode: code });
     assert.equal(fallback.overview.url, mod.OVERVIEW_TILE_URL, code);
     assert.equal(fallback.overview.opts.maxNativeZoom, 5, code);
+    assert.equal("minZoom" in fallback.overview.opts, false, code);
 });
 
 // the dots paint on canvas tiles where the bundled build offers them (jb

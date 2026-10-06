@@ -35,7 +35,8 @@
     const RA_DOTS_MAX_NATIVE_ZOOM = 7;
     // the two-letter codes that have an ra-dots archive: the 210 archives in
     // manifest tiles-v2-20260722:0ce3c532af1e986d (tools/tiles-r2/manifests/
-    // tiles-v2-20260722-0ce3c532af1e.manifest.json). update this list with
+    // tiles-v2-20260722-0ce3c532af1e.manifest.json, at commit 19eccadc3607f08fc6552b506d5571fd1c99eea2
+    // on branch data/tiles-v2-build-2026-10-07 until that branch merges). update this list with
     // TILES_VERSION whenever the archives are rebuilt. a country not listed
     // (and the world view, ZZ) falls back to the overview sample
     const RA_DOTS_COUNTRY_CODES = new Set((
@@ -104,6 +105,13 @@
                 ...common,
                 vectorTileLayerStyles: { [RA_DOTS_TILE_LAYER]: dotStyle(false) },
                 maxZoom: PLACES_MIN_ZOOM - 1,
+                // the zoom floor: leaflet's minNativeZoom alone only clamps
+                // requests to z3, so a zoom-out to z1 still fetched the
+                // country's z3 tiles for every wrapped world copy (168
+                // fetches, and 3 MB tiles for the us). with minZoom set the
+                // layer loads nothing below z3 (leaflet also takes the map's
+                // lowest zoom from its layers, so the map stops at z3 here)
+                minZoom: RA_DOTS_MIN_NATIVE_ZOOM,
                 minNativeZoom: RA_DOTS_MIN_NATIVE_ZOOM,
                 maxNativeZoom: RA_DOTS_MAX_NATIVE_ZOOM,
             })
