@@ -229,40 +229,143 @@ def _source_info(src):
     return {"path": src, "bytes": Path(src).stat().st_size, "sha256": h.hexdigest(), "metadata": meta}
 
 
+AUDIT_TOLERANCE_DEG = 0.003  # source-zoom quantisation is at most about 0.0014 degrees at z6; two zooms differ by less
+
+
+def _wrapped_dlon(a, b):
+    d = abs(a - b) % 360.0
+    return min(d, 360.0 - d)
+
+
+def _match_coordinates(a_pts, b_pts, tol=AUDIT_TOLERANCE_DEG):
+    """Number of points in a_pts that cannot be paired with a distinct point of b_pts within tol degrees.
+
+    Both lists hold (lon, lat) for one attribute group and are of equal length when the attribute
+    multisets agree. A pair needs |dlat| <= tol and a longitude difference, taken modulo 360, of at most
+    tol. The pairing is a maximum bipartite matching (greedy first, then augmenting paths), so
+    quantisation cannot produce a false mismatch inside a cluster of identical places, and a distant
+    occurrence replaced by a copy at another occurrence's location cannot be absorbed. Returns the
+    number of unmatched points of a_pts (equal to that of b_pts when the lists have equal length)."""
+    na, nb = len(a_pts), len(b_pts)
+    if na == 0 or nb == 0:
+        return na
+    if na == 1 and nb == 1:
+        ok = abs(a_pts[0][1] - b_pts[0][1]) <= tol and _wrapped_dlon(a_pts[0][0], b_pts[0][0]) <= tol
+        return 0 if ok else 1
+    ncell = max(1, int(360.0 // tol))
+    cell = lambda lon, lat: (int(((lon + 180.0) % 360.0) // tol) % ncell, int(math.floor(lat / tol)))
+    grid = collections.defaultdict(list)
+    for j, (lon, lat) in enumerate(b_pts):
+        grid[cell(lon, lat)].append(j)
+    adj = []
+    for lon, lat in a_pts:
+        cx, cy = cell(lon, lat)
+        near = []
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                for j in grid.get(((cx + dx) % ncell, cy + dy), ()):
+                    blon, blat = b_pts[j]
+                    if abs(lat - blat) <= tol and _wrapped_dlon(lon, blon) <= tol:
+                        near.append(j)
+        adj.append(sorted(set(near)))
+    match_b = [-1] * nb
+    match_a = [-1] * na
+    for i in range(na):
+        for j in adj[i]:
+            if match_b[j] < 0:
+                match_b[j], match_a[i] = i, j
+                break
+    for i in range(na):
+        if match_a[i] >= 0:
+            continue
+        # breadth-first search for an augmenting path from the unmatched a point i
+        parent = {}
+        seen_b = set()
+        queue = collections.deque([i])
+        found = None
+        while queue and found is None:
+            u = queue.popleft()
+            for j in adj[u]:
+                if j in seen_b:
+                    continue
+                seen_b.add(j)
+                parent[j] = u
+                if match_b[j] < 0:
+                    found = j
+                    break
+                queue.append(match_b[j])
+        if found is None:
+            continue
+        j = found
+        while True:
+            u = parent[j]
+            prev = match_a[u]
+            match_a[u], match_b[j] = j, u
+            if u == i:
+                break
+            j = prev
+    return sum(1 for m in match_a if m < 0)
+
+
+def _coordinate_audit(kept, other, tol=AUDIT_TOLERANCE_DEG):
+    """Match the coordinates of the two extractions within every attribute group.
+
+    Returns (groups, occurrences, unmatched_occurrences, groups_with_unmatched, examples) where examples
+    are (group size, unmatched count, lon, lat of the first unmatched point) with no attribute values."""
+    ga = collections.defaultdict(list)
+    gb = collections.defaultdict(list)
+    for lon, lat, p in kept:
+        ga[_attr_key(p)].append((lon, lat))
+    for lon, lat, p in other:
+        gb[_attr_key(p)].append((lon, lat))
+    groups = occurrences = unmatched = bad_groups = 0
+    examples = []
+    for k, pa in ga.items():
+        pb = gb.get(k, [])
+        groups += 1
+        occurrences += len(pa)
+        u = _match_coordinates(pa, pb, tol)
+        if u:
+            unmatched += u
+            bad_groups += 1
+            if len(examples) < 10:
+                examples.append({"group_size": len(pa), "unmatched": u})
+    return groups, occurrences, unmatched, bad_groups, examples
+
+
 def _audit(kept, kept_report, src, layer, a):
     """Compare the feature multiset at the extraction zoom with an independent zoom.
 
     The two zooms quantise coordinates differently and place tile edges at
-    different points, so agreement of the attribute multisets (osm key, name,
-    religion, denomination, country; with multiplicities) and of the
-    coordinates of every attribute key that occurs once shows that the
-    extraction holds the same features, not only the same number."""
+    different points. Agreement of the attribute multisets (osm key, name,
+    religion, denomination, country; with multiplicities) and, within every
+    attribute group of any size, of the coordinate multisets (paired within
+    0.003 degrees, longitude taken modulo 360) shows that the extraction holds
+    the same features at the same places, not only the same number. A group
+    whose members lie within the tolerance of one another cannot be told apart
+    by location; the audit tests only displacements beyond it."""
     other, other_report = _collect(src, layer, a.audit_zoom, a.jobs)
     ca = collections.Counter(_attr_key(p) for _, _, p in kept)
     cb = collections.Counter(_attr_key(p) for _, _, p in other)
     only_a = ca - cb
     only_b = cb - ca
-    first = {}
-    for lon, lat, p in kept:
-        first.setdefault(_attr_key(p), (lon, lat))
-    second = {}
-    for lon, lat, p in other:
-        second.setdefault(_attr_key(p), (lon, lat))
-    tol = 0.003
-    far = [k for k, c in ca.items() if c == 1 and cb.get(k) == 1
-           and (abs(first[k][0] - second[k][0]) > tol or abs(first[k][1] - second[k][1]) > tol)]
+    groups, occ, unmatched, bad_groups, examples = _coordinate_audit(kept, other)
     return {
         "audit_zoom": a.audit_zoom, "audit_zoom_unique": len(other),
         "audit_zoom_report": {k: v for k, v in other_report.items() if k != "edge_points_added_detail"},
         "attribute_multiset_equal": not only_a and not only_b,
         "occurrences_only_at_extraction_zoom": sum(only_a.values()),
         "occurrences_only_at_audit_zoom": sum(only_b.values()),
-        "examples_only_at_extraction_zoom": [list(map(str, k)) for k in list(only_a)[:10]],
-        "examples_only_at_audit_zoom": [list(map(str, k)) for k in list(only_b)[:10]],
-        "single_occurrence_keys_compared": sum(1 for k, c in ca.items() if c == 1 and cb.get(k) == 1),
-        "single_occurrence_keys_more_than_0_003_degrees_apart": len(far),
+        "attribute_groups_differing": len(set(only_a) | set(only_b)),
+        "coordinate_tolerance_degrees": AUDIT_TOLERANCE_DEG,
+        "coordinate_groups_compared": groups,
+        "coordinate_occurrences_compared": occ,
+        "coordinate_occurrences_unmatched": unmatched,
+        "coordinate_groups_with_unmatched": bad_groups,
+        "coordinate_unmatched_group_examples": examples,
         "distinct_attribute_keys": len(ca),
         "keys_occurring_more_than_once": sum(1 for c in ca.values() if c > 1),
+        "occurrences_in_repeated_groups": sum(c for c in ca.values() if c > 1),
     }
 
 
@@ -298,7 +401,7 @@ def cmd_extract(a):
               "Try --zoom 6, 14 or 18 and investigate before building.", file=sys.stderr)
         sys.exit(3)
     au = report.get("audit")
-    if au and not (au["attribute_multiset_equal"] and au["single_occurrence_keys_more_than_0_003_degrees_apart"] == 0):
+    if au and not (au["attribute_multiset_equal"] and au["coordinate_occurrences_unmatched"] == 0):
         print("extract: STOP. the feature multiset at the extraction zoom differs from the audit zoom; "
               "see extract-report.json.", file=sys.stderr)
         sys.exit(3)
@@ -504,6 +607,18 @@ def cmd_build(a):
 
 # --------------------------------------------------------------- validate
 
+def _norm(v):
+    """A property as compared between the expected NDJSON and a decoded tile: whole floats become ints."""
+    if isinstance(v, float) and v.is_integer():
+        return int(v)
+    return v
+
+
+def _occ_key(p):
+    """The attribute tuple of a tile feature or an NDJSON feature, over the RA attributes."""
+    return tuple(_norm(p.get(k)) for k in RA_ATTRS)
+
+
 def _decode_tile(args):
     import mapbox_vector_tile
 
@@ -515,8 +630,10 @@ def _decode_tile(args):
     religion, cc_counts = collections.Counter(), collections.Counter()
     attrs, core, pts_seen = set(), 0, set()
     core_keys = collections.Counter()
+    occ_all, occ_core = collections.Counter(), collections.Counter()
     for lname, lyr in d.items():
         ext = lyr["extent"]
+        world = (1 << z) * ext
         for f in lyr["features"]:
             g = f["geometry"]
             # a MultiPoint holds one point and its wrapped copy near the
@@ -526,14 +643,29 @@ def _decode_tile(args):
             attrs.update(p.keys())
             if want_keys and p.get("osm_id") is not None:
                 pts_seen.add((p.get("osm_type"), p.get("osm_id")))
+            ak = _occ_key(p) if want_keys else None
+            raw_seen = {}
             for px, py in pts:
-                if 0 <= px < ext and 0 <= py < ext:
+                inside = 0 <= px < ext and 0 <= py < ext
+                if want_keys:
+                    # position on the zoom's integer grid, longitude modulo the world width: a copy of a point
+                    # in a neighbour's buffer, or across the antimeridian, has the same position. A MultiPoint
+                    # also holds a point's wrapped copy, which has the same position at a different raw
+                    # longitude and is not a second occurrence; coincident points share the raw position too
+                    raw = x * ext + int(round(px))
+                    pos = (raw % world, y * ext + int(round(py)))
+                    if raw_seen.setdefault(pos, raw) == raw:
+                        occ_all[(ak, pos)] += 1
+                    if inside:
+                        # the proper-area copy counts as held, whichever copy came first
+                        occ_core[(ak, pos)] += 1
+                if inside:
                     core += 1
                     religion[p.get("religion")] += 1
                     cc_counts[p.get("country_code")] += 1
                     if want_keys and p.get("osm_id") is not None:
                         core_keys[(p.get("osm_type"), p.get("osm_id"))] += 1
-    return z, layers, core, religion, cc_counts, attrs, pts_seen, core_keys
+    return z, layers, core, religion, cc_counts, attrs, pts_seen, core_keys, occ_all, occ_core
 
 
 def _open_pm(path):
@@ -562,11 +694,19 @@ def _archive_scan(path, decode_zooms, want_keys=False, pool=None, sample_sizes=F
             jobs.append((z, x, y, bytes(data), compressed, want_keys))
     res = collections.defaultdict(lambda: {"core": 0, "religion": collections.Counter(),
                                            "cc": collections.Counter(), "keys": set(),
-                                           "core_keys": collections.Counter()})
+                                           "core_keys": collections.Counter(),
+                                           "occ_all": {}, "occ_core": collections.Counter()})
     attrs, layers = set(), set()
     it = pool.imap_unordered(_decode_tile, jobs, chunksize=4) if pool else map(_decode_tile, jobs)
-    for z, lys, core, rel, cc, at, pts_seen, core_keys in it:
+    for z, lys, core, rel, cc, at, pts_seen, core_keys, occ_all, occ_core in it:
         e = res[z]
+        # a point may appear in several tiles (its tile proper and neighbours' buffers) and is one
+        # occurrence; coincident points in one tile are several, so take the largest count over tiles
+        oa = e["occ_all"]
+        for k, c in occ_all.items():
+            if c > oa.get(k, 0):
+                oa[k] = c
+        e["occ_core"].update(occ_core)
         e["core_keys"].update(core_keys)
         e["core"] += core
         e["religion"].update(rel)
@@ -585,72 +725,169 @@ def _archive_scan(path, decode_zooms, want_keys=False, pool=None, sample_sizes=F
 RA_ZOOMS = (3, 4, 5, 6, 7)
 
 
-def _expected_key_counters(work):
-    """osm-key multiplicities per country, read back from the per-country NDJSON the archives were built from."""
-    out = {}
-    for p in sorted((work / "country-ndjson").glob("*.ndjson")):
-        c = collections.Counter()
-        with p.open(encoding="utf-8") as fh:
-            for line in fh:
-                pr = json.loads(line)["properties"]
-                if "osm_id" in pr:
-                    c[(pr["osm_type"], pr["osm_id"])] += 1
-        out[p.stem.upper()] = c
-    return out
+def _expected_occurrences(ndjson_path):
+    """Occurrence multiset of one country's NDJSON, the file its archive was built from: attribute tuples over
+    the RA attributes, with multiplicities. The osm-key multiplicities are derived from it."""
+    occ = collections.Counter()
+    if ndjson_path is None or not Path(ndjson_path).exists():
+        return occ
+    with Path(ndjson_path).open(encoding="utf-8") as fh:
+        for line in fh:
+            occ[_occ_key(json.loads(line)["properties"])] += 1
+    return occ
+
+
+def _key_multiplicities(occ):
+    keys = collections.Counter()
+    for ak, c in occ.items():
+        d = dict(zip(RA_ATTRS, ak))
+        if d["osm_id"] is not None:
+            keys[(d["osm_type"], d["osm_id"])] += c
+    return keys
+
+
+def _reconcile_zoom(e, expected_occ, expected_keys, expected_religion, expected, cc, z, final_zoom):
+    """Compare one decoded RA zoom with the expected occurrences. Returns (row, problems).
+
+    Every occurrence counts, keyed or not, whether a tile proper holds it or only a neighbour's
+    buffer does. present is the multiset of distinct (attributes, position) occurrences found in any
+    tile, buffer copies of one point counted once; it must equal the expected multiset at every zoom.
+    The occurrences held only in buffers are reported. At the final zoom every occurrence must also lie
+    in a tile proper, so counts, osm-key multiplicities and religion composition are exact there."""
+    present = collections.Counter()
+    for (ak, _pos), c in e["occ_all"].items():
+        present[ak] += c
+    held = collections.Counter()
+    for (ak, _pos), c in e["occ_core"].items():
+        held[ak] += c
+    buffer_only = collections.Counter()
+    for k, c in e["occ_all"].items():
+        extra = c - e["occ_core"].get(k, 0)
+        if extra > 0:
+            buffer_only[k[0]] += extra
+    missing = expected_occ - present
+    excess = present - expected_occ
+    keyless_idx = RA_ATTRS.index("osm_id")
+    other = {k: v for k, v in e["cc"].items() if k is not None and str(k).upper() != cc.upper()}
+    want_set = set(expected_keys)
+    missing_keys = len(want_set - e["keys"])
+    extra_keys = len(e["keys"] - want_set)
+    excess_key_mult = sum(max(0, c - expected_keys.get(k, 0)) for k, c in e["core_keys"].items())
+    short_key_mult = sum(max(0, c - e["core_keys"].get(k, 0)) for k, c in expected_keys.items())
+    excess_rel = {str(k): v - expected_religion.get(str(k), 0) for k, v in e["religion"].items()
+                  if v > expected_religion.get(str(k), 0)}
+    short_rel = {k: expected_religion[k] - e["religion"].get(k, 0) for k in expected_religion
+                 if e["religion"].get(k, 0) < expected_religion[k]}
+    row = {
+        "points_in_tile_proper": e["core"], "shortfall_in_tile_proper": expected - e["core"],
+        "occurrences_expected": expected, "occurrences_present_in_any_tile": sum(present.values()),
+        "occurrences_missing": sum(missing.values()), "occurrences_in_excess": sum(excess.values()),
+        "keyless_occurrences_missing": sum(c for k, c in missing.items() if k[keyless_idx] is None),
+        "occurrences_in_tile_proper_by_position": sum(held.values()),
+        "occurrences_only_in_tile_buffers": sum(buffer_only.values()),
+        "keyless_occurrences_only_in_tile_buffers": sum(c for k, c in buffer_only.items() if k[keyless_idx] is None),
+        "osm_keys_in_any_tile": len(e["keys"]), "osm_keys_missing_from_every_tile": missing_keys,
+        "osm_keys_not_expected": extra_keys, "osm_key_occurrences_short_in_tile_proper": short_key_mult,
+        "religion_short_in_tile_proper": short_rel,
+        "foreign_country": {str(k): v for k, v in other.items()},
+    }
+    problems = []
+    if e["core"] > expected:
+        problems.append(f"z{z}: {e['core']} points in tile proper, more than {expected}")
+    if row["occurrences_missing"] or row["occurrences_in_excess"]:
+        problems.append(
+            f"z{z}: occurrences differ from the expected multiset (missing {row['occurrences_missing']}, "
+            f"of which keyless {row['keyless_occurrences_missing']}; in excess {row['occurrences_in_excess']})")
+    if missing_keys or extra_keys:
+        problems.append(f"z{z}: osm key sets differ (missing {missing_keys}, unexpected {extra_keys})")
+    if excess_key_mult or excess_rel:
+        problems.append(f"z{z}: more occurrences than expected (osm keys {excess_key_mult}, religion {excess_rel})")
+    if other:
+        problems.append(f"z{z}: foreign country codes {other}")
+    if z == final_zoom:
+        # the archive's maximum zoom: every point is held by the tile whose proper area contains it
+        if e["core"] != expected:
+            problems.append(f"z{z}: {e['core']} points in tile proper, expected {expected}")
+        if row["occurrences_only_in_tile_buffers"]:
+            problems.append(f"z{z}: {row['occurrences_only_in_tile_buffers']} occurrences held only in tile buffers")
+        if short_key_mult:
+            problems.append(f"z{z}: {short_key_mult} osm key occurrences short in tile proper")
+        if short_rel:
+            problems.append(f"z{z}: religion composition short {short_rel}")
+    return row, problems
 
 
 def _validate_ra(args):
-    path, cc, expected, expected_keys, expected_religion = args
+    path, cc, expected, ndjson_path, expected_religion = args
+    expected_occ = _expected_occurrences(ndjson_path)
+    expected_keys = _key_multiplicities(expected_occ)
     r = _archive_scan(path, set(RA_ZOOMS), want_keys=True)
     out = {"file": Path(path).name, "country": cc, "expected": expected, "sizes": r["sizes"],
            "attributes": r["attributes"], "layers": r["layers"], "zooms": {}, "problems": []}
-    want_set = set(expected_keys)
+    if sum(expected_occ.values()) != expected:
+        out["problems"].append(f"expected NDJSON holds {sum(expected_occ.values())} points, not {expected}")
     for z in RA_ZOOMS:
+        sz = r["sizes"].get(z)
+        if not sz or sz["tiles"] < 1:
+            out["problems"].append(f"z{z}: no tiles")
         e = r["decoded"][z]
-        other = {k: v for k, v in e["cc"].items() if k is not None and str(k).upper() != cc.upper()}
-        missing_keys = len(want_set - e["keys"])
-        extra_keys = len(e["keys"] - want_set)
-        excess_key_mult = sum(max(0, c - expected_keys.get(k, 0)) for k, c in e["core_keys"].items())
-        short_key_mult = sum(max(0, c - e["core_keys"].get(k, 0)) for k, c in expected_keys.items())
-        excess_rel = {str(k): v - expected_religion.get(str(k), 0) for k, v in e["religion"].items()
-                      if v > expected_religion.get(str(k), 0)}
-        short_rel = {k: expected_religion[k] - e["religion"].get(k, 0) for k in expected_religion
-                     if e["religion"].get(k, 0) < expected_religion[k]}
-        out["zooms"][str(z)] = {
-            "points_in_tile_proper": e["core"], "shortfall_in_tile_proper": expected - e["core"],
-            "osm_keys_in_any_tile": len(e["keys"]), "osm_keys_missing_from_every_tile": missing_keys,
-            "osm_keys_not_expected": extra_keys, "osm_key_occurrences_short_in_tile_proper": short_key_mult,
-            "religion_short_in_tile_proper": short_rel,
-            "foreign_country": {str(k): v for k, v in other.items()},
-        }
-        if e["core"] > expected:
-            out["problems"].append(f"z{z}: {e['core']} points in tile proper, more than {expected}")
-        if missing_keys or extra_keys:
-            out["problems"].append(f"z{z}: osm key sets differ (missing {missing_keys}, unexpected {extra_keys})")
-        if excess_key_mult or excess_rel:
-            out["problems"].append(f"z{z}: more occurrences than expected (osm keys {excess_key_mult}, religion {excess_rel})")
-        if other:
-            out["problems"].append(f"z{z}: foreign country codes {other}")
-        if z == RA_ZOOMS[-1]:
-            # z7 is the archive's maximum zoom: every point is held by the tile whose proper area contains it,
-            # so counts, osm-key multiplicities and religion composition must all be exact
-            if e["core"] != expected:
-                out["problems"].append(f"z7: {e['core']} points in tile proper, expected {expected}")
-            if short_key_mult:
-                out["problems"].append(f"z7: {short_key_mult} osm key occurrences short in tile proper")
-            if short_rel:
-                out["problems"].append(f"z7: religion composition short {short_rel}")
-    # below z7 a point rounded onto a tile's far edge can sit only in the neighbour's buffer; the shortfall in
-    # tile proper areas is reported per zoom, and osm-keyed points are checked present in some tile
-    out["shortfall_in_tile_proper_by_zoom"] = {str(z): expected - out["zooms"][str(z)]["points_in_tile_proper"]
+        row, probs = _reconcile_zoom(e, expected_occ, expected_keys, expected_religion, expected, cc, z, RA_ZOOMS[-1])
+        out["zooms"][str(z)] = row
+        out["problems"].extend(probs)
+    out["shortfall_in_tile_proper_by_zoom"] = {str(z): out["zooms"][str(z)]["shortfall_in_tile_proper"]
                                                for z in RA_ZOOMS}
     if r["layers"] != [OVERVIEW_LAYER]:
         out["problems"].append(f"layers {r['layers']}")
     if not set(r["attributes"]) <= set(RA_ATTRS) or "religion" not in r["attributes"]:
         out["problems"].append(f"attributes {r['attributes']}")
-    if (r["header_min_zoom"], r["header_max_zoom"]) != (3, 7):
+    if (r["header_min_zoom"], r["header_max_zoom"]) != (RA_ZOOMS[0], RA_ZOOMS[-1]):
         out["problems"].append(f"zoom range {r['header_min_zoom']}-{r['header_max_zoom']}")
     return out
+
+
+OVERVIEW_ZOOMS = tuple(range(0, 6))
+
+
+def _check_overview(ov, in_share, total_in):
+    """Overview share table and its problems. Every expected zoom needs tiles and features, and every
+    compared share has to be finite: an empty zoom has no shares, which is a failure, not a pass.
+    Returns (shares, problems, criteria_not_met)."""
+    shares, problems, unmet = {}, [], []
+    if (ov["header_min_zoom"], ov["header_max_zoom"]) != (OVERVIEW_ZOOMS[0], OVERVIEW_ZOOMS[-1]):
+        problems.append(f"overview header zooms {ov['header_min_zoom']}-{ov['header_max_zoom']}, "
+                        f"expected {OVERVIEW_ZOOMS[0]}-{OVERVIEW_ZOOMS[-1]}")
+    for z in OVERVIEW_ZOOMS:
+        e = ov["decoded"][z] if z in ov["decoded"] else {"core": 0, "religion": collections.Counter()}
+        kept = e["core"]
+        tiles = ov["sizes"].get(z, {}).get("tiles", 0)
+        if tiles < 1:
+            problems.append(f"overview z{z}: no tiles")
+        if kept < 1:
+            problems.append(f"overview z{z}: no features")
+        row = {"kept_features": kept, "fraction_kept": kept / total_in, "religions": {}}
+        w = 0.0
+        finite = kept >= 1
+        for rel, s in in_share.items():
+            if s <= SHARE_FLOOR:
+                continue
+            ks = e["religion"].get(rel, 0) / kept if kept else float("nan")
+            d = (ks - s) * 100
+            if not math.isfinite(d):
+                finite = False
+                row["religions"][rel] = {"input_pct": round(s * 100, 3), "kept_pct": None, "diff_pp": None}
+                continue
+            row["religions"][rel] = {"input_pct": round(s * 100, 3), "kept_pct": round(ks * 100, 3),
+                                     "diff_pp": round(d, 3)}
+            w = max(w, abs(d))
+        if not finite:
+            problems.append(f"overview z{z}: religion shares are not finite")
+        row["max_abs_diff_pp"] = round(w, 3) if finite else None
+        row["within_tolerance"] = bool(finite and w <= SHARE_TOLERANCE_PP)
+        shares[str(z)] = row
+        if finite and w > SHARE_TOLERANCE_PP:
+            unmet.append(f"overview z{z}: religion share deviates by {w:.3f} pp from the input "
+                         f"(tolerance {SHARE_TOLERANCE_PP} pp)")
+    return shares, problems, unmet
 
 
 def cmd_validate(a):
@@ -661,9 +898,8 @@ def cmd_validate(a):
     problems = report["problems"]
 
     # per-country archives
-    expected_keys = _expected_key_counters(work)
-    tasks = [(str(out / f"ra-dots-{cc.lower()}-{SNAPSHOT}.pmtiles"), cc, n, expected_keys.get(cc, {}),
-              stats["religion_by_country"][cc])
+    tasks = [(str(out / f"ra-dots-{cc.lower()}-{SNAPSHOT}.pmtiles"), cc, n,
+              str(work / "country-ndjson" / f"{cc.lower()}.ndjson"), stats["religion_by_country"][cc])
              for cc, n in sorted(stats["by_country"].items(), key=lambda kv: -kv[1])]
     missing = [t[0] for t in tasks if not Path(t[0]).exists()]
     if missing:
@@ -686,6 +922,15 @@ def cmd_validate(a):
         "points_found_by_zoom": {str(z): sum(r["zooms"][str(z)]["points_in_tile_proper"] for r in ra) for z in RA_ZOOMS},
         "shortfall_in_tile_proper_by_zoom": {str(z): sum(r["shortfall_in_tile_proper_by_zoom"][str(z)] for r in ra)
                                              for z in RA_ZOOMS},
+        "occurrences_missing_by_zoom": {str(z): sum(r["zooms"][str(z)]["occurrences_missing"] for r in ra)
+                                        for z in RA_ZOOMS},
+        "occurrences_in_excess_by_zoom": {str(z): sum(r["zooms"][str(z)]["occurrences_in_excess"] for r in ra)
+                                          for z in RA_ZOOMS},
+        "occurrences_only_in_tile_buffers_by_zoom": {
+            str(z): sum(r["zooms"][str(z)]["occurrences_only_in_tile_buffers"] for r in ra) for z in RA_ZOOMS},
+        "keyless_occurrences_only_in_tile_buffers_by_zoom": {
+            str(z): sum(r["zooms"][str(z)]["keyless_occurrences_only_in_tile_buffers"] for r in ra)
+            for z in RA_ZOOMS},
         "archives_with_matching_counts": sum(1 for r in ra if not r["problems"]),
         "points_without_valid_country_code": stats["no_valid_country_code_count"],
         "points_in_no_ra_archive": stats["excluded_from_every_ra_archive"],
@@ -700,35 +945,17 @@ def cmd_validate(a):
         ov = _archive_scan(str(ov_path), set(range(0, 6)), pool=pool)
     total_in = stats["total"]
     in_share = {k: v / total_in for k, v in stats["by_religion"].items()}
-    shares = {}
-    worst = {}
-    for z in range(0, 6):
-        e = ov["decoded"][z]
-        kept = e["core"]
-        row = {"kept_features": kept, "fraction_kept": kept / total_in, "religions": {}}
-        w = 0.0
-        for rel, s in in_share.items():
-            if s <= SHARE_FLOOR:
-                continue
-            ks = e["religion"].get(rel, 0) / kept if kept else float("nan")
-            d = (ks - s) * 100
-            row["religions"][rel] = {"input_pct": round(s * 100, 3), "kept_pct": round(ks * 100, 3),
-                                     "diff_pp": round(d, 3)}
-            if not math.isnan(d):
-                w = max(w, abs(d))
-        worst[z] = w
-        row["max_abs_diff_pp"] = round(w, 3)
-        row["within_tolerance"] = w <= SHARE_TOLERANCE_PP
-        shares[str(z)] = row
-        if w > SHARE_TOLERANCE_PP:
-            report["criteria_not_met"].append(
-                f"overview z{z}: religion share deviates by {w:.3f} pp from the input (tolerance {SHARE_TOLERANCE_PP} pp)")
+    shares, ov_problems, unmet = _check_overview(ov, in_share, total_in)
+    problems.extend(ov_problems)
+    report["criteria_not_met"].extend(unmet)
     report["overview"] = {
         "file": ov_path.name, "bytes": ov_path.stat().st_size, "sizes": ov["sizes"],
         "attributes": ov["attributes"], "layers": ov["layers"], "shares": shares,
         "metadata_vector_layers": ov["metadata"].get("vector_layers"),
         "header_zoom": [ov["header_min_zoom"], ov["header_max_zoom"]],
     }
+    if not ov["sizes"]:
+        problems.append("overview holds no tiles")
     if ov["layers"] != [OVERVIEW_LAYER]:
         problems.append(f"overview layers {ov['layers']}")
     allowed = set(OVERVIEW_ATTRS)
@@ -760,7 +987,8 @@ def cmd_validate(a):
     report["ra_dots_max_tile_bytes_by_zoom"] = dict(mx)
     big = {}
     for z in RA_ZOOMS:
-        over = sorted(((r["country"], r["sizes"][z]["max_bytes"]) for r in ra if r["sizes"][z]["max_bytes"] > 1_000_000),
+        over = sorted(((r["country"], r["sizes"][z]["max_bytes"]) for r in ra
+                       if r["sizes"].get(z, {}).get("max_bytes", 0) > 1_000_000),
                       key=lambda t: -t[1])
         if over:
             big[z] = over
@@ -826,6 +1054,72 @@ def _sha256(path):
 
 def _cmd_text(c):
     return "; ".join(c) if isinstance(c, list) else c
+
+
+def _public_metadata(meta):
+    """The source's mbtiles metadata without attribute-value samples.
+
+    tippecanoe writes up to 100 sample values per attribute into the tilestats (phone numbers,
+    raw tags, addresses, websites). The public record keeps the layer definition (field types) and
+    the aggregate tilestats (counts, attribute names and types) and drops every value."""
+    out = dict(meta)
+    raw = out.get("json")
+    if isinstance(raw, str):
+        try:
+            doc = json.loads(raw)
+        except ValueError:
+            doc = None
+        if doc is not None:
+            for layer in (doc.get("tilestats") or {}).get("layers", []):
+                for attr in layer.get("attributes", []):
+                    attr.pop("values", None)
+            out["json"] = json.dumps(doc, ensure_ascii=False, separators=(",", ":"))
+    return out
+
+
+def _public_extract(ex):
+    """The extract report for public records: hashes, sizes, metadata without value samples, and counts.
+    The feature-level detail (names and osm keys of the far-edge points) stays in the private work directory."""
+    out = json.loads(json.dumps(ex))
+    if isinstance(out.get("source"), dict) and "metadata" in out["source"]:
+        out["source"]["metadata"] = _public_metadata(out["source"]["metadata"])
+    elif "edge_points_added_detail" not in out:
+        return out  # the first build's record carries neither metadata nor feature detail
+    detail = out.pop("edge_points_added_detail", None)
+    out["edge_points_added_detail_omitted"] = len(detail) if detail is not None else 0
+    au = out.get("audit")
+    if au:
+        for k in ("examples_only_at_extraction_zoom", "examples_only_at_audit_zoom"):
+            if au.pop(k, None) is not None:
+                au[k + "_omitted"] = True
+        au.get("audit_zoom_report", {}).pop("edge_points_added_detail", None)
+    return out
+
+
+_CITATION_META = re.compile(r"(mbtiles metadata: ).*?(; tippecanoe tilestats count)", re.S)
+
+
+def cmd_scrub_manifests(a):
+    """Rewrite the tracked records in --manifest-dir without attribute-value samples. Archive hashes,
+    sizes, layer definitions and aggregate counts are untouched. Idempotent."""
+    mdir = Path(a.manifest_dir)
+    for stats_path in sorted(mdir.glob("input-stats-*.json")):
+        d = json.loads(stats_path.read_text())
+        if "extract" not in d:
+            continue
+        d["extract"] = _public_extract(d["extract"])
+        stats_path.write_text(json.dumps(d, indent=2, ensure_ascii=False) + "\n")
+        tag = stats_path.stem[len("input-stats-tiles-v2-"):]
+        mpath = mdir / f"tiles-v2-{tag}.manifest.json"
+        if mpath.exists():
+            m = json.loads(mpath.read_text())
+            if not isinstance(d["extract"].get("source"), dict) or "metadata" not in d["extract"]["source"]:
+                continue
+            meta = json.dumps(d["extract"]["source"]["metadata"], ensure_ascii=False)
+            m["source"]["citation"] = _CITATION_META.sub(lambda mt: mt.group(1) + meta + mt.group(2),
+                                                         m["source"]["citation"])
+            mpath.write_text(json.dumps(m, indent=2, ensure_ascii=False) + "\n")
+        print(f"scrub: {stats_path.name}")
 
 
 def cmd_manifest(a):
@@ -900,7 +1194,8 @@ def cmd_manifest(a):
             "licence": None,
             "local_cache_hint": f"green:{ex['source']['path']}",
             "citation": (f"sha256 {ex['source']['sha256']}, {ex['source']['bytes']} bytes; "
-                         f"mbtiles metadata: {json.dumps(ex['source']['metadata'], ensure_ascii=False)[:1500]}; "
+                         f"mbtiles metadata (attribute-value samples omitted): "
+                         f"{json.dumps(_public_metadata(ex['source']['metadata']), ensure_ascii=False)}; "
                          f"tippecanoe tilestats count {EXPECTED_COUNT} features, layer places; "
                          f"decoded at z{ex['zoom']}: {ex['features_in_tile_proper']} features in tile proper plus "
                          f"{ex['edge_points_added']} far-edge points no tile held = {ex['unique']}; "
@@ -936,7 +1231,7 @@ def cmd_manifest(a):
     (dest / f"tiles-v2-{tag}.manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
     (dest / f"validation-report-tiles-v2-{tag}.json").write_text(json.dumps(rep, indent=2, ensure_ascii=False) + "\n")
     (dest / f"input-stats-tiles-v2-{tag}.json").write_text(
-        json.dumps({**stats, "extract": ex}, indent=2, ensure_ascii=False) + "\n")
+        json.dumps({**stats, "extract": _public_extract(ex)}, indent=2, ensure_ascii=False) + "\n")
     print(f"manifest: wrote {dest} (version {version_id})", flush=True)
 
 
@@ -969,7 +1264,7 @@ def cmd_record_uploads(a):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("stage", choices=["extract", "build", "validate", "manifest", "all", "record_uploads"])
+    ap.add_argument("stage", choices=["extract", "build", "validate", "manifest", "all", "record_uploads", "scrub_manifests"])
     ap.add_argument("--work", help="build directory (created if absent)")
     ap.add_argument("--manifest", help="record_uploads: manifest to update")
     ap.add_argument("--uploads", help="record_uploads: JSON list of verified uploads")
@@ -992,7 +1287,7 @@ def main():
     a = ap.parse_args()
     stages = ["extract", "build", "validate", "manifest"] if a.stage == "all" else [a.stage]
     for s in stages:
-        if s != "record_uploads" and not a.work:
+        if s not in ("record_uploads", "scrub_manifests") and not a.work:
             ap.error("--work is required")
         if s == "extract" and not a.source:
             ap.error("extract needs --source")
