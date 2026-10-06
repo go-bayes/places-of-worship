@@ -151,12 +151,18 @@
     } catch (err) {
       // private-mode storage failures cost only the return row
     }
+    // country pages warm neighbours after the map's first idle. the global
+    // map warms its guessed home country (NZ by default) once the overview
+    // source has loaded its tiles, not at window load, so the warm no longer
+    // competes with the overview tiles; first idle also counts, for a page
+    // whose overview layer is switched off
     let prefetchReady = currentCode
       ? window.__DATAMAP_FIRST_IDLE__ === true
-      : document.readyState === "complete";
+      : window.__DATAMAP_OVERVIEW_LOADED__ === true || window.__DATAMAP_FIRST_IDLE__ === true;
 
     function connectionAllowsPrefetch() {
-      // explicit data-saving and very slow connections disable all warming
+      // explicit data-saving (navigator.connection.saveData) and very slow
+      // connections disable all warming, the NZ warm included
       const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
       if (!connection) return true;
       return !connection.saveData && connection.effectiveType !== "2g" && connection.effectiveType !== "slow-2g";
@@ -344,7 +350,7 @@
     }
 
     document.addEventListener("datamap:first-idle", markPrefetchReady, { once: true });
-    if (!currentCode && !prefetchReady) window.addEventListener("load", markPrefetchReady, { once: true });
+    if (!currentCode) document.addEventListener("datamap:overview-loaded", markPrefetchReady, { once: true });
     if (prefetchReady) { warmHome(); void warmNeighbours(); }
     // border handoff uses the same network guard, idle gate, and page
     // budget; an offer on screen is strong intent, so the summary and
