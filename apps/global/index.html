@@ -21,6 +21,10 @@
       center: [174.7762, -41.2865],
       initialZoom: 4.5,
       keyPlacement: "top-centre",
+      // the world map keeps drawing the NZ statistical-area outlines when
+      // the view reaches Aotearoa (unchanged behaviour); every other page
+      // omits this key and requests no polygon tiles
+      polygonsTileset: "nz-polygons",
       regionsBase: "../regions/",
       schemaBase: "../../schemas/",
       onboardStorageKey: "pow-onboard-dismissed",

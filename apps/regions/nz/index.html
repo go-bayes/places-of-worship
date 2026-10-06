@@ -23,6 +23,9 @@
       title: "Places of Worship | NZ Research Map",
       center: [174.7762, -41.2865],
       initialZoom: 4.5,
+      // the NZ statistical-area outlines drawn faintly under the dots; pages
+      // that name no polygon tileset never request one
+      polygonsTileset: "nz-polygons",
       // each level is a governed area-summary product plus its boundary
       // file; paths resolve from this page's directory
       censusLevels: {

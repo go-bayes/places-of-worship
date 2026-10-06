@@ -241,13 +241,18 @@ const CONFIG = {
   tiles: {
     overview: "https://tiles.placemap.org/places-overview/{z}/{x}/{y}",
     places: "https://tiles.placemap.org/places/{z}/{x}/{y}",
-    polygons: "https://tiles.placemap.org/nz-polygons/{z}/{x}/{y}",
+    // optional overlay: a page names a polygon tileset in its config
+    // (REGION_CONFIG.polygonsTileset) or the source is never added and no
+    // tile is requested. configuration, not country identity
+    polygons: RC.polygonsTileset
+      ? `https://tiles.placemap.org/${RC.polygonsTileset}/{z}/{x}/{y}`
+      : null,
     buildings: "https://tiles.placemap.org/buildings/{z}/{x}/{y}"
   },
   layerDefaults: {
     overview: "places_overview",
     places: "places",
-    polygons: "nz-polygons",
+    polygons: RC.polygonsTileset || null,
     buildings: "buildings"
   }
 };
@@ -1679,6 +1684,8 @@ function addPlacesLayer() {
 }
 
 function addPolygonsLayer() {
+  // no polygonsTileset in the page config: no source, no layers, no requests
+  if (!CONFIG.tiles.polygons) return;
   map.addSource(SOURCES.polygons, { type: "vector", tiles: [CONFIG.tiles.polygons], minzoom: 2, maxzoom: 14 });
   map.addLayer({
     id: LAYERS.polygonsFill,
@@ -1766,9 +1773,18 @@ map.on("style.load", () => {
   setTimeout(refreshMapLayers, 650);
 });
 
+// the first time the overview source finishes loading its visible tiles, tell
+// the data-maps switcher that speculative prefetches may start (they would
+// otherwise compete with the overview tiles for bandwidth)
+let overviewLoadedAnnounced = false;
 map.on("sourcedata", (event) => {
   if (!event || !event.isSourceLoaded || !event.sourceId) return;
   if (!OVERLAY_SOURCES.has(event.sourceId)) return;
+  if (!overviewLoadedAnnounced && event.sourceId === SOURCES.overview) {
+    overviewLoadedAnnounced = true;
+    window.__DATAMAP_OVERVIEW_LOADED__ = true;
+    document.dispatchEvent(new CustomEvent("datamap:overview-loaded"));
+  }
   map.triggerRepaint();
 });
 
@@ -5802,7 +5818,7 @@ if (offerGo && !RC.disableBorderHandoff) {
   // country pages revalidate the manifest against the host's etag
   // (no-cache), so a new country launch reaches every page without a
   // cache-pin ceremony; the global map keeps default caching — the etag
-  // still revalidates — and defers the fetch past window load so the
+  // still revalidates. both defer the fetch past map load (below) so the
   // manifest stays off the critical path
   const armOffers = () => {
     fetch(`${REGIONS_BASE}_shared/data/region-bboxes.json`, HANDOFF_HOME ? { cache: "no-cache" } : undefined)
@@ -5871,9 +5887,16 @@ if (offerGo && !RC.disableBorderHandoff) {
       })
       .catch(() => {});
   };
-  if (HANDOFF_HOME) armOffers();
-  else if (document.readyState === "complete") armOffers();
-  else window.addEventListener("load", armOffers, { once: true });
+  // the manifest is not needed to draw the map, so it waits for the map's
+  // own load and then for an idle slot (setTimeout where requestIdleCallback
+  // is missing). every consumer null-checks handoffRegions, and arming ends
+  // in updateBorderHandoff(), so a late arrival only delays the pill
+  const armOffersWhenIdle = () => {
+    if ("requestIdleCallback" in window) window.requestIdleCallback(armOffers, { timeout: 5000 });
+    else window.setTimeout(armOffers, 1);
+  };
+  if (map.loaded()) armOffersWhenIdle();
+  else map.once("load", armOffersWhenIdle);
   // the offer engine claims the main zone's clicks in every non-resting
   // state; this listener registers before the switcher's (script order),
   // so resting clicks fall through to the panel as usual
