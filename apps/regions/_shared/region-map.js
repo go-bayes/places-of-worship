@@ -3415,13 +3415,20 @@ const censusState = {
   const y = Number(year);
   if (Number.isInteger(y) && y >= 1000 && y <= 9999) censusState.year = y;
 })();
-// start the default level's boundary and summary download now, rather than
-// at the first map idle: on a slow link the idle arrives long after the
-// network could have fetched these files. layer insertion stays behind the
-// first idle, where setCensusEnabled reuses this in-flight promise. the call
-// sits here because the loader reads CENSUS_METRICS and the config above;
-// earlier in the script it would hit the temporal dead zone
-if (HAS_CENSUS) void loadCensusData(censusState.level, { quiet: true });
+// start the default level's boundary and summary download once the overview
+// tiles have loaded, rather than at the first map idle: the overview dots are
+// what the page is for, and on a slow link the census files (up to several
+// megabytes) compete with them for bandwidth if requested at script start
+// (measured as a 2 to 3 s later map load on the larger pages). the idle
+// handler still loads the census itself if this event never fires (overview
+// disabled or its tiles failing), and reuses this in-flight promise when it
+// has. the listener sits here because the loader reads CENSUS_METRICS and the
+// config above; the event itself fires later, from the sourcedata handler
+if (HAS_CENSUS) {
+  document.addEventListener("datamap:overview-loaded", () => {
+    void loadCensusData(censusState.level, { quiet: true });
+  }, { once: true });
+}
 function writeCensusHash() {
   const carriable = censusState.enabled && !pulotuState.active;
   writeHashParam("d", carriable ? `${censusState.metric}:${censusState.year}` : null);
@@ -3726,9 +3733,10 @@ function syncCensusYearSelect() {
   }
 }
 
-// quiet loads (the early prefetch) record failure on the store but show no
-// hint: the map has not painted, so a hint would expire unseen.
-// setCensusEnabled announces the pending or failed load once the map is up
+// quiet loads record failure on the store but show no hint. the early
+// prefetch runs before the map has painted, so a hint would expire unseen, and
+// setCensusEnabled, which owns the hints for the load it enables, announces
+// the pending or failed load itself. level and domain switches load non-quiet
 async function loadCensusData(level, { quiet = false } = {}) {
   const existing = censusState.levels[level];
   if (existing && existing.geojson) return existing.geojson;
@@ -3754,8 +3762,9 @@ function censusFailedHint() {
 async function loadCensusDataInto(store, def, quiet = false) {
   if (!quiet) censusLoadingHint();
   try {
-    // low priority keeps these large files behind the style and tiles in
-    // Chromium; browsers without the option ignore it
+    // a low-priority hint asks Chromium to schedule these large files behind
+    // the style and tiles; it is advisory, not a guarantee, and browsers
+    // without the option ignore it
     const [boundariesRes, summaryRes] = await Promise.all([
       fetch(def.boundaries, { priority: "low" }),
       fetch(def.summary, { priority: "low" })
@@ -5329,15 +5338,18 @@ async function setCensusEnabled(on) {
   if (!HAS_CENSUS) return;
   censusState.enabled = on;
   if (on) {
-    const pending = loadCensusData(censusState.level);
-    // an early prefetch may still be in flight when the map first idles
-    if (censusState.levels[censusState.level]?.loading) censusLoadingHint();
+    // this caller owns the loading and failure hints for the load it enables
+    // (a fresh load, a retry after a failed prefetch, or an in-flight
+    // prefetch), so the loader runs quiet and each hint shows once
+    const pending = loadCensusData(censusState.level, { quiet: true });
+    const enabling = censusState.levels[censusState.level];
+    if (enabling?.loading) censusLoadingHint();
     const data = await pending;
     // a second toggle can land while the load is in flight; the later
     // intent wins, so a stale load must not add layers over it
     if (censusState.enabled !== on) return;
     if (!data) {
-      if (censusState.levels[censusState.level]?.failed) censusFailedHint();
+      if (enabling?.failed) censusFailedHint();
       censusState.enabled = false;
       updateCensusLegend();
       return;
