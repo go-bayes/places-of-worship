@@ -43,7 +43,7 @@ Stages:
 3. `measure`: sizes of the z6-7 tiles against the live ones (computed from `places.mbtiles`, from which the live archive was converted), a curl sample of live tiles (the edge recompresses, so served sizes are 96 to 100 percent of the stored sizes), and the tiles under the 42 country pages whose `initialZoom` is in [6, 8) (`manifests/landing-pages-z6-7.json`; the tiles of a 1440 x 900 viewport at the page's zoom).
 4. `manifest`: the data manifest (`schemas/data-manifest.schema.json`), `licence_status: needs_review` as for the v2 tiles, and the report. It recomputes the three digests and exits with code 7, writing nothing, when any differs from the report's, so a manifest cannot certify an archive other than the one validated.
 
-The upload must use the versioned-key refusal below, and the client switch (`CONFIG.tiles.places`, the counts label threshold, the `?v=` bump) and the Worker deploy follow review; the RA layers keep `places` and see identical bytes from z8.
+The upload used the versioned-key refusal below. The client switch is made (2026-10-07, `apps/regions/_shared/region-map.js`): `CONFIG.tiles.places` is `places-v2-20260722`, the source keeps `minzoom 6`, the counts line reads "Places shown" below zoom 8 and "Total" from 8, and the `?v=` stamp of `region-map.js` is `20261007b` on every page. The RA layers (`apps/regions/nz/js/unvalidated-places.js`) keep the unversioned `places` and read it from zoom 8 only, where the bytes are identical.
 
 ## Worker caching and tileset names
 

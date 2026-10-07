@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-10-07 (public places tier: places-v2, sampled z6-7)
+
+- Item L1 of the map-loading plan, client switch (authorised by Joseph on 2026-10-07). The public maps' places layer (`CONFIG.tiles.places` in `apps/regions/_shared/region-map.js`) reads `places-v2-20260722`, which is served by the deployed Worker: z8 to 18 byte-identical to `places`, z6 and z7 a fraction-preserving sample with tiles of at most 500 KB (manifest `tools/tiles-r2/manifests/places-v2-20260722.manifest.json`). The source keeps `minzoom 6`, so nothing below zoom 6 is requested from this tier.
+- The counts panel reads "Places shown" below zoom 8 and "Total" from zoom 8, because the z6 and z7 dots are a sample (previously the threshold was zoom 6). The layer that supplies the counts still switches from the overview to the places tier at zoom 6.
+- The RA and review layers (`apps/regions/nz/js/unvalidated-places.js`) are unchanged: they read the unversioned `places` from zoom 8 only, where the bytes are identical. The RA guide is unaffected (no contributor-portal UI changed).
+- Cache-busting: `region-map.js` is stamped `?v=20261007b` on the 104 pages that load it.
+- `tiles-v2-client.test.cjs` now checks the places tier URL, the source zoom range, the RA layers' tier and floor, the counts threshold and the new stamp. Docs updated: `docs/data-storage.md`, `tools/tiles-r2/README.md`.
+
 ### 2026-10-07 (ra-dots zoom floor, from the final review of #177)
 
 - RA and review portals: while a country's ra-dots archive layer is shown, the map's minimum zoom is set to 3 explicitly (`unvalidated-places.js`, `addTo`), and the previous minimum is saved and restored when the dots are hidden (`removeFrom`). The archive layer's own `minZoom` of 3 did not stop the map: Leaflet takes a map's lowest zoom from the lowest `minZoom` among its layers, and a basemap that reaches zoom 1 or 2 (Russia opens at 2.5) kept it there with no dots drawn. A fallback country, which draws the overview sample, keeps its usual zoom-out. A map opened or recentred below 3 lands on 3 while the dots are shown. `apps/guides/ra.html` qualifies the floor accordingly. `unvalidated-places.test.cjs` gains a Russia regression (toggling, recentring, restoring an explicit minimum, fallback country). Stamps: `unvalidated-places.js` `?v=20261007b`; `tiles-v2-client.test.cjs` now holds one stamp per script.

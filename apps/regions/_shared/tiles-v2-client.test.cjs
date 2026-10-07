@@ -1,6 +1,6 @@
 // source-level checks for the tiles v2 client switch (build 20260722): the
-// shared runtime reads the slim overview sample, the counts panel says
-// "places shown" below zoom 6, the RA and review portals read per-country
+// shared runtime reads the slim overview sample and the places-v2 tier (z6-7
+// sampled), the counts panel says "places shown" below zoom 8, the RA and review portals read per-country
 // ra-dots archives, and every page loading a changed script carries the
 // bumped cache-busting query. browser behaviour is checked separately in
 // the pull request; these checks stop the wiring regressing.
@@ -16,6 +16,17 @@ const verification = read("regions", "nz", "js", "verification-map.js");
 const review = read("regions", "nz", "js", "review-map.js");
 const unvalidated = read("regions", "nz", "js", "unvalidated-places.js");
 
+// shared runtime: versioned places tier (z6-7 sampled, z8-18 identical to the
+// live tier), source minzoom still 6 so nothing below z6 is requested
+assert.match(runtime, /places: "https:\/\/tiles\.placemap\.org\/places-v2-20260722\/\{z\}\/\{x\}\/\{y\}"/);
+assert.doesNotMatch(runtime, /tiles\.placemap\.org\/places\/\{z\}/);
+const placesSource = runtime.slice(runtime.indexOf("map.addSource(SOURCES.places"), runtime.indexOf("map.addLayer({\n    id: LAYERS.places"));
+assert.match(placesSource, /tiles: \[CONFIG\.tiles\.places\],\s+minzoom: 6,\s+maxzoom: 18,/);
+
+// the RA layers keep the unversioned places tier, read from zoom 8 only
+assert.match(unvalidated, /const PLACES_TILE_URL = "https:\/\/tiles\.placemap\.org\/places\/\{z\}\/\{x\}\/\{y\}";/);
+assert.match(unvalidated, /const PLACES_MIN_ZOOM = 8;/);
+
 // shared runtime: versioned overview, source maxzoom 5, layer still to 6
 assert.match(runtime, /overview: "https:\/\/tiles\.placemap\.org\/places-overview-v2-20260722\/\{z\}\/\{x\}\/\{y\}"/);
 assert.doesNotMatch(runtime, /tiles\.placemap\.org\/places-overview\//);
@@ -26,10 +37,13 @@ assert.match(layer, /maxzoom: 6,/);
 // the module keeps no country-conditional logic for the tier
 assert.doesNotMatch(runtime, /ra-dots/);
 
-// the counts line: "places shown" below zoom 6, "total" from 6 in
+// the counts line: "places shown" below zoom 8 (the overview below 6, the
+// places tier's sample at z6-7), "total" from 8; the layer still switches at 6
 assert.match(runtime, /function renderCounts\(counts, sampled = false\)/);
 assert.match(runtime, /\$\{sampled \? "Places shown" : "Total"\}: \$\{total\.toLocaleString\(\)\}/);
-assert.match(runtime, /renderCounts\(counts, zoom < 6\);/);
+assert.match(runtime, /const SAMPLED_BELOW_ZOOM = 8;/);
+assert.match(runtime, /renderCounts\(counts, zoom < SAMPLED_BELOW_ZOOM\);/);
+assert.doesNotMatch(runtime, /renderCounts\(counts, zoom < 6\)/);
 assert.match(runtime, /const preferredLayer = zoom < 6 \? LAYERS\.overview : LAYERS\.places;/);
 
 // portals: the country is handed to the module; the filter is gone
@@ -42,7 +56,7 @@ assert.doesNotMatch(unvalidated, /overviewKeep/);
 // every html page that loads a changed script carries the bumped query
 // one stamp per script: a script's stamp moves only when that script changes
 const stamps = {
-    "region-map.js": "20261007a",
+    "region-map.js": "20261007b", // places-v2 tier, counts label from z8,
     "unvalidated-places.js": "20261007b", // zoom floor for ra-dots layers
     "verification-map.js": "20261007b", // one-round-trip landing
     "review-map.js": "20261007a",

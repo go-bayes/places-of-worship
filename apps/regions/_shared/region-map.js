@@ -242,7 +242,9 @@ const CONFIG = {
     // tiles v2: a slim, fraction-preserving sample of every place, z0 to 5
     // (immutable versioned name; the archive is served by the tiles worker)
     overview: "https://tiles.placemap.org/places-overview-v2-20260722/{z}/{x}/{y}",
-    places: "https://tiles.placemap.org/places/{z}/{x}/{y}",
+    // places tier v2: z8 to 18 byte-identical to the live places tier; z6 and
+    // z7 are a slim, fraction-preserving sample (tiles of at most 500 KB)
+    places: "https://tiles.placemap.org/places-v2-20260722/{z}/{x}/{y}",
     // optional overlay: a page names a polygon tileset in its config
     // (REGION_CONFIG.polygonsTileset) or the source is never added and no
     // tile is requested. configuration, not country identity
@@ -3040,8 +3042,10 @@ if (countsToggle) {
   });
 }
 
-// below zoom 6 the counts come from the overview sample, a fraction of the
-// places, so the line says "places shown" and not a total
+// below zoom 8 the counts come from a sample (the overview below zoom 6, the
+// places tier's z6 and z7 sample from 6), a fraction of the places, so the
+// line says "places shown" and not a total
+const SAMPLED_BELOW_ZOOM = 8;
 function renderCounts(counts, sampled = false) {
   countsList.innerHTML = "";
   let total = 0;
@@ -3145,7 +3149,7 @@ function updateCounts() {
         counts[key] += 1;
       }
     });
-    renderCounts(counts, zoom < 6);
+    renderCounts(counts, zoom < SAMPLED_BELOW_ZOOM);
   });
 }
 

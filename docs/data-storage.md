@@ -20,7 +20,7 @@ generation.
   was deleted at the same time). The hostname is a Worker custom domain on
   the separate `placemap.org` zone, matching `tools/tiles-r2/worker/wrangler.jsonc`
   and the tile URLs in `apps/regions/_shared/region-map.js`.
-  - Tilesets: `places`, `places-overview`, `buildings`, `nz-polygons`.
+  - Tilesets: `places`, `places-overview`, `buildings`, `nz-polygons` (the public maps no longer read `places` or `places-overview`; the RA layers still read `places` from zoom 8).
   - Versioned tilesets (tiles v2, build 20260722; manifest
     `tools/tiles-r2/manifests/tiles-v2-20260722-0ce3c532af1e.manifest.json`,
     with its validation report beside it, on `main` at commit
@@ -29,9 +29,13 @@ generation.
     `places-overview-v2-20260722` (a thinned sample of every place, z0 to 5,
     read by the public maps) and 210 `ra-dots-<cc>-20260722` archives (every
     place of one country, z3 to 7, read by the RA and review portals below
-    zoom 8). The client reads them from the merge of the client switch; they
-    are served only once the Worker that routes versioned names is deployed
-    and the archives are uploaded.
+    zoom 8) and `places-v2-20260722` (the public places tier: z8 to 18
+    byte-identical to `places`, z6 and z7 a fraction-preserving sample with at
+    most 500 KB a tile; manifest `tools/tiles-r2/manifests/places-v2-20260722.manifest.json`).
+    The public maps read `places-v2-20260722` for the places layer from zoom 6
+    (the counts panel says "Places shown" below zoom 8 and "Total" from 8);
+    the RA layers keep the unversioned `places`, from zoom 8 only. The
+    archives are served by the Worker that routes versioned names.
   - Local copies of the archives are kept outside the repo; the worker
     README records the upload and rebuild procedure.
 - Site domain: `religionmap.org` is served by GitHub Pages (`CNAME` at the repo root) with DNS on Cloudflare. Keep the apex A/AAAA records and the `www` CNAME **DNS only** (grey cloud) for this configuration. Proxying these records interrupted GitHub Pages certificate renewal (`https_certificate.state = bad_authz`). An expired origin certificate can produce Cloudflare error 526 when strict origin-certificate validation is enabled. To recover, set the records to DNS only, remove and re-add the custom domain under Settings → Pages to restart issuance, wait for the state to read `approved`, then enable Enforce HTTPS. Inspect the certificate with `gh api repos/go-bayes/places-of-worship/pages --jq .https_certificate`. The repair completed on 2026-09-18: the replacement certificate is approved until 2026-12-17, HTTPS enforcement is enabled, and the HTTPS apex returns 200. The redirect domains (`placesmap.org`, `powmap.org`) and the tiles host are Worker custom domains on separate zones and remain unchanged.
