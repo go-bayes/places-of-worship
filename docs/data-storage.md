@@ -33,7 +33,8 @@ generation.
     byte-identical to `places`, z6 and z7 a fraction-preserving sample with at
     most 500 KB a tile; manifest `tools/tiles-r2/manifests/places-v2-20260722.manifest.json`).
     The public maps read `places-v2-20260722` for the places layer from zoom 6
-    (the counts panel says "Places shown" below zoom 8 and "Total" from 8);
+    (the counts panel says "Places shown" below zoom 8 and until every drawn
+    places tile is z8 or higher, "Total" after);
     the RA layers keep the unversioned `places`, from zoom 8 only. The
     archives are served by the Worker that routes versioned names.
   - Local copies of the archives are kept outside the repo; the worker

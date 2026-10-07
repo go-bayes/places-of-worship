@@ -2809,7 +2809,13 @@ let filtersBootstrapped = false;
 // urlsearchparams would re-encode.
 function readHashParam(key) {
   const seg = location.hash.slice(1).split("&").find((s) => s.startsWith(key + "="));
-  return seg ? decodeURIComponent(seg.slice(key.length + 1)) : null;
+  if (!seg) return null;
+  // a malformed escape (#f=%ZZ) is treated as an absent parameter
+  try {
+    return decodeURIComponent(seg.slice(key.length + 1));
+  } catch (err) {
+    return null;
+  }
 }
 function writeHashParam(key, value) {
   const segs = location.hash.slice(1).split("&").filter((s) => s && !s.startsWith(key + "="));
@@ -3060,6 +3066,29 @@ if (countsToggle) {
 // places tier's z6 and z7 sample from 6), a fraction of the places, so the
 // line says "places shown" and not a total
 const SAMPLED_BELOW_ZOOM = 8;
+// the camera zoom alone cannot say which tiles supplied the rendered features:
+// while a z8 tile loads or fails, the map keeps drawing the sampled z6 or z7
+// parent. the places counts are a total only when every tile the places source
+// is drawing is at or above SAMPLED_BELOW_ZOOM. tileZooms lists the canonical
+// zoom of each drawn tile; an empty list (nothing drawn, or the source cache is
+// unreachable) counts as sampled, the safe label
+function placesCountsSampled(zoom, tileZooms) {
+  if (zoom < SAMPLED_BELOW_ZOOM) return true;
+  if (!tileZooms || !tileZooms.length) return true;
+  return tileZooms.some((z) => z < SAMPLED_BELOW_ZOOM);
+}
+// canonical zooms of the tiles the places source is drawing now. maplibre does
+// not expose this publicly, so the lookup is defensive and returns null when
+// the internal source cache is not where it is expected
+function drawnPlacesTileZooms() {
+  try {
+    const cache = map.style && map.style.sourceCaches && map.style.sourceCaches[SOURCES.places];
+    if (!cache || typeof cache.getVisibleCoordinates !== "function") return null;
+    return cache.getVisibleCoordinates().map((id) => id.canonical.z);
+  } catch (err) {
+    return null;
+  }
+}
 function renderCounts(counts, sampled = false) {
   countsList.innerHTML = "";
   let total = 0;
@@ -3163,7 +3192,10 @@ function updateCounts() {
         counts[key] += 1;
       }
     });
-    renderCounts(counts, zoom < SAMPLED_BELOW_ZOOM);
+    const sampled = zoom < 6
+      ? true
+      : placesCountsSampled(zoom, drawnPlacesTileZooms());
+    renderCounts(counts, sampled);
   });
 }
 
@@ -5717,6 +5749,21 @@ if (censusSourceSelect && RC.pulotuCultures) {
   }
 }
 
+// a places tile arriving after the last move can turn the counts from a
+// sample into a total, or follow a first render, and idle may not fire while
+// another source is still loading. so the counts refresh shortly after a
+// places tile lands and when the map settles; the debounce lets the render
+// that draws the tile come first
+let countsSettleTimer = null;
+function scheduleCountsRefresh() {
+  if (!countsUserEnabled) return;
+  clearTimeout(countsSettleTimer);
+  countsSettleTimer = setTimeout(updateCounts, 300);
+}
+map.on("sourcedata", (event) => {
+  if (event && event.sourceId === SOURCES.places && event.tile) scheduleCountsRefresh();
+});
+map.on("idle", scheduleCountsRefresh);
 map.on("movestart", showTileStatus);
 map.on("moveend", () => {
   updateCounts();

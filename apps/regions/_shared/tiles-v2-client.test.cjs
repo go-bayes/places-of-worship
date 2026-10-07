@@ -42,7 +42,9 @@ assert.doesNotMatch(runtime, /ra-dots/);
 assert.match(runtime, /function renderCounts\(counts, sampled = false\)/);
 assert.match(runtime, /\$\{sampled \? "Places shown" : "Total"\}: \$\{total\.toLocaleString\(\)\}/);
 assert.match(runtime, /const SAMPLED_BELOW_ZOOM = 8;/);
-assert.match(runtime, /renderCounts\(counts, zoom < SAMPLED_BELOW_ZOOM\);/);
+assert.match(runtime, /placesCountsSampled\(zoom, drawnPlacesTileZooms\(\)\)/);
+assert.match(runtime, /renderCounts\(counts, sampled\);/);
+assert.doesNotMatch(runtime, /renderCounts\(counts, zoom < SAMPLED_BELOW_ZOOM\)/);
 assert.doesNotMatch(runtime, /renderCounts\(counts, zoom < 6\)/);
 assert.match(runtime, /const preferredLayer = zoom < 6 \? LAYERS\.overview : LAYERS\.places;/);
 

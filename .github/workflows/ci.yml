@@ -54,6 +54,7 @@ jobs:
           node apps/regions/_shared/region-map-startup.test.cjs
           node apps/regions/_shared/tiles-v2-client.test.cjs
           node apps/regions/_shared/denomination-filter.test.cjs
+          node apps/regions/_shared/counts-label.test.cjs
           node apps/regions/_shared/area-summary-columns.test.cjs
           node apps/regions/nz/js/refresh-merge.test.cjs
           node apps/regions/nz/js/ra-landing.test.cjs
