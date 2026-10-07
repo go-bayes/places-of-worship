@@ -3739,6 +3739,19 @@ async function loadCensusData(level) {
 // its REGION_CONFIG; the governed product (def.summary) stays canonical and is
 // the fallback on any fetch, parse or shape failure, so a missing or damaged
 // transport degrades to today's behaviour. configuration, not country logic.
+// a deep copy of a value that came from JSON (primitives, arrays, plain objects)
+function cloneJsonValue(value) {
+  if (value === null || typeof value !== "object") return value;
+  if (Array.isArray(value)) {
+    const copy = new Array(value.length);
+    for (let i = 0; i < value.length; i += 1) copy[i] = cloneJsonValue(value[i]);
+    return copy;
+  }
+  const copy = {};
+  for (const key of Object.keys(value)) copy[key] = cloneJsonValue(value[key]);
+  return copy;
+}
+
 function expandSummaryColumns(packed) {
   if (!packed || packed.schema_version !== "area-summary-columns.v1") throw new Error("unsupported columnar schema_version");
   const { n, keys, constants, encoded, columns, header } = packed;
@@ -3762,14 +3775,19 @@ function expandSummaryColumns(packed) {
     }
     decoded[key] = column;
   }
+  // per key: a constant, or a decoded column. arrays and objects that come from
+  // a constant or a dictionary are shared by every row that holds them, so each
+  // row gets its own copy and no two rows alias one value
+  const nk = keys.length;
+  const isConstant = keys.map((key) => Object.hasOwn(constants, key));
+  const source = keys.map((key, k) => (isConstant[k] ? constants[key] : decoded[key]));
+  const copies = keys.map((key, k) => isConstant[k] || Object.hasOwn(encoded, key));
   const rows = new Array(n);
   for (let i = 0; i < n; i += 1) {
     const row = {};
-    for (const key of keys) {
-      const value = Object.hasOwn(constants, key) ? constants[key] : decoded[key][i];
-      // arrays and objects shared through a dictionary or a constant are
-      // copied so no two rows alias one value
-      row[key] = value !== null && typeof value === "object" ? structuredClone(value) : value;
+    for (let k = 0; k < nk; k += 1) {
+      const value = isConstant[k] ? source[k] : source[k][i];
+      row[keys[k]] = copies[k] ? cloneJsonValue(value) : value;
     }
     rows[i] = row;
   }
