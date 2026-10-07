@@ -40,7 +40,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from build_tiles_v2 import _cmd_text, _public_metadata, _run, _sha256  # noqa: E402
+from build_tiles_v2 import _cmd_text, _public_metadata, _run, _sha256, _stratified_sample  # noqa: E402
 
 SNAPSHOT = "20260722"
 LAYER = "places"
@@ -51,6 +51,16 @@ THIN_ZOOMS = (6, 7)
 COPY_FROM_ZOOM = 8
 TIPPECANOE_FLAGS = ["-Z6", "-z7", "--drop-fraction-as-needed", "-M", "500000", "-r1", "-l", LAYER]
 TILE_CAP_BYTES = 500_000
+# z6 is built with the briefed flags, which meet the share criterion (0.048 pp). The briefed flags at z7 shift the
+# religion shares by 0.459 pp (christian -0.459, muslim +0.262: the drop runs along the spatial index, so a
+# religion's share changes with where it lies), which fails the 0.3 pp criterion. z7 is therefore built, as z0 and z1
+# of the overview were, from a seeded sample stratified by religion at one fraction, adjusted until the largest tile
+# is just under the cap
+STRATIFIED_ZOOMS = (7,)
+SAMPLE_SEED = 20261007
+SAMPLE_START_FRACTION = 0.70
+SAMPLE_TARGET_BYTES = (470_000, 499_000)
+SAMPLE_FLAGS = ["-Z7", "-z7", "-r1", "--no-feature-limit", "--no-tile-size-limit", "-l", LAYER]
 SHARE_FLOOR = 0.005
 SHARE_TOLERANCE_PP = 0.3
 LIVE_URL = "https://tiles.placemap.org/places/{z}/{x}/{y}"
@@ -96,6 +106,39 @@ def cmd_build(a):
     if rc:
         sys.exit(rc)
 
+    def max_bytes(path, z):
+        c = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+        r = c.execute("select max(length(tile_data)), count(*), sum(length(tile_data)) from tiles where zoom_level=?", (z,)).fetchone()
+        c.close()
+        return r
+
+    briefed_z7 = max_bytes(thin, 7)
+    print(f"briefed flags at z7: max tile {briefed_z7[0]} bytes, {briefed_z7[1]} tiles (discarded for the share criterion)", flush=True)
+    z7 = parts / "z7.mbtiles"
+    sample = parts / "z7-sample.ndjson"
+    frac, trace, settled = SAMPLE_START_FRACTION, [], False
+    for attempt in range(10):
+        kept_n = _stratified_sample(str(slim), str(sample), frac, SAMPLE_SEED)
+        cmd7 = ["tippecanoe", *SAMPLE_FLAGS, "--force", "--temporary-directory", str(tmp), "-o", str(z7), str(sample)]
+        rc, secs = _run(cmd7, logs / "tippecanoe-z7.log")
+        if rc:
+            sys.exit(rc)
+        mx = max_bytes(z7, 7)[0]
+        trace.append({"fraction": round(frac, 6), "points": kept_n, "max_tile_bytes": mx})
+        print(f"z7 attempt {attempt}: fraction {frac:.5f}, {kept_n} points, max tile {mx} bytes", flush=True)
+        lo, hi = SAMPLE_TARGET_BYTES
+        if lo <= mx <= hi:
+            settled = True
+            break
+        if frac >= 1.0 and mx < lo:
+            settled = True
+            break
+        frac = min(1.0, frac * (lo + hi) / 2 / mx)
+    if not settled:
+        print("build: the z7 fraction did not settle", file=sys.stderr)
+        sys.exit(4)
+    cmd7_text = " ".join(["tippecanoe", *SAMPLE_FLAGS, "-o", "<work>/parts/z7.mbtiles", "<z7-sample.ndjson>"])
+
     merged = out / f"{name(a)}.mbtiles"
     partial = out / f"{name(a)}.mbtiles.partial"
     for p in (partial, merged):
@@ -110,10 +153,13 @@ def cmd_build(a):
     db.execute("pragma synchronous=off")
     db.execute("attach database ? as thin", (f"file:{thin}?mode=ro",))
     db.execute("attach database ? as src", (f"file:{src}?mode=ro",))
+    db.execute("attach database ? as z7part", (f"file:{z7}?mode=ro",))
     n_thin = db.execute(
-        "insert into tiles select zoom_level, tile_column, tile_row, tile_data from thin.tiles where zoom_level between ? and ?",
-        (THIN_ZOOMS[0], THIN_ZOOMS[-1])).rowcount
-    n_thin_other = db.execute("select count(*) from thin.tiles where zoom_level not between ? and ?", THIN_ZOOMS).fetchone()[0]
+        "insert into tiles select zoom_level, tile_column, tile_row, tile_data from thin.tiles where zoom_level = 6").rowcount
+    n_thin += db.execute(
+        "insert into tiles select zoom_level, tile_column, tile_row, tile_data from z7part.tiles where zoom_level = 7").rowcount
+    n_thin_other = (db.execute("select count(*) from z7part.tiles where zoom_level != 7").fetchone()[0]
+                    + db.execute("select count(*) from thin.tiles where zoom_level not in (6, 7)").fetchone()[0])
     n_copy = db.execute(
         "insert into tiles select zoom_level, tile_column, tile_row, tile_data from src.tiles where zoom_level >= ?",
         (COPY_FROM_ZOOM,)).rowcount
@@ -159,9 +205,12 @@ def cmd_build(a):
     (work / "build-info.json").write_text(json.dumps({
         "tippecanoe": tippecanoe_version, "pmtiles_cli": pm_version,
         "commands": {
-            "z6-7": " ".join(["tippecanoe", *TIPPECANOE_FLAGS, "-o", "<work>/parts/z6-7.mbtiles", "<slim.ndjson>"]),
+            "z6": " ".join(["tippecanoe", *TIPPECANOE_FLAGS, "-o", "<work>/parts/z6-7.mbtiles", "<slim.ndjson>"]) + " (only z6 is kept)",
+            "z7": cmd7_text,
             "copy": f"sqlite insert into tiles select ... from places.mbtiles.tiles where zoom_level >= {COPY_FROM_ZOOM} (read-only attach)",
             "convert": f"pmtiles convert {merged.name} {pm.name}"},
+        "z7_briefed_flags_discarded": {"max_tile_bytes": briefed_z7[0], "tiles": briefed_z7[1], "total_bytes": briefed_z7[2]},
+        "z7_calibration": {"seed": SAMPLE_SEED, "attempts": trace, "target_bytes": list(SAMPLE_TARGET_BYTES)},
         "thin_tiles_inserted": n_thin, "copied_tiles_inserted": n_copy,
         "slim_sha256": slim_sha, "built_at": datetime.now(timezone.utc).isoformat()}, indent=2) + "\n")
 
@@ -188,7 +237,7 @@ def _decode_thin(args):
                     religion[p.get("religion")] += 1
                     if p.get("osm_id") is not None:
                         keys[(p.get("osm_type"), p.get("osm_id"))] += 1
-    return z, list(d), core, religion, keys, attrs
+    return z, x, y, list(d), core, religion, keys, attrs
 
 
 def _scan_src_zoom(args):
@@ -334,7 +383,9 @@ def cmd_validate(a):
                 slim_keys[(p.get("osm_type"), p.get("osm_id"))] += 1
     agg = {z: {"core": 0, "religion": collections.Counter(), "keys": collections.Counter()} for z in THIN_ZOOMS}
     attrs, layers = set(), set()
-    for z, lys, core, rel, keys, at in thin:
+    core_by_tile = {}
+    for z, x, y, lys, core, rel, keys, at in thin:
+        core_by_tile[(z, x, y)] = core
         e = agg[z]
         e["core"] += core
         e["religion"].update(rel)
@@ -398,12 +449,16 @@ def cmd_validate(a):
         out_tiles[z].add((x, y))
     cover = {}
     for z in THIN_ZOOMS:
-        outside = len(out_tiles[z] - set(src_tiles[z]))
+        extra = out_tiles[z] - set(src_tiles[z])
+        # a tile that holds only a neighbour's buffer copy has no point in its proper area: no client sees a dot there
+        outside = sum(1 for t in extra if core_by_tile[(z, *t)] > 0)
         absent = set(src_tiles[z]) - out_tiles[z]
         cover[str(z)] = {"source_tiles": len(src_tiles[z]), "archive_tiles": len(out_tiles[z]),
-                         "archive_tiles_not_in_source": outside, "source_tiles_absent_from_archive": len(absent)}
+                         "archive_tiles_not_in_source": len(extra),
+                         "archive_tiles_not_in_source_with_points_in_proper_area": outside,
+                         "source_tiles_absent_from_archive": len(absent)}
         if outside:
-            problems.append(f"z{z}: {outside} tiles that the source does not have")
+            problems.append(f"z{z}: {outside} tiles that the source does not have hold points in their proper area")
     report["z6_7_tile_coverage"] = cover
     live = {str(z): {"tiles": len(src_tiles[z]), "max_bytes": max(src_tiles[z].values()),
                      "p95_bytes": _p95(list(src_tiles[z].values())), "total_bytes": sum(src_tiles[z].values())} for z in THIN_ZOOMS}
@@ -540,7 +595,7 @@ def _md_report(rep, meas):
         L += [f"| {r} | {d['input_pct']} | {d['kept_pct']} | {d['diff_pp']} |" for r, d in v["religions"].items()] + [""]
     L += ["## z6-7 tile coverage", ""]
     L += [f"- z{z}: {v['archive_tiles']} archive tiles of {v['source_tiles']} source tiles; {v['source_tiles_absent_from_archive']} source tiles have no archive tile; "
-          f"{v['archive_tiles_not_in_source']} archive tiles are not in the source." for z, v in rep["z6_7_tile_coverage"].items()]
+          f"{v['archive_tiles_not_in_source']} archive tiles are not in the source ({v['archive_tiles_not_in_source_with_points_in_proper_area']} of them with points in the proper area; the others hold only a neighbour's buffer copy)." for z, v in rep["z6_7_tile_coverage"].items()]
     if meas:
         L += ["", "## Measurement", "", "| zoom | live max | live p95 | live total | new max | new p95 | new total |", "|---|---|---|---|---|---|---|"]
         for z, v in meas["size_table"].items():
@@ -570,7 +625,11 @@ def cmd_manifest(a):
         sys.exit(6)
     pm = out / f"{name(a)}.pmtiles"
     params = {
-        "thin_flags": ["tippecanoe", *TIPPECANOE_FLAGS], "thin_zooms": list(THIN_ZOOMS), "copy_from_zoom": COPY_FROM_ZOOM,
+        "z6_flags": ["tippecanoe", *TIPPECANOE_FLAGS], "z7_flags": ["tippecanoe", *SAMPLE_FLAGS],
+        "z7_sample": {"seed": SAMPLE_SEED, "stratified_by": "religion", "calibration": info["z7_calibration"],
+                      "briefed_flags_discarded": info["z7_briefed_flags_discarded"],
+                      "reason": "the briefed flags at z7 shift the christian share by -0.459 pp, beyond the 0.3 pp criterion"},
+        "thin_zooms": list(THIN_ZOOMS), "copy_from_zoom": COPY_FROM_ZOOM,
         "layer": LAYER, "z6_7_attributes": ATTRS, "z0_5": "not built: the public map's places source has minzoom 6 and the RA layers read this tier from z8",
         "z8_18": "rows copied byte for byte from places.mbtiles (read-only attach), verified by digest in both directions",
         "source_sha256": ex["source"]["sha256"], "source_bytes": ex["source"]["bytes"], "slim_sha256": info["slim_sha256"],
@@ -580,7 +639,7 @@ def cmd_manifest(a):
         "sha256": _sha256(pm), "feature_count": None, "privacy": "public", "licence_status": "needs_review",
         "notes": ("public places tier, z6-18, layer places. z6-7 are a fraction-preserving sample of the 2,072,349 input places, "
                   "six attributes, capped at 500,000 bytes per tile; z8-18 are byte-identical to the live places tileset. "
-                  f"commands: {_cmd_text(info['commands']['z6-7'])}; {info['commands']['copy']}; {info['commands']['convert']}. "
+                  f"commands: {_cmd_text(info['commands']['z6'])}; {_cmd_text(info['commands']['z7'])} (seeded religion-stratified sample, fraction in the parameters);{info['commands']['copy']}; {info['commands']['convert']}. "
                   "Location is a machine-local build output on green, a cache and not a durable store; the durable copy is the R2 object, once uploaded and recorded.")}]
     ident = hashlib.sha256(json.dumps({"files": [(pm.name, files[0]["sha256"])], "params": params}, sort_keys=True).encode()).hexdigest()
     manifest = {
