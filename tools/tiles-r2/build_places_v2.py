@@ -92,17 +92,36 @@ def _interior(lon, lat, z):
     return (x, y), clear
 
 
-def sample_with_coverage(src, dst, fraction, seed, zoom):
+BUFFER_FRACTION = 5 / 256  # tippecanoe's default buffer (5 of 256 screen pixels), as a fraction of the tile width
+
+
+def _buffered_tiles(lon, lat, z):
+    """Tiles whose buffered area holds a point, clear of the buffer's edge by EDGE_MARGIN (a tile's width)."""
+    n = 1 << z
+    fx = (lon + 180.0) / 360.0 * n
+    fy = (1.0 - math.asinh(math.tan(math.radians(lat))) / math.pi) / 2.0 * n
+    reach = BUFFER_FRACTION - EDGE_MARGIN
+    xs = range(max(0, math.ceil(fx - 1 - reach)), min(n - 1, math.floor(fx + reach)) + 1)
+    ys = range(max(0, math.ceil(fy - 1 - reach)), min(n - 1, math.floor(fy + reach)) + 1)
+    return [(x, y) for x in xs for y in ys]
+
+
+def sample_with_coverage(src, dst, fraction, seed, zoom, required_tiles=None):
     """Write a seeded sample of an NDJSON feature file at one fraction.
 
     Each religion keeps round(fraction * n) features, drawn at random, so the shares follow the input. Then
     every zoom-`zoom` tile that holds input points but no sampled point gets one, drawn at random from the
-    points in its proper area, so no place's neighbourhood loses every dot. Returns (points written, points
-    added for coverage)."""
+    points in its proper area, so no place's neighbourhood loses every dot. Then every tile in `required_tiles`
+    (the zoom-`zoom` tiles of the live source, a set of (x, y)) that no sampled point reaches, buffer included,
+    gets one point drawn at random from the points in its buffered area, so every source tile has an archive
+    tile. Returns (points written, points added for proper-area coverage, points added for source-tile coverage,
+    required tiles with no point in their buffered area)."""
     import random
 
+    required = set(required_tiles or ())
     by_religion = collections.defaultdict(list)
     tile_members = collections.defaultdict(list)
+    buffer_members = collections.defaultdict(list)
     with open(src, encoding="utf-8") as fh:
         for i, line in enumerate(fh):
             f = json.loads(line)
@@ -110,6 +129,10 @@ def sample_with_coverage(src, dst, fraction, seed, zoom):
             lon, lat = f["geometry"]["coordinates"]
             tile, clear = _interior(lon, lat, zoom)
             tile_members[tile].append((i, clear))
+            if required:
+                for t in _buffered_tiles(lon, lat, zoom):
+                    if t in required:
+                        buffer_members[t].append(i)
     chosen = set()
     for rel in sorted(by_religion, key=str):
         idx = by_religion[rel]
@@ -122,13 +145,21 @@ def sample_with_coverage(src, dst, fraction, seed, zoom):
         if clear and not any(i in chosen for i in clear):
             chosen.add(random.Random(f"{seed}:cover:{tile}").choice(clear))
             added += 1
+    added_buffer, unreachable = 0, 0
+    for tile in sorted(required):
+        reach = buffer_members.get(tile, [])
+        if not reach:
+            unreachable += 1
+        elif not any(i in chosen for i in reach):
+            chosen.add(random.Random(f"{seed}:source:{tile}").choice(reach))
+            added_buffer += 1
     n = 0
     with open(src, encoding="utf-8") as fh, open(dst, "w", encoding="utf-8") as out:
         for i, line in enumerate(fh):
             if i in chosen:
                 out.write(line)
                 n += 1
-    return n, added
+    return n, added, added_buffer, unreachable
 
 
 # ------------------------------------------------------------------ build
@@ -176,16 +207,23 @@ def cmd_build(a):
     print(f"briefed flags at z7: max tile {briefed_z7[0]} bytes, {briefed_z7[1]} tiles (discarded for the share criterion)", flush=True)
     z7 = parts / "z7.mbtiles"
     sample = parts / "z7-sample.ndjson"
+    sdb = sqlite3.connect(f"file:{src}?mode=ro", uri=True)
+    source_z7 = {(c, (1 << 7) - 1 - r) for c, r in sdb.execute("select tile_column, tile_row from tiles where zoom_level=7")}
+    sdb.close()
     frac, trace, settled = SAMPLE_START_FRACTION, [], False
     for attempt in range(10):
-        kept_n, cover_added = sample_with_coverage(str(slim), str(sample), frac, SAMPLE_SEED, 7)
+        kept_n, cover_added, source_added, unreachable = sample_with_coverage(
+            str(slim), str(sample), frac, SAMPLE_SEED, 7, required_tiles=source_z7)
         cmd7 = ["tippecanoe", *SAMPLE_FLAGS, "--force", "--temporary-directory", str(tmp), "-o", str(z7), str(sample)]
         rc, secs = _run(cmd7, logs / "tippecanoe-z7.log")
         if rc:
             sys.exit(rc)
         mx = max_bytes(z7, 7)[0]
-        trace.append({"fraction": round(frac, 6), "points": kept_n, "added_for_tile_coverage": cover_added, "max_tile_bytes": mx})
-        print(f"z7 attempt {attempt}: fraction {frac:.5f}, {kept_n} points ({cover_added} added for tile coverage), max tile {mx} bytes", flush=True)
+        trace.append({"fraction": round(frac, 6), "points": kept_n, "added_for_tile_coverage": cover_added,
+                      "added_for_source_tile_coverage": source_added, "source_tiles_without_a_reachable_point": unreachable,
+                      "max_tile_bytes": mx})
+        print(f"z7 attempt {attempt}: fraction {frac:.5f}, {kept_n} points ({cover_added} added for tile coverage, "
+              f"{source_added} for source tiles, {unreachable} source tiles unreachable), max tile {mx} bytes", flush=True)
         lo, hi = SAMPLE_TARGET_BYTES
         if lo <= mx <= hi:
             settled = True
@@ -282,7 +320,7 @@ def _decode_thin(args):
 
     z, x, y, data = args
     d = mapbox_vector_tile.decode(gzip.decompress(data), default_options={"y_coord_down": True})
-    religion, keys, attrs = collections.Counter(), collections.Counter(), set()
+    religion, keys, attrs, attr_core = collections.Counter(), collections.Counter(), set(), collections.Counter()
     core = 0
     for lyr in d.values():
         ext = lyr["extent"]
@@ -291,13 +329,15 @@ def _decode_thin(args):
             pts = g["coordinates"] if g["type"] == "MultiPoint" else [g["coordinates"]]
             p = f["properties"]
             attrs.update(p.keys())
+            present = [k for k, v in p.items() if v is not None]
             for px, py in pts:
                 if 0 <= px < ext and 0 <= py < ext:
                     core += 1
+                    attr_core.update(present)
                     religion[p.get("religion")] += 1
                     if p.get("osm_id") is not None:
                         keys[(p.get("osm_type"), p.get("osm_id"))] += 1
-    return z, x, y, list(d), core, religion, keys, attrs
+    return z, x, y, list(d), core, religion, keys, attrs, attr_core
 
 
 def _scan_src_zoom(args):
@@ -331,6 +371,82 @@ def size_table(sizes):
                      "total_bytes": sum(v)} for z, v in sorted(sizes.items()) if v}
 
 
+def attribute_problems(zoom, seen, core_counts, core, slim_counts, slim_total, expected=ATTRS):
+    """Problems with the attributes of one zoom's tiles, judged on that zoom alone.
+
+    `seen` is the set of attribute names on any feature of the zoom, `core_counts` the number of tile-proper points
+    carrying each attribute, `core` the number of tile-proper points, `slim_counts` the number of input features
+    carrying each attribute (value not null) and `slim_total` the input's feature count. An attribute the input
+    carries on every feature must be on every tile-proper point; one the input carries on some features must be on
+    some points; one the input never carries may be absent."""
+    found = []
+    if set(seen) - set(expected):
+        found.append(f"z{zoom}: attributes {sorted(set(seen) - set(expected))} are not among the expected six")
+    for attr in expected:
+        have, want = core_counts.get(attr, 0), slim_counts.get(attr, 0)
+        if want == 0:
+            continue
+        if want == slim_total and have != core:
+            found.append(f"z{zoom}: attribute {attr} is on {have} of {core} tile points, but the input has it on every feature")
+        elif have == 0:
+            found.append(f"z{zoom}: attribute {attr} is on no tile point, but the input has it on {want} features")
+    return found
+
+
+def coverage_unmet(zoom, source_tiles, archive_tiles):
+    """Source tiles with features that the archive lacks, as an unmet L1 criterion (or None)."""
+    absent = set(source_tiles) - set(archive_tiles)
+    if absent:
+        return f"z{zoom}: {len(absent)} source tiles that hold features have no archive tile (L1 requires one for each)"
+    return None
+
+
+BOUND_INPUTS = ("archive_sha256", "source_sha256", "slim_sha256")
+
+
+def binding_mismatches(recorded, current):
+    """Names of the bound inputs whose recorded digest is missing or differs from the current digest."""
+    return [k for k in BOUND_INPUTS if not recorded or not recorded.get(k) or recorded.get(k) != current.get(k)]
+
+
+PER_TILE_COLUMNS = ["x", "y", "input_points", "archive_points", "input_counts", "archive_counts", "max_abs_diff_pp"]
+
+
+def per_tile_religion_rows(in_rel, out_rel, religions):
+    """Per-tile religion counts of the input and the archive, and the largest share difference, for one zoom.
+
+    `in_rel` and `out_rel` map (x, y) to a Counter of religion; `religions` is the ordered list of reported
+    religions, the last entry being "other" for every religion outside the list. A row is
+    [x, y, input points, archive points, input counts, archive counts, largest absolute share difference in
+    percentage points]; the difference is None when either side has no points."""
+    keep = set(religions[:-1])
+
+    def fold(counter):
+        row = [0] * len(religions)
+        for rel, n in counter.items():
+            row[religions.index(rel) if rel in keep else len(religions) - 1] += n
+        return row
+
+    rows = []
+    for tile in sorted(set(in_rel) | set(out_rel)):
+        ci, co = fold(in_rel.get(tile, {})), fold(out_rel.get(tile, {}))
+        ni, no = sum(ci), sum(co)
+        diff = max(abs(co[k] / no - ci[k] / ni) for k in range(len(religions))) * 100 if ni and no else None
+        rows.append([tile[0], tile[1], ni, no, ci, co, None if diff is None else round(diff, 3)])
+    return rows
+
+
+def per_tile_summary(rows, min_points=100):
+    """Summary of the per-tile differences over tiles with at least `min_points` input points."""
+    diffs = sorted(r[6] for r in rows if r[2] >= min_points and r[6] is not None)
+    out = {"tiles": len(rows), "tiles_without_archive_points": sum(1 for r in rows if r[3] == 0),
+           "min_points": min_points, "tiles_at_or_above_min_points": len(diffs)}
+    if diffs:
+        out.update({"median_max_abs_diff_pp": diffs[len(diffs) // 2], "p95_max_abs_diff_pp": _p95(diffs), "max_max_abs_diff_pp": diffs[-1],
+                    "tiles_over_5_pp": sum(1 for d in diffs if d > 5), "tiles_over_10_pp": sum(1 for d in diffs if d > 10)})
+    return out
+
+
 def cmd_validate(a):
     from pmtiles.reader import Compression, MmapSource, Reader, all_tiles
 
@@ -346,6 +462,16 @@ def cmd_validate(a):
     problems, unmet = report["problems"], report["criteria_not_met"]
     warnings = report.setdefault("warnings", [])
     t0 = time.time()
+
+    # --- bind this report to the archive, the source and the slim input it examined
+    ex = json.loads((Path(a.extract_work) / "extract-report.json").read_text())
+    inputs = {"archive_sha256": _sha256(pm_path), "archive_bytes": pm_path.stat().st_size,
+              "source_sha256": _sha256(Path(src)), "source_bytes": Path(src).stat().st_size, "slim_sha256": _sha256(Path(a.slim))}
+    report["inputs"] = inputs
+    if inputs["slim_sha256"] != stats["slim_sha256"]:
+        problems.append("slim.ndjson digest differs from input-stats")
+    if inputs["source_sha256"] != ex["source"]["sha256"]:
+        problems.append("places.mbtiles digest differs from the extract report")
 
     # --- header and metadata
     with open(pm_path, "rb") as fh:
@@ -438,26 +564,36 @@ def cmd_validate(a):
     # --- z6-7: size cap, shares, counts, attributes, keys
     slim_keys = collections.Counter()
     input_tiles = {z: collections.Counter() for z in THIN_ZOOMS}
+    input_rel = {z: collections.defaultdict(collections.Counter) for z in THIN_ZOOMS}
+    slim_attr_counts, slim_total = collections.Counter(), 0
     with open(a.slim, encoding="utf-8") as fh:
         for line in fh:
             f = json.loads(line)
             p = f["properties"]
+            slim_total += 1
+            slim_attr_counts.update(k for k, v in p.items() if v is not None)
             if "osm_id" in p:
                 slim_keys[(p.get("osm_type"), p.get("osm_id"))] += 1
             lon, lat = f["geometry"]["coordinates"]
             for z in THIN_ZOOMS:
                 tile, clear = _interior(lon, lat, z)
+                input_rel[z][tile][p.get("religion")] += 1
                 if clear:
                     input_tiles[z][tile] += 1
-    agg = {z: {"core": 0, "religion": collections.Counter(), "keys": collections.Counter()} for z in THIN_ZOOMS}
+    agg = {z: {"core": 0, "religion": collections.Counter(), "keys": collections.Counter(), "attrs": set(),
+               "attr_core": collections.Counter()} for z in THIN_ZOOMS}
     attrs, layers = set(), set()
     core_by_tile = {}
-    for z, x, y, lys, core, rel, keys, at in thin:
+    out_rel = {z: {} for z in THIN_ZOOMS}
+    for z, x, y, lys, core, rel, keys, at, attr_core in thin:
         core_by_tile[(z, x, y)] = core
+        out_rel[z][(x, y)] = rel
         e = agg[z]
         e["core"] += core
         e["religion"].update(rel)
         e["keys"].update(keys)
+        e["attrs"] |= at
+        e["attr_core"].update(attr_core)
         attrs |= at
         layers |= set(lys)
     report["z6_7_size_bytes"] = size_table(sizes)
@@ -469,8 +605,15 @@ def cmd_validate(a):
             unmet.append(f"z{z}: largest tile {mx} bytes exceeds {TILE_CAP_BYTES}")
     report["z6_7_attributes"] = sorted(attrs)
     report["z6_7_layers"] = sorted(layers)
-    if attrs != set(ATTRS):
-        problems.append(f"z6-7 attributes {sorted(attrs)}, expected {sorted(ATTRS)}")
+    # each zoom is judged alone, so a field missing at one zoom is not hidden by the other
+    report["z6_7_attributes_by_zoom"] = {}
+    for z in THIN_ZOOMS:
+        e = agg[z]
+        report["z6_7_attributes_by_zoom"][str(z)] = {
+            "seen": sorted(e["attrs"]), "tile_points": e["core"],
+            "points_carrying": {k: e["attr_core"].get(k, 0) for k in ATTRS},
+            "input_features_carrying": {k: slim_attr_counts.get(k, 0) for k in ATTRS}}
+        problems += attribute_problems(z, e["attrs"], e["attr_core"], e["core"], slim_attr_counts, slim_total)
     if layers != {LAYER}:
         problems.append(f"z6-7 layers {sorted(layers)}, expected [{LAYER!r}]")
 
@@ -528,6 +671,9 @@ def cmd_validate(a):
                          "source_tiles_absent_from_archive": len(absent),
                          "input_tiles_with_points": len(input_tiles[z]),
                          "input_tiles_without_a_dot_in_archive": len(lost)}
+        gap = coverage_unmet(z, src_tiles[z], out_tiles[z])
+        if gap:
+            unmet.append(gap)
         if lost and z in STRATIFIED_ZOOMS:
             problems.append(f"z{z}: {len(lost)} tiles that hold input points have no dot in the archive")
         elif lost:
@@ -539,6 +685,28 @@ def cmd_validate(a):
     live = {str(z): {"tiles": len(src_tiles[z]), "max_bytes": max(src_tiles[z].values()),
                      "p95_bytes": _p95(list(src_tiles[z].values())), "total_bytes": sum(src_tiles[z].values())} for z in THIN_ZOOMS}
     report["z6_7_live_source_size_bytes"] = live
+
+    # --- per-tile religion diagnostics (reported, not gated: small tiles are noisy; the global shares above are the gate)
+    reported = [r for r, s in sorted(in_share.items(), key=lambda kv: -kv[1]) if s > SHARE_FLOOR]
+    religions = [str(r) for r in reported] + ["other"]
+    rows_by_zoom = {}
+    for z in THIN_ZOOMS:
+        rows_by_zoom[str(z)] = per_tile_religion_rows(input_rel[z], out_rel[z], religions)
+    report["z6_7_per_tile_religion"] = {
+        "file": f"per-tile-religion-{name(a)}.json",
+        "method": "for each z6 and z7 tile, religion counts of the input points in the tile's area against the points in the "
+                  "archive tile's proper area, over the religions above 0.5 percent of the input and one 'other' bucket, with the "
+                  "largest absolute difference in share (percentage points); diagnostic only, so tiles with few points are noisy",
+        "summary": {str(z): per_tile_summary(rows_by_zoom[str(z)]) for z in THIN_ZOOMS}}
+    (work / "per-tile-religion.json").write_text(
+        '{"archive": ' + json.dumps(pm_path.name) + ', "archive_sha256": ' + json.dumps(inputs["archive_sha256"]) +
+        ', "religions": ' + json.dumps(religions, ensure_ascii=False) + ', "columns": ' + json.dumps(PER_TILE_COLUMNS) +
+        ', "rows": {' + ", ".join(f'"{z}": [\n' + ",\n".join(json.dumps(r, separators=(",", ":")) for r in rows) + "\n]"
+                                  for z, rows in rows_by_zoom.items()) + "}}\n")
+
+    # the archive must be the one hashed at the start
+    if _sha256(pm_path) != inputs["archive_sha256"]:
+        problems.append("the archive changed while it was being validated")
     report["status"] = "failed" if problems else ("criteria_not_met" if unmet else "passed")
     report["seconds"] = round(time.time() - t0)
     (work / "validation-report.json").write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
@@ -678,7 +846,19 @@ def _md_report(rep, meas):
               f"{v['max_abs_diff_pp']} pp; osm keys over the input multiplicity: {v['osm_keys_over_input_multiplicity']}.", "",
               "| religion | input % | kept % | diff pp |", "|---|---|---|---|"]
         L += [f"| {r} | {d['input_pct']} | {d['kept_pct']} | {d['diff_pp']} |" for r, d in v["religions"].items()] + [""]
-    L += ["## z6-7 tile coverage", ""]
+    pt = rep["z6_7_per_tile_religion"]
+    L += ["## z6-7 per-tile religion shares (diagnostic)", "", f"{pt['method']}. Counts for every tile are in `{pt['file']}`.", "",
+          "| zoom | tiles | tiles with no archive point | tiles with at least {} input points | median largest diff pp | p95 | max | tiles over 5 pp | tiles over 10 pp |".format(
+              next(iter(pt["summary"].values()))["min_points"]), "|---|---|---|---|---|---|---|---|---|"]
+    L += [f"| {z} | {v['tiles']} | {v['tiles_without_archive_points']} | {v['tiles_at_or_above_min_points']} | "
+          f"{v.get('median_max_abs_diff_pp')} | {v.get('p95_max_abs_diff_pp')} | {v.get('max_max_abs_diff_pp')} | "
+          f"{v.get('tiles_over_5_pp')} | {v.get('tiles_over_10_pp')} |" for z, v in pt["summary"].items()]
+    L += ["", "## z6-7 attributes by zoom", ""]
+    L += [f"- z{z}: {v['tile_points']} tile points; carrying: " + ", ".join(f"{k} {n}" for k, n in v["points_carrying"].items()) +
+          "; input features carrying: " + ", ".join(f"{k} {n}" for k, n in v["input_features_carrying"].items()) for z, v in rep["z6_7_attributes_by_zoom"].items()]
+    L += ["", "## Bound inputs", "", "Digests the report was made from; the manifest stage recomputes them and refuses on a difference.", ""]
+    L += [f"- {k}: {v}" for k, v in rep["inputs"].items()]
+    L += ["", "## z6-7 tile coverage", ""]
     L += [f"- z{z}: {v['archive_tiles']} archive tiles of {v['source_tiles']} source tiles; {v['source_tiles_absent_from_archive']} source tiles have no archive tile; "
           f"{v['archive_tiles_not_in_source']} archive tiles are not in the source ({v['archive_tiles_not_in_source_with_points_in_proper_area']} of them with points in the proper area; the others hold only a neighbour's buffer copy). {v['input_tiles_with_points']} tiles hold input points clear of their edges; {v['input_tiles_without_a_dot_in_archive']} of them have no dot in the archive." for z, v in rep["z6_7_tile_coverage"].items()]
     if meas:
@@ -709,6 +889,15 @@ def cmd_manifest(a):
         print(f"manifest: the validation report says {rep['status']}; no manifest is written", file=sys.stderr)
         sys.exit(6)
     pm = out / f"{name(a)}.pmtiles"
+    # the report must describe these files: recompute the digests it recorded and refuse on any difference
+    current = {"archive_sha256": _sha256(pm), "source_sha256": _sha256(Path(a.source)), "slim_sha256": _sha256(Path(a.slim))}
+    bad = binding_mismatches(rep.get("inputs"), current)
+    if bad:
+        print(f"manifest: the validation report was not made from the current {', '.join(bad)}; validate again", file=sys.stderr)
+        sys.exit(7)
+    if info["slim_sha256"] != current["slim_sha256"]:
+        print("manifest: build-info records a different slim input than the current one; build again", file=sys.stderr)
+        sys.exit(7)
     params = {
         "z6_flags": ["tippecanoe", *TIPPECANOE_FLAGS], "z7_flags": ["tippecanoe", *SAMPLE_FLAGS],
         "z7_sample": {"seed": SAMPLE_SEED, "stratified_by": "religion", "calibration": info["z7_calibration"],
@@ -721,7 +910,7 @@ def cmd_manifest(a):
         "input_features": stats["total"]}
     files = [{
         "uri": f"green:{pm.resolve()}", "storage_provider": "other", "format": "pmtiles", "bytes": pm.stat().st_size,
-        "sha256": _sha256(pm), "feature_count": None, "privacy": "public", "licence_status": "needs_review",
+        "sha256": current["archive_sha256"], "feature_count": None, "privacy": "public", "licence_status": "needs_review",
         "notes": ("public places tier, z6-18, layer places. z6-7 are a fraction-preserving sample of the 2,072,349 input places, "
                   "six attributes, capped at 500,000 bytes per tile; z8-18 are byte-identical to the live places tileset. "
                   f"commands: {_cmd_text(info['commands']['z6'])}; {_cmd_text(info['commands']['z7'])} (seeded religion-stratified sample, fraction in the parameters);{info['commands']['copy']}; {info['commands']['convert']}. "
@@ -768,6 +957,7 @@ def cmd_manifest(a):
     (dest / f"{name(a)}.manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
     (dest / f"validation-report-{name(a)}.json").write_text(json.dumps({"validation": rep, "measurement": meas}, indent=2, ensure_ascii=False) + "\n")
     (dest / f"validation-report-{name(a)}.md").write_text(_md_report(rep, meas))
+    shutil.copyfile(work / "per-tile-religion.json", dest / rep["z6_7_per_tile_religion"]["file"])
     print(f"manifest: wrote {dest} (version {manifest['dataset_version_id']})", flush=True)
 
 
