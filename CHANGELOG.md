@@ -8,6 +8,7 @@
 - The counts panel reads "Places shown" below zoom 8 and "Total" from zoom 8, because the z6 and z7 dots are a sample (previously the threshold was zoom 6). The layer that supplies the counts still switches from the overview to the places tier at zoom 6.
 - The RA and review layers (`apps/regions/nz/js/unvalidated-places.js`) are unchanged: they read the unversioned `places` from zoom 8 only, where the bytes are identical. The RA guide is unaffected (no contributor-portal UI changed).
 - Cache-busting: `region-map.js` is stamped `?v=20261007b` on the 104 pages that load it.
+- Measured on 2026-10-07 on green (headless Chromium 1440x900, unthrottled, production tiles, `origin/main` and the branch each served locally, three interleaved runs, medians): overlay bytes at landing on the eight country pages that open at zoom 6 or 7 (NL, CH, DK, CZ, PT, IE, KR, TW) fall from 27.7 MB to 6.0 MB in total (NL 8.61 to 1.36 MB, CH 8.00 to 1.37 MB); the median tile takes 252 to 1,289 ms before and 197 to 561 ms after. In an earlier pass the live `places` z6 and z7 tiles under CH, CZ, PT, KR and TW had not answered after 90 seconds in at least one run (the same tiles under `places-v2-20260722` always answered); a second pass saw no stalls.
 - `tiles-v2-client.test.cjs` now checks the places tier URL, the source zoom range, the RA layers' tier and floor, the counts threshold and the new stamp. Docs updated: `docs/data-storage.md`, `tools/tiles-r2/README.md`.
 
 ### 2026-10-07 (ra-dots zoom floor, from the final review of #177)
