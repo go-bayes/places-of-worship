@@ -32,7 +32,7 @@ import {
   assertTaskReasonLimit,
 } from "./lib/limits";
 import { appendTaskEvent } from "./lib/taskEvents";
-import { evidenceDraftDoc, reviewDecisionDoc, taskDoc, taskEventDoc } from "./lib/validators";
+import { evidenceDraftDoc, reviewDecisionDoc, taskDoc, taskEventDoc, userDoc } from "./lib/validators";
 
 type IssueTaskType =
   | "possible_duplicate"
@@ -123,6 +123,95 @@ export function assertTaskSeedTextLimits(taskRecord: {
   }
 }
 
+type ListTasksArgs = {
+  countryCode: string;
+  batchId?: string;
+  status?: Doc<"tasks">["status"];
+  priority?: Doc<"tasks">["priority"];
+  limit?: number;
+};
+
+// the listTasks read, shared with raLanding so the role-scoped promotion
+// gates hold by one body of code and cannot drift between the two queries
+async function listTasksFor(ctx: QueryCtx, user: Doc<"users">, args: ListTasksArgs): Promise<Doc<"tasks">[]> {
+  // promotion gate (docs/development/revision-pipeline-all-countries.md,
+  // phase R1): tasks in a draft batch stay invisible to RA queues until a
+  // curator promotes the batch to active. Reviewers and above still see
+  // draft batches so they can inspect a seed before promotion.
+  const privileged = canReview(user.roles);
+  const limit = Math.min(Math.max(args.limit ?? 250, 1), 1000);
+  const batchId = args.batchId;
+  if (batchId !== undefined && !privileged) {
+    const scopedBatch = await ctx.db
+      .query("task_batches")
+      .withIndex("by_batch_id", (q) => q.eq("batch_id", batchId))
+      .unique();
+    if (scopedBatch !== null && scopedBatch.status === "draft") {
+      return [];
+    }
+  }
+  let tasks: Doc<"tasks">[];
+  if (batchId !== undefined && args.status !== undefined) {
+    const status = args.status;
+    tasks = await ctx.db
+      .query("tasks")
+      .withIndex("by_batch_status", (q) => q.eq("batch_id", batchId).eq("status", status))
+      .take(limit);
+  } else if (batchId !== undefined) {
+    tasks = await ctx.db
+      .query("tasks")
+      .withIndex("by_batch_status", (q) => q.eq("batch_id", batchId))
+      .take(limit);
+  } else if (args.status !== undefined) {
+    const status = args.status;
+    tasks = await ctx.db
+      .query("tasks")
+      .withIndex("by_country_status", (q) =>
+        q.eq("country_code", args.countryCode).eq("status", status),
+      )
+      .take(limit);
+  } else {
+    // per-status indexed reads keep every status bucket represented; a
+    // single prefix take would fill up on alphabetically-early statuses
+    const collected: Doc<"tasks">[] = [];
+    for (const status of taskStatusValues) {
+      collected.push(
+        ...(await ctx.db
+          .query("tasks")
+          .withIndex("by_country_status", (q) => q.eq("country_code", args.countryCode).eq("status", status))
+          .take(limit)),
+      );
+    }
+    tasks = collected
+      .sort((left, right) => left._creationTime - right._creationTime)
+      .slice(0, limit);
+  }
+
+  if (batchId !== undefined) {
+    tasks = tasks.filter((task) => task.country_code === args.countryCode);
+  }
+
+  // country-wide reads for non-privileged users also exclude draft
+  // batches; a country has at most a handful of them at a time
+  if (!privileged) {
+    const draftBatches = await ctx.db
+      .query("task_batches")
+      .withIndex("by_country_status", (q) =>
+        q.eq("country_code", args.countryCode).eq("status", "draft"),
+      )
+      .collect();
+    if (draftBatches.length > 0) {
+      const draftBatchIds = new Set(draftBatches.map((batch) => batch.batch_id));
+      tasks = tasks.filter((task) => !draftBatchIds.has(task.batch_id));
+    }
+  }
+
+  if (args.priority !== undefined) {
+    return tasks.filter((task) => task.priority === args.priority);
+  }
+  return tasks;
+}
+
 export const listTasks = query({
   args: {
     countryCode: v.string(),
@@ -134,82 +223,7 @@ export const listTasks = query({
   returns: v.array(taskDoc),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin", "service"]);
-    // promotion gate (docs/development/revision-pipeline-all-countries.md,
-    // phase R1): tasks in a draft batch stay invisible to RA queues until a
-    // curator promotes the batch to active. Reviewers and above still see
-    // draft batches so they can inspect a seed before promotion.
-    const privileged = canReview(user.roles);
-    const limit = Math.min(Math.max(args.limit ?? 250, 1), 1000);
-    const batchId = args.batchId;
-    if (batchId !== undefined && !privileged) {
-      const scopedBatch = await ctx.db
-        .query("task_batches")
-        .withIndex("by_batch_id", (q) => q.eq("batch_id", batchId))
-        .unique();
-      if (scopedBatch !== null && scopedBatch.status === "draft") {
-        return [];
-      }
-    }
-    let tasks: Doc<"tasks">[];
-    if (batchId !== undefined && args.status !== undefined) {
-      const status = args.status;
-      tasks = await ctx.db
-        .query("tasks")
-        .withIndex("by_batch_status", (q) => q.eq("batch_id", batchId).eq("status", status))
-        .take(limit);
-    } else if (batchId !== undefined) {
-      tasks = await ctx.db
-        .query("tasks")
-        .withIndex("by_batch_status", (q) => q.eq("batch_id", batchId))
-        .take(limit);
-    } else if (args.status !== undefined) {
-      const status = args.status;
-      tasks = await ctx.db
-        .query("tasks")
-        .withIndex("by_country_status", (q) =>
-          q.eq("country_code", args.countryCode).eq("status", status),
-        )
-        .take(limit);
-    } else {
-      // per-status indexed reads keep every status bucket represented; a
-      // single prefix take would fill up on alphabetically-early statuses
-      const collected: Doc<"tasks">[] = [];
-      for (const status of taskStatusValues) {
-        collected.push(
-          ...(await ctx.db
-            .query("tasks")
-            .withIndex("by_country_status", (q) => q.eq("country_code", args.countryCode).eq("status", status))
-            .take(limit)),
-        );
-      }
-      tasks = collected
-        .sort((left, right) => left._creationTime - right._creationTime)
-        .slice(0, limit);
-    }
-
-    if (batchId !== undefined) {
-      tasks = tasks.filter((task) => task.country_code === args.countryCode);
-    }
-
-    // country-wide reads for non-privileged users also exclude draft
-    // batches; a country has at most a handful of them at a time
-    if (!privileged) {
-      const draftBatches = await ctx.db
-        .query("task_batches")
-        .withIndex("by_country_status", (q) =>
-          q.eq("country_code", args.countryCode).eq("status", "draft"),
-        )
-        .collect();
-      if (draftBatches.length > 0) {
-        const draftBatchIds = new Set(draftBatches.map((batch) => batch.batch_id));
-        tasks = tasks.filter((task) => !draftBatchIds.has(task.batch_id));
-      }
-    }
-
-    if (args.priority !== undefined) {
-      return tasks.filter((task) => task.priority === args.priority);
-    }
-    return tasks;
+    return await listTasksFor(ctx, user, args);
   },
 });
 
@@ -240,6 +254,58 @@ async function latestReviewDecision(ctx: QueryCtx, taskId: string): Promise<Doc<
   return decisions.sort((left, right) => right.created_at - left.created_at)[0] ?? null;
 }
 
+type ListMyTasksArgs = {
+  statuses?: Doc<"tasks">["status"][];
+  countryCode?: string;
+  batchId?: string;
+  limit?: number;
+};
+
+type MyTaskRow = {
+  task: Doc<"tasks">;
+  latestDraft: Doc<"evidence_drafts"> | null;
+  latestReview: Doc<"review_decisions"> | null;
+};
+
+// the listMyTasks read, shared with raLanding
+async function listMyTasksFor(ctx: QueryCtx, user: Doc<"users">, args: ListMyTasksArgs): Promise<MyTaskRow[]> {
+  const limit = Math.min(Math.max(args.limit ?? 100, 1), 500);
+  const statuses = args.statuses ?? [
+    "in_progress",
+    "draft_saved",
+    "needs_review",
+    "unresolved_note",
+    "changes_requested",
+    "skipped",
+    "reviewed",
+    "pi_accepted",
+    "exported",
+  ];
+  const results: Doc<"tasks">[] = [];
+  for (const status of statuses) {
+    const tasks = await ctx.db
+      .query("tasks")
+      .withIndex("by_assignee_status", (q) => q.eq("assigned_to", user._id).eq("status", status))
+      .take(limit);
+    results.push(...tasks);
+  }
+  const filtered = results
+    .filter((task) => args.countryCode === undefined || task.country_code === args.countryCode)
+    .filter((task) => args.batchId === undefined || task.batch_id === args.batchId)
+    .sort((left, right) => (right.last_event_at ?? right.updated_at) - (left.last_event_at ?? left.updated_at))
+    .slice(0, limit);
+
+  const rows = [];
+  for (const task of filtered) {
+    rows.push({
+      task,
+      latestDraft: await latestDraftForTask(ctx, task.task_id, user),
+      latestReview: await latestReviewDecision(ctx, task.task_id),
+    });
+  }
+  return rows;
+}
+
 export const listMyTasks = query({
   args: {
     statuses: v.optional(v.array(taskStatus)),
@@ -254,41 +320,7 @@ export const listMyTasks = query({
   })),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
-    const limit = Math.min(Math.max(args.limit ?? 100, 1), 500);
-    const statuses = args.statuses ?? [
-      "in_progress",
-      "draft_saved",
-      "needs_review",
-      "unresolved_note",
-      "changes_requested",
-      "skipped",
-      "reviewed",
-      "pi_accepted",
-      "exported",
-    ];
-    const results: Doc<"tasks">[] = [];
-    for (const status of statuses) {
-      const tasks = await ctx.db
-        .query("tasks")
-        .withIndex("by_assignee_status", (q) => q.eq("assigned_to", user._id).eq("status", status))
-        .take(limit);
-      results.push(...tasks);
-    }
-    const filtered = results
-      .filter((task) => args.countryCode === undefined || task.country_code === args.countryCode)
-      .filter((task) => args.batchId === undefined || task.batch_id === args.batchId)
-      .sort((left, right) => (right.last_event_at ?? right.updated_at) - (left.last_event_at ?? left.updated_at))
-      .slice(0, limit);
-
-    const rows = [];
-    for (const task of filtered) {
-      rows.push({
-        task,
-        latestDraft: await latestDraftForTask(ctx, task.task_id, user),
-        latestReview: await latestReviewDecision(ctx, task.task_id),
-      });
-    }
-    return rows;
+    return await listMyTasksFor(ctx, user, args);
   },
 });
 
@@ -305,6 +337,139 @@ export const getTask = query({
     const task = await getTaskOrThrow(ctx, args.taskId);
     const latestDraft = await latestDraftForTask(ctx, args.taskId, user);
     return { task, latestDraft };
+  },
+});
+
+// slim projections for the RA landing: the fields the portal reads from a
+// landing row, nothing more. The full draft and review keep coming from
+// listTaskEvidence and the review queue when a task is opened. The key
+// allow-lists are asserted in tasks-landing.node-test.mjs so a later field
+// cannot leak evidence text into the landing by default.
+const slimDraft = v.object({
+  evidence_draft_id: v.string(),
+  draft_status: evidenceDraftDoc.fields.draft_status,
+  action: v.optional(v.string()),
+  source_title: v.optional(v.string()),
+  created_at: v.number(),
+  updated_at: v.number(),
+});
+
+const slimReview = v.object({
+  decision_status: reviewDecisionDoc.fields.decision_status,
+  decision_note: v.optional(v.string()),
+  required_follow_up: v.optional(v.string()),
+  created_at: v.number(),
+});
+
+const slimMyWorkRow = v.object({
+  task: taskDoc,
+  latestDraft: v.union(slimDraft, v.null()),
+  latestReview: v.union(slimReview, v.null()),
+});
+
+function slimDraftOf(draft: Doc<"evidence_drafts"> | null) {
+  if (draft === null) return null;
+  return {
+    evidence_draft_id: draft.evidence_draft_id,
+    draft_status: draft.draft_status,
+    ...(draft.action !== undefined ? { action: draft.action } : {}),
+    ...(draft.source_title !== undefined ? { source_title: draft.source_title } : {}),
+    created_at: draft.created_at,
+    updated_at: draft.updated_at,
+  };
+}
+
+function slimReviewOf(review: Doc<"review_decisions"> | null) {
+  if (review === null) return null;
+  return {
+    decision_status: review.decision_status,
+    ...(review.decision_note !== undefined ? { decision_note: review.decision_note } : {}),
+    ...(review.required_follow_up !== undefined ? { required_follow_up: review.required_follow_up } : {}),
+    created_at: review.created_at,
+  };
+}
+
+function slimMyWorkOf(row: MyTaskRow) {
+  return {
+    task: row.task,
+    latestDraft: slimDraftOf(row.latestDraft),
+    latestReview: slimReviewOf(row.latestReview),
+  };
+}
+
+// the signed-in RA landing in one round trip: users:me, listTasks for the
+// batch (or the country), listTasks for the country's manual batch, and
+// listMyTasks. Identity comes from the session only. Role and promotion
+// gates are inherited by calling the shared helpers behind listTasks and
+// listMyTasks. No identity returns a null user and empty lists, as users:me
+// does, so the client keeps one path for a dropped token.
+export const raLanding = query({
+  args: {
+    countryCode: v.string(),
+    batchId: v.optional(v.string()),
+    myStatuses: v.optional(v.array(taskStatus)),
+    limit: v.optional(v.number()),
+    // false skips the manual batch and my-work reads for pages that show
+    // neither (the default is to include them)
+    includeMine: v.optional(v.boolean()),
+  },
+  returns: v.object({
+    user: v.union(userDoc, v.null()),
+    tasks: v.array(taskDoc),
+    manualTasks: v.array(taskDoc),
+    myWork: v.array(slimMyWorkRow),
+  }),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (identity === null) {
+      return { user: null, tasks: [], manualTasks: [], myWork: [] };
+    }
+    const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
+    const tasks = await listTasksFor(ctx, user, {
+      countryCode: args.countryCode,
+      batchId: args.batchId,
+      limit: args.limit,
+    });
+    if (args.includeMine === false) {
+      return { user, tasks, manualTasks: [], myWork: [] };
+    }
+    const manualTasks = await listTasksFor(ctx, user, {
+      countryCode: args.countryCode,
+      batchId: manualBatchId(args.countryCode),
+      limit: args.limit,
+    });
+    const myWork = (await listMyTasksFor(ctx, user, { statuses: args.myStatuses, limit: 200 })).map(slimMyWorkOf);
+    return { user, tasks, manualTasks, myWork };
+  },
+});
+
+// one landing row after a save, skip or withdraw, so the portal need not
+// re-read three lists. Same gates as the lists: the task must be the
+// caller's (or the caller may review), and a draft batch is invisible to a
+// caller who cannot review (null, as listTasks omits it).
+export const raTaskRow = query({
+  args: {
+    taskId: v.string(),
+  },
+  returns: v.union(slimMyWorkRow, v.null()),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
+    const task = await getTaskOrThrow(ctx, args.taskId);
+    assertOwnsOrCanReview(user._id, user.roles, task.assigned_to);
+    if (!canReview(user.roles)) {
+      const batch = await ctx.db
+        .query("task_batches")
+        .withIndex("by_batch_id", (q) => q.eq("batch_id", task.batch_id))
+        .unique();
+      if (batch !== null && batch.status === "draft") {
+        return null;
+      }
+    }
+    return slimMyWorkOf({
+      task,
+      latestDraft: await latestDraftForTask(ctx, task.task_id, user),
+      latestReview: await latestReviewDecision(ctx, task.task_id),
+    });
   },
 });
 
