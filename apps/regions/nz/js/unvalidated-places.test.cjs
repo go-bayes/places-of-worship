@@ -140,4 +140,95 @@ assert.equal(feature.geometry.coordinates.join(","), "174,-41");
 assert.equal(feature.properties.osm_id, 1);
 assert.equal(feature.properties.country_code, "NZ");
 
+// the map's zoom floor while an ra-dots archive layer is shown (#177's final
+// review). leaflet takes a map's lowest zoom from the lowest minZoom among
+// its layers, so the archive layer's minZoom of 3 alone never stopped a map
+// whose basemap reaches lower. the fake map keeps leaflet 1.9's arithmetic:
+// getMinZoom() is the explicit option or the layers' lowest, and setView()
+// clamps to it
+{
+    const fakeLeaflet = {
+        vectorGrid: { protobuf(url, opts) { return { url, opts, addTo(map) { map.layers.add(this); return this; } }; } },
+    };
+    const makeMap = ({ zoom, layersMin, explicitMin }) => ({
+        options: explicitMin === undefined ? {} : { minZoom: explicitMin },
+        zoom, centre: [61.2, 104.9], layers: new Set(), fired: [],
+        getMinZoom() { return this.options.minZoom === undefined ? layersMin : this.options.minZoom; },
+        setMinZoom(value) { this.options.minZoom = value; if (this.zoom < value) this.setView(this.centre, value); return this; },
+        setView(centre, value) { this.centre = centre; this.zoom = Math.max(this.getMinZoom(), value); return this; },
+        hasLayer(layer) { return this.layers.has(layer); },
+        removeLayer(layer) { this.layers.delete(layer); },
+        fire(name) { this.fired.push(name); },
+    });
+    const russia = { centre: [61.2009, 104.8805], zoom: 2.5 };
+
+    // russia opens at 2.5 with a basemap that reaches z2: before the fix the dots (z3 and up) were gone on arrival
+    const ru = mod.createLayers(fakeLeaflet, { countryCode: "RU" });
+    assert.equal(ru.zoomFloor, 3);
+    const map = makeMap({ zoom: russia.zoom, layersMin: 2 });
+    map.setView(russia.centre, russia.zoom);
+    assert.equal(map.getMinZoom(), 2, "the layers alone leave the floor at the basemap's");
+    mod.addTo(map, ru);
+    assert.ok(mod.isShown(map, ru));
+    assert.equal(map.options.minZoom, 3, "the floor is set explicitly");
+    assert.equal(map.getMinZoom(), 3);
+    assert.equal(map.zoom, 3, "a map opened below the floor is raised to it");
+    assert.ok(map.fired.includes("zoomlevelschange"), "the zoom control is told");
+    map.setView(map.centre, 1);
+    assert.equal(map.zoom, 3, "zooming out stops at 3");
+    // the recentre button asks for the country's own zoom, 2.5
+    map.setView(russia.centre, russia.zoom);
+    assert.equal(map.zoom, 3, "recentring lands on the floor, where the dots are");
+    mod.addTo(map, ru);
+    assert.equal(map.options.minZoom, 3, "adding again changes nothing");
+
+    // hiding the dots gives the previous minimum back (none: the layers')
+    mod.removeFrom(map, ru);
+    assert.equal(mod.isShown(map, ru), false);
+    assert.equal(map.options.minZoom, undefined);
+    assert.equal(map.getMinZoom(), 2);
+    map.setView(russia.centre, russia.zoom);
+    assert.equal(map.zoom, 2.5, "without the dots the country view is as before");
+    // and showing them again takes the floor again
+    mod.addTo(map, ru);
+    assert.equal(map.getMinZoom(), 3);
+    assert.equal(map.zoom, 3);
+    mod.removeFrom(map, ru);
+    mod.removeFrom(map, ru);
+    assert.equal(map.options.minZoom, undefined, "removing twice restores once");
+
+    // a minimum the page set itself comes back, and one already above the floor is left alone
+    const explicit = makeMap({ zoom: 6, layersMin: 2, explicitMin: 1 });
+    const nzLayers = mod.createLayers(fakeLeaflet, { countryCode: "NZ" });
+    mod.addTo(explicit, nzLayers);
+    assert.equal(explicit.options.minZoom, 3);
+    mod.removeFrom(explicit, nzLayers);
+    assert.equal(explicit.options.minZoom, 1);
+    const high = makeMap({ zoom: 6, layersMin: 2, explicitMin: 5 });
+    const highLayers = mod.createLayers(fakeLeaflet, { countryCode: "NZ" });
+    mod.addTo(high, highLayers);
+    assert.equal(high.options.minZoom, 5);
+    mod.removeFrom(high, highLayers);
+    assert.equal(high.options.minZoom, 5);
+
+    // a fallback country (no archive) keeps its usual zoom-out
+    const fallbackLayers = mod.createLayers(fakeLeaflet, { countryCode: "AQ" });
+    assert.equal(fallbackLayers.zoomFloor, null);
+    const fallbackMap = makeMap({ zoom: 2, layersMin: 1 });
+    mod.addTo(fallbackMap, fallbackLayers);
+    assert.equal(fallbackMap.options.minZoom, undefined);
+    assert.equal(fallbackMap.getMinZoom(), 1);
+    assert.equal(fallbackMap.zoom, 2);
+    mod.removeFrom(fallbackMap, fallbackLayers);
+    assert.equal(fallbackMap.options.minZoom, undefined);
+    assert.deepEqual(fallbackMap.fired, [], "nothing fired for a fallback country");
+
+    // removing layers that were never added, and a missing map or layers, do nothing
+    const idle = makeMap({ zoom: 4, layersMin: 2 });
+    mod.removeFrom(idle, mod.createLayers(fakeLeaflet, { countryCode: "RU" }));
+    assert.equal(idle.options.minZoom, undefined);
+    mod.addTo(null, ru);
+    mod.removeFrom(idle, null);
+}
+
 console.log("unvalidated-places: ok");

@@ -108,8 +108,9 @@
                 // requests to z3, so a zoom-out to z1 still fetched the
                 // country's z3 tiles for every wrapped world copy (168
                 // fetches, and 3 MB tiles for the us). with minZoom set the
-                // layer loads nothing below z3 (leaflet also takes the map's
-                // lowest zoom from its layers, so the map stops at z3 here)
+                // layer loads nothing below z3. the map's own minimum is set
+                // by addTo() below, not left to the layers: leaflet takes the
+                // lowest of them, and the basemap's is lower
                 minZoom: RA_DOTS_MIN_NATIVE_ZOOM,
                 minNativeZoom: RA_DOTS_MIN_NATIVE_ZOOM,
                 maxNativeZoom: RA_DOTS_MAX_NATIVE_ZOOM,
@@ -126,7 +127,39 @@
             minZoom: PLACES_MIN_ZOOM,
             maxNativeZoom: PLACES_TILE_MAX_NATIVE_ZOOM,
         });
-        return { overview, places };
+        // zoomFloor: the lowest zoom the map may reach while these layers are
+        // shown; null where the overview sample draws (a fallback country
+        // keeps its usual zoom-out)
+        return { overview, places, zoomFloor: raUrl ? RA_DOTS_MIN_NATIVE_ZOOM : null };
+    }
+
+    // leaflet takes a map's lowest zoom from the lowest minZoom among its
+    // layers, so the archive layer's own minZoom of 3 never stops a map
+    // whose basemap reaches lower (russia opens at 2.5 and its basemap goes
+    // to 1 or 2: the dots vanished below 3). while an archive layer is
+    // shown the map's minimum is set to the floor explicitly, and the
+    // previous minimum (an explicit one, or none) comes back when the dots
+    // are hidden. a minimum already at or above the floor stays as it is
+    function applyZoomFloor(map, layers) {
+        if (!map || !layers || typeof layers.zoomFloor !== "number" || layers.floorState) return;
+        const previous = map.options ? map.options.minZoom : undefined;
+        layers.floorState = { map, previous };
+        if (typeof previous === "number" && previous >= layers.zoomFloor) return;
+        if (typeof map.setMinZoom === "function") map.setMinZoom(layers.zoomFloor);
+        if (typeof map.fire === "function") map.fire("zoomlevelschange");
+    }
+
+    function releaseZoomFloor(map, layers) {
+        const state = layers && layers.floorState;
+        if (!state || state.map !== map) return;
+        layers.floorState = null;
+        if (typeof state.previous === "number" && state.previous >= layers.zoomFloor) return;
+        if (state.previous === undefined) {
+            if (map.options) map.options.minZoom = undefined;
+        } else if (typeof map.setMinZoom === "function") {
+            map.setMinZoom(state.previous);
+        }
+        if (typeof map.fire === "function") map.fire("zoomlevelschange");
     }
 
     function addTo(map, layers) {
@@ -134,6 +167,7 @@
         [layers.overview, layers.places].forEach(layer => {
             if (layer && !map.hasLayer(layer)) layer.addTo(map);
         });
+        applyZoomFloor(map, layers);
     }
 
     function removeFrom(map, layers) {
@@ -141,6 +175,7 @@
         [layers.overview, layers.places].forEach(layer => {
             if (layer && map.hasLayer(layer)) map.removeLayer(layer);
         });
+        releaseZoomFloor(map, layers);
     }
 
     function isShown(map, layers) {
@@ -222,6 +257,8 @@
         RA_DOTS_MAX_NATIVE_ZOOM,
         RA_DOTS_COUNTRY_CODES,
         PLACES_MIN_ZOOM,
+        applyZoomFloor,
+        releaseZoomFloor,
         raDotsTileUrl,
         dotStyle,
         createLayers,

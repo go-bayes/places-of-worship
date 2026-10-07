@@ -40,8 +40,14 @@ assert.match(review, /registry\?\.iso2 \|\| options\.countryCode/);
 assert.doesNotMatch(unvalidated, /overviewKeep/);
 
 // every html page that loads a changed script carries the bumped query
-const stamp = "20261007a";
-const scripts = ["region-map.js", "unvalidated-places.js", "verification-map.js", "review-map.js"];
+// one stamp per script: a script's stamp moves only when that script changes
+const stamps = {
+    "region-map.js": "20261007a",
+    "unvalidated-places.js": "20261007b", // zoom floor for ra-dots layers
+    "verification-map.js": "20261007b", // one-round-trip landing
+    "review-map.js": "20261007a",
+};
+const scripts = Object.keys(stamps);
 const pages = [];
 (function walk(dir) {
     fs.readdirSync(dir, { withFileTypes: true }).forEach(entry => {
@@ -56,7 +62,7 @@ pages.forEach(page => {
     scripts.forEach(name => {
         const pattern = new RegExp(`${name.replace(".", "\\.")}\\?v=(\\w+)`, "g");
         for (const match of html.matchAll(pattern)) {
-            assert.equal(match[1], stamp, `${path.relative(apps, page)}: ${name} is ?v=${match[1]}`);
+            assert.equal(match[1], stamps[name],`${path.relative(apps, page)}: ${name} is ?v=${match[1]}`);
             checked += 1;
         }
     });
