@@ -36,6 +36,12 @@ flowchart LR
   U --> I
 ```
 
+## Map Data Transport Scripts
+
+| Script | Main entry point | Purpose | Inputs | Outputs | When to run |
+| --- | --- | --- | --- | --- | --- |
+| `scripts/build_area_summary_columns.py` | `main()` | Derive a columnar transport file beside each large governed area summary (12 levels on the US, BR, DK, MX, NZ and AU pages), round-trip it against the product, and write the tracked manifest. `--check` regenerates in memory and fails on any stale file. | The committed `apps/regions/*/data/area_summary_<level>.json` products listed in the script's `TARGETS`; products are never modified. | `apps/regions/*/data/area_summary_<level>.columns.json` (schema `schemas/area-summary-columns.v1.schema.json`) and `docs/manifests/area-summary-columns.manifest.json`. | After any rebuild of a listed governed summary, and in CI (`--check`). A page opts a level in with `summaryColumns` in its `REGION_CONFIG`. |
+
 ## Task And Workpack Scripts
 
 | Script | Main entry point | Purpose | Inputs | Outputs | When to run |

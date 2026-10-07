@@ -3733,15 +3733,76 @@ async function loadCensusData(level) {
   return store.promise;
 }
 
+// @columnar-transport-begin
+// derived columnar transport for large area summaries (schemas/
+// area-summary-columns.v1.schema.json). a level opts in with summaryColumns in
+// its REGION_CONFIG; the governed product (def.summary) stays canonical and is
+// the fallback on any fetch, parse or shape failure, so a missing or damaged
+// transport degrades to today's behaviour. configuration, not country logic.
+function expandSummaryColumns(packed) {
+  if (!packed || packed.schema_version !== "area-summary-columns.v1") throw new Error("unsupported columnar schema_version");
+  const { n, keys, constants, encoded, columns, header } = packed;
+  if (!Number.isInteger(n) || n < 1 || !Array.isArray(keys) || !header || typeof header !== "object"
+    || !constants || !encoded || !columns) throw new Error("malformed columnar summary");
+  const decoded = {};
+  for (const key of keys) {
+    if (Object.hasOwn(constants, key)) continue;
+    let column;
+    if (Object.hasOwn(encoded, key)) {
+      const { values, index } = encoded[key];
+      if (!Array.isArray(values) || !Array.isArray(index) || index.length !== n) throw new Error(`malformed encoded column ${key}`);
+      column = index.map((position) => {
+        if (!Number.isInteger(position) || position < 0 || position >= values.length) throw new Error(`bad position in column ${key}`);
+        return values[position];
+      });
+    } else if (Object.hasOwn(columns, key) && Array.isArray(columns[key]) && columns[key].length === n) {
+      column = columns[key];
+    } else {
+      throw new Error(`missing or short column ${key}`);
+    }
+    decoded[key] = column;
+  }
+  const rows = new Array(n);
+  for (let i = 0; i < n; i += 1) {
+    const row = {};
+    for (const key of keys) {
+      const value = Object.hasOwn(constants, key) ? constants[key] : decoded[key][i];
+      // arrays and objects shared through a dictionary or a constant are
+      // copied so no two rows alias one value
+      row[key] = value !== null && typeof value === "object" ? structuredClone(value) : value;
+    }
+    rows[i] = row;
+  }
+  return { ...header, rows };
+}
+
+// the summary for one level: the columnar transport when the level opts in
+// and it reads cleanly, otherwise the governed product. throws only when the
+// governed product itself cannot be read.
+async function fetchCensusSummary(def, fetchImpl = fetch) {
+  if (def.summaryColumns) {
+    try {
+      const res = await fetchImpl(def.summaryColumns);
+      if (res.ok) return expandSummaryColumns(await res.json());
+      console.warn(`columnar summary unavailable (${res.status}); using ${def.summary}`);
+    } catch (err) {
+      console.warn(`columnar summary unreadable (${err && err.message}); using ${def.summary}`);
+    }
+  }
+  const res = await fetchImpl(def.summary);
+  if (!res.ok) throw new Error("census fetch failed");
+  return res.json();
+}
+// @columnar-transport-end
+
 async function loadCensusDataInto(store, def) {
   showClickHint(`Loading ${(RC.dataNoun || "Census").toLowerCase()} boundaries…`);
   try {
-    const [boundariesRes, summaryRes] = await Promise.all([
+    const [boundariesRes, summary] = await Promise.all([
       fetch(def.boundaries),
-      fetch(def.summary)
+      fetchCensusSummary(def)
     ]);
-    if (!boundariesRes.ok || !summaryRes.ok) throw new Error("census fetch failed");
-    const summary = await summaryRes.json();
+    if (!boundariesRes.ok) throw new Error("census fetch failed");
     // design §2: a product whose declared domain disagrees with the
     // config slot that loads it fails loudly rather than painting the
     // wrong construct; products without the field default to religion

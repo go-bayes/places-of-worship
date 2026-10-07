@@ -31,6 +31,8 @@ resolve_schema() {
 }
 
 for f in apps/regions/*/data/area_summary_*.json; do
+  # columnar transports are gated below against their own schema
+  case "$f" in *.columns.json) continue ;; esac
   ver=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1])).get('schema_version') or '')" "$f" 2>/dev/null)
   if [ -z "$ver" ]; then
     echo "GATE FAIL (no schema_version): $f"
@@ -60,6 +62,37 @@ for f in apps/regions/*/data/area_summary_*.json; do
   fi
 done
 
-echo "gate: $((gate_total-gate_fails))/$gate_total area-summary.v2 products pass"
+# derived columnar transports (apps/regions/*/data/area_summary_*.columns.json)
+# are gated against their own schema, and the tracked manifest against the data
+# manifest schema; the byte-for-byte round trip to the governed products is
+# scripts/build_area_summary_columns.py --check, a separate CI step.
+col_total=0
+col_fails=0
+for f in apps/regions/*/data/area_summary_*.columns.json; do
+  [ -e "$f" ] || continue
+  col_total=$((col_total+1))
+  out=$(uvx check-jsonschema --base-uri "file://$PWD/schemas/" --schemafile schemas/area-summary-columns.v1.schema.json "$f" 2>&1)
+  if grep -q "ok --" <<<"$out"; then
+    echo "COLUMNS PASS: $f"
+  else
+    echo "COLUMNS FAIL: $f"
+    grep '::\$' <<<"$out" | head -8
+    col_fails=$((col_fails+1))
+  fi
+done
+if [ -f docs/manifests/area-summary-columns.manifest.json ]; then
+  col_total=$((col_total+1))
+  out=$(uvx check-jsonschema --base-uri "file://$PWD/schemas/" --schemafile schemas/data-manifest.schema.json docs/manifests/area-summary-columns.manifest.json 2>&1)
+  if grep -q "ok --" <<<"$out"; then
+    echo "COLUMNS PASS: docs/manifests/area-summary-columns.manifest.json"
+  else
+    echo "COLUMNS FAIL: docs/manifests/area-summary-columns.manifest.json"
+    col_fails=$((col_fails+1))
+  fi
+fi
+gate_total=$((gate_total+col_total))
+gate_fails=$((gate_fails+col_fails))
+
+echo "gate: $((gate_total-gate_fails))/$gate_total gated files pass (area-summary.v2 products, columnar transports and their manifest)"
 echo "legacy-advisory (non-gating): $adv_pass/$adv_total pass against base schema, $adv_fail fail"
 exit $gate_fails
