@@ -49,10 +49,12 @@ SCHEMA_VERSION = "area-summary-columns.v1"
 MANIFEST_PATH = REPO / "docs" / "manifests" / "area-summary-columns.manifest.json"
 MANIFEST_ID = "area-summary-columns"
 
-# the levels whose summary is large enough for the transport to matter, chosen
-# by gzip size (>= 75 KB; the six pages where the download is concentrated).
-# a page opts a level in with `summaryColumns` in its REGION_CONFIG; this list
-# says which files exist. levels below the threshold (NZ ta, BR uf) stay as is.
+# the levels of the six pages (US, BR, DK, MX, NZ, AU) whose governed summary
+# is 75 KB gzip or more. smaller levels on these pages (NZ ta, BR uf, DK
+# region) stay as they are. two other pages' levels are also large (RO
+# lau_2021, 183 KB gz; SK municipality, 132 KB gz) and are not opted in: the
+# scope was set to the six pages. a page opts a level in with `summaryColumns`
+# in its REGION_CONFIG; this list says which files exist.
 TARGETS = [
     "apps/regions/us/data/area_summary_county.json",
     "apps/regions/us/data/area_summary_county_1930.json",
