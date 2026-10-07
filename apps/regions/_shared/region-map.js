@@ -2752,6 +2752,23 @@ function allFiltersOn() {
   return others && christianOn;
 }
 
+// partially-selected christianity: an alias of a selected bucket passes, an
+// alias of a deselected bucket does not, and a denomination outside every
+// bucket follows the "Other Christian" checkbox (state.__other). taxonomy
+// aliases are unique across entries, as match labels must be
+function denominationMatch(denom, buckets, state) {
+  const selected = [];
+  const deselected = [];
+  buckets.forEach((b) => {
+    (state[b.code] ? selected : deselected).push(...b.aliases);
+  });
+  const other = Boolean(state.__other);
+  const arms = [];
+  if (selected.length) arms.push(selected, true);
+  if (deselected.length) arms.push(deselected, false);
+  return arms.length ? ["match", denom, ...arms, other] : other;
+}
+
 function currentFilterClauses() {
   if (allFiltersOn()) return null;
   const rel = ["coalesce", ["get", "religion"], "unknown"];
@@ -2767,12 +2784,9 @@ function currentFilterClauses() {
   ];
   if (totals && !christianFull && !christianNone) {
     // partially-selected christianity: only the chosen buckets pass
-    const aliases = christianBuckets.filter((b) => denomFilterState[b.code]).flatMap((b) => b.aliases);
     const denom = ["downcase", ["to-string", ["coalesce", ["get", "denomination"], ""]]];
-    const denomMatch = aliases.length
-      ? ["match", denom, aliases, true, Boolean(denomFilterState.__other)]
-      : Boolean(denomFilterState.__other);
-    parts.push(["all", ["==", rel, "christian"], denomMatch]);
+    parts.push(["all", ["==", rel, "christian"],
+      denominationMatch(denom, christianBuckets, denomFilterState)]);
   }
   return ["any", ...parts];
 }

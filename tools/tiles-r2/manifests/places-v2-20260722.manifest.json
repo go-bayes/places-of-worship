@@ -106,7 +106,7 @@
     "licence": null,
     "local_cache_hint": "green:/Users/joseph/tiles-archive-2026-07/tiles-migration/places.mbtiles",
     "citation": "places.mbtiles sha256 eaa55c50971381cacca36ea08b1d4a68628b77d47a7156848cebb6a13eb2c406, 4373762048 bytes; slim.ndjson sha256 aceb33558462ba5eb12543cc392acee6b86751ae3f4d5293adc69b90cf5509be, 2072349 features, extracted by build_tiles_v2.py (see the tiles-v2-20260722 manifests). This is a new dataset family member, not a replacement of the overview manifest.",
-    "licence_todo": "licence and attribution of the 701,349 places without an OSM key are not established; publication gate (serving the archive) stays open until documented"
+    "licence_todo": "licence and attribution of the 701,349 places without an OSM key are not established; publication gate (serving the archive) stays open until documented. Exposure of this archive (2026-10-07, PR #181 review): it adds no place and no attribute to what the live places tier already serves publicly at tiles.placemap.org/places (z6-18, the same OSM attribution string on the source); z8-18 are byte-identical to it, and z6-7 are a sample of the same input places with six of its attributes. The archive is therefore not a new publication of data. Clearance of the 701,349 unkeyed places is not given by this note and remains with Joseph; licence_status stays needs_review"
   },
   "durable_files": [
     {
