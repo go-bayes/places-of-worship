@@ -54,6 +54,7 @@ jobs:
           node apps/regions/_shared/region-map-startup.test.cjs
           node apps/regions/_shared/tiles-v2-client.test.cjs
           node apps/regions/_shared/denomination-filter.test.cjs
+          node apps/regions/_shared/area-summary-columns.test.cjs
           node apps/regions/nz/js/refresh-merge.test.cjs
           node apps/regions/nz/js/ra-landing.test.cjs
           node apps/regions/nz/js/convex-task-client.test.cjs
@@ -89,6 +90,10 @@ jobs:
         run: uv run scripts/test_indicator_schema.py
       - name: validate area summaries
         run: bash scripts/validate_area_summaries.sh
+      - name: columnar area-summary transport round trip
+        run: |
+          python3 -m unittest scripts/test_area_summary_columns.py
+          python3 scripts/build_area_summary_columns.py --check
 
   rust:
     runs-on: ubuntu-latest

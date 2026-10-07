@@ -1,0 +1,351 @@
+{
+  "$schema": "../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:area-summary-columns-9359ebbed042",
+  "manifest_sha256": "0675b02b9be424d2a04d7e8232eaf3ea4ac6a8b0a84d8ef736c4fb69beac0bb3",
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
+  "dataset_id": "area-summary-columns",
+  "dataset_version_id": "area-summary-columns:9359ebbed042d29e",
+  "dataset_family": "area-summary-columns",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "area",
+    "pipeline_stage": "public"
+  },
+  "created_at": "2026-10-07T03:19:12Z",
+  "created_by": "claude-sonnet-5-5 (workflow agent)",
+  "pipeline": {
+    "script": "scripts/build_area_summary_columns.py",
+    "git_commit": "9969f18a35aa0ec0320ec2e98022fa1afab4337f",
+    "command": "python3 scripts/build_area_summary_columns.py",
+    "parameters": {
+      "schema": "schemas/area-summary-columns.v1.schema.json",
+      "targets": [
+        "apps/regions/us/data/area_summary_county.json",
+        "apps/regions/us/data/area_summary_county_1930.json",
+        "apps/regions/us/data/area_summary_county_1890.json",
+        "apps/regions/us/data/area_summary_county_1870.json",
+        "apps/regions/us/data/area_summary_county_1860.json",
+        "apps/regions/us/data/area_summary_county_1850.json",
+        "apps/regions/br/data/area_summary_municipality.json",
+        "apps/regions/dk/data/area_summary_kommune.json",
+        "apps/regions/dk/data/area_summary_sogn.json",
+        "apps/regions/mx/data/area_summary_municipality.json",
+        "apps/regions/nz/data/area_summary_sa2.json",
+        "apps/regions/au/data/area_summary_sa2.json"
+      ]
+    },
+    "software_versions": {
+      "python": "stdlib only"
+    }
+  },
+  "source": {
+    "source_dataset_ids": [],
+    "licence": null
+  },
+  "durable_files": [
+    {
+      "uri": "apps/regions/us/data/area_summary_county.columns.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 1175366,
+      "sha256": "55d3318cfa4e1ea3f42c8104e5c7950620ca36f7cae60ae838386591807ee6fa",
+      "row_count": 21905,
+      "content": "derived columnar transport of apps/regions/us/data/area_summary_county.json (source sha256 bcc6c2eb68eaf0a58f5313ff3fa97e4665d9104eac43cddfa5fd186ba426d689); regenerable, decodes to the governed product exactly",
+      "privacy": "public"
+    },
+    {
+      "uri": "apps/regions/us/data/area_summary_county_1930.columns.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 728151,
+      "sha256": "51da6a229255efec6cc1a8ac2786e01fba86fcf6963444c04b435ad2469f4ae2",
+      "row_count": 12105,
+      "content": "derived columnar transport of apps/regions/us/data/area_summary_county_1930.json (source sha256 c0db3f664b0ce791d8c66976ae886e839de4b07132637a76345cec2eb6d0dab9); regenerable, decodes to the governed product exactly",
+      "privacy": "public"
+    },
+    {
+      "uri": "apps/regions/us/data/area_summary_county_1890.columns.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 282142,
+      "sha256": "43ad82bbe5d855764a5fd760f9800d05f275f5b39b47736acff2f0ecee19c487",
+      "row_count": 2784,
+      "content": "derived columnar transport of apps/regions/us/data/area_summary_county_1890.json (source sha256 234124b053dd2dba054eaf28dc6cdcfa24d85b7c8f113793bc108916ef939640); regenerable, decodes to the governed product exactly",
+      "privacy": "public"
+    },
+    {
+      "uri": "apps/regions/us/data/area_summary_county_1870.columns.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 232778,
+      "sha256": "b8494693e6f0137b1c1d8ea1105503aae51ac70d2bd6e32f6a08b1dd71bb04b3",
+      "row_count": 2310,
+      "content": "derived columnar transport of apps/regions/us/data/area_summary_county_1870.json (source sha256 6a82a2f15c61bf281824a2df6bff4887c586e1d08de90ef0eb119817b2a4d506); regenerable, decodes to the governed product exactly",
+      "privacy": "public"
+    },
+    {
+      "uri": "apps/regions/us/data/area_summary_county_1860.columns.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 212153,
+      "sha256": "d930c23273834371a8df6329d7e4e0fdd76e35d23d7939d8512167b4a9a0447d",
+      "row_count": 2097,
+      "content": "derived columnar transport of apps/regions/us/data/area_summary_county_1860.json (source sha256 d61c02d59c6de66fcd91627dbf4a902f7231c6580dfc3caa9d5dcf65634ecc38); regenerable, decodes to the governed product exactly",
+      "privacy": "public"
+    },
+    {
+      "uri": "apps/regions/us/data/area_summary_county_1850.columns.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 163384,
+      "sha256": "ba953c124d83b796646750c7b2e151d916fbe85fc77cfa15c5c9f3bed6b2478b",
+      "row_count": 1626,
+      "content": "derived columnar transport of apps/regions/us/data/area_summary_county_1850.json (source sha256 593a20149deac1d4625d91754f424b47fbf40113c4db3b658c885ebd1a4a2357); regenerable, decodes to the governed product exactly",
+      "privacy": "public"
+    },
+    {
+      "uri": "apps/regions/br/data/area_summary_municipality.columns.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 1288785,
+      "sha256": "00b7052170df438cdee59b9cd1e7ecea210803bee6c26705f3784b1e6ba279b1",
+      "row_count": 16710,
+      "content": "derived columnar transport of apps/regions/br/data/area_summary_municipality.json (source sha256 c69ef4b4a7346ed1825c71099dee28f059e8078c7b04dc4b0b1e629fa2d37a50); regenerable, decodes to the governed product exactly",
+      "privacy": "public"
+    },
+    {
+      "uri": "apps/regions/dk/data/area_summary_kommune.columns.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 89025,
+      "sha256": "51ee87cb70daaf4a600a2dae6531d1638277693bf2ed5b131e3ecd4c2096a6f1",
+      "row_count": 1584,
+      "content": "derived columnar transport of apps/regions/dk/data/area_summary_kommune.json (source sha256 b6d72a06262c2fc24c0fd6b3ddca251065f4fa447b5642170ed102a3ef52a5a6); regenerable, decodes to the governed product exactly",
+      "privacy": "public"
+    },
+    {
+      "uri": "apps/regions/dk/data/area_summary_sogn.columns.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 526678,
+      "sha256": "7b0e928d97878d5dfc4d6bcf3003296c0c368547a53a597812a63711d17805d6",
+      "row_count": 8332,
+      "content": "derived columnar transport of apps/regions/dk/data/area_summary_sogn.json (source sha256 9684c09640485f3362a936202497f80112a18c3a53b8da1c2443b1715a6ea6c8); regenerable, decodes to the governed product exactly",
+      "privacy": "public"
+    },
+    {
+      "uri": "apps/regions/mx/data/area_summary_municipality.columns.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 602095,
+      "sha256": "bc8c972e4b2ddf3709b4014aa257f704682593def1d21c31c458147caaaf5031",
+      "row_count": 7407,
+      "content": "derived columnar transport of apps/regions/mx/data/area_summary_municipality.json (source sha256 cba667dc533efb86d04036c310a5d0b4bab0e99c4b2a144e8805e1e0c2ac393e); regenerable, decodes to the governed product exactly",
+      "privacy": "public"
+    },
+    {
+      "uri": "apps/regions/nz/data/area_summary_sa2.columns.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 512423,
+      "sha256": "823545ff7fec9bf344e21747f7d3c90a2ddadd3cb926d5eb7dc9d54e15cb6e7c",
+      "row_count": 6933,
+      "content": "derived columnar transport of apps/regions/nz/data/area_summary_sa2.json (source sha256 d68eb7f6923208bc554dc77963b1d082f6fe4c1185bc1d338bd15bb6b7b9828a); regenerable, decodes to the governed product exactly",
+      "privacy": "public"
+    },
+    {
+      "uri": "apps/regions/au/data/area_summary_sa2.columns.json",
+      "storage_provider": "git_repository",
+      "format": "json",
+      "bytes": 438914,
+      "sha256": "9412160482bcc2597bb49176917681f40d5133e92cd5fa89277f9248b30d81b8",
+      "row_count": 4944,
+      "content": "derived columnar transport of apps/regions/au/data/area_summary_sa2.json (source sha256 f0ab10ae56e7196fa77db9f4e8cf1ef52d0a963043ab517a7c60e8c8227ff425); regenerable, decodes to the governed product exactly",
+      "privacy": "public"
+    }
+  ],
+  "stats": {
+    "files": [
+      {
+        "source": "apps/regions/us/data/area_summary_county.json",
+        "source_sha256": "bcc6c2eb68eaf0a58f5313ff3fa97e4665d9104eac43cddfa5fd186ba426d689",
+        "source_bytes": 16615134,
+        "source_gzip_bytes": 782493,
+        "columns": "apps/regions/us/data/area_summary_county.columns.json",
+        "columns_sha256": "55d3318cfa4e1ea3f42c8104e5c7950620ca36f7cae60ae838386591807ee6fa",
+        "columns_bytes": 1175366,
+        "columns_gzip_bytes": 252205,
+        "rows": 21905,
+        "constant_keys": 10,
+        "encoded_keys": 8,
+        "column_keys": 3
+      },
+      {
+        "source": "apps/regions/us/data/area_summary_county_1930.json",
+        "source_sha256": "c0db3f664b0ce791d8c66976ae886e839de4b07132637a76345cec2eb6d0dab9",
+        "source_bytes": 9779796,
+        "source_gzip_bytes": 456838,
+        "columns": "apps/regions/us/data/area_summary_county_1930.columns.json",
+        "columns_sha256": "51da6a229255efec6cc1a8ac2786e01fba86fcf6963444c04b435ad2469f4ae2",
+        "columns_bytes": 728151,
+        "columns_gzip_bytes": 170310,
+        "rows": 12105,
+        "constant_keys": 11,
+        "encoded_keys": 7,
+        "column_keys": 3
+      },
+      {
+        "source": "apps/regions/us/data/area_summary_county_1890.json",
+        "source_sha256": "234124b053dd2dba054eaf28dc6cdcfa24d85b7c8f113793bc108916ef939640",
+        "source_bytes": 2741746,
+        "source_gzip_bytes": 135045,
+        "columns": "apps/regions/us/data/area_summary_county_1890.columns.json",
+        "columns_sha256": "43ad82bbe5d855764a5fd760f9800d05f275f5b39b47736acff2f0ecee19c487",
+        "columns_bytes": 282142,
+        "columns_gzip_bytes": 74815,
+        "rows": 2784,
+        "constant_keys": 11,
+        "encoded_keys": 1,
+        "column_keys": 9
+      },
+      {
+        "source": "apps/regions/us/data/area_summary_county_1870.json",
+        "source_sha256": "6a82a2f15c61bf281824a2df6bff4887c586e1d08de90ef0eb119817b2a4d506",
+        "source_bytes": 2277786,
+        "source_gzip_bytes": 108077,
+        "columns": "apps/regions/us/data/area_summary_county_1870.columns.json",
+        "columns_sha256": "b8494693e6f0137b1c1d8ea1105503aae51ac70d2bd6e32f6a08b1dd71bb04b3",
+        "columns_bytes": 232778,
+        "columns_gzip_bytes": 60483,
+        "rows": 2310,
+        "constant_keys": 11,
+        "encoded_keys": 1,
+        "column_keys": 9
+      },
+      {
+        "source": "apps/regions/us/data/area_summary_county_1860.json",
+        "source_sha256": "d61c02d59c6de66fcd91627dbf4a902f7231c6580dfc3caa9d5dcf65634ecc38",
+        "source_bytes": 2045292,
+        "source_gzip_bytes": 97394,
+        "columns": "apps/regions/us/data/area_summary_county_1860.columns.json",
+        "columns_sha256": "d930c23273834371a8df6329d7e4e0fdd76e35d23d7939d8512167b4a9a0447d",
+        "columns_bytes": 212153,
+        "columns_gzip_bytes": 55894,
+        "rows": 2097,
+        "constant_keys": 11,
+        "encoded_keys": 2,
+        "column_keys": 8
+      },
+      {
+        "source": "apps/regions/us/data/area_summary_county_1850.json",
+        "source_sha256": "593a20149deac1d4625d91754f424b47fbf40113c4db3b658c885ebd1a4a2357",
+        "source_bytes": 1608430,
+        "source_gzip_bytes": 75508,
+        "columns": "apps/regions/us/data/area_summary_county_1850.columns.json",
+        "columns_sha256": "ba953c124d83b796646750c7b2e151d916fbe85fc77cfa15c5c9f3bed6b2478b",
+        "columns_bytes": 163384,
+        "columns_gzip_bytes": 43600,
+        "rows": 1626,
+        "constant_keys": 11,
+        "encoded_keys": 1,
+        "column_keys": 9
+      },
+      {
+        "source": "apps/regions/br/data/area_summary_municipality.json",
+        "source_sha256": "c69ef4b4a7346ed1825c71099dee28f059e8078c7b04dc4b0b1e629fa2d37a50",
+        "source_bytes": 14077458,
+        "source_gzip_bytes": 603832,
+        "columns": "apps/regions/br/data/area_summary_municipality.columns.json",
+        "columns_sha256": "00b7052170df438cdee59b9cd1e7ecea210803bee6c26705f3784b1e6ba279b1",
+        "columns_bytes": 1288785,
+        "columns_gzip_bytes": 311123,
+        "rows": 16710,
+        "constant_keys": 8,
+        "encoded_keys": 9,
+        "column_keys": 4
+      },
+      {
+        "source": "apps/regions/dk/data/area_summary_kommune.json",
+        "source_sha256": "b6d72a06262c2fc24c0fd6b3ddca251065f4fa447b5642170ed102a3ef52a5a6",
+        "source_bytes": 1899415,
+        "source_gzip_bytes": 87464,
+        "columns": "apps/regions/dk/data/area_summary_kommune.columns.json",
+        "columns_sha256": "51ee87cb70daaf4a600a2dae6531d1638277693bf2ed5b131e3ecd4c2096a6f1",
+        "columns_bytes": 89025,
+        "columns_gzip_bytes": 30014,
+        "rows": 1584,
+        "constant_keys": 11,
+        "encoded_keys": 5,
+        "column_keys": 5
+      },
+      {
+        "source": "apps/regions/dk/data/area_summary_sogn.json",
+        "source_sha256": "9684c09640485f3362a936202497f80112a18c3a53b8da1c2443b1715a6ea6c8",
+        "source_bytes": 8442577,
+        "source_gzip_bytes": 393476,
+        "columns": "apps/regions/dk/data/area_summary_sogn.columns.json",
+        "columns_sha256": "7b0e928d97878d5dfc4d6bcf3003296c0c368547a53a597812a63711d17805d6",
+        "columns_bytes": 526678,
+        "columns_gzip_bytes": 145994,
+        "rows": 8332,
+        "constant_keys": 11,
+        "encoded_keys": 5,
+        "column_keys": 5
+      },
+      {
+        "source": "apps/regions/mx/data/area_summary_municipality.json",
+        "source_sha256": "cba667dc533efb86d04036c310a5d0b4bab0e99c4b2a144e8805e1e0c2ac393e",
+        "source_bytes": 6757531,
+        "source_gzip_bytes": 287674,
+        "columns": "apps/regions/mx/data/area_summary_municipality.columns.json",
+        "columns_sha256": "bc8c972e4b2ddf3709b4014aa257f704682593def1d21c31c458147caaaf5031",
+        "columns_bytes": 602095,
+        "columns_gzip_bytes": 143992,
+        "rows": 7407,
+        "constant_keys": 8,
+        "encoded_keys": 8,
+        "column_keys": 5
+      },
+      {
+        "source": "apps/regions/nz/data/area_summary_sa2.json",
+        "source_sha256": "d68eb7f6923208bc554dc77963b1d082f6fe4c1185bc1d338bd15bb6b7b9828a",
+        "source_bytes": 5415474,
+        "source_gzip_bytes": 261386,
+        "columns": "apps/regions/nz/data/area_summary_sa2.columns.json",
+        "columns_sha256": "823545ff7fec9bf344e21747f7d3c90a2ddadd3cb926d5eb7dc9d54e15cb6e7c",
+        "columns_bytes": 512423,
+        "columns_gzip_bytes": 138331,
+        "rows": 6933,
+        "constant_keys": 7,
+        "encoded_keys": 9,
+        "column_keys": 5
+      },
+      {
+        "source": "apps/regions/au/data/area_summary_sa2.json",
+        "source_sha256": "f0ab10ae56e7196fa77db9f4e8cf1ef52d0a963043ab517a7c60e8c8227ff425",
+        "source_bytes": 4340807,
+        "source_gzip_bytes": 242258,
+        "columns": "apps/regions/au/data/area_summary_sa2.columns.json",
+        "columns_sha256": "9412160482bcc2597bb49176917681f40d5133e92cd5fa89277f9248b30d81b8",
+        "columns_bytes": 438914,
+        "columns_gzip_bytes": 118836,
+        "rows": 4944,
+        "constant_keys": 8,
+        "encoded_keys": 7,
+        "column_keys": 6
+      }
+    ]
+  },
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "python3 scripts/build_area_summary_columns.py --check"
+    ],
+    "notes": "each columnar file decodes to its governed product with every row and field equal (types and key order included)"
+  },
+  "privacy": "public",
+  "downstream_status": "public",
+  "notes": "Derived transport files for the map runtime. The governed area-summary products are unchanged and remain canonical; a page that opts a level in with summaryColumns falls back to the governed file on any error."
+}
