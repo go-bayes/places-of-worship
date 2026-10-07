@@ -80,16 +80,17 @@ for f in apps/regions/*/data/area_summary_*.columns.json; do
     col_fails=$((col_fails+1))
   fi
 done
-if [ -f docs/manifests/area-summary-columns.manifest.json ]; then
+for mf in docs/manifests/area-summary-columns.manifest.json docs/manifests/superseded/*.manifest.json; do
+  [ -f "$mf" ] || continue
   col_total=$((col_total+1))
-  out=$(uvx check-jsonschema --base-uri "file://$PWD/schemas/" --schemafile schemas/data-manifest.schema.json docs/manifests/area-summary-columns.manifest.json 2>&1)
+  out=$(uvx check-jsonschema --base-uri "file://$PWD/schemas/" --schemafile schemas/data-manifest.schema.json "$mf" 2>&1)
   if grep -q "ok --" <<<"$out"; then
-    echo "COLUMNS PASS: docs/manifests/area-summary-columns.manifest.json"
+    echo "COLUMNS PASS: $mf"
   else
-    echo "COLUMNS FAIL: docs/manifests/area-summary-columns.manifest.json"
+    echo "COLUMNS FAIL: $mf"
     col_fails=$((col_fails+1))
   fi
-fi
+done
 gate_total=$((gate_total+col_total))
 gate_fails=$((gate_fails+col_fails))
 

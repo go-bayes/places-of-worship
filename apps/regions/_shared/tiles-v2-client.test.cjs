@@ -42,7 +42,7 @@ assert.doesNotMatch(unvalidated, /overviewKeep/);
 // every html page that loads a changed script carries the bumped query
 // one stamp per script: a script's stamp moves only when that script changes
 const stamps = {
-    "region-map.js": "20261007d", // columnar area-summary transport
+    "region-map.js": "20261007e", // columnar area-summary transport, pinned and validated
     "unvalidated-places.js": "20261007b", // zoom floor for ra-dots layers
     "verification-map.js": "20261007b", // one-round-trip landing
     "review-map.js": "20261007a",

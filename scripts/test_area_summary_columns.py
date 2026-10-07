@@ -77,5 +77,57 @@ class ShippedFiles(unittest.TestCase):
             self.assertEqual(listed[entry["columns"]]["row_count"], entry["rows"])
 
 
+    def test_shipped_manifest_is_complete_and_current(self):
+        manifest = json.loads(cols.MANIFEST_PATH.read_text())
+        entries = [cols.build_one(s)[1] for s in cols.TARGETS]
+        self.assertEqual(cols.check_manifest(manifest, entries), [])
+        self.assertRegex(manifest["pipeline"]["git_commit"], r"^[0-9a-f]{40}$")
+        self.assertEqual(manifest["manifest_sha256"], cols.manifest_hash(manifest))
+
+    def test_pages_pin_the_current_hashes(self):
+        entries = [cols.build_one(s)[1] for s in cols.TARGETS]
+        for page, text in cols.page_pins(entries).items():
+            self.assertEqual(page.read_text(encoding="utf-8"), text, str(page))
+
+
+def fake_entries(tag):
+    return [{"source": "apps/regions/xx/data/area_summary_a.json", "source_sha256": tag * 64, "source_bytes": 1,
+             "source_gzip_bytes": 1, "columns": "apps/regions/xx/data/area_summary_a.columns.json",
+             "columns_sha256": tag * 64, "columns_bytes": 1, "columns_gzip_bytes": 1, "rows": 1,
+             "constant_keys": 0, "encoded_keys": 0, "column_keys": 1}]
+
+
+class ManifestVersioning(unittest.TestCase):
+    commit = "1" * 40
+
+    def test_unchanged_content_keeps_its_timestamp(self):
+        first, _ = cols.plan_manifest(fake_entries("a"), None, self.commit, "2026-01-01T00:00:00Z")
+        again, archived = cols.plan_manifest(fake_entries("a"), first, "2" * 40, "2026-06-01T00:00:00Z")
+        self.assertEqual(again["created_at"], "2026-01-01T00:00:00Z")
+        self.assertIsNone(archived)
+        self.assertIsNone(again["supersedes_manifest_id"])
+        self.assertEqual(again["manifest_sha256"], cols.manifest_hash(again))
+
+    def test_changed_content_gets_a_new_timestamp_and_supersedes_the_old(self):
+        first, _ = cols.plan_manifest(fake_entries("a"), None, self.commit, "2026-01-01T00:00:00Z")
+        second, archived = cols.plan_manifest(fake_entries("b"), first, self.commit, "2026-06-01T00:00:00Z")
+        self.assertEqual(second["created_at"], "2026-06-01T00:00:00Z")
+        self.assertNotEqual(second["dataset_version_id"], first["dataset_version_id"])
+        self.assertEqual(second["supersedes_manifest_id"], first["manifest_id"])
+        self.assertIsNone(second["superseded_by_manifest_id"])
+        # the previous record is preserved, marked superseded, with its own valid hash
+        self.assertEqual(archived["manifest_id"], first["manifest_id"])
+        self.assertEqual(archived["created_at"], "2026-01-01T00:00:00Z")
+        self.assertEqual(archived["downstream_status"], "superseded")
+        self.assertEqual(archived["superseded_by_manifest_id"], second["manifest_id"])
+        self.assertEqual(archived["manifest_sha256"], cols.manifest_hash(archived))
+        self.assertEqual(second["manifest_sha256"], cols.manifest_hash(second))
+
+    def test_manifest_hash_ignores_only_its_own_field(self):
+        m, _ = cols.plan_manifest(fake_entries("a"), None, self.commit, "2026-01-01T00:00:00Z")
+        self.assertEqual(cols.manifest_hash(m), cols.manifest_hash({**m, "manifest_sha256": "f" * 64}))
+        self.assertNotEqual(cols.manifest_hash(m), cols.manifest_hash({**m, "created_at": "2027-01-01T00:00:00Z"}))
+
+
 if __name__ == "__main__":
     unittest.main()

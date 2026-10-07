@@ -3752,28 +3752,81 @@ function cloneJsonValue(value) {
   return copy;
 }
 
-function expandSummaryColumns(packed) {
-  if (!packed || packed.schema_version !== "area-summary-columns.v1") throw new Error("unsupported columnar schema_version");
+const SHA256_PATTERN = /^[0-9a-f]{64}$/;
+const isPlainObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
+
+// the SHA-256 of fetched bytes as lower-case hex. needs a secure context
+// (crypto.subtle); where it is missing this throws and the loader falls back.
+async function sha256Hex(bytes) {
+  const hash = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(hash), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// validate the whole payload before any row is built, so a payload that is
+// damaged, from the wrong source or for the wrong product fails here (and
+// the loader falls back) rather than altering what the map shows.
+// expect: { sourceFile, sourceSha256, domain } from the level's configuration.
+function expandSummaryColumns(packed, expect = {}) {
+  if (!isPlainObject(packed) || packed.schema_version !== "area-summary-columns.v1") throw new Error("unsupported columnar schema_version");
   const { n, keys, constants, encoded, columns, header } = packed;
-  if (!Number.isInteger(n) || n < 1 || !Array.isArray(keys) || !header || typeof header !== "object"
-    || !constants || !encoded || !columns) throw new Error("malformed columnar summary");
+  if (typeof packed.source_file !== "string" || !packed.source_file) throw new Error("missing source_file");
+  if (typeof packed.source_sha256 !== "string" || !SHA256_PATTERN.test(packed.source_sha256)) throw new Error("missing or malformed source_sha256");
+  if (expect.sourceFile !== undefined && packed.source_file !== expect.sourceFile) throw new Error("source_file does not match the configured summary");
+  if (expect.sourceSha256 !== undefined && packed.source_sha256 !== expect.sourceSha256) throw new Error("source_sha256 does not match the pinned summary");
+  if (!Number.isInteger(n) || n < 1) throw new Error("malformed columnar summary: n");
+  if (!isPlainObject(header) || Object.hasOwn(header, "rows")) throw new Error("malformed columnar summary: header");
+  if (!isPlainObject(constants) || !isPlainObject(encoded) || !isPlainObject(columns)) throw new Error("malformed columnar summary: groups");
+  if (!Array.isArray(keys) || keys.length < 1) throw new Error("malformed columnar summary: keys");
+  const keySet = new Set();
+  for (const key of keys) {
+    if (typeof key !== "string" || !key || key === "__proto__") throw new Error("keys must be non-empty strings");
+    if (keySet.has(key)) throw new Error(`duplicate key ${key}`);
+    keySet.add(key);
+  }
+  // the three groups are disjoint and together are exactly the keys
+  let grouped = 0;
+  for (const group of [constants, encoded, columns]) {
+    for (const key of Object.keys(group)) {
+      if (!keySet.has(key)) throw new Error(`group key ${key} is not in keys`);
+      grouped += 1;
+    }
+  }
+  if (grouped !== keySet.size) throw new Error("keys, constants, encoded and columns disagree");
+  for (const key of keys) {
+    if (Number(Object.hasOwn(constants, key)) + Number(Object.hasOwn(encoded, key)) + Number(Object.hasOwn(columns, key)) !== 1) {
+      throw new Error(`key ${key} is not in exactly one group`);
+    }
+  }
+  // the runtime reads these two keys of every row, and a row is identified by
+  // the pair, so the pair must be present and unique
+  if (!keySet.has("area_code") || !keySet.has("year")) throw new Error("rows lack area_code or year");
+  if (expect.domain !== undefined && (header.domain || "religion") !== expect.domain) throw new Error("overlay domain mismatch");
   const decoded = {};
   for (const key of keys) {
     if (Object.hasOwn(constants, key)) continue;
     let column;
     if (Object.hasOwn(encoded, key)) {
-      const { values, index } = encoded[key];
-      if (!Array.isArray(values) || !Array.isArray(index) || index.length !== n) throw new Error(`malformed encoded column ${key}`);
+      const entry = encoded[key];
+      if (!isPlainObject(entry) || !Array.isArray(entry.values) || !Array.isArray(entry.index) || entry.index.length !== n) throw new Error(`malformed encoded column ${key}`);
+      const { values, index } = entry;
       column = index.map((position) => {
         if (!Number.isInteger(position) || position < 0 || position >= values.length) throw new Error(`bad position in column ${key}`);
         return values[position];
       });
-    } else if (Object.hasOwn(columns, key) && Array.isArray(columns[key]) && columns[key].length === n) {
+    } else if (Array.isArray(columns[key]) && columns[key].length === n) {
       column = columns[key];
     } else {
       throw new Error(`missing or short column ${key}`);
     }
     decoded[key] = column;
+  }
+  const code = (i) => (Object.hasOwn(constants, "area_code") ? constants.area_code : decoded.area_code[i]);
+  const year = (i) => (Object.hasOwn(constants, "year") ? constants.year : decoded.year[i]);
+  const seen = new Set();
+  for (let i = 0; i < n; i += 1) {
+    const id = `${code(i)}|${year(i)}`;
+    if (seen.has(id)) throw new Error(`duplicate area_code and year at row ${i}`);
+    seen.add(id);
   }
   // per key: a constant, or a decoded column. arrays and objects that come from
   // a constant or a dictionary are shared by every row that holds them, so each
@@ -3794,15 +3847,36 @@ function expandSummaryColumns(packed) {
   return { ...header, rows };
 }
 
-// the summary for one level: the columnar transport when the level opts in
-// and it reads cleanly, otherwise the governed product. throws only when the
-// governed product itself cannot be read.
-async function fetchCensusSummary(def, fetchImpl = fetch) {
+// the summary for one level: the columnar transport when the level opts in,
+// pins both SHA-256 values, and the fetched bytes verify; otherwise the
+// governed product. every transport failure (fetch, hash, parse, shape,
+// source, domain) takes the fallback. throws only when the governed product
+// itself cannot be read. expect.domain is the overlay domain the level loads
+// into.
+async function fetchColumnarSummary(def, fetchImpl, expect) {
+  const pinned = def.summaryColumnsSha256;
+  const source = def.summarySha256;
+  if (!SHA256_PATTERN.test(pinned || "") || !SHA256_PATTERN.test(source || "")) throw new Error("columnar summary is not pinned");
+  const res = await fetchImpl(def.summaryColumns);
+  if (!res.ok) return { unavailable: res.status };
+  const bytes = await res.arrayBuffer();
+  if (await sha256Hex(bytes) !== pinned) throw new Error("columnar summary does not match its pinned SHA-256");
+  const packed = JSON.parse(new TextDecoder("utf-8").decode(bytes));
+  return {
+    summary: expandSummaryColumns(packed, {
+      sourceFile: def.summary.split("/").pop(),
+      sourceSha256: source,
+      domain: expect.domain
+    })
+  };
+}
+
+async function fetchCensusSummary(def, fetchImpl = fetch, expect = {}) {
   if (def.summaryColumns) {
     try {
-      const res = await fetchImpl(def.summaryColumns);
-      if (res.ok) return expandSummaryColumns(await res.json());
-      console.warn(`columnar summary unavailable (${res.status}); using ${def.summary}`);
+      const out = await fetchColumnarSummary(def, fetchImpl, expect);
+      if (out.summary) return out.summary;
+      console.warn(`columnar summary unavailable (${out.unavailable}); using ${def.summary}`);
     } catch (err) {
       console.warn(`columnar summary unreadable (${err && err.message}); using ${def.summary}`);
     }
@@ -3818,7 +3892,7 @@ async function loadCensusDataInto(store, def) {
   try {
     const [boundariesRes, summary] = await Promise.all([
       fetch(def.boundaries),
-      fetchCensusSummary(def)
+      fetchCensusSummary(def, fetch, { domain: censusState.domain })
     ]);
     if (!boundariesRes.ok) throw new Error("census fetch failed");
     // design §2: a product whose declared domain disagrees with the

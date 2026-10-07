@@ -2,6 +2,9 @@
   "$schema": "../../schemas/data-manifest.schema.json",
   "schema_version": "data-manifest.v2",
   "manifest_id": "manifest:area-summary-columns-9359ebbed042",
+  "manifest_sha256": "0675b02b9be424d2a04d7e8232eaf3ea4ac6a8b0a84d8ef736c4fb69beac0bb3",
+  "supersedes_manifest_id": null,
+  "superseded_by_manifest_id": null,
   "dataset_id": "area-summary-columns",
   "dataset_version_id": "area-summary-columns:9359ebbed042d29e",
   "dataset_family": "area-summary-columns",
@@ -14,7 +17,7 @@
   "created_by": "claude-sonnet-5-5 (workflow agent)",
   "pipeline": {
     "script": "scripts/build_area_summary_columns.py",
-    "git_commit": null,
+    "git_commit": "9969f18a35aa0ec0320ec2e98022fa1afab4337f",
     "command": "python3 scripts/build_area_summary_columns.py",
     "parameters": {
       "schema": "schemas/area-summary-columns.v1.schema.json",
