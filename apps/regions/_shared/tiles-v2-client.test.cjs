@@ -40,7 +40,7 @@ assert.match(review, /registry\?\.iso2 \|\| options\.countryCode/);
 assert.doesNotMatch(unvalidated, /overviewKeep/);
 
 // every html page that loads a changed script carries the bumped query
-const stamp = "20261007a";
+const stamp = "20261007b";
 const scripts = ["region-map.js", "unvalidated-places.js", "verification-map.js", "review-map.js"];
 const pages = [];
 (function walk(dir) {

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-10-07 (public maps: census download starts with the page, item P3)
+
+- The shared runtime (`apps/regions/_shared/region-map.js`) starts the default level's boundary and area-summary download when the script runs, directly after the carried census view has been read, instead of at the map's first idle. Layer insertion still waits for the first idle: `setCensusEnabled` takes the in-flight promise from `loadCensusData`, so the choropleth is still added beneath the point layers and `datamap:first-idle` still fires after the data has arrived. The declared-domain check, the foreign-fix fold and the level and domain switching are unchanged, and no code path names a country.
+- Both census fetches carry `priority: "low"`, so Chromium schedules them behind the style and tiles (other browsers ignore the option).
+- The "Loading census boundaries…" hint is now shown by `setCensusEnabled` when the idle handler meets a load still in flight, and the failure hint likewise, because the early start runs before the map has painted and a hint then expires unseen. Loads started by a level switch or a domain switch show both hints as before.
+- Cache-busting: the four scripts are stamped `?v=20261007b` on every page that loads them.
+- Added `apps/regions/_shared/census-early-start.test.cjs` (source order of the early call and a run of the real loader and enable functions against stubs); CI runs it. Timings, the browser checks and the trade-off on slow links are in the pull request.
+
 ### 2026-10-07 (tiles v2 client: slim overview and per-country RA dots)
 
 - The maps read the v2 tilesets built on 2026-10-07 (manifest `tiles-v2-20260722:0ce3c532af1e986d`), items P2 and R1 (client side) of the map-loading plan. The manifest and its validation report are on `main` at commit `8dae8c76`, at `tools/tiles-r2/manifests/tiles-v2-20260722-0ce3c532af1e.manifest.json` and `tools/tiles-r2/manifests/validation-report-tiles-v2-20260722-0ce3c532af1e.md` (and `.json`). The tile Worker that routes versioned names (PR #172) is deployed (version `c9c12356`); merge only after the 211 archives are uploaded and verified on the production route, because until then the new names return 404 and the overview dots do not draw.

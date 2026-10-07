@@ -3415,6 +3415,13 @@ const censusState = {
   const y = Number(year);
   if (Number.isInteger(y) && y >= 1000 && y <= 9999) censusState.year = y;
 })();
+// start the default level's boundary and summary download now, rather than
+// at the first map idle: on a slow link the idle arrives long after the
+// network could have fetched these files. layer insertion stays behind the
+// first idle, where setCensusEnabled reuses this in-flight promise. the call
+// sits here because the loader reads CENSUS_METRICS and the config above;
+// earlier in the script it would hit the temporal dead zone
+if (HAS_CENSUS) void loadCensusData(censusState.level, { quiet: true });
 function writeCensusHash() {
   const carriable = censusState.enabled && !pulotuState.active;
   writeHashParam("d", carriable ? `${censusState.metric}:${censusState.year}` : null);
@@ -3719,7 +3726,10 @@ function syncCensusYearSelect() {
   }
 }
 
-async function loadCensusData(level) {
+// quiet loads (the early prefetch) record failure on the store but show no
+// hint: the map has not painted, so a hint would expire unseen.
+// setCensusEnabled announces the pending or failed load once the map is up
+async function loadCensusData(level, { quiet = false } = {}) {
   const existing = censusState.levels[level];
   if (existing && existing.geojson) return existing.geojson;
   // callers arriving mid-load share the one in-flight promise instead of
@@ -3729,16 +3739,26 @@ async function loadCensusData(level) {
   const def = CENSUS_LEVELS[level];
   const store = { geojson: null, rows: [], byAreaYear: new Map(), years: [], domains: {}, hasFlags: false, loading: true };
   censusState.levels[level] = store;
-  store.promise = loadCensusDataInto(store, def);
+  store.promise = loadCensusDataInto(store, def, quiet);
   return store.promise;
 }
 
-async function loadCensusDataInto(store, def) {
+function censusLoadingHint() {
   showClickHint(`Loading ${(RC.dataNoun || "Census").toLowerCase()} boundaries…`);
+}
+
+function censusFailedHint() {
+  showClickHint(`${RC.dataNoun || "Census"} data failed to load`);
+}
+
+async function loadCensusDataInto(store, def, quiet = false) {
+  if (!quiet) censusLoadingHint();
   try {
+    // low priority keeps these large files behind the style and tiles in
+    // Chromium; browsers without the option ignore it
     const [boundariesRes, summaryRes] = await Promise.all([
-      fetch(def.boundaries),
-      fetch(def.summary)
+      fetch(def.boundaries, { priority: "low" }),
+      fetch(def.summary, { priority: "low" })
     ]);
     if (!boundariesRes.ok || !summaryRes.ok) throw new Error("census fetch failed");
     const summary = await summaryRes.json();
@@ -3782,7 +3802,8 @@ async function loadCensusDataInto(store, def) {
     computeCensusDomains(store);
   } catch (err) {
     store.geojson = null;
-    showClickHint(`${RC.dataNoun || "Census"} data failed to load`);
+    store.failed = true;
+    if (!quiet) censusFailedHint();
   } finally {
     store.loading = false;
   }
@@ -5308,11 +5329,15 @@ async function setCensusEnabled(on) {
   if (!HAS_CENSUS) return;
   censusState.enabled = on;
   if (on) {
-    const data = await loadCensusData(censusState.level);
+    const pending = loadCensusData(censusState.level);
+    // an early prefetch may still be in flight when the map first idles
+    if (censusState.levels[censusState.level]?.loading) censusLoadingHint();
+    const data = await pending;
     // a second toggle can land while the load is in flight; the later
     // intent wins, so a stale load must not add layers over it
     if (censusState.enabled !== on) return;
     if (!data) {
+      if (censusState.levels[censusState.level]?.failed) censusFailedHint();
       censusState.enabled = false;
       updateCensusLegend();
       return;
