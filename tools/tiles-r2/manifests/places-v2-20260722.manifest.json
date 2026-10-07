@@ -1,9 +1,9 @@
 {
   "$schema": "../../../schemas/data-manifest.schema.json",
   "schema_version": "data-manifest.v2",
-  "manifest_id": "manifest:places-v2-20260722-b1c30cc1b3c1",
+  "manifest_id": "manifest:places-v2-20260722-6bbd0302e9f1",
   "dataset_id": "places-v2-20260722",
-  "dataset_version_id": "places-v2-20260722:b1c30cc1b3c185cd",
+  "dataset_version_id": "places-v2-20260722:6bbd0302e9f13a7a",
   "dataset_family": "places-tiles",
   "dataset_role": "public_product",
   "scope": {
@@ -11,11 +11,11 @@
     "snapshot_date": "2026-07-22",
     "pipeline_stage": "staged"
   },
-  "created_at": "2026-10-07T01:02:39+00:00",
+  "created_at": "2026-10-07T01:42:33+00:00",
   "created_by": "claude-sonnet-5-5 (workflow agent)",
   "pipeline": {
     "script": "tools/tiles-r2/build_places_v2.py",
-    "git_commit": "6fbe8b782de5c6c551706ca117e3c47884c3754c",
+    "git_commit": "1f808216c18aa06f8306bc70bfd8de1cbb062dd5",
     "command": "uv run tools/tiles-r2/build_places_v2.py all --work <dir> --source <places.mbtiles> --slim <slim.ndjson> --extract-work <dir>",
     "parameters": {
       "z6_flags": [
@@ -47,14 +47,18 @@
           "attempts": [
             {
               "fraction": 0.7,
-              "points": 1450912,
+              "points": 1450918,
               "added_for_tile_coverage": 92,
+              "added_for_source_tile_coverage": 6,
+              "source_tiles_without_a_reachable_point": 1,
               "max_tile_bytes": 396096
             },
             {
               "fraction": 0.856232,
-              "points": 1774573,
+              "points": 1774574,
               "added_for_tile_coverage": 32,
+              "added_for_source_tile_coverage": 1,
+              "source_tiles_without_a_reachable_point": 1,
               "max_tile_bytes": 473929
             }
           ],
@@ -109,8 +113,8 @@
       "uri": "green:/Users/joseph/tiles-build-2026-10-07/places-v2/out/places-v2-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
-      "bytes": 2797462444,
-      "sha256": "009635acdff5749c1290d4e426d81310a940fb61f477a45001540d348c77af2d",
+      "bytes": 2797462496,
+      "sha256": "f9855a668df3a23ad157b9ef55c99804a176161481ed1b540fa744867d99fda7",
       "feature_count": null,
       "privacy": "public",
       "licence_status": "needs_review",

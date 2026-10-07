@@ -1,6 +1,6 @@
 # Validation report, places-v2-20260722.pmtiles
 
-Status: **passed**. Generated 2026-10-07T01:01:13.758271+00:00. Aggregates only: no attribute values appear here.
+Status: **passed**. Generated 2026-10-07T01:40:53.978351+00:00. Aggregates only: no attribute values appear here.
 
 ## Warnings
 
@@ -9,8 +9,8 @@ Status: **passed**. Generated 2026-10-07T01:01:13.758271+00:00. Aggregates only:
 ## Header
 
 - zooms 6-18, tile type TileType.MVT, compression Compression.GZIP
-- addressed tiles 8177784, distinct tile contents 8177099
-- metadata layers: places; tiles per zoom: z6 950, z7 2688, z8 7631, z9 21061, z10 54232, z11 128983, z12 284007, z13 550307, z14 866044, z15 1184584, z16 1487106, z17 1719766, z18 1870425
+- addressed tiles 8177785, distinct tile contents 8177100
+- metadata layers: places; tiles per zoom: z6 950, z7 2689, z8 7631, z9 21061, z10 54232, z11 128983, z12 284007, z13 550307, z14 866044, z15 1184584, z16 1487106, z17 1719766, z18 1870425
 
 ## z8-18 against the source
 
@@ -35,7 +35,7 @@ Status: **passed**. Generated 2026-10-07T01:01:13.758271+00:00. Aggregates only:
 | zoom | tiles | max | p95 | mean | total | live max | live p95 |
 |---|---|---|---|---|---|---|---|
 | 6 | 950 | 408300 | 57091 | 10896 | 10350759 | 2743067 | 295940 |
-| 7 | 2688 | 473929 | 63032 | 11729 | 31527231 | 895099 | 110746 |
+| 7 | 2689 | 473929 | 63032 | 11725 | 31527353 | 895099 | 110746 |
 
 Attributes in z6-7 tiles: country_code, denomination, name, osm_id, osm_type, religion. Layers: places.
 
@@ -53,7 +53,7 @@ z6: 553717 of 2072349 features kept (26.72%); maximum absolute difference 0.048 
 | shinto | 2.441 | 2.443 | 0.001 |
 | jewish | 0.55 | 0.545 | -0.005 |
 
-z7: 1774573 of 2072349 features kept (85.63%); maximum absolute difference 0.004 pp; osm keys over the input multiplicity: 0.
+z7: 1774574 of 2072349 features kept (85.63%); maximum absolute difference 0.004 pp; osm keys over the input multiplicity: 0.
 
 | religion | input % | kept % | diff pp |
 |---|---|---|---|
@@ -65,19 +65,43 @@ z7: 1774573 of 2072349 features kept (85.63%); maximum absolute difference 0.004
 | shinto | 2.441 | 2.441 | -0.0 |
 | jewish | 0.55 | 0.55 | -0.0 |
 
+## z6-7 per-tile religion shares (diagnostic)
+
+for each z6 and z7 tile, religion counts of the input points in the tile's area against the points in the archive tile's proper area, over the religions above 0.5 percent of the input and one 'other' bucket, with the largest absolute difference in share (percentage points); diagnostic only, so tiles with few points are noisy. Counts for every tile are in `per-tile-religion-places-v2-20260722.json`.
+
+| zoom | tiles | tiles with no archive point | tiles with at least 100 input points | median largest diff pp | p95 | max | tiles over 5 pp | tiles over 10 pp |
+|---|---|---|---|---|---|---|---|---|
+| 6 | 950 | 29 | 504 | 0.844 | 5.672 | 22.573 | 31 | 6 |
+| 7 | 2689 | 41 | 1185 | 0.238 | 1.61 | 5.082 | 1 | 0 |
+
+## z6-7 attributes by zoom
+
+- z6: 553717 tile points; carrying: religion 553717, denomination 553710, name 553717, osm_id 365418, osm_type 365418, country_code 365418; input features carrying: religion 2072349, denomination 2072336, name 2072349, osm_id 1371000, osm_type 1371000, country_code 1371000
+- z7: 1774574 tile points; carrying: religion 1774574, denomination 1774562, name 1774574, osm_id 1174143, osm_type 1174143, country_code 1174143; input features carrying: religion 2072349, denomination 2072336, name 2072349, osm_id 1371000, osm_type 1371000, country_code 1371000
+
+## Bound inputs
+
+Digests the report was made from; the manifest stage recomputes them and refuses on a difference.
+
+- archive_sha256: f9855a668df3a23ad157b9ef55c99804a176161481ed1b540fa744867d99fda7
+- archive_bytes: 2797462496
+- source_sha256: eaa55c50971381cacca36ea08b1d4a68628b77d47a7156848cebb6a13eb2c406
+- source_bytes: 4373762048
+- slim_sha256: aceb33558462ba5eb12543cc392acee6b86751ae3f4d5293adc69b90cf5509be
+
 ## z6-7 tile coverage
 
 - z6: 950 archive tiles of 950 source tiles; 0 source tiles have no archive tile; 0 archive tiles are not in the source (0 of them with points in the proper area; the others hold only a neighbour's buffer copy). 930 tiles hold input points clear of their edges; 9 of them have no dot in the archive.
-- z7: 2688 archive tiles of 2688 source tiles; 1 source tiles have no archive tile; 1 archive tiles are not in the source (0 of them with points in the proper area; the others hold only a neighbour's buffer copy). 2646 tiles hold input points clear of their edges; 0 of them have no dot in the archive.
+- z7: 2689 archive tiles of 2688 source tiles; 0 source tiles have no archive tile; 1 archive tiles are not in the source (0 of them with points in the proper area; the others hold only a neighbour's buffer copy). 2646 tiles hold input points clear of their edges; 0 of them have no dot in the archive.
 
 ## Measurement
 
 | zoom | live max | live p95 | live total | new max | new p95 | new total |
 |---|---|---|---|---|---|---|
 | 6 | 2743067 | 295940 | 54179091 | 408300 | 57091 | 10350759 |
-| 7 | 895099 | 110746 | 56319270 | 473929 | 63032 | 31527231 |
+| 7 | 895099 | 110746 | 56319270 | 473929 | 63032 | 31527353 |
 
-Curl sample of live tiles: 60 of 60 returned 200; served bytes were 0.9648 to 1.0011 of the stored bytes (the edge recompresses). Largest served tile: z6 2719622 bytes, z7 885205 bytes.
+Curl sample of live tiles: 60 of 60 returned 200; served bytes were 0.9648 to 1.0011 of the stored bytes (the edge recompresses). Largest served tile: z6 2720007 bytes, z7 885473 bytes.
 
 ### Country pages that open at z6-7
 

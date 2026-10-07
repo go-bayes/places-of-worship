@@ -1,26 +1,33 @@
 {
   "validation": {
-    "generated_at": "2026-10-07T01:01:13.758271+00:00",
+    "generated_at": "2026-10-07T01:40:53.978351+00:00",
     "archive": "places-v2-20260722.pmtiles",
     "problems": [],
     "criteria_not_met": [],
     "warnings": [
       "z6: 9 of 930 tiles that hold input points have no dot in their proper area (the briefed drop-fraction flags thin sparse tiles to nothing; the tile exists with a neighbour's buffer copy)"
     ],
+    "inputs": {
+      "archive_sha256": "f9855a668df3a23ad157b9ef55c99804a176161481ed1b540fa744867d99fda7",
+      "archive_bytes": 2797462496,
+      "source_sha256": "eaa55c50971381cacca36ea08b1d4a68628b77d47a7156848cebb6a13eb2c406",
+      "source_bytes": 4373762048,
+      "slim_sha256": "aceb33558462ba5eb12543cc392acee6b86751ae3f4d5293adc69b90cf5509be"
+    },
     "header": {
       "min_zoom": 6,
       "max_zoom": 18,
       "tile_type": "TileType.MVT",
       "tile_compression": "Compression.GZIP",
-      "addressed_tiles": 8177784,
-      "tile_contents": 8177099
+      "addressed_tiles": 8177785,
+      "tile_contents": 8177100
     },
     "metadata_layers": [
       "places"
     ],
     "tiles_per_zoom": {
       "6": 950,
-      "7": 2688,
+      "7": 2689,
       "8": 7631,
       "9": 21061,
       "10": 54232,
@@ -33,7 +40,7 @@
       "17": 1719766,
       "18": 1870425
     },
-    "scan_seconds": 31,
+    "scan_seconds": 35,
     "z8_18_byte_identity": {
       "per_zoom": {
         "8": {
@@ -117,11 +124,11 @@
         "total_bytes": 10350759
       },
       "7": {
-        "tiles": 2688,
+        "tiles": 2689,
         "max_bytes": 473929,
         "p95_bytes": 63032,
-        "mean_bytes": 11729,
-        "total_bytes": 31527231
+        "mean_bytes": 11725,
+        "total_bytes": 31527353
       }
     },
     "z6_7_attributes": [
@@ -135,6 +142,62 @@
     "z6_7_layers": [
       "places"
     ],
+    "z6_7_attributes_by_zoom": {
+      "6": {
+        "seen": [
+          "country_code",
+          "denomination",
+          "name",
+          "osm_id",
+          "osm_type",
+          "religion"
+        ],
+        "tile_points": 553717,
+        "points_carrying": {
+          "religion": 553717,
+          "denomination": 553710,
+          "name": 553717,
+          "osm_id": 365418,
+          "osm_type": 365418,
+          "country_code": 365418
+        },
+        "input_features_carrying": {
+          "religion": 2072349,
+          "denomination": 2072336,
+          "name": 2072349,
+          "osm_id": 1371000,
+          "osm_type": 1371000,
+          "country_code": 1371000
+        }
+      },
+      "7": {
+        "seen": [
+          "country_code",
+          "denomination",
+          "name",
+          "osm_id",
+          "osm_type",
+          "religion"
+        ],
+        "tile_points": 1774574,
+        "points_carrying": {
+          "religion": 1774574,
+          "denomination": 1774562,
+          "name": 1774574,
+          "osm_id": 1174143,
+          "osm_type": 1174143,
+          "country_code": 1174143
+        },
+        "input_features_carrying": {
+          "religion": 2072349,
+          "denomination": 2072336,
+          "name": 2072349,
+          "osm_id": 1371000,
+          "osm_type": 1371000,
+          "country_code": 1371000
+        }
+      }
+    },
     "z6_7_religion_shares": {
       "6": {
         "kept_features": 553717,
@@ -184,7 +247,7 @@
         "features_with_osm_key": 365418
       },
       "7": {
-        "kept_features": 1774573,
+        "kept_features": 1774574,
         "input_features": 2072349,
         "fraction_kept": 0.85631,
         "religions": {
@@ -243,10 +306,10 @@
       },
       "7": {
         "source_tiles": 2688,
-        "archive_tiles": 2688,
+        "archive_tiles": 2689,
         "archive_tiles_not_in_source": 1,
         "archive_tiles_not_in_source_with_points_in_proper_area": 0,
-        "source_tiles_absent_from_archive": 1,
+        "source_tiles_absent_from_archive": 0,
         "input_tiles_with_points": 2646,
         "input_tiles_without_a_dot_in_archive": 0
       }
@@ -265,11 +328,39 @@
         "total_bytes": 56319270
       }
     },
+    "z6_7_per_tile_religion": {
+      "file": "per-tile-religion-places-v2-20260722.json",
+      "method": "for each z6 and z7 tile, religion counts of the input points in the tile's area against the points in the archive tile's proper area, over the religions above 0.5 percent of the input and one 'other' bucket, with the largest absolute difference in share (percentage points); diagnostic only, so tiles with few points are noisy",
+      "summary": {
+        "6": {
+          "tiles": 950,
+          "tiles_without_archive_points": 29,
+          "min_points": 100,
+          "tiles_at_or_above_min_points": 504,
+          "median_max_abs_diff_pp": 0.844,
+          "p95_max_abs_diff_pp": 5.672,
+          "max_max_abs_diff_pp": 22.573,
+          "tiles_over_5_pp": 31,
+          "tiles_over_10_pp": 6
+        },
+        "7": {
+          "tiles": 2689,
+          "tiles_without_archive_points": 41,
+          "min_points": 100,
+          "tiles_at_or_above_min_points": 1185,
+          "median_max_abs_diff_pp": 0.238,
+          "p95_max_abs_diff_pp": 1.61,
+          "max_max_abs_diff_pp": 5.082,
+          "tiles_over_5_pp": 1,
+          "tiles_over_10_pp": 0
+        }
+      }
+    },
     "status": "passed",
-    "seconds": 78
+    "seconds": 88
   },
   "measurement": {
-    "generated_at": "2026-10-07T01:02:31.664719+00:00",
+    "generated_at": "2026-10-07T01:42:21.721862+00:00",
     "archive": "places-v2-20260722.pmtiles",
     "size_table": {
       "6": {
@@ -295,10 +386,10 @@
           "total_bytes": 56319270
         },
         "new": {
-          "tiles": 2688,
+          "tiles": 2689,
           "max_bytes": 473929,
           "p95_bytes": 63032,
-          "total_bytes": 31527231
+          "total_bytes": 31527353
         },
         "total_reduction": 0.4402
       }
@@ -312,15 +403,15 @@
       "per_zoom": {
         "6": {
           "tiles": 30,
-          "max_served_bytes": 2719622,
-          "p95_served_bytes": 2481153,
-          "max_seconds": 2.137335
+          "max_served_bytes": 2720007,
+          "p95_served_bytes": 2480955,
+          "max_seconds": 3.512221
         },
         "7": {
           "tiles": 30,
-          "max_served_bytes": 885205,
-          "p95_served_bytes": 856741,
-          "max_seconds": 0.805128
+          "max_served_bytes": 885473,
+          "p95_served_bytes": 856340,
+          "max_seconds": 1.003749
         }
       },
       "note": "served_bytes is the body the live edge sent with Accept-Encoding: gzip; the edge recompresses what the Worker decompresses, so it differs slightly from the stored bytes of the same tile in places.mbtiles. The sample is the five largest tiles and a seeded random sample at each zoom, so its p95 is not the archive's p95"
