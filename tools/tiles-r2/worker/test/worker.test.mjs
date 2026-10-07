@@ -141,6 +141,7 @@ beforeEach(async () => {
     "places-overview.pmtiles": { bytes: ARCHIVE, etag: "aaa111" },
     "places-overview-v2-20261006.pmtiles": { bytes: ARCHIVE, etag: "bbb222" },
     "ra-dots-de-2026-10-06.pmtiles": { bytes: ARCHIVE, etag: "ccc333" },
+    "places-v2-20260722.pmtiles": { bytes: ARCHIVE, etag: "ddd444" },
   });
   // fresh module per test so the per-isolate archive map starts empty
   worker = (await import(`../src/index.js?t=${Math.random()}`)).default;
@@ -156,7 +157,7 @@ describe("tile worker", () => {
   });
 
   it("serves versioned names as immutable", async () => {
-    for (const name of ["places-overview-v2-20261006", "ra-dots-de-2026-10-06"]) {
+    for (const name of ["places-overview-v2-20261006", "ra-dots-de-2026-10-06", "places-v2-20260722"]) {
       const res = await get(`/${name}/5/31/19`);
       assert.equal(res.status, 200, name);
       assert.equal(res.headers.get("Cache-Control"), "public, max-age=31536000, immutable");
@@ -172,7 +173,7 @@ describe("tile worker", () => {
   });
 
   it("rejects names that match neither the allow-list nor the version pattern", async () => {
-    for (const name of ["places-v2", "ra-dots-de", "ra-dots-deu-20261006", "places-overview-v2-latest", "other-20261006"]) {
+    for (const name of ["places-v2", "places-v2-latest", "places-v2-2026", "places-v3-20260722", "xplaces-v2-20260722", "places-v2-20260722/extra", "ra-dots-de", "ra-dots-deu-20261006", "places-overview-v2-latest", "other-20261006"]) {
       const res = await get(`/${name}/5/31/19`);
       assert.equal(res.status, 404, name);
     }
