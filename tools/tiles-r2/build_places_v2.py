@@ -79,6 +79,19 @@ def _tile_of(lon, lat, z):
     return min(max(x, 0), n - 1), min(max(y, 0), n - 1)
 
 
+EDGE_MARGIN = 0.001  # of a tile's width; tippecanoe rounds to a 4096 grid, so a point this close to an edge may fall in the neighbour
+
+
+def _interior(lon, lat, z):
+    """The tile holding a point and whether the point lies clear of the tile's edges (by EDGE_MARGIN)."""
+    n = 1 << z
+    fx = (lon + 180.0) / 360.0 * n
+    fy = (1.0 - math.asinh(math.tan(math.radians(lat))) / math.pi) / 2.0 * n
+    x, y = min(max(math.floor(fx), 0), n - 1), min(max(math.floor(fy), 0), n - 1)
+    clear = EDGE_MARGIN <= fx - x <= 1 - EDGE_MARGIN and EDGE_MARGIN <= fy - y <= 1 - EDGE_MARGIN
+    return (x, y), clear
+
+
 def sample_with_coverage(src, dst, fraction, seed, zoom):
     """Write a seeded sample of an NDJSON feature file at one fraction.
 
@@ -95,7 +108,8 @@ def sample_with_coverage(src, dst, fraction, seed, zoom):
             f = json.loads(line)
             by_religion[f["properties"].get("religion")].append(i)
             lon, lat = f["geometry"]["coordinates"]
-            tile_members[_tile_of(lon, lat, zoom)].append(i)
+            tile, clear = _interior(lon, lat, zoom)
+            tile_members[tile].append((i, clear))
     chosen = set()
     for rel in sorted(by_religion, key=str):
         idx = by_religion[rel]
@@ -103,8 +117,10 @@ def sample_with_coverage(src, dst, fraction, seed, zoom):
     added = 0
     for tile in sorted(tile_members):
         members = tile_members[tile]
-        if not any(i in chosen for i in members):
-            chosen.add(random.Random(f"{seed}:cover:{tile}").choice(members))
+        # a tile counts as covered by a sampled point clear of its edges; an edge point may be rounded into the neighbour
+        clear = [i for i, c in members if c]
+        if clear and not any(i in chosen for i in clear):
+            chosen.add(random.Random(f"{seed}:cover:{tile}").choice(clear))
             added += 1
     n = 0
     with open(src, encoding="utf-8") as fh, open(dst, "w", encoding="utf-8") as out:
@@ -328,6 +344,7 @@ def cmd_validate(a):
     report = {"generated_at": datetime.now(timezone.utc).isoformat(), "archive": pm_path.name,
               "problems": [], "criteria_not_met": []}
     problems, unmet = report["problems"], report["criteria_not_met"]
+    warnings = report.setdefault("warnings", [])
     t0 = time.time()
 
     # --- header and metadata
@@ -429,7 +446,9 @@ def cmd_validate(a):
                 slim_keys[(p.get("osm_type"), p.get("osm_id"))] += 1
             lon, lat = f["geometry"]["coordinates"]
             for z in THIN_ZOOMS:
-                input_tiles[z][_tile_of(lon, lat, z)] += 1
+                tile, clear = _interior(lon, lat, z)
+                if clear:
+                    input_tiles[z][tile] += 1
     agg = {z: {"core": 0, "religion": collections.Counter(), "keys": collections.Counter()} for z in THIN_ZOOMS}
     attrs, layers = set(), set()
     core_by_tile = {}
@@ -509,8 +528,11 @@ def cmd_validate(a):
                          "source_tiles_absent_from_archive": len(absent),
                          "input_tiles_with_points": len(input_tiles[z]),
                          "input_tiles_without_a_dot_in_archive": len(lost)}
-        if lost:
+        if lost and z in STRATIFIED_ZOOMS:
             problems.append(f"z{z}: {len(lost)} tiles that hold input points have no dot in the archive")
+        elif lost:
+            warnings.append(f"z{z}: {len(lost)} of {len(input_tiles[z])} tiles that hold input points have no dot in their proper "
+                            "area (the briefed drop-fraction flags thin sparse tiles to nothing; the tile exists with a neighbour's buffer copy)")
         if outside:
             problems.append(f"z{z}: {outside} tiles that the source does not have hold points in their proper area")
     report["z6_7_tile_coverage"] = cover
@@ -633,6 +655,8 @@ def _md_report(rep, meas):
          f"Status: **{rep['status']}**. Generated {rep['generated_at']}. Aggregates only: no attribute values appear here.", ""]
     if rep["problems"] or rep["criteria_not_met"]:
         L += ["## Problems", ""] + [f"- {p}" for p in rep["problems"] + rep["criteria_not_met"]] + [""]
+    if rep.get("warnings"):
+        L += ["## Warnings", ""] + [f"- {w}" for w in rep["warnings"]] + [""]
     h = rep["header"]
     L += ["## Header", "", f"- zooms {h['min_zoom']}-{h['max_zoom']}, tile type {h['tile_type']}, compression {h['tile_compression']}",
           f"- addressed tiles {h['addressed_tiles']}, distinct tile contents {h['tile_contents']}",
@@ -656,7 +680,7 @@ def _md_report(rep, meas):
         L += [f"| {r} | {d['input_pct']} | {d['kept_pct']} | {d['diff_pp']} |" for r, d in v["religions"].items()] + [""]
     L += ["## z6-7 tile coverage", ""]
     L += [f"- z{z}: {v['archive_tiles']} archive tiles of {v['source_tiles']} source tiles; {v['source_tiles_absent_from_archive']} source tiles have no archive tile; "
-          f"{v['archive_tiles_not_in_source']} archive tiles are not in the source ({v['archive_tiles_not_in_source_with_points_in_proper_area']} of them with points in the proper area; the others hold only a neighbour's buffer copy). {v['input_tiles_with_points']} tiles hold input points in their proper area; {v['input_tiles_without_a_dot_in_archive']} of them have no dot in the archive." for z, v in rep["z6_7_tile_coverage"].items()]
+          f"{v['archive_tiles_not_in_source']} archive tiles are not in the source ({v['archive_tiles_not_in_source_with_points_in_proper_area']} of them with points in the proper area; the others hold only a neighbour's buffer copy). {v['input_tiles_with_points']} tiles hold input points clear of their edges; {v['input_tiles_without_a_dot_in_archive']} of them have no dot in the archive." for z, v in rep["z6_7_tile_coverage"].items()]
     if meas:
         L += ["", "## Measurement", "", "| zoom | live max | live p95 | live total | new max | new p95 | new total |", "|---|---|---|---|---|---|---|"]
         for z, v in meas["size_table"].items():
@@ -732,7 +756,8 @@ def cmd_manifest(a):
             "status": rep["status"],
             "commands": ["uv run tools/tiles-r2/build_places_v2.py validate --work <dir> --source <places.mbtiles> --slim <slim.ndjson> --extract-work <dir>"],
             "warnings": ["licence_status needs_review: licence of the places without an OSM key is not established",
-                         "z6-7 hold a sample; a source tile can lose all its features there (see the coverage counts in the validation report)"],
+                         "z6-7 hold a sample, and a place can be absent there that appears at z8 (z7 keeps a dot in every tile that holds a point; "
+                         "z6 does not, see the coverage counts in the validation report)"] + rep.get("warnings", []),
             "notes": f"full report in tools/tiles-r2/manifests/validation-report-{name(a)}.md",
             "input_features": stats["total"], "criteria_not_met": rep["criteria_not_met"]},
         "downstream_status": "staged"}
