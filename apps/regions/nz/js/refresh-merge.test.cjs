@@ -254,6 +254,30 @@ const mine = (id, status, over = {}) => ({ task: { task_id: id, batch_id: "nz-te
   assert.deepEqual(names(calls), ["raTaskRow"]);
 }
 
+// 11b. two row reads for one task answered in reverse order: the older
+// response is dropped as a whole, so its draft and review never pair with the newer task
+{
+  const landing = { user: { _id: "user_1" }, tasks: [{ task_id: "t1", status: "in_progress", updated_at: 10 }], manualTasks: [], myWork: [mine("t1", "in_progress")] };
+  const releases = [];
+  const reply = (status, stamp, draftId) => ({ row: { task: { task_id: "t1", batch_id: "nz-temporal-ra-workpack-001", status, assigned_to: "user_1", updated_at: stamp }, latestDraft: { evidence_draft_id: draftId, updated_at: stamp }, latestReview: null } });
+  const { page } = portal({ landing, rows: () => new Promise(resolve => releases.push(resolve)) });
+  await page.refreshBackendTasks();
+  const first = page.refreshTaskRow("t1");
+  await new Promise(resolve => setTimeout(resolve, 0));
+  const second = page.refreshTaskRow("t1");
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.equal(releases.length, 2);
+  // the newer request answers first, the older one afterwards
+  releases[1](reply("needs_review", 30, "d-new"));
+  await second;
+  releases[0](reply("in_progress", 20, "d-old"));
+  await first;
+  assert.equal(page.backendTasksById.get("t1").status, "needs_review");
+  const held = page.landingState.myItems.find(item => item.task.task_id === "t1");
+  assert.equal(held.task.status, "needs_review");
+  assert.equal(held.latestDraft.evidence_draft_id, "d-new", "the draft belongs to the newer response");
+}
+
 // 12. a full read in flight, no held landing, an unsupported raTaskRow, or a hidden row: a full read stands in
 {
   const landing = { user: { _id: "user_1" }, tasks: [{ task_id: "t1", status: "open", updated_at: 10 }], manualTasks: [], myWork: [] };

@@ -5563,6 +5563,12 @@ class NzVerificationMap {
             return;
         }
         const generation = this.refreshGeneration || 0;
+        // row reads are sequenced per task: only the newest request for a
+        // task may land, so an older response that arrives late cannot pair
+        // its draft and review with a newer task copy
+        this.rowRequestSeq = this.rowRequestSeq || new Map();
+        const sequence = (this.rowRequestSeq.get(taskId) || 0) + 1;
+        this.rowRequestSeq.set(taskId, sequence);
         let read;
         try {
             read = await this.backend.readTaskRow({ taskId });
@@ -5575,7 +5581,7 @@ class NzVerificationMap {
             await this.refreshBackendTasks();
             return;
         }
-        if (generation !== this.refreshGeneration) return;
+        if (generation !== this.refreshGeneration || sequence !== this.rowRequestSeq.get(taskId)) return;
         if (!read?.row?.task) {
             await this.refreshBackendTasks();
             return;

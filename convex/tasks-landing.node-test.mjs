@@ -199,9 +199,9 @@ test("raTaskRow returns the caller's row with the slim projection", async () => 
   assert.deepEqual(row, landing.myWork.find((entry) => entry.task.task_id === "t1"));
 });
 
-test("raTaskRow refuses another contributor's task and an unknown task", async () => {
+test("raTaskRow gives another contributor's task null and refuses an unknown task", async () => {
   const rows = fixture();
-  await assert.rejects(raTaskRow._handler(ctxFor(rows, "s-ra1"), { taskId: "t2" }), /assigned to another user/);
+  assert.equal(await raTaskRow._handler(ctxFor(rows, "s-ra1"), { taskId: "t2" }), null);
   await assert.rejects(raTaskRow._handler(ctxFor(rows, "s-ra1"), { taskId: "nope" }), /Task not found/);
   await assert.rejects(raTaskRow._handler(ctxFor(rows, null), { taskId: "t1" }), /Authentication required/);
   await assert.rejects(raTaskRow._handler(ctxFor(rows, "s-inv"), { taskId: "t1" }), /not active/);
@@ -215,6 +215,18 @@ test("raTaskRow lets a reviewer read another contributor's row and applies the p
   assert.equal(await raTaskRow._handler(ctxFor(rows, "s-ra1"), { taskId: "t4" }), null);
   assert.equal((await raTaskRow._handler(ctxFor(rows, "s-rev"), { taskId: "t4" })).task.task_id, "t4");
   assert.equal((await raTaskRow._handler(ctxFor(rows, "s-adm"), { taskId: "t4" })).task.task_id, "t4");
+});
+
+test("raTaskRow does not show a released task's review note to another contributor", async () => {
+  const rows = fixture();
+  // t7 carries ra_1's changes_requested note; releasing it clears the assignee
+  rows.tasks.find((row) => row.task_id === "t7").assigned_to = undefined;
+  assert.equal(await raTaskRow._handler(ctxFor(rows, "s-ra2"), { taskId: "t7" }), null);
+  assert.equal(await raTaskRow._handler(ctxFor(rows, "s-ra1"), { taskId: "t7" }), null);
+  const asReviewer = await raTaskRow._handler(ctxFor(rows, "s-rev"), { taskId: "t7" });
+  assert.equal(asReviewer.latestReview.decision_note, "Add a source");
+  // an unassigned task with no review gives a contributor nothing either
+  assert.equal(await raTaskRow._handler(ctxFor(rows, "s-ra1"), { taskId: "t3" }), null);
 });
 
 test("the refactored listTasks and listMyTasks keep their gates", async () => {

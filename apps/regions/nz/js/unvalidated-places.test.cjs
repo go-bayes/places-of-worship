@@ -154,7 +154,7 @@ assert.equal(feature.properties.country_code, "NZ");
         options: explicitMin === undefined ? {} : { minZoom: explicitMin },
         zoom, centre: [61.2, 104.9], layers: new Set(), fired: [],
         getMinZoom() { return this.options.minZoom === undefined ? layersMin : this.options.minZoom; },
-        setMinZoom(value) { this.options.minZoom = value; if (this.zoom < value) this.setView(this.centre, value); return this; },
+        setMinZoom(value) { const was = this.options.minZoom; this.options.minZoom = value; if (was !== value) this.fire("zoomlevelschange"); if (this.zoom < value) this.setView(this.centre, value); return this; },
         setView(centre, value) { this.centre = centre; this.zoom = Math.max(this.getMinZoom(), value); return this; },
         hasLayer(layer) { return this.layers.has(layer); },
         removeLayer(layer) { this.layers.delete(layer); },
@@ -173,7 +173,7 @@ assert.equal(feature.properties.country_code, "NZ");
     assert.equal(map.options.minZoom, 3, "the floor is set explicitly");
     assert.equal(map.getMinZoom(), 3);
     assert.equal(map.zoom, 3, "a map opened below the floor is raised to it");
-    assert.ok(map.fired.includes("zoomlevelschange"), "the zoom control is told");
+    assert.equal(map.fired.filter(name => name === "zoomlevelschange").length, 1, "the zoom control is told once");
     map.setView(map.centre, 1);
     assert.equal(map.zoom, 3, "zooming out stops at 3");
     // the recentre button asks for the country's own zoom, 2.5

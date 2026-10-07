@@ -145,8 +145,8 @@
         const previous = map.options ? map.options.minZoom : undefined;
         layers.floorState = { map, previous };
         if (typeof previous === "number" && previous >= layers.zoomFloor) return;
+        // leaflet's setMinZoom fires zoomlevelschange itself when the value changes
         if (typeof map.setMinZoom === "function") map.setMinZoom(layers.zoomFloor);
-        if (typeof map.fire === "function") map.fire("zoomlevelschange");
     }
 
     function releaseZoomFloor(map, layers) {
@@ -155,11 +155,12 @@
         layers.floorState = null;
         if (typeof state.previous === "number" && state.previous >= layers.zoomFloor) return;
         if (state.previous === undefined) {
+            // clearing the option directly does not fire, so the zoom control is told here
             if (map.options) map.options.minZoom = undefined;
+            if (typeof map.fire === "function") map.fire("zoomlevelschange");
         } else if (typeof map.setMinZoom === "function") {
             map.setMinZoom(state.previous);
         }
-        if (typeof map.fire === "function") map.fire("zoomlevelschange");
     }
 
     function addTo(map, layers) {

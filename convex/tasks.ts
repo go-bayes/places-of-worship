@@ -455,7 +455,12 @@ export const raTaskRow = query({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
-    assertOwnsOrCanReview(user._id, user.roles, task.assigned_to);
+    // stricter than assertOwnsOrCanReview, which admits any caller when the
+    // task is unassigned: a released task still carries the earlier
+    // contributor's review note, which only a reviewer or the assignee may read.
+    if (!canReview(user.roles) && task.assigned_to !== user._id) {
+      return null;
+    }
     if (!canReview(user.roles)) {
       const batch = await ctx.db
         .query("task_batches")
