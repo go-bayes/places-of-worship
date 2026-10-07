@@ -1,0 +1,895 @@
+{
+  "validation": {
+    "generated_at": "2026-10-07T01:40:53.978351+00:00",
+    "archive": "places-v2-20260722.pmtiles",
+    "problems": [],
+    "criteria_not_met": [],
+    "warnings": [
+      "z6: 9 of 930 tiles that hold input points have no dot in their proper area (the briefed drop-fraction flags thin sparse tiles to nothing; the tile exists with a neighbour's buffer copy)"
+    ],
+    "inputs": {
+      "archive_sha256": "f9855a668df3a23ad157b9ef55c99804a176161481ed1b540fa744867d99fda7",
+      "archive_bytes": 2797462496,
+      "source_sha256": "eaa55c50971381cacca36ea08b1d4a68628b77d47a7156848cebb6a13eb2c406",
+      "source_bytes": 4373762048,
+      "slim_sha256": "aceb33558462ba5eb12543cc392acee6b86751ae3f4d5293adc69b90cf5509be"
+    },
+    "header": {
+      "min_zoom": 6,
+      "max_zoom": 18,
+      "tile_type": "TileType.MVT",
+      "tile_compression": "Compression.GZIP",
+      "addressed_tiles": 8177785,
+      "tile_contents": 8177100
+    },
+    "metadata_layers": [
+      "places"
+    ],
+    "tiles_per_zoom": {
+      "6": 950,
+      "7": 2689,
+      "8": 7631,
+      "9": 21061,
+      "10": 54232,
+      "11": 128983,
+      "12": 284007,
+      "13": 550307,
+      "14": 866044,
+      "15": 1184584,
+      "16": 1487106,
+      "17": 1719766,
+      "18": 1870425
+    },
+    "scan_seconds": 35,
+    "z8_18_byte_identity": {
+      "per_zoom": {
+        "8": {
+          "source_tiles": 7631,
+          "archive_tiles": 7631,
+          "in_source_not_identical_in_archive": 0,
+          "in_archive_not_identical_in_source": 0
+        },
+        "9": {
+          "source_tiles": 21061,
+          "archive_tiles": 21061,
+          "in_source_not_identical_in_archive": 0,
+          "in_archive_not_identical_in_source": 0
+        },
+        "10": {
+          "source_tiles": 54232,
+          "archive_tiles": 54232,
+          "in_source_not_identical_in_archive": 0,
+          "in_archive_not_identical_in_source": 0
+        },
+        "11": {
+          "source_tiles": 128983,
+          "archive_tiles": 128983,
+          "in_source_not_identical_in_archive": 0,
+          "in_archive_not_identical_in_source": 0
+        },
+        "12": {
+          "source_tiles": 284007,
+          "archive_tiles": 284007,
+          "in_source_not_identical_in_archive": 0,
+          "in_archive_not_identical_in_source": 0
+        },
+        "13": {
+          "source_tiles": 550307,
+          "archive_tiles": 550307,
+          "in_source_not_identical_in_archive": 0,
+          "in_archive_not_identical_in_source": 0
+        },
+        "14": {
+          "source_tiles": 866044,
+          "archive_tiles": 866044,
+          "in_source_not_identical_in_archive": 0,
+          "in_archive_not_identical_in_source": 0
+        },
+        "15": {
+          "source_tiles": 1184584,
+          "archive_tiles": 1184584,
+          "in_source_not_identical_in_archive": 0,
+          "in_archive_not_identical_in_source": 0
+        },
+        "16": {
+          "source_tiles": 1487106,
+          "archive_tiles": 1487106,
+          "in_source_not_identical_in_archive": 0,
+          "in_archive_not_identical_in_source": 0
+        },
+        "17": {
+          "source_tiles": 1719766,
+          "archive_tiles": 1719766,
+          "in_source_not_identical_in_archive": 0,
+          "in_archive_not_identical_in_source": 0
+        },
+        "18": {
+          "source_tiles": 1870425,
+          "archive_tiles": 1870425,
+          "in_source_not_identical_in_archive": 0,
+          "in_archive_not_identical_in_source": 0
+        }
+      },
+      "source_tiles": 8174146,
+      "archive_tiles": 8174146,
+      "mismatched_or_missing": 0,
+      "method": "sha256 and length of every stored tile, compared per (z, x, y) in both directions; the archive is read through the pmtiles reader and the source through its tiles view, read-only"
+    },
+    "z6_7_size_bytes": {
+      "6": {
+        "tiles": 950,
+        "max_bytes": 408300,
+        "p95_bytes": 57091,
+        "mean_bytes": 10896,
+        "total_bytes": 10350759
+      },
+      "7": {
+        "tiles": 2689,
+        "max_bytes": 473929,
+        "p95_bytes": 63032,
+        "mean_bytes": 11725,
+        "total_bytes": 31527353
+      }
+    },
+    "z6_7_attributes": [
+      "country_code",
+      "denomination",
+      "name",
+      "osm_id",
+      "osm_type",
+      "religion"
+    ],
+    "z6_7_layers": [
+      "places"
+    ],
+    "z6_7_attributes_by_zoom": {
+      "6": {
+        "seen": [
+          "country_code",
+          "denomination",
+          "name",
+          "osm_id",
+          "osm_type",
+          "religion"
+        ],
+        "tile_points": 553717,
+        "points_carrying": {
+          "religion": 553717,
+          "denomination": 553710,
+          "name": 553717,
+          "osm_id": 365418,
+          "osm_type": 365418,
+          "country_code": 365418
+        },
+        "input_features_carrying": {
+          "religion": 2072349,
+          "denomination": 2072336,
+          "name": 2072349,
+          "osm_id": 1371000,
+          "osm_type": 1371000,
+          "country_code": 1371000
+        }
+      },
+      "7": {
+        "seen": [
+          "country_code",
+          "denomination",
+          "name",
+          "osm_id",
+          "osm_type",
+          "religion"
+        ],
+        "tile_points": 1774574,
+        "points_carrying": {
+          "religion": 1774574,
+          "denomination": 1774562,
+          "name": 1774574,
+          "osm_id": 1174143,
+          "osm_type": 1174143,
+          "country_code": 1174143
+        },
+        "input_features_carrying": {
+          "religion": 2072349,
+          "denomination": 2072336,
+          "name": 2072349,
+          "osm_id": 1371000,
+          "osm_type": 1371000,
+          "country_code": 1371000
+        }
+      }
+    },
+    "z6_7_religion_shares": {
+      "6": {
+        "kept_features": 553717,
+        "input_features": 2072349,
+        "fraction_kept": 0.26719,
+        "religions": {
+          "christian": {
+            "input_pct": 61.737,
+            "kept_pct": 61.745,
+            "diff_pp": 0.008
+          },
+          "muslim": {
+            "input_pct": 14.548,
+            "kept_pct": 14.533,
+            "diff_pp": -0.015
+          },
+          "unknown": {
+            "input_pct": 10.378,
+            "kept_pct": 10.382,
+            "diff_pp": 0.004
+          },
+          "buddhist": {
+            "input_pct": 6.88,
+            "kept_pct": 6.84,
+            "diff_pp": -0.039
+          },
+          "hindu": {
+            "input_pct": 2.561,
+            "kept_pct": 2.608,
+            "diff_pp": 0.048
+          },
+          "shinto": {
+            "input_pct": 2.441,
+            "kept_pct": 2.443,
+            "diff_pp": 0.001
+          },
+          "jewish": {
+            "input_pct": 0.55,
+            "kept_pct": 0.545,
+            "diff_pp": -0.005
+          }
+        },
+        "max_abs_diff_pp": 0.048,
+        "within_tolerance": true,
+        "osm_keys_in_tiles": 365415,
+        "osm_keys_over_input_multiplicity": 0,
+        "features_with_osm_key": 365418
+      },
+      "7": {
+        "kept_features": 1774574,
+        "input_features": 2072349,
+        "fraction_kept": 0.85631,
+        "religions": {
+          "christian": {
+            "input_pct": 61.737,
+            "kept_pct": 61.733,
+            "diff_pp": -0.004
+          },
+          "muslim": {
+            "input_pct": 14.548,
+            "kept_pct": 14.547,
+            "diff_pp": -0.001
+          },
+          "unknown": {
+            "input_pct": 10.378,
+            "kept_pct": 10.377,
+            "diff_pp": -0.001
+          },
+          "buddhist": {
+            "input_pct": 6.88,
+            "kept_pct": 6.879,
+            "diff_pp": -0.001
+          },
+          "hindu": {
+            "input_pct": 2.561,
+            "kept_pct": 2.56,
+            "diff_pp": -0.0
+          },
+          "shinto": {
+            "input_pct": 2.441,
+            "kept_pct": 2.441,
+            "diff_pp": -0.0
+          },
+          "jewish": {
+            "input_pct": 0.55,
+            "kept_pct": 0.55,
+            "diff_pp": -0.0
+          }
+        },
+        "max_abs_diff_pp": 0.004,
+        "within_tolerance": true,
+        "osm_keys_in_tiles": 1174138,
+        "osm_keys_over_input_multiplicity": 0,
+        "features_with_osm_key": 1174143
+      }
+    },
+    "z6_7_tile_coverage": {
+      "6": {
+        "source_tiles": 950,
+        "archive_tiles": 950,
+        "archive_tiles_not_in_source": 0,
+        "archive_tiles_not_in_source_with_points_in_proper_area": 0,
+        "source_tiles_absent_from_archive": 0,
+        "input_tiles_with_points": 930,
+        "input_tiles_without_a_dot_in_archive": 9
+      },
+      "7": {
+        "source_tiles": 2688,
+        "archive_tiles": 2689,
+        "archive_tiles_not_in_source": 1,
+        "archive_tiles_not_in_source_with_points_in_proper_area": 0,
+        "source_tiles_absent_from_archive": 0,
+        "input_tiles_with_points": 2646,
+        "input_tiles_without_a_dot_in_archive": 0
+      }
+    },
+    "z6_7_live_source_size_bytes": {
+      "6": {
+        "tiles": 950,
+        "max_bytes": 2743067,
+        "p95_bytes": 295940,
+        "total_bytes": 54179091
+      },
+      "7": {
+        "tiles": 2688,
+        "max_bytes": 895099,
+        "p95_bytes": 110746,
+        "total_bytes": 56319270
+      }
+    },
+    "z6_7_per_tile_religion": {
+      "file": "per-tile-religion-places-v2-20260722.json",
+      "method": "for each z6 and z7 tile, religion counts of the input points in the tile's area against the points in the archive tile's proper area, over the religions above 0.5 percent of the input and one 'other' bucket, with the largest absolute difference in share (percentage points); diagnostic only, so tiles with few points are noisy",
+      "summary": {
+        "6": {
+          "tiles": 950,
+          "tiles_without_archive_points": 29,
+          "min_points": 100,
+          "tiles_at_or_above_min_points": 504,
+          "median_max_abs_diff_pp": 0.844,
+          "p95_max_abs_diff_pp": 5.672,
+          "max_max_abs_diff_pp": 22.573,
+          "tiles_over_5_pp": 31,
+          "tiles_over_10_pp": 6
+        },
+        "7": {
+          "tiles": 2689,
+          "tiles_without_archive_points": 41,
+          "min_points": 100,
+          "tiles_at_or_above_min_points": 1185,
+          "median_max_abs_diff_pp": 0.238,
+          "p95_max_abs_diff_pp": 1.61,
+          "max_max_abs_diff_pp": 5.082,
+          "tiles_over_5_pp": 1,
+          "tiles_over_10_pp": 0
+        }
+      }
+    },
+    "status": "passed",
+    "seconds": 88
+  },
+  "measurement": {
+    "generated_at": "2026-10-07T01:42:21.721862+00:00",
+    "archive": "places-v2-20260722.pmtiles",
+    "size_table": {
+      "6": {
+        "live": {
+          "tiles": 950,
+          "max_bytes": 2743067,
+          "p95_bytes": 295940,
+          "total_bytes": 54179091
+        },
+        "new": {
+          "tiles": 950,
+          "max_bytes": 408300,
+          "p95_bytes": 57091,
+          "total_bytes": 10350759
+        },
+        "total_reduction": 0.809
+      },
+      "7": {
+        "live": {
+          "tiles": 2688,
+          "max_bytes": 895099,
+          "p95_bytes": 110746,
+          "total_bytes": 56319270
+        },
+        "new": {
+          "tiles": 2689,
+          "max_bytes": 473929,
+          "p95_bytes": 63032,
+          "total_bytes": 31527353
+        },
+        "total_reduction": 0.4402
+      }
+    },
+    "curl_sample": {
+      "tiles": 60,
+      "http_200": 60,
+      "failed": 0,
+      "served_over_stored_min": 0.9648,
+      "served_over_stored_max": 1.0011,
+      "per_zoom": {
+        "6": {
+          "tiles": 30,
+          "max_served_bytes": 2720007,
+          "p95_served_bytes": 2480955,
+          "max_seconds": 3.512221
+        },
+        "7": {
+          "tiles": 30,
+          "max_served_bytes": 885473,
+          "p95_served_bytes": 856340,
+          "max_seconds": 1.003749
+        }
+      },
+      "note": "served_bytes is the body the live edge sent with Accept-Encoding: gzip; the edge recompresses what the Worker decompresses, so it differs slightly from the stored bytes of the same tile in places.mbtiles. The sample is the five largest tiles and a seeded random sample at each zoom, so its p95 is not the archive's p95"
+    },
+    "landing_pages": {
+      "viewport_css_px": [
+        1440,
+        900
+      ],
+      "pages": [
+        {
+          "country": "al",
+          "initial_zoom": 7.3,
+          "tile_zoom": 7,
+          "viewport_tiles": 8,
+          "live_bytes": 803858,
+          "new_bytes": 443522,
+          "live_max_tile": 179812,
+          "new_max_tile": 99014,
+          "reduction": 0.4483
+        },
+        {
+          "country": "at",
+          "initial_zoom": 6.4,
+          "tile_zoom": 6,
+          "viewport_tiles": 9,
+          "live_bytes": 12823806,
+          "new_bytes": 2079882,
+          "live_max_tile": 2743067,
+          "new_max_tile": 408300,
+          "reduction": 0.8378
+        },
+        {
+          "country": "ba",
+          "initial_zoom": 7.0,
+          "tile_zoom": 7,
+          "viewport_tiles": 12,
+          "live_bytes": 2036872,
+          "new_bytes": 1129339,
+          "live_max_tile": 537003,
+          "new_max_tile": 302904,
+          "reduction": 0.4456
+        },
+        {
+          "country": "bd",
+          "initial_zoom": 6.3,
+          "tile_zoom": 6,
+          "viewport_tiles": 12,
+          "live_bytes": 1105733,
+          "new_bytes": 284421,
+          "live_max_tile": 222689,
+          "new_max_tile": 57183,
+          "reduction": 0.7428
+        },
+        {
+          "country": "bg",
+          "initial_zoom": 6.6,
+          "tile_zoom": 6,
+          "viewport_tiles": 9,
+          "live_bytes": 2586539,
+          "new_bytes": 506254,
+          "live_max_tile": 583597,
+          "new_max_tile": 101526,
+          "reduction": 0.8043
+        },
+        {
+          "country": "bs",
+          "initial_zoom": 6.2,
+          "tile_zoom": 6,
+          "viewport_tiles": 12,
+          "live_bytes": 900490,
+          "new_bytes": 184117,
+          "live_max_tile": 423168,
+          "new_max_tile": 77733,
+          "reduction": 0.7955
+        },
+        {
+          "country": "bt",
+          "initial_zoom": 6.7,
+          "tile_zoom": 6,
+          "viewport_tiles": 4,
+          "live_bytes": 506894,
+          "new_bytes": 134234,
+          "live_max_tile": 222689,
+          "new_max_tile": 57183,
+          "reduction": 0.7352
+        },
+        {
+          "country": "ch",
+          "initial_zoom": 6.7,
+          "tile_zoom": 6,
+          "viewport_tiles": 6,
+          "live_bytes": 7619190,
+          "new_bytes": 1282469,
+          "live_max_tile": 2503361,
+          "new_max_tile": 408300,
+          "reduction": 0.8317
+        },
+        {
+          "country": "cv",
+          "initial_zoom": 6.7,
+          "tile_zoom": 6,
+          "viewport_tiles": 6,
+          "live_bytes": 17744,
+          "new_bytes": 6056,
+          "live_max_tile": 12489,
+          "new_max_tile": 3967,
+          "reduction": 0.6587
+        },
+        {
+          "country": "cz",
+          "initial_zoom": 7.0,
+          "tile_zoom": 7,
+          "viewport_tiles": 9,
+          "live_bytes": 3715047,
+          "new_bytes": 1786585,
+          "live_max_tile": 618315,
+          "new_max_tile": 298868,
+          "reduction": 0.5191
+        },
+        {
+          "country": "dk",
+          "initial_zoom": 6.3,
+          "tile_zoom": 6,
+          "viewport_tiles": 8,
+          "live_bytes": 1758524,
+          "new_bytes": 282592,
+          "live_max_tile": 505195,
+          "new_max_tile": 77762,
+          "reduction": 0.8393
+        },
+        {
+          "country": "ee",
+          "initial_zoom": 6.9,
+          "tile_zoom": 6,
+          "viewport_tiles": 6,
+          "live_bytes": 230193,
+          "new_bytes": 54268,
+          "live_max_tile": 83283,
+          "new_max_tile": 15253,
+          "reduction": 0.7642
+        },
+        {
+          "country": "ge",
+          "initial_zoom": 7.0,
+          "tile_zoom": 7,
+          "viewport_tiles": 9,
+          "live_bytes": 166367,
+          "new_bytes": 141465,
+          "live_max_tile": 56100,
+          "new_max_tile": 48057,
+          "reduction": 0.1497
+        },
+        {
+          "country": "gh",
+          "initial_zoom": 6.4,
+          "tile_zoom": 6,
+          "viewport_tiles": 9,
+          "live_bytes": 459252,
+          "new_bytes": 108893,
+          "live_max_tile": 147879,
+          "new_max_tile": 34825,
+          "reduction": 0.7629
+        },
+        {
+          "country": "gn",
+          "initial_zoom": 6.0,
+          "tile_zoom": 6,
+          "viewport_tiles": 12,
+          "live_bytes": 353148,
+          "new_bytes": 85978,
+          "live_max_tile": 132633,
+          "new_max_tile": 28188,
+          "reduction": 0.7565
+        },
+        {
+          "country": "gw",
+          "initial_zoom": 7.0,
+          "tile_zoom": 7,
+          "viewport_tiles": 12,
+          "live_bytes": 68971,
+          "new_bytes": 56869,
+          "live_max_tile": 17596,
+          "new_max_tile": 14213,
+          "reduction": 0.1755
+        },
+        {
+          "country": "gy",
+          "initial_zoom": 6.0,
+          "tile_zoom": 6,
+          "viewport_tiles": 9,
+          "live_bytes": 61084,
+          "new_bytes": 19802,
+          "live_max_tile": 16366,
+          "new_max_tile": 5209,
+          "reduction": 0.6758
+        },
+        {
+          "country": "hr",
+          "initial_zoom": 6.4,
+          "tile_zoom": 6,
+          "viewport_tiles": 6,
+          "live_bytes": 6938918,
+          "new_bytes": 1184665,
+          "live_max_tile": 2503361,
+          "new_max_tile": 408300,
+          "reduction": 0.8293
+        },
+        {
+          "country": "hu",
+          "initial_zoom": 6.5,
+          "tile_zoom": 6,
+          "viewport_tiles": 9,
+          "live_bytes": 7738774,
+          "new_bytes": 1322221,
+          "live_max_tile": 1947041,
+          "new_max_tile": 328823,
+          "reduction": 0.8291
+        },
+        {
+          "country": "ie",
+          "initial_zoom": 6.0,
+          "tile_zoom": 6,
+          "viewport_tiles": 9,
+          "live_bytes": 2042514,
+          "new_bytes": 340138,
+          "live_max_tile": 922352,
+          "new_max_tile": 145188,
+          "reduction": 0.8335
+        },
+        {
+          "country": "il",
+          "initial_zoom": 7.2,
+          "tile_zoom": 7,
+          "viewport_tiles": 6,
+          "live_bytes": 97484,
+          "new_bytes": 85228,
+          "live_max_tile": 56485,
+          "new_max_tile": 49291,
+          "reduction": 0.1257
+        },
+        {
+          "country": "jm",
+          "initial_zoom": 7.2,
+          "tile_zoom": 7,
+          "viewport_tiles": 9,
+          "live_bytes": 29121,
+          "new_bytes": 24871,
+          "live_max_tile": 10846,
+          "new_max_tile": 9351,
+          "reduction": 0.1459
+        },
+        {
+          "country": "ke",
+          "initial_zoom": 6.0,
+          "tile_zoom": 6,
+          "viewport_tiles": 8,
+          "live_bytes": 378815,
+          "new_bytes": 84179,
+          "live_max_tile": 114360,
+          "new_max_tile": 24817,
+          "reduction": 0.7778
+        },
+        {
+          "country": "kh",
+          "initial_zoom": 6.4,
+          "tile_zoom": 6,
+          "viewport_tiles": 6,
+          "live_bytes": 862066,
+          "new_bytes": 178193,
+          "live_max_tile": 275409,
+          "new_max_tile": 57324,
+          "reduction": 0.7933
+        },
+        {
+          "country": "kr",
+          "initial_zoom": 6.5,
+          "tile_zoom": 6,
+          "viewport_tiles": 6,
+          "live_bytes": 1150371,
+          "new_bytes": 215179,
+          "live_max_tile": 597641,
+          "new_max_tile": 109900,
+          "reduction": 0.8129
+        },
+        {
+          "country": "lk",
+          "initial_zoom": 7.0,
+          "tile_zoom": 7,
+          "viewport_tiles": 12,
+          "live_bytes": 991313,
+          "new_bytes": 569884,
+          "live_max_tile": 810605,
+          "new_max_tile": 435127,
+          "reduction": 0.4251
+        },
+        {
+          "country": "lt",
+          "initial_zoom": 6.8,
+          "tile_zoom": 6,
+          "viewport_tiles": 6,
+          "live_bytes": 697924,
+          "new_bytes": 132394,
+          "live_max_tile": 486392,
+          "new_max_tile": 76180,
+          "reduction": 0.8103
+        },
+        {
+          "country": "md",
+          "initial_zoom": 7.0,
+          "tile_zoom": 7,
+          "viewport_tiles": 8,
+          "live_bytes": 542766,
+          "new_bytes": 310798,
+          "live_max_tile": 189184,
+          "new_max_tile": 99293,
+          "reduction": 0.4274
+        },
+        {
+          "country": "me",
+          "initial_zoom": 7.3,
+          "tile_zoom": 7,
+          "viewport_tiles": 8,
+          "live_bytes": 515923,
+          "new_bytes": 311594,
+          "live_max_tile": 147745,
+          "new_max_tile": 75425,
+          "reduction": 0.396
+        },
+        {
+          "country": "mw",
+          "initial_zoom": 6.3,
+          "tile_zoom": 6,
+          "viewport_tiles": 12,
+          "live_bytes": 89466,
+          "new_bytes": 28177,
+          "live_max_tile": 29628,
+          "new_max_tile": 9200,
+          "reduction": 0.6851
+        },
+        {
+          "country": "nl",
+          "initial_zoom": 6.4,
+          "tile_zoom": 6,
+          "viewport_tiles": 8,
+          "live_bytes": 8316386,
+          "new_bytes": 1270847,
+          "live_max_tile": 2743067,
+          "new_max_tile": 392572,
+          "reduction": 0.8472
+        },
+        {
+          "country": "np",
+          "initial_zoom": 6.3,
+          "tile_zoom": 6,
+          "viewport_tiles": 8,
+          "live_bytes": 890878,
+          "new_bytes": 217743,
+          "live_max_tile": 222689,
+          "new_max_tile": 57183,
+          "reduction": 0.7556
+        },
+        {
+          "country": "ps",
+          "initial_zoom": 7.8,
+          "tile_zoom": 7,
+          "viewport_tiles": 6,
+          "live_bytes": 97484,
+          "new_bytes": 85228,
+          "live_max_tile": 56485,
+          "new_max_tile": 49291,
+          "reduction": 0.1257
+        },
+        {
+          "country": "pt",
+          "initial_zoom": 6.0,
+          "tile_zoom": 6,
+          "viewport_tiles": 9,
+          "live_bytes": 1748587,
+          "new_bytes": 325373,
+          "live_max_tile": 568410,
+          "new_max_tile": 95230,
+          "reduction": 0.8139
+        },
+        {
+          "country": "ro",
+          "initial_zoom": 6.0,
+          "tile_zoom": 6,
+          "viewport_tiles": 9,
+          "live_bytes": 3607765,
+          "new_bytes": 656111,
+          "live_max_tile": 1633187,
+          "new_max_tile": 263776,
+          "reduction": 0.8181
+        },
+        {
+          "country": "rs",
+          "initial_zoom": 6.4,
+          "tile_zoom": 6,
+          "viewport_tiles": 6,
+          "live_bytes": 4275911,
+          "new_bytes": 753847,
+          "live_max_tile": 1947041,
+          "new_max_tile": 328823,
+          "reduction": 0.8237
+        },
+        {
+          "country": "rw",
+          "initial_zoom": 7.5,
+          "tile_zoom": 7,
+          "viewport_tiles": 6,
+          "live_bytes": 74499,
+          "new_bytes": 53930,
+          "live_max_tile": 39223,
+          "new_max_tile": 26364,
+          "reduction": 0.2761
+        },
+        {
+          "country": "sk",
+          "initial_zoom": 7.0,
+          "tile_zoom": 7,
+          "viewport_tiles": 8,
+          "live_bytes": 2590790,
+          "new_bytes": 1334041,
+          "live_max_tile": 568027,
+          "new_max_tile": 285716,
+          "reduction": 0.4851
+        },
+        {
+          "country": "tv",
+          "initial_zoom": 6.4,
+          "tile_zoom": 6,
+          "viewport_tiles": 9,
+          "live_bytes": 4279,
+          "new_bytes": 1335,
+          "live_max_tile": 2535,
+          "new_max_tile": 694,
+          "reduction": 0.688
+        },
+        {
+          "country": "tw",
+          "initial_zoom": 6.4,
+          "tile_zoom": 6,
+          "viewport_tiles": 9,
+          "live_bytes": 299938,
+          "new_bytes": 86919,
+          "live_max_tile": 164882,
+          "new_max_tile": 49925,
+          "reduction": 0.7102
+        },
+        {
+          "country": "vu",
+          "initial_zoom": 6.0,
+          "tile_zoom": 6,
+          "viewport_tiles": 8,
+          "live_bytes": 13806,
+          "new_bytes": 4250,
+          "live_max_tile": 6049,
+          "new_max_tile": 1557,
+          "reduction": 0.6922
+        },
+        {
+          "country": "ws",
+          "initial_zoom": 7.0,
+          "tile_zoom": 7,
+          "viewport_tiles": 8,
+          "live_bytes": 11230,
+          "new_bytes": 9207,
+          "live_max_tile": 5679,
+          "new_max_tile": 5078,
+          "reduction": 0.1801
+        }
+      ],
+      "total_live_bytes": 79220720,
+      "total_new_bytes": 18173098,
+      "pages_over_500k_live": 16,
+      "pages_over_500k_new": 0,
+      "method": "tiles of the page's initial zoom (floor, at least 6) under a 1440 x 900 css-pixel viewport centred on the configured centre, 512-pixel vector tiles; stored (gzip) bytes of the live places.mbtiles against the new archive"
+    }
+  }
+}

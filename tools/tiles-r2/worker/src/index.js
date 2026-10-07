@@ -6,10 +6,10 @@ const TILESETS = new Set(["places", "places-overview", "buildings", "nz-polygons
 
 // versioned tilesets are immutable: the snapshot is part of the name and a key is
 // never overwritten in r2, so tiles can be cached for a year. the pattern is explicit
-// so a stray name cannot reach r2: places-overview-v2-<snapshot> and
+// so a stray name cannot reach r2: places-overview-v2-<snapshot>, places-v2-<snapshot> and
 // ra-dots-<cc>-<snapshot>, where <snapshot> is yyyymmdd or yyyy-mm-dd with an
 // optional alphanumeric suffix (for example a rebuild letter)
-const VERSIONED = /^(?:places-overview-v2|ra-dots-[a-z]{2})-(?:\d{8}|\d{4}-\d{2}-\d{2})(?:-[a-z0-9]+)?$/;
+const VERSIONED = /^(?:places-overview-v2|places-v2|ra-dots-[a-z]{2})-(?:\d{8}|\d{4}-\d{2}-\d{2})(?:-[a-z0-9]+)?$/;
 
 const CACHE_VERSIONED = "public, max-age=31536000, immutable";
 // browsers hold unversioned tiles an hour; the edge holds them a week (purge on data rebuild)

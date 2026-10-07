@@ -1,0 +1,338 @@
+[
+ {
+  "country": "al",
+  "initial_zoom": 7.3,
+  "center": [
+   20.05,
+   41.15
+  ]
+ },
+ {
+  "country": "at",
+  "initial_zoom": 6.4,
+  "center": [
+   13.9,
+   47.6
+  ]
+ },
+ {
+  "country": "ba",
+  "initial_zoom": 7.0,
+  "center": [
+   17.68,
+   43.92
+  ]
+ },
+ {
+  "country": "bd",
+  "initial_zoom": 6.3,
+  "center": [
+   90.35,
+   23.7
+  ]
+ },
+ {
+  "country": "bg",
+  "initial_zoom": 6.6,
+  "center": [
+   25.3,
+   42.75
+  ]
+ },
+ {
+  "country": "bs",
+  "initial_zoom": 6.2,
+  "center": [
+   -78.6,
+   25.35
+  ]
+ },
+ {
+  "country": "bt",
+  "initial_zoom": 6.7,
+  "center": [
+   90.43684,
+   27.50842
+  ]
+ },
+ {
+  "country": "ch",
+  "initial_zoom": 6.7,
+  "center": [
+   8.23,
+   46.8
+  ]
+ },
+ {
+  "country": "cv",
+  "initial_zoom": 6.7,
+  "center": [
+   -24.4,
+   16.2
+  ]
+ },
+ {
+  "country": "cz",
+  "initial_zoom": 7.0,
+  "center": [
+   15.47,
+   49.82
+  ]
+ },
+ {
+  "country": "dk",
+  "initial_zoom": 6.3,
+  "center": [
+   10.5,
+   56.0
+  ]
+ },
+ {
+  "country": "ee",
+  "initial_zoom": 6.9,
+  "center": [
+   25.5,
+   58.7
+  ]
+ },
+ {
+  "country": "ge",
+  "initial_zoom": 7.0,
+  "center": [
+   43.4,
+   42.15
+  ]
+ },
+ {
+  "country": "gh",
+  "initial_zoom": 6.4,
+  "center": [
+   -1.2,
+   7.9
+  ]
+ },
+ {
+  "country": "gn",
+  "initial_zoom": 6.0,
+  "center": [
+   -11.37,
+   9.94
+  ]
+ },
+ {
+  "country": "gw",
+  "initial_zoom": 7.0,
+  "center": [
+   -15.18,
+   11.79
+  ]
+ },
+ {
+  "country": "gy",
+  "initial_zoom": 6.0,
+  "center": [
+   -58.93,
+   4.85
+  ]
+ },
+ {
+  "country": "hr",
+  "initial_zoom": 6.4,
+  "center": [
+   16.4,
+   44.9
+  ]
+ },
+ {
+  "country": "hu",
+  "initial_zoom": 6.5,
+  "center": [
+   19.5,
+   47.16
+  ]
+ },
+ {
+  "country": "ie",
+  "initial_zoom": 6.0,
+  "center": [
+   -8.1,
+   53.35
+  ]
+ },
+ {
+  "country": "il",
+  "initial_zoom": 7.2,
+  "center": [
+   35.05,
+   31.5
+  ]
+ },
+ {
+  "country": "jm",
+  "initial_zoom": 7.2,
+  "center": [
+   -77.27595,
+   18.11538
+  ]
+ },
+ {
+  "country": "ke",
+  "initial_zoom": 6.0,
+  "center": [
+   37.9,
+   0.2
+  ]
+ },
+ {
+  "country": "kh",
+  "initial_zoom": 6.4,
+  "center": [
+   104.98,
+   12.3
+  ]
+ },
+ {
+  "country": "kr",
+  "initial_zoom": 6.5,
+  "center": [
+   127.8,
+   36.3
+  ]
+ },
+ {
+  "country": "lk",
+  "initial_zoom": 7.0,
+  "center": [
+   80.7,
+   7.88
+  ]
+ },
+ {
+  "country": "lt",
+  "initial_zoom": 6.8,
+  "center": [
+   23.9,
+   55.2
+  ]
+ },
+ {
+  "country": "md",
+  "initial_zoom": 7.0,
+  "center": [
+   28.39,
+   46.98
+  ]
+ },
+ {
+  "country": "me",
+  "initial_zoom": 7.3,
+  "center": [
+   19.394,
+   42.702
+  ]
+ },
+ {
+  "country": "mw",
+  "initial_zoom": 6.3,
+  "center": [
+   34.3,
+   -13.4
+  ]
+ },
+ {
+  "country": "nl",
+  "initial_zoom": 6.4,
+  "center": [
+   5.3,
+   52.15
+  ]
+ },
+ {
+  "country": "np",
+  "initial_zoom": 6.3,
+  "center": [
+   84.1,
+   28.3
+  ]
+ },
+ {
+  "country": "ps",
+  "initial_zoom": 7.8,
+  "center": [
+   34.9,
+   31.89
+  ]
+ },
+ {
+  "country": "pt",
+  "initial_zoom": 6.0,
+  "center": [
+   -8.0,
+   39.6
+  ]
+ },
+ {
+  "country": "ro",
+  "initial_zoom": 6.0,
+  "center": [
+   24.97,
+   45.85
+  ]
+ },
+ {
+  "country": "rs",
+  "initial_zoom": 6.4,
+  "center": [
+   20.8,
+   44.0
+  ]
+ },
+ {
+  "country": "rw",
+  "initial_zoom": 7.5,
+  "center": [
+   29.9,
+   -1.94
+  ]
+ },
+ {
+  "country": "sk",
+  "initial_zoom": 7.0,
+  "center": [
+   19.7,
+   48.7
+  ]
+ },
+ {
+  "country": "tv",
+  "initial_zoom": 6.4,
+  "center": [
+   177.96,
+   -7.54
+  ]
+ },
+ {
+  "country": "tw",
+  "initial_zoom": 6.4,
+  "center": [
+   120.1,
+   24.15
+  ]
+ },
+ {
+  "country": "vu",
+  "initial_zoom": 6.0,
+  "center": [
+   167.9,
+   -16.3
+  ]
+ },
+ {
+  "country": "ws",
+  "initial_zoom": 7.0,
+  "center": [
+   -172.35,
+   -13.75
+  ]
+ }
+]
