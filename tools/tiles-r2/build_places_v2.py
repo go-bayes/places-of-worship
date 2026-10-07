@@ -40,7 +40,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from build_tiles_v2 import _cmd_text, _public_metadata, _run, _sha256, _stratified_sample  # noqa: E402
+from build_tiles_v2 import _cmd_text, _public_metadata, _run, _sha256  # noqa: E402
 
 SNAPSHOT = "20260722"
 LAYER = "places"
@@ -69,6 +69,50 @@ VIEWPORT = (1440, 900)  # css pixels, for the tiles under a country page
 
 def name(a):
     return f"places-v2-{a.snapshot}"
+
+
+def _tile_of(lon, lat, z):
+    """The z/x/y tile (y down) whose proper area holds a longitude and latitude."""
+    n = 1 << z
+    x = math.floor((lon + 180.0) / 360.0 * n)
+    y = math.floor((1.0 - math.asinh(math.tan(math.radians(lat))) / math.pi) / 2.0 * n)
+    return min(max(x, 0), n - 1), min(max(y, 0), n - 1)
+
+
+def sample_with_coverage(src, dst, fraction, seed, zoom):
+    """Write a seeded sample of an NDJSON feature file at one fraction.
+
+    Each religion keeps round(fraction * n) features, drawn at random, so the shares follow the input. Then
+    every zoom-`zoom` tile that holds input points but no sampled point gets one, drawn at random from the
+    points in its proper area, so no place's neighbourhood loses every dot. Returns (points written, points
+    added for coverage)."""
+    import random
+
+    by_religion = collections.defaultdict(list)
+    tile_members = collections.defaultdict(list)
+    with open(src, encoding="utf-8") as fh:
+        for i, line in enumerate(fh):
+            f = json.loads(line)
+            by_religion[f["properties"].get("religion")].append(i)
+            lon, lat = f["geometry"]["coordinates"]
+            tile_members[_tile_of(lon, lat, zoom)].append(i)
+    chosen = set()
+    for rel in sorted(by_religion, key=str):
+        idx = by_religion[rel]
+        chosen.update(random.Random(f"{seed}:{rel}").sample(idx, round(len(idx) * fraction)))
+    added = 0
+    for tile in sorted(tile_members):
+        members = tile_members[tile]
+        if not any(i in chosen for i in members):
+            chosen.add(random.Random(f"{seed}:cover:{tile}").choice(members))
+            added += 1
+    n = 0
+    with open(src, encoding="utf-8") as fh, open(dst, "w", encoding="utf-8") as out:
+        for i, line in enumerate(fh):
+            if i in chosen:
+                out.write(line)
+                n += 1
+    return n, added
 
 
 # ------------------------------------------------------------------ build
@@ -118,14 +162,14 @@ def cmd_build(a):
     sample = parts / "z7-sample.ndjson"
     frac, trace, settled = SAMPLE_START_FRACTION, [], False
     for attempt in range(10):
-        kept_n = _stratified_sample(str(slim), str(sample), frac, SAMPLE_SEED)
+        kept_n, cover_added = sample_with_coverage(str(slim), str(sample), frac, SAMPLE_SEED, 7)
         cmd7 = ["tippecanoe", *SAMPLE_FLAGS, "--force", "--temporary-directory", str(tmp), "-o", str(z7), str(sample)]
         rc, secs = _run(cmd7, logs / "tippecanoe-z7.log")
         if rc:
             sys.exit(rc)
         mx = max_bytes(z7, 7)[0]
-        trace.append({"fraction": round(frac, 6), "points": kept_n, "max_tile_bytes": mx})
-        print(f"z7 attempt {attempt}: fraction {frac:.5f}, {kept_n} points, max tile {mx} bytes", flush=True)
+        trace.append({"fraction": round(frac, 6), "points": kept_n, "added_for_tile_coverage": cover_added, "max_tile_bytes": mx})
+        print(f"z7 attempt {attempt}: fraction {frac:.5f}, {kept_n} points ({cover_added} added for tile coverage), max tile {mx} bytes", flush=True)
         lo, hi = SAMPLE_TARGET_BYTES
         if lo <= mx <= hi:
             settled = True
@@ -376,11 +420,16 @@ def cmd_validate(a):
 
     # --- z6-7: size cap, shares, counts, attributes, keys
     slim_keys = collections.Counter()
+    input_tiles = {z: collections.Counter() for z in THIN_ZOOMS}
     with open(a.slim, encoding="utf-8") as fh:
         for line in fh:
-            if '"osm_id"' in line:
-                p = json.loads(line)["properties"]
+            f = json.loads(line)
+            p = f["properties"]
+            if "osm_id" in p:
                 slim_keys[(p.get("osm_type"), p.get("osm_id"))] += 1
+            lon, lat = f["geometry"]["coordinates"]
+            for z in THIN_ZOOMS:
+                input_tiles[z][_tile_of(lon, lat, z)] += 1
     agg = {z: {"core": 0, "religion": collections.Counter(), "keys": collections.Counter()} for z in THIN_ZOOMS}
     attrs, layers = set(), set()
     core_by_tile = {}
@@ -453,10 +502,15 @@ def cmd_validate(a):
         # a tile that holds only a neighbour's buffer copy has no point in its proper area: no client sees a dot there
         outside = sum(1 for t in extra if core_by_tile[(z, *t)] > 0)
         absent = set(src_tiles[z]) - out_tiles[z]
+        lost = [t for t in input_tiles[z] if core_by_tile.get((z, *t), 0) == 0]
         cover[str(z)] = {"source_tiles": len(src_tiles[z]), "archive_tiles": len(out_tiles[z]),
                          "archive_tiles_not_in_source": len(extra),
                          "archive_tiles_not_in_source_with_points_in_proper_area": outside,
-                         "source_tiles_absent_from_archive": len(absent)}
+                         "source_tiles_absent_from_archive": len(absent),
+                         "input_tiles_with_points": len(input_tiles[z]),
+                         "input_tiles_without_a_dot_in_archive": len(lost)}
+        if lost:
+            problems.append(f"z{z}: {len(lost)} tiles that hold input points have no dot in the archive")
         if outside:
             problems.append(f"z{z}: {outside} tiles that the source does not have hold points in their proper area")
     report["z6_7_tile_coverage"] = cover
@@ -488,13 +542,16 @@ def _tile_cover(lon, lat, zoom, tile_zoom, width, height):
 
 
 def _curl(url):
-    r = subprocess.run(["curl", "-sS", "-o", "/dev/null", "-m", "60", "-H", "Accept-Encoding: gzip",
-                        "-w", "%{http_code} %{size_download} %{time_total}", url], capture_output=True, text=True)
-    try:
-        code, size, secs = r.stdout.split()
-        return int(code), int(size), float(secs)
-    except ValueError:
-        return None, None, None
+    for _ in range(3):
+        r = subprocess.run(["curl", "-sS", "-o", "/dev/null", "-m", "30", "-H", "Accept-Encoding: gzip",
+                            "-w", "%{http_code} %{size_download} %{time_total}", url], capture_output=True, text=True)
+        try:
+            code, size, secs = r.stdout.split()
+            if int(code) == 200:
+                return int(code), int(size), float(secs)
+        except ValueError:
+            pass
+    return None, None, None
 
 
 def cmd_measure(a):
@@ -521,7 +578,7 @@ def cmd_measure(a):
         zt[str(z)]["total_reduction"] = round(1 - sum(new) / sum(live), 4)
     rep["size_table"] = zt
 
-    # curl sample of live tiles: the five largest and a seeded random sample per zoom; sizes must equal the stored bytes
+    # curl sample of live tiles: the five largest and a seeded random sample per zoom; sizes are compared with the stored bytes
     import random
     rng = random.Random(20261007)
     sample = []
@@ -533,15 +590,19 @@ def cmd_measure(a):
     with cf.ThreadPoolExecutor(4) as ex:
         for (z, x, y, stored), (code, size, secs) in zip(
                 sample, ex.map(lambda t: _curl(LIVE_URL.format(z=t[0], x=t[1], y=t[2])), sample)):
-            results.append({"z": z, "x": x, "y": y, "stored_bytes": stored, "http": code, "downloaded_bytes": size,
-                            "seconds": secs, "equal": size == stored})
+            results.append({"z": z, "x": x, "y": y, "stored_bytes": stored, "http": code, "served_bytes": size, "seconds": secs})
+    ok = [r for r in results if r["http"] == 200]
+    ratios = [r["served_bytes"] / r["stored_bytes"] for r in ok if r["stored_bytes"] > 1000]
     rep["curl_sample"] = {
-        "tiles": len(results), "equal_to_stored": sum(r["equal"] for r in results),
-        "unequal": [r for r in results if not r["equal"]],
-        "per_zoom": {str(z): {"tiles": sum(1 for r in results if r["z"] == z),
-                              "max_downloaded_bytes": max((r["downloaded_bytes"] or 0) for r in results if r["z"] == z),
-                              "max_seconds": max((r["seconds"] or 0) for r in results if r["z"] == z)} for z in THIN_ZOOMS},
-        "note": "the size is the gzip body the live edge sent; it should equal the stored bytes of the same tile in places.mbtiles"}
+        "tiles": len(results), "http_200": len(ok), "failed": len(results) - len(ok),
+        "served_over_stored_min": round(min(ratios), 4), "served_over_stored_max": round(max(ratios), 4),
+        "per_zoom": {str(z): {"tiles": sum(1 for r in ok if r["z"] == z),
+                              "max_served_bytes": max(r["served_bytes"] for r in ok if r["z"] == z),
+                              "p95_served_bytes": _p95([r["served_bytes"] for r in ok if r["z"] == z]),
+                              "max_seconds": max(r["seconds"] for r in ok if r["z"] == z)} for z in THIN_ZOOMS},
+        "note": "served_bytes is the body the live edge sent with Accept-Encoding: gzip; the edge recompresses what the Worker "
+                "decompresses, so it differs slightly from the stored bytes of the same tile in places.mbtiles. The sample is the "
+                "five largest tiles and a seeded random sample at each zoom, so its p95 is not the archive's p95"}
 
     pg = []
     for p in pages:
@@ -561,7 +622,7 @@ def cmd_measure(a):
         "method": "tiles of the page's initial zoom (floor, at least 6) under a 1440 x 900 css-pixel viewport centred on the "
                   "configured centre, 512-pixel vector tiles; stored (gzip) bytes of the live places.mbtiles against the new archive"}
     (work / "measure-report.json").write_text(json.dumps(rep, indent=2, ensure_ascii=False) + "\n")
-    print(json.dumps({"size_table": zt, "curl": {k: rep["curl_sample"][k] for k in ("tiles", "equal_to_stored")},
+    print(json.dumps({"size_table": zt, "curl": {k: rep["curl_sample"][k] for k in ("tiles", "http_200", "served_over_stored_min", "served_over_stored_max")},
                       "pages_over_500k": [rep["landing_pages"]["pages_over_500k_live"], rep["landing_pages"]["pages_over_500k_new"]]}, indent=2))
 
 
@@ -595,13 +656,13 @@ def _md_report(rep, meas):
         L += [f"| {r} | {d['input_pct']} | {d['kept_pct']} | {d['diff_pp']} |" for r, d in v["religions"].items()] + [""]
     L += ["## z6-7 tile coverage", ""]
     L += [f"- z{z}: {v['archive_tiles']} archive tiles of {v['source_tiles']} source tiles; {v['source_tiles_absent_from_archive']} source tiles have no archive tile; "
-          f"{v['archive_tiles_not_in_source']} archive tiles are not in the source ({v['archive_tiles_not_in_source_with_points_in_proper_area']} of them with points in the proper area; the others hold only a neighbour's buffer copy)." for z, v in rep["z6_7_tile_coverage"].items()]
+          f"{v['archive_tiles_not_in_source']} archive tiles are not in the source ({v['archive_tiles_not_in_source_with_points_in_proper_area']} of them with points in the proper area; the others hold only a neighbour's buffer copy). {v['input_tiles_with_points']} tiles hold input points in their proper area; {v['input_tiles_without_a_dot_in_archive']} of them have no dot in the archive." for z, v in rep["z6_7_tile_coverage"].items()]
     if meas:
         L += ["", "## Measurement", "", "| zoom | live max | live p95 | live total | new max | new p95 | new total |", "|---|---|---|---|---|---|---|"]
         for z, v in meas["size_table"].items():
             L.append(f"| {z} | {v['live']['max_bytes']} | {v['live']['p95_bytes']} | {v['live']['total_bytes']} | {v['new']['max_bytes']} | {v['new']['p95_bytes']} | {v['new']['total_bytes']} |")
         c = meas["curl_sample"]
-        L += ["", f"Curl sample of live tiles: {c['equal_to_stored']} of {c['tiles']} downloaded sizes equal the stored bytes.", "",
+        L += ["", f"Curl sample of live tiles: {c['http_200']} of {c['tiles']} returned 200; served bytes were {c['served_over_stored_min']} to {c['served_over_stored_max']} of the stored bytes (the edge recompresses). Largest served tile: " + ", ".join(f"z{z} {v['max_served_bytes']} bytes" for z, v in c['per_zoom'].items()) + ".", "",
               "### Country pages that open at z6-7", "", "| country | zoom | viewport tiles | live bytes | new bytes | live max tile | new max tile |", "|---|---|---|---|---|---|---|"]
         L += [f"| {p['country'].upper()} | {p['initial_zoom']} | {p['viewport_tiles']} | {p['live_bytes']} | {p['new_bytes']} | {p['live_max_tile']} | {p['new_max_tile']} |"
               for p in meas["landing_pages"]["pages"]]
