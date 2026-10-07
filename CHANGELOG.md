@@ -2,13 +2,13 @@
 
 ## Unreleased
 
-### 2026-10-07 (public maps: census download starts with the page, item P3)
+### 2026-10-07 (public maps: census download starts at overview load, item P3)
 
-- The shared runtime (`apps/regions/_shared/region-map.js`) starts the default level's boundary and area-summary download when the script runs, directly after the carried census view has been read, instead of at the map's first idle. Layer insertion still waits for the first idle: `setCensusEnabled` takes the in-flight promise from `loadCensusData`, so the choropleth is still added beneath the point layers and `datamap:first-idle` still fires after the data has arrived. The declared-domain check, the foreign-fix fold and the level and domain switching are unchanged, and no code path names a country.
-- Both census fetches carry `priority: "low"`, so Chromium schedules them behind the style and tiles (other browsers ignore the option).
-- The "Loading census boundaries…" hint is now shown by `setCensusEnabled` when the idle handler meets a load still in flight, and the failure hint likewise, because the early start runs before the map has painted and a hint then expires unseen. Loads started by a level switch or a domain switch show both hints as before.
+- The shared runtime (`apps/regions/_shared/region-map.js`) starts the default level's boundary and area-summary download when the overview tiles have first loaded (the existing `datamap:overview-loaded` event), instead of at the map's first idle. An earlier draft started it at script start; measurement on a slow link showed that delayed the map's load by 2 to 3 s on the larger pages, so the start now waits for the overview dots. Layer insertion still waits for the first idle: `setCensusEnabled` takes the in-flight promise from `loadCensusData`, so the choropleth is still added beneath the point layers and `datamap:first-idle` still fires after the data has arrived. If the event never fires (overview disabled or its tiles failing) the idle handler loads the census as before. The declared-domain check, the foreign-fix fold and the level and domain switching are unchanged, and no code path names a country.
+- Both census fetches carry `priority: "low"`, a hint that asks Chromium to schedule them behind the style and tiles. It is advisory and not a scheduling guarantee, and other browsers ignore it.
+- The "Loading census boundaries…" and failure hints are owned by the caller that enables the census. `setCensusEnabled` shows the loading hint when it meets a load in flight (or starts a retry after a failed prefetch) and the failure hint once, because the prefetch runs before the map has painted and a hint then expires unseen. Loads started by a level switch or a domain switch show both hints as before.
 - Cache-busting: the four scripts are stamped `?v=20261007b` on every page that loads them.
-- Added `apps/regions/_shared/census-early-start.test.cjs` (source order of the early call and a run of the real loader and enable functions against stubs); CI runs it. Timings, the browser checks and the trade-off on slow links are in the pull request.
+- Added `apps/regions/_shared/census-early-start.test.cjs` (source order of the listener, and a run of the real loader and enable functions against stubs, including exact hint counts); CI runs it. Timings, the browser checks and the trade-off on slow links are in the pull request.
 
 ### 2026-10-07 (tiles v2 client: slim overview and per-country RA dots)
 
