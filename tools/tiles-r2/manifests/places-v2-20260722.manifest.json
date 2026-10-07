@@ -1,0 +1,135 @@
+{
+  "$schema": "../../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:places-v2-20260722-b1c30cc1b3c1",
+  "dataset_id": "places-v2-20260722",
+  "dataset_version_id": "places-v2-20260722:b1c30cc1b3c185cd",
+  "dataset_family": "places-tiles",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "global",
+    "snapshot_date": "2026-07-22",
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-10-07T01:02:39+00:00",
+  "created_by": "claude-sonnet-5-5 (workflow agent)",
+  "pipeline": {
+    "script": "tools/tiles-r2/build_places_v2.py",
+    "git_commit": "6fbe8b782de5c6c551706ca117e3c47884c3754c",
+    "command": "uv run tools/tiles-r2/build_places_v2.py all --work <dir> --source <places.mbtiles> --slim <slim.ndjson> --extract-work <dir>",
+    "parameters": {
+      "z6_flags": [
+        "tippecanoe",
+        "-Z6",
+        "-z7",
+        "--drop-fraction-as-needed",
+        "-M",
+        "500000",
+        "-r1",
+        "-l",
+        "places"
+      ],
+      "z7_flags": [
+        "tippecanoe",
+        "-Z7",
+        "-z7",
+        "-r1",
+        "--no-feature-limit",
+        "--no-tile-size-limit",
+        "-l",
+        "places"
+      ],
+      "z7_sample": {
+        "seed": 20261007,
+        "stratified_by": "religion",
+        "calibration": {
+          "seed": 20261007,
+          "attempts": [
+            {
+              "fraction": 0.7,
+              "points": 1450912,
+              "added_for_tile_coverage": 92,
+              "max_tile_bytes": 396096
+            },
+            {
+              "fraction": 0.856232,
+              "points": 1774573,
+              "added_for_tile_coverage": 32,
+              "max_tile_bytes": 473929
+            }
+          ],
+          "target_bytes": [
+            470000,
+            499000
+          ]
+        },
+        "briefed_flags_discarded": {
+          "max_tile_bytes": 390904,
+          "tiles": 2689,
+          "total_bytes": 25432395
+        },
+        "reason": "the briefed flags at z7 shift the christian share by -0.459 pp, beyond the 0.3 pp criterion"
+      },
+      "thin_zooms": [
+        6,
+        7
+      ],
+      "copy_from_zoom": 8,
+      "layer": "places",
+      "z6_7_attributes": [
+        "religion",
+        "denomination",
+        "name",
+        "osm_id",
+        "osm_type",
+        "country_code"
+      ],
+      "z0_5": "not built: the public map's places source has minzoom 6 and the RA layers read this tier from z8",
+      "z8_18": "rows copied byte for byte from places.mbtiles (read-only attach), verified by digest in both directions",
+      "source_sha256": "eaa55c50971381cacca36ea08b1d4a68628b77d47a7156848cebb6a13eb2c406",
+      "source_bytes": 4373762048,
+      "slim_sha256": "aceb33558462ba5eb12543cc392acee6b86751ae3f4d5293adc69b90cf5509be",
+      "input_features": 2072349
+    },
+    "software_versions": {
+      "tippecanoe": "tippecanoe v2.79.0",
+      "pmtiles_cli": "pmtiles dev, commit none, built at unknown",
+      "python": "3.14.7"
+    }
+  },
+  "source": {
+    "provider": "places.mbtiles, the live places tileset built 2026-07-22 (z8-18 copied from it); slim.ndjson of tiles-v2-20260722 (z6-7 input)",
+    "licence": null,
+    "local_cache_hint": "green:/Users/joseph/tiles-archive-2026-07/tiles-migration/places.mbtiles",
+    "citation": "places.mbtiles sha256 eaa55c50971381cacca36ea08b1d4a68628b77d47a7156848cebb6a13eb2c406, 4373762048 bytes; slim.ndjson sha256 aceb33558462ba5eb12543cc392acee6b86751ae3f4d5293adc69b90cf5509be, 2072349 features, extracted by build_tiles_v2.py (see the tiles-v2-20260722 manifests). This is a new dataset family member, not a replacement of the overview manifest.",
+    "licence_todo": "licence and attribution of the 701,349 places without an OSM key are not established; publication gate (serving the archive) stays open until documented"
+  },
+  "durable_files": [
+    {
+      "uri": "green:/Users/joseph/tiles-build-2026-10-07/places-v2/out/places-v2-20260722.pmtiles",
+      "storage_provider": "other",
+      "format": "pmtiles",
+      "bytes": 2797462444,
+      "sha256": "009635acdff5749c1290d4e426d81310a940fb61f477a45001540d348c77af2d",
+      "feature_count": null,
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "notes": "public places tier, z6-18, layer places. z6-7 are a fraction-preserving sample of the 2,072,349 input places, six attributes, capped at 500,000 bytes per tile; z8-18 are byte-identical to the live places tileset. commands: tippecanoe -Z6 -z7 --drop-fraction-as-needed -M 500000 -r1 -l places -o <work>/parts/z6-7.mbtiles <slim.ndjson> (only z6 is kept); tippecanoe -Z7 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places -o <work>/parts/z7.mbtiles <z7-sample.ndjson> (seeded religion-stratified sample, fraction in the parameters);sqlite insert into tiles select ... from places.mbtiles.tiles where zoom_level >= 8 (read-only attach); pmtiles convert places-v2-20260722.mbtiles places-v2-20260722.pmtiles. Location is a machine-local build output on green, a cache and not a durable store; the durable copy is the R2 object, once uploaded and recorded."
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "uv run tools/tiles-r2/build_places_v2.py validate --work <dir> --source <places.mbtiles> --slim <slim.ndjson> --extract-work <dir>"
+    ],
+    "warnings": [
+      "licence_status needs_review: licence of the places without an OSM key is not established",
+      "z6-7 hold a sample, and a place can be absent there that appears at z8 (z7 keeps a dot in every tile that holds a point; z6 does not, see the coverage counts in the validation report)",
+      "z6: 9 of 930 tiles that hold input points have no dot in their proper area (the briefed drop-fraction flags thin sparse tiles to nothing; the tile exists with a neighbour's buffer copy)"
+    ],
+    "notes": "full report in tools/tiles-r2/manifests/validation-report-places-v2-20260722.md",
+    "input_features": 2072349,
+    "criteria_not_met": []
+  },
+  "downstream_status": "staged"
+}
