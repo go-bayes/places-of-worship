@@ -4,10 +4,12 @@
 // revise portal"). every place of worship on the shop front's tiles is an
 // open case until a reviewer confirms it, so each is drawn as an amber disc
 // with a white halo on every basemap. two tilesets cover the zoom range:
-// the public map's places-overview tier at country scale (native zoom 5,
-// stretched to 7) and the full places tier from zoom 8 in. both carry
-// osm_id, osm_type, name and country_code, so a click on either opens the
-// same popup and revise card.
+// below zoom 8 the page country's own ra-dots archive (every place of that
+// country, native zooms 3 to 7; a country with no archive falls back to the
+// public map's slim places-overview-v2 sample, native zoom 5, stretched to
+// 7) and the full places tier from zoom 8 in. all carry osm_id, osm_type,
+// name and country_code where the place has them, so a click on any opens
+// the same popup and revise card.
 //
 // leaflet.vectorgrid 1.3.0's own hit-testing predates leaflet 1.8 and never
 // fires, so callers hit-test the map's click against the rendered symbols
@@ -20,16 +22,48 @@
     const PLACES_TILE_URL = "https://tiles.placemap.org/places/{z}/{x}/{y}";
     const PLACES_TILE_LAYER = "places";
     const PLACES_TILE_MAX_NATIVE_ZOOM = 18;
-    const OVERVIEW_TILE_URL = "https://tiles.placemap.org/places-overview/{z}/{x}/{y}";
+    // tiles v2 (build 20260722). the overview is a fraction-preserving
+    // sample, z0 to 5; the ra-dots archives hold every place of one country,
+    // z3 to 7, in the same layer name. both are immutable versioned names
+    // served by the tiles worker
+    const TILES_VERSION = "20260722";
+    const OVERVIEW_TILE_URL = `https://tiles.placemap.org/places-overview-v2-${TILES_VERSION}/{z}/{x}/{y}`;
     const OVERVIEW_TILE_LAYER = "places_overview";
     const OVERVIEW_TILE_MAX_NATIVE_ZOOM = 5;
-    // the full tier takes over from here; below it the overview tier draws
+    const RA_DOTS_TILE_LAYER = "places_overview";
+    const RA_DOTS_MIN_NATIVE_ZOOM = 3;
+    const RA_DOTS_MAX_NATIVE_ZOOM = 7;
+    // the two-letter codes that have an ra-dots archive: the 210 archives in
+    // manifest tiles-v2-20260722:0ce3c532af1e986d (tools/tiles-r2/manifests/
+    // tiles-v2-20260722-0ce3c532af1e.manifest.json, on main at commit 8dae8c76). update this list with
+    // TILES_VERSION whenever the archives are rebuilt. a country not listed
+    // (and the world view, ZZ) falls back to the overview sample
+    const RA_DOTS_COUNTRY_CODES = new Set((
+        "ad ae af ag ai al am ao ar at au az ba bb bd be bf bg bh bi bj bm bn bo br bs bt bw by " +
+        "bz ca cd cf cg ch ci ck cl cm cn co cr cu cv cy cz de dj dk dm do dz ec ee eg eh er es " +
+        "et fi fj fk fm fo fr ga gb gd ge gg gh gi gm gn gq gr gt gw gy hn hr ht hu id ie il im " +
+        "in iq ir is it je jm jo jp ke kg kh ki km kn kp kr kw ky kz la lb lc li lk lr ls lt lu " +
+        "lv ly ma mc md me mg mh mk ml mm mn mr ms mt mu mv mw mx my mz na ne ng ni nl no np nr " +
+        "nu nz om pa pe pg ph pk pl pt pw py qa ro rs ru rw sa sb sc sd se sg si sk sl sm sn so " +
+        "sr ss st sv sy sz tc td tg th tj tl tm tn to tr tt tv tw tz ua ug us uy uz va vc ve vg " +
+        "vn vu ws ye za zm zw"
+    ).split(" "));
+    // the full tier takes over from here; below it the country's ra-dots
+    // archive (or the overview sample) draws
     const PLACES_MIN_ZOOM = 8;
     const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
+    // the ra-dots archive url for a two-letter country code, or null when the
+    // build has none for it
+    function raDotsTileUrl(countryCode) {
+        const code = String(countryCode || "").trim().toLowerCase();
+        if (!RA_DOTS_COUNTRY_CODES.has(code)) return null;
+        return `https://tiles.placemap.org/ra-dots-${code}-${TILES_VERSION}/{z}/{x}/{y}`;
+    }
+
     function dotStyle(zoomed) {
         return {
-            // the overview tier is stretched up to two zoom levels past its
+            // the overview sample is stretched up to two zoom levels past its
             // native 5, so its dots start small
             radius: zoomed ? 5 : 2.4,
             color: HALO,
@@ -44,14 +78,16 @@
     // both tile layers for a leaflet map; neither is interactive (an
     // interactive path swallows the click before the map sees it). the
     // dots paint on canvas tiles: vectorgrid's default svg renderer makes
-    // one dom path per dot, and the overview tiles a phone requests at
-    // country scale carry some 300,000 places across europe, which ios
-    // safari could not hold through a zoom (jb 2026-09-22, sweden).
-    // `options.overviewKeep(props)`, when given, says which places the
-    // overview tier draws at all; the full tier always draws every place
+    // one dom path per dot, and the tiles a phone requests at country scale
+    // carried some 300,000 places across europe, which ios safari could not
+    // hold through a zoom (jb 2026-09-22, sweden). `options.countryCode` is
+    // the page country's two-letter iso code: below zoom 8 only that
+    // country's archive loads, so no neighbour's dots are fetched or drawn
+    // and no client-side filter is needed. the layer called `overview` in the
+    // result is the below-zoom-8 tier, whichever tileset backs it
     function createLayers(L, options = {}) {
         if (!L || !L.vectorGrid || typeof L.vectorGrid.protobuf !== "function") return null;
-        const keep = typeof options.overviewKeep === "function" ? options.overviewKeep : null;
+        const raUrl = raDotsTileUrl(options.countryCode);
         const common = {
             interactive: false,
             // the overlay pane sits above every basemap tile and below the
@@ -63,15 +99,27 @@
             // own default (svg) stands only where it is missing
             ...(L.canvas && typeof L.canvas.tile === "function" ? { rendererFactory: L.canvas.tile } : {}),
         };
-        // an empty style list makes vectorgrid skip the feature: no symbol
-        // object, no draw, no hit-test entry
-        const overviewStyle = keep ? props => (keep(props) ? dotStyle(false) : []) : dotStyle(false);
-        const overview = L.vectorGrid.protobuf(OVERVIEW_TILE_URL, {
-            ...common,
-            vectorTileLayerStyles: { [OVERVIEW_TILE_LAYER]: overviewStyle },
-            maxZoom: PLACES_MIN_ZOOM - 1,
-            maxNativeZoom: OVERVIEW_TILE_MAX_NATIVE_ZOOM,
-        });
+        const overview = raUrl
+            ? L.vectorGrid.protobuf(raUrl, {
+                ...common,
+                vectorTileLayerStyles: { [RA_DOTS_TILE_LAYER]: dotStyle(false) },
+                maxZoom: PLACES_MIN_ZOOM - 1,
+                // the zoom floor: leaflet's minNativeZoom alone only clamps
+                // requests to z3, so a zoom-out to z1 still fetched the
+                // country's z3 tiles for every wrapped world copy (168
+                // fetches, and 3 MB tiles for the us). with minZoom set the
+                // layer loads nothing below z3 (leaflet also takes the map's
+                // lowest zoom from its layers, so the map stops at z3 here)
+                minZoom: RA_DOTS_MIN_NATIVE_ZOOM,
+                minNativeZoom: RA_DOTS_MIN_NATIVE_ZOOM,
+                maxNativeZoom: RA_DOTS_MAX_NATIVE_ZOOM,
+            })
+            : L.vectorGrid.protobuf(OVERVIEW_TILE_URL, {
+                ...common,
+                vectorTileLayerStyles: { [OVERVIEW_TILE_LAYER]: dotStyle(false) },
+                maxZoom: PLACES_MIN_ZOOM - 1,
+                maxNativeZoom: OVERVIEW_TILE_MAX_NATIVE_ZOOM,
+            });
         const places = L.vectorGrid.protobuf(PLACES_TILE_URL, {
             ...common,
             vectorTileLayerStyles: { [PLACES_TILE_LAYER]: dotStyle(true) },
@@ -169,7 +217,12 @@
         OVERVIEW_TILE_URL,
         OVERVIEW_TILE_LAYER,
         OVERVIEW_TILE_MAX_NATIVE_ZOOM,
+        RA_DOTS_TILE_LAYER,
+        RA_DOTS_MIN_NATIVE_ZOOM,
+        RA_DOTS_MAX_NATIVE_ZOOM,
+        RA_DOTS_COUNTRY_CODES,
         PLACES_MIN_ZOOM,
+        raDotsTileUrl,
         dotStyle,
         createLayers,
         addTo,

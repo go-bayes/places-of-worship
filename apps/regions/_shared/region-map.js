@@ -239,7 +239,9 @@ const CONFIG = {
   mobileMinZoom: 3.0,
   desktopMinZoom: 1.5,
   tiles: {
-    overview: "https://tiles.placemap.org/places-overview/{z}/{x}/{y}",
+    // tiles v2: a slim, fraction-preserving sample of every place, z0 to 5
+    // (immutable versioned name; the archive is served by the tiles worker)
+    overview: "https://tiles.placemap.org/places-overview-v2-20260722/{z}/{x}/{y}",
     places: "https://tiles.placemap.org/places/{z}/{x}/{y}",
     // optional overlay: a page names a polygon tileset in its config
     // (REGION_CONFIG.polygonsTileset) or the source is never added and no
@@ -1554,7 +1556,9 @@ function addOverviewLayer() {
     type: "vector",
     tiles: [CONFIG.tiles.overview],
     minzoom: 0,
-    maxzoom: 6,
+    // the sample's last native zoom; the layer below still draws to zoom 6
+    // from overzoomed z5 tiles
+    maxzoom: 5,
     // the places data is odbl: credit is required, not courtesy
     attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
   });
@@ -3036,7 +3040,9 @@ if (countsToggle) {
   });
 }
 
-function renderCounts(counts) {
+// below zoom 6 the counts come from the overview sample, a fraction of the
+// places, so the line says "places shown" and not a total
+function renderCounts(counts, sampled = false) {
   countsList.innerHTML = "";
   let total = 0;
   countLabels.forEach(({ key, label, color }) => {
@@ -3048,7 +3054,7 @@ function renderCounts(counts) {
       `<span>${value.toLocaleString()}</span>`;
     countsList.appendChild(item);
   });
-  countsTotal.textContent = `Total: ${total.toLocaleString()}`;
+  countsTotal.textContent = `${sampled ? "Places shown" : "Total"}: ${total.toLocaleString()}`;
   // feed the toggle's hint dots with the categories that lead this view
   const ranked = countLabels
     .filter((c) => (counts[c.key] || 0) > 0)
@@ -3109,7 +3115,7 @@ function updateCounts() {
       if (IS_MOBILE) {
         countsList.style.display = "grid";
         countsTotal.style.display = "block";
-        renderCounts(EMPTY_COUNTS);
+        renderCounts(EMPTY_COUNTS, true);
       } else {
         countsList.style.display = "none";
         countsTotal.style.display = "none";
@@ -3139,7 +3145,7 @@ function updateCounts() {
         counts[key] += 1;
       }
     });
-    renderCounts(counts);
+    renderCounts(counts, zoom < 6);
   });
 }
 

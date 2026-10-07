@@ -1769,8 +1769,8 @@ const CONTEXT_DOT_COLOUR = UNVALIDATED_PLACES ? UNVALIDATED_PLACES.COLOUR : "#f5
 const CONTEXT_DOT_HALO = UNVALIDATED_PLACES ? UNVALIDATED_PLACES.HALO : "#ffffff";
 // unvalidated places for a country without a dated product (jb 2026-09-03,
 // "all points"): the shop front's places tiles, drawn by leaflet.vectorgrid,
-// with the public map's overview tier below zoom 8 so the whole country's
-// places show on arrival (jb 2026-09-04: australia showed only a subset)
+// with the country's own ra-dots archive below zoom 8 (the slim overview
+// sample where it has none) so the whole country's places show on arrival (jb 2026-09-04: australia showed only a subset)
 const TILE_DOTS_MIN_ZOOM = UNVALIDATED_PLACES ? UNVALIDATED_PLACES.PLACES_MIN_ZOOM : 8;
 
 function osmObjectUrl(osmType, osmId) {
@@ -3834,20 +3834,16 @@ class NzVerificationMap {
             return;
         }
         if (!this.tileDotLayers) {
-            // at country scale only this country's places draw (plus any the
-            // tiles leave untagged): sweden's 7,500 stood among the 317,000
-            // the overview tiles of a phone's viewport carried, and ios
-            // safari killed the page on the first zoom (jb 2026-09-22). from
-            // zoom 8 the full tier draws every place, a neighbour's dot with
-            // its own portal named in the popup. the world view keeps all
+            // below zoom 8 the module loads this country's own ra-dots
+            // archive, so only its places are fetched and drawn: sweden's
+            // 7,500 stood among the 317,000 the shared overview tiles of a
+            // phone's viewport carried, and ios safari killed the page on the
+            // first zoom (jb 2026-09-22). a country with no archive, and the
+            // world view (ZZ), get the slim overview sample. from zoom 8 the
+            // full tier draws every place, a neighbour's dot with its own
+            // portal named in the popup
             const ownIso = this.ownIsoCode();
-            const overviewKeep = ownIso && ownIso !== "ZZ"
-                ? props => {
-                    const code = String(props?.country_code || "").toUpperCase();
-                    return !code || code === ownIso;
-                }
-                : null;
-            this.tileDotLayers = UNVALIDATED_PLACES.createLayers(L, { overviewKeep });
+            this.tileDotLayers = UNVALIDATED_PLACES.createLayers(L, { countryCode: ownIso === "ZZ" ? "" : ownIso });
             if (!this.tileDotLayers) return;
             // vectorgrid's own hit-testing never fires here (see the module),
             // so the map's click is hit-tested against the rendered dots

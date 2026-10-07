@@ -127,9 +127,10 @@ places show by default and the legend names them `place on today's map,
 tap to revise`. The dots paint on canvas tiles, never as DOM paths (the
 overview tiles of a phone's viewport at country scale carried 317,000
 places across Europe, 7,500 of them in Sweden, and iOS Safari killed the
-page on the first pinch, 2026-09-22); at zooms 5 to 7 only the portal's
-own country draws, and from zoom 8 every place, a neighbour's dot with
-its own portal named in the popup.
+page on the first pinch, 2026-09-22); below zoom 8 only the portal's own
+country's `ra-dots-<cc>-20260722` archive loads (a country with no archive
+gets the slim `places-overview-v2-20260722` sample), and from zoom 8 every
+place draws, a neighbour's dot with its own portal named in the popup.
 
 Under the zoom buttons at the top left of the map are two icon buttons of
 one shape (`.map-icon-control` in `apps/regions/_shared/theme.css`: 44 px,
