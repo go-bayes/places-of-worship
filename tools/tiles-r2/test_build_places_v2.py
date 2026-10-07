@@ -114,6 +114,12 @@ class Sampling(unittest.TestCase):
             _, _, added_b1, unr1 = b.sample_with_coverage(src, dst, 0.0, 3, 7, required_tiles={(0, 0)})
             self.assertEqual((added_b1, unr1), (0, 1))
 
+    def test_buffer_wraps_at_the_antimeridian(self):
+        east = b._buffered_tiles(179.999, 50.0, 7)
+        west = b._buffered_tiles(-179.999, 50.0, 7)
+        self.assertEqual({x for x, _ in east}, {127, 0})
+        self.assertEqual({x for x, _ in west}, {0, 127})
+
     def test_buffered_tiles_contain_the_proper_tile_unless_on_the_edge(self):
         self.assertIn(b._tile_of(10.0, 50.0, 7), b._buffered_tiles(10.0, 50.0, 7))
         self.assertEqual(b._buffered_tiles(10.0, 50.0, 7), [b._tile_of(10.0, 50.0, 7)])

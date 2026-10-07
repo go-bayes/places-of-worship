@@ -101,9 +101,10 @@ def _buffered_tiles(lon, lat, z):
     fx = (lon + 180.0) / 360.0 * n
     fy = (1.0 - math.asinh(math.tan(math.radians(lat))) / math.pi) / 2.0 * n
     reach = BUFFER_FRACTION - EDGE_MARGIN
-    xs = range(max(0, math.ceil(fx - 1 - reach)), min(n - 1, math.floor(fx + reach)) + 1)
+    # longitude wraps at the antimeridian, where tippecanoe copies the buffer into the tile on the other side
+    xs = {x % n for x in range(math.ceil(fx - 1 - reach), math.floor(fx + reach) + 1)}
     ys = range(max(0, math.ceil(fy - 1 - reach)), min(n - 1, math.floor(fy + reach)) + 1)
-    return [(x, y) for x in xs for y in ys]
+    return [(x, y) for x in sorted(xs) for y in ys]
 
 
 def sample_with_coverage(src, dst, fraction, seed, zoom, required_tiles=None):
