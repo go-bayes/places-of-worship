@@ -54,6 +54,8 @@ jobs:
           node apps/regions/_shared/region-map-startup.test.cjs
           node apps/regions/_shared/tiles-v2-client.test.cjs
           node apps/regions/nz/js/refresh-merge.test.cjs
+          node apps/regions/nz/js/ra-landing.test.cjs
+          node apps/regions/nz/js/convex-task-client.test.cjs
           node apps/regions/nz/js/task-presentation.test.cjs
           node apps/regions/nz/js/task-state-dom.test.cjs
           node apps/regions/nz/js/add-revise-control.test.cjs

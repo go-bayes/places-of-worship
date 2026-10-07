@@ -105,8 +105,11 @@ const app = Object.create(window.NzVerificationMap.prototype);
     gates.push(resolve);
   });
   fresh.backend.listMyTasks = async () => [];
+  // a deployment without raLanding: the three list reads stand in
+  fresh.backend.readLanding = async () => null;
   const first = fresh.refreshBackendTasks();
   const second = fresh.refreshBackendTasks();
+  await new Promise(resolve => setTimeout(resolve, 0));
   assert.equal(gates.length, 2);
   // the second refresh answers first with the newer row
   gates[1]([{ task_id: "t1", status: "exported", updated_at: 200 }]);
@@ -118,5 +121,178 @@ const app = Object.create(window.NzVerificationMap.prototype);
   assert.equal(fresh.backendTasksById.get("t1").status, "exported");
 }
 
-console.log("refresh-merge: 4 checks passed");
+// a portal whose reads are scripted: the landing, the legacy lists, and the row
+function portal({ landing, legacy, rows }) {
+  const calls = [];
+  const page = Object.create(window.NzVerificationMap.prototype);
+  page.backendUser = { _id: "user_1" };
+  page.backendTasksById = new Map();
+  page.manualTasksById = new Map();
+  page.withdrawnNominationTaskIds = new Set();
+  page.myWorkItems = [];
+  page.myNominationItems = [];
+  page.landingState = null;
+  page.pendingLanding = null;
+  page.refreshesInFlight = 0;
+  page.renderNominationList = () => {};
+  page.renderInitialDetail = () => {};
+  page.renderBackendPanel = () => {};
+  page.renderSessionPanel = () => {};
+  page.renderAddReviseControl = () => {};
+  page.applyFilters = () => {};
+  page.assignmentTaskIsAvailable = () => true;
+  page.backend = {
+    configured: true,
+    signedIn: true,
+    async readLanding(args) { calls.push(["raLanding", args]); return landing ? (typeof landing === "function" ? landing() : landing) : null; },
+    async listTasks(args) { calls.push(["listTasks", args]); return (legacy?.tasks || []); },
+    async listMyTasks(args) { calls.push(["listMyTasks", args]); return (legacy?.mine || []); },
+    async readTaskRow(args) { calls.push(["raTaskRow", args]); return typeof rows === "function" ? rows(args) : rows ?? null; },
+  };
+  return { page, calls };
+}
+const names = calls => calls.map(call => call[0]);
+const mine = (id, status, over = {}) => ({ task: { task_id: id, batch_id: "nz-temporal-ra-workpack-001", status, assigned_to: "user_1", updated_at: 10, ...over }, latestDraft: null, latestReview: null });
+
+// 5. the full read is one raLanding call, with the page's arguments
+{
+  const landing = {
+    user: { _id: "user_1" },
+    tasks: [{ task_id: "t1", status: "open", updated_at: 1 }],
+    manualTasks: [{ task_id: "m1", batch_id: "manual-nz", status: "in_progress", updated_at: 1 }],
+    myWork: [mine("t1", "in_progress")],
+  };
+  const { page, calls } = portal({ landing });
+  await page.refreshBackendTasks();
+  assert.deepEqual(names(calls), ["raLanding"]);
+  assert.equal(calls[0][1].batchId, "nz-temporal-ra-workpack-001");
+  assert.equal(calls[0][1].limit, 1000);
+  assert.ok(Array.isArray(calls[0][1].myStatuses) && calls[0][1].myStatuses.includes("changes_requested"));
+  assert.equal(page.backendTasksById.size, 2);
+  assert.equal(page.myWorkItems.length, 1);
+}
+
+// 6. a landing that arrived with the session restore is used once, then reads are live
+{
+  const landing = { user: { _id: "user_1" }, tasks: [{ task_id: "t1", status: "open", updated_at: 1 }], manualTasks: [], myWork: [] };
+  const { page, calls } = portal({ landing });
+  page.pendingLanding = landing;
+  await page.refreshBackendTasks();
+  assert.deepEqual(names(calls), [], "the restore's landing needs no second read");
+  assert.equal(page.backendTasksById.get("t1").status, "open");
+  await page.refreshBackendTasks();
+  assert.deepEqual(names(calls), ["raLanding"]);
+}
+
+// 7. without raLanding the legacy reads run, in the old order
+{
+  const { page, calls } = portal({ landing: null, legacy: { tasks: [{ task_id: "t1", status: "open", updated_at: 1 }], mine: [mine("t1", "in_progress")] } });
+  await page.refreshBackendTasks();
+  assert.deepEqual(names(calls), ["raLanding", "listTasks", "listTasks", "listMyTasks"]);
+  assert.equal(calls[2][1].batchId, "manual-nz");
+  assert.equal(page.myWorkItems.length, 1);
+}
+
+// 8. after a write one row is read, and no list is: the task, my work and the derived lists update
+{
+  const landing = {
+    user: { _id: "user_1" },
+    tasks: [{ task_id: "t1", status: "in_progress", updated_at: 10, assigned_to: "user_1" }, { task_id: "t2", status: "open", updated_at: 5 }],
+    manualTasks: [],
+    myWork: [mine("t1", "in_progress", { last_event_at: 10 })],
+  };
+  const row = { task: { task_id: "t1", batch_id: "nz-temporal-ra-workpack-001", status: "needs_review", assigned_to: "user_1", updated_at: 20, last_event_at: 20 }, latestDraft: { evidence_draft_id: "d1", draft_status: "submitted", created_at: 1, updated_at: 2 }, latestReview: null };
+  const { page, calls } = portal({ landing, rows: { row } });
+  await page.refreshBackendTasks();
+  calls.length = 0;
+  await page.refreshTaskRow("t1");
+  assert.deepEqual(names(calls), ["raTaskRow"]);
+  assert.equal(JSON.stringify(calls[0][1]), JSON.stringify({ taskId: "t1" }));
+  assert.equal(page.backendTasksById.get("t1").status, "needs_review");
+  assert.equal(page.backendTasksById.get("t2").status, "open", "other rows keep their held copy");
+  assert.equal(page.myWorkItems.length, 1);
+  assert.equal(page.myWorkItems[0].latestDraft.draft_status, "submitted");
+}
+
+// 9. a row that leaves my work (reassigned or in a status my work does not list) leaves the list
+{
+  const landing = { user: { _id: "user_1" }, tasks: [{ task_id: "t1", status: "in_progress", updated_at: 10 }], manualTasks: [], myWork: [mine("t1", "in_progress")] };
+  const row = { task: { task_id: "t1", batch_id: "nz-temporal-ra-workpack-001", status: "provisionally_closed", assigned_to: "user_1", updated_at: 20 }, latestDraft: null, latestReview: null };
+  const { page } = portal({ landing, rows: { row } });
+  await page.refreshBackendTasks();
+  await page.refreshTaskRow("t1");
+  assert.equal(page.myWorkItems.length, 0);
+  assert.equal(page.backendTasksById.get("t1").status, "provisionally_closed");
+}
+
+// 10. a stale row stays out by the held stamp
+{
+  const landing = { user: { _id: "user_1" }, tasks: [{ task_id: "t1", status: "exported", updated_at: 200 }], manualTasks: [], myWork: [] };
+  const row = { task: { task_id: "t1", batch_id: "nz-temporal-ra-workpack-001", status: "in_progress", updated_at: 100 }, latestDraft: null, latestReview: null };
+  const { page } = portal({ landing, rows: { row } });
+  await page.refreshBackendTasks();
+  await page.refreshTaskRow("t1");
+  assert.equal(page.backendTasksById.get("t1").status, "exported");
+}
+
+// 11. a row that lands after a newer full read began is dropped
+{
+  const landing = { user: { _id: "user_1" }, tasks: [{ task_id: "t1", status: "in_progress", updated_at: 10 }], manualTasks: [], myWork: [] };
+  let release;
+  const gate = new Promise(resolve => { release = resolve; });
+  const row = { task: { task_id: "t1", batch_id: "nz-temporal-ra-workpack-001", status: "needs_review", updated_at: 20 }, latestDraft: null, latestReview: null };
+  const { page, calls } = portal({ landing, rows: () => gate.then(() => ({ row })) });
+  await page.refreshBackendTasks();
+  calls.length = 0;
+  const pendingRow = page.refreshTaskRow("t1");
+  await new Promise(resolve => setTimeout(resolve, 0));
+  // a full read begins and finishes while the row read is out
+  page.refreshGeneration += 1;
+  release();
+  await pendingRow;
+  assert.equal(page.backendTasksById.get("t1").status, "in_progress", "the dropped row changed nothing");
+  assert.deepEqual(names(calls), ["raTaskRow"]);
+}
+
+// 12. a full read in flight, no held landing, an unsupported raTaskRow, or a hidden row: a full read stands in
+{
+  const landing = { user: { _id: "user_1" }, tasks: [{ task_id: "t1", status: "open", updated_at: 10 }], manualTasks: [], myWork: [] };
+  const unsupported = portal({ landing, rows: null });
+  await unsupported.page.refreshBackendTasks();
+  unsupported.calls.length = 0;
+  await unsupported.page.refreshTaskRow("t1");
+  assert.deepEqual(names(unsupported.calls), ["raTaskRow", "raLanding"]);
+
+  const hidden = portal({ landing, rows: { row: null } });
+  await hidden.page.refreshBackendTasks();
+  hidden.calls.length = 0;
+  await hidden.page.refreshTaskRow("t1");
+  assert.deepEqual(names(hidden.calls), ["raTaskRow", "raLanding"]);
+
+  const cold = portal({ landing, rows: { row: mine("t1", "open") } });
+  await cold.page.refreshTaskRow("t1");
+  assert.deepEqual(names(cold.calls), ["raLanding"], "no held landing: the full read");
+
+  const failing = portal({ landing, rows: () => { throw new Error("Task is assigned to another user."); } });
+  await failing.page.refreshBackendTasks();
+  failing.calls.length = 0;
+  await failing.page.refreshTaskRow("t1");
+  assert.deepEqual(names(failing.calls), ["raTaskRow", "raLanding"]);
+
+  const busy = portal({ landing, rows: { row: mine("t1", "open") } });
+  await busy.page.refreshBackendTasks();
+  busy.calls.length = 0;
+  busy.page.refreshesInFlight = 1;
+  await busy.page.refreshTaskRow("t1");
+  assert.deepEqual(names(busy.calls), ["raLanding"], "an in-flight full read may predate the write");
+}
+
+// 13. an anonymous answer or an expired session shows the message, as the list queries did
+{
+  const { page } = portal({ landing: () => { const error = new Error("Your sign-in expired. Sign in again, then retry."); error.authExpired = true; throw error; } });
+  await page.refreshBackendTasks();
+  assert.equal(page.backendLastError, "Your sign-in expired. Sign in again, then retry.");
+}
+
+console.log("refresh-merge: 13 checks passed");
 })().catch((error) => { console.error(error); process.exit(1); });

@@ -13,9 +13,14 @@
     // in, cleared by the sign-out button and by expiry
     const AUTH_STORAGE_KEY = "powConvexAuth:v1";
     const GSI_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
-    // how long a session restore waits for google's script before going on
-    const GSI_RESTORE_WAIT_MS = 2500;
     const scriptLoads = new Map();
+
+    // a deployment that predates a function answers with this message; the
+    // client then falls back to the reads it replaces, so it can ship before
+    // or after the backend deploy
+    function isMissingFunctionError(error) {
+        return /Could not find public function/i.test(String(error?.message || ""));
+    }
 
     function normaliseConfig(config) {
         return { ...DEFAULT_CONFIG, ...(config || {}) };
@@ -258,24 +263,85 @@
         async restoreSession() {
             if (!this.configured || !this.authToken) return null;
             if (this.user) return this.user;
+            // the backend vouches for the kept token, so nothing waits for
+            // google. its script serves only the hour-end refresh: it loads
+            // in the background (measured 2026-10-01: 4 s to over 30 s from
+            // accounts.google.com, which held the task load and the
+            // signed-in landing behind a 2.5 s wait until 2026-10-07). a
+            // refresh before it lands fails as it does when the script never
+            // loads, and is retried until the token expires
+            this.warmGoogle();
             try {
-                // the backend vouches for the kept token; google's script
-                // serves the hour-end refresh and keeps loading in the
-                // background past this wait (measured 2026-10-01: 4 s to
-                // over 30 s from accounts.google.com, with the task load
-                // and the signed-in landing held behind it). a refresh
-                // before it lands fails as it does when the script never
-                // loads, and is retried until the token expires
-                await Promise.race([
-                    this.ensureGoogleInitialised().catch(() => false),
-                    new Promise((resolve) => window.setTimeout(resolve, GSI_RESTORE_WAIT_MS)),
-                ]);
                 this.user = (await this.me()) || null;
                 if (!this.user) this.clearAuth();
                 return this.user;
             } catch (error) {
                 this.clearAuth();
                 return null;
+            }
+        }
+
+        // starts google's script and initialisation without waiting for it
+        warmGoogle() {
+            this.ensureGoogleInitialised().catch(() => false);
+        }
+
+        // the landing in one query (tasks:raLanding): the user and the task
+        // lists together. null when the deployment has no raLanding yet, so
+        // the caller reads the lists the old way. a missing session reads
+        // as an expired one, as the list queries would have said
+        async readLanding(args) {
+            if (this.raLandingUnsupported) return null;
+            try {
+                const landing = await this.raLanding(args);
+                if (!landing?.user) {
+                    this.signOut();
+                    const error = new Error("Your sign-in expired. Sign in again, then retry.");
+                    error.authExpired = true;
+                    throw error;
+                }
+                return landing;
+            } catch (error) {
+                if (isMissingFunctionError(error)) {
+                    this.raLandingUnsupported = true;
+                    return null;
+                }
+                throw error;
+            }
+        }
+
+        // after a reload with a kept token: names the user and reads the
+        // landing in one round trip. landing is null when raLanding is
+        // unavailable or failed for a reason the old reads will report in
+        // their own words; the user is then named by users:me as before
+        async restoreSessionWithLanding(args) {
+            if (!this.configured || !this.authToken) return { user: null, landing: null };
+            if (this.user) return { user: this.user, landing: null };
+            this.warmGoogle();
+            try {
+                const landing = await this.readLanding(args);
+                if (landing) {
+                    this.user = landing.user;
+                    return { user: this.user, landing };
+                }
+            } catch (error) {
+                if (error.authExpired || !this.authToken) return { user: null, landing: null };
+            }
+            return { user: await this.restoreSession(), landing: null };
+        }
+
+        // one my-work row after a write; { row } or null when raTaskRow is
+        // unavailable (row itself is null for a task the caller cannot see)
+        async readTaskRow(args) {
+            if (this.raTaskRowUnsupported) return null;
+            try {
+                return { row: await this.raTaskRow(args) };
+            } catch (error) {
+                if (isMissingFunctionError(error)) {
+                    this.raTaskRowUnsupported = true;
+                    return null;
+                }
+                throw error;
             }
         }
 
@@ -355,6 +421,18 @@
 
         async listMyTasks(args) {
             return await this.request("query", "tasks:listMyTasks", args);
+        }
+
+        // the signed-in landing in one query: { user, tasks, manualTasks,
+        // myWork } with slim draft and review rows; takes { countryCode,
+        // batchId?, myStatuses?, limit?, includeMine? }
+        async raLanding(args) {
+            return await this.request("query", "tasks:raLanding", args);
+        }
+
+        // one my-work row for the after-save refresh; takes { taskId }
+        async raTaskRow(args) {
+            return await this.request("query", "tasks:raTaskRow", args);
         }
 
         async listTaskEvidence(args) {

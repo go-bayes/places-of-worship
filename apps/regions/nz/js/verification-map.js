@@ -1968,6 +1968,14 @@ class NzVerificationMap {
         this.latestDraftsByTaskId = new Map();
         this.myWorkItems = [];
         this.myNominationItems = [];
+        // the raw landing reads (batch tasks, manual-batch tasks, my work)
+        // behind the derived lists; the single-row refresh edits these and
+        // applyTaskState() derives everything again
+        this.landingState = null;
+        // a landing read that arrived with the session restore, taken once
+        // by the first refresh
+        this.pendingLanding = null;
+        this.refreshesInFlight = 0;
         this.nominationFeatures = [];
         // candidates cancelled on their confirmation screen this session
         this.withdrawnNominationTaskIds = new Set();
@@ -2443,8 +2451,15 @@ class NzVerificationMap {
         if (!this.backend?.configured || !this.backend.authToken || this.backendUser) return null;
         this.setTransportBusy("signing_in");
         try {
-            const user = await this.backend.restoreSession();
-            if (user) this.backendUser = user;
+            // the user and the landing lists arrive in one round trip; the
+            // first refresh takes the lists (landing is null on a
+            // deployment without tasks:raLanding, and that refresh reads
+            // the old way)
+            const { user, landing } = await this.backend.restoreSessionWithLanding(this.landingArgs());
+            if (user) {
+                this.backendUser = user;
+                this.pendingLanding = landing;
+            }
             return user;
         } finally {
             this.setTransportBusy("");
@@ -2469,6 +2484,8 @@ class NzVerificationMap {
         this.latestDraftsByTaskId.clear();
         this.myWorkItems = [];
         this.myNominationItems = [];
+        this.landingState = null;
+        this.pendingLanding = null;
         this.revisionDraftIdsByTaskId.clear();
         // sign-out discards the form with the panel; a lingering dirty flag
         // would fire beforeunload against a page showing no form at all
@@ -2497,6 +2514,11 @@ class NzVerificationMap {
     }
 
     async init() {
+        // a kept sign-in starts its one landing request now, so the round
+        // trip overlaps leaflet's boot and the basemap instead of following
+        // them. the continuation runs only after init first yields, by when
+        // the page is built
+        const restoring = this.restoreBackendSession();
         this.setupMap();
         this.setupPageMode();
         this.setupFilters();
@@ -2511,7 +2533,7 @@ class NzVerificationMap {
         document.addEventListener("keydown", event => this.handleGlobalKeydown(event));
         // the file button hides the native input, so the chosen count is shown beside it
         document.addEventListener("change", event => this.syncFilePickCount(event.target));
-        const restoredUser = await this.restoreBackendSession();
+        const restoredUser = await restoring;
         this.renderBackendPanel();
         await this.loadTasks();
         await this.refreshBackendTasks();
@@ -2705,7 +2727,7 @@ class NzVerificationMap {
         try {
             await this.backend.respondToReviewerComment({ taskId, response });
             this.taskHistoryByTaskId.delete(taskId);
-            await this.refreshBackendTasks();
+            await this.refreshTaskRow(taskId);
             this.applyFilters();
         } catch (error) {
             if (button) button.disabled = false;
@@ -2730,7 +2752,7 @@ class NzVerificationMap {
             const result = await this.backend.reviseEvidenceDraft({ taskId });
             this.revisionDraftIdsByTaskId.set(taskId, result.evidence_draft_id);
             this.latestDraftsByTaskId.delete(taskId);
-            await this.refreshBackendTasks();
+            await this.refreshTaskRow(taskId);
             this.selectTaskById(taskId, { focusDetail: true });
             const status = document.getElementById("copyStatus");
             if (status) {
@@ -5438,115 +5460,233 @@ class NzVerificationMap {
         return merged;
     }
 
+    // what the signed-in landing reads, by page: the assignment batch and the
+    // country's manual batch with my work (statuses as the portal lists
+    // them), or the country's tasks alone where the page shows neither
+    landingArgs() {
+        const args = { countryCode: COUNTRY_CONFIG.countryCode, limit: 1000 };
+        if (ASSIGNMENT_MODE) {
+            args.batchId = ASSIGNMENT_BATCH_ID;
+            args.myStatuses = MY_WORK_STATUSES;
+        } else {
+            args.includeMine = false;
+        }
+        return args;
+    }
+
+    landingStateFrom(landing) {
+        return {
+            allTasks: landing?.tasks || [],
+            // nominated candidates live in the manual batch, which the
+            // assignment-scoped query cannot return; it is read as well so
+            // nominations stay reachable and visible to the duplicate
+            // check after a reload, not only in this page's memory
+            manualBatchTasks: ASSIGNMENT_MODE ? landing?.manualTasks || [] : [],
+            myItems: ASSIGNMENT_MODE ? landing?.myWork || [] : [],
+        };
+    }
+
+    // the three list reads tasks:raLanding replaces, kept for a deployment
+    // that does not have it yet
+    async readLandingLegacy() {
+        const query = {
+            countryCode: COUNTRY_CONFIG.countryCode,
+            limit: 1000,
+        };
+        if (ASSIGNMENT_MODE) {
+            query.batchId = ASSIGNMENT_BATCH_ID;
+        }
+        const allTasks = (await this.backend.listTasks(query)) || [];
+        let manualBatchTasks = [];
+        let myItems = [];
+        if (ASSIGNMENT_MODE) {
+            const manualBatchId = `manual-${COUNTRY_CONFIG.countryCode.toLowerCase()}`;
+            manualBatchTasks = (await this.backend.listTasks({
+                countryCode: COUNTRY_CONFIG.countryCode,
+                batchId: manualBatchId,
+                limit: 1000,
+            })) || [];
+            // no batch scope: my work covers the assignment batch and the
+            // ra's own nominated candidates in the manual batch
+            myItems = (await this.backend.listMyTasks({
+                statuses: MY_WORK_STATUSES,
+                limit: 200,
+            })) || [];
+        }
+        return { allTasks, manualBatchTasks, myItems };
+    }
+
+    async readLandingState() {
+        const landing = await this.backend.readLanding(this.landingArgs());
+        return landing ? this.landingStateFrom(landing) : await this.readLandingLegacy();
+    }
+
+    // the full read: sign-in, the Refresh button and anything that changes
+    // which tasks the lists hold. one query (tasks:raLanding), or the
+    // session restore's own landing the first time
     async refreshBackendTasks() {
         if (!this.backend?.configured || !this.backend.signedIn) return;
         const generation = (this.refreshGeneration || 0) + 1;
         this.refreshGeneration = generation;
+        this.refreshesInFlight = (this.refreshesInFlight || 0) + 1;
         try {
-            const query = {
-                countryCode: COUNTRY_CONFIG.countryCode,
-                limit: 1000,
-            };
-            if (ASSIGNMENT_MODE) {
-                query.batchId = ASSIGNMENT_BATCH_ID;
-            }
-            const tasks = await this.backend.listTasks(query);
-            const allTasks = tasks || [];
-            // nominated candidates live in the manual batch, which the
-            // assignment-scoped query cannot return; fetch it as well so
-            // nominations stay reachable and visible to the duplicate
-            // check after a reload, not only in this page's memory
-            let manualBatchTasks = [];
-            if (ASSIGNMENT_MODE) {
-                const manualBatchId = `manual-${COUNTRY_CONFIG.countryCode.toLowerCase()}`;
-                manualBatchTasks = (await this.backend.listTasks({
-                    countryCode: COUNTRY_CONFIG.countryCode,
-                    batchId: manualBatchId,
-                    limit: 1000,
-                })) || [];
-            }
+            const pending = this.pendingLanding;
+            this.pendingLanding = null;
+            const state = pending ? this.landingStateFrom(pending) : await this.readLandingState();
             // a later refresh finished first: its rows are newer, so this
             // response is dropped whole
             if (generation !== this.refreshGeneration) return;
-            const held = this.backendTasksById;
-            this.backendTasksById = this.mergeTaskReads(held, allTasks);
-            for (const [taskId, task] of this.mergeTaskReads(held, manualBatchTasks)) {
-                this.backendTasksById.set(taskId, task);
-            }
-            // re-merge local copies so the ra stays landed in a task
-            // created moments ago that the queries have not indexed yet
-            for (const [taskId, manualTask] of this.manualTasksById) {
-                if (!this.backendTasksById.has(taskId)) {
-                    this.backendTasksById.set(taskId, manualTask);
-                }
-            }
-            // no batch scope: my work covers the assignment batch and the
-            // ra's own nominated candidates in the manual batch
-            const myItems = ASSIGNMENT_MODE
-                // no country scope either (jb 2026-09-23): an entry made from
-                // another country's page is still this contributor's work
-                ? ((await this.backend.listMyTasks({
-                    statuses: MY_WORK_STATUSES,
-                    limit: 200,
-                })) || []).filter(item => this.ownWorkBatch(item?.task?.batch_id))
-                : [];
-            // assignment work and the ra's own nominations are separate
-            // lists (jb 2026-08-31): my work covers the batch; nominations
-            // live in their own panel in add mode
-            // a nomination whose only submission was withdrawn is no longer
-            // a case: it leaves the list and the map (jb 2026-09-04, cancel
-            // at stage two), though the audit history keeps it
-            const withdrawn = item => this.withdrawnNominationTaskIds.has(item?.task?.task_id)
-                || (isNominationProps(item?.task) && item?.latestDraft?.draft_status === "withdrawn");
-            this.myWorkItems = myItems.filter(item => !isNominationProps(item?.task));
-            this.myNominationItems = myItems.filter(item => isNominationProps(item?.task) && !withdrawn(item));
-            // the nominations panel depends on this list and the selection
-            // only, so it renders here and on selectTask, not per keystroke
-            this.renderNominationList();
-            // the add card counts past submissions; refresh it while at rest
-            if (ASSIGNMENT_MODE && this.portalMode === "add" && !this.selectedTask
-                && !document.body?.classList?.contains("entry-open")) {
-                this.renderInitialDetail();
-            }
-            if (ASSIGNMENT_MODE) {
-                // nominated candidates join the map and list whatever their
-                // status: their author needs a route back to them, and the
-                // pin-drop proximity check needs to see them
-                const nominatedTasks = manualBatchTasks.filter(task => !this.withdrawnNominationTaskIds.has(task.task_id));
-                for (const [taskId, manualTask] of this.manualTasksById) {
-                    if (this.withdrawnNominationTaskIds.has(taskId)) continue;
-                    if (!nominatedTasks.some(task => task.task_id === taskId)) {
-                        nominatedTasks.push(manualTask);
-                    }
-                }
-                const availableTasks = allTasks.filter(task => this.assignmentTaskIsAvailable(task));
-                // the assigned-tasks button under Add / Revise reads this
-                this.assignedAvailableCount = availableTasks.length;
-                this.tasks = availableTasks
-                    .concat(nominatedTasks)
-                    .map(featureFromBackendTask);
-                const snapshotEl = document.getElementById("snapshotId");
-                if (snapshotEl) {
-                    // batch numbers only: nominations are separate work and
-                    // count in their own panel, not the assignment header
-                    snapshotEl.textContent = `${ASSIGNMENT_BATCH_ID} | ${availableTasks.length} available of ${allTasks.length}`;
-                }
-                const selectedId = this.selectedTask?.properties?.task_id;
-                if (selectedId && !this.backendTasksById.has(selectedId)) {
-                    this.selectedTask = null;
-                    this.renderInitialDetail();
-                } else if (selectedId) {
-                    this.selectedTask = this.featureForTaskId(selectedId) || this.selectedTask;
-                }
-            }
-            this.backendLastError = "";
-            this.renderBackendPanel();
-            this.renderSessionPanel();
-            this.renderAddReviseControl();
+            this.landingState = state;
+            this.applyTaskState();
         } catch (error) {
-            this.backendLastError = error.message || "Could not refresh shared task state.";
-            this.renderBackendPanel();
+            this.reportRefreshError(error);
+        } finally {
+            this.refreshesInFlight = Math.max((this.refreshesInFlight || 1) - 1, 0);
         }
+    }
+
+    reportRefreshError(error) {
+        this.backendLastError = error.message || "Could not refresh shared task state.";
+        this.renderBackendPanel();
+    }
+
+    // after one task changed (a save, skip, withdraw or revision): reads that
+    // row alone (tasks:raTaskRow) and derives the lists again from the held
+    // reads, instead of re-reading three lists. a full read stands in when
+    // none is held, when one is in flight (it may predate this write), when
+    // the server hides the row, or when raTaskRow is not deployed yet. a row
+    // that lands after a full read began is dropped: that read is newer
+    async refreshTaskRow(taskId) {
+        if (!this.backend?.configured || !this.backend.signedIn) return;
+        if (!taskId || !this.landingState || this.refreshesInFlight > 0) {
+            await this.refreshBackendTasks();
+            return;
+        }
+        const generation = this.refreshGeneration || 0;
+        let read;
+        try {
+            read = await this.backend.readTaskRow({ taskId });
+        } catch (error) {
+            if (error?.authExpired) {
+                this.reportRefreshError(error);
+                return;
+            }
+            // not this caller's row, or a transient failure: reconcile in full
+            await this.refreshBackendTasks();
+            return;
+        }
+        if (generation !== this.refreshGeneration) return;
+        if (!read?.row?.task) {
+            await this.refreshBackendTasks();
+            return;
+        }
+        try {
+            this.mergeRowIntoLanding(read.row);
+            this.applyTaskState();
+        } catch (error) {
+            this.reportRefreshError(error);
+        }
+    }
+
+    // one row into the held reads: the task replaces its copy in the batch
+    // and manual lists, and my work gains, loses or updates its entry
+    mergeRowIntoLanding(row) {
+        const state = this.landingState;
+        const taskId = row.task.task_id;
+        const merged = this.mergeTaskRead(this.backendTasksById.get(taskId), row.task);
+        const swap = list => (list || []).map(task => (task?.task_id === taskId ? merged : task));
+        state.allTasks = swap(state.allTasks);
+        state.manualBatchTasks = swap(state.manualBatchTasks);
+        const others = (state.myItems || []).filter(item => item?.task?.task_id !== taskId);
+        const mine = Boolean(merged.assigned_to) && merged.assigned_to === this.backendUser?._id
+            && MY_WORK_STATUSES.includes(merged.status);
+        if (mine) {
+            others.push({ ...row, task: merged });
+            const stamp = item => item.task.last_event_at ?? item.task.updated_at ?? 0;
+            others.sort((left, right) => stamp(right) - stamp(left));
+        }
+        state.myItems = others;
+    }
+
+    // derives every list and panel from the held reads; shared by the full
+    // and the single-row refresh
+    applyTaskState() {
+        const state = this.landingState;
+        if (!state) return;
+        const allTasks = state.allTasks || [];
+        const manualBatchTasks = state.manualBatchTasks || [];
+        const held = this.backendTasksById;
+        this.backendTasksById = this.mergeTaskReads(held, allTasks);
+        for (const [taskId, task] of this.mergeTaskReads(held, manualBatchTasks)) {
+            this.backendTasksById.set(taskId, task);
+        }
+        // re-merge local copies so the ra stays landed in a task
+        // created moments ago that the queries have not indexed yet
+        for (const [taskId, manualTask] of this.manualTasksById) {
+            if (!this.backendTasksById.has(taskId)) {
+                this.backendTasksById.set(taskId, manualTask);
+            }
+        }
+        // no batch scope: my work covers the assignment batch and the
+        // ra's own nominated candidates in the manual batch
+        // no country scope (jb 2026-09-23): an entry made from another
+        // country's page is still this contributor's work
+        const myItems = ASSIGNMENT_MODE
+            ? (state.myItems || []).filter(item => this.ownWorkBatch(item?.task?.batch_id))
+            : [];
+        // assignment work and the ra's own nominations are separate
+        // lists (jb 2026-08-31): my work covers the batch; nominations
+        // live in their own panel in add mode
+        // a nomination whose only submission was withdrawn is no longer
+        // a case: it leaves the list and the map (jb 2026-09-04, cancel
+        // at stage two), though the audit history keeps it
+        const withdrawn = item => this.withdrawnNominationTaskIds.has(item?.task?.task_id)
+            || (isNominationProps(item?.task) && item?.latestDraft?.draft_status === "withdrawn");
+        this.myWorkItems = myItems.filter(item => !isNominationProps(item?.task));
+        this.myNominationItems = myItems.filter(item => isNominationProps(item?.task) && !withdrawn(item));
+        // the nominations panel depends on this list and the selection
+        // only, so it renders here and on selectTask, not per keystroke
+        this.renderNominationList();
+        // the add card counts past submissions; refresh it while at rest
+        if (ASSIGNMENT_MODE && this.portalMode === "add" && !this.selectedTask
+            && !document.body?.classList?.contains("entry-open")) {
+            this.renderInitialDetail();
+        }
+        if (ASSIGNMENT_MODE) {
+            // nominated candidates join the map and list whatever their
+            // status: their author needs a route back to them, and the
+            // pin-drop proximity check needs to see them
+            const nominatedTasks = manualBatchTasks.filter(task => !this.withdrawnNominationTaskIds.has(task.task_id));
+            for (const [taskId, manualTask] of this.manualTasksById) {
+                if (this.withdrawnNominationTaskIds.has(taskId)) continue;
+                if (!nominatedTasks.some(task => task.task_id === taskId)) {
+                    nominatedTasks.push(manualTask);
+                }
+            }
+            const availableTasks = allTasks.filter(task => this.assignmentTaskIsAvailable(task));
+            // the assigned-tasks button under Add / Revise reads this
+            this.assignedAvailableCount = availableTasks.length;
+            this.tasks = availableTasks
+                .concat(nominatedTasks)
+                .map(featureFromBackendTask);
+            const snapshotEl = document.getElementById("snapshotId");
+            if (snapshotEl) {
+                // batch numbers only: nominations are separate work and
+                // count in their own panel, not the assignment header
+                snapshotEl.textContent = `${ASSIGNMENT_BATCH_ID} | ${availableTasks.length} available of ${allTasks.length}`;
+            }
+            const selectedId = this.selectedTask?.properties?.task_id;
+            if (selectedId && !this.backendTasksById.has(selectedId)) {
+                this.selectedTask = null;
+                this.renderInitialDetail();
+            } else if (selectedId) {
+                this.selectedTask = this.featureForTaskId(selectedId) || this.selectedTask;
+            }
+        }
+        this.backendLastError = "";
+        this.renderBackendPanel();
+        this.renderSessionPanel();
+        this.renderAddReviseControl();
     }
 
     assignmentTaskIsAvailable(task) {
@@ -6338,7 +6478,7 @@ class NzVerificationMap {
         try {
             const result = await this.backend.unskipTask({ taskId });
             this.taskHistoryByTaskId.delete(taskId);
-            await this.refreshBackendTasks();
+            await this.refreshTaskRow(taskId);
             this.applyFilters();
             // land the ra back in the reopened task's detail panel
             this.selectTaskById(result.task_id, { focusDetail: true });
@@ -6727,7 +6867,7 @@ class NzVerificationMap {
             this.latestDraftsByTaskId.delete(taskId);
             this.taskHistoryByTaskId.delete(taskId);
             this.clearFormDirty();
-            await this.refreshBackendTasks();
+            await this.refreshTaskRow(taskId);
             this.applyFilters();
             this.renderDetail(this.featureForTaskId(taskId) || this.selectedTask);
             this.focusDetailPanel();
@@ -6754,7 +6894,7 @@ class NzVerificationMap {
             const result = await this.backend.reviseEvidenceDraft({ taskId });
             this.revisionDraftIdsByTaskId.set(taskId, result.evidence_draft_id);
             this.latestDraftsByTaskId.delete(taskId);
-            await this.refreshBackendTasks();
+            await this.refreshTaskRow(taskId);
             await this.loadLatestDraftForTask(taskId);
             this.renderDetail(this.featureForTaskId(taskId) || this.selectedTask);
             const status = document.getElementById("copyStatus");
@@ -8315,7 +8455,7 @@ class NzVerificationMap {
                 this.deleteFormSnapshot(taskId);
                 this.latestDraftsByTaskId.delete(taskId);
                 this.taskHistoryByTaskId.delete(taskId);
-                await this.refreshBackendTasks();
+                await this.refreshTaskRow(taskId);
                 this.selectedTask = null;
                 this.applyFilters();
                 this.renderSubmissionRecordedDetail(options.props, {
@@ -11368,7 +11508,7 @@ class NzVerificationMap {
             }
             // the write added task events; drop the cached history
             this.taskHistoryByTaskId.delete(props.task_id);
-            await this.refreshBackendTasks();
+            await this.refreshTaskRow(props.task_id);
             if (unresolved || submit) {
                 // a recorded submission closes the task for this ra: mirror
                 // the review portal's return-to-list by clearing the
@@ -13102,7 +13242,7 @@ class NzVerificationMap {
                 this.clearFormDirty();
                 this.formSnapshotsByTaskId.delete(props.task_id);
                 this.clearGuidedPeriods(props.task_id);
-                await this.refreshBackendTasks();
+                await this.refreshTaskRow(props.task_id);
                 // a recorded skip closes the task for this ra too: same
                 // return-to-list as submit, with skip wording
                 this.selectedTask = null;
