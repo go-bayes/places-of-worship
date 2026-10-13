@@ -65,7 +65,7 @@ assert.doesNotMatch(unvalidated, /overviewKeep/);
 // one stamp per script: a script's stamp moves only when that script changes
 const stamps = {
     "region-map.js": "20261013a", // grid-thinned tiers, counts by n, representative-dot zoom, home view
-    "unvalidated-places.js": "20261007b", // zoom floor for ra-dots layers
+    "unvalidated-places.js": "20261013a", // grid-thinned overview as the fallback tier, representative-dot test
     "verification-map.js": "20261007b", // one-round-trip landing
     "review-map.js": "20261007a",
 };

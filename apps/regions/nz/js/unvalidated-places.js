@@ -5,11 +5,14 @@
 // open case until a reviewer confirms it, so each is drawn as an amber disc
 // with a white halo on every basemap. two tilesets cover the zoom range:
 // below zoom 8 the page country's own ra-dots archive (every place of that
-// country, native zooms 3 to 7; a country with no archive falls back to the
-// public map's slim places-overview-v2 sample, native zoom 5, stretched to
-// 7) and the full places tier from zoom 8 in. all carry osm_id, osm_type,
-// name and country_code where the place has them, so a click on any opens
-// the same popup and revise card.
+// country, native zooms 3 to 7; a country with no archive, and the world
+// view, falls back to the public map's grid-thinned overview, native zoom 5,
+// stretched to 7) and the full places tier from zoom 8 in. the ra-dots and
+// places tiers carry osm_id, osm_type, name and country_code where the place
+// has them, so a click on any opens the same popup and revise card. the
+// grid-thinned overview draws one dot per screen-pixel cell and carries no
+// name or osm id, so a click on one of its dots zooms in instead (the
+// portals test isRepresentativeDot before opening a popup).
 //
 // leaflet.vectorgrid 1.3.0's own hit-testing predates leaflet 1.8 and never
 // fires, so callers hit-test the map's click against the rendered symbols
@@ -22,12 +25,14 @@
     const PLACES_TILE_URL = "https://tiles.placemap.org/places/{z}/{x}/{y}";
     const PLACES_TILE_LAYER = "places";
     const PLACES_TILE_MAX_NATIVE_ZOOM = 18;
-    // tiles v2 (build 20260722). the overview is a fraction-preserving
-    // sample, z0 to 5; the ra-dots archives hold every place of one country,
-    // z3 to 7, in the same layer name. both are immutable versioned names
-    // served by the tiles worker
+    // tiles v2 (build 20260722). the overview is the grid-thinned tier of
+    // 2026-10-13 (one dot per screen-pixel cell, religion and denomination,
+    // every place represented, z0 to 5; it replaced the fraction sample that
+    // drew about two percent of the places); the ra-dots archives hold every
+    // place of one country, z3 to 7, in the same layer name. both are
+    // immutable versioned names served by the tiles worker
     const TILES_VERSION = "20260722";
-    const OVERVIEW_TILE_URL = `https://tiles.placemap.org/places-overview-v2-${TILES_VERSION}/{z}/{x}/{y}`;
+    const OVERVIEW_TILE_URL = `https://tiles.placemap.org/places-overview-v2-${TILES_VERSION}-grid/{z}/{x}/{y}`;
     const OVERVIEW_TILE_LAYER = "places_overview";
     const OVERVIEW_TILE_MAX_NATIVE_ZOOM = 5;
     const RA_DOTS_TILE_LAYER = "places_overview";
@@ -229,6 +234,13 @@
         return { latlng: best.latlng, feature: featureFrom(best.properties, best.latlng) };
     }
 
+    // a dot of the grid-thinned overview stands for the places in its
+    // screen-pixel cell and names none of them: no name, no osm id. the
+    // ra-dots and places tiers always carry one or the other
+    function isRepresentativeDot(props) {
+        return !(props && (props.name || props.osm_id));
+    }
+
     function featureFrom(props, latlng) {
         return {
             type: "Feature",
@@ -246,6 +258,7 @@
 
     window.PowUnvalidatedPlaces = {
         COLOUR,
+        isRepresentativeDot,
         HALO,
         PLACES_TILE_URL,
         PLACES_TILE_LAYER,

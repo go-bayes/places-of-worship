@@ -17,11 +17,16 @@ assert.equal(mod.HALO, "#ffffff");
 assert.equal(mod.dotStyle(true).fillColor, "#f59e0b");
 assert.equal(mod.dotStyle(false).color, "#ffffff");
 
-// the two tiers meet at zoom 8: the country's dots (or the overview sample)
-// below, the full places tier from 8 in
+// the two tiers meet at zoom 8: the country's dots (or the grid-thinned
+// overview) below, the full places tier from 8 in
 assert.equal(mod.PLACES_MIN_ZOOM, 8);
 assert.equal(mod.OVERVIEW_TILE_MAX_NATIVE_ZOOM, 5);
-assert.equal(mod.OVERVIEW_TILE_URL, "https://tiles.placemap.org/places-overview-v2-20260722/{z}/{x}/{y}");
+assert.equal(mod.OVERVIEW_TILE_URL, "https://tiles.placemap.org/places-overview-v2-20260722-grid/{z}/{x}/{y}");
+// a grid-thinned dot names nothing; a place from the other tiers carries a name or an osm id
+assert.equal(mod.isRepresentativeDot({ religion: "christian", n: 4 }), true);
+assert.equal(mod.isRepresentativeDot({}), true);
+assert.equal(mod.isRepresentativeDot({ name: "St Mary" }), false);
+assert.equal(mod.isRepresentativeDot({ osm_id: 12, osm_type: "node" }), false);
 assert.match(mod.PLACES_TILE_URL, /\/places\//);
 assert.equal(mod.RA_DOTS_MIN_NATIVE_ZOOM, 3);
 assert.equal(mod.RA_DOTS_MAX_NATIVE_ZOOM, 7);
