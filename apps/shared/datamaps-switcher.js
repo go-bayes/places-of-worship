@@ -252,14 +252,14 @@
       });
     }
 
-    async function prefetchCountry(code, includeSummary, includeBoundary) {
+    async function prefetchCountry(code, includeSummary, includeBoundary, includePage = true) {
       if (!connectionAllowsPrefetch() || code === currentCode) return;
       try {
         const regions = await loadCatalogue();
         const region = regions.find((item) => item.code === code);
         if (!region) return;
         const pageUrl = new URL(region.url.replace(/^apps\/regions\//, ""), hubUrl);
-        queuePrefetch(pageUrl, region.html_bytes);
+        if (includePage) queuePrefetch(pageUrl, region.html_bytes);
         if (includeSummary) queuePrefetch(new URL(region.summary[0], pageUrl), region.summary[3]);
         if (includeBoundary) queuePrefetch(new URL(region.boundary[0], pageUrl), region.boundary[3]);
       } catch (err) {
@@ -434,14 +434,16 @@
     }
 
     // a country row the pointer rests on (about 200 ms) or presses is
-    // prerendered, so the click opens a page whose map has already started.
-    // the rule matches rows inside the list only: the current page's row is
-    // excluded, and the border-handoff pill sits outside the list by design
-    // (its href carries the live camera and it writes sessionStorage at
-    // click time). each prerender spends one basemap load (accepted by jb
-    // with item 6, 2026-10-13); chrome keeps at most two moderate prerenders.
-    // the script element is built by hand because rules set through
-    // innerHTML are never registered; browsers without the api skip it
+    // prerendered, so the click activates a page whose document, scripts
+    // and basemap style are already loaded. the rule matches rows inside
+    // the list only: the current page's row is excluded, and the
+    // border-handoff pill sits outside the list by design (its href carries
+    // the live camera and it writes sessionStorage at click time). a
+    // prerender can spend one basemap load (the maintainer's decision of
+    // 2026-10-13); chrome keeps at most two moderate prerenders. the script
+    // element is built by hand because rules set through innerHTML are
+    // never registered; browsers without the api skip it
+    let rowsPrerender = false;
     function addRowPrerenderRule() {
       if (!connectionAllowsPrefetch()) return;
       if (!window.HTMLScriptElement || typeof HTMLScriptElement.supports !== "function" ||
@@ -450,6 +452,7 @@
       rules.type = "speculationrules";
       rules.textContent = JSON.stringify({
         prerender: [{
+          source: "document",
           where: {
             and: [
               { selector_matches: "#dm-list a.dm-item" },
@@ -460,6 +463,7 @@
         }]
       });
       document.head.appendChild(rules);
+      rowsPrerender = true;
     }
 
     function visibleItems() {
@@ -526,7 +530,7 @@
         name.className = "dm-name";
         name.textContent = `← Back to ${previousRegion.name}`;
         back.appendChild(name);
-        const warm = () => { void prefetchCountry(previousRegion.code, true, true); };
+        const warm = () => { void prefetchCountry(previousRegion.code, true, true, !rowsPrerender); };
         back.addEventListener("pointerenter", warm, { once: true });
         back.addEventListener("focus", warm, { once: true });
         back.addEventListener("touchstart", warm, { once: true, passive: true });
@@ -562,8 +566,11 @@
         }
         if (c.code) {
           // hover, focus or touch is strong intent: warm the whole pair
-          // so the destination's census layer opens from cache too
-          const warm = () => { void prefetchCountry(c.code, true, true); };
+          // so the destination's census layer opens from cache too. where
+          // the prerender rule runs, it fetches the page shell itself; the
+          // census pair still warms here, because a prerendered map requests
+          // no census data before the click
+          const warm = () => { void prefetchCountry(c.code, true, true, !rowsPrerender); };
           a.addEventListener("pointerenter", warm, { once: true });
           a.addEventListener("focus", warm, { once: true });
           a.addEventListener("touchstart", warm, { once: true, passive: true });
