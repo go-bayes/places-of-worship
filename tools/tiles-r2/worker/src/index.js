@@ -29,6 +29,15 @@ const ALLOWED_ORIGINS = new Set([
   "http://localhost:8000",
 ]);
 
+// the cloudflare pages site: the production origin and its branch or hash previews,
+// https://<label>.places-of-worship.pages.dev, where <label> is one or more lower-case
+// letters, digits or hyphens and holds no dot. https only, and the suffix must end the host
+const PAGES_ORIGIN = /^https:\/\/(?:[a-z0-9-]+\.)?places-of-worship\.pages\.dev$/;
+
+function originAllowed(origin) {
+  return ALLOWED_ORIGINS.has(origin) || PAGES_ORIGIN.test(origin);
+}
+
 class ArchiveMissingError extends Error {}
 
 // range reads against the r2 object; pmtiles fetches only the byte spans it needs.
@@ -122,7 +131,7 @@ function withCors(response, request) {
   const origin = request.headers.get("Origin");
   const headers = new Headers(response.headers);
   headers.set("Vary", "Origin");
-  if (origin && ALLOWED_ORIGINS.has(origin)) headers.set("Access-Control-Allow-Origin", origin);
+  if (origin && originAllowed(origin)) headers.set("Access-Control-Allow-Origin", origin);
   return new Response(response.body, { status: response.status, headers });
 }
 

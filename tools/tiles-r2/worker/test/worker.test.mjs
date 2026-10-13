@@ -348,6 +348,31 @@ describe("tile worker", () => {
     assert.equal(res.status, 204);
   });
 
+  it("allows the Pages production and preview origins and nothing near them", async () => {
+    const acao = async (origin) =>
+      (await get("/places-overview/5/31/19", { Origin: origin })).headers.get("Access-Control-Allow-Origin");
+    for (const origin of [
+      "https://places-of-worship.pages.dev",
+      "https://ops-tiles-1.places-of-worship.pages.dev",
+      "https://religionmap.org",
+    ]) {
+      assert.equal(await acao(origin), origin);
+    }
+    for (const origin of [
+      "https://places-of-worship.pages.dev.evil.example",
+      "https://evil.example/places-of-worship.pages.dev",
+      "http://places-of-worship.pages.dev",
+      "http://abc123.places-of-worship.pages.dev",
+      "https://a.b.places-of-worship.pages.dev",
+      "https://Abc.places-of-worship.pages.dev",
+      "https://.places-of-worship.pages.dev",
+      "https://evilplaces-of-worship.pages.dev",
+      "https://example.com",
+    ]) {
+      assert.equal(await acao(origin), null, origin);
+    }
+  });
+
   it("keeps CORS and Vary on 200 for an allowed origin only", async () => {
     const ok = await get("/places-overview/5/31/19", { Origin: "https://religionmap.org" });
     assert.equal(ok.headers.get("Access-Control-Allow-Origin"), "https://religionmap.org");

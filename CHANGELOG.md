@@ -2,9 +2,14 @@
 
 ## Unreleased
 
+### 2026-10-13 (tile Worker allows the Cloudflare Pages origins)
+
+- `tools/tiles-r2/worker/src/index.js`: the CORS check uses `originAllowed`, which keeps the exact-match set and adds `https://places-of-worship.pages.dev` and `https://<label>.places-of-worship.pages.dev` previews (`<label>` is lower-case letters, digits and hyphens, with no dot) (the maintainer's decision of 2026-10-13). `http://` Pages origins and other suffixes stay refused; `worker/test/worker.test.mjs` covers both. The Worker deploy is a separate step after merge.
+
 ### 2026-10-13 (catalogue records the columnar summary the page loads)
 
 - `scripts/build_region_catalog.py`: when a country's default level declares `summaryColumns`, the catalogue's `summary` record names that columnar file (path, bytes, sha256, gzip bytes) instead of the governed `summary` file, and the build exits if its sha256 differs from the level's `summaryColumnsSha256`. Waves are still derived from the governed summary file. The global map therefore warms the file the country page fetches, and the boundary fits the switcher's 1 MiB prefetch budget again for the columnar countries. `scripts/test_build_region_catalog.py` covers the matching and mismatching digest, the page without columns and the wave derivation, and runs in CI. `apps/shared/data/region-catalog.json` regenerated: five summary records changed (au, br, dk, mx, us), and `html_bytes` changed for every page whose size had drifted since the last rebuild (including nz). The catalogue is rebuilt again on this branch after pull request A (`map/census-at-startup`) merges, before this one merges, so the committed JSON matches main at merge time.
+
 
 ### 2026-10-13 (census at startup; dated places only when shown; dead config tag removed)
 
@@ -12,7 +17,6 @@
 - Dated places: a page whose dated tiers are hidden no longer adds the dated source or fetches `dated_places.geojson`. The first show fetches the file once, hands the parsed object to the source and derives the legend's founded-after count and reviewed-occupancy flag from the same response; before, every page that declares the file requested it twice as soon as the census opened, whether or not a dated tier was shown (item 5). The legend's founded-after count and its "or reviewed evidence" wording now appear once a dated tier is first shown, when that fetch lands, rather than shortly after page load.
 - Removed the blocking `config.js` script tag from the 102 country pages, the staged Central African Republic page and the world map; the file is gitignored, nothing reads `window.POW_CONFIG`, and every page requested it as a 404. Deleted `apps/global/config.example.js`, which described that unused override (item 4).
 - `apps/regions/_shared/region-map-startup.test.cjs` checks the startup fetch's position and runs the real load handler and dated-places sync against stubs; `tiles-v2-client.test.cjs` pins the new stamp.
-
 ### 2026-10-13 (portal dots: versioned grid places tier; grid tier from zoom 6 for the United States, Germany and Italy)
 
 - RA and review portals (`apps/regions/nz/js/unvalidated-places.js`, stamp `20261013b` on `unvalidated-places.js` in `verification.html` and `review.html`): the places tier from zoom 8 reads the versioned `places-v2-20260722-grid` archive instead of the unversioned `places` path. The 13 October build validated zooms 8 to 18 byte-identical, and the tile Worker serves the versioned name as immutable for a year, where the unversioned path carried a one-hour cache.
