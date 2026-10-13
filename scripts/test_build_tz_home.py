@@ -3,10 +3,13 @@ zones map to registry codes, page countries carry their page's own camera,
 the rest the registry camera, and the generated script parses as json"""
 import json
 import re
+import sys
 import unittest
 from pathlib import Path
 
-import build_tz_home as tz
+# ci runs this from the repository root, where scripts/ is not on the path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import build_tz_home as tz  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
 OUT = REPO / "apps/shared/data/tz-home.js"
