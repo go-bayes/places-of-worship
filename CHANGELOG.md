@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### 2026-10-13 (census at startup; dated places only when shown; dead config tag removed)
+
+- Country maps (`apps/regions/_shared/region-map.js`, stamp `20261013b` on all 104 pages that load it): the default census level's boundary and area summary start loading during script evaluation instead of at MapLibre's first idle, so on an unwarmed page the overlay no longer waits about 1.6 s for that idle. The default enable now runs from map `load`, after `style.load` has added the point layers, so the choropleth still inserts beneath the dots. `datamap:first-idle` still fires only after the map's first idle and after the census layers are added or the load has failed, so the switcher's prefetch gate keeps its meaning; the geolocate-abroad fold and the `#d=` year clamp are unchanged (country-scale loading plan, item 1; Joseph, 2026-10-13).
+- Dated places: a page whose dated tiers are hidden no longer adds the dated source or fetches `dated_places.geojson`. The first show fetches the file once, hands the parsed object to the source and derives the legend's founded-after count and reviewed-occupancy flag from the same response; before, every page that declares the file requested it twice as soon as the census opened, whether or not a dated tier was shown (item 5).
+- Removed the blocking `config.js` script tag from the 102 country pages, the staged Central African Republic page and the world map; the file is gitignored, nothing reads `window.POW_CONFIG`, and every page requested it as a 404. Deleted `apps/global/config.example.js`, which described that unused override (item 4).
+- `apps/regions/_shared/region-map-startup.test.cjs` checks the startup fetch's position and runs the real load handler and dated-places sync against stubs; `tiles-v2-client.test.cjs` pins the new stamp.
+
 ### 2026-10-13 (heap path moved to the private handover; legacy script removed)
 
 - `AGENTS.md`: the handover pointer names the newest private handover file (`handover-2026-10-13-close.md`) and notes that the conductor handover now carries the heap path.
