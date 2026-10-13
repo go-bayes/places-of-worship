@@ -1,6 +1,6 @@
 // serves z/x/y vector tiles straight from pmtiles archives in r2, preserving the
 // url shape martin used (/{tileset}/{z}/{x}/{y}), so the frontend needs no change
-import { EtagMismatch, PMTiles } from "pmtiles";
+import { EtagMismatch, PMTiles, ResolvedValueCache } from "pmtiles";
 
 const TILESETS = new Set(["places", "places-overview", "buildings", "nz-polygons"]);
 
@@ -54,11 +54,17 @@ class R2Source {
   }
 }
 
-// cache archive handles per isolate so directory lookups amortise across requests
+// cache archive handles per isolate so directory lookups amortise across requests.
+// the cache holds resolved headers and directories only, never in-flight promises:
+// workers cannot share a promise between requests, and the library's default
+// shared-promise cache kept the promise of a directory read whose request the
+// client had cancelled, so every later request for a tile in that directory waited
+// on it forever (observed on 2026-10-13 as 20-40 percent of cold tile requests to a
+// newly uploaded archive hanging until the isolate was recycled)
 const archives = new Map();
 function archive(env, name) {
   if (!archives.has(name)) {
-    archives.set(name, new PMTiles(new R2Source(env.BUCKET, `${name}.pmtiles`)));
+    archives.set(name, new PMTiles(new R2Source(env.BUCKET, `${name}.pmtiles`), new ResolvedValueCache()));
   }
   return archives.get(name);
 }
