@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### 2026-10-13 (heap path moved to the private handover; legacy script removed)
+
+- `AGENTS.md` names the project heap by its Dropbox folder only; the absolute path on Joseph's machines and the note on the stale Dropbox mount moved to the private handover (Joseph, 2026-10-13).
+- Removed `archive/legacy/scripts/create_simplified_ta_geojson.py`, an early territorial-authority boundary experiment that nothing referenced and that carried two absolute working paths (Joseph, 2026-10-13). It remains in the Git history.
+
 ### 2026-10-13 (portals read the grid-thinned overview; build-machine names scrubbed)
 
 - RA and review portals (`apps/regions/nz/js/unvalidated-places.js`, stamps `20261013a` on `unvalidated-places.js`, `verification-map.js` and `review-map.js` in `verification.html` and `review.html`): the fallback tier below zoom 8, used by a country without its own `ra-dots` archive and by the world view, is the grid-thinned `places-overview-v2-20260722-grid` instead of the fraction sample (Joseph, 2026-10-13). Its dots carry no name or OSM id, so a tap on one zooms the map in to where every place is named (`isRepresentativeDot`; `verification-map.js` and `review-map.js`) instead of opening an empty popup. The per-country `ra-dots` archives and the `places` tier from zoom 8 are unchanged. RA guide and UI style guide updated.
