@@ -89,6 +89,11 @@ class GridThinTest(unittest.TestCase):
         self.assertEqual(len(problems), 3)
         self.assertEqual(len(unmet), 1)
 
+    def test_religion_summary_folds_the_long_tail(self):
+        totals = {"christian": 900, "muslim": 60, "odd free text": 2, "another": 1}
+        self.assertEqual(g.religion_summary(totals, 963), {"christian": 900, "muslim": 60, "other": 3})
+        self.assertEqual(g.religion_summary({"christian": 10}, 10), {"christian": 10, "other": 0})
+
     def test_within_slack(self):
         self.assertTrue(g.within_slack(1000, 1000))
         self.assertTrue(g.within_slack(999, 1000))

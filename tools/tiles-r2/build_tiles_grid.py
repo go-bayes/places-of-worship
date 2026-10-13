@@ -159,6 +159,22 @@ def thinned_properties(props, religion, denomination, attrs, n):
     return out
 
 
+def religion_summary(totals, input_total):
+    """Totals for the religions above the count floor, the rest summed as `other`.
+
+    The religion attribute is free text in the source, so the long tail is not reproduced in the
+    public records; the validator compares only the religions above the floor."""
+    out = {}
+    other = 0
+    for rel, n in sorted(totals.items(), key=lambda kv: -kv[1]):
+        if n / input_total >= COUNT_FLOOR:
+            out[str(rel)] = n
+        else:
+            other += n
+    out["other"] = other
+    return out
+
+
 def write_part(rows, first, counts, attrs, path):
     kept = 0
     religion_totals = collections.Counter()
@@ -192,7 +208,8 @@ def cmd_thin(a):
         sys.exit(3)
     input_religion = collections.Counter(r[2] for r in rows)
     print(f"thin: loaded {len(rows)} rows in {time.time() - t0:.1f}s", flush=True)
-    report = {"slim_sha256": slim_sha, "input_features": len(rows), "input_religion": dict(input_religion),
+    report = {"slim_sha256": slim_sha, "input_features": len(rows),
+              "input_religion": religion_summary(input_religion, len(rows)),
               "tile_px": TILE_PX, "zooms": {}}
     for z, spec in ZOOM_SPEC.items():
         t = time.time()
@@ -205,7 +222,7 @@ def cmd_thin(a):
             "tier": spec["tier"], "cell_px": spec["cell_px"], "detail": spec["detail"], "attrs": spec["attrs"],
             "kept": kept, "kept_fraction": round(kept / len(rows), 6),
             "groups_with_n_over_1": sum(1 for v in counts.values() if v > 1),
-            "religion_totals": dict(totals), "seconds": round(time.time() - t, 1)}
+            "religion_totals": religion_summary(totals, len(rows)), "seconds": round(time.time() - t, 1)}
         print(f"thin: z{z} kept {kept} of {len(rows)} ({kept / len(rows):.1%}), cell {spec['cell_px']} px, {time.time() - t:.1f}s", flush=True)
     (work / "thin-report.json").write_text(json.dumps(report, indent=2) + "\n")
 
@@ -417,7 +434,7 @@ def check_thin_zoom(z, s, exp, layer, cap, input_religion, input_total):
     if not within_slack(s["n_sum"], input_total):
         problems.append(f"z{z}: the sum of n over tile-proper points is {s['n_sum']}, input {input_total}")
     for rel, total in input_religion.items():
-        if total / input_total < COUNT_FLOOR:
+        if rel == "other" or total / input_total < COUNT_FLOOR:
             continue
         if not within_slack(s["religion"].get(rel, 0), total):
             problems.append(f"z{z}: religion {rel} sums to {s['religion'].get(rel, 0)} by n, input {total}")
@@ -528,7 +545,7 @@ def cmd_validate(a):
             unmet += [f"overview {m}" for m in u]
             ov_rep["zooms"][str(z)] = {"sizes": size_table(s["sizes"]), "points": s["points"], "n_sum": s["n_sum"],
                                        "kept_in_thin_report": rep["zooms"][str(z)]["kept"],
-                                       "religion_by_n": dict(s["religion"]), "attributes": sorted(s["attrs"])}
+                                       "religion_by_n": religion_summary(s["religion"], input_total), "attributes": sorted(s["attrs"])}
         report["archives"][overview_name(a.snapshot)] = ov_rep
         print(f"validate: overview scanned in {round(time.time() - t0)}s", flush=True)
 
@@ -547,7 +564,7 @@ def cmd_validate(a):
                 unmet += [f"places {m}" for m in u]
                 pl_rep["zooms"][str(z)] = {"sizes": size_table(s["sizes"]), "points": s["points"], "n_sum": s["n_sum"],
                                            "kept_in_thin_report": rep["zooms"][str(z)]["kept"],
-                                           "religion_by_n": dict(s["religion"]), "attributes": sorted(s["attrs"]),
+                                           "religion_by_n": religion_summary(s["religion"], input_total), "attributes": sorted(s["attrs"]),
                                            "source_tiles": len(src_sets[z])}
             print(f"validate: places z6-7 scanned in {round(time.time() - t0)}s", flush=True)
             copied = list(range(COPY_FROM_ZOOM, MAX_ZOOM + 1))
@@ -619,12 +636,16 @@ def _manifest(a, name, archive, rep_arch, thin, info, zooms, description, upload
     if "copied_zooms" in rep_arch:
         params["z8_18"] = "rows copied byte for byte from places.mbtiles (read-only attach), verified by digest in both directions"
         params["source_sha256"] = rep_arch["source_sha256"]
+    # the build output is a cache on the build machine (its location is private); the durable copy is the R2 object
     files = [{
-        "uri": f"green:{archive.resolve()}", "storage_provider": "other", "format": "pmtiles", "bytes": archive.stat().st_size,
+        "uri": f"build-cache:{archive.name}", "storage_provider": "other", "format": "pmtiles", "bytes": archive.stat().st_size,
         "sha256": rep_arch["sha256"], "feature_count": None, "privacy": "public", "licence_status": "needs_review",
-        "notes": description + " Location is a machine-local build output on green, a cache and not a durable store; the durable copy is the R2 object, once uploaded and recorded."}]
+        "notes": description + " A machine-local build output, a cache and not a durable store; the durable copy is the R2 object, once uploaded and recorded."}]
     for u in uploads:
         if u.get("key") == f"{name}.pmtiles" and u.get("match"):
+            if u.get("sha256_readback") != rep_arch["sha256"]:
+                print(f"manifest: the upload record for {u['key']} carries sha256 {u.get('sha256_readback')}, the validated archive {rep_arch['sha256']}", file=sys.stderr)
+                sys.exit(7)
             files.append({"uri": f"r2://pow-tiles/{u['key']}", "storage_provider": "other", "format": "pmtiles", "bytes": u["bytes"],
                           "sha256": u["sha256_readback"], "feature_count": None, "privacy": "public", "licence_status": "needs_review",
                           "notes": f"durable R2 object, served at https://tiles.placemap.org/{name}/{{z}}/{{x}}/{{y}}; r2 etag {u.get('r2_etag')}; uploaded with a refusal on an existing key and verified by a full read-back sha256"})
@@ -647,6 +668,7 @@ def _manifest(a, name, archive, rep_arch, thin, info, zooms, description, upload
             "software_versions": {"tippecanoe": info["tippecanoe"], "pmtiles_cli": info["pmtiles_cli"], "python": sys.version.split()[0]}},
         "source": {
             "provider": "slim.ndjson of tiles-v2-20260722 (the extract of places.mbtiles, the live places tileset built 2026-07-22)" + ("; places.mbtiles for z8-18" if "copied_zooms" in rep_arch else ""),
+            "local_cache_hint": "the v2 extract work directory and the July archive folder on the build machine (private handover)",
             "licence": None,
             "citation": (f"slim.ndjson sha256 {thin['slim_sha256']}, {thin['input_features']} features, extracted by build_tiles_v2.py "
                          f"(see the tiles-v2-{SNAPSHOT} manifests)."),
