@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-10-13 (catalogue records the columnar summary the page loads)
+
+- `scripts/build_region_catalog.py`: when a country's default level declares `summaryColumns`, the catalogue's `summary` record names that columnar file (path, bytes, sha256, gzip bytes) instead of the governed `summary` file, and the build exits if its sha256 differs from the level's `summaryColumnsSha256`. Waves are still derived from the governed summary file. The global map therefore warms the file the country page fetches, and the boundary fits the switcher's 1 MiB prefetch budget again for the columnar countries. `scripts/test_build_region_catalog.py` covers the matching and mismatching digest, the page without columns and the wave derivation, and runs in CI. `apps/shared/data/region-catalog.json` regenerated; it needs one more rebuild after the page-size changes of `map/census-at-startup` merge (`html_bytes`).
+
 ### 2026-10-13 (census at startup; dated places only when shown; dead config tag removed)
 
 - Country maps (`apps/regions/_shared/region-map.js`, stamp `20261013b` on all 104 pages that load it): the default census level's boundary and area summary start loading during script evaluation instead of at MapLibre's first idle, so on an unwarmed page the overlay no longer waits about 1.6 s for that idle. The default enable now runs from map `load`, after `style.load` has added the point layers, so the choropleth still inserts beneath the dots. `datamap:first-idle` still fires only after the map's first idle and after the census layers are added or the load has failed, so the switcher's prefetch gate keeps its meaning; the geolocate-abroad fold and the `#d=` year clamp are unchanged (country-scale loading plan, item 1; Joseph, 2026-10-13).

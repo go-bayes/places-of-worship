@@ -137,7 +137,12 @@ def config_payloads(page):
     # multi-vintage pages declare their complete wave sequence in timeline
     timeline = property_container(config, "timeline", "[", "]")
     waves = sorted({int(value) for value in re.findall(r"\byear\s*:\s*(\d{4})", timeline or "")})
-    return boundary, summary, waves
+    # a columnar summary, when declared, is the file the page actually loads
+    columns = quoted_property(level, "summaryColumns")
+    columns_sha = quoted_property(level, "summaryColumnsSha256")
+    if columns and not columns_sha:
+        raise ValueError(f"default level {default_level!r} declares summaryColumns without summaryColumnsSha256")
+    return boundary, summary, waves, columns, columns_sha
 
 
 def summary_waves(path):
@@ -155,16 +160,19 @@ def summary_waves(path):
     return waves
 
 
-def payload_record(path, page_dir):
+def payload_record(path, page_dir, expected_sha256=None):
     # raw bytes bound parse and memory spend and feed the hash; the
     # zlib-6 length approximates the host's gzip transfer size, which
     # the switcher's prefetch budget spends (raw-byte budgeting barred
     # a third of the fleet's pairs from warming)
     data = path.read_bytes()
+    digest = hashlib.sha256(data).hexdigest()
+    if expected_sha256 is not None and digest != expected_sha256:
+        raise ValueError(f"{path.name} sha256 {digest} differs from the page's declared {expected_sha256}")
     return [
         path.relative_to(page_dir).as_posix(),
         len(data),
-        hashlib.sha256(data).hexdigest(),
+        digest,
         len(zlib.compress(data, 6)),
     ]
 
@@ -232,6 +240,30 @@ def tz_index(codes):
     sys.exit("no system zone tab found; cannot build the timezone index")
 
 
+def region_entry(code, name, page, boxes_by_code):
+    # one catalogue row; the summary record names the columnar file when
+    # the default level declares one, while waves still come from the
+    # governed summary file
+    boundary_rel, summary_rel, waves, columns_rel, columns_sha = config_payloads(page)
+    boundary = page.parent / boundary_rel
+    summary = page.parent / summary_rel
+    columns = page.parent / columns_rel if columns_rel else None
+    if not boundary.is_file() or not summary.is_file() or (columns and not columns.is_file()):
+        raise ValueError("configured default payload is missing")
+    if not waves:
+        waves = summary_waves(summary)
+    return {
+        "code": code,
+        "name": name,
+        "url": f"apps/regions/{code}/",
+        "html_bytes": page.stat().st_size,
+        "boundary": payload_record(boundary, page.parent),
+        "summary": payload_record(columns, page.parent, columns_sha) if columns else payload_record(summary, page.parent),
+        "waves": waves,
+        "neighbours": neighbours_for(code, boxes_by_code),
+    }
+
+
 def main():
     names = hub_names()
     try:
@@ -246,25 +278,9 @@ def main():
     for code, name in sorted(names.items()):
         page = REGIONS / code / "index.html"
         try:
-            boundary_rel, summary_rel, waves = config_payloads(page)
-            boundary = REGIONS / code / boundary_rel
-            summary = REGIONS / code / summary_rel
-            if not boundary.is_file() or not summary.is_file():
-                raise ValueError("configured default payload is missing")
-            if not waves:
-                waves = summary_waves(summary)
+            catalogue.append(region_entry(code, name, page, boxes_by_code))
         except (OSError, ValueError) as err:
             sys.exit(f"{code}: {err}")
-        catalogue.append({
-            "code": code,
-            "name": name,
-            "url": f"apps/regions/{code}/",
-            "html_bytes": page.stat().st_size,
-            "boundary": payload_record(boundary, page.parent),
-            "summary": payload_record(summary, page.parent),
-            "waves": waves,
-            "neighbours": neighbours_for(code, boxes_by_code),
-        })
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(
