@@ -60,6 +60,7 @@ import struct
 import subprocess
 import sys
 import time
+import zlib
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -285,6 +286,8 @@ def _fields(buf):
             v, i = _varint(buf, i)
         elif wire == 2:
             ln, i = _varint(buf, i)
+            if i + ln > n:
+                raise ValueError("length-delimited field runs past the end of the message")
             v, i = buf[i:i + ln], i + ln
         elif wire == 1:
             v, i = buf[i:i + 8], i + 8
@@ -314,7 +317,15 @@ def _value(buf):
 
 def decode_tile(raw):
     """Layers of a vector tile (gzip or plain): {layer name: [feature properties, ...]}. Geometry is
-    not decoded; the checks here read attributes only."""
+    not decoded; the checks here read attributes only. Raises ValueError on a corrupt tile (a tag
+    index past the key or value table, a truncated message, bad gzip or UTF-8)."""
+    try:
+        return _decode_tile(raw)
+    except (ValueError, IndexError, struct.error, UnicodeDecodeError, OSError, EOFError, zlib.error) as e:
+        raise ValueError(f"corrupt tile: {type(e).__name__}: {e}") from e
+
+
+def _decode_tile(raw):
     if raw[:2] == b"\x1f\x8b":
         raw = gzip.decompress(raw)
     layers = {}
@@ -362,7 +373,10 @@ def public_metadata(src, name, code_prop, name_prop, tippecanoe_version):
 
     Only the data-derived `bounds` and `center` and the tilestats counts come from tippecanoe;
     its command line (`generator_options`), strategies and every other key are dropped."""
-    doc = json.loads(src["json"])
+    try:
+        doc = json.loads(src["json"])
+    except (KeyError, TypeError, ValueError) as e:
+        raise ValueError(f"tippecanoe metadata has no usable json entry ({type(e).__name__}); the layer definition and tilestats cannot be rebuilt") from e
     stats = strip_values(doc.get("tilestats") or {"layerCount": 1, "layers": []})
     stats = {k: v for k, v in stats.items() if k in PUBLIC_TILESTATS_KEYS}
     stats["layers"] = [{k: v for k, v in layer.items() if k in PUBLIC_TILESTATS_LAYER_KEYS} for layer in stats.get("layers", [])]
@@ -427,7 +441,11 @@ def build_archive(spec, boundary, parts, out, logs):
     print(f"build: tippecanoe rc={rc} {secs}s", flush=True)
     if rc:
         sys.exit(rc)
-    meta = public_metadata(read_metadata(mb), spec["name"], spec["code_prop"], spec["name_prop"], spec["tippecanoe"])
+    try:
+        meta = public_metadata(read_metadata(mb), spec["name"], spec["code_prop"], spec["name_prop"], spec["tippecanoe"])
+    except ValueError as e:
+        print(f"build: STOP. {e}", file=sys.stderr)
+        sys.exit(3)
     replace_metadata(mb, meta)
     pmt = Path(out) / f"{spec['name']}.pmtiles"
     if pmt.exists():
@@ -507,7 +525,10 @@ def cmd_build(a):
 
 def _scan_tile(args):
     z, x, y, data, code_prop = args
-    layers = decode_tile(data)
+    try:
+        layers = decode_tile(data)
+    except ValueError as e:
+        return z, x, y, len(data), [], [], [], 0, 0, str(e)
     codes, keys, no_code, features = set(), set(), 0, 0
     for feats in layers.values():
         for props in feats:
@@ -539,12 +560,14 @@ def read_archive_meta(path):
 
 
 def new_scan():
-    return {"zooms": {}, "layers": set(), "keys": set(), "no_code": 0, "features": 0, "landing_sizes": {}}
+    return {"zooms": {}, "layers": set(), "keys": set(), "no_code": 0, "features": 0, "landing_sizes": {}, "errors": []}
 
 
 def add_tile(scan, result, landing_zoom):
     """Fold one scanned tile (the _scan_tile result) into the scan."""
-    z, x, y, size, layers, codes, keys, no_code, features = result
+    z, x, y, size, layers, codes, keys, no_code, features, *error = result
+    if error:
+        scan["errors"].append([z, x, y, error[0]])
     zs = scan["zooms"].setdefault(z, {"tiles": 0, "bytes": 0, "max": 0, "max_tile": None, "codes": set()})
     zs["tiles"] += 1
     zs["bytes"] += size
@@ -575,7 +598,7 @@ def leak_findings(strings, forbidden):
     """Absolute paths, command-line options, user names and host names in the given strings."""
     patterns = [
         ("absolute path", re.compile(r"/(?:Users|home|private|var|tmp|Volumes|mnt|root|opt|srv|etc)/|(?<![\w.])~/|[A-Za-z]:\\")),
-        ("command-line option", re.compile(r"\s--?[A-Za-z][\w-]*")),
+        ("command-line option", re.compile(r"(?:^|\s)(?:--[A-Za-z][\w-]+|-[A-Za-z]\d*(?=\s|$))")),
         ("tool invocation", re.compile(r"\btippecanoe\s+-|\bpmtiles\s+convert\b")),
     ]
     out = []
@@ -656,6 +679,9 @@ def check_scan(scan, header, meta, spec, codes_with_geometry, all_codes, forbidd
     report["code_coverage"] = cov
     report["empty_geometry_codes"] = list(spec["units_empty_geometry"])
 
+    if scan["errors"]:
+        e = scan["errors"][0]
+        problems.append(f"fact 2: {len(scan['errors'])} tiles could not be decoded (first: tile {e[:3]}, {e[3]})")
     allowed = {spec["code_prop"], spec["name_prop"]}
     if scan["keys"] != allowed:
         problems.append(f"fact 2: tile attributes {sorted(scan['keys'])}, expected exactly {sorted(allowed)}")

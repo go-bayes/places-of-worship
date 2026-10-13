@@ -201,8 +201,27 @@ class TileReaderTest(unittest.TestCase):
 
     def test_scan_tile_reports_codes_keys_and_missing_codes(self):
         data = make_tile([{"GEOID": "01001", "NAME": "A"}, {"NAME": "B"}])
-        z, x, y, size, layers, codes, keys, no_code, feats = c._scan_tile((3, 1, 2, data, "GEOID"))
-        self.assertEqual((z, x, y, size, layers, codes, keys, no_code, feats), (3, 1, 2, len(data), ["census"], ["01001"], ["GEOID", "NAME"], 1, 2))
+        r = c._scan_tile((3, 1, 2, data, "GEOID"))
+        self.assertEqual(r, (3, 1, 2, len(data), ["census"], ["01001"], ["GEOID", "NAME"], 1, 2))
+
+    def test_corrupt_tiles_raise_value_error(self):
+        # a tag index past the value table, a truncated message and bad gzip
+        good = make_tile([{"GEOID": "01001"}], compress=False)
+        bad_tag = good.replace(_v(0) + _v(0), _v(0) + _v(9), 1)
+        self.assertNotEqual(bad_tag, good)
+        for raw in (bad_tag, good[:-3], b"\x1f\x8bnot gzip"):
+            with self.assertRaises(ValueError):
+                c.decode_tile(raw)
+
+    def test_a_corrupt_tile_is_a_validation_problem(self):
+        good = make_tile([{"GEOID": "01001"}], compress=False)
+        bad = good.replace(_v(0) + _v(0), _v(0) + _v(9), 1)
+        r = c._scan_tile((4, 0, 0, bad, "GEOID"))
+        self.assertEqual(len(r), 10)
+        scan = good_scan()
+        c.add_tile(scan, r, 4)
+        problems, _ = c.check_scan(scan, {"minzoom": 0, "maxzoom": 10}, good_meta(), SPEC, ["01001", "01003"], ["01001", "01003"], [])
+        self.assertTrue(any("could not be decoded" in p for p in problems), problems)
 
 
 class MetadataTest(unittest.TestCase):
@@ -255,6 +274,15 @@ class MetadataTest(unittest.TestCase):
         doc["tilestats"]["layers"][0]["attributes"][0]["values"] = ["01001"]
         m["json"] = json.dumps(doc)
         self.assertTrue(c.check_metadata(m, SPEC, []))
+
+    def test_missing_or_bad_json_entry_is_refused(self):
+        for src in ({}, {"json": "not json"}, {"json": None}):
+            with self.assertRaises(ValueError):
+                c.public_metadata(src, SPEC["name"], "GEOID", "NAME", "tippecanoe v2.79.0")
+
+    def test_option_pattern_spares_ordinary_text(self):
+        self.assertEqual(c.leak_findings(["north -Ray", "a - b", "x-y"], []), [])
+        self.assertTrue(c.leak_findings(["run -Z0 now", "a --force b", "-z10"], []))
 
     def test_wrong_name_is_refused(self):
         self.assertTrue(c.check_metadata(good_meta("census-us-county-2020-ffffffffffff"), SPEC, []))
