@@ -6218,7 +6218,13 @@ if (offerGo && !RC.disableBorderHandoff) {
   // own load and then for an idle slot (setTimeout where requestIdleCallback
   // is missing). every consumer null-checks handoffRegions, and arming ends
   // in updateBorderHandoff(), so a late arrival only delays the pill
+  // a page prerendered from the switcher (speculation rules) arms only when
+  // the visitor arrives, so an unseen prerender never fetches the manifest
   const armOffersWhenIdle = () => {
+    if (document.prerendering) {
+      document.addEventListener("prerenderingchange", armOffersWhenIdle, { once: true });
+      return;
+    }
     if ("requestIdleCallback" in window) window.requestIdleCallback(armOffers, { timeout: 5000 });
     else window.setTimeout(armOffers, 1);
   };

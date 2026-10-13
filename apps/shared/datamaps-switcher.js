@@ -156,9 +156,10 @@
     // source has loaded its tiles, not at window load, so the warm no longer
     // competes with the overview tiles; first idle also counts, for a page
     // whose overview layer is switched off
-    let prefetchReady = currentCode
+    const readyAtInit = currentCode
       ? window.__DATAMAP_FIRST_IDLE__ === true
       : window.__DATAMAP_OVERVIEW_LOADED__ === true || window.__DATAMAP_FIRST_IDLE__ === true;
+    let prefetchReady = false;
 
     function connectionAllowsPrefetch() {
       // explicit data-saving (navigator.connection.saveData) and very slow
@@ -343,6 +344,13 @@
     }
 
     function markPrefetchReady() {
+      // a page prerendered from another page's switcher (speculation rules
+      // below) may never be shown, so its own warming waits until the
+      // visitor actually arrives; the same function listener registers once
+      if (document.prerendering) {
+        document.addEventListener("prerenderingchange", markPrefetchReady, { once: true });
+        return;
+      }
       prefetchReady = true;
       flushPrefetchQueue();
       warmHome();
@@ -351,7 +359,7 @@
 
     document.addEventListener("datamap:first-idle", markPrefetchReady, { once: true });
     if (!currentCode) document.addEventListener("datamap:overview-loaded", markPrefetchReady, { once: true });
-    if (prefetchReady) { warmHome(); void warmNeighbours(); }
+    if (readyAtInit) markPrefetchReady();
     // border handoff uses the same network guard, idle gate, and page
     // budget; an offer on screen is strong intent, so the summary and
     // boundary warm alongside the page shell (budget-capped as ever)
@@ -422,6 +430,36 @@
       statusEl = panel.querySelector("#dm-status");
       filterEl.addEventListener("input", () => renderList(filterEl.value));
       filterEl.addEventListener("keydown", onFilterKeys);
+      addRowPrerenderRule();
+    }
+
+    // a country row the pointer rests on (about 200 ms) or presses is
+    // prerendered, so the click opens a page whose map has already started.
+    // the rule matches rows inside the list only: the current page's row is
+    // excluded, and the border-handoff pill sits outside the list by design
+    // (its href carries the live camera and it writes sessionStorage at
+    // click time). each prerender spends one basemap load (accepted by jb
+    // with item 6, 2026-10-13); chrome keeps at most two moderate prerenders.
+    // the script element is built by hand because rules set through
+    // innerHTML are never registered; browsers without the api skip it
+    function addRowPrerenderRule() {
+      if (!connectionAllowsPrefetch()) return;
+      if (!window.HTMLScriptElement || typeof HTMLScriptElement.supports !== "function" ||
+          !HTMLScriptElement.supports("speculationrules")) return;
+      const rules = document.createElement("script");
+      rules.type = "speculationrules";
+      rules.textContent = JSON.stringify({
+        prerender: [{
+          where: {
+            and: [
+              { selector_matches: "#dm-list a.dm-item" },
+              { not: { selector_matches: '[aria-current="page"]' } }
+            ]
+          },
+          eagerness: "moderate"
+        }]
+      });
+      document.head.appendChild(rules);
     }
 
     function visibleItems() {
