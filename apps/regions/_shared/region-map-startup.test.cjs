@@ -119,4 +119,144 @@ ok(/!connection\.saveData/.test(switcher) && /function warmHome\(\) \{\n\s*if \(
   "the home warm is skipped under saveData");
 ok(/__DATAMAP_OVERVIEW_LOADED__/.test(runtime) && /datamap:overview-loaded/.test(runtime), "the runtime announces the overview load");
 
-console.log(`region-map startup: ${checks} checks passed`);
+// 4. the census starts loading during script evaluation (2026-10-13 plan,
+// item 1): the default level's fetch is a top-level call placed after the
+// carried #d= view is read and after the columnar transport's constants, and
+// the default enable runs from map load rather than first idle
+const vm = require("node:vm");
+const settle = () => new Promise((r) => setImmediate(r));
+const pending = [];
+{
+  const startup = "\nif (HAS_CENSUS) void loadCensusData(censusState.level);\n";
+  const at = runtime.indexOf(startup);
+  ok(at > 0 && runtime.indexOf(startup, at + 1) === -1, "one top-level startup census fetch");
+  ok(at > runtime.indexOf("(function applyCarriedCensusView() {"), "the startup fetch follows the carried census view");
+  ok(at > runtime.indexOf("const SHA256_PATTERN = "), "the startup fetch follows the columnar transport constants");
+  ok(at > runtime.indexOf("// @columnar-transport-end"), "the startup fetch sits outside the columnar transport block");
+  ok(/function showClickHint\(message, options = \{\}\) \{\n\s*if \(!clickHint\) return;/.test(runtime), "the loading hint tolerates a missing element");
+  ok(!/map\.once\("idle", async \(\) => \{\n\s*if \(HAS_CENSUS\) await setCensusEnabled\(true\);/.test(runtime), "the default enable no longer waits for first idle");
+}
+{
+  // behavioural: run the real load handler against a stub map
+  const from = runtime.indexOf('map.on("load", () => {');
+  const body = runtime.slice(from, runtime.indexOf("\n});\n", from) + 5);
+  const make = (abroad) => {
+    const log = [];
+    const handlers = { load: [], idle: [] };
+    let resolveEnable = null;
+    const sandbox = {
+      HAS_CENSUS: true, lastFixWasAbroad: abroad,
+      map: { on: (name, fn) => handlers[name].push(fn), once: (name, fn) => handlers[name].push(fn) },
+      initBasemapSelect: () => {}, updateCounts: () => {},
+      ensureCustomLayers: () => {}, nudgeMap: () => {}, refreshMapLayers: () => {},
+      setCensusEnabled: (on) => { log.push(`census:${on}`); return new Promise((r) => { resolveEnable = r; }); },
+      foldCensusForAbroad: () => log.push("fold"),
+      CustomEvent: class { constructor(type) { this.type = type; } },
+      window: {},
+      document: { dispatchEvent: (event) => log.push(event.type) }
+    };
+    vm.createContext(sandbox);
+    vm.runInContext(body, sandbox);
+    return {
+      sandbox, log,
+      load: () => handlers.load.splice(0).forEach((fn) => fn()),
+      idle: () => handlers.idle.splice(0).forEach((fn) => fn()),
+      enabled: () => resolveEnable()
+    };
+  };
+  pending.push((async () => {
+    // the census completes before the first idle: first-idle waits for the idle
+    let t = make(false);
+    t.load();
+    assert.deepEqual(t.log, ["census:true"], "map load enables the census at once");
+    t.enabled();
+    await settle();
+    assert.deepEqual(t.log, ["census:true"], "first-idle waits for the map's first idle");
+    t.idle();
+    await settle();
+    assert.deepEqual(t.log, ["census:true", "datamap:first-idle"], "first-idle follows the idle once the census is in");
+    assert.equal(t.sandbox.window.__DATAMAP_FIRST_IDLE__, true, "the first-idle flag is set");
+    checks += 4;
+    // the first idle comes before the census completes: first-idle waits for the census
+    t = make(false);
+    t.load();
+    t.idle();
+    await settle();
+    assert.deepEqual(t.log, ["census:true"], "first-idle waits for the census load");
+    t.enabled();
+    await settle();
+    assert.deepEqual(t.log, ["census:true", "datamap:first-idle"], "first-idle follows the census load");
+    checks += 2;
+    // a foreign fix judged before load folds the census the default switched on
+    t = make(true);
+    t.load();
+    t.enabled();
+    await settle();
+    t.idle();
+    await settle();
+    assert.deepEqual(t.log, ["census:true", "fold", "datamap:first-idle"], "a foreign fix folds the census after the default enable");
+    checks += 1;
+  })());
+}
+
+// 5. dated places only when shown (2026-10-13 plan, item 5): a hidden tier
+// adds no source and fetches nothing; the first show fetches once and hands
+// the parsed product to the source, which also feeds the legend's counts
+{
+  const from = runtime.indexOf("let datedHandlersAttached = false;");
+  const body = runtime.slice(from, runtime.indexOf("// ── pulotu cultures layer"));
+  const make = () => {
+    const log = [];
+    const sources = {};
+    const layers = {};
+    let resolveFetch = null;
+    const sandbox = {
+      RC: { datedPlaces: "data/dated_places.geojson" },
+      DATED: { source: "s", layer: "l", futureLayer: "f", windowLayer: "w", areaLayer: "a", transitionLayer: "t", ringImage: "r" },
+      DATED_AMBER: "#d68910", religionColors: "#000", censusState: { year: 2000, enabled: true },
+      map: {
+        getSource: (id) => sources[id], getLayer: (id) => layers[id],
+        addSource: (id, def) => { sources[id] = def; log.push(`source:${typeof def.data}`); },
+        addLayer: (def) => { layers[def.id] = def; },
+        setFilter: () => {}, setLayoutProperty: (id, key, value) => { layers[id].visibility = value; },
+        hasImage: () => true, on: () => {}, once: () => {}
+      },
+      fetch: (url) => { log.push(`fetch:${url}`); return new Promise((r) => { resolveFetch = r; }); },
+      updateCensusLegend: () => log.push("legend"),
+      log
+    };
+    vm.createContext(sandbox);
+    vm.runInContext(`${body}\nthis.state = () => ({ datedStartYears, datedHasReviewed });`, sandbox);
+    const respond = (features) => resolveFetch({ ok: true, json: () => Promise.resolve({ type: "FeatureCollection", features }) });
+    return { sandbox, log, layers, respond };
+  };
+  pending.push((async () => {
+    const t = make();
+    t.sandbox.syncDatedPlaces(false, false);
+    assert.deepEqual(t.log, [], "a hidden dated tier adds no source and fetches nothing");
+    t.sandbox.syncDatedPlaces(true, false);
+    t.sandbox.syncDatedPlaces(true, true);
+    assert.deepEqual(t.log, ["fetch:data/dated_places.geojson"], "the first show fetches once, however often it syncs");
+    t.respond([
+      { properties: { start_year: 1990 } },
+      { properties: { start_year: 2010, source: "reviewed_occupancy" } },
+      { properties: {} }
+    ]);
+    await settle();
+    assert.deepEqual(t.log, ["fetch:data/dated_places.geojson", "source:object", "legend"], "the parsed product becomes the source's data");
+    assert.deepEqual([...t.sandbox.state().datedStartYears], [1990, 2010], "start years come from the same fetch");
+    assert.equal(t.sandbox.state().datedHasReviewed, true, "reviewed occupancy is detected from the same fetch");
+    assert.equal(t.layers.l.visibility, "visible", "the latest show applies when the fetch lands");
+    assert.equal(t.layers.f.visibility, "visible", "the future tier follows the latest request");
+    t.sandbox.syncDatedPlaces(false, false);
+    assert.equal(t.layers.l.visibility, "none", "an existing tier still hides");
+    checks += 8;
+  })());
+}
+
+Promise.all(pending).then(() => {
+  console.log(`region-map startup: ${checks} checks passed`);
+}).catch((err) => {
+  console.error(err);
+  process.exitCode = 1;
+});
