@@ -62,6 +62,36 @@ Stages: `thin` (per-zoom NDJSON parts and `thin-report.json`), `build` (tippecan
 
 Measured on the 2026-07-22 extract: the largest overview tile (Europe at zoom 4) is 604 KB against 52 MB in the July archive and 550 KB in the fraction sample, and the New Zealand zoom-4 tile is 5 KB holding all its places where the sample held 31; the whole overview tier is 10.6 MB.
 
+## Census boundary tiles (2026-10-13)
+
+`build_census_tiles.py` builds one PMTiles archive per census boundary file, so a country page can fetch the tiles under its window in place of the whole boundary GeoJSON (the US county layer is 737 KB gzip as GeoJSON and 126 KB of tiles at the desktop landing view). This is step 1 of the plan: the builder only. No page reads the archives, the Worker does not yet accept the `census-` names, and nothing is uploaded.
+
+The archive name is `census-<cc>-<slug>-<vintage>-<id12>`: a two-letter country code, a lower-case alphanumeric name of the boundary set (`county`, `sa2`), a four-digit vintage, and the first 12 hex digits of a digest over the boundary file's sha256, the build parameters and the tippecanoe version. Changed geometry, options or tippecanoe therefore give a new name, and a versioned key is never overwritten (see the Worker section below). The Worker pattern the next pull request adds is `census-[a-z]{2}-[a-z0-9]+-\d{4}-[0-9a-f]{12}`, and the builder refuses any part that would not match it.
+
+tippecanoe builds z0 to 10 with one layer, `census`, and two attributes, the level's `codeProp` and `nameProp`: `-Z0 -z10 --low-detail=10 --no-feature-limit --no-tile-size-limit --no-tiny-polygon-reduction --no-simplification-of-shared-nodes -y <codeProp> -y <nameProp>`. `--low-detail=10` gives 1,024 units per tile below the maximum zoom, and the maximum zoom keeps full detail. Before `pmtiles convert`, the build replaces tippecanoe's metadata table with a fixed public set (`name`, `description`, `version`, `type`, `format`, `minzoom`, `maxzoom`, `bounds`, `center`, `generator`, and `json` holding the layer definition and tilestats without value samples). tippecanoe's own metadata records its command line with the input and output paths, which must stay off R2. The replacement also makes a rebuild byte-identical in any work directory.
+
+Run on a build machine with tippecanoe and the `pmtiles` command installed (the tool declares its Python dependencies for `uv run`):
+
+```sh
+uv run tools/tiles-r2/build_census_tiles.py all --work <work> \
+  --boundary apps/regions/us/data/counties_2020.geojson --country us --slug county --vintage 2020 \
+  --code-prop GEOID --name-prop NAME --landing=-98.6,39.8,4 --level-id <levelId> \
+  --verify-rebuild --manifest-dir tools/tiles-r2/manifests --git-commit <hash>
+```
+
+Stages: `build` (checks the boundary, which must have a non-empty string code on every feature; derives the name; runs tippecanoe; replaces the metadata; converts; `--verify-rebuild` builds again in a fresh directory and compares digests), `validate` and `manifest`. `validate` decodes every tile and establishes six facts, exiting with code 5 on a problem and 6 when the build record no longer matches the files:
+
+1. every code with geometry is present at the landing zoom (`floor` of the landing zoom, capped at the maximum) and every zoom above it; codes whose every feature has empty geometry are listed, not counted as missing; coverage below the landing zoom is reported (at z0 to 2, units smaller than a pixel drop out);
+2. the attribute set is exactly the `codeProp` and `nameProp`, every feature carries the code, and the layer is `census`;
+3. the header, the metadata and the tiles all run from z0 to z10;
+4. the largest tile at each zoom is below 150,000 stored (gzip) bytes;
+5. no two codes share a feature-state key, the number MapLibre derives from an id (the number itself for a string that converts to a safe integer, so `0100` and `100` collide; otherwise a 32-bit murmur3 hash);
+6. the archive metadata holds only the public set and no absolute path, command-line option, tool invocation, user name or host name.
+
+The report also records the tiles and bytes under a 1440 x 900 and a 390 x 844 window at the landing view. `manifest` writes the data manifest (`dataset_family: census-tiles`, recording the boundary file and its sha256, the slug and level ids, the archive's bytes and sha256, the unit count, code coverage and largest tile per zoom, the landing-view tiles and the commands) and the report, only after validation passed and the archive and boundary digests still match; `--uploads` adds verified R2 objects as for the grid tiers. There is no upload stage. Upload follows the versioned-key refusal below.
+
+The tests (`test_build_census_tiles.py`) run in CI without tippecanoe: names and the Worker pattern, the metadata replacement, the six facts on synthetic scans, the feature-state key, the tile reader on hand-built tiles, and the manifest against the schema. An integration test builds a small boundary twice and compares the digests when tippecanoe, `pmtiles` and the `pmtiles` Python package are installed, and is skipped otherwise.
+
 ## Worker caching and tileset names
 
 The worker (`worker/src/index.js`) serves two kinds of tileset name.
