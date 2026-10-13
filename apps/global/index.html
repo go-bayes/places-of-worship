@@ -13,13 +13,20 @@
   <script src="config.public.js"></script>
   <script src="config.js"></script>
   <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <!-- timezone -> landing camera table, so the map can open on the visitor's
+       own country without a permission prompt (homeView below) -->
+  <script src="../shared/data/tz-home.js?v=20261013a"></script>
   <script>
     // global world map: homeless config — no countryCode, no census, no
     // geocode bias. path bases point one level shallower than country pages.
     window.REGION_CONFIG = {
       title: "Places of Worship | MapLibre Flat Prototype",
+      // the default camera, used when the visitor's timezone names no
+      // country in the table or a shared link carries its own #map=
       center: [174.7762, -41.2865],
       initialZoom: 4.5,
+      // open on the visitor's own country, named by the device timezone
+      homeView: "auto",
       keyPlacement: "top-centre",
       // the world map keeps drawing the NZ statistical-area outlines when
       // the view reaches Aotearoa (unchanged behaviour); every other page
@@ -60,7 +67,7 @@
     };
   </script>
   <script src="../shared/region-resolve.js?v=20260904a"></script>
-  <script src="../regions/_shared/region-map.js?v=20261007f"></script>
+  <script src="../regions/_shared/region-map.js?v=20261013a"></script>
   <script src="../shared/datamaps-switcher.js?v=20260717d"></script>
 </body>
 </html>

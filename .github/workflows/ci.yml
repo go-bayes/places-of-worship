@@ -80,6 +80,8 @@ jobs:
         run: python3 -m unittest scripts/test_build_vu_woodberry_import.py
       - name: country registry tests
         run: python3 -m unittest scripts/test_build_country_registry.py
+      - name: timezone home-camera table tests
+        run: python3 -m unittest scripts/test_build_tz_home.py
       - name: export materialiser tests
         run: python3 -m unittest scripts/test_materialise_convex_export.py
       - name: tiles v2 builder tests
