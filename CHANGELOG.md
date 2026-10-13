@@ -4,6 +4,7 @@
 
 ### 2026-10-13 (heap path moved to the private handover; legacy script removed)
 
+- `AGENTS.md`: the handover pointer names the newest private handover file (`handover-2026-10-13-close.md`) and notes that the conductor handover now carries the heap path.
 - `AGENTS.md` names the project heap by its Dropbox folder only; the absolute path on Joseph's machines and the note on the stale Dropbox mount moved to the private handover (Joseph, 2026-10-13).
 - Removed `archive/legacy/scripts/create_simplified_ta_geojson.py`, an early territorial-authority boundary experiment that nothing referenced and that carried two absolute working paths (Joseph, 2026-10-13). It remains in the Git history.
 

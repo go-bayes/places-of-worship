@@ -9,9 +9,9 @@
 
 - HANDOVER (read first when conducting a work sitting):
   `~/GIT/pow-research/handover/` in the private tier. Start with the
-  newest dated file (currently `handover-2026-08-22.md`); the earlier
+  newest dated file (currently `handover-2026-10-13-close.md`); the earlier
   `pow-conductor-handover.md` carries the routing rulings, the project
-  lead's blocking list, and the trap list, and the war log sits beside
+  lead's blocking list, the trap list and the heap path, and the war log sits beside
   it as `pow-next-arc-global-databases.md`. These files travel with the
   private repo, so every machine with a `pow-research` clone has them;
   Claude memory directories are per-machine and no longer canonical.
