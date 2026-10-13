@@ -45,6 +45,23 @@ Stages:
 
 The upload used the versioned-key refusal below. The client switch is made (2026-10-07, `apps/regions/_shared/region-map.js`): `CONFIG.tiles.places` is `places-v2-20260722`, the source keeps `minzoom 6`, the counts line reads "Places shown" below zoom 8 and until every drawn places tile is z8 or higher, "Total" after, and the `?v=` stamp of `region-map.js` is `20261007f` on every page. The RA layers (`apps/regions/nz/js/unvalidated-places.js`) keep the unversioned `places` and read it from zoom 8 only, where the bytes are identical.
 
+## Grid-thinned tiers (2026-10-13)
+
+The fraction samples above thinned every zoom by one global fraction chosen so that the densest European tile fit a byte cap. That removed about 98 percent of the places everywhere, including sparse countries where no thinning was needed (New Zealand's zoom-4 tile kept 31 of 1,596 places), and the maps appeared nearly empty. `build_tiles_grid.py` replaces both public tiers with grid thinning: at each zoom a place is drawn as a dot a few css pixels wide, so places closer together than a screen pixel are indistinguishable, and the build keeps one representative per screen-pixel cell, religion and denomination (`ZOOM_SPEC`: 2 css pixels of a 512-pixel tile at zooms 0 to 6, 1 pixel at zoom 7). The representative is the first place of its group in the sorted input, so the build is reproducible, and it carries `n`, the number of input places it stands for, when that exceeds one. Thinning is strongest where dots overlap and absent where they do not. Positions are kept to one pixel (`-d 9`) or half a pixel (`-d 10`); names and OSM ids are carried from zoom 7, where the places tier's hover and popups read them, and the lower zooms carry `religion`, `denomination`, `country_code` and `n`.
+
+The archives are `places-overview-v2-20260722-grid` (z0 to 5, layer `places_overview`) and `places-v2-20260722-grid` (z6 and 7 thinned, layer `places`; z8 to 18 rows of `places.mbtiles` inserted unchanged and verified by digest in both directions). Both names match the Worker's versioned pattern, so no Worker change was needed. Run on green in a detached session, beside the v2 extract it reuses:
+
+```sh
+mkdir -p ~/tiles-build-2026-10-13/work && cd ~/tiles-build-2026-10-13
+uv run <repo>/tools/tiles-r2/build_tiles_grid.py all --work work \
+  --slim ~/tiles-build-2026-10-07/v3/work/slim.ndjson --extract-work ~/tiles-build-2026-10-07/v3/work \
+  --source ~/tiles-archive-2026-07/tiles-migration/places.mbtiles --git-commit <hash>
+```
+
+Stages: `thin` (per-zoom NDJSON parts and `thin-report.json`), `build` (tippecanoe per zoom and `tile-join -pk` for the overview; tippecanoe z6 and z7 plus the SQLite copy and `pmtiles convert` for the places tier), `validate` (every z0 to 7 tile decoded: tile-proper points equal the thin report's kept count, the sum of `n` and the per-religion sums equal the input, attributes within the zoom's set, layer names, header zooms, and the largest tile under the tier's byte criterion; z8 to 18 compared with the source by digest; exit 5 on a problem, 6 on an unmet criterion) and `manifest` (two data manifests and the report, written only when validation passed and the archive digests still match; `--uploads` adds the verified R2 objects from the upload script's JSON lines). Nothing in it writes to R2. Upload with the versioned-key refusal below (one archive at a time, read back in full).
+
+Measured on the 2026-07-22 extract: the largest overview tile (Europe at zoom 4) is 604 KB against 52 MB in the July archive and 550 KB in the fraction sample, and the New Zealand zoom-4 tile is 5 KB holding all its places where the sample held 31; the whole overview tier is 10.6 MB.
+
 ## Worker caching and tileset names
 
 The worker (`worker/src/index.js`) serves two kinds of tileset name.

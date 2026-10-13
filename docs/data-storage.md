@@ -37,6 +37,18 @@ generation.
     places tile is z8 or higher, "Total" after);
     the RA layers keep the unversioned `places`, from zoom 8 only. The
     archives are served by the Worker that routes versioned names.
+  - Grid-thinned tiers (build 2026-10-13; manifests
+    `tools/tiles-r2/manifests/places-overview-v2-20260722-grid.manifest.json`
+    and `places-v2-20260722-grid.manifest.json`, validation reports beside
+    them): `places-overview-v2-20260722-grid` (z0 to 5) and
+    `places-v2-20260722-grid` (z6 and 7 thinned, z8 to 18 byte-identical to
+    `places`). Each zoom keeps one dot per screen-pixel cell, religion and
+    denomination, with `n` the number of places the dot stands for, so
+    thinning happens only where dots overlap and a sparse country keeps
+    every place; the fraction samples of 2026-10-07 drew about 2 percent of
+    the places everywhere. The public maps read these two archives
+    (`apps/regions/_shared/region-map.js`); the superseded fraction-sampled
+    archives stay in R2 under their immutable names.
   - Local copies of the archives are kept outside the repo; the worker
     README records the upload and rebuild procedure.
 - Site domain: `religionmap.org` is served by GitHub Pages (`CNAME` at the repo root) with DNS on Cloudflare. Keep the apex A/AAAA records and the `www` CNAME **DNS only** (grey cloud) for this configuration. Proxying these records interrupted GitHub Pages certificate renewal (`https_certificate.state = bad_authz`). An expired origin certificate can produce Cloudflare error 526 when strict origin-certificate validation is enabled. To recover, set the records to DNS only, remove and re-add the custom domain under Settings → Pages to restart issuance, wait for the state to read `approved`, then enable Enforce HTTPS. Inspect the certificate with `gh api repos/go-bayes/places-of-worship/pages --jq .https_certificate`. The repair completed on 2026-09-18: the replacement certificate is approved until 2026-12-17, HTTPS enforcement is enabled, and the HTTPS apex returns 200. The redirect domains (`placesmap.org`, `powmap.org`) and the tiles host are Worker custom domains on separate zones and remain unchanged.
