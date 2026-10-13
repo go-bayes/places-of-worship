@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### 2026-10-13 (switcher rows prerender the country page)
+
+- Item 6 of the country-scale loading plan (Joseph, 2026-10-13). The data-maps switcher (`apps/shared/datamaps-switcher.js`) adds a Speculation Rules `prerender` rule with `eagerness: "moderate"` when its panel is first built: a country row the pointer rests on for about 200 ms, or presses, is prerendered, so the click activates a page whose map has already started. The rule matches `#dm-list a.dm-item` and excludes the current page's row (`aria-current="page"`); the border-handoff pill sits outside the list, so its live-camera link and click-time `sessionStorage` write are never speculated. The rule respects the existing data-saver and 2g guard and is added only where `HTMLScriptElement.supports("speculationrules")` holds; other browsers keep the hover prefetch alone. Each prerender spends one basemap load, which Joseph accepted with item 6; Chrome runs at most two moderate prerenders at once.
+- A prerendered page holds its own speculative work until the visitor arrives: the switcher's home and neighbour warms (`markPrefetchReady`) and the runtime's border-handoff manifest fetch (`armOffersWhenIdle` in `apps/regions/_shared/region-map.js`) run only when `document.prerendering` is false, else after `prerenderingchange`. `region-map-startup.test.cjs` checks the rule and both gates.
+- Script stamps are unchanged on this branch; the `datamaps-switcher.js` and `region-map.js` stamps on the 104 pages are bumped when it is rebased after the census-at-startup change merges.
+
 ### 2026-10-13 (tile Worker allows the Cloudflare Pages origins)
 
 - `tools/tiles-r2/worker/src/index.js`: the CORS check uses `originAllowed`, which keeps the exact-match set and adds `https://places-of-worship.pages.dev` and `https://<label>.places-of-worship.pages.dev` previews (`<label>` is lower-case letters, digits and hyphens, with no dot) (the maintainer's decision of 2026-10-13). `http://` Pages origins and other suffixes stay refused; `worker/test/worker.test.mjs` covers both. The Worker deploy is a separate step after merge.

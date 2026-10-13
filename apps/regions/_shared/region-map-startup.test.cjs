@@ -254,6 +254,27 @@ const pending = [];
   })());
 }
 
+// 4. switcher rows are prerendered on moderate intent; a prerendered page
+// holds its own speculative work until activation (item 6, 2026-10-13)
+{
+  const rule = switcher.slice(switcher.indexOf("function addRowPrerenderRule() {"));
+  const ruleHead = rule.slice(0, rule.indexOf("document.head.appendChild(rules)"));
+  ok(/function buildPanel\(\) \{[\s\S]*?addRowPrerenderRule\(\);\n\s*\}/.test(switcher), "the panel adds the prerender rule when it is built");
+  ok(/if \(!connectionAllowsPrefetch\(\)\) return;/.test(ruleHead), "the rule honours the data-saver and 2g guard");
+  ok(/HTMLScriptElement\.supports\("speculationrules"\)/.test(ruleHead), "the rule is feature-detected");
+  ok(/document\.createElement\("script"\);\n\s*rules\.type = "speculationrules";/.test(ruleHead) && !/innerHTML/.test(ruleHead),
+    "the rule script is built as an element, never through innerHTML");
+  ok(/selector_matches: "#dm-list a\.dm-item"/.test(ruleHead), "the rule selects the list's rows only, so the handoff pill is outside it");
+  ok(/not: \{ selector_matches: '\[aria-current="page"\]' \}/.test(ruleHead), "the current page's row is excluded");
+  ok(/prerender: \[/.test(ruleHead) && /eagerness: "moderate"/.test(ruleHead), "a moderate prerender rule");
+  ok(/function markPrefetchReady\(\) \{[\s\S]*?if \(document\.prerendering\) \{\n\s*document\.addEventListener\("prerenderingchange", markPrefetchReady, \{ once: true \}\);\n\s*return;\n\s*\}\n\s*prefetchReady = true;/.test(switcher),
+    "warming, the home and neighbour warms included, waits for activation");
+  ok(/let prefetchReady = false;/.test(switcher) && /if \(readyAtInit\) markPrefetchReady\(\);/.test(switcher) &&
+    !/if \(prefetchReady\) \{ warmHome\(\)/.test(switcher), "a late script start passes through the same gate");
+  ok(/const armOffersWhenIdle = \(\) => \{\n\s*if \(document\.prerendering\) \{\n\s*document\.addEventListener\("prerenderingchange", armOffersWhenIdle, \{ once: true \}\);\n\s*return;/.test(arm),
+    "the handoff manifest waits for activation");
+}
+
 Promise.all(pending).then(() => {
   console.log(`region-map startup: ${checks} checks passed`);
 }).catch((err) => {
