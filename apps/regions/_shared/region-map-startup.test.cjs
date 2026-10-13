@@ -266,7 +266,11 @@ const pending = [];
     "the rule script is built as an element, never through innerHTML");
   ok(/selector_matches: "#dm-list a\.dm-item"/.test(ruleHead), "the rule selects the list's rows only, so the handoff pill is outside it");
   ok(/not: \{ selector_matches: '\[aria-current="page"\]' \}/.test(ruleHead), "the current page's row is excluded");
-  ok(/prerender: \[/.test(ruleHead) && /eagerness: "moderate"/.test(ruleHead), "a moderate prerender rule");
+  ok(/prerender: \[\{\n\s*source: "document",/.test(ruleHead) && /eagerness: "moderate"/.test(ruleHead), "a moderate document-source prerender rule");
+  ok(/document\.head\.appendChild\(rules\);\n\s*rowsPrerender = true;/.test(rule) &&
+    /if \(includePage\) queuePrefetch\(pageUrl, region\.html_bytes\);/.test(switcher) &&
+    (switcher.match(/prefetchCountry\([^)]*, true, true, !rowsPrerender\)/g) || []).length === 2,
+    "row hovers skip the page-shell prefetch the prerender already fetches, and keep the census pair");
   ok(/function markPrefetchReady\(\) \{[\s\S]*?if \(document\.prerendering\) \{\n\s*document\.addEventListener\("prerenderingchange", markPrefetchReady, \{ once: true \}\);\n\s*return;\n\s*\}\n\s*prefetchReady = true;/.test(switcher),
     "warming, the home and neighbour warms included, waits for activation");
   ok(/let prefetchReady = false;/.test(switcher) && /if \(readyAtInit\) markPrefetchReady\(\);/.test(switcher) &&
