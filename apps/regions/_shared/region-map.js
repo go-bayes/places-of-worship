@@ -87,8 +87,10 @@ const SCHEMA_BASE = RC.schemaBase || "../../../schemas/";
   const hasCensusConfig = Boolean(RC.censusLevels || RC.overlays);
   const censusChrome = hasCensusConfig ? `  <!-- census data control: options, colour key and time slider; front and
        centre (jb 2026-07-09) now the top strip has room. the pill is split:
-       the census-data half toggles the panel, the points half is the place-
-       dot mode select promoted out of the panel so it cannot be missed -->
+       the census-data half toggles the panel while the layer is on and turns
+       the layer back on while it is off (jb 2026-10-14); the points half is
+       the place-dot mode select promoted out of the panel so it cannot be
+       missed -->
   <div id="top-center-controls">
   <div id="census-wrap">
     <div id="data-pill" class="shell-pill">
@@ -3597,13 +3599,45 @@ function rememberCensusPanelDismissal(dismissed) {
   }
 }
 let censusPanelOpen = !censusPanelDismissalRemembered();
+// the census button follows the layer (jb 2026-10-14). while the layer is
+// off (the data maps pill's toggle, a failed load, a foreign location fix)
+// the panel stays hidden, because its selects, key and slider would describe
+// a layer the map is not drawing, and the button turns the layer back on
+// instead of folding the panel. censusPanelOpen and the phone's remembered
+// dismissal are left as they were, so the layer's return restores the panel
+// as the visitor left it. until the first enable or disable (the default
+// enable runs at map load) the button reads as on, so the panel does not
+// show the off state while the map loads
+let censusLayerSettled = false;
+function censusLayerOff() {
+  return HAS_CENSUS && censusLayerSettled && !censusState.enabled;
+}
 function syncCensusPanel() {
-  if (censusPanel) censusPanel.hidden = !censusPanelOpen;
-  if (censusToggle) {
-    censusToggle.setAttribute("aria-expanded", censusPanelOpen ? "true" : "false");
-    const caret = censusToggle.querySelector(".census-caret");
-    if (caret) caret.textContent = censusPanelOpen ? "▴" : "▾";
+  const off = censusLayerOff();
+  if (censusPanel) censusPanel.hidden = off || !censusPanelOpen;
+  if (!censusToggle) return;
+  const noun = RC.dataNoun || "Census";
+  const caret = censusToggle.querySelector(".census-caret");
+  const shortLabel = censusToggle.querySelector(".census-label-short");
+  censusToggle.classList.toggle("census-off", off);
+  if (off) {
+    // an action, not a disclosure: no expanded state and no controlled
+    // panel, and the accessible name keeps both visible labels
+    censusToggle.removeAttribute("aria-expanded");
+    censusToggle.removeAttribute("aria-controls");
+    censusToggle.setAttribute("aria-label", `Show ${noun} Data on the map`);
+    if (caret) caret.hidden = true;
+    if (shortLabel) shortLabel.textContent = `Show ${noun}`;
+    return;
   }
+  censusToggle.removeAttribute("aria-label");
+  censusToggle.setAttribute("aria-controls", "census-panel");
+  censusToggle.setAttribute("aria-expanded", censusPanelOpen ? "true" : "false");
+  if (caret) {
+    caret.hidden = false;
+    caret.textContent = censusPanelOpen ? "▴" : "▾";
+  }
+  if (shortLabel) shortLabel.textContent = noun;
 }
 
 function censusActive() {
@@ -5221,7 +5255,14 @@ function syncPlaceDotEra() {
   // overlay domain the place layers hide and the points row drops; the
   // user's chosen mode survives in placesDotState for religion's return
   const dotsBelong = activeDomainId === "religion";
-  const mode = !dotsBelong ? "off" : censusState.enabled ? effectivePointsMode() : "all";
+  // with the census off the period mode has no census year to bound it,
+  // so the dots show in full; "off" still applies, which keeps the pill's
+  // points select working while the layer is off (jb 2026-10-14). the
+  // chosen mode survives in placesDotState for the layer's return
+  const chosen = effectivePointsMode();
+  const mode = !dotsBelong ? "off"
+    : censusState.enabled ? chosen
+    : chosen === "off" ? "off" : "all";
   // period mode shows only the dated tier; all mode keeps the pre-modes
   // behaviour where the dated tier joins the faded snapshot on
   // historical years; off shows no dots at all
@@ -5232,7 +5273,9 @@ function syncPlaceDotEra() {
   try { syncPulotuCultures(); } catch (e) { /* cultures layer is optional */ }
   // the undated snapshot tiers hide entirely (not fade) in period and
   // off modes; hidden layers also drop out of click hit-testing
-  const hideSnapshot = censusState.enabled && mode !== "all";
+  // with the census off only the religion domain's own "off" hides them;
+  // other domains keep their census-off behaviour
+  const hideSnapshot = censusState.enabled ? mode !== "all" : dotsBelong && mode === "off";
   if (map.getLayer(LAYERS.overview)) {
     map.setLayoutProperty(LAYERS.overview, "visibility", hideSnapshot ? "none" : "visible");
   }
@@ -5288,6 +5331,9 @@ function syncPointsControl(mode) {
   // the points control speaks only for religion's place dots; other
   // overlay domains drop the row entirely (design §4)
   select.hidden = activeDomainId !== "religion";
+  // period needs the census year, so it is unavailable while the layer is off
+  const period = select.querySelector('option[value="period"]');
+  if (period) period.disabled = !censusState.enabled;
   if (select.value !== mode) select.value = mode;
   if (futureRow) futureRow.hidden = mode !== "period" || !RC.datedPlaces;
 }
@@ -5651,11 +5697,21 @@ function attachCensusTimeListeners() {
   }
 }
 
+// both census controls derive from censusState.enabled: the top pill's
+// census button and panel, and the data maps pill's dot when that pill is
+// the home toggle. every write of the flag is followed by this call
+function syncCensusChrome() {
+  syncCensusPanel();
+  if (offerMode === "toggle") renderOfferToggle();
+}
+
 async function setCensusEnabled(on) {
   // a censusless page has nothing to enable; returning before the state
   // write means the flag can never be left true with no store
   if (!HAS_CENSUS) return;
   censusState.enabled = on;
+  censusLayerSettled = true;
+  syncCensusChrome();
   if (on) {
     const data = await loadCensusData(censusState.level);
     // a second toggle can land while the load is in flight; the later
@@ -5664,6 +5720,7 @@ async function setCensusEnabled(on) {
     if (!data) {
       censusState.enabled = false;
       updateCensusLegend();
+      syncCensusChrome();
       return;
     }
     // a carried census view (#d=metric:year) can name a wave this
@@ -5690,7 +5747,7 @@ async function setCensusEnabled(on) {
   }
   // the data maps pill's home state is the census toggle; its dot
   // follows the layer wherever the enable/disable came from
-  if (offerMode === "toggle") renderOfferToggle();
+  syncCensusChrome();
 }
 
 // switching geography swaps the source and rejoins; each level's data
@@ -5790,6 +5847,14 @@ async function setOverlayDomain(domainId) {
 if (censusToggle) {
   syncCensusPanel();
   censusToggle.addEventListener("click", () => {
+    // with the layer off the button is the way back on; the panel returns
+    // in whatever open or folded state it was left
+    if (censusLayerOff()) {
+      Promise.resolve(setCensusEnabled(true))
+        .catch(() => {})
+        .finally(syncCensusChrome);
+      return;
+    }
     censusPanelOpen = !censusPanelOpen;
     rememberCensusPanelDismissal(!censusPanelOpen);
     syncCensusPanel();
@@ -6165,7 +6230,9 @@ function updateBorderHandoff() {
 // is in another country); the choropleth has nothing to paint there, so
 // the data layer reads off while its panels keep talking about a census
 // the viewport no longer shows. make the state honest: turn the census
-// off and fold its panel. only the crossing itself acts — a user who
+// off, which also hides its panel (syncCensusPanel) while leaving the
+// panel's open or folded state for the layer's return (jb 2026-10-14).
+// only the crossing itself acts — a user who
 // re-enables the layer while abroad (to browse this map's data from
 // afar) is not fought on every subsequent watch fix.
 let lastFixWasAbroad = false;
@@ -6175,8 +6242,6 @@ let latestFix = null;
 function foldCensusForAbroad() {
   if (!censusState.enabled) return;
   void setCensusEnabled(false);
-  censusPanelOpen = false;
-  syncCensusPanel();
 }
 function judgeFix() {
   if (!handoffRegions || !latestFix) return;

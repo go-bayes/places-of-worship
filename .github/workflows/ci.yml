@@ -52,6 +52,7 @@ jobs:
           node apps/regions/nz/js/portal-first-screen.test.cjs
           node apps/regions/_shared/theme.test.cjs
           node apps/regions/_shared/region-map-startup.test.cjs
+          node apps/regions/_shared/census-chrome.test.cjs
           node apps/regions/_shared/tiles-v2-client.test.cjs
           node apps/regions/_shared/denomination-filter.test.cjs
           node apps/regions/_shared/counts-label.test.cjs

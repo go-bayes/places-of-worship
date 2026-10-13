@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### 2026-10-14 (the census button follows the census layer)
+
+- Country maps (`apps/regions/_shared/region-map.js`): when the census layer is off, whether from the bottom data maps pill ("● NZ Data"), a failed load or a location fix abroad, the census panel is hidden and the census half of the top pill turns the layer back on instead of folding an empty panel. It reads "Show Census Data" (on phones "Show Census"), with no fold caret, no `aria-expanded` or `aria-controls`, and the accessible name "Show Census Data on the map" (the page's data noun replaces "Census"). The panel's open or folded state and the phone's remembered dismissal are kept, so the layer's return restores the panel as it was; a location fix abroad no longer folds the panel. With the layer on, the button folds and unfolds the panel as before (Joseph, 2026-10-14, option b). Before, the off state left "Show Census Data ▴" over a panel holding only the metric and geography selects, and the button could not bring the layer back (since 2026-07-16).
+- `syncCensusChrome` updates the top pill and the bottom pill's dot after every write of `censusState.enabled`, including the failed-load branch, so the two always agree.
+- The points select in the pill works while the census is off: "Points: off" hides the place dots and "Points: all" shows them; "Points: period" needs the census year, so it is unavailable until the layer returns, and a chosen period mode comes back with it.
+- Stamp `region-map.js?v=20261014a` on all 104 pages that load it (pinned in `tiles-v2-client.test.cjs`). The new `census-chrome.test.cjs`, run in CI, exercises the off and on states, the fold, the failed load, the abroad fold and the points modes against stubs.
+
 ### 2026-10-13 (switcher rows prerender the country page)
 
 - The data-maps switcher (`apps/shared/datamaps-switcher.js`) adds a Speculation Rules `prerender` rule (`source: "document"`, `eagerness: "moderate"`) when its panel is first built: a country row the pointer rests on for about 200 ms, or presses, is prerendered, so the click activates a page whose document, scripts and basemap style are already loaded. The rule matches `#dm-list a.dm-item` and excludes the current page's row (`aria-current="page"`); the border-handoff pill sits outside the list, so its live-camera link and click-time `sessionStorage` write are never speculated. The rule respects the existing data-saver and 2g guard and is added only where `HTMLScriptElement.supports("speculationrules")` holds. A prerender can spend one basemap load (the maintainer's decision of 2026-10-13); Chrome runs at most two moderate prerenders at once.

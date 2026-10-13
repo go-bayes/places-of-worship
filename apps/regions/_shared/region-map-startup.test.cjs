@@ -86,8 +86,9 @@ ok(/if \(lastFixWasAbroad\) foldCensusForAbroad\(\);/.test(runtime), "the defaul
   t.handler(foreign(-10));
   assert.deepEqual(t.log, [], "no judgement without a manifest");
   t.arrive();
-  assert.deepEqual(t.log, ["census:false", "panel"], "a foreign fix received before the manifest folds the census on arrival");
-  assert.equal(t.censusPanelOpen, false, "the census panel closes");
+  assert.deepEqual(t.log, ["census:false"], "a foreign fix received before the manifest turns the census off on arrival");
+  // the off layer hides the panel itself; its open state is kept for the return
+  assert.equal(t.censusPanelOpen, true, "the remembered panel state is left alone");
   checks += 3;
   // a home fix before the manifest changes nothing
   t = make();
@@ -108,7 +109,7 @@ ok(/if \(lastFixWasAbroad\) foldCensusForAbroad\(\);/.test(runtime), "the defaul
   t.handler(foreign(-10));
   t.censusState.enabled = true;
   t.handler(foreign(-11));
-  assert.deepEqual(t.log, ["census:false", "panel"], "only the crossing acts");
+  assert.deepEqual(t.log, ["census:false"], "only the crossing acts");
   checks += 1;
 }
 
