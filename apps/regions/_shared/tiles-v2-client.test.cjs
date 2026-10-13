@@ -24,8 +24,8 @@ assert.doesNotMatch(runtime, /tiles\.placemap\.org\/places-v2-20260722\/\{z\}/, 
 const placesSource = runtime.slice(runtime.indexOf("map.addSource(SOURCES.places"), runtime.indexOf("map.addLayer({\n    id: LAYERS.places"));
 assert.match(placesSource, /tiles: \[CONFIG\.tiles\.places\],\s+minzoom: 6,\s+maxzoom: 18,/);
 
-// the RA layers keep the unversioned places tier, read from zoom 8 only
-assert.match(unvalidated, /const PLACES_TILE_URL = "https:\/\/tiles\.placemap\.org\/places\/\{z\}\/\{x\}\/\{y\}";/);
+// the RA layers read the versioned grid places tier (immutable), from zoom 8 for a country with a set
+assert.match(unvalidated, /const PLACES_TILE_URL = `https:\/\/tiles\.placemap\.org\/places-v2-\$\{TILES_VERSION\}-grid\/\{z\}\/\{x\}\/\{y\}`;/);
 assert.match(unvalidated, /const PLACES_MIN_ZOOM = 8;/);
 
 // shared runtime: versioned grid-thinned overview, source maxzoom 5, layer still to 6
@@ -65,7 +65,7 @@ assert.doesNotMatch(unvalidated, /overviewKeep/);
 // one stamp per script: a script's stamp moves only when that script changes
 const stamps = {
     "region-map.js": "20261013a", // grid-thinned tiers, counts by n, representative-dot zoom, home view
-    "unvalidated-places.js": "20261013a", // grid-thinned overview as the fallback tier, representative-dot test
+    "unvalidated-places.js": "20261013b", // versioned grid places url; us, de and it use the grid tier from zoom 6
     "verification-map.js": "20261013a", // tap on a grid-thinned fallback dot zooms in
     "review-map.js": "20261013a", // tap on a grid-thinned fallback dot zooms in
 };

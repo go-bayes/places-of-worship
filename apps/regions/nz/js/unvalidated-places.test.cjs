@@ -29,7 +29,11 @@ assert.equal(mod.isRepresentativeDot({ name: "St Mary" }), false);
 assert.equal(mod.isRepresentativeDot({ "name:en": "St Mary" }), false);
 assert.equal(mod.isRepresentativeDot({ name_en: "St Mary" }), false);
 assert.equal(mod.isRepresentativeDot({ osm_id: 12, osm_type: "node" }), false);
-assert.match(mod.PLACES_TILE_URL, /\/places\//);
+// the places tier reads the versioned, immutable grid archive (layer name unchanged)
+assert.equal(mod.PLACES_TILE_URL, "https://tiles.placemap.org/places-v2-20260722-grid/{z}/{x}/{y}");
+assert.equal(mod.PLACES_TILE_LAYER, "places");
+// a grid-thinned zoom 6 or 7 dot of the places tier carries n, no name, no osm id
+assert.equal(mod.isRepresentativeDot({ religion: "christian", denomination: "catholic", n: 3 }), true);
 assert.equal(mod.RA_DOTS_MIN_NATIVE_ZOOM, 3);
 assert.equal(mod.RA_DOTS_MAX_NATIVE_ZOOM, 7);
 
@@ -39,7 +43,7 @@ assert.equal(mod.RA_DOTS_COUNTRY_CODES.size, 210);
 ["nz", "us", "de", "se", "fj", "gb", "id", "br"].forEach(code => assert.ok(mod.RA_DOTS_COUNTRY_CODES.has(code), code));
 ["zz", "uk", "aq", "xk"].forEach(code => assert.equal(mod.RA_DOTS_COUNTRY_CODES.has(code), false, code));
 assert.equal(mod.raDotsTileUrl("NZ"), "https://tiles.placemap.org/ra-dots-nz-20260722/{z}/{x}/{y}");
-assert.equal(mod.raDotsTileUrl(" us "), "https://tiles.placemap.org/ra-dots-us-20260722/{z}/{x}/{y}");
+assert.equal(mod.raDotsTileUrl(" se "), "https://tiles.placemap.org/ra-dots-se-20260722/{z}/{x}/{y}");
 assert.equal(mod.raDotsTileUrl("ZZ"), null);
 assert.equal(mod.raDotsTileUrl(""), null);
 assert.equal(mod.raDotsTileUrl(undefined), null);
@@ -89,6 +93,34 @@ assert.equal(nz.overview.opts.vectorTileLayerStyles.places_overview.fillColor, "
 assert.equal(nz.places.url, mod.PLACES_TILE_URL);
 assert.equal(nz.places.opts.minZoom, 8);
 assert.ok(made.every(entry => !/places-overview/.test(entry.url)));
+
+// an ordinary country with a set is unchanged: its own archive below zoom 8,
+// the places tier from 8
+assert.equal(mod.placesMinZoom("nz"), 8);
+assert.equal(nz.places.opts.minZoom, 8);
+assert.equal(nz.overview.opts.maxZoom, 7);
+
+// the three largest sets (us, de, it) have no ra-dots url: the overview draws
+// to zoom 5 and the grid places tier takes over at zoom 6
+assert.deepEqual([...mod.GRID_PLACES_COUNTRY_CODES].sort(), ["de", "it", "us"]);
+assert.equal(mod.GRID_PLACES_MIN_ZOOM, 6);
+["us", "DE", " it "].forEach(code => {
+    assert.equal(mod.raDotsTileUrl(code), null, code);
+    made.length = 0;
+    const large = mod.createLayers(fakeL, { countryCode: code });
+    assert.equal(large.overview.url, mod.OVERVIEW_TILE_URL, code);
+    assert.equal(large.overview.opts.maxNativeZoom, 5, code);
+    assert.equal(large.overview.opts.maxZoom, 5, code);
+    assert.equal("minZoom" in large.overview.opts, false, code);
+    assert.equal(large.zoomFloor, null, code);
+    assert.equal(large.places.url, mod.PLACES_TILE_URL, code);
+    assert.equal(large.places.opts.minZoom, 6, code);
+    assert.equal(large.places.opts.maxNativeZoom, 18, code);
+    assert.ok(made.every(entry => !/ra-dots/.test(entry.url)), code);
+});
+// japan, the next largest set, stays on its own archive
+assert.equal(mod.raDotsTileUrl("jp"), "https://tiles.placemap.org/ra-dots-jp-20260722/{z}/{x}/{y}");
+assert.equal(mod.placesMinZoom("jp"), 8);
 
 // a country with no archive (and ZZ) falls back to the overview sample
 ["ZZ", "aq", "xx"].forEach(code => {

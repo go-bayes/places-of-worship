@@ -7,7 +7,12 @@
 // below zoom 8 the page country's own ra-dots archive (every place of that
 // country, native zooms 3 to 7; a country with no archive, and the world
 // view, falls back to the public map's grid-thinned overview, native zoom 5,
-// stretched to 7) and the full places tier from zoom 8 in. the ra-dots and
+// stretched to 7) and the places tier from zoom 8 in, read from the versioned
+// grid archive (byte-identical to the live tier from zoom 8, immutable for a
+// year). the three countries whose ra-dots archive exceeds 10 MB (us, de, it;
+// jb 2026-10-13, item 7, revising the 2026-09-04 "every place shows" ruling
+// for them only) use the overview below zoom 6 and the grid places tier at
+// zooms 6 and 7, so their tiles stay small. the ra-dots and
 // places tiers carry osm_id, osm_type, name and country_code where the place
 // has them, so a click on any opens the same popup and revise card. the
 // grid-thinned overview draws one dot per screen-pixel cell and carries no
@@ -22,8 +27,7 @@
 (function () {
     const COLOUR = "#f59e0b";
     const HALO = "#ffffff";
-    const PLACES_TILE_URL = "https://tiles.placemap.org/places/{z}/{x}/{y}";
-    const PLACES_TILE_LAYER = "places";
+        const PLACES_TILE_LAYER = "places";
     const PLACES_TILE_MAX_NATIVE_ZOOM = 18;
     // tiles v2 (build 20260722). the overview is the grid-thinned tier of
     // 2026-10-13 (one dot per screen-pixel cell, religion and denomination,
@@ -32,6 +36,7 @@
     // place of one country, z3 to 7, in the same layer name. both are
     // immutable versioned names served by the tiles worker
     const TILES_VERSION = "20260722";
+    const PLACES_TILE_URL = `https://tiles.placemap.org/places-v2-${TILES_VERSION}-grid/{z}/{x}/{y}`;
     const OVERVIEW_TILE_URL = `https://tiles.placemap.org/places-overview-v2-${TILES_VERSION}-grid/{z}/{x}/{y}`;
     const OVERVIEW_TILE_LAYER = "places_overview";
     const OVERVIEW_TILE_MAX_NATIVE_ZOOM = 5;
@@ -56,14 +61,27 @@
     // the full tier takes over from here; below it the country's ra-dots
     // archive (or the overview sample) draws
     const PLACES_MIN_ZOOM = 8;
+    // countries whose ra-dots archive exceeds 10 MB in the tiles manifest
+    // (us 34.6 MB, de 11.8 MB, it 10.7 MB; the next is jp at 9.3 MB). they
+    // have no ra-dots url and take the grid places tier from a lower zoom.
+    // update with TILES_VERSION
+    const GRID_PLACES_COUNTRY_CODES = new Set(["us", "de", "it"]);
+    const GRID_PLACES_MIN_ZOOM = 6;
     const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
     // the ra-dots archive url for a two-letter country code, or null when the
     // build has none for it
     function raDotsTileUrl(countryCode) {
         const code = String(countryCode || "").trim().toLowerCase();
-        if (!RA_DOTS_COUNTRY_CODES.has(code)) return null;
+        if (GRID_PLACES_COUNTRY_CODES.has(code) || !RA_DOTS_COUNTRY_CODES.has(code)) return null;
         return `https://tiles.placemap.org/ra-dots-${code}-${TILES_VERSION}/{z}/{x}/{y}`;
+    }
+
+    // the zoom at which the places tier takes over from the overview for a
+    // country code
+    function placesMinZoom(countryCode) {
+        const code = String(countryCode || "").trim().toLowerCase();
+        return GRID_PLACES_COUNTRY_CODES.has(code) ? GRID_PLACES_MIN_ZOOM : PLACES_MIN_ZOOM;
     }
 
     function dotStyle(zoomed) {
@@ -93,6 +111,7 @@
     function createLayers(L, options = {}) {
         if (!L || !L.vectorGrid || typeof L.vectorGrid.protobuf !== "function") return null;
         const raUrl = raDotsTileUrl(options.countryCode);
+        const placesFrom = placesMinZoom(options.countryCode);
         const common = {
             interactive: false,
             // the overlay pane sits above every basemap tile and below the
@@ -108,7 +127,7 @@
             ? L.vectorGrid.protobuf(raUrl, {
                 ...common,
                 vectorTileLayerStyles: { [RA_DOTS_TILE_LAYER]: dotStyle(false) },
-                maxZoom: PLACES_MIN_ZOOM - 1,
+                maxZoom: placesFrom - 1,
                 // the zoom floor: leaflet's minNativeZoom alone only clamps
                 // requests to z3, so a zoom-out to z1 still fetched the
                 // country's z3 tiles for every wrapped world copy (168
@@ -123,13 +142,13 @@
             : L.vectorGrid.protobuf(OVERVIEW_TILE_URL, {
                 ...common,
                 vectorTileLayerStyles: { [OVERVIEW_TILE_LAYER]: dotStyle(false) },
-                maxZoom: PLACES_MIN_ZOOM - 1,
+                maxZoom: placesFrom - 1,
                 maxNativeZoom: OVERVIEW_TILE_MAX_NATIVE_ZOOM,
             });
         const places = L.vectorGrid.protobuf(PLACES_TILE_URL, {
             ...common,
             vectorTileLayerStyles: { [PLACES_TILE_LAYER]: dotStyle(true) },
-            minZoom: PLACES_MIN_ZOOM,
+            minZoom: placesFrom,
             maxNativeZoom: PLACES_TILE_MAX_NATIVE_ZOOM,
         });
         // zoomFloor: the lowest zoom the map may reach while these layers are
@@ -271,6 +290,9 @@
         RA_DOTS_MAX_NATIVE_ZOOM,
         RA_DOTS_COUNTRY_CODES,
         PLACES_MIN_ZOOM,
+        GRID_PLACES_COUNTRY_CODES,
+        GRID_PLACES_MIN_ZOOM,
+        placesMinZoom,
         applyZoomFloor,
         releaseZoomFloor,
         raDotsTileUrl,

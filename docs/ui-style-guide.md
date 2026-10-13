@@ -130,7 +130,9 @@ places across Europe, 7,500 of them in Sweden, and iOS Safari killed the
 page on the first pinch, 2026-09-22); below zoom 8 only the portal's own
 country's `ra-dots-<cc>-20260722` archive loads (a country with no archive
 gets the grid-thinned `places-overview-v2-20260722-grid` overview, whose
-dots name nothing and zoom the map in when tapped), and from zoom 8 every
+dots name nothing and zoom the map in when tapped; the United States,
+Germany and Italy, whose archives exceed 10 MB, use that overview below zoom
+6 and the thinned places tier at zooms 6 and 7), and from zoom 8 every
 place draws, a neighbour's dot with its own portal named in the popup.
 
 Under the zoom buttons at the top left of the map are two icon buttons of

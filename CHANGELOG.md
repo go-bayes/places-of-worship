@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### 2026-10-13 (portal dots: versioned grid places tier; grid tier from zoom 6 for the United States, Germany and Italy)
+
+- RA and review portals (`apps/regions/nz/js/unvalidated-places.js`, stamp `20261013b` on `unvalidated-places.js` in `verification.html` and `review.html`): the places tier from zoom 8 reads the versioned `places-v2-20260722-grid` archive instead of the unversioned `places` path. The 13 October build validated zooms 8 to 18 byte-identical, and the tile Worker serves the versioned name as immutable for a year, where the unversioned path carried a one-hour cache.
+- Ruling (Joseph, 2026-10-13, item 7 of the country-speed plan, revising the 2026-09-04 "every place shows" ruling for these three countries only): the countries whose `ra-dots` archive exceeds 10 MB in the tiles manifest (`us` 34.6 MB, `de` 11.8 MB, `it` 10.7 MB; Japan, the next, is 9.3 MB and stays on its set) have no `ra-dots` layer. The grid-thinned overview draws to zoom 5 and the grid places tier at zooms 6 and 7, so the US portal's zoom-4 tile is about 259 KB rather than 3.04 MB. Dots there that stand for several places carry no name or OSM id, so `isRepresentativeDot` makes a tap zoom in; every place is still represented, and every other country is unchanged. The countries are the named set `GRID_PLACES_COUNTRY_CODES`, and the zoom is `GRID_PLACES_MIN_ZOOM`.
+- RA guide (`apps/guides/ra.html`) and UI style guide (`docs/ui-style-guide.md`) describe the three-country exception.
+
 ### 2026-10-13 (Cloudflare Pages response headers)
 
 - Added `_headers` at the repository root and `docs/development/cloudflare-pages-hosting.md` for the planned move from GitHub Pages to Cloudflare Pages (the maintainer's decision of 2026-10-13). Pages, scripts, styles, data and `/schemas/*` keep revalidation (`max-age=600, stale-while-revalidate=86400`); `/apps/vendor/*` is `immutable` for a year. Cloudflare joins duplicate headers from overlapping rules, so the revalidating rules name the top-level paths instead of a catch-all `/*`. The `?v=` stamps keep their role. Nothing changes until the maintainer connects the project in the dashboard; the document records the steps and the rollback.
