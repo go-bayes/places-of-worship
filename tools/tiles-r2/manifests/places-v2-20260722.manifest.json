@@ -104,13 +104,13 @@
   "source": {
     "provider": "places.mbtiles, the live places tileset built 2026-07-22 (z8-18 copied from it); slim.ndjson of tiles-v2-20260722 (z6-7 input)",
     "licence": null,
-    "local_cache_hint": "green:/Users/joseph/tiles-archive-2026-07/tiles-migration/places.mbtiles",
+    "local_cache_hint": "build-cache:places.mbtiles",
     "citation": "places.mbtiles sha256 eaa55c50971381cacca36ea08b1d4a68628b77d47a7156848cebb6a13eb2c406, 4373762048 bytes; slim.ndjson sha256 aceb33558462ba5eb12543cc392acee6b86751ae3f4d5293adc69b90cf5509be, 2072349 features, extracted by build_tiles_v2.py (see the tiles-v2-20260722 manifests). This is a new dataset family member, not a replacement of the overview manifest.",
     "licence_todo": "licence and attribution of the 701,349 places without an OSM key are not established; publication gate (serving the archive) stays open until documented. Exposure of this archive (2026-10-07, PR #181 review): it adds no place and no attribute to what the live places tier already serves publicly at tiles.placemap.org/places (z6-18, the same OSM attribution string on the source); z8-18 are byte-identical to it, and z6-7 are a sample of the same input places with six of its attributes. The archive is therefore not a new publication of data. Clearance of the 701,349 unkeyed places is not given by this note and remains with Joseph; licence_status stays needs_review"
   },
   "durable_files": [
     {
-      "uri": "green:/Users/joseph/tiles-build-2026-10-07/places-v2/out/places-v2-20260722.pmtiles",
+      "uri": "build-cache:places-v2-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 2797462496,
@@ -118,7 +118,7 @@
       "feature_count": null,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "public places tier, z6-18, layer places. z6-7 are a fraction-preserving sample of the 2,072,349 input places, six attributes, capped at 500,000 bytes per tile; z8-18 are byte-identical to the live places tileset. commands: tippecanoe -Z6 -z7 --drop-fraction-as-needed -M 500000 -r1 -l places -o <work>/parts/z6-7.mbtiles <slim.ndjson> (only z6 is kept); tippecanoe -Z7 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places -o <work>/parts/z7.mbtiles <z7-sample.ndjson> (seeded religion-stratified sample, fraction in the parameters);sqlite insert into tiles select ... from places.mbtiles.tiles where zoom_level >= 8 (read-only attach); pmtiles convert places-v2-20260722.mbtiles places-v2-20260722.pmtiles. Location is a machine-local build output on green, a cache and not a durable store; the durable copy is the R2 object recorded in the next entry."
+      "notes": "public places tier, z6-18, layer places. z6-7 are a fraction-preserving sample of the 2,072,349 input places, six attributes, capped at 500,000 bytes per tile; z8-18 are byte-identical to the live places tileset. commands: tippecanoe -Z6 -z7 --drop-fraction-as-needed -M 500000 -r1 -l places -o <work>/parts/z6-7.mbtiles <slim.ndjson> (only z6 is kept); tippecanoe -Z7 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places -o <work>/parts/z7.mbtiles <z7-sample.ndjson> (seeded religion-stratified sample, fraction in the parameters);sqlite insert into tiles select ... from places.mbtiles.tiles where zoom_level >= 8 (read-only attach); pmtiles convert places-v2-20260722.mbtiles places-v2-20260722.pmtiles. Location is a machine-local build output on the build machine, a cache and not a durable store; the durable copy is the R2 object recorded in the next entry."
     },
     {
       "uri": "r2://pow-tiles/places-v2-20260722.pmtiles",
@@ -129,7 +129,7 @@
       "feature_count": null,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "durable copy of the archive in the previous entry: Cloudflare R2 bucket pow-tiles, key places-v2-20260722.pmtiles. R2 etag \"37827c3b17691ee2e5153580a4ecc1ce-21\" (multipart, 21 parts). Uploaded 2026-10-07 from green through the S3 multipart API (tools/tiles-r2/upload_r2.py). Verification: the full object was downloaded back and its SHA-256 equals that of the built file (the sha256 above). Served by the tile Worker (version 771b20dc) at https://tiles.placemap.org/places-v2-20260722/{z}/{x}/{y}. The versioned key is immutable; a rebuild takes a new name. licence_status stays needs_review (see source.licence_todo); downstream_status stays staged because the licence of the places without an OSM key is not cleared, although the archive is served."
+      "notes": "durable copy of the archive in the previous entry: Cloudflare R2 bucket pow-tiles, key places-v2-20260722.pmtiles. R2 etag \"37827c3b17691ee2e5153580a4ecc1ce-21\" (multipart, 21 parts). Uploaded 2026-10-07 from the build machine through the S3 multipart API (tools/tiles-r2/upload_r2.py). Verification: the full object was downloaded back and its SHA-256 equals that of the built file (the sha256 above). Served by the tile Worker (version 771b20dc) at https://tiles.placemap.org/places-v2-20260722/{z}/{x}/{y}. The versioned key is immutable; a rebuild takes a new name. licence_status stays needs_review (see source.licence_todo); downstream_status stays staged because the licence of the places without an OSM key is not cleared, although the archive is served."
     }
   ],
   "validation": {

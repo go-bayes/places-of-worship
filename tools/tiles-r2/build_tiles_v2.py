@@ -1241,7 +1241,7 @@ def cmd_manifest(a):
             "feature_count": feats if feats is not None else stats["total"] if is_ov else None,
             "privacy": "public", "licence_status": "needs_review",
             "notes": note + (" feature_count is the input count; the tiles hold a sample." if is_ov else "")
-                     + " Location is a machine-local build output on green, a cache and not a durable store;"
+                     + " Location is a machine-local build output on the build machine, a cache and not a durable store;"
                      " the durable copy is the R2 object, once uploaded and recorded.",
         })
     params = {

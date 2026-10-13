@@ -2,7 +2,7 @@
 
 > **Superseded** by `validation-report-tiles-v2-20260722-0ce3c532af1e.md`. This report describes the first build (strict `country_code` routing, overview from one tippecanoe run), which was never uploaded. Its findings on completeness, coverage, the z1 religion share and the tile-size range were repaired in the second build.
 
-Built on green on 2026-10-07 by `tools/tiles-r2/build_tiles_v2.py` (commit 384b0dd6), tippecanoe v2.79.0. Source: `places.mbtiles` in `~/tiles-archive-2026-07/tiles-migration/` on green, opened read-only (tilestats count 2,072,349). Sizes are stored (gzip) tile bytes; 1 KB is 1,000 bytes.
+Built on the build machine on 2026-10-07 by `tools/tiles-r2/build_tiles_v2.py` (commit 384b0dd6), tippecanoe v2.79.0. Source: `places.mbtiles` in `<archive>/` on the build machine, opened read-only (tilestats count 2,072,349). Sizes are stored (gzip) tile bytes; 1 KB is 1,000 bytes.
 
 ## Verdict
 
@@ -109,7 +109,7 @@ Largest tile over all archives by zoom: z3 3,130,652, z4 3,007,573, z5 1,855,061
 
 The brief says to leave places with an empty or invalid `country_code` out of every per-country archive and to report them. The count is not marginal. In the source, `country_code`, `osm_id` and `osm_type` exist only on the 1,371,000 OSM-keyed features, so the strict build covers 33 countries and drops a third of the places, including all of Indonesia (87,083) and Brazil (56,093). Archives without them would remove those dots from the RA map, which departs from the 2026-09-04 ruling that every unreviewed place shows as an amber dot. These places cannot be revised by OSM key today either, because the live tiles carry no `osm_id` for them.
 
-The alternative was built and validated in a second directory (`--country-fallback`, routing by the `country` attribute; the properties written are unchanged, so these features still lack `country_code`, `osm_id` and `osm_type`). It gives 210 archives, 2,072,349 points found at z7 (exact in every archive), none left out, and 166,731,279 bytes in total (strict: 129,763,364). Largest tiles by zoom equal the strict build's (z3 3,130,652; z7 544,505 bytes). Its archives are on green in `~/tiles-build-2026-10-07/work-fallback/out/` and are not in the manifest; `country-fallback-summary-tiles-v2-20260722.json` has its per-country counts and tile sizes. Which routing to ship is Joseph's decision; the manifest lists the strict set.
+The alternative was built and validated in a second directory (`--country-fallback`, routing by the `country` attribute; the properties written are unchanged, so these features still lack `country_code`, `osm_id` and `osm_type`). It gives 210 archives, 2,072,349 points found at z7 (exact in every archive), none left out, and 166,731,279 bytes in total (strict: 129,763,364). Largest tiles by zoom equal the strict build's (z3 3,130,652; z7 544,505 bytes). Its archives are on the build machine in `<work-fallback>/out/` and are not in the manifest; `country-fallback-summary-tiles-v2-20260722.json` has its per-country counts and tile sizes. Which routing to ship is Joseph's decision; the manifest lists the strict set.
 
 ## 5. Reproducing
 

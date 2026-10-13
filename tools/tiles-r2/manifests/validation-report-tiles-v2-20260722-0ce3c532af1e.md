@@ -1,8 +1,8 @@
 # Tiles v2 validation report (input built 20260722, version 0ce3c532af1e)
 
-Built on green on 2026-10-07 by `tools/tiles-r2/build_tiles_v2.py` (build commit 46f07ce8; audit and validation re-run on the unchanged archives with commit d260e9cd, see the note below), tippecanoe v2.79.0. Source: `places.mbtiles` in `~/tiles-archive-2026-07/tiles-migration/` on green, opened read-only (4,373,762,048 bytes, sha256 `eaa55c50971381cacca36ea08b1d4a68628b77d47a7156848cebb6a13eb2c406`, tilestats count 2,072,349). Sizes are stored (gzip) tile bytes; 1 KB is 1,000 bytes. This report supersedes `validation-report-tiles-v2-20260722.md`, which described the first build (strict country routing, overview built in one tippecanoe run); the first build was never uploaded.
+Built on the build machine on 2026-10-07 by `tools/tiles-r2/build_tiles_v2.py` (build commit 46f07ce8; audit and validation re-run on the unchanged archives with commit d260e9cd, see the note below), tippecanoe v2.79.0. Source: `places.mbtiles` in `<archive>/` on the build machine, opened read-only (4,373,762,048 bytes, sha256 `eaa55c50971381cacca36ea08b1d4a68628b77d47a7156848cebb6a13eb2c406`, tilestats count 2,072,349). Sizes are stored (gzip) tile bytes; 1 KB is 1,000 bytes. This report supersedes `validation-report-tiles-v2-20260722.md`, which described the first build (strict country routing, overview built in one tippecanoe run); the first build was never uploaded.
 
-**Re-run of 2026-10-07 (review round two).** The extraction audit and the RA validation were repaired and re-run against the existing archives in `~/tiles-build-2026-10-07/v3/work/out/` on green, without rebuilding. All 211 archive SHA-256 digests and sizes equal the earlier manifest (172,259,334 bytes) and the version digest is unchanged. The repaired checks are described in sections 1 and 3; the earlier audit paired coordinates only within attribute groups of one occurrence and the earlier validation reconciled counts only at z7.
+**Re-run of 2026-10-07 (review round two).** The extraction audit and the RA validation were repaired and re-run against the existing archives in `<work>/out/` on the build machine, without rebuilding. All 211 archive SHA-256 digests and sizes equal the earlier manifest (172,259,334 bytes) and the version digest is unchanged. The repaired checks are described in sections 1 and 3; the earlier audit paired coordinates only within attribute groups of one occurrence and the earlier validation reconciled counts only at z7.
 
 Machine-readable record: `validation-report-tiles-v2-20260722-0ce3c532af1e.json`, with the manifest `tiles-v2-20260722-0ce3c532af1e.manifest.json` and `input-stats-tiles-v2-20260722-0ce3c532af1e.json`.
 
@@ -103,7 +103,7 @@ The remaining 198 archives are in the machine-readable report.
 
 - **Licence.** `source.licence` is null and `licence_status` is `needs_review` for every file: the licence and attribution of the 701,349 places without an OSM key are not established. Uploading the archives to R2 does not serve them; the Worker does not route versioned names until it is deployed, and serving is a separate decision.
 - **Source lineage.** The source archive's byte hash, size and metadata are recorded. Its original dataset links and retrieval date are not in the archive and are not known.
-- **Durable copies.** The build output on green is a machine-local cache. The durable copy is the R2 object, recorded in the manifest after upload and verification.
+- **Durable copies.** The build output on the build machine is a machine-local cache. The durable copy is the R2 object, recorded in the manifest after upload and verification.
 
 ## 5. Reproducing
 

@@ -3,10 +3,10 @@
 #
 #   tmux new -d -s places-v2 'caffeinate -is tools/tiles-r2/run_places_v2.sh'
 #
-# Environment (defaults suit green):
-#   WORK      build directory                      ~/tiles-build-2026-10-07/places-v2
-#   SOURCE    places.mbtiles, opened read-only     ~/tiles-archive-2026-07/tiles-migration/places.mbtiles
-#   EXTRACT   work directory of the v2 extract     ~/tiles-build-2026-10-07/v3/work (holds slim.ndjson, input-stats.json, extract-report.json)
+# Environment (ARCHIVE is required; the other defaults are relative to the current directory):
+#   WORK      build directory                      <work-places>/
+#   SOURCE    places.mbtiles, opened read-only     <archive>/places.mbtiles
+#   EXTRACT   work directory of the v2 extract     <work>/ (holds slim.ndjson, input-stats.json, extract-report.json)
 #   STAGES    space-separated stages               "build validate measure manifest"
 #   PAGES     JSON list of the pages at z6-7       <this folder>/manifests/landing-pages-z6-7.json
 #   MANIFESTS manifest directory                   <WORK>/manifests
@@ -16,10 +16,10 @@
 set -uo pipefail
 export PATH=/opt/homebrew/bin:$PATH
 here="$(cd "$(dirname "$0")" && pwd)"
-ARCHIVE="${HOME}/tiles-archive-2026-07/tiles-migration"
-WORK="${WORK:-${HOME}/tiles-build-2026-10-07/places-v2}"
+ARCHIVE="${ARCHIVE:?set ARCHIVE to the folder holding places.mbtiles}"
+WORK="${WORK:-${PWD}/places-v2}"
 SOURCE="${SOURCE:-${ARCHIVE}/places.mbtiles}"
-EXTRACT="${EXTRACT:-${HOME}/tiles-build-2026-10-07/v3/work}"
+EXTRACT="${EXTRACT:?set EXTRACT to the work directory of the v2 extract}"
 STAGES="${STAGES:-build validate measure manifest}"
 PAGES="${PAGES:-${here}/manifests/landing-pages-z6-7.json}"
 MANIFESTS="${MANIFESTS:-${WORK}/manifests}"

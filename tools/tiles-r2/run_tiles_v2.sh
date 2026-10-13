@@ -3,10 +3,10 @@
 #
 #   tmux new -d -s tiles-v2 'caffeinate -is tools/tiles-r2/run_tiles_v2.sh'
 #
-# Environment (defaults suit green):
-#   WORK      build directory                     ~/tiles-build-2026-10-07/work
-#   SOURCE    places.mbtiles, opened read-only    ~/tiles-archive-2026-07/tiles-migration/places.mbtiles
-#   LIVE      live places-overview.pmtiles        ~/tiles-archive-2026-07/tiles-migration/places-overview.pmtiles
+# Environment (ARCHIVE is required; the other defaults are relative to the current directory):
+#   WORK      build directory                     <work>/
+#   SOURCE    places.mbtiles, opened read-only    <archive>/places.mbtiles
+#   LIVE      live places-overview.pmtiles        <archive>/places-overview.pmtiles
 #   STAGES    space-separated stages              "extract build validate manifest"
 #   EXTRA     extra flags, e.g. --country-routing strict, --supersedes <manifest_id>
 #   MANIFESTS manifest directory                  <this folder>/manifests
@@ -15,8 +15,8 @@
 set -uo pipefail
 export PATH=/opt/homebrew/bin:$PATH
 here="$(cd "$(dirname "$0")" && pwd)"
-ARCHIVE="${HOME}/tiles-archive-2026-07/tiles-migration"
-WORK="${WORK:-${HOME}/tiles-build-2026-10-07/work}"
+ARCHIVE="${ARCHIVE:?set ARCHIVE to the folder holding places.mbtiles}"
+WORK="${WORK:-${PWD}/work}"
 SOURCE="${SOURCE:-${ARCHIVE}/places.mbtiles}"
 LIVE="${LIVE:-${ARCHIVE}/places-overview.pmtiles}"
 STAGES="${STAGES:-extract build validate manifest}"

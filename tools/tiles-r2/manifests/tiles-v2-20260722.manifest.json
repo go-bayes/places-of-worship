@@ -63,12 +63,12 @@
   "source": {
     "provider": "places.mbtiles, the live places tileset built 2026-07-22 (all_places.ndjson, no longer retained)",
     "licence": null,
-    "local_cache_hint": "green:~/tiles-archive-2026-07/tiles-migration/places.mbtiles",
+    "local_cache_hint": "build-cache:places.mbtiles",
     "citation": "tippecanoe tilestats count 2072349 features, layer places; generator_options: tippecanoe -Z0 -z18 --drop-densest-as-needed --extend-zooms-if-still-dropping --no-feature-limit --no-tile-size-limit -r1 -l places; decoded at z10: 2072346 features in tile proper plus 3 far-edge points no tile held = 2072349; 701349 features carry no osm_id, osm_type or id; 5 osm keys occur twice at identical coordinates in the source"
   },
   "durable_files": [
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/places-overview-v2-20260722.pmtiles",
+      "uri": "build-cache:places-overview-v2-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 5442685,
@@ -76,10 +76,10 @@
       "feature_count": 2072349,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "public overview tier, z0-5, layer places_overview, fraction-preserving sample (tippecanoe -Z0 -z5 --drop-fraction-as-needed -M 250000 -l places_overview); command: tippecanoe -Z0 -z5 --drop-fraction-as-needed -M 250000 -l places_overview -P --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp -o /Users/joseph/tiles-build-2026-10-07/work/out/places-overview-v2-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/slim.ndjson feature_count is the input count; the tiles hold a sample."
+      "notes": "public overview tier, z0-5, layer places_overview, fraction-preserving sample (tippecanoe -Z0 -z5 --drop-fraction-as-needed -M 250000 -l places_overview); command: tippecanoe -Z0 -z5 --drop-fraction-as-needed -M 250000 -l places_overview -P --force --temporary-directory <work>/tmp -o <work>/out/places-overview-v2-20260722.pmtiles <work>/slim.ndjson feature_count is the input count; the tiles hold a sample."
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-at-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-at-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 2608189,
@@ -87,10 +87,10 @@
       "feature_count": 31112,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/at -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-at-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/at.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/at -o <work>/out/ra-dots-at-20260722.pmtiles <work>/country-ndjson/at.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-au-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-au-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 1402868,
@@ -98,10 +98,10 @@
       "feature_count": 12342,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/au -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-au-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/au.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/au -o <work>/out/ra-dots-au-20260722.pmtiles <work>/country-ndjson/au.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-be-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-be-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 1393511,
@@ -109,10 +109,10 @@
       "feature_count": 15305,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/be -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-be-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/be.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/be -o <work>/out/ra-dots-be-20260722.pmtiles <work>/country-ndjson/be.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-cz-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-cz-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 2174315,
@@ -120,10 +120,10 @@
       "feature_count": 28104,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/cz -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-cz-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/cz.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/cz -o <work>/out/ra-dots-cz-20260722.pmtiles <work>/country-ndjson/cz.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-de-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-de-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 11848205,
@@ -131,10 +131,10 @@
       "feature_count": 135242,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/de -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-de-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/de.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/de -o <work>/out/ra-dots-de-20260722.pmtiles <work>/country-ndjson/de.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-dk-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-dk-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 433393,
@@ -142,10 +142,10 @@
       "feature_count": 4081,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/dk -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-dk-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/dk.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/dk -o <work>/out/ra-dots-dk-20260722.pmtiles <work>/country-ndjson/dk.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-es-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-es-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 5512764,
@@ -153,10 +153,10 @@
       "feature_count": 53491,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/es -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-es-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/es.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/es -o <work>/out/ra-dots-es-20260722.pmtiles <work>/country-ndjson/es.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-fi-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-fi-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 503050,
@@ -164,10 +164,10 @@
       "feature_count": 4270,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/fi -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-fi-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/fi.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/fi -o <work>/out/ra-dots-fi-20260722.pmtiles <work>/country-ndjson/fi.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-fr-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-fr-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 7950113,
@@ -175,10 +175,10 @@
       "feature_count": 90281,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/fr -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-fr-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/fr.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/fr -o <work>/out/ra-dots-fr-20260722.pmtiles <work>/country-ndjson/fr.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-gb-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-gb-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 6267267,
@@ -186,10 +186,10 @@
       "feature_count": 56957,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/gb -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-gb-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/gb.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/gb -o <work>/out/ra-dots-gb-20260722.pmtiles <work>/country-ndjson/gb.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-gh-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-gh-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 645325,
@@ -197,10 +197,10 @@
       "feature_count": 4683,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/gh -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-gh-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/gh.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/gh -o <work>/out/ra-dots-gh-20260722.pmtiles <work>/country-ndjson/gh.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-gr-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-gr-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 2830022,
@@ -208,10 +208,10 @@
       "feature_count": 32256,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/gr -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-gr-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/gr.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/gr -o <work>/out/ra-dots-gr-20260722.pmtiles <work>/country-ndjson/gr.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-hr-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-hr-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 692226,
@@ -219,10 +219,10 @@
       "feature_count": 7487,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/hr -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-hr-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/hr.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/hr -o <work>/out/ra-dots-hr-20260722.pmtiles <work>/country-ndjson/hr.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-hu-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-hu-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 1083605,
@@ -230,10 +230,10 @@
       "feature_count": 12713,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/hu -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-hu-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/hu.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/hu -o <work>/out/ra-dots-hu-20260722.pmtiles <work>/country-ndjson/hu.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-in-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-in-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 7540787,
@@ -241,10 +241,10 @@
       "feature_count": 73869,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/in -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-in-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/in.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/in -o <work>/out/ra-dots-in-20260722.pmtiles <work>/country-ndjson/in.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-it-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-it-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 10693422,
@@ -252,10 +252,10 @@
       "feature_count": 119721,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/it -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-it-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/it.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/it -o <work>/out/ra-dots-it-20260722.pmtiles <work>/country-ndjson/it.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-jp-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-jp-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 9268670,
@@ -263,10 +263,10 @@
       "feature_count": 108829,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/jp -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-jp-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/jp.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/jp -o <work>/out/ra-dots-jp-20260722.pmtiles <work>/country-ndjson/jp.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-ke-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-ke-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 559525,
@@ -274,10 +274,10 @@
       "feature_count": 4502,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/ke -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-ke-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/ke.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/ke -o <work>/out/ra-dots-ke-20260722.pmtiles <work>/country-ndjson/ke.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-kr-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-kr-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 1357641,
@@ -285,10 +285,10 @@
       "feature_count": 15152,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/kr -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-kr-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/kr.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/kr -o <work>/out/ra-dots-kr-20260722.pmtiles <work>/country-ndjson/kr.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-my-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-my-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 1264944,
@@ -296,10 +296,10 @@
       "feature_count": 12648,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/my -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-my-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/my.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/my -o <work>/out/ra-dots-my-20260722.pmtiles <work>/country-ndjson/my.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-ng-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-ng-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 718812,
@@ -307,10 +307,10 @@
       "feature_count": 7107,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/ng -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-ng-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/ng.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/ng -o <work>/out/ra-dots-ng-20260722.pmtiles <work>/country-ndjson/ng.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-nl-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-nl-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 975632,
@@ -318,10 +318,10 @@
       "feature_count": 9892,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/nl -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-nl-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/nl.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/nl -o <work>/out/ra-dots-nl-20260722.pmtiles <work>/country-ndjson/nl.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-no-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-no-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 479239,
@@ -329,10 +329,10 @@
       "feature_count": 3999,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/no -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-no-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/no.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/no -o <work>/out/ra-dots-no-20260722.pmtiles <work>/country-ndjson/no.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-nz-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-nz-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 578232,
@@ -340,10 +340,10 @@
       "feature_count": 4718,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/nz -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-nz-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/nz.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/nz -o <work>/out/ra-dots-nz-20260722.pmtiles <work>/country-ndjson/nz.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-ph-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-ph-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 2389419,
@@ -351,10 +351,10 @@
       "feature_count": 23376,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/ph -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-ph-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/ph.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/ph -o <work>/out/ra-dots-ph-20260722.pmtiles <work>/country-ndjson/ph.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-pl-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-pl-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 6753828,
@@ -362,10 +362,10 @@
       "feature_count": 80529,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/pl -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-pl-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/pl.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/pl -o <work>/out/ra-dots-pl-20260722.pmtiles <work>/country-ndjson/pl.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-ro-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-ro-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 2033780,
@@ -373,10 +373,10 @@
       "feature_count": 21999,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/ro -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-ro-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/ro.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/ro -o <work>/out/ra-dots-ro-20260722.pmtiles <work>/country-ndjson/ro.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-se-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-se-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 741589,
@@ -384,10 +384,10 @@
       "feature_count": 7167,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/se -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-se-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/se.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/se -o <work>/out/ra-dots-se-20260722.pmtiles <work>/country-ndjson/se.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-th-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-th-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 2558867,
@@ -395,10 +395,10 @@
       "feature_count": 29013,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/th -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-th-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/th.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/th -o <work>/out/ra-dots-th-20260722.pmtiles <work>/country-ndjson/th.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-ug-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-ug-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 494182,
@@ -406,10 +406,10 @@
       "feature_count": 4078,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/ug -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-ug-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/ug.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/ug -o <work>/out/ra-dots-ug-20260722.pmtiles <work>/country-ndjson/ug.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-us-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-us-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 34581897,
@@ -417,10 +417,10 @@
       "feature_count": 342655,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/us -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-us-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/us.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/us -o <work>/out/ra-dots-us-20260722.pmtiles <work>/country-ndjson/us.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-vn-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-vn-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 866641,
@@ -428,10 +428,10 @@
       "feature_count": 8444,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/vn -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-vn-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/vn.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/vn -o <work>/out/ra-dots-vn-20260722.pmtiles <work>/country-ndjson/vn.ndjson"
     },
     {
-      "uri": "green:~/tiles-build-2026-10-07/out/ra-dots-za-20260722.pmtiles",
+      "uri": "build-cache:ra-dots-za-20260722.pmtiles",
       "storage_provider": "other",
       "format": "pmtiles",
       "bytes": 561404,
@@ -439,7 +439,7 @@
       "feature_count": 4978,
       "privacy": "public",
       "licence_status": "needs_review",
-      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory /Users/joseph/tiles-build-2026-10-07/work/tmp/za -o /Users/joseph/tiles-build-2026-10-07/work/out/ra-dots-za-20260722.pmtiles /Users/joseph/tiles-build-2026-10-07/work/country-ndjson/za.ndjson"
+      "notes": "RA dots for one country, z3-7, every point kept; command: tippecanoe -Z3 -z7 -r1 --no-feature-limit --no-tile-size-limit -l places_overview --force --temporary-directory <work>/tmp/za -o <work>/out/ra-dots-za-20260722.pmtiles <work>/country-ndjson/za.ndjson"
     }
   ],
   "validation": {

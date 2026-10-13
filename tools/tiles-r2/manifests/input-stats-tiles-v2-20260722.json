@@ -1220,7 +1220,7 @@
   },
   "excluded_from_every_ra_archive": 701349,
   "extract": {
-    "source": "/Users/joseph/tiles-archive-2026-07/tiles-migration/places.mbtiles",
+    "source": "<archive>/places.mbtiles",
     "zoom": 10,
     "tiles": 54232,
     "rows_decoded_in_tile_or_edge": 2073286,

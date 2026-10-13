@@ -4579,7 +4579,7 @@
   "slim_sha256_note": "sha256 of slim.ndjson, the overview input; the file is sorted, so the digest is stable",
   "extract": {
     "source": {
-      "path": "/Users/joseph/tiles-archive-2026-07/tiles-migration/places.mbtiles",
+      "path": "<archive>/places.mbtiles",
       "bytes": 4373762048,
       "sha256": "eaa55c50971381cacca36ea08b1d4a68628b77d47a7156848cebb6a13eb2c406",
       "metadata": {

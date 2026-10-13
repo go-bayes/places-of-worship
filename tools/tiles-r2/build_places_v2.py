@@ -915,7 +915,7 @@ def cmd_manifest(a):
         "notes": ("public places tier, z6-18, layer places. z6-7 are a fraction-preserving sample of the 2,072,349 input places, "
                   "six attributes, capped at 500,000 bytes per tile; z8-18 are byte-identical to the live places tileset. "
                   f"commands: {_cmd_text(info['commands']['z6'])}; {_cmd_text(info['commands']['z7'])} (seeded religion-stratified sample, fraction in the parameters);{info['commands']['copy']}; {info['commands']['convert']}. "
-                  "Location is a machine-local build output on green, a cache and not a durable store; the durable copy is the R2 object, once uploaded and recorded.")}]
+                  "Location is a machine-local build output on the build machine, a cache and not a durable store; the durable copy is the R2 object, once uploaded and recorded.")}]
     ident = hashlib.sha256(json.dumps({"files": [(pm.name, files[0]["sha256"])], "params": params}, sort_keys=True).encode()).hexdigest()
     manifest = {
         "$schema": "../../../schemas/data-manifest.schema.json",
