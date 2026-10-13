@@ -230,21 +230,55 @@ if (!window.maplibregl) {
 
 const showStatus = () => {};
 
+// landing camera. a page may open on the visitor's own country
+// (REGION_CONFIG.homeView === "auto", the global map): the device timezone
+// names a country without any permission prompt, and the generated table
+// window.POW_TZ_HOME (apps/shared/data/tz-home.js, loaded by the page)
+// gives that country's camera. a shared link's #map= camera still wins,
+// because maplibre applies the hash after the constructor camera; an
+// unknown zone, a missing table or a page without the key keeps the page's
+// own centre and zoom. the dm-home session key is the switcher's qa override
+function homeCamera() {
+  if (RC.homeView !== "auto") return null;
+  const table = window.POW_TZ_HOME;
+  if (!table || !table.zones || !table.cameras) return null;
+  let code = null;
+  try {
+    const forced = window.sessionStorage.getItem("dm-home");
+    if (forced && table.cameras[forced]) code = forced;
+  } catch (err) {}
+  if (!code) {
+    try {
+      const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      code = zone ? table.zones[zone] || null : null;
+    } catch (err) {}
+  }
+  const camera = code ? table.cameras[code] : null;
+  if (!Array.isArray(camera) || camera.length !== 3 || !camera.every(Number.isFinite)) return null;
+  return { center: [camera[0], camera[1]], zoom: camera[2], code };
+}
+const HOME_CAMERA = homeCamera();
+
 const CONFIG = {
-  // camera opens on the country's own centre and zoom (config)
-  center: RC.center,
-  initialZoom: RC.initialZoom,
+  // camera opens on the country's own centre and zoom (config), or on the
+  // visitor's country where the page asks for it
+  center: HOME_CAMERA ? HOME_CAMERA.center : RC.center,
+  initialZoom: HOME_CAMERA ? HOME_CAMERA.zoom : RC.initialZoom,
   streetViewMinZoom: 14,
   streetViewFailDelayMs: 1200,
   mobileMinZoom: 3.0,
   desktopMinZoom: 1.5,
   tiles: {
-    // tiles v2: a slim, fraction-preserving sample of every place, z0 to 5
-    // (immutable versioned name; the archive is served by the tiles worker)
-    overview: "https://tiles.placemap.org/places-overview-v2-20260722/{z}/{x}/{y}",
-    // places tier v2: z8 to 18 byte-identical to the live places tier; z6 and
-    // z7 are a slim, fraction-preserving sample (tiles of at most 500 KB)
-    places: "https://tiles.placemap.org/places-v2-20260722/{z}/{x}/{y}",
+    // grid-thinned overview, z0 to 5: one dot per screen-pixel cell, religion
+    // and denomination, so every place that would be visible on its own is
+    // drawn and only overlapping dots are merged; a dot's `n` is the number of
+    // places it stands for (immutable versioned name, served by the tiles
+    // worker). the 2026-10-07 fraction sample drew about 2 percent of the
+    // places everywhere and made sparse countries look empty
+    overview: "https://tiles.placemap.org/places-overview-v2-20260722-grid/{z}/{x}/{y}",
+    // places tier: z8 to 18 byte-identical to the live places tier; z6 and z7
+    // grid-thinned the same way (z6 without names, z7 with them)
+    places: "https://tiles.placemap.org/places-v2-20260722-grid/{z}/{x}/{y}",
     // optional overlay: a page names a polygon tileset in its config
     // (REGION_CONFIG.polygonsTileset) or the source is never added and no
     // tile is requested. configuration, not country identity
@@ -1268,12 +1302,27 @@ function clampPopupToViewport(popup, padding = 12) {
   popup.setOffset([base.x + dx, base.y + dy]);
 }
 
+// a grid-thinned dot (the overview tier, and the places tier at zoom 6)
+// stands for every place in its screen-pixel cell and carries no name or osm
+// id, so a popup could name nothing. a tap on one zooms the map in on it, to
+// where the places tier draws named places
+function isRepresentativeDot(props) {
+  return !(props && (props.name || props["name:en"] || props.name_en || props.osm_id));
+}
+function zoomToRepresentative(coords) {
+  map.flyTo({ center: coords, zoom: Math.max(9, Math.floor(map.getZoom()) + 2), speed: 1.2, curve: 1.4 });
+}
+
 async function handlePlaceFeatureClick(feature, fallbackLngLat) {
   if (!feature) return;
   const props = feature?.properties || {};
   const name = props["name:en"] || props.name_en || props.name || "Loading place…";
   const coords = coordsFromFeature(feature, fallbackLngLat);
   if (!coords) return;
+  if (isRepresentativeDot(props)) {
+    zoomToRepresentative(coords);
+    return;
+  }
   // hold or release the guide line on this place (no-op without a
   // measuring point); survives popup close by design
   focusPlace(props, coords);
@@ -1607,6 +1656,10 @@ function addOverviewLayer() {
       const coords = coordsFromFeature(feature, e.lngLat);
       if (!coords) return;
       markMobileFeatureClickHandled();
+      if (isRepresentativeDot(props)) {
+        zoomToRepresentative(coords);
+        return;
+      }
       focusPlace(props, coords);
       showMobileStreetViewPopup(name, coords, feature.id);
     });
@@ -1667,9 +1720,17 @@ function addPlacesLayer() {
     const feature = e.features && e.features[0];
     if (!feature) return;
     const props = feature.properties || {};
-    const name = props["name:en"] || props.name_en || props.name || "Unnamed";
     const coords = coordsFromFeature(feature, e.lngLat);
     if (!coords) return;
+    if (isRepresentativeDot(props)) {
+      // a zoom-6 dot names nothing; say what a tap does
+      hoverPopup
+        .setLngLat(coords)
+        .setHTML('<div style="font-weight:600;color:inherit;">Zoom in for places</div>')
+        .addTo(map);
+      return;
+    }
+    const name = props["name:en"] || props.name_en || props.name || "Unnamed";
     hoverPopup
       .setLngLat(coords)
       .setHTML(`<div style="font-weight:600;color:inherit;">${name}</div>`)
@@ -1842,6 +1903,10 @@ if (IS_MOBILE) {
     const coords = coordsFromFeature(feature, e.lngLat);
     if (!coords) return;
     markMobileFeatureClickHandled();
+    if (isRepresentativeDot(props)) {
+      zoomToRepresentative(coords);
+      return;
+    }
     focusPlace(props, coords);
     showMobileStreetViewPopup(name, coords, feature.id);
   });
@@ -3062,9 +3127,11 @@ if (countsToggle) {
   });
 }
 
-// below zoom 8 the counts come from a sample (the overview below zoom 6, the
-// places tier's z6 and z7 sample from 6), a fraction of the places, so the
-// line says "places shown" and not a total
+// below zoom 8 the dots are grid-thinned representatives (the overview below
+// zoom 6, the places tier's z6 and z7 from 6): the panel sums the places each
+// dot stands for, but dots repeated in neighbouring tile buffers and the
+// thinning itself keep it an approximation, so the line says "places shown"
+// and not a total
 const SAMPLED_BELOW_ZOOM = 8;
 // the camera zoom alone cannot say which tiles supplied the rendered features:
 // while a z8 tile loads or fails, the map keeps drawing the sampled z6 or z7
@@ -3186,10 +3253,14 @@ function updateCounts() {
     const counts = { ...EMPTY_COUNTS };
     features.forEach((feature) => {
       const key = feature.properties?.religion || "unknown";
+      // a grid-thinned dot counts the places it stands for (its `n`), so the
+      // panel counts places, not dots
+      const n = Number(feature.properties?.n);
+      const places = Number.isFinite(n) && n > 1 ? n : 1;
       if (counts[key] === undefined) {
-        counts.unknown += 1;
+        counts.unknown += places;
       } else {
-        counts[key] += 1;
+        counts[key] += places;
       }
     });
     const sampled = zoom < 6

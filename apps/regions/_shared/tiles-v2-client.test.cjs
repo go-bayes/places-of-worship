@@ -16,10 +16,11 @@ const verification = read("regions", "nz", "js", "verification-map.js");
 const review = read("regions", "nz", "js", "review-map.js");
 const unvalidated = read("regions", "nz", "js", "unvalidated-places.js");
 
-// shared runtime: versioned places tier (z6-7 sampled, z8-18 identical to the
-// live tier), source minzoom still 6 so nothing below z6 is requested
-assert.match(runtime, /places: "https:\/\/tiles\.placemap\.org\/places-v2-20260722\/\{z\}\/\{x\}\/\{y\}"/);
+// shared runtime: versioned places tier (z6-7 grid-thinned, z8-18 identical to
+// the live tier), source minzoom still 6 so nothing below z6 is requested
+assert.match(runtime, /places: "https:\/\/tiles\.placemap\.org\/places-v2-20260722-grid\/\{z\}\/\{x\}\/\{y\}"/);
 assert.doesNotMatch(runtime, /tiles\.placemap\.org\/places\/\{z\}/);
+assert.doesNotMatch(runtime, /tiles\.placemap\.org\/places-v2-20260722\/\{z\}/, "the fraction-sampled places tier is retired");
 const placesSource = runtime.slice(runtime.indexOf("map.addSource(SOURCES.places"), runtime.indexOf("map.addLayer({\n    id: LAYERS.places"));
 assert.match(placesSource, /tiles: \[CONFIG\.tiles\.places\],\s+minzoom: 6,\s+maxzoom: 18,/);
 
@@ -27,9 +28,14 @@ assert.match(placesSource, /tiles: \[CONFIG\.tiles\.places\],\s+minzoom: 6,\s+ma
 assert.match(unvalidated, /const PLACES_TILE_URL = "https:\/\/tiles\.placemap\.org\/places\/\{z\}\/\{x\}\/\{y\}";/);
 assert.match(unvalidated, /const PLACES_MIN_ZOOM = 8;/);
 
-// shared runtime: versioned overview, source maxzoom 5, layer still to 6
-assert.match(runtime, /overview: "https:\/\/tiles\.placemap\.org\/places-overview-v2-20260722\/\{z\}\/\{x\}\/\{y\}"/);
+// shared runtime: versioned grid-thinned overview, source maxzoom 5, layer still to 6
+assert.match(runtime, /overview: "https:\/\/tiles\.placemap\.org\/places-overview-v2-20260722-grid\/\{z\}\/\{x\}\/\{y\}"/);
 assert.doesNotMatch(runtime, /tiles\.placemap\.org\/places-overview\//);
+assert.doesNotMatch(runtime, /tiles\.placemap\.org\/places-overview-v2-20260722\/\{z\}/, "the fraction-sampled overview is retired");
+// a grid-thinned dot counts the places it stands for, and a tap on one zooms in
+assert.match(runtime, /const places = Number\.isFinite\(n\) && n > 1 \? n : 1;/);
+assert.match(runtime, /function isRepresentativeDot\(props\)/);
+assert.match(runtime, /if \(isRepresentativeDot\(props\)\) \{\n\s*zoomToRepresentative\(coords\);\n\s*return;/);
 const source = runtime.slice(runtime.indexOf("map.addSource(SOURCES.overview"), runtime.indexOf("map.addLayer({\n    id: LAYERS.overview"));
 assert.match(source, /maxzoom: 5,/);
 const layer = runtime.slice(runtime.indexOf("id: LAYERS.overview,"), runtime.indexOf("if (IS_MOBILE && !overviewMobileHandlerAttached)"));
@@ -58,7 +64,7 @@ assert.doesNotMatch(unvalidated, /overviewKeep/);
 // every html page that loads a changed script carries the bumped query
 // one stamp per script: a script's stamp moves only when that script changes
 const stamps = {
-    "region-map.js": "20261007f", // places-v2 tier, counts label from unsampled tiles, denomination filter, malformed #f=
+    "region-map.js": "20261013a", // grid-thinned tiers, counts by n, representative-dot zoom, home view
     "unvalidated-places.js": "20261007b", // zoom floor for ra-dots layers
     "verification-map.js": "20261007b", // one-round-trip landing
     "review-map.js": "20261007a",
