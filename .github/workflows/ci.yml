@@ -87,11 +87,9 @@ jobs:
         run: python3 -m unittest scripts/test_build_tz_home.py
       - name: export materialiser tests
         run: python3 -m unittest scripts/test_materialise_convex_export.py
-      - name: tiles v2 builder tests
-        run: python3 -m unittest discover -s tools/tiles-r2 -p "test_*.py"
-      - name: census tile builder tests
-        run: python3 -m unittest discover -s tools/tiles-r2 -p "test_build_census_tiles.py"
       - uses: astral-sh/setup-uv@v5
+      - name: tiles builder tests (v2, grid and census; jsonschema runs the manifest schema test)
+        run: uv run --with jsonschema==4.26.0 python -m unittest discover -s tools/tiles-r2 -p "test_*.py"
       - name: agent research pilot tests
         run: python3 -m unittest discover -s scripts/agent_research -p "test_*.py"
       - name: indicator schema tests

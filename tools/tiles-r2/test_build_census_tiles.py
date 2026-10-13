@@ -6,6 +6,7 @@ package are installed, and is skipped otherwise"""
 import copy
 import gzip
 import json
+import os
 import re
 import shutil
 import sqlite3
@@ -348,6 +349,8 @@ class ManifestTest(unittest.TestCase):
         try:
             import jsonschema
         except ImportError:
+            if os.environ.get("CI"):
+                self.fail("jsonschema must be installed in CI")
             self.skipTest("jsonschema not installed")
         spec = dict(SPEC, boundary_label="apps/regions/us/data/counties_2020.geojson", boundary_sha256="a" * 64, boundary_bytes=10,
                     level_ids=["county-2020"], tippecanoe="tippecanoe v2.79.0", pmtiles_cli="pmtiles dev", units=2, units_with_geometry=2, features=2)
