@@ -1878,19 +1878,24 @@ map.on("load", () => {
   map.once("idle", ensureCustomLayers);
   map.once("idle", nudgeMap);
   map.once("idle", refreshMapLayers);
-  // census is on by default so the map opens already oriented in NZ; this
-  // idle fires after the point layers exist, so the choropleth inserts
-  // beneath them rather than over the dots
-  map.once("idle", async () => {
+  const firstIdle = new Promise((resolve) => map.once("idle", resolve));
+  // census is on by default so the map opens already oriented in the
+  // country. its boundary and summary have been loading since script
+  // evaluation (see the startup fetch after loadCensusDataInto); load fires
+  // after style.load has run addCustomLayers, so the point layers exist and
+  // the choropleth inserts beneath them rather than over the dots
+  void (async () => {
     if (HAS_CENSUS) await setCensusEnabled(true);
     // a foreign fix judged before this default enable must still fold the
     // census the default has just switched on
     if (lastFixWasAbroad) foldCensusForAbroad();
-    // navigation prefetch starts only after the default boundary and summary
-    // have completed, so speculative requests never contend with map data
+    // navigation prefetch starts only after the map's first idle and after
+    // the default boundary and summary have completed, so speculative
+    // requests never contend with map data
+    await firstIdle;
     window.__DATAMAP_FIRST_IDLE__ = true;
     document.dispatchEvent(new CustomEvent("datamap:first-idle"));
-  });
+  })();
 });
 
 map.on("error", (e) => {
@@ -4080,6 +4085,14 @@ async function loadCensusDataInto(store, def) {
   return store.geojson;
 }
 
+// the default level's boundary and summary start loading during script
+// evaluation rather than at the map's first idle: the fetch needs only the
+// config and the carried #d= view read above, not the style. the store keeps
+// the in-flight promise, so the default enable on map load awaits this same
+// load. it sits after the columnar transport so that block's constants are
+// initialised before the loader first reads them
+if (HAS_CENSUS) void loadCensusData(censusState.level);
+
 // reduce a partial-layer declaration to its display reason, or null when
 // the layer is complete. accepts a bare string or {reason}/{note} objects.
 function normalisePartialLayer(value) {
@@ -4537,6 +4550,12 @@ const DATED = {
 const DATED_AMBER = "#d68910";
 let datedHandlersAttached = false;
 let datedStartYears = null;
+// the parsed dated product: fetched once, the first time a dated layer is
+// shown, then handed to the source as data and reused after a style swap
+let datedGeojson = null;
+let datedLoading = null;
+// the latest visibility asked of the dated layers, applied when the fetch lands
+let datedWanted = { showAlive: false, showFuture: false };
 // whether the wired product carries reviewed occupancy features; the
 // legend explains the window and transition marks only when it does
 let datedHasReviewed = false;
@@ -4583,9 +4602,37 @@ function datedWindowFilter(year) {
     ["all", ["==", ["get", "end_unknown"], true], ["has", "start_upper"], [">", year, ["get", "start_upper"]]]
   ];
 }
+// one fetch serves both the source and the legend's counts; a failed fetch
+// clears the in-flight promise so the next show retries
+function loadDatedPlaces() {
+  if (datedGeojson) return Promise.resolve(datedGeojson);
+  if (!datedLoading) {
+    datedLoading = fetch(RC.datedPlaces)
+      .then((r) => {
+        if (!r.ok) throw new Error("dated places fetch failed");
+        return r.json();
+      })
+      .then((geo) => {
+        // the future count feeds the legend: an honest "2 places founded
+        // after 2018" stops an almost-empty layer reading as a broken control
+        const features = geo.features || [];
+        datedStartYears = features
+          .map((f) => f.properties && f.properties.start_year)
+          .filter((y) => Number.isFinite(y));
+        datedHasReviewed = features.some((f) => f.properties && f.properties.source === "reviewed_occupancy");
+        datedGeojson = geo;
+        return geo;
+      })
+      .catch((err) => {
+        datedLoading = null;
+        throw err;
+      });
+  }
+  return datedLoading;
+}
 function addDatedPlacesLayer() {
-  if (!RC.datedPlaces || map.getSource(DATED.source)) return;
-  map.addSource(DATED.source, { type: "geojson", data: RC.datedPlaces });
+  if (!RC.datedPlaces || !datedGeojson || map.getSource(DATED.source)) return;
+  map.addSource(DATED.source, { type: "geojson", data: datedGeojson });
   map.addLayer({
     id: DATED.layer,
     type: "circle",
@@ -4664,19 +4711,6 @@ function addDatedPlacesLayer() {
       "line-opacity": 0.9
     }
   });
-  // the future count feeds the legend: an honest "2 places founded after
-  // 2018" stops an almost-empty layer reading as a broken control
-  if (!datedStartYears) {
-    datedStartYears = [];
-    fetch(RC.datedPlaces).then((r) => r.json()).then((geo) => {
-      const features = geo.features || [];
-      datedStartYears = features
-        .map((f) => f.properties && f.properties.start_year)
-        .filter((y) => Number.isFinite(y));
-      datedHasReviewed = features.some((f) => f.properties && f.properties.source === "reviewed_occupancy");
-      updateCensusLegend();
-    }).catch(() => { /* count stays empty; the legend simply omits it */ });
-  }
   if (!datedHandlersAttached) {
     datedHandlersAttached = true;
     const openDatedPopup = (e) => {
@@ -4737,7 +4771,31 @@ function addDatedPlacesLayer() {
 }
 function syncDatedPlaces(showAlive, showFuture) {
   if (!RC.datedPlaces) return;
-  addDatedPlacesLayer();
+  datedWanted = { showAlive, showFuture };
+  if (!map.getSource(DATED.source)) {
+    // a hidden layer that does not exist needs no hiding: the product is
+    // fetched only when a dated tier is first shown
+    if (!showAlive && !showFuture) return;
+    if (!datedGeojson) {
+      // only the sync that starts the fetch waits on it; later syncs while it
+      // is in flight just update datedWanted, which the landing applies
+      if (datedLoading) return;
+      loadDatedPlaces().then(() => {
+        const apply = () => {
+          syncDatedPlaces(datedWanted.showAlive, datedWanted.showFuture);
+          updateCensusLegend();
+        };
+        try {
+          apply();
+        } catch (e) {
+          // a style swap in flight refuses new sources; retry once it settles
+          map.once("idle", () => { try { apply(); } catch (err) { /* dated layer is optional */ } });
+        }
+      }).catch(() => { /* the layer and its count stay absent; the next show retries */ });
+      return;
+    }
+    addDatedPlacesLayer();
+  }
   if (!map.getLayer(DATED.layer)) return;
   const year = censusState.year;
   const alive = datedAliveFilter(year);
