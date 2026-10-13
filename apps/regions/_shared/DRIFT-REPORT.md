@@ -145,3 +145,5 @@ levels, from config), `../../../schemas/denomination-taxonomy.json`
 `../../global/config.public.js` + `../../global/config.js` key-loading
 pattern stays in each `next.html` verbatim (including the 404-tolerant
 optional `config.js`).
+(2026-10-13: the `config.js` tag has since been removed from every page;
+nothing read it.)
