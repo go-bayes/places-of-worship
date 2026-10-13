@@ -10,8 +10,8 @@
 // stretched to 7) and the places tier from zoom 8 in, read from the versioned
 // grid archive (byte-identical to the live tier from zoom 8, immutable for a
 // year). the three countries whose ra-dots archive exceeds 10 MB (us, de, it;
-// jb 2026-10-13, item 7, revising the 2026-09-04 "every place shows" ruling
-// for them only) use the overview below zoom 6 and the grid places tier at
+// the maintainer's decision of 2026-10-13, revising the 2026-09-04 rule that
+// every place shows, for them only) use the overview below zoom 6 and the grid places tier at
 // zooms 6 and 7, so their tiles stay small. the ra-dots and
 // places tiers carry osm_id, osm_type, name and country_code where the place
 // has them, so a click on any opens the same popup and revise card. the
@@ -27,7 +27,7 @@
 (function () {
     const COLOUR = "#f59e0b";
     const HALO = "#ffffff";
-        const PLACES_TILE_LAYER = "places";
+    const PLACES_TILE_LAYER = "places";
     const PLACES_TILE_MAX_NATIVE_ZOOM = 18;
     // tiles v2 (build 20260722). the overview is the grid-thinned tier of
     // 2026-10-13 (one dot per screen-pixel cell, religion and denomination,

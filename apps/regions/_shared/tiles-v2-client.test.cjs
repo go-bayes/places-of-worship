@@ -66,7 +66,7 @@ assert.doesNotMatch(unvalidated, /overviewKeep/);
 const stamps = {
     "region-map.js": "20261013a", // grid-thinned tiers, counts by n, representative-dot zoom, home view
     "unvalidated-places.js": "20261013b", // versioned grid places url; us, de and it use the grid tier from zoom 6
-    "verification-map.js": "20261013a", // tap on a grid-thinned fallback dot zooms in
+    "verification-map.js": "20261013b", // unused zoom constant removed
     "review-map.js": "20261013a", // tap on a grid-thinned fallback dot zooms in
 };
 const scripts = Object.keys(stamps);

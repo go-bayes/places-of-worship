@@ -1771,7 +1771,6 @@ const CONTEXT_DOT_HALO = UNVALIDATED_PLACES ? UNVALIDATED_PLACES.HALO : "#ffffff
 // "all points"): the shop front's places tiles, drawn by leaflet.vectorgrid,
 // with the country's own ra-dots archive below zoom 8 (the slim overview
 // sample where it has none) so the whole country's places show on arrival (jb 2026-09-04: australia showed only a subset)
-const TILE_DOTS_MIN_ZOOM = UNVALIDATED_PLACES ? UNVALIDATED_PLACES.PLACES_MIN_ZOOM : 8;
 
 function osmObjectUrl(osmType, osmId) {
     if (!osmType || !osmId) return "";
