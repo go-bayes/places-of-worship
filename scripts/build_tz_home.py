@@ -29,12 +29,40 @@ REPO = Path(__file__).resolve().parents[1]
 REGISTRY = REPO / "apps/shared/data/country-registry.json"
 PAGES = REPO / "apps/regions"
 OUT = REPO / "apps/shared/data/tz-home.js"
+# zone.tab first: it lists one country per zone and keeps link zones such as
+# Europe/Oslo that zone1970.tab folds into another country's line
 ZONE_TABS = [
-    Path("/usr/share/zoneinfo/zone1970.tab"),
     Path("/usr/share/zoneinfo/zone.tab"),
-    Path("/var/db/timezone/zoneinfo/zone1970.tab"),
     Path("/var/db/timezone/zoneinfo/zone.tab"),
+    Path("/usr/share/zoneinfo/zone1970.tab"),
+    Path("/var/db/timezone/zoneinfo/zone1970.tab"),
 ]
+# legacy zone names some browsers still report (the tz database's backward
+# links); each maps to the canonical zone whose country it shares
+ZONE_ALIASES = {
+    "Asia/Calcutta": "Asia/Kolkata",
+    "Asia/Katmandu": "Asia/Kathmandu",
+    "Asia/Rangoon": "Asia/Yangon",
+    "Asia/Saigon": "Asia/Ho_Chi_Minh",
+    "Asia/Macao": "Asia/Macau",
+    "Asia/Ujung_Pandang": "Asia/Makassar",
+    "Asia/Dacca": "Asia/Dhaka",
+    "Asia/Thimbu": "Asia/Thimphu",
+    "Asia/Ulan_Bator": "Asia/Ulaanbaatar",
+    "America/Buenos_Aires": "America/Argentina/Buenos_Aires",
+    "America/Cordoba": "America/Argentina/Cordoba",
+    "America/Godthab": "America/Nuuk",
+    "America/Indianapolis": "America/Indiana/Indianapolis",
+    "America/Louisville": "America/Kentucky/Louisville",
+    "Europe/Kiev": "Europe/Kyiv",
+    "Europe/Belfast": "Europe/London",
+    "Europe/Nicosia": "Asia/Nicosia",
+    "Pacific/Enderbury": "Pacific/Kanton",
+    "Pacific/Ponape": "Pacific/Pohnpei",
+    "Pacific/Truk": "Pacific/Chuuk",
+    "Atlantic/Faeroe": "Atlantic/Faroe",
+    "Africa/Asmera": "Africa/Asmara",
+}
 # project page codes where they differ from iso alpha-2
 PROJECT_CODE_FOR_ISO = {"gb": "uk"}
 CENTER_RE = re.compile(r"center:\s*\[\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*\]")
@@ -69,6 +97,9 @@ def parse_zone_tab(text):
         primary = fields[0].split(",")[0].strip().lower()
         if len(primary) == 2:
             zones.setdefault(fields[2].strip(), primary)
+    for alias, canonical in ZONE_ALIASES.items():
+        if canonical in zones:
+            zones.setdefault(alias, zones[canonical])
     return zones
 
 

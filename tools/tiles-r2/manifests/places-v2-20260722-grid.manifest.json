@@ -1,0 +1,114 @@
+{
+  "$schema": "../../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:places-v2-20260722-grid-be739145a0d8",
+  "dataset_id": "places-v2-20260722-grid",
+  "dataset_version_id": "places-v2-20260722-grid:be739145a0d88317",
+  "dataset_family": "places-tiles",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "global",
+    "snapshot_date": "2026-07-22",
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-10-13T03:31:45+00:00",
+  "created_by": "claude-fable-5-1 (claude code)",
+  "pipeline": {
+    "script": "tools/tiles-r2/build_tiles_grid.py",
+    "git_commit": "5dddf3ce",
+    "command": "uv run tools/tiles-r2/build_tiles_grid.py all --work <dir> --source <places.mbtiles> --slim <slim.ndjson> --extract-work <dir>",
+    "parameters": {
+      "method": "screen-pixel grid thinning: one representative per cell, religion and denomination at each zoom; n = places represented",
+      "tile_px": 512,
+      "zooms": {
+        "6": {
+          "tier": "places",
+          "cell_px": 2,
+          "detail": 9,
+          "attrs": [
+            "religion",
+            "denomination",
+            "country_code"
+          ]
+        },
+        "7": {
+          "tier": "places",
+          "cell_px": 1,
+          "detail": 10,
+          "attrs": [
+            "religion",
+            "denomination",
+            "name",
+            "osm_id",
+            "osm_type",
+            "country_code"
+          ]
+        }
+      },
+      "kept": {
+        "6": 1212056,
+        "7": 1653926
+      },
+      "tippecanoe_flags": "-Z<z> -z<z> -r1 --no-feature-limit --no-tile-size-limit -d <detail> -l <layer>, one run per zoom",
+      "commands": {
+        "z6": "tippecanoe -Z6 -z6 -r1 --no-feature-limit --no-tile-size-limit -d 9 -l places --force --temporary-directory <tmp> -o <parts>/z6.mbtiles <parts/z6.ndjson>",
+        "z7": "tippecanoe -Z7 -z7 -r1 --no-feature-limit --no-tile-size-limit -d 10 -l places --force --temporary-directory <tmp> -o <parts>/z7.mbtiles <parts/z7.ndjson>",
+        "places_copy": "sqlite insert into tiles select ... from places.mbtiles.tiles where zoom_level >= 8 (read-only attach)",
+        "places_convert": "pmtiles convert places-v2-20260722-grid.mbtiles places-v2-20260722-grid.pmtiles"
+      },
+      "slim_sha256": "aceb33558462ba5eb12543cc392acee6b86751ae3f4d5293adc69b90cf5509be",
+      "input_features": 2072349,
+      "z8_18": "rows copied byte for byte from places.mbtiles (read-only attach), verified by digest in both directions",
+      "source_sha256": "eaa55c50971381cacca36ea08b1d4a68628b77d47a7156848cebb6a13eb2c406"
+    },
+    "software_versions": {
+      "tippecanoe": "tippecanoe v2.79.0",
+      "pmtiles_cli": "pmtiles dev, commit none, built at unknown",
+      "python": "3.14.8"
+    }
+  },
+  "source": {
+    "provider": "slim.ndjson of tiles-v2-20260722 (the extract of places.mbtiles, the live places tileset built 2026-07-22); places.mbtiles for z8-18",
+    "local_cache_hint": "the v2 extract work directory and the July archive folder on the build machine (private handover)",
+    "licence": null,
+    "citation": "slim.ndjson sha256 aceb33558462ba5eb12543cc392acee6b86751ae3f4d5293adc69b90cf5509be, 2072349 features, extracted by build_tiles_v2.py (see the tiles-v2-20260722 manifests).",
+    "licence_todo": "licence and attribution of the 701,349 places without an OSM key are not established; the archive adds no place and no attribute to what the live tiers already serve"
+  },
+  "durable_files": [
+    {
+      "uri": "build-cache:places-v2-20260722-grid.pmtiles",
+      "storage_provider": "other",
+      "format": "pmtiles",
+      "bytes": 2791099919,
+      "sha256": "a6c9cdfdae4375a786bda06b2869016638168c658eb90eec63409d9417d77fb2",
+      "feature_count": null,
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "notes": "public places tier, z6-18, layer places: z6 one dot per 2 px cell, religion and denomination (religion, denomination, country_code, n); z7 one dot per 1 px cell with the six slim attributes and n; z8-18 byte-identical to the live places tileset. A machine-local build output, a cache and not a durable store; the durable copy is the R2 object, once uploaded and recorded."
+    },
+    {
+      "uri": "r2://pow-tiles/places-v2-20260722-grid.pmtiles",
+      "storage_provider": "other",
+      "format": "pmtiles",
+      "bytes": 2791099919,
+      "sha256": "a6c9cdfdae4375a786bda06b2869016638168c658eb90eec63409d9417d77fb2",
+      "feature_count": null,
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "notes": "durable R2 object, served at https://tiles.placemap.org/places-v2-20260722-grid/{z}/{x}/{y}; r2 etag \"c62aff4eb3188168eb399cda30bab323-21\"; uploaded with a refusal on an existing key and verified by a full read-back sha256"
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "uv run tools/tiles-r2/build_tiles_grid.py validate --work <dir> --source <places.mbtiles> --slim <slim.ndjson> --extract-work <dir>"
+    ],
+    "warnings": [
+      "licence_status needs_review: licence of the places without an OSM key is not established"
+    ],
+    "notes": "full report in tools/tiles-r2/manifests/validation-report-places-v2-20260722-grid.md",
+    "input_features": 2072349,
+    "criteria_not_met": []
+  },
+  "downstream_status": "staged"
+}

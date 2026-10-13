@@ -1,0 +1,156 @@
+{
+  "$schema": "../../../schemas/data-manifest.schema.json",
+  "schema_version": "data-manifest.v2",
+  "manifest_id": "manifest:places-overview-v2-20260722-grid-b34ac1d41d00",
+  "dataset_id": "places-overview-v2-20260722-grid",
+  "dataset_version_id": "places-overview-v2-20260722-grid:b34ac1d41d00ff72",
+  "dataset_family": "places-tiles",
+  "dataset_role": "public_product",
+  "scope": {
+    "level": "global",
+    "snapshot_date": "2026-07-22",
+    "pipeline_stage": "staged"
+  },
+  "created_at": "2026-10-13T03:31:44+00:00",
+  "created_by": "claude-fable-5-1 (claude code)",
+  "pipeline": {
+    "script": "tools/tiles-r2/build_tiles_grid.py",
+    "git_commit": "5dddf3ce",
+    "command": "uv run tools/tiles-r2/build_tiles_grid.py all --work <dir> --source <places.mbtiles> --slim <slim.ndjson> --extract-work <dir>",
+    "parameters": {
+      "method": "screen-pixel grid thinning: one representative per cell, religion and denomination at each zoom; n = places represented",
+      "tile_px": 512,
+      "zooms": {
+        "0": {
+          "tier": "overview",
+          "cell_px": 2,
+          "detail": 9,
+          "attrs": [
+            "religion",
+            "denomination",
+            "country_code"
+          ]
+        },
+        "1": {
+          "tier": "overview",
+          "cell_px": 2,
+          "detail": 9,
+          "attrs": [
+            "religion",
+            "denomination",
+            "country_code"
+          ]
+        },
+        "2": {
+          "tier": "overview",
+          "cell_px": 2,
+          "detail": 9,
+          "attrs": [
+            "religion",
+            "denomination",
+            "country_code"
+          ]
+        },
+        "3": {
+          "tier": "overview",
+          "cell_px": 2,
+          "detail": 9,
+          "attrs": [
+            "religion",
+            "denomination",
+            "country_code"
+          ]
+        },
+        "4": {
+          "tier": "overview",
+          "cell_px": 2,
+          "detail": 9,
+          "attrs": [
+            "religion",
+            "denomination",
+            "country_code"
+          ]
+        },
+        "5": {
+          "tier": "overview",
+          "cell_px": 2,
+          "detail": 9,
+          "attrs": [
+            "religion",
+            "denomination",
+            "country_code"
+          ]
+        }
+      },
+      "kept": {
+        "0": 65265,
+        "1": 116143,
+        "2": 206647,
+        "3": 359835,
+        "4": 603131,
+        "5": 916974
+      },
+      "tippecanoe_flags": "-Z<z> -z<z> -r1 --no-feature-limit --no-tile-size-limit -d <detail> -l <layer>, one run per zoom",
+      "commands": {
+        "z0": "tippecanoe -Z0 -z0 -r1 --no-feature-limit --no-tile-size-limit -d 9 -l places_overview --force --temporary-directory <tmp> -o <parts>/z0.mbtiles <parts/z0.ndjson>",
+        "z1": "tippecanoe -Z1 -z1 -r1 --no-feature-limit --no-tile-size-limit -d 9 -l places_overview --force --temporary-directory <tmp> -o <parts>/z1.mbtiles <parts/z1.ndjson>",
+        "z2": "tippecanoe -Z2 -z2 -r1 --no-feature-limit --no-tile-size-limit -d 9 -l places_overview --force --temporary-directory <tmp> -o <parts>/z2.mbtiles <parts/z2.ndjson>",
+        "z3": "tippecanoe -Z3 -z3 -r1 --no-feature-limit --no-tile-size-limit -d 9 -l places_overview --force --temporary-directory <tmp> -o <parts>/z3.mbtiles <parts/z3.ndjson>",
+        "z4": "tippecanoe -Z4 -z4 -r1 --no-feature-limit --no-tile-size-limit -d 9 -l places_overview --force --temporary-directory <tmp> -o <parts>/z4.mbtiles <parts/z4.ndjson>",
+        "z5": "tippecanoe -Z5 -z5 -r1 --no-feature-limit --no-tile-size-limit -d 9 -l places_overview --force --temporary-directory <tmp> -o <parts>/z5.mbtiles <parts/z5.ndjson>",
+        "overview_join": "tile-join -pk -f -o <out>/places-overview-v2-20260722-grid.pmtiles <parts>/z0.mbtiles <parts>/z1.mbtiles <parts>/z2.mbtiles <parts>/z3.mbtiles <parts>/z4.mbtiles <parts>/z5.mbtiles"
+      },
+      "slim_sha256": "aceb33558462ba5eb12543cc392acee6b86751ae3f4d5293adc69b90cf5509be",
+      "input_features": 2072349
+    },
+    "software_versions": {
+      "tippecanoe": "tippecanoe v2.79.0",
+      "pmtiles_cli": "pmtiles dev, commit none, built at unknown",
+      "python": "3.14.8"
+    }
+  },
+  "source": {
+    "provider": "slim.ndjson of tiles-v2-20260722 (the extract of places.mbtiles, the live places tileset built 2026-07-22)",
+    "local_cache_hint": "the v2 extract work directory and the July archive folder on the build machine (private handover)",
+    "licence": null,
+    "citation": "slim.ndjson sha256 aceb33558462ba5eb12543cc392acee6b86751ae3f4d5293adc69b90cf5509be, 2072349 features, extracted by build_tiles_v2.py (see the tiles-v2-20260722 manifests).",
+    "licence_todo": "licence and attribution of the 701,349 places without an OSM key are not established; the archive adds no place and no attribute to what the live tiers already serve"
+  },
+  "durable_files": [
+    {
+      "uri": "build-cache:places-overview-v2-20260722-grid.pmtiles",
+      "storage_provider": "other",
+      "format": "pmtiles",
+      "bytes": 10622492,
+      "sha256": "ba140d7d736c1c135d61a572d255c5c559d613a99ddd3f06ee68a8d403ca509e",
+      "feature_count": null,
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "notes": "public overview tier, z0-5, layer places_overview: one dot per screen-pixel cell, religion and denomination, with n the places represented; attributes religion, denomination, country_code, n. A machine-local build output, a cache and not a durable store; the durable copy is the R2 object, once uploaded and recorded."
+    },
+    {
+      "uri": "r2://pow-tiles/places-overview-v2-20260722-grid.pmtiles",
+      "storage_provider": "other",
+      "format": "pmtiles",
+      "bytes": 10622492,
+      "sha256": "ba140d7d736c1c135d61a572d255c5c559d613a99ddd3f06ee68a8d403ca509e",
+      "feature_count": null,
+      "privacy": "public",
+      "licence_status": "needs_review",
+      "notes": "durable R2 object, served at https://tiles.placemap.org/places-overview-v2-20260722-grid/{z}/{x}/{y}; r2 etag \"e39825f74dd0fb9e2c3571d0e7baebe2\"; uploaded with a refusal on an existing key and verified by a full read-back sha256"
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "commands": [
+      "uv run tools/tiles-r2/build_tiles_grid.py validate --work <dir> --source <places.mbtiles> --slim <slim.ndjson> --extract-work <dir>"
+    ],
+    "warnings": [
+      "licence_status needs_review: licence of the places without an OSM key is not established"
+    ],
+    "notes": "full report in tools/tiles-r2/manifests/validation-report-places-overview-v2-20260722-grid.md",
+    "input_features": 2072349,
+    "criteria_not_met": []
+  },
+  "downstream_status": "staged"
+}

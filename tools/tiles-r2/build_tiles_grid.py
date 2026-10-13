@@ -85,8 +85,10 @@ PLACES_THIN_ZOOMS = [z for z, s in ZOOM_SPEC.items() if s["tier"] == "places"]
 # acceptance criteria on stored (gzip) tile bytes, per tier
 TILE_CAP_BYTES = {"overview": 750_000, "places": 1_250_000}
 # a point on a tile edge can round into the neighbouring tile's buffer; counts
-# over tile-proper points are allowed this fraction of slack against the input
-EDGE_SLACK = 0.001
+# over tile-proper points are allowed this many places of slack against the
+# input (the extract records three far-edge points; the 2026-10-13 build
+# needed none)
+EDGE_SLACK_PLACES = 50
 COUNT_FLOOR = 0.005  # religions above this share of the input are checked for totals
 
 
@@ -417,8 +419,8 @@ def size_table(sizes):
     return {"tiles": len(sizes), "max": max(sizes) if sizes else 0, "p95": _p95(sizes), "total": sum(sizes)}
 
 
-def within_slack(observed, expected, slack=EDGE_SLACK):
-    return abs(observed - expected) <= max(1, slack * expected)
+def within_slack(observed, expected, slack=EDGE_SLACK_PLACES):
+    return abs(observed - expected) <= slack
 
 
 def check_thin_zoom(z, s, exp, layer, cap, input_religion, input_total):
@@ -718,6 +720,9 @@ def cmd_manifest(a):
                         "public places tier, z6-18, layer places: z6 one dot per 2 px cell, religion and denomination (religion, denomination, country_code, n); z7 one dot per 1 px cell with the six slim attributes and n; z8-18 byte-identical to the live places tileset."))
     for name, zooms, description in targets:
         archive = out / f"{name}.pmtiles"
+        if name not in rep["archives"]:
+            print(f"manifest: the validation report holds no record of {name}; validate without --skip-places", file=sys.stderr)
+            sys.exit(7)
         current = _sha256(archive)
         if current != rep["archives"][name]["sha256"]:
             print(f"manifest: {archive.name} digest {current} differs from the validated {rep['archives'][name]['sha256']}; validate again", file=sys.stderr)

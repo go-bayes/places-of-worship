@@ -1307,6 +1307,8 @@ function clampPopupToViewport(popup, padding = 12) {
 // id, so a popup could name nothing. a tap on one zooms the map in on it, to
 // where the places tier draws named places
 function isRepresentativeDot(props) {
+  // from zoom 8 the tiles are the live places, every one named or keyed
+  if (map.getZoom() >= SAMPLED_BELOW_ZOOM) return false;
   return !(props && (props.name || props["name:en"] || props.name_en || props.osm_id));
 }
 function zoomToRepresentative(coords) {
@@ -1320,6 +1322,8 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
   const coords = coordsFromFeature(feature, fallbackLngLat);
   if (!coords) return;
   if (isRepresentativeDot(props)) {
+    // the generic mobile handler may already have flown here and set the guard
+    if (IS_MOBILE && mobileFeatureClickHandled) return;
     zoomToRepresentative(coords);
     return;
   }
@@ -1645,6 +1649,19 @@ function addOverviewLayer() {
     }
   });
 
+  if (!IS_MOBILE && !overviewMobileHandlerAttached) {
+    // desktop: the generic click handler stands aside for a direct hit on a
+    // dot (it expects the layer's own handler), so the overview layer needs
+    // one too, or a click on an overview dot does nothing
+    overviewMobileHandlerAttached = true;
+    map.on("click", LAYERS.overview, (e) => {
+      const feature = e.features && e.features[0];
+      if (!feature) return;
+      void handlePlaceFeatureClick(feature, e.lngLat);
+    });
+    map.on("mouseenter", LAYERS.overview, () => { map.getCanvas().style.cursor = "pointer"; });
+    map.on("mouseleave", LAYERS.overview, () => { map.getCanvas().style.cursor = ""; });
+  }
   if (IS_MOBILE && !overviewMobileHandlerAttached) {
     overviewMobileHandlerAttached = true;
     map.on("click", LAYERS.overview, (e) => {

@@ -76,10 +76,10 @@ class GridThinTest(unittest.TestCase):
                 "religion": collections.Counter(religion), "attrs": collections.Counter({"religion": 1000, "n": 300}),
                 "missing_religion": 0, "layers": collections.Counter({g.OVERVIEW_LAYER: 3})}
         self.assertEqual(g.check_thin_zoom(3, good, exp, g.OVERVIEW_LAYER, 100, religion, 2000), ([], []))
-        # one edge point lost to a neighbour's buffer is within the slack; ten are not
-        slack = dict(good, points=999, n_sum=1998, religion=collections.Counter({"christian": 1499, "muslim": 500}))
+        # a few edge points lost to a neighbour's buffer are within the slack; a hundred are not
+        slack = dict(good, points=999, n_sum=1998, religion=collections.Counter({"christian": 1498, "muslim": 500}))
         self.assertEqual(g.check_thin_zoom(3, slack, exp, g.OVERVIEW_LAYER, 100, religion, 2000), ([], []))
-        bad = dict(good, points=990)
+        bad = dict(good, points=900)
         problems, _ = g.check_thin_zoom(3, bad, exp, g.OVERVIEW_LAYER, 100, religion, 2000)
         self.assertEqual(len(problems), 1)
         # an unexpected attribute, a wrong layer and a missing religion are problems; a big tile is a criterion
@@ -96,19 +96,21 @@ class GridThinTest(unittest.TestCase):
 
     def test_within_slack(self):
         self.assertTrue(g.within_slack(1000, 1000))
-        self.assertTrue(g.within_slack(999, 1000))
-        self.assertFalse(g.within_slack(990, 1000))
-        self.assertTrue(g.within_slack(5, 5))
-        self.assertTrue(g.within_slack(4, 5))
+        self.assertTrue(g.within_slack(990, 1000))
+        self.assertFalse(g.within_slack(900, 1000))
+        self.assertFalse(g.within_slack(2072000, 2072349))
 
     def test_committed_manifests_name_the_grid_archives(self):
         here = Path(__file__).resolve().parent / "manifests"
         for name in (g.overview_name(), g.places_name()):
             path = here / f"{name}.manifest.json"
-            if path.exists():
-                text = path.read_text(encoding="utf-8")
-                self.assertIn('"dataset_id": "%s"' % name, text)
-                self.assertNotIn('"values"', text)
+            self.assertTrue(path.is_file(), f"{path.name} is not committed")
+            text = path.read_text(encoding="utf-8")
+            self.assertIn('"dataset_id": "%s"' % name, text)
+            self.assertIn(f'"uri": "r2://pow-tiles/{name}.pmtiles"', text, "the durable R2 object is recorded")
+            self.assertNotIn('"values"', text)
+            self.assertNotIn("/Users/", text, "no private absolute paths in the public record")
+            self.assertTrue((here / f"validation-report-{name}.md").is_file())
 
 
 if __name__ == "__main__":

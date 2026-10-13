@@ -19,6 +19,7 @@ NZ\t-3652+17446\tPacific/Auckland
 GB\t+513030-0000731\tEurope/London
 AQ\t-7750+16636\tAntarctica/McMurdo
 US\t+404251-0740023\tAmerica/New_York
+UA\t+5026+03031\tEurope/Kyiv
 """
 
 REGISTRY = {"countries": [
@@ -41,6 +42,10 @@ class TzHomeTest(unittest.TestCase):
         self.assertEqual(zones["Pacific/Auckland"], "nz")
         self.assertEqual(zones["Europe/London"], "gb")
         self.assertEqual(zones["Antarctica/McMurdo"], "aq")
+        # a legacy alias follows its canonical zone; one whose zone is absent is not invented
+        self.assertEqual(zones["Europe/Kiev"], "ua")
+        self.assertEqual(zones["Europe/Belfast"], "gb")
+        self.assertNotIn("Asia/Calcutta", zones)
 
     def test_page_camera_reads_centre_and_zoom(self):
         self.assertEqual(tz.page_camera(PAGE), [174.7762, -41.2865, 4.5])
@@ -69,6 +74,11 @@ class TzHomeTest(unittest.TestCase):
         table = json.loads(m.group(1))
         self.assertEqual(table["zones"]["Pacific/Auckland"], "nz")
         self.assertEqual(table["zones"]["Europe/London"], "uk")
+        # link zones (absent from zone1970.tab) and legacy aliases browsers still report
+        for zone, code in (("Europe/Oslo", "no"), ("Europe/Stockholm", "se"), ("Europe/Amsterdam", "nl"),
+                           ("Asia/Calcutta", "in"), ("Europe/Kiev", "ua"), ("Asia/Saigon", "vn"),
+                           ("America/Buenos_Aires", "ar")):
+            self.assertEqual(table["zones"].get(zone), code, zone)
         registry = json.loads(tz.REGISTRY.read_text(encoding="utf-8"))
         codes = {c["code"] for c in registry["countries"]}
         self.assertEqual(set(table["cameras"]), codes)

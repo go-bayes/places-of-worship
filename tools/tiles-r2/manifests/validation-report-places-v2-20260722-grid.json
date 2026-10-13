@@ -1,0 +1,547 @@
+{
+  "validation": {
+    "status": "passed",
+    "inputs": {
+      "slim_sha256": "aceb33558462ba5eb12543cc392acee6b86751ae3f4d5293adc69b90cf5509be"
+    },
+    "archives": {
+      "places-overview-v2-20260722-grid": {
+        "sha256": "ba140d7d736c1c135d61a572d255c5c559d613a99ddd3f06ee68a8d403ca509e",
+        "bytes": 10622492,
+        "header": {
+          "minzoom": 0,
+          "maxzoom": 5
+        },
+        "zooms": {
+          "0": {
+            "sizes": {
+              "tiles": 1,
+              "max": 347369,
+              "p95": 347369,
+              "total": 347369
+            },
+            "points": 65265,
+            "n_sum": 2072349,
+            "kept_in_thin_report": 65265,
+            "religion_by_n": {
+              "christian": 1279407,
+              "muslim": 301479,
+              "unknown": 215068,
+              "buddhist": 142575,
+              "hindu": 53065,
+              "shinto": 50594,
+              "jewish": 11407,
+              "other": 18754
+            },
+            "attributes": [
+              "country_code",
+              "denomination",
+              "n",
+              "religion"
+            ]
+          },
+          "1": {
+            "sizes": {
+              "tiles": 4,
+              "max": 298432,
+              "p95": 220099,
+              "total": 622631
+            },
+            "points": 116143,
+            "n_sum": 2072349,
+            "kept_in_thin_report": 116143,
+            "religion_by_n": {
+              "christian": 1279407,
+              "muslim": 301479,
+              "unknown": 215068,
+              "buddhist": 142575,
+              "hindu": 53065,
+              "shinto": 50594,
+              "jewish": 11407,
+              "other": 18754
+            },
+            "attributes": [
+              "country_code",
+              "denomination",
+              "n",
+              "religion"
+            ]
+          },
+          "2": {
+            "sizes": {
+              "tiles": 12,
+              "max": 392292,
+              "p95": 241193,
+              "total": 1030336
+            },
+            "points": 206647,
+            "n_sum": 2072349,
+            "kept_in_thin_report": 206647,
+            "religion_by_n": {
+              "christian": 1279407,
+              "muslim": 301479,
+              "unknown": 215068,
+              "buddhist": 142575,
+              "hindu": 53065,
+              "shinto": 50594,
+              "jewish": 11407,
+              "other": 18754
+            },
+            "attributes": [
+              "country_code",
+              "denomination",
+              "n",
+              "religion"
+            ]
+          },
+          "3": {
+            "sizes": {
+              "tiles": 37,
+              "max": 455753,
+              "p95": 132601,
+              "total": 1753355
+            },
+            "points": 359835,
+            "n_sum": 2072349,
+            "kept_in_thin_report": 359835,
+            "religion_by_n": {
+              "christian": 1279407,
+              "muslim": 301479,
+              "unknown": 215068,
+              "buddhist": 142575,
+              "hindu": 53065,
+              "shinto": 50594,
+              "jewish": 11407,
+              "other": 18754
+            },
+            "attributes": [
+              "country_code",
+              "denomination",
+              "n",
+              "religion"
+            ]
+          },
+          "4": {
+            "sizes": {
+              "tiles": 118,
+              "max": 604066,
+              "p95": 87983,
+              "total": 2769602
+            },
+            "points": 603131,
+            "n_sum": 2072349,
+            "kept_in_thin_report": 603131,
+            "religion_by_n": {
+              "christian": 1279407,
+              "muslim": 301479,
+              "unknown": 215068,
+              "buddhist": 142575,
+              "hindu": 53065,
+              "shinto": 50594,
+              "jewish": 11407,
+              "other": 18754
+            },
+            "attributes": [
+              "country_code",
+              "denomination",
+              "n",
+              "religion"
+            ]
+          },
+          "5": {
+            "sizes": {
+              "tiles": 327,
+              "max": 277401,
+              "p95": 55696,
+              "total": 4095060
+            },
+            "points": 916974,
+            "n_sum": 2072349,
+            "kept_in_thin_report": 916974,
+            "religion_by_n": {
+              "christian": 1279407,
+              "muslim": 301479,
+              "unknown": 215068,
+              "buddhist": 142575,
+              "hindu": 53065,
+              "shinto": 50594,
+              "jewish": 11407,
+              "other": 18754
+            },
+            "attributes": [
+              "country_code",
+              "denomination",
+              "n",
+              "religion"
+            ]
+          }
+        }
+      },
+      "places-v2-20260722-grid": {
+        "sha256": "a6c9cdfdae4375a786bda06b2869016638168c658eb90eec63409d9417d77fb2",
+        "bytes": 2791099919,
+        "header": {
+          "minzoom": 6,
+          "maxzoom": 18
+        },
+        "zooms": {
+          "6": {
+            "sizes": {
+              "tiles": 950,
+              "max": 204302,
+              "p95": 29011,
+              "total": 5498661
+            },
+            "points": 1212056,
+            "n_sum": 2072349,
+            "kept_in_thin_report": 1212056,
+            "religion_by_n": {
+              "christian": 1279407,
+              "muslim": 301479,
+              "unknown": 215068,
+              "buddhist": 142575,
+              "hindu": 53065,
+              "shinto": 50594,
+              "jewish": 11407,
+              "other": 18754
+            },
+            "attributes": [
+              "country_code",
+              "denomination",
+              "n",
+              "religion"
+            ],
+            "source_tiles": 950
+          },
+          "7": {
+            "sizes": {
+              "tiles": 2691,
+              "max": 385726,
+              "p95": 59102,
+              "total": 30016722
+            },
+            "points": 1653926,
+            "n_sum": 2072349,
+            "kept_in_thin_report": 1653926,
+            "religion_by_n": {
+              "christian": 1279407,
+              "muslim": 301479,
+              "unknown": 215068,
+              "buddhist": 142575,
+              "hindu": 53065,
+              "shinto": 50594,
+              "jewish": 11407,
+              "other": 18754
+            },
+            "attributes": [
+              "country_code",
+              "denomination",
+              "n",
+              "name",
+              "osm_id",
+              "osm_type",
+              "religion"
+            ],
+            "source_tiles": 2688
+          }
+        },
+        "copied_zooms": {
+          "8": {
+            "source_tiles": 7631,
+            "archive_tiles": 7631,
+            "mismatched": 0,
+            "missing_in_source": 0,
+            "missing_in_archive": 0
+          },
+          "9": {
+            "source_tiles": 21061,
+            "archive_tiles": 21061,
+            "mismatched": 0,
+            "missing_in_source": 0,
+            "missing_in_archive": 0
+          },
+          "10": {
+            "source_tiles": 54232,
+            "archive_tiles": 54232,
+            "mismatched": 0,
+            "missing_in_source": 0,
+            "missing_in_archive": 0
+          },
+          "11": {
+            "source_tiles": 128983,
+            "archive_tiles": 128983,
+            "mismatched": 0,
+            "missing_in_source": 0,
+            "missing_in_archive": 0
+          },
+          "12": {
+            "source_tiles": 284007,
+            "archive_tiles": 284007,
+            "mismatched": 0,
+            "missing_in_source": 0,
+            "missing_in_archive": 0
+          },
+          "13": {
+            "source_tiles": 550307,
+            "archive_tiles": 550307,
+            "mismatched": 0,
+            "missing_in_source": 0,
+            "missing_in_archive": 0
+          },
+          "14": {
+            "source_tiles": 866044,
+            "archive_tiles": 866044,
+            "mismatched": 0,
+            "missing_in_source": 0,
+            "missing_in_archive": 0
+          },
+          "15": {
+            "source_tiles": 1184584,
+            "archive_tiles": 1184584,
+            "mismatched": 0,
+            "missing_in_source": 0,
+            "missing_in_archive": 0
+          },
+          "16": {
+            "source_tiles": 1487106,
+            "archive_tiles": 1487106,
+            "mismatched": 0,
+            "missing_in_source": 0,
+            "missing_in_archive": 0
+          },
+          "17": {
+            "source_tiles": 1719766,
+            "archive_tiles": 1719766,
+            "mismatched": 0,
+            "missing_in_source": 0,
+            "missing_in_archive": 0
+          },
+          "18": {
+            "source_tiles": 1870425,
+            "archive_tiles": 1870425,
+            "mismatched": 0,
+            "missing_in_source": 0,
+            "missing_in_archive": 0
+          }
+        },
+        "source_sha256": "eaa55c50971381cacca36ea08b1d4a68628b77d47a7156848cebb6a13eb2c406"
+      }
+    },
+    "problems": [],
+    "criteria_not_met": [],
+    "warnings": [],
+    "seconds": 119
+  },
+  "thin": {
+    "slim_sha256": "aceb33558462ba5eb12543cc392acee6b86751ae3f4d5293adc69b90cf5509be",
+    "input_features": 2072349,
+    "input_religion": {
+      "christian": 1279407,
+      "muslim": 301479,
+      "unknown": 215068,
+      "buddhist": 142575,
+      "hindu": 53065,
+      "shinto": 50594,
+      "jewish": 11407,
+      "other": 18754
+    },
+    "tile_px": 512,
+    "zooms": {
+      "0": {
+        "tier": "overview",
+        "cell_px": 2,
+        "detail": 9,
+        "attrs": [
+          "religion",
+          "denomination",
+          "country_code"
+        ],
+        "kept": 65265,
+        "kept_fraction": 0.031493,
+        "groups_with_n_over_1": 37873,
+        "religion_totals": {
+          "christian": 1279407,
+          "muslim": 301479,
+          "unknown": 215068,
+          "buddhist": 142575,
+          "hindu": 53065,
+          "shinto": 50594,
+          "jewish": 11407,
+          "other": 18754
+        },
+        "seconds": 1.2
+      },
+      "1": {
+        "tier": "overview",
+        "cell_px": 2,
+        "detail": 9,
+        "attrs": [
+          "religion",
+          "denomination",
+          "country_code"
+        ],
+        "kept": 116143,
+        "kept_fraction": 0.056044,
+        "groups_with_n_over_1": 66878,
+        "religion_totals": {
+          "christian": 1279407,
+          "muslim": 301479,
+          "unknown": 215068,
+          "buddhist": 142575,
+          "hindu": 53065,
+          "shinto": 50594,
+          "jewish": 11407,
+          "other": 18754
+        },
+        "seconds": 1.4
+      },
+      "2": {
+        "tier": "overview",
+        "cell_px": 2,
+        "detail": 9,
+        "attrs": [
+          "religion",
+          "denomination",
+          "country_code"
+        ],
+        "kept": 206647,
+        "kept_fraction": 0.099716,
+        "groups_with_n_over_1": 114783,
+        "religion_totals": {
+          "christian": 1279407,
+          "muslim": 301479,
+          "unknown": 215068,
+          "buddhist": 142575,
+          "hindu": 53065,
+          "shinto": 50594,
+          "jewish": 11407,
+          "other": 18754
+        },
+        "seconds": 1.7
+      },
+      "3": {
+        "tier": "overview",
+        "cell_px": 2,
+        "detail": 9,
+        "attrs": [
+          "religion",
+          "denomination",
+          "country_code"
+        ],
+        "kept": 359835,
+        "kept_fraction": 0.173636,
+        "groups_with_n_over_1": 190536,
+        "religion_totals": {
+          "christian": 1279407,
+          "muslim": 301479,
+          "unknown": 215068,
+          "buddhist": 142575,
+          "hindu": 53065,
+          "shinto": 50594,
+          "jewish": 11407,
+          "other": 18754
+        },
+        "seconds": 2.1
+      },
+      "4": {
+        "tier": "overview",
+        "cell_px": 2,
+        "detail": 9,
+        "attrs": [
+          "religion",
+          "denomination",
+          "country_code"
+        ],
+        "kept": 603131,
+        "kept_fraction": 0.291037,
+        "groups_with_n_over_1": 285047,
+        "religion_totals": {
+          "christian": 1279407,
+          "muslim": 301479,
+          "unknown": 215068,
+          "buddhist": 142575,
+          "hindu": 53065,
+          "shinto": 50594,
+          "jewish": 11407,
+          "other": 18754
+        },
+        "seconds": 2.7
+      },
+      "5": {
+        "tier": "overview",
+        "cell_px": 2,
+        "detail": 9,
+        "attrs": [
+          "religion",
+          "denomination",
+          "country_code"
+        ],
+        "kept": 916974,
+        "kept_fraction": 0.44248,
+        "groups_with_n_over_1": 336682,
+        "religion_totals": {
+          "christian": 1279407,
+          "muslim": 301479,
+          "unknown": 215068,
+          "buddhist": 142575,
+          "hindu": 53065,
+          "shinto": 50594,
+          "jewish": 11407,
+          "other": 18754
+        },
+        "seconds": 3.6
+      },
+      "6": {
+        "tier": "places",
+        "cell_px": 2,
+        "detail": 9,
+        "attrs": [
+          "religion",
+          "denomination",
+          "country_code"
+        ],
+        "kept": 1212056,
+        "kept_fraction": 0.584871,
+        "groups_with_n_over_1": 331922,
+        "religion_totals": {
+          "christian": 1279407,
+          "muslim": 301479,
+          "unknown": 215068,
+          "buddhist": 142575,
+          "hindu": 53065,
+          "shinto": 50594,
+          "jewish": 11407,
+          "other": 18754
+        },
+        "seconds": 4.4
+      },
+      "7": {
+        "tier": "places",
+        "cell_px": 1,
+        "detail": 10,
+        "attrs": [
+          "religion",
+          "denomination",
+          "name",
+          "osm_id",
+          "osm_type",
+          "country_code"
+        ],
+        "kept": 1653926,
+        "kept_fraction": 0.798092,
+        "groups_with_n_over_1": 245854,
+        "religion_totals": {
+          "christian": 1279407,
+          "muslim": 301479,
+          "unknown": 215068,
+          "buddhist": 142575,
+          "hindu": 53065,
+          "shinto": 50594,
+          "jewish": 11407,
+          "other": 18754
+        },
+        "seconds": 6.3
+      }
+    }
+  }
+}
