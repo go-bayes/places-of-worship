@@ -6,8 +6,6 @@
 # Anything not listed keeps the Pages default (revalidate on every request).
 /
   Cache-Control: public, max-age=600, stale-while-revalidate=86400
-/index.html
-  Cache-Control: public, max-age=600, stale-while-revalidate=86400
 /apps/global/*
   Cache-Control: public, max-age=600, stale-while-revalidate=86400
 /apps/guides/*
@@ -17,6 +15,8 @@
 /apps/shared/*
   Cache-Control: public, max-age=600, stale-while-revalidate=86400
 /apps/workbench/*
+  Cache-Control: public, max-age=600, stale-while-revalidate=86400
+/schemas/*
   Cache-Control: public, max-age=600, stale-while-revalidate=86400
 # versioned vendor directory: library versions are in the path
 /apps/vendor/*
