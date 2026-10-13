@@ -66,8 +66,8 @@ assert.doesNotMatch(unvalidated, /overviewKeep/);
 const stamps = {
     "region-map.js": "20261013a", // grid-thinned tiers, counts by n, representative-dot zoom, home view
     "unvalidated-places.js": "20261013a", // grid-thinned overview as the fallback tier, representative-dot test
-    "verification-map.js": "20261007b", // one-round-trip landing
-    "review-map.js": "20261007a",
+    "verification-map.js": "20261013a", // tap on a grid-thinned fallback dot zooms in
+    "review-map.js": "20261013a", // tap on a grid-thinned fallback dot zooms in
 };
 const scripts = Object.keys(stamps);
 const pages = [];

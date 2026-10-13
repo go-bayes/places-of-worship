@@ -3898,7 +3898,8 @@ class NzVerificationMap {
         // a dot of the grid-thinned overview (a country with no dots set, the
         // world view) names nothing: zoom in to where every place is named
         if (UNVALIDATED_PLACES.isRepresentativeDot && UNVALIDATED_PLACES.isRepresentativeDot(hit.feature.properties)) {
-            this.map.flyTo(hit.latlng, Math.max(UNVALIDATED_PLACES.PLACES_MIN_ZOOM, Math.floor(this.map.getZoom()) + 2), { duration: 0.6 });
+            const target = Math.min(this.map.getMaxZoom(), Math.max(UNVALIDATED_PLACES.PLACES_MIN_ZOOM, Math.floor(this.map.getZoom()) + 2));
+            this.map.flyTo(hit.latlng, target, { duration: 0.6 });
             return;
         }
         this.openContextDot(hit.feature, hit.latlng);

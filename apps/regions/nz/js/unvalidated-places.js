@@ -238,7 +238,7 @@
     // screen-pixel cell and names none of them: no name, no osm id. the
     // ra-dots and places tiers always carry one or the other
     function isRepresentativeDot(props) {
-        return !(props && (props.name || props.osm_id));
+        return !(props && (props.name || props["name:en"] || props.name_en || props.osm_id));
     }
 
     function featureFrom(props, latlng) {

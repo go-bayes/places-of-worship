@@ -26,6 +26,8 @@ assert.equal(mod.OVERVIEW_TILE_URL, "https://tiles.placemap.org/places-overview-
 assert.equal(mod.isRepresentativeDot({ religion: "christian", n: 4 }), true);
 assert.equal(mod.isRepresentativeDot({}), true);
 assert.equal(mod.isRepresentativeDot({ name: "St Mary" }), false);
+assert.equal(mod.isRepresentativeDot({ "name:en": "St Mary" }), false);
+assert.equal(mod.isRepresentativeDot({ name_en: "St Mary" }), false);
 assert.equal(mod.isRepresentativeDot({ osm_id: 12, osm_type: "node" }), false);
 assert.match(mod.PLACES_TILE_URL, /\/places\//);
 assert.equal(mod.RA_DOTS_MIN_NATIVE_ZOOM, 3);

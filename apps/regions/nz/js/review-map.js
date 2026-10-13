@@ -479,7 +479,8 @@
                 // a dot of the grid-thinned overview names nothing: zoom in
                 // to where every place is named rather than open an empty popup
                 if (places.isRepresentativeDot && places.isRepresentativeDot(props)) {
-                    map.flyTo(hit.latlng, Math.max(places.PLACES_MIN_ZOOM, Math.floor(map.getZoom()) + 2), { duration: 0.6 });
+                    const target = Math.min(map.getMaxZoom(), Math.max(places.PLACES_MIN_ZOOM, Math.floor(map.getZoom()) + 2));
+                    map.flyTo(hit.latlng, target, { duration: 0.6 });
                     return;
                 }
                 const lat = hit.latlng.lat;
