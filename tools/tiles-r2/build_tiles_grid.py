@@ -86,10 +86,13 @@ PLACES_THIN_ZOOMS = [z for z, s in ZOOM_SPEC.items() if s["tier"] == "places"]
 TILE_CAP_BYTES = {"overview": 750_000, "places": 1_250_000}
 # a point on a tile edge can round into the neighbouring tile's buffer; counts
 # over tile-proper points are allowed this many places of slack against the
-# input (the extract records three far-edge points; the 2026-10-13 build
-# needed none)
+# input. absolute, not proportional: the loss is a few points per tile edge at
+# most (the extract records three far-edge points; the 2026-10-13 build needed
+# none), so it does not grow with the input, and a proportional slack of 0.1
+# percent would have let two thousand places go missing unnoticed
 EDGE_SLACK_PLACES = 50
 COUNT_FLOOR = 0.005  # religions above this share of the input are checked for totals
+TAIL_KEY = "(below floor)"  # the folded long tail of religion values in public reports
 
 
 def overview_name(snapshot=SNAPSHOT, suffix=SUFFIX):
@@ -173,7 +176,8 @@ def religion_summary(totals, input_total):
             out[str(rel)] = n
         else:
             other += n
-    out["other"] = other
+    # a key no source religion can collide with
+    out[TAIL_KEY] = other
     return out
 
 
@@ -436,7 +440,7 @@ def check_thin_zoom(z, s, exp, layer, cap, input_religion, input_total):
     if not within_slack(s["n_sum"], input_total):
         problems.append(f"z{z}: the sum of n over tile-proper points is {s['n_sum']}, input {input_total}")
     for rel, total in input_religion.items():
-        if rel == "other" or total / input_total < COUNT_FLOOR:
+        if rel == TAIL_KEY or total / input_total < COUNT_FLOOR:
             continue
         if not within_slack(s["religion"].get(rel, 0), total):
             problems.append(f"z{z}: religion {rel} sums to {s['religion'].get(rel, 0)} by n, input {total}")
@@ -644,7 +648,10 @@ def _manifest(a, name, archive, rep_arch, thin, info, zooms, description, upload
         "sha256": rep_arch["sha256"], "feature_count": None, "privacy": "public", "licence_status": "needs_review",
         "notes": description + " A machine-local build output, a cache and not a durable store; the durable copy is the R2 object, once uploaded and recorded."}]
     for u in uploads:
-        if u.get("key") == f"{name}.pmtiles" and u.get("match"):
+        if u.get("key") == f"{name}.pmtiles":
+            if not u.get("match"):
+                print(f"manifest: the upload record for {u['key']} did not verify (match false); not recording it", file=sys.stderr)
+                sys.exit(7)
             if u.get("sha256_readback") != rep_arch["sha256"]:
                 print(f"manifest: the upload record for {u['key']} carries sha256 {u.get('sha256_readback')}, the validated archive {rep_arch['sha256']}", file=sys.stderr)
                 sys.exit(7)
@@ -670,7 +677,6 @@ def _manifest(a, name, archive, rep_arch, thin, info, zooms, description, upload
             "software_versions": {"tippecanoe": info["tippecanoe"], "pmtiles_cli": info["pmtiles_cli"], "python": sys.version.split()[0]}},
         "source": {
             "provider": "slim.ndjson of tiles-v2-20260722 (the extract of places.mbtiles, the live places tileset built 2026-07-22)" + ("; places.mbtiles for z8-18" if "copied_zooms" in rep_arch else ""),
-            "local_cache_hint": "the v2 extract work directory and the July archive folder on the build machine (private handover)",
             "licence": None,
             "citation": (f"slim.ndjson sha256 {thin['slim_sha256']}, {thin['input_features']} features, extracted by build_tiles_v2.py "
                          f"(see the tiles-v2-{SNAPSHOT} manifests)."),
@@ -718,6 +724,8 @@ def cmd_manifest(a):
     if info.get("places_built"):
         targets.append((places_name(a.snapshot), PLACES_THIN_ZOOMS,
                         "public places tier, z6-18, layer places: z6 one dot per 2 px cell, religion and denomination (religion, denomination, country_code, n); z7 one dot per 1 px cell with the six slim attributes and n; z8-18 byte-identical to the live places tileset."))
+    # every target is checked and built before anything is written, so a failure leaves the directory untouched
+    manifests = []
     for name, zooms, description in targets:
         archive = out / f"{name}.pmtiles"
         if name not in rep["archives"]:
@@ -729,6 +737,8 @@ def cmd_manifest(a):
             sys.exit(7)
         manifest = _manifest(a, name, archive, rep["archives"][name], thin, info, zooms, description, uploads)
         jsonschema.validate(manifest, schema)
+        manifests.append((name, manifest))
+    for name, manifest in manifests:
         (dest / f"{name}.manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
         (dest / f"validation-report-{name}.json").write_text(json.dumps({"validation": rep, "thin": thin}, indent=2, ensure_ascii=False) + "\n")
         (dest / f"validation-report-{name}.md").write_text(_md_report(rep, thin))

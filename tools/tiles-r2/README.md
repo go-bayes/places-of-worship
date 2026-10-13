@@ -56,7 +56,7 @@ mkdir -p <work> && uv run tools/tiles-r2/build_tiles_grid.py all --work <work> \
   --slim <extract>/slim.ndjson --extract-work <extract> --source <source> --git-commit <hash>
 ```
 
-At zoom 7 a named dot can stand for more than one place (`n` above one): hover and the popup show the representative's name while the counts panel adds `n`.
+The two validation reports under `manifests/` are the same document, written once per archive name: each covers the whole build, both archives and the thin report. At zoom 7 a named dot can stand for more than one place (`n` above one): hover and the popup show the representative's name while the counts panel adds `n`.
 
 Stages: `thin` (per-zoom NDJSON parts and `thin-report.json`), `build` (tippecanoe per zoom and `tile-join -pk` for the overview; tippecanoe z6 and z7 plus the SQLite copy and `pmtiles convert` for the places tier), `validate` (every z0 to 7 tile decoded: tile-proper points equal the thin report's kept count, the sum of `n` and the per-religion sums equal the input, attributes within the zoom's set, layer names, header zooms, and the largest tile under the tier's byte criterion; z8 to 18 compared with the source by digest; exit 5 on a problem, 6 on an unmet criterion) and `manifest` (two data manifests and the report, written only when validation passed and the archive digests still match; `--uploads` adds the verified R2 objects from the upload script's JSON lines). Nothing in it writes to R2. Upload with the versioned-key refusal below (one archive at a time, read back in full).
 
