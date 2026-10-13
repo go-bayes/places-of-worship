@@ -142,6 +142,8 @@ def config_payloads(page):
     columns_sha = quoted_property(level, "summaryColumnsSha256")
     if columns and not columns_sha:
         raise ValueError(f"default level {default_level!r} declares summaryColumns without summaryColumnsSha256")
+    if columns_sha and not columns:
+        raise ValueError(f"default level {default_level!r} declares summaryColumnsSha256 without summaryColumns")
     return boundary, summary, waves, columns, columns_sha
 
 

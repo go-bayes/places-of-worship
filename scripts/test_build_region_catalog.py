@@ -71,6 +71,13 @@ class CatalogueSummaryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "without summaryColumnsSha256"):
             self.entry(html)
 
+    def test_sha_without_columns_fails(self):
+        html = page_html(with_columns=False).replace(
+            'summary: "data/summary.json",', f'summary: "data/summary.json",\n      summaryColumnsSha256: "{self.sha}",'
+        )
+        with self.assertRaisesRegex(ValueError, "summaryColumnsSha256 without summaryColumns"):
+            self.entry(html)
+
     def test_page_without_columns_records_the_governed_summary(self):
         entry = self.entry(page_html(with_columns=False))
         governed = (self.dir / "data" / "summary.json").read_bytes()
