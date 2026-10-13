@@ -353,14 +353,20 @@ describe("tile worker", () => {
       (await get("/places-overview/5/31/19", { Origin: origin })).headers.get("Access-Control-Allow-Origin");
     for (const origin of [
       "https://places-of-worship.pages.dev",
-      "https://ops-tiles-1.places-of-worship.pages.dev",
+      "https://preview-1.places-of-worship.pages.dev",
       "https://religionmap.org",
     ]) {
       assert.equal(await acao(origin), origin);
     }
     for (const origin of [
       "https://places-of-worship.pages.dev.evil.example",
-      "https://evil.example/places-of-worship.pages.dev",
+      "https://evil-places-of-worship.pages.dev",
+      "https://places-of-worship.pages.dev:8443",
+      "https://places-of-worship.pages.dev/",
+      "https://user@places-of-worship.pages.dev",
+      "https://-a.places-of-worship.pages.dev",
+      "https://a-.places-of-worship.pages.dev",
+      "null",
       "http://places-of-worship.pages.dev",
       "http://abc123.places-of-worship.pages.dev",
       "https://a.b.places-of-worship.pages.dev",
@@ -371,6 +377,17 @@ describe("tile worker", () => {
     ]) {
       assert.equal(await acao(origin), null, origin);
     }
+  });
+
+  it("answers an OPTIONS preflight from a Pages origin with its origin", async () => {
+    const origin = "https://preview-1.places-of-worship.pages.dev";
+    const res = await worker.fetch(
+      new Request("https://tiles.test/places-overview/5/31/19", { method: "OPTIONS", headers: { Origin: origin } }),
+      { BUCKET: bucket },
+      ctx,
+    );
+    assert.equal(res.headers.get("Access-Control-Allow-Origin"), origin);
+    assert.equal(res.headers.get("Vary"), "Origin");
   });
 
   it("keeps CORS and Vary on 200 for an allowed origin only", async () => {

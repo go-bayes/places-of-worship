@@ -31,8 +31,9 @@ const ALLOWED_ORIGINS = new Set([
 
 // the cloudflare pages site: the production origin and its branch or hash previews,
 // https://<label>.places-of-worship.pages.dev, where <label> is one or more lower-case
-// letters, digits or hyphens and holds no dot. https only, and the suffix must end the host
-const PAGES_ORIGIN = /^https:\/\/(?:[a-z0-9-]+\.)?places-of-worship\.pages\.dev$/;
+// letters, digits or hyphens, starts and ends with a letter or digit, and holds no dot.
+// https only, and the suffix must end the host
+const PAGES_ORIGIN = /^https:\/\/(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)?places-of-worship\.pages\.dev$/;
 
 function originAllowed(origin) {
   return ALLOWED_ORIGINS.has(origin) || PAGES_ORIGIN.test(origin);
