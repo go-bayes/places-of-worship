@@ -567,9 +567,11 @@
         if (c.code) {
           // hover, focus or touch is strong intent: warm the whole pair
           // so the destination's census layer opens from cache too. where
-          // the prerender rule runs, it fetches the page shell itself; the
-          // census pair still warms here, because a prerendered map requests
-          // no census data before the click
+          // the prerender rule runs, it fetches the page shell itself, so
+          // the shell is skipped. the census pair still warms here for
+          // browsers without the api and under the shared byte budget;
+          // where the rule runs, the prerendered page has already fetched
+          // both from its startup census fetch, so this warm is a cache hit
           const warm = () => { void prefetchCountry(c.code, true, true, !rowsPrerender); };
           a.addEventListener("pointerenter", warm, { once: true });
           a.addEventListener("focus", warm, { once: true });
