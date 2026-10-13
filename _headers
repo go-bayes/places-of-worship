@@ -1,0 +1,23 @@
+# Cloudflare Pages response headers (see docs/development/cloudflare-pages-hosting.md).
+# Cloudflare merges every matching rule and joins duplicate headers with a comma,
+# so a catch-all /* rule plus an /apps/vendor/* rule would send two contradictory
+# Cache-Control values for the vendor files. The revalidating rules below therefore
+# name the top-level paths one by one and leave /apps/vendor/* out.
+# Anything not listed keeps the Pages default (revalidate on every request).
+/
+  Cache-Control: public, max-age=600, stale-while-revalidate=86400
+/index.html
+  Cache-Control: public, max-age=600, stale-while-revalidate=86400
+/apps/global/*
+  Cache-Control: public, max-age=600, stale-while-revalidate=86400
+/apps/guides/*
+  Cache-Control: public, max-age=600, stale-while-revalidate=86400
+/apps/regions/*
+  Cache-Control: public, max-age=600, stale-while-revalidate=86400
+/apps/shared/*
+  Cache-Control: public, max-age=600, stale-while-revalidate=86400
+/apps/workbench/*
+  Cache-Control: public, max-age=600, stale-while-revalidate=86400
+# versioned vendor directory: library versions are in the path
+/apps/vendor/*
+  Cache-Control: public, max-age=31536000, immutable

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-10-13 (Cloudflare Pages response headers)
+
+- Added `_headers` at the repository root and `docs/development/cloudflare-pages-hosting.md` for the planned move from GitHub Pages to Cloudflare Pages (item 8 of the country-speed plan, ruling D8; Joseph, 2026-10-13). Pages, scripts, styles and data keep revalidation (`max-age=600, stale-while-revalidate=86400`); `/apps/vendor/*` is `immutable` for a year. Cloudflare joins duplicate headers from overlapping rules, so the revalidating rules name the top-level paths instead of a catch-all `/*`. The `?v=` stamps keep their role. Nothing changes until the maintainer connects the project in the dashboard; the document records the steps and the rollback.
+
 ### 2026-10-13 (heap path moved to the private handover; legacy script removed)
 
 - `AGENTS.md`: the handover pointer names the newest private handover file (`handover-2026-10-13-close.md`) and notes that the conductor handover now carries the heap path.
