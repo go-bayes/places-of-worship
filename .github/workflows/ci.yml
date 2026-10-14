@@ -56,6 +56,7 @@ jobs:
           node apps/regions/_shared/tiles-v2-client.test.cjs
           node apps/regions/_shared/denomination-filter.test.cjs
           node apps/regions/_shared/counts-label.test.cjs
+          node apps/regions/_shared/escape-map-text.test.cjs
           node apps/regions/_shared/area-summary-columns.test.cjs
           node apps/regions/nz/js/refresh-merge.test.cjs
           node apps/regions/nz/js/ra-landing.test.cjs
@@ -74,6 +75,7 @@ jobs:
           node apps/regions/nz/js/deep-link-context.test.cjs
           node apps/regions/nz/js/country-config.test.cjs
           node apps/regions/nz/js/link-nearby-place-dom.test.cjs
+          node apps/regions/nz/js/marker-tooltip-escape.test.cjs
           node apps/shared/region-resolve.test.cjs
       - name: dated-places builder tests
         run: python3 -m unittest scripts/test_build_occupancy_dated_places.py

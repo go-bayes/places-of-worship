@@ -1270,6 +1270,17 @@ function escapeHtml(value) {
         .replaceAll("'", "&#039;");
 }
 
+// an href only when the value parses as an http or https url; else ""
+function safeHttpUrl(value) {
+    if (typeof value !== "string" || !value.trim()) return "";
+    try {
+        const url = new URL(value.trim());
+        return url.protocol === "http:" || url.protocol === "https:" ? url.href : "";
+    } catch (error) {
+        return "";
+    }
+}
+
 function cap(value) {
     return String(value || "")
         .replaceAll("_", " ")
@@ -5863,11 +5874,13 @@ class NzVerificationMap {
         const backendTask = this.backendTasksById.get(props.task_id);
         const statusText = (backendTask?.status || "not started").replaceAll("_", " ");
         const lastActivity = relativeTimeText(backendTask?.last_event_at || backendTask?.updated_at);
+        // leaflet writes a string tooltip as html, and the name is contributor
+        // entered: escape each part
         return [
             props.name || "Unnamed site",
             statusText,
             lastActivity ? `last activity ${lastActivity}` : "",
-        ].filter(Boolean).join(" · ");
+        ].filter(Boolean).map(escapeHtml).join(" · ");
     }
 
     createIcon(priority, status, verifState = "unvalidated", isNomination = false) {
@@ -13170,7 +13183,12 @@ class NzVerificationMap {
         if (!url) {
             return `<span></span>`;
         }
-        return `<a${className ? ` class="${escapeHtml(className)}"` : ""} href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`;
+        // render a link only for http and https urls; any other scheme shows the text alone
+        const href = safeHttpUrl(url);
+        if (!href) {
+            return `<span>${escapeHtml(label)}</span>`;
+        }
+        return `<a${className ? ` class="${escapeHtml(className)}"` : ""} href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`;
     }
 
     async copyEvidenceRow(props) {

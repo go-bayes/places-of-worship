@@ -742,6 +742,89 @@ function ensureNearestLine() {
   map.getSource(NEAREST_LINE_SOURCE).setData({ type: "FeatureCollection", features });
 }
 
+// ---- escaping and link checks for markup built from data ----------------
+// tile properties (osm names, tags), fetched json and contributor records all
+// reach popups, tooltips and panels as html strings; escape each value with
+// escText before it enters markup. RC config strings stay author-controlled
+// html as elsewhere in this file
+function escText(value) {
+  return String(value).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+// an href only when the value parses as an http or https url; else ""
+function safeHttpUrl(value) {
+  if (typeof value !== "string" || !value.trim()) return "";
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === "http:" || url.protocol === "https:" ? url.href : "";
+  } catch (err) {
+    return "";
+  }
+}
+// an openstreetmap object link only for node, way or relation with a digit id
+function osmObjectUrl(type, id) {
+  const t = String(type === undefined || type === null ? "" : type).toLowerCase();
+  const n = String(id === undefined || id === null ? "" : id);
+  return (t === "node" || t === "way" || t === "relation") && /^[0-9]+$/.test(n)
+    ? `https://www.openstreetmap.org/${t}/${n}`
+    : "";
+}
+// the one-line name label of the hover and pinned popups
+function placeLabelHtml(name) {
+  return `<div style="font-weight:600;color:inherit;">${escText(name)}</div>`;
+}
+// the title row of a census area popup
+function censusAreaHeaderHtml(name) {
+  return `<div class="popup-header"><span class="popup-title">${escText(name)}</span></div>`;
+}
+// the census area hover popup: area name, then the metric line
+function censusHoverHtml(name, metricLabel, year, valueText) {
+  return `<div style="font-weight:600;">${escText(name)}</div>` +
+    `<div>${escText(metricLabel)} (${escText(year)}): ${escText(valueText)}</div>`;
+}
+// the dated-place popup. every record string is escaped; the osm link needs a
+// valid object type and id; coords is [lng, lat]
+function datedPlacePopupHtml(pr, coords) {
+  const [lng, lat] = coords;
+  const name = pr.name || "Unnamed place";
+  const reviewed = pr.source === "reviewed_occupancy";
+  // a reviewed period states its windows: "1899–1901 to 1960" reads
+  // as a start somewhere in 1899–1901 and an end in 1960
+  const startWords = reviewed && Number.isFinite(pr.start_lower) && Number.isFinite(pr.start_upper) && pr.start_lower !== pr.start_upper
+    ? `${pr.start_lower}–${pr.start_upper}`
+    : reviewed && !Number.isFinite(pr.start_lower) && Number.isFinite(pr.start_upper)
+      ? `by ${pr.start_upper}`
+      : `${pr.start_year || "?"}`;
+  const endWords = reviewed && pr.end_unknown
+    ? "end undated"
+    : reviewed && Number.isFinite(pr.end_lower) && Number.isFinite(pr.end_upper) && pr.end_lower !== pr.end_upper
+      ? `${pr.end_lower}–${pr.end_upper}`
+      : reviewed && Number.isFinite(pr.end_lower) && !Number.isFinite(pr.end_upper)
+        ? `after ${pr.end_lower}`
+        : reviewed && pr.still_active_asof
+          ? `in use as of ${pr.still_active_asof}`
+          : `${pr.end_year || "present"}`;
+  const span = reviewed ? `${startWords} to ${endWords}` : `${pr.start_year || "?"}–${pr.end_year || "present"}`;
+  const prospective = censusState.enabled &&
+    Number.isFinite(pr.start_year) && pr.start_year > censusState.year;
+  const osmUrl = osmObjectUrl(pr.osm_type, pr.osm_id);
+  return `<div class="popup-header"><span class="popup-title">${escText(name)}</span></div>` +
+    `<div class="place-attrs">` +
+    (pr.religion ? `<div class="place-attr"><span class="place-attr-key">Religion</span><span class="place-attr-val">${escText(pr.religion)}</span></div>` : "") +
+    (pr.denomination ? `<div class="place-attr"><span class="place-attr-key">Denomination</span><span class="place-attr-val">${escText(pr.denomination)}</span></div>` : "") +
+    `<div class="place-attr"><span class="place-attr-key">Dated</span><span class="place-attr-val">${escText(span)}</span></div>` +
+    (reviewed && Number.isFinite(pr.radius_m) ? `<div class="place-attr"><span class="place-attr-key">Location</span><span class="place-attr-val">approximate, within ${pr.radius_m >= 1000 ? `${pr.radius_m / 1000} km` : `${pr.radius_m} m`}</span></div>` : "") +
+    (reviewed && pr.end_reason ? `<div class="place-attr"><span class="place-attr-key">Ended</span><span class="place-attr-val">${escText(String(pr.end_reason).replace(/_/g, " "))}</span></div>` : "") +
+    `</div>` +
+    (prospective ? `<div class="place-note">Founded after ${censusState.year} — shown because "show later foundations" is on.</div>` : "") +
+    (reviewed
+      ? `<div class="place-note">A period of use recorded from evidence and accepted by a reviewer; a dashed ring means ${censusState.year} falls inside a start or end window.</div>`
+      : `<div class="place-note">Dates from OpenStreetMap tags — provisional until reviewed evidence replaces them.</div>`) +
+    `<div class="popup-actions">` +
+    `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat.toFixed(6)},${lng.toFixed(6)}" target="_blank" rel="noopener">Street View</a>` +
+    (osmUrl ? `<a href="${osmUrl}" target="_blank" rel="noopener">Open OSM</a>` : "") +
+    `</div>`;
+}
+
 // holding focus keys on osm identity so the line survives popup close
 // (useful for planning); clicking the same place again, or changing the
 // measuring point, releases the line back to the nearest place
@@ -781,7 +864,7 @@ function portalReviseHref(name, latFixed, lngFixed, props) {
 }
 function reviseLinkHtml(name, latFixed, lngFixed, props) {
   const href = portalReviseHref(name, latFixed, lngFixed, props);
-  return href ? `<a class="popup-revise" href="${href}" title="Open the contributor portal at this place">Revise this place</a>` : "";
+  return href ? `<a class="popup-revise" href="${escText(href)}" title="Open the contributor portal at this place">Revise this place</a>` : "";
 }
 function placeKey(props, coords) {
   return props && props.osm_id ? `${props.osm_type || "node"}/${props.osm_id}` : coords.join(",");
@@ -949,7 +1032,7 @@ function showPinnedLabel(name, coords) {
   pinnedLabel.options.anchor = undefined;
   pinnedLabel
     .setLngLat(coords)
-    .setHTML(`<div style="font-weight:600;color:inherit;">${name}</div>`)
+    .setHTML(placeLabelHtml(name))
     .addTo(map);
   makePopupDraggable(pinnedLabel);
   if (pinnedTimer) clearTimeout(pinnedTimer);
@@ -1082,7 +1165,7 @@ function showMobileStreetViewPopup(name, coords, featureId) {
   const popup = new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
     .setLngLat(coords)
     .setHTML(
-      `<div class="popup-header"><span class="popup-title">${name || "Unnamed"}</span></div>` +
+      `<div class="popup-header"><span class="popup-title">${escText(name || "Unnamed")}</span></div>` +
       distanceRowsHtml(coords) +
       `<div class="popup-actions">${reviseLink}${openStreetViewLink}${directionsLink}</div>`
     )
@@ -1100,7 +1183,7 @@ function showMobileStreetViewPopup(name, coords, featureId) {
     const betterName = p["name:en"] || p.name_en || p.name;
     if (betterName) {
       popup.setHTML(
-        `<div class="popup-header"><span class="popup-title">${betterName}</span></div>` +
+        `<div class="popup-header"><span class="popup-title">${escText(betterName)}</span></div>` +
         `<div class="popup-actions">${reviseLinkHtml(betterName, latFixed, lngFixed, p)}${openStreetViewLink}${directionsLink}</div>`
       );
     }
@@ -1348,7 +1431,7 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
     new maplibregl.Popup({ maxWidth: "340px", closeOnClick: true })
       .setLngLat(coords)
       .setHTML(
-        `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
+        `<div class="popup-header"><span class="popup-title">${escText(name)}</span></div>` +
         `<div class="popup-actions">` +
         reviseLinkHtml(name, latFixed, lngFixed, props) +
         `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latFixed},${lngFixed}" target="_blank" rel="noopener">Street View</a>` +
@@ -1363,7 +1446,7 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
     .setLngLat(coords)
     .setHTML(
       `<div class="popup-header" data-drag-handle="true">` +
-      `<span class="popup-title">${name}</span>` +
+      `<span class="popup-title">${escText(name)}</span>` +
       `</div>` +
       distanceRowsHtml(coords) +
       `<div class="streetview" id="${panoId}">Loading Street View…</div>` +
@@ -1752,7 +1835,7 @@ function addPlacesLayer() {
     const name = props["name:en"] || props.name_en || props.name || "Unnamed";
     hoverPopup
       .setLngLat(coords)
-      .setHTML(`<div style="font-weight:600;color:inherit;">${name}</div>`)
+      .setHTML(placeLabelHtml(name))
       .addTo(map);
     showPinnedLabel(name, coords);
   });
@@ -4351,8 +4434,7 @@ function attachCensusHandlers() {
     censusHoverPopup
       .setLngLat(e.lngLat)
       .setHTML(
-        `<div style="font-weight:600;">${feature.properties[censusLevelDef().nameProp]}</div>` +
-        `<div>${def.label} (${censusState.year}): ${valueText}</div>`
+        censusHoverHtml(feature.properties[censusLevelDef().nameProp], def.label, censusState.year, valueText)
       )
       .addTo(map);
   });
@@ -4419,7 +4501,7 @@ function openCensusPopup(feature, lngLat) {
     const pendingNote = RC.pendingAreaNote ||
       `Place density from OpenStreetMap. ${RC.dataNoun || "Census"} religious-affiliation data are pending for this area.`;
     const html =
-      `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
+      censusAreaHeaderHtml(name) +
       placeInfo +
       `<div class="place-note">${pendingNote}</div>` +
       `<div class="place-note">${levelDef.credit}${placeInfo ? " · places © OpenStreetMap (ODbL)" : ""}</div>`;
@@ -4486,7 +4568,7 @@ function openCensusPopup(feature, lngLat) {
     if (flagged) anyFlagged = true;
     const selected = year === censusState.year ? ' class="census-year-selected"' : "";
     return `<tr${selected}>
-      <td>${year}${flagged ? "*" : ""}</td>
+      <td>${escText(year)}${flagged ? "*" : ""}</td>
       ${showActive ? `<td>${fmtActive(row[activeMetric])}${activeIsShare ? shareMark(row) : ""}</td>` : ""}
       ${hasCountMetric ? `<td>${Number.isFinite(row.religious_affiliation_count) ? countDef.format(row.religious_affiliation_count) : "–"}</td>` : ""}
       ${hasAffiliationPercent ? `<td>${fmtPercent(row.religious_affiliation_percent)}${shareMark(row)}</td>` : ""}
@@ -4521,14 +4603,14 @@ function openCensusPopup(feature, lngLat) {
         if (Number.isFinite(entry.percent)) parts.push(`${entry.percent}%`);
         if (Number.isFinite(entry.count)) parts.push(String(entry.count));
         return `<div class="place-attr">` +
-          `<span class="place-attr-key">${pulotuEscape(entry.label_verbatim)}</span>` +
+          `<span class="place-attr-key">${escText(entry.label_verbatim)}</span>` +
           `<span class="place-attr-val">${parts.join(" · ")}</span>` +
           `</div>`;
       }).join("") +
       `</div>`
     : "";
   const html =
-    `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
+    censusAreaHeaderHtml(name) +
     `<table class="census-table">` +
     `<thead><tr><th>${RC.dataNoun || "Census"}</th>${showActive ? `<th>${activeDef.label}</th>` : ""}${hasCountMetric ? `<th>${countLabel}</th>` : ""}${hasAffiliationPercent ? `<th>${affiliationLabel}</th>` : ""}${hasNoReligion ? `<th>${noReligionLabel}</th>` : ""}${hasPlaces ? "<th>Places</th><th>Per 10k</th>" : ""}</tr></thead>` +
     `<tbody>${rowsHtml}</tbody></table>` +
@@ -4751,48 +4833,9 @@ function addDatedPlacesLayer() {
       const f = e.features && e.features[0];
       if (!f) return;
       const pr = f.properties || {};
-      const name = pr.name || "Unnamed place";
-      const reviewed = pr.source === "reviewed_occupancy";
-      // a reviewed period states its windows: "1899–1901 to 1960" reads
-      // as a start somewhere in 1899–1901 and an end in 1960
-      const startWords = reviewed && Number.isFinite(pr.start_lower) && Number.isFinite(pr.start_upper) && pr.start_lower !== pr.start_upper
-        ? `${pr.start_lower}–${pr.start_upper}`
-        : reviewed && !Number.isFinite(pr.start_lower) && Number.isFinite(pr.start_upper)
-          ? `by ${pr.start_upper}`
-          : `${pr.start_year || "?"}`;
-      const endWords = reviewed && pr.end_unknown
-        ? "end undated"
-        : reviewed && Number.isFinite(pr.end_lower) && Number.isFinite(pr.end_upper) && pr.end_lower !== pr.end_upper
-          ? `${pr.end_lower}–${pr.end_upper}`
-          : reviewed && Number.isFinite(pr.end_lower) && !Number.isFinite(pr.end_upper)
-            ? `after ${pr.end_lower}`
-            : reviewed && pr.still_active_asof
-              ? `in use as of ${pr.still_active_asof}`
-              : `${pr.end_year || "present"}`;
-      const span = reviewed ? `${startWords} to ${endWords}` : `${pr.start_year || "?"}–${pr.end_year || "present"}`;
-      const prospective = censusState.enabled &&
-        Number.isFinite(pr.start_year) && pr.start_year > censusState.year;
-      const [lng, lat] = f.geometry.coordinates;
       const popup = new maplibregl.Popup({ maxWidth: "320px" })
         .setLngLat(f.geometry.coordinates)
-        .setHTML(
-          `<div class="popup-header"><span class="popup-title">${name}</span></div>` +
-          `<div class="place-attrs">` +
-          (pr.religion ? `<div class="place-attr"><span class="place-attr-key">Religion</span><span class="place-attr-val">${pr.religion}</span></div>` : "") +
-          (pr.denomination ? `<div class="place-attr"><span class="place-attr-key">Denomination</span><span class="place-attr-val">${pr.denomination}</span></div>` : "") +
-          `<div class="place-attr"><span class="place-attr-key">Dated</span><span class="place-attr-val">${span}</span></div>` +
-          (reviewed && Number.isFinite(pr.radius_m) ? `<div class="place-attr"><span class="place-attr-key">Location</span><span class="place-attr-val">approximate, within ${pr.radius_m >= 1000 ? `${pr.radius_m / 1000} km` : `${pr.radius_m} m`}</span></div>` : "") +
-          (reviewed && pr.end_reason ? `<div class="place-attr"><span class="place-attr-key">Ended</span><span class="place-attr-val">${String(pr.end_reason).replace(/_/g, " ")}</span></div>` : "") +
-          `</div>` +
-          (prospective ? `<div class="place-note">Founded after ${censusState.year} — shown because "show later foundations" is on.</div>` : "") +
-          (reviewed
-            ? `<div class="place-note">A period of use recorded from evidence and accepted by a reviewer; a dashed ring means ${censusState.year} falls inside a start or end window.</div>`
-            : `<div class="place-note">Dates from OpenStreetMap tags — provisional until reviewed evidence replaces them.</div>`) +
-          `<div class="popup-actions">` +
-          `<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat.toFixed(6)},${lng.toFixed(6)}" target="_blank" rel="noopener">Street View</a>` +
-          (pr.osm_type && pr.osm_id ? `<a href="https://www.openstreetmap.org/${pr.osm_type}/${pr.osm_id}" target="_blank" rel="noopener">Open OSM</a>` : "") +
-          `</div>`
-        )
+        .setHTML(datedPlacePopupHtml(pr, f.geometry.coordinates))
         .addTo(map);
       trackPlacePopup(popup);
     };
@@ -4932,9 +4975,6 @@ const PULOTU_GROUPS = [
   ["Post-Contact History", [["adoption_world_religion", "Adoption of a world religion"]]],
   ["Current Culture", [["dominant_world_religion", "Dominant world religion"]]]
 ];
-function pulotuEscape(s) {
-  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
 // the geojson loads once per session; each feature's curated codes are
 // flattened onto top-level properties (code_<metric>, -1 = not documented)
 // so paint expressions can match on them — maplibre expressions cannot
@@ -5034,17 +5074,17 @@ async function addPulotuLayer() {
         if (!v || v.code === null || v.code === undefined) {
           return `<span class="pulotu-val pulotu-val-missing">not documented</span>`;
         }
-        const full = pulotuEscape(v.label || "");
-        const head = pulotuEscape(String(v.label || "").split(" (")[0]);
+        const full = escText(v.label || "");
+        const head = escText(String(v.label || "").split(" (")[0]);
         const src = (v.sources || []).length
-          ? ` <span class="pulotu-src">${pulotuEscape(v.sources.join(", "))}</span>`
+          ? ` <span class="pulotu-src">${escText(v.sources.join(", "))}</span>`
           : "";
         return `<span class="pulotu-val" title="${full}">${head}</span>${src}`;
       };
       const groups = PULOTU_GROUPS.map(([heading, keys]) => {
         const rows = keys.map(([k, fallbackName]) => {
           const v = values[k];
-          const name = pulotuEscape(v && v.variable ? v.variable : fallbackName);
+          const name = escText(v && v.variable ? v.variable : fallbackName);
           return `<div class="place-attr"><span class="place-attr-key">${name}</span><span class="place-attr-val">${valueRow(v)}</span></div>`;
         }).join("");
         return `<div class="pulotu-group-title">${heading}</div><div class="place-attrs">${rows}</div>`;
@@ -5052,14 +5092,14 @@ async function addPulotuLayer() {
       const popup = new maplibregl.Popup({ maxWidth: "360px" })
         .setLngLat(f.geometry.coordinates)
         .setHTML(
-          `<div class="popup-header"><span class="popup-title">${pulotuEscape(pr.name || pr.culture_id)}</span></div>` +
+          `<div class="popup-header"><span class="popup-title">${escText(pr.name || pr.culture_id)}</span></div>` +
           `<div class="place-attrs">` +
           anchorRow("Traditional state time focus", timeFocus.traditional_state) +
           anchorRow("Contemporary time focus", timeFocus.contemporary) +
           `</div>` +
           groups +
           `<div class="place-note">A documented cultural reconstruction from the Pulotu database — values cite the database's sources; the full record carries all 88 variables.</div>` +
-          (pr.record_url ? `<div class="popup-actions"><a href="${pulotuEscape(pr.record_url)}" target="_blank" rel="noopener">Full Pulotu record</a></div>` : "")
+          (safeHttpUrl(pr.record_url) ? `<div class="popup-actions"><a href="${escText(safeHttpUrl(pr.record_url))}" target="_blank" rel="noopener">Full Pulotu record</a></div>` : "")
         )
         .addTo(map);
       trackPlacePopup(popup);
@@ -5104,14 +5144,14 @@ function renderPulotuLegend() {
     else counts.set(code, (counts.get(code) || 0) + 1);
   }
   const legendRow = (colour, label, n) =>
-    `<div class="pulotu-legend-row"><span class="pulotu-swatch" style="background:${colour}"></span><span class="pulotu-legend-label">${pulotuEscape(label)}</span><span class="pulotu-legend-count">${n}</span></div>`;
+    `<div class="pulotu-legend-row"><span class="pulotu-swatch" style="background:${colour}"></span><span class="pulotu-legend-label">${escText(label)}</span><span class="pulotu-legend-count">${n}</span></div>`;
   const rows = def.codes
     .filter(([code]) => counts.has(code))
     .map(([code, label, colour]) => legendRow(colour, label, counts.get(code)))
     .join("");
   const missingRow = missing ? legendRow(PULOTU_MISSING_COLOUR, "not documented", missing) : "";
   scale.innerHTML =
-    `<div class="census-legend-title">Pulotu cultures: ${pulotuEscape(def.label)} (${tp.label})</div>` +
+    `<div class="census-legend-title">Pulotu cultures: ${escText(def.label)} (${tp.label})</div>` +
     rows + missingRow +
     `<div class="census-legend-note">${tp.note}</div>` +
     `<div class="census-legend-note">Pulotu cultures are documented cultural reconstructions, not counts — the timeline steps through Pulotu's own three time points, never ${(RC.dataNoun || "census").toLowerCase()} years. © Pulotu (D-PLACE CLDF v1.3.1, CC BY 4.0)</div>`;
@@ -5368,11 +5408,8 @@ function updatePartialIndicator() {
 }
 
 // ---- dataset passport ---------------------------------------------------
-// escape product-json strings before they enter panel markup; RC config
-// strings stay author-controlled html as elsewhere in this file
-function escText(value) {
-  return String(value).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
+// (escText, safeHttpUrl and osmObjectUrl are defined with the popup helpers
+// near portalReviseHref)
 
 // distinct statistics providers behind the active product; boundary and
 // place-snapshot datasets stay in the drawer, off the identity line. two
@@ -5443,13 +5480,15 @@ function renderEvidenceDrawer(meta) {
     if (!s) continue;
     const name = s.name || s.provider || s.source_dataset_id;
     if (!name) continue;
-    const link = s.url
-      ? `<a href="${escText(s.url)}" target="_blank" rel="noopener">${escText(name)}</a>`
+    const sourceUrl = safeHttpUrl(s.url);
+    const link = sourceUrl
+      ? `<a href="${escText(sourceUrl)}" target="_blank" rel="noopener">${escText(name)}</a>`
       : escText(name);
     const licence = s.licence && (s.licence.name || (typeof s.licence === "string" ? s.licence : null));
+    const licenceUrl = safeHttpUrl(s.licence && s.licence.url);
     const licenceHtml = licence
-      ? (s.licence.url
-        ? ` — <a href="${escText(s.licence.url)}" target="_blank" rel="noopener">${escText(licence)}</a>`
+      ? (licenceUrl
+        ? ` — <a href="${escText(licenceUrl)}" target="_blank" rel="noopener">${escText(licence)}</a>`
         : ` — ${escText(licence)}`)
       : "";
     rows.push(`<li>${link}${licenceHtml}</li>`);
