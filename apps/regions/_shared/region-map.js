@@ -562,7 +562,7 @@ const contributeEscape = (value) => String(value).replace(/[&<>"']/g, (c) => ({ 
 function contributePortalMarkup(decision, idPrefix) {
   if (decision.kind === "config" || decision.kind === "country") {
     const named = decision.name ? ` · ${contributeEscape(decision.name)}` : "";
-    return `<a id="${idPrefix}-portal" href="${decision.portal}"><strong>Submit evidence to religionmap.org${named}</strong><span>Project members sign in with Google. If you are not yet a member, the sign-in page says how to get in touch.</span></a>`;
+    return `<a id="${idPrefix}-portal" href="${escText(decision.portal)}"><strong>Submit evidence to religionmap.org${named}</strong><span>Project members sign in with Google. If you are not yet a member, the sign-in page says how to get in touch.</span></a>`;
   }
   return `<span id="${idPrefix}-note" class="shell-panel-note" role="note">Zoom to a country to submit evidence</span>`;
 }
@@ -851,7 +851,7 @@ function portalReviseHref(name, latFixed, lngFixed, props) {
   if (!base) {
     const country = countryForPlace(props, Number(latFixed), Number(lngFixed));
     if (!country) return "";
-    base = `${PORTAL_BASE}verification.html?country=${String(country.code).toLowerCase()}`;
+    base = `${PORTAL_BASE}verification.html?country=${encodeURIComponent(String(country.code).toLowerCase())}`;
   }
   const params = new URLSearchParams({ revise: "1", lat: latFixed, lng: lngFixed });
   if (name && name !== "Loading place…" && name !== "Unnamed") params.set("name", name);
@@ -5662,7 +5662,7 @@ function censusTicksMarkup(tickYears, timeEl) {
     // always-labelled final year
     const labelled = stride === 1 || i === last ||
       (i % stride === 0 && last - i >= stride / 2);
-    return `<span data-year="${y}">${labelled ? y : ""}</span>`;
+    return `<span data-year="${escText(y)}">${labelled ? escText(y) : ""}</span>`;
   });
   return `<div class="census-ticks">${spans.join("")}</div>`;
 }

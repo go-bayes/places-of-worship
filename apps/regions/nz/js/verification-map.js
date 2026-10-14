@@ -11355,7 +11355,9 @@ class NzVerificationMap {
             rowEl.querySelector(".attachment-view")?.addEventListener("click", async () => {
                 try {
                     const grant = await this.backend.requestAttachmentView({ attachmentId });
-                    window.open(grant.view_url, "_blank", "noopener");
+                    // open only an http or https url from the server
+                    const viewUrl = safeHttpUrl(grant.view_url);
+                    if (viewUrl) window.open(viewUrl, "_blank", "noopener");
                 } catch (error) {
                     const status = block.querySelector(".attachment-status");
                     if (status) status.textContent = error.message || "Could not open the file.";
