@@ -32,6 +32,7 @@ import {
   assertTaskReasonLimit,
 } from "./lib/limits";
 import { DECIDED_REOPEN_REASON_MIN, isDecidedTaskStatus, sideRouteRefusal } from "./lib/intakeGate";
+import { intakeRateLimiter } from "./lib/rateLimits";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { evidenceDraftDoc, reviewDecisionDoc, taskDoc, taskEventDoc, userDoc } from "./lib/validators";
 
@@ -933,10 +934,18 @@ export const reopenTask = mutation({
       );
     }
     assertTaskReasonLimit("reopen reason", reason);
+    // an ra's reopens from a decided status are limited per user, 20 an
+    // hour (reserved security review, 2026-10-15); review roles are not
+    if (decided && !canReview(user.roles)) {
+      await intakeRateLimiter.limit(ctx, "decidedReopenPerUser", { key: user._id, throws: true });
+    }
     const now = Date.now();
     await ctx.db.patch(task._id, {
       status: "reopened",
-      ...(fromDecided !== null
+      // a flag already on the task means it has not been accepted afresh
+      // since the first reopen, so the first reopen's record stands; the
+      // event log holds every later reopen
+      ...(fromDecided !== null && task.reopened_after_decision === undefined
         ? {
           reopened_after_decision: {
             from_status: fromDecided,

@@ -9,6 +9,7 @@ import { world, draftContent } from "./testing/exportWorld.node-test.mjs";
 const { claimTask, releaseTask, skipTask, unskipTask, markProvisionallyClosed, reopenTask } = await import("./tasks.ts");
 const { submitEvidenceDraft, importSubmittedEvidenceDrafts } = await import("./evidence.ts");
 const { createExportBatch } = await import("./exports.ts");
+const { intakeRateLimiter } = await import("./lib/rateLimits.ts");
 const { recordReviewDecision, getReviewSnapshot } = await import("./reviews.ts");
 const { recordAcceptance } = await import("./acceptances.ts");
 
@@ -213,4 +214,58 @@ test("a spreadsheet import carrying a decided status does not move a reopened ta
     drafts: [],
   });
   assert.equal(w.row("tasks", "task_id", "task_new").status, "reviewed");
+});
+
+// reserved security review, 2026-10-15: the first reopen's record stands
+test("a later reopen keeps the flag of the first reopen, and its reason", async () => {
+  const w = await scene("pi_accepted");
+  await reopenTask._handler(w.as(w.ra), { taskId: "task_1", reason: "Reason A: new register." });
+  const first = { ...w.task.reopened_after_decision };
+  assert.equal(first.from_status, "pi_accepted");
+  await w.db.patch(w.task._id, { status: "reviewed" });
+  await reopenTask._handler(w.as(w.reviewer), { taskId: "task_1", reason: "Reason B: second look." });
+  assert.equal(w.task.status, "reopened");
+  assert.deepEqual({ ...w.task.reopened_after_decision }, first);
+  assert.equal(w.task.reopened_after_decision.reason, "Reason A: new register.");
+  const reopens = w.rows.task_events.filter((event) => event.event_type === "reopened");
+  assert.equal(reopens.length, 2);
+  assert.equal(reopens[1].reason, "Reason B: second look.");
+});
+
+test("an ra's reopens from a decided status are charged to the per-user limit; review roles and other reopens are not", async () => {
+  const original = intakeRateLimiter.limit;
+  const charged = [];
+  intakeRateLimiter.limit = async (_ctx, name, options) => {
+    charged.push([name, options?.key]);
+    if (charged.filter(([n]) => n === "decidedReopenPerUser").length > 2) throw new Error("Rate limit exceeded.");
+    return { ok: true, retryAfter: 0 };
+  };
+  try {
+    // an ra, decided: charged under the user's key
+    const w = await scene("reviewed");
+    await reopenTask._handler(w.as(w.ra), { taskId: "task_1", reason: "New evidence on the date." });
+    assert.deepEqual(charged, [["decidedReopenPerUser", w.ra._id]]);
+    // reviewers and non-decided reopens are not charged
+    for (const [status, actor] of [["reviewed", "reviewer"], ["needs_review", "ra"]]) {
+      const x = await scene(status);
+      await reopenTask._handler(x.as(x[actor]), { taskId: "task_1", reason: "Another look at it." });
+    }
+    assert.equal(charged.length, 1);
+    // a refusal by the limiter leaves the task decided and writes nothing
+    await reopenTask._handler(w.as(w.ra), { taskId: "task_x", reason: "Unused." }).catch(() => {});
+    const a = await scene("pi_accepted");
+    const b = await scene("exported");
+    await reopenTask._handler(a.as(a.ra), { taskId: "task_1", reason: "Second charge ok." });
+    await assert.rejects(reopenTask._handler(b.as(b.ra), { taskId: "task_1", reason: "Third charge refused." }), /Rate limit/);
+    assert.equal(b.task.status, "exported");
+    assert.equal(b.task.reopened_after_decision, undefined);
+    assert.equal(b.rows.task_events.length, 0);
+    // a short reason is refused before the limiter is charged
+    const before = charged.length;
+    const c = await scene("reviewed");
+    await assert.rejects(reopenTask._handler(c.as(c.ra), { taskId: "task_1", reason: "short" }), /at least 8/);
+    assert.equal(charged.length, before);
+  } finally {
+    intakeRateLimiter.limit = original;
+  }
 });

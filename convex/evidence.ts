@@ -237,7 +237,7 @@ export const restoreEvidenceDraft = mutation({
       throw new Error("Only a superseded or withdrawn record can be restored.");
     }
     const task = await getTaskOrThrow(ctx, draft.task_id);
-    if (["reviewed", "pi_accepted", "exported"].includes(task.status)) {
+    if (isDecidedTaskStatus(task.status)) {
       throw new Error("Reopen the task before restoring evidence on it.");
     }
 

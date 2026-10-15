@@ -40,4 +40,14 @@ export const intakeRateLimiter = new RateLimiter(components.rateLimiter, {
     rate: 1_000,
     period: HOUR,
   },
+  // an ra reopening a task from a decided status (reviewed, pi_accepted,
+  // exported) is limited to 20 an hour; reviewers, curators and admins are
+  // not charged. the cap bounds a compromised or careless invited account's
+  // reach over decided work, and sits well above honest use (reserved
+  // security review, 2026-10-15; jb ruling of the same day opened the route)
+  decidedReopenPerUser: {
+    kind: "fixed window",
+    rate: 20,
+    period: HOUR,
+  },
 });
