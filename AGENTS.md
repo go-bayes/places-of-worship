@@ -209,6 +209,10 @@
   summaries before replacing existing artefacts.
 - For frontend changes, test the affected map page in a browser and check tiles,
   controls, legends, popups, and overlays.
+- Every served page carries a Content-Security-Policy `<meta>` with the hashes
+  of its inline scripts. After editing an inline `<script>` or adding a page or
+  an external host, run `node scripts/stamp_csp.mjs` (see
+  `docs/development/content-security-policy.md`); CI checks it.
 - Any change to contributor-portal UI (`apps/regions/*/verification.html`,
   `apps/regions/nz/js/verification-map.js`, portal styles, or the rapid-entry
   contract's RA-facing surface) must update the RA guide

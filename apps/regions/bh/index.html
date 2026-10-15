@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com/maplibre-gl@3.6.1/ https://accounts.google.com/gsi/client https://maps.googleapis.com 'sha256-k3cuBDfb4pFOJoi+n7Mj9IAdonNSLT5t7YBpm9K2BEE=' 'sha256-PR88pvYbxnhOG7CDueQ1W0WpY5v0BG6KCN4pKBJCKZ4='; style-src 'self' 'unsafe-inline' https://unpkg.com/maplibre-gl@3.6.1/ https://accounts.google.com/gsi/style https://fonts.googleapis.com; img-src 'self' data: blob: https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://*.googleapis.com https://*.gstatic.com https://*.ggpht.com https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev https://*.r2.cloudflarestorage.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://tiles.placemap.org https://api.maptiler.com https://tile.openstreetmap.org https://photon.komoot.io https://nominatim.openstreetmap.org https://api.openstreetmap.org https://pastel-goshawk-398.convex.cloud https://*.r2.cloudflarestorage.com https://accounts.google.com/gsi/ https://maps.googleapis.com; worker-src 'self' blob:; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Places of Worship | Bahrain Research Map</title>
-  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous">
   <link href="../../shared/map-shell.css?v=20260904a" rel="stylesheet">
   <link href="../../global/styles/maplibre-flat.css?v=20260904a" rel="stylesheet">
   <link href="../_shared/region-map.css?v=20260904a" rel="stylesheet">
@@ -12,7 +13,7 @@
 <body>
   <div id="region-root"></div>
   <script src="../../global/config.public.js"></script>
-  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js" integrity="sha384-uofOi1moPDuBpTo0FkNAG4WsnGegNBw9g6c0yU85W9DOyVkz3Ht2vKC744Y92hu0" crossorigin="anonymous"></script>
   <script>
     // country-specific config only; shared behaviour lives in the runtime.
     // Bahrain's product is Information & eGovernment Authority (iGA) census

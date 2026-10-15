@@ -27,8 +27,9 @@ jobs:
           node scripts/export_bundle_fixture.mjs --check
           node scripts/build_definition_guide.mjs --check
           node scripts/osm_confidence_judgments.mjs --check
+          node scripts/stamp_csp.mjs --check
       - name: test evidence submission contract
-        run: node --test convex/lib/*.node-test.mjs convex/*.node-test.mjs scripts/osm_confidence_judgments.node-test.mjs
+        run: node --test convex/lib/*.node-test.mjs convex/*.node-test.mjs scripts/osm_confidence_judgments.node-test.mjs scripts/stamp_csp.node-test.mjs
       - name: typecheck workbench
         working-directory: apps/workbench
         run: |

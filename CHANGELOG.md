@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-10-15 (content security policy on every page)
+
+- Every served HTML page (259 of them; the workbench's Vite development entry is left out) carries a `<meta http-equiv="Content-Security-Policy">` directly after its `<meta charset>` line. GitHub Pages cannot send headers, so the policy is in the page. Scripts run only from the site, the pinned MapLibre release on unpkg, Google sign-in (`accounts.google.com/gsi/client`) and the Google Maps API; inline scripts run only when the page's policy carries their SHA-256 hash, so injected markup cannot run script. Fetches, images, fonts, frames and workers are limited to the hosts the code uses: the tile Worker, MapTiler, OpenStreetMap tiles and APIs, Photon, Nominatim, the Convex deployment, attachment storage, the guide screenshots and the Google Maps image hosts. Styles keep `'unsafe-inline'`; `object-src 'none'`, `base-uri 'self'` and `form-action 'self'` close the remaining injection routes.
+- The unpkg `maplibre-gl@3.6.1` script and stylesheet tags on the 104 map pages carry subresource-integrity hashes, checked against the files in the npm tarball, so a changed file on the CDN is refused.
+- `scripts/stamp_csp.mjs` writes the policy, the per-page hashes and the integrity attributes; `--check` runs in CI with the new `scripts/stamp_csp.node-test.mjs`. After editing an inline `<script>`, adding a page or adding an external host, rerun the stamp (`docs/development/content-security-policy.md`, and a line in `AGENTS.md`). The data-maps switcher's speculation-rules script is allowed by the hash of its text, which the stamp reads from `apps/shared/datamaps-switcher.js`: Chromium refused it under `'inline-speculation-rules'` in a meta policy.
+- Removed the eight legacy demo pages under `archive/legacy/html/` and `archive/legacy/frontend/`. The site served them, and they loaded unpinned third-party scripts and a tag manager on the same origin as the portal. Nothing linked to them; they remain in the Git history (`archive/README.md`).
+- No runtime script changed, so no `?v=` stamp moved.
+
 ### 2026-10-15 (escape map text in popups and tooltips)
 
 - Stored cross-site scripting repair. Text from third parties and other users reached HTML sinks unescaped, so markup in a name or tag would have run in the viewer's page. Where it was unescaped, and who could plant it:
