@@ -458,6 +458,44 @@ const waitingText = "A nomination from the map is waiting at (-41.28650, 174.776
   assert.strictEqual(noticeKind(loaded), "unsaved");
 }
 
+// a saved entry behind a dirty form: the button re-checks precedence, so the
+// confirmed discard clears the entry and the pin lands at the link's point
+{
+  const loaded = branchPortal({ storage: savedStorage(), real: ["setPortalMode"] });
+  const { app, window: win } = loaded;
+  app.portalMode = "assigned";
+  app.formDirty = true;
+  win.confirm = () => false;
+  app.applyNominateLink(app.pendingDeepLink);
+  assert.strictEqual(noticeKind(loaded), "unsaved");
+  assert.strictEqual(app.portalMode, "assigned");
+  win.confirm = () => true;
+  findNodes(loaded.notice, node => node.tagName === "button")[0].click();
+  assert.strictEqual(loaded.storage.getItem(draftKey), null, "the retry left the saved record");
+  assert.strictEqual(loaded.storage.getItem(periodsKey), null, "the retry left the period cards");
+  assert.strictEqual(app.portalMode, "add");
+  const placed = loaded.calls.filter(call => call[0] === "placePin");
+  assert.strictEqual(placed.length, 1, "the retry did not place the pin");
+  assert.deepStrictEqual({ ...placed[0][1] }, { lat: -41.2865, lng: 174.7762 });
+  assert.strictEqual(app.mapPinRequest.startedEntry, true);
+  assert.strictEqual(noticeKind(loaded), null);
+}
+
+// ... and a refused discard on that retry leaves both stores and the mode alone
+{
+  const loaded = branchPortal({ storage: savedStorage(), real: ["setPortalMode"] });
+  const { app, window: win } = loaded;
+  app.portalMode = "assigned";
+  app.formDirty = true;
+  win.confirm = () => false;
+  app.applyNominateLink(app.pendingDeepLink);
+  findNodes(loaded.notice, node => node.tagName === "button")[0].click();
+  assert.strictEqual(loaded.storage.getItem(draftKey), draftSeed);
+  assert.strictEqual(loaded.storage.getItem(periodsKey), periodsSeed);
+  assert.strictEqual(app.portalMode, "assigned");
+  assert.strictEqual(noticeKind(loaded), "unsaved");
+}
+
 // the notice button with a saved entry: only a confirmed choice discards it
 {
   const loaded = branchPortal({ storage: savedStorage() });
@@ -533,6 +571,10 @@ const waitingText = "A nomination from the map is waiting at (-41.28650, 174.776
   app.signOutBackend();
   assert.strictEqual(loaded.notice.hidden, true);
   assert.strictEqual(app.mapPinRequest, null);
+  // existing sign-out policy for a shared computer: period cards leave with
+  // the session. the rapid-pin record is untouched unless pin mode was open
+  // (exitPinMode), which it was not here
+  assert.strictEqual(loaded.storage.getItem(periodsKey), null, "sign-out kept the period cards");
   assert.strictEqual(loaded.storage.getItem(draftKey), draftSeed, "sign-out changed the saved entry");
 }
 

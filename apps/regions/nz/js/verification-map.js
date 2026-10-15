@@ -7004,14 +7004,18 @@ class NzVerificationMap {
         notice.hidden = false;
     }
 
-    // the notice's button: with a saved entry in the way, the existing discard
-    // asks first and clears the record and its period cards; refused, both
-    // stay. with unsaved changes in the way, the branch runs again and the
-    // portal asks its usual question
+    // the notice's button re-checks precedence as it stands now. with a saved
+    // entry in the way, the existing discard asks first and clears the record
+    // and its period cards; refused, both stay. with none, the branch runs
+    // again and setPortalMode asks its usual question about unsaved changes
     nominateAtMapPin() {
         const request = this.mapPinRequest;
         if (!request) return;
-        if (this.mapPinNoticeKind !== "unsaved" && !this.discardEntryAttempt()) return;
+        const precedence = mapPinPrecedence({
+            rapidLane: RAPID_NOMINATION_ENTRY,
+            savedPin: this.readRapidDraft("rapid-pin")?.pin,
+        });
+        if (precedence === "saved_entry" && !this.discardEntryAttempt()) return;
         this.applyNominateLink(request);
     }
 
