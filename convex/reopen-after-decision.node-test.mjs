@@ -188,7 +188,7 @@ test("a spreadsheet import carrying a decided status does not move a reopened ta
 
   for (const importedStatus of ["pi_accepted", "reviewed", "exported"]) {
     const result = await importSubmittedEvidenceDrafts._handler(w.as(admin), {
-      batch: { batch_id: "test-batch", country_code: "VU", source_kind: "spreadsheet", target_years: [2013, 2018, 2023] },
+      batch: { batch_id: "test-batch", country_code: "VU", source_kind: "spreadsheet_submission", target_years: [2013, 2018, 2023] },
       tasks: [{ task_id: "task_1", batch_id: "test-batch", country_code: "VU", task_type: "verify_existing_site", priority: "medium", status: importedStatus, target_years: [2013, 2018, 2023], name: "Test place of worship", task_brief: "Check it.", geometry: { type: "Point", coordinates: [174.768, -41.282] } }],
       drafts: [],
     });
@@ -200,7 +200,7 @@ test("a spreadsheet import carrying a decided status does not move a reopened ta
 
   // an import without a decided status still applies, as before
   await importSubmittedEvidenceDrafts._handler(w.as(admin), {
-    batch: { batch_id: "test-batch", country_code: "VU", source_kind: "spreadsheet", target_years: [2013, 2018, 2023] },
+    batch: { batch_id: "test-batch", country_code: "VU", source_kind: "spreadsheet_submission", target_years: [2013, 2018, 2023] },
     tasks: [{ task_id: "task_1", batch_id: "test-batch", country_code: "VU", task_type: "verify_existing_site", priority: "medium", status: "needs_review", target_years: [2013, 2018, 2023], name: "Test place of worship", task_brief: "Check it." , geometry: { type: "Point", coordinates: [174.768, -41.282] } }],
     drafts: [],
   });
@@ -209,7 +209,7 @@ test("a spreadsheet import carrying a decided status does not move a reopened ta
 
   // a new task inserted with a decided status is left as before
   await importSubmittedEvidenceDrafts._handler(w.as(admin), {
-    batch: { batch_id: "test-batch", country_code: "VU", source_kind: "spreadsheet", target_years: [2013, 2018, 2023] },
+    batch: { batch_id: "test-batch", country_code: "VU", source_kind: "spreadsheet_submission", target_years: [2013, 2018, 2023] },
     tasks: [{ task_id: "task_new", batch_id: "test-batch", country_code: "VU", task_type: "verify_existing_site", priority: "medium", status: "reviewed", target_years: [2013, 2018, 2023], name: "New place", task_brief: "Check it.", geometry: { type: "Point", coordinates: [174.768, -41.282] } }],
     drafts: [],
   });
@@ -235,10 +235,13 @@ test("a later reopen keeps the flag of the first reopen, and its reason", async 
 test("an ra's reopens from a decided status are charged to the per-user limit; review roles and other reopens are not", async () => {
   const original = intakeRateLimiter.limit;
   const charged = [];
+  // like the real limiter, the stub throws only when asked to; otherwise an
+  // over-limit call returns ok: false, which the handler would ignore
   intakeRateLimiter.limit = async (_ctx, name, options) => {
     charged.push([name, options?.key]);
-    if (charged.filter(([n]) => n === "decidedReopenPerUser").length > 2) throw new Error("Rate limit exceeded.");
-    return { ok: true, retryAfter: 0 };
+    const over = charged.filter(([n]) => n === "decidedReopenPerUser").length > 2;
+    if (over && options?.throws === true) throw new Error("Rate limit exceeded.");
+    return { ok: !over, retryAfter: over ? 1000 : 0 };
   };
   try {
     // an ra, decided: charged under the user's key
