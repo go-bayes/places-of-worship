@@ -55,7 +55,7 @@ export function world() {
     derived_year_locations: [], derived_target_year_functions: [], derived_state_events: [],
     review_decisions: [], agent_reviews: [], sources: [], task_batches: [],
     task_acceptances: [], export_batches: [], review_snapshots: [],
-    export_runs: [], export_run_members: [], evidence_attachments: [],
+    export_runs: [], export_run_members: [], evidence_attachments: [], agent_judgments: [], agent_first_pass_receipts: [],
   };
   // functions scheduled through ctx.scheduler, run by helper.drainScheduled()
   const scheduled = [];
@@ -90,7 +90,8 @@ export function world() {
         lte(field, value) { filters.push([field, (candidate) => candidate <= value]); return q; },
       };
       const selected = () => {
-        const matched = rows[table].filter((row) => filters.every(([field, test]) => test(row[field])));
+        const valueAt = (row, field) => field.split(".").reduce((value, key) => value?.[key], row);
+        const matched = rows[table].filter((row) => filters.every(([field, test]) => test(valueAt(row, field))));
         return descending ? [...matched].reverse() : matched;
       };
       const chain = {

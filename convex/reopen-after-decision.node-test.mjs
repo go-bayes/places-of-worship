@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { ConvexError } from "convex/values";
 import { world, draftContent } from "./testing/exportWorld.node-test.mjs";
 
 // JB ruling 2026-10-15: a decided task (reviewed, pi_accepted, exported)
@@ -240,7 +241,7 @@ test("an ra's reopens from a decided status are charged to the per-user limit; r
   intakeRateLimiter.limit = async (_ctx, name, options) => {
     charged.push([name, options?.key]);
     const over = charged.filter(([n]) => n === "decidedReopenPerUser").length > 2;
-    if (over && options?.throws === true) throw new Error("Rate limit exceeded.");
+    if (over && options?.throws === true) throw new ConvexError({ kind: "RateLimited", name, retryAfter: 1000 });
     return { ok: !over, retryAfter: over ? 1000 : 0 };
   };
   try {
@@ -259,7 +260,7 @@ test("an ra's reopens from a decided status are charged to the per-user limit; r
     const a = await scene("pi_accepted");
     const b = await scene("exported");
     await reopenTask._handler(a.as(a.ra), { taskId: "task_1", reason: "Second charge ok." });
-    await assert.rejects(reopenTask._handler(b.as(b.ra), { taskId: "task_1", reason: "Third charge refused." }), /Rate limit/);
+    await assert.rejects(reopenTask._handler(b.as(b.ra), { taskId: "task_1", reason: "Third charge refused." }), /reopened 20 decided tasks in the last hour\. Try again later, or ask a reviewer/);
     assert.equal(b.task.status, "exported");
     assert.equal(b.task.reopened_after_decision, undefined);
     assert.equal(b.rows.task_events.length, 0);
@@ -279,12 +280,12 @@ test("the global cap refuses an ra's decided reopen after the per-user limit pas
   intakeRateLimiter.limit = async (_ctx, name, options) => {
     charged.push(name);
     const over = name === "decidedReopenGlobal";
-    if (over && options?.throws === true) throw new Error("Rate limit exceeded: global.");
+    if (over && options?.throws === true) throw new ConvexError({ kind: "RateLimited", name, retryAfter: 1000 });
     return { ok: !over, retryAfter: over ? 1000 : 0 };
   };
   try {
     const w = await scene("pi_accepted");
-    await assert.rejects(reopenTask._handler(w.as(w.ra), { taskId: "task_1", reason: "Everyone is reopening." }), /global/);
+    await assert.rejects(reopenTask._handler(w.as(w.ra), { taskId: "task_1", reason: "Everyone is reopening." }), /Too many reopens of decided tasks across the project in the last hour\. Try again later, or ask a reviewer/);
     assert.deepEqual(charged, ["decidedReopenPerUser", "decidedReopenGlobal"]);
     assert.equal(w.task.status, "pi_accepted");
     assert.equal(w.task.reopened_after_decision, undefined);
@@ -410,4 +411,61 @@ test("a reverted pi_accepted task is export-eligible again, and a reopened one i
   assert.equal(w.task.status, "pi_accepted");
   const batch = await createExportBatch._handler(w.as(w.admin), { countryCode: "VU", taskIds: ["task_1"] });
   assert.ok(batch.export_batch_id);
+});
+
+test("a limiter fault that is not a rate limit is not rewritten", async () => {
+  const original = intakeRateLimiter.limit;
+  intakeRateLimiter.limit = async () => { throw new Error("component unavailable"); };
+  try {
+    const w = await scene("reviewed");
+    await assert.rejects(reopenTask._handler(w.as(w.ra), { taskId: "task_1", reason: "New evidence on the date." }), /component unavailable/);
+    assert.equal(w.task.status, "reviewed");
+  } finally {
+    intakeRateLimiter.limit = original;
+  }
+});
+
+// review findings on #198
+test("a revert is refused after a write that logs no event: a receipt, a seeding update, an agent row", async () => {
+  const stamp = () => Date.now() + 5;
+  const cases = {
+    // an unchanged resubmission inserts a receipt and no task event
+    receipt: async (w) => {
+      await w.addDraft({ evidence_draft_id: "task_1:draft_r", task_id: "task_1", created_by: w.ra._id, ...draftContent() });
+      // the receipt is newer than the draft row in creation order
+      await w.db.insert("evidence_submission_receipts", { submission_key: "submit:r", route: "submit", task_id: "task_1", evidence_draft_id: "task_1:draft_r", recorded_at: stamp() });
+    },
+    // a batch seeding update patches the task row and writes no event
+    seeding: (w) => w.db.patch(w.task._id, { updated_at: stamp(), name: "Renamed by a seeding update" }),
+    lastEventOnly: (w) => w.db.patch(w.task._id, { last_event_at: stamp() }),
+    agentReview: (w) => w.db.insert("agent_reviews", { task_id: "task_1", created_at: stamp() }),
+    agentJudgment: (w) => w.db.insert("agent_judgments", { context: { task_id: "task_1" }, created_at: stamp() }),
+    firstPass: (w) => w.db.insert("agent_first_pass_receipts", { task_id: "task_1", created_at: stamp() }),
+  };
+  for (const [label, write] of Object.entries(cases)) {
+    const w = await reopened("pi_accepted");
+    await write(w);
+    await assert.rejects(revertReopen._handler(w.as(w.reviewer), { taskId: "task_1", reason: "Opened in error, no new evidence." }), /written to this task since/, label);
+    assert.equal(w.task.status, "reopened", label);
+    assert.ok(w.task.reopened_after_decision, label);
+  }
+});
+
+test("a revert fails closed when a table holds more rows than the check will read", async () => {
+  const w = await reopened("pi_accepted");
+  // 201 historical claims written before the reopen: none is a write since,
+  // but the check cannot see the whole history
+  for (let i = 0; i < 201; i += 1) {
+    await w.db.insert("historical_claims", { task_id: "task_1", created_at: 1, updated_at: 1 });
+  }
+  await assert.rejects(revertReopen._handler(w.as(w.reviewer), { taskId: "task_1", reason: "Opened in error, no new evidence." }), /too much recorded history/);
+  assert.equal(w.task.status, "reopened");
+  assert.ok(w.task.reopened_after_decision);
+  // within the budget the same history is fine
+  const x = await reopened("pi_accepted");
+  for (let i = 0; i < 200; i += 1) {
+    await x.db.insert("historical_claims", { task_id: "task_1", created_at: 1, updated_at: 1 });
+  }
+  await revertReopen._handler(x.as(x.reviewer), { taskId: "task_1", reason: "Opened in error, no new evidence." });
+  assert.equal(x.task.status, "pi_accepted");
 });
