@@ -5327,7 +5327,7 @@ function updatePartialIndicator() {
 
 // ---- dataset passport ---------------------------------------------------
 // (escText, safeHttpUrl and osmObjectUrl are defined with the popup helpers
-// near portalReviseHref)
+// near portalLinkHref)
 
 // distinct statistics providers behind the active product; boundary and
 // place-snapshot datasets stay in the drawer, off the identity line. two
