@@ -873,6 +873,7 @@ const READ_ONLY_ASSIGNMENT_STATUSES = new Set([
     "changes_requested",
     "skipped",
     "reviewed",
+    "pi_accepted",
     "exported",
 ]);
 // statuses where a matched context-dot task can be reopened for another
