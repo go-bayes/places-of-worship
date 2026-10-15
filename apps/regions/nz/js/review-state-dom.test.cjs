@@ -133,6 +133,40 @@ assert.doesNotMatch(reopenedForm, /More outcomes/);
 assert.match(reopenedForm, /data-decision="accepted_for_export" aria-pressed="false" disabled/);
 assert.match(fs.readFileSync(path.join(__dirname, "..", "review.html"), "utf8"), /<option value="reopened">reopened after a decision<\/option>/);
 
+// reverting a reopen (JB, 2026-10-15): the control shows only on a reopened
+// task that carries the flag, explains its condition, checks the reason
+// client-side and calls the client with the trimmed reason
+assert.match(reopenedForm, /id="revertReopenButton">Revert the reopen</);
+assert.match(reopenedForm, /only while nothing has been written to the task since the reopen|works only while nothing has been written/);
+assert.doesNotMatch(portal.decisionForm(row("t-plain", "reopened").task, null), /revertReopenButton/, "no flag, no control");
+assert.doesNotMatch(portal.decisionForm(row("t-ex", "exported", null, { reopened_after_decision: { from_status: "exported", reason: "x" } }).task, null), /revertReopenButton/, "not reopened, no control");
+(async () => {
+    const reverted = [];
+    window.PowConvexTaskClient.prototype.revertReopen = async (args) => { reverted.push(args); return {}; };
+    window.PowConvexTaskClient.prototype.listReviewQueue = async () => [];
+    for (const id of ["revertReopenButton", "revertReopenForm", "revertReopenReason", "revertReopenConfirm", "revertReopenCancel", "revertReopenProblem"]) element(id);
+    const fire = async (id) => { for (const fn of elements.get(id).listeners.click || []) await fn(); };
+    elements.get("revertReopenForm").hidden = true;
+    portal.state.user = { display_name: "Reviewer", roles: ["reviewer"] };
+    portal.wireRevertReopen(flaggedTask.task);
+    await fire("revertReopenButton");
+    assert.equal(elements.get("revertReopenForm").hidden, false);
+    assert.equal(elements.get("revertReopenButton").hidden, true);
+    elements.get("revertReopenReason").value = "short";
+    await fire("revertReopenConfirm");
+    assert.match(elements.get("revertReopenProblem").textContent, /at least 8 characters/);
+    assert.equal(reverted.length, 0, "a short reason is not sent");
+    elements.get("revertReopenReason").value = "  Opened in error, no new evidence.  ";
+    await fire("revertReopenConfirm");
+    assert.deepEqual(JSON.parse(JSON.stringify(reverted)), [{ taskId: "t-re", reason: "Opened in error, no new evidence." }]);
+    // a refusal from the server is shown, not swallowed
+    window.PowConvexTaskClient.prototype.revertReopen = async () => { throw new Error("Something has been written to this task since it was reopened."); };
+    elements.get("revertReopenConfirm").disabled = false;
+    await fire("revertReopenConfirm");
+    assert.match(elements.get("revertReopenProblem").textContent, /written to this task since/);
+    assert.equal(elements.get("revertReopenConfirm").disabled, false);
+})().catch((error) => { console.error(error); process.exit(1); });
+
 // the transport dot is its own axis
 element("transportDot");
 portal.setTransport("saving");

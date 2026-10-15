@@ -30,6 +30,7 @@
       <li><a href="#ai-review-panel">Read the AI review panel before deciding</a></li>
       <li><a href="#recorded-confidence">Read the recorded confidence before deciding</a></li>
       <li><a href="#ai-evidence-checks">How the AI evidence checks work</a></li>
+      <li><a href="#reopened-after-decision">Reopened after a decision, and reverting a reopen</a></li>
       <li><a href="#decision-records-and-hashes">How decisions are recorded and hashed</a></li>
       <li><a href="#change-class">Genuine change versus map correction</a></li>
       <li><a href="#identity-decisions">Identity decisions</a></li>
@@ -129,6 +130,12 @@
 <p>The AI review is advisory. It cannot accept a claim, change a task, edit evidence, or record a decision — the tables it writes to are append-only annotations, and the portal renders them beside the evidence, never in place of it. Every recommendation you see was produced by a versioned prompt against one specific version of the claim; if the claim is revised, the old recommendation stays attached to the old version and a new review must be run. The human decision is the gate: when you record a decision you also record whether you followed, disagreed with, or did not consider the AI recommendation, and that agreement record is part of the audit trail.</p>
 <p>Each recommendation carries its evidence work. For every source in the claim, the reviewer run records what was checked (existence, date support, location plausibility), how it was checked (fetched over the web, assessed by the model, or not checked), and what the check found (supported, not supported, unclear, unreachable, or requires human access). A source that was not checked is recorded as not checked — never silently passed. If a fetched page contains text that tries to instruct the AI, that content is treated as data, and the human decision remains the gate.</p>
 <p>Two further guards matter for this project. First, the kastom / cultural-sensitivity gate: where a claim touches culturally sensitive material, the AI does not judge the cultural question; the review is deferred and the portal shows &quot;Requires human cultural judgement&quot;. Second, restricted material never leaves the deployment: sources flagged restricted are not fetched by the runner at all.</p>
+</section>
+
+<section class="guide-section prose-section" id="reopened-after-decision">
+  <h2>Reopened after a decision, and reverting a reopen</h2>
+  <p>Any signed-in RA may reopen a place you have reviewed, accepted or exported, if they give a reason of at least eight characters (JB, 2026-10-15). The task returns to <em>Reopened</em> and carries a <em>Reopened after decision</em> marker, with the status it held and the reason, in the review queue and the decision panel. Choose <em>reopened after a decision</em> in the queue&#x27;s task status to list them. A reopened task cannot be decided until the contributor submits new evidence; it then comes back to the queue as usual, and the marker stays until you next accept it. Reopening does not change a record that has already been exported.</p>
+  <p>If a place was reopened by mistake, a reviewer, curator, admin or PI can press <em>Revert the reopen</em> in the decision panel and give a reason of at least eight characters. The task goes back to the status it held, exactly as before, and the marker clears. This works only while nothing has been written to the task since the reopen: no claim, note, evidence or second reopen. Once anything has been written, the reopen stands and the place needs a new decision. An RA is limited to 20 reopens of decided places an hour, and all RAs together to 60.</p>
 </section>
 
 <section class="guide-section prose-section" id="decision-records-and-hashes">
