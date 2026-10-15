@@ -114,6 +114,25 @@ const closed = portal.decisionForm(row("t9", "exported").task, null);
 assert.doesNotMatch(closed, /More outcomes/);
 assert.match(closed, /data-decision="accepted_for_export" aria-pressed="false" disabled/);
 
+// reopened-after-decision rows (jb ruling 2026-10-15): listed under the
+// "reopened" status with the marker and reason escaped, and the panel says no
+// decision can be recorded rather than offering buttons the server refuses
+const flaggedTask = row("t-re", "reopened", null, {
+    reopened_after_decision: { from_status: "exported", reopened_at: 5, reopened_by: "u1", reason: "<script>x</script> later register" },
+});
+portal.state.queue = [flaggedTask];
+portal.renderQueue();
+const reopenedList = elements.get("queueList").innerHTML;
+assert.match(reopenedList, />Reopened after decision<\/span>/);
+assert.match(reopenedList, /title="Reopened after decision \(was exported\): &lt;script&gt;/);
+assert.doesNotMatch(reopenedList, /<script>/);
+const reopenedForm = portal.decisionForm(flaggedTask.task, null);
+assert.match(reopenedForm, /Reopened after decision \(was exported\)\. Reason given: &lt;script&gt;x&lt;\/script&gt; later register/);
+assert.match(reopenedForm, /This task was reopened and is with the contributor/);
+assert.doesNotMatch(reopenedForm, /More outcomes/);
+assert.match(reopenedForm, /data-decision="accepted_for_export" aria-pressed="false" disabled/);
+assert.match(fs.readFileSync(path.join(__dirname, "..", "review.html"), "utf8"), /<option value="reopened">reopened after a decision<\/option>/);
+
 // the transport dot is its own axis
 element("transportDot");
 portal.setTransport("saving");

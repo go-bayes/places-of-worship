@@ -2044,7 +2044,7 @@ function human(value) {
                     <textarea id="decisionNote" name="decisionNote" placeholder="Record why this decision is appropriate. Mention source gaps, identity uncertainty, or any changes needed." ${canDecide ? "" : "disabled"}></textarea>
                 </div>
                 <div class="wide">
-                    <div id="decisionHelp" class="review-warning">${escapeHtml(canDecide ? decisionHint("") : "This task is already reviewed or exported. Change the queue status to inspect other work, or reopen it with a reason from the contributor portal if new evidence requires action.")}</div>
+                    <div id="decisionHelp" class="review-warning">${escapeHtml(canDecide ? decisionHint("") : task.status === "reopened" ? "This task was reopened and is with the contributor. It comes back to the queue when they submit new evidence; no decision can be recorded on it now." : "This task is already reviewed or exported. Change the queue status to inspect other work, or reopen it with a reason from the contributor portal if new evidence requires action.")}</div>
                     <button type="submit" class="primary" id="recordDecisionButton" ${state.busy || !canDecide || ownSubmission ? "disabled" : ""}>Record decision</button>
                     <span id="decisionStatusText" class="muted">${draft ? `Draft: ${escapeHtml(draft.evidence_draft_id)}` : "Accepted-for-export requires an evidence draft."}</span>
                 </div>
