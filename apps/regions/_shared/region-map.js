@@ -1538,8 +1538,9 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
     handle.className = "sv-resize-handle";
     handle.textContent = "↘";
     target.appendChild(handle);
+    // maps embed needs at least 200 x 200 css px
     const MIN_W = 260;
-    const MIN_H = 160;
+    const MIN_H = 200;
     handle.addEventListener("mousedown", (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -1579,6 +1580,8 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
     frame.src = streetViewEmbedUrl(latFixed, lngFixed);
     frame.allowFullscreen = true;
     frame.style.cssText = "display:block;width:100%;height:100%;border:0;";
+    node.style.minHeight = "200px";
+    node.style.minWidth = "200px";
     node.textContent = "";
     node.appendChild(frame);
     attachResizeHandle(node, frame);

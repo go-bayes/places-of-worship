@@ -125,3 +125,23 @@ test("no google maps script host and no wildcard script source", () => {
   assert.ok(!policy.includes("maps.googleapis.com"));
   assert.ok(!/script-src[^;]*\*/.test(policy));
 });
+
+test("a comment-like string inside a script is hashed as written", () => {
+  const body = 'window.note="<!-- keep -->";';
+  assert.ok(scriptSrc(policyFor(pageWith(`<script>${body}</script>`))).includes(hashOf(body)));
+});
+
+test("a commented-out charset line is not the anchor", () => {
+  const html = '<html>\n<head>\n<!-- <meta charset="UTF-8"> -->\n  <meta charset="UTF-8">\n</head>\n</html>\n';
+  const out = stamp(html, "commented.html");
+  const comment = out.indexOf("-->");
+  assert.ok(out.indexOf('http-equiv="Content-Security-Policy"') > comment);
+  assert.equal(stamp(out, "commented.html"), out);
+});
+
+test("pinning reads attribute boundaries, not text inside values", () => {
+  const out = stamp(pageWith(
+    '<script data-note=" src=other.js integrity=keep" src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>'
+  ), "boundaries.html");
+  assert.match(out, /<script data-note=" src=other\.js integrity=keep" src="[^"]+maplibre-gl\.js" integrity="sha384-[^"]+" crossorigin="anonymous"><\/script>/);
+});

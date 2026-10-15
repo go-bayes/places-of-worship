@@ -115,81 +115,165 @@ export function speculationRulesHash(source) {
 
 const RULES_HASH = speculationRulesHash(readFileSync(join(ROOT, SWITCHER), "utf8"));
 
-const META_RE = /^[ \t]*<meta http-equiv="Content-Security-Policy" content="[^"]*">\n/m;
-const CHARSET_RE = /^([ \t]*)<meta charset="[^"]*">\n/im;
-const COMMENT_RE = /<!--[\s\S]*?-->/g;
-// attribute values may hold ">", so quoted values are matched whole
-const ATTRS = `((?:[^>"']|"[^"]*"|'[^']*')*)`;
-const SCRIPT_RE = new RegExp(`<script\\b${ATTRS}>([\\s\\S]*?)</script\\s*>`, "gi");
-const TAG_RE = (name) => new RegExp(`<${name}\\b${ATTRS}>`, "gi");
-const FIRST_RESOURCE_RE = /<(?:script|link|style)\b/i;
+// a small tokeniser for the parts of html that matter here: comments are
+// skipped, raw-text elements (script, style, textarea, title, noscript)
+// keep their bodies verbatim, and start tags yield parsed attributes
+const RAW_TEXT = new Set(["script", "style", "textarea", "title", "noscript"]);
 
-// a named attribute in a tag's attribute text, quoted values masked so
-// that a value containing " src=" is not taken for the attribute
-function hasAttr(attrs, name) {
-  const masked = attrs.replace(/"[^"]*"|'[^']*'/g, '""');
-  return new RegExp(`(?:^|\\s)${name}(?:\\s*=|\\s|$)`, "i").test(masked);
+function parseAttributes(html, from) {
+  const attrs = [];
+  let i = from;
+  for (;;) {
+    while (i < html.length && /[\s/]/.test(html[i])) i += 1;
+    if (i >= html.length || html[i] === ">") return { attrs, end: i + 1 };
+    const start = i;
+    while (i < html.length && !/[\s/>=]/.test(html[i])) i += 1;
+    const name = html.slice(start, i).toLowerCase();
+    let value = "";
+    let j = i;
+    while (j < html.length && /\s/.test(html[j])) j += 1;
+    if (html[j] === "=") {
+      j += 1;
+      while (j < html.length && /\s/.test(html[j])) j += 1;
+      const quote = html[j];
+      if (quote === '"' || quote === "'") {
+        const close = html.indexOf(quote, j + 1);
+        value = html.slice(j + 1, close < 0 ? html.length : close);
+        j = close < 0 ? html.length : close + 1;
+      } else {
+        const valueStart = j;
+        while (j < html.length && !/[\s>]/.test(html[j])) j += 1;
+        value = html.slice(valueStart, j);
+      }
+      i = j;
+    }
+    attrs.push({ name, value, raw: html.slice(start, i) });
+  }
 }
 
-function attrValue(attrs, name) {
-  const m = attrs.match(new RegExp(`(?:^|\\s)${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'>]+))`, "i"));
-  return m ? (m[1] ?? m[2] ?? m[3]) : null;
+export function tokens(html) {
+  const out = [];
+  let i = 0;
+  while (i < html.length) {
+    const lt = html.indexOf("<", i);
+    if (lt < 0) break;
+    if (html.startsWith("<!--", lt)) {
+      const close = html.indexOf("-->", lt + 4);
+      i = close < 0 ? html.length : close + 3;
+      continue;
+    }
+    const endTag = /^<\/([a-zA-Z][\w-]*)[^>]*>/.exec(html.slice(lt, lt + 200));
+    if (endTag) {
+      out.push({ type: "end", name: endTag[1].toLowerCase(), start: lt, end: lt + endTag[0].length });
+      i = lt + endTag[0].length;
+      continue;
+    }
+    const startTag = /^<([a-zA-Z][\w-]*)/.exec(html.slice(lt, lt + 64));
+    if (!startTag) {
+      i = lt + 1;
+      continue;
+    }
+    const name = startTag[1].toLowerCase();
+    const { attrs, end } = parseAttributes(html, lt + startTag[0].length);
+    const token = { type: "start", name, attrs, start: lt, end };
+    out.push(token);
+    i = end;
+    if (RAW_TEXT.has(name)) {
+      const closeRe = new RegExp(`</${name}[\\s/>]`, "ig");
+      closeRe.lastIndex = end;
+      const close = closeRe.exec(html);
+      const bodyEnd = close ? close.index : html.length;
+      token.body = html.slice(end, bodyEnd);
+      i = bodyEnd;
+    }
+  }
+  return out;
 }
+
+const attr = (token, name) => {
+  const found = token.attrs.find((a) => a.name === name);
+  return found ? found.value : null;
+};
+
+const isPolicyMeta = (t) =>
+  t.type === "start" && t.name === "meta" &&
+  (attr(t, "http-equiv") || "").toLowerCase() === "content-security-policy";
 
 function inlineScriptHashes(html) {
   const hashes = [];
-  for (const m of html.replace(COMMENT_RE, "").matchAll(SCRIPT_RE)) {
-    if (hasAttr(m[1], "src")) continue;
+  for (const t of tokens(html)) {
+    if (t.type !== "start" || t.name !== "script" || attr(t, "src") !== null) continue;
     // the html parser turns crlf and lone cr into lf before the browser hashes
-    const body = m[2].replace(/\r\n?/g, "\n");
+    const body = t.body.replace(/\r\n?/g, "\n");
     const token = `'sha256-${createHash("sha256").update(body, "utf8").digest("base64")}'`;
     if (!hashes.includes(token)) hashes.push(token);
   }
   return hashes;
 }
 
+// remove every policy meta, with its line when it stands alone on one
+function withoutPolicy(html) {
+  let out = html;
+  for (const t of tokens(html).filter(isPolicyMeta).reverse()) {
+    let start = t.start;
+    let end = t.end;
+    const lineStart = out.lastIndexOf("\n", start - 1) + 1;
+    if (/^[ \t]*$/.test(out.slice(lineStart, start)) && out[end] === "\n") {
+      start = lineStart;
+      end += 1;
+    }
+    out = out.slice(0, start) + out.slice(end);
+  }
+  return out;
+}
+
 export function policyFor(html) {
-  const withoutMeta = html.replace(META_RE, "");
+  const bare = withoutPolicy(html);
   const directives = Object.entries(SOURCES).map(([name, list]) => {
-    const values = name === "script-src" ? [...list, RULES_HASH, ...inlineScriptHashes(withoutMeta)] : list;
+    const values = name === "script-src" ? [...list, RULES_HASH, ...inlineScriptHashes(bare)] : list;
     return `${name} ${values.join(" ")}`;
   });
   return directives.join("; ");
 }
 
 // set integrity and crossorigin on the maplibre tags, whatever the attribute
-// order, keeping every other attribute
+// order, keeping every other attribute as written
 function pinMaplibre(html) {
-  const pin = (tag, attrs, url) => {
-    const kept = attrs
-      .replace(/\s+(?:integrity|crossorigin)(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'>]+))?/gi, "")
-      .replace(/\s*\/?\s*$/, "");
-    return `<${tag}${kept} integrity="${SRI[url]}" crossorigin="anonymous">`;
-  };
-  return html
-    .replace(TAG_RE("script"), (whole, attrs) =>
-      attrValue(attrs, "src") === MAPLIBRE_JS ? pin("script", attrs, MAPLIBRE_JS) : whole)
-    .replace(TAG_RE("link"), (whole, attrs) =>
-      attrValue(attrs, "href") === MAPLIBRE_CSS ? pin("link", attrs, MAPLIBRE_CSS) : whole);
+  let out = html;
+  const targets = tokens(html).filter((t) => t.type === "start" && (
+    (t.name === "script" && attr(t, "src") === MAPLIBRE_JS) ||
+    (t.name === "link" && attr(t, "href") === MAPLIBRE_CSS)));
+  for (const t of targets.reverse()) {
+    const url = t.name === "script" ? MAPLIBRE_JS : MAPLIBRE_CSS;
+    const kept = t.attrs.filter((a) => a.name !== "integrity" && a.name !== "crossorigin").map((a) => a.raw);
+    const tag = `<${t.name} ${[...kept, `integrity="${SRI[url]}"`, 'crossorigin="anonymous"'].join(" ")}>`;
+    out = out.slice(0, t.start) + tag + out.slice(t.end);
+  }
+  return out;
 }
 
 export function stamp(html, page) {
-  const bare = pinMaplibre(html).replace(META_RE, "");
-  const anchor = bare.match(CHARSET_RE);
-  if (!anchor) throw new Error(`${page}: no <meta charset> line to anchor the policy`);
-  const at = anchor.index + anchor[0].length;
+  const bare = withoutPolicy(pinMaplibre(html));
+  const all = tokens(bare);
+  const charset = all.find((t) => t.type === "start" && t.name === "meta" && attr(t, "charset") !== null);
+  if (!charset) throw new Error(`${page}: no <meta charset> to anchor the policy`);
   // a meta policy governs only what follows it, inside the head
-  const head = bare.search(/<head\b/i);
-  const headEnd = bare.search(/<\/head\s*>/i);
-  const firstResource = bare.search(FIRST_RESOURCE_RE);
-  if (head < 0 || anchor.index < head || (headEnd >= 0 && at > headEnd)) {
+  const head = all.find((t) => t.type === "start" && t.name === "head");
+  const headEnd = all.find((t) => t.type === "end" && t.name === "head");
+  if (!head || charset.start < head.start || (headEnd && charset.start > headEnd.start)) {
     throw new Error(`${page}: <meta charset> must sit inside <head>`);
   }
-  if (firstResource >= 0 && firstResource < at) {
+  const early = all.find((t) => t.type === "start" && ["script", "link", "style"].includes(t.name) && t.start < charset.start);
+  if (early) {
     throw new Error(`${page}: a script, link or style precedes <meta charset>; the policy would not cover it`);
   }
-  const meta = `${anchor[1]}<meta http-equiv="Content-Security-Policy" content="${policyFor(bare)}">\n`;
-  return bare.slice(0, at) + meta + bare.slice(at);
+  const lineStart = bare.lastIndexOf("\n", charset.start - 1) + 1;
+  const indent = /^[ \t]*$/.test(bare.slice(lineStart, charset.start)) ? bare.slice(lineStart, charset.start) : "";
+  const meta = `<meta http-equiv="Content-Security-Policy" content="${policyFor(bare)}">`;
+  const at = charset.end;
+  return bare[at] === "\n"
+    ? `${bare.slice(0, at + 1)}${indent}${meta}\n${bare.slice(at + 1)}`
+    : `${bare.slice(0, at)}${meta}${bare.slice(at)}`;
 }
 
 // the workbench page is a vite development entry: vite serves it with inline
