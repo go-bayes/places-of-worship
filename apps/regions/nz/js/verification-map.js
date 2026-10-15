@@ -719,6 +719,17 @@ function strictCoordinate(raw) {
     return Number(trimmed);
 }
 
+// which comes first when a nominate link arrives: an entry saved on the
+// device, or the link's point. a saved entry is the one the resume would
+// reopen on this page: the quick-entry lane, with a pin whose coordinates
+// are finite. typed values without a pin are not a saved entry
+function mapPinPrecedence({ rapidLane, savedPin } = {}) {
+    if (rapidLane === true && Number.isFinite(savedPin?.latitude) && Number.isFinite(savedPin?.longitude)) {
+        return "saved_entry";
+    }
+    return "apply";
+}
+
 // public-map hand-off (jb 2026-09-03): ?revise=1 opens the revise flow for
 // the linked place; ?report_issue=1 keeps the standalone issue form;
 // ?nominate=1 (map pin) carries only a strictly parsed pin position. pure
@@ -2055,6 +2066,12 @@ class NzVerificationMap {
         // a time
         const deepLink = deepLinkContextFromParams(SEARCH_PARAMS);
         this.pendingDeepLink = deepLink?.mode === "revise" || deepLink?.mode === "nominate" ? deepLink : null;
+        // the point of a nominate link once it has been taken from
+        // pendingDeepLink: { latitude, longitude, hasCoords, startedEntry }.
+        // the notice and its button read it; pendingDeepLink stays free for
+        // a later request to revise
+        this.mapPinRequest = null;
+        this.mapPinNoticeKind = null;
         this.pinMarker = null;
         this.pinUncertaintyCircle = null;
         this.pinConfirmed = null;
@@ -2543,6 +2560,10 @@ class NzVerificationMap {
         this.backend?.signOut({ deliberate: true });
         this.backendUser = null;
         this.signedOutDeliberately = true;
+        // a held request belongs to the session that opened it; the device
+        // record stays for the next sign-in
+        this.renderMapPinNotice(null);
+        this.mapPinRequest = null;
         // a deliberate sign-out forgets the chosen activity; an expired
         // session (backendUser cleared elsewhere) keeps it for the return
         if (this.pinMode) this.exitPinMode();
@@ -6862,15 +6883,18 @@ class NzVerificationMap {
     // revise link opens in assignment mode only once a contributor is signed
     // in, landing in add places where the revise entry lives. a place matched
     // to a loaded task opens that task, as the dot's popup does; otherwise
-    // the revise card for the place. a nominate link is cleared here and
-    // opens nothing yet
+    // the revise card for the place. a nominate link opens the nomination
+    // flow at its point (applyNominateLink)
     applyPendingDeepLink() {
         const link = this.pendingDeepLink;
         if (!link) return;
         // revising and nominating need an account in every mode (r-h4)
         if (!this.backendUser) return;
         this.pendingDeepLink = null;
-        if (link.mode === "nominate") return;
+        if (link.mode === "nominate") {
+            this.applyNominateLink(link);
+            return;
+        }
         if (ASSIGNMENT_MODE) this.setPortalMode("add");
         const feature = {
             type: "Feature",
@@ -6884,6 +6908,111 @@ class NzVerificationMap {
         } else {
             this.openContextIssueForm(feature);
         }
+    }
+
+    // the nominate branch (brief 3.2, changes 4 and 5). the saved entry is
+    // read before setPortalMode, which itself resumes a saved entry when the
+    // mode changes to add
+    applyNominateLink(link) {
+        this.mapPinRequest = {
+            latitude: link.latitude,
+            longitude: link.longitude,
+            hasCoords: Boolean(link.hasCoords),
+            startedEntry: false,
+        };
+        const request = this.mapPinRequest;
+        if (!ASSIGNMENT_MODE) {
+            this.renderMapPinNotice("standard_portal");
+            return;
+        }
+        const precedence = mapPinPrecedence({
+            rapidLane: RAPID_NOMINATION_ENTRY,
+            savedPin: this.readRapidDraft("rapid-pin")?.pin,
+        });
+        if (precedence === "saved_entry") {
+            // the saved entry resumes: through setPortalMode when the mode
+            // changes to add, directly when it is add already
+            if (this.portalMode === "add") {
+                this.resumeRapidPinFromDevice();
+            } else {
+                this.setPortalMode("add");
+            }
+            this.renderMapPinNotice(this.portalMode === "add" ? "waiting" : "unsaved");
+            return;
+        }
+        this.setPortalMode("add");
+        if (this.portalMode !== "add") {
+            // the RA kept unsaved changes at the mode prompt
+            this.renderMapPinNotice("unsaved");
+            return;
+        }
+        this.renderMapPinNotice(null);
+        request.startedEntry = true;
+        if (request.hasCoords) {
+            this.map.setView([request.latitude, request.longitude], Math.max(this.map.getZoom(), PIN_MIN_PLACEMENT_ZOOM));
+        }
+        this.enterPinMode();
+        if (request.hasCoords) this.placePin(L.latLng(request.latitude, request.longitude));
+    }
+
+    // the notice's address for a page outside assignment mode: this address
+    // without full and batch, so the point is carried to the standard portal
+    standardPortalHref() {
+        const params = new URLSearchParams(window.location.search);
+        for (const name of ["full", "batch"]) params.delete(name);
+        const query = params.toString();
+        return `${window.location.pathname}${query ? `?${query}` : ""}`;
+    }
+
+    // one notice, in the sidebar outside the detail panel so repaints leave
+    // it be. kind is "waiting" (a saved entry came first), "unsaved" (the RA
+    // kept unsaved changes at the mode prompt), "standard_portal" (the page
+    // is not in assignment mode) or null to hide it. built with DOM nodes and
+    // textContent, never innerHTML
+    renderMapPinNotice(kind) {
+        const notice = document.getElementById("mapPinNotice");
+        this.mapPinNoticeKind = kind || null;
+        if (!notice) return;
+        notice.textContent = "";
+        if (!kind) {
+            notice.hidden = true;
+            return;
+        }
+        notice.setAttribute("data-kind", kind);
+        const append = (tag, text) => {
+            const node = document.createElement(tag);
+            node.textContent = text;
+            notice.appendChild(node);
+            return node;
+        };
+        if (kind === "standard_portal") {
+            append("span", "Nominations from the map open in the ");
+            const anchor = append("a", "standard portal");
+            anchor.setAttribute("href", this.standardPortalHref());
+        } else {
+            const request = this.mapPinRequest;
+            append("span", request?.hasCoords
+                ? `A nomination from the map is waiting at (${request.latitude.toFixed(5)}, ${request.longitude.toFixed(5)})`
+                : "A nomination from the map is waiting; the link held no usable location");
+            const nominate = append("button", "Nominate at the map pin");
+            nominate.setAttribute("type", "button");
+            nominate.addEventListener("click", () => this.nominateAtMapPin());
+            const dismiss = append("button", "Dismiss");
+            dismiss.setAttribute("type", "button");
+            dismiss.addEventListener("click", () => this.renderMapPinNotice(null));
+        }
+        notice.hidden = false;
+    }
+
+    // the notice's button: with a saved entry in the way, the existing discard
+    // asks first and clears the record and its period cards; refused, both
+    // stay. with unsaved changes in the way, the branch runs again and the
+    // portal asks its usual question
+    nominateAtMapPin() {
+        const request = this.mapPinRequest;
+        if (!request) return;
+        if (this.mapPinNoticeKind !== "unsaved" && !this.discardEntryAttempt()) return;
+        this.applyNominateLink(request);
     }
 
     focusNominationPanel() {
@@ -13567,6 +13696,7 @@ class NzVerificationMap {
 }
 
 NzVerificationMap.deepLinkContextFromParams = deepLinkContextFromParams;
+NzVerificationMap.mapPinPrecedence = mapPinPrecedence;
 window.NzVerificationMap = NzVerificationMap;
 if (!window.__POW_TEST_NO_BOOTSTRAP__) {
     window.nzVerificationMap = new NzVerificationMap();
