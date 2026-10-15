@@ -957,9 +957,12 @@ let pinMarker = null;
 let pinDragging = false;
 let pinCard = null;
 // a finger lifting after a press-and-hold can click the pin that has just
-// appeared under it, which would open the card the drop meant to keep closed
+// appeared under it, which would open the card the drop meant to keep closed.
+// the guard holds from the drop until the finger lifts, however long the
+// hold, and for a short window after the release
 const PIN_HOLD_CLICK_GUARD_MS = 700;
-let pinHoldDropAt = -Infinity;
+let pinHoldDown = false;
+let pinHoldReleaseAt = -Infinity;
 
 // the card's content, built from dom nodes and text only. the coordinates
 // are the wrapped five-decimal label; the link appears only where a portal
@@ -1017,12 +1020,12 @@ document.addEventListener("keydown", (event) => {
 });
 
 // the click on the pin: toggles its card, except while a drag settles or
-// just after a press-and-hold dropped the pin under the finger. the clock is
-// a parameter so a test can inject it
+// while the press-and-hold that dropped the pin under the finger is still
+// down or has just lifted. the clock is a parameter so a test can inject it
 function onPinClick(event, now = Date.now()) {
   event.stopPropagation();
   if (pinDragging) return;
-  if (now - pinHoldDropAt < PIN_HOLD_CLICK_GUARD_MS) return;
+  if (pinHoldDown || now - pinHoldReleaseAt < PIN_HOLD_CLICK_GUARD_MS) return;
   if (pinCard) closePinCard();
   else openPinCard();
 }
@@ -1079,7 +1082,16 @@ function cancelLongPress() {
   pressTimer = null;
   pressPoint = null;
 }
+// the finger lifting from a completed long-press starts the click guard's
+// window; a touch that dropped nothing starts none
+function releasePinHold() {
+  if (!pinHoldDown) return;
+  pinHoldDown = false;
+  pinHoldReleaseAt = Date.now();
+}
 map.on("touchstart", (e) => {
+  // a hold whose release never arrived does not block later taps
+  pinHoldDown = false;
   if (!e.lngLat || (e.points && e.points.length > 1)) {
     cancelLongPress();
     return;
@@ -1089,7 +1101,7 @@ map.on("touchstart", (e) => {
   if (pressTimer) clearTimeout(pressTimer);
   pressTimer = setTimeout(() => {
     pressTimer = null;
-    pinHoldDropAt = Date.now();
+    pinHoldDown = true;
     setPin(lngLat);
   }, 600);
 });
@@ -1099,8 +1111,14 @@ map.on("touchmove", (e) => {
     cancelLongPress();
   }
 });
-map.on("touchend", cancelLongPress);
-map.on("touchcancel", cancelLongPress);
+map.on("touchend", () => {
+  releasePinHold();
+  cancelLongPress();
+});
+map.on("touchcancel", () => {
+  releasePinHold();
+  cancelLongPress();
+});
 map.on("move", cancelLongPress);
 
 let pinnedLabel = null;

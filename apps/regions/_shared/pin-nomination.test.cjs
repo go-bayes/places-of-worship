@@ -266,9 +266,11 @@ function loadCard(opts, cleared) {
   assert.equal(ctx.isCardOpen(), false, "clearing the pin closes the card");
 }
 
-// press-and-hold guard: a click on the pin within the window after a hold
-// drop is ignored, a click after it toggles the card, and a drag keeps its
-// own guard. the real onPinClick runs with an injected clock
+// press-and-hold guard: the release click of a completed long-press is
+// ignored however long the finger was held, as is any click within the
+// window after the finger lifts; a deliberate tap after that window toggles
+// the card, and a drag keeps its own guard. the real touch handlers and
+// onPinClick run over a stub map with an injected clock and timers
 {
   const popups = [];
   class Popup {
@@ -279,49 +281,84 @@ function loadCard(opts, cleared) {
     on(type, fn) { this.handlers[type] = fn; return this; }
     remove() { if (this.open) { this.open = false; if (this.handlers.close) this.handlers.close(); } return this; }
   }
+  const clock = { t: 0 };
+  const timers = [];
+  const handlers = {};
   const ctx = load({ rc: { countryCode: "nz" } });
   Object.assign(ctx, {
     maplibregl: { Popup },
-    map: {},
+    map: { on: (type, fn) => { handlers[type] = fn; } },
     document: stubDocument(),
     showClickHint() {},
-    referenceChanged() {}
+    referenceChanged() {},
+    Date: { now: () => clock.t },
+    setTimeout: (fn, ms) => { const timer = { fn, at: clock.t + ms, done: false }; timers.push(timer); return timer; },
+    clearTimeout: (timer) => { if (timer) timer.done = true; },
   });
   const names = ["pinCardElement", "onPinClick", "openPinCard", "closePinCard"];
   const constant = runtime.match(/const PIN_HOLD_CLICK_GUARD_MS = \d+;/);
   assert.ok(constant, "the guard window is a named constant");
+  const stateStart = runtime.indexOf(constant[0]);
+  const state = runtime.slice(stateStart, runtime.indexOf("\n\n", stateStart));
+  const touchStart = runtime.indexOf("// long-press for touch");
+  const touch = runtime.slice(touchStart, runtime.indexOf('map.on("move", cancelLongPress);', touchStart));
   vm.runInContext(
-    `let pinMarker = { getLngLat: () => ({ lng: 174.7762, lat: -41.2865 }) }, pinDragging = false, pinCard = null, activePlacePopup = null;\n` +
-      `${constant[0]}\nlet pinHoldDropAt = -Infinity;\n` +
+    `let pinMarker = null, pinDragging = false, pinCard = null, activePlacePopup = null;\n` +
+      `${state}\n` +
       `${names.map((name) => lift(`function ${name}(`)).join("\n")}\n` +
+      `function setPin() { pinMarker = { getLngLat: () => ({ lng: 174.7762, lat: -41.2865 }) }; }\n` +
+      `${touch}\n` +
       `this.onPinClick = onPinClick; this.isCardOpen = () => pinCard !== null;\n` +
-      `this.holdDroppedAt = (t) => { pinHoldDropAt = t; }; this.setDragging = (v) => { pinDragging = v; };\n` +
+      `this.setDragging = (v) => { pinDragging = v; };\n` +
       `this.guardMs = PIN_HOLD_CLICK_GUARD_MS;`,
     ctx
   );
+  // advance the clock, firing the timers that fall due on the way
+  const advance = (to) => {
+    for (const timer of timers) {
+      if (!timer.done && timer.at <= to) { clock.t = timer.at; timer.done = true; timer.fn(); }
+    }
+    clock.t = to;
+  };
+  const touchAt = (lng, lat) => ({ lngLat: { lng, lat }, point: { x: 100, y: 100 }, points: [{ x: 100, y: 100 }] });
   let stopped = 0;
   const event = { stopPropagation() { stopped += 1; } };
   assert.ok(ctx.guardMs >= 500 && ctx.guardMs <= 1000, "the window is short enough not to block a deliberate tap");
 
-  ctx.holdDroppedAt(10000);
-  ctx.onPinClick(event, 10000 + ctx.guardMs - 1);
-  assert.equal(ctx.isCardOpen(), false, "a click inside the window after a hold drop is ignored");
-  assert.equal(stopped, 1, "the click is still kept from the map");
-  ctx.onPinClick(event, 10000 + ctx.guardMs);
-  assert.equal(ctx.isCardOpen(), true, "a click after the window opens the card");
-  ctx.onPinClick(event, 10000 + ctx.guardMs + 50);
-  assert.equal(ctx.isCardOpen(), false, "and the next click closes it");
+  // a hold of 1.5 s: the pin drops at 600 ms and the finger lifts at 1.5 s
+  advance(10000);
+  handlers.touchstart(touchAt(174.7762, -41.2865));
+  advance(10600);
+  assert.ok(ctx.isCardOpen() === false, "the drop opened the card");
+  ctx.onPinClick(event, 10900);
+  assert.equal(ctx.isCardOpen(), false, "a click while the finger is still down is ignored");
+  advance(11500);
+  handlers.touchend({});
+  ctx.onPinClick(event, 11500);
+  assert.equal(ctx.isCardOpen(), false, "the release click of a 1.5 s hold is ignored");
+  assert.equal(stopped, 2, "the clicks are still kept from the map");
+  ctx.onPinClick(event, 11500 + ctx.guardMs - 1);
+  assert.equal(ctx.isCardOpen(), false, "a click inside the window after release is ignored");
+  ctx.onPinClick(event, 11500 + ctx.guardMs);
+  assert.equal(ctx.isCardOpen(), true, "a deliberate tap after the window opens the card");
+  ctx.onPinClick(event, 11500 + ctx.guardMs + 50);
+  assert.equal(ctx.isCardOpen(), false, "and the next tap closes it");
+
+  // a short touch that drops nothing starts no window
+  advance(20000);
+  handlers.touchstart(touchAt(174.7762, -41.2865));
+  advance(20200);
+  handlers.touchend({});
+  ctx.onPinClick(event, 20210);
+  assert.equal(ctx.isCardOpen(), true, "a tap with no completed hold opens the card at once");
+  ctx.onPinClick(event, 20300);
 
   ctx.setDragging(true);
   ctx.onPinClick(event, 50000);
   assert.equal(ctx.isCardOpen(), false, "the drag guard stays");
   ctx.setDragging(false);
   ctx.onPinClick(event, 50000);
-  assert.equal(ctx.isCardOpen(), true, "with no hold drop on record a click opens the card at once");
-
-  // the long-press timer records the drop before it places the pin
-  const press = runtime.slice(runtime.indexOf("pressTimer = setTimeout("));
-  assert.ok(/pinHoldDropAt = Date\.now\(\);\s*setPin\(lngLat\);/.test(press.slice(0, 200)), "the hold drop is stamped before setPin");
+  assert.equal(ctx.isCardOpen(), true, "with no hold on record a click opens the card at once");
 }
 
 // source checks: no innerHTML in the card, and both drop hints name the card
