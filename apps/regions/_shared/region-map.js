@@ -267,7 +267,6 @@ const CONFIG = {
   center: HOME_CAMERA ? HOME_CAMERA.center : RC.center,
   initialZoom: HOME_CAMERA ? HOME_CAMERA.zoom : RC.initialZoom,
   streetViewMinZoom: 14,
-  streetViewFailDelayMs: 1200,
   mobileMinZoom: 3.0,
   desktopMinZoom: 1.5,
   tiles: {
@@ -309,7 +308,6 @@ const NOMINATIM_EMAIL = window.NOMINATIM_EMAIL || "";
 const BACKDROP_BASEMAP_ID = "backdrop";
 let terrainToggle = null;
 let terrainOn = false;
-let googleMapsReady = false;
 const IS_MOBILE = window.matchMedia && window.matchMedia("(max-width: 640px)").matches;
 
 const religionColors = [
@@ -1081,34 +1079,21 @@ function initBasemapSelect() {
   updateTerrainToggleAvailability();
 }
 
-// with loading=async the maps api is NOT ready at script.onload;
-// readiness must come from the callback= param. the promise is cached
-// so rapid clicks cannot inject the script twice.
-let googleMapsPromise = null;
-function loadGoogleMaps() {
-  if (window.google && window.google.maps && window.google.maps.StreetViewService) {
-    return Promise.resolve();
-  }
-  if (!GOOGLE_MAPS_KEY) return Promise.reject(new Error("Missing Google Maps key"));
-  if (googleMapsPromise) return googleMapsPromise;
-  googleMapsPromise = new Promise((resolve, reject) => {
-    const callbackName = "__powGoogleMapsReady";
-    window[callbackName] = () => {
-      googleMapsReady = true;
-      delete window[callbackName];
-      resolve();
-    };
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(GOOGLE_MAPS_KEY)}&loading=async&callback=${callbackName}`;
-    script.async = true;
-    script.onerror = () => {
-      googleMapsPromise = null;
-      delete window[callbackName];
-      reject(new Error("Failed to load Google Maps"));
-    };
-    document.head.appendChild(script);
+// street view comes from google's maps embed iframe, so google's script never
+// runs on this origin and the content security policy names no google script
+// host (the maps javascript loader echoes its callback parameter, which would
+// let any injected script tag through). embed loads are not billed. one
+// search: the nearest outdoor panorama within 1120 m, facing north
+function streetViewEmbedUrl(lat, lng) {
+  const params = new URLSearchParams({
+    key: GOOGLE_MAPS_KEY,
+    location: `${lat},${lng}`,
+    radius: "1120",
+    source: "outdoor",
+    heading: "0",
+    pitch: "0"
   });
-  return googleMapsPromise;
+  return `https://www.google.com/maps/embed/v1/streetview?${params.toString()}`;
 }
 
 const SOURCES = {
@@ -1473,14 +1458,12 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
   // expand, the drag hint, and copy-coords live outside the lazy path
   const popupEl = popup.getElement();
   const expandButton = popupEl.querySelector(`[data-mode="expand"][data-pano="${panoId}"]`);
-  let resizePano = null;
   if (expandButton) {
     expandButton.addEventListener("click", () => {
       const target = panoContainer();
       if (!target) return;
       const expanded = target.classList.toggle("expanded");
       expandButton.textContent = expanded ? "Collapse" : "Expand";
-      if (resizePano) resizePano();
       requestAnimationFrame(() => clampPopupToViewport(popup));
     });
   }
@@ -1536,8 +1519,8 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
     if (node) node.textContent = "Street View unavailable.";
     return;
   }
-  // lazy street view: the maps api bills per dynamic load, and most
-  // popup opens never look at it — load only on request
+  // lazy street view: most popup opens never look at it, so the iframe
+  // loads only on request
   const placeholder = panoContainer();
   if (placeholder) {
     placeholder.innerHTML = `<button type="button" class="sv-show">Show Street View</button>`;
@@ -1545,148 +1528,61 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
     placeholder.querySelector(".sv-show").addEventListener("click", () => {
       if (svStarted) return;
       svStarted = true;
-      void startStreetView();
+      startStreetView();
     });
   }
 
-  async function startStreetView() {
-  try {
-    const loadingNode = panoContainer();
-    if (loadingNode) loadingNode.textContent = "Loading Street View…";
-    await loadGoogleMaps();
+  function attachResizeHandle(target, frame) {
+    if (!target || target.querySelector(".sv-resize-handle")) return;
+    const handle = document.createElement("div");
+    handle.className = "sv-resize-handle";
+    handle.textContent = "↘";
+    target.appendChild(handle);
+    const MIN_W = 260;
+    const MIN_H = 160;
+    handle.addEventListener("mousedown", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      handle.style.cursor = "nwse-resize";
+      // the iframe would swallow mousemove once the pointer crosses it
+      frame.style.pointerEvents = "none";
+      const startX = event.clientX;
+      const startY = event.clientY;
+      const rect = target.getBoundingClientRect();
+      const startW = rect.width;
+      const startH = rect.height;
+
+      function onMove(e) {
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+        const nextW = Math.min(window.innerWidth * 0.9, Math.max(MIN_W, startW + deltaX));
+        const nextH = Math.min(window.innerHeight * 0.72, Math.max(MIN_H, startH + deltaY));
+        target.style.width = `${nextW}px`;
+        target.style.height = `${nextH}px`;
+      }
+      function onUp() {
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("mouseup", onUp);
+        frame.style.pointerEvents = "";
+        handle.style.cursor = "nwse-resize";
+      }
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+    });
+  }
+
+  function startStreetView() {
     const node = panoContainer();
     if (!node) return;
-    const sv = new google.maps.StreetViewService();
-    let panoInstance = null;
-    let currentSource = "OUTDOOR";
-    let panoLoading = false;
-    let lastPanoRequest = 0;
-    let resizeObserver = null;
-    let pendingFailTimer = null;
-
-    function attachResizeHandle(target) {
-      if (!target || target.querySelector(".sv-resize-handle")) return;
-      const handle = document.createElement("div");
-      handle.className = "sv-resize-handle";
-      handle.textContent = "↘";
-      target.appendChild(handle);
-      const MIN_W = 260;
-      const MIN_H = 160;
-      handle.addEventListener("mousedown", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        handle.style.cursor = "nwse-resize";
-        const startX = event.clientX;
-        const startY = event.clientY;
-        const rect = target.getBoundingClientRect();
-        const startW = rect.width;
-        const startH = rect.height;
-
-        function onMove(e) {
-          const deltaX = e.clientX - startX;
-          const deltaY = e.clientY - startY;
-          const nextW = Math.min(window.innerWidth * 0.9, Math.max(MIN_W, startW + deltaX));
-          const nextH = Math.min(window.innerHeight * 0.72, Math.max(MIN_H, startH + deltaY));
-          target.style.width = `${nextW}px`;
-          target.style.height = `${nextH}px`;
-          resizePanorama();
-        }
-        function onUp() {
-          window.removeEventListener("mousemove", onMove);
-          window.removeEventListener("mouseup", onUp);
-          handle.style.cursor = "nwse-resize";
-        }
-        window.addEventListener("mousemove", onMove);
-        window.addEventListener("mouseup", onUp);
-      });
-    }
-
-    function resizePanorama() {
-      if (panoInstance && window.google?.maps?.event) {
-        window.google.maps.event.trigger(panoInstance, "resize");
-      }
-    }
-
-    function watchResize() {
-      const target = panoContainer();
-      if (!target || typeof ResizeObserver === "undefined") return;
-      if (resizeObserver) resizeObserver.disconnect();
-      resizeObserver = new ResizeObserver(() => resizePanorama());
-      resizeObserver.observe(target);
-    }
-
-    function setMessage(message) {
-      const target = panoContainer();
-      if (target) target.textContent = message;
-    }
-
-    function loadPanorama(source, attempt = 0) {
-      const target = panoContainer();
-      if (!target) return;
-      if (pendingFailTimer) {
-        clearTimeout(pendingFailTimer);
-        pendingFailTimer = null;
-      }
-      const now = Date.now();
-      lastPanoRequest = now;
-      target.textContent = "Loading Street View…";
-      const radius = attempt === 0 ? 560 : 1120;
-      const request = {
-        location: { lat: coords[1], lng: coords[0] },
-        radius,
-        source: google.maps.StreetViewSource[source] || google.maps.StreetViewSource.DEFAULT
-      };
-      sv.getPanorama(request, (data, status) => {
-        if (pendingFailTimer) {
-          clearTimeout(pendingFailTimer);
-          pendingFailTimer = null;
-        }
-        if (status === "OK") {
-          currentSource = source;
-          panoInstance = new google.maps.StreetViewPanorama(target, {
-            position: { lat: coords[1], lng: coords[0] },
-            pov: { heading: 0, pitch: 0 },
-            zoom: 1,
-            addressControl: false,
-            fullscreenControl: false,
-            motionTracking: false,
-            showRoadLabels: false
-          });
-          resizePanorama();
-        } else {
-          if (attempt === 0) {
-            // Fallback: broaden search and switch source if we started outdoors.
-            const nextSource = source === "OUTDOOR" ? "DEFAULT" : "OUTDOOR";
-            loadPanorama(nextSource, attempt + 1);
-            return;
-          }
-          pendingFailTimer = setTimeout(() => {
-            if (source === "OUTDOOR") {
-              setMessage("No outdoor Street View available.");
-            } else {
-              setMessage("No Street View for this location.");
-            }
-          }, CONFIG.streetViewFailDelayMs);
-        }
-      });
-    }
-
-    // the hoisted expand handler resizes the pano once it exists
-    resizePano = resizePanorama;
-
-    loadPanorama("OUTDOOR");
-    attachResizeHandle(panoContainer());
-    watchResize();
+    const frame = document.createElement("iframe");
+    frame.title = `Street View near ${name}`;
+    frame.src = streetViewEmbedUrl(latFixed, lngFixed);
+    frame.allowFullscreen = true;
+    frame.style.cssText = "display:block;width:100%;height:100%;border:0;";
+    node.textContent = "";
+    node.appendChild(frame);
+    attachResizeHandle(node, frame);
     requestAnimationFrame(() => clampPopupToViewport(popup));
-    popup.on("close", () => {
-      if (resizeObserver) resizeObserver.disconnect();
-      resizeObserver = null;
-      if (pendingFailTimer) clearTimeout(pendingFailTimer);
-    });
-  } catch (error) {
-    const node = panoContainer();
-    if (node) node.textContent = "Street View failed to load.";
-  }
   }
 }
 

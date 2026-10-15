@@ -24,51 +24,35 @@ import { runInNewContext } from "node:vm";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 // maplibre-gl 3.6.1 from unpkg; hashes checked against the npm tarball
-const MAPLIBRE = "https://unpkg.com/maplibre-gl@3.6.1/dist/";
+const MAPLIBRE_JS = "https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js";
+const MAPLIBRE_CSS = "https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css";
 const SRI = {
-  "maplibre-gl.js": "sha384-uofOi1moPDuBpTo0FkNAG4WsnGegNBw9g6c0yU85W9DOyVkz3Ht2vKC744Y92hu0",
-  "maplibre-gl.css": "sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH"
+  [MAPLIBRE_JS]: "sha384-uofOi1moPDuBpTo0FkNAG4WsnGegNBw9g6c0yU85W9DOyVkz3Ht2vKC744Y92hu0",
+  [MAPLIBRE_CSS]: "sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH"
 };
 
 // map data and basemaps, geocoders, osm history, the portal backend and
-// attachment storage, google sign-in and the street view api
+// attachment uploads, google sign-in and the street view embed. no google
+// maps script host is listed: its loader echoes a callback parameter into
+// the script it returns, so allowing it would admit any injected script tag
 const TILES = [
   "https://tiles.placemap.org",
   "https://api.maptiler.com",
   "https://tile.openstreetmap.org"
 ];
-const GOOGLE_MAPS_IMG = [
-  "https://*.googleapis.com",
-  "https://*.gstatic.com",
-  "https://*.ggpht.com"
-];
-const ATTACHMENTS = "https://*.r2.cloudflarestorage.com";
 
 const SOURCES = {
   "default-src": ["'self'"],
-  "script-src": [
-    "'self'",
-    "https://unpkg.com/maplibre-gl@3.6.1/",
-    "https://accounts.google.com/gsi/client",
-    "https://maps.googleapis.com"
-  ],
-  "style-src": [
-    "'self'",
-    "'unsafe-inline'",
-    "https://unpkg.com/maplibre-gl@3.6.1/",
-    "https://accounts.google.com/gsi/style",
-    "https://fonts.googleapis.com"
-  ],
+  "script-src": ["'self'", MAPLIBRE_JS, "https://accounts.google.com/gsi/client"],
+  "style-src": ["'self'", "'unsafe-inline'", MAPLIBRE_CSS, "https://accounts.google.com/gsi/style"],
   "img-src": [
     "'self'",
     "data:",
     "blob:",
     ...TILES,
-    ...GOOGLE_MAPS_IMG,
-    "https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev",
-    ATTACHMENTS
+    "https://pub-7ea3480b1cda47698311dce4dbab438c.r2.dev"
   ],
-  "font-src": ["'self'", "https://fonts.gstatic.com"],
+  "font-src": ["'self'"],
   "connect-src": [
     "'self'",
     ...TILES,
@@ -76,12 +60,12 @@ const SOURCES = {
     "https://nominatim.openstreetmap.org",
     "https://api.openstreetmap.org",
     "https://pastel-goshawk-398.convex.cloud",
-    ATTACHMENTS,
-    "https://accounts.google.com/gsi/",
-    "https://maps.googleapis.com"
+    // attachment uploads go to presigned urls on the account's r2 host
+    "https://*.r2.cloudflarestorage.com",
+    "https://accounts.google.com/gsi/"
   ],
   "worker-src": ["'self'", "blob:"],
-  "frame-src": ["https://accounts.google.com/gsi/"],
+  "frame-src": ["https://accounts.google.com/gsi/", "https://www.google.com/maps/embed/"],
   "object-src": ["'none'"],
   "base-uri": ["'self'"],
   "form-action": ["'self'"]
@@ -94,18 +78,37 @@ const SOURCES = {
 const SWITCHER = "apps/shared/datamaps-switcher.js";
 const RULES_CALL = "rules.textContent = JSON.stringify(";
 
+// the end of a balanced bracket expression starting at `open`, skipping
+// string literals and comments so a ")" inside a selector does not count
+function closingIndex(source, open) {
+  let depth = 0;
+  for (let i = open; i < source.length; i += 1) {
+    const ch = source[i];
+    if (ch === '"' || ch === "'" || ch === "`") {
+      for (i += 1; i < source.length && source[i] !== ch; i += 1) {
+        if (source[i] === "\\") i += 1;
+      }
+    } else if (ch === "/" && source[i + 1] === "/") {
+      i = source.indexOf("\n", i);
+      if (i < 0) break;
+    } else if (ch === "/" && source[i + 1] === "*") {
+      i = source.indexOf("*/", i + 2) + 1;
+      if (i <= 0) break;
+    } else if (ch === "(" || ch === "{" || ch === "[") {
+      depth += 1;
+    } else if (ch === ")" || ch === "}" || ch === "]") {
+      depth -= 1;
+      if (depth === 0) return i;
+    }
+  }
+  throw new Error(`${SWITCHER}: unbalanced speculation rules expression`);
+}
+
 export function speculationRulesHash(source) {
   const start = source.indexOf(RULES_CALL);
   if (start < 0) throw new Error(`${SWITCHER}: speculation rules not found`);
-  let depth = 0;
-  let end = start + RULES_CALL.length - 1;
-  do {
-    const ch = source[end];
-    if (ch === "(" || ch === "{" || ch === "[") depth += 1;
-    if (ch === ")" || ch === "}" || ch === "]") depth -= 1;
-    end += 1;
-  } while (depth > 0 && end < source.length);
-  const call = source.slice(start + "rules.textContent = ".length, end);
+  const open = start + RULES_CALL.length - 1;
+  const call = source.slice(start + "rules.textContent = ".length, closingIndex(source, open) + 1);
   const text = runInNewContext(call, Object.create(null));
   return `'sha256-${createHash("sha256").update(text, "utf8").digest("base64")}'`;
 }
@@ -114,24 +117,32 @@ const RULES_HASH = speculationRulesHash(readFileSync(join(ROOT, SWITCHER), "utf8
 
 const META_RE = /^[ \t]*<meta http-equiv="Content-Security-Policy" content="[^"]*">\n/m;
 const CHARSET_RE = /^([ \t]*)<meta charset="[^"]*">\n/im;
-const INLINE_RE = /<script(\s[^>]*)?>([\s\S]*?)<\/script>/g;
+const COMMENT_RE = /<!--[\s\S]*?-->/g;
+// attribute values may hold ">", so quoted values are matched whole
+const ATTRS = `((?:[^>"']|"[^"]*"|'[^']*')*)`;
+const SCRIPT_RE = new RegExp(`<script\\b${ATTRS}>([\\s\\S]*?)</script\\s*>`, "gi");
+const TAG_RE = (name) => new RegExp(`<${name}\\b${ATTRS}>`, "gi");
+const FIRST_RESOURCE_RE = /<(?:script|link|style)\b/i;
 
-// the workbench page is a vite development entry: vite serves it with inline
-// hot-reload scripts, and in production its module 404s and nothing runs
-const SKIP = new Set(["apps/workbench/index.html"]);
+// a named attribute in a tag's attribute text, quoted values masked so
+// that a value containing " src=" is not taken for the attribute
+function hasAttr(attrs, name) {
+  const masked = attrs.replace(/"[^"]*"|'[^']*'/g, '""');
+  return new RegExp(`(?:^|\\s)${name}(?:\\s*=|\\s|$)`, "i").test(masked);
+}
 
-function servedPages() {
-  const out = execFileSync("git", ["ls-files", "-z", "*.html"], { cwd: ROOT, encoding: "utf8" });
-  return out.split("\0").filter((page) => page && !SKIP.has(page)).sort();
+function attrValue(attrs, name) {
+  const m = attrs.match(new RegExp(`(?:^|\\s)${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'>]+))`, "i"));
+  return m ? (m[1] ?? m[2] ?? m[3]) : null;
 }
 
 function inlineScriptHashes(html) {
   const hashes = [];
-  for (const m of html.matchAll(INLINE_RE)) {
-    const attrs = m[1] || "";
-    if (/\ssrc\s*=/.test(attrs)) continue;
-    const digest = createHash("sha256").update(m[2], "utf8").digest("base64");
-    const token = `'sha256-${digest}'`;
+  for (const m of html.replace(COMMENT_RE, "").matchAll(SCRIPT_RE)) {
+    if (hasAttr(m[1], "src")) continue;
+    // the html parser turns crlf and lone cr into lf before the browser hashes
+    const body = m[2].replace(/\r\n?/g, "\n");
+    const token = `'sha256-${createHash("sha256").update(body, "utf8").digest("base64")}'`;
     if (!hashes.includes(token)) hashes.push(token);
   }
   return hashes;
@@ -146,30 +157,48 @@ export function policyFor(html) {
   return directives.join("; ");
 }
 
+// set integrity and crossorigin on the maplibre tags, whatever the attribute
+// order, keeping every other attribute
 function pinMaplibre(html) {
-  let out = html;
-  for (const [file, hash] of Object.entries(SRI)) {
-    const url = MAPLIBRE + file;
-    const tag = file.endsWith(".js")
-      ? new RegExp(`<script src="${url.replace(/[.]/g, "\\.")}"[^>]*></script>`, "g")
-      : new RegExp(`<link href="${url.replace(/[.]/g, "\\.")}"[^>]*>`, "g");
-    const pinned = file.endsWith(".js")
-      ? `<script src="${url}" integrity="${hash}" crossorigin="anonymous"></script>`
-      : `<link href="${url}" rel="stylesheet" integrity="${hash}" crossorigin="anonymous">`;
-    out = out.replace(tag, pinned);
-  }
-  return out;
+  const pin = (tag, attrs, url) => {
+    const kept = attrs
+      .replace(/\s+(?:integrity|crossorigin)(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'>]+))?/gi, "")
+      .replace(/\s*\/?\s*$/, "");
+    return `<${tag}${kept} integrity="${SRI[url]}" crossorigin="anonymous">`;
+  };
+  return html
+    .replace(TAG_RE("script"), (whole, attrs) =>
+      attrValue(attrs, "src") === MAPLIBRE_JS ? pin("script", attrs, MAPLIBRE_JS) : whole)
+    .replace(TAG_RE("link"), (whole, attrs) =>
+      attrValue(attrs, "href") === MAPLIBRE_CSS ? pin("link", attrs, MAPLIBRE_CSS) : whole);
 }
 
 export function stamp(html, page) {
-  const pinned = pinMaplibre(html);
-  const charset = pinned.match(CHARSET_RE);
-  if (!charset) throw new Error(`${page}: no <meta charset> line to anchor the policy`);
-  const meta = `${charset[1]}<meta http-equiv="Content-Security-Policy" content="${policyFor(pinned)}">\n`;
-  const bare = pinned.replace(META_RE, "");
+  const bare = pinMaplibre(html).replace(META_RE, "");
   const anchor = bare.match(CHARSET_RE);
+  if (!anchor) throw new Error(`${page}: no <meta charset> line to anchor the policy`);
   const at = anchor.index + anchor[0].length;
+  // a meta policy governs only what follows it, inside the head
+  const head = bare.search(/<head\b/i);
+  const headEnd = bare.search(/<\/head\s*>/i);
+  const firstResource = bare.search(FIRST_RESOURCE_RE);
+  if (head < 0 || anchor.index < head || (headEnd >= 0 && at > headEnd)) {
+    throw new Error(`${page}: <meta charset> must sit inside <head>`);
+  }
+  if (firstResource >= 0 && firstResource < at) {
+    throw new Error(`${page}: a script, link or style precedes <meta charset>; the policy would not cover it`);
+  }
+  const meta = `${anchor[1]}<meta http-equiv="Content-Security-Policy" content="${policyFor(bare)}">\n`;
   return bare.slice(0, at) + meta + bare.slice(at);
+}
+
+// the workbench page is a vite development entry: vite serves it with inline
+// hot-reload scripts, and in production its module 404s and nothing runs
+const SKIP = new Set(["apps/workbench/index.html"]);
+
+function servedPages() {
+  const out = execFileSync("git", ["ls-files", "-z", "*.html"], { cwd: ROOT, encoding: "utf8" });
+  return out.split("\0").filter((page) => page && !SKIP.has(page)).sort();
 }
 
 function main() {

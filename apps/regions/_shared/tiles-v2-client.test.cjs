@@ -64,7 +64,7 @@ assert.doesNotMatch(unvalidated, /overviewKeep/);
 // every html page that loads a changed script carries the bumped query
 // one stamp per script: a script's stamp moves only when that script changes
 const stamps = {
-    "region-map.js": "20261015a", // map text escaped in popups and tooltips
+    "region-map.js": "20261015b", // street view through the embed iframe
     "datamaps-switcher.js": "20261013a", // switcher rows prerender; warming waits for activation
     "unvalidated-places.js": "20261013b", // versioned grid places url; us, de and it use the grid tier from zoom 6
     "verification-map.js": "20261015a", // marker tooltip text escaped, links scheme-checked

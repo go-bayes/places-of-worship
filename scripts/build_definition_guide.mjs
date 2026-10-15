@@ -9,6 +9,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { stamp } from "./stamp_csp.mjs";
+
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const sourcePath = path.join(repoRoot, "docs/operational-definition.md");
 const targetPath = path.join(repoRoot, "apps/guides/definition.html");
@@ -132,7 +134,8 @@ ${body}
 };
 
 const mode = process.argv[2];
-const rendered = render(fs.readFileSync(sourcePath, "utf8"));
+// the guide is a served page, so it carries the content security policy
+const rendered = stamp(render(fs.readFileSync(sourcePath, "utf8")), path.relative(repoRoot, targetPath));
 if (mode === "--write") {
   fs.writeFileSync(targetPath, rendered);
   console.log(`wrote ${path.relative(repoRoot, targetPath)}`);

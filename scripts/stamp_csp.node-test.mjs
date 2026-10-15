@@ -69,3 +69,59 @@ test("the speculation-rules hash is the hash of the switcher's JSON text", () =>
   assert.equal(speculationRulesHash(source), `'sha256-${hash}'`);
   assert.ok(scriptSrc(policyFor(PAGE)).includes("'sha256-"));
 });
+
+function hashOf(text) {
+  return `'sha256-${createHash("sha256").update(text, "utf8").digest("base64")}'`;
+}
+
+function pageWith(body) {
+  return `<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n</head>\n<body>\n${body}\n</body>\n</html>\n`;
+}
+
+test("script detection follows the html parser, not the source spelling", () => {
+  const src = scriptSrc(policyFor(pageWith(
+    '<SCRIPT>upper()</SCRIPT>\n' +
+    '<script>spaced()</script >\n' +
+    '<script data-note=" src=x">masked()</script>\n' +
+    '<script data-x="a>b">quoted()</script>\n' +
+    '<!-- <script>commented()</script> -->\n' +
+    '<script src="x.js"></script>'
+  )));
+  for (const body of ["upper()", "spaced()", "masked()", "quoted()"]) {
+    assert.ok(src.includes(hashOf(body)), body);
+  }
+  assert.ok(!src.includes(hashOf("commented()")));
+  assert.ok(!src.includes(hashOf("")));
+});
+
+test("crlf in a script is hashed as the browser sees it", () => {
+  const src = scriptSrc(policyFor(pageWith("<script>a()\r\nb()\rc()</script>")));
+  assert.ok(src.includes(hashOf("a()\nb()\nc()")));
+});
+
+test("a resource before the charset line is refused", () => {
+  const html = '<html>\n<head>\n<script src="early.js"></script>\n  <meta charset="UTF-8">\n</head>\n</html>\n';
+  assert.throws(() => stamp(html, "early.html"), /precedes <meta charset>/);
+});
+
+test("pinning ignores attribute order and keeps other attributes", () => {
+  const out = stamp(pageWith(
+    '<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css">\n' +
+    '<script defer src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>'
+  ), "order.html");
+  assert.match(out, /<link rel="stylesheet" href="[^"]+maplibre-gl\.css" integrity="sha384-[^"]+" crossorigin="anonymous">/);
+  assert.match(out, /<script defer src="[^"]+maplibre-gl\.js" integrity="sha384-[^"]+" crossorigin="anonymous"><\/script>/);
+  assert.equal(stamp(out, "order.html"), out);
+});
+
+test("a bracket inside a selector string does not end the rules expression", () => {
+  const source = 'rules.textContent = JSON.stringify({ where: { selector_matches: "a:not(.x))" } }); // )\n';
+  const text = JSON.stringify({ where: { selector_matches: "a:not(.x))" } });
+  assert.equal(speculationRulesHash(source), hashOf(text));
+});
+
+test("no google maps script host and no wildcard script source", () => {
+  const policy = policyFor(PAGE);
+  assert.ok(!policy.includes("maps.googleapis.com"));
+  assert.ok(!/script-src[^;]*\*/.test(policy));
+});
