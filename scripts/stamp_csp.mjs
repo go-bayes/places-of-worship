@@ -254,7 +254,13 @@ function pinMaplibre(html) {
 
 export function stamp(html, page) {
   const bare = withoutPolicy(pinMaplibre(html));
-  const all = tokens(bare);
+  // template contents are inert, so a charset or policy inside one counts
+  // for nothing; drop those tokens before looking for the anchor
+  let depth = 0;
+  const all = tokens(bare).filter((t) => {
+    if (t.name === "template") depth += t.type === "start" ? 1 : -1;
+    return depth === 0 && t.name !== "template";
+  });
   const charset = all.find((t) => t.type === "start" && t.name === "meta" && attr(t, "charset") !== null);
   if (!charset) throw new Error(`${page}: no <meta charset> to anchor the policy`);
   // a meta policy governs only what follows it, inside the head

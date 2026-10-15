@@ -145,3 +145,10 @@ test("pinning reads attribute boundaries, not text inside values", () => {
   ), "boundaries.html");
   assert.match(out, /<script data-note=" src=other\.js integrity=keep" src="[^"]+maplibre-gl\.js" integrity="sha384-[^"]+" crossorigin="anonymous"><\/script>/);
 });
+
+test("a charset inside a template is not the anchor", () => {
+  const html = '<html>\n<head>\n<template><meta charset="UTF-8"></template>\n  <meta charset="UTF-8">\n</head>\n</html>\n';
+  const out = stamp(html, "template.html");
+  assert.ok(out.indexOf('http-equiv="Content-Security-Policy"') > out.indexOf("</template>"));
+  assert.equal(stamp(out, "template.html"), out);
+});
