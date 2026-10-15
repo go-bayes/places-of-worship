@@ -843,7 +843,12 @@ function countryForPlace(props, lat, lng) {
   }
   return null;
 }
-function portalReviseHref(name, latFixed, lngFixed, props) {
+// one builder for the portal's two deep links. "revise" opens a place's card
+// (name and osm identity ride along); "nominate" opens the nomination flow at
+// a hand-placed map pin and carries only the flag and the point. a page
+// config's own portal is used as it stands; otherwise the shared portal opens
+// for the country the place belongs to, and a place with none gets no link
+function portalLinkHref(mode, { name, latFixed, lngFixed, props }) {
   const configPortal = CONTRIBUTE_ROUTES.portal;
   let base = configPortal ? configPortal.href : "";
   if (!base) {
@@ -851,17 +856,30 @@ function portalReviseHref(name, latFixed, lngFixed, props) {
     if (!country) return "";
     base = `${PORTAL_BASE}verification.html?country=${encodeURIComponent(String(country.code).toLowerCase())}`;
   }
-  const params = new URLSearchParams({ revise: "1", lat: latFixed, lng: lngFixed });
-  if (name && name !== "Loading place…" && name !== "Unnamed") params.set("name", name);
-  const osmId = props && props.osm_id !== undefined && props.osm_id !== null ? String(props.osm_id) : "";
-  if (osmId) {
-    params.set("osm_type", String(props.osm_type || "node"));
-    params.set("osm_id", osmId);
+  const params = new URLSearchParams(mode === "nominate" ? { nominate: "1" } : { revise: "1" });
+  params.set("lat", latFixed);
+  params.set("lng", lngFixed);
+  if (mode === "revise") {
+    if (name && name !== "Loading place…" && name !== "Unnamed") params.set("name", name);
+    const osmId = props && props.osm_id !== undefined && props.osm_id !== null ? String(props.osm_id) : "";
+    if (osmId) {
+      params.set("osm_type", String(props.osm_type || "node"));
+      params.set("osm_id", osmId);
+    }
   }
   return `${base}${base.includes("?") ? "&" : "?"}${params.toString()}`;
 }
+// the pin's coordinates for the card and the link. maplibre reports unwrapped
+// longitudes after a long pan (wellington can read 534.7762), and the portal
+// accepts only -180 to 180, so the longitude is wrapped first; the link
+// carries six decimals and the card label five
+function pinLinkCoords(lngLat) {
+  const lng = normaliseLng(Number(lngLat.lng));
+  const lat = Number(lngLat.lat);
+  return { latFixed: lat.toFixed(6), lngFixed: lng.toFixed(6), latLabel: lat.toFixed(5), lngLabel: lng.toFixed(5) };
+}
 function reviseLinkHtml(name, latFixed, lngFixed, props) {
-  const href = portalReviseHref(name, latFixed, lngFixed, props);
+  const href = portalLinkHref("revise", { name, latFixed, lngFixed, props });
   return href ? `<a class="popup-revise" href="${escText(href)}" title="Open the contributor portal at this place">Revise this place</a>` : "";
 }
 function placeKey(props, coords) {
