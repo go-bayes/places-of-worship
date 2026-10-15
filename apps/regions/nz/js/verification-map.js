@@ -709,14 +709,49 @@ const HISTORICAL_CLAIM_ENTRY = ASSIGNMENT_MODE;
 // so the sign-in card can name the specific invited account
 const INVITED_EMAIL_HINT = (SEARCH_PARAMS.get("email") || "").trim();
 
+// strict coordinate parse for the nominate hand-off: the value must be
+// present and, once trimmed, a plain signed decimal (no exponent, hex, plus
+// prefix or trailing characters). returns NaN otherwise
+function strictCoordinate(raw) {
+    if (typeof raw !== "string") return Number.NaN;
+    const trimmed = raw.trim();
+    if (!/^-?\d+(\.\d+)?$/.test(trimmed)) return Number.NaN;
+    return Number(trimmed);
+}
+
+// which comes first when a nominate link arrives: an entry saved on the
+// device, or the link's point. a saved entry is the one the resume would
+// reopen on this page: the quick-entry lane, with a pin whose coordinates
+// are finite. typed values without a pin are not a saved entry
+function mapPinPrecedence({ rapidLane, savedPin } = {}) {
+    if (rapidLane === true && Number.isFinite(savedPin?.latitude) && Number.isFinite(savedPin?.longitude)) {
+        return "saved_entry";
+    }
+    return "apply";
+}
+
 // public-map hand-off (jb 2026-09-03): ?revise=1 opens the revise flow for
-// the linked place; ?report_issue=1 keeps the standalone issue form. pure
+// the linked place; ?report_issue=1 keeps the standalone issue form;
+// ?nominate=1 (map pin) carries only a strictly parsed pin position. pure
 // so the parse is testable; the caller decides what to open and when
 function deepLinkContextFromParams(params) {
     const mode = params.get("revise") === "1"
         ? "revise"
-        : params.get("report_issue") === "1" ? "report_issue" : null;
+        : params.get("report_issue") === "1"
+            ? "report_issue"
+            : params.get("nominate") === "1" ? "nominate" : null;
     if (!mode) return null;
+    if (mode === "nominate") {
+        const latitude = strictCoordinate(params.get("lat"));
+        const longitude = strictCoordinate(params.get("lng"));
+        return {
+            mode,
+            latitude,
+            longitude,
+            hasCoords: Number.isFinite(latitude) && Number.isFinite(longitude)
+                && Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180,
+        };
+    }
     const latitude = Number.parseFloat(params.get("lat") || "");
     const longitude = Number.parseFloat(params.get("lng") || "");
     const osmId = (params.get("osm_id") || "").trim();
@@ -2025,11 +2060,18 @@ class NzVerificationMap {
         // refresh cannot see the manual batch, so we re-merge these)
         this.pinMode = false;
         this.reviseContext = null;
-        // a ?revise=1 hand-off waiting for sign-in (assignment mode gates
-        // the sidebar): parsed here so the first sign-in card can say so,
-        // applied once the contributor is in
+        // a ?revise=1 or ?nominate=1 hand-off waiting for sign-in (assignment
+        // mode gates the sidebar): parsed here so the first sign-in card can
+        // say so, applied once the contributor is in. one request is held at
+        // a time
         const deepLink = deepLinkContextFromParams(SEARCH_PARAMS);
-        this.pendingDeepLink = deepLink?.mode === "revise" ? deepLink : null;
+        this.pendingDeepLink = deepLink?.mode === "revise" || deepLink?.mode === "nominate" ? deepLink : null;
+        // the point of a nominate link once it has been taken from
+        // pendingDeepLink: { latitude, longitude, hasCoords, startedEntry }.
+        // the notice and its button read it; pendingDeepLink stays free for
+        // a later request to revise
+        this.mapPinRequest = null;
+        this.mapPinNoticeKind = null;
         this.pinMarker = null;
         this.pinUncertaintyCircle = null;
         this.pinConfirmed = null;
@@ -2216,6 +2258,29 @@ class NzVerificationMap {
         });
     }
 
+    // what the signed-out card says of a held nominate link: the pin's point
+    // from the parsed numbers, or why the RA will drop the pin by hand
+    nominateSignInNoteText(link) {
+        if (!link?.hasCoords) {
+            return "Sign in to nominate a missing place of worship; the link held no usable location, so you will drop the pin yourself.";
+        }
+        return `Sign in to nominate the place at the pin (${link.latitude.toFixed(5)}, ${link.longitude.toFixed(5)}); it opens here after sign-in`;
+    }
+
+    // removes the map pin's parameters from the address and keeps every
+    // other one (country, batch, detailed, email), so a reload cannot
+    // restore a link that has been applied, replaced or dismissed
+    retireMapPinParams() {
+        const params = new URLSearchParams(window.location.search);
+        for (const name of ["nominate", "lat", "lng"]) params.delete(name);
+        const query = params.toString();
+        window.history.replaceState(
+            window.history.state,
+            "",
+            `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash || ""}`,
+        );
+    }
+
     renderBackendPanel() {
         const panel = document.getElementById("backendPanel");
         if (!panel) return;
@@ -2244,7 +2309,8 @@ class NzVerificationMap {
             panel.innerHTML = `
                 <div class="backend-card auth-required">
                     <strong>${ASSIGNMENT_MODE ? "1. Sign in to start" : "Sign in"}</strong>
-                    ${this.pendingDeepLink ? `<span role="note">Sign in to revise <em>${escapeHtml(this.pendingDeepLink.name || "a place on the map")}</em>; it opens here after sign-in.</span>` : ""}
+                    ${this.pendingDeepLink?.mode === "revise" ? `<span role="note">Sign in to revise <em>${escapeHtml(this.pendingDeepLink.name || "a place on the map")}</em>; it opens here after sign-in.</span>` : ""}
+                    ${this.pendingDeepLink?.mode === "nominate" ? `<span role="note" id="pendingLinkNote"></span>` : ""}
                     ${INVITED_EMAIL_HINT ? `<span>Use <strong class="inline">${escapeHtml(INVITED_EMAIL_HINT)}</strong>.</span>` : ""}
                     <div id="googleSignInButton" class="google-sign-in-host"></div>
                     <a class="join-button" href="https://github.com/go-bayes/places-of-worship" target="_blank" rel="noopener">Contact to join</a>
@@ -2253,6 +2319,9 @@ class NzVerificationMap {
                     ${this.backendLastError ? `<span class="copy-status${this.signedOutDeliberately ? "" : " error"}">${escapeHtml(this.backendLastError)}</span>` : ""}
                 </div>
             `;
+            // the nominate note carries coordinates, so it is set as text
+            const pendingLinkNote = document.getElementById("pendingLinkNote");
+            if (pendingLinkNote) pendingLinkNote.textContent = this.nominateSignInNoteText(this.pendingDeepLink);
             this.backend.renderSignInButton(document.getElementById("googleSignInButton"), {
                 initials: this.getRaInitials(),
                 onSignedIn: user => this.onBackendSignedIn(user),
@@ -2458,6 +2527,8 @@ class NzVerificationMap {
             // known; a restored mode must not keep the other mode's intro
             this.renderInitialDetail();
         }
+        // the one place a held link is applied, after the repaint above,
+        // for the google button and a kept sign-in alike
         this.applyPendingDeepLink();
         this.resumeRapidPinFromDevice();
     }
@@ -2489,6 +2560,10 @@ class NzVerificationMap {
         this.backend?.signOut({ deliberate: true });
         this.backendUser = null;
         this.signedOutDeliberately = true;
+        // a held request belongs to the session that opened it; the device
+        // record stays for the next sign-in
+        this.renderMapPinNotice(null);
+        this.mapPinRequest = null;
         // a deliberate sign-out forgets the chosen activity; an expired
         // session (backendUser cleared elsewhere) keeps it for the return
         if (this.pinMode) this.exitPinMode();
@@ -4662,6 +4737,9 @@ class NzVerificationMap {
         const longitude = Number(coords[0]);
         const osmId = props.osm_id !== undefined && props.osm_id !== null ? String(props.osm_id) : "";
         const osmTypeRaw = window.PowOsmHistory ? window.PowOsmHistory.normaliseType(props.osm_type) : String(props.osm_type || "");
+        // one request is held: a revise replaces a nominate link, and its
+        // parameters leave the address so a reload cannot bring it back
+        if (this.pendingDeepLink?.mode === "nominate") this.retireMapPinParams();
         this.pendingDeepLink = {
             mode: "revise",
             name: String(props.name || "").trim(),
@@ -6776,10 +6854,9 @@ class NzVerificationMap {
         if (link.hasCoords) {
             this.map.setView([link.latitude, link.longitude], Math.max(this.map.getZoom(), 16));
         }
-        if (link.mode === "revise") {
-            this.applyPendingDeepLink();
-            return;
-        }
+        // revise and nominate links wait for onBackendSignedIn, which
+        // applies them after its repaint
+        if (link.mode === "revise" || link.mode === "nominate") return;
         const context = {
             taskId: "",
             name: link.name,
@@ -6802,16 +6879,22 @@ class NzVerificationMap {
         this.focusDetailPanel();
     }
 
-    // opens the pending revise hand-off: in assignment mode only once a
-    // contributor is signed in, landing in add places where the revise
-    // entry lives. a place matched to a loaded task opens that task, as
-    // the dot's popup does; otherwise the revise card for the place
+    // opens the pending hand-off, called from onBackendSignedIn only. a
+    // revise link opens in assignment mode only once a contributor is signed
+    // in, landing in add places where the revise entry lives. a place matched
+    // to a loaded task opens that task, as the dot's popup does; otherwise
+    // the revise card for the place. a nominate link opens the nomination
+    // flow at its point (applyNominateLink)
     applyPendingDeepLink() {
         const link = this.pendingDeepLink;
         if (!link) return;
-        // revising needs an account in every mode (r-h4)
+        // revising and nominating need an account in every mode (r-h4)
         if (!this.backendUser) return;
         this.pendingDeepLink = null;
+        if (link.mode === "nominate") {
+            this.applyNominateLink(link);
+            return;
+        }
         if (ASSIGNMENT_MODE) this.setPortalMode("add");
         const feature = {
             type: "Feature",
@@ -6825,6 +6908,133 @@ class NzVerificationMap {
         } else {
             this.openContextIssueForm(feature);
         }
+    }
+
+    // the nominate branch (brief 3.2, changes 4 and 5). the saved entry is
+    // read before setPortalMode, which itself resumes a saved entry when the
+    // mode changes to add
+    applyNominateLink(link) {
+        this.mapPinRequest = {
+            latitude: link.latitude,
+            longitude: link.longitude,
+            hasCoords: Boolean(link.hasCoords),
+            startedEntry: false,
+        };
+        const request = this.mapPinRequest;
+        if (!ASSIGNMENT_MODE) {
+            this.renderMapPinNotice("standard_portal");
+            return;
+        }
+        const precedence = mapPinPrecedence({
+            rapidLane: RAPID_NOMINATION_ENTRY,
+            savedPin: this.readRapidDraft("rapid-pin")?.pin,
+        });
+        if (precedence === "saved_entry") {
+            // the saved entry resumes: through setPortalMode when the mode
+            // changes to add, directly when it is add already
+            if (this.portalMode === "add") {
+                this.resumeRapidPinFromDevice();
+            } else {
+                this.setPortalMode("add");
+            }
+            this.renderMapPinNotice(this.portalMode === "add" ? "waiting" : "unsaved");
+            return;
+        }
+        this.setPortalMode("add");
+        if (this.portalMode !== "add") {
+            // the RA kept unsaved changes at the mode prompt
+            this.renderMapPinNotice("unsaved");
+            return;
+        }
+        if (request.hasCoords) {
+            this.map.setView([request.latitude, request.longitude], Math.max(this.map.getZoom(), PIN_MIN_PLACEMENT_ZOOM));
+        }
+        this.enterPinMode();
+        if (request.hasCoords) this.placePin(L.latLng(request.latitude, request.longitude));
+        // the request has started an entry only once that entry is open with
+        // its pin; otherwise it keeps waiting in the notice
+        if (!this.pinMode || (request.hasCoords && !this.pinMarker)) {
+            this.renderMapPinNotice("waiting");
+            return;
+        }
+        request.startedEntry = true;
+        this.renderMapPinNotice(null);
+    }
+
+    // the notice's address for a page outside assignment mode: this address
+    // without full and batch, so the point is carried to the standard portal
+    standardPortalHref() {
+        const params = new URLSearchParams(window.location.search);
+        for (const name of ["full", "batch"]) params.delete(name);
+        const query = params.toString();
+        return `${window.location.pathname}${query ? `?${query}` : ""}`;
+    }
+
+    // one notice, in the sidebar outside the detail panel so repaints leave
+    // it be. kind is "waiting" (a saved entry came first), "unsaved" (the RA
+    // kept unsaved changes at the mode prompt), "standard_portal" (the page
+    // is not in assignment mode) or null to hide it. built with DOM nodes and
+    // textContent, never innerHTML
+    renderMapPinNotice(kind) {
+        const notice = document.getElementById("mapPinNotice");
+        this.mapPinNoticeKind = kind || null;
+        if (!notice) return;
+        notice.textContent = "";
+        if (!kind) {
+            notice.hidden = true;
+            return;
+        }
+        notice.setAttribute("data-kind", kind);
+        const append = (tag, text) => {
+            const node = document.createElement(tag);
+            node.textContent = text;
+            notice.appendChild(node);
+            return node;
+        };
+        if (kind === "standard_portal") {
+            append("span", "Nominations from the map open in the ");
+            const anchor = append("a", "standard portal");
+            anchor.setAttribute("href", this.standardPortalHref());
+        } else {
+            const request = this.mapPinRequest;
+            append("span", request?.hasCoords
+                ? `A nomination from the map is waiting at (${request.latitude.toFixed(5)}, ${request.longitude.toFixed(5)})`
+                : "A nomination from the map is waiting; the link held no usable location");
+            const nominate = append("button", "Nominate at the map pin");
+            nominate.setAttribute("type", "button");
+            nominate.addEventListener("click", () => this.nominateAtMapPin());
+            const dismiss = append("button", "Dismiss");
+            dismiss.setAttribute("type", "button");
+            // dismissing releases the request whether or not it started an entry
+            dismiss.addEventListener("click", () => this.releaseMapPinRequest());
+        }
+        notice.hidden = false;
+    }
+
+    // the link is used up: its parameters leave the address, the request is
+    // forgotten and the notice is hidden (brief 3.2, change 6)
+    releaseMapPinRequest() {
+        this.retireMapPinParams();
+        this.mapPinRequest = null;
+        this.renderMapPinNotice(null);
+    }
+
+    // the notice's button re-checks precedence as it stands now. a saved
+    // entry in the way, or an open entry the request did not start, goes
+    // through the existing discard, which asks first when something would be
+    // lost and clears the record and its period cards; refused, all stay.
+    // with neither, the branch runs again and setPortalMode asks its usual
+    // question about unsaved changes
+    nominateAtMapPin() {
+        const request = this.mapPinRequest;
+        if (!request) return;
+        const precedence = mapPinPrecedence({
+            rapidLane: RAPID_NOMINATION_ENTRY,
+            savedPin: this.readRapidDraft("rapid-pin")?.pin,
+        });
+        const otherEntryOpen = Boolean(this.pinMode && !request.startedEntry);
+        if ((precedence === "saved_entry" || otherEntryOpen) && !this.discardEntryAttempt()) return;
+        this.applyNominateLink(request);
     }
 
     focusNominationPanel() {
@@ -8087,8 +8297,10 @@ class NzVerificationMap {
     }
 
     // leaving the pin flow by choice (back to map, cancel, submit, sign-out)
-    // ends the resume; the typed values stay as they always have
+    // ends the resume; the typed values stay as they always have. only the
+    // quick-entry lane owns this record: the detailed lane leaves it alone
     dropRapidPinFromDevice() {
+        if (!RAPID_NOMINATION_ENTRY) return;
         const record = this.readRapidDraft("rapid-pin");
         if (!record?.pin) return;
         delete record.pin;
@@ -12240,8 +12452,11 @@ class NzVerificationMap {
     discardEntryAttempt({ confirmFirst = true } = {}) {
         const somethingToLose = Boolean(this.formDirty || this.pinConfirmed || this.quickPhotoCarry);
         if (confirmFirst && somethingToLose && !window.confirm("Discard this entry? Nothing has been saved.")) return false;
-        this.clearRapidDraft("rapid-pin");
-        this.clearGuidedPeriods(RAPID_PIN_PERIODS_KEY);
+        // the quick-entry draft belongs to the quick-entry lane alone
+        if (RAPID_NOMINATION_ENTRY) {
+            this.clearRapidDraft("rapid-pin");
+            this.clearGuidedPeriods(RAPID_PIN_PERIODS_KEY);
+        }
         this.clearFormDirty();
         if (this.pinMode) this.exitPinMode();
         this.reviseContext = null;
@@ -12340,8 +12555,9 @@ class NzVerificationMap {
         this.pinSearchRows = [];
         this.setEntryOpen(true);
         document.body?.classList?.add("pin-open");
-        // cards saved with an earlier entry belong to that place only
-        this.reconcileRapidPeriodsPlace(this.rapidPinPlaceKey());
+        // cards saved with an earlier entry belong to that place only; the
+        // quick-entry cards belong to the quick-entry lane alone
+        if (RAPID_NOMINATION_ENTRY) this.reconcileRapidPeriodsPlace(this.rapidPinPlaceKey());
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
         this.pinLinkedRefs = [];
@@ -12893,6 +13109,10 @@ class NzVerificationMap {
             } : {}),
         };
         this.keepRapidPinOnDevice();
+        // the pin is settled in the entry the map link started, so the link
+        // has been used (brief 3.2, change 6). an older entry resumed while
+        // the link waits leaves it in the notice
+        if (this.mapPinRequest?.startedEntry) this.releaseMapPinRequest();
         if (this.rapidFormOptions?.pin) this.renderRapidSourceLinks("pin", this.rapidFormOptions.pin);
         // the confirmed position is what gets recorded; freeze the pin
         this.pinMarker.dragging.disable();
@@ -13199,6 +13419,8 @@ class NzVerificationMap {
             this.clearFormDirty();
         }
         this.dropRapidPinFromDevice();
+        // leaving the entry the map link started uses the link up
+        if (this.mapPinRequest?.startedEntry) this.releaseMapPinRequest();
         this.paneSnap("rest");
         // a cancelled period placement returns to the pane with its cards
         const occupancyPin = this.occupancyPinContext;
@@ -13503,6 +13725,7 @@ class NzVerificationMap {
 }
 
 NzVerificationMap.deepLinkContextFromParams = deepLinkContextFromParams;
+NzVerificationMap.mapPinPrecedence = mapPinPrecedence;
 window.NzVerificationMap = NzVerificationMap;
 if (!window.__POW_TEST_NO_BOOTSTRAP__) {
     window.nzVerificationMap = new NzVerificationMap();

@@ -64,10 +64,10 @@ assert.doesNotMatch(unvalidated, /overviewKeep/);
 // every html page that loads a changed script carries the bumped query
 // one stamp per script: a script's stamp moves only when that script changes
 const stamps = {
-    "region-map.js": "20261015e", // street view resizes from its corner, no expand button
+    "region-map.js": "20261015f", // nominate from the map pin: pin card, portal link
     "datamaps-switcher.js": "20261013a", // switcher rows prerender; warming waits for activation
     "unvalidated-places.js": "20261013b", // versioned grid places url; us, de and it use the grid tier from zoom 6
-    "verification-map.js": "20261015c", // decided tasks reopen with a reason; reopened-after-decision marker
+    "verification-map.js": "20261015d", // nominate link branch, pin notice
     "task-presentation.js": "20261015c", // decided-status and reopen-flag helpers
     "convex-task-client.js": "20261015d", // revertReopen client method
     "review-portal.js": "20261015d", // revert-the-reopen control

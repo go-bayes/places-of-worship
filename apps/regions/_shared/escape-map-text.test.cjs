@@ -90,7 +90,7 @@ const noRawMarkup = (html, message) => {
 
 // the revise link keeps its href inside the attribute
 {
-  const ctx = load(["escText", "reviseLinkHtml"], { portalReviseHref: () => 'x" onmouseover="alert(1)' });
+  const ctx = load(["escText", "reviseLinkHtml"], { portalLinkHref: () => 'x" onmouseover="alert(1)' });
   const html = ctx.reviseLinkHtml("n", "1", "2", null);
   assert.ok(!/" onmouseover="/.test(html), "href cannot leave its attribute");
 }

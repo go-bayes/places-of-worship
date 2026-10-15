@@ -843,7 +843,12 @@ function countryForPlace(props, lat, lng) {
   }
   return null;
 }
-function portalReviseHref(name, latFixed, lngFixed, props) {
+// one builder for the portal's two deep links. "revise" opens a place's card
+// (name and osm identity ride along); "nominate" opens the nomination flow at
+// a hand-placed map pin and carries only the flag and the point. a page
+// config's own portal is used as it stands; otherwise the shared portal opens
+// for the country the place belongs to, and a place with none gets no link
+function portalLinkHref(mode, { name, latFixed, lngFixed, props }) {
   const configPortal = CONTRIBUTE_ROUTES.portal;
   let base = configPortal ? configPortal.href : "";
   if (!base) {
@@ -851,17 +856,30 @@ function portalReviseHref(name, latFixed, lngFixed, props) {
     if (!country) return "";
     base = `${PORTAL_BASE}verification.html?country=${encodeURIComponent(String(country.code).toLowerCase())}`;
   }
-  const params = new URLSearchParams({ revise: "1", lat: latFixed, lng: lngFixed });
-  if (name && name !== "Loading place…" && name !== "Unnamed") params.set("name", name);
-  const osmId = props && props.osm_id !== undefined && props.osm_id !== null ? String(props.osm_id) : "";
-  if (osmId) {
-    params.set("osm_type", String(props.osm_type || "node"));
-    params.set("osm_id", osmId);
+  const params = new URLSearchParams(mode === "nominate" ? { nominate: "1" } : { revise: "1" });
+  params.set("lat", latFixed);
+  params.set("lng", lngFixed);
+  if (mode === "revise") {
+    if (name && name !== "Loading place…" && name !== "Unnamed") params.set("name", name);
+    const osmId = props && props.osm_id !== undefined && props.osm_id !== null ? String(props.osm_id) : "";
+    if (osmId) {
+      params.set("osm_type", String(props.osm_type || "node"));
+      params.set("osm_id", osmId);
+    }
   }
   return `${base}${base.includes("?") ? "&" : "?"}${params.toString()}`;
 }
+// the pin's coordinates for the card and the link. maplibre reports unwrapped
+// longitudes after a long pan (wellington can read 534.7762), and the portal
+// accepts only -180 to 180, so the longitude is wrapped first; the link
+// carries six decimals and the card label five
+function pinLinkCoords(lngLat) {
+  const lng = normaliseLng(Number(lngLat.lng));
+  const lat = Number(lngLat.lat);
+  return { latFixed: lat.toFixed(6), lngFixed: lng.toFixed(6), latLabel: lat.toFixed(5), lngLabel: lng.toFixed(5) };
+}
 function reviseLinkHtml(name, latFixed, lngFixed, props) {
-  const href = portalReviseHref(name, latFixed, lngFixed, props);
+  const href = portalLinkHref("revise", { name, latFixed, lngFixed, props });
   return href ? `<a class="popup-revise" href="${escText(href)}" title="Open the contributor portal at this place">Revise this place</a>` : "";
 }
 function placeKey(props, coords) {
@@ -933,9 +951,84 @@ function distanceSummary(metres) {
 // right-click (mouse) or press-and-hold (touch) drops a draggable amber
 // pin; while present it replaces the blue dot as the measuring point, so
 // the banner and directions answer "from the pin". the × on the banner
-// or a tap on the pin removes it.
+// removes it, or a tap on the pin opens its card (coordinates, a link to
+// nominate a missing place there, and a remove button).
 let pinMarker = null;
 let pinDragging = false;
+let pinCard = null;
+// a finger lifting after a press-and-hold can click the pin that has just
+// appeared under it, which would open the card the drop meant to keep closed.
+// the guard holds from the drop until the finger lifts, however long the
+// hold, and for a short window after the release
+const PIN_HOLD_CLICK_GUARD_MS = 700;
+let pinHoldDown = false;
+let pinHoldReleaseAt = -Infinity;
+
+// the card's content, built from dom nodes and text only. the coordinates
+// are the wrapped five-decimal label; the link appears only where a portal
+// resolves, so at sea the card offers the coordinates and removal alone
+function pinCardElement(lngLat, doc = document) {
+  const { latFixed, lngFixed, latLabel, lngLabel } = pinLinkCoords(lngLat);
+  const card = doc.createElement("div");
+  card.className = "pin-card";
+  const coords = doc.createElement("div");
+  coords.className = "pin-card-coords";
+  coords.textContent = `${latLabel}, ${lngLabel}`;
+  card.append(coords);
+  const actions = doc.createElement("div");
+  actions.className = "popup-actions";
+  const href = portalLinkHref("nominate", { name: "", latFixed, lngFixed, props: null });
+  if (href) {
+    const link = doc.createElement("a");
+    link.className = "pin-card-link";
+    link.setAttribute("href", href);
+    link.textContent = "Nominate missing PoW here";
+    actions.append(link);
+  }
+  const remove = doc.createElement("button");
+  remove.setAttribute("type", "button");
+  remove.textContent = "Remove pin";
+  remove.addEventListener("click", () => clearPin());
+  actions.append(remove);
+  card.append(actions);
+  return card;
+}
+
+// one card at a time, at the pin. opening it closes any place popup, and a
+// place popup opening closes it (trackPlacePopup), so the two never stack
+function openPinCard() {
+  if (!pinMarker) return;
+  closePinCard();
+  if (activePlacePopup) activePlacePopup.remove();
+  const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: true, anchor: "bottom", offset: [0, -42], maxWidth: "280px" })
+    .setLngLat(pinMarker.getLngLat())
+    .setDOMContent(pinCardElement(pinMarker.getLngLat()))
+    .addTo(map);
+  pinCard = popup;
+  popup.on("close", () => {
+    if (pinCard === popup) pinCard = null;
+  });
+}
+function closePinCard() {
+  if (!pinCard) return;
+  const popup = pinCard;
+  pinCard = null;
+  popup.remove();
+}
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closePinCard();
+});
+
+// the click on the pin: toggles its card, except while a drag settles or
+// while the press-and-hold that dropped the pin under the finger is still
+// down or has just lifted. the clock is a parameter so a test can inject it
+function onPinClick(event, now = Date.now()) {
+  event.stopPropagation();
+  if (pinDragging) return;
+  if (pinHoldDown || now - pinHoldReleaseAt < PIN_HOLD_CLICK_GUARD_MS) return;
+  if (pinCard) closePinCard();
+  else openPinCard();
+}
 
 function setPin(lngLat) {
   const coords = [lngLat.lng, lngLat.lat];
@@ -943,22 +1036,23 @@ function setPin(lngLat) {
     pinMarker = new maplibregl.Marker({ color: "#f59e0b", draggable: true })
       .setLngLat(coords)
       .addTo(map);
-    pinMarker.on("dragstart", () => { pinDragging = true; });
+    pinMarker.on("dragstart", () => {
+      pinDragging = true;
+      closePinCard();
+    });
     pinMarker.on("dragend", () => {
       const moved = pinMarker.getLngLat();
       pinLocation = [moved.lng, moved.lat];
       referenceChanged();
-      // let the post-drag click slip past before re-arming tap-to-remove
+      // let the post-drag click slip past before re-arming tap-for-options
       setTimeout(() => { pinDragging = false; }, 80);
     });
-    // tap the pin itself to remove it: click on, click off
-    pinMarker.getElement().addEventListener("click", (event) => {
-      event.stopPropagation();
-      if (pinDragging) return;
-      clearPin();
-    });
-    showClickHint("Measuring from pin — tap it to remove", { durationMs: 2400 });
+    // tap the pin itself for its card: click on, click off
+    pinMarker.getElement().addEventListener("click", (event) => onPinClick(event));
+    showClickHint("Measuring from pin — tap it for options", { durationMs: 2400 });
   } else {
+    // an open card holds the old point; close it, as a drag does
+    closePinCard();
     pinMarker.setLngLat(coords);
   }
   pinLocation = coords;
@@ -966,6 +1060,7 @@ function setPin(lngLat) {
 }
 
 function clearPin() {
+  closePinCard();
   if (pinMarker) {
     pinMarker.remove();
     pinMarker = null;
@@ -987,7 +1082,16 @@ function cancelLongPress() {
   pressTimer = null;
   pressPoint = null;
 }
+// the finger lifting from a completed long-press starts the click guard's
+// window; a touch that dropped nothing starts none
+function releasePinHold() {
+  if (!pinHoldDown) return;
+  pinHoldDown = false;
+  pinHoldReleaseAt = Date.now();
+}
 map.on("touchstart", (e) => {
+  // a hold whose release never arrived does not block later taps
+  pinHoldDown = false;
   if (!e.lngLat || (e.points && e.points.length > 1)) {
     cancelLongPress();
     return;
@@ -997,6 +1101,7 @@ map.on("touchstart", (e) => {
   if (pressTimer) clearTimeout(pressTimer);
   pressTimer = setTimeout(() => {
     pressTimer = null;
+    pinHoldDown = true;
     setPin(lngLat);
   }, 600);
 });
@@ -1006,8 +1111,14 @@ map.on("touchmove", (e) => {
     cancelLongPress();
   }
 });
-map.on("touchend", cancelLongPress);
-map.on("touchcancel", cancelLongPress);
+map.on("touchend", () => {
+  releasePinHold();
+  cancelLongPress();
+});
+map.on("touchcancel", () => {
+  releasePinHold();
+  cancelLongPress();
+});
 map.on("move", cancelLongPress);
 
 let pinnedLabel = null;
@@ -1182,6 +1293,7 @@ function showMobileStreetViewPopup(name, coords, featureId) {
 let activePlacePopup = null;
 function trackPlacePopup(popup) {
   if (activePlacePopup && activePlacePopup !== popup) activePlacePopup.remove();
+  closePinCard();
   activePlacePopup = popup;
   makePopupDraggable(popup);
   popup.on("close", () => {
@@ -2694,7 +2806,7 @@ async function runSearch() {
       // also replaces the sticky searching message, which setPin alone
       // leaves behind when it merely moves an existing pin.
       setPin({ lng: lon, lat: lat });
-      showClickHint("Measuring pin dropped at the address — tap it to remove", { durationMs: 2600 });
+      showClickHint("Measuring pin dropped at the address — tap it for options", { durationMs: 2600 });
     } else if (!maybeShowPinTip()) {
       scheduleSearchHintClear([lon, lat]);
     }
@@ -5309,7 +5421,7 @@ function updatePartialIndicator() {
 
 // ---- dataset passport ---------------------------------------------------
 // (escText, safeHttpUrl and osmObjectUrl are defined with the popup helpers
-// near portalReviseHref)
+// near portalLinkHref)
 
 // distinct statistics providers behind the active product; boundary and
 // place-snapshot datasets stay in the drawer, off the identity line. two
