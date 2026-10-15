@@ -956,6 +956,10 @@ function distanceSummary(metres) {
 let pinMarker = null;
 let pinDragging = false;
 let pinCard = null;
+// a finger lifting after a press-and-hold can click the pin that has just
+// appeared under it, which would open the card the drop meant to keep closed
+const PIN_HOLD_CLICK_GUARD_MS = 700;
+let pinHoldDropAt = -Infinity;
 
 // the card's content, built from dom nodes and text only. the coordinates
 // are the wrapped five-decimal label; the link appears only where a portal
@@ -1012,6 +1016,17 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") closePinCard();
 });
 
+// the click on the pin: toggles its card, except while a drag settles or
+// just after a press-and-hold dropped the pin under the finger. the clock is
+// a parameter so a test can inject it
+function onPinClick(event, now = Date.now()) {
+  event.stopPropagation();
+  if (pinDragging) return;
+  if (now - pinHoldDropAt < PIN_HOLD_CLICK_GUARD_MS) return;
+  if (pinCard) closePinCard();
+  else openPinCard();
+}
+
 function setPin(lngLat) {
   const coords = [lngLat.lng, lngLat.lat];
   if (!pinMarker) {
@@ -1030,12 +1045,7 @@ function setPin(lngLat) {
       setTimeout(() => { pinDragging = false; }, 80);
     });
     // tap the pin itself for its card: click on, click off
-    pinMarker.getElement().addEventListener("click", (event) => {
-      event.stopPropagation();
-      if (pinDragging) return;
-      if (pinCard) closePinCard();
-      else openPinCard();
-    });
+    pinMarker.getElement().addEventListener("click", (event) => onPinClick(event));
     showClickHint("Measuring from pin — tap it for options", { durationMs: 2400 });
   } else {
     // an open card holds the old point; close it, as a drag does
@@ -1079,6 +1089,7 @@ map.on("touchstart", (e) => {
   if (pressTimer) clearTimeout(pressTimer);
   pressTimer = setTimeout(() => {
     pressTimer = null;
+    pinHoldDropAt = Date.now();
     setPin(lngLat);
   }, 600);
 });

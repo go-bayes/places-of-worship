@@ -266,6 +266,64 @@ function loadCard(opts, cleared) {
   assert.equal(ctx.isCardOpen(), false, "clearing the pin closes the card");
 }
 
+// press-and-hold guard: a click on the pin within the window after a hold
+// drop is ignored, a click after it toggles the card, and a drag keeps its
+// own guard. the real onPinClick runs with an injected clock
+{
+  const popups = [];
+  class Popup {
+    constructor() { this.open = false; this.handlers = {}; popups.push(this); }
+    setLngLat() { return this; }
+    setDOMContent() { return this; }
+    addTo() { this.open = true; return this; }
+    on(type, fn) { this.handlers[type] = fn; return this; }
+    remove() { if (this.open) { this.open = false; if (this.handlers.close) this.handlers.close(); } return this; }
+  }
+  const ctx = load({ rc: { countryCode: "nz" } });
+  Object.assign(ctx, {
+    maplibregl: { Popup },
+    map: {},
+    document: stubDocument(),
+    showClickHint() {},
+    referenceChanged() {}
+  });
+  const names = ["pinCardElement", "onPinClick", "openPinCard", "closePinCard"];
+  const constant = runtime.match(/const PIN_HOLD_CLICK_GUARD_MS = \d+;/);
+  assert.ok(constant, "the guard window is a named constant");
+  vm.runInContext(
+    `let pinMarker = { getLngLat: () => ({ lng: 174.7762, lat: -41.2865 }) }, pinDragging = false, pinCard = null, activePlacePopup = null;\n` +
+      `${constant[0]}\nlet pinHoldDropAt = -Infinity;\n` +
+      `${names.map((name) => lift(`function ${name}(`)).join("\n")}\n` +
+      `this.onPinClick = onPinClick; this.isCardOpen = () => pinCard !== null;\n` +
+      `this.holdDroppedAt = (t) => { pinHoldDropAt = t; }; this.setDragging = (v) => { pinDragging = v; };\n` +
+      `this.guardMs = PIN_HOLD_CLICK_GUARD_MS;`,
+    ctx
+  );
+  let stopped = 0;
+  const event = { stopPropagation() { stopped += 1; } };
+  assert.ok(ctx.guardMs >= 500 && ctx.guardMs <= 1000, "the window is short enough not to block a deliberate tap");
+
+  ctx.holdDroppedAt(10000);
+  ctx.onPinClick(event, 10000 + ctx.guardMs - 1);
+  assert.equal(ctx.isCardOpen(), false, "a click inside the window after a hold drop is ignored");
+  assert.equal(stopped, 1, "the click is still kept from the map");
+  ctx.onPinClick(event, 10000 + ctx.guardMs);
+  assert.equal(ctx.isCardOpen(), true, "a click after the window opens the card");
+  ctx.onPinClick(event, 10000 + ctx.guardMs + 50);
+  assert.equal(ctx.isCardOpen(), false, "and the next click closes it");
+
+  ctx.setDragging(true);
+  ctx.onPinClick(event, 50000);
+  assert.equal(ctx.isCardOpen(), false, "the drag guard stays");
+  ctx.setDragging(false);
+  ctx.onPinClick(event, 50000);
+  assert.equal(ctx.isCardOpen(), true, "with no hold drop on record a click opens the card at once");
+
+  // the long-press timer records the drop before it places the pin
+  const press = runtime.slice(runtime.indexOf("pressTimer = setTimeout("));
+  assert.ok(/pinHoldDropAt = Date\.now\(\);\s*setPin\(lngLat\);/.test(press.slice(0, 200)), "the hold drop is stamped before setPin");
+}
+
 // source checks: no innerHTML in the card, and both drop hints name the card
 {
   assert.ok(!/innerHTML|insertAdjacentHTML/.test(lift("function pinCardElement(")), "the card is built from DOM nodes only");
@@ -273,8 +331,8 @@ function loadCard(opts, cleared) {
   assert.equal(runtime.split("tap it for options").length - 1, 2, "both hints read tap it for options");
   assert.ok(runtime.includes("Measuring from pin — tap it for options"));
   assert.ok(runtime.includes("Measuring pin dropped at the address — tap it for options"));
-  const click = runtime.slice(runtime.indexOf('getElement().addEventListener("click"'));
-  assert.ok(/pinDragging[\s\S]{0,40}return;[\s\S]{0,80}openPinCard\(\)/.test(click.slice(0, 400)), "the click keeps the drag guard, then opens the card");
+  assert.ok(runtime.includes('getElement().addEventListener("click", (event) => onPinClick(event))'), "the pin's click runs onPinClick");
+  assert.ok(/pinDragging\) return;[\s\S]{0,120}openPinCard\(\)/.test(lift("function onPinClick(")), "the click keeps the drag guard, then opens the card");
 }
 
 console.log("pin-nomination tests passed");
