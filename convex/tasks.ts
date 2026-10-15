@@ -938,6 +938,10 @@ export const reopenTask = mutation({
     // hour (reserved security review, 2026-10-15); review roles are not
     if (decided && !canReview(user.roles)) {
       await intakeRateLimiter.limit(ctx, "decidedReopenPerUser", { key: user._id, throws: true });
+      // and 60 an hour across all users (JB, 2026-10-15), so several
+      // accounts cannot together reopen decided work faster than a
+      // reviewer can follow
+      await intakeRateLimiter.limit(ctx, "decidedReopenGlobal", { throws: true });
     }
     const now = Date.now();
     await ctx.db.patch(task._id, {
@@ -968,6 +972,96 @@ export const reopenTask = mutation({
       reason,
     });
     return { task_id: args.taskId, status: "reopened" as const };
+  },
+});
+
+// the rows that hang off a task and carry a write time, read for the revert
+// check: any written at or after the first reopen means the reopen has been
+// built on and cannot be undone
+const REVERT_WRITE_TABLES = [
+  ["evidence_drafts", "by_task_status"],
+  ["evidence_attachments", "by_task_status"],
+  ["historical_claims", "by_task_and_created_at"],
+  ["site_occupancies", "by_task_and_created_at"],
+  ["evidence_versions", "by_task"],
+  ["evidence_head_changes", "by_task"],
+  ["review_decisions", "by_task"],
+  ["task_acceptances", "by_task"],
+] as const;
+
+// a reviewer, curator, admin or the PI may undo a reopen made from a decided
+// status, but only while nothing has been written to the task since: the
+// task goes back to the status it held, exactly as before, and the flag
+// clears (JB, 2026-10-15). acceptance rows, review decisions and export
+// batch fields are not touched
+export const revertReopen = mutation({
+  args: {
+    taskId: v.string(),
+    reason: v.string(),
+  },
+  returns: v.object({
+    task_id: v.string(),
+    status: v.union(v.literal("reviewed"), v.literal("pi_accepted"), v.literal("exported")),
+  }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx, ["reviewer", "curator", "admin", "pi"]);
+    const task = await getTaskOrThrow(ctx, args.taskId);
+    const flag = task.reopened_after_decision;
+    if (task.status !== "reopened" || flag === undefined) {
+      throw new Error("Only a task reopened from a decision, and still reopened, can have its reopen reverted.");
+    }
+    const reason = args.reason.trim();
+    if (reason.length < DECIDED_REOPEN_REASON_MIN) {
+      throw new Error(`Give a reason of at least ${DECIDED_REOPEN_REASON_MIN} characters to revert a reopen.`);
+    }
+    assertTaskReasonLimit("revert reason", reason);
+
+    const since = flag.reopened_at;
+    const writtenSince = "Something has been written to this task since it was reopened, so the reopen can no longer be reverted. Record a new decision through the review workflow instead.";
+    // the only event at or after the first reopen is that reopen itself;
+    // a claim, a note, a draft save or a second reopen is another
+    const events = await ctx.db
+      .query("task_events")
+      .withIndex("by_task_time", (q) => q.eq("task_id", args.taskId).gte("occurred_at", since))
+      .collect();
+    const onlyTheReopen = events.length === 1
+      && events[0].event_type === "reopened"
+      && events[0].actor_user_id === flag.reopened_by
+      && events[0].previous_status === flag.from_status
+      && events[0].new_status === "reopened";
+    if (!onlyTheReopen) {
+      throw new Error(writtenSince);
+    }
+    for (const [table, index] of REVERT_WRITE_TABLES) {
+      const rows: any[] = await (ctx.db as any)
+        .query(table)
+        .withIndex(index, (q: any) => q.eq("task_id", args.taskId))
+        .collect();
+      for (const row of rows) {
+        const wroteAt = Math.max(row.created_at ?? 0, row.updated_at ?? 0, row.recorded_at ?? 0);
+        if (wroteAt >= since) {
+          throw new Error(writtenSince);
+        }
+      }
+    }
+
+    const now = Date.now();
+    await ctx.db.patch(task._id, {
+      status: flag.from_status,
+      reopened_after_decision: undefined,
+      updated_at: now,
+      last_event_at: now,
+    });
+    await appendTaskEvent(ctx, {
+      taskId: args.taskId,
+      eventType: "reopen_reverted",
+      actorUserId: user._id,
+      actorRole: chooseActorRole(user, ["reviewer", "curator", "admin", "pi"]),
+      previousStatus: "reopened",
+      newStatus: flag.from_status,
+      reason,
+    });
+    return { task_id: args.taskId, status: flag.from_status };
   },
 });
 

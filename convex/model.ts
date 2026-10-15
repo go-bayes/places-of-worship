@@ -113,6 +113,9 @@ export const taskEventType = v.union(
   v.literal("pi_returned"),
   // a retired (superseded or withdrawn) draft returned to active review
   v.literal("draft_restored"),
+  // a reopen from a decided status undone before anything was written to
+  // the task: it returns to the status it held (jb 2026-10-15)
+  v.literal("reopen_reverted"),
 );
 
 // evidence-version.v1: how an immutable evidence version came to exist.

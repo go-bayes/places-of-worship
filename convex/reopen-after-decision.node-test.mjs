@@ -247,13 +247,13 @@ test("an ra's reopens from a decided status are charged to the per-user limit; r
     // an ra, decided: charged under the user's key
     const w = await scene("reviewed");
     await reopenTask._handler(w.as(w.ra), { taskId: "task_1", reason: "New evidence on the date." });
-    assert.deepEqual(charged, [["decidedReopenPerUser", w.ra._id]]);
+    assert.deepEqual(charged, [["decidedReopenPerUser", w.ra._id], ["decidedReopenGlobal", undefined]], "per-user first, then the global cap");
     // reviewers and non-decided reopens are not charged
     for (const [status, actor] of [["reviewed", "reviewer"], ["needs_review", "ra"]]) {
       const x = await scene(status);
       await reopenTask._handler(x.as(x[actor]), { taskId: "task_1", reason: "Another look at it." });
     }
-    assert.equal(charged.length, 1);
+    assert.equal(charged.length, 2);
     // a refusal by the limiter leaves the task decided and writes nothing
     await reopenTask._handler(w.as(w.ra), { taskId: "task_x", reason: "Unused." }).catch(() => {});
     const a = await scene("pi_accepted");
@@ -271,4 +271,143 @@ test("an ra's reopens from a decided status are charged to the per-user limit; r
   } finally {
     intakeRateLimiter.limit = original;
   }
+});
+
+test("the global cap refuses an ra's decided reopen after the per-user limit passes, and is not charged to review roles", async () => {
+  const original = intakeRateLimiter.limit;
+  const charged = [];
+  intakeRateLimiter.limit = async (_ctx, name, options) => {
+    charged.push(name);
+    const over = name === "decidedReopenGlobal";
+    if (over && options?.throws === true) throw new Error("Rate limit exceeded: global.");
+    return { ok: !over, retryAfter: over ? 1000 : 0 };
+  };
+  try {
+    const w = await scene("pi_accepted");
+    await assert.rejects(reopenTask._handler(w.as(w.ra), { taskId: "task_1", reason: "Everyone is reopening." }), /global/);
+    assert.deepEqual(charged, ["decidedReopenPerUser", "decidedReopenGlobal"]);
+    assert.equal(w.task.status, "pi_accepted");
+    assert.equal(w.task.reopened_after_decision, undefined);
+    assert.equal(w.rows.task_events.length, 0);
+    // a reviewer is not held by the cap
+    await reopenTask._handler(w.as(w.reviewer), { taskId: "task_1", reason: "Reviewer reopening anyway." });
+    assert.equal(w.task.status, "reopened");
+    assert.deepEqual(charged, ["decidedReopenPerUser", "decidedReopenGlobal"]);
+  } finally {
+    intakeRateLimiter.limit = original;
+  }
+});
+
+// jb, 2026-10-15: a reviewer, curator, admin or the PI may undo a reopen
+// while nothing has been written to the task since
+const { revertReopen, addTaskNote } = await import("./tasks.ts");
+const { saveEvidenceDraft } = await import("./evidence.ts");
+
+async function reopened(status, over = {}) {
+  const w = await scene(status, over);
+  w.admin = await w.addUser("admin-subject", ["admin"]);
+  w.curator = await w.addUser("curator-subject", ["curator"]);
+  await reopenTask._handler(w.as(w.ra), { taskId: "task_1", reason: "New evidence on the date." });
+  return w;
+}
+
+for (const status of DECIDED) {
+  test(`a reviewer reverts a reopen of a ${status} task: the status returns, the flag clears, the event is recorded`, async () => {
+    const w = await reopened(status);
+    const before = JSON.stringify({ a: w.rows.task_acceptances, d: w.rows.review_decisions, b: w.rows.export_batches });
+    const result = await revertReopen._handler(w.as(w.reviewer), { taskId: "task_1", reason: "  Opened in error, no new evidence.  " });
+    assert.deepEqual(result, { task_id: "task_1", status });
+    assert.equal(w.task.status, status);
+    assert.equal(w.task.reopened_after_decision, undefined);
+    const event = w.rows.task_events.at(-1);
+    assert.equal(event.event_type, "reopen_reverted");
+    assert.equal(event.previous_status, "reopened");
+    assert.equal(event.new_status, status);
+    assert.equal(event.reason, "Opened in error, no new evidence.");
+    assert.equal(event.actor_user_id, w.reviewer._id);
+    assert.equal(JSON.stringify({ a: w.rows.task_acceptances, d: w.rows.review_decisions, b: w.rows.export_batches }), before);
+    // the side routes refuse it again, as before the reopen
+    await assert.rejects(claimTask._handler(w.as(w.ra), { taskId: "task_1" }), REFUSAL);
+  });
+}
+
+test("a curator, an admin and the PI may revert; an ra may not", async () => {
+  for (const actor of ["curator", "admin", "pi"]) {
+    const w = await reopened("reviewed");
+    await revertReopen._handler(w.as(w[actor]), { taskId: "task_1", reason: "Opened in error, no new evidence." });
+    assert.equal(w.task.status, "reviewed", actor);
+  }
+  const w = await reopened("reviewed");
+  await assert.rejects(revertReopen._handler(w.as(w.ra), { taskId: "task_1", reason: "Opened in error, no new evidence." }), /Project role does not permit/);
+  assert.equal(w.task.status, "reopened");
+});
+
+test("a revert is refused unless the task is reopened with a flag, and for a short reason", async () => {
+  for (const status of ["reviewed", "pi_accepted", "exported", "needs_review", "open"]) {
+    const w = await scene(status);
+    await assert.rejects(revertReopen._handler(w.as(w.reviewer), { taskId: "task_1", reason: "Opened in error, no new evidence." }), /reopened from a decision/, status);
+  }
+  // reopened from a status that is not decided: no flag
+  const x = await scene("needs_review");
+  await reopenTask._handler(x.as(x.ra), { taskId: "task_1", reason: "ok" });
+  await assert.rejects(revertReopen._handler(x.as(x.reviewer), { taskId: "task_1", reason: "Opened in error, no new evidence." }), /reopened from a decision/);
+  const w = await reopened("pi_accepted");
+  for (const reason of ["", "short", "   1234567  "]) {
+    await assert.rejects(revertReopen._handler(w.as(w.reviewer), { taskId: "task_1", reason }), /at least 8 characters/, JSON.stringify(reason));
+  }
+  await assert.rejects(revertReopen._handler(w.as(w.reviewer), { taskId: "task_1", reason: "x".repeat(2_049) }));
+  assert.equal(w.task.status, "reopened");
+  assert.ok(w.task.reopened_after_decision);
+});
+
+test("a revert is refused after any later write: a claim, a note, a draft save, or a second reopen", async () => {
+  const cases = {
+    claim: (w) => claimTask._handler(w.as(w.ra), { taskId: "task_1" }),
+    note: (w) => addTaskNote._handler(w.as(w.ra), { taskId: "task_1", note: "Looking into it." }),
+    draft: async (w) => {
+      await saveEvidenceDraft._handler(w.as(w.ra), { taskId: "task_1", evidenceDraftId: "task_1:draft_z", draft: draftContent() });
+    },
+    // a row written without a task event (a row written by a route that logs none)
+    silentDraft: (w) => w.addDraft({ evidence_draft_id: "task_1:draft_y", task_id: "task_1", created_by: w.ra._id, ...draftContent() }),
+    silentAttachment: (w) => w.db.insert("evidence_attachments", { task_id: "task_1", status: "active", created_at: Date.now() + 1, updated_at: Date.now() + 1 }),
+    silentOccupancy: (w) => w.db.insert("site_occupancies", { task_id: "task_1", created_at: Date.now() + 1, updated_at: Date.now() + 1 }),
+    silentClaim: (w) => w.db.insert("historical_claims", { task_id: "task_1", created_at: Date.now() + 1, updated_at: Date.now() + 1 }),
+    secondReopen: async (w) => {
+      await w.db.patch(w.task._id, { status: "reviewed" });
+      await reopenTask._handler(w.as(w.reviewer), { taskId: "task_1", reason: "A second reopening." });
+    },
+  };
+  for (const [label, write] of Object.entries(cases)) {
+    const w = await reopened("pi_accepted");
+    await write(w);
+    if (w.task.status !== "reopened") await w.db.patch(w.task._id, { status: "reopened" });
+    await assert.rejects(revertReopen._handler(w.as(w.reviewer), { taskId: "task_1", reason: "Opened in error, no new evidence." }), /written to this task since/, label);
+    assert.ok(w.task.reopened_after_decision, label);
+  }
+  // rows from before the reopen do not count
+  const w = await scene("pi_accepted");
+  await w.addDraft({ evidence_draft_id: "task_1:draft_old", task_id: "task_1", created_by: w.ra._id, ...draftContent() });
+  await reopenTask._handler(w.as(w.ra), { taskId: "task_1", reason: "New evidence on the date." });
+  await revertReopen._handler(w.as(w.reviewer), { taskId: "task_1", reason: "Opened in error, no new evidence." });
+  assert.equal(w.task.status, "pi_accepted");
+});
+
+test("a reverted pi_accepted task is export-eligible again, and a reopened one is not", async () => {
+  const w = await scene("in_progress");
+  w.admin = await w.addUser("admin-subject", ["admin"]);
+  await w.addDraft({ evidence_draft_id: "task_1:draft_a", task_id: "task_1", created_by: w.ra._id, ...draftContent() });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  const snapshot = await getReviewSnapshot._handler(w.as(w.reviewer), { taskId: "task_1", evidenceDraftId: "task_1:draft_a" });
+  await recordReviewDecision._handler(w.as(w.reviewer), {
+    taskId: "task_1",
+    decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the entry in full." },
+    snapshotHash: snapshot.snapshot_hash,
+  });
+  await recordAcceptance._handler(w.as(w.pi), { taskId: "task_1", outcome: "accepted", note: "Ratifying the reviewer's decision." });
+  await reopenTask._handler(w.as(w.ra), { taskId: "task_1", reason: "New evidence on the date." });
+  await assert.rejects(createExportBatch._handler(w.as(w.admin), { countryCode: "VU", taskIds: ["task_1"] }));
+  await revertReopen._handler(w.as(w.reviewer), { taskId: "task_1", reason: "Opened in error, no new evidence." });
+  assert.equal(w.task.status, "pi_accepted");
+  const batch = await createExportBatch._handler(w.as(w.admin), { countryCode: "VU", taskIds: ["task_1"] });
+  assert.ok(batch.export_batch_id);
 });
