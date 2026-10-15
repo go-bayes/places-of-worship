@@ -1441,7 +1441,6 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
       `<a href="${directionsUrl(latFixed, lngFixed)}" target="_blank" rel="noopener">Directions</a>` +
       `<a href="https://www.openstreetmap.org/?mlat=${latFixed}&mlon=${lngFixed}#map=18/${latFixed}/${lngFixed}" target="_blank" rel="noopener">Open OSM</a>` +
       `<button type="button" data-copy="${latFixed},${lngFixed}">Copy coords</button>` +
-      `<button type="button" class="streetview-expand" data-mode="expand" data-pano="${panoId}">Expand</button>` +
       `</div>`
     )
     .addTo(map);
@@ -1455,18 +1454,8 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
   // per-popup setLngLat drag (which detached the popup from its feature)
   // is gone
   // ui wiring that must work whether or not street view ever starts:
-  // expand, the drag hint, and copy-coords live outside the lazy path
+  // the drag hint and copy-coords live outside the lazy path
   const popupEl = popup.getElement();
-  const expandButton = popupEl.querySelector(`[data-mode="expand"][data-pano="${panoId}"]`);
-  if (expandButton) {
-    expandButton.addEventListener("click", () => {
-      const target = panoContainer();
-      if (!target) return;
-      const expanded = target.classList.toggle("expanded");
-      expandButton.textContent = expanded ? "Collapse" : "Expand";
-      requestAnimationFrame(() => clampPopupToViewport(popup));
-    });
-  }
   if (popupBody) {
     const DRAG_HINT_KEY = "pow-drag-hint-dismissed";
     const hint = document.createElement("div");
@@ -1537,6 +1526,7 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
     const handle = document.createElement("div");
     handle.className = "sv-resize-handle";
     handle.textContent = "↘";
+    handle.title = "Drag to resize";
     target.appendChild(handle);
     // maps embed needs at least 200 x 200 css px
     const MIN_W = 260;
@@ -1547,6 +1537,10 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
       handle.style.cursor = "nwse-resize";
       // the iframe would swallow mousemove once the pointer crosses it
       frame.style.pointerEvents = "none";
+      // the popup's width cap and the panel's max-width: 100% would clamp
+      // a wider drag, so both lift once the visitor takes the corner
+      popup.setMaxWidth("none");
+      target.style.maxWidth = "none";
       const startX = event.clientX;
       const startY = event.clientY;
       const rect = target.getBoundingClientRect();
@@ -1566,6 +1560,7 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
         window.removeEventListener("mouseup", onUp);
         frame.style.pointerEvents = "";
         handle.style.cursor = "nwse-resize";
+        requestAnimationFrame(() => clampPopupToViewport(popup));
       }
       window.addEventListener("mousemove", onMove);
       window.addEventListener("mouseup", onUp);
