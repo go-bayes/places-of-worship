@@ -24,8 +24,11 @@ chain, not dead code.
 ## Legacy (dead; kept only for the record)
 
 `legacy/` holds the pre-2026-02 prototype: the FastAPI stubs, the original
-`frontend/` and `src/` apps, one-off extraction scripts, the December-2025
-demo HTML pages (`legacy/html/`), the territorial-authority JSON experiments
-and their test script (`legacy/ta-json/`), and two planning notes
-(`legacy/planning/`). Nothing here runs or is referenced by live code or
-docs. Reorganised 2026-08-25 (stocktake item from 2026-08-14).
+`frontend/` stylesheet and `src/` apps, one-off extraction scripts, the
+territorial-authority JSON experiments and their test script
+(`legacy/ta-json/`), and two planning notes (`legacy/planning/`). Nothing
+here runs or is referenced by live code or docs. Reorganised 2026-08-25
+(stocktake item from 2026-08-14). The eight legacy HTML pages
+(`legacy/html/` and `legacy/frontend/*.html`) were removed on 2026-10-15:
+the site served them, and they loaded third-party scripts on the portal's
+origin. They remain in the Git history.
