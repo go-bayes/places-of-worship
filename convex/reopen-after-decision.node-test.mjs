@@ -429,12 +429,6 @@ test("a limiter fault that is not a rate limit is not rewritten", async () => {
 test("a revert is refused after a write that logs no event: a receipt, a seeding update, an agent row", async () => {
   const stamp = () => Date.now() + 5;
   const cases = {
-    // an unchanged resubmission inserts a receipt and no task event
-    receipt: async (w) => {
-      await w.addDraft({ evidence_draft_id: "task_1:draft_r", task_id: "task_1", created_by: w.ra._id, ...draftContent() });
-      // the receipt is newer than the draft row in creation order
-      await w.db.insert("evidence_submission_receipts", { submission_key: "submit:r", route: "submit", task_id: "task_1", evidence_draft_id: "task_1:draft_r", recorded_at: stamp() });
-    },
     // a batch seeding update patches the task row and writes no event
     seeding: (w) => w.db.patch(w.task._id, { updated_at: stamp(), name: "Renamed by a seeding update" }),
     lastEventOnly: (w) => w.db.patch(w.task._id, { last_event_at: stamp() }),
@@ -448,6 +442,25 @@ test("a revert is refused after a write that logs no event: a receipt, a seeding
     await assert.rejects(revertReopen._handler(w.as(w.reviewer), { taskId: "task_1", reason: "Opened in error, no new evidence." }), /written to this task since/, label);
     assert.equal(w.task.status, "reopened", label);
     assert.ok(w.task.reopened_after_decision, label);
+  }
+});
+
+// the draft predates the reopen, so only the receipt is a write since; the
+// control case proves the draft alone does not refuse the revert
+test("a revert is refused after an unchanged resubmission that writes only a receipt", async () => {
+  for (const withReceipt of [false, true]) {
+    const w = await scene("pi_accepted");
+    w.admin = await w.addUser("admin-subject", ["admin"]);
+    await w.addDraft({ evidence_draft_id: "task_1:draft_r", task_id: "task_1", created_by: w.ra._id, ...draftContent(), created_at: 1, updated_at: 1 });
+    await reopenTask._handler(w.as(w.ra), { taskId: "task_1", reason: "New evidence on the date." });
+    if (withReceipt) {
+      await w.db.insert("evidence_submission_receipts", { submission_key: "submit:r", route: "submit", task_id: "task_1", evidence_draft_id: "task_1:draft_r", recorded_at: Date.now() + 5 });
+      await assert.rejects(revertReopen._handler(w.as(w.reviewer), { taskId: "task_1", reason: "Opened in error, no new evidence." }), /written to this task since/);
+      assert.equal(w.task.status, "reopened");
+    } else {
+      const reverted = await revertReopen._handler(w.as(w.reviewer), { taskId: "task_1", reason: "Opened in error, no new evidence." });
+      assert.equal(reverted.status, "pi_accepted");
+    }
   }
 });
 
