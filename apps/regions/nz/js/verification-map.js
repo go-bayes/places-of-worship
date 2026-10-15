@@ -6999,7 +6999,12 @@ class NzVerificationMap {
             nominate.addEventListener("click", () => this.nominateAtMapPin());
             const dismiss = append("button", "Dismiss");
             dismiss.setAttribute("type", "button");
-            dismiss.addEventListener("click", () => this.renderMapPinNotice(null));
+            dismiss.addEventListener("click", () => {
+                // dismissing retires the link whether or not it started an entry
+                this.retireMapPinParams();
+                this.mapPinRequest = null;
+                this.renderMapPinNotice(null);
+            });
         }
         notice.hidden = false;
     }
@@ -13090,6 +13095,14 @@ class NzVerificationMap {
             } : {}),
         };
         this.keepRapidPinOnDevice();
+        // the pin is settled in the entry the map link started, so the link
+        // has been used (brief 3.2, change 6). an older entry resumed while
+        // the link waits leaves it in the notice
+        if (this.mapPinRequest?.startedEntry) {
+            this.retireMapPinParams();
+            this.mapPinRequest = null;
+            this.renderMapPinNotice(null);
+        }
         if (this.rapidFormOptions?.pin) this.renderRapidSourceLinks("pin", this.rapidFormOptions.pin);
         // the confirmed position is what gets recorded; freeze the pin
         this.pinMarker.dragging.disable();
@@ -13396,6 +13409,12 @@ class NzVerificationMap {
             this.clearFormDirty();
         }
         this.dropRapidPinFromDevice();
+        // leaving the entry the map link started uses the link up
+        if (this.mapPinRequest?.startedEntry) {
+            this.retireMapPinParams();
+            this.mapPinRequest = null;
+            this.renderMapPinNotice(null);
+        }
         this.paneSnap("rest");
         // a cancelled period placement returns to the pane with its cards
         const occupancyPin = this.occupancyPinContext;

@@ -298,7 +298,9 @@ const branchPortal = ({ search = nominateSearch, storage = {}, real = [] } = {})
   app.map = { setView: (...args) => calls.push(["setView", ...args]), getZoom: () => 10, closePopup() {} };
   app.enterPinMode = () => { calls.push(["enterPinMode"]); app.pinMode = true; };
   app.placePin = latlng => { calls.push(["placePin", latlng]); app.pinMarker = { latlng }; };
-  app.exitPinMode = () => { calls.push(["exitPinMode"]); app.pinMode = false; app.pinMarker = null; app.pinConfirmed = null; };
+  if (!real.includes("exitPinMode")) {
+    app.exitPinMode = () => { calls.push(["exitPinMode"]); app.pinMode = false; app.pinMarker = null; app.pinConfirmed = null; };
+  }
   app.resumeRapidPinFromDevice = () => { calls.push(["resume"]); return true; };
   app.renderInitialDetail = () => {};
   app.renderBackendPanel = () => {};
@@ -576,6 +578,154 @@ const waitingText = "A nomination from the map is waiting at (-41.28650, 174.776
   // (exitPinMode), which it was not here
   assert.strictEqual(loaded.storage.getItem(periodsKey), null, "sign-out kept the period cards");
   assert.strictEqual(loaded.storage.getItem(draftKey), draftSeed, "sign-out changed the saved entry");
+}
+
+// --- a link is applied once (brief 3.2, change 6) -----------------------------
+// the real confirmPinLocation and exitPinMode run over a stub map. replaceState
+// is spied: a retired link is one call that drops nominate, lat and lng and
+// keeps every other parameter
+const retiringPortal = options => {
+  const loaded = branchPortal({ ...options, real: [...(options?.real || []), "exitPinMode"] });
+  const { app, window: win } = loaded;
+  const urls = [];
+  win.history = { state: null, replaceState: (state, title, url) => urls.push(url) };
+  loaded.urls = urls;
+  loaded.document.body.classList.remove = () => {};
+  const layer = { dragging: { disable() {} }, getLatLng: () => ({ lat: -41.2865, lng: 174.7762 }) };
+  app.map = {
+    setView: (...args) => loaded.calls.push(["setView", ...args]),
+    getZoom: () => 18,
+    getBounds: () => ({ contains: () => true }),
+    closePopup() {},
+    off() {},
+    removeLayer() {},
+    getContainer: () => ({ classList: { add() {}, remove() {} } }),
+  };
+  // a pin placed the way the armed click handler places it: placePin for the
+  // first placement, setPendingPin for a later move
+  loaded.clickMap = latlng => {
+    if (app.pinMarker) app.setPendingPin(latlng.lat, latlng.lng, { zoom: 18 });
+    else app.placePin(latlng);
+  };
+  app.placePin = latlng => { loaded.calls.push(["placePin", latlng]); app.pinMarker = layer; };
+  app.setPendingPin = (lat, lng) => loaded.calls.push(["setPendingPin", lat, lng]);
+  app.pinLocationMode = () => "exact";
+  app.pinLocationRadius = () => undefined;
+  app.notePinCountry = () => {};
+  app.keepRapidPinOnDevice = () => {};
+  app.nearbyTaskRows = () => [];
+  app.showPinForm = () => loaded.calls.push(["showPinForm"]);
+  app.paneSnap = () => {};
+  app.renderEntryCountryNote = () => {};
+  app.renderAddReviseControl = () => {};
+  app.setEntryOpen = () => {};
+  return loaded;
+};
+const assertRetired = (loaded, label) => {
+  assert.strictEqual(loaded.urls.length, 1, `${label}: the link was not retired by one replaceState call`);
+  const kept = new URL(loaded.urls[0], "https://example.org");
+  for (const name of ["nominate", "lat", "lng"]) assert.ok(!kept.searchParams.has(name), `${label}: ${name} stayed in the address`);
+  assert.strictEqual(kept.searchParams.get("batch"), "nz-test", `${label}: batch was lost`);
+  assert.strictEqual(kept.searchParams.get("email"), "ra@example.org", `${label}: email was lost`);
+  assert.strictEqual(loaded.app.mapPinRequest, null, `${label}: the request was kept`);
+  assert.strictEqual(noticeKind(loaded), null, `${label}: the notice stayed`);
+};
+
+// confirming the pin of a link-started entry
+{
+  const loaded = retiringPortal();
+  const { app } = loaded;
+  app.applyNominateLink(app.pendingDeepLink);
+  assert.strictEqual(app.mapPinRequest.startedEntry, true);
+  assert.deepStrictEqual(loaded.urls, [], "the link was retired before the pin was confirmed");
+  app.confirmPinLocation();
+  assert.ok(app.pinConfirmed, "the pin was not confirmed");
+  assertRetired(loaded, "confirm");
+  // a reload before confirmation holds the link again
+  const reloaded = constructPortal({ search: nominateSearch });
+  assert.strictEqual(reloaded.app.pendingDeepLink?.mode, "nominate", "a reload before confirmation lost the link");
+}
+
+// a link without usable coordinates, a pin placed by hand, then confirmed
+{
+  const loaded = retiringPortal({ search: "?batch=nz-test&nominate=1&lat=abc&lng=174.7762&email=ra%40example.org" });
+  const { app } = loaded;
+  app.applyNominateLink(app.pendingDeepLink);
+  assert.strictEqual(app.mapPinRequest.hasCoords, false);
+  assert.strictEqual(app.mapPinRequest.startedEntry, true);
+  loaded.clickMap({ lat: -41.2865, lng: 174.7762 });
+  assert.ok(app.pinMarker, "the hand-placed pin did not land");
+  assert.deepStrictEqual(loaded.urls, [], "placing the pin by hand retired the link");
+  app.confirmPinLocation();
+  assertRetired(loaded, "hand-placed pin");
+}
+
+// a later move of the pin by hand uses setPendingPin and leaves the request be
+{
+  const loaded = retiringPortal();
+  const { app } = loaded;
+  app.applyNominateLink(app.pendingDeepLink);
+  loaded.clickMap({ lat: -41.287, lng: 174.777 });
+  assert.ok(loaded.calls.some(call => call[0] === "setPendingPin"), "the later click did not move the pin");
+  assert.deepStrictEqual(loaded.urls, []);
+  assert.ok(app.mapPinRequest, "moving the pin cleared the request");
+}
+
+// leaving pin mode in the entry the request started
+{
+  const loaded = retiringPortal();
+  const { app } = loaded;
+  app.applyNominateLink(app.pendingDeepLink);
+  app.exitPinMode();
+  assert.strictEqual(app.pinMode, false);
+  assertRetired(loaded, "exitPinMode");
+}
+
+// dismissing the notice always retires the link
+for (const [label, options, setup] of [
+  ["dismiss, waiting", { storage: savedStorage() }, ({ app }) => { app.portalMode = "add"; }],
+  ["dismiss, unsaved", { real: ["setPortalMode"] }, ({ app, window: win }) => { app.portalMode = "assigned"; app.formDirty = true; win.confirm = () => false; }],
+]) {
+  const loaded = retiringPortal(options);
+  const { app } = loaded;
+  setup(loaded);
+  app.applyNominateLink(app.pendingDeepLink);
+  assert.ok(["waiting", "unsaved"].includes(noticeKind(loaded)), `${label}: the notice did not show`);
+  assert.strictEqual(app.mapPinRequest.startedEntry, false);
+  assert.deepStrictEqual(loaded.urls, []);
+  findNodes(loaded.notice, node => node.tagName === "button")[1].click();
+  assertRetired(loaded, label);
+}
+
+// confirming or leaving a resumed older entry leaves the waiting request alone
+{
+  const loaded = retiringPortal({ storage: savedStorage() });
+  const { app } = loaded;
+  app.portalMode = "add";
+  app.applyNominateLink(app.pendingDeepLink);
+  assert.strictEqual(noticeKind(loaded), "waiting");
+  const request = app.mapPinRequest;
+  // the resumed entry has its own pin in pin mode
+  app.pinMode = true;
+  app.pinMarker = { dragging: { disable() {} }, getLatLng: () => ({ lat: -41.2865, lng: 174.7762 }) };
+  app.confirmPinLocation();
+  assert.ok(app.pinConfirmed, "the resumed pin was not confirmed");
+  assert.deepStrictEqual(loaded.urls, [], "confirming a resumed entry retired the link");
+  assert.strictEqual(app.mapPinRequest, request, "confirming a resumed entry cleared the request");
+  assert.strictEqual(noticeKind(loaded), "waiting", "confirming a resumed entry hid the notice");
+  app.exitPinMode();
+  assert.deepStrictEqual(loaded.urls, [], "leaving a resumed entry retired the link");
+  assert.strictEqual(app.mapPinRequest, request, "leaving a resumed entry cleared the request");
+  assert.strictEqual(noticeKind(loaded), "waiting", "leaving a resumed entry hid the notice");
+}
+
+// a reload after retiring holds no link; a reload before it holds the link again
+{
+  const loaded = retiringPortal();
+  loaded.app.applyNominateLink(loaded.app.pendingDeepLink);
+  loaded.app.confirmPinLocation();
+  const reloaded = constructPortal({ search: new URL(loaded.urls[0], "https://example.org").search });
+  assert.strictEqual(reloaded.app.pendingDeepLink, null, "a reload restored the retired link");
 }
 
 console.log("map-pin-nomination-dom tests passed");
