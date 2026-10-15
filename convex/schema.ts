@@ -162,6 +162,16 @@ export default defineSchema({
     // contributor, shown in the ra panel until answered or decided; the
     // audit copy lives in task events
     pending_reviewer_comment: v.optional(v.string()),
+    // set when a task is reopened from a decided status (reviewed,
+    // pi_accepted, exported), so reviewers and the pi see it; cleared when
+    // the task next reaches pi_accepted through a new acceptance (jb ruling
+    // 2026-10-15)
+    reopened_after_decision: v.optional(v.object({
+      from_status: v.union(v.literal("reviewed"), v.literal("pi_accepted"), v.literal("exported")),
+      reopened_at: v.number(),
+      reopened_by: v.id("users"),
+      reason: v.string(),
+    })),
     selected_target_year: v.optional(v.number()),
     target_years: v.array(v.number()),
     matched_current_site_id: v.optional(v.string()),

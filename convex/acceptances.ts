@@ -145,6 +145,8 @@ export const recordAcceptance = mutation({
     const newStatus = taskStatusForAcceptance(args.outcome);
     await ctx.db.patch(task._id, {
       status: newStatus,
+      // a new acceptance closes out an earlier reopen-after-decision flag
+      ...(newStatus === "pi_accepted" ? { reopened_after_decision: undefined } : {}),
       updated_at: now,
       last_event_at: now,
     });

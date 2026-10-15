@@ -31,6 +31,7 @@ import {
   assertMaxString,
   assertTaskReasonLimit,
 } from "./lib/limits";
+import { DECIDED_REOPEN_REASON_MIN, isDecidedTaskStatus, sideRouteRefusal } from "./lib/intakeGate";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { evidenceDraftDoc, reviewDecisionDoc, taskDoc, taskEventDoc, userDoc } from "./lib/validators";
 
@@ -82,6 +83,15 @@ async function getTaskOrThrow(ctx: QueryCtx | MutationCtx, taskId: string): Prom
     throw new Error(`Task not found: ${taskId}`);
   }
   return task;
+}
+
+// claim, release, skip and provisional close have no reason to record, so
+// they refuse a decided task outright; reopenTask is the one route back
+function assertSideRouteAllowed(taskStatus: string): void {
+  const refusal = sideRouteRefusal(taskStatus);
+  if (refusal !== null) {
+    throw new Error(refusal);
+  }
 }
 
 // shared with revisionSeed.ts, which seeds through the same task shape
@@ -710,6 +720,7 @@ export const claimTask = mutation({
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
     assertOwnsOrCanReview(user._id, user.roles, task.assigned_to);
+    assertSideRouteAllowed(task.status);
 
     const now = Date.now();
     const newStatus = task.status === "open" || task.status === "reopened" ? "in_progress" : task.status;
@@ -746,6 +757,7 @@ export const releaseTask = mutation({
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
     assertOwnsOrCanReview(user._id, user.roles, task.assigned_to);
+    assertSideRouteAllowed(task.status);
 
     const now = Date.now();
     await ctx.db.patch(task._id, {
@@ -782,6 +794,7 @@ export const skipTask = mutation({
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
     assertOwnsOrCanReview(user._id, user.roles, task.assigned_to);
+    assertSideRouteAllowed(task.status);
 
     const now = Date.now();
     await ctx.db.patch(task._id, {
@@ -856,6 +869,7 @@ export const markProvisionallyClosed = mutation({
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
     assertOwnsOrCanReview(user._id, user.roles, task.assigned_to);
+    assertSideRouteAllowed(task.status);
 
     const now = Date.now();
     await ctx.db.patch(task._id, {
@@ -894,22 +908,44 @@ export const reopenTask = mutation({
     // reviewers/curators/admins (portal feature, 2026-07-08)
     const user = await requireUser(ctx, ["ra", "reviewer", "curator", "admin"]);
     const task = await getTaskOrThrow(ctx, args.taskId);
-    // ra-initiated reopens are limited to tasks under review or closed
-    // pending review; reviewers/curators/admins may reopen any task
-    // exported tasks stay closed to ra reopens so export bookkeeping
-    // is undisturbed (JB ruling 2026-07-08)
+    // ra-initiated reopens cover tasks under review, closed pending review,
+    // and decided tasks (reviewed, pi_accepted, exported); reviewers,
+    // curators and admins may reopen any task. a reopen from a decided
+    // status needs a reason and is flagged on the task (JB ruling 2026-10-15)
     const raReopenable = new Set([
       "needs_review",
       "unresolved_note",
       "provisionally_closed",
       "reviewed",
+      "pi_accepted",
+      "exported",
     ]);
     if (!canReview(user.roles) && !raReopenable.has(task.status)) {
       throw new Error("This task is not in a state a research assistant can reopen.");
     }
+    const previousStatus = task.status;
+    const fromDecided = isDecidedTaskStatus(task.status) ? task.status : null;
+    const decided = fromDecided !== null;
+    const reason = decided ? args.reason.trim() : args.reason;
+    if (decided && reason.length < DECIDED_REOPEN_REASON_MIN) {
+      throw new Error(
+        `Give a reason of at least ${DECIDED_REOPEN_REASON_MIN} characters to reopen a task that has been reviewed, accepted, or exported.`,
+      );
+    }
+    assertTaskReasonLimit("reopen reason", reason);
     const now = Date.now();
     await ctx.db.patch(task._id, {
       status: "reopened",
+      ...(fromDecided !== null
+        ? {
+          reopened_after_decision: {
+            from_status: fromDecided,
+            reopened_at: now,
+            reopened_by: user._id,
+            reason,
+          },
+        }
+        : {}),
       updated_at: now,
       last_event_at: now,
     });
@@ -918,9 +954,9 @@ export const reopenTask = mutation({
       eventType: "reopened",
       actorUserId: user._id,
       actorRole: chooseActorRole(user, ["ra", "reviewer", "curator", "admin"]),
-      previousStatus: task.status,
+      previousStatus,
       newStatus: "reopened",
-      reason: args.reason,
+      reason,
     });
     return { task_id: args.taskId, status: "reopened" as const };
   },
