@@ -951,9 +951,66 @@ function distanceSummary(metres) {
 // right-click (mouse) or press-and-hold (touch) drops a draggable amber
 // pin; while present it replaces the blue dot as the measuring point, so
 // the banner and directions answer "from the pin". the × on the banner
-// or a tap on the pin removes it.
+// removes it, or a tap on the pin opens its card (coordinates, a link to
+// nominate a missing place there, and a remove button).
 let pinMarker = null;
 let pinDragging = false;
+let pinCard = null;
+
+// the card's content, built from dom nodes and text only. the coordinates
+// are the wrapped five-decimal label; the link appears only where a portal
+// resolves, so at sea the card offers the coordinates and removal alone
+function pinCardElement(lngLat, doc = document) {
+  const { latFixed, lngFixed, latLabel, lngLabel } = pinLinkCoords(lngLat);
+  const card = doc.createElement("div");
+  card.className = "pin-card";
+  const coords = doc.createElement("div");
+  coords.className = "pin-card-coords";
+  coords.textContent = `${latLabel}, ${lngLabel}`;
+  card.append(coords);
+  const actions = doc.createElement("div");
+  actions.className = "popup-actions";
+  const href = portalLinkHref("nominate", { name: "", latFixed, lngFixed, props: null });
+  if (href) {
+    const link = doc.createElement("a");
+    link.className = "pin-card-link";
+    link.setAttribute("href", href);
+    link.textContent = "Nominate missing PoW here";
+    actions.append(link);
+  }
+  const remove = doc.createElement("button");
+  remove.setAttribute("type", "button");
+  remove.textContent = "Remove pin";
+  remove.addEventListener("click", () => clearPin());
+  actions.append(remove);
+  card.append(actions);
+  return card;
+}
+
+// one card at a time, at the pin. opening it closes any place popup, and a
+// place popup opening closes it (trackPlacePopup), so the two never stack
+function openPinCard() {
+  if (!pinMarker) return;
+  closePinCard();
+  if (activePlacePopup) activePlacePopup.remove();
+  const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: true, anchor: "bottom", offset: [0, -42], maxWidth: "280px" })
+    .setLngLat(pinMarker.getLngLat())
+    .setDOMContent(pinCardElement(pinMarker.getLngLat()))
+    .addTo(map);
+  pinCard = popup;
+  popup.on("close", () => {
+    if (pinCard === popup) pinCard = null;
+  });
+}
+function closePinCard() {
+  if (!pinCard) return;
+  const popup = pinCard;
+  pinCard = null;
+  popup.remove();
+}
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closePinCard();
+});
 
 function setPin(lngLat) {
   const coords = [lngLat.lng, lngLat.lat];
@@ -961,21 +1018,25 @@ function setPin(lngLat) {
     pinMarker = new maplibregl.Marker({ color: "#f59e0b", draggable: true })
       .setLngLat(coords)
       .addTo(map);
-    pinMarker.on("dragstart", () => { pinDragging = true; });
+    pinMarker.on("dragstart", () => {
+      pinDragging = true;
+      closePinCard();
+    });
     pinMarker.on("dragend", () => {
       const moved = pinMarker.getLngLat();
       pinLocation = [moved.lng, moved.lat];
       referenceChanged();
-      // let the post-drag click slip past before re-arming tap-to-remove
+      // let the post-drag click slip past before re-arming tap-for-options
       setTimeout(() => { pinDragging = false; }, 80);
     });
-    // tap the pin itself to remove it: click on, click off
+    // tap the pin itself for its card: click on, click off
     pinMarker.getElement().addEventListener("click", (event) => {
       event.stopPropagation();
       if (pinDragging) return;
-      clearPin();
+      if (pinCard) closePinCard();
+      else openPinCard();
     });
-    showClickHint("Measuring from pin — tap it to remove", { durationMs: 2400 });
+    showClickHint("Measuring from pin — tap it for options", { durationMs: 2400 });
   } else {
     pinMarker.setLngLat(coords);
   }
@@ -984,6 +1045,7 @@ function setPin(lngLat) {
 }
 
 function clearPin() {
+  closePinCard();
   if (pinMarker) {
     pinMarker.remove();
     pinMarker = null;
@@ -1200,6 +1262,7 @@ function showMobileStreetViewPopup(name, coords, featureId) {
 let activePlacePopup = null;
 function trackPlacePopup(popup) {
   if (activePlacePopup && activePlacePopup !== popup) activePlacePopup.remove();
+  closePinCard();
   activePlacePopup = popup;
   makePopupDraggable(popup);
   popup.on("close", () => {
@@ -2712,7 +2775,7 @@ async function runSearch() {
       // also replaces the sticky searching message, which setPin alone
       // leaves behind when it merely moves an existing pin.
       setPin({ lng: lon, lat: lat });
-      showClickHint("Measuring pin dropped at the address — tap it to remove", { durationMs: 2600 });
+      showClickHint("Measuring pin dropped at the address — tap it for options", { durationMs: 2600 });
     } else if (!maybeShowPinTip()) {
       scheduleSearchHintClear([lon, lat]);
     }

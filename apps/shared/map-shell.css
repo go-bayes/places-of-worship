@@ -217,6 +217,18 @@ body, html { margin: 0; height: 100%; background: var(--bg); color: var(--text);
   text-decoration: none;
   cursor: pointer;
 }
+/* the planning pin's card: coordinates over a link and a remove button,
+   on the popup idiom's action row */
+.maplibregl-popup-content .pin-card-coords {
+  font-size: var(--fs-chrome);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.maplibregl-popup-content .popup-actions a.pin-card-link {
+  background: rgba(248, 250, 252, 0.92);
+  border-color: rgba(248, 250, 252, 0.92);
+  color: #0f172a;
+}
 .maplibregl-popup-content .place-attrs {
   display: grid;
   grid-template-columns: auto 1fr;

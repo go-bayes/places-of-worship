@@ -133,4 +133,84 @@ const nominate = (ctx, latFixed = "-41.286500", lngFixed = "174.776200") =>
   assert.equal(load().reviseLinkHtml("Loading place…", "1", "2", null), "", "an unresolved country gives no link, name or not");
 }
 
+// the pin card (brief section 3.1 changes 2 to 5). a minimal document stub
+// records what the card builds: elements, their text, attributes and handlers.
+function stubDocument() {
+  const make = (tag) => ({
+    tag,
+    children: [],
+    attributes: {},
+    handlers: {},
+    className: "",
+    textContent: "",
+    append(...nodes) { this.children.push(...nodes); },
+    setAttribute(name, value) { this.attributes[name] = String(value); },
+    addEventListener(type, fn) { this.handlers[type] = fn; }
+  });
+  return { createElement: make };
+}
+function descendants(node) {
+  return node.children.flatMap((child) => [child, ...descendants(child)]);
+}
+function loadCard(opts, cleared) {
+  const ctx = load(opts);
+  const body = lift("function pinCardElement(");
+  ctx.clearPin = () => { cleared.count += 1; };
+  vm.runInContext(`${body}\nthis.pinCardElement = pinCardElement;`, ctx);
+  return ctx;
+}
+
+// the card on a country page: coordinates, the nominate link, the remove button
+{
+  const cleared = { count: 0 };
+  const ctx = loadCard({ rc: { countryCode: "nz" } }, cleared);
+  const card = ctx.pinCardElement({ lng: 174.7762, lat: -41.2865 }, stubDocument());
+  const nodes = descendants(card);
+  assert.ok(nodes.some((n) => n.textContent === "-41.28650, 174.77620"), "the card shows the pin to five decimals");
+  const links = nodes.filter((n) => n.tag === "a");
+  assert.equal(links.length, 1, "one link");
+  assert.equal(links[0].textContent, "Nominate missing PoW here");
+  assert.equal(
+    links[0].attributes.href,
+    ctx.portalLinkHref("nominate", { name: "", latFixed: "-41.286500", lngFixed: "174.776200", props: null })
+  );
+  assert.equal(links[0].attributes.href, "../nz/verification.html?country=nz&nominate=1&lat=-41.286500&lng=174.776200");
+  assert.equal(links[0].attributes.target, undefined, "the link opens in the same tab");
+  const buttons = nodes.filter((n) => n.tag === "button");
+  assert.equal(buttons.length, 1, "one button");
+  assert.equal(buttons[0].textContent, "Remove pin");
+  assert.equal(buttons[0].attributes.type, "button");
+  assert.equal(cleared.count, 0, "building the card clears nothing");
+  buttons[0].handlers.click({ stopPropagation() {} });
+  assert.equal(cleared.count, 1, "Remove pin clears the pin");
+}
+
+// an unwrapped longitude shows and links wrapped
+{
+  const ctx = loadCard({ rc: { countryCode: "nz" } }, { count: 0 });
+  const nodes = descendants(ctx.pinCardElement({ lng: 534.7762, lat: -41.2865 }, stubDocument()));
+  assert.ok(nodes.some((n) => n.textContent === "-41.28650, 174.77620"));
+  assert.ok(nodes.find((n) => n.tag === "a").attributes.href.endsWith("&lat=-41.286500&lng=174.776200"));
+}
+
+// at sea the card holds the coordinates and the button only
+{
+  const ctx = loadCard({ region: null }, { count: 0 });
+  const nodes = descendants(ctx.pinCardElement({ lng: -150, lat: -30 }, stubDocument()));
+  assert.equal(nodes.filter((n) => n.tag === "a").length, 0, "no link at sea");
+  assert.ok(nodes.some((n) => n.textContent === "-30.00000, -150.00000"));
+  assert.equal(nodes.filter((n) => n.tag === "button").length, 1);
+}
+
+// source checks: no innerHTML in the card, and both drop hints name the card
+{
+  assert.ok(!/innerHTML|insertAdjacentHTML/.test(lift("function pinCardElement(")), "the card is built from DOM nodes only");
+  assert.ok(!runtime.includes("tap it to remove"), "the old hint is gone");
+  assert.equal(runtime.split("tap it for options").length - 1, 2, "both hints read tap it for options");
+  assert.ok(runtime.includes("Measuring from pin — tap it for options"));
+  assert.ok(runtime.includes("Measuring pin dropped at the address — tap it for options"));
+  const click = runtime.slice(runtime.indexOf('getElement().addEventListener("click"'));
+  assert.ok(/pinDragging[\s\S]{0,40}return;[\s\S]{0,80}openPinCard\(\)/.test(click.slice(0, 400)), "the click keeps the drag guard, then opens the card");
+}
+
 console.log("pin-nomination tests passed");
