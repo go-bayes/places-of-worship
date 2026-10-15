@@ -503,6 +503,14 @@
             return await this.request("mutation", "tasks:reopenTask", args);
         }
 
+        async revertReopen(args) {
+            // undoes a reopen made from a decided status, for review roles,
+            // while nothing has been written to the task since; takes
+            // { taskId, reason } with a reason of at least 8 characters
+            // (JB, 2026-10-15)
+            return await this.request("mutation", "tasks:revertReopen", args);
+        }
+
         async createManualCandidateTask(args) {
             // nominates a missing place of worship as an in-progress task in
             // the country's manual batch, assigned to the nominating ra

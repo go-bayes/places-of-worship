@@ -230,6 +230,28 @@ function human(value) {
         return `<div class="review-warning">${escapeHtml(flag.summary)}. Reason given: ${escapeHtml(flag.reason)}</div>`;
     }
 
+    // the control that undoes a reopen made from a decided status (JB,
+    // 2026-10-15): shown only on a reopened task that carries the flag; the
+    // server refuses it once anything has been written since
+    function revertReopenHtml(task) {
+        if (task?.status !== "reopened" || !reopenFlagOf(task)) return "";
+        return `
+            <div class="review-claim-bar" id="revertReopenBlock">
+                <button type="button" class="secondary" id="revertReopenButton">Revert the reopen</button>
+                <div class="muted">Puts the task back to the status it held before the reopen. It works only while nothing has been written to the task since the reopen: no claim, note, evidence or second reopen.</div>
+                <div id="revertReopenForm" hidden>
+                    <label for="revertReopenReason">Why is the reopen being reverted? Give at least 8 characters.</label>
+                    <textarea id="revertReopenReason" rows="2" maxlength="2000"></textarea>
+                    <div class="review-actions">
+                        <button type="button" class="primary" id="revertReopenConfirm">Revert this reopen</button>
+                        <button type="button" class="secondary" id="revertReopenCancel">Cancel</button>
+                    </div>
+                </div>
+                <div id="revertReopenProblem" class="muted" role="status" aria-live="polite"></div>
+            </div>
+        `;
+    }
+
     function taskPills(task, draft, agentReview, latestReview) {
         const pills = [
             statePillHtml(presentRow(task, latestReview)),
@@ -908,6 +930,7 @@ function human(value) {
             form.addEventListener("submit", submitDecision);
         }
         wireClaimControls(task);
+        wireRevertReopen(task);
         wireConfidencePanel(task);
         wireAgentReviewPanel(form, agentReview);
         // evidence files open through a fresh short-lived url per click —
@@ -1623,6 +1646,46 @@ function human(value) {
         });
     }
 
+    function wireRevertReopen(task) {
+        const button = document.getElementById("revertReopenButton");
+        if (!button) return;
+        const form = document.getElementById("revertReopenForm");
+        const input = document.getElementById("revertReopenReason");
+        const problem = document.getElementById("revertReopenProblem");
+        const confirm = document.getElementById("revertReopenConfirm");
+        button.addEventListener("click", () => {
+            button.hidden = true;
+            if (form) form.hidden = false;
+            input?.focus?.();
+        });
+        document.getElementById("revertReopenCancel")?.addEventListener("click", () => {
+            if (form) form.hidden = true;
+            button.hidden = false;
+            if (problem) problem.textContent = "";
+        });
+        confirm?.addEventListener("click", async () => {
+            const reason = String(input?.value ?? "").trim();
+            if (reason.length < 8) {
+                if (problem) problem.textContent = "Give a reason of at least 8 characters.";
+                input?.focus?.();
+                return;
+            }
+            confirm.disabled = true;
+            try {
+                await client.revertReopen({ taskId: task.task_id, reason });
+                await loadQueue();
+                if (state.queue.find((entry) => entry.task.task_id === task.task_id)) {
+                    await selectTask(task.task_id);
+                } else {
+                    renderDetail(false);
+                }
+            } catch (error) {
+                confirm.disabled = false;
+                if (problem) problem.textContent = error.message || "The reopen could not be reverted.";
+            }
+        });
+    }
+
     // the recorded-confidence panel (p4, 2026-10-01): the agent judgments
     // about the task's place, rendered above the AI recommendation. a tier
     // orders review and decides nothing; the decision form below stays the
@@ -1975,6 +2038,7 @@ function human(value) {
         ` : "";
         return `
             ${reopenFlagWarningHtml(task)}
+            ${revertReopenHtml(task)}
             ${claimBar}
             <form id="reviewDecisionForm" class="decision-form">
                 <div class="wide">
@@ -2241,7 +2305,7 @@ function human(value) {
     // the dom tests load this file with the flag set and drive the pure-ish
     // renderers directly; the page itself boots as before
     if (window.__POW_TEST_NO_BOOTSTRAP__) {
-        window.__PowReviewPortalTest = { state, els, renderQueue, renderQueueRollup, renderDetail, renderEmptyDetail, decisionForm, wireDecisionForm, setDecisionFormValues, setTransport, renderAuth };
+        window.__PowReviewPortalTest = { state, els, renderQueue, renderQueueRollup, renderDetail, renderEmptyDetail, decisionForm, wireRevertReopen, wireDecisionForm, setDecisionFormValues, setTransport, renderAuth };
     } else {
         init();
     }

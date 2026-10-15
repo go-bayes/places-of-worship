@@ -69,8 +69,8 @@ const stamps = {
     "unvalidated-places.js": "20261013b", // versioned grid places url; us, de and it use the grid tier from zoom 6
     "verification-map.js": "20261015c", // decided tasks reopen with a reason; reopened-after-decision marker
     "task-presentation.js": "20261015c", // decided-status and reopen-flag helpers
-    "convex-task-client.js": "20261015c", // reopenTask comment
-    "review-portal.js": "20261015c", // reopened-after-decision marker
+    "convex-task-client.js": "20261015d", // revertReopen client method
+    "review-portal.js": "20261015d", // revert-the-reopen control
     "review-map.js": "20261013a", // tap on a grid-thinned fallback dot zooms in
 };
 const scripts = Object.keys(stamps);
