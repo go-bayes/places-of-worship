@@ -1038,6 +1038,8 @@ function setPin(lngLat) {
     });
     showClickHint("Measuring from pin — tap it for options", { durationMs: 2400 });
   } else {
+    // an open card holds the old point; close it, as a drag does
+    closePinCard();
     pinMarker.setLngLat(coords);
   }
   pinLocation = coords;

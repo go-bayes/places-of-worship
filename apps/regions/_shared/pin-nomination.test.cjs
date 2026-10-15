@@ -202,6 +202,70 @@ function loadCard(opts, cleared) {
   assert.equal(nodes.filter((n) => n.tag === "button").length, 1);
 }
 
+// lifecycle: moving the pin through setPin closes an open card, and reopening
+// carries the new point. the real setPin, openPinCard, closePinCard and
+// clearPin run against stub maplibre classes
+{
+  const popups = [];
+  class Popup {
+    constructor() { this.handlers = {}; this.open = false; popups.push(this); }
+    setLngLat(value) { this.lngLat = value; return this; }
+    setDOMContent(node) { this.content = node; return this; }
+    addTo() { this.open = true; return this; }
+    on(type, fn) { this.handlers[type] = fn; return this; }
+    remove() {
+      if (!this.open) return this;
+      this.open = false;
+      if (this.handlers.close) this.handlers.close();
+      return this;
+    }
+  }
+  class Marker {
+    constructor() { this.element = { addEventListener() {} }; }
+    setLngLat(value) { this.lngLat = { lng: value[0], lat: value[1] }; return this; }
+    getLngLat() { return this.lngLat; }
+    addTo() { return this; }
+    on() { return this; }
+    remove() {}
+    getElement() { return this.element; }
+  }
+  const ctx = load({ rc: { countryCode: "nz" } });
+  Object.assign(ctx, {
+    maplibregl: { Popup, Marker },
+    map: {},
+    document: stubDocument(),
+    showClickHint() {},
+    referenceChanged() {}
+  });
+  const names = ["pinCardElement", "setPin", "openPinCard", "closePinCard", "clearPin"];
+  vm.runInContext(
+    `let pinMarker = null, pinDragging = false, pinCard = null, pinLocation = null, activePlacePopup = null;\n` +
+      `${names.map((name) => lift(`function ${name}(`)).join("\n")}\n` +
+      `${names.map((name) => `this.${name} = ${name};`).join("")}\n` +
+      `this.isCardOpen = () => pinCard !== null;`,
+    ctx
+  );
+  const linkOf = (popup) => descendants(popup.content).find((n) => n.tag === "a").attributes.href;
+
+  ctx.setPin({ lng: 174.7762, lat: -41.2865 });
+  assert.equal(ctx.isCardOpen(), false, "the card stays closed when the pin drops");
+  ctx.openPinCard();
+  assert.equal(ctx.isCardOpen(), true);
+  assert.ok(linkOf(popups[0]).endsWith("&lat=-41.286500&lng=174.776200"));
+
+  ctx.setPin({ lng: 170.5, lat: -45.8 });
+  assert.equal(ctx.isCardOpen(), false, "relocating the pin closes the card");
+  assert.equal(popups[0].open, false, "the stale popup is removed from the map");
+
+  ctx.openPinCard();
+  assert.equal(popups.length, 2);
+  assert.ok(linkOf(popups[1]).endsWith("&lat=-45.800000&lng=170.500000"), "the reopened card carries the new point");
+  assert.deepEqual(popups[1].lngLat, { lng: 170.5, lat: -45.8 }, "and is anchored at the new point");
+
+  ctx.clearPin();
+  assert.equal(ctx.isCardOpen(), false, "clearing the pin closes the card");
+}
+
 // source checks: no innerHTML in the card, and both drop hints name the card
 {
   assert.ok(!/innerHTML|insertAdjacentHTML/.test(lift("function pinCardElement(")), "the card is built from DOM nodes only");
