@@ -709,14 +709,38 @@ const HISTORICAL_CLAIM_ENTRY = ASSIGNMENT_MODE;
 // so the sign-in card can name the specific invited account
 const INVITED_EMAIL_HINT = (SEARCH_PARAMS.get("email") || "").trim();
 
+// strict coordinate parse for the nominate hand-off: the value must be
+// present and, once trimmed, a plain signed decimal (no exponent, hex, sign
+// prefix or trailing characters). returns NaN otherwise
+function strictCoordinate(raw) {
+    if (typeof raw !== "string") return Number.NaN;
+    const trimmed = raw.trim();
+    if (!/^-?\d+(\.\d+)?$/.test(trimmed)) return Number.NaN;
+    return Number(trimmed);
+}
+
 // public-map hand-off (jb 2026-09-03): ?revise=1 opens the revise flow for
-// the linked place; ?report_issue=1 keeps the standalone issue form. pure
+// the linked place; ?report_issue=1 keeps the standalone issue form;
+// ?nominate=1 (map pin) carries only a strictly parsed pin position. pure
 // so the parse is testable; the caller decides what to open and when
 function deepLinkContextFromParams(params) {
     const mode = params.get("revise") === "1"
         ? "revise"
-        : params.get("report_issue") === "1" ? "report_issue" : null;
+        : params.get("report_issue") === "1"
+            ? "report_issue"
+            : params.get("nominate") === "1" ? "nominate" : null;
     if (!mode) return null;
+    if (mode === "nominate") {
+        const latitude = strictCoordinate(params.get("lat"));
+        const longitude = strictCoordinate(params.get("lng"));
+        return {
+            mode,
+            latitude,
+            longitude,
+            hasCoords: Number.isFinite(latitude) && Number.isFinite(longitude)
+                && Math.abs(latitude) <= 90 && Math.abs(longitude) <= 180,
+        };
+    }
     const latitude = Number.parseFloat(params.get("lat") || "");
     const longitude = Number.parseFloat(params.get("lng") || "");
     const osmId = (params.get("osm_id") || "").trim();
