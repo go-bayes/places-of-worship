@@ -142,7 +142,7 @@ assert.doesNotMatch(portal.decisionForm(row("t-plain", "reopened").task, null), 
 assert.doesNotMatch(portal.decisionForm(row("t-ex", "exported", null, { reopened_after_decision: { from_status: "exported", reason: "x" } }).task, null), /revertReopenButton/, "not reopened, no control");
 (async () => {
     const reverted = [];
-    window.PowConvexTaskClient.prototype.revertReopen = async (args) => { reverted.push(args); return {}; };
+    window.PowConvexTaskClient.prototype.revertReopen = async (args) => { reverted.push(args); return { task_id: args.taskId, status: "pi_accepted" }; };
     window.PowConvexTaskClient.prototype.listReviewQueue = async () => [];
     for (const id of ["revertReopenButton", "revertReopenForm", "revertReopenReason", "revertReopenConfirm", "revertReopenCancel", "revertReopenProblem"]) element(id);
     const fire = async (id) => { for (const fn of elements.get(id).listeners.click || []) await fn(); };
@@ -159,6 +159,12 @@ assert.doesNotMatch(portal.decisionForm(row("t-ex", "exported", null, { reopened
     elements.get("revertReopenReason").value = "  Opened in error, no new evidence.  ";
     await fire("revertReopenConfirm");
     assert.deepEqual(JSON.parse(JSON.stringify(reverted)), [{ taskId: "t-re", reason: "Opened in error, no new evidence." }]);
+    // the success transition: no stale selection, and a message in place of the old detail
+    assert.equal(portal.state.selected, null);
+    const done = elements.get("detailPanel").innerHTML;
+    assert.match(done, /The reopen was reverted\./);
+    assert.match(done, /Task t-re is back to accepted\./);
+    assert.doesNotMatch(done, /revertReopenButton|reviewDecisionForm/);
     // a refusal from the server is shown, not swallowed
     window.PowConvexTaskClient.prototype.revertReopen = async () => { throw new Error("Something has been written to this task since it was reopened."); };
     elements.get("revertReopenConfirm").disabled = false;

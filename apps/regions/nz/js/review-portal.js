@@ -1672,13 +1672,15 @@ function human(value) {
             }
             confirm.disabled = true;
             try {
-                await client.revertReopen({ taskId: task.task_id, reason });
+                const result = await client.revertReopen({ taskId: task.task_id, reason });
+                // the task has left the reopened list and is a different
+                // task now: drop the stale selection, reload the queue, and
+                // say what happened in place of the old detail
+                state.selected = null;
                 await loadQueue();
-                if (state.queue.find((entry) => entry.task.task_id === task.task_id)) {
-                    await selectTask(task.task_id);
-                } else {
-                    renderDetail(false);
-                }
+                renderDetail(false);
+                const restored = { reviewed: "reviewed", pi_accepted: "accepted", exported: "exported" }[result && result.status] || "its earlier status";
+                els.detailPanel.innerHTML = `<div class="state-empty"><strong>The reopen was reverted.</strong> ${escapeHtml(task.name || task.task_id)} is back to ${escapeHtml(restored)}. Choose another task from the queue, or change the queue status to find it.</div>`;
             } catch (error) {
                 confirm.disabled = false;
                 if (problem) problem.textContent = error.message || "The reopen could not be reverted.";
