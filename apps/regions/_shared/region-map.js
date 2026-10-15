@@ -1579,6 +1579,9 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
     frame.title = `Street View near ${name}`;
     frame.src = streetViewEmbedUrl(latFixed, lngFixed);
     frame.allowFullscreen = true;
+    // google's frame may run its own scripts and open "view on google maps"
+    // in a new tab, but may not navigate this page
+    frame.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox");
     frame.style.cssText = "display:block;width:100%;height:100%;border:0;";
     node.style.minHeight = "200px";
     node.style.minWidth = "200px";
