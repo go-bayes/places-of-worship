@@ -32,6 +32,7 @@ import {
   assertTaskReasonLimit,
 } from "./lib/limits";
 import { DECIDED_REOPEN_REASON_MIN, isDecidedTaskStatus, sideRouteRefusal } from "./lib/intakeGate";
+import { isRateLimitError } from "@convex-dev/rate-limiter";
 import { intakeRateLimiter } from "./lib/rateLimits";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { evidenceDraftDoc, reviewDecisionDoc, taskDoc, taskEventDoc, userDoc } from "./lib/validators";
@@ -937,11 +938,25 @@ export const reopenTask = mutation({
     // an ra's reopens from a decided status are limited per user, 20 an
     // hour (reserved security review, 2026-10-15); review roles are not
     if (decided && !canReview(user.roles)) {
-      await intakeRateLimiter.limit(ctx, "decidedReopenPerUser", { key: user._id, throws: true });
+      try {
+        await intakeRateLimiter.limit(ctx, "decidedReopenPerUser", { key: user._id, throws: true });
+      } catch (error) {
+        if (isRateLimitError(error)) {
+          throw new Error("You have reopened 20 decided tasks in the last hour. Try again later, or ask a reviewer to reopen it.");
+        }
+        throw error;
+      }
       // and 60 an hour across all users (JB, 2026-10-15), so several
       // accounts cannot together reopen decided work faster than a
       // reviewer can follow
-      await intakeRateLimiter.limit(ctx, "decidedReopenGlobal", { throws: true });
+      try {
+        await intakeRateLimiter.limit(ctx, "decidedReopenGlobal", { throws: true });
+      } catch (error) {
+        if (isRateLimitError(error)) {
+          throw new Error("Too many reopens of decided tasks across the project in the last hour. Try again later, or ask a reviewer to reopen it.");
+        }
+        throw error;
+      }
     }
     const now = Date.now();
     await ctx.db.patch(task._id, {
@@ -975,19 +990,85 @@ export const reopenTask = mutation({
   },
 });
 
-// the rows that hang off a task and carry a write time, read for the revert
-// check: any written at or after the first reopen means the reopen has been
-// built on and cannot be undone
-const REVERT_WRITE_TABLES = [
+// how many rows of one table the revert check will read before it fails
+// closed: a task with more history than this is not one to revert quietly
+const REVERT_SCAN_BUDGET = 200;
+
+type WriteStamp = { created_at?: number; updated_at?: number; recorded_at?: number };
+
+function wroteAtOf(row: WriteStamp): number {
+  return Math.max(row.created_at ?? 0, row.updated_at ?? 0, row.recorded_at ?? 0);
+}
+
+// rows that can be updated after they are created: read within the budget
+// and compare each row's latest write time
+const REVERT_UPDATABLE_TABLES = [
   ["evidence_drafts", "by_task_status"],
   ["evidence_attachments", "by_task_status"],
   ["historical_claims", "by_task_and_created_at"],
   ["site_occupancies", "by_task_and_created_at"],
+  ["review_decisions", "by_task"],
+] as const;
+
+// append-only rows: the newest row by creation order says whether any was
+// written since
+const REVERT_APPEND_ONLY_TABLES = [
   ["evidence_versions", "by_task"],
   ["evidence_head_changes", "by_task"],
-  ["review_decisions", "by_task"],
   ["task_acceptances", "by_task"],
+  ["agent_reviews", "by_task"],
 ] as const;
+
+const REVERT_WRITTEN_SINCE = "Something has been written to this task since it was reopened, so the reopen can no longer be reverted. Record a new decision through the review workflow instead.";
+const REVERT_TOO_MUCH_HISTORY = "This task has too much recorded history to check that nothing was written since it was reopened, so the reopen cannot be reverted here. Record a new decision through the review workflow instead.";
+
+// throws unless nothing has been written to the task at or after `since`;
+// reads a bounded number of rows and fails closed past the budget
+async function assertNothingWrittenSince(ctx: MutationCtx, taskId: string, since: number): Promise<void> {
+  const db = ctx.db as any;
+  for (const [table, index] of REVERT_UPDATABLE_TABLES) {
+    const rows: WriteStamp[] = await db
+      .query(table)
+      .withIndex(index, (q: any) => q.eq("task_id", taskId))
+      .take(REVERT_SCAN_BUDGET + 1);
+    if (rows.some((row) => wroteAtOf(row) >= since)) throw new Error(REVERT_WRITTEN_SINCE);
+    if (rows.length > REVERT_SCAN_BUDGET) throw new Error(REVERT_TOO_MUCH_HISTORY);
+  }
+  for (const [table, index] of REVERT_APPEND_ONLY_TABLES) {
+    const [newest]: WriteStamp[] = await db
+      .query(table)
+      .withIndex(index, (q: any) => q.eq("task_id", taskId))
+      .order("desc")
+      .take(1);
+    if (newest !== undefined && wroteAtOf(newest) >= since) throw new Error(REVERT_WRITTEN_SINCE);
+  }
+  // an unchanged resubmission writes a receipt and no event; receipts are
+  // indexed by draft, so read the newest of each of the task's drafts
+  const drafts: Array<{ evidence_draft_id: string }> = await db
+    .query("evidence_drafts")
+    .withIndex("by_task_status", (q: any) => q.eq("task_id", taskId))
+    .take(REVERT_SCAN_BUDGET + 1);
+  if (drafts.length > REVERT_SCAN_BUDGET) throw new Error(REVERT_TOO_MUCH_HISTORY);
+  for (const draft of drafts) {
+    const [newest]: WriteStamp[] = await db
+      .query("evidence_submission_receipts")
+      .withIndex("by_draft", (q: any) => q.eq("evidence_draft_id", draft.evidence_draft_id))
+      .order("desc")
+      .take(1);
+    if (newest !== undefined && wroteAtOf(newest) >= since) throw new Error(REVERT_WRITTEN_SINCE);
+  }
+  // agent annotations indexed by task and time: any at or after `since`
+  const judgment = await db
+    .query("agent_judgments")
+    .withIndex("by_task", (q: any) => q.eq("context.task_id", taskId).gte("created_at", since))
+    .take(1);
+  if (judgment.length > 0) throw new Error(REVERT_WRITTEN_SINCE);
+  const firstPass = await db
+    .query("agent_first_pass_receipts")
+    .withIndex("by_task", (q: any) => q.eq("task_id", taskId).gte("created_at", since))
+    .take(1);
+  if (firstPass.length > 0) throw new Error(REVERT_WRITTEN_SINCE);
+}
 
 // a reviewer, curator, admin or the PI may undo a reopen made from a decided
 // status, but only while nothing has been written to the task since: the
@@ -1017,33 +1098,26 @@ export const revertReopen = mutation({
     assertTaskReasonLimit("revert reason", reason);
 
     const since = flag.reopened_at;
-    const writtenSince = "Something has been written to this task since it was reopened, so the reopen can no longer be reverted. Record a new decision through the review workflow instead.";
-    // the only event at or after the first reopen is that reopen itself;
-    // a claim, a note, a draft save or a second reopen is another
+    // reopenTask writes updated_at, last_event_at and the flag's time in one
+    // stamp, so a task row touched since (a seeding update, say) differs
+    if (task.updated_at !== since || task.last_event_at !== since) {
+      throw new Error(REVERT_WRITTEN_SINCE);
+    }
+    // the only event at or after the first reopen is that reopen itself; a
+    // claim, a note, a draft save or a second reopen is another
     const events = await ctx.db
       .query("task_events")
       .withIndex("by_task_time", (q) => q.eq("task_id", args.taskId).gte("occurred_at", since))
-      .collect();
+      .take(2);
     const onlyTheReopen = events.length === 1
       && events[0].event_type === "reopened"
       && events[0].actor_user_id === flag.reopened_by
       && events[0].previous_status === flag.from_status
       && events[0].new_status === "reopened";
     if (!onlyTheReopen) {
-      throw new Error(writtenSince);
+      throw new Error(REVERT_WRITTEN_SINCE);
     }
-    for (const [table, index] of REVERT_WRITE_TABLES) {
-      const rows: any[] = await (ctx.db as any)
-        .query(table)
-        .withIndex(index, (q: any) => q.eq("task_id", args.taskId))
-        .collect();
-      for (const row of rows) {
-        const wroteAt = Math.max(row.created_at ?? 0, row.updated_at ?? 0, row.recorded_at ?? 0);
-        if (wroteAt >= since) {
-          throw new Error(writtenSince);
-        }
-      }
-    }
+    await assertNothingWrittenSince(ctx, args.taskId, since);
 
     const now = Date.now();
     await ctx.db.patch(task._id, {
