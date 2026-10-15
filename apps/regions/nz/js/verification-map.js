@@ -6946,13 +6946,19 @@ class NzVerificationMap {
             this.renderMapPinNotice("unsaved");
             return;
         }
-        this.renderMapPinNotice(null);
-        request.startedEntry = true;
         if (request.hasCoords) {
             this.map.setView([request.latitude, request.longitude], Math.max(this.map.getZoom(), PIN_MIN_PLACEMENT_ZOOM));
         }
         this.enterPinMode();
         if (request.hasCoords) this.placePin(L.latLng(request.latitude, request.longitude));
+        // the request has started an entry only once that entry is open with
+        // its pin; otherwise it keeps waiting in the notice
+        if (!this.pinMode || (request.hasCoords && !this.pinMarker)) {
+            this.renderMapPinNotice("waiting");
+            return;
+        }
+        request.startedEntry = true;
+        this.renderMapPinNotice(null);
     }
 
     // the notice's address for a page outside assignment mode: this address
@@ -7013,10 +7019,12 @@ class NzVerificationMap {
         this.renderMapPinNotice(null);
     }
 
-    // the notice's button re-checks precedence as it stands now. with a saved
-    // entry in the way, the existing discard asks first and clears the record
-    // and its period cards; refused, both stay. with none, the branch runs
-    // again and setPortalMode asks its usual question about unsaved changes
+    // the notice's button re-checks precedence as it stands now. a saved
+    // entry in the way, or an open entry the request did not start, goes
+    // through the existing discard, which asks first when something would be
+    // lost and clears the record and its period cards; refused, all stay.
+    // with neither, the branch runs again and setPortalMode asks its usual
+    // question about unsaved changes
     nominateAtMapPin() {
         const request = this.mapPinRequest;
         if (!request) return;
@@ -7024,7 +7032,8 @@ class NzVerificationMap {
             rapidLane: RAPID_NOMINATION_ENTRY,
             savedPin: this.readRapidDraft("rapid-pin")?.pin,
         });
-        if (precedence === "saved_entry" && !this.discardEntryAttempt()) return;
+        const otherEntryOpen = Boolean(this.pinMode && !request.startedEntry);
+        if ((precedence === "saved_entry" || otherEntryOpen) && !this.discardEntryAttempt()) return;
         this.applyNominateLink(request);
     }
 

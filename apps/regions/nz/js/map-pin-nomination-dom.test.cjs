@@ -771,4 +771,64 @@ for (const [label, options, setup] of [
   assert.strictEqual(reloaded.app.pendingDeepLink, null, "a reload restored the retired link");
 }
 
+// --- the notice button over an entry the request did not start ---------------
+// the saved entry takes precedence and the link waits; the RA leaves that
+// entry and opens another, placing an unconfirmed pin at (-42, 173). the
+// button discards that entry (asking first when something would be lost)
+// and only then opens the link's entry, with its pin at the link's point
+const otherEntryPortal = () => {
+  const loaded = retiringPortal({ realPlacement: true, storage: savedStorage() });
+  const { app } = loaded;
+  app.portalMode = "add";
+  app.applyNominateLink(app.pendingDeepLink);
+  assert.strictEqual(noticeKind(loaded), "waiting");
+  // the saved entry is gone; the RA opens another and drops a pin by hand
+  loaded.storage.removeItem(draftKey);
+  app.enterPinMode();
+  loaded.clickMap({ lat: -42, lng: 173 });
+  assert.deepStrictEqual({ ...app.pinMarker.getLatLng() }.lat, -42);
+  loaded.press = () => findNodes(loaded.notice, node => node.tagName === "button")[0].click();
+  loaded.pinAt = () => ({ lat: app.pinMarker?.getLatLng().lat, lng: app.pinMarker?.getLatLng().lng });
+  return loaded;
+};
+
+// an unconfirmed pin with nothing typed: nothing to lose, so no prompt
+{
+  const loaded = otherEntryPortal();
+  const { app } = loaded;
+  loaded.press();
+  assert.strictEqual(app.pinMode, true, "the link's entry did not open");
+  assert.deepStrictEqual(loaded.pinAt(), { lat: -41.2865, lng: 174.7762 }, "the pin is not at the link's point");
+  assert.strictEqual(app.pinConfirmed, null, "the link's pin was confirmed");
+  assert.strictEqual(app.mapPinRequest?.startedEntry, true, "the request did not start the entry");
+  assert.strictEqual(noticeKind(loaded), null, "the notice stayed over the started entry");
+  assert.deepStrictEqual(loaded.urls, [], "the link was retired before its pin was confirmed");
+}
+
+// the other entry holds typed text: a refused prompt leaves it and the notice
+{
+  const loaded = otherEntryPortal();
+  const { app, window: win } = loaded;
+  app.formDirty = true;
+  const marker = app.pinMarker;
+  let asked = 0;
+  win.confirm = () => { asked += 1; return false; };
+  loaded.press();
+  assert.strictEqual(asked, 1, "the discard did not ask first");
+  assert.strictEqual(app.pinMode, true, "a refused discard closed the other entry");
+  assert.strictEqual(app.pinMarker, marker, "a refused discard replaced the other entry's pin");
+  assert.deepStrictEqual(loaded.pinAt(), { lat: -42, lng: 173 }, "a refused discard moved the other entry's pin");
+  assert.strictEqual(app.formDirty, true, "a refused discard cleared the typed text");
+  assert.strictEqual(noticeKind(loaded), "waiting", "a refused discard hid the notice");
+  assert.strictEqual(app.mapPinRequest?.startedEntry, false, "a refused discard marked the request started");
+  // confirmed, the other entry goes and the link's entry opens at its point
+  win.confirm = () => { asked += 1; return true; };
+  loaded.press();
+  assert.strictEqual(asked, 2);
+  assert.deepStrictEqual(loaded.pinAt(), { lat: -41.2865, lng: 174.7762 }, "the confirmed discard did not place the link's pin");
+  assert.strictEqual(app.pinConfirmed, null);
+  assert.strictEqual(app.mapPinRequest?.startedEntry, true);
+  assert.strictEqual(noticeKind(loaded), null);
+}
+
 console.log("map-pin-nomination-dom tests passed");
