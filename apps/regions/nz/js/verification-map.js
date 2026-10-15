@@ -8087,8 +8087,10 @@ class NzVerificationMap {
     }
 
     // leaving the pin flow by choice (back to map, cancel, submit, sign-out)
-    // ends the resume; the typed values stay as they always have
+    // ends the resume; the typed values stay as they always have. only the
+    // quick-entry lane owns this record: the detailed lane leaves it alone
     dropRapidPinFromDevice() {
+        if (!RAPID_NOMINATION_ENTRY) return;
         const record = this.readRapidDraft("rapid-pin");
         if (!record?.pin) return;
         delete record.pin;
@@ -12240,8 +12242,11 @@ class NzVerificationMap {
     discardEntryAttempt({ confirmFirst = true } = {}) {
         const somethingToLose = Boolean(this.formDirty || this.pinConfirmed || this.quickPhotoCarry);
         if (confirmFirst && somethingToLose && !window.confirm("Discard this entry? Nothing has been saved.")) return false;
-        this.clearRapidDraft("rapid-pin");
-        this.clearGuidedPeriods(RAPID_PIN_PERIODS_KEY);
+        // the quick-entry draft belongs to the quick-entry lane alone
+        if (RAPID_NOMINATION_ENTRY) {
+            this.clearRapidDraft("rapid-pin");
+            this.clearGuidedPeriods(RAPID_PIN_PERIODS_KEY);
+        }
         this.clearFormDirty();
         if (this.pinMode) this.exitPinMode();
         this.reviseContext = null;
