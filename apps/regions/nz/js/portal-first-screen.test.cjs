@@ -84,9 +84,13 @@ const fresh = () => Object.create(window.NzVerificationMap.prototype);
   const words = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().split(" ").length;
   assert.ok(words <= 45, `the signed-out card reads in under 45 words, got ${words}`);
   // a parked place is still named on the card
-  app.pendingDeepLink = { name: "Sacred Heart Cathedral" };
+  app.pendingDeepLink = { mode: "revise", name: "Sacred Heart Cathedral" };
   app.renderBackendPanel();
   assert.match(panel.innerHTML, /Sign in to revise <em>Sacred Heart Cathedral<\/em>/);
+  // the revise note follows the revise mode, not the absence of another
+  app.pendingDeepLink = { name: "Sacred Heart Cathedral" };
+  app.renderBackendPanel();
+  assert.doesNotMatch(panel.innerHTML, /Sign in to revise/, "a held link without the revise mode was named as a revision");
 }
 
 // 2. the map lands on hybrid and comes back to it when a mode ends

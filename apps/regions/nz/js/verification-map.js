@@ -710,7 +710,7 @@ const HISTORICAL_CLAIM_ENTRY = ASSIGNMENT_MODE;
 const INVITED_EMAIL_HINT = (SEARCH_PARAMS.get("email") || "").trim();
 
 // strict coordinate parse for the nominate hand-off: the value must be
-// present and, once trimmed, a plain signed decimal (no exponent, hex, sign
+// present and, once trimmed, a plain signed decimal (no exponent, hex, plus
 // prefix or trailing characters). returns NaN otherwise
 function strictCoordinate(raw) {
     if (typeof raw !== "string") return Number.NaN;
@@ -2309,7 +2309,7 @@ class NzVerificationMap {
             panel.innerHTML = `
                 <div class="backend-card auth-required">
                     <strong>${ASSIGNMENT_MODE ? "1. Sign in to start" : "Sign in"}</strong>
-                    ${this.pendingDeepLink && this.pendingDeepLink.mode !== "nominate" ? `<span role="note">Sign in to revise <em>${escapeHtml(this.pendingDeepLink.name || "a place on the map")}</em>; it opens here after sign-in.</span>` : ""}
+                    ${this.pendingDeepLink?.mode === "revise" ? `<span role="note">Sign in to revise <em>${escapeHtml(this.pendingDeepLink.name || "a place on the map")}</em>; it opens here after sign-in.</span>` : ""}
                     ${this.pendingDeepLink?.mode === "nominate" ? `<span role="note" id="pendingLinkNote"></span>` : ""}
                     ${INVITED_EMAIL_HINT ? `<span>Use <strong class="inline">${escapeHtml(INVITED_EMAIL_HINT)}</strong>.</span>` : ""}
                     <div id="googleSignInButton" class="google-sign-in-host"></div>

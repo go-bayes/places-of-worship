@@ -92,7 +92,9 @@ const seededStorage = () => ({ [draftKey]: draftSeed, [periodsKey]: periodsSeed 
 
 {
   const { app, storage } = loadPortal({ search: "?batch=nz-test&detailed=1", storage: seededStorage() });
-  assert.strictEqual(storage.getItem(periodsKey), periodsSeed, "the seed must sit under the periods key the portal uses");
+  // a self-check of the seed alone: the key is the one written here, and the
+  // quick-entry control below shows the portal clearing it
+  assert.strictEqual(storage.getItem(periodsKey), periodsSeed, "the periods seed was not stored under its key");
   app.dropRapidPinFromDevice();
   assert.strictEqual(storage.getItem(draftKey), draftSeed, "detailed lane: leaving pin mode changed the quick-entry draft");
   app.discardEntryAttempt({ confirmFirst: false });
