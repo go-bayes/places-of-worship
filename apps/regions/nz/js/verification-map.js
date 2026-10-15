@@ -12555,8 +12555,9 @@ class NzVerificationMap {
         this.pinSearchRows = [];
         this.setEntryOpen(true);
         document.body?.classList?.add("pin-open");
-        // cards saved with an earlier entry belong to that place only
-        this.reconcileRapidPeriodsPlace(this.rapidPinPlaceKey());
+        // cards saved with an earlier entry belong to that place only; the
+        // quick-entry cards belong to the quick-entry lane alone
+        if (RAPID_NOMINATION_ENTRY) this.reconcileRapidPeriodsPlace(this.rapidPinPlaceKey());
         this.pinConfirmed = null;
         this.pinNearbyCount = 0;
         this.pinLinkedRefs = [];

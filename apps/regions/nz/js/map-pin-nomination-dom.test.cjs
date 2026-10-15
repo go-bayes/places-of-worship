@@ -590,7 +590,9 @@ const waitingText = "A nomination from the map is waiting at (-41.28650, 174.776
 // keeps every other parameter
 // realPlacement runs the real enterPinMode, armed click handler, placePin and
 // setPendingPin over a minimal leaflet stub instead of stubbing them
-const retiringPortal = ({ realPlacement = false, ...options } = {}) => {
+// realReconcile keeps the real reconcileRapidPeriodsPlace and rapidPinPlaceKey
+// under realPlacement, so a test sees what entering writes to the period store
+const retiringPortal = ({ realPlacement = false, realReconcile = false, ...options } = {}) => {
   const real = [...(options.real || []), "exitPinMode", ...(realPlacement ? ["enterPinMode", "placePin"] : [])];
   const loaded = branchPortal({ ...options, real });
   const { app, window: win } = loaded;
@@ -643,8 +645,10 @@ const retiringPortal = ({ realPlacement = false, ...options } = {}) => {
     loaded.document.body.classList.add = () => {};
     // collaborators outside the placement itself
     app.loadEntryCountryOutlines = () => {};
-    app.reconcileRapidPeriodsPlace = () => {};
-    app.rapidPinPlaceKey = () => "";
+    if (!realReconcile) {
+      app.reconcileRapidPeriodsPlace = () => {};
+      app.rapidPinPlaceKey = () => "";
+    }
     app.mountPinCards = () => {};
     app.liftBasemapForPin = () => {};
     app.tileDotAt = () => null;
@@ -829,6 +833,47 @@ const otherEntryPortal = () => {
   assert.strictEqual(app.pinConfirmed, null);
   assert.strictEqual(app.mapPinRequest?.startedEntry, true);
   assert.strictEqual(noticeKind(loaded), null);
+}
+
+// --- the detailed lane leaves quick-entry periods untouched (brief 3.2, change 5)
+// the real enterPinMode, placePin, confirmPinLocation, exitPinMode and
+// discardEntryAttempt run with reconciliation unstubbed over a populated
+// quick-entry record and period cards whose placeKey differs from the entry's
+const keyedPeriodsSeed = JSON.stringify({
+  placeKey: "revise:-41.20000,174.70000",
+  segments: [{ id: "segment_1", status: "currently_used_for_worship" }],
+});
+const keyedStorage = () => ({ [draftKey]: draftSeed, [periodsKey]: keyedPeriodsSeed });
+{
+  const loaded = retiringPortal({ realPlacement: true, realReconcile: true, search: `${nominateSearch}&detailed=1`, storage: keyedStorage() });
+  const { app, storage } = loaded;
+  const unchanged = label => {
+    assert.strictEqual(storage.getItem(draftKey), draftSeed, `detailed lane: ${label} changed the quick-entry record`);
+    assert.strictEqual(storage.getItem(periodsKey), keyedPeriodsSeed, `detailed lane: ${label} changed the quick-entry period cards`);
+  };
+  app.applyNominateLink(app.pendingDeepLink);
+  assert.ok(app.pinMarker, "the detailed lane placed no pin");
+  unchanged("entering and placing");
+  app.confirmPinLocation();
+  assert.ok(app.pinConfirmed, "the detailed lane did not confirm the pin");
+  unchanged("confirming");
+  app.exitPinMode();
+  unchanged("cancelling");
+  app.enterPinMode();
+  loaded.clickMap({ lat: -41.2865, lng: 174.7762 });
+  unchanged("entering again");
+  app.discardEntryAttempt({ confirmFirst: false });
+  unchanged("discarding");
+}
+
+// control: in the quick-entry lane entering still reconciles the cards' place
+{
+  const loaded = retiringPortal({ realPlacement: true, realReconcile: true, storage: { [periodsKey]: keyedPeriodsSeed } });
+  const { app, storage } = loaded;
+  app.applyNominateLink(app.pendingDeepLink);
+  const held = JSON.parse(storage.getItem(periodsKey));
+  assert.strictEqual(held.placeKey, "new-place", "quick-entry lane: entering did not reconcile the cards' place");
+  assert.ok(!(held.segments || []).some(segment => segment.id === "segment_1"), "quick-entry lane: another place's cards were kept");
 }
 
 console.log("map-pin-nomination-dom tests passed");
