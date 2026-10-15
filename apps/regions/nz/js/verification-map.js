@@ -6999,14 +6999,18 @@ class NzVerificationMap {
             nominate.addEventListener("click", () => this.nominateAtMapPin());
             const dismiss = append("button", "Dismiss");
             dismiss.setAttribute("type", "button");
-            dismiss.addEventListener("click", () => {
-                // dismissing retires the link whether or not it started an entry
-                this.retireMapPinParams();
-                this.mapPinRequest = null;
-                this.renderMapPinNotice(null);
-            });
+            // dismissing releases the request whether or not it started an entry
+            dismiss.addEventListener("click", () => this.releaseMapPinRequest());
         }
         notice.hidden = false;
+    }
+
+    // the link is used up: its parameters leave the address, the request is
+    // forgotten and the notice is hidden (brief 3.2, change 6)
+    releaseMapPinRequest() {
+        this.retireMapPinParams();
+        this.mapPinRequest = null;
+        this.renderMapPinNotice(null);
     }
 
     // the notice's button re-checks precedence as it stands now. with a saved
@@ -13098,11 +13102,7 @@ class NzVerificationMap {
         // the pin is settled in the entry the map link started, so the link
         // has been used (brief 3.2, change 6). an older entry resumed while
         // the link waits leaves it in the notice
-        if (this.mapPinRequest?.startedEntry) {
-            this.retireMapPinParams();
-            this.mapPinRequest = null;
-            this.renderMapPinNotice(null);
-        }
+        if (this.mapPinRequest?.startedEntry) this.releaseMapPinRequest();
         if (this.rapidFormOptions?.pin) this.renderRapidSourceLinks("pin", this.rapidFormOptions.pin);
         // the confirmed position is what gets recorded; freeze the pin
         this.pinMarker.dragging.disable();
@@ -13410,11 +13410,7 @@ class NzVerificationMap {
         }
         this.dropRapidPinFromDevice();
         // leaving the entry the map link started uses the link up
-        if (this.mapPinRequest?.startedEntry) {
-            this.retireMapPinParams();
-            this.mapPinRequest = null;
-            this.renderMapPinNotice(null);
-        }
+        if (this.mapPinRequest?.startedEntry) this.releaseMapPinRequest();
         this.paneSnap("rest");
         // a cancelled period placement returns to the pane with its cards
         const occupancyPin = this.occupancyPinContext;

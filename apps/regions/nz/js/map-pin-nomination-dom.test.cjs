@@ -77,7 +77,7 @@ const loadPortal = ({ search = "", storage = {} } = {}) => {
   app.backendUser = { _id: "user_1" };
   app.backend = { user: app.backendUser };
   app.guidedPeriodsByTaskId = new Map();
-  return { app, window, document, elements, element, storage: localStorage };
+  return { app, window, document, elements, element, storage: localStorage, context };
 };
 
 // --- the detailed lane leaves the quick-entry draft ---------------------------
@@ -296,8 +296,12 @@ const branchPortal = ({ search = nominateSearch, storage = {}, real = [] } = {})
   loaded.notice = notice;
   app.backendUser = { _id: "user_1" };
   app.map = { setView: (...args) => calls.push(["setView", ...args]), getZoom: () => 10, closePopup() {} };
-  app.enterPinMode = () => { calls.push(["enterPinMode"]); app.pinMode = true; };
-  app.placePin = latlng => { calls.push(["placePin", latlng]); app.pinMarker = { latlng }; };
+  if (!real.includes("placePin")) {
+    app.placePin = latlng => { calls.push(["placePin", latlng]); app.pinMarker = { latlng }; };
+  }
+  if (!real.includes("enterPinMode")) {
+    app.enterPinMode = () => { calls.push(["enterPinMode"]); app.pinMode = true; };
+  }
   if (!real.includes("exitPinMode")) {
     app.exitPinMode = () => { calls.push(["exitPinMode"]); app.pinMode = false; app.pinMarker = null; app.pinConfirmed = null; };
   }
@@ -584,8 +588,11 @@ const waitingText = "A nomination from the map is waiting at (-41.28650, 174.776
 // the real confirmPinLocation and exitPinMode run over a stub map. replaceState
 // is spied: a retired link is one call that drops nominate, lat and lng and
 // keeps every other parameter
-const retiringPortal = options => {
-  const loaded = branchPortal({ ...options, real: [...(options?.real || []), "exitPinMode"] });
+// realPlacement runs the real enterPinMode, armed click handler, placePin and
+// setPendingPin over a minimal leaflet stub instead of stubbing them
+const retiringPortal = ({ realPlacement = false, ...options } = {}) => {
+  const real = [...(options.real || []), "exitPinMode", ...(realPlacement ? ["enterPinMode", "placePin"] : [])];
+  const loaded = branchPortal({ ...options, real });
   const { app, window: win } = loaded;
   const urls = [];
   win.history = { state: null, replaceState: (state, title, url) => urls.push(url) };
@@ -607,8 +614,44 @@ const retiringPortal = options => {
     if (app.pinMarker) app.setPendingPin(latlng.lat, latlng.lng, { zoom: 18 });
     else app.placePin(latlng);
   };
-  app.placePin = latlng => { loaded.calls.push(["placePin", latlng]); app.pinMarker = layer; };
-  app.setPendingPin = (lat, lng) => loaded.calls.push(["setPendingPin", lat, lng]);
+  if (!realPlacement) {
+    app.placePin = latlng => { loaded.calls.push(["placePin", latlng]); app.pinMarker = layer; };
+    app.setPendingPin = (lat, lng) => loaded.calls.push(["setPendingPin", lat, lng]);
+  } else {
+    const handlers = {};
+    const point = (lat, lng) => ({ lat, lng, equals: other => other.lat === lat && other.lng === lng });
+    loaded.context.L.latLng = (lat, lng) => (typeof lat === "object" ? point(lat.lat, lat.lng) : point(lat, lng));
+    loaded.context.L.divIcon = options => options;
+    loaded.context.L.marker = latlng => {
+      let position = point(latlng.lat, latlng.lng);
+      const marker = {
+        dragging: { disable() {} },
+        on() {},
+        addTo() { return marker; },
+        getLatLng: () => position,
+        setLatLng: next => { position = next; loaded.calls.push(["setLatLng", next.lat, next.lng]); },
+      };
+      return marker;
+    };
+    Object.assign(app.map, {
+      on: (name, handler) => { handlers[name] = handler; },
+      panTo() {},
+    });
+    app.basemap = "streets";
+    loaded.document.addEventListener = () => {};
+    loaded.document.removeEventListener = () => {};
+    loaded.document.body.classList.add = () => {};
+    // collaborators outside the placement itself
+    app.loadEntryCountryOutlines = () => {};
+    app.reconcileRapidPeriodsPlace = () => {};
+    app.rapidPinPlaceKey = () => "";
+    app.mountPinCards = () => {};
+    app.liftBasemapForPin = () => {};
+    app.tileDotAt = () => null;
+    app.updatePinConfirmCard = () => {};
+    // the armed click handler enterPinMode bound to the map
+    loaded.clickMap = latlng => handlers.click({ latlng, containerPoint: { x: 0, y: 0 } });
+  }
   app.pinLocationMode = () => "exact";
   app.pinLocationRadius = () => undefined;
   app.notePinCountry = () => {};
@@ -646,29 +689,29 @@ const assertRetired = (loaded, label) => {
   assert.strictEqual(reloaded.app.pendingDeepLink?.mode, "nominate", "a reload before confirmation lost the link");
 }
 
-// a link without usable coordinates, a pin placed by hand, then confirmed
+// a link without usable coordinates opens pin mode with no pin. the RA places
+// a pin by hand through the real armed click handler (placePin for the first
+// click, setPendingPin for the second), then confirms it with the real
+// confirmPinLocation; the link is retired once, at confirmation
 {
-  const loaded = retiringPortal({ search: "?batch=nz-test&nominate=1&lat=abc&lng=174.7762&email=ra%40example.org" });
+  const loaded = retiringPortal({ realPlacement: true, search: "?batch=nz-test&nominate=1&lat=abc&lng=174.7762&email=ra%40example.org" });
   const { app } = loaded;
   app.applyNominateLink(app.pendingDeepLink);
   assert.strictEqual(app.mapPinRequest.hasCoords, false);
   assert.strictEqual(app.mapPinRequest.startedEntry, true);
+  assert.strictEqual(app.pinMode, true, "the real enterPinMode did not open pin mode");
+  assert.strictEqual(app.pinMarker, null, "a link without coordinates placed a pin");
   loaded.clickMap({ lat: -41.2865, lng: 174.7762 });
-  assert.ok(app.pinMarker, "the hand-placed pin did not land");
-  assert.deepStrictEqual(loaded.urls, [], "placing the pin by hand retired the link");
-  app.confirmPinLocation();
-  assertRetired(loaded, "hand-placed pin");
-}
-
-// a later move of the pin by hand uses setPendingPin and leaves the request be
-{
-  const loaded = retiringPortal();
-  const { app } = loaded;
-  app.applyNominateLink(app.pendingDeepLink);
+  assert.ok(app.pinMarker, "the first click did not place the pin");
+  assert.deepStrictEqual({ lat: app.pinMarker.getLatLng().lat, lng: app.pinMarker.getLatLng().lng }, { lat: -41.2865, lng: 174.7762 });
   loaded.clickMap({ lat: -41.287, lng: 174.777 });
-  assert.ok(loaded.calls.some(call => call[0] === "setPendingPin"), "the later click did not move the pin");
-  assert.deepStrictEqual(loaded.urls, []);
-  assert.ok(app.mapPinRequest, "moving the pin cleared the request");
+  assert.deepStrictEqual(loaded.calls.filter(call => call[0] === "setLatLng"), [["setLatLng", -41.287, 174.777]], "the second click did not move the pin through setPendingPin");
+  assert.deepStrictEqual(loaded.urls, [], "placing and moving the pin retired the link");
+  assert.ok(app.mapPinRequest, "placing the pin cleared the request");
+  app.confirmPinLocation();
+  assert.ok(app.pinConfirmed, "the pin was not confirmed");
+  assert.strictEqual(app.pinConfirmed.latitude, -41.287, "the confirmed pin is not the moved one");
+  assertRetired(loaded, "hand-placed pin");
 }
 
 // leaving pin mode in the entry the request started
