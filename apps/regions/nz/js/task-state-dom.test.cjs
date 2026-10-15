@@ -343,4 +343,30 @@ const feature = (t) => ({ type: "Feature", properties: { task_id: t.task_id, nam
   console.log("task-state-dom: reopen ok");
 })().catch((error) => { console.error(error); process.exit(1); });
 
+// 10. the rapid-observation detail path (reviewFormHtml -> rapidReadOnlyHtml)
+// offers the same "Reopen with a reason" control for each decided status, and
+// still says nothing about asking JB; a task waiting for review gets its plain note
+{
+  const app = fresh();
+  app.rapidCorrectionTaskIds = new Set();
+  app.taskUsesRapidForm = () => true;
+  for (const status of ["reviewed", "pi_accepted", "exported"]) {
+    const decided = task(`t-rapid-${status}`, status);
+    app.backendTasksById.set(decided.task_id, decided);
+    app.latestDraftsByTaskId.set(decided.task_id, { observation_contract_version: "rapid_current_v1", current_observation_status: "present", source_date_or_capture_date: "2026-10-01", privacy_flag: "clear" });
+    const html = app.reviewFormHtml({ task_id: decided.task_id });
+    assert.match(html, /<h3>Recorded observation<\/h3>/, status);
+    assert.match(html, new RegExp(`data-detail-reopen="t-rapid-${status}"`), status);
+    assert.match(html, />Reopen with a reason<\/button>/, status);
+    assert.doesNotMatch(html, /Ask JB to reopen|unless JB reopens/, status);
+    assert.match(html, /reopen the task with a reason first/, status);
+  }
+  const waiting = task("t-rapid-wait", "needs_review");
+  app.backendTasksById.set(waiting.task_id, waiting);
+  app.latestDraftsByTaskId.set(waiting.task_id, { observation_contract_version: "rapid_current_v1", current_observation_status: "present", privacy_flag: "clear" });
+  const waitHtml = app.reviewFormHtml({ task_id: waiting.task_id });
+  assert.match(waitHtml, /This observation is waiting for review\./);
+  assert.doesNotMatch(waitHtml, /data-detail-reopen/);
+}
+
 console.log("task-state-dom: ok");

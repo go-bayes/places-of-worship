@@ -7,7 +7,8 @@ import { world, draftContent } from "./testing/exportWorld.node-test.mjs";
 // on the task until a new pi acceptance clears it
 
 const { claimTask, releaseTask, skipTask, unskipTask, markProvisionallyClosed, reopenTask } = await import("./tasks.ts");
-const { submitEvidenceDraft } = await import("./evidence.ts");
+const { submitEvidenceDraft, importSubmittedEvidenceDrafts } = await import("./evidence.ts");
+const { createExportBatch } = await import("./exports.ts");
 const { recordReviewDecision, getReviewSnapshot } = await import("./reviews.ts");
 const { recordAcceptance } = await import("./acceptances.ts");
 
@@ -165,4 +166,51 @@ test("a pi return does not clear the flag", async () => {
   await recordAcceptance._handler(w.as(w.pi), { taskId: "task_1", outcome: "returned", note: "Needs a second source." });
   assert.equal(w.task.status, "needs_review");
   assert.ok(w.task.reopened_after_decision);
+});
+
+// review finding on #197: a spreadsheet import must not hand a reopened task
+// back to pi_accepted, which would skip the new acceptance the flag waits on
+test("a spreadsheet import carrying a decided status does not move a reopened task or reach export", async () => {
+  const w = await scene("in_progress");
+  const admin = await w.addUser("admin-subject", ["admin"]);
+  await w.addDraft({ evidence_draft_id: "task_1:draft_a", task_id: "task_1", created_by: w.ra._id, ...draftContent() });
+  await submitEvidenceDraft._handler(w.as(w.ra), { evidenceDraftId: "task_1:draft_a" });
+  const snapshot = await getReviewSnapshot._handler(w.as(w.reviewer), { taskId: "task_1", evidenceDraftId: "task_1:draft_a" });
+  await recordReviewDecision._handler(w.as(w.reviewer), {
+    taskId: "task_1",
+    decision: { evidence_draft_id: "task_1:draft_a", decision_status: "accepted_for_export", decision_note: "Checked the entry in full." },
+    snapshotHash: snapshot.snapshot_hash,
+  });
+  await recordAcceptance._handler(w.as(w.pi), { taskId: "task_1", outcome: "accepted", note: "Ratifying the reviewer's decision." });
+  assert.equal(w.task.status, "pi_accepted");
+  await reopenTask._handler(w.as(w.ra), { taskId: "task_1", reason: "New evidence on the opening date." });
+
+  for (const importedStatus of ["pi_accepted", "reviewed", "exported"]) {
+    const result = await importSubmittedEvidenceDrafts._handler(w.as(admin), {
+      batch: { batch_id: "test-batch", country_code: "VU", source_kind: "spreadsheet", target_years: [2013, 2018, 2023] },
+      tasks: [{ task_id: "task_1", batch_id: "test-batch", country_code: "VU", task_type: "verify_existing_site", priority: "medium", status: importedStatus, target_years: [2013, 2018, 2023], name: "Test place of worship", task_brief: "Check it.", geometry: { type: "Point", coordinates: [174.768, -41.282] } }],
+      drafts: [],
+    });
+    assert.deepEqual(result.tasks, { inserted: 0, updated: 1 }, importedStatus);
+    assert.equal(w.task.status, "reopened", importedStatus);
+    assert.equal(w.task.reopened_after_decision.from_status, "pi_accepted", importedStatus);
+  }
+  await assert.rejects(createExportBatch._handler(w.as(admin), { countryCode: "VU", taskIds: ["task_1"] }));
+
+  // an import without a decided status still applies, as before
+  await importSubmittedEvidenceDrafts._handler(w.as(admin), {
+    batch: { batch_id: "test-batch", country_code: "VU", source_kind: "spreadsheet", target_years: [2013, 2018, 2023] },
+    tasks: [{ task_id: "task_1", batch_id: "test-batch", country_code: "VU", task_type: "verify_existing_site", priority: "medium", status: "needs_review", target_years: [2013, 2018, 2023], name: "Test place of worship", task_brief: "Check it." , geometry: { type: "Point", coordinates: [174.768, -41.282] } }],
+    drafts: [],
+  });
+  assert.equal(w.task.status, "needs_review");
+  assert.ok(w.task.reopened_after_decision);
+
+  // a new task inserted with a decided status is left as before
+  await importSubmittedEvidenceDrafts._handler(w.as(admin), {
+    batch: { batch_id: "test-batch", country_code: "VU", source_kind: "spreadsheet", target_years: [2013, 2018, 2023] },
+    tasks: [{ task_id: "task_new", batch_id: "test-batch", country_code: "VU", task_type: "verify_existing_site", priority: "medium", status: "reviewed", target_years: [2013, 2018, 2023], name: "New place", task_brief: "Check it.", geometry: { type: "Point", coordinates: [174.768, -41.282] } }],
+    drafts: [],
+  });
+  assert.equal(w.row("tasks", "task_id", "task_new").status, "reviewed");
 });

@@ -8003,7 +8003,9 @@ class NzVerificationMap {
                 : `<div class="copy-status">No observation is attached to this task yet.</div>`;
         return `
             <h3>Recorded observation</h3>
-            <div class="pilot-note">${escapeHtml(statusNote)}</div>
+            ${DECIDED_STATUSES.has(status) && taskId
+                ? this.decidedTaskNoteHtml(taskId, status)
+                : `<div class="pilot-note">${escapeHtml(statusNote)}</div>`}
             ${summary}
             ${canCorrect || canAddHistory ? `
                 <div class="button-row">

@@ -16,7 +16,7 @@ import {
   assertTaskReasonLimit,
 } from "./lib/limits";
 import { assertNotRapidContract, isRapidCurrentDraft } from "./lib/rapidEntry";
-import { evidenceIntakeRefusal } from "./lib/intakeGate";
+import { evidenceIntakeRefusal, isDecidedTaskStatus } from "./lib/intakeGate";
 import { dateFloorYear, targetYearsOrEmpty } from "./lib/countryYears";
 import { assignedTaskPeriodProblem } from "./lib/assignedTaskPeriods";
 import { assertOccupancySet, occupancyReferenceDate } from "./lib/occupancies";
@@ -488,7 +488,12 @@ async function upsertSpreadsheetTask(ctx: any, taskRecord: any, user: Doc<"users
     return "inserted";
   }
 
+  // an import never decides a task: a closed existing task keeps its status,
+  // and an imported decided status (reviewed, pi_accepted, exported) is not
+  // applied to an existing task, so a reopened task cannot reach export
+  // without a new acceptance (jb ruling 2026-10-15)
   const status = closedTaskStatuses.has(existing.status)
+    || (taskRecord.status !== undefined && isDecidedTaskStatus(taskRecord.status))
     ? existing.status
     : taskRecord.status ?? "needs_review";
   await ctx.db.patch(existing._id, {
