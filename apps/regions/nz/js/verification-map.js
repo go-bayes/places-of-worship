@@ -2049,11 +2049,12 @@ class NzVerificationMap {
         // refresh cannot see the manual batch, so we re-merge these)
         this.pinMode = false;
         this.reviseContext = null;
-        // a ?revise=1 hand-off waiting for sign-in (assignment mode gates
-        // the sidebar): parsed here so the first sign-in card can say so,
-        // applied once the contributor is in
+        // a ?revise=1 or ?nominate=1 hand-off waiting for sign-in (assignment
+        // mode gates the sidebar): parsed here so the first sign-in card can
+        // say so, applied once the contributor is in. one request is held at
+        // a time
         const deepLink = deepLinkContextFromParams(SEARCH_PARAMS);
-        this.pendingDeepLink = deepLink?.mode === "revise" ? deepLink : null;
+        this.pendingDeepLink = deepLink?.mode === "revise" || deepLink?.mode === "nominate" ? deepLink : null;
         this.pinMarker = null;
         this.pinUncertaintyCircle = null;
         this.pinConfirmed = null;
@@ -2240,6 +2241,29 @@ class NzVerificationMap {
         });
     }
 
+    // what the signed-out card says of a held nominate link: the pin's point
+    // from the parsed numbers, or why the RA will drop the pin by hand
+    nominateSignInNoteText(link) {
+        if (!link?.hasCoords) {
+            return "Sign in to nominate a missing place of worship; the link held no usable location, so you will drop the pin yourself.";
+        }
+        return `Sign in to nominate the place at the pin (${link.latitude.toFixed(5)}, ${link.longitude.toFixed(5)}); it opens here after sign-in`;
+    }
+
+    // removes the map pin's parameters from the address and keeps every
+    // other one (country, batch, detailed, email), so a reload cannot
+    // restore a link that has been applied, replaced or dismissed
+    retireMapPinParams() {
+        const params = new URLSearchParams(window.location.search);
+        for (const name of ["nominate", "lat", "lng"]) params.delete(name);
+        const query = params.toString();
+        window.history.replaceState(
+            window.history.state,
+            "",
+            `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash || ""}`,
+        );
+    }
+
     renderBackendPanel() {
         const panel = document.getElementById("backendPanel");
         if (!panel) return;
@@ -2268,7 +2292,8 @@ class NzVerificationMap {
             panel.innerHTML = `
                 <div class="backend-card auth-required">
                     <strong>${ASSIGNMENT_MODE ? "1. Sign in to start" : "Sign in"}</strong>
-                    ${this.pendingDeepLink ? `<span role="note">Sign in to revise <em>${escapeHtml(this.pendingDeepLink.name || "a place on the map")}</em>; it opens here after sign-in.</span>` : ""}
+                    ${this.pendingDeepLink && this.pendingDeepLink.mode !== "nominate" ? `<span role="note">Sign in to revise <em>${escapeHtml(this.pendingDeepLink.name || "a place on the map")}</em>; it opens here after sign-in.</span>` : ""}
+                    ${this.pendingDeepLink?.mode === "nominate" ? `<span role="note" id="pendingLinkNote"></span>` : ""}
                     ${INVITED_EMAIL_HINT ? `<span>Use <strong class="inline">${escapeHtml(INVITED_EMAIL_HINT)}</strong>.</span>` : ""}
                     <div id="googleSignInButton" class="google-sign-in-host"></div>
                     <a class="join-button" href="https://github.com/go-bayes/places-of-worship" target="_blank" rel="noopener">Contact to join</a>
@@ -2277,6 +2302,9 @@ class NzVerificationMap {
                     ${this.backendLastError ? `<span class="copy-status${this.signedOutDeliberately ? "" : " error"}">${escapeHtml(this.backendLastError)}</span>` : ""}
                 </div>
             `;
+            // the nominate note carries coordinates, so it is set as text
+            const pendingLinkNote = document.getElementById("pendingLinkNote");
+            if (pendingLinkNote) pendingLinkNote.textContent = this.nominateSignInNoteText(this.pendingDeepLink);
             this.backend.renderSignInButton(document.getElementById("googleSignInButton"), {
                 initials: this.getRaInitials(),
                 onSignedIn: user => this.onBackendSignedIn(user),
@@ -2482,6 +2510,8 @@ class NzVerificationMap {
             // known; a restored mode must not keep the other mode's intro
             this.renderInitialDetail();
         }
+        // the one place a held link is applied, after the repaint above,
+        // for the google button and a kept sign-in alike
         this.applyPendingDeepLink();
         this.resumeRapidPinFromDevice();
     }
@@ -4686,6 +4716,9 @@ class NzVerificationMap {
         const longitude = Number(coords[0]);
         const osmId = props.osm_id !== undefined && props.osm_id !== null ? String(props.osm_id) : "";
         const osmTypeRaw = window.PowOsmHistory ? window.PowOsmHistory.normaliseType(props.osm_type) : String(props.osm_type || "");
+        // one request is held: a revise replaces a nominate link, and its
+        // parameters leave the address so a reload cannot bring it back
+        if (this.pendingDeepLink?.mode === "nominate") this.retireMapPinParams();
         this.pendingDeepLink = {
             mode: "revise",
             name: String(props.name || "").trim(),
@@ -6800,10 +6833,9 @@ class NzVerificationMap {
         if (link.hasCoords) {
             this.map.setView([link.latitude, link.longitude], Math.max(this.map.getZoom(), 16));
         }
-        if (link.mode === "revise") {
-            this.applyPendingDeepLink();
-            return;
-        }
+        // revise and nominate links wait for onBackendSignedIn, which
+        // applies them after its repaint
+        if (link.mode === "revise" || link.mode === "nominate") return;
         const context = {
             taskId: "",
             name: link.name,
@@ -6826,16 +6858,19 @@ class NzVerificationMap {
         this.focusDetailPanel();
     }
 
-    // opens the pending revise hand-off: in assignment mode only once a
-    // contributor is signed in, landing in add places where the revise
-    // entry lives. a place matched to a loaded task opens that task, as
-    // the dot's popup does; otherwise the revise card for the place
+    // opens the pending hand-off, called from onBackendSignedIn only. a
+    // revise link opens in assignment mode only once a contributor is signed
+    // in, landing in add places where the revise entry lives. a place matched
+    // to a loaded task opens that task, as the dot's popup does; otherwise
+    // the revise card for the place. a nominate link is cleared here and
+    // opens nothing yet
     applyPendingDeepLink() {
         const link = this.pendingDeepLink;
         if (!link) return;
-        // revising needs an account in every mode (r-h4)
+        // revising and nominating need an account in every mode (r-h4)
         if (!this.backendUser) return;
         this.pendingDeepLink = null;
+        if (link.mode === "nominate") return;
         if (ASSIGNMENT_MODE) this.setPortalMode("add");
         const feature = {
             type: "Feature",
