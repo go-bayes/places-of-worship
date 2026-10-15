@@ -92,21 +92,15 @@
       justify-content: center;
       font-size: var(--fs-chrome);
       margin-top: 8px;
-      resize: both;
       position: relative;
       cursor: default;
       touch-action: none;
-    }
-    .streetview.expanded {
-      width: min(960px, 92vw);
-      height: min(630px, 72vh);
     }
     /* popup skin comes from the shared sheet; the drag affordance is ours.
        popups drag by their body on every pointer type, so the content opts
        out of browser pan/zoom; interactive children keep native gestures
        via the drag-start exclusions, and .streetview declares its own
-       touch-action for the pano. the expand button wears the shared
-       action-row recipe like its neighbours (one weight, one face) */
+       touch-action for the pano */
     .maplibregl-popup-content {
       cursor: grab;
       touch-action: none;

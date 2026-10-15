@@ -4,7 +4,7 @@
 
 ### 2026-10-15 (street view resizes from its corner)
 
-- The desktop place popup's Street View panel loses its Expand/Collapse button, which only ever changed the height: the panel's `max-width: 100%` and the popup's 720 px cap held the width. Dragging the corner handle (titled "Drag to resize") now resizes the panel in both directions, up to 90% of the window width and 72% of its height and down to 260 by 200 px (the Maps Embed minimum); the first drag lifts both width caps, and the popup is kept inside the viewport after each drag (JB, 2026-10-15). Stamp `region-map.js?v=20261015e` on all 104 pages (pinned in `tiles-v2-client.test.cjs`).
+- The desktop place popup's Street View panel loses its Expand/Collapse button. Its rule asked for `min(960px, 92vw)` by `min(630px, 72vh)`, but the panel's `max-width: 100%` and the popup's 720 px cap held the width, so it grew only in height. Dragging the corner handle (titled "Drag to resize") now resizes the panel in both directions, up to 90% of the window width and 72% of its height and down to 260 by 200 px (Maps Embed needs at least 200 by 200); the first drag pins the popup's anchor and lifts both width caps, and the popup is kept inside the viewport after each drag. The unused `.streetview.expanded` rule and the panel's native `resize: both`, whose browser grip sat under the handle, are removed (JB, 2026-10-15). Stamps `region-map.js?v=20261015e` (pinned in `tiles-v2-client.test.cjs`) and `maplibre-flat.css?v=20261015e` on all 104 pages.
 
 ### 2026-10-15 (reopen after decision, side routes closed)
 

@@ -1539,6 +1539,9 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
       frame.style.pointerEvents = "none";
       // the popup's width cap and the panel's max-width: 100% would clamp
       // a wider drag, so both lift once the visitor takes the corner
+      // setMaxWidth re-runs the popup layout, which would re-choose an auto
+      // anchor and make an undragged popup jump; pin it first
+      pinPopupAnchor(popup);
       popup.setMaxWidth("none");
       target.style.maxWidth = "none";
       const startX = event.clientX;
