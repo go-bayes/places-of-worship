@@ -50,4 +50,10 @@ export const intakeRateLimiter = new RateLimiter(components.rateLimiter, {
     rate: 20,
     period: HOUR,
   },
+  // all users together: 60 decided reopens an hour (JB, 2026-10-15)
+  decidedReopenGlobal: {
+    kind: "fixed window",
+    rate: 60,
+    period: HOUR,
+  },
 });

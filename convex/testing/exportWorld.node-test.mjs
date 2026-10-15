@@ -55,7 +55,7 @@ export function world() {
     derived_year_locations: [], derived_target_year_functions: [], derived_state_events: [],
     review_decisions: [], agent_reviews: [], sources: [], task_batches: [],
     task_acceptances: [], export_batches: [], review_snapshots: [],
-    export_runs: [], export_run_members: [],
+    export_runs: [], export_run_members: [], evidence_attachments: [],
   };
   // functions scheduled through ctx.scheduler, run by helper.drainScheduled()
   const scheduled = [];
