@@ -495,9 +495,11 @@
         }
 
         async reopenTask(args) {
-            // reopens a task that is under review or provisionally/closed
-            // pending review for another verification pass; takes
-            // { taskId, reason }
+            // reopens a task for another verification pass; takes
+            // { taskId, reason }. a task that is reviewed, pi_accepted or
+            // exported needs a reason of at least 8 characters (trimmed) and
+            // is flagged reopened_after_decision; any signed-in contributor
+            // may reopen it (JB, 2026-10-15)
             return await this.request("mutation", "tasks:reopenTask", args);
         }
 

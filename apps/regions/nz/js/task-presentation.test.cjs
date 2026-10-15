@@ -145,3 +145,26 @@ test("transport is a separate axis with its own labels, and unknown states read 
     assert.equal(transport("offline").tone, "broken");
     assert.equal(transport("nonsense").state, "error");
 });
+
+test("decided statuses and the reopen reason rule match the server (jb 2026-10-15)", () => {
+    const { isDecided, reopenReasonProblem } = window.PowTaskPresentation;
+    for (const status of ["reviewed", "pi_accepted", "exported"]) assert.equal(isDecided(status), true, status);
+    for (const status of ["open", "needs_review", "provisionally_closed", "reopened", "", undefined]) assert.equal(isDecided(status), false, String(status));
+    assert.ok(reopenReasonProblem(""));
+    assert.ok(reopenReasonProblem("1234567"));
+    assert.ok(reopenReasonProblem("   short   "));
+    assert.equal(reopenReasonProblem("12345678"), null);
+    assert.equal(reopenReasonProblem("  12345678  "), null);
+});
+
+test("reopenFlag reads the flag as plain text, and is null without one", () => {
+    const { reopenFlag } = window.PowTaskPresentation;
+    assert.equal(reopenFlag({ status: "reopened" }), null);
+    assert.equal(reopenFlag(null), null);
+    const flag = reopenFlag({ reopened_after_decision: { from_status: "pi_accepted", reopened_at: 5, reopened_by: "u1", reason: "<b>New</b> register" } });
+    assert.equal(flag.label, "Reopened after decision");
+    assert.equal(flag.fromLabel, "Accepted");
+    assert.equal(flag.reason, "<b>New</b> register");
+    assert.equal(flag.summary, "Reopened after decision (was accepted)");
+    assert.equal(reopenFlag({ reopened_after_decision: { from_status: "exported", reason: "x" } }).fromLabel, "Exported");
+});

@@ -229,4 +229,118 @@ const feature = (t) => ({ type: "Feature", properties: { task_id: t.task_id, nam
   assert.equal(app.detailStateHtml("t-unknown"), "", "a task the page knows nothing about shows no pill");
 }
 
+// 7. reopening a decided task (jb ruling 2026-10-15): the flag shows on the
+// row, the detail and my work with its reason escaped; a decided task's note
+// offers "Reopen with a reason"; the reason is checked before anything is sent
+{
+  const flagged = task("t-flag", "reopened", {
+    reopened_after_decision: { from_status: "pi_accepted", reopened_at: 5, reopened_by: "user_1", reason: "<img src=x onerror=alert(1)> new register" },
+  });
+  const app = fresh();
+  app.rapidCorrectionTaskIds = new Set();
+  app.backendTasksById.set(flagged.task_id, flagged);
+  app.filteredTasks = [feature(flagged)];
+  const list = element("taskList", { hidden: false });
+  app.renderTaskList();
+  assert.match(list.innerHTML, /<span class="state-pill tone-act" title="Reopened after decision \(was accepted\): &lt;img[^"]*">Reopened after decision<\/span>/, "the row carries the marker, reason escaped in the title");
+  assert.doesNotMatch(list.innerHTML, /<img/);
+  const detail = app.detailStateHtml("t-flag");
+  assert.match(detail, /Reopened after decision<\/span>/);
+  assert.match(detail, /Reopened after decision \(was accepted\)\. Reason given: &lt;img src=x onerror=alert\(1\)&gt; new register/);
+  assert.doesNotMatch(detail, /<img/);
+  const mine = app.myWorkEntryHtml({ task: flagged, latestDraft: null, latestReview: null });
+  assert.match(mine, />Reopened after decision<\/span>/);
+  // an unflagged task shows no marker
+  app.backendTasksById.set("t-plain", task("t-plain", "reopened"));
+  assert.equal(app.reopenFlagPillHtml(app.backendTasksById.get("t-plain")), "");
+  assert.doesNotMatch(app.detailStateHtml("t-plain"), /Reopened after decision/);
+
+  // a decided task's notice offers the reopen control, each decided status once
+  for (const status of ["reviewed", "pi_accepted", "exported"]) {
+    const decided = task(`t-${status}`, status);
+    app.backendTasksById.set(decided.task_id, decided);
+    const note = app.formModeNoticeHtml({ task_id: decided.task_id });
+    assert.match(note, /data-detail-reopen="t-/, status);
+    assert.match(note, />Reopen with a reason<\/button>/, status);
+    assert.doesNotMatch(note, /unless JB reopens it/, status);
+  }
+  const waiting = task("t-waiting", "needs_review");
+  app.backendTasksById.set(waiting.task_id, waiting);
+  assert.doesNotMatch(app.formModeNoticeHtml({ task_id: "t-waiting" }), /data-detail-reopen/);
+
+  // the reason block is markup only: the task id is escaped, no prompt
+  const block = app.reopenReasonBlockHtml('t-"><b>');
+  assert.match(block, /data-reopen-reason-for="t-&quot;&gt;&lt;b&gt;"/);
+  assert.match(block, /<textarea id="reopenReason\d+"/);
+
+  // pi_accepted and exported are now reopenable from the map
+  const { REOPEN_ELIGIBLE } = (() => {
+    const src = fs.readFileSync(path.join(__dirname, "verification-map.js"), "utf8");
+    const match = src.match(/const REOPEN_ELIGIBLE_STATUSES = new Set\(\[([^\]]*)\]\)/);
+    return { REOPEN_ELIGIBLE: [...match[1].matchAll(/"(\w+)"/g)].map((m) => m[1]) };
+  })();
+  for (const status of ["pi_accepted", "exported", "reviewed", "needs_review"]) assert.ok(REOPEN_ELIGIBLE.includes(status), status);
+  assert.ok(!REOPEN_ELIGIBLE.includes("open"));
+}
+
+// 8. the reason is checked before it is sent: under 8 characters after
+// trimming nothing goes to the server; the trimmed reason goes when it passes
+{
+  const sent = [];
+  const mkBlock = (value) => {
+    const handlers = {};
+    const problem = { textContent: "" };
+    const input = { value, focus() { this.focused = true; } };
+    const pick = { "[data-reopen-reason-input]": input, "[data-reopen-reason-problem]": problem };
+    const confirm = { addEventListener(_t, fn) { handlers.confirm = fn; } };
+    const cancel = { addEventListener(_t, fn) { handlers.cancel = fn; } };
+    pick["[data-reopen-reason-confirm]"] = confirm;
+    pick["[data-reopen-reason-cancel]"] = cancel;
+    return { handlers, problem, input, removed: false, remove() { this.removed = true; }, querySelector: (sel) => pick[sel] || null };
+  };
+  const app = fresh();
+  for (const typed of ["", "short", "   1234567   "]) {
+    const block = mkBlock(typed);
+    app.bindReopenReason(block, (reason) => sent.push(reason));
+    block.handlers.confirm();
+    assert.match(block.problem.textContent, /at least 8 characters/, JSON.stringify(typed));
+    assert.equal(block.input.focused, true);
+  }
+  assert.equal(sent.length, 0, "no short reason is sent");
+  const ok = mkBlock("  New evidence from the 1931 register.  ");
+  let cancelled = 0;
+  app.bindReopenReason(ok, (reason) => sent.push(reason), () => { cancelled += 1; });
+  ok.handlers.confirm();
+  assert.equal(sent.join("|"), "New evidence from the 1931 register.");
+  ok.handlers.cancel();
+  assert.ok(ok.removed);
+  assert.equal(cancelled, 1);
+}
+
+// 9. reopenIssueFromContext sends the typed reason for a decided task and
+// the fixed reason otherwise; a decided task with no valid reason sends nothing
+(async () => {
+  const calls = [];
+  const app = fresh();
+  app.backend = { configured: true, signedIn: true, async reopenTask(args) { calls.push(args); } };
+  app.map = { closePopup() {} };
+  app.taskHistoryByTaskId = new Map();
+  app.refreshBackendTasks = async () => {};
+  app.applyFilters = () => {};
+  app.selectTaskById = () => {};
+  const status = element("copyStatus", { hidden: false });
+  app.backendTasksById.set("t-dec", task("t-dec", "exported"));
+  app.backendTasksById.set("t-rev", task("t-rev", "needs_review"));
+  await app.reopenIssueFromContext("t-dec", null);
+  await app.reopenIssueFromContext("t-dec", null, "short");
+  assert.equal(calls.length, 0);
+  assert.match(status.textContent, /at least 8 characters/);
+  await app.reopenIssueFromContext("t-dec", null, "  A corrected opening date.  ");
+  await app.reopenIssueFromContext("t-rev", null);
+  assert.equal(calls.length, 2);
+  assert.equal(calls[0].reason, "A corrected opening date.");
+  assert.equal(calls[1].reason, "Reopened from map context-dot inspection.");
+  console.log("task-state-dom: reopen ok");
+})().catch((error) => { console.error(error); process.exit(1); });
+
 console.log("task-state-dom: ok");

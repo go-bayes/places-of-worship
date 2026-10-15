@@ -211,9 +211,29 @@ function human(value) {
         return `<span class="state-pill tone-${escapeHtml(row.tone)}"${row.hint ? ` title="${escapeHtml(row.hint)}"` : ""}>${escapeHtml(row.label)}</span>`;
     }
 
+    // the marker a task carries after a reopen from a decided status (jb
+    // ruling 2026-10-15), until it is next accepted; the reason rides in the
+    // title and, in the decision panel, in full
+    function reopenFlagOf(task) {
+        return presentation && presentation.reopenFlag ? presentation.reopenFlag(task) : null;
+    }
+
+    function reopenFlagPillHtml(task) {
+        const flag = reopenFlagOf(task);
+        if (!flag) return "";
+        return `<span class="state-pill tone-act" title="${escapeHtml(`${flag.summary}: ${flag.reason}`)}">${escapeHtml(flag.label)}</span>`;
+    }
+
+    function reopenFlagWarningHtml(task) {
+        const flag = reopenFlagOf(task);
+        if (!flag) return "";
+        return `<div class="review-warning">${escapeHtml(flag.summary)}. Reason given: ${escapeHtml(flag.reason)}</div>`;
+    }
+
     function taskPills(task, draft, agentReview, latestReview) {
         const pills = [
             statePillHtml(presentRow(task, latestReview)),
+            reopenFlagPillHtml(task),
             `<span class="pill">${escapeHtml(human(task.task_type))}</span>`,
             `<span class="pill">${escapeHtml(human(task.priority))} priority</span>`,
         ];
@@ -1954,6 +1974,7 @@ function human(value) {
             </div>
         ` : "";
         return `
+            ${reopenFlagWarningHtml(task)}
             ${claimBar}
             <form id="reviewDecisionForm" class="decision-form">
                 <div class="wide">
@@ -2023,7 +2044,7 @@ function human(value) {
                     <textarea id="decisionNote" name="decisionNote" placeholder="Record why this decision is appropriate. Mention source gaps, identity uncertainty, or any changes needed." ${canDecide ? "" : "disabled"}></textarea>
                 </div>
                 <div class="wide">
-                    <div id="decisionHelp" class="review-warning">${escapeHtml(canDecide ? decisionHint("") : "This task is already reviewed or exported. Change the queue status to inspect other work, or reopen from the maintainer workflow if new evidence requires action.")}</div>
+                    <div id="decisionHelp" class="review-warning">${escapeHtml(canDecide ? decisionHint("") : "This task is already reviewed or exported. Change the queue status to inspect other work, or reopen it with a reason from the contributor portal if new evidence requires action.")}</div>
                     <button type="submit" class="primary" id="recordDecisionButton" ${state.busy || !canDecide || ownSubmission ? "disabled" : ""}>Record decision</button>
                     <span id="decisionStatusText" class="muted">${draft ? `Draft: ${escapeHtml(draft.evidence_draft_id)}` : "Accepted-for-export requires an evidence draft."}</span>
                 </div>

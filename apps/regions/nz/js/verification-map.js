@@ -876,13 +876,20 @@ const READ_ONLY_ASSIGNMENT_STATUSES = new Set([
     "exported",
 ]);
 // statuses where a matched context-dot task can be reopened for another
-// pass: under review or closed pending review (never already open/active)
+// pass: under review, closed pending review, or decided (never already
+// open/active). a decided task (reviewed, pi_accepted, exported) reopens
+// only with a typed reason (jb ruling 2026-10-15)
 const REOPEN_ELIGIBLE_STATUSES = new Set([
     "needs_review",
     "unresolved_note",
     "provisionally_closed",
     "reviewed",
+    "pi_accepted",
+    "exported",
 ]);
+const DECIDED_STATUSES = new Set(["reviewed", "pi_accepted", "exported"]);
+const DECIDED_STATUS_WORDS = { reviewed: "reviewed", pi_accepted: "accepted", exported: "exported" };
+const REOPEN_REASON_MIN = 8;
 // the export column list comes from the shared mirror
 // (js/wide-evidence-fields.js of convex/lib/wideEvidenceFields.ts); the
 // server refuses a draft whose list disagrees with its own (pr-b0)
@@ -2543,6 +2550,7 @@ class NzVerificationMap {
         document.addEventListener("keydown", event => this.handleGlobalKeydown(event));
         // the file button hides the native input, so the chosen count is shown beside it
         document.addEventListener("change", event => this.syncFilePickCount(event.target));
+        document.addEventListener("click", event => this.handleDetailReopenClick(event));
         const restoredUser = await restoring;
         this.renderBackendPanel();
         await this.loadTasks();
@@ -2804,7 +2812,8 @@ class NzVerificationMap {
         // the status pill is the control when the status carries an action
         // (jb ruling 2026-09-19); it opens the task like the row's view button
         const presented = presentTask(this.taskPresentationInput(task.task_id, item));
-        const statePill = this.statePillHtml(presented, { button: true, taskId: task.task_id || "", className: "my-work-open" });
+        const statePill = this.statePillHtml(presented, { button: true, taskId: task.task_id || "", className: "my-work-open" })
+            + this.reopenFlagPillHtml(task);
         const reviewNote = review.decision_note
             ? `<div class="entry-meta">Review note: ${escapeHtml(review.decision_note)}</div>`
             : "";
@@ -4852,9 +4861,26 @@ class NzVerificationMap {
         this.bindCopyCoords(el);
         this.bindSourceLinks(el);
         el.querySelector("[data-reopen-task-id]")?.addEventListener("click", (event) => {
-            const taskId = event.currentTarget.dataset.reopenTaskId;
+            const button = event.currentTarget;
+            const taskId = button.dataset.reopenTaskId;
             if (!this.leavePinForRevise()) return;
-            this.reopenIssueFromContext(taskId, feature);
+            const status = this.backendTasksById.get(taskId)?.status;
+            if (!DECIDED_STATUSES.has(status)) {
+                this.reopenIssueFromContext(taskId, feature);
+                return;
+            }
+            // a decided task needs a reason: ask inside the popup first
+            if (el.querySelector("[data-reopen-reason-for]")) return;
+            button.hidden = true;
+            button.insertAdjacentHTML("afterend", this.reopenReasonBlockHtml(taskId));
+            const block = el.querySelector("[data-reopen-reason-for]");
+            this.bindReopenReason(
+                block,
+                reason => this.reopenIssueFromContext(taskId, feature, reason),
+                () => { button.hidden = false; popup.update?.(); },
+            );
+            popup.update?.();
+            block.querySelector("textarea")?.focus();
         });
         el.querySelector("[data-open-task-id]")?.addEventListener("click", (event) => {
             const taskId = event.currentTarget.dataset.openTaskId;
@@ -4978,19 +5004,120 @@ class NzVerificationMap {
         this.focusDetailPanel();
     }
 
+    // the reason field a decided task's reopen needs (jb ruling 2026-10-15):
+    // inline, never window.prompt. the id comes from a counter, not the task
+    reopenReasonBlockHtml(taskId) {
+        this.reopenReasonSeq = (this.reopenReasonSeq || 0) + 1;
+        const id = `reopenReason${this.reopenReasonSeq}`;
+        return `
+            <div class="reopen-reason" data-reopen-reason-for="${escapeHtml(taskId)}">
+                <label for="${id}">Why does this place need reopening? Give at least ${REOPEN_REASON_MIN} characters; the reviewers and the PI will read it.</label>
+                <textarea id="${id}" rows="3" maxlength="2000" data-reopen-reason-input="1"></textarea>
+                <div class="button-row">
+                    <button type="button" class="primary" data-reopen-reason-confirm="1">Reopen this place</button>
+                    <button type="button" class="secondary" data-reopen-reason-cancel="1">Cancel</button>
+                </div>
+                <div class="muted" role="status" data-reopen-reason-problem="1"></div>
+            </div>
+        `;
+    }
+
+    // wires a block from reopenReasonBlockHtml: confirm checks the trimmed
+    // length before it sends, cancel removes the block
+    bindReopenReason(block, send, onCancel) {
+        if (!block) return;
+        const input = block.querySelector("[data-reopen-reason-input]");
+        const problem = block.querySelector("[data-reopen-reason-problem]");
+        block.querySelector("[data-reopen-reason-confirm]")?.addEventListener("click", () => {
+            const text = String(input?.value ?? "").trim();
+            const message = text.length < REOPEN_REASON_MIN
+                ? `Give a reason of at least ${REOPEN_REASON_MIN} characters.`
+                : "";
+            if (problem) problem.textContent = message;
+            if (message) {
+                input?.focus?.();
+                return;
+            }
+            send(text);
+        });
+        block.querySelector("[data-reopen-reason-cancel]")?.addEventListener("click", () => {
+            block.remove();
+            if (typeof onCancel === "function") onCancel();
+        });
+    }
+
+    // the "Reopen with a reason" button in a task's detail note: one
+    // delegated listener, since the note is rebuilt with each render
+    handleDetailReopenClick(event) {
+        const button = event.target?.closest?.("[data-detail-reopen]");
+        if (!button) return;
+        const taskId = button.dataset.detailReopen;
+        const host = button.closest("[data-reopen-host]") || button.parentElement;
+        if (!host || host.querySelector("[data-reopen-reason-for]")) return;
+        button.hidden = true;
+        host.insertAdjacentHTML("beforeend", this.reopenReasonBlockHtml(taskId));
+        const block = host.querySelector("[data-reopen-reason-for]");
+        this.bindReopenReason(
+            block,
+            reason => this.reopenIssueFromContext(taskId, null, reason),
+            () => { button.hidden = false; },
+        );
+        block?.querySelector("textarea")?.focus?.();
+    }
+
+    // the note a decided task shows in place of the plain closed note: what
+    // happened to it, and the one route back
+    decidedTaskNoteHtml(taskId, status) {
+        const word = DECIDED_STATUS_WORDS[status] || "decided";
+        return `
+            <div class="pilot-note" data-reopen-host="1">
+                This task has been ${escapeHtml(word)}. You can view the saved evidence. If you have new evidence, reopen the task with a reason first; the reviewers and the PI will see the reason.
+                <div class="button-row">
+                    <button type="button" class="secondary" data-detail-reopen="${escapeHtml(taskId)}">Reopen with a reason</button>
+                </div>
+            </div>
+        `;
+    }
+
+    // the "reopened after decision" marker (jb ruling 2026-10-15): a pill
+    // for list rows, and a line with the reason for the detail. both empty
+    // when the task carries no flag
+    reopenFlagPillHtml(task) {
+        const flag = window.PowTaskPresentation?.reopenFlag?.(task);
+        if (!flag) return "";
+        const title = `${flag.summary}: ${flag.reason}`;
+        return `<span class="state-pill tone-act" title="${escapeHtml(title)}">${escapeHtml(flag.label)}</span>`;
+    }
+
+    reopenFlagDetailHtml(task) {
+        const flag = window.PowTaskPresentation?.reopenFlag?.(task);
+        if (!flag) return "";
+        return `<div class="muted reopen-flag-detail">${escapeHtml(flag.summary)}. Reason given: ${escapeHtml(flag.reason)}</div>`;
+    }
+
     // reopens a matched under-review/closed task through the existing
     // reopenTask mutation, then refreshes the task list and lands on it.
     // Signed-out or misconfigured backends fall back to the issue form.
-    async reopenIssueFromContext(taskId, feature) {
+    // a task in a decided status needs the RA's own reason (at least 8
+    // characters, enforced again by the server); other reopens send the
+    // fixed context-dot reason
+    async reopenIssueFromContext(taskId, feature, reason) {
         if (!this.backend?.configured || !this.backend.signedIn) {
-            this.openContextIssueForm(feature);
+            if (feature) this.openContextIssueForm(feature);
+            return;
+        }
+        const decided = DECIDED_STATUSES.has(this.backendTasksById.get(taskId)?.status);
+        const typed = typeof reason === "string" ? reason.trim() : "";
+        if (decided && typed.length < REOPEN_REASON_MIN) {
+            const status = document.getElementById("copyStatus");
+            if (status) status.textContent = `Give a reason of at least ${REOPEN_REASON_MIN} characters to reopen this place.`;
             return;
         }
         this.map.closePopup();
         try {
             await this.backend.reopenTask({
                 taskId,
-                reason: "Reopened from map context-dot inspection.",
+                reason: typed || "Reopened from map context-dot inspection.",
             });
             // drop the cached history so the new reopened event shows
             this.taskHistoryByTaskId.delete(taskId);
@@ -6059,7 +6186,8 @@ class NzVerificationMap {
             const backendTask = this.backendTasksById.get(props.task_id);
             // one state pill per row (jb ruling 2026-09-19); a row known
             // only from this browser's session log presents its outcome
-            const statePill = this.statePillHtml(presentTask(this.taskPresentationInput(props.task_id)));
+            const statePill = this.statePillHtml(presentTask(this.taskPresentationInput(props.task_id)))
+                + this.reopenFlagPillHtml(backendTask);
             // subtle state dot mirroring the map's validation ring
             const verifState = validationState(backendTask?.status, temporal.status);
             const stateSwatch = {
@@ -6948,7 +7076,8 @@ class NzVerificationMap {
     detailStateHtml(taskId) {
         const presented = presentTask(this.taskPresentationInput(taskId));
         if (!presented.label) return "";
-        return `<div class="detail-state">${this.statePillHtml(presented)}${presented.hint ? `<span class="muted">${escapeHtml(presented.hint)}</span>` : ""}</div>`;
+        const backendTask = this.backendTasksById.get(taskId);
+        return `<div class="detail-state">${this.statePillHtml(presented)}${this.reopenFlagPillHtml(backendTask)}${presented.hint ? `<span class="muted">${escapeHtml(presented.hint)}</span>` : ""}</div>${this.reopenFlagDetailHtml(backendTask)}`;
     }
 
     backendStatusHtml(props) {
@@ -7576,6 +7705,9 @@ class NzVerificationMap {
         const readOnly = props?.task_id ? this.taskIsReadOnly(props.task_id) : false;
         const revisionMode = props?.task_id ? this.taskIsRevisionMode(props.task_id) : false;
         if (this.backend?.configured && this.backendUser) {
+            if (props?.task_id && DECIDED_STATUSES.has(status)) {
+                return this.decidedTaskNoteHtml(props.task_id, status);
+            }
             if (this.taskUsesRapidForm(props) && !readOnly) {
                 return `
                     <div class="pilot-note">
@@ -10474,7 +10606,7 @@ class NzVerificationMap {
                             </div>
                         ` : `
                             <div class="disabled-panel">
-                                Status: ${escapeHtml(presentTask(this.taskPresentationInput(taskId)).label || "Closed")}. Ask JB to reopen this task if new evidence changes the answer.
+                                Status: ${escapeHtml(presentTask(this.taskPresentationInput(taskId)).label || "Closed")}. ${DECIDED_STATUSES.has(backendTask?.status) ? "If new evidence changes the answer, reopen the task with a reason from the note above." : "Ask JB to reopen this task if new evidence changes the answer."}
                             </div>
                         `}
                     ` : `

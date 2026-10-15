@@ -196,7 +196,41 @@
         return { state: TRANSPORT[state] ? state : "error", label: row.label, tone: row.tone, pulse: Boolean(row.pulse) };
     }
 
-    const api = { present, rollup, compare, absorb, transport, human, TONES, TERMINAL };
+    // decided tasks (reviewed, accepted, exported) change only through an
+    // explicit reopen with a reason (jb ruling 2026-10-15); the server holds
+    // the same rule in convex/lib/intakeGate.ts
+    const DECIDED = new Set(["reviewed", "pi_accepted", "exported"]);
+    const REOPEN_REASON_MIN = 8;
+    const DECIDED_LABELS = { reviewed: "Reviewed", pi_accepted: "Accepted", exported: "Exported" };
+
+    function isDecided(status) {
+        return DECIDED.has(status);
+    }
+
+    // the "reopened after decision" flag a task carries from a reopen out of
+    // a decided status until it is next accepted; null when there is none.
+    // plain text: callers escape it
+    function reopenFlag(task) {
+        const flag = task?.reopened_after_decision;
+        if (!flag || typeof flag !== "object") return null;
+        const from = DECIDED_LABELS[flag.from_status] || human(flag.from_status);
+        return {
+            label: "Reopened after decision",
+            fromLabel: from,
+            reason: String(flag.reason ?? ""),
+            reopenedAt: Number(flag.reopened_at) || 0,
+            summary: `Reopened after decision (was ${from.toLowerCase()})`,
+        };
+    }
+
+    // null when the typed reason is long enough to send, else the message to show
+    function reopenReasonProblem(text) {
+        return String(text ?? "").trim().length >= REOPEN_REASON_MIN
+            ? null
+            : `Give a reason of at least ${REOPEN_REASON_MIN} characters.`;
+    }
+
+    const api = { present, rollup, compare, absorb, transport, human, isDecided, reopenFlag, reopenReasonProblem, TONES, TERMINAL, DECIDED, REOPEN_REASON_MIN };
     if (typeof window !== "undefined") window.PowTaskPresentation = api;
     if (typeof module !== "undefined" && module.exports) module.exports = api;
 })();

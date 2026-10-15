@@ -67,7 +67,10 @@ const stamps = {
     "region-map.js": "20261015b", // street view through the embed iframe
     "datamaps-switcher.js": "20261013a", // switcher rows prerender; warming waits for activation
     "unvalidated-places.js": "20261013b", // versioned grid places url; us, de and it use the grid tier from zoom 6
-    "verification-map.js": "20261015a", // marker tooltip text escaped, links scheme-checked
+    "verification-map.js": "20261015c", // decided tasks reopen with a reason; reopened-after-decision marker
+    "task-presentation.js": "20261015c", // decided-status and reopen-flag helpers
+    "convex-task-client.js": "20261015c", // reopenTask comment
+    "review-portal.js": "20261015c", // reopened-after-decision marker
     "review-map.js": "20261013a", // tap on a grid-thinned fallback dot zooms in
 };
 const scripts = Object.keys(stamps);
