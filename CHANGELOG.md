@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-10-19 (edge-case register)
+
+- Add [`docs/edge-cases.md`](docs/edge-cases.md), a register of real places that test the operational definition, the data model or the path from evidence to the public map, with an entry template and the rule that entries carry public facts only. The first entry, EC-001, records Wayside Baptist Church in Kendall, Florida: an OpenStreetMap node about 87 m from the church building with no denomination, which tests correction against new place, change in the world against change in our knowledge, and how a reviewed correction reaches the public map. `AGENTS.md` points agents to the register.
+
 ### 2026-10-15 (revert a reopen, global reopen cap)
 
 - Revert route (JB, 2026-10-15). New mutation `tasks:revertReopen({ taskId, reason })` for `reviewer`, `curator`, `admin` and `pi` (RAs are refused). It undoes a reopen made from a decided status: the task returns to the status it held (`reviewed`, `pi_accepted` or `exported`), `reopened_after_decision` clears, and a `reopen_reverted` task event records the actor, the reason and the status change. It is allowed only while the task is `reopened` with the flag and nothing has been written to it since the first reopen: the reopen is the only task event at or after the flag's `reopened_at` (a claim, note, draft save or second reopen each count as a write), and no evidence draft, attachment, historical claim, occupancy, evidence version, head change, review decision or acceptance row has a write time at or after it. The reason needs 8 characters after trimming. Acceptance rows, review decisions and export batch fields are not touched, so a restored `pi_accepted` task is export-eligible again exactly as before the reopen.
