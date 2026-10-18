@@ -128,9 +128,7 @@
             endReason: text(v.endReason),
             endAroundYear: "",
             stillActiveAsof: text(v.stillActiveAsof),
-            // the card shows the successor field only for a move to a different
-            // property, so a value left behind under another reason is dropped
-            successorSiteId: text(v.endReason) === "relocated" ? text(v.successorSiteId) : "",
+            successorSiteId: text(v.successorSiteId),
             useFrequency: text(v.useFrequency),
             sameAsPin: v.sameAsPin !== false,
             location: v.location && typeof v.location === "object" ? v.location : null,
@@ -173,6 +171,13 @@
             out.endBasis = "unknown";
         }
         if (out.endMode === "still_active") out.endReason = "";
+        // the card shows the reason only for a dated end. a hidden move reason
+        // would impose set rules the contributor cannot see, and the successor
+        // field shows only for a dated move to a different property, so a value
+        // left behind under another mode or reason is dropped
+        const endDated = out.endMode === "known" || out.endMode === "between" || out.endMode === "after";
+        if (!endDated && (out.endReason === "relocated" || out.endReason === "moved_within_site")) out.endReason = "";
+        if (!endDated || out.endReason !== "relocated") out.successorSiteId = "";
         return out;
     }
 

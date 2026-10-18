@@ -212,6 +212,9 @@ export function assertOccupancySegment(
       if (s.end_reason !== undefined) {
         throw new Error("A still-active period has no end reason.");
       }
+      if (!blank(s.successor_site_id)) {
+        throw new Error("A still-active period has no successor identifier.");
+      }
       break;
     case "known":
       assertPartialDate("The end date", s.end_date, referenceDate, floorYear);

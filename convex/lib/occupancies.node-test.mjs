@@ -259,6 +259,8 @@ test("a distinct location needs a valid assertion; only a move off the site name
   assert.doesNotThrow(() => assertOccupancySegment(input({ ...ended, end_reason: "relocated" }), REF));
   assert.throws(() => assertOccupancySegment(input({ ...ended, end_reason: "moved_within_site", successor_site_id: "nz-osm-way-1234" }), REF), /stays the same place of worship/);
   assert.throws(() => assertOccupancySegment(input({ ...ended, end_reason: "relocated", successor_site_id: "x".repeat(201) }), REF), /200 characters or fewer/);
+  // a place still in use has not moved off its site
+  assert.throws(() => assertOccupancySegment(input({ successor_site_id: "nz-osm-way-1234" }), REF), /still-active period has no successor/);
 });
 
 test("a set must be numbered, non-overlapping, and a move within the site must move", () => {

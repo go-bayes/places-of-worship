@@ -81,6 +81,12 @@ check("still-active carries no reason in the payload", occupancy.payload({ ...va
 check("a move to a different property may name its successor", v({ ...closed, endReason: "relocated", successorSiteId: "nz-0001" }) === "");
 check("the successor reaches the payload", occupancy.payload({ ...closed, endReason: "relocated", successorSiteId: " nz-0001 " }).successor_site_id === "nz-0001");
 check("a successor left under another reason is dropped", !("successor_site_id" in occupancy.payload({ ...closed, endReason: "moved_within_site", successorSiteId: "nz-0001" })) && v({ ...closed, endReason: "moved_within_site", successorSiteId: "nz-0001" }) === "");
+check("a successor is dropped when the end becomes still in use", !("successor_site_id" in occupancy.payload({ ...valid, endReason: "relocated", successorSiteId: "nz-0001" })));
+check("a hidden move reason and successor are dropped when the end becomes unknown", (() => {
+  const p = occupancy.payload({ ...closed, endMode: "unknown", endDate: "", endBasis: "", endReason: "relocated", successorSiteId: "nz-0001" });
+  return !("successor_site_id" in p) && !("end_reason" in p);
+})());
+check("a hidden within-site move does not demand a next period once the end is unknown", occupancy.validateSet([{ ...closed, endMode: "unknown", endDate: "", endBasis: "", endReason: "moved_within_site" }], REFERENCE, TASK_POINT) === "");
 check("an over-long successor fails", /200 characters or fewer/.test(v({ ...closed, endReason: "relocated", successorSiteId: "x".repeat(201) })));
 check("the summary names the new place", /moved to a different property, new place nz-0001/.test(occupancy.describeBounds({ ...closed, endReason: "relocated", successorSiteId: "nz-0001" })));
 
