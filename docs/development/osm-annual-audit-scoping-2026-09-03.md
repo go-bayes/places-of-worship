@@ -24,6 +24,8 @@ Two gaps in the document itself: it refers to `docs/manifests/`, which does not 
 
 ## 3. The census-of-change design
 
+> **Amended 2026-10-19.** Section 7 of the vocabulary reconciliation now defines the census of change as a comparison of two 1 September anchors under the same knowledge, reported apart from a revision ledger; the draft-id and hash set difference is the ledger's audit trail. Raw-source record classes remain leads for review. The text below is kept as written.
+
 JB's ruling of 22 August (`docs/development/c2-vocabulary-reconciliation-2026-08-14.md` section 7) sets four constraints for the master rebuild: the diff unit is the accepted draft; the claim hash is computed server-side over a versioned canonical projection and any change to that projection re-baselines the edition; corrections are append-only through clone and supersede; each rebuild is stamped with an `export_batch_id` and diffed as a set difference on draft-id and hash pairs.
 
 The OSM audit is the raw-source counterpart. The working protocol in the research repo (`research/sparrc/osm-repeat-2025-2026/README.md`) already fixes the 1 September anchor and states the blocker: the public global extractor does not supply a scientifically exact historical state, because its date argument labels an output directory while the script obtains current Overpass records at execution time. The same protocol requires that machine differences be labelled only as record classes (stable, tag change, geometry change, churn, apparent add, apparent remove, duplicate split or merge, unresolved); they become openings and closures only after review. It separates a 50-case rule-development sample from a later probability sample for prevalence estimation.
