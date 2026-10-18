@@ -77,7 +77,12 @@ check("dated end needs a dated basis", /how the end is known/.test(v({ ...closed
 check("still-active end forces basis unknown in the payload", occupancy.payload({ ...valid, endBasis: "closure_stated" }).end_basis === "unknown");
 check("dated end needs a reason", /why the period ended/.test(v({ ...closed, endReason: "" })));
 check("still-active carries no reason in the payload", occupancy.payload({ ...valid, endReason: "closed" }).end_reason === undefined);
-check("relocation cannot name a successor", /successor identifier/.test(v({ ...closed, endReason: "relocated", successorSiteId: "nz-0001" })));
+// definition 0.1.6: a move to a different property names the new place; a move within the site does not
+check("a move to a different property may name its successor", v({ ...closed, endReason: "relocated", successorSiteId: "nz-0001" }) === "");
+check("the successor reaches the payload", occupancy.payload({ ...closed, endReason: "relocated", successorSiteId: " nz-0001 " }).successor_site_id === "nz-0001");
+check("a successor left under another reason is dropped", !("successor_site_id" in occupancy.payload({ ...closed, endReason: "moved_within_site", successorSiteId: "nz-0001" })) && v({ ...closed, endReason: "moved_within_site", successorSiteId: "nz-0001" }) === "");
+check("an over-long successor fails", /200 characters or fewer/.test(v({ ...closed, endReason: "relocated", successorSiteId: "x".repeat(201) })));
+check("the summary names the new place", /moved to a different property, new place nz-0001/.test(occupancy.describeBounds({ ...closed, endReason: "relocated", successorSiteId: "nz-0001" })));
 
 // still active as-of ≤ reference; every date ≤ reference
 check("still-active as-of after the reference fails", /cannot be later than/.test(v({ ...valid, stillActiveAsof: "2010-06-02" })));
@@ -131,16 +136,20 @@ check("payload has exactly the expected keys", JSON.stringify(Object.keys(payloa
 check("payload drops stale fields the mode does not use", !("start_not_later_than" in occupancy.payload({ ...valid, startNotLaterThan: "1990" })));
 
 // set rules
-const first = { ...closed, endReason: "relocated" };
+const first = { ...closed, endReason: "moved_within_site" };
+const offSite = { ...closed, endReason: "relocated", successorSiteId: "nz-0001" };
 const second = { ...valid, startDate: "1981", sameAsPin: false, location: DISTINCT };
 check("one valid period passes", occupancy.validateSet([valid], REFERENCE, TASK_POINT) === "");
 check("empty set fails", /at least one/.test(occupancy.validateSet([], REFERENCE, TASK_POINT)));
 check("set errors name the period", /^Period 2: /.test(occupancy.validateSet([closed, { ...valid, startDate: "" }], REFERENCE, TASK_POINT)));
 check("still active must be last", /must be the last/.test(occupancy.validateSet([valid, closed], REFERENCE, TASK_POINT)));
 check("overlapping cores fail", /overlap/.test(occupancy.validateSet([closed, { ...valid, startDate: "1975" }], REFERENCE, TASK_POINT)));
-check("relocation followed by a distinct place passes", occupancy.validateSet([first, second], REFERENCE, TASK_POINT) === "");
-check("relocation followed by the same pin fails", /different place/.test(occupancy.validateSet([first, { ...valid, startDate: "1981" }], REFERENCE, TASK_POINT)));
-check("relocation as the last period fails", /following period/.test(occupancy.validateSet([first], REFERENCE, TASK_POINT)));
+check("a move within the site followed by its new position passes", occupancy.validateSet([first, second], REFERENCE, TASK_POINT) === "");
+check("a move within the site followed by the same pin fails", /new position/.test(occupancy.validateSet([first, { ...valid, startDate: "1981" }], REFERENCE, TASK_POINT)));
+check("a move within the site as the last period fails", /following period at its new position/.test(occupancy.validateSet([first], REFERENCE, TASK_POINT)));
+check("a move to a different property may end the record", occupancy.validateSet([offSite], REFERENCE, TASK_POINT) === "");
+check("a move to a different property cannot continue at the new place", /starts a new place of worship/.test(occupancy.validateSet([offSite, second], REFERENCE, TASK_POINT)));
+check("worship resumed at the old site follows a move off it", occupancy.validateSet([offSite, { ...valid, startDate: "2001", startBasis: "reopening_stated" }], REFERENCE, TASK_POINT) === "");
 check("more than 20 periods fail", /at most 20/.test(occupancy.validateSet(new Array(21).fill(closed), REFERENCE, TASK_POINT)));
 
 

@@ -23,7 +23,7 @@ function ok(name) {
 
 const near = (a, b, tol = 1e-6) => Math.abs(a - b) <= tol;
 
-// a two-period history: a dated first period that relocated, then a
+// a two-period history: a dated first period whose building moved within its site, then a
 // bounded-start second period still active
 const first = {
     occupancy_id: "t:u:occupancy:s:0",
@@ -38,7 +38,7 @@ const first = {
     end_mode: "known",
     end_date: "1920",
     end_basis: "closure_stated",
-    end_reason: "relocated",
+    end_reason: "moved_within_site",
     location_relation: "same_as_task_point",
     latitude: -41.29,
     longitude: 174.78,
@@ -135,7 +135,8 @@ ok("review-state and status pills map as ruled");
 // plain words
 assert.equal(occ.describeStart(first), "began 1885-03 (building dedication)");
 assert.equal(occ.describeStart(second), "began between 1920 and 1925 (first seen only)");
-assert.equal(occ.describeEnd(first), "ended 1920 (closure stated; relocated)");
+assert.equal(occ.describeEnd(first), "ended 1920 (closure stated; moved within its site)");
+assert.equal(occ.describeEnd({ ...first, end_reason: "relocated", successor_site_id: "nz-osm-way-1234" }), "ended 1920 (closure stated; moved to a different property, new place nz-osm-way-1234)");
 assert.equal(occ.describeEnd(second), "still active as of 2024-06-01");
 assert.equal(occ.describeEnd(undated), "end unknown");
 const taskPoint = { latitude: -41.29, longitude: 174.78 };

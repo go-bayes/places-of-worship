@@ -336,9 +336,11 @@ export const occupancyEndBasis = v.union(
 );
 // pr-f (ruling r-f2): a desacralisation is a datable ecclesiastical act,
 // distinct from a change of use
+// definition 0.1.6: relocated is a move to a distinct property (a new place,
+// linked by successor_site_id); moved_within_site keeps the same place
 export const occupancyEndReason = v.union(
   v.literal("closed"), v.literal("relocated"), v.literal("demolished"), v.literal("use_changed"),
-  v.literal("desacralised"), v.literal("unknown"),
+  v.literal("desacralised"), v.literal("unknown"), v.literal("moved_within_site"),
 );
 // pr-f: how often the place was used for worship during a period; the
 // census derivation counts regular, monthly, and several_times_a_year as

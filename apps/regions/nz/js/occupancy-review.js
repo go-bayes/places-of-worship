@@ -75,7 +75,8 @@
 
     const END_REASON_TEXT = {
         closed: "closed",
-        relocated: "relocated",
+        relocated: "moved to a different property",
+        moved_within_site: "moved within its site",
         demolished: "demolished",
         use_changed: "use changed",
         desacralised: "desacralised",
@@ -318,7 +319,8 @@
 
     function describeEnd(segment) {
         const basis = END_BASIS_TEXT[segment.end_basis] || segment.end_basis || "";
-        const reason = segment.end_reason ? `; ${END_REASON_TEXT[segment.end_reason] || segment.end_reason}` : "";
+        const successor = segment.successor_site_id ? `, new place ${segment.successor_site_id}` : "";
+        const reason = segment.end_reason ? `; ${END_REASON_TEXT[segment.end_reason] || segment.end_reason}${successor}` : "";
         switch (segment.end_mode) {
             case "still_active":
                 return `still active as of ${segment.still_active_asof}`;

@@ -29,7 +29,12 @@ export type StartMode = "known" | "between" | "by" | "unknown";
 export type EndMode = "still_active" | "known" | "between" | "after" | "unknown";
 export type StartBasis = "founding_stated" | "reopening_stated" | "organisation_founded" | "building_dedication" | "first_seen_only" | "unknown";
 export type EndBasis = "closure_stated" | "last_seen_only" | "unknown";
-export type EndReason = "closed" | "relocated" | "demolished" | "use_changed" | "desacralised" | "unknown";
+// definition 0.1.6 (2026-09-22): "relocated" is a move to a distinct
+// property, which ends this place at its site and starts a new place with
+// its own identifier, linked here by successor_site_id; "moved_within_site"
+// is a building shifted within its own site or parcel, which stays the same
+// place and continues in the next period at the new position
+export type EndReason = "closed" | "relocated" | "moved_within_site" | "demolished" | "use_changed" | "desacralised" | "unknown";
 export type UseFrequency = "regular" | "monthly" | "several_times_a_year" | "annual" | "occasional" | "uncertain";
 // ruling r-f1: these frequencies count as in use for the census derivation;
 // annual, occasional, and uncertain derive uncertain (rule 11)
@@ -105,6 +110,7 @@ export type OccupancySegment = {
 };
 
 const MAX_TEXT = 2_000;
+const MAX_SUCCESSOR_ID = 200;
 const MIN_UNCERTAINTY_NOTE = 12;
 
 function blank(value: string | undefined): boolean {
@@ -244,13 +250,16 @@ export function assertOccupancySegment(
     throw new Error("A dated end needs its basis: closure stated or last seen only.");
   }
   if (!endUndated && s.end_mode !== "unknown" && s.end_reason === undefined) {
-    throw new Error("A dated end needs its reason: closed, relocated, demolished, use changed, desacralised, or unknown.");
+    throw new Error("A dated end needs its reason: closed, moved to a different property, moved within its site, demolished, use changed, desacralised, or unknown.");
   }
   if (s.use_frequency !== undefined && !USE_FREQUENCIES.includes(s.use_frequency)) {
     throw new Error("Choose how often the place was used: regular, monthly, several times a year, annual, occasional, or uncertain.");
   }
-  if (s.successor_site_id !== undefined && s.end_reason === "relocated") {
-    throw new Error("A relocation keeps the same place of worship; a successor identifier is only for a split.");
+  if (s.successor_site_id !== undefined && s.successor_site_id.length > MAX_SUCCESSOR_ID) {
+    throw new Error(`The successor identifier must be ${MAX_SUCCESSOR_ID} characters or fewer.`);
+  }
+  if (!blank(s.successor_site_id) && s.end_reason === "moved_within_site") {
+    throw new Error("A building moved within its site stays the same place of worship; a successor identifier is only for a move to a different property.");
   }
   // ordering within the segment
   const b = segmentBounds(s);
@@ -298,7 +307,8 @@ export function assertOccupancySegment(
   }
 }
 
-// validates a whole submission: indices, one-place-at-a-time, relocation links
+// validates a whole submission: indices, one-place-at-a-time, and the two
+// kinds of move under definition 0.1.6
 export function assertOccupancySet(
   segments: OccupancySegmentInput[],
   referenceDate: string,
@@ -327,17 +337,22 @@ export function assertOccupancySet(
     if (here.endLower !== undefined && next.startUpper !== undefined && here.endLower > next.startUpper) {
       throw new Error("Periods overlap: a place of worship occupies one place at a time.");
     }
-    if (ordered[i].end_reason === "relocated") {
-      const a = resolveLocation(ordered[i], taskPoint);
-      const b = resolveLocation(ordered[i + 1], taskPoint);
-      if (Math.abs(a.latitude - b.latitude) < 1e-7 && Math.abs(a.longitude - b.longitude) < 1e-7) {
-        throw new Error("A relocated period must be followed by a period at a different place.");
-      }
+    const a = resolveLocation(ordered[i], taskPoint);
+    const b = resolveLocation(ordered[i + 1], taskPoint);
+    const samePoint = Math.abs(a.latitude - b.latitude) < 1e-7 && Math.abs(a.longitude - b.longitude) < 1e-7;
+    if (ordered[i].end_reason === "moved_within_site" && samePoint) {
+      throw new Error("A building moved within its site must be followed by a period at its new position.");
+    }
+    // the place at the new property is a new place of worship, recorded on
+    // its own and linked by the successor identifier; a later period here
+    // can only be renewed worship at this site
+    if (ordered[i].end_reason === "relocated" && !samePoint) {
+      throw new Error("A move to a different property starts a new place of worship. Record the new site as its own place and give its identifier as the successor; a later period in this record stays at this site. Choose \"moved within its site\" for a move on the same parcel.");
     }
   }
   const last = ordered[ordered.length - 1];
-  if (last.end_reason === "relocated") {
-    throw new Error("A relocated period needs the following period at the new place.");
+  if (last.end_reason === "moved_within_site") {
+    throw new Error("A building moved within its site needs the following period at its new position.");
   }
 }
 

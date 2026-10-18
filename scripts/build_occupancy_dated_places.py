@@ -353,7 +353,14 @@ def transition_years(first: dict[str, int | bool | None], second: dict[str, int 
     return (min(candidates), max(candidates))
 
 
-# A dashed-line feature joining a relocation's two members while the transition is in progress.
+# Periods whose end is a move to the next period's position: a building moved within its site
+# (definition 0.1.6), and rows recorded before 0.1.6, when a relocation continued the same place
+# at the next period. A 0.1.6 relocation to a distinct property is never followed by a period
+# elsewhere, so it draws no line.
+MOVE_END_REASONS = ("moved_within_site", "relocated")
+
+
+# A dashed-line feature joining a move's two members while the transition is in progress.
 def transition_feature(
     first: dict[str, Any],
     second: dict[str, Any],
@@ -367,6 +374,8 @@ def transition_feature(
     start = ruled_point(first, ruling)
     end = ruled_point(second, ruling)
     if start is None or end is None:
+        return None
+    if round(start[0], 6) == round(end[0], 6) and round(start[1], 6) == round(end[1], 6):
         return None
     return {
         "type": "Feature",
@@ -500,7 +509,7 @@ def features_from_export(
             elif ruling_applies(row, ruling) and ruling["accepted"] is None:
                 count_dropped(dropped, "uncertain", country)
         for first, second in zip(rows, rows[1:]):
-            if first.get("end_reason") != "relocated":
+            if first.get("end_reason") not in MOVE_END_REASONS:
                 continue
             line = transition_feature(first, second, task, first.get("_export_batch_id", export["export_batch_id"]), ruling)
             if line:
