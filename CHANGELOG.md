@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-10-19 (the annual record becomes an edition of a continuous log)
+
+- Amend section 7 of `docs/development/c2-vocabulary-reconciliation-2026-08-14.md` under JB's ruling of 2026-10-19. Accepted claims enter the master log at each batch release, and the master is rebuilt by replay, not once a year. Each year the project pins an edition at a knowledge cut-off holding states at every 1 September anchor. Each edition reports a census of change (two anchors, same knowledge), a revision ledger (one anchor, two states of knowledge) and an onset-unknown class, with review coverage by area. The (draft id, hash) set difference between editions becomes the revision ledger's audit trail. The original 2026-08-22 text is kept below the amendment.
+
 ### 2026-10-15 (revert a reopen, global reopen cap)
 
 - Revert route (JB, 2026-10-15). New mutation `tasks:revertReopen({ taskId, reason })` for `reviewer`, `curator`, `admin` and `pi` (RAs are refused). It undoes a reopen made from a decided status: the task returns to the status it held (`reviewed`, `pi_accepted` or `exported`), `reopened_after_decision` clears, and a `reopen_reverted` task event records the actor, the reason and the status change. It is allowed only while the task is `reopened` with the flag and nothing has been written to it since the first reopen: the reopen is the only task event at or after the flag's `reopened_at` (a claim, note, draft save or second reopen each count as a write), and no evidence draft, attachment, historical claim, occupancy, evidence version, head change, review decision or acceptance row has a write time at or after it. The reason needs 8 characters after trimming. Acceptance rows, review decisions and export batch fields are not touched, so a restored `pi_accepted` task is export-eligible again exactly as before the reopen.
