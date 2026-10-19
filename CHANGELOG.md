@@ -4,7 +4,7 @@
 
 ### 2026-10-19 (operating terms for the annual edition)
 
-- Record in the section 7 amendment of `docs/development/c2-vocabulary-reconciliation-2026-08-14.md` JB's later rulings of 2026-10-19: editions close on 1 December; a public release follows each PI batch release; the event contract gains a correction scope and an accession intent (contract change pending); editions carry OpenStreetMap records as a labelled provisional tier; outputs are an annual register until coverage is evaluated.
+- Record in the section 7 amendment of `docs/development/c2-vocabulary-reconciliation-2026-08-14.md` JB's later rulings of 2026-10-19: editions close on 1 December; a public release follows each PI batch release and is automatically published, with a receipt and a withdrawal path, after ODbL advice; the event contract is to gain a correction scope and a non-lifecycle accession intent (contract change pending); editions include OpenStreetMap records as a labelled provisional tier; outputs are an annual register until coverage is evaluated.
 
 ### 2026-10-19 (identity bases of definition 0.1.6 in review decisions)
 
