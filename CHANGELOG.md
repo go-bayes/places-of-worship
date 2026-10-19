@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-10-19 (operating terms for the annual edition)
+
+- Record in the section 7 amendment of `docs/development/c2-vocabulary-reconciliation-2026-08-14.md` JB's later rulings of 2026-10-19: editions close on 1 December; a public release follows each PI batch release; the event contract gains a correction scope and an accession intent (contract change pending); editions carry OpenStreetMap records as a labelled provisional tier; outputs are an annual register until coverage is evaluated.
+
 ### 2026-10-19 (identity bases of definition 0.1.6 in review decisions)
 
 - The review decision's `identity_decision` follows [operational definition](docs/operational-definition.md#identity-over-time) 0.1.6. The validator (`convex/model.ts`) gains `conversion` (worship continuing at the site under a new community, same place), `successor_at_new_site` (a community moved to a different property: a new place linked to its predecessor) and `end_and_new_foundation` (worship recurring at a site after an earlier place there ended: a new place linked by location). `relocation`, under which one identifier followed a community to a new site before version 0.1.6, stays in the validator so that it does not narrow; the review form no longer offers it. An exported review decision carries the value as recorded, and a row with `relocation` is read under the definition in force when it was recorded.
