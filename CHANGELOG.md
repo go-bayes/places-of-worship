@@ -5,6 +5,7 @@
 ### 2026-10-19 (the annual record becomes an edition of a continuous log)
 
 - Amend section 7 of `docs/development/c2-vocabulary-reconciliation-2026-08-14.md` under JB's ruling of 2026-10-19. Accepted claims enter the master log at each batch release, and the master is rebuilt by replay, not once a year. Each year the project pins an edition at a knowledge cut-off holding states at every 1 September anchor. Each edition reports a census of change (two anchors, same knowledge), a revision ledger (one anchor, two states of knowledge) and an onset-unknown class, with review coverage by area. The (draft id, hash) set difference between editions becomes the revision ledger's audit trail. The original 2026-08-22 text is kept below the amendment.
+
 ### 2026-10-19 (edge-case register)
 
 - Add [`docs/edge-cases.md`](docs/edge-cases.md), a register of real places that test the operational definition, the data model or the path from evidence to the public map, with an entry template and the rule that entries carry public facts only. The first entry, EC-001, records Wayside Baptist Church in Kendall, Florida: an OpenStreetMap node about 87 m from the church building with no denomination, which tests correction against new place, change in the world against change in our knowledge, and how a reviewed correction reaches the public map. `AGENTS.md` points agents to the register.
