@@ -329,7 +329,7 @@ export async function applyReviewDecision(ctx: MutationCtx, args: { taskId: stri
     // where the task has no original point to rule between
     assertLocationOutcome(task, args.decision);
     // relocation is refused and a linked basis names its other place
-    const linkedSiteIds = assertIdentityLinks(args.taskId, args.decision);
+    const linkedSiteIds = assertIdentityLinks(task, args.decision);
     assertMaxString("review decision note", args.decision.decision_note, TASK_REASON_MAX);
     assertMaxString("accepted action", args.decision.accepted_action, MEDIUM_TEXT_MAX);
     assertMaxString("required follow-up", args.decision.required_follow_up, LONG_TEXT_MAX);

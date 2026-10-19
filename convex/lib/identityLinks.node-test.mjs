@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { assertIdentityLinks, LINK_REQUIRED_BASES, LINK_OPTIONAL_BASES } from "./identityLinks.ts";
 
-const check = (identity_decision, linked_site_ids) => assertIdentityLinks("task_1", { identity_decision, linked_site_ids });
+const task = { task_id: "task_1", matched_current_site_id: "nz-site-1", candidate_site_id: "candidate:nz:b:1" };
+const check = (identity_decision, linked_site_ids) => assertIdentityLinks(task, { identity_decision, linked_site_ids });
 
 test("relocation is refused on a new decision, with or without links", () => {
   assert.throws(() => check("relocation"), /no longer an identity basis/);
@@ -38,7 +39,10 @@ test("link identifiers are bounded, distinct, printable and not the task itself"
   assert.deepEqual(check("split", ["x".repeat(200)]), ["x".repeat(200)]);
   assert.throws(() => check("split", ["nz-a", " nz-a"]), /named once/);
   assert.throws(() => check("split", ["nz\u0007a"]), /control characters/);
-  assert.throws(() => check("split", ["task_1"]), /its own task/);
+  for (const own of ["task_1", " nz-site-1 ", "candidate:nz:b:1"]) {
+    assert.throws(() => check("successor_at_new_site", [own]), /another place/);
+  }
+  assert.deepEqual(assertIdentityLinks({ task_id: "task_2" }, { identity_decision: "split", linked_site_ids: ["nz-site-1"] }), ["nz-site-1"]);
   assert.throws(() => check("merge", Array.from({ length: 11 }, (_, i) => `nz-${i}`)), /at most 10/);
   assert.equal(check("merge", Array.from({ length: 10 }, (_, i) => `nz-${i}`)).length, 10);
 });

@@ -135,6 +135,24 @@ for (const basis of ["same_site", "conversion", "new_candidate", undefined]) {
 assert.match(portal.linkedSiteIdsProblem("split", ["nz-a", "nz-a"]), /once/);
 assert.match(portal.linkedSiteIdsProblem("split", ["x".repeat(201)]), /200 characters/);
 assert.match(portal.linkedSiteIdsProblem("merge", Array.from({ length: 11 }, (_, i) => `nz-${i}`)), /at most 10/);
+assert.match(portal.linkedSiteIdsProblem("split", ["nz\u0007a"]), /control characters/);
+const ownTask = { task_id: "t1", matched_current_site_id: "nz-site-1", candidate_site_id: "candidate:nz:b:1" };
+for (const own of ["t1", "nz-site-1", "candidate:nz:b:1"]) {
+    assert.match(portal.linkedSiteIdsProblem("successor_at_new_site", [own], ownTask), /another place/);
+}
+assert.equal(portal.linkedSiteIdsProblem("successor_at_new_site", ["nz-site-2"], ownTask), "");
+
+// the last decision shows its identity basis and escaped links
+portal.state.attachments = [];
+portal.state.selected = {
+    task: { task_id: "t-linked", name: "Linked", status: "reviewed", task_type: "verify", priority: "high" },
+    latestReview: { decision_status: "accepted_for_export", identity_decision: "successor_at_new_site", linked_site_ids: ["nz-a", "<b>x</b>"], decision_note: "Moved to a new property." },
+};
+portal.renderDetail();
+const linkedDetail = elements.get("detailPanel").innerHTML;
+assert.match(linkedDetail, /<br>Identity: successor at a new site/);
+assert.match(linkedDetail, /<br>Linked place: nz-a, &lt;b&gt;x&lt;\/b&gt;/);
+assert.equal(portal.identityLabel("relocation"), "relocation (before definition 0.1.6)");
 
 // a task that cannot be decided offers no chooser menu and disables the two buttons
 const closed = portal.decisionForm(row("t9", "exported").task, null);

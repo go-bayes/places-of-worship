@@ -24,12 +24,28 @@ export const LINK_OPTIONAL_BASES: readonly string[] = Object.freeze([
   "uncertain",
 ]);
 
+type TaskIdentifiers = {
+  task_id: string;
+  matched_current_site_id?: string;
+  candidate_site_id?: string;
+};
+
+// the identifiers that name the place this task is about: a link to any of
+// them names the place itself, not another
+export function ownIdentifiers(task: TaskIdentifiers): string[] {
+  return [task.task_id, task.matched_current_site_id, task.candidate_site_id]
+    .filter((id): id is string => typeof id === "string")
+    .map((id) => id.trim())
+    .filter((id) => id.length > 0);
+}
+
 // validates the decision's identity basis and links, and returns the links
 // to store: trimmed, or undefined when none were given
 export function assertIdentityLinks(
-  taskId: string,
+  task: TaskIdentifiers,
   decision: { identity_decision?: string; linked_site_ids?: string[] },
 ): string[] | undefined {
+  const own = ownIdentifiers(task);
   const basis = decision.identity_decision;
   if (basis === "relocation") {
     throw new Error("Relocation is no longer an identity basis (definition 0.1.6). Choose successor at a new site for a move to a different property, or same place for a building moved within its site.");
@@ -45,7 +61,7 @@ export function assertIdentityLinks(
       throw new Error(`A linked place identifier must be ${MAX_LINKED_SITE_ID} characters or fewer.`);
     }
     if (/[\u0000-\u001f\u007f]/.test(id)) throw new Error("A linked place identifier cannot contain control characters.");
-    if (id === taskId) throw new Error("A decision cannot link the place to its own task.");
+    if (own.includes(id)) throw new Error("A linked place must be another place, not this task's own record.");
   }
   if (new Set(links).size !== links.length) throw new Error("Each linked place is named once.");
   if (basis !== undefined && LINK_REQUIRED_BASES.includes(basis)) {
