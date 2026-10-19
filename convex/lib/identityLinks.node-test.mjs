@@ -1,0 +1,44 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { assertIdentityLinks, LINK_REQUIRED_BASES, LINK_OPTIONAL_BASES } from "./identityLinks.ts";
+
+const check = (identity_decision, linked_site_ids) => assertIdentityLinks("task_1", { identity_decision, linked_site_ids });
+
+test("relocation is refused on a new decision, with or without links", () => {
+  assert.throws(() => check("relocation"), /no longer an identity basis/);
+  assert.throws(() => check("relocation", ["nz-a"]), /no longer an identity basis/);
+});
+
+test("a basis that relates two places requires a link and returns it trimmed", () => {
+  for (const basis of LINK_REQUIRED_BASES) {
+    assert.throws(() => check(basis), /give the linked place's identifier/);
+    assert.throws(() => check(basis, []), /give the linked place's identifier/);
+    assert.deepEqual(check(basis, [" nz-a ", "nz-b"]), ["nz-a", "nz-b"]);
+  }
+});
+
+test("a duplicate or an uncertain decision may carry links or none", () => {
+  for (const basis of LINK_OPTIONAL_BASES) {
+    assert.equal(check(basis), undefined);
+    assert.deepEqual(check(basis, ["nz-a"]), ["nz-a"]);
+  }
+});
+
+test("bases that keep or found a place alone refuse links", () => {
+  for (const basis of ["same_site", "conversion", "new_candidate", undefined]) {
+    assert.equal(check(basis), undefined);
+    assert.equal(check(basis, []), undefined);
+    assert.throws(() => check(basis, ["nz-a"]), /apply only to/);
+  }
+});
+
+test("link identifiers are bounded, distinct, printable and not the task itself", () => {
+  assert.throws(() => check("split", ["  "]), /blank/);
+  assert.throws(() => check("split", ["x".repeat(201)]), /200 characters/);
+  assert.deepEqual(check("split", ["x".repeat(200)]), ["x".repeat(200)]);
+  assert.throws(() => check("split", ["nz-a", " nz-a"]), /named once/);
+  assert.throws(() => check("split", ["nz\u0007a"]), /control characters/);
+  assert.throws(() => check("split", ["task_1"]), /its own task/);
+  assert.throws(() => check("merge", Array.from({ length: 11 }, (_, i) => `nz-${i}`)), /at most 10/);
+  assert.equal(check("merge", Array.from({ length: 10 }, (_, i) => `nz-${i}`)).length, 10);
+});

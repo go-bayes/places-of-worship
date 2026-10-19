@@ -517,9 +517,17 @@ Fields:
   `new_candidate` (a new place with no predecessor), `duplicate`, `split`,
   `merge`, or `uncertain`. The validator still accepts `relocation`, the
   pre-0.1.6 value under which one identifier followed a community to a new
-  site; the review form no longer offers it, and an exported row carrying it
-  is read under the definition in force when it was recorded. The predecessor
-  is named in the decision note until the decision gains a link field.
+  site, so stored rows remain valid; new decisions with it are refused
+  (JB, 2026-10-19), and an exported row carrying it is read under the
+  definition in force when it was recorded.
+- `linked_site_ids`: optional array of the other places an identity basis
+  relates this one to: the predecessor of a successor at a new site, the
+  ended place of an end and new foundation, and the other places of a split or
+  a merge, each of which requires at least one. A duplicate may name the
+  record it repeats and an uncertain decision its alternatives; the other bases
+  refuse links. At most 10 identifiers of at most 200 characters each, trimmed
+  and distinct (`convex/lib/identityLinks.ts`). Stored outside `decision_hash`,
+  like `evidence_version_hash`, until a version 2 envelope names it.
 - `target_year_affects`: array of target-year affect objects.
 - `required_follow_up`: optional.
 - `created_at`, `updated_at`.

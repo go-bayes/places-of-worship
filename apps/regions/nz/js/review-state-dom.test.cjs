@@ -115,6 +115,27 @@ for (const [value, label] of [["same_site", "same place"], ["conversion", "conve
 }
 assert.doesNotMatch(form, /value="relocation"/);
 
+// the linked place field and its client check, mirroring convex/lib/identityLinks.ts
+assert.match(form, /<label for="linkedSiteIds">Linked place<\/label>/);
+assert.match(form, /<input id="linkedSiteIds" name="linkedSiteIds" type="text"/);
+assert.deepEqual([...portal.parseLinkedSiteIds(" nz-a ,\n nz-b,, ")], ["nz-a", "nz-b"]);
+assert.deepEqual([...portal.parseLinkedSiteIds(undefined)], []);
+for (const basis of ["successor_at_new_site", "end_and_new_foundation", "split", "merge"]) {
+    assert.match(portal.linkedSiteIdsProblem(basis, []), /give the linked place's identifier/);
+    assert.equal(portal.linkedSiteIdsProblem(basis, ["nz-a"]), "");
+}
+for (const basis of ["duplicate", "uncertain"]) {
+    assert.equal(portal.linkedSiteIdsProblem(basis, []), "");
+    assert.equal(portal.linkedSiteIdsProblem(basis, ["nz-a"]), "");
+}
+for (const basis of ["same_site", "conversion", "new_candidate", undefined]) {
+    assert.match(portal.linkedSiteIdsProblem(basis, ["nz-a"]), /applies only to/);
+    assert.equal(portal.linkedSiteIdsProblem(basis, []), "");
+}
+assert.match(portal.linkedSiteIdsProblem("split", ["nz-a", "nz-a"]), /once/);
+assert.match(portal.linkedSiteIdsProblem("split", ["x".repeat(201)]), /200 characters/);
+assert.match(portal.linkedSiteIdsProblem("merge", Array.from({ length: 11 }, (_, i) => `nz-${i}`)), /at most 10/);
+
 // a task that cannot be decided offers no chooser menu and disables the two buttons
 const closed = portal.decisionForm(row("t9", "exported").task, null);
 assert.doesNotMatch(closed, /More outcomes/);
