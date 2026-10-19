@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-10-19 (publication pipeline brief)
+
+- Add `docs/development/publication-pipeline-brief-2026-10-19.md`, the design brief for the path from a PI batch release to a public release under D25 and its amendment: version 2 of the change-event contract (`correction_scope`, a `site_registered` event with intent `accession`, a pinned `payload_hash`, provenance members and an `event_retracted` type, with fixtures); agent intake of corrections (a `correction_proposal` in the dossier, a revision-shaped task, human preparation before review, the roles the Kendall run needs); `pow accept` (bundle verification, deterministic translation, `site_id` minting with OSM identifiers as a crosswalk, an append-only segment log); `pow rebuild-master` (state(*S*, *T*) under D3 and D4, canonical JSONL tables, the D15 determinism gate); `pow export release` (the reviewed overlay, the suppression list, recomputed grid-thinned tiers at zooms 0 to 7, a release manifest, a short-cache pointer, receipts, withdrawal, the ODbL gate); the annual edition as a rebuild at 1 December plus the census, ledger and onset-unknown queries with a provisional OSM tier under the name annual register; Kendall as the end-to-end fixture; nine pull requests with estimates; and twenty rulings for JB. Design only: nothing in the repository's code, data or deployments changes.
+
 ### 2026-10-19 (operating terms for the annual edition)
 
 - Record in the section 7 amendment of `docs/development/c2-vocabulary-reconciliation-2026-08-14.md` JB's later rulings of 2026-10-19: editions close on 1 December; a public release follows each PI batch release and is automatically published, with a receipt and a withdrawal path, after ODbL advice; the event contract is to gain a correction scope and a non-lifecycle accession intent (contract change pending); editions include OpenStreetMap records as a labelled provisional tier; outputs are an annual register until coverage is evaluated.
