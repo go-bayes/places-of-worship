@@ -72,7 +72,7 @@ const stamps = {
     "occupancy-review.js": "20261019a", // move wording and successor in the reviewer's period summary
     "task-presentation.js": "20261015c", // decided-status and reopen-flag helpers
     "convex-task-client.js": "20261015d", // revertReopen client method
-    "review-portal.js": "20261019a", // identity bases of definition 0.1.6
+    "review-portal.js": "20261019b", // linked place on identity decisions
     "review-map.js": "20261013a", // tap on a grid-thinned fallback dot zooms in
 };
 const scripts = Object.keys(stamps);
