@@ -44,6 +44,21 @@ test("batch acceptance succeeds with the current snapshot and records an audit h
   assert.match(recorded.snapshot_json, /needs_review/);
 });
 
+test("a decision records a definition 0.1.6 identity basis and hashes it", async () => {
+  const ctx = context();
+  const inspected = await getReviewSnapshot._handler(ctx, { taskId: "task_1", evidenceDraftId: "draft_1" });
+  const successor = item(inspected.snapshot_hash);
+  successor.decision.identity_decision = "successor_at_new_site";
+  await batchRecordReviewDecisions._handler(ctx, { items: [successor] });
+  const stored = ctx.rows.review_decisions[0];
+  assert.equal(stored.identity_decision, "successor_at_new_site");
+  const { canonicalJson, sha256 } = await import("./lib/sha256.ts");
+  const { decision_hash, review_snapshot_hash, decision_hash_version, evidence_version_hash, ...fields } = stored;
+  fields.reviewer_user_id = String(fields.reviewer_user_id);
+  const expected = sha256(canonicalJson({ schema_version: "review-decision.v1", decision: fields, review_snapshot_hash }));
+  assert.equal(decision_hash, expected);
+});
+
 test("batch acceptance refuses intake-only drafts before writing", async () => {
   const ctx = context({ intake: true });
   const inspected = await getReviewSnapshot._handler(ctx, { taskId: "task_1", evidenceDraftId: "draft_1" });

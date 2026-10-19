@@ -508,8 +508,18 @@ Fields:
 - `decision_status`.
 - `decision_note`.
 - `accepted_action`: optional.
-- `identity_decision`: optional, e.g. `same_site`, `new_candidate`,
-  `duplicate`, `split`, `merge`, `relocation`, or `uncertain`.
+- `identity_decision`: optional, the reviewer's identity basis under the
+  [operational definition](operational-definition.md#identity-over-time)
+  (version 0.1.6): `same_site` (same place), `conversion` (same place, worship
+  continuing under a new community), `successor_at_new_site` (a new place at a
+  different property, linked to its predecessor), `end_and_new_foundation` (a
+  new place after an earlier one ended there, linked by location),
+  `new_candidate` (a new place with no predecessor), `duplicate`, `split`,
+  `merge`, or `uncertain`. The validator still accepts `relocation`, the
+  pre-0.1.6 value under which one identifier followed a community to a new
+  site; the review form no longer offers it, and an exported row carrying it
+  is read under the definition in force when it was recorded. The predecessor
+  is named in the decision note until the decision gains a link field.
 - `target_year_affects`: array of target-year affect objects.
 - `required_follow_up`: optional.
 - `created_at`, `updated_at`.

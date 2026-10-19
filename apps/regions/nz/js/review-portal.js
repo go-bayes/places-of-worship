@@ -2074,12 +2074,14 @@ function human(value) {
                     <label for="identityDecision">Identity decision</label>
                     <select id="identityDecision" name="identityDecision" ${canDecide ? "" : "disabled"}>
                         <option value="">not specified</option>
-                        <option value="same_site">same site</option>
-                        <option value="new_candidate">new candidate</option>
+                        <option value="same_site">same place</option>
+                        <option value="conversion">conversion</option>
+                        <option value="successor_at_new_site">successor at a new site</option>
+                        <option value="end_and_new_foundation">end and new foundation</option>
+                        <option value="new_candidate">new place, no predecessor</option>
                         <option value="duplicate">duplicate</option>
                         <option value="split">split</option>
                         <option value="merge">merge</option>
-                        <option value="relocation">relocation</option>
                         <option value="uncertain">uncertain</option>
                     </select>
                 </div>

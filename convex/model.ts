@@ -510,8 +510,17 @@ export const observationContractVersion = v.union(
   v.literal("rapid_current_v1"),
 );
 
+// the reviewer's identity basis (operational definition 0.1.6): conversion
+// keeps the place with a dated change of community; a successor at a new
+// site and an end and new foundation are new places linked to the earlier
+// one. relocation is the pre-0.1.6 value, when one identifier followed a
+// community to a new site; the review form no longer offers it and it stays
+// accepted only so the validator does not narrow
 export const identityDecision = v.union(
   v.literal("same_site"),
+  v.literal("conversion"),
+  v.literal("successor_at_new_site"),
+  v.literal("end_and_new_foundation"),
   v.literal("new_candidate"),
   v.literal("duplicate"),
   v.literal("split"),

@@ -116,9 +116,12 @@ Choosing a pending candidate attaches the evidence to that candidate. Choosing
 match exists.
 
 Reviewers see the match list, the RA's choice, confidence, and any automated
-identity warnings. Review decisions use the existing identity vocabulary:
-`same_site`, `new_candidate`, `duplicate`, `split`, `merge`, `relocation`, and
-`uncertain`.
+identity warnings. Review decisions use the identity vocabulary of the
+[operational definition](operational-definition.md#identity-over-time), version
+0.1.6: `same_site`, `conversion`, `successor_at_new_site`,
+`end_and_new_foundation`, `new_candidate`, `duplicate`, `split`, `merge`, and
+`uncertain` (see `review_decisions` in the
+[task-layer spec](convex-task-layer-spec.md)).
 
 ## Provisional Identity
 
@@ -136,9 +139,10 @@ The recommended candidate id form is
 browser. Convex mode should preserve incoming ids for idempotency, then return
 the canonical task id and candidate id.
 
-Moving congregations normally create a new site linked by relocation evidence.
-Reviewers decide whether a submitted claim is a new site, a duplicate, a split,
-a merge, or a relocation.
+A congregation that moves to a different property creates a new place linked
+to its predecessor. Reviewers decide whether a submitted claim is the same
+place, a conversion, a successor at a new site, an end and new foundation, a
+new place, a duplicate, a split, or a merge.
 
 ## State Model
 

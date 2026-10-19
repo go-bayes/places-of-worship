@@ -109,6 +109,12 @@ assert.match(form, /<select id="decisionStatus" name="decisionStatus" required h
 assert.match(form, /id="recordDecisionButton"[^>]*>Record decision</);
 assert.doesNotMatch(form, /<option value="accepted_for_export">[^<]*<\/option>\s*<\/select>\s*<\/div>\s*<div>\s*<label for="identityDecision"/);
 
+// identity bases of definition 0.1.6; relocation is no longer offered
+for (const [value, label] of [["same_site", "same place"], ["conversion", "conversion"], ["successor_at_new_site", "successor at a new site"], ["end_and_new_foundation", "end and new foundation"], ["new_candidate", "new place, no predecessor"]]) {
+    assert.match(form, new RegExp(`<option value="${value}">${label}</option>`));
+}
+assert.doesNotMatch(form, /value="relocation"/);
+
 // a task that cannot be decided offers no chooser menu and disables the two buttons
 const closed = portal.decisionForm(row("t9", "exported").task, null);
 assert.doesNotMatch(closed, /More outcomes/);
