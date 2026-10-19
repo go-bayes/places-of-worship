@@ -11,7 +11,7 @@ The OSM stock counts about 1.54 million `amenity=place_of_worship` records acros
 Three populations need different treatment.
 
 1. **Submissions.** Evidence filed by RAs and collaborators: hundreds to low thousands. Full human review, then PI acceptance, as now. AI pre-triage exists for this lane already (`docs/portal-claude-batch-review.md`) and is unchanged.
-2. **The census of change.** The record classes the annual audit produces between editions (stable, tag change, geometry change, identifier churn, apparent addition, apparent removal, duplicate or split or merge candidate, unresolved). Tens of thousands a year, not millions.
+2. **The census of change.** (Amended 2026-10-19: section 7 of the vocabulary reconciliation now reserves "census of change" for reviewed change between 1 September anchors; the record classes below are its raw-source leads.) The record classes the annual audit produces between editions (stable, tag change, geometry change, identifier churn, apparent addition, apparent removal, duplicate or split or merge candidate, unresolved). Tens of thousands a year, not millions.
 3. **The stock.** The 1.54 million records themselves. Never reviewed one by one. Characterised by deterministic checks over all of it, AI screening over the informative slice, and a human-reviewed probability sample that supports population estimates with uncertainty.
 
 Human effort scales with submissions and with churn, never with the stock.
