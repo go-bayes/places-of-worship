@@ -151,6 +151,19 @@ class BuildTests(unittest.TestCase):
         self.assertEqual((line["properties"]["year_lower"], line["properties"]["year_upper"]), (1960, 1961))
         self.assertEqual((line["properties"]["from_occupancy_id"], line["properties"]["to_occupancy_id"]), ("o1", "o2"))
 
+    def test_move_within_site_draws_a_line_and_a_move_off_site_does_not(self):
+        # definition 0.1.6: a building moved within its site continues at the next period's
+        # position; a relocation to a distinct property ends the place here, so a later period
+        # in the same record is renewed worship at this site and no line joins them
+        task = {"task_id": "nz-t1", "name": "St Test"}
+        here = {**BASE_ROW, "occupancy_id": "a", "end_mode": "known", "end_date": "1960", "end_basis": "closure_stated", "latitude": -41.29, "longitude": 174.78}
+        nearby = {**BASE_ROW, "occupancy_id": "b", "start_mode": "known", "start_date": "1961", "start_basis": "building_dedication", "latitude": -41.2901, "longitude": 174.7801}
+        same = {**nearby, "occupancy_id": "c", "latitude": -41.29, "longitude": 174.78}
+        line = builder.transition_feature({**here, "end_reason": "moved_within_site"}, nearby, task, "batch-7")
+        assert line is not None
+        self.assertEqual(line["geometry"]["coordinates"], [[174.78, -41.29], [174.7801, -41.2901]])
+        self.assertIsNone(builder.transition_feature({**here, "end_reason": "relocated"}, same, task, "batch-7"))
+
     def test_overridden_rows_do_not_reach_the_map_and_empty_products_stay_unwired(self):
         summary = builder.build_products([self.export], self.regions)
         vu = json.loads((self.regions / "vu" / "data" / "dated_places.geojson").read_text(encoding="utf-8"))

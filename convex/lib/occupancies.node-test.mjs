@@ -140,7 +140,7 @@ test("a by-date start makes every earlier year uncertain", () => {
 test("segments combine: present beats uncertain beats absent; no firing means no row", () => {
   assert.equal(combinePresence(1999, []), null);
   const rows = derivePresence([
-    stored("a", { end_mode: "known", end_date: "1990", end_basis: "closure_stated", end_reason: "relocated", still_active_asof: undefined }),
+    stored("a", { end_mode: "known", end_date: "1990", end_basis: "closure_stated", end_reason: "moved_within_site", still_active_asof: undefined }),
     stored("b", { segment_index: 1, start_date: "1992", latitude: -17.7, longitude: 168.3 }),
   ], VU_YEARS);
   assert.deepEqual(rows.map((r) => [r.target_year, r.derived_status]), [
@@ -151,8 +151,8 @@ test("segments combine: present beats uncertain beats absent; no firing means no
   ]);
 });
 
-test("relocation: the year's location follows the occupancy in force", () => {
-  const a = stored("a", { start_date: "1978", end_mode: "between", end_not_earlier_than: "1994", end_not_later_than: "1997", end_basis: "closure_stated", end_reason: "relocated", still_active_asof: undefined, location_mode: "approximate_area", uncertainty_radius_m: 500 });
+test("a move within the site: the year's location follows the occupancy in force", () => {
+  const a = stored("a", { start_date: "1978", end_mode: "between", end_not_earlier_than: "1994", end_not_later_than: "1997", end_basis: "closure_stated", end_reason: "moved_within_site", still_active_asof: undefined, location_mode: "approximate_area", uncertainty_radius_m: 500 });
   const b = stored("b", { segment_index: 1, start_mode: "between", start_date: undefined, start_not_earlier_than: "1994", start_not_later_than: "1997", latitude: -17.70, longitude: 168.30 });
   const presences = derivePresence([a, b], VU_YEARS);
   const locations = deriveLocations([a, b], presences, VU_YEARS);
@@ -166,7 +166,7 @@ test("relocation: the year's location follows the occupancy in force", () => {
 });
 
 test("a transition year lists both locations as one group", () => {
-  const a = stored("a", { start_date: "1978", end_mode: "between", end_not_earlier_than: "1998", end_not_later_than: "2001", end_basis: "closure_stated", end_reason: "relocated", still_active_asof: undefined });
+  const a = stored("a", { start_date: "1978", end_mode: "between", end_not_earlier_than: "1998", end_not_later_than: "2001", end_basis: "closure_stated", end_reason: "moved_within_site", still_active_asof: undefined });
   const b = stored("b", { segment_index: 1, start_mode: "between", start_date: undefined, start_not_earlier_than: "1998", start_not_later_than: "2001", latitude: -17.70, longitude: 168.30 });
   const presences = derivePresence([a, b], [1999]);
   assert.equal(presences[0].derived_status, "uncertain");
@@ -247,30 +247,53 @@ test("a wholly undated period needs its uncertainty wording", () => {
   assert.doesNotThrow(() => assertOccupancySegment({ ...undated, uncertainty_note: "Elders recall worship here at some time before the war." }, REF));
 });
 
-test("a distinct location needs a valid assertion; a relocation needs a successor and the same identity", () => {
+test("a distinct location needs a valid assertion; only a move off the site names a successor", () => {
   assert.throws(() => assertOccupancySegment(input({ location_relation: "distinct" }), REF), /needs its location/);
   assert.doesNotThrow(() => assertOccupancySegment(input({
     location_relation: "distinct",
     location: { contract_version: "location_assertion_v1", mode: "approximate_area", basis: "address_or_locality", latitude: -17.7, longitude: 168.3, uncertainty_radius_m: 500, source_wording: "the old village site", confidence: "moderate", contributor_confirmed: true },
   }), REF));
-  assert.throws(() => assertOccupancySegment(input({ end_mode: "known", end_date: "1990", end_basis: "closure_stated", end_reason: "relocated", successor_site_id: "x", still_active_asof: undefined }), REF), /successor identifier is only for a split/);
+  const ended = { end_mode: "known", end_date: "1990", end_basis: "closure_stated", still_active_asof: undefined };
+  // definition 0.1.6: a move to a distinct property links the new place by its identifier
+  assert.doesNotThrow(() => assertOccupancySegment(input({ ...ended, end_reason: "relocated", successor_site_id: "nz-osm-way-1234" }), REF));
+  assert.doesNotThrow(() => assertOccupancySegment(input({ ...ended, end_reason: "relocated" }), REF));
+  assert.throws(() => assertOccupancySegment(input({ ...ended, end_reason: "moved_within_site", successor_site_id: "nz-osm-way-1234" }), REF), /stays the same place of worship/);
+  assert.throws(() => assertOccupancySegment(input({ ...ended, end_reason: "relocated", successor_site_id: "x".repeat(201) }), REF), /200 characters or fewer/);
+  // a place still in use has not moved off its site
+  assert.throws(() => assertOccupancySegment(input({ successor_site_id: "nz-osm-way-1234" }), REF), /still-active period has no successor/);
 });
 
-test("a set must be numbered, non-overlapping, and relocations must move", () => {
-  const first = input({ end_mode: "known", end_date: "1990", end_basis: "closure_stated", end_reason: "relocated", still_active_asof: undefined });
+test("a set must be numbered, non-overlapping, and a move within the site must move", () => {
+  const first = input({ end_mode: "known", end_date: "1990", end_basis: "closure_stated", end_reason: "moved_within_site", still_active_asof: undefined });
   const secondSamePlace = input({ segment_index: 1, start_date: "1992" });
-  assert.throws(() => assertOccupancySet([first, secondSamePlace], REF, PIN), /must be followed by a period at a different place/);
+  assert.throws(() => assertOccupancySet([first, secondSamePlace], REF, PIN), /followed by a period at its new position/);
   const secondMoved = input({
     segment_index: 1, start_date: "1992", location_relation: "distinct",
     location: { contract_version: "location_assertion_v1", mode: "building_identified", basis: "map_placement", latitude: -17.70, longitude: 168.30, confidence: "high", contributor_confirmed: true },
   });
   assert.doesNotThrow(() => assertOccupancySet([first, secondMoved], REF, PIN));
   assert.throws(() => assertOccupancySet([first, { ...secondMoved, segment_index: 2 }], REF, PIN), /numbered 0, 1, 2/);
-  assert.throws(() => assertOccupancySet([first], REF, PIN), /needs the following period/);
+  assert.throws(() => assertOccupancySet([first], REF, PIN), /needs the following period at its new position/);
   const overlapping = input({ segment_index: 1, start_date: "1985", location_relation: "distinct", location: secondMoved.location });
   assert.throws(() => assertOccupancySet([first, overlapping], REF, PIN), /one place at a time/);
   assert.throws(() => assertOccupancySet([input({}), input({ segment_index: 1, start_date: "2011" })], REF, PIN), /still-active period must be the last/);
   assert.throws(() => assertOccupancySet([], REF, PIN), /at least one period/);
+});
+
+test("a move to a different property ends the place at its site and links the new place", () => {
+  // definition 0.1.6: the congregation moved across town in 1990; the new site
+  // is its own place of worship, so this record ends here with the link
+  const relocated = input({ end_mode: "known", end_date: "1990", end_basis: "closure_stated", end_reason: "relocated", successor_site_id: "nz-osm-way-1234", still_active_asof: undefined });
+  assert.doesNotThrow(() => assertOccupancySet([relocated], REF, PIN));
+  // the superseded rule carried the same identifier on to the new property
+  const atNewProperty = input({
+    segment_index: 1, start_date: "1991", location_relation: "distinct",
+    location: { contract_version: "location_assertion_v1", mode: "building_identified", basis: "map_placement", latitude: -17.70, longitude: 168.30, confidence: "high", contributor_confirmed: true },
+  });
+  assert.throws(() => assertOccupancySet([relocated, atNewProperty], REF, PIN), /starts a new place of worship/);
+  // worship that later resumes at the old site stays in this record
+  const resumedHere = input({ segment_index: 1, start_date: "2005", start_basis: "reopening_stated" });
+  assert.doesNotThrow(() => assertOccupancySet([relocated, resumedHere], REF, PIN));
 });
 
 test("rule 11 (r-f1'): annual use is present at the intermittent level; only an uncertain frequency is uncertain", () => {

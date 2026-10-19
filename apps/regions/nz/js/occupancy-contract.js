@@ -19,7 +19,10 @@
     const END_MODES = new Set(["still_active", "known", "between", "after", "unknown"]);
     const START_BASES = new Set(["founding_stated", "reopening_stated", "organisation_founded", "building_dedication", "first_seen_only", "unknown"]);
     const END_BASES = new Set(["closure_stated", "last_seen_only", "unknown"]);
-    const END_REASONS = new Set(["closed", "relocated", "demolished", "use_changed", "desacralised", "unknown"]);
+    // definition 0.1.6: relocated is a move to a distinct property (a new place,
+    // linked by the successor identifier); moved_within_site keeps the place
+    const END_REASONS = new Set(["closed", "relocated", "moved_within_site", "demolished", "use_changed", "desacralised", "unknown"]);
+    const MAX_SUCCESSOR_ID = 200;
     // pr-f (ruling r-f1): regular, monthly, and several times a year count
     // as in use for the census derivation; the rest derive uncertain
     const USE_FREQUENCIES = new Set(["regular", "monthly", "several_times_a_year", "annual", "occasional", "uncertain"]);
@@ -51,7 +54,8 @@
     };
     const END_REASON_WORDS = {
         closed: "closed",
-        relocated: "relocated",
+        relocated: "moved to a different property",
+        moved_within_site: "moved within its site",
         demolished: "demolished",
         use_changed: "use changed",
         desacralised: "desacralised",
@@ -167,6 +171,13 @@
             out.endBasis = "unknown";
         }
         if (out.endMode === "still_active") out.endReason = "";
+        // the card shows the reason only for a dated end. a hidden move reason
+        // would impose set rules the contributor cannot see, and the successor
+        // field shows only for a dated move to a different property, so a value
+        // left behind under another mode or reason is dropped
+        const endDated = out.endMode === "known" || out.endMode === "between" || out.endMode === "after";
+        if (!endDated && (out.endReason === "relocated" || out.endReason === "moved_within_site")) out.endReason = "";
+        if (!endDated || out.endReason !== "relocated") out.successorSiteId = "";
         return out;
     }
 
@@ -256,7 +267,7 @@
             return "Say how the end is known: closure stated or last seen only.";
         }
         if (endDated && !END_REASONS.has(s.endReason)) {
-            return "Say why the period ended: closed, relocated, demolished, use changed, desacralised, or unknown.";
+            return "Say why the period ended: closed, moved to a different property, moved within its site, demolished, use changed, desacralised, or unknown.";
         }
         if (s.useFrequency && !USE_FREQUENCIES.has(s.useFrequency)) {
             return "Choose how often the place was used: regular, monthly, several times a year, annual, occasional, or uncertain.";
@@ -264,8 +275,11 @@
         if (s.endMode === "unknown" && s.endReason && !END_REASONS.has(s.endReason)) {
             return "Choose a listed end reason.";
         }
-        if (s.successorSiteId && s.endReason === "relocated") {
-            return "A relocation keeps the same place of worship; a successor identifier is only for a split.";
+        if (s.successorSiteId.length > MAX_SUCCESSOR_ID) {
+            return `The successor identifier must be ${MAX_SUCCESSOR_ID} characters or fewer.`;
+        }
+        if (s.successorSiteId && s.endReason === "moved_within_site") {
+            return "A building moved within its site stays the same place of worship; a successor identifier is only for a move to a different property.";
         }
         // ordering within the period
         const b = segmentBounds(s);
@@ -328,7 +342,8 @@
     }
 
     // whole-submission rules: contiguous indices in card order, still active
-    // only last, one place at a time, relocation followed by a new place
+    // only last, one place at a time, and the two kinds of move under
+    // definition 0.1.6
     function validateSet(segments, referenceDate, taskPoint) {
         if (!Array.isArray(segments) || segments.length === 0) return "Record at least one period.";
         if (segments.length > MAX_SEGMENTS) return `A submission carries at most ${MAX_SEGMENTS} periods.`;
@@ -346,13 +361,17 @@
             if (here.endLower !== undefined && next.startUpper !== undefined && here.endLower > next.startUpper) {
                 return `Periods ${i + 1} and ${i + 2} overlap: a place of worship occupies one place at a time.`;
             }
-            if (ordered[i].endReason === "relocated"
-                && samePoint(resolvePoint(ordered[i], taskPoint), resolvePoint(ordered[i + 1], taskPoint))) {
-                return `Period ${i + 2}: a relocation must be followed by a period at a different place.`;
+            const moved = !samePoint(resolvePoint(ordered[i], taskPoint), resolvePoint(ordered[i + 1], taskPoint));
+            if (ordered[i].endReason === "moved_within_site" && !moved) {
+                return `Period ${i + 2}: a building moved within its site must be followed by a period at its new position.`;
+            }
+            // the place at the new property is its own place of worship
+            if (ordered[i].endReason === "relocated" && moved) {
+                return `Period ${i + 2}: a move to a different property starts a new place of worship. Record the new site as its own place and give its identifier on period ${i + 1}; a later period here stays at this site. Choose "Building moved within its site" for a move on the same parcel.`;
             }
         }
-        if (ordered[ordered.length - 1].endReason === "relocated") {
-            return `Period ${ordered.length}: a relocated period needs the following period at the new place.`;
+        if (ordered[ordered.length - 1].endReason === "moved_within_site") {
+            return `Period ${ordered.length}: a building moved within its site needs the following period at its new position.`;
         }
         return "";
     }
@@ -433,6 +452,7 @@
         if (s.endAroundYear) endNotes.push(`around ${s.endAroundYear}`);
         if (s.endMode !== "still_active" && s.endMode !== "unknown" && endWords) endNotes.push(endWords);
         if (s.endMode !== "still_active" && END_REASON_WORDS[s.endReason]) endNotes.push(END_REASON_WORDS[s.endReason]);
+        if (s.endMode !== "still_active" && s.successorSiteId) endNotes.push(`new place ${s.successorSiteId}`);
         if (endNotes.length) end += ` (${endNotes.join(", ")})`;
 
         const where = s.sameAsPin ? "" : "; at a different place";

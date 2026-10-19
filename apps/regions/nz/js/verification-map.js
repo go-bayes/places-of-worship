@@ -834,9 +834,12 @@ const OCCUPANCY_END_BASIS_OPTIONS = [
     ["closure_stated", "Closure stated by the source"],
     ["last_seen_only", "Last seen in a record only"],
 ];
+// definition 0.1.6: a move to a different property starts a new place of
+// worship; a building moved within its own site or parcel stays the same place
 const OCCUPANCY_END_REASON_OPTIONS = [
     ["closed", "Closed"],
-    ["relocated", "Relocated to another place"],
+    ["moved_within_site", "Building moved within its site"],
+    ["relocated", "Moved to a different property (a new place)"],
     ["demolished", "Demolished"],
     ["use_changed", "Use changed"],
     ["desacralised", "Desacralised (deconsecrated)"],
@@ -9084,6 +9087,14 @@ class NzVerificationMap {
                             <select data-field="endReason"><option value="">Choose one...</option>${selectOptionsHtml(OCCUPANCY_END_REASON_OPTIONS, s.endReason || "")}</select>
                         </label>
                     </div>
+                    <div class="copy-help" data-show="reason:moved_within_site">The building moved on the same site or parcel, so it is the same place. The next period records its new position.</div>
+                    <div data-show="reason:relocated">
+                        <div class="copy-help">A move to a different property starts a new place of worship. This period ends the place at this site; record the new site as its own place (find it on the map, or use <em>Nominate missing PoW</em>) and do not add a period here at the new property.</div>
+                        <label>
+                            Identifier of the place at the new property (if it is on the map)
+                            <input data-field="successorSiteId" type="text" maxlength="200" autocomplete="off" value="${escapeHtml(s.successorSiteId || "")}">
+                        </label>
+                    </div>
                 </div>
                 <div class="occupancy-block" data-block="use">
                     <label>
@@ -9788,7 +9799,7 @@ class NzVerificationMap {
             const card = target?.closest?.(".occupancy-card");
             if (!card) return;
             const index = Number(card.dataset.index);
-            if (target.dataset?.field === "endReason" && target.value === "relocated" && index === state.segments.length - 1) {
+            if (target.dataset?.field === "endReason" && target.value === "moved_within_site" && index === state.segments.length - 1) {
                 state.segments.push(this.occupancyBlankSegment({ referenceDate: state.segments[0].stillActiveAsof, referenceDateFromParent: false }, { sameAsPin: false }));
                 state.gapAnswer = state.gapAnswer || "yes";
                 this.rerenderGuidedPeriods(taskId, { focusIndex: index + 1 });
@@ -10035,8 +10046,9 @@ class NzVerificationMap {
             const card = target?.closest?.(".occupancy-card");
             if (!card) return;
             const index = Number(card.dataset.index);
-            // a relocation opens the next card at a new place
-            if (target.dataset?.field === "endReason" && target.value === "relocated" && index === draft.segments.length - 1) {
+            // a move within the site opens the next card at the new position;
+            // a move to a different property ends the record here (definition 0.1.6)
+            if (target.dataset?.field === "endReason" && target.value === "moved_within_site" && index === draft.segments.length - 1) {
                 draft.segments.push(this.occupancyBlankSegment(context, { sameAsPin: false }));
                 this.renderOccupancyEntry(context, { restore: true, focusIndex: index + 1, markDirty: true });
             }
@@ -10138,7 +10150,8 @@ class NzVerificationMap {
         const startMode = segment.startMode || "known";
         const endMode = segment.endMode || "known";
         const startTokens = new Set([startMode, ...(startMode !== "unknown" ? ["dated"] : [])]);
-        const endTokens = new Set([endMode, ...(["known", "between", "after"].includes(endMode) ? ["dated"] : [])]);
+        const endDated = ["known", "between", "after"].includes(endMode);
+        const endTokens = new Set([endMode, ...(endDated ? ["dated"] : []), ...(endDated && segment.endReason ? [`reason:${segment.endReason}`] : [])]);
         const apply = (block, tokens) => {
             card.querySelectorAll(`[data-block="${block}"] [data-show]`).forEach(element => {
                 element.hidden = !element.dataset.show.split(" ").some(token => tokens.has(token));
