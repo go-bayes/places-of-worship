@@ -55,7 +55,11 @@ findings and questions coming back to you by email. The running list:
 2. **1989**: your Area Council → Enumeration Area → named-place lookup
    from the census map volumes is the priority — it closes the one gap
    in the island series. Individual-level data never travels by email;
-   aggregated island-unit tables are the deliverable.
+   aggregated island-unit tables are the deliverable. Added 2026-10-22:
+   please also send scans of the 1989 map-volume pages you are working
+   from. From those we can draft the lookup for you to check and
+   correct, which should save you most of the transcription, and the
+   scans are archived in private storage like your 1999 scan.
 3. **1999**: yes please to coding the island rows from your scan.
 4. **2009**: skip — our extraction already carries island grain
    (64 islands) from Basic Tables T3.5.

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-10-22 (1989 scan request for Guy)
+
+- Guy's task list (`docs/people/guy/README.md`) asks for scans of the 1989 census map-volume pages behind his Area Council → Enumeration Area → named-place lookup, so the project can draft the lookup from them for him to check.
+
+### 2026-10-19 (operating terms for the annual edition)
+
+- Record in the section 7 amendment of `docs/development/c2-vocabulary-reconciliation-2026-08-14.md` JB's later rulings of 2026-10-19: editions close on 1 December; a public release follows each PI batch release and is automatically published, with a receipt and a withdrawal path, after ODbL advice; the event contract is to gain a correction scope and a non-lifecycle accession intent (contract change pending); editions include OpenStreetMap records as a labelled provisional tier; outputs are an annual register until coverage is evaluated.
+
 ### 2026-10-19 (relocation retired, linked place on identity decisions)
 
 - Behaviour change for reviewers (JB, 2026-10-19, on #205). `reviews:applyReviewDecision`, behind `recordReviewDecision` and `batchRecordReviewDecisions`, refuses a new decision whose `identity_decision` is `relocation` and names the 0.1.6 choices instead. The literal stays in the validator, as Joseph ruled at the closure of #205, so stored rows remain valid.
