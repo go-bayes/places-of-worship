@@ -527,7 +527,8 @@ Fields:
   record it repeats and an uncertain decision its alternatives; the other bases
   refuse links. At most 10 identifiers of at most 200 characters each, trimmed,
   distinct, and none naming the task's own record (`task_id`,
-  `matched_current_site_id`, `candidate_site_id`) (`convex/lib/identityLinks.ts`). Stored outside `decision_hash`,
+  `matched_current_site_id`, `candidate_site_id`, `source_record_id`, or the
+  `osm:<type>/<id>` reference) (`convex/lib/identityLinks.ts`). Stored outside `decision_hash`,
   like `evidence_version_hash`, until a version 2 envelope names it.
 - `target_year_affects`: array of target-year affect objects.
 - `required_follow_up`: optional.

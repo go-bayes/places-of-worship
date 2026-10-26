@@ -43,6 +43,12 @@ test("link identifiers are bounded, distinct, printable and not the task itself"
     assert.throws(() => check("successor_at_new_site", [own]), /another place/);
   }
   assert.deepEqual(assertIdentityLinks({ task_id: "task_2" }, { identity_decision: "split", linked_site_ids: ["nz-site-1"] }), ["nz-site-1"]);
+  // an internal-intake task may name its place only by source record or osm reference
+  const intake = { task_id: "task_3", source_record_id: "osm:node/123", osm_object_type: "way", matched_osm_id: "456" };
+  for (const own of ["osm:node/123", " osm:way/456 "]) {
+    assert.throws(() => assertIdentityLinks(intake, { identity_decision: "successor_at_new_site", linked_site_ids: [own] }), /another place/);
+  }
+  assert.deepEqual(assertIdentityLinks(intake, { identity_decision: "successor_at_new_site", linked_site_ids: ["osm:node/789"] }), ["osm:node/789"]);
   assert.throws(() => check("merge", Array.from({ length: 11 }, (_, i) => `nz-${i}`)), /at most 10/);
   assert.equal(check("merge", Array.from({ length: 10 }, (_, i) => `nz-${i}`)).length, 10);
 });

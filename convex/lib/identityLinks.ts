@@ -28,12 +28,20 @@ type TaskIdentifiers = {
   task_id: string;
   matched_current_site_id?: string;
   candidate_site_id?: string;
+  source_record_id?: string;
+  osm_object_type?: string;
+  matched_osm_id?: string;
 };
 
-// the identifiers that name the place this task is about: a link to any of
-// them names the place itself, not another
+// the identifiers that name the place this task is about, including the
+// source record and the osm reference an internal-intake task may carry
+// without either site id: a link to any of them names the place itself,
+// not another
 export function ownIdentifiers(task: TaskIdentifiers): string[] {
-  return [task.task_id, task.matched_current_site_id, task.candidate_site_id]
+  const osmRef = task.osm_object_type !== undefined && task.matched_osm_id !== undefined
+    ? `osm:${task.osm_object_type}/${task.matched_osm_id}`
+    : undefined;
+  return [task.task_id, task.matched_current_site_id, task.candidate_site_id, task.source_record_id, osmRef]
     .filter((id): id is string => typeof id === "string")
     .map((id) => id.trim())
     .filter((id) => id.length > 0);

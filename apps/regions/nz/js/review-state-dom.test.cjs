@@ -140,6 +140,11 @@ const ownTask = { task_id: "t1", matched_current_site_id: "nz-site-1", candidate
 for (const own of ["t1", "nz-site-1", "candidate:nz:b:1"]) {
     assert.match(portal.linkedSiteIdsProblem("successor_at_new_site", [own], ownTask), /another place/);
 }
+const intakeTask = { task_id: "t2", source_record_id: "osm:node/123", osm_object_type: "way", matched_osm_id: "456" };
+for (const own of ["osm:node/123", "osm:way/456"]) {
+    assert.match(portal.linkedSiteIdsProblem("successor_at_new_site", [own], intakeTask), /another place/);
+}
+assert.equal(portal.linkedSiteIdsProblem("successor_at_new_site", ["osm:node/789"], intakeTask), "");
 assert.equal(portal.linkedSiteIdsProblem("successor_at_new_site", ["nz-site-2"], ownTask), "");
 
 // the last decision shows its identity basis and escaped links

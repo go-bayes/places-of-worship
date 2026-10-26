@@ -1929,7 +1929,10 @@ function human(value) {
     }
 
     function ownTaskIdentifiers(task) {
-        return [task?.task_id, task?.matched_current_site_id, task?.candidate_site_id]
+        const osmRef = task?.osm_object_type && task?.matched_osm_id
+            ? `osm:${task.osm_object_type}/${task.matched_osm_id}`
+            : undefined;
+        return [task?.task_id, task?.matched_current_site_id, task?.candidate_site_id, task?.source_record_id, osmRef]
             .filter((id) => typeof id === "string")
             .map((id) => id.trim())
             .filter((id) => id.length > 0);
