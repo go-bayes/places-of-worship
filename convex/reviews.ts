@@ -16,6 +16,7 @@ import {
 import { canonicalJson, sha256 } from "./lib/sha256";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { assertLocationOutcome } from "./lib/locationOutcome";
+import { assertIdentityLinks } from "./lib/identityLinks";
 
 async function getTaskOrThrow(ctx: any, taskId: string): Promise<Doc<"tasks">> {
   const task = await ctx.db
@@ -327,6 +328,8 @@ export async function applyReviewDecision(ctx: MutationCtx, args: { taskId: stri
     // a moved pin needs a ruling before acceptance; the ruling is refused
     // where the task has no original point to rule between
     assertLocationOutcome(task, args.decision);
+    // relocation is refused and a linked basis names its other place
+    const linkedSiteIds = assertIdentityLinks(task, args.decision);
     assertMaxString("review decision note", args.decision.decision_note, TASK_REASON_MAX);
     assertMaxString("accepted action", args.decision.accepted_action, MEDIUM_TEXT_MAX);
     assertMaxString("required follow-up", args.decision.required_follow_up, LONG_TEXT_MAX);
@@ -344,6 +347,10 @@ export async function applyReviewDecision(ctx: MutationCtx, args: { taskId: stri
       decision_note: args.decision.decision_note,
       accepted_action: args.decision.accepted_action,
       identity_decision: args.decision.identity_decision,
+      // outside the decision hash below, like evidence_version_hash: the
+      // version 0 and 1 contracts name their fields, so hashing the links
+      // waits for a version 2 envelope
+      linked_site_ids: linkedSiteIds,
       location_outcome: args.decision.location_outcome,
       target_year_affects: args.decision.target_year_affects ?? [],
       required_follow_up: args.decision.required_follow_up,

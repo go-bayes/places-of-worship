@@ -703,6 +703,8 @@ function human(value) {
                     <div class="status">
                         Last review decision: <strong>${escapeHtml(decisionLabel(review.decision_status))}</strong>
                         ${review.location_outcome ? `<br>Location ruling: ${escapeHtml(locationOutcomeLabel(review.location_outcome))}` : ""}
+                        ${review.identity_decision ? `<br>Identity: ${escapeHtml(identityLabel(review.identity_decision))}` : ""}
+                        ${Array.isArray(review.linked_site_ids) && review.linked_site_ids.length > 0 ? `<br>Linked place: ${review.linked_site_ids.map((id) => escapeHtml(id)).join(", ")}` : ""}
                         ${review.decision_note ? `<br>${escapeHtml(review.decision_note)}` : ""}
                     </div>
                 ` : ""}
@@ -1904,9 +1906,59 @@ function human(value) {
         });
     }
 
+    const LINK_REQUIRED_BASES = ["successor_at_new_site", "end_and_new_foundation", "split", "merge"];
+    const LINK_OPTIONAL_BASES = ["duplicate", "uncertain"];
+
+    const IDENTITY_LABELS = {
+        same_site: "same place",
+        conversion: "conversion",
+        successor_at_new_site: "successor at a new site",
+        end_and_new_foundation: "end and new foundation",
+        new_candidate: "new place, no predecessor",
+        relocation: "relocation (before definition 0.1.6)",
+    };
+
+    function identityLabel(value) {
+        return IDENTITY_LABELS[value] || human(value);
+    }
+
+    // input parsing: empty entries left by a stray comma are dropped here, so
+    // the form never sends the blank identifier the server refuses
+    function parseLinkedSiteIds(text) {
+        return String(text || "").split(/[,\n]/).map((id) => id.trim()).filter((id) => id.length > 0);
+    }
+
+    function ownTaskIdentifiers(task) {
+        const osmRef = task?.osm_object_type && task?.matched_osm_id
+            ? `osm:${task.osm_object_type}/${task.matched_osm_id}`
+            : undefined;
+        return [task?.task_id, task?.matched_current_site_id, task?.candidate_site_id, task?.source_record_id, osmRef]
+            .filter((id) => typeof id === "string")
+            .map((id) => id.trim())
+            .filter((id) => id.length > 0);
+    }
+
+    // mirrors convex/lib/identityLinks.ts so the reviewer hears before sending
+    function linkedSiteIdsProblem(basis, ids, task) {
+        if (ids.length > 10) return "Link at most 10 places.";
+        if (ids.some((id) => id.length > 200)) return "Each linked place identifier must be 200 characters or fewer.";
+        if (ids.some((id) => /[\u0000-\u001f\u007f]/.test(id))) return "A linked place identifier cannot contain control characters.";
+        const own = ownTaskIdentifiers(task);
+        if (ids.some((id) => own.includes(id))) return "A linked place must be another place, not this task's own record.";
+        if (new Set(ids).size !== ids.length) return "Name each linked place once.";
+        if (LINK_REQUIRED_BASES.includes(basis) && ids.length === 0) {
+            return "This identity basis relates the place to another: give the linked place's identifier, or choose uncertain if it is not known.";
+        }
+        if (!LINK_REQUIRED_BASES.includes(basis) && !LINK_OPTIONAL_BASES.includes(basis) && ids.length > 0) {
+            return "A linked place applies only to a successor at a new site, an end and new foundation, a split, a merge, a duplicate, or an uncertain decision.";
+        }
+        return "";
+    }
+
     function setDecisionFormValues(form, values) {
         if (values.decisionStatus !== undefined) form.decisionStatus.value = values.decisionStatus;
         if (values.identityDecision !== undefined) form.identityDecision.value = values.identityDecision;
+        if (values.linkedSiteIds !== undefined && form.linkedSiteIds) form.linkedSiteIds.value = values.linkedSiteIds;
         if (values.locationOutcome !== undefined && form.locationOutcome) form.locationOutcome.value = values.locationOutcome;
         if (values.acceptedAction !== undefined) form.acceptedAction.value = values.acceptedAction;
         if (values.requiredFollowUp !== undefined) form.requiredFollowUp.value = values.requiredFollowUp;
@@ -2085,6 +2137,11 @@ function human(value) {
                         <option value="uncertain">uncertain</option>
                     </select>
                 </div>
+                <div>
+                    <label for="linkedSiteIds">Linked place</label>
+                    <input id="linkedSiteIds" name="linkedSiteIds" type="text" maxlength="2200" autocomplete="off" ${canDecide ? "" : "disabled"}>
+                    <small class="muted">The identifier of the other place, as shown on the map or its task; separate several with commas. Required for a successor at a new site, an end and new foundation, a split or a merge; optional for a duplicate or an uncertain decision.</small>
+                </div>
                 ${hasOriginalPoint ? `
                     <div>
                         <label for="locationOutcome">Location ruling</label>
@@ -2200,12 +2257,25 @@ function human(value) {
             return;
         }
 
+        // definition 0.1.6 (jb 2026-10-19): a basis that relates this place
+        // to another names it; the server holds the same rule
+        const identityBasis = form.identityDecision.value || undefined;
+        const linkedSiteIds = parseLinkedSiteIds(form.linkedSiteIds?.value);
+        const linkProblem = linkedSiteIdsProblem(identityBasis, linkedSiteIds, currentTask());
+        if (linkProblem) {
+            statusText.textContent = linkProblem;
+            statusText.className = "state-banner tone-broken";
+            form.linkedSiteIds?.focus();
+            return;
+        }
+
         const decision = {
             evidence_draft_id: draft?.evidence_draft_id,
             decision_status: decisionStatus,
             decision_note: form.decisionNote.value.trim() || undefined,
             accepted_action: form.acceptedAction.value.trim() || undefined,
-            identity_decision: form.identityDecision.value || undefined,
+            identity_decision: identityBasis,
+            linked_site_ids: linkedSiteIds.length > 0 ? linkedSiteIds : undefined,
             location_outcome: locationOutcome,
             target_year_affects: decisionStatus === "accepted_for_export"
                 ? targetYearAffectsFromDraft(draft)
@@ -2309,7 +2379,7 @@ function human(value) {
     // the dom tests load this file with the flag set and drive the pure-ish
     // renderers directly; the page itself boots as before
     if (window.__POW_TEST_NO_BOOTSTRAP__) {
-        window.__PowReviewPortalTest = { state, els, renderQueue, renderQueueRollup, renderDetail, renderEmptyDetail, decisionForm, wireRevertReopen, wireDecisionForm, setDecisionFormValues, setTransport, renderAuth };
+        window.__PowReviewPortalTest = { state, els, renderQueue, renderQueueRollup, renderDetail, renderEmptyDetail, decisionForm, wireRevertReopen, wireDecisionForm, setDecisionFormValues, setTransport, renderAuth, parseLinkedSiteIds, linkedSiteIdsProblem, identityLabel };
     } else {
         init();
     }

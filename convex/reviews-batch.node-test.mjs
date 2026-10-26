@@ -44,19 +44,35 @@ test("batch acceptance succeeds with the current snapshot and records an audit h
   assert.match(recorded.snapshot_json, /needs_review/);
 });
 
-test("a decision records a definition 0.1.6 identity basis and hashes it", async () => {
+test("a decision records a definition 0.1.6 identity basis with its link, outside the hash", async () => {
   const ctx = context();
   const inspected = await getReviewSnapshot._handler(ctx, { taskId: "task_1", evidenceDraftId: "draft_1" });
   const successor = item(inspected.snapshot_hash);
   successor.decision.identity_decision = "successor_at_new_site";
+  successor.decision.linked_site_ids = [" nz-osm-node-1 "];
   await batchRecordReviewDecisions._handler(ctx, { items: [successor] });
   const stored = ctx.rows.review_decisions[0];
   assert.equal(stored.identity_decision, "successor_at_new_site");
+  assert.deepEqual(stored.linked_site_ids, ["nz-osm-node-1"]);
+  // the version 1 envelope names its fields, so the links stay outside it
   const { canonicalJson, sha256 } = await import("./lib/sha256.ts");
-  const { decision_hash, review_snapshot_hash, decision_hash_version, evidence_version_hash, ...fields } = stored;
+  const { decision_hash, review_snapshot_hash, decision_hash_version, evidence_version_hash, linked_site_ids, ...fields } = stored;
   fields.reviewer_user_id = String(fields.reviewer_user_id);
   const expected = sha256(canonicalJson({ schema_version: "review-decision.v1", decision: fields, review_snapshot_hash }));
   assert.equal(decision_hash, expected);
+});
+
+test("a new decision refuses relocation and an unlinked successor before writing", async () => {
+  const ctx = context();
+  const inspected = await getReviewSnapshot._handler(ctx, { taskId: "task_1", evidenceDraftId: "draft_1" });
+  const relocation = item(inspected.snapshot_hash);
+  relocation.decision.identity_decision = "relocation";
+  await assert.rejects(batchRecordReviewDecisions._handler(ctx, { items: [relocation] }), /no longer an identity basis/);
+  const unlinked = item(inspected.snapshot_hash);
+  unlinked.decision.identity_decision = "successor_at_new_site";
+  await assert.rejects(batchRecordReviewDecisions._handler(ctx, { items: [unlinked] }), /linked place's identifier/);
+  assert.equal(ctx.rows.review_decisions.length, 0);
+  assert.equal(ctx.task.status, "needs_review");
 });
 
 test("batch acceptance refuses intake-only drafts before writing", async () => {

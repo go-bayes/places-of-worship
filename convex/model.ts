@@ -516,8 +516,8 @@ export const observationContractVersion = v.union(
 // keeps the place with a dated change of community; a successor at a new
 // site and an end and new foundation are new places linked to the earlier
 // one. relocation is the pre-0.1.6 value, when one identifier followed a
-// community to a new site; the review form no longer offers it and it stays
-// accepted only so the validator does not narrow
+// community to a new site; it stays in the validator so stored rows remain
+// valid, and applyReviewDecision refuses it on new decisions
 export const identityDecision = v.union(
   v.literal("same_site"),
   v.literal("conversion"),
@@ -813,6 +813,7 @@ export const reviewDecisionInput = v.object({
   decision_note: v.optional(v.string()),
   accepted_action: v.optional(v.string()),
   identity_decision: v.optional(identityDecision),
+  linked_site_ids: v.optional(v.array(v.string())),
   location_outcome: v.optional(locationOutcome),
   target_year_affects: v.optional(v.array(targetYearAffect)),
   required_follow_up: v.optional(v.string()),
