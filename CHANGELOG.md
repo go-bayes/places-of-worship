@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-10-26 (configurable cache for the OSM count script)
+
+- `scripts/osm_pow_country_counts.py` caches the Natural Earth download in `data/intermediate/` (ignored by git) or in the directory named by `OSM_POW_CACHE_DIR`, in place of a hard-coded machine-local path.
+
 ### 2026-10-22 (1989 scan request for Guy)
 
 - Guy's task list (`docs/people/guy/README.md`) asks for scans of the 1989 census map-volume pages behind his Area Council → Enumeration Area → named-place lookup, so the project can draft the lookup from them for him to check.
