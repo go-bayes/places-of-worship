@@ -113,7 +113,9 @@
   font-size: var(--fs-chrome);
   cursor: pointer;
 }
-#census-options select:focus { outline: 1px solid var(--muted); }
+/* the chrome's 3 px focus ring (ui suggestions item 2) */
+#census-options select:focus { outline: none; }
+#census-options select:focus-visible { outline: 3px solid var(--action); outline-offset: 2px; }
 /* place-dot visibility control: mode select plus the later-foundations
    checkbox that only period mode offers */
 /* the points select moved up into the split data pill; this row now only
@@ -158,7 +160,8 @@
   font-size: var(--fs-chrome);
   cursor: pointer;
 }
-#census-points-row select:focus { outline: 1px solid var(--muted); }
+#census-points-row select:focus { outline: none; }
+#census-points-row select:focus-visible { outline: 3px solid var(--action); outline-offset: 2px; }
 #census-points-future {
   display: inline-flex;
   align-items: center;
@@ -232,16 +235,97 @@
 }
 /* the top-right wordmark cluster is right-anchored and reaches the screen
    centre below ~1150px; the pill drops one row down there so the two never
-   collide, and recentres because 25% would clip it on a phone */
+   collide, and recentres because 25% would clip it on a phone. the row
+   step clears the 46 px wordmark and key pills (ui suggestions item 2) */
 @media (max-width: 1150px) {
-  #top-center-controls { top: calc(var(--safe-top) + 44px); left: 50%; }
+  #top-center-controls { top: calc(var(--safe-top) + 52px); left: 50%; }
 }
 /* only the buttons and the two panels catch clicks; the flanks stay
    transparent so pans and taps reach the map */
 #top-left-controls button,
 #top-left-controls #counts,
 #top-center-controls #data-pill,
+#top-center-controls #census-fold,
 #top-center-controls #census-panel { pointer-events: auto; }
+/* the folded panel (ui suggestions item 1, accepted 2026-11-03): one bar
+   under the data pill that names the overlay's metric, year and geography,
+   with Change at its end; the whole bar opens the panel. phones drop the
+   geography and ellipsise the metric, so the year always shows */
+#census-fold {
+  position: absolute;
+  top: 100%;
+  /* desktop: from the pill's left edge, rightwards, so the bar never runs
+     under the onboarding card at the left; phones centre it (below) */
+  left: 0;
+  z-index: 12;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: min(420px, calc(100vw - var(--safe-left) - var(--safe-right)));
+  min-height: 44px;
+  padding: 0 6px 0 14px;
+  font: inherit;
+  font-size: var(--fs-chrome);
+  text-align: left;
+  cursor: pointer;
+}
+.census-fold-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--action);
+}
+.census-fold-text {
+  display: flex;
+  min-width: 0;
+  white-space: nowrap;
+}
+/* the metric shrinks before the year, and the geography long before the
+   metric: flex shrinks in proportion to the factor */
+.census-fold-metric {
+  flex: 0 1 auto;
+  min-width: 4em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+.census-fold-frame { flex: none; }
+.census-fold-level {
+  flex: 0 100 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* wide screens have room for the whole sentence beside the pill */
+@media (min-width: 901px) {
+  #census-fold { max-width: 560px; }
+}
+.census-fold-change {
+  flex: none;
+  margin-left: auto;
+  padding: 6px 12px;
+  border: 1px solid var(--chrome-line);
+  border-radius: var(--r-pill);
+  color: var(--ink);
+  white-space: nowrap;
+}
+#census-fold:hover .census-fold-change { background: var(--chrome-wash); }
+@media (max-width: 640px) {
+  #census-fold {
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100vw - var(--safe-left) - var(--safe-right));
+  }
+  .census-fold-level { display: none; }
+}
+/* desktop: on a page with census chrome the onboarding card starts below
+   the folded bar's row, so the card and the bar never overlap */
+@media (min-width: 641px) {
+  .map-chrome.has-census #onboard { top: calc(var(--safe-top) + 112px); }
+}
 /* each wrap anchors its own drop-down panel */
 #key-wrap { position: relative; }
 #census-wrap { position: relative; }
@@ -293,14 +377,19 @@
 }
 .census-caret { color: var(--muted); font-size: var(--fs-chrome-xs); }
 /* style-guide touch floor (tribunal 2026-07-17 item 5 tail): the two top
-   pills reach 44px on touch screens, and the data pill's interactive
-   children stretch so the whole height answers the finger, not just the
-   text line. display-only children keep their centred line */
-@media (pointer: coarse) {
-  #data-pill, #counts-toggle { min-height: 44px; }
-  #data-pill .shell-pill-select,
-  #data-pill #census-toggle { align-self: stretch; }
-}
+   pills reach 44px, and the data pill's interactive children stretch so
+   the whole height answers the finger, not just the text line.
+   display-only children keep their centred line. every pointer since the
+   public-map controls reached the 44 px floor (ui suggestions item 2,
+   2026-11-03); it was touch screens only */
+#data-pill, #counts-toggle { min-height: 44px; }
+/* the pill's own padding is horizontal only, so each half answers across
+   the pill's whole height; safari ignores stretch on a select, so the
+   points select takes its height explicitly */
+#data-pill { padding-top: 0; padding-bottom: 0; }
+#data-pill .shell-pill-select,
+#data-pill #census-toggle { align-self: stretch; }
+#data-pill .shell-pill-select { height: 42px; }
 .census-label-short { display: none; }
 @media (max-width: 640px) {
   /* the top row is tight on phones: the key shrinks to its colour dots and

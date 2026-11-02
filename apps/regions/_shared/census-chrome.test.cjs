@@ -1,8 +1,11 @@
 // the census button follows the layer (jb 2026-10-14, option b): while the
-// census layer is off the panel is hidden, the button turns the layer back
-// on, the data maps pill's dot agrees, and the remembered panel state
-// survives for the layer's return. runs the real panel sync, enable, click
-// and place-dot code from region-map.js against stubs
+// census layer is off the panel and its folded bar are hidden, the button
+// turns the layer back on, the data maps pill's dot agrees, and the panel
+// state survives for the layer's return. the folded panel is one bar that
+// opens it, phones open folded, and the onboarding card folds an open panel
+// while it shows (ui suggestions item 1, 2026-11-03). runs the real panel
+// sync, onboarding fold, enable, click and place-dot code from
+// region-map.js against stubs
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -15,13 +18,15 @@ const slice = (from, to) => {
   assert.ok(a >= 0 && b > a, `slice ${from}`);
   return runtime.slice(a, b);
 };
-const panelBody = slice("const CENSUS_PANEL_DISMISSED_KEY", "function censusActive()");
+const panelBody = slice("let censusPanelOpen = !IS_MOBILE;", "function censusActive()");
+const onboardFoldBody = slice("let censusFoldedForOnboard = false;", "// the card appears after a short delay");
 const enableBody = slice("function syncCensusChrome() {", "// switching geography swaps the source");
 const clickBody = slice("if (censusToggle) {\n  syncCensusPanel();", "if (censusLevelSelect && HAS_CENSUS) {");
 const foldBody = slice("function foldCensusForAbroad() {", "function judgeFix() {");
 const dotsBody = slice("function syncPlaceDotEra() {", "function applyCensusPaint() {");
 const settle = () => new Promise((r) => setImmediate(r));
 let checks = 0;
+const focusLog = [];
 
 function element(attrs = {}) {
   const listeners = {};
@@ -38,6 +43,7 @@ function element(attrs = {}) {
     querySelector(sel) { return this.children[sel] || null; },
     addEventListener(type, fn) { (listeners[type] = listeners[type] || []).push(fn); },
     click() { (listeners.click || []).forEach((fn) => fn()); },
+    focus() { focusLog.push(this); },
     classList: {
       toggle(name, on) { if (on) classes.add(name); else classes.delete(name); },
       contains(name) { return classes.has(name); }
@@ -45,13 +51,13 @@ function element(attrs = {}) {
   };
 }
 
-function make({ mobile = false, dismissed = false, loads = true } = {}) {
+function make({ mobile = false, loads = true } = {}) {
   const log = [];
-  const storage = new Map(dismissed ? [["pow-census-panel-dismissed", "1"]] : []);
   const toggle = element({ "aria-controls": "census-panel", "aria-expanded": "true" });
   toggle.children[".census-caret"] = Object.assign(element(), { textContent: "▴" });
   toggle.children[".census-label-short"] = Object.assign(element(), { textContent: "Census" });
   const panel = element();
+  const fold = element();
   const close = element();
   const offerGo = element();
   const select = element();
@@ -63,16 +69,10 @@ function make({ mobile = false, dismissed = false, loads = true } = {}) {
     IS_MOBILE: mobile,
     HAS_CENSUS: true,
     RC: { dataNoun: "Census", datedPlaces: "x" },
-    window: {
-      sessionStorage: {
-        getItem: (k) => (storage.has(k) ? storage.get(k) : null),
-        setItem: (k, v) => storage.set(k, v),
-        removeItem: (k) => storage.delete(k)
-      }
-    },
     censusState: { enabled: false, level: "sa2", year: 2018, metric: "x" },
     censusToggle: toggle,
     censusPanel: panel,
+    censusFold: fold,
     document: { getElementById: (id) => ({ "census-close": close, censusPoints: select, "census-points-future": element() }[id] || null) },
     loadCensusData: () => { log.push("load"); return Promise.resolve(loads ? {} : null); },
     censusActive: () => null,
@@ -97,13 +97,13 @@ function make({ mobile = false, dismissed = false, loads = true } = {}) {
       setLayoutProperty: (id, key, value) => { layers[id] = value; },
       setPaintProperty: () => {}
     },
-    log, storage, toggle, panel, close, offerGo, select, periodOption, layers
+    log, toggle, panel, fold, close, offerGo, select, periodOption, layers
   };
   vm.createContext(sandbox);
   vm.runInContext(
-    `${panelBody}\n${enableBody}\n${clickBody}\n${foldBody}\n` +
+    `${panelBody}\n${onboardFoldBody}\n${enableBody}\n${clickBody}\n${foldBody}\n` +
     `this.realSyncPlaceDotEra = (function () {\n${dotsBody}\nreturn syncPlaceDotEra;\n})();\n` +
-    "this.state = () => ({ censusPanelOpen, censusLayerSettled });",
+    "this.state = () => ({ censusPanelOpen, censusLayerSettled, censusFoldedForOnboard });",
     sandbox
   );
   return sandbox;
@@ -111,6 +111,7 @@ function make({ mobile = false, dismissed = false, loads = true } = {}) {
 
 const on = (t) => {
   assert.equal(t.panel.hidden, !t.state().censusPanelOpen, "the panel follows its own open state");
+  assert.equal(t.fold.hidden, t.state().censusPanelOpen, "the folded bar shows exactly when the panel is folded");
   assert.equal(t.toggle.getAttribute("aria-controls"), "census-panel", "the button controls the panel");
   assert.equal(t.toggle.getAttribute("aria-expanded"), t.state().censusPanelOpen ? "true" : "false", "aria-expanded follows the panel");
   assert.equal(t.toggle.getAttribute("aria-label"), null, "the visible label names the button");
@@ -118,10 +119,11 @@ const on = (t) => {
   assert.equal(t.toggle.children[".census-caret"].textContent, t.state().censusPanelOpen ? "▴" : "▾", "the caret follows the panel");
   assert.equal(t.toggle.children[".census-label-short"].textContent, "Census", "the short label is the noun");
   assert.equal(t.offerGo.getAttribute("aria-pressed"), "true", "the bottom dot reads on");
-  checks += 8;
+  checks += 9;
 };
 const off = (t) => {
   assert.equal(t.panel.hidden, true, "the panel hides while the layer is off");
+  assert.equal(t.fold.hidden, true, "the folded bar hides while the layer is off");
   assert.equal(t.toggle.hasAttribute("aria-expanded"), false, "no expanded state while off");
   assert.equal(t.toggle.hasAttribute("aria-controls"), false, "no controlled panel while off");
   assert.equal(t.toggle.getAttribute("aria-label"), "Show Census Data on the map", "the action names the layer");
@@ -129,7 +131,7 @@ const off = (t) => {
   assert.equal(t.toggle.children[".census-label-short"].textContent, "Show Census", "the short label reads as the action");
   assert.equal(t.toggle.classList.contains("census-off"), true, "the off class is set");
   assert.equal(t.offerGo.getAttribute("aria-pressed"), "false", "the bottom dot reads off");
-  checks += 8;
+  checks += 9;
 };
 
 (async () => {
@@ -172,19 +174,64 @@ const off = (t) => {
   assert.equal(t.panel.hidden, true, "the folded panel returns folded");
   checks += 1;
 
-  // a phone dismissal is not cleared by the layer going off
-  t = make({ mobile: true, dismissed: true });
+  // a phone opens folded, and the layer going off and on keeps it folded
+  t = make({ mobile: true });
   await t.setCensusEnabled(true);
   on(t);
-  assert.equal(t.panel.hidden, true, "a remembered dismissal folds the panel");
+  assert.equal(t.panel.hidden, true, "a phone opens with the panel folded");
+  assert.equal(t.fold.hidden, false, "the folded bar names what is on");
   await t.setCensusEnabled(false);
   off(t);
-  assert.equal(t.storage.get("pow-census-panel-dismissed"), "1", "the dismissal memory survives the off state");
   t.toggle.click();
   await settle();
   on(t);
-  assert.equal(t.storage.get("pow-census-panel-dismissed"), "1", "turning on does not rewrite the memory");
+  assert.equal(t.panel.hidden, true, "the phone panel returns folded");
   checks += 3;
+
+  // the folded bar opens the panel and hands focus to the census button
+  focusLog.length = 0;
+  t.fold.click();
+  on(t);
+  assert.equal(t.panel.hidden, false, "the bar opens the panel");
+  assert.equal(focusLog[0], t.toggle, "focus moves to the census button");
+  // the phone x folds it back to the bar
+  t.close.click();
+  on(t);
+  assert.equal(t.fold.hidden, false, "the x folds the panel to its bar");
+  checks += 3;
+
+  // the onboarding card folds an open desktop panel and reopens it on dismissal
+  t = make();
+  await t.setCensusEnabled(true);
+  t.foldCensusForOnboard();
+  on(t);
+  assert.equal(t.panel.hidden, true, "the card folds the panel");
+  t.restoreCensusAfterOnboard();
+  on(t);
+  assert.equal(t.panel.hidden, false, "dismissing the card reopens the panel");
+  // a gesture while the card shows wins over the card's fold
+  t.foldCensusForOnboard();
+  t.fold.click();
+  t.toggle.click();
+  t.restoreCensusAfterOnboard();
+  on(t);
+  assert.equal(t.panel.hidden, true, "the visitor's fold stands after the card");
+  // a folded panel stays folded, and the card leaves it so
+  t.foldCensusForOnboard();
+  assert.equal(t.state().censusFoldedForOnboard, false, "the card did not fold a folded panel");
+  t.restoreCensusAfterOnboard();
+  assert.equal(t.panel.hidden, true, "the card opens nothing it did not fold");
+  checks += 5;
+
+  // on a phone the card's dismissal keeps the panel folded
+  t = make({ mobile: true });
+  await t.setCensusEnabled(true);
+  t.fold.click();
+  t.foldCensusForOnboard();
+  t.restoreCensusAfterOnboard();
+  on(t);
+  assert.equal(t.panel.hidden, true, "a phone keeps the bar after the card");
+  checks += 1;
 
   // a failed load leaves both pills off, and the button retries
   t = make({ loads: false });
