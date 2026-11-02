@@ -39,6 +39,7 @@
       transition: transform 120ms ease, box-shadow 120ms ease; font-size: var(--fs-chrome-lg);
     }
     .dock-row button.secondary { background: var(--chrome-wash); color: var(--ink); }
+    #searchButton { min-height: 44px; }
     .dock-row button:hover { transform: translateY(-1px); box-shadow: var(--shadow-1); }
     .dock-cities-row { align-items: center; }
     .dock-cities {
@@ -181,10 +182,10 @@
       text-decoration: none;
       cursor: pointer;
       /* the set-north badge seats on the right (jb 2026-07-17): below the
-         top-right wordmark on desktop (the wordmark is ~35px tall at the
-         chrome size); phones hide the wordmark, so the badge takes the
-         corner itself (media rule below) */
-      top: calc(var(--safe-top) + 42px);
+         top-right wordmark on desktop (46 px tall since its entries reached
+         44 px); phones hide the wordmark, so the badge takes the corner
+         itself (media rule below) */
+      top: calc(var(--safe-top) + 52px);
       /* compass on demand: hidden until the map is rotated off north */
       display: none;
       align-items: center;
@@ -218,22 +219,23 @@
       z-index: 11;
     }
     #tile-status.visible { opacity: 0.5; }
+    /* one card at a time (ui suggestions item 1, accepted 2026-11-03): the
+       card sits under the top row, so the key stays in sight, and only its
+       body scrolls: the action row is pinned, so Got it is always on
+       screen. phones take it as a bottom sheet (phone block below) */
     #onboard {
       position: fixed;
       left: var(--safe-left);
-      top: calc(var(--safe-top) + 8px);
+      top: calc(var(--safe-top) + 52px);
       z-index: 14;
       display: none;
+      flex-direction: column;
       max-width: min(320px, 88vw);
-      /* cap the card at the viewport and scroll inside it: long onboarding
-         copy on small screens must never push the actions row (the close
-         button) below a fixed, unscrollable card. vh first as the fallback,
-         dvh where supported so the mobile url bar cannot hide the actions. */
-      max-height: calc(100vh - var(--safe-top) - var(--safe-bottom) - 16px);
-      max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 16px);
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
+      /* cap the card at the viewport: vh first as the fallback, dvh where
+         supported so the mobile url bar cannot hide the actions */
+      max-height: calc(100vh - var(--safe-top) - var(--safe-bottom) - 128px);
+      max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 128px);
+      overflow: hidden;
       background: var(--chrome-face);
       border: 1px solid var(--chrome-line);
       border-radius: var(--r-lg);
@@ -241,7 +243,24 @@
       color: var(--ink);
       box-shadow: var(--shadow-2);
     }
-    #onboard.visible { display: block; }
+    #onboard.visible { display: flex; }
+    #onboard .onboard-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    /* longer source notes wait behind a disclosure; its summary is a
+       secondary control at 40 px */
+    #onboard .onboard-notes { margin: 0 0 6px; font-size: var(--fs-chrome); }
+    #onboard .onboard-notes summary {
+      cursor: pointer;
+      padding: 10px 0;
+      color: var(--ink);
+      font-weight: 600;
+    }
+    #onboard .onboard-notes p { margin-top: 2px; }
     #onboard h3 {
       margin: 0 0 6px;
       font-size: var(--fs-chrome-lg);
@@ -260,16 +279,20 @@
     }
     #onboard li { margin-bottom: 4px; }
     #onboard .onboard-actions {
+      flex: none;
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
+      padding-top: 10px;
     }
+    /* 44 px targets (style guide touch floor) through height and padding */
     #onboard .onboard-actions a,
     #onboard .onboard-actions button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 6px 10px;
+      min-height: 44px;
+      padding: 0 14px;
       border-radius: var(--r-pill);
       border: 1px solid var(--chrome-line);
       background: var(--chrome-wash);
@@ -396,28 +419,123 @@
     /* the pill names its action in full on desktop and by its object on
        phones, mirroring the census pill's long/short label swap */
     #datamaps-pill .dm-label-short { display: none; }
-    /* phones: every resting pill shrinks as one (the filter chip and the
-       contribute pill too), and an overfull row wraps upward instead of
-       running off-screen */
+    /* the action bar's line icons belong to the phone bar alone */
+    #bottom-actions .bar-icon { display: none; }
+    /* one bottom row on phones (ui suggestions item 4, accepted 2026-11-03):
+       a single bar of labelled cells, icon over label, 60 px tall, that
+       never wraps: Search, Near Me, the data pill's two zones (the country
+       data and the Countries switcher keep their own cells, so neither the
+       census toggle of 2026-07-16 nor the switcher leaves the phone) and a
+       labelled Contribute, which stays in the row as r-d2 rules. the reset
+       button joins the right-hand stack with the credits disc, which
+       empties the bottom-left corner and keeps the credit off the bar.
+       desktop keeps its row of pills */
     @media (max-width: 640px) {
       #bottom-actions {
-        flex-wrap: wrap;
-        justify-content: center;
-        max-width: 96vw;
+        left: var(--safe-left);
+        right: var(--safe-right);
+        transform: none;
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(0, 1fr);
+        align-items: stretch;
+        gap: 0;
+        background: var(--chrome-face);
+        border: 1px solid var(--chrome-line);
+        border-radius: var(--r-lg);
+        box-shadow: var(--shadow-1);
       }
-      #dock-toggle,
-      #near-me,
-      #contribute-go,
-      #filters-clear {
+      /* every cell drops its own pill face: the bar is the face */
+      #bottom-actions > .shell-pill {
+        --pill-bg: transparent;
+        --pill-border: transparent;
+        --pill-shadow: none;
+        min-width: 0;
+        min-height: 60px;
+        border-width: 0;
+        border-radius: 0;
+      }
+      #bottom-actions > .bar-cell {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 6px 2px;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.15;
+      }
+      #bottom-actions > :not(:first-child):not(#filters-clear) {
+        border-left: 1px solid var(--chrome-line);
+      }
+      #bottom-actions > :first-child { border-radius: var(--r-lg) 0 0 var(--r-lg); }
+      #bottom-actions > :last-child { border-radius: 0 var(--r-lg) var(--r-lg) 0; }
+      #bottom-actions .bar-icon { display: block; width: 20px; height: 20px; flex: none; }
+      #bottom-actions .bar-label,
+      #datamaps-go > span:not(.dm-dot):not(.dm-offer-arrow) {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      #near-me .nm-dot { width: 16px; height: 16px; margin: 2px 0; }
+      /* the filters chip floats above the bar's first cell instead of
+         adding a cell */
+      #bottom-actions > #filters-clear {
+        --pill-bg: rgba(59, 130, 246, 0.22);
+        --pill-border: rgba(59, 130, 246, 0.5);
+        --pill-shadow: var(--shadow-1);
+        position: absolute;
+        left: 0;
+        bottom: calc(100% + 8px);
         padding: 10px 13px;
         font-size: var(--fs-chrome);
+        min-height: 44px;
+        border-width: 1px;
+        border-radius: var(--r-pill);
       }
-      #datamaps-pill { font-size: var(--fs-chrome); }
-      #datamaps-go {
-        padding: 10px 8px 10px 13px;
-        max-width: 56vw;
+      /* the data pill spans two cells, one per zone */
+      #datamaps-pill {
+        grid-column: span 2;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        overflow: hidden;
       }
-      #datamaps-caret { padding: 10px 12px 10px 8px; font-size: var(--fs-chrome-xs); }
+      #datamaps-go,
+      #datamaps-caret {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        min-width: 0;
+        max-width: none;
+        margin: 0;
+        padding: 6px 2px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      /* the data zone's icon: the census toggle shows its on/off dot and an
+         offer its arrow, so the bars icon shows only in the other states */
+      #datamaps-go::before {
+        content: "";
+        width: 20px;
+        height: 20px;
+        flex: none;
+        background: currentColor;
+        -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M4 20V10M10 20V4M16 20v-8M22 20H2'/%3E%3C/svg%3E") center / contain no-repeat;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M4 20V10M10 20V4M16 20v-8M22 20H2'/%3E%3C/svg%3E") center / contain no-repeat;
+      }
+      #datamaps-go:has(.dm-dot)::before,
+      #datamaps-go:has(.dm-offer-arrow)::before { display: none; }
+      #datamaps-go .dm-dot { width: 16px; height: 16px; margin: 2px 0; }
+      #datamaps-go .dm-offer-name { display: block; }
+      #datamaps-go .dm-offer-arrow { order: -1; margin: 0; font-size: 18px; line-height: 20px; }
+      /* the switcher zone: its glyph above its word */
+      #datamaps-caret { flex-direction: column-reverse; }
+      #datamaps-caret .dm-caret-word { margin: 0; }
+      #datamaps-caret .dm-caret-glyph { font-size: 14px; line-height: 20px; }
       #datamaps-pill .dm-label-long { display: none; }
       #datamaps-pill .dm-label-short { display: inline; }
     }
@@ -510,6 +628,33 @@
       color: var(--muted);
       font-size: var(--fs-chrome-xs);
     }
+    /* the key pill at the 44 px floor on every pointer (ui suggestions
+       item 2) */
+    #counts-toggle { min-height: 44px; }
+    /* the key strip (ui suggestions item 3): on the wide global map the
+       pill names the top three categories in view with their counts, and
+       Key with its caret closes the strip behind a divider */
+    #counts-toggle.key-strip { gap: 0; padding: 0 12px 0 14px; }
+    #counts-toggle .key-cat {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding-right: 10px;
+    }
+    #counts-toggle .key-cat + .key-cat {
+      border-left: 1px solid var(--chrome-line);
+      padding-left: 10px;
+    }
+    #counts-toggle .key-name { font-weight: 600; }
+    #counts-toggle .key-count { color: var(--muted); font-variant-numeric: tabular-nums; }
+    #counts-toggle.key-strip .key-label {
+      border-left: 1px solid var(--chrome-line);
+      padding-left: 10px;
+      margin: 0 6px 0 0;
+      align-self: stretch;
+      display: inline-flex;
+      align-items: center;
+    }
     /* disabled keeps its label readable: muted ink, dimmed dots, never
        element opacity */
     #counts-toggle[disabled] { color: var(--muted); cursor: default; }
@@ -591,26 +736,44 @@
         transform: translateX(-50%);
         width: 86dvw;
         max-width: 86dvw;
-        /* sit above the pill row so the open panel hides no controls;
-           the band wraps to two pill rows on phones since the data maps
-           pill joined it, so the old 64px offset overlapped by 20px
-           (measured at 430px, jb report 2026-07-17) */
-        bottom: calc(var(--safe-bottom) + 92px);
+        /* sit above the one-row bar (60 px cells and its border) so the
+           open panel hides no control, and over the right-hand stack */
+        bottom: calc(var(--safe-bottom) + 70px);
+        z-index: 14;
       }
+      /* reset joins the right-hand stack above the bar (ui suggestions
+         item 4), under the credits disc */
       #corner-refresh {
+        left: auto;
+        right: var(--safe-right);
         width: 44px;
         height: 44px;
-        /* the action row needs the whole bottom band on a phone, so the
-           refresh button steps up out of its way */
-        bottom: calc(var(--safe-bottom) + 60px);
+        bottom: calc(var(--safe-bottom) + 70px);
       }
       #corner-refresh svg { width: 22px; height: 22px; }
+      .map-chrome .maplibregl-ctrl-bottom-right { bottom: calc(var(--safe-bottom) + 122px); }
+      .map-chrome .maplibregl-ctrl-bottom-right .maplibregl-ctrl { margin-bottom: 0; }
+      /* the onboarding card is a bottom sheet on phones (ui suggestions
+         item 1): capped at 46% of the screen, its body scrolls and its
+         actions stay pinned, so Got it is always on screen. it is not
+         draggable, as the card never was */
       #onboard {
-        left: 50%;
-        transform: translateX(-50%);
-        top: calc(var(--safe-top) + 10px);
-        max-width: min(88vw, 360px);
+        left: 0;
+        right: 0;
+        top: auto;
+        bottom: 0;
+        max-width: none;
+        max-height: 46vh;
+        max-height: 46dvh;
+        border-radius: var(--r-lg) var(--r-lg) 0 0;
+        border-bottom: 0;
+        /* a sheet is read, not seen through: the face is nearly opaque */
+        background: rgba(15, 23, 42, 0.97);
+        padding: 14px 16px calc(var(--safe-bottom) + 6px);
+        box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
       }
+      #onboard .onboard-actions a,
+      #onboard .onboard-actions button { flex: 1 1 auto; }
       .dock-cities-row { display: none; }
       #counts {
         display: none;
@@ -637,7 +800,6 @@
         padding: 6px 20px;
         min-width: max-content;
       }
-      .maplibregl-ctrl { transform: scale(0.85); transform-origin: bottom right; }
       #corner-reset {
         width: 54px;
         height: 54px;
@@ -673,9 +835,9 @@
 #wordmark {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 0;
   color: var(--ink);
-  padding: 8px 14px;
+  padding: 0 6px;
   font-size: var(--fs-chrome);
   letter-spacing: 0.02em;
 }
@@ -684,6 +846,18 @@
   text-decoration: none;
   white-space: nowrap;
 }
+/* each entry is its own 44 px target (ui suggestions item 2): height and
+   padding on the entry, the divider kept between them. safari ignores
+   padding on a select's height, so the theme select takes it explicitly */
+#wordmark > a,
+#wordmark > button,
+#wordmark > select {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 10px;
+}
+#wordmark > select { height: 44px; padding-right: 24px; background-position: right 8px center; }
 #wordmark a:hover {
   color: #fff;
   text-decoration: underline;
@@ -784,8 +958,11 @@
   font-size: var(--fs-chrome-xl);
   line-height: 1;
   cursor: pointer;
-  padding: 0 6px;
+  padding: 0;
   flex: none;
+  /* 44 px target (ui suggestions item 2) */
+  width: 44px;
+  height: 44px;
 }
 #dock-close:hover { color: #fff; }
 
