@@ -89,6 +89,8 @@ function make({ mobile = false, dismissed = false, loads = true } = {}) {
     effectivePointsMode: () => sandbox.placesDotState.mode || "all",
     placeSnapshotStale: () => false,
     syncDatedPlaces: () => {}, syncPulotuCultures: () => {},
+    // the place layers' paint (home country first) builds the opacity curves
+    overviewPaint: () => ({ "circle-opacity": 0.75 }), placesPaint: () => ({ "circle-opacity": 0.85 }),
     // the key sync is in the slice; with no key element it returns at once
     keyWrap: null, countsToggle: null,
     LAYERS: { overview: "overview", places: "places" },

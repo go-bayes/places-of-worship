@@ -1590,6 +1590,425 @@ async function handlePlaceFeatureClick(feature, fallbackLngLat) {
   }
 }
 
+// ---- home country first --------------------------------------------------
+// below zoom 8 a country page draws its neighbours' dots receded (about 28%
+// opacity, smaller, no stroke) and its own outline thicker, so the opening
+// view says which country the page is about; from zoom 8 every place draws
+// at full weight (ui review item 9, 2026-10-26). a dot is home when its
+// tile country_code names this country. a dot without a code (most
+// countries' overview dots carry none) is home when it falls inside the
+// home outline from the shared page manifest (region-bboxes.json), tested
+// with maplibre's `within` behind a cheap test against the manifest's
+// boxes; on a page whose own dots all carry codes it is a neighbour's
+// (homeUntaggedTest). the paint is evaluated per dot as each tile is
+// parsed, never per frame. a page whose country has no manifest entry
+// draws as before.
+const HOME_FIRST_FULL_ZOOM = 8;
+// a neighbour's opacity as a share of a home dot's (0.75 -> 0.28 on the
+// overview tier) and its radius as a share of a home dot's
+const HOME_FIRST_OPACITY = 0.37;
+const HOME_FIRST_RADIUS = 0.7;
+// the manifest's outlines are simplified at 0.03 degrees and drop islets,
+// which cuts coastal places off; the test outline grows by this margin
+// (degrees) plus any further simplification below
+const HOME_FIRST_MARGIN = 0.03;
+// `within` re-projects the whole test outline for every dot it tests, so
+// the outline is simplified until it holds at most this many vertices
+const HOME_FIRST_MAX_VERTICES = 240;
+const HOME_FIRST_TOLERANCES = [0, 0.02, 0.05, 0.1, 0.2, 0.35, 0.5, 0.75, 1];
+// the countries whose own overview dots carry country_code in this
+// overview tileset (at least 99% of the dots sampled inside each outline,
+// 2026-11-03). on their pages an untagged dot is a neighbour's, so the
+// outline test, the costliest part of the paint and the source of a band
+// of neighbours drawn as home along the border, is skipped. a different
+// overview tileset drops the list and tests every page
+const HOME_FIRST_TAGGED = {
+  tileset: "places-overview-v2-20260722-grid",
+  codes: new Set(["AT", "AU", "CZ", "DE", "DK", "ES", "FI", "GB", "GH", "HR", "HU", "IN", "IT",
+    "KE", "MY", "NL", "NO", "NZ", "PH", "PL", "RO", "SE", "TH", "US", "ZA"])
+};
+const HOME_OUTLINE = { source: "pow-home-outline", layer: "pow-home-outline-line" };
+// the boolean paint expression that is true for a home dot, and the home
+// outline for the line layer; both null until the manifest names this
+// country, and on the global map
+let homeDotTest = null;
+let homeOutlineFeature = null;
+
+// the receded colour set: religionColors with each colour at the
+// neighbour's opacity share, so the overview tier recedes through colour
+// alone (one evaluation per dot) and keeps its zoom-only opacity
+const religionColorsReceded = religionColors.map((item) =>
+  typeof item === "string" && item.startsWith("#") ? hexWithAlpha(item, HOME_FIRST_OPACITY) : item);
+function hexWithAlpha(hex, alpha) {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}
+
+// the value of a piecewise-linear zoom curve, [[zoom, value], ...], at z
+function zoomCurveAt(stops, z) {
+  if (z <= stops[0][0]) return stops[0][1];
+  for (let i = 1; i < stops.length; i++) {
+    const [z1, v1] = stops[i];
+    if (z <= z1) {
+      const [z0, v0] = stops[i - 1];
+      return v0 + (v1 - v0) * (z - z0) / (z1 - z0);
+    }
+  }
+  return stops[stops.length - 1][1];
+}
+
+// a zoom curve as a paint expression whose stops below zoom 8 recede a
+// neighbour's dot by `factor`. maplibre evaluates a data-driven zoom curve
+// at each tile's integer zoom and the next, and an interpolate evaluates
+// both stops around its input even when the input sits on a stop. so the
+// receding stops sit on integer zooms, each followed 0.001 later by the
+// home value alone: every evaluation then runs the home test once. the
+// filler stops only shape hit-testing between integer zooms, where they
+// give a neighbour's dot the home value. a layer that stops drawing at
+// `layerMaxZoom` needs no receding stop above it. the test is bound once
+// with `let`, which keeps the expression small; maplibre evaluates a bound
+// variable where it is read, so the count of tests is unchanged. without
+// a home test, the plain curve
+function homeFirstCurve(stops, factor, layerMaxZoom = HOME_FIRST_FULL_ZOOM) {
+  const plain = ["interpolate", ["linear"], ["zoom"], ...stops.flat()];
+  if (!homeDotTest) return plain;
+  const first = Math.max(Math.ceil(stops[0][0]), 0);
+  const last = Math.min(layerMaxZoom, HOME_FIRST_FULL_ZOOM - 1);
+  const out = ["interpolate", ["linear"], ["zoom"]];
+  for (let z = first; z <= last; z++) {
+    const v = zoomCurveAt(stops, z);
+    out.push(z, v * factor === v ? v : ["case", ["var", "home"], v, v * factor]);
+    out.push(z + 0.001, v);
+  }
+  // from zoom 8 the plain curve's own stops
+  out.push(HOME_FIRST_FULL_ZOOM, zoomCurveAt(stops, HOME_FIRST_FULL_ZOOM));
+  stops.filter(([z]) => z > HOME_FIRST_FULL_ZOOM).forEach(([z, v]) => out.push(z, v));
+  return ["let", "home", homeDotTest, out];
+}
+
+// douglas-peucker over an open polyline in a local frame
+function simplifyLine(points, tol) {
+  if (points.length < 3) return points.slice();
+  const keep = new Uint8Array(points.length);
+  keep[0] = 1;
+  keep[points.length - 1] = 1;
+  const stack = [[0, points.length - 1]];
+  while (stack.length) {
+    const [a, b] = stack.pop();
+    const [ax, ay] = points[a];
+    const dx = points[b][0] - ax;
+    const dy = points[b][1] - ay;
+    const len2 = dx * dx + dy * dy;
+    let worst = 0;
+    let index = -1;
+    for (let i = a + 1; i < b; i++) {
+      const t = len2 ? Math.max(0, Math.min(1, ((points[i][0] - ax) * dx + (points[i][1] - ay) * dy) / len2)) : 0;
+      const d = Math.hypot(points[i][0] - ax - t * dx, points[i][1] - ay - t * dy);
+      if (d > worst) {
+        worst = d;
+        index = i;
+      }
+    }
+    if (index > 0 && worst > tol) {
+      keep[index] = 1;
+      stack.push([a, index], [index, b]);
+    }
+  }
+  return points.filter((_, i) => keep[i]);
+}
+
+// an open ring simplified as two lines split at the vertex farthest from
+// the first
+function simplifyRing(ring, tol) {
+  if (tol <= 0 || ring.length < 5) return ring.slice();
+  let far = 1;
+  let farthest = -1;
+  ring.forEach((p, i) => {
+    const d = Math.hypot(p[0] - ring[0][0], p[1] - ring[0][1]);
+    if (d > farthest) {
+      farthest = d;
+      far = i;
+    }
+  });
+  const a = simplifyLine(ring.slice(0, far + 1), tol);
+  const b = simplifyLine(ring.slice(far).concat([ring[0]]), tol);
+  return a.slice(0, -1).concat(b.slice(0, -1));
+}
+
+function ringArea(ring) {
+  let twice = 0;
+  for (let i = 0; i < ring.length; i++) {
+    const [x1, y1] = ring[i];
+    const [x2, y2] = ring[(i + 1) % ring.length];
+    twice += x1 * y2 - x2 * y1;
+  }
+  return twice / 2;
+}
+
+// an open ring moved outward by d (inward when d < 0) along each vertex's
+// mitre; the mitre is capped at twice d so a sharp corner throws no spike.
+// a narrow inlet can fold the moved ring over itself, so the test keeps
+// the unmoved ring beside it (see homeTestGeometry)
+function offsetRing(ring, d) {
+  const n = ring.length;
+  const sign = ringArea(ring) >= 0 ? 1 : -1;
+  const normal = (a, b) => {
+    const dx = b[0] - a[0];
+    const dy = b[1] - a[1];
+    const len = Math.hypot(dx, dy) || 1;
+    return [sign * dy / len, -sign * dx / len];
+  };
+  return ring.map((c, i) => {
+    const n1 = normal(ring[(i - 1 + n) % n], c);
+    const n2 = normal(c, ring[(i + 1) % n]);
+    let mx = n1[0] + n2[0];
+    let my = n1[1] + n2[1];
+    const ml = Math.hypot(mx, my);
+    if (ml < 1e-9) {
+      mx = n1[0];
+      my = n1[1];
+    } else {
+      mx /= ml;
+      my /= ml;
+    }
+    const len = d / Math.max(mx * n1[0] + my * n1[1], 0.5);
+    return [c[0] + mx * len, c[1] + my * len];
+  });
+}
+
+function ringBox(ring) {
+  let w = Infinity, s = Infinity, e = -Infinity, n = -Infinity;
+  ring.forEach(([x, y]) => {
+    w = Math.min(w, x);
+    s = Math.min(s, y);
+    e = Math.max(e, x);
+    n = Math.max(n, y);
+  });
+  return [w, s, e, n];
+}
+
+function boxRing([w, s, e, n]) {
+  return [[w, s], [e, s], [e, n], [w, n]];
+}
+
+// the test outline at one tolerance: each polygon simplified in a frame
+// where a degree of longitude is scaled to its length at the polygon's
+// latitude, grown by the margin plus the tolerance (holes shrink by the
+// same), and kept beside its simplified unmoved self. a ring the
+// tolerance would collapse becomes its box; islets closer than four
+// tolerances share one box
+function homeTestAt(polygons, tol) {
+  const grow = tol + HOME_FIRST_MARGIN;
+  const parts = [];
+  const islets = [];
+  polygons.forEach((polygon) => {
+    const [w, s, e, n] = ringBox(polygon[0]);
+    const k = Math.max(Math.cos(((s + n) / 2) * Math.PI / 180), 0.2);
+    const toFrame = (ring) => ring.slice(0, -1).map(([x, y]) => [x * k, y]);
+    const fromFrame = (ring) => {
+      const out = ring.map(([x, y]) => [x / k, y]);
+      out.push(out[0]);
+      return out;
+    };
+    const exterior = toFrame(polygon[0]);
+    const [fw, fs, fe, fn] = ringBox(exterior);
+    if (Math.max(fe - fw, fn - fs) < 4 * Math.max(tol, 0.01) || exterior.length < 4) {
+      islets.push([w, s, e, n]);
+      return;
+    }
+    const simple = simplifyRing(exterior, tol);
+    if (simple.length < 3) {
+      islets.push([w, s, e, n]);
+      return;
+    }
+    const holes = polygon.slice(1).map(toFrame).map((ring) => simplifyRing(ring, tol))
+      .filter((ring) => ring.length >= 3);
+    const grownHoles = holes.map((ring) => {
+      const shrunk = offsetRing(ring, -grow);
+      // a hole the margin closes, or turns inside out, is dropped
+      return Math.sign(ringArea(shrunk)) === Math.sign(ringArea(ring)) &&
+        Math.abs(ringArea(shrunk)) > grow * grow ? shrunk : null;
+    }).filter(Boolean);
+    parts.push([simple, ...holes].map(fromFrame));
+    parts.push([offsetRing(simple, grow), ...grownHoles].map(fromFrame));
+  });
+  // islets: boxes grown by the margin, merged while they overlap or sit
+  // within four tolerances of each other
+  const pad = grow;
+  const near = 4 * Math.max(tol, 0.01);
+  let boxes = islets.map(([w, s, e, n]) => [w - pad, s - pad, e + pad, n + pad]);
+  let merged = true;
+  while (merged) {
+    merged = false;
+    for (let i = 0; i < boxes.length && !merged; i++) {
+      for (let j = i + 1; j < boxes.length; j++) {
+        const a = boxes[i];
+        const b = boxes[j];
+        if (a[0] - near <= b[2] && b[0] - near <= a[2] && a[1] - near <= b[3] && b[1] - near <= a[3]) {
+          boxes[i] = [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[2], b[2]), Math.max(a[3], b[3])];
+          boxes.splice(j, 1);
+          merged = true;
+          break;
+        }
+      }
+    }
+  }
+  boxes.forEach((box) => {
+    const ring = boxRing(box);
+    ring.push(ring[0]);
+    parts.push([ring]);
+  });
+  const vertices = parts.reduce((sum, part) => sum + part.reduce((t, ring) => t + ring.length, 0), 0);
+  return { geometry: { type: "MultiPolygon", coordinates: parts }, vertices };
+}
+
+// the coarsest test outline needed to stay within the vertex budget
+function homeTestGeometry(polygons) {
+  let test = null;
+  for (const tol of HOME_FIRST_TOLERANCES) {
+    test = homeTestAt(polygons, tol);
+    if (test.vertices <= HOME_FIRST_MAX_VERTICES) return { ...test, tol };
+  }
+  return { ...test, tol: HOME_FIRST_TOLERANCES[HOME_FIRST_TOLERANCES.length - 1] };
+}
+
+// the manifest's boxes as one multipolygon, grown by the test's margin; a
+// box whose west edge exceeds its east wraps the antimeridian, and runs
+// past 180 as the outline rings do
+function homeBoxGeometry(boxes, grow) {
+  return {
+    type: "MultiPolygon",
+    coordinates: boxes.map(([w, s, e, n]) => {
+      const east = e < w ? e + 360 : e;
+      const ring = boxRing([w - grow, Math.max(s - grow, -85), east + grow, Math.min(n + grow, 85)]);
+      ring.push(ring[0]);
+      return [ring];
+    })
+  };
+}
+
+// the home test for a dot without a country_code: false on a page whose
+// own dots carry codes (HOME_FIRST_TAGGED), else the outline test
+function homeUntaggedTest(region, polygons, codes) {
+  const overviewTiles = String((CONFIG.tiles && CONFIG.tiles.overview) || "");
+  if (overviewTiles.includes(`/${HOME_FIRST_TAGGED.tileset}/`) &&
+    codes.some((code) => HOME_FIRST_TAGGED.codes.has(code))) return false;
+  const test = homeTestGeometry(polygons);
+  return ["all",
+    ["within", homeBoxGeometry(region.boxes, test.tol + HOME_FIRST_MARGIN)],
+    ["within", test.geometry]];
+}
+
+function homeFirstFromRegion(region) {
+  if (!region || !Array.isArray(region.rings) || !region.rings.length || !Array.isArray(region.boxes)) return false;
+  const feature = window.RegionResolve.regionFeature(region);
+  const polygons = feature.geometry.coordinates;
+  if (!polygons.length) return false;
+  const codes = homeIsoCodes();
+  homeDotTest = ["case",
+    ["has", "country_code"],
+    ["any", ...codes.map((code) => ["==", ["get", "country_code"], code])],
+    homeUntaggedTest(region, polygons, codes)];
+  homeOutlineFeature = feature;
+  return true;
+}
+
+// the tiles name countries by iso code; the page by project code
+function homeIsoCodes() {
+  const code = String(RC.countryCode || "").toLowerCase();
+  const codes = new Set([code.toUpperCase()]);
+  Object.entries(PROJECT_CODE_FOR_ISO).forEach(([iso, project]) => {
+    if (project === code) codes.add(iso.toUpperCase());
+  });
+  return [...codes];
+}
+
+// the place layers' paint. the stale and census states choose the
+// opacity curves (syncPlaceDotEra); the home test, once known, recedes
+// the neighbours inside each
+
+// the overview layer's maxzoom (addOverviewLayer); it draws below this zoom
+const OVERVIEW_MAX_ZOOM = 6;
+const OVERVIEW_RADIUS_STOPS = [[0, 1.4], [6, 3.5], [9, 4.2]];
+const PLACES_RADIUS_STOPS = [[6, 2.1], [10, 3.85], [16, 5.95]];
+let overviewOpacityStops = [[0, RC.overviewDotOpacity ?? 0.75], [5, RC.overviewDotOpacity ?? 0.75], [6, 0]];
+let placesOpacityStops = [[6, 0.2], [9, 0.85], [12, 0.75], [18, 0.7]];
+
+function overviewPaint() {
+  return {
+    "circle-radius": homeFirstCurve(OVERVIEW_RADIUS_STOPS, HOME_FIRST_RADIUS, OVERVIEW_MAX_ZOOM),
+    "circle-color": homeDotTest ? ["case", homeDotTest, religionColors, religionColorsReceded] : religionColors,
+    "circle-stroke-width": homeDotTest ? ["case", homeDotTest, 0.6, 0] : 0.6,
+    // a country whose OSM dot density would bury the census choropleth
+    // at national zoom can fade the overview tier via config; the
+    // detailed places tier still ramps in on zoom as everywhere else.
+    // the overview tier recedes a neighbour through its colour, so its
+    // opacity stays a zoom curve
+    "circle-opacity": ["interpolate", ["linear"], ["zoom"], ...overviewOpacityStops.flat()]
+  };
+}
+
+function placesPaint() {
+  return {
+    "circle-radius": homeFirstCurve(PLACES_RADIUS_STOPS, HOME_FIRST_RADIUS),
+    "circle-stroke-width": homeDotTest ? homeFirstCurve([[6, 0.8]], 0) : 0.8,
+    "circle-opacity": homeFirstCurve(placesOpacityStops, HOME_FIRST_OPACITY)
+  };
+}
+
+function applyPlacePaint() {
+  [[LAYERS.overview, overviewPaint()], [LAYERS.places, placesPaint()]].forEach(([id, paint]) => {
+    if (!map.getLayer(id)) return;
+    Object.entries(paint).forEach(([prop, value]) => map.setPaintProperty(id, prop, value));
+  });
+}
+
+// the home outline, drawn beneath the dots and faded out between zooms 6
+// and 7, where the manifest's outline (simplified at 0.03 degrees) would
+// visibly stray from the coast and the border
+function addHomeOutlineLayer() {
+  if (!homeOutlineFeature) return;
+  if (!map.getSource(HOME_OUTLINE.source)) {
+    map.addSource(HOME_OUTLINE.source, { type: "geojson", data: homeOutlineFeature });
+  }
+  if (map.getLayer(HOME_OUTLINE.layer)) return;
+  const beforeId = [LAYERS.overview, LAYERS.polygonsFill, LAYERS.buildingsFill, LAYERS.places]
+    .find((id) => map.getLayer(id));
+  map.addLayer({
+    id: HOME_OUTLINE.layer,
+    type: "line",
+    source: HOME_OUTLINE.source,
+    maxzoom: 7,
+    layout: { "line-join": "round" },
+    paint: {
+      "line-color": "#1e293b",
+      "line-width": ["interpolate", ["linear"], ["zoom"], 2, 1.6, 6, 2.4],
+      "line-opacity": ["interpolate", ["linear"], ["zoom"], 6, 0.85, 7, 0]
+    }
+  }, beforeId);
+}
+
+// the manifest fetch for the home test. it is the same file the border
+// handoff reads after load; this read starts at once so the recession is
+// usually in place before the first tiles are parsed, and the handoff's
+// later read revalidates against the cached copy
+let homeFirstRequested = false;
+function loadHomeFirst() {
+  if (homeFirstRequested || !RC.countryCode || !window.RegionResolve) return;
+  homeFirstRequested = true;
+  const code = String(RC.countryCode).toLowerCase();
+  fetch(`${REGIONS_BASE}_shared/data/region-bboxes.json`)
+    .then((res) => (res.ok ? res.json() : null))
+    .then((doc) => {
+      const region = doc && Array.isArray(doc.regions) ? doc.regions.find((r) => r.code === code) : null;
+      if (!homeFirstFromRegion(region)) return;
+      applyPlacePaint();
+      addHomeOutlineLayer();
+    })
+    .catch(() => { /* no manifest: the page draws without the recession */ });
+}
+loadHomeFirst();
+
 let overviewMobileHandlerAttached = false;
 function addOverviewLayer() {
   map.addSource(SOURCES.overview, {
@@ -1609,28 +2028,8 @@ function addOverviewLayer() {
     "source-layer": OVERVIEW_LAYER,
     maxzoom: 6,
     paint: {
-      "circle-radius": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        0, 1.4,
-        6, 3.5,
-        9, 4.2
-      ],
-      "circle-color": religionColors,
-      "circle-stroke-width": 0.6,
-      "circle-stroke-color": "rgba(10, 11, 14, 0.6)",
-      // a country whose OSM dot density would bury the census choropleth
-      // at national zoom can fade the overview tier via config; the
-      // detailed places tier still ramps in on zoom as everywhere else
-      "circle-opacity": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        0, RC.overviewDotOpacity ?? 0.75,
-        5, RC.overviewDotOpacity ?? 0.75,
-        6, 0.0
-      ]
+      ...overviewPaint(),
+      "circle-stroke-color": "rgba(10, 11, 14, 0.6)"
     }
   });
 
@@ -1683,26 +2082,9 @@ function addPlacesLayer() {
     source: SOURCES.places,
     "source-layer": PLACES_LAYER,
     paint: {
-      "circle-radius": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        6, 2.1,
-        10, 3.85,
-        16, 5.95
-      ],
+      ...placesPaint(),
       "circle-color": religionColors,
-      "circle-stroke-width": 0.8,
-      "circle-stroke-color": "#0b0c10",
-      "circle-opacity": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        6, 0.2,
-        9, 0.85,
-        12, 0.75,
-        18, 0.7
-      ]
+      "circle-stroke-color": "#0b0c10"
     }
   });
 
@@ -1821,6 +2203,7 @@ function addCustomLayers() {
   addPolygonsLayer();
   addBuildingsLayer();
   addPlacesLayer();
+  addHomeOutlineLayer();
 }
 
 function ensureCustomLayers() {
@@ -5226,17 +5609,21 @@ function syncPlaceDotEra() {
   // readable on a historical year and the legend note carries the caveat
   const overviewBase = RC.overviewDotOpacity ?? 0.75;
   const ov = stale ? overviewBase * 0.5 : overviewBase;
+  overviewOpacityStops = [[0, ov], [5, ov], [6, 0]];
+  const censusFirst = censusState.enabled && !stale;
+  placesOpacityStops = stale
+    ? [[6, 0.1], [9, 0.45], [12, 0.4], [18, 0.4]]
+    : censusFirst
+      ? [[6, 0.08], [8, 0.45], [9, 0.85], [12, 0.75], [18, 0.7]]
+      : [[6, 0.2], [9, 0.85], [12, 0.75], [18, 0.7]];
+  // the places tier's opacity curve carries the home test
+  // (homeFirstCurve), so a neighbour stays receded through the era fades;
+  // the overview tier recedes through its colour
   if (map.getLayer(LAYERS.overview)) {
-    map.setPaintProperty(LAYERS.overview, "circle-opacity",
-      ["interpolate", ["linear"], ["zoom"], 0, ov, 5, ov, 6, 0.0]);
+    map.setPaintProperty(LAYERS.overview, "circle-opacity", overviewPaint()["circle-opacity"]);
   }
   if (map.getLayer(LAYERS.places)) {
-    const censusFirst = censusState.enabled && !stale;
-    map.setPaintProperty(LAYERS.places, "circle-opacity", stale
-      ? ["interpolate", ["linear"], ["zoom"], 6, 0.1, 9, 0.45, 12, 0.4, 18, 0.4]
-      : censusFirst
-        ? ["interpolate", ["linear"], ["zoom"], 6, 0.08, 8, 0.45, 9, 0.85, 12, 0.75, 18, 0.7]
-        : ["interpolate", ["linear"], ["zoom"], 6, 0.2, 9, 0.85, 12, 0.75, 18, 0.7]);
+    map.setPaintProperty(LAYERS.places, "circle-opacity", placesPaint()["circle-opacity"]);
   }
   syncPointsControl(mode);
   syncKeyToDots(mode);
