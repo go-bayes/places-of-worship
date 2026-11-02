@@ -26,7 +26,7 @@
       "provider": "Samoa Bureau of Statistics (SBS)",
       "url": "https://www.sbs.gov.ws/wp-content/uploads/2022/12/CensusTablesEXCELFiles.xlsx",
       "retrieval_date": "2026-07-11",
-      "local_path": "/Users/joseph/GIT/places-of-worship/apps/regions/ws/data/area_summary_constituency.json",
+      "local_path": "apps/regions/ws/data/area_summary_constituency.json",
       "licence": {
         "name": "SBS asserts a bare copyright with no explicit reuse grant (verbatim: \"Copyright ©  Samoa Bureau of Statistics (SBS), Apia, Samoa, 2022.\"). No SBS terms-of-use or open-data licence page was located. This build ships derived aggregate rates with SBS attribution under the project lead's use-for-now ruling (2026-07-11). Written SBS confirmation of reuse terms remains pending. The licence position is needs_review.",
         "url": "https://www.sbs.gov.ws/",
