@@ -72,7 +72,7 @@ const stamps = {
     "occupancy-review.js": "20261019a", // move wording and successor in the reviewer's period summary
     "task-presentation.js": "20261015c", // decided-status and reopen-flag helpers
     "convex-task-client.js": "20261015d", // revertReopen client method
-    "review-portal.js": "20261103a", // linked place resolved to a known site
+    "review-portal.js": "20261103b", // linked place: well-formed ids, own osm spellings
     "review-map.js": "20261013a", // tap on a grid-thinned fallback dot zooms in
 };
 const scripts = Object.keys(stamps);

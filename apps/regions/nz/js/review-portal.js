@@ -1932,10 +1932,23 @@ function human(value) {
         const osmRef = task?.osm_object_type && task?.matched_osm_id
             ? `osm:${task.osm_object_type}/${task.matched_osm_id}`
             : undefined;
-        return [task?.task_id, task?.matched_current_site_id, task?.candidate_site_id, task?.source_record_id, osmRef]
+        const ids = [task?.task_id, task?.matched_current_site_id, task?.candidate_site_id, task?.source_record_id, osmRef]
             .filter((id) => typeof id === "string")
             .map((id) => id.trim())
             .filter((id) => id.length > 0);
+        // the other spelling of each osm object: n123 and osm:node/123 name
+        // one place, as ownIdentifiers in convex/lib/identityLinks.ts maps it
+        const spellings = new Set(ids);
+        for (const id of ids) {
+            const site = /^([nwr])([0-9]+)$/.exec(id);
+            const ref = /^osm:(node|way|relation)\/([0-9]+)$/.exec(id);
+            const type = site ? { n: "node", w: "way", r: "relation" }[site[1]] : ref?.[1];
+            const number = site ? site[2] : ref?.[2];
+            if (!type) continue;
+            spellings.add(`osm:${type}/${number}`);
+            spellings.add(`${type[0]}${number}`);
+        }
+        return [...spellings];
     }
 
     // mirrors convex/lib/identityLinks.ts so the reviewer hears before sending
@@ -2140,7 +2153,7 @@ function human(value) {
                 <div>
                     <label for="linkedSiteIds">Linked place</label>
                     <input id="linkedSiteIds" name="linkedSiteIds" type="text" maxlength="2200" autocomplete="off" ${canDecide ? "" : "disabled"}>
-                    <small class="muted">The other place's site or candidate identifier, its task identifier, a source record, or an OpenStreetMap reference such as osm:node/123; separate several with commas. The place must already be in the portal, in any country, and the decision records its site identifier. Required for a successor at a new site, an end and new foundation, a split or a merge; optional for a duplicate or an uncertain decision.</small>
+                    <small class="muted">The other place's site identifier, such as n123 or w456, an OpenStreetMap reference such as osm:node/123, a candidate identifier, or the task identifier or source record of a place in the portal; separate several with commas. A place in any country may be linked; a task or source record is recorded as its place's site identifier. Required for a successor at a new site, an end and new foundation, a split or a merge; optional for a duplicate or an uncertain decision.</small>
                 </div>
                 ${hasOriginalPoint ? `
                     <div>

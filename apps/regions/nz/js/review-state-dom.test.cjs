@@ -119,8 +119,8 @@ assert.doesNotMatch(form, /value="relocation"/);
 assert.match(form, /<label for="linkedSiteIds">Linked place<\/label>/);
 assert.match(form, /<input id="linkedSiteIds" name="linkedSiteIds" type="text"/);
 // the help names the identifier forms the server resolves, and what it stores
-assert.match(form, /site or candidate identifier, its task identifier, a source record, or an OpenStreetMap reference such as osm:node\/123/);
-assert.match(form, /in any country, and the decision records its site identifier/);
+assert.match(form, /site identifier, such as n123 or w456, an OpenStreetMap reference such as osm:node\/123, a candidate identifier, or the task identifier or source record of a place in the portal/);
+assert.match(form, /A place in any country may be linked; a task or source record is recorded as its place's site identifier/);
 assert.deepEqual([...portal.parseLinkedSiteIds(" nz-a ,\n nz-b,, ")], ["nz-a", "nz-b"]);
 assert.deepEqual([...portal.parseLinkedSiteIds(undefined)], []);
 for (const basis of ["successor_at_new_site", "end_and_new_foundation", "split", "merge"]) {
@@ -148,6 +148,11 @@ for (const own of ["osm:node/123", "osm:way/456"]) {
     assert.match(portal.linkedSiteIdsProblem("successor_at_new_site", [own], intakeTask), /another place/);
 }
 assert.equal(portal.linkedSiteIdsProblem("successor_at_new_site", ["osm:node/789"], intakeTask), "");
+// the bare spelling of the task's own osm object is its own place too
+for (const own of ["n123", "w456"]) {
+    assert.match(portal.linkedSiteIdsProblem("successor_at_new_site", [own], intakeTask), /another place/);
+}
+assert.equal(portal.linkedSiteIdsProblem("successor_at_new_site", ["n456"], intakeTask), "");
 assert.equal(portal.linkedSiteIdsProblem("successor_at_new_site", ["nz-site-2"], ownTask), "");
 
 // the last decision shows its identity basis and escaped links
