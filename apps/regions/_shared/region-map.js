@@ -3193,6 +3193,7 @@ let countsScheduled = false;
 // its counts, then its names. country maps keep the compact pill, because
 // the census pill and its folded bar sit beside the key there
 let countsTopThree = null; // [{ key, label, color, count }], or null
+let countsSampled = false; // the counts are an approximation (below zoom 8)
 let keyStripLive = false;  // the strip has live counts to show
 const KEY_STRIP_QUERY = window.matchMedia("(min-width: 900px)");
 function keyStripWanted() {
@@ -3201,13 +3202,14 @@ function keyStripWanted() {
 // form: "counts" (dot, name, count), "names" (dot, name) or "dots"
 function countsToggleName(top, form) {
   const verb = countsUserEnabled ? "Hide" : "Show";
-  const names = top.map((c) => (form === "counts" ? `${c.label} ${c.count.toLocaleString()}` : c.label));
+  const names = top.map((c) => (form === "counts" ? `${c.label} ${countsSampled ? "about " : ""}${c.count.toLocaleString()}` : c.label));
   return `${verb} denomination key: ${names.join(", ")}`;
 }
 function renderCountsToggle(top, form) {
   const dot = (c) => `<span class="key-dot" style="background:${c.color}" aria-hidden="true"></span>`;
   const cat = (c) => `<span class="key-cat">${dot(c)}<span class="key-name">${c.label}</span>` +
-    (form === "counts" ? `<span class="key-count">${c.count.toLocaleString()}</span>` : "") +
+    // sampled counts carry a tilde, as the panel's line says "places shown"
+    (form === "counts" ? `<span class="key-count">${countsSampled ? "~" : ""}${c.count.toLocaleString()}</span>` : "") +
     `</span>`;
   countsToggle.classList.toggle("key-strip", form !== "dots");
   countsToggle.innerHTML =
@@ -3300,6 +3302,7 @@ function renderCounts(counts, sampled = false) {
     .slice(0, 3)
     .map((c) => ({ ...c, count: counts[c.key] || 0 }));
   countsTopThree = ranked.length ? ranked : null;
+  countsSampled = Boolean(sampled);
   syncCountsToggleLabel();
 }
 

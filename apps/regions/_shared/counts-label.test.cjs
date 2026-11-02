@@ -69,7 +69,7 @@ assert.match(runtime, /map\.on\("idle", scheduleCountsRefresh\);/);
 // the key's accessible name lists the categories its dots show (ui
 // suggestions item 3), with their counts when the strip shows counts
 {
-  const context = vm.createContext({ countsUserEnabled: false });
+  const context = vm.createContext({ countsUserEnabled: false, countsSampled: false });
   vm.runInContext(`${lift("function countsToggleName(")}\nthis.name = countsToggleName;`, context);
   const top = [
     { label: "Christian", count: 3159 },
@@ -79,6 +79,10 @@ assert.match(runtime, /map\.on\("idle", scheduleCountsRefresh\);/);
   assert.equal(context.name(top, "dots"), "Show denomination key: Christian, Muslim, Hindu");
   assert.equal(context.name(top, "names"), "Show denomination key: Christian, Muslim, Hindu");
   assert.match(context.name(top, "counts"), /^Show denomination key: Christian 3.?159, Muslim 72, Hindu 9$/);
+  // below zoom 8 the counts are sampled, and the name says so
+  context.countsSampled = true;
+  assert.match(context.name(top, "counts"), /^Show denomination key: Christian about 3.?159, Muslim about 72, Hindu about 9$/);
+  assert.equal(context.name(top, "names"), "Show denomination key: Christian, Muslim, Hindu");
   context.countsUserEnabled = true;
   assert.match(context.name(top, "dots"), /^Hide denomination key: /);
 }
