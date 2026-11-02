@@ -13,12 +13,16 @@ Outputs:
 
 Usage:
   uv run --with requests python3 scripts/osm_pow_country_counts.py
+
+The Natural Earth download is cached in data/intermediate/ (ignored by git);
+set OSM_POW_CACHE_DIR to cache it elsewhere.
 """
 
 from __future__ import annotations
 
 import csv
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -32,10 +36,10 @@ FILTER = "amenity=place_of_worship and (type:node or type:way)"
 ANCHOR_EARLY = "2025-09-01"
 LATEST_CEILING = "2026-09-01T00:00:00Z"  # pick the latest ohsome timestamp on or before this
 
-SCRATCH = Path("/private/tmp/claude-503/-Users-joseph-GIT-places-of-worship/cbb02a28-d8d7-4c2f-aab3-2b2a83b155b3/scratchpad")
-NE_CACHE = SCRATCH / "ne_110m_admin_0_countries.geojson"
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
+# the download cache is local and ignored; OSM_POW_CACHE_DIR moves it
+CACHE_DIR = Path(os.environ.get("OSM_POW_CACHE_DIR", REPO_ROOT / "data/intermediate"))
+NE_CACHE = CACHE_DIR / "ne_110m_admin_0_countries.geojson"
 OUT_CSV = REPO_ROOT / "docs/development/assets/osm-pow-counts-2026-09-03.csv"
 # per-country progress so an interrupted overnight run resumes where it stopped
 PROGRESS_JSONL = REPO_ROOT / "data/intermediate/osm_pow_counts_progress.jsonl"
@@ -59,6 +63,7 @@ def fetch_country_polygons() -> list[dict]:
     else:
         resp = requests.get(NE_URL, timeout=60)
         resp.raise_for_status()
+        NE_CACHE.parent.mkdir(parents=True, exist_ok=True)
         NE_CACHE.write_text(resp.text)
         raw = json.loads(resp.text)
 
