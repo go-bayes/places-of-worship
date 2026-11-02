@@ -149,7 +149,7 @@ export const MAX_RESOLUTION_MATCHES = 25;
 
 // typed against the generated data model, so a renamed index or field
 // fails the typecheck; the tests supply an in-memory table of the same shape
-type TaskReader = QueryCtx["db"];
+export type TaskReader = QueryCtx["db"];
 const take = MAX_RESOLUTION_MATCHES;
 
 // the places a record reference resolves to: the site identifiers carried
