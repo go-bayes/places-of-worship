@@ -1940,8 +1940,8 @@ function human(value) {
         // one place, as ownIdentifiers in convex/lib/identityLinks.ts maps it
         const spellings = new Set(ids);
         for (const id of ids) {
-            const site = /^([nwr])([0-9]+)$/.exec(id);
-            const ref = /^osm:(node|way|relation)\/([0-9]+)$/.exec(id);
+            const site = /^([nwr])([1-9][0-9]*)$/.exec(id);
+            const ref = /^osm:(node|way|relation)\/([1-9][0-9]*)$/.exec(id);
             const type = site ? { n: "node", w: "way", r: "relation" }[site[1]] : ref?.[1];
             const number = site ? site[2] : ref?.[2];
             if (!type) continue;

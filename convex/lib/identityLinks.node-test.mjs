@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { assertIdentityLinks, ownIdentifiers, resolveIdentityLinks, LINK_REQUIRED_BASES, LINK_OPTIONAL_BASES } from "./identityLinks.ts";
+import { assertIdentityLinks, ownIdentifiers, resolveIdentityLinks, LINK_REQUIRED_BASES, LINK_OPTIONAL_BASES, MAX_RESOLUTION_MATCHES } from "./identityLinks.ts";
 
 const task = { task_id: "task_1", matched_current_site_id: "nz-site-1", candidate_site_id: "candidate:nz:b:1" };
 const check = (identity_decision, linked_site_ids) => assertIdentityLinks(task, { identity_decision, linked_site_ids });
@@ -127,7 +127,7 @@ test("a well-formed place identifier no task carries is stored as entered", asyn
 });
 
 test("an identifier that fits no place form and no task carries is refused by name, with an example", async () => {
-  for (const typo of ["nz-osm-node-1", "N999", "n 999", "n999a", "osm:node/12a", "osm:area/1", "candidate:", "candidate: x", "999"]) {
+  for (const typo of ["nz-osm-node-1", "N999", "n 999", "n999a", "osm:node/12a", "osm:area/1", "candidate:", "candidate: x", "999", "n0123", "osm:node/0123"]) {
     await assert.rejects(resolve(["n100", typo]), (error) => {
       assert.ok(error.message.includes(`Linked place "${typo}" is not a place identifier`), error.message);
       assert.match(error.message, /such as n123 or w456.*osm:node\/123.*candidate:nz-candidate-1/);
@@ -173,6 +173,16 @@ test("an ambiguous reference and two links naming one place are refused", async 
   await assert.rejects(resolve(["n100", "osm:node/100"]), /"n100" and "osm:node\/100" name the same place \(n100\)/);
   // two spellings of one object no task carries are one place too
   await assert.rejects(resolve(["n999", "osm:node/999"]), /"n999" and "osm:node\/999" name the same place \(osm:node\/999\)/);
+  // a site-less workpack record and the osm reference of its object are one
+  // place, although the first is stored as osm:node/100 and the second as n100
+  await assert.rejects(resolve(["osm:node/100", "nz-osm-date-tag-node-100"]), /name the same place/);
+});
+
+test("a reference more tasks share than one lookup reads is refused, not read as complete", async () => {
+  const many = Array.from({ length: MAX_RESOLUTION_MATCHES + 1 }, (_, i) => ({ task_id: `bulk-${i}`, candidate_site_id: i === MAX_RESOLUTION_MATCHES ? "candidate:other" : "candidate:same", source_record_id: "shared batch record" }));
+  await assert.rejects(resolve(["shared batch record"], thisTask, many), /shared by more than 10 tasks; give the site identifier/);
+  // at the limit the lookup is complete and resolves
+  assert.deepEqual(await resolve(["shared batch record"], thisTask, many.slice(0, MAX_RESOLUTION_MATCHES)), ["candidate:same"]);
 });
 
 test("resolution reads only through the five task indexes", async () => {

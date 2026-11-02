@@ -46,8 +46,8 @@ type TaskIdentifiers = {
 //   osm:relation/123
 // - a candidate id, "candidate:" and a task id or a country, batch and row,
 //   as tasks.ts, rapidEntry.ts, batchImport.ts and the seed scripts mint it
-export const OSM_REFERENCE = /^osm:(node|way|relation)\/([0-9]+)$/;
-export const MAP_SITE_ID = /^([nwr])([0-9]+)$/;
+export const OSM_REFERENCE = /^osm:(node|way|relation)\/([1-9][0-9]*)$/;
+export const MAP_SITE_ID = /^([nwr])([1-9][0-9]*)$/;
 export const CANDIDATE_SITE_ID = /^candidate:[A-Za-z0-9][A-Za-z0-9._:#/-]*$/;
 
 const OSM_TYPE_BY_PREFIX: Record<string, string> = { n: "node", w: "way", r: "relation" };
@@ -143,14 +143,17 @@ export function assertIdentityLinks(
 // 2. otherwise by form: a well-formed place identifier (above) is stored as
 //    entered, and anything else is refused as a likely typo.
 
-// rows read per index per link: ten links and five lookups bound one
-// decision at under a thousand reads
-export const MAX_RESOLUTION_MATCHES = 25;
+// tasks one record reference may name before the reviewer is asked for the
+// site identifier instead: each lookup reads one more row than this, so a
+// lookup that is cut short is refused rather than read as complete, and one
+// decision (ten links, two site lookups and three record lookups of eleven
+// rows) reads at most 350 tasks
+export const MAX_RESOLUTION_MATCHES = 10;
 
 // typed against the generated data model, so a renamed index or field
 // fails the typecheck; the tests supply an in-memory table of the same shape
 export type TaskReader = QueryCtx["db"];
-const take = MAX_RESOLUTION_MATCHES;
+const take = MAX_RESOLUTION_MATCHES + 1;
 
 // the places a record reference resolves to: the site identifiers carried
 // by the tasks that hold it, one per place; where none carries one, the
@@ -196,15 +199,23 @@ export async function resolveIdentityLinks(
       canonical = id;
     } else {
       const holders = new Map<string, TaskIdentifiers>();
+      // a lookup that fills its read is cut short, and a later task could
+      // name another place, so it is refused rather than read as complete
+      const complete = <T>(rows: T[]): T[] => {
+        if (rows.length > MAX_RESOLUTION_MATCHES) {
+          throw new Error(`Linked place "${id}" is shared by more than ${MAX_RESOLUTION_MATCHES} tasks; give the site identifier of the place meant.`);
+        }
+        return rows;
+      };
       const osm = osmObjectOf(id);
       if (osm !== undefined) {
         // the index narrows to one osm number; the type is checked here
-        for (const row of await db.query("tasks").withIndex("by_osm", (q) => q.eq("matched_osm_id", osm.number)).take(take)) {
+        for (const row of complete(await db.query("tasks").withIndex("by_osm", (q) => q.eq("matched_osm_id", osm.number)).take(take))) {
           if (row.osm_object_type === osm.type) holders.set(row.task_id, row);
         }
       }
-      for (const row of await db.query("tasks").withIndex("by_task_id", (q) => q.eq("task_id", id)).take(take)) holders.set(row.task_id, row);
-      for (const row of await db.query("tasks").withIndex("by_source_record_id", (q) => q.eq("source_record_id", id)).take(take)) holders.set(row.task_id, row);
+      for (const row of complete(await db.query("tasks").withIndex("by_task_id", (q) => q.eq("task_id", id)).take(take))) holders.set(row.task_id, row);
+      for (const row of complete(await db.query("tasks").withIndex("by_source_record_id", (q) => q.eq("source_record_id", id)).take(take))) holders.set(row.task_id, row);
       if (holders.has(task.task_id)) {
         throw new Error(`Linked place "${id}" is this task's own record; a link must name another place.`);
       }

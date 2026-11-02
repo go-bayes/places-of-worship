@@ -550,8 +550,8 @@ Fields:
 
   2. A link no task carries is accepted, trimmed and as entered, if it is a
      well-formed place identifier: a map site id `n123`, `w123` or `r123`
-     (`^[nwr][0-9]+$`), an OSM reference `osm:node/123`, `osm:way/123` or
-     `osm:relation/123` (`^osm:(node|way|relation)/[0-9]+$`), or a candidate
+     (`^[nwr][1-9][0-9]*$`), an OSM reference `osm:node/123`, `osm:way/123` or
+     `osm:relation/123` (`^osm:(node|way|relation)/[1-9][0-9]*$`), or a candidate
      id (`^candidate:[A-Za-z0-9][A-Za-z0-9._:#/-]*$`, as `candidate:<task id>`
      and `candidate:<country>:<batch>:<row>` are minted). Anything else is
      refused as a likely typo, naming the string and giving an example of each
@@ -562,8 +562,11 @@ Fields:
   resolves to more than one site id (a source record shared by several
   candidates, for example), when a link resolves to the task's own place
   (another task on the same site, named by its task id, or either spelling of
-  the task's own OSM object), and when two links name the same place. Each
-  lookup reads at most 25 tasks, so a decision reads under a thousand. The
+  the task's own OSM object), when two links name the same place, and when a
+  reference is shared by more than ten tasks (each lookup reads eleven rows
+  and refuses a full read rather than treat it as complete, so a decision
+  reads at most 350 tasks). Numbers in a site id or OSM reference have no
+  leading zero, so `n0123` is refused rather than taken as another place. The
   portal's help text names the accepted forms, and its check refuses the
   task's own identifiers in either OSM spelling; the form check is the
   server's, and its refusal is shown as returned, so no new public query is
