@@ -328,9 +328,10 @@ export async function applyReviewDecision(ctx: MutationCtx, args: { taskId: stri
     // a moved pin needs a ruling before acceptance; the ruling is refused
     // where the task has no original point to rule between
     assertLocationOutcome(task, args.decision);
-    // relocation is refused and a linked basis names its other place; each
-    // link must resolve to a known place and is stored as that place's
-    // canonical identifier (jb ruling, option b)
+    // relocation is refused and a linked basis names its other place; a
+    // link a task carries is stored as the site id behind it, and one no
+    // task carries must be a well-formed place identifier (jb, option b and
+    // its revision of 2026-11-03)
     const checkedLinks = assertIdentityLinks(task, args.decision);
     const linkedSiteIds = checkedLinks === undefined
       ? undefined
