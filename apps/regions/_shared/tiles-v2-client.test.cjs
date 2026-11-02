@@ -72,7 +72,7 @@ const stamps = {
     "occupancy-review.js": "20261019a", // move wording and successor in the reviewer's period summary
     "task-presentation.js": "20261015c", // decided-status and reopen-flag helpers
     "convex-task-client.js": "20261015d", // revertReopen client method
-    "review-portal.js": "20261103a", // one-line header, account in the header, rollup in the queue's header
+    "review-portal.js": "20261103b", // one-line header, account in the header, rollup in the queue's header
     "review-map.js": "20261103a", // the legend becomes the folding map data panel
 };
 const scripts = Object.keys(stamps);
