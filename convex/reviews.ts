@@ -16,7 +16,7 @@ import {
 import { canonicalJson, sha256 } from "./lib/sha256";
 import { appendTaskEvent } from "./lib/taskEvents";
 import { assertLocationOutcome } from "./lib/locationOutcome";
-import { assertIdentityLinks } from "./lib/identityLinks";
+import { assertIdentityLinks, resolveIdentityLinks } from "./lib/identityLinks";
 
 async function getTaskOrThrow(ctx: any, taskId: string): Promise<Doc<"tasks">> {
   const task = await ctx.db
@@ -328,8 +328,13 @@ export async function applyReviewDecision(ctx: MutationCtx, args: { taskId: stri
     // a moved pin needs a ruling before acceptance; the ruling is refused
     // where the task has no original point to rule between
     assertLocationOutcome(task, args.decision);
-    // relocation is refused and a linked basis names its other place
-    const linkedSiteIds = assertIdentityLinks(task, args.decision);
+    // relocation is refused and a linked basis names its other place; each
+    // link must resolve to a known place and is stored as that place's
+    // canonical identifier (jb ruling, option b)
+    const checkedLinks = assertIdentityLinks(task, args.decision);
+    const linkedSiteIds = checkedLinks === undefined
+      ? undefined
+      : await resolveIdentityLinks(ctx.db, task, checkedLinks);
     assertMaxString("review decision note", args.decision.decision_note, TASK_REASON_MAX);
     assertMaxString("accepted action", args.decision.accepted_action, MEDIUM_TEXT_MAX);
     assertMaxString("required follow-up", args.decision.required_follow_up, LONG_TEXT_MAX);

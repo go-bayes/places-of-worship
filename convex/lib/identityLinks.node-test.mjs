@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { assertIdentityLinks, LINK_REQUIRED_BASES, LINK_OPTIONAL_BASES } from "./identityLinks.ts";
+import { assertIdentityLinks, resolveIdentityLinks, LINK_REQUIRED_BASES, LINK_OPTIONAL_BASES } from "./identityLinks.ts";
 
 const task = { task_id: "task_1", matched_current_site_id: "nz-site-1", candidate_site_id: "candidate:nz:b:1" };
 const check = (identity_decision, linked_site_ids) => assertIdentityLinks(task, { identity_decision, linked_site_ids });
@@ -51,4 +51,101 @@ test("link identifiers are bounded, distinct, printable and not the task itself"
   assert.deepEqual(assertIdentityLinks(intake, { identity_decision: "successor_at_new_site", linked_site_ids: ["osm:node/789"] }), ["osm:node/789"]);
   assert.throws(() => check("merge", Array.from({ length: 11 }, (_, i) => `nz-${i}`)), /at most 10/);
   assert.equal(check("merge", Array.from({ length: 10 }, (_, i) => `nz-${i}`)).length, 10);
+});
+
+// an in-memory tasks table answering the five index lookups the resolver
+// makes; each index is checked against the field it names in schema.ts
+const INDEX_FIELDS = { by_matched_site: "matched_current_site_id", by_candidate_site: "candidate_site_id", by_osm: "matched_osm_id", by_task_id: "task_id", by_source_record_id: "source_record_id" };
+function tasksDb(rows) {
+  const reads = [];
+  return {
+    reads,
+    query(table) {
+      assert.equal(table, "tasks");
+      return {
+        withIndex(index, range) {
+          let field;
+          let value;
+          range({ eq(f, v) { field = f; value = v; return this; } });
+          assert.equal(field, INDEX_FIELDS[index], `${index} ranges over ${INDEX_FIELDS[index]}`);
+          reads.push(index);
+          return { async take(n) { return rows.filter((row) => row[field] === value).slice(0, n); } };
+        },
+      };
+    },
+  };
+}
+
+const known = [
+  // an nz map site, a revision task on the same site, and a workpack task
+  // that names it only by osm reference and source record
+  { task_id: "nz-verify-n100", country_code: "NZ", matched_current_site_id: "n100", source_record_id: "nz-verify-n100", matched_osm_id: "100", osm_object_type: "node" },
+  { task_id: "revise-nz-1-n100", country_code: "NZ", matched_current_site_id: "n100", source_record_id: "nz_places:abc#n100", matched_osm_id: "100", osm_object_type: "node" },
+  { task_id: "nz-workpack-1", country_code: "NZ", source_record_id: "nz-osm-date-tag-node-100", matched_osm_id: "100", osm_object_type: "node" },
+  // a way sharing the number of the node above
+  { task_id: "nz-verify-w100", country_code: "NZ", matched_current_site_id: "w100", source_record_id: "nz-verify-w100", matched_osm_id: "100", osm_object_type: "way" },
+  // a nominated candidate, and a vanuatu site whose current id is an osm reference
+  { task_id: "nz-manual-1", country_code: "NZ", candidate_site_id: "candidate:nz-candidate-1" },
+  { task_id: "vu-revise-1", country_code: "VU", matched_current_site_id: "osm:node/555", source_record_id: "osm-vu-place-of-worship#node/555", matched_osm_id: "555", osm_object_type: "node" },
+  // an internal-intake task that names its place only by osm reference
+  { task_id: "agent-research:k1", country_code: "NZ", source_record_id: "osm:way/777", matched_osm_id: "777", osm_object_type: "way" },
+  // a source record shared by two different places
+  { task_id: "vu-woodberry-1", country_code: "VU", candidate_site_id: "candidate:vu:w:1", source_record_id: "Woodberry (2010)" },
+  { task_id: "vu-woodberry-2", country_code: "VU", candidate_site_id: "candidate:vu:w:2", source_record_id: "Woodberry (2010)" },
+];
+const thisTask = { task_id: "nz-verify-n200", matched_current_site_id: "n200", source_record_id: "nz-verify-n200", matched_osm_id: "200", osm_object_type: "node" };
+const resolve = (links, task = thisTask, rows = known) => resolveIdentityLinks(tasksDb(rows), task, links);
+
+test("an existing current or candidate site identifier is stored as entered", async () => {
+  assert.deepEqual(await resolve(["n100"]), ["n100"]);
+  assert.deepEqual(await resolve(["candidate:nz-candidate-1"]), ["candidate:nz-candidate-1"]);
+});
+
+test("an existing source record or task identifier resolves to its place's site identifier", async () => {
+  assert.deepEqual(await resolve(["nz-verify-n100"]), ["n100"]);
+  assert.deepEqual(await resolve(["nz_places:abc#n100"]), ["n100"]);
+  assert.deepEqual(await resolve(["revise-nz-1-n100"]), ["n100"]);
+  // a workpack record without a site id stands for its osm object's place
+  assert.deepEqual(await resolve(["nz-osm-date-tag-node-100"]), ["osm:node/100"]);
+});
+
+test("an existing osm reference resolves to the site carrying that object, type and all", async () => {
+  // the node's tasks carry n100 (one carries no site id), the way's w100
+  assert.deepEqual(await resolve(["osm:node/100"]), ["n100"]);
+  assert.deepEqual(await resolve(["osm:way/100"]), ["w100"]);
+  // an internal-intake place known only by its osm reference keeps it
+  assert.deepEqual(await resolve(["osm:way/777"]), ["osm:way/777"]);
+  await assert.rejects(resolve(["osm:relation/100"]), /"osm:relation\/100" is not a known place/);
+});
+
+test("an unknown identifier is refused by name", async () => {
+  await assert.rejects(resolve(["n999"]), /Linked place "n999" is not a known place/);
+  await assert.rejects(resolve(["n100", "nz-osm-node-1"]), /"nz-osm-node-1" is not a known place/);
+});
+
+test("a link to a place in another country is accepted", async () => {
+  assert.deepEqual(await resolve(["osm:node/555"]), ["osm:node/555"]);
+  assert.deepEqual(await resolve(["osm-vu-place-of-worship#node/555", "candidate:vu:w:1"]), ["osm:node/555", "candidate:vu:w:1"]);
+});
+
+test("a link that resolves to this task's own place is refused", async () => {
+  // another task on this task's site, named by its task id or source record
+  const rows = [...known, { task_id: "revise-nz-1-n200", matched_current_site_id: "n200", source_record_id: "nz_places:abc#n200" }];
+  await assert.rejects(resolve(["revise-nz-1-n200"], thisTask, rows), /resolves to this task's own place \(n200\)/);
+  await assert.rejects(resolve(["nz_places:abc#n200"], thisTask, rows), /own place/);
+  // the place an internal-intake task names by osm reference
+  const intake = known.find((row) => row.task_id === "agent-research:k1");
+  const other = [...known, { task_id: "nz-workpack-2", source_record_id: "nz-osm-date-tag-way-777", matched_osm_id: "777", osm_object_type: "way" }];
+  await assert.rejects(resolve(["nz-osm-date-tag-way-777"], intake, other), /own place \(osm:way\/777\)/);
+});
+
+test("an ambiguous reference and two links naming one place are refused", async () => {
+  await assert.rejects(resolve(["Woodberry (2010)"]), /matches more than one place \(candidate:vu:w:1, candidate:vu:w:2\)/);
+  await assert.rejects(resolve(["n100", "osm:node/100"]), /"n100" and "osm:node\/100" name the same place \(n100\)/);
+});
+
+test("resolution reads only through the five task indexes", async () => {
+  const db = tasksDb(known);
+  await resolveIdentityLinks(db, thisTask, ["osm:node/100"]);
+  assert.deepEqual(db.reads, ["by_matched_site", "by_candidate_site", "by_osm", "by_task_id", "by_source_record_id"]);
 });
