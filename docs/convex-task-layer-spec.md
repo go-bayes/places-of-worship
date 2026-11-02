@@ -527,37 +527,47 @@ Fields:
   record it repeats and an uncertain decision its alternatives; the other bases
   refuse links. At most 10 identifiers of at most 200 characters each, trimmed,
   distinct, and none naming the task's own record (`task_id`,
-  `matched_current_site_id`, `candidate_site_id`, `source_record_id`, or the
-  `osm:<type>/<id>` reference) (`convex/lib/identityLinks.ts`). Stored outside `decision_hash`,
+  `matched_current_site_id`, `candidate_site_id`, `source_record_id`, the
+  `osm:<type>/<id>` reference, or the other spelling of an OSM object among
+  them, so `w777` for a task carrying only `osm:way/777` and back)
+  (`convex/lib/identityLinks.ts`). Stored outside `decision_hash`,
   like `evidence_version_hash`, until a version 2 envelope names it.
-  Each link must name a known place (JB ruling, option b, before #206
-  merged). Convex holds no master site table, so the `tasks` table is the
-  register of known places, in every country: a successor across a border is
-  accepted, as definition 0.1.6 permits. `reviews:applyReviewDecision` resolves
-  each link through the existing task indexes, with no new index:
+  Links are resolved simply (JB, option b and its revision of 2026-11-03:
+  "an academic site, not Fort Knox"). Convex holds no master site table, and
+  a link may name a place in any country, as definition 0.1.6 permits a
+  successor across a border. `reviews:applyReviewDecision` resolves each link
+  in two steps, through the existing task indexes with no new index:
 
-  | Entered | Proved by | Stored as |
-  | --- | --- | --- |
-  | current site id (`n123`, `w123`; `osm:node/123` in Vanuatu) | `by_matched_site` | as entered |
-  | candidate site id (`candidate:...`) | `by_candidate_site` | as entered |
-  | `osm:<type>/<id>` reference | `by_osm`, with the object type checked | the site id of the tasks carrying the object, else the reference |
-  | task id | `by_task_id` | the site id of that task, else its OSM reference, else the task id |
-  | source record id | `by_source_record_id` | as for a task id |
+  1. A link a task carries resolves to the site id behind it:
 
-  A site id (current, then candidate) found on a task is taken as entered and
-  checked first; any other identifier is a record reference, stored as the
-  site id of the place that carries it, so a stored link names a place and
-  never a document. Where some tasks holding a reference carry a site id and
-  others do not, the site id stands. The decision is refused, naming the
-  identifier entered, when a link names no known place, when a reference
+     | Entered | Found by | Stored as |
+     | --- | --- | --- |
+     | current site id | `by_matched_site` | as entered |
+     | candidate site id | `by_candidate_site` | as entered |
+     | `n123`/`w123`/`r123` or `osm:<type>/<id>` | `by_osm`, with the object type checked | the site id of the tasks carrying the object, else the reference entered |
+     | task id | `by_task_id` | the site id of that task, else the link itself if it is a well-formed place identifier, else its OSM reference, else the task id |
+     | source record id | `by_source_record_id` | as for a task id |
+
+  2. A link no task carries is accepted, trimmed and as entered, if it is a
+     well-formed place identifier: a map site id `n123`, `w123` or `r123`
+     (`^[nwr][0-9]+$`), an OSM reference `osm:node/123`, `osm:way/123` or
+     `osm:relation/123` (`^osm:(node|way|relation)/[0-9]+$`), or a candidate
+     id (`^candidate:[A-Za-z0-9][A-Za-z0-9._:#/-]*$`, as `candidate:<task id>`
+     and `candidate:<country>:<batch>:<row>` are minted). Anything else is
+     refused as a likely typo, naming the string and giving an example of each
+     accepted form.
+
+  `n123` and `osm:node/123` name one OSM object and so one place. The
+  decision is also refused, naming the identifier entered, when a reference
   resolves to more than one site id (a source record shared by several
-  candidates, for example), when it resolves to the task's own place (another
-  task on the same site, named by its task id), and when two links resolve to
-  the same place. Each lookup reads at most 25 tasks, so a decision reads under
-  a thousand. A map site that has no task in the deployment is not yet a known
-  place there; link it once its task is seeded. The portal's help text names
-  the accepted forms; the client check stays a string check, and the server's
-  refusal is shown as returned, so no new public query is needed.
+  candidates, for example), when a link resolves to the task's own place
+  (another task on the same site, named by its task id, or either spelling of
+  the task's own OSM object), and when two links name the same place. Each
+  lookup reads at most 25 tasks, so a decision reads under a thousand. The
+  portal's help text names the accepted forms, and its check refuses the
+  task's own identifiers in either OSM spelling; the form check is the
+  server's, and its refusal is shown as returned, so no new public query is
+  needed.
 - `target_year_affects`: array of target-year affect objects.
 - `required_follow_up`: optional.
 - `created_at`, `updated_at`.
