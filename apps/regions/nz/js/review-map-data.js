@@ -135,6 +135,9 @@
                 // the body opens above the bar
                 if (parts.caret) parts.caret.textContent = folded ? "▴" : "▾";
                 if (parts.body) parts.body.hidden = folded;
+                // the opened body grows upward, so pull a panel dragged near
+                // the map's top back inside it (greptile, pr #212)
+                parts.movable?.clamp();
                 if (chosen) write(FOLD_KEY, folded ? "1" : "0");
                 return folded;
             },
